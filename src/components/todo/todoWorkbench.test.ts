@@ -208,18 +208,18 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
   });
   it("frame P1 — the lighter greys: wash, rule, on-grey meta ink; NO title node in the bar", () => {
     const b = rule(".tdb-dochead");
-    expect(b).toContain("background: linear-gradient(180deg, #f4f3f1, #f0eeeb)");
-    expect(b).toContain("border-bottom: 1px solid #e5e3de");
-    expect(rule(".tdb-bartext")).toContain("color: #4d4238"); // detail P2: the Playfair line took the meta's slot
+    expect(b).toContain("background: var(--container-head-bg)"); // the settlement: one stone fill
+    expect(b).toContain("border-bottom: 1px solid var(--container-head-rule)");
+    expect(rule(".tdb-bartext")).toContain("color: var(--container-head-ink)"); // the settlement: the warm head ink
     expect(page).not.toContain("tdb-doct"); // the centred "To do" idea is dropped
     expect(page).not.toContain(">To do<");
   });
   it("frame P1 — the segment on the paler ground: #faf9f8 track, #dbd9d4 border, 30×22 chips", () => {
     const t = rule(".tdb-vseg");
-    expect(t).toContain("background: #faf9f8");
-    expect(t).toContain("border: 1px solid #dbd9d4");
-    expect(t).toContain("height: 30px");
-    expect(rule(".tdb-vseg button")).toContain("height: 22px");
+    expect(t).toContain("background: rgba(255, 255, 255, 0.6)"); // the settlement: the toggle sits on stone
+    expect(t).toContain("border: 1px solid var(--container-head-rule)"); // the settlement
+    expect(t).toContain("height: 26px"); // the settlement: inside the 36px bar
+    expect(rule(".tdb-vseg button")).toContain("height: 20px"); // the settlement: the toggle sits on a 36px bar
     const on = rule(".tdb-vseg button.on");
     expect(on).toContain("background: var(--white, #fff)");
     expect(on).toContain("border: 1px solid var(--ink)");
@@ -328,7 +328,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
   it("the bar line is Playfair 700 (size + numeric variants unchanged)", () => {
     const t = rule(".tdb-bartext");
     expect(t).toContain("font-weight: 700");
-    expect(t).toContain("font-size: 14.5px");
+    expect(t).toContain("font-size: 12.5px"); // the settlement: the bar line sits inside 36px
     expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
   });
   it("the composer: white notes-family card, Caveat autofocus growing, the mono hint, quiet Cancel + emphasised Save", () => {
@@ -538,9 +538,9 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
   });
   it("the Today panel: lifted white card with the diary-sage header (the pack's hexes)", () => {
     expect(rule(".tdb-today2")).toContain("box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14)");
-    expect(rule(".tdb-th")).toContain("linear-gradient(180deg, #d7ddd5, #d5dbd3)");
-    expect(rule(".tdb-th .tdb-t")).toContain("color: #3d4a3b");
-    expect(rule(".tdb-th .tdb-thr")).toContain("color: #5a6e58");
+    expect(rule(".tdb-th")).toContain("background: var(--container-head-bg)"); // the settlement: stone, not sage
+    expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)");
+    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)");
   });
 });
 
@@ -609,7 +609,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).toContain(">Showing {shownX} of {shownY} items on your list</span>"); // live under search — the reactive-rail derivation
     const t = rule(".tdb-bartext");
     expect(t).toContain("font-family: var(--f12-serif)");
-    expect(t).toContain("font-size: 14.5px");
+    expect(t).toContain("font-size: 12.5px"); // the settlement
     expect(t).toContain("font-weight: 700"); // hero-pair P4: the bar line goes bold
     expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
     expect(page).not.toContain("tdb-shmeta"); // the mono meta is gone
@@ -618,7 +618,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).toContain('className="tdb-vseg" role="group" aria-label="View"');
     expect(page).toContain('onClick={() => pickView("cards")}>▦</button>');
     expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
-    expect(rule(".tdb-vseg")).toContain("margin-left: auto");
+    expect(rule(".tdb-vseg")).toContain("border-radius: 99px"); // the settlement: the right cluster carries the margin now
   });
   it("ONE review surface repo-wide: the rvbox; the strip banner classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");

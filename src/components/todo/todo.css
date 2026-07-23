@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --container-head-h: 36px; --container-head-bg: #f5f3f0; --container-head-rule: #e6e2db; --container-head-pad: 14px; --container-head-ink: #3a332c; --container-head-mono: #8a8074; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -37,7 +37,7 @@
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */
 /* frame P1 (todo-frame-v5.html): the bar lightens — no centred title, meta left / toggle right only */
-.tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: linear-gradient(180deg, #f4f3f1, #f0eeeb); border-bottom: 1px solid #e5e3de; border-radius: 15px 15px 0 0; }
+.tdb-dochead { display: flex; align-items: center; gap: 10px; height: var(--container-head-h); padding: 0 var(--container-head-pad); background: var(--container-head-bg); border-bottom: 1px solid var(--container-head-rule); border-radius: 15px 15px 0 0; box-sizing: border-box; }
 .tdb-sheetbody { padding: 16px 18px 18px; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-centre { width: 100%; } }
 
@@ -124,7 +124,10 @@
 /* frame P3 — the SECTION HEADER bands (todo-frame-v5.html .rsech): the rail + the sheet's
    bar share one grey system. .nt2 drops the top rule when the band follows the review row's
    own border-bottom. */
-.tdb-rsech { background: linear-gradient(180deg, #f4f3f1, #f0eeeb); border-top: 1px solid #e5e3de; border-bottom: 1px solid #e5e3de; padding: 8px 16px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.16em; color: #8a857d; display: flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+/* THE SETTLEMENT — one stone treatment, ONE height for every container header (the
+   filter card's FILTER band, the sheet's document bar, Today's header). The height is
+   the token, never padding: contents flex-centre inside it. */
+.tdb-rsech { background: var(--container-head-bg); border-top: 1px solid var(--container-head-rule); border-bottom: 1px solid var(--container-head-rule); height: var(--container-head-h); padding: 0 var(--container-head-pad); font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.16em; color: var(--container-head-mono); display: flex; align-items: center; gap: 7px; flex: 0 0 auto; box-sizing: border-box; }
 .tdb-rsech.fc1 { border-top: none; border-radius: 15px 15px 0 0; } /* the card's opening band takes the top radius */
 .tdb-rsech + .tdb-fpill { margin-top: 10px; } /* the first pill breathes under the band (ref) */
 /* the review CHIP — the free-standing standing entry point (the WK stamp rides the hover
@@ -563,9 +566,12 @@ button.tdb-tdot { cursor: pointer; }
    slot: date when empty ⇄ "{n} OF 5"); the middle region holds committed rows above the dashed
    ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
 .tdb-today2 { flex: 0 1 auto; min-height: 0; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); display: flex; flex-direction: column; overflow: hidden; } /* v4: lifted white */
-.tdb-th { flex: none; display: flex; align-items: baseline; gap: 8px; padding: 11px 14px; background: linear-gradient(180deg, #d7ddd5, #d5dbd3); border-bottom: 1px solid var(--hk-spine); } /* v4: the diary-sage head (pack hexes) */
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: #3d4a3b; }
-.tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6e58; white-space: nowrap; }
+/* the settlement: Today's diary-sage head is RETIRED — it takes the same stone as its two
+   siblings. Sage now lives only at GLYPH scale (Today's row dots, completion ticks, the
+   StatusDot incoming states), which is untouched. */
+.tdb-th { flex: none; display: flex; align-items: center; gap: 8px; height: var(--container-head-h); padding: 0 var(--container-head-pad); background: var(--container-head-bg); border-bottom: 1px solid var(--container-head-rule); border-radius: 15px 15px 0 0; box-sizing: border-box; }
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 13px; font-weight: 700; color: var(--container-head-ink); }
+.tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--container-head-mono); white-space: nowrap; }
 .tdb-tmid2 { flex: 0 1 auto; padding: 0 13px; display: flex; flex-direction: column; }
 .tdb-tcommit { display: flex; flex-direction: column; }
 .tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
@@ -604,11 +610,12 @@ button.tdb-tdot { cursor: pointer; }
    currentColor cup; ink "Open it ›" ⇄ ghost "View again" on the derived boolean. No ✕, ever. ── */
 /* detail P2 — the bar line (todo-detail-a.html §2): lining + tabular figures — Playfair's
    oldstyle figures dip below the baseline and shift width as counts change */
-.tdb-bartext { font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; color: #4d4238; font-variant-numeric: lining-nums tabular-nums; } /* hero-pair P4: bold */
+.tdb-bartext { font-family: var(--f12-serif); font-size: 12.5px; font-weight: 700; color: var(--container-head-ink); font-variant-numeric: lining-nums tabular-nums; } /* hero-pair P4: bold */
 /* the segment restyled to sit on grey (ref B): paler track, its own border; the active chip
    keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
-.tdb-vseg { margin-left: auto; height: 30px; box-sizing: border-box; border: 1px solid #dbd9d4; background: #faf9f8; border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }
-.tdb-vseg button { width: 30px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
+/* on stone: a translucent track with the shared rule; the active chip is unchanged */
+.tdb-vseg { height: 26px; box-sizing: border-box; border: 1px solid var(--container-head-rule); background: rgba(255, 255, 255, 0.6); border-radius: 99px; display: inline-flex; align-items: center; padding: 2px; gap: 2px; }
+.tdb-vseg button { width: 26px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
 .tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-sizing: border-box; } /* selected = white + ink ring (frame P2: the press language died) */
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
