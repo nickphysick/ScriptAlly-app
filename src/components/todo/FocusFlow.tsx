@@ -595,7 +595,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
               const prev = q.status as QueryStatus;
               await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Marked as no response from the focus flow");
               // Undo = delete the created activity record (the existing undo path), never a compensating entry.
-              onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE); onToast("Restored"); } });
+              onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE); onToast("Restored"); } });
             }
             advance();
           }}>
@@ -801,7 +801,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={() => { if (dirty && c.userTaskId) updateUserTask(c.userTaskId, { text: text.trim() }); advance(); }}>Keep it</button>
-        <button type="button" className="tdb-ffpri pink" onClick={() => { if (c.userTaskId) { updateUserTask(c.userTaskId, { done: true, completedAt: new Date().toISOString(), ...(dirty ? { text: text.trim() } : {}) }); onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } }); } advance(); }}>✓ Mark it done</button>
+        <button type="button" className="tdb-ffpri pink" onClick={() => { if (c.userTaskId) { updateUserTask(c.userTaskId, { done: true, completedAt: new Date().toISOString(), ...(dirty ? { text: text.trim() } : {}) }); onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } }); } advance(); }}>✓ Mark it done</button>
       </>,
       band("paper", c.due || "Note to self", "A note, in your own hand.", undefined, { art: "note", kickCls: "nt" }),
     );
@@ -819,7 +819,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
       await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
-      onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } });
+      onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } });
       advanceAfterReceipt(`${c.title} — struck through on Today.`);
       return;
     }
@@ -828,7 +828,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (c.taskType === "no_response_close") {
       const prev = q.status as QueryStatus;
       await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from sweep mode");
-      onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE); onToast("Restored"); } });
+      onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE); onToast("Restored"); } });
       advanceAfterReceipt("Logged as no response — not a rejection, so your response rate stays honest.");
       return;
     }
@@ -842,7 +842,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
         if (acts[0]?.id) await deleteActivity(acts[0].id);
       };
-      onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undo(); onToast("Restored"); } });
+      onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); onToast("Restored"); } });
       advanceAfterReceipt(receiptLine(p, todayISO()));
       return;
     }
@@ -854,14 +854,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
-    onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, p.targetStatus); onToast("Restored"); } });
+    onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, p.targetStatus); onToast("Restored"); } });
     advanceAfterReceipt(receiptLine(p, todayISO(), materialOptsForTask(c.taskType)));
   }
 
   function sweepSnooze(it: FocusItem) {
     if (it.kind === "group") {
       it.group.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", 7));
-      onToast(`✓ ${HK_RULES[it.group.rule].label} — snoozed`, { label: "Undo", fn: async () => { it.group.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); onToast("Restored"); } });
+      onToast(`Snoozed until next week`, { label: "Undo", fn: async () => { it.group.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); onToast("Restored"); } });
       advance();
       return;
     }
@@ -869,11 +869,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (c.userTaskId) {
       const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId };
       upsertTaskFlag(key, { snoozedUntil: plusDaysISO(7), bumpSnooze: true });
-      onToast(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); onToast("Restored"); } });
+      onToast(`Snoozed until next week`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); onToast("Restored"); } });
     } else if (c.taskType && c.relatedRecordId) {
       dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
       const key = flagKeyForTask(c.taskType, c.relatedRecordId);
-      onToast(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); onToast("Restored"); } });
+      onToast(`Snoozed until next week`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); onToast("Restored"); } });
     }
     advance();
   }

@@ -307,11 +307,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     document.getElementById(`tdb-lane-${cls}`)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   };
-  const flash = (msg: string, action?: ToastAction) => {
-    const t = { msg, action };
-    setToast(t);
-    window.setTimeout(() => setToast((cur) => (cur === t ? null : cur)), action ? 5000 : 2600);
+  // ── doc pass P5: THE UNDO TOAST — quick actions never confirm, they UNDO. The write fires
+  // immediately; the ink pill slides up with a paper Undo on a 6-second window. Hover pauses
+  // the timer (remaining-time model); ONE toast at a time — a new action replaces the current
+  // toast, which COMMITS the previous (its write already happened; replacement just ends the
+  // takeback). Esc dismisses (= commits). Undo reverses via each action's EXISTING inverse —
+  // the primitives are already reversible through the derivation layer; nothing new here. ──
+  const toastTimer = useRef<number | null>(null);
+  const toastDeadline = useRef(0);
+  const clearToastTimer = () => { if (toastTimer.current) { window.clearTimeout(toastTimer.current); toastTimer.current = null; } };
+  const armToastTimer = (ms: number) => {
+    clearToastTimer();
+    toastDeadline.current = Date.now() + ms;
+    toastTimer.current = window.setTimeout(() => setToast(null), ms);
   };
+  const pauseToast = () => { toastDeadline.current = Math.max(600, toastDeadline.current - Date.now()); clearToastTimer(); };
+  const resumeToast = () => armToastTimer(toastDeadline.current || 6000);
+  const flash = (msg: string, action?: ToastAction) => {
+    setToast({ msg, action });
+    armToastTimer(action ? 6000 : 2600);
+  };
+  useEffect(() => {
+    if (!toast) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { clearToastTimer(); setToast(null); } };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toast]);
   function unmuteRule(rule: HkRule) {
     updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== rule) });
     flash("Unmuted — those reminders are back.");
@@ -349,7 +371,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });
       const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
       setOverlay(c.key, { kind: "dismissed", lane, text, undo });
-      flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
     if (!c.taskType || !c.relatedRecordId) return;
@@ -357,25 +379,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const key = flagKeyForTask(c.taskType, c.relatedRecordId);
     const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
     setOverlay(c.key, { kind: "dismissed", lane, text, undo });
-    flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+    flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
   }
   function snoozeGroup(g: HkGroup, days: number, when: string) {
     g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", days));
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
     const gkey = `group-${g.rule}`;
     setOverlay(gkey, { kind: "dismissed", lane: "hk", text: `Snoozed — back ${when}.`, undo });
-    flash(`✓ ${HK_RULES[g.rule].label} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(gkey); flash("Restored"); } });
+    flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(gkey); flash("Restored"); } });
   }
   // the per-type hide — the SAME single suppression point Task settings drives (restorable there)
   function hideType(c: BoardCard, ruleKey: string) {
     updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), ruleKey])) });
     const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== ruleKey) });
-    flash(`✓ ${c.title} — hidden (restore in Task settings)`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
+    flash(`Hidden — ${c.due}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   function muteRuleFromCard(g: HkGroup) {
     updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), g.rule])) });
     const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== g.rule) });
-    flash(`✓ ${g.meta.label} — dismissed`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
+    flash(`Hidden — ${g.meta.label}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
 
   // Today: committed band (committedDate === today, the 5-cap set) + done band (the cleared
@@ -536,7 +558,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
       setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on Today.`, undo });
-      flash(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
@@ -546,7 +568,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from the quick rail");
       const undo = () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE);
       setOverlay(c.key, { kind: "receipt", lane: "hk", title: `${c.who || "Query"} — closed`, line: "Logged as no response — not a rejection, so your response rate stays honest." , undo });
-      flash(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
     if (c.taskType === "nudge_overdue") {
@@ -561,7 +583,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         if (acts[0]?.id) await deleteActivity(acts[0].id);
       };
       setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line: receiptLine(p, today), undo });
-      flash(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
     const action = getPrimaryAction(q.status as QueryStatus);
@@ -584,7 +606,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       openFlowCards([c]);
     };
     setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line, undo, edit });
-    flash(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+    flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
   }
 
   function quickPause(c: BoardCard) {
@@ -598,9 +620,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       const muteUndo = () => upsertTaskFlag(key, { snoozedUntil: null });
       setOverlay(c.key, {
         kind: "dismissed", lane, text: "Snoozed — back in a week.", undo,
-        never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo: muteUndo }); flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await muteUndo(); clearOverlay(c.key); flash("Restored"); } }); },
+        never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo: muteUndo }); flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await muteUndo(); clearOverlay(c.key); flash("Restored"); } }); },
       });
-      flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
     if (!c.taskType || !c.relatedRecordId) return;
@@ -610,9 +632,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const muteUndo = () => upsertTaskFlag(key, { snoozedUntil: null });
     setOverlay(c.key, {
       kind: "dismissed", lane, text: "Snoozed — back in a week.", undo,
-      never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo: muteUndo }); flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await muteUndo(); clearOverlay(c.key); flash("Restored"); } }); },
+      never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo: muteUndo }); flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await muteUndo(); clearOverlay(c.key); flash("Restored"); } }); },
     });
-    flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+    flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
   }
 
   // Grouped-card ⏸ fork actions — mute scopes, stated plainly. Nothing is ever deleted.
@@ -621,14 +643,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
     const key = `group-${g.rule}`;
     setOverlay(key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo });
-    flash(`✓ ${HK_RULES[g.rule].label} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
+    flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
   }
   function forkNeverThese(g: HkGroup) {
     g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL }));
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })); };
     const key = `group-${g.rule}`;
     setOverlay(key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about these agents again.", undo });
-    flash(`✓ ${HK_RULES[g.rule].label} — dismissed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
+    flash(`Hidden — ${HK_RULES[g.rule].label}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
   }
   function forkNeverRule(g: HkGroup) {
     // rule-mute now carries its own Undo (the finishing pack's compensator-table gap): the
@@ -636,7 +658,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), g.rule])) });
     clearOverlay(`group-${g.rule}`);
     const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== g.rule) });
-    flash(`✓ ${HK_RULES[g.rule].label} — dismissed`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
+    flash(`Hidden — ${HK_RULES[g.rule].label}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   function forkStale(c: BoardCard, mode: "notNow" | "neverThis") {
     if (!c.taskType || !c.relatedRecordId) return;
@@ -646,11 +668,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
       const snoozeUndo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
       setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo: snoozeUndo });
-      flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await snoozeUndo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await snoozeUndo(); clearOverlay(c.key); flash("Restored"); } });
     } else {
       upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
       setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about this query again.", undo });
-      flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
     }
   }
   async function addTask() {
@@ -807,9 +829,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
-        <div className="tdb-toast" role="status">
+        <div className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}>
           {toast.msg}
-          {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); setToast(null); }}>{toast.action.label}</button>}
+          {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); clearToastTimer(); setToast(null); }}>{toast.action.label}</button>}
         </div>
       )}
       {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
@@ -1004,7 +1026,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <div className="tdb-tcommit">
               {committedCards.map((c) => (
                 <div key={c.key} className="tdb-trow" onClick={() => openFlowCards([c])}>
-                  <span className="tdb-tdot">{!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}</span>
+                  {/* doc pass P5 — Today's tick: the leading dot grows the tick on row hover/
+                      focus and completes with the undo toast (offers keep the plain dot) */}
+                  {c.taskType === "offer_received" ? (
+                    <span className="tdb-tdot">{!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}</span>
+                  ) : (
+                    <button type="button" className="tdb-tdot tick" aria-label={`Mark done — ${c.title}`} onClick={(e) => { e.stopPropagation(); quickDone(c); }}>
+                      {!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}
+                      <span className="tdb-ttick" aria-hidden>✓</span>
+                    </button>
+                  )}
                   <div className="tdb-tmid"><div className="tdb-tx">{c.title}</div><div className="tdb-tm">{c.record}</div></div>
                   <button type="button" className="tdb-x" title="Take off Today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
                 </div>

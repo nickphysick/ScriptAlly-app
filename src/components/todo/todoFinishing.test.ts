@@ -30,28 +30,72 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
   });
 
   it("the compensator table has NO gaps: mute-item and mute-rule toasts carry Undo", () => {
-    // the never: callbacks toast with an Undo that unsets the flag
-    expect((page.match(/— dismissed`, \{ label: "Undo"/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    // the never:/hide callbacks toast with an Undo that unsets the flag (doc-pass grammar)
+    expect((page.match(/Hidden — [^`]*`, \{ label: "Undo"/g) ?? []).length).toBeGreaterThanOrEqual(4);
     // rule-mute reverses via the profile filter-out (the same write unmuteRule performs)
     expect(page).toContain("mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== g.rule)");
   });
 
-  it("toast grammar unified: ✓ {title} — {verb}; the old ad-hoc TOAST copies are gone", () => {
+  it("toast grammar (doc pass P5): Done — “{title}” · Snoozed until {when} · Hidden — {type}; the ad-hoc copies stay gone", () => {
     // scoped to the toast calls — receipt-overlay card copy legitimately keeps its own prose
     const toastCalls = [...(page.match(/flash\([^;]*\)/g) ?? []), ...(flow.match(/onToast\([^;]*\)/g) ?? [])].join("\n");
-    for (const gone of ["logged with defaults", "Snoozed for 7 days", 'flash("Note done"', 'onToast("Note done"', '"Closed as no response"']) {
+    for (const gone of ["logged with defaults", "Snoozed for 7 days", 'flash("Note done"', 'onToast("Note done"', '"Closed as no response"', "— done`", "— snoozed`", "— dismissed`", "(restore in Task settings)"]) {
       expect(toastCalls).not.toContain(gone);
     }
-    expect(page).toContain("— done`");
-    expect(page).toContain("— snoozed`");
-    expect(page).toContain("— dismissed`");
+    expect(page).toContain("flash(`Done — “${c.title}”`,");
+    expect(page).toContain('flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`,');
+    expect(page).toContain("flash(`Snoozed until next week`,"); // the fixed 7-day paths
+    expect(page).toContain("flash(`Hidden — ${g.meta.label}`,");
+    expect(page).toContain("flash(`Hidden — ${HK_RULES[g.rule].label}`,");
+    expect(page).toContain("flash(`Hidden — “${c.title}”`,"); // item-level mutes name the item
   });
 
-  it("undo confirms with Restored; the toast is a status region on a ~5s action window", () => {
+  it("undo confirms with Restored; the toast is a status region on the 6s action window", () => {
     expect((page.match(/flash\("Restored"\)/g) ?? []).length).toBeGreaterThanOrEqual(8);
     expect((flow.match(/onToast\("Restored"\)/g) ?? []).length).toBeGreaterThanOrEqual(7);
-    expect(page).toContain('action ? 5000 : 2600');
-    expect(page).toContain('className="tdb-toast" role="status"');
+    expect(page).toContain("action ? 6000 : 2600"); // doc pass P5: undo toasts hold 6 seconds
+    expect(page).toContain('className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}');
+  });
+});
+
+describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)", () => {
+  const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+  const css = readFileSync(join(here, "todo.css"), "utf8");
+
+  it("6s timer with hover PAUSE (remaining-time model); a new toast replaces (= commits) the current one", () => {
+    expect(page).toContain("const armToastTimer = (ms: number) => {");
+    expect(page).toContain("toastTimer.current = window.setTimeout(() => setToast(null), ms);");
+    expect(page).toContain("const pauseToast = () => { toastDeadline.current = Math.max(600, toastDeadline.current - Date.now()); clearToastTimer(); };");
+    expect(page).toContain("const resumeToast = () => armToastTimer(toastDeadline.current || 6000);");
+    // replacement semantics: flash unconditionally swaps the toast + re-arms — the previous
+    // action's write already happened, so replacement simply ends its takeback window
+    expect(page).toContain("setToast({ msg, action });");
+    expect(page).toContain("armToastTimer(action ? 6000 : 2600);");
+  });
+  it("keyboard: the toast is a status region, Undo is a real button, Esc dismisses (= commits)", () => {
+    expect(page).toContain('if (e.key === "Escape") { clearToastTimer(); setToast(null); }');
+    expect(page).toContain('<button type="button" className="tdb-toast-act"');
+  });
+  it("the ink pill: bottom-centre, paper Undo, slide-up; reduced motion = fade only", () => {
+    const t = css.match(/\.tdb-toast \{([^}]*)\}/)?.[1] ?? "";
+    expect(t).toContain("left: 50%; bottom: 26px");
+    expect(t).toContain("background: var(--ink)");
+    expect(t).toContain("border-radius: 99px");
+    expect(t).toContain("animation: tdbToastUp");
+    const u = css.match(/\.tdb-toast-act \{([^}]*)\}/)?.[1] ?? "";
+    expect(u).toContain("background: var(--paper)");
+    expect(u).toContain("color: var(--ink)");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-toast { animation: tdbToastFade 160ms ease; } }");
+  });
+  it("undo reverses via the EXISTING inverses only — the reversible primitives, no new compensators", () => {
+    for (const inv of ["undoQueryStatus(q.id, prev", "deleteActivity(acts[0].id)", "snoozedUntil: null, unbumpSnooze: true", "updateUserTask(c.userTaskId!, { done: false })", "mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter"]) {
+      expect(page).toContain(inv);
+    }
+  });
+  it("Today's tick: the committed row's leading dot completes via quickDone with the toast; offers keep the plain dot", () => {
+    expect(page).toContain('className="tdb-tdot tick" aria-label={`Mark done — ${c.title}`} onClick={(e) => { e.stopPropagation(); quickDone(c); }}');
+    expect(page).toContain('{c.taskType === "offer_received" ? (');
+    expect(css).toContain(".tdb-trow:hover .tdb-tdot.tick .tdb-ttick, .tdb-trow:focus-within .tdb-tdot.tick .tdb-ttick { display: inline; }");
   });
 });
 
