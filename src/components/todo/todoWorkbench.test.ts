@@ -217,7 +217,7 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
   });
   it("frame P1 — the segment on the paler ground: #faf9f8 track, #dbd9d4 border, 30×22 chips", () => {
     const t = rule(".tdb-vseg");
-    expect(t).toContain("background: rgba(255, 255, 255, 0.6)"); // the settlement: the toggle sits on stone
+    expect(t).toContain("background: rgba(255, 255, 255, 0.55)"); // the settlement: the toggle sits on sage
     expect(t).toContain("border: 1px solid var(--container-head-rule)"); // the settlement
     expect(t).toContain("height: 26px"); // the settlement: inside the 36px bar
     expect(rule(".tdb-vseg button")).toContain("height: 20px"); // the settlement: the toggle sits on a 36px bar

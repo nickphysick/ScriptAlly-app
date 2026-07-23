@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE SETTLEMENT (design-refs/todo-settlement.html — the final board): source/rule-text locks.
+ * THE SETTLEMENT — SAGE, FINAL (design-refs/todo-settlement.html = todo-fix40): source/rule-
+ * text locks. fix39's stone headers and its bar-seated pair are superseded.
  * The colour question is closed — the soft pastille card system is settled and untouched here;
  * this suite guards CONTAINER STRUCTURE and the hero's furniture only.
  */
@@ -21,14 +22,17 @@ const rule = (sel: string): string => {
 /** The three container headers, by their real selectors. */
 const HEADS = [".tdb-rsech", ".tdb-dochead", ".tdb-th"];
 
-describe("settlement P1 — stone headers: one treatment, ONE height, everywhere", () => {
+describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere", () => {
   it("the tokens exist once, on the wrap, and carry the settled values", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--container-head-h: 36px");
-    expect(w).toContain("--container-head-bg: #f5f3f0");
-    expect(w).toContain("--container-head-rule: #e6e2db");
-    expect(w).toContain("--container-head-ink: #3a332c");
-    expect(w).toContain("--container-head-mono: #8a8074");
+    expect(w).toContain("--container-head-h: 42px");
+    expect(w).toContain("--container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3)");
+    expect(w).toContain("--container-head-rule: #b9c9b4");
+    expect(w).toContain("--container-head-ink: #3d4a3b");
+    expect(w).toContain("--container-head-mono: #5a6e58");
+    // ONE sage source: no near-duplicate of the head fill or rule anywhere else in the sheet
+    expect(css.match(/#d7ddd5/g)!.length).toBe(1);
+    expect(css.match(/#b9c9b4/g)!.length).toBe(1);
   });
   it("ALL THREE headers read the same fill, the same rule and the same height token", () => {
     for (const sel of HEADS) {
@@ -48,10 +52,10 @@ describe("settlement P1 — stone headers: one treatment, ONE height, everywhere
     // no vertical padding anywhere in the three
     for (const sel of HEADS) expect(rule(sel)).not.toMatch(/padding:\s*\d+px \d+px/);
   });
-  it("Today's SAGE header is retired — and sage survives at glyph scale, untouched", () => {
+  it("Today's sage header is now the FAMILY — its siblings joined it; the sage glyphs stand", () => {
     const t = rule(".tdb-th");
-    expect(t).not.toContain("#d7ddd5");
-    expect(t).not.toContain("hk-sage");
+    expect(t).toContain("background: var(--container-head-bg)"); // the same one source
+    expect(t).not.toContain("hk-sage"); // it reads the head token now, not the band pair
     expect(t).not.toContain("hk-spine");
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)");
     expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)");
@@ -67,15 +71,24 @@ describe("settlement P1 — stone headers: one treatment, ONE height, everywhere
     expect(rule(".tdb-bartext")).toContain("var(--f12-serif)");
     expect(rule(".tdb-th .tdb-t")).toContain("var(--f12-serif)");
   });
+  it("the header inks join the sage family: mono labels #5a6e58, Playfair lines #3d4a3b", () => {
+    expect(rule(".tdb-rsech")).toContain("color: var(--container-head-mono)"); // the sidebar's mono label
+    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)"); // Today's count
+    expect(rule(".tdb-bartext")).toContain("color: var(--container-head-ink)"); // the bar's Playfair line
+    expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title
+    // the values themselves, once, on the wrap
+    expect(rule(".tdb-wrap")).toContain("--container-head-mono: #5a6e58");
+    expect(rule(".tdb-wrap")).toContain("--container-head-ink: #3d4a3b");
+  });
   it("radius continuity: each header takes ITS container's top radii", () => {
     for (const sel of HEADS) expect(rule(sel + (sel === ".tdb-rsech" ? ".fc1" : ""))).toContain("border-radius: 15px 15px 0 0");
     for (const c of [".tdb-mainc", ".tdb-today2", ".tdb-fbox"]) expect(rule(c)).toContain("border-radius: 16px");
   });
-  it("the view toggle restyles onto stone; the active chip is unchanged", () => {
+  it("the view toggle restyles onto sage; the active chip is unchanged", () => {
     const t = rule(".tdb-vseg");
-    expect(t).toContain("background: rgba(255, 255, 255, 0.6)");
+    expect(t).toContain("background: rgba(255, 255, 255, 0.55)");
     expect(t).toContain("border: 1px solid var(--container-head-rule)");
-    expect(t).toContain("height: 26px"); // inside the 36px bar
+    expect(t).toContain("height: 26px"); // inside the 42px bar
     const on = rule(".tdb-vseg button.on");
     expect(on).toContain("background: var(--white, #fff)");
     expect(on).toContain("border: 1px solid var(--ink)");
