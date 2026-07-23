@@ -394,3 +394,30 @@ describe("v9 P2 — the template fix: the name list cannot repeat itself", () =>
     expect(sc).not.toContain("i.outstanding.map(surname).join(\", \")");
   });
 });
+
+describe("v9 P3 — the carriage + the close against the PAGE", () => {
+  it("the carriage moves the PAGE: the seat, the leaving clone and both directions are page-sized", () => {
+    expect(rule(".tdb-fsseat")).toContain("width: 600px");
+    expect(rule(".tdb-fsseat")).toContain("margin-left: -300px");
+    expect(css).toContain(".tdb-fsleave .tdb-fspage.lv");
+    expect(css).toContain("@keyframes tdbCarriageOut { to { transform: translateX(-120%); opacity: 0; } }");
+    expect(css).toContain("@keyframes tdbCarriageIn { from { transform: translateX(120%); } }");
+    // the timings are unchanged — the carriage is the same motion over a bigger object
+    expect(css).toContain(".tdb-fsleave.handled { animation: tdbCarriageOut 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) 440ms forwards; }");
+  });
+  it("the centring RE-DERIVES per task — a long page and a short one both sit centred", () => {
+    expect(ss).toContain("const id = requestAnimationFrame(() => measure());");
+    expect(ss).toContain("}, [index, phase, composed]);");
+    expect(ss).toContain("const cardH = bigRef.current?.offsetHeight || 240;");
+  });
+  it("the close resolves in the SAME centre (frame 5): both headlines, the ledger, two exits", () => {
+    expect(ss).toContain('<div className={`tdb-fswrap${phase === "close" ? " closing" : ""}`}');
+    expect(rule(".tdb-fswrap.closing")).toContain("align-items: center");
+    expect(ss).toContain('{anyLive ? "Good session." : "Desk cleared."}');
+    expect(ss).toContain("Every box ticked turns the dial in your favour.");
+    expect(ss).toContain(">Handled<span className=\"tdb-sssn\">{handled.length}</span>");
+    expect(ss).toContain(">Session length<span");
+    expect(ss).toContain('onClick={backToDesk}>Back to your desk</button>');
+    expect(ss).toContain(">Review what you did</button>");
+  });
+});

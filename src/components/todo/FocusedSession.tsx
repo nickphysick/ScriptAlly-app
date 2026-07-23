@@ -398,6 +398,16 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, composed, index, total]);
 
+  // v9 P3 — the PAGE's height varies with its prose, so the centring is re-derived on every
+  // task change (and when the close replaces it): the page always sits centred in the region
+  // between the 48px band and the stage foot.
+  useEffect(() => {
+    if (!composed) return;
+    const id = requestAnimationFrame(() => measure());
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, phase, composed]);
+
   // P3 — the whisper names the next LIVE task (dead entries fast-forward silently anyway)
   const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));
   const anyLive = order.some((x) => liveKeys.has(x.key));
@@ -420,7 +430,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       <div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW, top: geo.barBottom }} aria-hidden />
       <div className={`tdb-fscurt r${curtains ? " on" : ""}`} style={{ width: curtW, top: geo.barBottom }} aria-hidden />
       {/* the seat region below the hero — the card + the close live here, INSET by the curtains */}
-      <div className="tdb-fswrap" style={{ top: geo.wrapTop, left: curtW, right: curtW }}>
+      <div className={`tdb-fswrap${phase === "close" ? " closing" : ""}`} style={{ top: geo.wrapTop, left: curtW, right: curtW }}>
         {phase !== "close" && current && (
           <>
             <div className="tdb-fsseat" style={{ top: geo.restY }}>

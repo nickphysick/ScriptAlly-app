@@ -682,6 +682,8 @@ button.tdb-tdot { cursor: pointer; }
 @keyframes tdbSesIn { from { opacity: 0; } }
 /* the seat region below the hero */
 .tdb-fswrap { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; }
+/* v9 — the close resolves in the SAME centre the page occupied (journey frame 5) */
+.tdb-fswrap.closing { display: flex; align-items: center; justify-content: center; }
 .tdb-fsseat { position: absolute; left: 50%; width: 600px; margin-left: -300px; } /* v9 — the page's width */
 /* ── v7 P2: THE CURTAINS + THE DIM (session-v7.html) — the ONLY focus treatment (the pool of
    light + the deck edges are retired): ink panels close from the screen edges (the stage
@@ -748,7 +750,7 @@ button.tdb-tdot { cursor: pointer; }
 @keyframes tdbCarriageBack { from { transform: translateX(-120%); } }
 @keyframes tdbCarriageOutR { to { transform: translateX(120%); opacity: 0; } }
 /* THE CLOSE, IN PLACE (frame D) — the same centre region on the bare ground */
-.tdb-ssclose { text-align: center; padding: 40px 0 30px; animation: tdbSesIn 500ms ease; }
+.tdb-ssclose { text-align: center; padding: 0 0 10px; animation: tdbSesIn 500ms ease; }
 .tdb-ssclose h1 { font-family: var(--f12-serif); font-size: 46px; font-weight: 700; color: var(--ink); }
 .tdb-ssub { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--ink-2); margin-top: 8px; }
 .tdb-ssexits { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
