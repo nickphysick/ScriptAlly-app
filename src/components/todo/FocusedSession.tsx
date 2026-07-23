@@ -19,7 +19,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { BoardCard } from "../../lib/todoBoard";
-import { nearestEdgeFly, wanderPoints, OPENING, RITUAL_LINES, FLY_SELECTOR } from "../../lib/sessionStage";
+import { nearestEdgeFly, wanderPoints, OPENING, RITUAL_LINES, FLY_SELECTOR, DEAL } from "../../lib/sessionStage";
 import { whereThisStands, STATUS_OWED } from "../../lib/sessionContext";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -51,6 +51,11 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   const [handled, setHandled] = useState<BoardCard[]>([]);
   const [skipped, setSkipped] = useState<BoardCard[]>([]);
   const startedAt = useRef(Date.now());
+  // ── session P3: THE DEAL — the leaving clone + the rise; dealRef guards the vanish
+  // effect against re-firing while the choreography runs. ──
+  const [deal, setDeal] = useState<{ card: BoardCard; kind: "handled" | "skip" } | null>(null);
+  const [rose, setRose] = useState(false);
+  const dealRef = useRef(false);
   // the opening's own progress — "final" = the lit-card + pair composition
   const [openingFinal, setOpeningFinal] = useState(reduce);
   const [line, setLine] = useState(-1); // the active ritual line
@@ -273,37 +278,53 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     if (i >= order.length) { setPhase("close"); return; }
     setIndex(i);
   }
-  /** The current task is HANDLED (its write already landed — the vanish drove this, or the
-   *  primitive resolved): record it and deal to the next. P3 wraps this in the choreography. */
+  /** The current task is HANDLED (its write already landed — the vanish drove this): the
+   *  DEAL runs — the stamp lands and holds, the sheet sweeps off left, the next rises with
+   *  the advance (progress + footer tick WITH the rise). Reduced motion: the stamp appears
+   *  without its pop for a beat, then the instant swap. */
   function markHandledAdvance(c: BoardCard) {
+    if (dealRef.current) return;
+    dealRef.current = true;
     setHandled((h) => (h.some((x) => x.key === c.key) ? h : [...h, c]));
-    advancePast(index + 1);
+    setDeal({ card: c, kind: "handled" });
+    const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;
+    const clearAtMs = reduce ? 420 : DEAL.stampHoldMs + DEAL.sweepMs + 60;
+    at(advanceAtMs, () => { advancePast(index + 1); setRose(true); });
+    at(clearAtMs, () => { setDeal(null); dealRef.current = false; });
+    at(clearAtMs + DEAL.riseMs, () => setRose(false));
   }
-  /** Skip for now — the honest requeue: to the session order's end (the engine has no requeue
-   *  of its own — recon; the deal draws the slide-to-bottom). Skipping the last live task
-   *  ends the session. */
+  /** Skip for now — no stamp: the sheet slides to the BOTTOM of the stack (down and behind,
+   *  the honest requeue — the engine has no requeue of its own; recon) and the next rises.
+   *  Skipping the last live task ends the session. */
   function skipCurrent() {
-    if (!current) return;
+    if (!current || dealRef.current) return;
     const c0 = current;
-    setSkipped((k) => (k.some((x) => x.key === c0.key) ? k : [...k, c0]));
     const rest = order.filter((_, i2) => i2 !== index);
-    const next = [...rest, c0]; // the honest requeue — to the session order's end
-    setOrder(next);
-    // skipping the only live task ends the session (an endless self-deal helps nobody)
-    if (!rest.some((x) => liveKeys.has(x.key))) { setPhase("close"); return; }
-    // the slot now holds what WAS next; fast-forward any dead entries (the wrap can land
-    // back on the skipped task itself once everything between has gone)
-    let i = index;
-    while (i < next.length && !liveKeys.has(next[i].key)) i += 1;
-    if (i >= next.length) { setPhase("close"); return; }
-    setIndex(i);
+    const next = [...rest, c0]; // the requeue — to the session order's end
+    setSkipped((k) => (k.some((x) => x.key === c0.key) ? k : [...k, c0]));
+    if (!rest.some((x) => liveKeys.has(x.key))) { setOrder(next); setPhase("close"); return; }
+    dealRef.current = true;
+    if (!reduce) setDeal({ card: c0, kind: "skip" });
+    const doRequeue = () => {
+      setOrder(next);
+      // the slot now holds what WAS next; fast-forward any dead entries (the wrap can land
+      // back on the skipped task itself once everything between has gone)
+      let i = index;
+      while (i < next.length && !liveKeys.has(next[i].key)) i += 1;
+      if (i >= next.length) { setPhase("close"); return; }
+      setIndex(i);
+      setRose(true);
+    };
+    at(reduce ? 0 : DEAL.skipAdvanceMs, doRequeue);
+    at(reduce ? 20 : DEAL.skipMs + 60, () => { setDeal(null); dealRef.current = false; });
+    at((reduce ? 20 : DEAL.skipMs + 60) + DEAL.riseMs, () => setRose(false));
   }
   // the round-trip law: a journey that completed the current task returns to a board without
   // it — the session detects the vanish and deals it as handled; a surviving task resumes
   // in place. (Mark handled itself only fires the primitive; the vanish drives the advance,
   // so a declined dup-guard honestly stays put.)
   useEffect(() => {
-    if (phase !== "room" || !current) return;
+    if (phase !== "room" || !current || dealRef.current) return;
     if (!liveKeys.has(current.key)) markHandledAdvance(current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveKeys, phase, index, order]);
@@ -354,7 +375,33 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
             <button type="button" className="tdb-ssexit" onClick={() => setPhase("close")}>End session ✕</button>
           </div>
           <div className="tdb-ssroomc">
-            <div className="tdb-ssheet">
+            {/* P3 — the STACK: at most two sheet-edges peek beneath (the true count lives in
+                the bar); the leaving clone deals over the top. */}
+            <div className="tdb-ssstack">
+              {(() => {
+                const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;
+                return (
+                  <>
+                    {remaining >= 2 && <div className="tdb-ssdeck d2" aria-hidden />}
+                    {remaining >= 1 && <div className="tdb-ssdeck d1" aria-hidden />}
+                  </>
+                );
+              })()}
+              {deal && (
+                <div className={`tdb-ssleave ${deal.kind}${reduce ? " static" : ""}`} aria-hidden>
+                  <div className="tdb-ssheet lv">
+                    <div className={`tdb-band ${deal.card.stream}`}>
+                      <span className={`tdb-tag due${deal.card.taskType === "offer_received" ? " offer" : ""}`}>{deal.card.taskType === "offer_received" ? `★ ${deal.card.due}` : deal.card.due}</span>
+                    </div>
+                    <div className="tdb-ssheetc">
+                      <h2>{deal.card.title}</h2>
+                      {deal.card.subtitle && <div className="tdb-ssms2">{deal.card.subtitle}</div>}
+                    </div>
+                  </div>
+                  {deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}
+                </div>
+              )}
+            <div className={`tdb-ssheet${rose ? " rise" : ""}`}>
               <div className={`tdb-band ${current.stream}`}>
                 <span className={`tdb-tag due${isOffer(current) ? " offer" : ""}`}>{isOffer(current) ? `★ ${current.due}` : current.due}</span>
               </div>
@@ -367,13 +414,14 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
                   <div className="tdb-ssctx"><b>WHERE THIS STANDS</b>{standFor(current)}</div>
                 )}
                 <div className="tdb-ssacts">
-                  <button type="button" className="tdb-ssb bp on" onClick={() => onOpenJourney(current)}>Action now</button>
+                  <button type="button" className="tdb-ssb bp on" disabled={!!deal} onClick={() => onOpenJourney(current)}>Action now</button>
                   {canQuickComplete(current) && (
-                    <button type="button" className="tdb-btnh em tdb-ssbig" onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
+                    <button type="button" className="tdb-btnh em tdb-ssbig" disabled={!!deal} onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
                   )}
-                  <button type="button" className="tdb-btnh tdb-ssbig" onClick={skipCurrent}>Skip for now</button>
+                  <button type="button" className="tdb-btnh tdb-ssbig" disabled={!!deal} onClick={skipCurrent}>Skip for now</button>
                 </div>
               </div>
+            </div>
             </div>
             {order[index + 1] && (
               <div className="tdb-ssnext">NEXT UP · <i>{order[index + 1].title}</i></div>

@@ -77,6 +77,23 @@ export const FLY_SELECTOR = [
   ".tdb-ask", ".tdb-srchrow", ".tdb-heropair", // the hero
 ].join(", ");
 
+/**
+ * THE DEAL's timing spine (session-deal.html option A — the paper stack). The stamp lands
+ * with its pop, holds the beat, the sheet sweeps off left, and the next rises from the stack
+ * 180ms into the sweep; the advance (progress + footer) fires WITH the rise.
+ */
+export const DEAL = {
+  stampPopMs: 350, // the sage stamp's scale-pop (rotated −8°)
+  stampHoldMs: 520, // the beat before the sweep (the ref's stampThen wait)
+  sweepMs: 500, // off left with the −5° tilt
+  riseDelayMs: 180, // the next sheet starts rising this far into the sweep
+  riseMs: 400, // the rise's overshoot settle
+  skipMs: 450, // down and behind — the honest requeue
+  skipAdvanceMs: 250, // the next rises mid-slide
+  /** At most this many sheet-edges peek beneath the current sheet — never more. */
+  deckMax: 2,
+} as const;
+
 /** The spotlight's wander: enters from below, two waypoints, then the lock (the ref's path). */
 export function wanderPoints(W: number, H: number, target: { x: number; y: number }): Array<{ x: number; y: number }> {
   return [

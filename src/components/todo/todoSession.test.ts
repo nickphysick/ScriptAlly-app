@@ -126,8 +126,45 @@ describe("session P2 — the room", () => {
     expect(ss).toContain("while (i < order.length && !liveKeys.has(order[i].key)) i += 1;");
   });
   it("skip requeues to the session order's end (the engine has no requeue — recon); skipping the last live task closes", () => {
-    expect(ss).toContain("const next = [...rest, c0]; // the honest requeue — to the session order's end");
-    expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setPhase("close"); return; }');
+    expect(ss).toContain("const next = [...rest, c0]; // the requeue — to the session order's end"); // (P3 reworded the comment)
+    expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setOrder(next); setPhase("close"); return; }'); // (P3: the requeued order lands before the close)
+  });
+});
+
+describe("session P3 — the deal (option A: the paper stack)", () => {
+  it("the stack caps at TWO edges regardless of queue length; the states thin (1 left → one edge; last → none)", () => {
+    expect(ss).toContain("const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;");
+    expect(ss).toContain('{remaining >= 2 && <div className="tdb-ssdeck d2" aria-hidden />}');
+    expect(ss).toContain('{remaining >= 1 && <div className="tdb-ssdeck d1" aria-hidden />}');
+    expect(rule(".tdb-ssdeck")).toContain("scale(0.975)");
+    expect(rule(".tdb-ssdeck.d2")).toContain("scale(0.95)");
+    expect(rule(".tdb-ssdeck.d2")).toContain("opacity: 0.7");
+  });
+  it("HANDLED: stamp (rotated −8°, 350ms pop) → hold 520 → sweep off left → the next rises 180 in; the advance fires WITH the rise", () => {
+    expect(ss).toContain('setDeal({ card: c, kind: "handled" });');
+    expect(ss).toContain("const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;");
+    expect(ss).toContain("at(advanceAtMs, () => { advancePast(index + 1); setRose(true); });");
+    expect(css).toContain("animation: tdbStampIn 350ms cubic-bezier(0.2, 0.9, 0.3, 1.5) both;");
+    expect(css).toContain("@keyframes tdbStampIn { from { transform: rotate(-8deg) scale(0); } to { transform: rotate(-8deg) scale(1); } }");
+    expect(css).toContain(".tdb-ssleave.handled { animation: tdbSweepOff 500ms cubic-bezier(0.5, 0.05, 0.6, 1) 520ms forwards; }");
+    expect(css).toContain("@keyframes tdbSweepOff { to { transform: translateX(-160%) rotate(-5deg); opacity: 0; } }");
+    expect(css).toContain(".tdb-ssheet.rise { animation: tdbRise 400ms cubic-bezier(0.2, 0.9, 0.3, 1.15); }");
+  });
+  it("SKIP: no stamp — down and behind (450ms, z beneath the risen sheet) with the requeue via the session order", () => {
+    expect(ss).toContain('if (!reduce) setDeal({ card: c0, kind: "skip" });');
+    expect(ss).toContain('{deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}'); // skip stamps nothing
+    expect(css).toContain(".tdb-ssleave.skip { animation: tdbSkipDown 450ms ease forwards; }");
+    expect(css).toContain(".tdb-ssleave.skip { z-index: 1; }");
+    expect(ss).toContain("at(reduce ? 0 : DEAL.skipAdvanceMs, doRequeue);");
+  });
+  it("progress + footer sync: they read index/order, which move at the rise moment; the actions sit disabled while dealing", () => {
+    expect(ss).toContain("disabled={!!deal} onClick={() => onOpenJourney(current)}");
+    expect(ss).toContain("disabled={!!deal} onClick={skipCurrent}");
+    expect(ss).toContain("if (dealRef.current) return;"); // the vanish effect + re-entry guard
+  });
+  it("reduced motion: instant swaps; the stamp appears without its pop", () => {
+    expect(css).toContain(".tdb-ssleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
+    expect(css).toContain(".tdb-ssleave.handled, .tdb-ssleave.skip, .tdb-ssheet.rise, .tdb-ssstamp { animation: none; }");
   });
 });
 
