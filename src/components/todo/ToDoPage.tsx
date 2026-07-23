@@ -609,34 +609,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
   }
 
-  function quickPause(c: BoardCard) {
-    if (c.taskType === "no_response_close") { setOverlay(c.key, { kind: "fork", single: true }); return; }
-    const lane = (c.stream === "nt" ? "nt" : c.stream === "hk" ? "hk" : "do") as "do" | "hk" | "nt";
-    const plus7 = new Date(Date.now() + 7 * 86400000).toISOString();
-    if (c.userTaskId) {
-      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId };
-      upsertTaskFlag(key, { snoozedUntil: plus7, bumpSnooze: true });
-      const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-      const muteUndo = () => upsertTaskFlag(key, { snoozedUntil: null });
-      setOverlay(c.key, {
-        kind: "dismissed", lane, text: "Snoozed — back in a week.", undo,
-        never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo: muteUndo }); flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await muteUndo(); clearOverlay(c.key); flash("Restored"); } }); },
-      });
-      flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
-      return;
-    }
-    if (!c.taskType || !c.relatedRecordId) return;
-    dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
-    const key = flagKeyForTask(c.taskType, c.relatedRecordId);
-    const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
-    const muteUndo = () => upsertTaskFlag(key, { snoozedUntil: null });
-    setOverlay(c.key, {
-      kind: "dismissed", lane, text: "Snoozed — back in a week.", undo,
-      never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo: muteUndo }); flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await muteUndo(); clearOverlay(c.key); flash("Restored"); } }); },
-    });
-    flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
-  }
-
   // Grouped-card ⏸ fork actions — mute scopes, stated plainly. Nothing is ever deleted.
   function forkNotNowGroup(g: HkGroup) {
     g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", 7));
@@ -1215,9 +1187,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── the quick rail (hover / :focus-within, top-right). Offers get NO rail — they need the moment. ──
-  // (the hover ✓/⏸ quick rail retired — the card contract's verb row is the action surface;
-  // quickPause lives on for the ledger rows' ⏸.)
+  // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,
+  // the ledger's head checkbox + "Snooze or dismiss" menu, and the undo toast are the quick surfaces.)
 
   // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
   //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──

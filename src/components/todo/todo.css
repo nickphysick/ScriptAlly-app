@@ -6,7 +6,7 @@
  */
 
 /* The page's scroll region (polish v3 P5 — two-layer): the wrap is now the FULL-WIDTH scroller
-   only; the assembly centres itself via the width tokens (the deck-era .tdb-col column died
+   only; the assembly centres itself via the width tokens (the deck-era column wrapper died
    with the band). `flex: 1` because .tdb-wrap
    is a flex child of .f12-root (a flex column); min-height:0 lets it shrink so overflow-y can
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding

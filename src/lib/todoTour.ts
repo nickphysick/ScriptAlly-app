@@ -49,7 +49,7 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-tile, .tdb-gcard, .tdb-step",
+    sel: ".tdb-tile, .tdb-gcard, .tdb-lrow",
     h: "Every card works the same.",
     p: "Click to open it. Hover for the quick verbs — done, Today, or later.",
     cta: "Next →",

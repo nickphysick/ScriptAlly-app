@@ -15,7 +15,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
       ".tdb-bigsearch",
       ".tdb-fpill, .tdb-fpillbtn",
       ".tdb-rvbox",
-      ".tdb-tile, .tdb-gcard, .tdb-step",
+      ".tdb-tile, .tdb-gcard, .tdb-lrow",
       ".tdb-today2, .tdb-todaychip",
     ]);
     expect(TOUR_STOPS.slice(0, -1).every((s) => s.cta === "Next →")).toBe(true);

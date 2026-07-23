@@ -459,6 +459,27 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
   });
 });
 
+describe("doc pass P6 — sweep", () => {
+  it("quickPause is gone (call-less since the table died); the sheethead container stays extinct", () => {
+    expect(page).not.toContain("quickPause");
+    expect(page).not.toContain("tdb-sheethead");
+    expect(css).not.toContain("tdb-sheethead");
+  });
+  it("the tour's card stop targets the ledger's row class (never the extinct step)", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('".tdb-tile, .tdb-gcard, .tdb-lrow"');
+    expect(tour).not.toContain("tdb-step");
+  });
+  it("the reactive rail + the press law rode through untouched", () => {
+    expect(page).toContain("const searchFc = searchActive");
+    expect(page).toContain('"tdb-fsec">FILTER{searchActive && (');
+    expect(rule(".tdb-cta")).toContain("box-shadow: 2px 2px 0 var(--ink)");
+    expect(rule(".tdb-cta")).toContain("height: 40px");
+    expect(rule(".tdb-cta.sm")).toContain("height: 34px");
+    expect(rule(".tdb-cta.xs")).toContain("height: 32px");
+  });
+});
+
 describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head checkbox)", () => {
   it("the view toggle is LIVE both ways and persisted (sa.todoView)", () => {
     expect(page).toContain('view === "ledger" ? renderLedger() : (');
