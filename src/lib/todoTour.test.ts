@@ -36,6 +36,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
     expect(TOUR_STOPS[3].p).toContain("turns the dial in your favour");
     expect(TOUR_STOPS[3].p).toContain("or the chip beneath Begin"); // toolbelt P3 retarget
     expect(TOUR_STOPS[4].p).toContain("Hover for the actions"); // toolbelt P3: the parity phrases
+    expect(TOUR_STOPS[4].p).toContain("Batches expand in place"); // grouping P4
     expect(TOUR_STOPS[5].p).toContain("struck through as you go");
   });
 });

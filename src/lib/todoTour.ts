@@ -52,7 +52,7 @@ export const TOUR_STOPS: TourStop[] = [
   {
     sel: ".tdb-tile, .tdb-gcard, .tdb-lrow",
     h: "Every card works the same.",
-    p: "Click to open it. Hover for the actions — Action now, Today\u2019s list, or snooze.",
+    p: "Click to open it. Hover for the actions — Action now, Today\u2019s list, or snooze. Batches expand in place to show every agent.",
     cta: "Next →",
   },
   {

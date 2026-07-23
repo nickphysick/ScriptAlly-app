@@ -727,6 +727,19 @@ describe("doc pass P6 — sweep", () => {
   });
 });
 
+describe("grouping P4 — sweep", () => {
+  it("the ref's §3 spotlight demo is NOT built here (fenced to the focused-session work)", () => {
+    for (const dead of ["tdb-veil", "tdb-spot", "destination-out", "createRadialGradient"]) {
+      expect(page).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+  });
+  it("the tour's card stop mentions expanding", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain("Batches expand in place to show every agent");
+  });
+});
+
 describe("grouping P3 — persistence + interplay", () => {
   it("expansion persists per-batch (sa.todoGroupsOpen) and is ONE state consumed by BOTH views", () => {
     expect(page).toContain('JSON.parse(localStorage.getItem("sa.todoGroupsOpen") || "{}")');
