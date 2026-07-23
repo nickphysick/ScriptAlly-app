@@ -103,7 +103,7 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(page).toContain('action: "Action now",');
     expect(page).toContain('todayAdd: "＋ Today’s list",');
     expect(page).toContain('todayRemove: "− Today’s list",');
-    expect(page).toContain('later: "☾ Snooze or dismiss ▾",');
+    expect(page).toContain('later: "Snooze or dismiss",'); // detail P3: moon + chevron left the label — the clock carries the signal
     // the unit stack: Action now (emphasised) · Today's list · Snooze or dismiss — 30px rows
     expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
     expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");

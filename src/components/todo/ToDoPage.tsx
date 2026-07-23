@@ -62,13 +62,25 @@ const shortHeaderDate = (ms: number): string =>
 // the whole app down twice: openSundayReview `4d4fbed`, GHOST_BARS this fix). The regression
 // lock in todoWorkbench.test.ts bans component-level const/let after the return.
 // toolbelt P2 — ONE source for the action labels: the ledger rows AND the card stacks read
-// these strings; a future rename touches this object only.
+// these strings; a future rename touches this object only. (detail P3: the moon + chevron
+// left the snooze label — the clock glyph carries the deferral signal.)
 const VERB_LABELS = {
   action: "Action now",
   todayAdd: "＋ Today’s list",
   todayRemove: "− Today’s list",
-  later: "☾ Snooze or dismiss ▾",
+  later: "Snooze or dismiss",
 } as const;
+
+// detail P3 — the snooze CLOCK (todo-detail-b.html §1, the recommended plain clock). It
+// follows TypeGlyph's exact grammar (currentColor stroke SVG, viewBox 24, aria-hidden, size
+// prop) as a page-scoped sibling — TypeGlyph itself is LOCKED to the three material
+// ComponentTypes and cannot carry a clock verbatim.
+const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3.5 2" />
+  </svg>
+);
 
 const GHOST_BARS = [64, 78, 52];
 const fmtTime = (ms?: number): string => {
@@ -1117,7 +1129,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // tick on row hover/focus and completes immediately (offers + batches keep the plain dot —
   // an offer needs its moment, a batch has no single completion). The acting controls sit at
   // the tail, vertically centred: the emphasised lead (OPENS the acting surface, same as
-  // row-click — it never marks complete) · ghost "＋ Today's list" · ghost "☾ Snooze or
+  // row-click — it never marks complete) · ghost "＋ Today's list" · the clock "Snooze or
   // dismiss ▾" (the SAME Later menu, renamed trigger). The cards view keeps its short verbs —
   // a deliberate, baked divergence. Headings stick within the page scroll on a wash-coloured
   // backing; clicking the heading (not its play button) folds the section, persisted per-lane
@@ -1180,7 +1192,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
           <button type="button" className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>
           <span className="tdb-latwrap">
-            <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>{VERB_LABELS.later}</button>
+            <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}><ClockGlyph />{VERB_LABELS.later}</button>
             {laterKey === key && (
               <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                 <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
@@ -1226,10 +1238,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {!ledgerFold.hk && hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}
           </section>
         )}
-        {vNt.length > 0 && (
+        {/* detail P3 — the ☰ view keeps Notes to self even when EMPTY (parity with the cards'
+            lane): the dashed add-row invites, wired to the same addTask. The lane still hides
+            under an active narrow with no matches, exactly as the cards view hides its lanes. */}
+        {(!active || vNt.length > 0) && (
           <section className={`tdb-lsec n${ledgerFold.nt ? " folded" : ""}`}>
             {ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes, undefined, addTask)}
-            {!ledgerFold.nt && vNt.map(runRow)}
+            {!ledgerFold.nt && (vNt.length > 0 ? vNt.map(runRow) : (
+              <button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>
+            ))}
           </section>
         )}
       </div>
@@ -1301,7 +1318,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── THE CARD CONTRACT (Deck v2 laws; labels realigned by toolbelt P2) — band = identity +
   // status only (tag, the sage ✓ TODAY chip); body = content only; CLICK ANYWHERE opens (unit →
   // the journey sheet); hover (~150ms intent, 180ms ease) grows the STACK downward as an
-  // overlay — the reel never reflows: Action now · ＋/− Today's list · ☾ Snooze or dismiss ▾
+  // overlay — the reel never reflows: Action now · ＋/− Today's list · the clock Snooze menu
   // (tomorrow / a week / don't-show-these — the per-type hide, restorable in Task settings;
   // offers keep no hide — the locked row). One grammar with the ledger, via VERB_LABELS. ──
   // arrow navigation inside the Later menu (P5 a11y): ↓/↑ cycle the menuitems; Esc closes
@@ -1316,7 +1333,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const hideKey = laterHideKey(c.taskType);
     return (
       <span className="tdb-latwrap">
-        <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>{VERB_LABELS.later}</button>
+        <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}><ClockGlyph />{VERB_LABELS.later}</button>
         {laterKey === c.key && (
           <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
             <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>
@@ -1390,7 +1407,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // ── the BATCH card (the contract): flat, hairline, count headline + roundels; click anywhere
-  // opens the Batch-fix sheet; the hover stack = Action now · ☾ Snooze or dismiss ▾ (Today's
+  // opens the Batch-fix sheet; the hover stack = Action now · the clock Snooze menu (Today's
   // list omitted: groups are not committable — the existing Today primitive is per-card). ──
   function renderGroupCard(g: HkGroup) {
     const key = `group-${g.rule}`;
@@ -1438,7 +1455,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <div className="tdb-vstack" onClick={(e) => e.stopPropagation()}>
                 <button type="button" className="tdb-btnh em" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>
                 <span className="tdb-latwrap">
-                  <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>{VERB_LABELS.later}</button>
+                  <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}><ClockGlyph />{VERB_LABELS.later}</button>
                   {laterKey === key && (
                     <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                       <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>

@@ -237,6 +237,31 @@ describe("frame P4 — sweep", () => {
   });
 });
 
+describe("detail P3 — ledger Notes parity + the clock snooze", () => {
+  it("the ☰ Notes section stands even when EMPTY: the pack's wash, the dashed add-row wired to addTask", () => {
+    expect(page).toContain("{(!active || vNt.length > 0) && (");
+    expect(page).toContain('<button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>');
+    expect(page).toContain("{!ledgerFold.nt && (vNt.length > 0 ? vNt.map(runRow) : (");
+    const r = rule(".tdb-laddrow");
+    expect(r).toContain("border: 1.5px dashed #d9c87a");
+    expect(r).toContain("justify-content: center");
+    expect(rule(".tdb-lsec.n")).toContain("background: linear-gradient(180deg, #fbf8ec, #f9f5e4)");
+    expect(rule(".tdb-lsec.n")).toContain("border-color: #ece2c6");
+  });
+  it("the clock snooze: the plain outline clock leads the label in BOTH views from the ONE constant; moon + chevron dead", () => {
+    // the clock follows TypeGlyph's grammar as a page-scoped sibling — TypeGlyph itself is
+    // LOCKED to the three material ComponentTypes (the recon resolution, reported)
+    expect(page).toContain('const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (');
+    expect(page).toContain('<circle cx="12" cy="12" r="9" />');
+    expect(page).toContain('<path d="M12 7v5l3.5 2" />');
+    expect(page).toContain('stroke="currentColor"');
+    expect((page.match(/<ClockGlyph \/>\{VERB_LABELS\.later\}/g) ?? []).length).toBe(3); // the card menu + ledger batch + batch card — one constant, one glyph
+    expect(page).toContain('later: "Snooze or dismiss",');
+    expect(page).not.toContain("☾");
+    expect(page).not.toContain("Snooze or dismiss ▾");
+  });
+});
+
 describe("toolbelt P3 — sweep", () => {
   it("the short-verb family is extinct in the stylesheet; the tour speaks the new grammar", () => {
     expect(css).not.toContain(".tdb-verb ");
@@ -635,7 +660,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(rule(".tdb-lsec.p")).toContain("border-color: #f3ddd4");
     expect(rule(".tdb-lsec.l")).toContain("background: linear-gradient(180deg, #faf6ee, #f8f3e8)");
     expect(rule(".tdb-lsec.l")).toContain("border-color: #ede4d2");
-    expect(rule(".tdb-lsec.n")).toContain("#fcf9ee"); // derived at the same whisper strength — the pack specified two
+    expect(rule(".tdb-lsec.n")).toContain("#fbf8ec"); // detail P3: the pack's hexes superseded the derived whisper
     expect(rule(".tdb-lsec")).toContain("border-radius: 14px");
     const row = rule(".tdb-lrow");
     expect(row).toContain("background: var(--white, #fff)");
@@ -648,7 +673,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(rule(".tdb-lsech")).toContain("position: sticky; top: 0");
     expect(css).toContain(".tdb-lsec.p .tdb-lsech { background: #fbf1ed; }");
     expect(css).toContain(".tdb-lsec.l .tdb-lsech { background: #faf6ee; }");
-    expect(css).toContain(".tdb-lsec.n .tdb-lsech { background: #fcf9ee; }");
+    expect(css).toContain(".tdb-lsec.n .tdb-lsech { background: #fbf8ec; }");
     expect(page).toContain('ledgerHeading("p", "do", "tdb-lane-do", "Urgent"');
     expect(page).toContain('ledgerHeading("l", "hk", "tdb-lane-hk", "Housekeeping"');
     expect(page).toContain('ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self"');
@@ -662,7 +687,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).toContain('localStorage.getItem("sa.todoLedgerFold")');
     expect(page).toContain("{!ledgerFold.do && doSorted.map(runRow)}");
     expect(page).toContain("{!ledgerFold.hk && hkTop.map((r) => (r.kind === \"group\" ? runBatchRow(r.g) : runRow(r.c)))}".replace(/\\/g, ""));
-    expect(page).toContain("{!ledgerFold.nt && vNt.map(runRow)}");
+    expect(page).toContain("{!ledgerFold.nt && (vNt.length > 0 ? vNt.map(runRow) : ("); // detail P3: the empty add-row branch
   });
   it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
     expect(rule(".tdb-lacts")).toContain("align-self: center");
@@ -677,7 +702,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(br).not.toContain("Today’s list"); // groups stay uncommittable — the carried resolution
   });
   it("the dropdown keeps the Later items under the renamed trigger", () => {
-    expect(page).toContain('>{VERB_LABELS.later}</button>'); // ONE trigger form everywhere (the ledger param died)
+    expect(page).toContain('><ClockGlyph />{VERB_LABELS.later}</button>'); // ONE trigger form everywhere — the clock leads it (detail P3)
     expect((page.match(/>Remind me tomorrow<\/button>/g) ?? []).length).toBe(3); // the card menu + the ledger batch row + the batch CARD
     expect((page.match(/>Give it a week<\/button>/g) ?? []).length).toBe(3);
     expect((page.match(/>Don’t show these again<\/button>/g) ?? []).length).toBe(3);
@@ -699,7 +724,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(cv).toContain("laterMenu(c)");
     // the literals live ONCE, in the constant — nowhere inline
     expect((page.match(/: "Action now"/g) ?? []).length).toBe(1); // the constant's assignment alone
-    expect((page.match(/: "☾ Snooze or dismiss ▾"/g) ?? []).length).toBe(1);
+    expect((page.match(/: "Snooze or dismiss"/g) ?? []).length).toBe(1);
     expect(page).not.toContain("✓ DONE");
     expect(page).not.toContain("⚡ FIX");
     expect(page).not.toContain("LATER ▾");

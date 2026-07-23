@@ -307,18 +307,20 @@
 .tdb-lsec { border-radius: 14px; padding: 6px 16px 10px; margin-bottom: 16px; border: 1px solid transparent; }
 .tdb-lsec.p { background: linear-gradient(180deg, #fbf1ed, #faeee9); border-color: #f3ddd4; }
 .tdb-lsec.l { background: linear-gradient(180deg, #faf6ee, #f8f3e8); border-color: #ede4d2; }
-.tdb-lsec.n { background: linear-gradient(180deg, #fcf9ee, #faf5e3); border-color: #e9e0c8; }
+.tdb-lsec.n { background: linear-gradient(180deg, #fbf8ec, #f9f5e4); border-color: #ece2c6; } /* detail P3: the pack's hexes supersede the doc-pass derived whisper */
 .tdb-lsec.folded { padding-bottom: 6px; }
 .tdb-lsech { display: flex; align-items: center; gap: 11px; margin: 0 -16px; padding: 10px 18px 8px; position: sticky; top: 0; z-index: 10; border-radius: 13px 13px 0 0; cursor: pointer; }
 .tdb-lsec.p .tdb-lsech { background: #fbf1ed; }
 .tdb-lsec.l .tdb-lsech { background: #faf6ee; }
-.tdb-lsec.n .tdb-lsech { background: #fcf9ee; }
+.tdb-lsec.n .tdb-lsech { background: #fbf8ec; }
 .tdb-lsech:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .tdb-lst { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
 .tdb-lscc { font-family: var(--f12-mono); font-size: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; color: var(--ink-2); }
 .tdb-lsfold { margin-left: auto; font-size: 10px; color: var(--muted); }
 .tdb-lrow { position: relative; display: flex; align-items: center; gap: 14px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; }
 .tdb-lrow:hover, .tdb-lrow:focus-within { z-index: 30; } /* the ledger's expanding surface (the open menu) clears the sticky headings too */
+.tdb-laddrow { display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; padding: 13px 16px; margin-bottom: 2px; background: none; border: 1.5px dashed #d9c87a; border-radius: 11px; font-size: 11px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.tdb-laddrow:hover { background: rgba(255, 255, 255, 0.5); }
 .tdb-lrow:last-child { margin-bottom: 2px; }
 .tdb-lrow:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 /* the leading roundel: the family dot at rest; the TICK face on row hover/focus (units +
