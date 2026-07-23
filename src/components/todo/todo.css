@@ -32,7 +32,12 @@
    812 wide, 16 apart. The stack owns the width token + the 220ms Today transition; each
    container fills it. */
 .tdb-centre { width: var(--tdb-sheet); flex: 0 0 auto; min-width: 0; display: flex; flex-direction: column; gap: 16px; transition: width 220ms ease; }
-.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
+.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 0; }
+/* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
+   sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
+   overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */
+.tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: linear-gradient(180deg, #edecea, #e7e6e3); border-bottom: 1px solid #d9d7d2; border-radius: 15px 15px 0 0; }
+.tdb-sheetbody { padding: 16px 18px 18px; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-centre { width: 100%; } }
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
@@ -494,11 +499,12 @@
 /* ── Final Shape P3 — the SHEET SHELL: the corner row (mono meta · the ▦/☰ segment) over THE
    RESIDENT REVIEW DOCBAND (ref .docband): warm gradient, hairline, radius 12; 42px uncircled
    currentColor cup; ink "Open it ›" ⇄ ghost "View again" on the derived boolean. No ✕, ever. ── */
-.tdb-sheethead { display: flex; align-items: center; gap: 10px; padding: 2px 4px 14px; }
-.tdb-shmeta { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; }
-.tdb-vseg { margin-left: auto; height: 32px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }
-.tdb-vseg button { width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 11px; color: var(--muted); border: none; background: none; cursor: pointer; }
-.tdb-vseg button.on { background: var(--paper); color: var(--ink); border: 1px solid var(--ink); box-shadow: 1px 1px 0 var(--ink); box-sizing: border-box; } /* selected = pressed in */
+.tdb-shmeta { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; color: #7d776f; text-transform: uppercase; }
+/* the segment restyled to sit on grey (ref B): paler track, its own border; the active chip
+   keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
+.tdb-vseg { margin-left: auto; height: 30px; box-sizing: border-box; border: 1px solid #cfcdc8; background: #f4f3f1; border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }
+.tdb-vseg button { width: 30px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
+.tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-shadow: 1px 1px 0 var(--ink); box-sizing: border-box; } /* selected = pressed in */
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
    none is introduced (the fence records the resolution). */

@@ -683,13 +683,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
           {/* THE SHEET — unchanged internally, minus the docband + banner it loses */}
           <div className="tdb-mainc">
-            <div className="tdb-sheethead">
+            {/* doc pass P3 — THE DOCUMENT HEADER: a warm-grey toolbar band across the sheet's
+                full top edge, BOTH views (it sits outside the view branch): meta left, the
+                restyled segment right. The body padding starts below the band. */}
+            <div className="tdb-dochead">
               <span className="tdb-shmeta">{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}</span>
               <span className="tdb-vseg" role="group" aria-label="View">
                 <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
                 <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
               </span>
             </div>
+            <div className="tdb-sheetbody">
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -758,6 +762,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         )}
+            </div>
           </div>
           {/* the Pro COLLEAGUE — its own container at the stack's foot (polish P3) */}
           {!isProUser(currentUser) && (

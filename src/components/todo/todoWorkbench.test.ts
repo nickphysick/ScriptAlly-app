@@ -160,6 +160,40 @@ describe("polish P2 — THE STATIONERY PRESS (the button law)", () => {
   });
 });
 
+describe("doc pass P3 — the document header (the grey toolbar band)", () => {
+  it("the band spans the sheet's top on BOTH views: it sits before the view branch, meta left + segment right", () => {
+    const head = page.indexOf('className="tdb-dochead"');
+    const body = page.indexOf('className="tdb-sheetbody"');
+    const branch = page.indexOf('desk === "new-desk"');
+    expect(head).toBeGreaterThan(page.indexOf('className="tdb-mainc"'));
+    expect(head).toBeLessThan(body);
+    expect(body).toBeLessThan(branch); // the branch (cards ⇄ ledger ⇄ desk states) lives inside the body
+    expect(page).not.toContain("tdb-sheethead"); // the corner row's container is superseded
+    expect(css).not.toContain("tdb-sheethead");
+  });
+  it("the band's colours: warm grey wash, the 1px rule, the on-grey meta ink", () => {
+    const b = rule(".tdb-dochead");
+    expect(b).toContain("background: linear-gradient(180deg, #edecea, #e7e6e3)");
+    expect(b).toContain("border-bottom: 1px solid #d9d7d2");
+    expect(rule(".tdb-shmeta")).toContain("color: #7d776f");
+  });
+  it("the segment restyled to sit on grey: paler track + border, 30×22 chips; the active chip keeps the half-press", () => {
+    const t = rule(".tdb-vseg");
+    expect(t).toContain("background: #f4f3f1");
+    expect(t).toContain("border: 1px solid #cfcdc8");
+    expect(t).toContain("height: 30px");
+    expect(rule(".tdb-vseg button")).toContain("height: 22px");
+    const on = rule(".tdb-vseg button.on");
+    expect(on).toContain("background: var(--white, #fff)");
+    expect(on).toContain("border: 1px solid var(--ink)");
+    expect(on).toContain("box-shadow: 1px 1px 0 var(--ink)");
+  });
+  it("radius continuity WITHOUT overflow:hidden (sticky must survive): the band's own 15px top corners", () => {
+    expect(rule(".tdb-dochead")).toContain("border-radius: 15px 15px 0 0");
+    expect(rule(".tdb-mainc")).not.toContain("overflow"); // hidden would re-scope the lane headings' sticky
+  });
+});
+
 describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
   it("the tier media: asm 1624 + sheet 1072 + a 4-up grid, tokens only (never a hard card width)", () => {
     const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
@@ -621,11 +655,12 @@ describe("Width v4 — the centred assembly tokens (Final Shape)", () => {
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
-  it("THE SHEET: both views render inside the white panel (radius 16, hairline, 18/18/8; width from the stack)", () => {
+  it("THE SHEET: both views render inside the white panel (radius 16, hairline; the body pads below the band)", () => {
     const m = rule(".tdb-mainc");
     expect(m).toContain("width: 100%");
     expect(m).toContain("border-radius: 16px");
-    expect(m).toContain("padding: 18px 18px 8px");
+    expect(m).toContain("padding: 0"); // doc pass P3: the band is full-bleed; the body carries the padding
+    expect(rule(".tdb-sheetbody")).toContain("padding: 16px 18px 18px");
     // one sheet, both views: the ledger + the lanes render inside .tdb-mainc (no second panel)
     const mainc = page.indexOf('className="tdb-mainc"');
     expect(mainc).toBeGreaterThan(0);
