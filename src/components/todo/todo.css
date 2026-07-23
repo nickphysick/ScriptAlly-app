@@ -25,7 +25,7 @@
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 22px 0 26px; } /* the assembly work row (ref .work) */
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 50px 0 26px; } /* the assembly work row; detail P2: 22 + the pack's +28 air above all three columns */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
 /* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),
@@ -108,11 +108,12 @@
 .tdb-rsech + .tdb-fpill { margin-top: 10px; } /* the first pill breathes under the band (ref) */
 /* the review CHIP — the free-standing standing entry point (the WK stamp rides the hover
    title, keeping the resting face uncrowded) */
-.tdb-rvchip { display: flex; align-items: center; gap: 9px; height: 38px; width: 100%; box-sizing: border-box; padding: 0 13px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08); font-size: 11px; font-weight: 600; color: #4d4238; cursor: pointer; flex: 0 0 auto; text-align: left; }
-.tdb-rvchip:hover { border-color: var(--ink-2); }
-.tdb-rvcups { width: 24px; flex: 0 0 auto; color: var(--ink); }
-.tdb-rvcups svg { width: 100%; height: auto; display: block; }
-.tdb-rvnew { width: 7px; height: 7px; border-radius: 50%; background: #c96a55; flex: 0 0 auto; margin-left: auto; }
+/* detail P2: Begin's EXACT INVERSE — identical geometry (44 / full width / centred label /
+   12.5 · 600 · .02em), colours swapped (cream fill, ink text); the cup left the chip; the
+   unread dot rides inline after the label. */
+.tdb-rvchip { display: inline-flex; align-items: center; justify-content: center; gap: 9px; height: 44px; width: 100%; box-sizing: border-box; padding: 0 20px; line-height: 1; background: #f3e7da; border: 1px solid #1d100c; color: #2a1a13; border-radius: 99px; box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08); font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; flex: 0 0 auto; white-space: nowrap; }
+.tdb-rvchip:hover { background: #f5ecdf; }
+.tdb-rvnew { width: 7px; height: 7px; border-radius: 50%; background: #c96a55; flex: 0 0 auto; }
 /* polish P4 — the removable query chip (the pink tag law) + the struck old total */
 .tdb-fq { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #7c3a2a; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; min-width: 0; max-width: 100%; }
 .tdb-fq:hover { border-color: #7c3a2a; }
@@ -549,7 +550,9 @@ button.tdb-tdot { cursor: pointer; }
 /* ── Final Shape P3 — the SHEET SHELL: the corner row (mono meta · the ▦/☰ segment) over THE
    RESIDENT REVIEW DOCBAND (ref .docband): warm gradient, hairline, radius 12; 42px uncircled
    currentColor cup; ink "Open it ›" ⇄ ghost "View again" on the derived boolean. No ✕, ever. ── */
-.tdb-shmeta { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; color: #8a857d; text-transform: uppercase; }
+/* detail P2 — the bar line (todo-detail-a.html §2): lining + tabular figures — Playfair's
+   oldstyle figures dip below the baseline and shift width as counts change */
+.tdb-bartext { font-family: var(--f12-serif); font-size: 14.5px; font-weight: 400; color: #4d4238; font-variant-numeric: lining-nums tabular-nums; }
 /* the segment restyled to sit on grey (ref B): paler track, its own border; the active chip
    keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
 .tdb-vseg { margin-left: auto; height: 30px; box-sizing: border-box; border: 1px solid #dbd9d4; background: #faf9f8; border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }

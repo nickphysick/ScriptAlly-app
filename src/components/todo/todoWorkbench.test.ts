@@ -197,7 +197,7 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
     const b = rule(".tdb-dochead");
     expect(b).toContain("background: linear-gradient(180deg, #f4f3f1, #f0eeeb)");
     expect(b).toContain("border-bottom: 1px solid #e5e3de");
-    expect(rule(".tdb-shmeta")).toContain("color: #8a857d");
+    expect(rule(".tdb-bartext")).toContain("color: #4d4238"); // detail P2: the Playfair line took the meta's slot
     expect(page).not.toContain("tdb-doct"); // the centred "To do" idea is dropped
     expect(page).not.toContain(">To do<");
   });
@@ -276,15 +276,28 @@ describe("toolbelt P1 — the three-element stack (option C)", () => {
     expect(b).toContain("width: 100%");
     expect(b).toContain("box-shadow: 0 3px 12px rgba(29, 16, 12, 0.22)");
   });
-  it("the review chip: 38 white pill, cup + label + right-aligned dot; the WK stamp rides the hover title", () => {
+  it("detail P2 — the +28 air: the work row opens 50 above the three columns (22 + 28)", () => {
+    expect(rule(".tdb-ws")).toContain("padding: 50px 0 26px" /* detail P2: +28 air */);
+  });
+  it("detail P2 — the chip is Begin's EXACT INVERSE: identical geometry, colours swapped; no cup; the dot inline", () => {
     const c = rule(".tdb-rvchip");
-    expect(c).toContain("height: 38px");
-    expect(c).toContain("background: var(--white, #fff)");
-    expect(c).toContain("border: 1px solid var(--line)");
-    expect(c).toContain("box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08)");
+    const b = rule(".tdb-btnp");
+    // geometry equality with Begin (computed from the two rules)
+    for (const decl of ["height: 44px", "justify-content: center", "font-size: 12.5px", "font-weight: 600", "letter-spacing: 0.02em", "line-height: 1", "padding: 0 20px", "border-radius: 99px"]) {
+      expect(c).toContain(decl);
+      expect(b).toContain(decl.replace("height: 44px", "height: 42px")); // Begin's base is 42; the toolbelt override lifts BOTH to 44
+    }
+    expect(rule(".tdb-fsb2")).toContain("height: 44px"); // the pair stands at 44 together
+    // the colour inversion: cream fill · ink text · the primary's border hex
+    expect(c).toContain("background: #f3e7da");
+    expect(c).toContain("color: #2a1a13");
+    expect(c).toContain("border: 1px solid #1d100c");
+    // no cup on the chip; the dot rides INLINE after the label (no right-align)
+    const belt = page.slice(page.indexOf("function renderToolbelt"), page.indexOf("function renderFilterCard"));
+    expect(belt).not.toContain("tdb-rvcups");
     expect(page).toContain("title={`WK ${reviewWin.weekNumber}`} onClick={openReview}");
     expect(page).toContain("{!reviewSeen && <span className=\"tdb-rvnew\" aria-hidden />}".replace(/\\/g, ""));
-    expect(rule(".tdb-rvnew")).toContain("margin-left: auto"); // the dot right-aligns on the chip
+    expect(rule(".tdb-rvnew")).not.toContain("margin-left");
     expect(rule(".tdb-rvnew")).toContain("background: #c96a55");
     expect(page).not.toContain("tdb-rvwk"); // the resting face stays uncrowded
   });
@@ -490,9 +503,16 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).not.toContain("tdb-docband");
     expect(css).not.toContain("tdb-docband");
   });
-  it("the corner row: derived mono meta (date · open · showing) left, the ▦/☰ segment right", () => {
-    expect(page).toContain("{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}");
-    expect(rule(".tdb-shmeta")).toContain("text-transform: uppercase");
+  it("detail P2 — the bar line: Playfair sentence off the SAME shared derivation, lining+tabular figures; the segment right", () => {
+    expect(page).toContain(">Showing {shownX} of {shownY} items on your list</span>"); // live under search — the reactive-rail derivation
+    const t = rule(".tdb-bartext");
+    expect(t).toContain("font-family: var(--f12-serif)");
+    expect(t).toContain("font-size: 14.5px");
+    expect(t).toContain("font-weight: 400");
+    expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
+    expect(page).not.toContain("tdb-shmeta"); // the mono meta is gone
+    expect(css).not.toContain("tdb-shmeta");
+    expect(page).not.toContain("OPEN · SHOWING"); // no mono remnant
     expect(page).toContain('className="tdb-vseg" role="group" aria-label="View"');
     expect(page).toContain('onClick={() => pickView("cards")}>▦</button>');
     expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
@@ -754,7 +774,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-ws")).toContain("padding: 22px 0 26px"); // the assembly work row (v2)
+    expect(rule(".tdb-ws")).toContain("padding: 50px 0 26px"); // the assembly work row (v2)
     expect(rule(".tdb-fside, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading

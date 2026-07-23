@@ -713,7 +713,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 full top edge, BOTH views (it sits outside the view branch): meta left, the
                 restyled segment right. The body padding starts below the band. */}
             <div className="tdb-dochead">
-              <span className="tdb-shmeta">{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}</span>
+              {/* detail P2 — the bar line: normal-weight Playfair reading the SAME shownX/shownY
+                  the rail counts derive from, so it re-derives live under search/filter; lining
+                  + tabular figures keep the numerals on the baseline at a steady width. */}
+              <span className="tdb-bartext">Showing {shownX} of {shownY} items on your list</span>
               <span className="tdb-vseg" role="group" aria-label="View">
                 <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
                 <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
@@ -953,9 +956,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <>
         <button type="button" className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
+        {/* detail P2 — the chip is Begin's exact inverse: identical geometry, colours swapped;
+            the cup left the chip (the review banner keeps the big cup); the dot sits inline
+            after the label. All afterlife behaviour unchanged. */}
         {reviewWin && (
           <button type="button" className="tdb-rvchip" title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
-            <span className="tdb-rvcups" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
             Last week in review
             {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
           </button>
