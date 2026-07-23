@@ -171,16 +171,18 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
     expect(page).not.toContain("tdb-sheethead"); // the corner row's container is superseded
     expect(css).not.toContain("tdb-sheethead");
   });
-  it("the band's colours: warm grey wash, the 1px rule, the on-grey meta ink", () => {
+  it("frame P1 — the lighter greys: wash, rule, on-grey meta ink; NO title node in the bar", () => {
     const b = rule(".tdb-dochead");
-    expect(b).toContain("background: linear-gradient(180deg, #edecea, #e7e6e3)");
-    expect(b).toContain("border-bottom: 1px solid #d9d7d2");
-    expect(rule(".tdb-shmeta")).toContain("color: #7d776f");
+    expect(b).toContain("background: linear-gradient(180deg, #f4f3f1, #f0eeeb)");
+    expect(b).toContain("border-bottom: 1px solid #e5e3de");
+    expect(rule(".tdb-shmeta")).toContain("color: #8a857d");
+    expect(page).not.toContain("tdb-doct"); // the centred "To do" idea is dropped
+    expect(page).not.toContain(">To do<");
   });
-  it("the segment restyled to sit on grey: paler track + border, 30×22 chips; the active chip keeps the half-press", () => {
+  it("frame P1 — the segment on the paler ground: #faf9f8 track, #dbd9d4 border, 30×22 chips", () => {
     const t = rule(".tdb-vseg");
-    expect(t).toContain("background: #f4f3f1");
-    expect(t).toContain("border: 1px solid #cfcdc8");
+    expect(t).toContain("background: #faf9f8");
+    expect(t).toContain("border: 1px solid #dbd9d4");
     expect(t).toContain("height: 30px");
     expect(rule(".tdb-vseg button")).toContain("height: 22px");
     const on = rule(".tdb-vseg button.on");
