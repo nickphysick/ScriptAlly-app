@@ -1,0 +1,67 @@
+<!-- design-refs/todo-detail-b.html — Downloads todo-fix10c.html (23 Jul 14:41), committed with detail P1.
+  NORMATIVE for: the clock snooze button (§1 — the RECOMMENDED plain outline clock, 13px, sw 2;
+  the clock-with-z and calendar alternatives are rejected) and the colophon's FINAL WORDING (§2).
+  Build note: TypeGlyph is hard-keyed to the three material ComponentTypes (locked) — the clock
+  follows TypeGlyph's exact grammar (currentColor stroke SVG, size prop, aria-hidden) as the
+  page-scoped ClockGlyph; recorded as the pack-vs-locked-component resolution. -->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Snooze icon + reworded colophon</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:42px 0 12px;width:1000px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px}
+.bed{width:1000px;background:var(--oat);border-radius:12px;box-shadow:0 6px 16px rgba(58,28,20,.13);padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;align-items:center}
+.hl{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;padding:0 15px;font-size:10.5px;background:var(--paper);border:1px solid var(--ink);color:var(--ink);border-radius:99px;font-weight:700;line-height:1}
+.hq{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;padding:0 14px;font-size:10.5px;background:var(--paper);border:1px solid var(--hair);color:#6b5a4e;border-radius:99px;font-weight:600;line-height:1}
+.trio{display:flex;gap:7px;align-items:center}
+.cap{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.13em;color:#a5988c}
+.p4{text-align:center;padding:26px 0 12px;border-top:1px solid var(--hair);position:relative;width:820px}
+.p4 .spark{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--oat);padding:0 12px;color:#6A89A7;font-size:14px}
+.p4 .k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.17em;color:#6A89A7;margin-bottom:7px}
+.p4 h4{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
+.p4 p{font-size:11.5px;color:#5d4d40;margin-top:5px;font-variant-numeric:lining-nums}
+.p4 p b{color:#3d5872}
+.p4 .links{margin-top:12px;display:flex;gap:24px;justify-content:center}
+.p4 a{color:#557393;font-size:12.5px;font-weight:700;border-bottom:1px solid #b9cad9;padding-bottom:1px;text-decoration:none}
+.p4 a.g{color:#8a7a6d;border-color:var(--hair)}
+</style></head><body><div class="lbl">1 &middot; The snooze button &mdash; moon and chevron gone, clock in <em>&mdash; the universal deferral symbol (Gmail, Slack, Outlook, Todoist); three icon candidates in the real trio, the plain clock recommended.</em></div><div class="bed">
+<div class="cap">RECOMMENDED &mdash; THE PLAIN CLOCK</div>
+<div class="trio"><span class="hl">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Snooze or dismiss</span></div>
+<div class="cap" style="margin-top:8px">ALTERNATIVES &mdash; CLOCK-WITH-Z &middot; CALENDAR</div>
+<div style="display:flex;gap:22px"><span class="hq"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13" r="8"/><path d="M10 9v4l2.5 1.5"/><path d="M16 3h5l-5 5h5"/></svg>Snooze or dismiss</span><span class="hq"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Snooze or dismiss</span></div>
+</div><div class="lbl">2 &middot; The colophon, reworded <em>&mdash; your copy verbatim, numbers live-derived, lining figures.</em></div><div class="bed"><div class="p4"><span class="spark">&#10022;</span>
+<div class="k">SCRIPTALLY PRO</div>
+<h4>Hand over the housekeeping</h4>
+<p>The assistant carries out your agent research for you. <b>40 of your current 44 tasks</b> could be handled in the background whilst you write.</p>
+<div class="links"><a>Meet the assistant &rarr;</a><a class="g">What&rsquo;s in Pro</a></div></div></div></body></html>

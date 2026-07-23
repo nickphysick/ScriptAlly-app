@@ -317,6 +317,7 @@
 .tdb-lscc { font-family: var(--f12-mono); font-size: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; color: var(--ink-2); }
 .tdb-lsfold { margin-left: auto; font-size: 10px; color: var(--muted); }
 .tdb-lrow { position: relative; display: flex; align-items: center; gap: 14px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; }
+.tdb-lrow:hover, .tdb-lrow:focus-within { z-index: 30; } /* the ledger's expanding surface (the open menu) clears the sticky headings too */
 .tdb-lrow:last-child { margin-bottom: 2px; }
 .tdb-lrow:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 /* the leading roundel: the family dot at rest; the TICK face on row hover/focus (units +
@@ -378,10 +379,16 @@ button.tdb-ldot { cursor: pointer; }
    collapsed by grid-template-rows 0fr ⇄ 1fr (180ms ease; the ~150ms hover intent is JS).
    Overlay faces (receipts/forks) render WITHOUT a cell and stay in-flow — the base rule keeps
    their flex slot. The rim/.tdb-frame wrapper survives only for those faces. */
-.tdb-cell { position: relative; height: var(--tdb-cardh); } /* a grid item now — the column tracks size it */
+/* detail P1 — THE STACKING LAW (todo-detail-a.html §1): the surface anchors top/left/right
+   ONLY (never bottom/inset — a pinned bottom locks it to the cell) with min-height = the
+   cell, growing downward freely; the CELL (not the surface) raises z on hover/focus-within
+   above the sticky section headings (z 10) so the expansion covers the next section. The
+   ancestor chain (grid → lane → sheetbody → mainc) is audited clip-free and context-free. */
+.tdb-cell { position: relative; height: var(--tdb-cardh); z-index: 1; } /* a grid item — the column tracks size it */
+.tdb-cell:hover, .tdb-cell:focus-within { z-index: 30; }
 .tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; min-height: 100%; }
 .tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
-.tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); z-index: 5; }
+.tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); } /* the z raise rides the CELL (detail P1) */
 /* the default ring dies; keyboard focus = a 2px ink outline riding the surface's radius */
 .tdb-tile:focus, .tdb-gcard:focus { outline: none; }
 .tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }

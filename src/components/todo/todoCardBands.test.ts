@@ -47,12 +47,38 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     const hov = rule(".tdb-tile.hov, .tdb-gcard.hov");
     expect(hov).toContain("box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18)");
     expect(hov).toContain("transform: translateY(-2px)");
-    expect(hov).toContain("z-index: 5");
+    expect(hov).not.toContain("z-index"); // detail P1: the raise rides the CELL, not the surface
     // the CELL holds the slot at a fixed resting height; the SURFACE is absolute inside it
     expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)");
     expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)"); // v4 P4: ONE resting height — batch cells match units
     expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("position: absolute; top: 0; left: 0; right: 0;");
     expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("min-height: 100%");
+  });
+  it("detail P1 — THE STACKING LAW: cell-carried z above the sticky headings; the anchor stays bottom-free", () => {
+    // the anchor rule: top/left/right only — never bottom, never inset
+    const surf = rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard");
+    expect(surf).toContain("position: absolute; top: 0; left: 0; right: 0;");
+    expect(surf).toContain("min-height: 100%");
+    expect(surf).not.toContain("bottom");
+    expect(surf).not.toContain("inset");
+    // the z-rule: the CELL raises on hover AND focus-within, above the headings' z 10
+    expect(rule(".tdb-cell")).toContain("z-index: 1");
+    expect(css).toContain(".tdb-cell:hover, .tdb-cell:focus-within { z-index: 30; }");
+    expect(css).toContain(".tdb-lrow:hover, .tdb-lrow:focus-within { z-index: 30; }"); // the ledger's open menu clears them too
+    expect(rule(".tdb-lh2")).toContain("z-index: 10"); // what the raise must beat
+    expect(rule(".tdb-lsech")).toContain("z-index: 10");
+    // the ancestor audit: no clipper, no stacking-context creator between cell and sheet body
+    for (const sel of [".tdb-grid", ".tdb-lane", ".tdb-lanes", ".tdb-sheetbody", ".tdb-mainc"]) {
+      let r = "";
+      try { r = rule(sel); } catch { continue; } // .tdb-lanes has no own rule — nothing to audit
+      expect(r).not.toContain("overflow: hidden");
+      expect(r).not.toContain("overflow: clip");
+      expect(r).not.toContain("transform");
+      expect(r).not.toContain("filter");
+      expect(r).not.toContain("will-change");
+      expect(r).not.toMatch(/[^-]z-index/);
+    }
+    // the overlap itself is a paint-order fact jsdom cannot render — the browser walk confirms
   });
   it("the verb stack lives INSIDE the surface's border: grid 0fr⇄1fr 180ms; the wrapper brings NOTHING of its own", () => {
     expect(rule(".tdb-vwrap")).toContain("display: grid; grid-template-rows: 0fr; transition: grid-template-rows 180ms ease");
