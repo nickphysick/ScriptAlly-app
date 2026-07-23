@@ -43,9 +43,9 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
   });
   it("the spacing law: the hero is a stacked flow — the sub-slot is FIXED HEIGHT with even gaps; no absolute over the board", () => {
     const slot = rule(".tdb-srchrow");
-    expect(slot).toContain("min-height: 46px"); // the slot never collapses when the search leaves
+    expect(slot).toContain("min-height: var(--tdb-search-h)"); // the slot tracks the pill; it never collapses when the search leaves
     expect(slot).toContain("align-items: center");
-    expect(slot).toContain("margin: 20px 0 12px"); // ≥10px even gaps above/below
+    expect(slot).toContain("margin: 20px 0 var(--tdb-search-clear)"); // the settlement: the clearance band below
     // the ONE intended overlap is the title crossfade pair; the sub-slot content is a real child
     expect(page).toContain('className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}');
     expect(page).not.toContain("style={{ top: geo.subTop }}"); // the v6 measured overlay is gone

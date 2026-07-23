@@ -643,10 +643,10 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
     const sr = rule(".tdb-srchrow");
     expect(sr).toContain("justify-content: center");
-    expect(sr).toContain("margin: 20px 0 12px"); // v7: the fixed sub-slot spacing (≥10px gaps)
+    expect(sr).toContain("margin: 20px 0 var(--tdb-search-clear)"); // the settlement: the clearance band below
     const bs = rule(".tdb-bigsearch");
-    expect(bs).toContain("width: 380px"); // doc pass P1: 540 → 380
-    expect(bs).toContain("height: 46px");
+    expect(bs).toContain("width: var(--tdb-search-w)"); // the settlement: grown to 460
+    expect(bs).toContain("height: var(--tdb-search-h)");
     expect(page).toContain('placeholder="Search"'); // polish: exactly "Search"
     expect(page).toContain("matchesSearch(c, search, sctx)");
   });
@@ -659,7 +659,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     const input = page.indexOf("ref={searchRef}");
     expect(page.indexOf('className="tdb-mag"')).toBeGreaterThan(input);
     const mag = rule(".tdb-mag");
-    expect(mag).toContain("width: 34px");
+    expect(mag).toContain("width: 32px"); // the settlement: the roundel scales with the grown pill
     expect(mag).toContain("border-radius: 50%");
     expect(mag).toContain("background: var(--oat)");
     expect(mag).toContain("margin-left: auto");

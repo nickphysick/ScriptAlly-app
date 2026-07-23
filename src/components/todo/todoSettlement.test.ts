@@ -81,3 +81,43 @@ describe("settlement P1 — stone headers: one treatment, ONE height, everywhere
     expect(on).toContain("border: 1px solid var(--ink)");
   });
 });
+
+describe("settlement P2 — the search, grown, and the clearance band", () => {
+  it("one step up: 460 × 46, font 13, and the responsive floor kept", () => {
+    const w = rule(".tdb-wrap");
+    expect(w).toContain("--tdb-search-w: 460px");
+    expect(w).toContain("--tdb-search-h: 46px");
+    const bs = rule(".tdb-bigsearch");
+    expect(bs).toContain("width: var(--tdb-search-w)");
+    expect(bs).toContain("height: var(--tdb-search-h)");
+    expect(bs).toContain("font-size: 13px");
+    expect(bs).toContain("max-width: calc(100vw - 2 * var(--tdb-edge))"); // the floor: it never overruns the gutter
+    expect(rule(".tdb-bigsearch input")).toContain("font-size: 13px");
+  });
+  it("the mag roundel scales with it (32px), placement and behaviour unchanged", () => {
+    const m = rule(".tdb-mag");
+    expect(m).toContain("width: 32px");
+    expect(m).toContain("height: 32px");
+    expect(m).toContain("margin-left: auto"); // still the right-hand glass
+    expect(page).toContain('placeholder="Search"');
+    expect(page).toContain("ref={searchRef}"); // ⌘K still lands here
+  });
+  it("THE CLEARANCE: ≥40px of clear ground below the pill, as a token, at every tier", () => {
+    expect(rule(".tdb-wrap")).toContain("--tdb-search-clear: 40px");
+    expect(rule(".tdb-srchrow")).toContain("margin: 20px 0 var(--tdb-search-clear)");
+    // it is the ROW's own bottom margin — no child can collapse through it — and NOTHING
+    // redefines it or the token anywhere else in the sheet, so it holds at every width tier
+    expect(css.match(/--tdb-search-clear:/g)!.length).toBe(1);
+    expect(css.match(/\n\.tdb-srchrow \{/g)!.length).toBe(1);
+    expect(css.match(/\.tdb-srchrow\s*\{[^}]*margin:/g)!.length).toBe(1);
+  });
+  it("the v9 sub-slot spacing law still holds with the taller pill", () => {
+    const slot = rule(".tdb-srchrow");
+    expect(slot).toContain("min-height: var(--tdb-search-h)"); // the slot tracks the pill exactly
+    expect(slot).toContain("position: relative"); // the single crossfading occupant rides it
+    expect(rule(".tdb-heroslot")).toContain("position: absolute; inset: 0");
+    // the session's region is MEASURED from the row's real bottom, so a taller pill just moves it
+    const ss = readFileSync(join(here, "FocusedSession.tsx"), "utf8");
+    expect(ss).toContain("const region = sessionRegion(sr ? sr.bottom : slotTop + 30, window.innerHeight);");
+  });
+});
