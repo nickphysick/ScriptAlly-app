@@ -305,10 +305,13 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     dealRef.current = true;
     setHandled((h) => (h.some((x) => x.key === c.key) ? h : [...h, c]));
     setDeal({ card: c, kind: "handled" });
+    // P4 — the LAST card's sweep completes before the close mounts (an instant phase flip
+    // would unmount the clone mid-flight); the close then fades into the same centre region.
+    const willClose = !order.slice(index + 1).some((x) => liveKeys.has(x.key));
     const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;
     const clearAtMs = reduce ? 420 : DEAL.stampHoldMs + DEAL.sweepMs + 60;
-    at(advanceAtMs, () => { advancePast(index + 1); setRose(true); });
-    at(clearAtMs, () => { setDeal(null); dealRef.current = false; });
+    at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });
+    at(clearAtMs, () => { setDeal(null); dealRef.current = false; if (willClose) setPhase("close"); });
     at(clearAtMs + DEAL.riseMs, () => setRose(false));
   }
   /** Skip for now — no stamp: the sheet slides to the BOTTOM of the stack (down and behind,

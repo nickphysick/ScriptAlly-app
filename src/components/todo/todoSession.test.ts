@@ -134,7 +134,7 @@ describe("final P3 — the card + the deal at the rest line", () => {
   });
   it("the deal: stamp → hold → sweep left → the rise (450) WITH the session-line advance; skip goes down-and-behind", () => {
     expect(ss).toContain("const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;");
-    expect(ss).toContain("at(advanceAtMs, () => { advancePast(index + 1); setRose(true); });");
+    expect(ss).toContain("at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });"); // P4: the last sweep defers the close
     expect(css).toContain(".tdb-fsleave.handled { animation: tdbSweepOff 500ms cubic-bezier(0.5, 0.05, 0.6, 1) 520ms forwards; }");
     expect(css).toContain(".tdb-fscard.rise { animation: tdbRise 450ms cubic-bezier(0.2, 0.9, 0.3, 1.15); }");
     expect(css).toContain(".tdb-fsleave.skip { animation: tdbSkipDown 450ms ease forwards; }");
@@ -156,6 +156,11 @@ describe("final P3 — the card + the deal at the rest line", () => {
 });
 
 describe("final P4 — the close, in place", () => {
+  it("the LAST card sweeps off before the close mounts (the deferral); the pool leaves with the branch", () => {
+    expect(ss).toContain("const willClose = !order.slice(index + 1).some((x) => liveKeys.has(x.key));");
+    expect(ss).toContain('at(clearAtMs, () => { setDeal(null); dealRef.current = false; if (willClose) setPhase("close"); });');
+    expect(ss).toContain("at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });");
+  });
   it("the headline by state over the same centre region; the subtitle + session line fade with the close", () => {
     expect(ss).toContain('{anyLive ? "Good session." : "Desk cleared."}');
     expect(ss).toContain(">Every box ticked turns the dial in your favour.</div>");
