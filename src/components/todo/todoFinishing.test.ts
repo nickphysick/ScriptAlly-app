@@ -109,18 +109,23 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
     expect(flow).toContain("reviewCompletionSnooze(win)");
     expect(flow).toContain('flagKeyForTask("weekly_review", win.key)');
   });
-  it("ONE derived boolean drives the button: opened ≔ completed-this-week (the only stored review record)", () => {
+  it("the derived booleans: the completion sentinel is the one STORED record and composes into seen", () => {
     expect(page).toContain("const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;");
     expect(page).toContain("f.snoozedUntil === reviewCompletionSnooze(reviewWin)");
-    expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
-    // press-law dress: unopened = the true-primary press small; opened = the quiet ghost
-    expect(page).toContain('className={`${reviewOpened ? "tdb-btnh" : "tdb-btnp sm"} tdb-rvopen2`} onClick={openSundayReview}'); // frame P2 dress
+    expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
+    // frame P3: the banner shows only while UNSEEN and UNDISMISSED; its button is always the
+    // ink "Open it ›" (an opened week never re-shows the banner, so the View-again flip died)
+    expect(page).toContain("{reviewWin && !reviewSeen && !reviewDismissed && (");
+    expect(page).toContain('className="tdb-btnp sm tdb-rvopen2" onClick={openReview}>Open it ›</button>');
+    expect(page).not.toContain("View again");
   });
-  it("the ✕ is a SESSION-ONLY hide — component state, ZERO writes; no stored dismissal exists", () => {
-    expect(page).toContain("const [reviewHidden, setReviewHidden] = useState(false);");
-    expect(page).toContain("{reviewWin && !reviewHidden && (");
-    expect(page).toContain('aria-label="Hide until next visit" onClick={() => setReviewHidden(true)}>✕</button>');
-    expect(page).not.toContain("dismissReviewBanner");
+  it("frame P3 — the ✕ persists PER-WEEK (sa. prefs, no data writes); a new week resets both flags", () => {
+    expect(page).toContain('localStorage.getItem("sa.todoReviewSeen")');
+    expect(page).toContain('localStorage.setItem("sa.todoReviewSeen", reviewWin.key)');
+    expect(page).toContain('localStorage.setItem("sa.todoReviewDismissed", reviewWin.key)');
+    expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week = reset
+    expect(page).toContain('aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>');
+    expect(page).not.toContain("reviewHidden"); // the session-only hide is superseded
     expect(page).not.toContain("reviewSurface");
     for (const stale of ["tdb-rvbanner", "tdb-rvbar", "tdb-rvcard", "tdb-rvx2", "tdb-rvgo2", "renderReviewAfterlife"]) {
       expect(page).not.toContain(stale);

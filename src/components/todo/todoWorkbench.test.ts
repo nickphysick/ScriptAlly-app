@@ -52,17 +52,17 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).not.toContain("tdb-frst");
     expect(css).not.toContain("tdb-frst");
     // SHOW ALL sits first, directly under the FILTER header
-    const sec = page.indexOf('className="tdb-fsec"');
+    const sec = page.indexOf('>FILTER{searchActive');
     const sa = page.indexOf("SHOW ALL<span");
     expect(sa).toBeGreaterThan(sec);
     expect(sa).toBeLessThan(page.indexOf('railPill("OFFERS"'));
-    expect(page).toContain('"tdb-fsec">FILTER{searchActive && ('); // P4: the header grows the query chip
+    expect(page).toContain('>FILTER{searchActive && ('); // P4: the header grows the query chip
   });
   it("v4 P2: Begin focused session leads the rail (same wiring); the foot keeps Task settings only", () => {
     expect(page).toContain('className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>'); // the ink primary
     expect(rule(".tdb-btnp")).toContain("height: 42px"); // frame P2: Begin at 42
     const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
-    expect(panel.indexOf("tdb-fsb2")).toBeLessThan(panel.indexOf("tdb-fsec"));
+    expect(panel.indexOf("tdb-fsb2")).toBeLessThan(panel.indexOf(">FILTER{"));
     expect(panel).toContain('className="tdb-setrow"');
   });
   it("the lens below a divider; the same state the search composes with", () => {
@@ -72,7 +72,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
   });
   it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
     expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
-    expect(rule(".tdb-sic")).toContain("width: 26px; height: 26px; border-radius: 50%");
+    expect(page).toContain('<svg className="tdb-cog" width="20" height="20"'); // frame P3: the bare cog, no roundel
     // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
     // names (tdb-prok2 / tdb-progoP) don't false-trip the ban
     for (const stale of [/tdb-prosq/, /tdb-prok(?!2)/, /tdb-progo(?!P)/]) {
@@ -154,7 +154,7 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
   it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
     expect(page).toContain('className="tdb-btnp tdb-fsb2"'); // Begin (rail)
     expect((page.match(/className="tdb-btnp sm"/g) ?? []).length).toBe(1); // Work the list (Today)
-    expect(page).toContain('"tdb-btnh" : "tdb-btnp sm"'); // Open it › (the review banner)
+    expect(page).toContain('className="tdb-btnp sm tdb-rvopen2"'); // Open it › (the review banner)
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(3); // the full ink census — three, nowhere else
     expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>');
     expect(page).toContain('className="tdb-btnh em" onClick={open}>Action now</button>');
@@ -214,6 +214,55 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
   it("radius continuity WITHOUT overflow:hidden (sticky must survive): the band's own 15px top corners", () => {
     expect(rule(".tdb-dochead")).toContain("border-radius: 15px 15px 0 0");
     expect(rule(".tdb-mainc")).not.toContain("overflow"); // hidden would re-scope the lane headings' sticky
+  });
+});
+
+describe("frame P3 — the sectioned rail + the review's afterlife", () => {
+  it("rail order: Begin · REVIEW band · the review row · FILTER band · SHOW ALL … · divider · lens · the foot", () => {
+    const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
+    const idx = [
+      panel.indexOf("tdb-fsb2"),
+      panel.indexOf(">REVIEW</div>"),
+      panel.indexOf('className="tdb-rvrow"'),
+      panel.indexOf(">FILTER{"),
+      panel.indexOf("SHOW ALL<span"),
+      panel.indexOf('className="tdb-fdivider"'),
+      panel.indexOf("TODAY’S LIST<span"),
+      panel.indexOf('className="tdb-setrow"'),
+    ];
+    for (let i = 0; i < idx.length; i++) expect(idx[i]).toBeGreaterThan(i === 0 ? -1 : idx[i - 1]);
+  });
+  it("the header bands share the bar's grey system; the FILTER band drops its top rule after the row's line", () => {
+    const b = rule(".tdb-rsech");
+    expect(b).toContain("background: linear-gradient(180deg, #f4f3f1, #f0eeeb)");
+    expect(b).toContain("border-top: 1px solid #e5e3de");
+    expect(b).toContain("border-bottom: 1px solid #e5e3de");
+    expect(b).toContain("font-size: 7px");
+    expect(b).toContain("letter-spacing: 0.16em");
+    expect(css).toContain(".tdb-rsech.nt2 { border-top: none; }");
+    expect(page).toContain("className={`tdb-rsech${reviewWin ? \" nt2\" : \"\"}`}".replace(/\\/g, ""));
+  });
+  it("the review row: small cup · label · the unread dot while unseen · the WK stamp; click opens the review", () => {
+    expect(page).toContain('<span className="tdb-rvcups" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />');
+    expect(page).toContain("{!reviewSeen && <span className=\"tdb-rvnew\" aria-hidden />}".replace(/\\/g, ""));
+    expect(page).toContain('<span className="tdb-rvwk">WK {reviewWin.weekNumber}</span>');
+    expect(page).toContain('className="tdb-rvrow" onClick={openReview}');
+    expect(rule(".tdb-rvnew")).toContain("background: #c96a55");
+    expect(rule(".tdb-rvcups")).toContain("width: 26px");
+  });
+  it("the afterlife: opening OR dismissing collapses the banner; the row is the sole re-entry; opening clears the dot", () => {
+    expect(page).toContain("const openReview = () => { markReviewSeen(); openSundayReview(); };");
+    expect(page).toContain("{reviewWin && !reviewSeen && !reviewDismissed && (");
+    // opening marks seen (banner + dot both key off it); dismissal only hides the banner —
+    // the dot survives a dismissal, so the rail still whispers the week is unread
+    expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
+    expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
+  });
+  it("the foot: a bare 20px cog + label, same wiring; the roundel selector is gone", () => {
+    expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
+    expect(page).not.toContain("tdb-sic");
+    expect(css).not.toContain("tdb-sic");
+    expect(rule(".tdb-cog")).toContain("flex: 0 0 auto");
   });
 });
 
@@ -291,7 +340,7 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
     expect(q).toContain("background: var(--pink-t)");
     expect(q).toContain("border: 1px solid var(--pink-b)");
     expect(q).toContain("border-radius: 99px");
-    expect(rule(".tdb-fsec")).toContain("display: flex");
+    expect(rule(".tdb-rsech")).toContain("display: flex"); // the band carries the chip row
   });
   it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
     expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");
@@ -399,7 +448,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).not.toContain("tdb-rvhead");
     expect(css).not.toContain("tdb-rvhead");
     expect((page.match(/tdb-rvbox/g) ?? []).length).toBe(1);
-    expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
+    expect(page).toContain(">Open it ›</button>"); // frame P3: the flip died with the afterlife
   });
 });
 
@@ -495,7 +544,7 @@ describe("doc pass P6 — sweep", () => {
   });
   it("the reactive rail rode through; the heights hold on the law's primitives (rewritten in frame P2)", () => {
     expect(page).toContain("const searchFc = searchActive");
-    expect(page).toContain('"tdb-fsec">FILTER{searchActive && (');
+    expect(page).toContain('>FILTER{searchActive && (');
     expect(rule(".tdb-btnp")).toContain("height: 42px");
     expect(rule(".tdb-btnp.sm")).toContain("height: 34px");
     expect(rule(".tdb-btnh")).toContain("height: 34px");

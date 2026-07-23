@@ -272,9 +272,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const now = Date.now();
   const today = localYMD(now);
 
-  // Deck v2 P1 — the RESIDENT review banner: no windows, no dismissal, one derived boolean.
-  // "Opened" reads the only stored review record — the completion sentinel finishReview writes —
-  // so the button flips to "View again" once the week's review is finished (recon resolution 1).
+  // "Opened" reads the only stored review record — the completion sentinel finishReview
+  // writes — and composes into the frame-P3 seen flag (a completed week never re-shows the
+  // banner, on any device).
   const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
   const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
   const board = useMemo(
@@ -457,9 +457,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }))
   ).slice(0, 4);
   const [assistantOpen, setAssistantOpen] = useState(false);
-  // polish P3 — the review ✕: SESSION-ONLY hide (component state, zero writes — no stored
-  // dismissal exists and none is introduced; the card returns next visit).
-  const [reviewHidden, setReviewHidden] = useState(false);
+  // frame P3 — the review's AFTERLIFE: opening or dismissing the banner collapses it for the
+  // week (per-week sa. prefs; recon found no existing seen/dismissed flags — the completion
+  // sentinel is the one stored "opened" record, and it composes into seen below). The rail's
+  // REVIEW row is then the sole entry point; a new week resets both.
+  const [reviewSeenWk, setReviewSeenWk] = useState<string | null>(() => { try { return localStorage.getItem("sa.todoReviewSeen"); } catch { return null; } });
+  const [reviewDismissedWk, setReviewDismissedWk] = useState<string | null>(() => { try { return localStorage.getItem("sa.todoReviewDismissed"); } catch { return null; } });
+  const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;
+  const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;
+  const markReviewSeen = () => {
+    if (!reviewWin) return;
+    setReviewSeenWk(reviewWin.key);
+    try { localStorage.setItem("sa.todoReviewSeen", reviewWin.key); } catch { /* private mode */ }
+  };
+  const dismissReviewWeek = () => {
+    if (!reviewWin) return;
+    setReviewDismissedWk(reviewWin.key);
+    try { localStorage.setItem("sa.todoReviewDismissed", reviewWin.key); } catch { /* private mode */ }
+  };
+  const openReview = () => { markReviewSeen(); openSundayReview(); };
 
   // v4 P3 — CONDITIONAL TODAY: the column exists only with content (≥1 committed OR ≥1 done
   // today — the existing derivation); empty → the board runs 4-up. Exit lags 220ms for the
@@ -670,7 +686,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* ── polish P3: THE CENTRE STACK — three sibling lifted containers, 812 wide,
               16 apart: the review card · the sheet · the Pro colleague. ── */}
           <div className="tdb-centre">
-          {reviewWin && !reviewHidden && (
+          {reviewWin && !reviewSeen && !reviewDismissed && (
             <div className="tdb-rvbox">
               <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
               <div className="tdb-rvhx">
@@ -678,10 +694,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <b>Last week in review</b>
                 <p>Every box ticked turns the dial in your favour.</p>
               </div>
-              <button type="button" className={`${reviewOpened ? "tdb-btnh" : "tdb-btnp sm"} tdb-rvopen2`} onClick={openSundayReview}>
-                {reviewOpened ? "View again" : "Open it ›"}
-              </button>
-              <button type="button" className="tdb-rvx" aria-label="Hide until next visit" onClick={() => setReviewHidden(true)}>✕</button>
+              <button type="button" className="tdb-btnp sm tdb-rvopen2" onClick={openReview}>Open it ›</button>
+              <button type="button" className="tdb-rvx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
             </div>
           )}
           {/* THE SHEET — unchanged internally, minus the docband + banner it loses */}
@@ -923,7 +937,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <>
         {/* v4 P2 — the focused-session button leads the rail (moved from the hero; same wiring) */}
         <button type="button" className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
-        <div className="tdb-fsec">FILTER{searchActive && (
+        {/* frame P3 — the sectioned rail: grey REVIEW / FILTER header bands (the bar's grey
+            system); the review row is the week's standing entry point — its dot clears on
+            opening. The FILTER band drops its top rule when it follows the row's own line. */}
+        {reviewWin && (
+          <>
+            <div className="tdb-rsech">REVIEW</div>
+            <button type="button" className="tdb-rvrow" onClick={openReview}>
+              <span className="tdb-rvcups" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
+              Last week in review
+              {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
+              <span className="tdb-rvwk">WK {reviewWin.weekNumber}</span>
+            </button>
+          </>
+        )}
+        <div className={`tdb-rsech${reviewWin ? " nt2" : ""}`}>FILTER{searchActive && (
           <button type="button" className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
             “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
           </button>
@@ -946,7 +974,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </button>
         <div className="tdb-fsfoot">
           <button type="button" className="tdb-setrow" onClick={() => setSettingsOpen(true)}>
-            <span className="tdb-sic" aria-hidden>⚙</span>Task settings
+            <svg className="tdb-cog" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="3.2" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>Task settings
           </button>
         </div>
       </>

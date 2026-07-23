@@ -96,7 +96,19 @@
    vertical quiet pills (34px rows, family dot left, count right), the RESET row when narrowed,
    the lens below a divider, and the top-bordered foot (Task-settings row + the Pro square). ── */
 .tdb-fside { width: var(--tdb-rail); flex: 0 0 auto; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 3px 14px rgba(58, 28, 20, 0.08); overflow: hidden; }
-.tdb-fsec { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--faint); padding: 14px 16px 7px; display: flex; align-items: center; gap: 7px; }
+/* frame P3 — the SECTION HEADER bands (todo-frame-v5.html .rsech): the rail + the sheet's
+   bar share one grey system. .nt2 drops the top rule when the band follows the review row's
+   own border-bottom. */
+.tdb-rsech { background: linear-gradient(180deg, #f4f3f1, #f0eeeb); border-top: 1px solid #e5e3de; border-bottom: 1px solid #e5e3de; padding: 8px 16px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.16em; color: #8a857d; display: flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+.tdb-rsech.nt2 { border-top: none; }
+.tdb-rsech + .tdb-fpill { margin-top: 10px; } /* the first pill breathes under the band (ref) */
+/* the review's rail row — the week's standing entry point */
+.tdb-rvrow { display: flex; align-items: center; gap: 10px; padding: 11px 14px; width: 100%; box-sizing: border-box; font-size: 11.5px; font-weight: 600; color: #4d4238; cursor: pointer; border: none; border-bottom: 1px solid var(--hairline); background: none; text-align: left; flex: 0 0 auto; }
+.tdb-rvrow:hover { background: var(--paper); }
+.tdb-rvcups { width: 26px; flex: 0 0 auto; color: var(--ink); }
+.tdb-rvcups svg { width: 100%; height: auto; display: block; }
+.tdb-rvnew { width: 7px; height: 7px; border-radius: 50%; background: #c96a55; flex: 0 0 auto; }
+.tdb-rvwk { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.1em; color: var(--faint); }
 /* polish P4 — the removable query chip (the pink tag law) + the struck old total */
 .tdb-fq { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #7c3a2a; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; min-width: 0; max-width: 100%; }
 .tdb-fq:hover { border-color: #7c3a2a; }
@@ -115,14 +127,14 @@
 .tdb-fpill.nar .tdb-dotc { background: #7c3a2a; }
 .tdb-fpill.nar .tdb-fn { color: #7c3a2a; }
 /* v4 P2 — the rail's lead button + the SHOW ALL selected pill (the RESET row is gone) */
-.tdb-fsb2 { margin: 12px 10px 4px; width: calc(100% - 20px); flex: 0 0 auto; display: flex; } /* the ink primary (.tdb-btnp) carries the look */
+.tdb-fsb2 { margin: 12px 10px; width: calc(100% - 20px); flex: 0 0 auto; display: flex; } /* the ink primary (.tdb-btnp) carries the look */
 .tdb-fpill.sel { border-color: var(--ink); font-weight: 700; color: var(--ink); }
 .tdb-fpill.sel::before { content: "✓"; font-size: 9px; }
 .tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
 .tdb-fsfoot { margin-top: 10px; border-top: 1px solid var(--hairline); padding: 12px; }
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
 .tdb-setrow:hover { background: var(--paper); }
-.tdb-sic { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); flex: 0 0 auto; }
+.tdb-cog { flex: 0 0 auto; color: #4d4238; } /* frame P3: the bare 20px cog — the roundel is gone */
 /* ── polish P3: THE PRO COLLEAGUE (todo-pro-banner.html .pro) — the stack's third sibling,
    below the sheet; nameplate glyph + spark, personalised numbers, the quiet quoted line.
    Pro keeps its own slate identity — the CTA is press-law EXEMPT. Non-Pro only. ── */
