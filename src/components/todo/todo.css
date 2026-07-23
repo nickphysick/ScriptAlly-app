@@ -329,6 +329,7 @@
 .tdb-lsub { position: relative; display: flex; align-items: center; gap: 10px; margin: 0 0 7px 40px; background: var(--white, #fff); border: 1px solid var(--hairline); border-left: 3px solid var(--lat-bd); border-radius: 9px; padding: 8px 12px; cursor: pointer; animation: tdbGroupIn 200ms ease; }
 .tdb-lsub:hover, .tdb-lsub:focus-within { z-index: 30; }
 .tdb-lsub .tdb-lbt.sm { font-size: 12.5px; }
+.tdb-lshow { flex: 0 0 auto; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--lat-ink); white-space: nowrap; }
 .tdb-lpage { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); box-sizing: border-box; margin: 0 0 7px 40px; padding: 10px; background: none; border: 1.5px dashed var(--lat-bd); border-radius: 9px; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
 /* hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): white, notes-family border,
    Caveat growing to content; the affordance transforms in place. */

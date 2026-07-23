@@ -208,14 +208,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
   const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
   // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
-  // animation to the just-collapsed batch (never a page-load flash).
-  const [openGroups, setOpenGroups] = useState<Record<string, true>>({});
+  // animation to the just-collapsed batch (never a page-load flash). P3: the expansion
+  // persists per-batch (sa. prefs) and is ONE state — expand in cards, arrive expanded in
+  // the ledger.
+  const [openGroups, setOpenGroups] = useState<Record<string, true>>(() => {
+    try { return JSON.parse(localStorage.getItem("sa.todoGroupsOpen") || "{}"); } catch { return {}; }
+  });
   const [pagedGroups, setPagedGroups] = useState<Record<string, true>>({});
   const [recentG, setRecentG] = useState<string | null>(null);
   const toggleGroup = (rule: string) => {
     setOpenGroups((g) => {
       const next = { ...g };
       if (next[rule]) delete next[rule]; else next[rule] = true;
+      try { localStorage.setItem("sa.todoGroupsOpen", JSON.stringify(next)); } catch { /* private mode */ }
       return next;
     });
     setRecentG(rule);
@@ -489,6 +494,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     ? filterCounts({ doCards: sDo, hkGroups: sGroups, staleCards: sStale, ntCards: sNt, committedCount: committedCards.filter((c) => matchesSearch(c, search, sctx)).length })
     : null;
   const searchTotal = searchActive ? sDo.length + hkGapCount(sGroups) + sStale.length + sNt.length : null;
+  // grouping P3 — search narrows the MEMBERS of an expanded batch through the SAME
+  // matchesSearch the sheet uses; the bar keeps standing with SHOWING {matched} OF {n}.
+  const groupMembers = (g: HkGroup) => (searchActive ? g.members.filter((m) => matchesSearch(m.card, search, sctx)) : g.members);
+  const groupShowing = (g: HkGroup, matched: number) => (matched === g.members.length ? `SHOWING ALL ${g.members.length}` : `SHOWING ${matched} OF ${g.members.length}`);
+  // the zero-member teardown: a rule absent from the UNFILTERED derivation has truly emptied
+  // (a filtered-out group still exists) — its open flag prunes so a future re-forming batch
+  // arrives collapsed.
+  useEffect(() => {
+    setOpenGroups((g) => {
+      const live = Object.entries(g).filter(([r]) => hkGroups.some((x) => x.rule === r));
+      if (live.length === Object.keys(g).length) return g;
+      const next = Object.fromEntries(live) as Record<string, true>;
+      try { localStorage.setItem("sa.todoGroupsOpen", JSON.stringify(next)); } catch { /* private mode */ }
+      return next;
+    });
+  }, [hkGroups]);
   /** The struck-pair count face: old total struck beside the live match count — during search only. */
   const fnFace = (base: number, live: number) =>
     searchActive && live !== base ? (<><s className="tdb-was">{base}</s>{live}</>) : (<>{base}</>);
@@ -1272,6 +1293,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
   function runBatchRow(g: HkGroup) {
+    // grouping P3 — a group of one renders as its UNIT row
+    if (g.members.length === 1) return runRow(g.members[0].card);
     const key = `group-${g.rule}`;
     const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
     const prog = hkGroupProgress(agents.length, g.members.length);
@@ -1279,7 +1302,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     // grouping P2 — the row's non-action click TOGGLES the nest (Action now keeps open —
     // a scoped supersede of the doc-pass "same as row-click" clause for BATCH rows only)
     const expanded = !!openGroups[g.rule];
-    const members = g.members;
+    const members = groupMembers(g);
     const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);
     const remaining = members.length - paged.length;
     return (
@@ -1295,6 +1318,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>
           <div className="tdb-mmeta">{prog.caption.toUpperCase()} · {prog.pct}%</div>
         </div>
+        {expanded && members.length !== g.members.length && <span className="tdb-lshow">{groupShowing(g, members.length)}</span>}
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
           <button type="button" className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>
           <span className="tdb-latwrap">
@@ -1536,14 +1560,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // rest. The fragment sits at the batch's map position, so following cards flow after. ──
   function renderGroupExpanded(g: HkGroup) {
     const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
-    const members = g.members;
+    const members = groupMembers(g);
     const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);
     const remaining = members.length - paged.length;
     return (
       <React.Fragment key={g.rule}>
         <div className="tdb-gbar">
           <span className="tdb-gbart">{g.members.length}{copy.rest(g.members.length)}</span>
-          <span className="tdb-gbarn">SHOWING ALL {g.members.length}</span>
+          <span className="tdb-gbarn">{groupShowing(g, members.length)}</span>
           <button type="button" className="tdb-btnh em tdb-gcol" onClick={() => toggleGroup(g.rule)}>Collapse ▴</button>
         </div>
         {paged.map((m) => renderCard(m.card, true))}
@@ -1554,6 +1578,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
   function renderGroupCard(g: HkGroup) {
+    // grouping P3 — a group of one renders as its UNIT (no batch card, no Expand affordance)
+    if (g.members.length === 1) return renderCard(g.members[0].card);
     const key = `group-${g.rule}`;
     const ov = overlays[key];
     if (ov?.kind === "fork") {

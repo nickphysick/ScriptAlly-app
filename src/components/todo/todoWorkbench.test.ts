@@ -727,6 +727,32 @@ describe("doc pass P6 — sweep", () => {
   });
 });
 
+describe("grouping P3 — persistence + interplay", () => {
+  it("expansion persists per-batch (sa.todoGroupsOpen) and is ONE state consumed by BOTH views", () => {
+    expect(page).toContain('JSON.parse(localStorage.getItem("sa.todoGroupsOpen") || "{}")');
+    expect(page).toContain('localStorage.setItem("sa.todoGroupsOpen", JSON.stringify(next))');
+    expect(page).toContain("if (openGroups[g.rule]) return renderGroupExpanded(g);"); // cards
+    expect(page).toContain("const expanded = !!openGroups[g.rule];"); // ledger
+    expect((page.match(/toggleGroup\(g\.rule\)/g) ?? []).length).toBeGreaterThanOrEqual(4); // xp · gbar Collapse · row · row key
+  });
+  it("search narrows MEMBERS via the one matchesSearch; the bar stands with SHOWING {matched} OF {n} (both views)", () => {
+    expect(page).toContain("const groupMembers = (g: HkGroup) => (searchActive ? g.members.filter((m) => matchesSearch(m.card, search, sctx)) : g.members);");
+    expect(page).toContain("const groupShowing = (g: HkGroup, matched: number) => (matched === g.members.length ? `SHOWING ALL ${g.members.length}` : `SHOWING ${matched} OF ${g.members.length}`);");
+    expect((page.match(/const members = groupMembers\(g\);/g) ?? []).length).toBe(2); // gx + the ledger row
+    expect(page).toContain('<span className="tdb-lshow">{groupShowing(g, members.length)}</span>');
+    expect(rule(".tdb-lshow")).toContain("color: var(--lat-ink)");
+  });
+  it("member actions re-derive the counts (the bar reads g.members.length live — no cached tally); zero members prune the flag", () => {
+    expect(page).toContain("{g.members.length}{copy.rest(g.members.length)}"); // the gbar title reads the LIVE derivation
+    expect(page).toContain("const live = Object.entries(g).filter(([r]) => hkGroups.some((x) => x.rule === r));");
+    expect(page).toContain("}, [hkGroups]);"); // the prune keys off the UNFILTERED derivation — a filtered-out group survives
+  });
+  it("n = 1: a group of one renders as its UNIT in both views (no batch card, no Expand, no chevron)", () => {
+    expect(page).toContain("if (g.members.length === 1) return renderCard(g.members[0].card);");
+    expect(page).toContain("if (g.members.length === 1) return runRow(g.members[0].card);");
+  });
+});
+
 describe("grouping P2 — the ledger nest", () => {
   it("the chevron rotates 90° open; the row's non-action click TOGGLES (Action now keeps its opener)", () => {
     const c = rule(".tdb-lchev");

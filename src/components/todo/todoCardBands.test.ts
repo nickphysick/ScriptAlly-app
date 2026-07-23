@@ -160,12 +160,12 @@ describe("v4 P4 → grouping P1 — the batch card at rest (the Expand affordanc
     expect(b).toContain("border: 1px solid var(--lat-bd)");
     expect(rule(".tdb-gbart")).toContain("font-family: var(--f12-serif)");
     expect(rule(".tdb-gbarn")).toContain("color: var(--lat-ink)");
-    expect(page).toContain(">SHOWING ALL {g.members.length}</span>");
+    expect(page).toContain("{groupShowing(g, members.length)}</span>"); // SHOWING ALL {n} ⇄ SHOWING {matched} OF {n}
     expect(page).toContain('className="tdb-btnh em tdb-gcol" onClick={() => toggleGroup(g.rule)}>Collapse ▴</button>');
     expect(rule(".tdb-gcol")).toContain("margin-left: auto");
     // members render from g.members via the ONE card contract — never a second query path
     const gx = page.slice(page.indexOf("function renderGroupExpanded"), page.indexOf("function renderGroupCard"));
-    expect(gx).toContain("const members = g.members;");
+    expect(gx).toContain("const members = groupMembers(g);"); // P3: the search-narrowed view of g.members — still the ONE derivation
     expect(gx).toContain("{paged.map((m) => renderCard(m.card, true))}");
     expect(gx).not.toContain("queries.");
     expect(gx).not.toContain("agents.");
