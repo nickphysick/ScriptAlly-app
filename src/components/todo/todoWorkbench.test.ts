@@ -161,9 +161,10 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect(page).toContain('className="tdb-btnh" onClick={() => toggleToday(c)}');
     expect(page).toContain('className="tdb-btnh" onClick={helpMePick}>＋ Add more</button>');
     // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
-    expect(rule(".tdb-verb.pri")).toContain("background: var(--white, #fff)");
-    expect(rule(".tdb-verb.pri")).not.toContain("var(--panel)");
-    expect(rule(".tdb-verb")).toContain("color: #6b5a4e");
+    // toolbelt P2/P3: the compact verb family is gone — the card stack rides the law's own
+    // hairline primitives at 30px (no ink-solid anywhere in the expansion)
+    expect(css).toContain(".tdb-vstack .tdb-btnh { height: 30px; width: 100%; font-size: 10px; }");
+    expect(css).not.toContain(".tdb-verb");
   });
   it("fixed heights + centring hold: the Today pair sits level; the toggle's active chip = white + ink ring, shadowless", () => {
     expect(css).toContain(".tdb-tf2 .tdb-btnh, .tdb-tf2 .tdb-btnp { flex: 1; padding: 0; white-space: nowrap; }");
@@ -220,9 +221,10 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
 describe("frame P4 — sweep", () => {
   it("the press primitives + the roundel are extinct; the tour's review stop targets the rail row", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    expect(tour).toContain('".tdb-rvrow"');
+    expect(tour).toContain('".tdb-rvchip"'); // toolbelt P3: the chip is the standing home
     expect(tour).not.toContain("tdb-rvbox");
-    expect(tour).toContain("or find it under REVIEW in the rail");
+    expect(tour).not.toContain("tdb-rvrow");
+    expect(tour).toContain("or the chip beneath Begin");
     expect(page).not.toContain("tdb-cta");
     expect(css).not.toContain("tdb-cta");
     expect(page).not.toContain("tdb-sic");
@@ -232,6 +234,18 @@ describe("frame P4 — sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).not.toContain("Task settings");
     expect(tour).not.toContain("tdb-setrow");
+  });
+});
+
+describe("toolbelt P3 — sweep", () => {
+  it("the short-verb family is extinct in the stylesheet; the tour speaks the new grammar", () => {
+    expect(css).not.toContain(".tdb-verb ");
+    expect(css).not.toContain(".tdb-verb:");
+    expect(css).not.toContain(".tdb-verb.");
+    expect(css).not.toContain(".tdb-verbs");
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain("Action now, Today\\u2019s list, or snooze"); // the .ts carries the \\u2019 escape
+    expect(tour).not.toContain("done, Today, or later");
   });
 });
 

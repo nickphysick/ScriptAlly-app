@@ -4,7 +4,7 @@
  *
  * todoTour — the pure layer of the first-visit spotlight tour (design ref:
  * Final Shape P6 rewire — SIX stops: the hero's Begin → the floating search → the rail's
- * pills (or the ⚲ FILTER pill) → the rail's REVIEW row → a card's hover verbs → Today. The last
+ * pills (or the ⚲ FILTER pill) → the review chip → a card's hover actions → Today. The last
  * stop's button reads "Done" and ends the tour.
  *
  * The seen flag is `User.tourSeenAt` (ISO timestamp) — the established additive user-doc pattern
@@ -43,17 +43,16 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // frame P4: the banner is transient now (the afterlife collapses it) — the rail's REVIEW
-    // row is the standing home, so the stop targets it
-    sel: ".tdb-rvrow",
+    // toolbelt P3: the free-standing chip beneath Begin is the standing home
+    sel: ".tdb-rvchip",
     h: "Your week, reviewed.",
-    p: "Every box ticked turns the dial in your favour \u2014 open it from the banner, or find it under REVIEW in the rail.",
+    p: "Every box ticked turns the dial in your favour \u2014 open it from the banner, or the chip beneath Begin.",
     cta: "Next →",
   },
   {
     sel: ".tdb-tile, .tdb-gcard, .tdb-lrow",
     h: "Every card works the same.",
-    p: "Click to open it. Hover for the quick verbs — done, Today, or later.",
+    p: "Click to open it. Hover for the actions — Action now, Today\u2019s list, or snooze.",
     cta: "Next →",
   },
   {
