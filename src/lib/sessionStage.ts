@@ -108,18 +108,15 @@ export const CURTAIN = {
 } as const;
 
 /**
- * THE DEAL's timing spine (session-deal.html option A at the rest line). The stamp lands
- * with its pop, holds the beat, the sheet sweeps off left, and the next rises from the
- * stack 180ms into the sweep; the advance (the session line + next-up) fires WITH the rise.
+ * v7 — THE CARRIAGE (session-v7.html transition A, the straight carriage): on handled the
+ * sage stamp lands and holds, then the card slides straight out LEFT while the NEXT slides
+ * straight in from the RIGHT, overlapping in flight; the session line increments in sync.
+ * Skip: no stamp — the same out-left slide, the engine's requeue deciding what slides in.
  */
-export const DEAL = {
+export const CARRIAGE = {
   stampPopMs: 350, // the sage stamp's scale-pop (rotated −8°)
-  stampHoldMs: 520, // the beat before the sweep (the ref's stampThen wait)
-  sweepMs: 500, // off left with the tilt
-  riseDelayMs: 180, // the next sheet starts rising this far into the sweep
-  riseMs: 450, // the rise's mild overshoot (the final pack's figure)
-  skipMs: 450, // down and behind — the honest requeue
-  skipAdvanceMs: 250, // the next rises mid-slide
-  /** At most this many sheet-edges peek beneath the current sheet — never more. */
-  deckMax: 2,
+  stampHoldMs: 440, // the beat before the slide (handled only)
+  slideOutMs: 500, // the outgoing card slides straight out left
+  slideInMs: 500, // the incoming card slides straight in from the right
+  overlapMs: 170, // the incoming starts this far into the out-slide (they overlap)
 } as const;

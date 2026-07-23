@@ -25,7 +25,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BoardCard } from "../../lib/todoBoard";
 import {
-  gatherTransform, staggerFor, restTop, GATHER, DEAL, RITUAL_LINES,
+  gatherTransform, staggerFor, restTop, GATHER, CARRIAGE, RITUAL_LINES,
   EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR,
   curtainWidth, CURTAIN,
 } from "../../lib/sessionStage";
@@ -326,11 +326,11 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     // P4 — the LAST card's sweep completes before the close mounts (an instant phase flip
     // would unmount the clone mid-flight); the close then fades into the same centre region.
     const willClose = !order.slice(index + 1).some((x) => liveKeys.has(x.key));
-    const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;
-    const clearAtMs = reduce ? 420 : DEAL.stampHoldMs + DEAL.sweepMs + 60;
+    const advanceAtMs = reduce ? 400 : CARRIAGE.stampHoldMs + CARRIAGE.overlapMs;
+    const clearAtMs = reduce ? 420 : CARRIAGE.stampHoldMs + CARRIAGE.slideOutMs + 60;
     at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });
     at(clearAtMs, () => { setDeal(null); dealRef.current = false; if (willClose) setPhase("close"); });
-    at(clearAtMs + DEAL.riseMs, () => setRose(false));
+    at(clearAtMs + CARRIAGE.slideInMs, () => setRose(false));
   }
   /** Skip for now — no stamp: the sheet slides to the BOTTOM of the stack (down and behind,
    *  the honest requeue — the engine has no requeue of its own; recon) and the next rises.
@@ -352,9 +352,9 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       setIndex(i);
       setRose(true);
     };
-    at(reduce ? 0 : DEAL.skipAdvanceMs, doRequeue);
-    at(reduce ? 20 : DEAL.skipMs + 60, () => { setDeal(null); dealRef.current = false; });
-    at((reduce ? 20 : DEAL.skipMs + 60) + DEAL.riseMs, () => setRose(false));
+    at(reduce ? 0 : CARRIAGE.overlapMs, doRequeue);
+    at(reduce ? 20 : CARRIAGE.slideOutMs + 60, () => { setDeal(null); dealRef.current = false; });
+    at((reduce ? 20 : CARRIAGE.slideOutMs + 60) + CARRIAGE.slideInMs, () => setRose(false));
   }
   // the round-trip law: a journey that completed the current task returns to a board without
   // it — the session detects the vanish and deals it as handled; a surviving task resumes
@@ -413,7 +413,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
                   {deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}
                 </div>
               )}
-              <div ref={bigRef} className={`tdb-fscard${bigOn ? " on" : ""}${rose ? " rise" : ""}`}>
+              <div ref={bigRef} className={`tdb-fscard${bigOn ? " on" : ""}${rose ? " carriagein" : ""}`}>
                 <div className={`tdb-band ${current.stream}`}>
                   <span className={`tdb-tag due${isOffer(current) ? " offer" : ""}`}>{isOffer(current) ? `★ ${current.due}` : current.due}</span>
                   <span className="tdb-fslane">{lane(current)}</span>

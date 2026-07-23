@@ -6,7 +6,7 @@
  * the lib is pure. (The dark-room opening's nearest-edge/spotlight maths left with it.)
  */
 import { describe, it, expect } from "vitest";
-import { gatherTransform, staggerFor, restTop, GATHER, DEAL, RITUAL_LINES, EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR } from "./sessionStage";
+import { gatherTransform, staggerFor, restTop, GATHER, CARRIAGE, RITUAL_LINES, EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR } from "./sessionStage";
 
 describe("gatherTransform — the gather law", () => {
   it("centre-aligns onto the first rect and scales to its footprint", () => {
@@ -79,14 +79,12 @@ describe("the gather's spine", () => {
   });
 });
 
-describe("THE DEAL's spine (option A at the rest line)", () => {
-  it("stamp pop 350 · hold 520 · sweep 500 · the rise 450 at +180 · skip 450; the deck caps at two", () => {
-    expect(DEAL.stampPopMs).toBe(350);
-    expect(DEAL.stampHoldMs).toBe(520);
-    expect(DEAL.sweepMs).toBe(500);
-    expect(DEAL.riseDelayMs).toBe(180);
-    expect(DEAL.riseMs).toBe(450); // the final pack's figure
-    expect(DEAL.skipMs).toBe(450);
-    expect(DEAL.deckMax).toBe(2);
+describe("THE CARRIAGE's spine (v7 transition A — the straight carriage)", () => {
+  it("stamp pop 350 · hold 440 · slide out 500 · slide in 500 · overlap 170", () => {
+    expect(CARRIAGE.stampPopMs).toBe(350);
+    expect(CARRIAGE.stampHoldMs).toBe(440);
+    expect(CARRIAGE.slideOutMs).toBe(500);
+    expect(CARRIAGE.slideInMs).toBe(500);
+    expect(CARRIAGE.overlapMs).toBe(170);
   });
 });

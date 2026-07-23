@@ -139,7 +139,7 @@ describe("v7 P2 — the curtains + the dim (pool of light + deck edges retired)"
   });
 });
 
-describe("final P3 — the card + the deal at the rest line", () => {
+describe("v7 P4 — the card + the carriage (transition A)", () => {
   it("frame-A content: family band + tag + lane, Playfair title, the italic line, WHERE THIS STANDS from templates", () => {
     expect(ss).toContain('<span className="tdb-fslane">{lane(current)}</span>');
     expect(rule(".tdb-fscardc h2")).toContain("font-size: 21px");
@@ -161,15 +161,20 @@ describe("final P3 — the card + the deal at the rest line", () => {
     expect(ss).toContain("if (!liveKeys.has(current.key)) markHandledAdvance(current);");
     expect(ss).toContain("setHandled((h) => (h.some((x) => x.key === c.key) ? h : [...h, c]));");
   });
-  it("the deal: stamp → hold → sweep left → the rise (450) WITH the session-line advance; skip goes down-and-behind", () => {
-    expect(ss).toContain("const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;");
-    expect(ss).toContain("at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });"); // P4: the last sweep defers the close
-    expect(css).toContain(".tdb-fsleave.handled { animation: tdbSweepOff 500ms cubic-bezier(0.5, 0.05, 0.6, 1) 520ms forwards; }");
-    expect(css).toContain(".tdb-fscard.rise { animation: tdbRise 450ms cubic-bezier(0.2, 0.9, 0.3, 1.15); }");
-    expect(css).toContain(".tdb-fsleave.skip { animation: tdbSkipDown 450ms ease forwards; }");
-    expect(css).toContain(".tdb-fsleave.skip { z-index: 2; }"); // down AND BEHIND
+  it("the carriage: stamp → hold → the outgoing slides straight OUT LEFT while the incoming slides IN from the RIGHT, overlapping", () => {
+    expect(ss).toContain("const advanceAtMs = reduce ? 400 : CARRIAGE.stampHoldMs + CARRIAGE.overlapMs;"); // the incoming overlaps the out-slide
+    expect(ss).toContain("at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });"); // + the session-line advance; the last defers the close
+    expect(css).toContain(".tdb-fsleave.handled { animation: tdbCarriageOut 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) 440ms forwards; }");
+    expect(css).toContain("@keyframes tdbCarriageOut { to { transform: translateX(-120%); opacity: 0; } }");
+    expect(css).toContain(".tdb-fscard.carriagein { animation: tdbCarriageIn 500ms cubic-bezier(0.2, 0.85, 0.3, 1.1); }");
+    expect(css).toContain("@keyframes tdbCarriageIn { from { transform: translateX(120%); } }");
+  });
+  it("skip: NO stamp — the same out-left slide; the engine's requeue decides what slides in (to the session order's end)", () => {
+    expect(css).toContain(".tdb-fsleave.skip { animation: tdbCarriageOut 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) forwards; }");
+    expect(ss).toContain('{deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}');
     expect(ss).toContain("const next = [...rest, c0]; // the requeue — to the session order's end");
     expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setOrder(next); setPhase("close"); return; }');
+    expect(css).not.toContain("tdbSkipDown");
   });
   it("v7: no residual stack (deck edges retired); the true count lives in the session line; next-up is the next LIVE", () => {
     expect(ss).not.toContain("tdb-fsdeck");
@@ -178,7 +183,7 @@ describe("final P3 — the card + the deal at the rest line", () => {
   });
   it("reduced motion: instant swaps; the stamp appears without its pop", () => {
     expect(css).toContain(".tdb-fsleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
-    expect(css).toContain(".tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.rise, .tdb-ssstamp { animation: none; }");
+    expect(css).toContain(".tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.carriagein, .tdb-ssstamp { animation: none; }");
   });
 });
 
