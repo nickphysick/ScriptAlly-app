@@ -61,7 +61,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
   it("v4 P2: Begin focused session leads the rail (same wiring); the foot keeps Task settings only", () => {
     expect(page).toContain('className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>'); // the ink primary
     expect(rule(".tdb-btnp")).toContain("height: 42px"); // frame P2: Begin at 42
-    const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
+    const panel = page.slice(page.indexOf("function renderToolbelt"), page.indexOf("function renderRail"));
     expect(panel.indexOf("tdb-fsb2")).toBeLessThan(panel.indexOf(">FILTER{"));
     expect(panel).toContain('className="tdb-setrow"');
   });
@@ -235,46 +235,68 @@ describe("frame P4 — sweep", () => {
   });
 });
 
-describe("frame P3 — the sectioned rail + the review's afterlife", () => {
-  it("rail order: Begin · REVIEW band · the review row · FILTER band · SHOW ALL … · divider · lens · the foot", () => {
-    const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
-    const idx = [
-      panel.indexOf("tdb-fsb2"),
-      panel.indexOf(">REVIEW</div>"),
-      panel.indexOf('className="tdb-rvrow"'),
-      panel.indexOf(">FILTER{"),
-      panel.indexOf("SHOW ALL<span"),
-      panel.indexOf('className="tdb-fdivider"'),
-      panel.indexOf("TODAY’S LIST<span"),
-      panel.indexOf('className="tdb-setrow"'),
-    ];
-    for (let i = 0; i < idx.length; i++) expect(idx[i]).toBeGreaterThan(i === 0 ? -1 : idx[i - 1]);
+describe("toolbelt P1 — the three-element stack (option C)", () => {
+  it("the aside is the transparent 10px stack; Begin + the chip are FREE-STANDING (never children of the filter card)", () => {
+    const f = rule(".tdb-fside");
+    expect(f).toContain("gap: 10px");
+    expect(f).not.toContain("background");
+    expect(f).not.toContain("overflow");
+    const card = rule(".tdb-fbox");
+    expect(card).toContain("background: var(--white, #fff)");
+    expect(card).toContain("border-radius: 16px");
+    expect(card).toContain("overflow: hidden");
+    const belt = page.slice(page.indexOf("function renderToolbelt"), page.indexOf("function renderFilterCard"));
+    expect(belt).toContain("tdb-fsb2");
+    expect(belt).toContain('className="tdb-rvchip"');
+    expect(belt).toContain('<div className="tdb-fbox">{renderFilterCard()}</div>');
+    const beginAt = belt.indexOf("tdb-fsb2");
+    const chipAt = belt.indexOf("tdb-rvchip");
+    const cardAt = belt.indexOf("tdb-fbox");
+    expect(beginAt).toBeGreaterThan(-1);
+    expect(beginAt).toBeLessThan(chipAt);
+    expect(chipAt).toBeLessThan(cardAt); // Begin → chip → the card, siblings in order
   });
-  it("the header bands share the bar's grey system; the FILTER band drops its top rule after the row's line", () => {
-    const b = rule(".tdb-rsech");
-    expect(b).toContain("background: linear-gradient(180deg, #f4f3f1, #f0eeeb)");
-    expect(b).toContain("border-top: 1px solid #e5e3de");
-    expect(b).toContain("border-bottom: 1px solid #e5e3de");
-    expect(b).toContain("font-size: 7px");
-    expect(b).toContain("letter-spacing: 0.16em");
-    expect(css).toContain(".tdb-rsech.nt2 { border-top: none; }");
-    expect(page).toContain("className={`tdb-rsech${reviewWin ? \" nt2\" : \"\"}`}".replace(/\\/g, ""));
+  it("Begin free-standing: 44 tall, full width, the soft shadow (the toolbelt bakes 44 over the law's 42)", () => {
+    const b = rule(".tdb-fsb2");
+    expect(b).toContain("height: 44px");
+    expect(b).toContain("width: 100%");
+    expect(b).toContain("box-shadow: 0 3px 12px rgba(29, 16, 12, 0.22)");
   });
-  it("the review row: small cup · label · the unread dot while unseen · the WK stamp; click opens the review", () => {
-    expect(page).toContain('<span className="tdb-rvcups" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />');
+  it("the review chip: 38 white pill, cup + label + right-aligned dot; the WK stamp rides the hover title", () => {
+    const c = rule(".tdb-rvchip");
+    expect(c).toContain("height: 38px");
+    expect(c).toContain("background: var(--white, #fff)");
+    expect(c).toContain("border: 1px solid var(--line)");
+    expect(c).toContain("box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08)");
+    expect(page).toContain("title={`WK ${reviewWin.weekNumber}`} onClick={openReview}");
     expect(page).toContain("{!reviewSeen && <span className=\"tdb-rvnew\" aria-hidden />}".replace(/\\/g, ""));
-    expect(page).toContain('<span className="tdb-rvwk">WK {reviewWin.weekNumber}</span>');
-    expect(page).toContain('className="tdb-rvrow" onClick={openReview}');
+    expect(rule(".tdb-rvnew")).toContain("margin-left: auto"); // the dot right-aligns on the chip
     expect(rule(".tdb-rvnew")).toContain("background: #c96a55");
-    expect(rule(".tdb-rvcups")).toContain("width: 26px");
+    expect(page).not.toContain("tdb-rvwk"); // the resting face stays uncrowded
   });
-  it("the afterlife: opening OR dismissing collapses the banner; the row is the sole re-entry; opening clears the dot", () => {
+  it("the afterlife transfers VERBATIM to the chip: banner until opened/dismissed, dot cleared by opening, per-week reset", () => {
     expect(page).toContain("const openReview = () => { markReviewSeen(); openSundayReview(); };");
     expect(page).toContain("{reviewWin && !reviewSeen && !reviewDismissed && (");
-    // opening marks seen (banner + dot both key off it); dismissal only hides the banner —
-    // the dot survives a dismissal, so the rail still whispers the week is unread
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
+    expect(page).toContain('localStorage.setItem("sa.todoReviewSeen", reviewWin.key)');
+  });
+  it("the filter card holds ONLY the FILTER band (top radius, no top border) + pills + divider + lens + the foot; REVIEW band gone", () => {
+    expect(css).toContain(".tdb-rsech.fc1 { border-top: none; border-radius: 15px 15px 0 0; }");
+    expect(page).toContain('className="tdb-rsech fc1"');
+    expect(page).not.toContain(">REVIEW</div>");
+    expect(page).not.toContain("tdb-rvrow"); // (FocusFlow's review-mode .tdb-rvrow is a different, live namesake — css keeps it)
+    const cardFn = page.slice(page.indexOf("function renderFilterCard"), page.indexOf("function renderRail"));
+    expect(cardFn).toContain("SHOW ALL<span");
+    expect(cardFn).toContain('className="tdb-fdivider"');
+    expect(cardFn).toContain("TODAY’S LIST<span");
+    expect(cardFn).toContain('className="tdb-setrow"');
+    expect(cardFn).not.toContain("tdb-fsb2"); // Begin is not the card's child
+    expect(cardFn).not.toContain("tdb-rvchip"); // nor the chip
+  });
+  it("the fold: the <1428 drawer carries the SAME toolbelt whole (the icon rail stays extinct — recon: retired chrome)", () => {
+    expect((page.match(/\{renderToolbelt\(\)\}/g) ?? []).length).toBe(2); // aside + drawer
+    expect(page).not.toContain("tdb-ric");
   });
   it("the foot: a bare 20px cog + label, same wiring; the roundel selector is gone", () => {
     expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
@@ -409,7 +431,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
     expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setFilterDrawerOpen(false); return; }');
     expect(page).toContain("if (e.shiftKey && document.activeElement === first)");
     expect(page).toContain('className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)}');
-    expect((page.match(/\{renderFilterPanel\(\)\}/g) ?? []).length).toBe(2);
+    expect((page.match(/\{renderToolbelt\(\)\}/g) ?? []).length).toBe(2);
   });
   it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
     expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(1); // the Lane builder (the ledger grew its own washed heading, doc pass P4)
@@ -874,8 +896,8 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
     expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }");
     expect(page).toContain("⚲ FILTER · {shownX}/{shownY}"); // (multi-line JSX — no leading >)
     expect(page).toContain('className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters"');
-    expect(page).toContain("{renderFilterPanel()}");
-    expect((page.match(/\{renderFilterPanel\(\)\}/g) ?? []).length).toBe(2); // aside + drawer, one panel
+    expect(page).toContain("{renderToolbelt()}");
+    expect((page.match(/\{renderToolbelt\(\)\}/g) ?? []).length).toBe(2); // aside + drawer, one panel
     expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
     expect(page).not.toContain("tdb-ric"); // the icon rail is extinct
   });

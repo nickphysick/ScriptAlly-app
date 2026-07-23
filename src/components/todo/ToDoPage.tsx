@@ -932,26 +932,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </button>
     );
   }
-  function renderFilterPanel() {
+  // ── toolbelt P1 (todo-toolbelt.html option C): the left column is a vertical stack of
+  // THREE SEPARATE elements, 10px apart — Begin (free-standing ink, 44), the review chip
+  // (free-standing white pill; ALL afterlife behaviour transfers verbatim — the banner in the
+  // centre stack until opened/dismissed, the chip the persistent entry, its dot cleared by
+  // opening, per-week reset; the WK stamp lives in the chip's hover title, keeping the
+  // resting face uncrowded), and the filter-only card. The REVIEW band + row are gone. The
+  // <1428 drawer carries the same stack whole (the pack's icon-rail fold clause describes
+  // chrome the Final Shape retired — reported). ──
+  function renderToolbelt() {
     return (
       <>
-        {/* v4 P2 — the focused-session button leads the rail (moved from the hero; same wiring) */}
         <button type="button" className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
-        {/* frame P3 — the sectioned rail: grey REVIEW / FILTER header bands (the bar's grey
-            system); the review row is the week's standing entry point — its dot clears on
-            opening. The FILTER band drops its top rule when it follows the row's own line. */}
         {reviewWin && (
-          <>
-            <div className="tdb-rsech">REVIEW</div>
-            <button type="button" className="tdb-rvrow" onClick={openReview}>
-              <span className="tdb-rvcups" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
-              Last week in review
-              {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
-              <span className="tdb-rvwk">WK {reviewWin.weekNumber}</span>
-            </button>
-          </>
+          <button type="button" className="tdb-rvchip" title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
+            <span className="tdb-rvcups" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
+            Last week in review
+            {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
+          </button>
         )}
-        <div className={`tdb-rsech${reviewWin ? " nt2" : ""}`}>FILTER{searchActive && (
+        <div className="tdb-fbox">{renderFilterCard()}</div>
+      </>
+    );
+  }
+  function renderFilterCard() {
+    return (
+      <>
+        <div className="tdb-rsech fc1">FILTER{searchActive && (
           <button type="button" className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
             “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
           </button>
@@ -981,10 +988,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
   function renderRail() {
-    if (compact) return null; // <1428 the rail lives in the overlay drawer (the ⚲ FILTER pill)
+    if (compact) return null; // <1428 the toolbelt lives in the overlay drawer (the ⚲ FILTER pill)
     return (
       <aside className="tdb-fside" aria-label="Filters">
-        {renderFilterPanel()}
+        {renderToolbelt()}
       </aside>
     );
   }
@@ -994,7 +1001,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <div className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters">
         <div className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)} />
         <div className="tdb-fdpanel" ref={drawerRef}>
-          {renderFilterPanel()}
+          {renderToolbelt()}
         </div>
       </div>
     );
