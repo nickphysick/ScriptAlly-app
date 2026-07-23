@@ -114,12 +114,12 @@
 .tdb-rsech + .tdb-fpill { margin-top: 10px; } /* the first pill breathes under the band (ref) */
 /* the review CHIP — the free-standing standing entry point (the WK stamp rides the hover
    title, keeping the resting face uncrowded) */
-/* detail P2: Begin's EXACT INVERSE — identical geometry (44 / full width / centred label /
-   12.5 · 600 · .02em), colours swapped (cream fill, ink text); the cup left the chip; the
-   unread dot rides inline after the label. */
-.tdb-rvchip { display: inline-flex; align-items: center; justify-content: center; gap: 9px; height: 44px; box-sizing: border-box; padding: 0 20px; line-height: 1; background: #f3e7da; border: 1px solid #1d100c; color: #2a1a13; border-radius: 99px; box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08); font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; flex: 0 0 auto; white-space: nowrap; }
-.tdb-rvchip:hover { background: #f5ecdf; }
-.tdb-rvnew { width: 7px; height: 7px; border-radius: 50%; background: #c96a55; flex: 0 0 auto; }
+/* hero-pair P2: the WHITE rewind chip — Begin's height/typography, white fill, ink text +
+   border; the ↺ rewind at the play's exact seat (same flex gap). Unread by WEIGHT: unopened
+   = full ink; opened (.seen) = glyph + label soften to muted (the border stays ink). */
+.tdb-rvchip { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; box-sizing: border-box; padding: 0 20px; line-height: 1; background: var(--white, #fff); border: 1px solid #1d100c; color: #2a1a13; border-radius: 99px; box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08); font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; flex: 0 0 auto; white-space: nowrap; }
+.tdb-rvchip:hover { background: var(--paper); }
+.tdb-rvchip.seen { color: #6b5a4e; }
 /* polish P4 — the removable query chip (the pink tag law) + the struck old total */
 .tdb-fq { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #7c3a2a; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; min-width: 0; max-width: 100%; }
 .tdb-fq:hover { border-color: #7c3a2a; }

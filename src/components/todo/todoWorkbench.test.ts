@@ -294,6 +294,33 @@ describe("toolbelt P3 — sweep", () => {
   });
 });
 
+describe("hero-pair P2 — the white rewind chip", () => {
+  it("white fill, ink text + border, Begin's height/typography; the gap matches the play's seat exactly", () => {
+    const c = rule(".tdb-rvchip");
+    expect(c).toContain("background: var(--white, #fff)");
+    expect(c).toContain("color: #2a1a13");
+    expect(c).toContain("border: 1px solid #1d100c");
+    for (const decl of ["height: 44px", "font-size: 12.5px", "font-weight: 600", "letter-spacing: 0.02em", "gap: 8px"]) {
+      expect(c).toContain(decl);
+    }
+    expect(rule(".tdb-btnp")).toContain("gap: 8px"); // the play's seat — the SAME gap token
+  });
+  it("the ↺ rewind (TypeGlyph grammar, 12px) leads the label; the dot is GONE", () => {
+    expect(page).toContain("const RewindGlyph: React.FC<{ size?: number }> = ({ size = 12 }) => (");
+    expect(page).toContain('<path d="M3.5 8 A 9.5 9.5 0 1 1 3 13.5" />');
+    expect(page).toContain('<path d="M3.5 3.5 v4.5 h4.5" />');
+    expect(page).toContain("<RewindGlyph />");
+    expect(page).not.toContain("tdb-rvnew");
+    expect(css).not.toContain("tdb-rvnew");
+  });
+  it("unread by WEIGHT: unopened = full ink; opened softens glyph + label to muted; the same flags; weekly reset", () => {
+    expect(page).toContain("className={`tdb-rvchip${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, ""));
+    expect(css).toContain(".tdb-rvchip.seen { color: #6b5a4e; }"); // currentColor carries the glyph with it
+    expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
+    expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week resets
+  });
+});
+
 describe("hero-pair P1 — the pair beneath the search (variant B)", () => {
   it("Begin + the chip sit centred under the pill with 24px of clear air; both size to content", () => {
     const pr = rule(".tdb-heropair");
@@ -302,7 +329,7 @@ describe("hero-pair P1 — the pair beneath the search (variant B)", () => {
     expect(pr).toContain("margin: 18px 0 0"); // + the srchrow's 6 = the pack's 24 clear
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterCard"));
     expect(hero).toContain('className="tdb-btnp tdb-herobegin"');
-    expect(hero).toContain('className="tdb-rvchip"');
+    expect(hero).toContain("className={`tdb-rvchip${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // P2's weight-state template
     expect(rule(".tdb-rvchip")).not.toContain("width: 100%"); // content-sized in the pair
     expect(rule(".tdb-herobegin")).toContain("box-shadow: 0 3px 12px rgba(29, 16, 12, 0.22)");
   });

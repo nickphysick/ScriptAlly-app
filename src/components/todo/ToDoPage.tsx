@@ -75,6 +75,15 @@ const VERB_LABELS = {
 // follows TypeGlyph's exact grammar (currentColor stroke SVG, viewBox 24, aria-hidden, size
 // prop) as a page-scoped sibling — TypeGlyph itself is LOCKED to the three material
 // ComponentTypes and cannot carry a clock verbatim.
+const RewindGlyph: React.FC<{ size?: number }> = ({ size = 12 }) => (
+  // hero-pair P2 — the ↺ rewind (todo-hero-pair.html): the review chip's glyph, seated
+  // exactly as Begin's play (same flex seat, the button's own gap).
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
+    <path d="M3.5 8 A 9.5 9.5 0 1 1 3 13.5" />
+    <path d="M3.5 3.5 v4.5 h4.5" />
+  </svg>
+);
+
 const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
     <circle cx="12" cy="12" r="9" />
@@ -946,10 +955,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
             Begin focused session
           </button>
+          {/* hero-pair P2 — unread by WEIGHT, not ornament: unopened = full ink, opened =
+              muted; the same flags drive it. The rewind sits at the play's exact seat. */}
           {reviewWin && (reviewSeen || reviewDismissed) && (
-            <button type="button" className="tdb-rvchip" title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
+            <button type="button" className={`tdb-rvchip${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
+              <RewindGlyph />
               Last week in review
-              {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
             </button>
           )}
         </div>
