@@ -862,3 +862,34 @@ Rule-text-locked in `todoTagLaw.test.ts`.
 - **THE RENAME:** "Over to you" → **"Agent waiting"** everywhere (tags, pills, ledger, kickers,
   copy, tests; repo-wide grep-locked). The review banner is a RESIDENT of the identity strip
   (no windows, no dismissal; Open it › ⇄ View again on the completion sentinel).
+
+## To-do containers — stone (settled)
+
+The colour question is **closed**. The soft pastille card system stands exactly as deployed —
+pink urgency, latte housekeeping, butter notes, white tag pills — and is not revisited: **the
+pastille bands are SIGNAL**, the containers around them are furniture, and furniture does not
+compete. Ref: `design-refs/todo-settlement.html` (todo-fix39, normative; boards fix31–fix38
+are exploration history and are not refs).
+
+- **THE STONE PAIR:** every container header takes one fill `#f5f3f0` and one bottom rule
+  `#e6e2db`, from `--container-head-bg` / `--container-head-rule` on `.tdb-wrap`. Three
+  headers, one treatment: the filter card's FILTER band, the sheet's document bar, Today's
+  header.
+- **THE 36px LAW:** one height token, `--container-head-h: 36px`, for all three, with contents
+  flex-centred — never a padding-derived height. Each header takes its own container's top
+  radii (15/15/0/0 inside a 16px container). The view toggle sits on stone at 26px (track
+  `rgba(255,255,255,.6)`, the shared rule) with its active chip unchanged; the bar's 28px
+  pills clear the 36px without growing it.
+- **HEADER TYPE** stays per container: the mono FILTER label warmed to `--container-head-mono
+  #8a8074`, the Playfair bar line and Today's title in `--container-head-ink #3a332c`, Today's
+  count mono `#8a8074`.
+- **SAGE AT GLYPH SCALE:** Today's diary-sage header is retired. Sage survives only small —
+  Today's row dots, the completion ticks, the StatusDot incoming states — where it reads as a
+  mark rather than a surface.
+- **THE HERO** is title + search only (the search 460×46 with a 32px glass, over a tokened
+  `--tdb-search-clear: 40px` band of clear ground). Begin focused session and Last week in
+  review ride the sheet's bar: line → pair → 20px hairline divider → view toggle.
+
+*(No blush set was ever adopted: `todo-blush-prompt.md` was superseded before it ran, and the
+board carries no blush or greige tokens.)*
+

@@ -193,3 +193,36 @@ describe("settlement P3 — the pair's new seat: in the bar", () => {
     expect(page.indexOf("function renderHero")).toBeGreaterThan(iRail); // (the helper-below-return law)
   });
 });
+
+describe("settlement P4 — the sweep", () => {
+  it("themes.md records the settlement, and no blush set was ever adopted", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## To-do containers — stone (settled)");
+    expect(themes).toContain("THE STONE PAIR");
+    expect(themes).toContain("THE 36px LAW");
+    expect(themes).toContain("SAGE AT GLYPH SCALE");
+    expect(themes).toContain("pastille bands are SIGNAL");
+    expect(themes).toContain("todo-blush-prompt.md` was superseded before it ran");
+  });
+  it("no blush or greige token ever entered the board", () => {
+    expect(css).not.toMatch(/blush|greige/i);
+    expect(page).not.toMatch(/blush|greige/i);
+  });
+  it("the pastille card system is byte-untouched by this pack", () => {
+    // the three families' band tokens and the white tag pills stand exactly as deployed
+    for (const t of ["--pink-t", "--pink-b", "--lat-1", "--lat-2"]) expect(css).toContain(t);
+    expect(css).toContain(".tdb-band"); // the card band grammar
+    expect(rule(".tdb-tag")).toContain("background: var(--white)"); // white tag pills
+  });
+  it("the tour still lands: Begin's anchor followed the seat into the bar", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('sel: ".tdb-herobegin"');
+    expect(tour).toContain("the settlement: Begin sits in the SHEET BAR");
+    expect(page).toContain('className="tdb-btnp sm tdb-herobegin"'); // the anchor exists at that seat
+    // every other stop's anchor still exists in the board
+    for (const sel of [".tdb-bigsearch", ".tdb-fpill, .tdb-fpillbtn", ".tdb-rvchip", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2, .tdb-todaychip"]) {
+      expect(tour).toContain(sel);
+      for (const one of sel.split(", ")) expect(css).toContain(one);
+    }
+  });
+});
