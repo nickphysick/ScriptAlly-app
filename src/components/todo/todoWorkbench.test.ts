@@ -70,7 +70,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain('>FILTER{searchActive && ('); // the header keeps the query chip
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
-    expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>');
+    expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>'); // session P1: Begin launches the cinematic session over the same engine queue
     expect(rule(".tdb-btnp")).toContain("height: 42px"); // the law's base; the hero seat lifts to 44
     expect(rule(".tdb-herobegin")).toContain("height: 44px");
     const panel = page.slice(page.indexOf("function renderFilterCard"), page.indexOf("function renderRail"));

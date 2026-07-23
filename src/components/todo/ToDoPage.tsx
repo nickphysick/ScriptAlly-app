@@ -38,6 +38,7 @@ import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
+import { FocusedSession } from "./FocusedSession";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { ProBanner, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
@@ -543,6 +544,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }))
   ).slice(0, 4);
   const [assistantOpen, setAssistantOpen] = useState(false);
+  // the focused session (the session pack): the queue = the ENGINE's own boardCards order,
+  // captured at launch; the cinematic container drives it.
+  const [session, setSession] = useState<{ queue: BoardCard[] } | null>(null);
   // frame P3 — the review's AFTERLIFE: opening or dismissing the banner collapses it for the
   // week (per-week sa. prefs; recon found no existing seen/dismissed flags — the completion
   // sentinel is the one stored "opened" record, and it composes into seen below). The rail's
@@ -654,6 +658,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── quick rail — "the honest fastest version of actually doing it". Every ✓ funnels through the
   // SAME write paths as the journey (quick*Payload → markSentWriteArgs/nudgeWriteArgs); defaults are
   // stated on the receipt, and Undo deletes/unwinds the created record via the existing primitives.
+  // session P1 — the Mark-handled gate: TRUE only where quickDone has an honest arm
+  // (notes · no-response-close · nudge · the mark-sent quick path). Offers keep the standing
+  // no-one-tap rule; dq member cards have no arm (they complete through their journeys).
+  function sessionCanQuick(c: BoardCard): boolean {
+    if (c.taskType === "offer_received") return false;
+    if (c.userTaskId) return true;
+    if (c.taskType === "no_response_close" || c.taskType === "nudge_overdue") return true;
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    return !!q && getPrimaryAction(q.status as QueryStatus).kind === "mark-sent";
+  }
   async function quickDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
@@ -922,6 +936,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       )}
       {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
+      {session && (
+        <FocusedSession
+          queue={session.queue}
+          wrapEl={wrapRef.current}
+          liveKeys={new Set(boardCards.map((c) => c.key))}
+          onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}
+          onQuickComplete={quickDone}
+          canQuickComplete={sessionCanQuick}
+          onClose={() => setSession(null)}
+        />
+      )}
     </F12Page>
   );
 
@@ -1019,7 +1044,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         <div className="tdb-heropair">
-          <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>
+          <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
             <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
             Begin focused session
           </button>

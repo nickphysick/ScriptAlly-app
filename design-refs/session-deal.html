@@ -1,0 +1,96 @@
+<!-- design-refs/session-deal.html — Downloads todo-fix19.html (23 Jul 16:41), committed with session P1.
+  NORMATIVE for OPTION A ONLY (the deal: the visible paper stack, the sage stamp, the sweep-off
+  left, the rise; live — play A). Options B (the promotion), C (the carriage) and D (the quiet
+  rise) are REJECTED alternatives. -->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Between tasks - four transitions, live</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:44px 0 12px;width:1100px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.5}
+.stage{position:relative;width:1100px;height:330px;background:var(--oat);border:1px solid var(--hair);border-radius:14px;overflow:hidden;box-shadow:0 6px 16px rgba(58,28,20,.13)}
+.play{position:absolute;right:14px;top:12px;z-index:30;display:inline-flex;align-items:center;gap:7px;background:#2a1a13;color:#f3e7da;border:1px solid #1d100c;border-radius:99px;height:32px;padding:0 15px;font-size:10.5px;font-weight:600;cursor:pointer}
+.sheet{position:absolute;left:50%;top:46%;width:430px;transform:translate(-50%,-50%);background:var(--white);border:1px solid #d8cfc4;border-radius:14px;box-shadow:0 12px 34px rgba(58,28,20,.16);overflow:hidden}
+.sheet .b{height:26px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b);display:flex;align-items:center;padding:0 14px}
+.tg{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;border-radius:99px;padding:2px 8px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.sheet .c{padding:16px 18px 18px}
+.sheet h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.sheet .m{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a6a5e;margin-top:3px}
+.stamp{position:absolute;right:14px;top:34px;width:36px;height:36px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1.5px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:17px;transform:rotate(-8deg) scale(0);transition:transform .3s cubic-bezier(.2,.9,.3,1.5)}
+.stamp.on{transform:rotate(-8deg) scale(1)}
+.next{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#a5988c;white-space:nowrap}
+.next i{font-style:normal;color:#6b5a4e}
+/* deck edges */
+.deck1,.deck2{position:absolute;left:50%;top:46%;width:430px;height:110px;transform:translate(-50%,-50%);background:var(--white);border:1px solid #ddd3c6;border-radius:14px;z-index:1}
+.deck1{margin-top:7px;transform:translate(-50%,-50%) scale(.975)}
+.deck2{margin-top:14px;transform:translate(-50%,-50%) scale(.95);opacity:.7}
+</style></head><body><div class="lbl">A &middot; The deal &nbsp;&#9733; <em>&mdash; the remaining tasks are a visible PAPER STACK behind the sheet; Done stamps, the top sheet sweeps off left, and the next rises from the stack into place. The queue is tangible &mdash; you can see it thinning.</em></div><div class="stage" id="sA"><div class="deck2"></div><div class="deck1"></div><div class="sheet" id="a1" style="z-index:10;"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Tom Ellery has made an offer</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="sheet" id="a2" style="z-index:5;transform:translate(-50%,-50%) scale(.975);margin-top:7px"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Send your full to Jonathan Marsh</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="next">NEXT UP &middot; <i>Send your partial to Daniel O&rsquo;Rourke</i></div><button class="play" data-s="sA">&#9654; Play</button></div><div class="lbl">B &middot; The promotion <em>&mdash; the &ldquo;NEXT UP&rdquo; whisper physically rises and becomes the task; the thing you were promised turns into the thing in front of you. Strong narrative logic, subtler visually.</em></div><div class="stage" id="sB"><div class="sheet" id="b1" style="z-index:10;"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Tom Ellery has made an offer</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="sheet" id="b2" style="z-index:5;opacity:0"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Send your full to Jonathan Marsh</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="next">NEXT UP &middot; <i>Send your partial to Daniel O&rsquo;Rourke</i></div><button class="play" data-s="sB">&#9654; Play</button></div><div class="lbl">C &middot; The carriage <em>&mdash; typewriter grammar: done exits left, next enters from the right in one horizontal motion, progress advancing in sync. Brisk, literary, directional.</em></div><div class="stage" id="sC"><div class="sheet" id="c1" style="z-index:10;"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Tom Ellery has made an offer</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="sheet" id="c2" style="z-index:5;transform:translate(120%,-50%)"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Send your full to Jonathan Marsh</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="next">NEXT UP &middot; <i>Send your partial to Daniel O&rsquo;Rourke</i></div><button class="play" data-s="sC">&#9654; Play</button></div><div class="lbl">D &middot; The quiet rise <em>&mdash; minimal: old fades down-and-out, new fades up into place. Zero theatre; the safest and least characterful.</em></div><div class="stage" id="sD"><div class="sheet" id="d1" style="z-index:10;"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Tom Ellery has made an offer</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="sheet" id="d2" style="z-index:5;opacity:0;transform:translate(-50%,-38%)"><div class="b"><span class="tg">AGENT WAITING</span></div>
+<div class="c"><h3>Send your full to Jonathan Marsh</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div></div><span class="stamp">&#10003;</span></div><div class="next">NEXT UP &middot; <i>Send your partial to Daniel O&rsquo;Rourke</i></div><button class="play" data-s="sD">&#9654; Play</button></div>
+<script>
+function q(s,r){return (r||document).querySelector(s)}
+function stampThen(el,cb){q('.stamp',el).classList.add('on');setTimeout(cb,520)}
+document.querySelectorAll('.play').forEach(function(btn){btn.addEventListener('click',function(){
+var id=btn.dataset.s, st=document.getElementById(id);
+if(id==='sA'){var s1=q('#a1'),s2=q('#a2');
+stampThen(s1,function(){
+s1.style.transition='transform .5s cubic-bezier(.5,.05,.6,1),opacity .45s';
+s1.style.transform='translate(-160%,-50%) rotate(-5deg)';s1.style.opacity=0;
+setTimeout(function(){s2.style.transition='transform .4s cubic-bezier(.2,.9,.3,1.15),margin .4s';
+s2.style.transform='translate(-50%,-50%) scale(1)';s2.style.marginTop='0px';s2.style.zIndex=10;},180);});}
+if(id==='sB'){var s1=q('#b1'),s2=q('#b2'),nx=q('.next',st);
+stampThen(s1,function(){
+s1.style.transition='transform .45s,opacity .4s';s1.style.transform='translate(-50%,-70%)';s1.style.opacity=0;
+nx.style.transition='transform .5s cubic-bezier(.2,.8,.3,1),opacity .3s';
+nx.style.transform='translate(-50%,-190px) scale(1.4)';nx.style.opacity=0;
+setTimeout(function(){s2.style.transition='opacity .35s';s2.style.opacity=1;s2.style.zIndex=10;},330);});}
+if(id==='sC'){var s1=q('#c1'),s2=q('#c2');
+stampThen(s1,function(){
+s1.style.transition='transform .5s cubic-bezier(.55,.05,.55,.95),opacity .45s';
+s1.style.transform='translate(-190%,-50%)';s1.style.opacity=0;
+s2.style.transition='transform .5s cubic-bezier(.2,.8,.25,1)';
+s2.style.transform='translate(-50%,-50%)';s2.style.zIndex=10;});}
+if(id==='sD'){var s1=q('#d1'),s2=q('#d2');
+stampThen(s1,function(){
+s1.style.transition='opacity .35s,transform .35s';s1.style.opacity=0;s1.style.transform='translate(-50%,-62%)';
+setTimeout(function(){s2.style.transition='opacity .4s,transform .4s ease-out';
+s2.style.opacity=1;s2.style.transform='translate(-50%,-50%)';s2.style.zIndex=10;},200);});}
+});});
+</script></body></html>
