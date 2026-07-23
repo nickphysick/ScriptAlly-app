@@ -903,6 +903,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-hero">
           <h1 className="tdb-ask">What’s on your desk?</h1>
         </div>
+        {/* hero-pair P1 (todo-hero-pair.html variant B): Begin + the review chip sit centred
+            beneath the search with 24px of clear air; both size to content. The chip renders
+            only in its AFTERLIFE state (opened/dismissed — the banner's complement); Begin
+            re-centres alone otherwise. The pair is hero furniture — it never folds into the
+            rail's compact drawer. */}
         <div className="tdb-srchrow">
           {/* doc pass P1 — 380px; the ⌘K advert is gone (the shortcut itself still focuses
               here); the glass grows to a 19px stroke icon in a 34px oat roundel at the right */}
@@ -936,6 +941,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </span>
           )}
         </div>
+        <div className="tdb-heropair">
+          <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>
+            <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
+            Begin focused session
+          </button>
+          {reviewWin && (reviewSeen || reviewDismissed) && (
+            <button type="button" className="tdb-rvchip" title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
+              Last week in review
+              {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
+            </button>
+          )}
+        </div>
       </>
     );
   }
@@ -956,31 +973,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </button>
     );
   }
-  // ── toolbelt P1 (todo-toolbelt.html option C): the left column is a vertical stack of
-  // THREE SEPARATE elements, 10px apart — Begin (free-standing ink, 44), the review chip
-  // (free-standing white pill; ALL afterlife behaviour transfers verbatim — the banner in the
-  // centre stack until opened/dismissed, the chip the persistent entry, its dot cleared by
-  // opening, per-week reset; the WK stamp lives in the chip's hover title, keeping the
-  // resting face uncrowded), and the filter-only card. The REVIEW band + row are gone. The
-  // <1428 drawer carries the same stack whole (the pack's icon-rail fold clause describes
-  // chrome the Final Shape retired — reported). ──
-  function renderToolbelt() {
-    return (
-      <>
-        <button type="button" className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
-        {/* detail P2 — the chip is Begin's exact inverse: identical geometry, colours swapped;
-            the cup left the chip (the review banner keeps the big cup); the dot sits inline
-            after the label. All afterlife behaviour unchanged. */}
-        {reviewWin && (
-          <button type="button" className="tdb-rvchip" title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
-            Last week in review
-            {!reviewSeen && <span className="tdb-rvnew" aria-hidden />}
-          </button>
-        )}
-        <div className="tdb-fbox">{renderFilterCard()}</div>
-      </>
-    );
-  }
+  // ── hero-pair P1: the toolbelt stack is RETIRED — Begin + the chip live under the hero;
+  // the left column begins directly with the filter card. ──
   function renderFilterCard() {
     return (
       <>
@@ -1017,7 +1011,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (compact) return null; // <1428 the toolbelt lives in the overlay drawer (the ⚲ FILTER pill)
     return (
       <aside className="tdb-fside" aria-label="Filters">
-        {renderToolbelt()}
+        <div className="tdb-fbox">{renderFilterCard()}</div>
       </aside>
     );
   }
@@ -1027,7 +1021,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <div className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters">
         <div className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)} />
         <div className="tdb-fdpanel" ref={drawerRef}>
-          {renderToolbelt()}
+          <div className="tdb-fbox">{renderFilterCard()}</div>
         </div>
       </div>
     );
