@@ -235,18 +235,24 @@ describe("settlement P3 — REVIEW & FILTER: the pair at the sidebar's top", () 
 });
 
 describe("settlement P4 — the sweep", () => {
-  it("themes.md records the settlement, and no blush set was ever adopted", () => {
+  it("themes.md records the sage settlement and marks the stone step superseded", () => {
     const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
-    expect(themes).toContain("## To-do containers — stone (settled)");
-    expect(themes).toContain("THE STONE PAIR");
-    expect(themes).toContain("THE 36px LAW");
-    expect(themes).toContain("SAGE AT GLYPH SCALE");
+    expect(themes).toContain("## To-do containers — sage (settled)");
+    expect(themes).toContain("THE SAGE TRIO");
+    expect(themes).toContain("THE 42px LAW");
+    expect(themes).toContain("THE REVIEW & FILTER SEAT");
     expect(themes).toContain("pastille bands are SIGNAL");
     expect(themes).toContain("todo-blush-prompt.md` was superseded before it ran");
+    expect(themes).toContain("stone ⚠️ SUPERSEDED");
+    expect(themes.indexOf("stone ⚠️ SUPERSEDED")).toBeLessThan(themes.indexOf("sage (settled)"));
   });
-  it("no blush or greige token ever entered the board", () => {
+  it("no blush, greige or stone exploration token remains in the board", () => {
     expect(css).not.toMatch(/blush|greige/i);
     expect(page).not.toMatch(/blush|greige/i);
+    for (const dead of ["#f5f3f0", "#e6e2db", "#3a332c", "#8a8074"]) { // the stone set
+      expect(css).not.toContain(dead);
+      expect(page).not.toContain(dead);
+    }
   });
   it("the pastille card system is byte-untouched by this pack", () => {
     // the three families' band tokens and the white tag pills stand exactly as deployed

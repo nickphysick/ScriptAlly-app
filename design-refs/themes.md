@@ -863,33 +863,39 @@ Rule-text-locked in `todoTagLaw.test.ts`.
   copy, tests; repo-wide grep-locked). The review banner is a RESIDENT of the identity strip
   (no windows, no dismissal; Open it › ⇄ View again on the completion sentinel).
 
-## To-do containers — stone (settled)
+## To-do containers — stone ⚠️ SUPERSEDED (see "sage (settled)" below)
+
+*(The stone pair `#f5f3f0`/`#e6e2db` at 36px, and the Begin/review pair seated in the sheet's
+bar, were one exploration step — `todo-fix39`. Both are superseded by the sage settlement.)*
+
+## To-do containers — sage (settled)
 
 The colour question is **closed**. The soft pastille card system stands exactly as deployed —
 pink urgency, latte housekeeping, butter notes, white tag pills — and is not revisited: **the
 pastille bands are SIGNAL**, the containers around them are furniture, and furniture does not
-compete. Ref: `design-refs/todo-settlement.html` (todo-fix39, normative; boards fix31–fix38
-are exploration history and are not refs).
+compete. Ref: `design-refs/todo-settlement.html` (todo-fix40, normative; boards fix31–fix39,
+stone included, are exploration history and are not refs).
 
-- **THE STONE PAIR:** every container header takes one fill `#f5f3f0` and one bottom rule
-  `#e6e2db`, from `--container-head-bg` / `--container-head-rule` on `.tdb-wrap`. Three
-  headers, one treatment: the filter card's FILTER band, the sheet's document bar, Today's
-  header.
-- **THE 36px LAW:** one height token, `--container-head-h: 36px`, for all three, with contents
+- **THE SAGE TRIO:** every container header takes one fill `#d7ddd5 → #d5dbd3` over one bottom
+  rule `#b9c9b4`, from `--container-head-bg` / `--container-head-rule` on `.tdb-wrap` — one
+  source, asserted unique in the sheet. Three headers, one treatment: the left sidebar's band,
+  the sheet's document bar, Today's header. Today wore this first; its siblings joined it.
+- **THE 42px LAW:** one height token, `--container-head-h: 42px`, for all three, contents
   flex-centred — never a padding-derived height. Each header takes its own container's top
-  radii (15/15/0/0 inside a 16px container). The view toggle sits on stone at 26px (track
-  `rgba(255,255,255,.6)`, the shared rule) with its active chip unchanged; the bar's 28px
-  pills clear the 36px without growing it.
-- **HEADER TYPE** stays per container: the mono FILTER label warmed to `--container-head-mono
-  #8a8074`, the Playfair bar line and Today's title in `--container-head-ink #3a332c`, Today's
-  count mono `#8a8074`.
-- **SAGE AT GLYPH SCALE:** Today's diary-sage header is retired. Sage survives only small —
-  Today's row dots, the completion ticks, the StatusDot incoming states — where it reads as a
-  mark rather than a surface.
-- **THE HERO** is title + search only (the search 460×46 with a 32px glass, over a tokened
-  `--tdb-search-clear: 40px` band of clear ground). Begin focused session and Last week in
-  review ride the sheet's bar: line → pair → 20px hairline divider → view toggle.
+  radii (15/15/0/0 inside a 16px container). The view toggle sits on sage at 26px (track
+  `rgba(255,255,255,.55)`, the shared rule) with its active chip — white plus the ink ring —
+  unchanged.
+- **HEADER INKS** join the family: mono labels `--container-head-mono #5a6e58`, Playfair lines
+  and titles `--container-head-ink #3d4a3b`. Sage also keeps its glyph-scale life beside them
+  (Today's row dots, completion ticks, StatusDot incoming) — unchanged.
+- **THE REVIEW & FILTER SEAT:** the left sidebar's band is labelled REVIEW & FILTER, and Begin
+  focused session (ink) + Last week in review (white) stack full-width at the top of its body
+  at `--tdb-sbpair-h: 34px`, above a `#eee8dd` hairline, with the filter pills unchanged
+  beneath. In a focused session they leave with the sidebar's own slide — one animation, never
+  two.
+- **THE HERO** is title + search only: the search 460 × 46 with a 32px glass, over a tokened
+  `--tdb-search-clear: 40px` minimum band of clear ground. The sheet's bar holds just its
+  Playfair line and the view toggle.
 
 *(No blush set was ever adopted: `todo-blush-prompt.md` was superseded before it ran, and the
 board carries no blush or greige tokens.)*
-
