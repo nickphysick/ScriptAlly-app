@@ -817,10 +817,10 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
 });
 describe("P4 — search + filters (source locks; the matrix lives in todoFilters.test.ts)", () => {
   it("BOTH views read the same visible sets (cards lanes and ledger sections consume vDo/vGroups/vStale/vNt)", () => {
-    expect(page).toContain("{vDo.map(renderCard)}");
+    expect(page).toContain("{vDo.map((c) => renderCard(c))}"); // explicit lambda — the map index must never leak into renderCard's gin param (grouping P1)
     expect(page).toContain("{vGroups.map(renderGroupCard)}");
-    expect(page).toContain("{vStale.map(renderCard)}");
-    expect(page).toContain("{vNt.map(renderCard)}");
+    expect(page).toContain("{vStale.map((c) => renderCard(c))}");
+    expect(page).toContain("{vNt.map((c) => renderCard(c))}");
     expect(page).toContain("sortLedgerDo(vDo, lctx, now)"); // the ledger sorts the SAME set (review-free by construction)
   });
   it("the filter derivations survive the deck's death (the rail consumes them in P2)", () => {

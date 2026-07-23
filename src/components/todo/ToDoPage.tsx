@@ -92,6 +92,9 @@ const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (
   </svg>
 );
 
+/** grouping P1 — the members page size: 5 render, a dashed cell pages in the rest. */
+const GROUP_PAGE = 5;
+
 const GHOST_BARS = [64, 78, 52];
 const fmtTime = (ms?: number): string => {
   if (ms == null) return "";
@@ -204,6 +207,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // folds; <1420 it becomes the 56px icon rail instead, P5.)
   const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
   const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
+  // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
+  // animation to the just-collapsed batch (never a page-load flash).
+  const [openGroups, setOpenGroups] = useState<Record<string, true>>({});
+  const [pagedGroups, setPagedGroups] = useState<Record<string, true>>({});
+  const [recentG, setRecentG] = useState<string | null>(null);
+  const toggleGroup = (rule: string) => {
+    setOpenGroups((g) => {
+      const next = { ...g };
+      if (next[rule]) delete next[rule]; else next[rule] = true;
+      return next;
+    });
+    setRecentG(rule);
+    window.setTimeout(() => setRecentG((r) => (r === rule ? null : r)), 260);
+  };
   // doc pass P4 — per-lane ledger fold, persisted under the sa. prefs convention
   const [ledgerFold, setLedgerFold] = useState<{ do: boolean; hk: boolean; nt: boolean }>(() => {
     try { return { do: false, hk: false, nt: false, ...JSON.parse(localStorage.getItem("sa.todoLedgerFold") || "{}") }; } catch { return { do: false, hk: false, nt: false }; }
@@ -793,7 +810,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               </div>
             }>
             {overlayCards("do")}
-            {vDo.map(renderCard)}
+            {vDo.map((c) => renderCard(c))}
           </Lane>
           )}
           {(!active || vGroups.length > 0 || vStale.length > 0 || overlayCards("hk").length > 0) && (
@@ -827,7 +844,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           >
             {overlayCards("hk")}
             {vGroups.map(renderGroupCard)}
-            {vStale.map(renderCard)}
+            {vStale.map((c) => renderCard(c))}
           </Lane>
           )}
           {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
@@ -836,7 +853,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             emptyNode={composerAt === "cards" ? renderComposer() : <button type="button" className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"><span className="tdb-gg" aria-hidden>＋</span></button>}>
             {composerAt === "cards" && vNt.length > 0 && renderComposer()}
             {overlayCards("nt")}
-            {vNt.map(renderCard)}
+            {vNt.map((c) => renderCard(c))}
           </Lane>
           )}
         </div>
@@ -1433,7 +1450,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
   // ── full-detail lane card (the contract): band tag (+ ✓ TODAY chip) over title + manuscript. ──
-  function renderCard(c: BoardCard) {
+  function renderCard(c: BoardCard, gin = false) {
     const committed = onList(c);
     const ov = overlays[c.key];
     const isOffer = c.taskType === "offer_received";
@@ -1450,7 +1467,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     // never changes size; the SURFACE (absolute inside it) carries the only border/background/
     // radius/shadow and grows downward over whatever lies beneath — one continuous outline.
     return (
-      <div key={c.key} className="tdb-cell">
+      <div key={c.key} className={`tdb-cell${gin ? " gin" : ""}`}>
         <div className={`tdb-tile ${c.stream}${hov ? " hov" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`}
           onClick={() => openFlowCards([c])}
           onMouseEnter={() => armVerbs(c.key)} onMouseLeave={disarmVerbs}
@@ -1475,6 +1492,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── the BATCH card (the contract): flat, hairline, count headline + roundels; click anywhere
   // opens the Batch-fix sheet; the hover stack = Action now · the clock Snooze menu (Today's
   // list omitted: groups are not committable — the existing Today primitive is per-card). ──
+  // ── grouping P1 — THE GROUP BAR (todo-grouping.html §1): expanding replaces the batch
+  // card with a slim full-span bar that OWNS the Collapse control; the members flow beneath
+  // as standard unit cards rendered from the batch's OWN member derivation (g.members[].card
+  // — never a second query path). The first GROUP_PAGE render; a dashed cell pages in the
+  // rest. The fragment sits at the batch's map position, so following cards flow after. ──
+  function renderGroupExpanded(g: HkGroup) {
+    const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
+    const members = g.members;
+    const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);
+    const remaining = members.length - paged.length;
+    return (
+      <React.Fragment key={g.rule}>
+        <div className="tdb-gbar">
+          <span className="tdb-gbart">{g.members.length}{copy.rest(g.members.length)}</span>
+          <span className="tdb-gbarn">SHOWING ALL {g.members.length}</span>
+          <button type="button" className="tdb-btnh em tdb-gcol" onClick={() => toggleGroup(g.rule)}>Collapse ▴</button>
+        </div>
+        {paged.map((m) => renderCard(m.card, true))}
+        {remaining > 0 && (
+          <button type="button" className="tdb-gpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>
+        )}
+      </React.Fragment>
+    );
+  }
   function renderGroupCard(g: HkGroup) {
     const key = `group-${g.rule}`;
     const ov = overlays[key];
@@ -1485,12 +1526,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       );
     }
+    if (openGroups[g.rule]) return renderGroupExpanded(g);
     const faces = g.members.slice(0, 4);
     const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
     const prog = hkGroupProgress(agents.length, g.members.length);
     const hov = verbKey === key;
     return (
-      <div key={g.rule} className="tdb-cell">
+      <div key={g.rule} className={`tdb-cell b${recentG === g.rule ? " gin" : ""}`}>
         <div className={`tdb-gcard${hov ? " hov" : ""}`}
           onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
           onMouseEnter={() => armVerbs(key)} onMouseLeave={disarmVerbs}
@@ -1508,6 +1550,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
               {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
             </div>
+            {/* grouping P1 — the one rest affordance (below the roundels, above the hover
+                verb area; it replaces neither the hover expansion nor Action now) */}
+            <button type="button" className="tdb-gxp" onClick={(e) => { e.stopPropagation(); toggleGroup(g.rule); }}>Expand {g.members.length} ▾</button>
           </div>
           <div className="tdb-vwrap" aria-hidden={!hov}>
             <div className="tdb-vinner">

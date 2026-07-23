@@ -138,15 +138,51 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
   });
 });
 
-describe("v4 P4 — the batch card levels with units at rest; detail rides the hover expansion", () => {
-  it("ONE resting cell height; the resting batch body = headline + roundels only", () => {
-    expect(css).not.toContain("--tdb-cardh-b");
-    expect(page).not.toContain('className="tdb-cell batch"');
+describe("v4 P4 → grouping P1 — the batch card at rest (the Expand affordance re-heights the cell)", () => {
+  it("the batch cell carries its own height token (the affordance needs the room); the body = headline + roundels + Expand", () => {
+    expect(css).toContain("--tdb-cardh-g: 150px");
+    expect(css).toContain(".tdb-cell.b { height: var(--tdb-cardh-g); }");
+    expect(page).toContain("className={`tdb-cell b${recentG === g.rule ? \" gin\" : \"\"}`}".replace(/\\/g, ""));
+    expect(css).not.toContain("--tdb-cardh-b"); // the v4 name stays dead
     const body = page.slice(page.indexOf("the RESTING batch body"), page.indexOf('className="tdb-vwrap" aria-hidden={!hov}>', page.indexOf("the RESTING batch body")));
     expect(body).toContain("tdb-gtt");
     expect(body).toContain("tdb-avs");
+    expect(body).toContain("tdb-gxp"); // grouping P1 — the one rest affordance
     expect(body).not.toContain("tdb-gsub");
     expect(body).not.toContain("tdb-gprog");
+    // it toggles only — it replaces neither the hover expansion nor Action now
+    expect(page).toContain('className="tdb-gxp" onClick={(e) => { e.stopPropagation(); toggleGroup(g.rule); }}>Expand {g.members.length} ▾</button>');
+  });
+  it("grouping P1 — THE GROUP BAR: full-span family bar owning Collapse; members = the batch's OWN derivation", () => {
+    const b = rule(".tdb-gbar");
+    expect(b).toContain("grid-column: 1 / -1");
+    expect(b).toContain("background: linear-gradient(180deg, var(--lat-1), var(--lat-2))");
+    expect(b).toContain("border: 1px solid var(--lat-bd)");
+    expect(rule(".tdb-gbart")).toContain("font-family: var(--f12-serif)");
+    expect(rule(".tdb-gbarn")).toContain("color: var(--lat-ink)");
+    expect(page).toContain(">SHOWING ALL {g.members.length}</span>");
+    expect(page).toContain('className="tdb-btnh em tdb-gcol" onClick={() => toggleGroup(g.rule)}>Collapse ▴</button>');
+    expect(rule(".tdb-gcol")).toContain("margin-left: auto");
+    // members render from g.members via the ONE card contract — never a second query path
+    const gx = page.slice(page.indexOf("function renderGroupExpanded"), page.indexOf("function renderGroupCard"));
+    expect(gx).toContain("const members = g.members;");
+    expect(gx).toContain("{paged.map((m) => renderCard(m.card, true))}");
+    expect(gx).not.toContain("queries.");
+    expect(gx).not.toContain("agents.");
+    // the fragment sits at the batch's map position (ordering) and the open branch returns it
+    expect(gx).toContain("<React.Fragment key={g.rule}>");
+    expect(page).toContain("if (openGroups[g.rule]) return renderGroupExpanded(g);");
+  });
+  it("grouping P1 — pagination + the animation branches: 5 render, the dashed cell pages in the rest; 200ms in; reduced-motion instant", () => {
+    expect(page).toContain("const GROUP_PAGE = 5;");
+    expect(page).toContain("const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);");
+    expect(page).toContain('className="tdb-gpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>');
+    expect(rule(".tdb-gpage")).toContain("border: 1.5px dashed var(--lat-bd)");
+    expect(rule(".tdb-gpage")).toContain("height: var(--tdb-cardh)");
+    expect(css).toContain("@keyframes tdbGroupIn { from { opacity: 0; transform: translateY(4px); } }");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin { animation: none; } }");
+    // collapse restores the batch card in place, its return animated via the scoped recentG
+    expect(page).toContain('window.setTimeout(() => setRecentG((r) => (r === rule ? null : r)), 260);');
   });
   it("the description + progress reveal INSIDE the expansion, above the stack; Action now stays primary", () => {
     const start = page.indexOf('className="tdb-gdetail"');

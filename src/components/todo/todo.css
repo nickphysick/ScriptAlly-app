@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -402,6 +402,7 @@ button.tdb-ldot { cursor: pointer; }
    above the sticky section headings (z 10) so the expansion covers the next section. The
    ancestor chain (grid → lane → sheetbody → mainc) is audited clip-free and context-free. */
 .tdb-cell { position: relative; height: var(--tdb-cardh); z-index: 1; } /* a grid item — the column tracks size it */
+.tdb-cell.b { height: var(--tdb-cardh-g); } /* grouping P1: the batch cell re-heights for the rest affordance */
 .tdb-cell:hover, .tdb-cell:focus-within { z-index: 30; }
 .tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; min-height: 100%; }
 .tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
@@ -423,7 +424,18 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tile.hov .tdb-vwrap, .tdb-gcard.hov .tdb-vwrap { grid-template-rows: 1fr; }
 .tdb-vinner { overflow: hidden; min-height: 0; visibility: hidden; transition: visibility 0s linear 180ms; }
 .tdb-tile.hov .tdb-vinner, .tdb-gcard.hov .tdb-vinner { visibility: visible; transition-delay: 0s; }
-.tdb-gdetail { padding: 0 12px 6px; } /* v4 P4: the batch detail revealed above the verbs */
+.tdb-gdetail { padding: 0 12px 6px; }
+/* ── grouping P1 (todo-grouping.html §1): the rest affordance · the full-span GROUP BAR
+   (family band colours; it owns Collapse) · the dashed page-in cell · the in-animation. ── */
+.tdb-gxp { margin-top: 11px; width: 100%; border: none; border-top: 1px solid var(--hairline); background: none; padding: 9px 0 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10.5px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.tdb-gbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; background: linear-gradient(180deg, var(--lat-1), var(--lat-2)); border: 1px solid var(--lat-bd); border-radius: 10px; padding: 8px 14px; animation: tdbGroupIn 200ms ease; }
+.tdb-gbart { font-family: var(--f12-serif); font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.tdb-gbarn { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--lat-ink); }
+.tdb-gcol { margin-left: auto; height: 28px; padding: 0 13px; font-size: 10px; }
+.tdb-gpage { height: var(--tdb-cardh); border: 1.5px dashed var(--lat-bd); border-radius: 12px; background: none; display: flex; align-items: center; justify-content: center; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
+.tdb-cell.gin { animation: tdbGroupIn 200ms ease; }
+@keyframes tdbGroupIn { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin { animation: none; } } /* v4 P4: the batch detail revealed above the verbs */
 /* toolbelt P2 (todo-toolbelt.html §2 .vstack): the expansion stacks the ledger's three
    phrases full-width above a hairline; the reveal mechanics (vwrap/vinner) untouched. */
 .tdb-vstack { display: flex; flex-direction: column; gap: 6px; margin: 9px 12px 12px; border-top: 1px solid var(--hairline); padding-top: 11px; }
