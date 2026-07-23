@@ -858,8 +858,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <h1 className="tdb-ask">What’s on your desk?</h1>
         </div>
         <div className="tdb-srchrow">
+          {/* doc pass P1 — 380px; the ⌘K advert is gone (the shortcut itself still focuses
+              here); the glass grows to a 19px stroke icon in a 34px oat roundel at the right */}
           <span className="tdb-bigsearch">
-            <span aria-hidden>⌕</span>
             <input
               ref={searchRef}
               type="text"
@@ -869,7 +870,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
             />
-            <kbd aria-hidden>⌘K</kbd>
+            <span className="tdb-mag" aria-hidden>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
+            </span>
           </span>
           {compact && (
             <button type="button" className="tdb-fpillbtn" aria-haspopup="dialog" aria-expanded={filterDrawerOpen} onClick={() => setFilterDrawerOpen((v) => !v)}>

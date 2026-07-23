@@ -333,10 +333,28 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(sr).toContain("justify-content: center");
     expect(sr).toContain("margin: 22px 0 6px"); // polish spacing
     const bs = rule(".tdb-bigsearch");
-    expect(bs).toContain("width: 540px");
+    expect(bs).toContain("width: 380px"); // doc pass P1: 540 → 380
     expect(bs).toContain("height: 46px");
     expect(page).toContain('placeholder="Search"'); // polish: exactly "Search"
     expect(page).toContain("matchesSearch(c, search, sctx)");
+  });
+  it("doc pass P1 — the ⌘K ADVERT is gone (the shortcut works on); the 19px glass rides the right-hand oat roundel", () => {
+    expect(page).not.toContain("<kbd aria-hidden>⌘K</kbd>");
+    expect(css).not.toContain(".tdb-bigsearch kbd");
+    // the icon: 19px stroke glass inside the 34px oat roundel, AFTER the input (right end)
+    expect(page).toContain('<span className="tdb-mag" aria-hidden>');
+    expect(page).toContain('<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"');
+    const input = page.indexOf("ref={searchRef}");
+    expect(page.indexOf('className="tdb-mag"')).toBeGreaterThan(input);
+    const mag = rule(".tdb-mag");
+    expect(mag).toContain("width: 34px");
+    expect(mag).toContain("border-radius: 50%");
+    expect(mag).toContain("background: var(--oat)");
+    expect(mag).toContain("margin-left: auto");
+    // ⌘K still focuses the pill — the handler survives the badge
+    expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)');
+    // the reactive rail composes with the same search state, untouched
+    expect(page).toContain("const searchActive = search.trim().length > 0;");
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes); Esc chain: search then filters", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");

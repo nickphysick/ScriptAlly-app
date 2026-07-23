@@ -40,10 +40,11 @@
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
 .tdb-hero { padding: 40px 0 0; text-align: center; }
 .tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: 22px 0 6px; position: relative; z-index: 6; }
-.tdb-bigsearch { width: 540px; height: 46px; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 20px; color: var(--muted); font-size: 13px; }
+/* doc pass P1 (todo-doc-pass-a.html §1): 380px, right-hand 19px glass in the oat roundel */
+.tdb-bigsearch { width: 380px; height: 46px; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 8px 0 20px; color: var(--muted); font-size: 13px; }
+.tdb-mag { margin-left: auto; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--oat); color: var(--ink); flex: 0 0 auto; }
 .tdb-bigsearch input { flex: 1; min-width: 0; border: none; background: none; font-size: 13px; color: var(--ink); outline: none; }
 .tdb-bigsearch input::placeholder { color: var(--muted); }
-.tdb-bigsearch kbd { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; color: var(--faint); }
 .tdb-bigsearch:focus-within { border-color: var(--ink-2); }
 .tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
 /* (the strip census retired — the counts live on the filter rail's pills) */
