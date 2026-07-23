@@ -180,7 +180,7 @@ describe("v4 P4 → grouping P1 — the batch card at rest (the Expand affordanc
     expect(rule(".tdb-gpage")).toContain("border: 1.5px dashed var(--lat-bd)");
     expect(rule(".tdb-gpage")).toContain("height: var(--tdb-cardh)");
     expect(css).toContain("@keyframes tdbGroupIn { from { opacity: 0; transform: translateY(4px); } }");
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin { animation: none; } }");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin, .tdb-lsub, .tdb-lpage { animation: none; } .tdb-lchev { transition: none; } }"); // P2 joined the branch
     // collapse restores the batch card in place, its return animated via the scoped recentG
     expect(page).toContain('window.setTimeout(() => setRecentG((r) => (r === rule ? null : r)), 260);');
   });

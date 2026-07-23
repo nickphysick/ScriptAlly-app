@@ -727,6 +727,40 @@ describe("doc pass P6 — sweep", () => {
   });
 });
 
+describe("grouping P2 — the ledger nest", () => {
+  it("the chevron rotates 90° open; the row's non-action click TOGGLES (Action now keeps its opener)", () => {
+    const c = rule(".tdb-lchev");
+    expect(c).toContain("transition: transform 0.15s");
+    expect(css).toContain(".tdb-lrow.open .tdb-lchev { transform: rotate(90deg); }");
+    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
+    expect(br).toContain("onClick={() => toggleGroup(g.rule)}");
+    expect(br).toContain("aria-expanded={expanded}");
+    expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });'); // Action now's opener survives
+    expect(br).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
+  });
+  it("member rows: inset 40, family-tinted 3px spine, smaller title, the STANDARD trio; pagination matches the cards", () => {
+    const sub2 = rule(".tdb-lsub");
+    expect(sub2).toContain("margin: 0 0 7px 40px");
+    expect(sub2).toContain("border-left: 3px solid var(--lat-bd)");
+    expect(css).toContain(".tdb-lsub .tdb-lbt.sm { font-size: 12.5px; }");
+    const mr = page.slice(page.indexOf("function runMemberRow"), page.indexOf("function runBatchRow"));
+    expect(mr).toContain("onClick={() => openFlowCards([c])}");
+    expect(mr).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(mr).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
+    expect(mr).toContain("laterMenu(c)");
+    expect(page).toContain("{paged.map((m) => runMemberRow(m.card))}");
+    expect(page).toContain('className="tdb-lpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>');
+    expect(rule(".tdb-lpage")).toContain("border: 1.5px dashed var(--lat-bd)");
+  });
+  it("the parent row persists while open (progress + meta intact) as the collapse control", () => {
+    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
+    expect(br).toContain("tdb-minibar");
+    expect(br).toContain("tdb-mmeta");
+    expect(br).toContain("{expanded && (");
+    expect(br).toContain("<React.Fragment key={key}>");
+  });
+});
+
 describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head checkbox)", () => {
   it("the view toggle is LIVE both ways and persisted (sa.todoView)", () => {
     expect(page).toContain('view === "ledger" ? renderLedger() : (');
@@ -792,7 +826,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     const ld = page.slice(page.indexOf("function ledgerDot"), page.indexOf("function runRow"));
     expect(ld).toContain('if (c.taskType === "offer_received")'); // the plain-dot branch
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain('<span className="tdb-ldot" aria-hidden><span className="tdb-lddot" /></span>');
+    expect(br).toContain('<span className="tdb-lchev" aria-hidden>▶</span>'); // grouping P2: the chevron took the batch head (units keep ledgerDot)
   });
   it("toolbelt P2 — the divergence is RETIRED: cards + ledger read ONE shared VERB_LABELS constant", () => {
     const cv = page.slice(page.indexOf("function cardVerbs"), page.indexOf("function renderCard"));

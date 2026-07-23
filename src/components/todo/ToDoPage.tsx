@@ -1250,16 +1250,44 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
+  // ── grouping P2 — the nested MEMBER ROW (todo-grouping.html §2): inset beneath the
+  // parent with the family-tinted spine, smaller title, the STANDARD trio of row actions;
+  // no head checkbox (the ref draws none — a dq member completes through its journey). ──
+  function runMemberRow(c: BoardCard) {
+    const committed = onList(c);
+    return (
+      <div key={c.key} className="tdb-lsub" role="button" tabIndex={0}
+        onClick={() => openFlowCards([c])}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
+        <div className="tdb-lbody">
+          <h3 className="tdb-lbt sm">{c.title}</h3>
+          {c.subtitle && <div className="tdb-lbms">{c.subtitle}</div>}
+        </div>
+        <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
+          <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
+          <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}</button>
+          {laterMenu(c)}
+        </div>
+      </div>
+    );
+  }
   function runBatchRow(g: HkGroup) {
     const key = `group-${g.rule}`;
     const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
     const prog = hkGroupProgress(agents.length, g.members.length);
     const open = () => setFlow({ items: [{ kind: "group", group: g }] });
+    // grouping P2 — the row's non-action click TOGGLES the nest (Action now keeps open —
+    // a scoped supersede of the doc-pass "same as row-click" clause for BATCH rows only)
+    const expanded = !!openGroups[g.rule];
+    const members = g.members;
+    const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);
+    const remaining = members.length - paged.length;
     return (
-      <div key={key} className="tdb-lrow" role="button" tabIndex={0}
-        onClick={open}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
-        <span className="tdb-ldot" aria-hidden><span className="tdb-lddot" /></span>
+      <React.Fragment key={key}>
+      <div className={`tdb-lrow${expanded ? " open" : ""}`} role="button" tabIndex={0} aria-expanded={expanded}
+        onClick={() => toggleGroup(g.rule)}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); toggleGroup(g.rule); } }}>
+        <span className="tdb-lchev" aria-hidden>▶</span>
         <div className="tdb-lbody">
           <div className="tdb-tagline"><span className="tdb-tag due">{g.meta.label.toUpperCase()}</span></div>
           <h3 className="tdb-lbt batch"><b>{g.members.length}</b>{copy.rest(g.members.length)}</h3>
@@ -1281,6 +1309,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </span>
         </div>
       </div>
+      {expanded && (
+        <>
+          {paged.map((m) => runMemberRow(m.card))}
+          {remaining > 0 && (
+            <button type="button" className="tdb-lpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>
+          )}
+        </>
+      )}
+      </React.Fragment>
     );
   }
   function ledgerHeading(cls: "p" | "l" | "n", lane: "do" | "hk" | "nt", id: string, label: string, count: number, onSession?: () => void, onAdd?: () => void) {

@@ -322,6 +322,14 @@
 .tdb-lrow:hover, .tdb-lrow:focus-within { z-index: 30; } /* the ledger's expanding surface (the open menu) clears the sticky headings too */
 .tdb-laddrow { display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; padding: 13px 16px; margin-bottom: 2px; background: none; border: 1.5px dashed #d9c87a; border-radius: 11px; font-size: 11px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
 .tdb-laddrow:hover { background: rgba(255, 255, 255, 0.5); }
+/* ── grouping P2 (todo-grouping.html §2): the rotating chevron on the batch row; member rows
+   inset with the family-tinted spine at a smaller height; the dashed page-in row. ── */
+.tdb-lchev { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); display: flex; align-items: center; justify-content: center; font-size: 9px; color: #6b5a4e; flex: 0 0 auto; transition: transform 0.15s; }
+.tdb-lrow.open .tdb-lchev { transform: rotate(90deg); }
+.tdb-lsub { position: relative; display: flex; align-items: center; gap: 10px; margin: 0 0 7px 40px; background: var(--white, #fff); border: 1px solid var(--hairline); border-left: 3px solid var(--lat-bd); border-radius: 9px; padding: 8px 12px; cursor: pointer; animation: tdbGroupIn 200ms ease; }
+.tdb-lsub:hover, .tdb-lsub:focus-within { z-index: 30; }
+.tdb-lsub .tdb-lbt.sm { font-size: 12.5px; }
+.tdb-lpage { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); box-sizing: border-box; margin: 0 0 7px 40px; padding: 10px; background: none; border: 1.5px dashed var(--lat-bd); border-radius: 9px; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
 /* hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): white, notes-family border,
    Caveat growing to content; the affordance transforms in place. */
 .tdb-composer { background: var(--white, #fff); border: 1px solid #ece2c6; border-radius: 11px; padding: 12px 14px; box-shadow: 0 4px 14px rgba(120, 100, 40, 0.1); margin-bottom: 8px; }
@@ -435,7 +443,7 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-gpage { height: var(--tdb-cardh); border: 1.5px dashed var(--lat-bd); border-radius: 12px; background: none; display: flex; align-items: center; justify-content: center; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
 .tdb-cell.gin { animation: tdbGroupIn 200ms ease; }
 @keyframes tdbGroupIn { from { opacity: 0; transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin { animation: none; } } /* v4 P4: the batch detail revealed above the verbs */
+@media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin, .tdb-lsub, .tdb-lpage { animation: none; } .tdb-lchev { transition: none; } } /* v4 P4: the batch detail revealed above the verbs */
 /* toolbelt P2 (todo-toolbelt.html §2 .vstack): the expansion stacks the ledger's three
    phrases full-width above a hairline; the reveal mechanics (vwrap/vinner) untouched. */
 .tdb-vstack { display: flex; flex-direction: column; gap: 6px; margin: 9px 12px 12px; border-top: 1px solid var(--hairline); padding-top: 11px; }
