@@ -156,6 +156,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // folds; <1420 it becomes the 56px icon rail instead, P5.)
   const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
   const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
+  // doc pass P4 — per-lane ledger fold, persisted under the sa. prefs convention
+  const [ledgerFold, setLedgerFold] = useState<{ do: boolean; hk: boolean; nt: boolean }>(() => {
+    try { return { do: false, hk: false, nt: false, ...JSON.parse(localStorage.getItem("sa.todoLedgerFold") || "{}") }; } catch { return { do: false, hk: false, nt: false }; }
+  });
+  const toggleFold = (lane: "do" | "hk" | "nt") => setLedgerFold((f) => {
+    const next = { ...f, [lane]: !f[lane] };
+    try { localStorage.setItem("sa.todoLedgerFold", JSON.stringify(next)); } catch { /* private mode */ }
+    return next;
+  });
   // Ledger view state (Phase 3) — session-only: which batch rows are expanded (default collapsed)
   // + which sections dropped their SHOW ALL cap. Collapse restores the scroll position captured at
   // expand (the wrap is the scroller).
@@ -1049,67 +1058,77 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── THE LEDGER (workbench P3; ref todo-ledger-v1.html) — a re-projection of the SAME board
-  // sets the cards render: shared 9-col grid, tinted section heads, typed batch parents with
-  // full-cohort expansion, StatusDot verbatim in the STATUS column. Rows open the same journeys
-  // (openFlowCards / group flow); the td circle is the same toggleToday. ──
-  // ── Final Shape P5: THE RUN SHEET (☰) — the same lane headings over hairline-divided rows.
-  // UNNUMBERED (the pack overrides the ref's numerals): the 26px family-tinted roundel carries
-  // the family dot. Verbs fade IN PLACE at the row's right on hover/focus — same three slots,
-  // same handlers as the cards; row click opens the journey / Batch fix. The old 9-col ledger,
-  // its selection machinery and truncation are extinct. ──
+  // ── doc pass P4: LEDGER v2 (todo-doc-pass-a.html §3 + todo-doc-pass-b.html §2) — each
+  // lane's rows live in a family-washed section (whisper pink / whisper latte / a DERIVED
+  // notes whisper — the pack specified two; the wash is territory, not decoration); rows are
+  // white cards inside it. DONE lives at the row's HEAD: the 24px family roundel becomes a
+  // tick on row hover/focus and completes immediately (offers + batches keep the plain dot —
+  // an offer needs its moment, a batch has no single completion). The acting controls sit at
+  // the tail, 32px, vertically centred: press "Action now" (OPENS the acting surface, same as
+  // row-click — it never marks complete) · ghost "＋ Today's list" · ghost "☾ Snooze or
+  // dismiss ▾" (the SAME Later menu, renamed trigger). The cards view keeps its short verbs —
+  // a deliberate, baked divergence. Headings stick within the page scroll on a wash-coloured
+  // backing; clicking the heading (not its play button) folds the section, persisted per-lane
+  // (sa.todoLedgerFold). ──
+  function ledgerDot(c: BoardCard) {
+    if (c.taskType === "offer_received") {
+      return <span className="tdb-ldot" aria-hidden><span className="tdb-lddot" /></span>;
+    }
+    return (
+      <button type="button" className="tdb-ldot tick" aria-label={`Mark done — ${c.title}`}
+        onClick={(e) => { e.stopPropagation(); quickDone(c); }}>
+        <span className="tdb-lddot" aria-hidden />
+        <span className="tdb-ldtick" aria-hidden>✓</span>
+      </button>
+    );
+  }
   function runRow(c: BoardCard) {
     const committed = onList(c);
     const isOffer = c.taskType === "offer_received";
-    const fam = c.stream === "do" ? "pk" : c.stream === "hk" ? "lt" : "yl";
     const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
     return (
-      <div key={c.key} className={`tdb-step ${fam}`} role="button" tabIndex={0}
+      <div key={c.key} className="tdb-lrow" role="button" tabIndex={0}
         onClick={() => openFlowCards([c])}
         onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
-        <span className="tdb-stepn" aria-hidden><span className="tdb-dotc" /></span>
-        <div className="tdb-stepbody">
+        {ledgerDot(c)}
+        <div className="tdb-lbody">
           <div className="tdb-tagline">
             <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
             {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
             {committed && <span className="tdb-chipon">✓ TODAY</span>}
           </div>
-          <h3 className="tdb-steptt">{c.title}</h3>
-          {c.subtitle && <div className="tdb-stepms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+          <h3 className="tdb-lbt">{c.title}</h3>
+          {c.subtitle && <div className="tdb-lbms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
         </div>
-        <div className="tdb-stepacts" onClick={(e) => e.stopPropagation()}>
-          {!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}
-          <button type="button" className="tdb-verb" onClick={() => toggleToday(c)}>{committed ? "− TODAY" : "＋ TODAY"}</button>
-          {laterMenu(c)}
+        <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
+          <button type="button" className="tdb-cta xs" onClick={() => openFlowCards([c])}>Action now</button>
+          <button type="button" className="tdb-ctaghost xs" onClick={() => toggleToday(c)}>{committed ? "− Today’s list" : "＋ Today’s list"}</button>
+          {laterMenu(c, true)}
         </div>
       </div>
     );
   }
   function runBatchRow(g: HkGroup) {
     const key = `group-${g.rule}`;
-    const faces = g.members.slice(0, 4);
     const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
     const prog = hkGroupProgress(agents.length, g.members.length);
+    const open = () => setFlow({ items: [{ kind: "group", group: g }] });
     return (
-      <div key={key} className="tdb-step lt" role="button" tabIndex={0}
-        onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); setFlow({ items: [{ kind: "group", group: g }] }); } }}>
-        <span className="tdb-stepn" aria-hidden><span className="tdb-dotc" /></span>
-        <div className="tdb-stepbody">
+      <div key={key} className="tdb-lrow" role="button" tabIndex={0}
+        onClick={open}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
+        <span className="tdb-ldot" aria-hidden><span className="tdb-lddot" /></span>
+        <div className="tdb-lbody">
           <div className="tdb-tagline"><span className="tdb-tag due">{g.meta.label.toUpperCase()}</span></div>
-          <h3 className="tdb-steptt batch"><b>{g.members.length}</b>{copy.rest(g.members.length)}</h3>
-          <div className="tdb-stepsub">{copy.sub}</div>
+          <h3 className="tdb-lbt batch"><b>{g.members.length}</b>{copy.rest(g.members.length)}</h3>
+          <div className="tdb-lbsub">{copy.sub}</div>
           <div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>
           <div className="tdb-mmeta">{prog.caption.toUpperCase()} · {prog.pct}%</div>
-          <div className="tdb-avs">
-            {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
-            {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
-          </div>
         </div>
-        <div className="tdb-stepacts" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="tdb-verb pri" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>⚡ FIX {g.members.length} →</button>
+        <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
+          <button type="button" className="tdb-cta xs" onClick={open}>Action now</button>
           <span className="tdb-latwrap">
-            <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ LATER ▾</button>
+            <button type="button" className="tdb-ctaghost xs" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ Snooze or dismiss ▾</button>
             {laterKey === key && (
               <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                 <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
@@ -1122,17 +1141,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
-  function runHeading(cls: "p" | "lat" | "n", id: string, label: string, count: number, onSession?: () => void, onAdd?: () => void) {
+  function ledgerHeading(cls: "p" | "l" | "n", lane: "do" | "hk" | "nt", id: string, label: string, count: number, onSession?: () => void, onAdd?: () => void) {
+    const folded = ledgerFold[lane];
     return (
-      <div className={`tdb-lh2 ${cls}`} id={id}>
+      <div className={`tdb-lsech ${cls}`} id={id} role="button" tabIndex={0} aria-expanded={!folded}
+        onClick={() => toggleFold(lane)}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); toggleFold(lane); } }}>
         {onSession && (
-          <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onSession}>
+          <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={(e) => { e.stopPropagation(); onSession(); }}>
             <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
           </button>
         )}
-        {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
-        <span className="tdb-lgt">{label}</span>
-        <span className="tdb-ln">{count}</span>
+        {onAdd && <button type="button" className="tdb-cadd" onClick={(e) => { e.stopPropagation(); onAdd(); }} aria-label="Add a note">＋</button>}
+        <span className="tdb-lst">{label}</span>
+        <span className="tdb-lscc">{count}</span>
+        <span className="tdb-lsfold" aria-hidden>{folded ? "▸" : "▾"}</span>
       </div>
     );
   }
@@ -1140,22 +1163,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <div className="tdb-runsheet">
         {doSorted.length > 0 && (
-          <>
-            {runHeading("p", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent, () => setFlow({ items: doSorted.map((card) => ({ kind: "card", card })), mode: "sweep" }))}
-            {doSorted.map(runRow)}
-          </>
+          <section className={`tdb-lsec p${ledgerFold.do ? " folded" : ""}`}>
+            {ledgerHeading("p", "do", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent, () => setFlow({ items: doSorted.map((card) => ({ kind: "card", card })), mode: "sweep" }))}
+            {!ledgerFold.do && doSorted.map(runRow)}
+          </section>
         )}
         {(vGroups.length > 0 || vStale.length > 0) && (
-          <>
-            {runHeading("lat", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping, () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }))}
-            {hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}
-          </>
+          <section className={`tdb-lsec l${ledgerFold.hk ? " folded" : ""}`}>
+            {ledgerHeading("l", "hk", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping, () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }))}
+            {!ledgerFold.hk && hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}
+          </section>
         )}
         {vNt.length > 0 && (
-          <>
-            {runHeading("n", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes, undefined, addTask)}
-            {vNt.map(runRow)}
-          </>
+          <section className={`tdb-lsec n${ledgerFold.nt ? " folded" : ""}`}>
+            {ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes, undefined, addTask)}
+            {!ledgerFold.nt && vNt.map(runRow)}
+          </section>
         )}
       </div>
     );
@@ -1238,11 +1261,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
     else if (e.key === "Escape") { e.stopPropagation(); setLaterKey(null); }
   }
-  function laterMenu(c: BoardCard) {
+  function laterMenu(c: BoardCard, ledger = false) {
     const hideKey = laterHideKey(c.taskType);
     return (
       <span className="tdb-latwrap">
-        <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>☾ LATER ▾</button>
+        <button type="button" className={ledger ? "tdb-ctaghost xs" : "tdb-verb"} aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>{ledger ? "☾ Snooze or dismiss ▾" : "☾ LATER ▾"}</button>
         {laterKey === c.key && (
           <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
             <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>

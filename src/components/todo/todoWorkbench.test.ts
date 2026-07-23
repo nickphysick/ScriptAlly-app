@@ -307,7 +307,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
   it("GREP SWEEP — strip/deck/post-it/reel/ledger-table/selection remnants all extinct", () => {
     const stale = [
       "post-it", "postit", "tdb-strip", "tdb-deck", "deckPill", "tdb-reel", "reelFit", "REEL_PAGE",
-      "tdb-pg", "tdb-lgrid", "tdb-lrow", "tdb-ltd", "tdb-bulk", "todoSelection", "tdb-ric",
+      "tdb-pg", "tdb-lgrid", "tdb-ltd", "tdb-bulk", "todoSelection", "tdb-ric", // (tdb-lrow returned as doc-pass P4's row card — a different object, same name)
       "tdb-sq", "tdb-lrail", "renderStrip", "renderDeck", "soloPostit", "scroll-snap",
     ];
     for (const t of stale) {
@@ -322,7 +322,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
     expect((page.match(/\{renderFilterPanel\(\)\}/g) ?? []).length).toBe(2);
   });
   it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
-    expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(2); // the Lane + runHeading builders
+    expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(1); // the Lane builder (the ledger grew its own washed heading, doc pass P4)
   });
 });
 
@@ -459,47 +459,87 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
   });
 });
 
-describe("Final Shape P5 — THE RUN SHEET (the ☰ view; the 9-col ledger is extinct)", () => {
+describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head checkbox)", () => {
   it("the view toggle is LIVE both ways and persisted (sa.todoView)", () => {
     expect(page).toContain('view === "ledger" ? renderLedger() : (');
     expect(page).toContain('localStorage.setItem("sa.todoView"');
   });
-  it("rows are UNNUMBERED: the 26px family-tinted roundel carries the FAMILY DOT (pack overrides the ref)", () => {
-    expect(page).toContain('<span className="tdb-stepn" aria-hidden><span className="tdb-dotc" /></span>');
-    expect(rule(".tdb-stepn")).toContain("width: 26px; height: 26px; border-radius: 50%");
-    expect(css).toContain(".tdb-step.pk .tdb-stepn { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn));");
-    expect(css).toContain(".tdb-step.lt .tdb-stepn { background: linear-gradient(180deg, var(--lat-1), var(--lat-2));");
-    expect(page).not.toContain("stepn\">{"); // never a number inside
+  it("washed sections: whisper pink/latte per ref A + the DERIVED notes whisper; rows are white cards inside", () => {
+    expect(rule(".tdb-lsec.p")).toContain("background: linear-gradient(180deg, #fbf1ed, #faeee9)");
+    expect(rule(".tdb-lsec.p")).toContain("border-color: #f3ddd4");
+    expect(rule(".tdb-lsec.l")).toContain("background: linear-gradient(180deg, #faf6ee, #f8f3e8)");
+    expect(rule(".tdb-lsec.l")).toContain("border-color: #ede4d2");
+    expect(rule(".tdb-lsec.n")).toContain("#fcf9ee"); // derived at the same whisper strength — the pack specified two
+    expect(rule(".tdb-lsec")).toContain("border-radius: 14px");
+    const row = rule(".tdb-lrow");
+    expect(row).toContain("background: var(--white, #fff)");
+    expect(row).toContain("border-radius: 11px");
+    expect(row).toContain("border: 1px solid var(--line)");
+    expect(row).toContain("margin-bottom: 8px");
   });
-  it("row anatomy: tagline (+ ✓ TODAY chip) · Playfair 14 title (batch b 17) · italic ms; batch adds sub/progress/roundels", () => {
-    expect(rule(".tdb-steptt")).toContain("font-size: 14px");
-    expect(rule(".tdb-steptt.batch b")).toContain("font-size: 17px");
-    expect(page).toContain('<h3 className="tdb-steptt batch"><b>{g.members.length}</b>{copy.rest(g.members.length)}</h3>');
-    expect(rule(".tdb-minibar")).toContain("background: #ece5d8");
-    expect(rule(".tdb-minibar i")).toContain("background: var(--ink)");
-    expect(page).toContain('{committed && <span className="tdb-chipon">✓ TODAY</span>}');
+  it("the heading on the wash: play · Playfair 19 · count chip; STICKY with wash-coloured backing", () => {
+    expect(rule(".tdb-lst")).toContain("font-size: 19px");
+    expect(rule(".tdb-lsech")).toContain("position: sticky; top: 0");
+    expect(css).toContain(".tdb-lsec.p .tdb-lsech { background: #fbf1ed; }");
+    expect(css).toContain(".tdb-lsec.l .tdb-lsech { background: #faf6ee; }");
+    expect(css).toContain(".tdb-lsec.n .tdb-lsech { background: #fcf9ee; }");
+    expect(page).toContain('ledgerHeading("p", "do", "tdb-lane-do", "Urgent"');
+    expect(page).toContain('ledgerHeading("l", "hk", "tdb-lane-hk", "Housekeeping"');
+    expect(page).toContain('ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self"');
   });
-  it("verbs fade IN PLACE on hover/focus — same slots, same handlers as the cards; nothing grows", () => {
-    expect(rule(".tdb-stepacts")).toContain("opacity: 0.35");
-    expect(css).toContain(".tdb-step:hover .tdb-stepacts, .tdb-step:focus-within .tdb-stepacts { opacity: 1; }");
+  it("collapse: heading click folds (the play button opts out via stopPropagation); chevron + aria; persisted per-lane", () => {
+    expect(page).toContain("onClick={() => toggleFold(lane)}");
+    expect(page).toContain("aria-expanded={!folded}");
+    expect(page).toContain("onClick={(e) => { e.stopPropagation(); onSession(); }}");
+    expect(page).toContain('{folded ? "▸" : "▾"}');
+    expect(page).toContain('localStorage.setItem("sa.todoLedgerFold", JSON.stringify(next))');
+    expect(page).toContain('localStorage.getItem("sa.todoLedgerFold")');
+    expect(page).toContain("{!ledgerFold.do && doSorted.map(runRow)}");
+    expect(page).toContain("{!ledgerFold.hk && hkTop.map((r) => (r.kind === \"group\" ? runBatchRow(r.g) : runRow(r.c)))}".replace(/\\/g, ""));
+    expect(page).toContain("{!ledgerFold.nt && vNt.map(runRow)}");
+  });
+  it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
+    expect(rule(".tdb-lacts")).toContain("align-self: center");
+    expect(rule(".tdb-cta.xs")).toContain("height: 32px");
+    expect(rule(".tdb-ctaghost.xs")).toContain("height: 32px");
     const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
-    expect(rr).toContain('onClick={() => quickDone(c)}>✓ DONE</button>');
-    expect(rr).toContain("laterMenu(c)");
-    expect(page).toContain(">⚡ FIX {g.members.length} →</button>");
+    expect(rr).toContain('className="tdb-cta xs" onClick={() => openFlowCards([c])}>Action now</button>');
+    expect(rr).not.toContain("quickDone(c)}>Action now");
+    expect(rr).toContain('{committed ? "− Today’s list" : "＋ Today’s list"}');
+    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
+    expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });');
+    expect(br).toContain('className="tdb-cta xs" onClick={open}>Action now</button>');
+    expect(br).not.toContain("Today’s list"); // groups stay uncommittable — the carried resolution
   });
-  it("row click opens the journey / Batch fix — parity with the cards; rows divided by hairlines", () => {
-    const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function renderLedger"));
+  it("the dropdown keeps the Later items under the renamed trigger", () => {
+    expect(page).toContain('{ledger ? "☾ Snooze or dismiss ▾" : "☾ LATER ▾"}');
+    expect((page.match(/>Remind me tomorrow<\/button>/g) ?? []).length).toBe(3); // the card menu + the ledger batch row + the batch CARD
+    expect((page.match(/>Give it a week<\/button>/g) ?? []).length).toBe(3);
+    expect((page.match(/>Don’t show these again<\/button>/g) ?? []).length).toBe(3);
+  });
+  it("quick-complete = the LEADING checkbox: the roundel ticks on row hover/focus and completes; offers + batches exempt", () => {
+    expect(page).toContain('className="tdb-ldot tick" aria-label={`Mark done — ${c.title}`}');
+    expect(page).toContain("onClick={(e) => { e.stopPropagation(); quickDone(c); }}");
+    expect(rule(".tdb-ldot")).toContain("width: 24px");
+    expect(css).toContain(".tdb-lrow:hover .tdb-ldot.tick .tdb-ldtick, .tdb-lrow:focus-within .tdb-ldot.tick .tdb-ldtick { display: inline; }");
+    const ld = page.slice(page.indexOf("function ledgerDot"), page.indexOf("function runRow"));
+    expect(ld).toContain('if (c.taskType === "offer_received")'); // the plain-dot branch
+    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
+    expect(br).toContain('<span className="tdb-ldot" aria-hidden><span className="tdb-lddot" /></span>');
+  });
+  it("the cards view keeps its short verbs — the divergence is deliberate and BAKED; row click parity holds", () => {
+    const cv = page.slice(page.indexOf("function cardVerbs"), page.indexOf("function renderCard"));
+    expect(cv).toContain(">✓ DONE</button>");
+    expect(cv).toContain('{committed ? "− TODAY" : "＋ TODAY"}');
+    expect(cv).toContain("laterMenu(c)");
+    expect(page).toContain(">⚡ FIX {g.members.length} →</button>"); // the batch CARD primary stands
+    const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
     expect(rr).toContain("onClick={() => openFlowCards([c])}");
-    expect(rr).toContain('onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}');
-    expect(rule(".tdb-step")).toContain("border-top: 1px solid var(--hairline)");
   });
-  it("the run sheet shares the sticky lane headings; notes keep ＋; NO truncation, NO 9-col grid", () => {
-    expect(page).toContain('runHeading("p", "tdb-lane-do", "Urgent"');
-    expect(page).toContain('runHeading("lat", "tdb-lane-hk", "Housekeeping"');
-    expect(page).toContain('runHeading("n", "tdb-lane-nt", "Notes to self"');
-    for (const stale of ["tdb-lgrid", "tdb-lcols", "tdb-lrow", "tdb-ltd", "tdb-lagn", "tdb-lstack", "tdb-lmore", "tdb-tbl", "truncateRows", "SHOW ALL {opts.total}", "ledgerCardRow", "ledgerBatchRow", "ledgerSection"]) {
+  it("the step family is extinct; the 9-col ledger stays extinct", () => {
+    for (const stale of ["tdb-step", "runHeading", "tdb-lgrid", "tdb-lcols", "tdb-ltd", "truncateRows"]) {
       expect(page).not.toContain(stale);
-      expect(css).not.toContain(stale.startsWith("tdb") ? stale : "zz-no");
+      expect(css).not.toContain(stale);
     }
   });
 });
@@ -623,9 +663,9 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).not.toContain("tdb-kd");
     expect(css).not.toContain("tdb-kick");
   });
-  it("ONE section grammar in both views — the band-less lh2 heading (v2)", () => {
+  it("the cards view keeps the band-less lh2 heading; the ledger's washed heading is doc-pass P4's deliberate divergence", () => {
     expect(page).toContain("tdb-lh2 ${cls ===");
-    expect(page).toContain('className={`tdb-lh2 ${cls}`}'); // runHeading shares the grammar
+    expect(page).toContain('className={`tdb-lsech ${cls}`}'); // the ledger's own heading (washed, foldable)
     expect((page.match(/tdb-playb/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
   it("the batch card's Never + footer CTA are extinct (the contract); the hide lives in ☾ LATER", () => {
@@ -769,10 +809,14 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
     const walk = readFileSync(join(here, "..", "..", "lib", "todoWalk.ts"), "utf8");
-    for (const src of [page, css, flow, tour, board, walk]) {
+    for (const src of [css, flow, tour, board, walk]) {
       expect(src).not.toContain("oday’s list"); // catches Today's/today's alike
       // (Deck v2 legalised the uppercase form: the lens pill + sage chip are named TODAY'S LIST)
     }
+    // doc pass P4 re-legalised the phrase ON THE PAGE for one control only: the ledger's
+    // ghost "＋/− Today's list" (ref B baked) — exactly the toggle's two forms, nowhere else
+    expect((page.match(/oday’s list/g) ?? []).length).toBe(2);
+    expect(page).toContain('{committed ? "− Today’s list" : "＋ Today’s list"}');
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)
     expect(page).toContain('{committed ? "− TODAY" : "＋ TODAY"}'); // the verb row's Today toggle
@@ -805,7 +849,7 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
   it("a play button leads each lane head in BOTH views, full wording in title+aria, same handlers", () => {
     // cards view: the Lane's onFocusedSession; ledger view: the section's onSession — unchanged
     expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
-    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onSession}'); // runHeading (run sheet)
+    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={(e) => { e.stopPropagation(); onSession(); }}'); // ledgerHeading (the fold click must not fire)
     expect(page).toContain('<path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" />');
     const b = rule(".tdb-playb");
     expect(b).toContain("width: 28px; height: 28px; border-radius: 50%"); // Final Shape: 28
@@ -866,7 +910,7 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
       expect(tour).not.toContain(stale);
     }
     expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
-    expect(page).toMatch(/onClick=\{onSession\}/); // the run sheet's heading shares the wording
+    expect(page).toMatch(/e\.stopPropagation\(\); onSession\(\)/); // the ledger heading shares the wording (play opts out of the fold click)
     expect(page).toContain("Begin focused session"); // the rail owns the walk (v4 P2)
   });
 });
