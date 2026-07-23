@@ -807,9 +807,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {renderHero()}
         {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
-          {/* the settlement P3 — TAB ORDER: search → the bar's controls (left to right) → the
-              filter rail. The sheet therefore leads in the DOM and the rail takes its left
-              seat through `order: -1`, so the reading order and the visual order both hold. */}
+          {/* the settlement (sage) — TAB ORDER: search → the sidebar's pair → its pills → the
+              sheet. The sidebar leads in the DOM again, as it sits on the left. */}
+          {renderRail()}
           {/* ── polish P3: THE CENTRE STACK — three sibling lifted containers, 812 wide,
               16 apart: the review card · the sheet · the Pro colleague. ── */}
           <div className="tdb-centre">
@@ -835,33 +835,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   the rail counts derive from, so it re-derives live under search/filter; lining
                   + tabular figures keep the numerals on the baseline at a steady width. */}
               <span className="tdb-bartext">Showing {shownX} of {shownY} items on your list</span>
-              {/* THE SETTLEMENT P3 — the bar's right cluster, left to right: the pair, a 20px
-                  hairline divider, then the view toggle, which keeps its seat as the bar's
-                  rightmost resident. Below --tdb-bar-collapse the pills go icon-only (their
-                  labels carried by aria-label + title) BEFORE any text wraps; the toggle
-                  never collapses. */}
-              <span className="tdb-barvt">
-                {heroSession.slot?.kind !== "session" && (
-                  <span className={`tdb-barpair${heroSession.clearing ? " insession" : ""}`}>
-                    <button type="button" className="tdb-btnp sm tdb-herobegin" disabled={boardCards.length === 0} aria-label="Begin focused session" title="Begin focused session" onClick={() => setSession({ queue: boardCards })}>
-                      <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
-                      <i>Begin focused session</i>
-                    </button>
-                    {/* hero-pair P2 — unread by WEIGHT, not ornament: unopened = full ink,
-                        opened = muted; the same flags drive it. */}
-                    {reviewWin && (reviewSeen || reviewDismissed) && (
-                      <button type="button" className={`tdb-rvchip sm${reviewSeen ? " seen" : ""}`} aria-label={`Last week in review — week ${reviewWin.weekNumber}`} title={`Last week in review · WK ${reviewWin.weekNumber}`} onClick={openReview}>
-                        <RewindGlyph />
-                        <i>Last week in review</i>
-                      </button>
-                    )}
-                    <span className="tdb-bardiv" aria-hidden />
-                  </span>
-                )}
-                <span className="tdb-vseg" role="group" aria-label="View">
-                  <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
-                  <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
-                </span>
+              {/* THE SETTLEMENT (sage) — the bar holds only its Playfair line and the view
+                  toggle at the far right. The pair's seat is the sidebar's top. */}
+              <span className="tdb-vseg" role="group" aria-label="View">
+                <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
+                <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
               </span>
             </div>
             <div className="tdb-sheetbody">
@@ -947,7 +925,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             />
           )}
           </div>
-          {renderRail()}
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
               masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
@@ -1165,11 +1142,34 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function renderFilterCard() {
     return (
       <>
-        <div className="tdb-rsech fc1">FILTER{searchActive && (
+        <div className="tdb-rsech fc1">REVIEW &amp; FILTER{searchActive && (
           <button type="button" className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
             “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
           </button>
         )}</div>
+        {/* THE SETTLEMENT (sage) — the pair's seat: stacked full-width at the top of the
+            sidebar's body, Begin first (ink) then the review chip (white), above a hairline
+            with the filter pills unchanged beneath. In session they simply LEAVE WITH THE
+            SIDEBAR — its slide is the only animation; the unmount happens off-screen. */}
+        {heroSession.slot?.kind !== "session" && (
+          <>
+            <div className="tdb-sbpair">
+              <button type="button" className="tdb-btnp sb tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
+                <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
+                Begin focused session
+              </button>
+              {/* hero-pair P2 — unread by WEIGHT, not ornament: unopened = full ink, opened =
+                  muted; the same flags drive it. */}
+              {reviewWin && (reviewSeen || reviewDismissed) && (
+                <button type="button" className={`tdb-rvchip sb${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
+                  <RewindGlyph />
+                  Last week in review
+                </button>
+              )}
+            </div>
+            <span className="tdb-sbdiv" aria-hidden />
+          </>
+        )}
         {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
             the narrowed meta lives in the sheet's corner line */}
         <button type="button" className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>

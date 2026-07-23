@@ -24,7 +24,7 @@ export interface TourStop {
 
 export const TOUR_STOPS: TourStop[] = [
   {
-    sel: ".tdb-herobegin",  // the settlement: Begin sits in the SHEET BAR's right cluster
+    sel: ".tdb-herobegin",  // the settlement: Begin sits at the SIDEBAR's top, over the filter pills
     h: "Say go, any time.",
     p: "Begin a focused session — it walks your whole desk for you, one sheet at a time, no distractions.",
     cta: "Next →",

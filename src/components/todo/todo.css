@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-bar-collapse: 680px; --tdb-search-w: 460px; --tdb-search-h: 46px; --tdb-search-clear: 40px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-sbpair-h: 34px; --tdb-sbpair-fs: 12.5px; --tdb-search-w: 460px; --tdb-search-h: 46px; --tdb-search-clear: 40px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -55,33 +55,22 @@
 .tdb-srchrow { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 20px 0 var(--tdb-search-clear); min-height: var(--tdb-search-h); position: relative; z-index: 6; }
 .tdb-srchrow.insession .tdb-bigsearch, .tdb-srchrow.insession .tdb-fpillbtn, .tdb-srchrow.insession .tdb-todaypopwrap { opacity: 0; pointer-events: none; transition: opacity 400ms; }
 .tdb-heroslot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; animation: tdbSesIn 400ms ease; }
-/* ── THE SETTLEMENT P3 — the pair's new seat: the sheet's 36px bar. The hero is title +
-   search only. The bar's right cluster reads left to right: the pair → a 20px hairline
-   divider → the view toggle (the bar's rightmost resident, never collapsing). ── */
-.tdb-barvt { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.tdb-barpair { display: flex; align-items: center; gap: 8px; }
-/* the pair leaves with the session's opening: it fades, then unmounts once composed. The bar
-   and its toggle stay — they ride the document bar's own exit as the sheet dissolves. */
-.tdb-barpair.insession { opacity: 0; pointer-events: none; transition: opacity 400ms; }
-.tdb-btnp.sm i, .tdb-rvchip.sm i { font-style: normal; }
-.tdb-bardiv { width: 1px; height: 20px; background: var(--container-head-rule); margin: 0 2px; flex: 0 0 auto; }
-/* compact: 28px inside the 36px bar, one type step down from the hero's 12.5 — the ink
-   primary and white secondary treatments are otherwise unchanged */
-.tdb-btnp.sm, .tdb-rvchip.sm { height: 28px; padding: 0 12px; font-size: 11px; gap: 6px; box-shadow: none; }
-.tdb-rvchip.sm { border-color: var(--container-head-rule); }
+/* ── THE SETTLEMENT (sage, final) — the pair's seat: the TOP OF THE SIDEBAR's body, under the
+   REVIEW & FILTER band. Stacked full-width within the card, Begin first (ink primary) then the
+   review chip (white secondary), both centred-label at --tdb-sbpair-h, above a hairline with
+   the filter pills unchanged beneath. The hero is title + search only; the sheet's bar keeps
+   only its line and the toggle. ── */
+.tdb-sbpair { display: flex; flex-direction: column; gap: 7px; padding: 11px 9px 4px; }
+.tdb-btnp.sb, .tdb-rvchip.sb { width: 100%; height: var(--tdb-sbpair-h); padding: 0 12px; font-size: var(--tdb-sbpair-fs); justify-content: center; white-space: nowrap; box-shadow: none; }
+/* MEASURED at the sidebar's 248px: 206px of label room against a 133px worst-case label
+   (Begin, 12.5px, with its glyph) — 73px of slack, so no tier wraps and no font step is
+   needed; the size stays a token so a future rail width has one knob. Ellipsis is forbidden
+   and impossible here: the labels never reach the edge. */
+.tdb-sbdiv { display: block; height: 1px; background: #eee8dd; margin: 8px 9px 2px; }
 .tdb-herobegin { box-shadow: 0 1px 4px rgba(29, 16, 12, 0.18); }
-.tdb-barpair .tdb-rvchip { animation: tdbChipIn 200ms ease; }
+.tdb-sbpair .tdb-rvchip { animation: tdbChipIn 200ms ease; }
 @keyframes tdbChipIn { from { opacity: 0; transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-barpair .tdb-rvchip { animation: none; } }
-/* the collapse tier, BAKED FROM MEASUREMENT (see reports/todo-settlement.md): the bar's
-   contents measure 546px (line 209 + pills 124/112 + divider 5 + toggle 62 + gaps 34) against
-   viewport − 94 of chrome, so they collide at 640px; the token carries a 40px cushion so the
-   line never sits flush. Below it the pills go icon-only — the labels live on aria-label +
-   title — and the toggle is untouched. */
-@media (max-width: 679.98px) {
-  .tdb-btnp.sm i, .tdb-rvchip.sm i { display: none; }
-  .tdb-btnp.sm, .tdb-rvchip.sm { padding: 0 9px; }
-}
+@media (prefers-reduced-motion: reduce) { .tdb-sbpair .tdb-rvchip { animation: none; } }
 /* doc pass P1 (todo-doc-pass-a.html §1): 380px, right-hand 19px glass in the oat roundel */
 .tdb-bigsearch { width: var(--tdb-search-w); max-width: calc(100vw - 2 * var(--tdb-edge)); height: var(--tdb-search-h); box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 8px 0 20px; color: var(--muted); font-size: 13px; }
 .tdb-mag { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--oat); color: var(--ink); flex: 0 0 auto; }
@@ -140,9 +129,7 @@
    the lens below a divider, and the top-bordered foot (Task-settings row + the Pro square). ── */
 /* hero-pair P1: the toolbelt stack is retired — the aside is the plain positioning wrapper
    and the left column begins directly with the filter card (.tdb-fbox). */
-/* the settlement P3 — the sheet leads in the DOM so the tab order reads search → the bar's
-   controls → the filter rail; the rail keeps its LEFT seat visually through `order`. */
-.tdb-fside { width: var(--tdb-rail); flex: 0 0 auto; order: -1; }
+.tdb-fside { width: var(--tdb-rail); flex: 0 0 auto; }
 .tdb-fbox { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 3px 14px rgba(58, 28, 20, 0.08); overflow: hidden; display: flex; flex-direction: column; }
 /* frame P3 — the SECTION HEADER bands (todo-frame-v5.html .rsech): the rail + the sheet's
    bar share one grey system. .nt2 drops the top rule when the band follows the review row's
@@ -637,7 +624,7 @@ button.tdb-tdot { cursor: pointer; }
 /* the segment restyled to sit on grey (ref B): paler track, its own border; the active chip
    keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
 /* on sage: a translucent track with the shared rule; the active chip is unchanged */
-.tdb-vseg { height: 26px; box-sizing: border-box; border: 1px solid var(--container-head-rule); background: rgba(255, 255, 255, 0.55); border-radius: 99px; display: inline-flex; align-items: center; padding: 2px; gap: 2px; }
+.tdb-vseg { margin-left: auto; height: 26px; box-sizing: border-box; border: 1px solid var(--container-head-rule); background: rgba(255, 255, 255, 0.55); border-radius: 99px; display: inline-flex; align-items: center; padding: 2px; gap: 2px; }
 .tdb-vseg button { width: 26px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
 .tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-sizing: border-box; } /* selected = white + ink ring (frame P2: the press language died) */
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
