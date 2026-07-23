@@ -376,7 +376,11 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       <div className="tdb-fswrap" style={{ top: geo.wrapTop }}>
         {phase !== "close" && current && (
           <>
-            <div className="tdb-fsseat" style={{ top: geo.restY }}>
+            <div className={`tdb-fsseat${composed ? " lit" : ""}`} style={{ top: geo.restY }}>
+              {/* P2 — THE POOL OF LIGHT (option 5): no page treatment; the card carries the
+                  mode. The pool + the deep shadow arrive with the morph's landing and leave
+                  with the close (this whole branch unmounts at phase "close"). */}
+              {composed && <div className="tdb-fspool" aria-hidden />}
               {edgesOn && remaining >= 2 && <div className="tdb-fsdeck d2" aria-hidden />}
               {edgesOn && remaining >= 1 && <div className="tdb-fsdeck d1" aria-hidden />}
               {deal && (

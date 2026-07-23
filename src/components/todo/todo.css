@@ -667,8 +667,14 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-fsdeck { position: absolute; left: 0; right: 0; top: 0; height: 60%; background: var(--white, #fff); border: 1px solid #ddd3c6; border-radius: 16px; z-index: 1; animation: tdbSesIn 400ms ease; }
 .tdb-fsdeck.d1 { transform: translateY(7px) scale(0.975); }
 .tdb-fsdeck.d2 { transform: translateY(14px) scale(0.95); opacity: 0.7; }
-/* the session card — the one heavy object on a bright desk (the pool deepens it in P2) */
-.tdb-fscard { position: relative; width: 500px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 16px; box-shadow: 0 20px 50px rgba(58, 28, 20, 0.22); overflow: hidden; z-index: 3; opacity: 0; }
+/* ── P2: THE POOL OF LIGHT (session-focus-signal.html option 5 — options 0–4 all
+   REJECTED): no page treatment; the session card is the one heavy object
+   on a bright desk. The lit seat deepens the shadow; the soft elliptical pool sits beneath,
+   wider than the card, at z 0 — under the deck edges (1), under the card (3). Both arrive
+   with the morph's landing and leave with the close. ── */
+.tdb-fscard { position: relative; width: 500px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 16px; box-shadow: 0 20px 50px rgba(58, 28, 20, 0.22); overflow: hidden; z-index: 3; opacity: 0; transition: box-shadow 500ms ease; }
+.tdb-fsseat.lit .tdb-fscard { box-shadow: 0 26px 60px rgba(58, 28, 20, 0.38); }
+.tdb-fspool { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -30%); width: 640px; height: 200px; border-radius: 50%; background: radial-gradient(ellipse, rgba(58, 28, 20, 0.14), transparent 65%); z-index: 0; pointer-events: none; animation: tdbSesIn 500ms ease; }
 .tdb-fscard.on { opacity: 1; }
 .tdb-fscard .tdb-band { padding: 7px 15px; min-height: 0; display: flex; align-items: center; }
 .tdb-fslane { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: var(--ink-2); }
@@ -718,7 +724,8 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-ssreviewlist { border-top: 1px solid var(--hairline); margin-top: 4px; padding-top: 4px; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-fssub, .tdb-fsrit span { transition: none; }
-  .tdb-fsses, .tdb-fsdeck, .tdb-ssnext, .tdb-ssclose { animation: none; }
+  .tdb-fsses, .tdb-fsdeck, .tdb-ssnext, .tdb-ssclose, .tdb-fspool { animation: none; }
+  .tdb-fscard { transition: none; }
   .tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.rise, .tdb-ssstamp { animation: none; }
 }
 

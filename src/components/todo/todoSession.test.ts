@@ -82,6 +82,34 @@ describe("final P1 — the gather (in place: the chrome + title never leave)", (
   });
 });
 
+describe("final P2 — the pool of light (option 5; every other treatment rejected)", () => {
+  it("the lit seat deepens the card's shadow to the ref's order; the pool is the soft ellipse beneath", () => {
+    expect(css).toContain(".tdb-fsseat.lit .tdb-fscard { box-shadow: 0 26px 60px rgba(58, 28, 20, 0.38); }");
+    const pool = rule(".tdb-fspool");
+    expect(pool).toContain("background: radial-gradient(ellipse, rgba(58, 28, 20, 0.14), transparent 65%)");
+    expect(pool).toContain("width: 640px"); // wider than the 500 card
+    expect(rule(".tdb-fscard")).toContain("transition: box-shadow 500ms ease"); // the deepening rides the landing
+  });
+  it("z-order: the pool(0) under the deck edges(1) under the card(3)", () => {
+    expect(rule(".tdb-fspool")).toContain("z-index: 0");
+    expect(rule(".tdb-fsdeck")).toContain("z-index: 1");
+    expect(rule(".tdb-fscard")).toContain("z-index: 3");
+  });
+  it("presence is bound to the composed session and leaves with the close; it follows the card's seat through the deals", () => {
+    expect(ss).toContain('{composed && <div className="tdb-fspool" aria-hidden />}');
+    expect(ss).toContain('className={`tdb-fsseat${composed ? " lit" : ""}`}'); // the state class rides the CONTAINER
+    // the pool lives inside the phase !== "close" branch — the close unmounts it
+    const branch = ss.slice(ss.indexOf('{phase !== "close" && current && ('), ss.indexOf('{phase === "close" && ('));
+    expect(branch).toContain("tdb-fspool");
+  });
+  it("the rejected treatments are absent: no vignette, no ground shift, no inset frame, no ribbon", () => {
+    for (const dead of ["vignette", "tdb-fsvig", "tdb-fsframe", "tdb-fsribbon", "radial-gradient(ellipse 72%"]) {
+      expect(ss).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+  });
+});
+
 describe("final P3 — the card + the deal at the rest line", () => {
   it("frame-A content: family band + tag + lane, Playfair title, the italic line, WHERE THIS STANDS from templates", () => {
     expect(ss).toContain('<span className="tdb-fslane">{lane(current)}</span>');
