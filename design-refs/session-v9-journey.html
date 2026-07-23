@@ -1,0 +1,153 @@
+<!-- ScriptAlly fence note (v9 session pack):
+     v9 MASTER — the whole session journey in six frames (board at rest / the opening / IN FOCUS / the carriage / the close / the exit).
+     Frame 3 'IN FOCUS' is superseded on ONE point by session-v9-header.html V2: no kicker above the title.
+     Binding here: the curtains + dim begin BELOW the app bar (top = the bar's bottom edge), the hero rides above them,
+     the close's two headlines + ledger + two exits, and the quiet exit line at the stage foot.
+-->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The full journey - board to session and back</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:46px 0 12px;width:1250px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.55}
+.stage{position:relative;width:1250px;height:460px;background:var(--oat);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(58,28,20,.18)}
+.tbar{position:relative;z-index:70;height:34px;background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;padding:0 20px;gap:11px}
+.wm{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:800}
+.curt{position:absolute;top:34px;bottom:0;width:140px;background:linear-gradient(90deg,#1d100c,#2a1a13);z-index:40}
+.curt.R{right:0;background:linear-gradient(270deg,#1d100c,#2a1a13)}.curt.L{left:0}
+.curt.half.L{transform:translateX(-55%)}.curt.half.R{transform:translateX(55%)}
+.dim{position:absolute;top:34px;bottom:0;left:140px;right:140px;background:rgba(58,28,20,.14);z-index:20}
+.hero{position:relative;z-index:50;text-align:center;padding-top:14px}
+.hero h1{font-family:'Playfair Display',serif;font-size:27px;font-weight:600}
+.hero h1.small{font-size:23px}
+.progwrap{width:300px;margin:9px auto 0;display:flex;align-items:center;gap:11px}
+.prog{flex:1;height:4px;border-radius:2px;background:#ddd2c2;overflow:hidden}
+.prog b{display:block;height:100%;background:var(--ink);border-radius:2px}
+.pf{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;font-variant-numeric:lining-nums}
+.pf i{font-style:normal;font-size:10px;color:#8a7a6d;font-weight:400}
+.rit{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6b5a4e;margin-top:9px}
+.srch{width:230px;height:32px;margin:9px auto 0;background:var(--white);border:1px solid var(--hair);border-radius:99px;display:flex;align-items:center;padding:0 14px;color:#8a7a6d;font-size:10px;box-sizing:border-box}
+.pair{display:flex;gap:8px;justify-content:center;margin-top:9px}
+.bp{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:31px;padding:0 14px;font-size:9.5px;font-weight:600}
+.wv{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--white);border:1px solid #1d100c;color:#2a1a13;border-radius:99px;height:31px;padding:0 14px;font-size:9.5px;font-weight:600}
+.work{display:flex;gap:14px;align-items:flex-start;padding:12px 22px 0;position:relative;z-index:10}
+.rl{width:140px;flex:0 0 auto;background:var(--white);border:1px solid var(--hair);border-radius:12px;height:190px}
+.rl.mid{transform:translateX(-90%);opacity:.35}
+.td{width:130px;flex:0 0 auto;background:var(--white);border:1px solid var(--hair);border-radius:12px;height:150px;overflow:hidden}
+.td .hd{height:24px;background:linear-gradient(180deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--sage-bd)}
+.td.mid{transform:translateX(90%);opacity:.35}
+.sh{flex:1;background:var(--white);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.sh.bare{background:transparent;border-color:transparent}
+.dh{background:linear-gradient(180deg,#f4f3f1,#f0eeeb);border-bottom:1px solid #e5e3de;padding:6px 12px;font-family:'Playfair Display',serif;font-size:10px;font-weight:700;color:#4d4238}
+.gr{display:grid;grid-template-columns:repeat(3,150px);gap:9px;padding:11px;justify-content:center}
+.cd{background:var(--white);border:1px solid #d8cfc4;border-radius:9px;overflow:hidden;height:64px}
+.cd i{display:block;height:14px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.cd.l i{background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc}
+.cd span{display:block;padding:6px 8px;font-family:'Playfair Display',serif;font-size:8px;font-weight:600;line-height:1.3}
+.gath1{transform:translate(160px,10px) rotate(3deg);opacity:.85}
+.gath2{transform:translate(-160px,-70px) rotate(-3deg);opacity:.85}
+.gath3{transform:translate(0px,-78px) rotate(2deg);opacity:.85}
+/* page */
+.pageA{position:absolute;left:50%;transform:translate(-50%,-50%);width:470px;background:var(--white);border:1px solid #d8cfc4;border-radius:8px;box-shadow:0 18px 46px rgba(58,28,20,.26);padding:24px 34px 20px;box-sizing:border-box;z-index:30}
+.rk{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.16em;color:#b5563e;display:flex;gap:10px}
+.pageA h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-top:7px}
+.pageA .m{font-family:'Playfair Display',serif;font-style:italic;font-size:10px;color:#7a6a5e;margin-top:3px}
+.pageA .body{font-size:9.5px;color:#4d4238;line-height:1.65;margin-top:10px;border-top:1px solid var(--hair2);padding-top:10px}
+.pacts{display:flex;align-items:center;margin-top:12px}
+.pacts .bp{height:31px;font-size:9.5px}
+.pacts .links{margin-left:auto;display:flex;gap:13px}
+.pacts .links span{font-size:8.5px;font-weight:600;color:#5d4d40;border-bottom:1px solid var(--hair);padding-bottom:1px}
+.footnav{display:flex;justify-content:space-between;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;color:#8a7a6d}
+.endfoot{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;z-index:50}
+.pageA.exiting{transform:translate(-135%,-50%) rotate(-2deg);opacity:.5}
+.pageA.entering{transform:translate(38%,-50%) scale(.97);opacity:.75}
+.stamp{position:absolute;right:12px;top:26px;width:26px;height:26px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1.5px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:12px;transform:rotate(-8deg)}
+/* close */
+.fin{position:absolute;left:0;right:0;top:46%;transform:translateY(-50%);text-align:center;z-index:30}
+.fin h1{font-family:'Playfair Display',serif;font-size:33px;font-weight:700}
+.fin .s{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a6a5e;margin-top:4px}
+.led{width:290px;margin:14px auto 0;background:var(--white);border:1px solid var(--hair);border-radius:12px;padding:10px 14px;box-shadow:0 8px 22px rgba(58,28,20,.14)}
+.lr{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--hair2);font-size:9.5px;color:#4d4238}
+.lr:last-child{border-bottom:none}
+.lr .sd{width:13px;height:13px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:7px}
+.lr .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;color:#8a7a6d}
+.closec{display:flex;gap:8px;justify-content:center;margin-top:13px}
+.annot{position:absolute;z-index:80;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;color:#b5563e;background:rgba(253,250,245,.9);border:1px solid #e8c8bc;border-radius:99px;padding:3px 9px}
+</style></head><body><div class="lbl">1 &middot; THE BOARD AT REST <em>&mdash; where it starts: hero, search, the pair, the filter, the sheet, Today.</em></div><div class="stage"><div class="tbar"><span style="font-size:11px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.12em;color:#a5988c">QUERYING / TO-DO</span></div>
+<div class="hero"><h1>What&rsquo;s on your desk?</h1><div class="srch">Search</div>
+<div class="pair"><span class="bp">&#9654; Begin focused session</span><span class="wv">&#8634; Last week in review</span></div></div>
+<div class="work"><div class="rl"></div><div class="sh"><div class="dh">Showing 29 of 29 items on your list</div><div class="gr"><div class="cd  "><i></i><span>Tom Ellery has made an offer</span></div><div class="cd  "><i></i><span>Send your full to Jonathan Marsh</span></div><div class="cd  "><i></i><span>Send your partial to Daniel</span></div><div class="cd l "><i></i><span>16 agents missing materials</span></div><div class="cd l "><i></i><span>15 agents missing wish lists</span></div><div class="cd l "><i></i><span>Jonathan Marsh silent</span></div></div></div><div class="td"><div class="hd"></div></div></div>
+<span class="annot" style="right:24px;top:52px">THE BOARD AT REST</span></div><div class="lbl">2 &middot; THE OPENING (&sim;2.5s, any input skips) <em>&mdash; Begin pressed: sidebars slide off, the sheet dissolves, the curtains close in, the title dims as it prepares to crossfade, the ritual lines play in the search&rsquo;s slot, and the cards gather behind the first.</em></div><div class="stage"><div class="tbar"><span style="font-size:11px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.12em;color:#a5988c">QUERYING / TO-DO</span></div>
+<div class="curt L half"></div><div class="curt R half"></div>
+<div class="hero"><h1 class="small" style="opacity:.55">What&rsquo;s on your desk?</h1><div class="rit">Stacking the deck&hellip;</div></div>
+<div class="work"><div class="rl mid"></div><div class="sh bare"><div class="gr"><div class="cd  "><i></i><span>Tom Ellery has made an offer</span></div><div class="cd  gath1"><i></i><span>Send your full to Jonathan Marsh</span></div><div class="cd  gath2"><i></i><span>Send your partial to Daniel</span></div><div class="cd l gath3"><i></i><span>16 agents missing materials</span></div><div class="cd l gath1"><i></i><span>15 agents missing wish lists</span></div><div class="cd l gath2"><i></i><span>Jonathan Marsh silent</span></div></div></div><div class="td mid"><div class="hd"></div></div></div>
+<span class="annot" style="right:24px;top:52px">SIDEBARS LEAVE &middot; CURTAINS CLOSING &middot; THE GATHER &middot; RITUAL LINE IN THE SLOT</span></div><div class="lbl">3 &middot; IN FOCUS &mdash; V2 WITHOUT THE KICKER <em>&mdash; the settled session screen: &ldquo;In focus&rdquo; with the progress bar + Playfair fraction directly beneath (no FOCUSED SESSION text); the manuscript page vertically centred between hero and stage foot; split actions (ink primary, quiet text secondaries); prev/next as the page&rsquo;s running footer; End session centred at the stage&rsquo;s foot.</em></div><div class="stage"><div class="tbar"><span style="font-size:11px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.12em;color:#a5988c">QUERYING / TO-DO</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="progwrap"><span class="prog"><b style="width:3%"></b></span><span class="pf">1<i> / 29</i></span></div></div>
+<div class="pageA " style="top:57%">
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Tom Ellery has made an offer</h2><div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date.</div>
+<div class="pacts"><span class="bp">Action now</span><div class="links"><span>&#65291; Today&rsquo;s list</span><span>&#128340; Snooze or dismiss</span></div></div>
+<div class="footnav"><span>&#8249; PREVIOUS &middot; REDO</span><span>SKIP &middot; NEXT &#8250;</span></div></div>
+<span class="endfoot wv">End session &#10005;</span>
+<span class="annot" style="right:160px;top:52px">NO KICKER &middot; TITLE + PROGRESS ONLY &middot; PAGE CENTRED &middot; END AT THE FOOT</span></div><div class="lbl">4 &middot; BETWEEN TASKS &mdash; THE CARRIAGE <em>&mdash; stamp lands, the page slides out left, the next slides in from the right, the bar advances and the fraction ticks.</em></div><div class="stage"><div class="tbar"><span style="font-size:11px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.12em;color:#a5988c">QUERYING / TO-DO</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="progwrap"><span class="prog"><b style="width:7%"></b></span><span class="pf">2<i> / 29</i></span></div></div>
+<div class="pageA exiting" style="top:57%"><span class="stamp">&#10003;</span>
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Tom Ellery has made an offer</h2><div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date.</div>
+<div class="pacts"><span class="bp">Action now</span><div class="links"><span>&#65291; Today&rsquo;s list</span><span>&#128340; Snooze or dismiss</span></div></div>
+<div class="footnav"><span>&#8249; PREVIOUS &middot; REDO</span><span>SKIP &middot; NEXT &#8250;</span></div></div>
+<div class="pageA entering" style="top:57%">
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Send your full to Jonathan Marsh</h2><div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date.</div>
+<div class="pacts"><span class="bp">Action now</span><div class="links"><span>&#65291; Today&rsquo;s list</span><span>&#128340; Snooze or dismiss</span></div></div>
+<div class="footnav"><span>&#8249; PREVIOUS &middot; REDO</span><span>SKIP &middot; NEXT &#8250;</span></div></div>
+<span class="endfoot wv">End session &#10005;</span>
+<span class="annot" style="right:160px;top:52px">THE CARRIAGE &middot; STAMP &rarr; OUT LEFT &middot; NEXT IN FROM RIGHT &middot; BAR ADVANCES</span></div><div class="lbl">5 &middot; THE CLOSE <em>&mdash; the last page slides out and the close resolves in the same centre: headline, the ledger, two exits. Ending early gives &ldquo;Good session.&rdquo; over the same ledger.</em></div><div class="stage"><div class="tbar"><span style="font-size:11px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.12em;color:#a5988c">QUERYING / TO-DO</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="progwrap"><span class="prog"><b style="width:100%"></b></span><span class="pf">29<i> / 29</i></span></div></div>
+<div class="fin"><h1>Desk cleared.</h1><div class="s">Every box ticked turns the dial in your favour.</div>
+<div class="led"><div class="lr"><span class="sd">&#10003;</span>Handled<span class="n">24</span></div>
+<div class="lr"><span class="sd" style="background:var(--white);border-style:dashed;color:transparent"></span>Snoozed or skipped<span class="n">5</span></div>
+<div class="lr"><span class="sd" style="background:#f4f3f1;border-color:#dbd9d4;color:#8a857d">&#9202;</span>Session length<span class="n">38 MIN</span></div></div>
+<div class="closec"><span class="bp">Back to your desk</span><span class="wv" style="border-color:var(--hair);color:#6b5a4e">Review what you did</span></div></div>
+<span class="annot" style="right:160px;top:52px">THE CLOSE &middot; IN PLACE &middot; (EARLY EXIT: &ldquo;GOOD SESSION.&rdquo;)</span></div><div class="lbl">6 &middot; THE EXIT <em>&mdash; Back to your desk reverses the opening compressed (&sim;700ms): curtains withdraw, dim lifts, the title crossfades back to &ldquo;What&rsquo;s on your desk?&rdquo;, sidebars and sheet slide home &mdash; and the board is already correct (29 &rarr; 24) because everything wrote through the shared derivation during the session. No sync step, no flash of stale counts.</em></div><div class="stage"><div class="tbar"><span style="font-size:11px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.12em;color:#a5988c">QUERYING / TO-DO</span></div>
+<div class="curt L half"></div><div class="curt R half"></div>
+<div class="hero"><h1 class="small">What&rsquo;s on your desk?</h1><div class="srch" style="opacity:.6">Search</div></div>
+<div class="work"><div class="rl" style="transform:translateX(-30%);opacity:.6"></div><div class="sh" style="opacity:.75"><div class="dh">Showing 24 of 24 items on your list</div><div class="gr"><div class="cd  "><i></i><span>Tom Ellery has made an offer</span></div><div class="cd  "><i></i><span>Send your full to Jonathan Marsh</span></div><div class="cd  "><i></i><span>Send your partial to Daniel</span></div><div class="cd l "><i></i><span>16 agents missing materials</span></div><div class="cd l "><i></i><span>15 agents missing wish lists</span></div><div class="cd l "><i></i><span>Jonathan Marsh silent</span></div></div></div><div class="td" style="transform:translateX(30%);opacity:.6"><div class="hd"></div></div></div>
+<span class="annot" style="right:24px;top:52px">THE EXIT &middot; CURTAINS WITHDRAW &middot; TITLE CROSSFADES BACK &middot; BOARD REASSEMBLES, ALREADY CORRECT (29&rarr;24)</span></div></body></html>

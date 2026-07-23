@@ -1,0 +1,183 @@
+<!-- ScriptAlly fence note (v9 session pack):
+     v9 — the session's task presentation. COMPOSITION A (the manuscript page) is the build: a single generous white page,
+     the context as PROSE under a hairline rule, prev/next as a running footer.
+     B (the carousel/filmstrip), C and D in this file are REJECTED alternatives — no part of them is built.
+-->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The in-session screen - five compositions</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:44px 0 12px;width:1300px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.55}
+.stage{position:relative;width:1300px;height:560px;background:var(--oat);border-radius:14px;overflow:hidden;box-shadow:0 10px 26px rgba(58,28,20,.2)}
+.tbar{position:relative;z-index:70;height:36px;background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;padding:0 20px;gap:12px}
+.tbar .wm{font-family:'Playfair Display',serif;font-size:14px;font-weight:800}
+.curt{position:absolute;top:36px;bottom:0;width:150px;background:linear-gradient(90deg,#1d100c,#2a1a13);z-index:40}
+.curt.R{right:0;background:linear-gradient(270deg,#1d100c,#2a1a13)}.curt.L{left:0}
+.dim{position:absolute;top:36px;bottom:0;left:150px;right:150px;background:rgba(58,28,20,.14);z-index:20}
+.hero{position:relative;z-index:50;text-align:center;padding-top:22px}
+.hero h1{font-family:'Playfair Display',serif;font-size:38px;font-weight:600}
+.taskline{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:#6b5a4e}
+.taskline b{color:var(--ink)}
+.endb{margin-left:16px;display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid #1d100c;color:#2a1a13;border-radius:99px;height:28px;padding:0 13px;font-size:9.5px;font-weight:600;vertical-align:middle}
+.z{position:relative;z-index:30}
+.tg{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;border-radius:99px;padding:2px 8px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.bp{display:inline-flex;align-items:center;justify-content:center;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:34px;padding:0 16px;font-size:10.5px;font-weight:600}
+.hq{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 13px;border-radius:99px;font-size:10px;font-weight:600;background:var(--paper);border:1px solid var(--hair);color:#6b5a4e}
+.ctxc{background:#fbf8f3;border:1px solid var(--hair2);border-radius:10px;padding:10px 12px;font-size:10px;color:#5d4d40;line-height:1.55}
+.ctxc b{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.13em;color:#a5988c;display:block;margin-bottom:3px}
+/* A the page */
+.pageA{position:absolute;left:50%;top:150px;transform:translateX(-50%);width:600px;background:var(--white);border:1px solid #d8cfc4;border-radius:6px;box-shadow:0 22px 54px rgba(58,28,20,.26);padding:38px 54px 30px;box-sizing:border-box;z-index:30}
+.pageA .rk{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.16em;color:#b5563e;display:flex;gap:12px}
+.pageA h2{font-family:'Playfair Display',serif;font-size:27px;font-weight:700;margin-top:10px}
+.pageA .m{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#7a6a5e;margin-top:5px}
+.pageA .body{font-size:11.5px;color:#4d4238;line-height:1.7;margin-top:16px;border-top:1px solid var(--hair2);padding-top:14px}
+.pageA .footnav{display:flex;justify-content:space-between;margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:#8a7a6d}
+.pageA .footnav span{cursor:pointer}
+/* B carousel */
+.carB{position:absolute;left:150px;right:150px;top:170px;display:flex;align-items:center;justify-content:center;gap:16px;z-index:30}
+.cB{background:var(--white);border:1px solid #d8cfc4;border-radius:14px;overflow:hidden}
+.cB.side{width:210px;opacity:.4;transform:scale(.85)}
+.cB.cur{width:430px;box-shadow:0 18px 46px rgba(58,28,20,.28)}
+.cB .bb{height:22px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.cB .cc{padding:14px 17px}
+.cB h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:700}
+.cB.cur h3{font-size:19px}
+.cB .m{font-family:'Playfair Display',serif;font-style:italic;font-size:10px;color:#7a6a5e;margin-top:3px}
+.arr{width:38px;height:38px;border-radius:50%;background:var(--white);border:1px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink);cursor:pointer;flex:0 0 auto}
+.dots{position:absolute;left:0;right:0;bottom:-34px;display:flex;justify-content:center;gap:5px}
+.dots i{width:5px;height:5px;border-radius:50%;background:#c9bcae}
+.dots i.on{background:var(--ink);width:16px;border-radius:3px}
+/* C presenter */
+.wrapC{position:absolute;left:170px;right:170px;top:150px;display:flex;gap:20px;z-index:30}
+.mainC{flex:1;background:var(--white);border:1px solid #d8cfc4;border-radius:15px;box-shadow:0 16px 40px rgba(58,28,20,.24);overflow:hidden}
+.mainC .bb{padding:7px 15px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.mainC .cc{padding:17px 20px}
+.mainC h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:700}
+.mainC .m{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a6a5e;margin-top:3px}
+.queC{width:250px;flex:0 0 auto;background:rgba(255,255,255,.72);border:1px solid var(--hair);border-radius:15px;padding:12px;box-sizing:border-box;backdrop-filter:blur(2px)}
+.queC .qk{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.15em;color:#8a7a6d;margin:2px 0 8px 2px}
+.qrow{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:8px;font-size:10px;color:#4d4238}
+.qrow.done{opacity:.5;text-decoration:line-through}
+.qrow.cur{background:#f1e9dd;font-weight:700}
+.qrow .qd{width:12px;height:12px;border-radius:50%;border:1px solid var(--pink-b);background:var(--pink-t);flex:0 0 auto}
+.qrow.done .qd{background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-color:var(--sage-bd)}
+/* E the desk */
+.trayL,.trayR{position:absolute;bottom:26px;z-index:30;width:180px}
+.trayL{left:190px}.trayR{right:190px}
+.traycap{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.15em;color:#8a7a6d;text-align:center;margin-bottom:7px}
+.pileE{position:relative;height:74px}
+.pe{position:absolute;left:50%;width:130px;height:58px;background:var(--white);border:1px solid #d8cfc4;border-radius:9px}
+.pe.p1{transform:translateX(-50%) rotate(-2deg)}
+.pe.p2{transform:translateX(-50%) rotate(2deg) translateY(-5px)}
+.pe.p3{transform:translateX(-50%) rotate(-1deg) translateY(-10px)}
+.pe .st{position:absolute;right:7px;top:7px;width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:9px;transform:rotate(-8deg)}
+.pcount{position:absolute;left:50%;transform:translateX(-50%);bottom:-20px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#6b5a4e;letter-spacing:.1em}
+.deskcard{position:absolute;left:50%;top:150px;transform:translateX(-50%);width:470px;z-index:31;background:var(--white);border:1px solid #d8cfc4;border-radius:15px;box-shadow:0 18px 46px rgba(58,28,20,.28);overflow:hidden}
+.deskcard .bb{padding:7px 15px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.deskcard .cc{padding:16px 19px}
+.deskcard h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.deskcard .m{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a6a5e;margin-top:3px}
+/* F typographic */
+.typoF{position:absolute;left:190px;right:190px;top:160px;text-align:center;z-index:30}
+.typoF .tg{margin-bottom:14px;display:inline-flex}
+.typoF h2{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;line-height:1.1}
+.typoF .m{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#7a6a5e;margin-top:8px}
+.typoF .ctxline{font-size:12px;color:#5d4d40;margin-top:16px;line-height:1.6;max-width:560px;margin-left:auto;margin-right:auto}
+.typoF .acts{justify-content:center;display:flex;gap:9px;margin-top:22px}
+.typoF .pn{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#8a7a6d}
+.typoF .pn span{cursor:pointer;color:#6b5a4e}
+</style></head><body><div class="lbl">A &middot; The manuscript page <em>&mdash; no card grammar at all: the task typeset on a single generous PAGE, the context written as prose, prev/next as a book&rsquo;s running footer. The calmest and most literary.</em></div><div class="stage">
+<div class="tbar"><span style="font-size:12px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="taskline">TASK <b>1</b> OF <b>29</b><span class="endb">End session &#10005;</span></div></div>
+<div class="pageA">
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Tom Ellery has made an offer</h2>
+<div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date so the decision has a clock.</div>
+<div style="display:flex;gap:8px;margin-top:18px"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq">&#128340; Snooze or dismiss</span></div>
+<div class="footnav"><span>&#8249; PREVIOUS &middot; TOM ELLERY</span><span>NEXT &middot; JONATHAN MARSH &#8250;</span></div>
+</div></div><div class="lbl">B &middot; The carousel <em>&mdash; a disciplined filmstrip: previous and next properly seated in a row with arrows and a progress dot-bar; everything aligned, nothing loose.</em></div><div class="stage">
+<div class="tbar"><span style="font-size:12px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="taskline">TASK <b>2</b> OF <b>29</b><span class="endb">End session &#10005;</span></div></div>
+<div class="carB">
+<span class="arr">&#8249;</span>
+<div class="cB side"><div class="bb"></div><div class="cc"><h3>Tom Ellery has made an offer</h3><div class="m">Handled &#10003;</div></div></div>
+<div class="cB cur"><div class="bb" style="padding:5px 14px"><span class="tg">AGENT WAITING</span></div><div class="cc"><h3>Send your full to Jonathan Marsh</h3><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="ctxc" style="margin-top:11px"><b>WHERE THIS STANDS</b>Full requested 12 Jul &mdash; eleven days ago. Your manuscript is ready in the package builder.</div>
+<div style="display:flex;gap:7px;margin-top:13px"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s</span><span class="hq">&#128340; Snooze</span></div></div>
+<div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i></div></div>
+<div class="cB side"><div class="bb" style="background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc"></div><div class="cc"><h3>16 agents missing a materials list</h3><div class="m">Next up</div></div></div>
+<span class="arr">&#8250;</span>
+</div></div><div class="lbl">C &middot; The presenter <em>&mdash; task left, THIS SESSION queue right: every remaining item visible, done ones striking through as you go; jump anywhere. The most functional, least theatrical.</em></div><div class="stage">
+<div class="tbar"><span style="font-size:12px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="taskline">TASK <b>2</b> OF <b>29</b><span class="endb">End session &#10005;</span></div></div>
+<div class="wrapC">
+<div class="mainC"><div class="bb"><span class="tg">AGENT WAITING</span></div><div class="cc">
+<h2>Send your full to Jonathan Marsh</h2><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="ctxc" style="margin-top:12px"><b>WHERE THIS STANDS</b>Full requested 12 Jul &mdash; eleven days ago. Your manuscript is ready in the package builder.</div>
+<div style="display:flex;gap:8px;margin-top:15px"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq">&#128340; Snooze or dismiss</span></div>
+</div></div>
+<div class="queC"><div class="qk">THIS SESSION</div>
+<div class="qrow done"><span class="qd"></span>Tom Ellery has made an offer</div>
+<div class="qrow cur"><span class="qd"></span>Send your full to Jonathan Marsh</div>
+<div class="qrow"><span class="qd" style="background:#f5efe6;border-color:#ddd0bc"></span>16 agents missing materials</div>
+<div class="qrow"><span class="qd" style="background:#f5efe6;border-color:#ddd0bc"></span>15 agents missing wish lists</div>
+<div class="qrow"><span class="qd" style="background:#f5efe6;border-color:#ddd0bc"></span>Jonathan Marsh silent</div>
+<div class="qk" style="margin-top:8px">+ 24 MORE</div>
+</div></div></div><div class="lbl">E &middot; The desk trays <em>&mdash; the card centre-stage; a DONE tray accumulating stamped papers bottom-left, a TO COME pile thinning bottom-right. Progress made physical; the desk metaphor completed.</em></div><div class="stage">
+<div class="tbar"><span style="font-size:12px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="taskline">TASK <b>2</b> OF <b>29</b><span class="endb">End session &#10005;</span></div></div>
+<div class="deskcard"><div class="bb"><span class="tg">AGENT WAITING</span></div><div class="cc">
+<h2>Send your full to Jonathan Marsh</h2><div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="ctxc" style="margin-top:12px"><b>WHERE THIS STANDS</b>Full requested 12 Jul &mdash; eleven days ago. Your manuscript is ready in the package builder.</div>
+<div style="display:flex;gap:8px;margin-top:15px"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq">&#128340; Snooze or dismiss</span></div>
+</div></div>
+<div class="trayL"><div class="traycap">DONE &middot; 1</div><div class="pileE"><span class="pe p1"><span class="st">&#10003;</span></span></div></div>
+<div class="trayR"><div class="traycap">TO COME &middot; 27</div><div class="pileE"><span class="pe p1"></span><span class="pe p2"></span><span class="pe p3"></span></div></div></div><div class="lbl">F &middot; The typographic <em>&mdash; no container: the task set LARGE directly on the stage like a title screen; one context line; the trio; prev/next in small caps. Ultra-minimal, maximum type.</em></div><div class="stage">
+<div class="tbar"><span style="font-size:12px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="taskline">TASK <b>2</b> OF <b>29</b><span class="endb">End session &#10005;</span></div></div>
+<div class="typoF">
+<span class="tg">AGENT WAITING &middot; URGENT</span>
+<h2>Send your full to<br>Jonathan Marsh</h2>
+<div class="m">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="ctxline">Full requested 12 July &mdash; eleven days ago. Your manuscript is ready in the package builder.</div>
+<div class="acts"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq">&#128340; Snooze or dismiss</span></div>
+<div class="pn"><span>&#8249; TOM ELLERY</span> &nbsp;&middot;&nbsp; <span>JONATHAN MARSH &#8250;</span></div>
+</div></div></body></html>

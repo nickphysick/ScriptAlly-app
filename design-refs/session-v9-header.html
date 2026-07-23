@@ -1,0 +1,124 @@
+<!-- ScriptAlly fence note (v9 session pack):
+     v9 — the in-session header. V2 is the build: NO kicker; 'In focus' over a thin progress bar (ink on #ddd2c2, ~340px)
+     with a Playfair fraction beside it; the curtains/dim begin at the app bar's bottom edge.
+     The other header variants in this file are REJECTED alternatives.
+-->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Composition A - three treatments</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:44px 0 12px;width:1300px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.55}
+.stage{position:relative;width:1300px;height:600px;background:var(--oat);border-radius:14px;overflow:hidden;box-shadow:0 10px 26px rgba(58,28,20,.2)}
+.curt{position:absolute;bottom:0;width:150px;background:linear-gradient(90deg,#1d100c,#2a1a13);z-index:40}
+.curt.R{right:0;background:linear-gradient(270deg,#1d100c,#2a1a13)}.curt.L{left:0}
+.dim{position:absolute;bottom:0;left:150px;right:150px;background:rgba(58,28,20,.14);z-index:20}
+/* shared page */
+.pageA{position:absolute;left:50%;transform:translate(-50%,-50%);width:600px;background:var(--white);border:1px solid #d8cfc4;border-radius:8px;box-shadow:0 22px 54px rgba(58,28,20,.26);padding:34px 50px 26px;box-sizing:border-box;z-index:30}
+.pageA .rk{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.16em;color:#b5563e;display:flex;gap:12px}
+.pageA h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-top:9px}
+.pageA .m{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#7a6a5e;margin-top:4px}
+.pageA .body{font-size:11.5px;color:#4d4238;line-height:1.7;margin-top:14px;border-top:1px solid var(--hair2);padding-top:13px}
+.bp{display:inline-flex;align-items:center;justify-content:center;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:36px;padding:0 18px;font-size:11px;font-weight:600;cursor:pointer}
+.hq{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;font-size:10.5px;font-weight:600;background:var(--paper);border:1px solid var(--hair);color:#6b5a4e;cursor:pointer}
+.tlink{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:#8a7a6d;cursor:pointer}
+.endw{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid #1d100c;color:#2a1a13;border-radius:99px;font-weight:600;cursor:pointer;box-shadow:0 3px 10px rgba(29,16,12,.14)}
+/* V1 */
+.v1 .tbar{position:relative;z-index:70;height:40px;background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;padding:0 22px;gap:12px}
+.v1 .wm{font-family:'Playfair Display',serif;font-size:15px;font-weight:800}
+.v1 .bc2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:#a5988c}
+.v1 .curt,.v1 .dim{top:40px}
+.v1 .hero{position:relative;z-index:50;text-align:center;padding-top:24px}
+.v1 .hero h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:600}
+.v1 .count{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.24em;color:#4d4238}
+.v1 .count b{font-size:15px;color:var(--ink)}
+.v1 .ends{position:absolute;top:64px;right:190px;z-index:50;height:36px;padding:0 17px;font-size:11px}
+/* V2 */
+.v2 .tbar{position:relative;z-index:70;height:40px;background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;padding:0 22px;gap:12px}
+.v2 .wm{font-family:'Playfair Display',serif;font-size:15px;font-weight:800}
+.v2 .curt,.v2 .dim{top:40px}
+.v2 .hero{position:relative;z-index:50;text-align:center;padding-top:20px}
+.v2 .kick{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.22em;color:#8a7a6d}
+.v2 .hero h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:600;margin-top:4px}
+.v2 .progwrap{width:340px;margin:13px auto 0;display:flex;align-items:center;gap:12px}
+.v2 .prog{flex:1;height:4px;border-radius:2px;background:#ddd2c2;overflow:hidden}
+.v2 .prog b{display:block;height:100%;width:7%;background:var(--ink);border-radius:2px}
+.v2 .pf{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;font-variant-numeric:lining-nums}
+.v2 .pf i{font-style:normal;font-size:11px;color:#8a7a6d;font-weight:400}
+.v2 .endfoot{position:absolute;left:50%;transform:translateX(-50%);bottom:26px;z-index:50;height:38px;padding:0 20px;font-size:11.5px}
+/* V3 */
+.v3 .tbar{position:relative;z-index:70;height:44px;background:#241511;border-bottom:1px solid #1d100c;display:flex;align-items:center;padding:0 22px;gap:12px;color:#f3e7da}
+.v3 .wm{font-family:'Playfair Display',serif;font-size:15px;font-weight:800;color:#fdfaf5}
+.v3 .bc2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#c9b8ab}
+.v3 .bc2 b{color:#fdfaf5}
+.v3 .endnav{margin-left:auto;height:28px;padding:0 14px;font-size:10px;background:#f3e7da;border:none;color:#2a1a13}
+.v3 .curt,.v3 .dim{top:44px}
+.v3 .hero{position:relative;z-index:50;text-align:center;padding-top:30px}
+.v3 .hero .fr{font-family:'Playfair Display',serif;font-variant-numeric:lining-nums;font-size:44px;font-weight:700;line-height:1}
+.v3 .hero .fr i{font-style:normal;font-size:20px;color:#8a7a6d;font-weight:400}
+.v3 .hero .lab{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.22em;color:#8a7a6d;margin-top:6px}
+</style></head><body><div class="lbl">V1 &middot; The plain masthead <em>&mdash; nav stays exactly as normal, full-width above the curtains; &ldquo;In focus&rdquo; at 36px with the count as a BIG spaced mono line beneath; End session floats top-right inside the tramlines, clear of everything; the trio in a row on the page; page centred in the remaining space.</em></div><div class="stage v1">
+<div class="tbar"><span style="font-size:13px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span class="bc2">QUERYING / TO-DO</span><span style="margin-left:auto;font-size:11px;font-weight:600;color:#4d4238">ML &nbsp;Michael Li</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><h1>In focus</h1><div class="count">TASK <b>1</b> &nbsp;OF&nbsp; <b>29</b></div></div>
+<span class="endw ends">End session &#10005;</span>
+<div class="pageA" style="top:58%">
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Tom Ellery has made an offer</h2>
+<div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date so the decision has a clock.</div>
+<div style="display:flex;gap:8px;margin-top:17px"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq">&#128340; Snooze or dismiss</span></div><div style="display:flex;justify-content:space-between;margin-top:18px"><span class="tlink">&#8249; PREVIOUS &middot; REDO</span><span class="tlink">SKIP &middot; NEXT &#8250;</span></div></div>
+</div><div class="lbl">V2 &middot; The playbill <em>&mdash; a mono kicker over the title; the count as a PROGRESS BAR with a Playfair fraction; End session at the FOOT of the stage, centre &mdash; you leave the theatre at the bottom; the page&rsquo;s actions split: one ink primary, the two secondaries as quiet underlined text.</em></div><div class="stage v2">
+<div class="tbar"><span style="font-size:13px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><div class="kick">FOCUSED SESSION</div><h1>In focus</h1>
+<div class="progwrap"><span class="prog"><b></b></span><span class="pf">2<i> / 29</i></span></div></div>
+<div class="pageA" style="top:55%">
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Tom Ellery has made an offer</h2>
+<div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date so the decision has a clock.</div>
+<div style="display:flex;align-items:center;margin-top:17px"><span class="bp">Action now</span><span style="margin-left:auto;display:flex;gap:16px"><span class="tlink" style="font-size:9px;letter-spacing:.08em;color:#5d4d40;border-bottom:1px solid var(--hair);padding-bottom:1px">&#65291; Today&rsquo;s list</span><span class="tlink" style="font-size:9px;letter-spacing:.08em;color:#5d4d40;border-bottom:1px solid var(--hair);padding-bottom:1px">&#128340; Snooze or dismiss</span></span></div><div style="display:flex;justify-content:space-between;margin-top:18px"><span class="tlink">&#8249; PREVIOUS &middot; REDO</span><span class="tlink">SKIP &middot; NEXT &#8250;</span></div></div>
+<span class="endw endfoot">End session &#10005;</span>
+</div><div class="lbl">V3 &middot; The chrome takeover <em>&mdash; the nav bar itself enters the session: it inks over, the breadcrumb extends to &ldquo;&hellip;/ IN FOCUS&rdquo;, and End session lives IN the bar (cream pill, right) &mdash; chrome-level, always in the same corner; the hero then needs no title at all, just the count as a large Playfair fraction &ldquo;2 of 29&rdquo;.</em></div><div class="stage v3">
+<div class="tbar"><span style="font-size:13px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span><span class="bc2">QUERYING / TO-DO / <b>IN FOCUS</b></span><span class="endw endnav">End session &#10005;</span></div>
+<div class="curt L"></div><div class="curt R"></div><div class="dim"></div>
+<div class="hero"><div class="fr">2 <i>of</i> 29</div><div class="lab">IN FOCUS</div></div>
+<div class="pageA" style="top:56%">
+<div class="rk"><span>&#9733; OFFER</span><span>&middot;</span><span>URGENT</span></div>
+<h2>Tom Ellery has made an offer</h2>
+<div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="body">Offer received 19 July. Two fulls are still out &mdash; Jonathan Marsh and Daniel O&rsquo;Rourke. Convention says you nudge them with the news, and set Tom a reply-by date so the decision has a clock.</div>
+<div style="display:flex;gap:8px;margin-top:17px"><span class="bp">Action now</span><span class="hq">&#65291; Today&rsquo;s list</span><span class="hq">&#128340; Snooze or dismiss</span></div><div style="display:flex;justify-content:space-between;margin-top:18px"><span class="tlink">&#8249; PREVIOUS &middot; REDO</span><span class="tlink">SKIP &middot; NEXT &#8250;</span></div></div>
+</div></body></html>
