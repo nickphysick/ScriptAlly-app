@@ -44,8 +44,13 @@
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
-.tdb-hero { padding: 40px 0 0; text-align: center; }
-.tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: 22px 0 6px; position: relative; z-index: 6; }
+.tdb-hero { padding: 40px 0 0; text-align: center; position: relative; }
+/* v7 — the sub-slot: fixed height so nothing below shifts and nothing overlaps; hosts exactly
+   ONE occupant at a time — the search at rest → the ritual lines → the mono session line —
+   crossfading within it. ≥10px even gaps above/below. */
+.tdb-srchrow { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 20px 0 12px; min-height: 46px; position: relative; z-index: 6; }
+.tdb-srchrow.insession .tdb-bigsearch, .tdb-srchrow.insession .tdb-fpillbtn, .tdb-srchrow.insession .tdb-todaypopwrap { opacity: 0; pointer-events: none; transition: opacity 400ms; }
+.tdb-heroslot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; animation: tdbSesIn 400ms ease; }
 /* hero-pair P1: the pair breathes 24px under the pill (6 srchrow-margin + 18 here); both
    buttons size to content and wrap to a stacked-centred column when the width runs out */
 .tdb-heropair { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin: 18px 0 0; }
@@ -60,6 +65,13 @@
 .tdb-bigsearch input::placeholder { color: var(--muted); }
 .tdb-bigsearch:focus-within { border-color: var(--ink-2); }
 .tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
+/* v7 — the gentle title crossfade (opacity only, 800ms). The pair share the line: t1 in flow,
+   t2 absolute over it — the ONE intended overlap (a crossfade cannot be done without it); the
+   sub-slot below never overlaps and never shifts. */
+.tdb-ask.t1, .tdb-ask.t2 { transition: opacity 800ms ease; }
+.tdb-ask.t2 { position: absolute; left: 0; right: 0; top: 40px; opacity: 0; pointer-events: none; }
+.tdb-ask.t1.out { opacity: 0; }
+.tdb-ask.t2.in { opacity: 1; }
 /* (the strip census retired — the counts live on the filter rail's pills) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
 /* ── THE BUTTON LAW (frame P2; todo-frame-v5.html §2 system 10 + the pack prose — the press
@@ -647,11 +659,7 @@ button.tdb-tdot { cursor: pointer; }
    Seat z: the pool(0) < the deck edges(1) < the skip clone(2) < the card(3) < the handled
    clone(4). ── */
 .tdb-ss { position: fixed; inset: 0; z-index: 48; }
-/* the subtitle under the standing title */
-.tdb-fssub { position: absolute; left: 0; right: 0; text-align: center; font-family: var(--f12-serif); font-style: italic; font-size: 15px; color: var(--ink-2); opacity: 0; transition: opacity 500ms; pointer-events: none; }
-.tdb-fssub.on { opacity: 1; }
-/* the search's vacated slot: the ritual lines, then the session line */
-.tdb-fsslot { position: absolute; left: 0; right: 0; height: 40px; display: flex; align-items: center; justify-content: center; }
+/* v7 — the ritual lines + the session line live inside the hero's fixed sub-slot (.tdb-heroslot) */
 .tdb-fsrit { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .tdb-fsrit span { position: absolute; font-family: var(--f12-serif); font-style: italic; font-size: 19px; color: #6b5a4e; opacity: 0; transform: translateY(8px); transition: opacity 400ms, transform 400ms; }
 .tdb-fsrit span.on { opacity: 1; transform: none; }
@@ -723,7 +731,7 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-sssn { margin-left: auto; font-family: var(--f12-mono); font-size: 9px; color: var(--ink-2); }
 .tdb-ssreviewlist { border-top: 1px solid var(--hairline); margin-top: 4px; padding-top: 4px; }
 @media (prefers-reduced-motion: reduce) {
-  .tdb-fssub, .tdb-fsrit span { transition: none; }
+  .tdb-ask.t1, .tdb-ask.t2, .tdb-fsrit span, .tdb-heroslot { transition: none; animation: none; }
   .tdb-fsses, .tdb-fsdeck, .tdb-ssnext, .tdb-ssclose, .tdb-fspool { animation: none; }
   .tdb-fscard { transition: none; }
   .tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.rise, .tdb-ssstamp { animation: none; }

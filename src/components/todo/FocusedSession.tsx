@@ -33,6 +33,13 @@ import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { QueryStatus } from "../../types";
 
+/** The hero's in-session view-model (v7): ToDoPage renders the crossfading title + the
+ *  fixed sub-slot's single occupant from this — the hero stays a real stacked flow. */
+export type HeroSession =
+  | { clearing: boolean; slot: null }
+  | { clearing: boolean; slot: { kind: "ritual"; index: number } }
+  | { clearing: boolean; slot: { kind: "session"; i: number; n: number; onEnd: () => void } };
+
 export interface FocusedSessionProps {
   /** The session queue — the engine's own boardCards order, captured at launch. */
   queue: BoardCard[];
@@ -43,12 +50,14 @@ export interface FocusedSessionProps {
   onOpenJourney: (card: BoardCard) => void;
   onQuickComplete: (card: BoardCard) => Promise<void> | void;
   canQuickComplete: (card: BoardCard) => boolean;
+  /** v7 — report the hero's in-session state up (the title crossfade + the sub-slot occupant). */
+  onHero: (h: HeroSession) => void;
   onClose: () => void;
 }
 
 const LANE_LABEL: Record<string, string> = { do: "URGENT", hk: "HOUSEKEEPING", nt: "NOTES" };
 
-export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, liveKeys, onOpenJourney, onQuickComplete, canQuickComplete, onClose }) => {
+export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, liveKeys, onOpenJourney, onQuickComplete, canQuickComplete, onHero, onClose }) => {
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const { queries, agents } = useScriptAllyDb();
   const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");
@@ -114,6 +123,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     composedRef.current = true;
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
+    onHero({ clearing: true, slot: null });
     if (!wrapEl) { setLine(-1); setBigOn(true); setEdgesOn(true); setComposed(true); setPhase("session"); return; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_LEFT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_RIGHT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
@@ -163,7 +173,8 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       }
     });
     // 2 — the ritual lines in the search's vacated slot
-    RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => setLine(i)));
+    onHero({ clearing: true, slot: null }); // the title crossfades to "Clearing the desk" as the session begins
+    RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => { setLine(i); onHero({ clearing: true, slot: { kind: "ritual", index: i } }); }));
     // 3 — the gather: every other item flies onto the first task's footprint
     at(GATHER.gatherStartMs, () => {
       if (!wrapEl || composedRef.current) return;
@@ -221,7 +232,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
           setEdgesOn(true);
           setLine(-1);
           setComposed(true);
-          setPhase("session");
+          setPhase("session"); // the sync effect fills the session line
         });
       });
     });
@@ -246,6 +257,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
 
   /** Back to your desk — the compressed reassembly (~700ms), then every style strips. */
   function backToDesk() {
+    onHero({ clearing: false, slot: null }); // the title crossfades back WITH the reassembly
     for (const el of styled.current) {
       el.style.transition = `transform ${GATHER.reverseMs}ms ease, opacity ${GATHER.reverseMs}ms ease, background ${GATHER.reverseMs}ms ease, border-color ${GATHER.reverseMs}ms ease, box-shadow ${GATHER.reverseMs}ms ease`;
       el.style.transform = "";
@@ -347,6 +359,13 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     if (!liveKeys.has(current.key)) markHandledAdvance(current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveKeys, phase, index, order]);
+  // v7 — the hero's sub-slot follows the session: the mono TASK i OF n line while working, and
+  // it empties at the close (the title stays "Clearing the desk" until Back to your desk).
+  useEffect(() => {
+    if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total, onEnd: () => setPhase("close") } });
+    else if (phase === "close") onHero({ clearing: true, slot: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, composed, index, total]);
 
   const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;
   // P3 — the whisper names the next LIVE task (dead entries fast-forward silently anyway)
@@ -359,25 +378,9 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}
       onKeyDown={phase === "gather" && !composed ? jumpToComposed : undefined}
       tabIndex={-1}>
-      {/* the "Focused session" subtitle under the standing title */}
-      <div className={`tdb-fssub${composed && phase !== "close" ? " on" : ""}`} style={{ top: geo.subTop }}>Focused session</div>
-      {/* the ritual lines / the session line — the search's vacated slot */}
-      <div className="tdb-fsslot" style={{ top: geo.slotTop }}>
-        {phase === "gather" && !composed && (
-          <div className="tdb-fsrit" aria-live="polite">
-            {RITUAL_LINES.map((l, i) => (
-              <span key={l} className={line === i ? "on" : line > i ? "off" : ""}>{l}</span>
-            ))}
-          </div>
-        )}
-        {composed && phase !== "close" && (
-          <div className="tdb-fsses">
-            FOCUSED SESSION · TASK <b>{Math.min(index + 1, total)}</b> OF <b>{total}</b> ·{" "}
-            <button type="button" className="tdb-fsend" onClick={() => setPhase("close")}>END SESSION ✕</button>
-          </div>
-        )}
-      </div>
-      {/* the seat region below the hero — the stack, the card, the close all live here */}
+      {/* v7 — the hero's title + sub-slot are driven up through onHero (ToDoPage renders them
+          in the real stacked-flow hero); this overlay carries only the board region below. */}
+      {/* the seat region below the hero — the card + the close live here */}
       <div className="tdb-fswrap" style={{ top: geo.wrapTop }}>
         {phase !== "close" && current && (
           <>

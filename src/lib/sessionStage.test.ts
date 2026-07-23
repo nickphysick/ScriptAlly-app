@@ -66,8 +66,8 @@ describe("the gather's spine", () => {
   it("the exit selectors: sidebars slide, chrome fades, the bar exits up, the sheet dissolves; nothing nests", () => {
     expect(EXIT_LEFT).toBe(".tdb-fside");
     expect(EXIT_RIGHT).toBe(".tdb-railr");
-    expect(EXIT_FADE).toContain(".tdb-bigsearch");
-    expect(EXIT_FADE).toContain(".tdb-heropair");
+    expect(EXIT_FADE).not.toContain(".tdb-bigsearch"); // v7: the HERO owns the search/pair crossfade
+    expect(EXIT_FADE).toContain(".tdb-lh2");
     expect(EXIT_BAR).toBe(".tdb-dochead");
     expect(DISSOLVE).toBe(".tdb-mainc, .tdb-lsec");
     // the gatherables are the items, never their dissolving containers

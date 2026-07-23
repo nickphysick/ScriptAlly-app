@@ -633,7 +633,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(rule(".tdb-hero")).toContain("text-align: center");
     expect(rule(".tdb-hero")).not.toContain("background");
     expect(rule(".tdb-hero")).not.toContain("border");
-    expect(page).toContain('<h1 className="tdb-ask">What’s on your desk?</h1>');
+    expect(page).toContain('>What’s on your desk?</h1>'); // v7: the crossfade pair (t1/t2)
     expect(rule(".tdb-ask")).toContain("font-size: 64px"); // polish: 64
     expect(rule(".tdb-ask")).toContain("letter-spacing: -0.015em");
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
@@ -643,7 +643,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
     const sr = rule(".tdb-srchrow");
     expect(sr).toContain("justify-content: center");
-    expect(sr).toContain("margin: 22px 0 6px"); // polish spacing
+    expect(sr).toContain("margin: 20px 0 12px"); // v7: the fixed sub-slot spacing (≥10px gaps)
     const bs = rule(".tdb-bigsearch");
     expect(bs).toContain("width: 380px"); // doc pass P1: 540 → 380
     expect(bs).toContain("height: 46px");

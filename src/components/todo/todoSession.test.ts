@@ -21,64 +21,61 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("final P1 — the gather (in place: the chrome + title never leave)", () => {
-  it("Begin launches the session with the engine's own queue; the overlay is TRANSPARENT (no ground, no veil)", () => {
+describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritual", () => {
+  it("Begin launches the session with the engine's own queue; the overlay stays transparent", () => {
     expect(page).toContain('onClick={() => setSession({ queue: boardCards })}>');
     expect(page).toContain("queue={session.queue}");
-    expect(rule(".tdb-ss")).not.toContain("background"); // the real title + chrome show through
-    expect(ss).not.toContain("canvas"); // the dark-room veil left with the room pack
+    expect(rule(".tdb-ss")).not.toContain("background");
+    expect(ss).not.toContain("canvas");
   });
-  it("the exits: sidebars slide ∓140% · search/pair/free-cards/headings fade · the bar exits up · the sheet dissolves", () => {
-    expect(ss).toContain("el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`;");
-    expect(ss).toContain("el.style.transform = `translateX(${GATHER.exitSlidePct}%)`;");
-    expect(ss).toContain('el.style.transform = "translateY(-130%)";'); // the document bar
-    expect(ss).toContain('el.style.background = "transparent"; el.style.borderColor = "transparent"; el.style.boxShadow = "none";'); // the dissolve — items float
-    expect(ss).toContain("querySelectorAll<HTMLElement>(EXIT_FADE)");
+  it("the title crossfades gently (opacity only, 800ms) between the two lines — a stacked pair, driven by clearing", () => {
+    expect(page).toContain('<h1 className={`tdb-ask t1${heroSession.clearing ? " out" : ""}`}>What’s on your desk?</h1>');
+    expect(page).toContain('<h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>Clearing the desk</h1>');
+    expect(css).toContain(".tdb-ask.t1, .tdb-ask.t2 { transition: opacity 800ms ease; }");
+    expect(rule(".tdb-ask.t2")).toContain("opacity: 0"); // t2 waits; .in reveals it
+    expect(css).toContain(".tdb-ask.t1.out { opacity: 0; }");
+    expect(css).toContain(".tdb-ask.t2.in { opacity: 1; }");
+    // FocusedSession drives it BOTH ways: clearing:true on start, clearing:false on Back to desk
+    expect(ss).toContain('onHero({ clearing: true, slot: null }); // the title crossfades to "Clearing the desk" as the session begins');
+    expect(ss).toContain("onHero({ clearing: false, slot: null }); // the title crossfades back WITH the reassembly");
   });
-  it("the ritual lines play in the SEARCH'S VACATED SLOT — italic Playfair 19, ink-muted, 780ms each", () => {
-    expect(ss).toContain("RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => setLine(i)));");
+  it("the spacing law: the hero is a stacked flow — the sub-slot is FIXED HEIGHT with even gaps; no absolute over the board", () => {
+    const slot = rule(".tdb-srchrow");
+    expect(slot).toContain("min-height: 46px"); // the slot never collapses when the search leaves
+    expect(slot).toContain("align-items: center");
+    expect(slot).toContain("margin: 20px 0 12px"); // ≥10px even gaps above/below
+    // the ONE intended overlap is the title crossfade pair; the sub-slot content is a real child
+    expect(page).toContain('className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}');
+    expect(page).not.toContain("style={{ top: geo.subTop }}"); // the v6 measured overlay is gone
+    expect(ss).not.toContain("tdb-fssub");
+    expect(css).not.toContain("tdb-fssub");
+    expect(ss).not.toContain("tdb-fsslot");
+  });
+  it("the sub-slot hosts EXACTLY ONE occupant: search at rest → ritual → the mono session line; the search fades in session", () => {
+    expect(page).toContain('<div className="tdb-heroslot" aria-live="polite">');
+    expect(css).toContain(".tdb-srchrow.insession .tdb-bigsearch"); // the search fades within the slot
+    expect(rule(".tdb-heroslot")).toContain("position: absolute; inset: 0");
+    expect(page).toContain("TASK <b>{slot.i}</b> OF <b>{slot.n}</b>");
+    expect(page).not.toContain("FOCUSED SESSION · TASK"); // the prefix + the subtitle are dropped in v7
+    expect(page).toContain('onClick={slot.onEnd}>END SESSION ✕</button>');
+  });
+  it("the ritual lines: the three, italic Playfair 19 ink-muted, 780ms each, reported up per line", () => {
+    expect(ss).toContain('RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => { setLine(i); onHero({ clearing: true, slot: { kind: "ritual", index: i } }); }));');
     const l = rule(".tdb-fsrit span");
     expect(l).toContain("font-style: italic");
     expect(l).toContain("font-size: 19px");
     expect(l).toContain("color: #6b5a4e");
-    expect(ss).toContain('style={{ top: geo.slotTop }}'); // the measured slot, not a hard-coded seat
+    expect(page).toContain('className={slot.index === i ? "on" : slot.index > i ? "off" : ""}'); // rise-in/out both kept
   });
-  it("the gather: every other item flies onto the FIRST task (engine-first via data-tdbkey), staggered, z below it", () => {
-    expect(ss).toContain("const firstKey = queue[0]?.key ?? \"\";");
-    expect(ss).toContain('[data-tdbkey="${');
-    expect(page).toContain("data-tdbkey={c.key}"); // the board rows/cells carry their keys
-    expect(ss).toContain("const s = staggerFor(flyers.length + 1);");
-    expect(ss).toContain("gatherTransform({ left: r.left, top: r.top, width: r.width, height: r.height }");
-    expect(ss).toContain("el.style.opacity = String(GATHER.gatherOpacity);"); // ~85% behind the first
-    expect(ss).toContain('el.style.zIndex = String(Math.max(1, 20 - i));'); // beneath …
-    expect(ss).toContain('firstEl.style.zIndex = "30";'); // … the first, never covered
-    expect(ss).toContain('const m = wrapEl.querySelector<HTMLElement>(".tdb-mainc")?.getBoundingClientRect();'); // the collapsed-member fallback
-  });
-  it("the morph: the pile grows in one motion to the computed rest (min 24 top clearance, remeasured on resize)", () => {
-    expect(ss).toContain("const gRestY = restTop(g.regionH, g.cardH);");
-    expect(ss).toContain("big.style.transform = `translate(${dx}px, ${dy}px) scale(${sc})`;");
-    expect(ss).toContain("big.style.transition = `transform ${GATHER.morphMs}ms cubic-bezier(.25,.8,.3,1.05)`;");
-    expect(ss).toContain('big.style.transform = "none";');
-    expect(ss).toContain("const onResize = () => measure();");
-    expect(ss).toContain("setEdgesOn(true);"); // the deck edges settle in at the rest line
-  });
-  it("the subtitle + the session line take their seats as the gather lands", () => {
-    expect(ss).toContain(">Focused session</div>");
-    expect(rule(".tdb-fssub")).toContain("font-style: italic");
-    expect(ss).toContain("FOCUSED SESSION · TASK <b>{Math.min(index + 1, total)}</b> OF <b>{total}</b>");
-    expect(ss).toContain('onClick={() => setPhase("close")}>END SESSION ✕</button>');
-    expect(rule(".tdb-fsses")).toContain("letter-spacing: 0.18em");
+  it("the session line updates LIVE with the carriage index (one sync effect owns it; it empties at the close)", () => {
+    expect(ss).toContain('if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total, onEnd: () => setPhase("close") } });');
+    expect(ss).toContain('else if (phase === "close") onHero({ clearing: true, slot: null });');
+    expect(ss).toContain("}, [phase, composed, index, total]);");
   });
   it("skip: any click/keypress jumps to the composed state; reduced motion starts there", () => {
     expect(ss).toContain('onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}');
-    expect(ss).toContain('onKeyDown={phase === "gather" && !composed ? jumpToComposed : undefined}');
     expect(ss).toContain("const [composed, setComposed] = useState(reduce);");
-    expect(ss).toContain("if (reduce) {\n      applyComposedInstant();");
-  });
-  it("every styled board element is TRACKED and stripped on any exit (the styled set)", () => {
-    expect(ss).toContain("const styled = useRef<Set<HTMLElement>>(new Set());");
-    expect(ss).toContain('for (const el of styled.current) el.style.cssText = "";');
-    expect(ss).toContain("stripAll();");
+    expect(css).toContain(".tdb-ask.t1, .tdb-ask.t2, .tdb-fsrit span, .tdb-heroslot { transition: none; animation: none; }");
   });
 });
 
@@ -161,11 +158,10 @@ describe("final P4 — the close, in place", () => {
     expect(ss).toContain('at(clearAtMs, () => { setDeal(null); dealRef.current = false; if (willClose) setPhase("close"); });');
     expect(ss).toContain("at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });");
   });
-  it("the headline by state over the same centre region; the subtitle + session line fade with the close", () => {
+  it("the headline by state over the same centre region; the session line empties at the close", () => {
     expect(ss).toContain('{anyLive ? "Good session." : "Desk cleared."}');
     expect(ss).toContain(">Every box ticked turns the dial in your favour.</div>");
-    expect(ss).toContain('className={`tdb-fssub${composed && phase !== "close" ? " on" : ""}`}'); // the subtitle leaves at the close
-    expect(ss).toContain('{composed && phase !== "close" && (');
+    expect(ss).toContain('else if (phase === "close") onHero({ clearing: true, slot: null });'); // v7: the session line leaves; the title stays clearing until Back
     expect(css.match(/\.tdb-ssclose h1 \{([^}]*)\}/)?.[1] ?? "").toContain("font-size: 46px");
   });
   it("the honest ledger from the session events + the frozen timer; Review expands the per-task marks", () => {

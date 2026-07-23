@@ -83,7 +83,7 @@ export const GATHER = {
 /** The exit choreography's selectors (the board transforms; the chrome + title stay). */
 export const EXIT_LEFT = ".tdb-fside"; // the filter card slides off left
 export const EXIT_RIGHT = ".tdb-railr"; // Today slides off right
-export const EXIT_FADE = ".tdb-bigsearch, .tdb-heropair, .tdb-rvbox, .tdb-colo, .tdb-lh2, .tdb-lsech"; // the search, the hero buttons + the centre's free cards and headings fade
+export const EXIT_FADE = ".tdb-rvbox, .tdb-colo, .tdb-lh2, .tdb-lsech"; // the centre's free cards + the headings fade (v7: the HERO owns the search/pair crossfade — see ToDoPage renderHero)
 export const EXIT_BAR = ".tdb-dochead"; // the document bar slides up and out
 export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // white/border/shadow dissolve; the items float
 /** The gatherable items — cards, group bars, or ledger rows, whichever view is up. */

@@ -37,7 +37,8 @@ import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
-import { FocusedSession } from "./FocusedSession";
+import { FocusedSession, HeroSession } from "./FocusedSession";
+import { RITUAL_LINES } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { ProBanner, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
@@ -546,6 +547,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // the focused session (the session pack): the queue = the ENGINE's own boardCards order,
   // captured at launch; the cinematic container drives it.
   const [session, setSession] = useState<{ queue: BoardCard[] } | null>(null);
+  // v7 — the hero in session: the title crossfade + the fixed sub-slot's single occupant are
+  // driven by the FocusedSession through this ONE lifted view-model (the hero stays a real
+  // stacked flow — nothing absolutely positioned over the board).
+  const [heroSession, setHeroSession] = useState<HeroSession>({ clearing: false, slot: null });
   // frame P3 — the review's AFTERLIFE: opening or dismissing the banner collapses it for the
   // week (per-week sa. prefs; recon found no existing seen/dismissed flags — the completion
   // sentinel is the one stored "opened" record, and it composes into seen below). The rail's
@@ -943,7 +948,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}
           onQuickComplete={quickDone}
           canQuickComplete={sessionCanQuick}
-          onClose={() => setSession(null)}
+          onHero={setHeroSession}
+          onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}
         />
       )}
     </F12Page>
@@ -1002,14 +1008,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {/* v4 P1 — the hero sits on the bare page ground: no band, no border, CENTRED; the
             search stacks directly beneath it. The focused-session button lives in the rail. */}
         <div className="tdb-hero">
-          <h1 className="tdb-ask">What’s on your desk?</h1>
+          {/* v7 — the gentle title crossfade (opacity only, 800ms): the stacked pair share the
+              line; nothing shifts (the sub-slot below is fixed height). */}
+          <h1 className={`tdb-ask t1${heroSession.clearing ? " out" : ""}`}>What’s on your desk?</h1>
+          <h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>Clearing the desk</h1>
         </div>
         {/* hero-pair P1 (todo-hero-pair.html variant B): Begin + the review chip sit centred
             beneath the search with 24px of clear air; both size to content. The chip renders
             only in its AFTERLIFE state (opened/dismissed — the banner's complement); Begin
             re-centres alone otherwise. The pair is hero furniture — it never folds into the
             rail's compact drawer. */}
-        <div className="tdb-srchrow">
+        <div className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}>
           {/* doc pass P1 — 380px; the ⌘K advert is gone (the shortcut itself still focuses
               here); the glass grows to a 19px stroke icon in a 34px oat roundel at the right */}
           <span className="tdb-bigsearch">
@@ -1026,6 +1035,27 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
             </span>
           </span>
+          {/* v7 — the sub-slot's session occupant: the ritual lines during the opening, then the
+              mono session line. It crossfades over the faded search WITHIN the fixed slot. */}
+          {heroSession.slot && (() => {
+            const slot = heroSession.slot;
+            return (
+              <div className="tdb-heroslot" aria-live="polite">
+                {slot.kind === "ritual" ? (
+                  <div className="tdb-fsrit">
+                    {RITUAL_LINES.map((l, i) => (
+                      <span key={l} className={slot.index === i ? "on" : slot.index > i ? "off" : ""}>{l}</span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="tdb-fsses">
+                    TASK <b>{slot.i}</b> OF <b>{slot.n}</b> ·{" "}
+                    <button type="button" className="tdb-fsend" onClick={slot.onEnd}>END SESSION ✕</button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {compact && (
             <button type="button" className="tdb-fpillbtn" aria-haspopup="dialog" aria-expanded={filterDrawerOpen} onClick={() => setFilterDrawerOpen((v) => !v)}>
               ⚲ FILTER · {shownX}/{shownY}
