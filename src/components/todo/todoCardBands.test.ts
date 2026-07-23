@@ -54,15 +54,15 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("position: absolute; top: 0; left: 0; right: 0;");
     expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("min-height: 100%");
   });
-  it("the verb row lives INSIDE the surface's border: grid 0fr⇄1fr 180ms; the wrapper brings NOTHING of its own", () => {
+  it("the verb stack lives INSIDE the surface's border: grid 0fr⇄1fr 180ms; the wrapper brings NOTHING of its own", () => {
     expect(rule(".tdb-vwrap")).toContain("display: grid; grid-template-rows: 0fr; transition: grid-template-rows 180ms ease");
     expect(css).toContain(".tdb-tile.hov .tdb-vwrap, .tdb-gcard.hov .tdb-vwrap { grid-template-rows: 1fr; }");
     expect(rule(".tdb-vinner")).toContain("overflow: hidden");
-    for (const banned of ["background", "border", "border-radius", "box-shadow"]) {
+    for (const banned of ["background", "border-radius", "box-shadow"]) {
       expect(rule(".tdb-vwrap")).not.toContain(banned);
-      expect(rule(".tdb-verbs")).not.toContain(banned);
+      expect(rule(".tdb-vstack")).not.toContain(banned); // (the stack's border-TOP hairline is the ref's divider, not chrome)
     }
-    expect(rule(".tdb-verbs")).not.toContain("position: absolute");
+    expect(rule(".tdb-vstack")).not.toContain("position: absolute");
     // always mounted (the animation needs it); aria-hidden + visibility gate the tab order
     expect(page).toContain("{cardVerbs(c, hov)}");
     expect((page.match(/className="tdb-vwrap" aria-hidden=\{!hov\}/g) ?? []).length).toBe(2);
@@ -73,11 +73,20 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(css).toContain(".tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }");
     expect(css).toContain(".tdb-tile.hov, .tdb-gcard.hov { transform: none; }");
   });
-  it("verbs: unit [✓ DONE]·[＋/− TODAY]·[☾ LATER ▾]; batch [⚡ FIX n →]·[☾ LATER ▾]; offers keep no ✓", () => {
-    expect(page).toContain('{!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}');
-    expect(page).toContain('{committed ? "− TODAY" : "＋ TODAY"}');
-    expect(page).toContain(">⚡ FIX {g.members.length} →</button>");
-    expect(page).toContain(">☾ LATER ▾</button>");
+  it("toolbelt P2 — ONE grammar with the ledger: the stack reads VERB_LABELS (a single source; renames touch one place)", () => {
+    expect(page).toContain('action: "Action now",');
+    expect(page).toContain('todayAdd: "＋ Today’s list",');
+    expect(page).toContain('todayRemove: "− Today’s list",');
+    expect(page).toContain('later: "☾ Snooze or dismiss ▾",');
+    // the unit stack: Action now (emphasised) · Today's list · Snooze or dismiss — 30px rows
+    expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
+    expect(rule(".tdb-vstack")).toContain("gap: 6px");
+    expect(css).toContain(".tdb-vstack .tdb-btnh { height: 30px; width: 100%; font-size: 10px; }");
+    // the short verbs are extinct — the doc-pass divergence is formally retired
+    expect(page).not.toContain("✓ DONE");
+    expect(page).not.toContain("⚡ FIX");
+    expect(page).not.toContain("LATER ▾");
   });
   it("the Later menu — identical everywhere: tomorrow · a week · the per-type hide (restorable)", () => {
     expect(page).toContain(">Remind me tomorrow</button>");
@@ -113,13 +122,13 @@ describe("v4 P4 — the batch card levels with units at rest; detail rides the h
     expect(body).not.toContain("tdb-gsub");
     expect(body).not.toContain("tdb-gprog");
   });
-  it("the description + progress reveal INSIDE the expansion, above the verbs; ⚡ FIX stays primary", () => {
+  it("the description + progress reveal INSIDE the expansion, above the stack; Action now stays primary", () => {
     const start = page.indexOf('className="tdb-gdetail"');
-    const wrap = page.slice(start, page.indexOf(">⚡ FIX", start));
+    const wrap = page.slice(start, page.indexOf('className="tdb-vstack"', start));
     expect(wrap).toContain("tdb-gsub");
     expect(wrap).toContain("tdb-pbar");
     expect(wrap).toContain("tdb-pcap");
     expect(rule(".tdb-gdetail")).toContain("padding: 0 12px 6px");
-    expect(page).toContain(">⚡ FIX {g.members.length} →</button>");
+    expect(page).toContain('className="tdb-btnh em" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>');
   });
 });

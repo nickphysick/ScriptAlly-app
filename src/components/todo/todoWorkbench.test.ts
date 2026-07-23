@@ -156,8 +156,8 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect((page.match(/className="tdb-btnp sm"/g) ?? []).length).toBe(1); // Work the list (Today)
     expect(page).toContain('className="tdb-btnp sm tdb-rvopen2"'); // Open it › (the review banner)
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(3); // the full ink census — three, nowhere else
-    expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>');
-    expect(page).toContain('className="tdb-btnh em" onClick={open}>Action now</button>');
+    expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(page).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
     expect(page).toContain('className="tdb-btnh" onClick={() => toggleToday(c)}');
     expect(page).toContain('className="tdb-btnh" onClick={helpMePick}>＋ Add more</button>');
     // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
@@ -565,7 +565,7 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
   });
   it("VI P3: the Focus pill became the PLAY BUTTON — full wording in title/aria; Batch fix stands", () => {
     expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
-    expect(page).toContain(">⚡ FIX {g.members.length} →</button>"); // the run-sheet primary (the quick → retired with the table)
+    expect(page).toContain('onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>'); // the batch card's lead (toolbelt P2 parity)
     expect(page).not.toContain("Fix together");
     expect(page).not.toContain(">▶ Focus on"); // the pill text is extinct in both views
   });
@@ -634,16 +634,16 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(rule(".tdb-lacts")).toContain("align-self: center");
     expect(rule(".tdb-btnh")).toContain("height: 34px"); // frame P2: the row actions ride the law's small height
     const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
-    expect(rr).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>');
+    expect(rr).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
     expect(rr).not.toContain("quickDone(c)}>Action now");
-    expect(rr).toContain('{committed ? "− Today’s list" : "＋ Today’s list"}');
+    expect(rr).toContain('{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}');
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
     expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });');
-    expect(br).toContain('className="tdb-btnh em" onClick={open}>Action now</button>');
+    expect(br).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
     expect(br).not.toContain("Today’s list"); // groups stay uncommittable — the carried resolution
   });
   it("the dropdown keeps the Later items under the renamed trigger", () => {
-    expect(page).toContain('{ledger ? "☾ Snooze or dismiss ▾" : "☾ LATER ▾"}');
+    expect(page).toContain('>{VERB_LABELS.later}</button>'); // ONE trigger form everywhere (the ledger param died)
     expect((page.match(/>Remind me tomorrow<\/button>/g) ?? []).length).toBe(3); // the card menu + the ledger batch row + the batch CARD
     expect((page.match(/>Give it a week<\/button>/g) ?? []).length).toBe(3);
     expect((page.match(/>Don’t show these again<\/button>/g) ?? []).length).toBe(3);
@@ -658,12 +658,17 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
     expect(br).toContain('<span className="tdb-ldot" aria-hidden><span className="tdb-lddot" /></span>');
   });
-  it("the cards view keeps its short verbs — the divergence is deliberate and BAKED; row click parity holds", () => {
+  it("toolbelt P2 — the divergence is RETIRED: cards + ledger read ONE shared VERB_LABELS constant", () => {
     const cv = page.slice(page.indexOf("function cardVerbs"), page.indexOf("function renderCard"));
-    expect(cv).toContain(">✓ DONE</button>");
-    expect(cv).toContain('{committed ? "− TODAY" : "＋ TODAY"}');
+    expect(cv).toContain("{VERB_LABELS.action}");
+    expect(cv).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
     expect(cv).toContain("laterMenu(c)");
-    expect(page).toContain(">⚡ FIX {g.members.length} →</button>"); // the batch CARD primary stands
+    // the literals live ONCE, in the constant — nowhere inline
+    expect((page.match(/: "Action now"/g) ?? []).length).toBe(1); // the constant's assignment alone
+    expect((page.match(/: "☾ Snooze or dismiss ▾"/g) ?? []).length).toBe(1);
+    expect(page).not.toContain("✓ DONE");
+    expect(page).not.toContain("⚡ FIX");
+    expect(page).not.toContain("LATER ▾");
     const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
     expect(rr).toContain("onClick={() => openFlowCards([c])}");
   });
@@ -947,10 +952,10 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     // doc pass P4 re-legalised the phrase ON THE PAGE for one control only: the ledger's
     // ghost "＋/− Today's list" (ref B baked) — exactly the toggle's two forms, nowhere else
     expect((page.match(/oday’s list/g) ?? []).length).toBe(2);
-    expect(page).toContain('{committed ? "− Today’s list" : "＋ Today’s list"}');
+    expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // via the shared constant — the two literals live in VERB_LABELS alone
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)
-    expect(page).toContain('{committed ? "− TODAY" : "＋ TODAY"}'); // the verb row's Today toggle
+    expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // the card stack's Today toggle (toolbelt P2)
   });
   it("the header's right slot: today's date when empty ⇄ '{n} OF 5' once anything is committed", () => {
     expect(page).toContain("{committedCards.length === 0 && doneN === 0 ? shortHeaderDate(now) : `${committedCards.length} OF ${MAX_TODAY}`}");

@@ -61,6 +61,15 @@ const shortHeaderDate = (ms: number): string =>
 // initialised — and a hoisted reader hits the TDZ at first render (the crash class that took
 // the whole app down twice: openSundayReview `4d4fbed`, GHOST_BARS this fix). The regression
 // lock in todoWorkbench.test.ts bans component-level const/let after the return.
+// toolbelt P2 — ONE source for the action labels: the ledger rows AND the card stacks read
+// these strings; a future rename touches this object only.
+const VERB_LABELS = {
+  action: "Action now",
+  todayAdd: "＋ Today’s list",
+  todayRemove: "− Today’s list",
+  later: "☾ Snooze or dismiss ▾",
+} as const;
+
 const GHOST_BARS = [64, 78, 52];
 const fmtTime = (ms?: number): string => {
   if (ms == null) return "";
@@ -1102,7 +1111,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // white cards inside it. DONE lives at the row's HEAD: the 24px family roundel becomes a
   // tick on row hover/focus and completes immediately (offers + batches keep the plain dot —
   // an offer needs its moment, a batch has no single completion). The acting controls sit at
-  // the tail, 32px, vertically centred: press "Action now" (OPENS the acting surface, same as
+  // the tail, vertically centred: the emphasised lead (OPENS the acting surface, same as
   // row-click — it never marks complete) · ghost "＋ Today's list" · ghost "☾ Snooze or
   // dismiss ▾" (the SAME Later menu, renamed trigger). The cards view keeps its short verbs —
   // a deliberate, baked divergence. Headings stick within the page scroll on a wash-coloured
@@ -1139,9 +1148,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {c.subtitle && <div className="tdb-lbms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
         </div>
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>
-          <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? "− Today’s list" : "＋ Today’s list"}</button>
-          {laterMenu(c, true)}
+          <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
+          <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}</button>
+          {laterMenu(c)}
         </div>
       </div>
     );
@@ -1164,9 +1173,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-mmeta">{prog.caption.toUpperCase()} · {prog.pct}%</div>
         </div>
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="tdb-btnh em" onClick={open}>Action now</button>
+          <button type="button" className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>
           <span className="tdb-latwrap">
-            <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ Snooze or dismiss ▾</button>
+            <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>{VERB_LABELS.later}</button>
             {laterKey === key && (
               <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                 <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
@@ -1284,12 +1293,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── Deck v2 P4: THE CARD CONTRACT (the LAWS, verbatim) — band = identity + status only (tag,
-  // the sage ✓ TODAY chip); body = content only; CLICK ANYWHERE opens (unit → the journey sheet);
-  // hover (~150ms intent, 180ms ease) grows the VERB ROW downward as an overlay — the reel never
-  // reflows: [✓ DONE] · ＋/− TODAY · ☾ LATER ▾ (tomorrow / a week / don't-show-these — the
-  // per-type hide, restorable in Task settings). Offers: no ✓ DONE (the journey decides), no
-  // hide (the locked row). The old quick rail, body pill and meta row are retired. ──
+  // ── THE CARD CONTRACT (Deck v2 laws; labels realigned by toolbelt P2) — band = identity +
+  // status only (tag, the sage ✓ TODAY chip); body = content only; CLICK ANYWHERE opens (unit →
+  // the journey sheet); hover (~150ms intent, 180ms ease) grows the STACK downward as an
+  // overlay — the reel never reflows: Action now · ＋/− Today's list · ☾ Snooze or dismiss ▾
+  // (tomorrow / a week / don't-show-these — the per-type hide, restorable in Task settings;
+  // offers keep no hide — the locked row). One grammar with the ledger, via VERB_LABELS. ──
   // arrow navigation inside the Later menu (P5 a11y): ↓/↑ cycle the menuitems; Esc closes
   function latMenuKeys(e: React.KeyboardEvent<HTMLDivElement>) {
     const items = Array.from((e.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>("[role=menuitem]"));
@@ -1298,11 +1307,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
     else if (e.key === "Escape") { e.stopPropagation(); setLaterKey(null); }
   }
-  function laterMenu(c: BoardCard, ledger = false) {
+  function laterMenu(c: BoardCard) {
     const hideKey = laterHideKey(c.taskType);
     return (
       <span className="tdb-latwrap">
-        <button type="button" className={ledger ? "tdb-btnh" : "tdb-verb"} aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>{ledger ? "☾ Snooze or dismiss ▾" : "☾ LATER ▾"}</button>
+        <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>{VERB_LABELS.later}</button>
         {laterKey === c.key && (
           <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
             <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>
@@ -1317,15 +1326,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
   // The verb wrapper is ALWAYS mounted (the 0fr→1fr grid trick needs a live element to
   // animate); visibility keeps the collapsed buttons out of the tab order.
+  // toolbelt P2 — the cards adopt the ledger's phrases: the expansion stacks the three
+  // full-width rows (single-surface mechanics untouched; rest state untouched). The tick verb left
+  // the card verbs with the parity — the quickDone pathway stands at its other surfaces
+  // (the ledger's head checkbox, Today's tick).
   function cardVerbs(c: BoardCard, hov: boolean) {
     const committed = onList(c);
-    const isOffer = c.taskType === "offer_received";
     return (
       <div className="tdb-vwrap" aria-hidden={!hov}>
         <div className="tdb-vinner">
-          <div className="tdb-verbs" onClick={(e) => e.stopPropagation()}>
-            {!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}
-            <button type="button" className="tdb-verb" onClick={() => toggleToday(c)}>{committed ? "− TODAY" : "＋ TODAY"}</button>
+          <div className="tdb-vstack" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
+            <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}</button>
             {laterMenu(c)}
           </div>
         </div>
@@ -1372,10 +1384,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── the BATCH card (the contract): flat, hairline, count headline + sub + progress + roundels;
-  // no roundel buttons, no footer CTA, no NEVER — click anywhere opens the Batch-fix sheet;
-  // hover verbs [⚡ FIX n →] · ☾ LATER ▾ (＋ TODAY omitted: groups are not committable — the
-  // existing Today primitive is per-card; reported). ──
+  // ── the BATCH card (the contract): flat, hairline, count headline + roundels; click anywhere
+  // opens the Batch-fix sheet; the hover stack = Action now · ☾ Snooze or dismiss ▾ (Today's
+  // list omitted: groups are not committable — the existing Today primitive is per-card). ──
   function renderGroupCard(g: HkGroup) {
     const key = `group-${g.rule}`;
     const ov = overlays[key];
@@ -1419,10 +1430,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
                 </div>
               </div>
-              <div className="tdb-verbs" onClick={(e) => e.stopPropagation()}>
-                <button type="button" className="tdb-verb pri" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>⚡ FIX {g.members.length} →</button>
+              <div className="tdb-vstack" onClick={(e) => e.stopPropagation()}>
+                <button type="button" className="tdb-btnh em" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>
                 <span className="tdb-latwrap">
-                  <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ LATER ▾</button>
+                  <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>{VERB_LABELS.later}</button>
                   {laterKey === key && (
                     <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                       <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>

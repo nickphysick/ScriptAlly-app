@@ -400,7 +400,12 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-vinner { overflow: hidden; min-height: 0; visibility: hidden; transition: visibility 0s linear 180ms; }
 .tdb-tile.hov .tdb-vinner, .tdb-gcard.hov .tdb-vinner { visibility: visible; transition-delay: 0s; }
 .tdb-gdetail { padding: 0 12px 6px; } /* v4 P4: the batch detail revealed above the verbs */
-.tdb-verbs { display: flex; gap: 5px; padding: 2px 12px 12px; }
+/* toolbelt P2 (todo-toolbelt.html §2 .vstack): the expansion stacks the ledger's three
+   phrases full-width above a hairline; the reveal mechanics (vwrap/vinner) untouched. */
+.tdb-vstack { display: flex; flex-direction: column; gap: 6px; margin: 9px 12px 12px; border-top: 1px solid var(--hairline); padding-top: 11px; }
+.tdb-vstack .tdb-btnh { height: 30px; width: 100%; font-size: 10px; }
+.tdb-vstack .tdb-latwrap { width: 100%; display: flex; }
+.tdb-vstack .tdb-latwrap .tdb-btnh { flex: 1; }
 /* the verb row adopts the law's TONES at its own compact geometry (frame P2): .pri =
    emphasised (ink border/text), base = quiet — never ink-solid */
 .tdb-verb { flex: 1; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 6px 0; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.05em; text-align: center; color: #6b5a4e; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; cursor: pointer; }
