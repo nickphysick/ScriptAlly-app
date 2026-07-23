@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The first-visit tour — polish P5 retarget: hero → search → rail pills → the review card → a card →
+ * The first-visit tour — polish P5 retarget: hero → search → rail pills → the rail's REVIEW row → a card →
  * Today. Copy snapshot-locked; the auto-run gate unchanged.
  */
 import { describe, it, expect } from "vitest";
@@ -14,7 +14,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
       ".tdb-fsb2",
       ".tdb-bigsearch",
       ".tdb-fpill, .tdb-fpillbtn",
-      ".tdb-rvbox",
+      ".tdb-rvrow",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       ".tdb-today2, .tdb-todaychip",
     ]);
@@ -34,6 +34,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
     expect(TOUR_STOPS[1].p).toContain("⌘K");
     expect(TOUR_STOPS[2].p).toContain("RESET brings everything back");
     expect(TOUR_STOPS[3].p).toContain("turns the dial in your favour");
+    expect(TOUR_STOPS[3].p).toContain("or find it under REVIEW in the rail"); // frame P4 retarget
     expect(TOUR_STOPS[4].p).toContain("Hover for the quick verbs");
     expect(TOUR_STOPS[5].p).toContain("struck through as you go");
   });

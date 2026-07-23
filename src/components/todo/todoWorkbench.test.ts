@@ -217,6 +217,24 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
   });
 });
 
+describe("frame P4 — sweep", () => {
+  it("the press primitives + the roundel are extinct; the tour's review stop targets the rail row", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('".tdb-rvrow"');
+    expect(tour).not.toContain("tdb-rvbox");
+    expect(tour).toContain("or find it under REVIEW in the rail");
+    expect(page).not.toContain("tdb-cta");
+    expect(css).not.toContain("tdb-cta");
+    expect(page).not.toContain("tdb-sic");
+    expect(css).not.toContain("tdb-sic");
+  });
+  it("no tour step references Task settings (recon: none existed — nothing to retarget)", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).not.toContain("Task settings");
+    expect(tour).not.toContain("tdb-setrow");
+  });
+});
+
 describe("frame P3 — the sectioned rail + the review's afterlife", () => {
   it("rail order: Begin · REVIEW band · the review row · FILTER band · SHOW ALL … · divider · lens · the foot", () => {
     const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
