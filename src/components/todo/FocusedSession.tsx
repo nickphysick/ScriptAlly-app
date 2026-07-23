@@ -56,6 +56,13 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   const [deal, setDeal] = useState<{ card: BoardCard; kind: "handled" | "skip" } | null>(null);
   const [rose, setRose] = useState(false);
   const dealRef = useRef(false);
+  // ── session P4: the close — the session-scoped timer freezes on entry; the review list
+  // expands the ledger to per-task marks. ──
+  const closedAt = useRef<number | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  useEffect(() => {
+    if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();
+  }, [phase]);
   // the opening's own progress — "final" = the lit-card + pair composition
   const [openingFinal, setOpeningFinal] = useState(reduce);
   const [line, setLine] = useState(-1); // the active ritual line
@@ -430,13 +437,36 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
         </div>
       )}
       {phase === "close" && (
-        // P2 scaffold — Phase 4 builds the full close (the ledger + review expansion)
+        // ── session P4: THE CLOSE (frame D) — the bare ground; "Desk cleared." when the
+        // queue emptied, "Good session." on an early exit (same ledger, no guilt copy).
+        // Completed work is already on the board via the shared derivation — the session
+        // holds NO local state that needs syncing (and writes nothing, ever).
         <div className="tdb-ssroom">
           <div className="tdb-ssclose">
             <h1>{order.some((x) => liveKeys.has(x.key)) ? "Good session." : "Desk cleared."}</h1>
             <div className="tdb-ssub">Every box ticked turns the dial in your favour.</div>
+            <div className="tdb-sssum">
+              <div className="tdb-sssumrow"><span className="tdb-sssd done" aria-hidden>✓</span>Handled<span className="tdb-sssn">{handled.length}</span></div>
+              {skipped.length > 0 && (
+                <div className="tdb-sssumrow"><span className="tdb-sssd skip" aria-hidden />Skipped — back on your desk<span className="tdb-sssn">{skipped.length}</span></div>
+              )}
+              <div className="tdb-sssumrow"><span className="tdb-sssd time" aria-hidden>⏱</span>Session length<span className="tdb-sssn">{Math.max(1, Math.round(((closedAt.current ?? Date.now()) - startedAt.current) / 60000))} MIN</span></div>
+              {reviewOpen && (handled.length > 0 || skipped.length > 0) && (
+                <div className="tdb-ssreviewlist">
+                  {handled.map((c) => (
+                    <div key={c.key} className="tdb-sssumrow sub"><span className="tdb-sssd done" aria-hidden>✓</span>{c.title}</div>
+                  ))}
+                  {skipped.map((c) => (
+                    <div key={c.key} className="tdb-sssumrow sub"><span className="tdb-sssd skip" aria-hidden />{c.title}</div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="tdb-ssexits">
               <button type="button" className="tdb-ssb bp on" onClick={onClose}>Back to your desk</button>
+              {(handled.length > 0 || skipped.length > 0) && (
+                <button type="button" className="tdb-btnh tdb-ssbig" onClick={() => setReviewOpen((v) => !v)}>Review what you did</button>
+              )}
             </div>
           </div>
         </div>

@@ -168,3 +168,31 @@ describe("session P3 — the deal (option A: the paper stack)", () => {
   });
 });
 
+describe("session P4 — the close (frame D)", () => {
+  it("the headline by state: Desk cleared. when the queue emptied · Good session. on an early exit — same ledger, no guilt copy", () => {
+    expect(ss).toContain('{order.some((x) => liveKeys.has(x.key)) ? "Good session." : "Desk cleared."}');
+    expect(ss).toContain(">Every box ticked turns the dial in your favour.</div>");
+    expect(css.match(/\.tdb-ssclose h1 \{([^}]*)\}/)?.[1] ?? "").toContain("font-size: 46px");
+  });
+  it("the honest ledger from the SESSION EVENTS: ✓ Handled n · dashed-ring Skipped (uniform destination named) · ⏱ length from the frozen timer", () => {
+    expect(ss).toContain(">Handled<span className=\"tdb-sssn\">{handled.length}</span>".replace(/\\/g, ""));
+    expect(ss).toContain(">Skipped — back on your desk<span className=\"tdb-sssn\">{skipped.length}</span>".replace(/\\/g, ""));
+    expect(ss).toContain('if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();'); // the timer freezes on entry
+    expect(ss).toContain("Math.max(1, Math.round(((closedAt.current ?? Date.now()) - startedAt.current) / 60000))");
+    expect(css).toContain(".tdb-sssd.done { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2));");
+    expect(css).toContain(".tdb-sssd.skip { background: var(--white, #fff); border: 1px dashed var(--line); color: transparent; }");
+  });
+  it("Review what you did expands the ledger to the per-task list with the mark grammar (sage tick / dashed ring)", () => {
+    expect(ss).toContain('onClick={() => setReviewOpen((v) => !v)}>Review what you did</button>');
+    expect(ss).toContain("{handled.map((c) => (");
+    expect(ss).toContain("{skipped.map((c) => (");
+    expect(ss).toContain('className="tdb-sssumrow sub"');
+  });
+  it("Back to your desk returns via onClose; the board already reflects the work — the session WRITES NOTHING (no sync)", () => {
+    expect(ss).toContain('onClick={onClose}>Back to your desk</button>');
+    for (const w of ["recordMaterialsSent", "updateQueryStatus", "upsertTaskFlag", "updateUserTask", "updateAgent", "updateUserProfile", "dismissTask", "logNudge", "addUserTask", "deleteActivity"]) {
+      expect(ss).not.toContain(w);
+    }
+  });
+});
+
