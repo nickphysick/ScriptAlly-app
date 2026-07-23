@@ -668,7 +668,27 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-ssroom { position: absolute; inset: 0; background: var(--oat); overflow-y: auto; }
 .tdb-ssbar { display: flex; align-items: center; gap: 14px; padding: 16px 26px; border-bottom: 1px solid var(--line); }
 .tdb-ssk { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.16em; color: var(--ink-2); white-space: nowrap; }
+.tdb-ssprog { flex: 1; height: 4px; border-radius: 2px; background: #e3d8c8; overflow: hidden; }
+.tdb-ssprog b { display: block; height: 100%; background: var(--ink); border-radius: 2px; transition: width 300ms ease; }
 .tdb-ssexit { margin-left: auto; background: none; border: none; border-bottom: 1px solid var(--line); padding: 0 0 1px; font-size: 11px; font-weight: 600; color: #6b5a4e; cursor: pointer; }
+/* the room (frame A): one 560 sheet, centred — nothing else exists */
+.tdb-ssroomc { display: flex; flex-direction: column; align-items: center; padding-top: 34px; }
+.tdb-ssheet { width: 560px; max-width: 92vw; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 18px; box-shadow: 0 16px 44px rgba(58, 28, 20, 0.16); overflow: hidden; }
+.tdb-ssheet .tdb-band { padding: 9px 18px; min-height: 0; }
+.tdb-ssheetc { padding: 22px 26px 24px; }
+.tdb-ssheetc h2 { font-family: var(--f12-serif); font-size: 26px; font-weight: 700; line-height: 1.15; color: var(--ink); }
+.tdb-ssms2 { font-family: var(--f12-serif); font-style: italic; font-size: 12px; color: var(--ink-2); margin-top: 5px; }
+.tdb-ssctx { margin-top: 16px; background: #fbf8f3; border: 1px solid var(--hairline); border-radius: 11px; padding: 12px 14px; font-size: 11.5px; color: #5d4d40; line-height: 1.55; }
+.tdb-ssctx b { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.13em; color: var(--faint); display: block; margin-bottom: 4px; font-weight: 600; }
+.tdb-ssacts { display: flex; gap: 9px; margin-top: 20px; flex-wrap: wrap; }
+.tdb-ssbig { height: 42px; padding: 0 18px; font-size: 11.5px; }
+.tdb-ssnext { margin-top: 22px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; color: var(--faint); }
+.tdb-ssnext i { font-style: normal; color: #6b5a4e; }
+/* the close (frame D — P4 completes the ledger) */
+.tdb-ssclose { text-align: center; padding: 64px 0 30px; }
+.tdb-ssclose h1 { font-family: var(--f12-serif); font-size: 46px; font-weight: 700; color: var(--ink); }
+.tdb-ssub { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--ink-2); margin-top: 8px; }
+.tdb-ssexits { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-ssdim, .tdb-ssveil, .tdb-sslines span, .tdb-ssb, .tdb-ssfirst { transition: none; }
 }

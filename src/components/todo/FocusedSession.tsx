@@ -20,6 +20,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BoardCard } from "../../lib/todoBoard";
 import { nearestEdgeFly, wanderPoints, OPENING, RITUAL_LINES, FLY_SELECTOR } from "../../lib/sessionStage";
+import { whereThisStands, STATUS_OWED } from "../../lib/sessionContext";
+import { useScriptAllyDb } from "../../lib/db";
+import { getPrimaryAction } from "../../lib/queryPrimaryAction";
+import { QueryStatus } from "../../types";
 
 export interface FocusedSessionProps {
   /** The session queue — the engine's own boardCards order, captured at launch. */
@@ -38,7 +42,15 @@ const LANE_LABEL: Record<string, string> = { do: "URGENT", hk: "HOUSEKEEPING", n
 
 export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, liveKeys, onOpenJourney, onQuickComplete, canQuickComplete, onClose }) => {
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  const { queries, agents } = useScriptAllyDb();
   const [phase, setPhase] = useState<"opening" | "room" | "close">("opening");
+  // ── session P2: the room's engine seat — the session-local ORDER (skip requeues to its
+  // end), the index, and the session's own event ledger (the close reads it). ──
+  const [order, setOrder] = useState<BoardCard[]>(queue);
+  const [index, setIndex] = useState(0);
+  const [handled, setHandled] = useState<BoardCard[]>([]);
+  const [skipped, setSkipped] = useState<BoardCard[]>([]);
+  const startedAt = useRef(Date.now());
   // the opening's own progress — "final" = the lit-card + pair composition
   const [openingFinal, setOpeningFinal] = useState(reduce);
   const [line, setLine] = useState(-1); // the active ritual line
@@ -223,6 +235,79 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   const lane = (c: BoardCard) => LANE_LABEL[c.stream] ?? "";
   const isOffer = (c: BoardCard) => c.taskType === "offer_received";
 
+  // ── session P2: the room ──
+  const current = order[index];
+  const total = order.length;
+  /** "Where this stands" — assembled from EXISTING derived fields only (the template lib
+   *  omits any clause whose fact is missing; "" hides the card). */
+  function standFor(c: BoardCard): string {
+    if (c.userTaskId) return "";
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    const agentName = c.who || undefined;
+    if (c.taskType === "offer_received") {
+      const outstanding = queries
+        .filter((x) => x.id !== q?.id && getPrimaryAction(x.status as QueryStatus).ballHolder === "agent")
+        .map((x) => agents.find((a) => a.id === x.agentId)?.name)
+        .filter((n): n is string => !!n);
+      return whereThisStands({ kind: "offer", agentName, offerDate: q?.lastStatusChange, outstanding });
+    }
+    if (c.taskType === "no_response_close") {
+      const agent = q ? agents.find((a) => a.id === q.agentId) : undefined;
+      const silentDays = q?.dateSent ? Math.max(0, Math.floor((Date.now() - new Date(q.dateSent).getTime()) / 86400000)) : undefined;
+      return whereThisStands({ kind: "stale", agentName, silentDays, windowWeeks: agent?.responseTimeWeeks || undefined });
+    }
+    if (c.taskType === "nudge_overdue") {
+      const agent = q ? agents.find((a) => a.id === q.agentId) : undefined;
+      return whereThisStands({ kind: "nudge", sentDate: q?.dateSent, windowWeeks: agent?.responseTimeWeeks || undefined });
+    }
+    if (c.taskType === "data_quality_poor") {
+      return whereThisStands({ kind: "dq", batchLine: c.subtitle || undefined });
+    }
+    return whereThisStands({ kind: "awaiting-send", agentName, sentDate: q?.dateSent, requestedDate: q?.lastStatusChange, owed: q ? STATUS_OWED[q.status as string] : undefined });
+  }
+  /** Advance past the current task; dead queue entries (completed outside the session's own
+   *  stamps) fast-forward silently — they were never session actions. */
+  function advancePast(nextIndex: number) {
+    let i = nextIndex;
+    while (i < order.length && !liveKeys.has(order[i].key)) i += 1;
+    if (i >= order.length) { setPhase("close"); return; }
+    setIndex(i);
+  }
+  /** The current task is HANDLED (its write already landed — the vanish drove this, or the
+   *  primitive resolved): record it and deal to the next. P3 wraps this in the choreography. */
+  function markHandledAdvance(c: BoardCard) {
+    setHandled((h) => (h.some((x) => x.key === c.key) ? h : [...h, c]));
+    advancePast(index + 1);
+  }
+  /** Skip for now — the honest requeue: to the session order's end (the engine has no requeue
+   *  of its own — recon; the deal draws the slide-to-bottom). Skipping the last live task
+   *  ends the session. */
+  function skipCurrent() {
+    if (!current) return;
+    const c0 = current;
+    setSkipped((k) => (k.some((x) => x.key === c0.key) ? k : [...k, c0]));
+    const rest = order.filter((_, i2) => i2 !== index);
+    const next = [...rest, c0]; // the honest requeue — to the session order's end
+    setOrder(next);
+    // skipping the only live task ends the session (an endless self-deal helps nobody)
+    if (!rest.some((x) => liveKeys.has(x.key))) { setPhase("close"); return; }
+    // the slot now holds what WAS next; fast-forward any dead entries (the wrap can land
+    // back on the skipped task itself once everything between has gone)
+    let i = index;
+    while (i < next.length && !liveKeys.has(next[i].key)) i += 1;
+    if (i >= next.length) { setPhase("close"); return; }
+    setIndex(i);
+  }
+  // the round-trip law: a journey that completed the current task returns to a board without
+  // it — the session detects the vanish and deals it as handled; a surviving task resumes
+  // in place. (Mark handled itself only fires the primitive; the vanish drives the advance,
+  // so a declined dup-guard honestly stays put.)
+  useEffect(() => {
+    if (phase !== "room" || !current) return;
+    if (!liveKeys.has(current.key)) markHandledAdvance(current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveKeys, phase, index, order]);
+
   // ── render ──
   return (
     <div className="tdb-ss" role="dialog" aria-modal="true" aria-label="Focused session"
@@ -257,12 +342,54 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
           </div>
         </>
       )}
-      {phase === "room" && (
-        // P1 scaffold — Phase 2 builds the room (bar · sheet · actions · footer)
+      {phase === "room" && current && (
+        // ── session P2: THE ROOM (session-room.html frame A) — one task, centred; nothing
+        // else exists. Action now opens the journey OVER the session (z 50 > 48) and a
+        // surviving task resumes in place; a completed one vanishes from liveKeys and deals.
         <div className="tdb-ssroom">
           <div className="tdb-ssbar">
-            <span className="tdb-ssk">FOCUSED SESSION · TASK 1 OF {queue.length}</span>
-            <button type="button" className="tdb-ssexit" onClick={onClose}>End session ✕</button>
+            <span className="tdb-ssk">FOCUSED SESSION · TASK {Math.min(index + 1, total)} OF {total}</span>
+            <span className="tdb-ssprog" aria-hidden><b style={{ width: `${Math.round(((index + 1) / Math.max(1, total)) * 100)}%` }} /></span>
+            <span className="tdb-ssk">{lane(current)}</span>
+            <button type="button" className="tdb-ssexit" onClick={() => setPhase("close")}>End session ✕</button>
+          </div>
+          <div className="tdb-ssroomc">
+            <div className="tdb-ssheet">
+              <div className={`tdb-band ${current.stream}`}>
+                <span className={`tdb-tag due${isOffer(current) ? " offer" : ""}`}>{isOffer(current) ? `★ ${current.due}` : current.due}</span>
+              </div>
+              <div className="tdb-ssheetc">
+                <h2>{current.title}</h2>
+                {(current.subtitle || current.who) && (
+                  <div className="tdb-ssms2">{[current.subtitle, current.who].filter(Boolean).join(" · ")}</div>
+                )}
+                {standFor(current) && (
+                  <div className="tdb-ssctx"><b>WHERE THIS STANDS</b>{standFor(current)}</div>
+                )}
+                <div className="tdb-ssacts">
+                  <button type="button" className="tdb-ssb bp on" onClick={() => onOpenJourney(current)}>Action now</button>
+                  {canQuickComplete(current) && (
+                    <button type="button" className="tdb-btnh em tdb-ssbig" onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
+                  )}
+                  <button type="button" className="tdb-btnh tdb-ssbig" onClick={skipCurrent}>Skip for now</button>
+                </div>
+              </div>
+            </div>
+            {order[index + 1] && (
+              <div className="tdb-ssnext">NEXT UP · <i>{order[index + 1].title}</i></div>
+            )}
+          </div>
+        </div>
+      )}
+      {phase === "close" && (
+        // P2 scaffold — Phase 4 builds the full close (the ledger + review expansion)
+        <div className="tdb-ssroom">
+          <div className="tdb-ssclose">
+            <h1>{order.some((x) => liveKeys.has(x.key)) ? "Good session." : "Desk cleared."}</h1>
+            <div className="tdb-ssub">Every box ticked turns the dial in your favour.</div>
+            <div className="tdb-ssexits">
+              <button type="button" className="tdb-ssb bp on" onClick={onClose}>Back to your desk</button>
+            </div>
           </div>
         </div>
       )}

@@ -78,3 +78,56 @@ describe("session P1 — the opening", () => {
     expect(rule(".tdb-ss")).toContain("z-index: 48");
   });
 });
+
+describe("session P2 — the room", () => {
+  it("the bar: FOCUSED SESSION · TASK i OF n, the live progress line, the lane label, End session", () => {
+    expect(ss).toContain("FOCUSED SESSION · TASK {Math.min(index + 1, total)} OF {total}");
+    expect(ss).toContain("width: `${Math.round(((index + 1) / Math.max(1, total)) * 100)}%`");
+    expect(rule(".tdb-ssprog")).toContain("background: #e3d8c8");
+    expect(rule(".tdb-ssprog b")).toContain("background: var(--ink)");
+    expect(ss).toContain("{lane(current)}");
+    expect(ss).toContain('onClick={() => setPhase("close")}>End session ✕</button>'); // exits to the close in its early state
+  });
+  it("the sheet: 560, family band + tag, Playfair 26 title, the italic manuscript · agent line", () => {
+    expect(rule(".tdb-ssheet")).toContain("width: 560px");
+    expect(rule(".tdb-ssheetc h2")).toContain("font-size: 26px");
+    expect(ss).toContain("{[current.subtitle, current.who].filter(Boolean).join(\" · \")}".replace(/\\/g, ""));
+    expect(rule(".tdb-ssms2")).toContain("font-style: italic");
+  });
+  it("WHERE THIS STANDS: templates from existing derived fields only; an empty composition hides the card", () => {
+    expect(ss).toContain("{standFor(current) && (");
+    expect(ss).toContain(">WHERE THIS STANDS</b>");
+    // the assembler reads the REAL stores through the existing derivations — never free text
+    expect(ss).toContain("whereThisStands({ kind: \"offer\", agentName, offerDate: q?.lastStatusChange, outstanding });".replace(/\\/g, ""));
+    expect(ss).toContain('getPrimaryAction(x.status as QueryStatus).ballHolder === "agent"');
+    expect(ss).toContain("owed: q ? STATUS_OWED[q.status as string] : undefined");
+    expect(ss).toContain('if (c.userTaskId) return "";'); // notes say nothing
+  });
+  it("the actions: Action now (ink, opens the journey OVER the session) · ✓ Mark handled (gated on the honest arm) · Skip", () => {
+    expect(ss).toContain('onClick={() => onOpenJourney(current)}>Action now</button>');
+    expect(ss).toContain("{canQuickComplete(current) && (");
+    expect(ss).toContain('onClick={() => onQuickComplete(current)}>✓ Mark handled</button>');
+    expect(ss).toContain("onClick={skipCurrent}>Skip for now</button>");
+    // the page: the gate mirrors quickDone's arms; offers keep the standing no-one-tap rule
+    expect(page).toContain('if (c.taskType === "offer_received") return false;');
+    expect(page).toContain('return !!q && getPrimaryAction(q.status as QueryStatus).kind === "mark-sent";');
+    expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}'); // the journey mounts at z 50, over the session
+    expect(page).toContain("onQuickComplete={quickDone}"); // the completion primitive with its undo toast
+  });
+  it("the round-trip law: a completed task vanishes from liveKeys and deals as handled; a survivor resumes in place", () => {
+    expect(ss).toContain("if (!liveKeys.has(current.key)) markHandledAdvance(current);");
+    expect(ss).toContain("setHandled((h) => (h.some((x) => x.key === c.key) ? h : [...h, c]));");
+    // Mark handled fires the primitive only — the vanish drives the advance, so a declined
+    // dup-guard honestly stays put
+    expect(ss).not.toContain("onQuickComplete(current).then");
+  });
+  it("the footer whispers what's next; dead queue entries fast-forward silently", () => {
+    expect(ss).toContain(">NEXT UP · <i>{order[index + 1].title}</i></div>");
+    expect(ss).toContain("while (i < order.length && !liveKeys.has(order[i].key)) i += 1;");
+  });
+  it("skip requeues to the session order's end (the engine has no requeue — recon); skipping the last live task closes", () => {
+    expect(ss).toContain("const next = [...rest, c0]; // the honest requeue — to the session order's end");
+    expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setPhase("close"); return; }');
+  });
+});
+
