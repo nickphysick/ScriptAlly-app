@@ -30,7 +30,7 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
   });
   it("the title crossfades gently (opacity only, 800ms) between the two lines — a stacked pair, driven by clearing", () => {
     expect(page).toContain('<h1 className={`tdb-ask t1${heroSession.clearing ? " out" : ""}`}>What’s on your desk?</h1>');
-    expect(page).toContain('<h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>Clearing the desk</h1>');
+    expect(page).toContain('<h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>In focus</h1>'); // v9
     expect(css).toContain(".tdb-ask.t1, .tdb-ask.t2 { transition: opacity 800ms ease; }");
     expect(rule(".tdb-ask.t2")).toContain("opacity: 0"); // t2 waits; .in reveals it
     expect(css).toContain(".tdb-ask.t1.out { opacity: 0; }");
@@ -51,13 +51,12 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
     expect(css).not.toContain("tdb-fssub");
     expect(ss).not.toContain("tdb-fsslot");
   });
-  it("the sub-slot hosts EXACTLY ONE occupant: search at rest → ritual → the mono session line; the search fades in session", () => {
+  it("the sub-slot hosts EXACTLY ONE occupant: search at rest → ritual → the progress row (v9); the search fades in session", () => {
     expect(page).toContain('<div className="tdb-heroslot" aria-live="polite">');
     expect(css).toContain(".tdb-srchrow.insession .tdb-bigsearch"); // the search fades within the slot
     expect(rule(".tdb-heroslot")).toContain("position: absolute; inset: 0");
-    expect(page).toContain("TASK <b>{slot.i}</b> OF <b>{slot.n}</b>");
+    expect(page).toContain('<span className="tdb-fsfrac">{slot.i} / {slot.n}</span>');
     expect(page).not.toContain("FOCUSED SESSION · TASK"); // the prefix + the subtitle are dropped in v7
-    expect(page).toContain('onClick={slot.onEnd}>END SESSION ✕</button>');
   });
   it("the ritual lines: the three, italic Playfair 19 ink-muted, 780ms each, reported up per line", () => {
     expect(ss).toContain('RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => onHero({ clearing: true, slot: { kind: "ritual", index: i } })));');
@@ -68,12 +67,12 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
     expect(page).toContain('className={slot.index === i ? "on" : slot.index > i ? "off" : ""}'); // rise-in/out both kept
   });
   it("the session line updates LIVE with the carriage index (one sync effect owns it; it empties at the close)", () => {
-    expect(ss).toContain('if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total, onEnd: () => setPhase("close") } });');
+    expect(ss).toContain('if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total } });');
     expect(ss).toContain('else if (phase === "close") onHero({ clearing: true, slot: null });');
     expect(ss).toContain("}, [phase, composed, index, total]);");
   });
   it("skip: any click/keypress jumps to the composed state; reduced motion starts there", () => {
-    expect(ss).toContain('onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}');
+    expect(ss).toContain('<div className="tdb-fsskip" onPointerDown={jumpToComposed}'); // v9 — its own layer
     expect(ss).toContain("const [composed, setComposed] = useState(reduce);");
     expect(css).toContain(".tdb-ask.t1, .tdb-ask.t2, .tdb-fsrit span, .tdb-heroslot { transition: none; animation: none; }");
   });
@@ -106,8 +105,7 @@ describe("v7 P5 — wiring + the supersession sweep", () => {
   it("the state machine: board → gather → session → close → board; back + END SESSION land safely", () => {
     expect(ss).toContain('const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");');
     expect(ss).toContain('window.addEventListener("popstate", onPop);'); // browser back → onClose
-    expect(ss).toContain("onEnd: () => setPhase(\"close\") }".replace(/\\/g, "")); // END SESSION (rendered in the hero) closes the session
-    expect(page).toContain('onClick={slot.onEnd}>END SESSION ✕</button>');
+    expect(ss).toContain('setPhase("close")'); // v9 — the quiet exit line at the stage foot closes the session
   });
   it("the overture plays every session (no seen-flag); its skip is instant; the styled set strips on any exit", () => {
     expect(ss).not.toContain("localStorage");
@@ -135,7 +133,7 @@ describe("v7 P2 — the curtains + the dim (pool of light + deck edges retired)"
     expect(css).toContain(".tdb-fscurt.r { right: 0; transform: translateX(100%); background: linear-gradient(270deg, #1d100c, #2a1a13); }");
     expect(css).toContain(".tdb-fscurt.on { transform: translateX(0); }");
     // the width is a viewport token; the wrap insets by it (the curtains clip nothing)
-    expect(ss).toContain('<div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW }} aria-hidden />');
+    expect(ss).toContain('<div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW, top: geo.barBottom }} aria-hidden />'); // v9 — below the bar
     expect(ss).toContain('style={{ top: geo.wrapTop, left: curtW, right: curtW }}'); // the card wrap inset
     expect(ss).toContain("const [curtW, setCurtW] = useState(curtainWidth(window.innerWidth));");
     expect(ss).toContain("setCurtW(curtainWidth(window.innerWidth));"); // remeasured on resize
@@ -263,3 +261,53 @@ describe("final P5 — wiring + the supersession sweep", () => {
     expect(page).not.toContain("import focusArt");
   });
 });
+
+describe("v9 P1 — THE FRAME: the bar exempt · the pair out · In focus + progress · the band", () => {
+  it("THE APP BAR IS EXEMPT: the curtains take their top from the MEASURED bar bottom", () => {
+    expect(ss).toContain("const barBottom = Math.max(0, wrapEl?.getBoundingClientRect().top ?? 0);");
+    expect(ss).toContain("style={{ width: curtW, top: geo.barBottom }}");
+    // the v7 fault: the curtains rode the whole viewport and covered the bar
+    expect(ss).not.toContain('className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW }}');
+  });
+  it("the overlay is POINTER-TRANSPARENT — it can no longer swallow the hero's controls", () => {
+    expect(rule(".tdb-ss")).toContain("pointer-events: none");
+    expect(css).toContain(".tdb-ss button, .tdb-ss a, .tdb-fsskip { pointer-events: auto; }");
+    // the overture's skip is its OWN layer, alive only during the opening
+    expect(ss).toContain('{phase === "gather" && !composed && (');
+    expect(ss).toContain('<div className="tdb-fsskip" onPointerDown={jumpToComposed}');
+    expect(ss).not.toContain('onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}');
+  });
+  it("the Begin/review pair and the search LEAVE for the session and return with the exit", () => {
+    expect(page).toContain('{heroSession.slot?.kind !== "session" && (');
+    expect(page).toContain('<div className={`tdb-heropair${heroSession.clearing ? " insession" : ""}`}>');
+    expect(rule(".tdb-heropair.insession")).toContain("opacity: 0");
+    expect(rule(".tdb-heropair.insession")).toContain("pointer-events: none");
+    expect(css).toContain(".tdb-srchrow.insession .tdb-bigsearch"); // the search still fades in its slot
+  });
+  it("the title is 'In focus' — 'Clearing the desk' is replaced, both directions still crossfade", () => {
+    expect(page).toContain(">In focus</h1>");
+    expect(page).toContain("What\u2019s on your desk?</h1>");
+    expect(page).not.toContain("Clearing the desk");
+    expect(ss).toContain("onHero({ clearing: false, slot: null })"); // the exit crossfades back
+    expect(ss).toContain("onHero({ clearing: true, slot: null })");
+  });
+  it("the progress treatment replaces the mono session line — a bar + a Playfair fraction, NO kicker", () => {
+    expect(page).toContain('<div className="tdb-fsprog"');
+    expect(page).toContain("progressPct(slot.i, slot.n)");
+    expect(page).toContain('<span className="tdb-fsfrac">{slot.i} / {slot.n}</span>');
+    expect(rule(".tdb-fsbar")).toContain("#ddd2c2");
+    expect(rule(".tdb-fsbar b")).toContain("background: var(--ink)");
+    expect(rule(".tdb-fsprog")).toContain("width: 340px");
+    expect(rule(".tdb-fsfrac")).toContain("var(--f12-serif)");
+    expect(rule(".tdb-fsfrac")).toContain("lining-nums tabular-nums");
+    // no kicker node, and the old line is gone
+    expect(css).not.toContain(".tdb-fsses ");
+    expect(page).not.toContain("TASK <b>");
+    expect(page).not.toContain("tdb-fskick");
+  });
+  it("THE SPACING LAW is real space: the seat region comes from sessionRegion, resize-aware", () => {
+    expect(ss).toContain("const region = sessionRegion(sr ? sr.bottom : slotTop + 30, window.innerHeight);");
+    expect(ss).toContain("const wrapTop = region.top;");
+    expect(ss).toContain('window.addEventListener("resize", onResize)');
+  });
+});expect(page).toContain('<span className="tdb-fsfrac">{slot.i} / {slot.n}</span>'); // v9 — the progress row

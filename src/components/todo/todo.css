@@ -54,6 +54,9 @@
 /* hero-pair P1: the pair breathes 24px under the pill (6 srchrow-margin + 18 here); both
    buttons size to content and wrap to a stacked-centred column when the width runs out */
 .tdb-heropair { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin: 18px 0 0; }
+/* v9 — the pair leaves with the opening: it fades on the way in, then unmounts once the
+   session composes (nothing of the board's hero controls remains in-session). */
+.tdb-heropair.insession { opacity: 0; pointer-events: none; transition: opacity 400ms; }
 .tdb-herobegin { height: 44px; box-shadow: 0 3px 12px rgba(29, 16, 12, 0.22); }
 .tdb-heropair .tdb-rvchip { animation: tdbChipIn 200ms ease; }
 @keyframes tdbChipIn { from { opacity: 0; transform: translateY(4px); } }
@@ -658,16 +661,24 @@ button.tdb-tdot { cursor: pointer; }
    (beneath the flow 50 / toast 60 / ask 90); every piece positions from the measured board.
    Seat z: the pool(0) < the deck edges(1) < the skip clone(2) < the card(3) < the handled
    clone(4). ── */
-.tdb-ss { position: fixed; inset: 0; z-index: 48; }
+/* v9 — the overlay is POINTER-TRANSPARENT: it lies over the hero, so if it caught pointers
+   the hero's own controls would be dead (the v7 fault). Its interactive children opt back in. */
+.tdb-ss { position: fixed; inset: 0; z-index: 48; pointer-events: none; }
+.tdb-ss button, .tdb-ss a, .tdb-fsskip { pointer-events: auto; }
+/* the overture's skip catcher — its own layer, alive only while the opening plays */
+.tdb-fsskip { position: absolute; inset: 0; z-index: 8; }
 /* v7 — the ritual lines + the session line live inside the hero's fixed sub-slot (.tdb-heroslot) */
 .tdb-fsrit { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
 .tdb-fsrit span { position: absolute; font-family: var(--f12-serif); font-style: italic; font-size: 19px; color: #6b5a4e; opacity: 0; transform: translateY(8px); transition: opacity 400ms, transform 400ms; }
 .tdb-fsrit span.on { opacity: 1; transform: none; }
 .tdb-fsrit span.off { opacity: 0; transform: translateY(-8px); }
-.tdb-fsses { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.18em; color: #8a7a6d; animation: tdbSesIn 500ms ease; }
-.tdb-fsses b { color: var(--ink); font-weight: 600; }
-.tdb-fsend { background: none; border: none; padding: 0; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.18em; color: #8a7a6d; cursor: pointer; }
-.tdb-fsend:hover { color: var(--ink); }
+/* v9 — THE PROGRESS ROW (session-v9-header.html V2): a thin ink bar on #ddd2c2 with a
+   Playfair fraction beside it, 340px, advancing per task. No kicker, no other text — the
+   END SESSION control lives at the stage foot (the quiet line). */
+.tdb-fsprog { display: flex; align-items: center; gap: 12px; width: 340px; animation: tdbSesIn 500ms ease; }
+.tdb-fsbar { flex: 1; height: 4px; border-radius: 2px; background: #ddd2c2; overflow: hidden; }
+.tdb-fsbar b { display: block; height: 100%; background: var(--ink); border-radius: 2px; transition: width 500ms cubic-bezier(0.3, 0.7, 0.2, 1); }
+.tdb-fsfrac { font-family: var(--f12-serif); font-size: 13px; font-weight: 600; color: var(--ink); font-variant-numeric: lining-nums tabular-nums; }
 @keyframes tdbSesIn { from { opacity: 0; } }
 /* the seat region below the hero */
 .tdb-fswrap { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; }
@@ -679,6 +690,8 @@ button.tdb-tdot { cursor: pointer; }
    the edges, the centred card never under them. ── */
 .tdb-fsdim { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(58, 28, 20, 0.16); opacity: 0; transition: opacity 900ms ease; z-index: 0; pointer-events: none; }
 .tdb-fsdim.on { opacity: 1; }
+/* v9 — top is set inline from the measured APP BAR bottom edge: the bar is exempt, always
+   full-width above everything, and the curtains begin beneath it. */
 .tdb-fscurt { position: absolute; top: 0; bottom: 0; background: linear-gradient(90deg, #1d100c, #2a1a13); z-index: 6; transition: transform 1100ms cubic-bezier(0.3, 0.7, 0.2, 1); }
 .tdb-fscurt.l { left: 0; transform: translateX(-100%); }
 .tdb-fscurt.r { right: 0; transform: translateX(100%); background: linear-gradient(270deg, #1d100c, #2a1a13); }

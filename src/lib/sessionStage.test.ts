@@ -6,7 +6,7 @@
  * the lib is pure. (The dark-room opening's nearest-edge/spotlight maths left with it.)
  */
 import { describe, it, expect } from "vitest";
-import { gatherTransform, staggerFor, restTop, GATHER, CARRIAGE, RITUAL_LINES, EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR } from "./sessionStage";
+import { gatherTransform, staggerFor, restTop, sessionRegion, progressPct, FRAME, GATHER, CARRIAGE, RITUAL_LINES, EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR } from "./sessionStage";
 
 describe("gatherTransform — the gather law", () => {
   it("centre-aligns onto the first rect and scales to its footprint", () => {
@@ -86,5 +86,43 @@ describe("THE CARRIAGE's spine (v7 transition A — the straight carriage)", () 
     expect(CARRIAGE.slideOutMs).toBe(500);
     expect(CARRIAGE.slideInMs).toBe(500);
     expect(CARRIAGE.overlapMs).toBe(170);
+  });
+});
+
+describe("v9 — THE SPACING LAW (sessionRegion): the 48px band, the foot, the centring", () => {
+  it("the region begins a MINIMUM 48px clear band below the progress row", () => {
+    expect(FRAME.bandPx).toBe(48);
+    expect(sessionRegion(300, 900).top).toBe(348);
+    expect(sessionRegion(300, 900).top - 300).toBeGreaterThanOrEqual(48);
+  });
+  it("it ends at the stage foot — the quiet exit line's strip is never overrun", () => {
+    const r = sessionRegion(300, 900);
+    expect(r.top + r.height).toBe(900 - FRAME.footPx);
+    expect(FRAME.footPx).toBeGreaterThanOrEqual(28); // the line sits ≥28px above the bottom
+  });
+  it("it re-derives on resize — a shorter viewport shrinks the region, never the band", () => {
+    const tall = sessionRegion(300, 1000);
+    const short = sessionRegion(300, 700);
+    expect(short.top).toBe(tall.top); // the band is fixed to the hero
+    expect(short.height).toBeLessThan(tall.height);
+    expect(sessionRegion(300, 200).height).toBe(FRAME.regionMinPx); // never collapses
+  });
+  it("the page centres INSIDE the region (restTop over the region's height)", () => {
+    const r = sessionRegion(280, 900);
+    expect(restTop(r.height, 300)).toBe((r.height - 300) / 2 - 10);
+  });
+});
+
+describe("v9 — the progress treatment (header V2)", () => {
+  it("the fraction's fill advances per task and is bounded", () => {
+    expect(progressPct(1, 29)).toBe(3);
+    expect(progressPct(2, 29)).toBe(7);
+    expect(progressPct(29, 29)).toBe(100);
+    expect(progressPct(40, 29)).toBe(100);
+    expect(progressPct(0, 0)).toBe(0); // an empty queue cannot divide by zero
+  });
+  it("the bar is the ref's: 340px, a 4px track", () => {
+    expect(FRAME.progWidthPx).toBe(340);
+    expect(FRAME.progTrackPx).toBe(4);
   });
 });

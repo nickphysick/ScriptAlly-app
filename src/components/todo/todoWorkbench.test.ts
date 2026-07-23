@@ -638,7 +638,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(rule(".tdb-ask")).toContain("letter-spacing: -0.015em");
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
     expect(hero).toContain("Begin focused session"); // hero-pair P1: the pair sits beneath the search
-    expect(hero).toContain('className="tdb-heropair"');
+    expect(hero).toContain("tdb-heropair"); // v9 — the pair carries an .insession state and leaves for the session
   });
   it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
     const sr = rule(".tdb-srchrow");

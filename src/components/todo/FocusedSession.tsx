@@ -24,7 +24,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   gatherTransform, staggerFor, restTop, GATHER, CARRIAGE, RITUAL_LINES,
   EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR,
-  curtainWidth, CURTAIN,
+  curtainWidth, CURTAIN, sessionRegion, FRAME,
 } from "../../lib/sessionStage";
 import { whereThisStands, STATUS_OWED } from "../../lib/sessionContext";
 import { useScriptAllyDb } from "../../lib/db";
@@ -36,7 +36,7 @@ import { QueryStatus } from "../../types";
 export type HeroSession =
   | { clearing: boolean; slot: null }
   | { clearing: boolean; slot: { kind: "ritual"; index: number } }
-  | { clearing: boolean; slot: { kind: "session"; i: number; n: number; onEnd: () => void } };
+  | { clearing: boolean; slot: { kind: "session"; i: number; n: number } };
 
 export interface FocusedSessionProps {
   /** The session queue — the engine's own boardCards order, captured at launch. */
@@ -88,7 +88,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   const [bigOn, setBigOn] = useState(reduce);
   // measured geometry: the subtitle under the title, the ritual/session line in the
   // search's vacated slot, the seat region below the hero, the card's rest offset
-  const [geo, setGeo] = useState({ subTop: 120, slotTop: 160, wrapTop: 210, restY: 40 });
+  const [geo, setGeo] = useState({ subTop: 120, slotTop: 160, wrapTop: 210, restY: 40, barBottom: 0, regionH: 400 });
   // v7 — the curtains + the dim: on with the gather, off with the reverse; the width is a
   // token by viewport so the card wrap can inset by it (the curtains clip nothing).
   const [curtains, setCurtains] = useState(reduce);
@@ -112,11 +112,17 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     const sr = slot?.getBoundingClientRect();
     const subTop = tr ? tr.bottom + 2 : 120;
     const slotTop = sr ? Math.max(60, sr.top + sr.height / 2 - 12) : subTop + 40;
-    const wrapTop = (sr ? sr.bottom : slotTop + 30) + 8;
-    const regionH = Math.max(200, window.innerHeight - wrapTop);
+    // v9 — THE APP BAR IS EXEMPT: the board wrap begins at the bar's bottom edge, so the
+    // curtains and the dim start there and the bar is never covered.
+    const barBottom = Math.max(0, wrapEl?.getBoundingClientRect().top ?? 0);
+    // v9 — THE SPACING LAW: a real clear band below the progress row; the region runs to the
+    // stage foot (the quiet exit's strip), and the page centres inside it.
+    const region = sessionRegion(sr ? sr.bottom : slotTop + 30, window.innerHeight);
+    const wrapTop = region.top;
+    const regionH = region.height;
     const cardH = bigRef.current?.offsetHeight || 240;
-    setGeo({ subTop, slotTop, wrapTop, restY: restTop(regionH, cardH) });
-    return { subTop, slotTop, wrapTop, regionH, cardH };
+    setGeo({ subTop, slotTop, wrapTop, restY: restTop(regionH, cardH), barBottom, regionH });
+    return { subTop, slotTop, wrapTop, regionH, cardH, barBottom };
   }
 
   /** The composed session state, applied instantly (the skip + reduced-motion entry). */
@@ -362,7 +368,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   // v7 — the hero's sub-slot follows the session: the mono TASK i OF n line while working, and
   // it empties at the close (the title stays "Clearing the desk" until Back to your desk).
   useEffect(() => {
-    if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total, onEnd: () => setPhase("close") } });
+    if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total } });
     else if (phase === "close") onHero({ clearing: true, slot: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, composed, index, total]);
@@ -373,17 +379,21 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
 
   // ── render — everything positioned from the MEASURED board (the title stays real) ──
   return (
-    <div className="tdb-ss" role="dialog" aria-modal="true" aria-label="Focused session"
-      onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}
-      onKeyDown={phase === "gather" && !composed ? jumpToComposed : undefined}
-      tabIndex={-1}>
+    <div className="tdb-ss" role="dialog" aria-modal="true" aria-label="Focused session" tabIndex={-1}>
+      {/* v9 — the overlay itself is pointer-transparent (its interactive children opt back in),
+          so nothing it lays over the hero can swallow a click. The overture's skip catcher is
+          its OWN layer and exists only while the opening plays. */}
+      {phase === "gather" && !composed && (
+        <div className="tdb-fsskip" onPointerDown={jumpToComposed} onKeyDown={jumpToComposed} aria-hidden />
+      )}
       {/* v7 — the hero's title + sub-slot are driven up through onHero (ToDoPage renders them
           in the real stacked-flow hero); this overlay carries the curtains, the dim + the card. */}
       {/* the DIM: a slight wash over the work area below the hero — the card renders above it */}
       <div className={`tdb-fsdim${curtains ? " on" : ""}`} style={{ top: geo.wrapTop }} aria-hidden />
-      {/* the CURTAINS: ink panels close from the screen edges (the stage wings) */}
-      <div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW }} aria-hidden />
-      <div className={`tdb-fscurt r${curtains ? " on" : ""}`} style={{ width: curtW }} aria-hidden />
+      {/* the CURTAINS: ink panels close from the screen edges (the stage wings) — v9: they
+          begin at the APP BAR's bottom edge, which stays full-width above everything */}
+      <div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW, top: geo.barBottom }} aria-hidden />
+      <div className={`tdb-fscurt r${curtains ? " on" : ""}`} style={{ width: curtW, top: geo.barBottom }} aria-hidden />
       {/* the seat region below the hero — the card + the close live here, INSET by the curtains */}
       <div className="tdb-fswrap" style={{ top: geo.wrapTop, left: curtW, right: curtW }}>
         {phase !== "close" && current && (

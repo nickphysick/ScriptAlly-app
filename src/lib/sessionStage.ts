@@ -50,6 +50,38 @@ export function restTop(regionH: number, cardH: number): number {
   return Math.max(GATHER.restMinTopPx, (regionH - cardH) / 2 - 10);
 }
 
+/**
+ * v9 — THE SPACING LAW. The session's content region begins a CLEAR BAND below the hero's
+ * progress row and ends at the stage foot (the quiet exit line's reserved strip). Nothing is
+ * ever absolutely positioned over anything: the band is real space.
+ *   heroBottom → the measured bottom of the progress row
+ *   viewportH  → window.innerHeight
+ * Returns the region's top and height; the page then centres inside it (restTop).
+ */
+export function sessionRegion(heroBottom: number, viewportH: number): { top: number; height: number } {
+  const top = heroBottom + FRAME.bandPx;
+  return { top, height: Math.max(FRAME.regionMinPx, viewportH - top - FRAME.footPx) };
+}
+
+/**
+ * v9 — THE FRAME (session-v9-journey.html + session-v9-header.html V2). The app bar is
+ * exempt: the curtains and the dim begin at its bottom edge, never over it. The hero carries
+ * "In focus" over a thin progress bar with a Playfair fraction; no kicker, no other text.
+ */
+export const FRAME = {
+  bandPx: 48, // the minimum clear band below the progress row before any session content
+  footPx: 76, // the stage foot reserved for the quiet exit line (28 above the bottom + its hit area)
+  regionMinPx: 200,
+  progWidthPx: 340, // the progress row's width (V2)
+  progTrackPx: 4, // the bar's height — ink fill on #ddd2c2
+} as const;
+
+/** The progress bar's fill for task i of n (i is 1-based; the first task already shows a sliver). */
+export function progressPct(i: number, n: number): number {
+  if (n <= 0) return 0;
+  return Math.max(0, Math.min(100, Math.round((i / n) * 100)));
+}
+
 /** The ritual lines — played in the search's vacated slot (ink-muted; we are on a light page). */
 export const RITUAL_LINES = ["Gathering your tasks…", "Stacking the deck…", "Choosing where to start…"] as const;
 

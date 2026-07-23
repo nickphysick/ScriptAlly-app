@@ -38,7 +38,7 @@ import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
 import { FocusedSession, HeroSession } from "./FocusedSession";
-import { RITUAL_LINES } from "../../lib/sessionStage";
+import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { ProBanner, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
@@ -1011,7 +1011,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* v7 — the gentle title crossfade (opacity only, 800ms): the stacked pair share the
               line; nothing shifts (the sub-slot below is fixed height). */}
           <h1 className={`tdb-ask t1${heroSession.clearing ? " out" : ""}`}>What’s on your desk?</h1>
-          <h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>Clearing the desk</h1>
+          <h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>In focus</h1>
         </div>
         {/* hero-pair P1 (todo-hero-pair.html variant B): Begin + the review chip sit centred
             beneath the search with 24px of clear air; both size to content. The chip renders
@@ -1048,9 +1048,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     ))}
                   </div>
                 ) : (
-                  <div className="tdb-fsses">
-                    TASK <b>{slot.i}</b> OF <b>{slot.n}</b> ·{" "}
-                    <button type="button" className="tdb-fsend" onClick={slot.onEnd}>END SESSION ✕</button>
+                  // v9 — the progress treatment (session-v9-header.html V2): a thin ink bar on
+                  // #ddd2c2 with a Playfair fraction beside it. No kicker, no other text.
+                  <div className="tdb-fsprog" aria-label={`Task ${slot.i} of ${slot.n}`}>
+                    <span className="tdb-fsbar" aria-hidden><b style={{ width: `${progressPct(slot.i, slot.n)}%` }} /></span>
+                    <span className="tdb-fsfrac">{slot.i} / {slot.n}</span>
                   </div>
                 )}
               </div>
@@ -1072,7 +1074,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </span>
           )}
         </div>
-        <div className="tdb-heropair">
+        {heroSession.slot?.kind !== "session" && (
+        <div className={`tdb-heropair${heroSession.clearing ? " insession" : ""}`}>
           <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
             <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
             Begin focused session
@@ -1086,6 +1089,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </button>
           )}
         </div>
+        )}
       </>
     );
   }
