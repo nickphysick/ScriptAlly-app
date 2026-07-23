@@ -196,3 +196,29 @@ describe("session P4 — the close (frame D)", () => {
   });
 });
 
+describe("session P5 — wiring + sweep", () => {
+  it("the state machine: opening → room → deal loop → close; End session and browser back both land safely", () => {
+    expect(ss).toContain('const [phase, setPhase] = useState<"opening" | "room" | "close">("opening");');
+    expect(ss).toContain("function beginRoom() {"); // Begin session → the room
+    expect(ss).toContain('onClick={() => setPhase("close")}>End session ✕</button>');
+    expect(ss).toContain('window.addEventListener("popstate", onPop);'); // back → onClose, cleanly
+    // the unmount guard strips the board's inline styles from ANY exit path
+    expect(ss).toContain("for (const el of flown.current) el.style.cssText = el.style.cssText.replace(");
+  });
+  it("the overture plays EVERY session start (no seen-flag anywhere); its skip is instant", () => {
+    expect(ss).not.toContain("localStorage"); // no per-session persistence — the opening always plays
+    expect(ss).toContain("function jumpToFinal() {");
+  });
+  it("the superseded presentation: ONLY the Begin entry's whole-board walk went (P1); FocusFlow stands as the journey engine", () => {
+    expect(page).not.toContain("setFlow({ items: boardCards.map");
+    expect(page).toContain('mode: "sweep"'); // the lane sweeps stand
+    expect(page).toContain("ritual: true"); // Work the list stands
+    expect(page).toContain('mode: "weeklyReview"'); // the Sunday review stands
+    expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}'); // the journeys stand
+  });
+  it("focus-art.png stays reserved and unused; the tour's Begin copy still speaks true", () => {
+    expect(ss).not.toContain("focus-art");
+    expect(page).not.toContain("import focusArt"); // the dead strip-era import swept; the asset stays reserved in assets/ (a comment may still NAME it)
+  });
+});
+

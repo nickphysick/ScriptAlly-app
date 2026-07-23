@@ -63,6 +63,13 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   useEffect(() => {
     if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();
   }, [phase]);
+  // ── session P5: browser back lands safely on the board — the session closes cleanly
+  // (the opening effect's unmount guard strips every inline style it added). ──
+  useEffect(() => {
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [onClose]);
   // the opening's own progress — "final" = the lit-card + pair composition
   const [openingFinal, setOpeningFinal] = useState(reduce);
   const [line, setLine] = useState(-1); // the active ritual line

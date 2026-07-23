@@ -30,7 +30,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
       "Every card works the same.",
       "Today lives beside your work.",
     ]);
-    expect(TOUR_STOPS[0].p).toContain("focused session");
+    expect(TOUR_STOPS[0].p).toContain("focused session"); // still true of the cinematic session (P5 verified — no retarget needed)
     expect(TOUR_STOPS[1].p).toContain("⌘K");
     expect(TOUR_STOPS[2].p).toContain("Show all brings everything back"); // hero-pair P5: the reset speaks sentence case
     expect(TOUR_STOPS[3].p).toContain("turns the dial in your favour");
