@@ -678,7 +678,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <b>Last week in review</b>
                 <p>Every box ticked turns the dial in your favour.</p>
               </div>
-              <button type="button" className={`${reviewOpened ? "tdb-ctaghost" : "tdb-cta sm"} tdb-rvopen2`} onClick={openSundayReview}>
+              <button type="button" className={`${reviewOpened ? "tdb-btnh" : "tdb-btnp sm"} tdb-rvopen2`} onClick={openSundayReview}>
                 {reviewOpened ? "View again" : "Open it ›"}
               </button>
               <button type="button" className="tdb-rvx" aria-label="Hide until next visit" onClick={() => setReviewHidden(true)}>✕</button>
@@ -922,7 +922,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <>
         {/* v4 P2 — the focused-session button leads the rail (moved from the hero; same wiring) */}
-        <button type="button" className="tdb-cta tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
+        <button type="button" className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
         <div className="tdb-fsec">FILTER{searchActive && (
           <button type="button" className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
             “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
@@ -1043,17 +1043,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-tf2">
           {committedCards.length > 0 ? (
             <>
-              <button type="button" className="tdb-ctaghost" onClick={helpMePick}>＋ Add more</button>
-              <button type="button" className="tdb-cta sm" onClick={() => {
+              <button type="button" className="tdb-btnh" onClick={helpMePick}>＋ Add more</button>
+              <button type="button" className="tdb-btnp sm" onClick={() => {
                 // C2 family law — the Today walk is a ritual: sage bands whole-walk
                 setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
               }}>Work the list</button>
             </>
           ) : (
             <>
-              <button type="button" className="tdb-ctaghost" onClick={helpMePick}>Help me pick</button>
+              <button type="button" className="tdb-btnh" onClick={helpMePick}>Help me pick</button>
               {/* the manual doorway — commitment happens on the board's cards */}
-              <button type="button" className="tdb-cta sm" onClick={() => scrollToLane("do")}>＋ Add</button>
+              <button type="button" className="tdb-btnh" onClick={() => scrollToLane("do")}>＋ Add</button>
             </>
           )}
         </div>
@@ -1104,8 +1104,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {c.subtitle && <div className="tdb-lbms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
         </div>
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="tdb-cta xs" onClick={() => openFlowCards([c])}>Action now</button>
-          <button type="button" className="tdb-ctaghost xs" onClick={() => toggleToday(c)}>{committed ? "− Today’s list" : "＋ Today’s list"}</button>
+          <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>
+          <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? "− Today’s list" : "＋ Today’s list"}</button>
           {laterMenu(c, true)}
         </div>
       </div>
@@ -1129,9 +1129,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-mmeta">{prog.caption.toUpperCase()} · {prog.pct}%</div>
         </div>
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="tdb-cta xs" onClick={open}>Action now</button>
+          <button type="button" className="tdb-btnh em" onClick={open}>Action now</button>
           <span className="tdb-latwrap">
-            <button type="button" className="tdb-ctaghost xs" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ Snooze or dismiss ▾</button>
+            <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ Snooze or dismiss ▾</button>
             {laterKey === key && (
               <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                 <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
@@ -1267,7 +1267,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const hideKey = laterHideKey(c.taskType);
     return (
       <span className="tdb-latwrap">
-        <button type="button" className={ledger ? "tdb-ctaghost xs" : "tdb-verb"} aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>{ledger ? "☾ Snooze or dismiss ▾" : "☾ LATER ▾"}</button>
+        <button type="button" className={ledger ? "tdb-btnh" : "tdb-verb"} aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>{ledger ? "☾ Snooze or dismiss ▾" : "☾ LATER ▾"}</button>
         {laterKey === c.key && (
           <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
             <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>

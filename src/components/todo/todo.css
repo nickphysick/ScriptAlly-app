@@ -55,23 +55,22 @@
 .tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
 /* (the strip census retired — the counts live on the filter rail's pills) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
-/* ── THE STATIONERY PRESS (polish P2, todo-polish.html) — the button law. .tdb-cta = TRUE
-   PRIMARIES ONLY (Begin focused session · Work the list · Open it ›): paper fill, 1px ink, ink
-   text, 99px, hard offset shadow 2px 2px 0 ink; hover presses (1,1 + 1px shadow); active seats
-   (2,2 + none). Fixed heights (40 standard / 34 small), inline-flex centring, line-height 1, no
-   vertical padding — the structural fix for the clipped Today pair. .tdb-ctaghost = secondaries:
-   flat paper, hairline, muted, no press. The Pro banner's slate CTA is EXEMPT (its own
-   identity). Reduced motion: no translate, shadow steps only. ── */
-.tdb-cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; line-height: 1; box-sizing: border-box; background: var(--paper); border: 1px solid var(--ink); color: var(--ink); border-radius: 99px; font-size: 12.5px; font-weight: 700; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); transition: transform 0.1s, box-shadow 0.1s; }
-.tdb-cta:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
-.tdb-cta:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }
-.tdb-cta.sm { height: 34px; padding: 0 18px; font-size: 10.5px; }
-.tdb-ctaghost { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 16px; line-height: 1; box-sizing: border-box; background: var(--paper); border: 1px solid var(--line); color: var(--muted); border-radius: 99px; font-size: 10.5px; font-weight: 600; cursor: pointer; }
-.tdb-ctaghost:hover { border-color: var(--ink-2); color: var(--ink-2); }
-@media (prefers-reduced-motion: reduce) {
-  .tdb-cta { transition: none; }
-  .tdb-cta:hover:not(:disabled), .tdb-cta:active:not(:disabled) { transform: none; }
-}
+/* ── THE BUTTON LAW (frame P2; todo-frame-v5.html §2 system 10 + the pack prose — the press
+   system is RETIRED: no offset shadows, no translate steps, anywhere). Two primitives:
+   .tdb-btnp — the tailored ink solid, RESERVED for the singular page-level actions (Begin
+   focused session · Work the list · Open it ›); hover deepens to full ink. Repeated per-row/
+   per-card actions are never ink-solid — 44 black buttons is the heaviness this replaces.
+   .tdb-btnh — the hairline secondary in two tones: .em (ink border, ink text, 700) for
+   per-row/per-card lead actions; quiet (hairline border, muted #6b5a4e, 600) for the rest.
+   Fixed heights 42 (Begin) / 34 (small + every hairline); inline-flex centring; the Pro
+   banner's slate CTA stays exempt. ── */
+.tdb-btnp { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 20px; line-height: 1; box-sizing: border-box; background: #2a1a13; border: 1px solid #1d100c; color: #f3e7da; border-radius: 99px; font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; white-space: nowrap; }
+.tdb-btnp:hover:not(:disabled) { background: var(--ink); }
+.tdb-btnp.sm { height: 34px; padding: 0 16px; font-size: 11px; }
+.tdb-btnh { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 15px; line-height: 1; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); color: #6b5a4e; border-radius: 99px; font-size: 10.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tdb-btnh:hover:not(:disabled) { border-color: var(--ink-2); color: var(--ink-2); }
+.tdb-btnh.em { border-color: var(--ink); color: var(--ink); font-weight: 700; }
+.tdb-btnh.em:hover:not(:disabled) { background: var(--paper); border-color: var(--ink); color: var(--ink); }
 
 /* the quiet pills' family dots (THE LAWS) */
 .tdb-wrap { --dot-p: #e59b8f; --dot-lat: #cbb995; --dot-y: #d9c87a; --dot-s: #9db29a; }
@@ -116,7 +115,7 @@
 .tdb-fpill.nar .tdb-dotc { background: #7c3a2a; }
 .tdb-fpill.nar .tdb-fn { color: #7c3a2a; }
 /* v4 P2 — the rail's lead button + the SHOW ALL selected pill (the RESET row is gone) */
-.tdb-fsb2 { margin: 12px 10px 4px; width: calc(100% - 20px); flex: 0 0 auto; display: flex; } /* the press (.tdb-cta) carries the look */
+.tdb-fsb2 { margin: 12px 10px 4px; width: calc(100% - 20px); flex: 0 0 auto; display: flex; } /* the ink primary (.tdb-btnp) carries the look */
 .tdb-fpill.sel { border-color: var(--ink); font-weight: 700; color: var(--ink); }
 .tdb-fpill.sel::before { content: "✓"; font-size: 9px; }
 .tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
@@ -226,7 +225,7 @@
    this page: paper fill (sinks into the page where white pops) · hairline border · faint text ·
    NO shadow · not-allowed cursor · no hover response. NEVER dashed (dashed = invitation-to-add)
    and NEVER opacity-only (a dimmed live button still reads clickable). ── */
-.tdb-cta:disabled, .tdb-ctaghost:disabled,
+.tdb-btnp:disabled, .tdb-btnh:disabled,
 .tdb-ffpri:disabled, .tdb-ffback:disabled, .tdb-ffcopy:disabled,
 .tdb-ra:disabled {
   background: var(--paper);
@@ -329,10 +328,8 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-minibar { height: 5px; border-radius: 3px; background: #ece5d8; margin-top: 8px; overflow: hidden; max-width: 320px; }
 .tdb-minibar i { display: block; height: 100%; background: var(--ink); }
 .tdb-mmeta { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.1em; color: var(--faint); margin-top: 4px; }
-/* the acting controls — the press law's 32px row size, centred on the row */
+/* the acting controls — 34px hairlines (em lead + quiet), centred on the row (frame P2) */
 .tdb-lacts { display: flex; gap: 7px; align-items: center; flex: 0 0 auto; align-self: center; }
-.tdb-cta.xs { height: 32px; padding: 0 15px; font-size: 10.5px; }
-.tdb-ctaghost.xs { height: 32px; padding: 0 14px; font-size: 10.5px; }
 .tdb-lacts .tdb-latwrap { position: relative; flex: none; } /* the menu anchors here — no clip to escape in a row */
 .tdb-lacts .tdb-latmenu { right: 0; }
 
@@ -388,10 +385,12 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tile.hov .tdb-vinner, .tdb-gcard.hov .tdb-vinner { visibility: visible; transition-delay: 0s; }
 .tdb-gdetail { padding: 0 12px 6px; } /* v4 P4: the batch detail revealed above the verbs */
 .tdb-verbs { display: flex; gap: 5px; padding: 2px 12px 12px; }
-.tdb-verb { flex: 1; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 6px 0; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.05em; text-align: center; color: var(--ink-2); display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; cursor: pointer; }
+/* the verb row adopts the law's TONES at its own compact geometry (frame P2): .pri =
+   emphasised (ink border/text), base = quiet — never ink-solid */
+.tdb-verb { flex: 1; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 6px 0; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.05em; text-align: center; color: #6b5a4e; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; cursor: pointer; }
 .tdb-verb:hover { border-color: var(--ink-2); color: var(--ink); }
-.tdb-verb.pri { background: var(--ink); color: var(--panel); border-color: var(--ink); }
-.tdb-verb.pri:hover { filter: brightness(1.3); color: var(--panel); }
+.tdb-verb.pri { background: var(--white, #fff); color: var(--ink); border-color: var(--ink); font-weight: 700; }
+.tdb-verb.pri:hover { background: var(--paper); color: var(--ink); }
 .tdb-latwrap { position: static; flex: 1; display: flex; } /* static: the menu's containing block is the SURFACE, escaping .tdb-vinner's clip */
 .tdb-latwrap .tdb-verb { flex: 1; }
 /* the Later menu — identical on every card (ref .menu2) */
@@ -521,7 +520,7 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-tick { width: 20px; height: 20px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
 /* the footer verbs — outline + ink primary, equal widths (ref .tfoot) */
 .tdb-tf2 { flex: none; display: flex; gap: 6px; padding: 12px 13px 13px; }
-.tdb-tf2 .tdb-ctaghost, .tdb-tf2 .tdb-cta { flex: 1; padding: 0; white-space: nowrap; } /* the fixed-height pair sits level — the clip fixed structurally */
+.tdb-tf2 .tdb-btnh, .tdb-tf2 .tdb-btnp { flex: 1; padding: 0; white-space: nowrap; } /* the fixed-height pair sits level — the clip fixed structurally */
 
 /* ── Polish III P1: the REVIEW BANNER (5ways §1 — white lifted card; live tokens; the shadow
    literal is the ref's) + the thin-bar AFTERLIFE (refine ref) — the Sunday card + the masthead
@@ -534,7 +533,7 @@ button.tdb-tdot { cursor: pointer; }
    keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
 .tdb-vseg { margin-left: auto; height: 30px; box-sizing: border-box; border: 1px solid #dbd9d4; background: #faf9f8; border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }
 .tdb-vseg button { width: 30px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
-.tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-shadow: 1px 1px 0 var(--ink); box-sizing: border-box; } /* selected = pressed in */
+.tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-sizing: border-box; } /* selected = white + ink ring (frame P2: the press language died) */
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
    none is introduced (the fence records the resolution). */
@@ -545,7 +544,7 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-rvk2 { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.13em; color: var(--hk-ink); margin-bottom: 3px; }
 .tdb-rvhx b { display: block; font-family: var(--f12-serif); font-size: 15px; font-weight: 700; white-space: nowrap; color: var(--ink); }
 .tdb-rvhx p { font-size: 10.5px; color: var(--sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tdb-rvopen2 { margin-left: auto; flex: 0 0 auto; white-space: nowrap; } /* the press (.tdb-cta.sm) / ghost carries the look */
+.tdb-rvopen2 { margin-left: auto; flex: 0 0 auto; white-space: nowrap; } /* the ink primary (.tdb-btnp.sm) / quiet hairline carries the look */
 .tdb-rvx { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); color: var(--muted); font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .tdb-rvx:hover { color: var(--ink-2); border-color: var(--ink-2); }
 

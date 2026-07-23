@@ -114,7 +114,7 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
     expect(page).toContain("f.snoozedUntil === reviewCompletionSnooze(reviewWin)");
     expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
     // press-law dress: unopened = the true-primary press small; opened = the quiet ghost
-    expect(page).toContain('className={`${reviewOpened ? "tdb-ctaghost" : "tdb-cta sm"} tdb-rvopen2`} onClick={openSundayReview}');
+    expect(page).toContain('className={`${reviewOpened ? "tdb-btnh" : "tdb-btnp sm"} tdb-rvopen2`} onClick={openSundayReview}'); // frame P2 dress
   });
   it("the ✕ is a SESSION-ONLY hide — component state, ZERO writes; no stored dismissal exists", () => {
     expect(page).toContain("const [reviewHidden, setReviewHidden] = useState(false);");

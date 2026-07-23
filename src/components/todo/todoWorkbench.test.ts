@@ -59,8 +59,8 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain('"tdb-fsec">FILTER{searchActive && ('); // P4: the header grows the query chip
   });
   it("v4 P2: Begin focused session leads the rail (same wiring); the foot keeps Task settings only", () => {
-    expect(page).toContain('className="tdb-cta tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>'); // the press primary
-    expect(rule(".tdb-cta")).toContain("height: 40px"); // the press law: 40 standard (overrides the drawn 42)
+    expect(page).toContain('className="tdb-btnp tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>'); // the ink primary
+    expect(rule(".tdb-btnp")).toContain("height: 42px"); // frame P2: Begin at 42
     const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
     expect(panel.indexOf("tdb-fsb2")).toBeLessThan(panel.indexOf("tdb-fsec"));
     expect(panel).toContain('className="tdb-setrow"');
@@ -94,7 +94,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
   it("the panel is the VI 'Today' card — ref anatomy, same state + handlers", () => {
     expect(page).toContain('<div className="tdb-today2">');
-    for (const inner of ["tdb-th", "tdb-thr", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-ghostbox", "tdb-grow", "tdb-donerow", "tdb-tdone", "tdb-drow", "tdb-tf2", "tdb-ctaghost", "tdb-cta sm"]) {
+    for (const inner of ["tdb-th", "tdb-thr", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-ghostbox", "tdb-grow", "tdb-donerow", "tdb-tdone", "tdb-drow", "tdb-tf2", "tdb-btnh", "tdb-btnp sm"]) {
       expect(page).toContain(inner);
     }
     expect(rule(".tdb-th")).not.toContain("hk-sage"); // VI P1: plain paper header, no sage band
@@ -130,33 +130,54 @@ describe("v4 P6 — empty-state copy + sweep", () => {
   });
 });
 
-describe("polish P2 — THE STATIONERY PRESS (the button law)", () => {
-  it("the primitives: paper/1px ink/2px 2px 0 shadow; hover 1,1; active 2,2; fixed 40/34; lh 1, no v-padding", () => {
-    const c = rule(".tdb-cta");
-    expect(c).toContain("background: var(--paper)");
-    expect(c).toContain("border: 1px solid var(--ink)");
-    expect(c).toContain("box-shadow: 2px 2px 0 var(--ink)");
-    expect(c).toContain("height: 40px");
-    expect(c).toContain("line-height: 1");
-    expect(c).toContain("padding: 0 20px");
-    expect(css).toContain(".tdb-cta:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }");
-    expect(css).toContain(".tdb-cta:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }");
-    expect(rule(".tdb-cta.sm")).toContain("height: 34px");
-    const g = rule(".tdb-ctaghost");
-    expect(g).toContain("border: 1px solid var(--line)");
-    expect(g).not.toContain("box-shadow");
+describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the press is retired)", () => {
+  it("the primitives: tailored ink (#2a1a13/#1d100c/cream, 600, .02em, 42/34) + two-tone hairlines (34)", () => {
+    const p = rule(".tdb-btnp");
+    expect(p).toContain("background: #2a1a13");
+    expect(p).toContain("border: 1px solid #1d100c");
+    expect(p).toContain("color: #f3e7da");
+    expect(p).toContain("height: 42px");
+    expect(p).toContain("font-weight: 600");
+    expect(p).toContain("letter-spacing: 0.02em");
+    expect(p).toContain("display: inline-flex");
+    expect(css).toContain(".tdb-btnp:hover:not(:disabled) { background: var(--ink); }"); // hover deepens to full ink
+    expect(rule(".tdb-btnp.sm")).toContain("height: 34px");
+    const h = rule(".tdb-btnh");
+    expect(h).toContain("height: 34px");
+    expect(h).toContain("border: 1px solid var(--line)");
+    expect(h).toContain("color: #6b5a4e");
+    expect(h).toContain("font-weight: 600");
+    const em = rule(".tdb-btnh.em");
+    expect(em).toContain("border-color: var(--ink)");
+    expect(em).toContain("font-weight: 700");
   });
-  it("assignment: press = Begin/Work the list only here (Open it › lands P3); secondaries ghost; verbs untouched", () => {
-    expect(page).toContain('className="tdb-cta tdb-fsb2"');
-    expect((page.match(/className="tdb-cta sm"/g) ?? []).length).toBe(2); // Work the list + ＋ Add
-    expect(page).toContain('className="tdb-ctaghost" onClick={helpMePick}>＋ Add more</button>');
-    expect(page).not.toContain("tdb-worklist");
-    expect(page).not.toContain("tdb-pick\"");
-    expect(rule(".tdb-verb.pri")).toContain("background: var(--ink)"); // the card verbs keep their micro-grammar
+  it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
+    expect(page).toContain('className="tdb-btnp tdb-fsb2"'); // Begin (rail)
+    expect((page.match(/className="tdb-btnp sm"/g) ?? []).length).toBe(1); // Work the list (Today)
+    expect(page).toContain('"tdb-btnh" : "tdb-btnp sm"'); // Open it › (the review banner)
+    expect((page.match(/tdb-btnp/g) ?? []).length).toBe(3); // the full ink census — three, nowhere else
+    expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>');
+    expect(page).toContain('className="tdb-btnh em" onClick={open}>Action now</button>');
+    expect(page).toContain('className="tdb-btnh" onClick={() => toggleToday(c)}');
+    expect(page).toContain('className="tdb-btnh" onClick={helpMePick}>＋ Add more</button>');
+    // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
+    expect(rule(".tdb-verb.pri")).toContain("background: var(--white, #fff)");
+    expect(rule(".tdb-verb.pri")).not.toContain("var(--panel)");
+    expect(rule(".tdb-verb")).toContain("color: #6b5a4e");
   });
-  it("the view segment's selected state = the half-pressed chip; reduced motion = shadow steps only", () => {
-    expect(rule(".tdb-vseg button.on")).toContain("box-shadow: 1px 1px 0 var(--ink)");
-    expect(css).toContain(".tdb-cta:hover:not(:disabled), .tdb-cta:active:not(:disabled) { transform: none; }");
+  it("fixed heights + centring hold: the Today pair sits level; the toggle's active chip = white + ink ring, shadowless", () => {
+    expect(css).toContain(".tdb-tf2 .tdb-btnh, .tdb-tf2 .tdb-btnp { flex: 1; padding: 0; white-space: nowrap; }");
+    const on = rule(".tdb-vseg button.on");
+    expect(on).toContain("background: var(--white, #fff)");
+    expect(on).toContain("border: 1px solid var(--ink)");
+    expect(on).not.toContain("box-shadow");
+  });
+  it("the press is EXTINCT: no offset shadows, no translate steps, no press reduced-motion branch, no cta classes", () => {
+    expect(page).not.toContain("tdb-cta");
+    expect(css).not.toContain("tdb-cta");
+    expect(css).not.toMatch(/box-shadow: [12]px [12]px 0/);
+    expect(css).not.toContain("translate(1px, 1px)");
+    expect(css).not.toContain("translate(2px, 2px)");
   });
 });
 
@@ -188,7 +209,7 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
     const on = rule(".tdb-vseg button.on");
     expect(on).toContain("background: var(--white, #fff)");
     expect(on).toContain("border: 1px solid var(--ink)");
-    expect(on).toContain("box-shadow: 1px 1px 0 var(--ink)");
+    expect(on).not.toContain("box-shadow"); // frame P2: the half-press died with the press
   });
   it("radius continuity WITHOUT overflow:hidden (sticky must survive): the band's own 15px top corners", () => {
     expect(rule(".tdb-dochead")).toContain("border-radius: 15px 15px 0 0");
@@ -234,10 +255,10 @@ describe("polish P5 — sweep: dead selectors out; disabled joins the inert gram
       expect(css).not.toContain("." + dead.trim() + ",");
     }
   });
-  it("the press's disabled state is the INERT GRAMMAR, not opacity — the page law holds for every control", () => {
-    expect(css).not.toContain(".tdb-cta:disabled { opacity");
-    expect(css).toContain(".tdb-cta:disabled, .tdb-ctaghost:disabled,");
-    expect(css).toMatch(/\.tdb-cta:disabled, \.tdb-ctaghost:disabled,[^{]*\{\n?[^}]*cursor: not-allowed/);
+  it("the button law's disabled state is the INERT GRAMMAR, not opacity — the page law holds for every control", () => {
+    expect(css).not.toContain(".tdb-btnp:disabled { opacity");
+    expect(css).toContain(".tdb-btnp:disabled, .tdb-btnh:disabled,");
+    expect(css).toMatch(/\.tdb-btnp:disabled, \.tdb-btnh:disabled,[^{]*\{\n?[^}]*cursor: not-allowed/);
   });
 });
 
@@ -472,13 +493,12 @@ describe("doc pass P6 — sweep", () => {
     expect(tour).toContain('".tdb-tile, .tdb-gcard, .tdb-lrow"');
     expect(tour).not.toContain("tdb-step");
   });
-  it("the reactive rail + the press law rode through untouched", () => {
+  it("the reactive rail rode through; the heights hold on the law's primitives (rewritten in frame P2)", () => {
     expect(page).toContain("const searchFc = searchActive");
     expect(page).toContain('"tdb-fsec">FILTER{searchActive && (');
-    expect(rule(".tdb-cta")).toContain("box-shadow: 2px 2px 0 var(--ink)");
-    expect(rule(".tdb-cta")).toContain("height: 40px");
-    expect(rule(".tdb-cta.sm")).toContain("height: 34px");
-    expect(rule(".tdb-cta.xs")).toContain("height: 32px");
+    expect(rule(".tdb-btnp")).toContain("height: 42px");
+    expect(rule(".tdb-btnp.sm")).toContain("height: 34px");
+    expect(rule(".tdb-btnh")).toContain("height: 34px");
   });
 });
 
@@ -523,15 +543,14 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
   });
   it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
     expect(rule(".tdb-lacts")).toContain("align-self: center");
-    expect(rule(".tdb-cta.xs")).toContain("height: 32px");
-    expect(rule(".tdb-ctaghost.xs")).toContain("height: 32px");
+    expect(rule(".tdb-btnh")).toContain("height: 34px"); // frame P2: the row actions ride the law's small height
     const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
-    expect(rr).toContain('className="tdb-cta xs" onClick={() => openFlowCards([c])}>Action now</button>');
+    expect(rr).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>Action now</button>');
     expect(rr).not.toContain("quickDone(c)}>Action now");
     expect(rr).toContain('{committed ? "− Today’s list" : "＋ Today’s list"}');
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
     expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });');
-    expect(br).toContain('className="tdb-cta xs" onClick={open}>Action now</button>');
+    expect(br).toContain('className="tdb-btnh em" onClick={open}>Action now</button>');
     expect(br).not.toContain("Today’s list"); // groups stay uncommittable — the carried resolution
   });
   it("the dropdown keeps the Later items under the renamed trigger", () => {
@@ -860,11 +879,11 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     expect(page).toContain("const ghosts = todayGhosts(committedCards.length, doneN);");
     expect(page).toContain("{ghosts > 0 && (");
   });
-  it("footer verbs switch with the fill: empty = Help me pick + ink ＋ Add; filled = ＋ Add more + ink Work the list", () => {
+  it("footer verbs switch with the fill: empty = Help me pick + ＋ Add; filled = ＋ Add more + INK Work the list", () => {
     expect(page).toContain("{committedCards.length > 0 ? (");
-    expect(page).toContain('className="tdb-cta sm" onClick={() => scrollToLane("do")}>＋ Add</button>'); // press small
-    expect(rule(".tdb-cta")).toContain("box-shadow: 2px 2px 0 var(--ink)"); // the press replaced the ink fill
-    expect(css).toContain(".tdb-tf2 .tdb-ctaghost, .tdb-tf2 .tdb-cta { flex: 1;");
+    // frame P2: Work the list is the pair's ONE ink primary; ＋ Add is quiet furniture
+    expect(page).toContain('className="tdb-btnh" onClick={() => scrollToLane("do")}>＋ Add</button>');
+    expect(css).toContain(".tdb-tf2 .tdb-btnh, .tdb-tf2 .tdb-btnp { flex: 1;");
   });
 });
 
