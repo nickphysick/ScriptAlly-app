@@ -997,18 +997,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
             the narrowed meta lives in the sheet's corner line */}
         <button type="button" className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>
-          SHOW ALL<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>
+          Show all<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>
         </button>
-        {railPill("OFFERS", "offers", fc.offers, "p")}
-        {railPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
-        {railPill("MATERIALS", "materials", fc.materials, "lat")}
-        {railPill("WISH LISTS", "mswl", fc.mswl, "lat")}
-        {railPill("STALE", "stale", fc.stale, "lat")}
-        {railPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
-        {railPill("NOTES", "notes", fc.notes, "y")}
+        {railPill("Offers", "offers", fc.offers, "p")}
+        {railPill("Agent waiting", "overToYou", fc.overToYou, "p")}
+        {railPill("Materials", "materials", fc.materials, "lat")}
+        {railPill("Wish lists", "mswl", fc.mswl, "lat")}
+        {railPill("Stale", "stale", fc.stale, "lat")}
+        {railPill("Snoozed", "snoozed", fc.snoozed, "lat")}
+        {railPill("Notes", "notes", fc.notes, "y")}
         <div className="tdb-fdivider" aria-hidden />
         <button type="button" className={`tdb-fpill d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
-          <span className="tdb-dotc" aria-hidden />TODAY’S LIST<span className="tdb-fn">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>
+          <span className="tdb-dotc" aria-hidden />Today’s list<span className="tdb-fn">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>
         </button>
         <div className="tdb-fsfoot">
           <button type="button" className="tdb-setrow" onClick={() => setSettingsOpen(true)}>

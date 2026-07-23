@@ -124,22 +124,23 @@
 .tdb-fq { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #7c3a2a; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; min-width: 0; max-width: 100%; }
 .tdb-fq:hover { border-color: #7c3a2a; }
 .tdb-fn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
-.tdb-fpill { display: flex; align-items: center; gap: 10px; margin: 0 10px 6px; height: 34px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 0 13px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--ink-2); cursor: pointer; flex: 0 0 auto; }
+/* hero-pair P3 — FORMAT 3 (todo-filter-formats.html option 3, soft rectangles): the mono
+   pill grammar retires — sentence-case sans rows in 10px-radius boxes; the reactive
+   machinery (nar/dim/z, struck counts, the query chip) rides unchanged. The app's body sans
+   stands in for the ref's Inter (the standing body-font convention). */
+.tdb-fpill { display: flex; align-items: center; gap: 10px; margin: 0 10px 6px; height: 34px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 10px; padding: 0 12px; font-size: 12px; font-weight: 500; color: #4d4238; cursor: pointer; flex: 0 0 auto; }
 .tdb-fpill:hover { background: var(--paper); }
 .tdb-fpill .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
 .tdb-fpill.d-p .tdb-dotc { background: var(--dot-p); }
 .tdb-fpill.d-lat .tdb-dotc { background: var(--dot-lat); }
 .tdb-fpill.d-y .tdb-dotc { background: var(--dot-y); }
 .tdb-fpill.d-s .tdb-dotc { background: var(--dot-s); }
-.tdb-fpill .tdb-fn { margin-left: auto; color: var(--faint); }
+.tdb-fpill .tdb-fn { margin-left: auto; font-size: 10px; color: #a5988c; font-variant-numeric: tabular-nums; }
 .tdb-fpill.z { opacity: 0.4; }
 .tdb-fpill.dim { opacity: 0.4; }
-.tdb-fpill.nar { border-color: #7c3a2a; color: #7c3a2a; background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); font-weight: 700; }
-.tdb-fpill.nar .tdb-dotc { background: #7c3a2a; }
-.tdb-fpill.nar .tdb-fn { color: #7c3a2a; }
+.tdb-fpill.nar { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; color: var(--ink); }
 /* v4 P2 — the rail's lead button + the SHOW ALL selected pill (the RESET row is gone) */
-.tdb-fpill.sel { border-color: var(--ink); font-weight: 700; color: var(--ink); }
-.tdb-fpill.sel::before { content: "✓"; font-size: 9px; }
+.tdb-fpill.sel { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; color: var(--ink); } /* no tick — the ring is the mark */
 .tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
 .tdb-fsfoot { margin-top: 10px; border-top: 1px solid var(--hairline); padding: 12px; }
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }

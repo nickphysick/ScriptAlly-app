@@ -31,32 +31,43 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain('<aside className="tdb-fside" aria-label="Filters">');
   });
   it("SHOW: seven vertical pills in the locked order, 34px rows, dot left + count right, zero 40%", () => {
-    for (const call of ['railPill("OFFERS", "offers", fc.offers, "p")', 'railPill("AGENT WAITING", "overToYou", fc.overToYou, "p")', 'railPill("MATERIALS", "materials", fc.materials, "lat")', 'railPill("WISH LISTS", "mswl", fc.mswl, "lat")', 'railPill("STALE", "stale", fc.stale, "lat")', 'railPill("SNOOZED", "snoozed", fc.snoozed, "lat")', 'railPill("NOTES", "notes", fc.notes, "y")']) {
-      expect(page).toContain(call);
+    for (const call of ['railPill("Offers", "offers", fc.offers, "p")', 'railPill("Agent waiting", "overToYou", fc.overToYou, "p")', 'railPill("Materials", "materials", fc.materials, "lat")', 'railPill("Wish lists", "mswl", fc.mswl, "lat")', 'railPill("Stale", "stale", fc.stale, "lat")', 'railPill("Snoozed", "snoozed", fc.snoozed, "lat")', 'railPill("Notes", "notes", fc.notes, "y")']) {
+      expect(page).toContain(call); // hero-pair P3: sentence case
     }
-    const order = ["OFFERS", "AGENT WAITING", "MATERIALS", "WISH LISTS", "STALE", "SNOOZED", "NOTES"];
+    const order = ["Offers", "Agent waiting", "Materials", "Wish lists", "Stale", "Snoozed", "Notes"];
     let last = -1;
     for (const l of order) { const i = page.indexOf(`railPill("${l}"`); expect(i).toBeGreaterThan(last); last = i; }
-    expect(rule(".tdb-fpill")).toContain("height: 34px");
+    const f = rule(".tdb-fpill");
+    expect(f).toContain("height: 34px");
+    expect(f).toContain("border-radius: 10px"); // format 3: soft rectangle, not a pill
+    expect(f).toContain("font-size: 12px");
+    expect(f).toContain("font-weight: 500");
+    expect(f).not.toContain("--f12-mono"); // the mono grammar retired
     expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
-    expect(rule(".tdb-fpill .tdb-fn")).toContain("margin-left: auto");
+    const n = rule(".tdb-fpill .tdb-fn");
+    expect(n).toContain("margin-left: auto");
+    expect(n).toContain("font-size: 10px");
+    expect(n).toContain("font-variant-numeric: tabular-nums");
   });
-  it("v4 P2: SHOW ALL is the default-selected pill AND the reset; narrowing keeps nar/dim; no RESET row", () => {
-    const nar = rule(".tdb-fpill.nar");
-    expect(nar).toContain("border-color: #7c3a2a");
-    expect(nar).toContain("font-weight: 700");
+  it("hero-pair P3: 'Show all' (sentence case, exactly) leads as the default-selected reset; ONE ink-ring selected grammar", () => {
     expect(page).toContain('className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}');
-    expect(page).toContain('SHOW ALL<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>'); // P4: the match total during search
-    expect(rule(".tdb-fpill.sel")).toContain("border-color: var(--ink)");
-    expect(css).toContain('.tdb-fpill.sel::before { content: "✓"; font-size: 9px; }');
+    expect(page).toContain('Show all<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>'); // the match total during search
+    expect(page).not.toContain("SHOW ALL<span"); // explicitly not capitals
+    const sel = rule(".tdb-fpill.sel");
+    expect(sel).toContain("border-color: var(--ink)");
+    expect(sel).toContain("box-shadow: inset 0 0 0 1px var(--ink)");
+    expect(sel).toContain("font-weight: 700");
+    expect(css).not.toContain(".tdb-fpill.sel::before"); // no tick glyph
+    const nar = rule(".tdb-fpill.nar");
+    expect(nar).toContain("box-shadow: inset 0 0 0 1px var(--ink)"); // the narrowed rows wear the same clothes
+    expect(nar).not.toContain("#7c3a2a");
     expect(page).not.toContain("tdb-frst");
     expect(css).not.toContain("tdb-frst");
-    // SHOW ALL sits first, directly under the FILTER header
     const sec = page.indexOf('>FILTER{searchActive');
-    const sa = page.indexOf("SHOW ALL<span");
+    const sa = page.indexOf("Show all<span");
     expect(sa).toBeGreaterThan(sec);
-    expect(sa).toBeLessThan(page.indexOf('railPill("OFFERS"'));
-    expect(page).toContain('>FILTER{searchActive && ('); // P4: the header grows the query chip
+    expect(sa).toBeLessThan(page.indexOf('railPill("Offers"'));
+    expect(page).toContain('>FILTER{searchActive && ('); // the header keeps the query chip
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
     expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>');
@@ -68,7 +79,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(panel).not.toContain("tdb-herobegin"); // Begin is hero furniture now
   });
   it("the lens below a divider; the same state the search composes with", () => {
-    expect(page.indexOf('className="tdb-fdivider"')).toBeLessThan(page.indexOf("TODAY’S LIST<span"));
+    expect(page.indexOf('className="tdb-fdivider"')).toBeLessThan(page.indexOf("Today’s list<span"));
     expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
     expect(page).toContain("matchesSearch(c, search, sctx)");
   });
@@ -415,7 +426,7 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
   it("the struck pair renders during search only, and only when the count CHANGED", () => {
     expect(page).toContain("searchActive && live !== base ? (<><s className=\"tdb-was\">{base}</s>{live}</>) : (<>{base}</>)");
     expect(page).toContain('{label}<span className="tdb-fn">{fnFace(count, live)}</span>');
-    expect(page).toContain("TODAY’S LIST<span className=\"tdb-fn\">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>".replace(/\\/g, ""));
+    expect(page).toContain("Today’s list<span className=\"tdb-fn\">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>".replace(/\\/g, "")); // P3: sentence case
     expect(css).toContain(".tdb-fn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }");
   });
   it("zero-match pills DIM in place (the live count keys the existing 40%) — never hidden, never reordered", () => {
@@ -1007,9 +1018,9 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
       expect(src).not.toContain("oday’s list"); // catches Today's/today's alike
       // (Deck v2 legalised the uppercase form: the lens pill + sage chip are named TODAY'S LIST)
     }
-    // doc pass P4 re-legalised the phrase ON THE PAGE for one control only: the ledger's
-    // ghost "＋/− Today's list" (ref B baked) — exactly the toggle's two forms, nowhere else
-    expect((page.match(/oday’s list/g) ?? []).length).toBe(2);
+    // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms);
+    // hero-pair P3 added the lens row's sentence-case "Today's list" — exactly three
+    expect((page.match(/oday’s list/g) ?? []).length).toBe(3);
     expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // via the shared constant — the two literals live in VERB_LABELS alone
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)
