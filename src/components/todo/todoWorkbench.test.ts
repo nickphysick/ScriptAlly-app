@@ -70,9 +70,10 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain('>FILTER{searchActive && ('); // the header keeps the query chip
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
-    expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>'); // session P1: Begin launches the cinematic session over the same engine queue
+    expect(page).toContain('className="tdb-btnp sm tdb-herobegin" disabled={boardCards.length === 0}'); // session P1: Begin launches the cinematic session over the same engine queue
+    expect(page).toContain("onClick={() => setSession({ queue: boardCards })}");
     expect(rule(".tdb-btnp")).toContain("height: 42px"); // the law's base; the hero seat lifts to 44
-    expect(rule(".tdb-herobegin")).toContain("height: 44px");
+    expect(rule(".tdb-btnp.sm, .tdb-rvchip.sm")).toContain("height: 28px"); // the settlement: compact, in the bar
     const panel = page.slice(page.indexOf("function renderFilterCard"), page.indexOf("function renderRail"));
     expect(panel.indexOf(">FILTER{")).toBeGreaterThan(-1);
     expect(panel).toContain('className="tdb-setrow"');
@@ -165,7 +166,7 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect(em).toContain("font-weight: 700");
   });
   it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
-    expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // Begin (the hero pair)
+    expect(page).toContain('className="tdb-btnp sm tdb-herobegin"'); // Begin (the bar's pair)
     expect((page.match(/className="tdb-btnp sm"/g) ?? []).length).toBe(1); // Work the list (Today)
     expect(page).toContain('className="tdb-btnp sm tdb-rvopen2"'); // Open it › (the review banner)
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(3); // the full ink census — three, nowhere else
@@ -392,30 +393,29 @@ describe("hero-pair P2 — the white rewind chip", () => {
     expect(css).not.toContain("tdb-rvnew");
   });
   it("unread by WEIGHT: unopened = full ink; opened softens glyph + label to muted; the same flags; weekly reset", () => {
-    expect(page).toContain("className={`tdb-rvchip${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, ""));
+    expect(page).toContain("className={`tdb-rvchip sm${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // the settlement: compact, in the bar
     expect(css).toContain(".tdb-rvchip.seen { color: #6b5a4e; }"); // currentColor carries the glyph with it
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week resets
   });
 });
 
-describe("hero-pair P1 — the pair beneath the search (variant B)", () => {
-  it("Begin + the chip sit centred under the pill with 24px of clear air; both size to content", () => {
-    const pr = rule(".tdb-heropair");
-    expect(pr).toContain("justify-content: center");
-    expect(pr).toContain("flex-wrap: wrap"); // stacks centred when the width runs out (~560)
-    expect(pr).toContain("margin: 18px 0 0"); // + the srchrow's 6 = the pack's 24 clear
-    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterCard"));
-    expect(hero).toContain('className="tdb-btnp tdb-herobegin"');
-    expect(hero).toContain("className={`tdb-rvchip${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // P2's weight-state template
-    expect(rule(".tdb-rvchip")).not.toContain("width: 100%"); // content-sized in the pair
-    expect(rule(".tdb-herobegin")).toContain("box-shadow: 0 3px 12px rgba(29, 16, 12, 0.22)");
+describe("hero-pair P1 — the pair (SETTLED: it now rides the sheet's bar, not the hero)", () => {
+  it("Begin + the chip sit in the bar's right cluster; both size to content", () => {
+    const pr = rule(".tdb-barpair");
+    expect(pr).toContain("display: flex");
+    expect(pr).toContain("align-items: center");
+    const bar = page.slice(page.indexOf('className="tdb-dochead"'), page.indexOf('className="tdb-sheetbody"'));
+    expect(bar).toContain('className="tdb-btnp sm tdb-herobegin"');
+    expect(bar).toContain("className={`tdb-rvchip sm${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // P2's weight-state template
+    expect(rule(".tdb-rvchip")).not.toContain("width: 100%"); // content-sized in the cluster
+    expect(rule(".tdb-herobegin")).toContain("box-shadow: 0 1px 4px rgba(29, 16, 12, 0.18)");
   });
   it("the chip renders ONLY in its afterlife state; Begin re-centres alone otherwise; the appearance fades in", () => {
     expect(page).toContain("{reviewWin && (reviewSeen || reviewDismissed) && (");
-    expect(css).toContain(".tdb-heropair .tdb-rvchip { animation: tdbChipIn 200ms ease; }");
+    expect(css).toContain(".tdb-barpair .tdb-rvchip { animation: tdbChipIn 200ms ease; }");
     expect(css).toContain("@keyframes tdbChipIn");
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-heropair .tdb-rvchip { animation: none; } }");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-barpair .tdb-rvchip { animation: none; } }");
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
   });
@@ -637,8 +637,8 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(rule(".tdb-ask")).toContain("font-size: 64px"); // polish: 64
     expect(rule(".tdb-ask")).toContain("letter-spacing: -0.015em");
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
-    expect(hero).toContain("Begin focused session"); // hero-pair P1: the pair sits beneath the search
-    expect(hero).toContain("tdb-heropair"); // v9 — the pair carries an .insession state and leaves for the session
+    expect(hero).not.toContain("Begin focused session"); // the settlement: the hero is title + search only
+    expect(hero).not.toContain("tdb-barpair");
   });
   it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
     const sr = rule(".tdb-srchrow");

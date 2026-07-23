@@ -121,3 +121,75 @@ describe("settlement P2 — the search, grown, and the clearance band", () => {
     expect(ss).toContain("const region = sessionRegion(sr ? sr.bottom : slotTop + 30, window.innerHeight);");
   });
 });
+
+describe("settlement P3 — the pair's new seat: in the bar", () => {
+  const bar = page.slice(page.indexOf('className="tdb-dochead"'), page.indexOf('className="tdb-sheetbody"'));
+  it("the bar reads left to right: the Playfair line → the pair → the divider → the toggle", () => {
+    const iLine = bar.indexOf("tdb-bartext");
+    const iBegin = bar.indexOf("tdb-herobegin");
+    const iChip = bar.indexOf("tdb-rvchip");
+    const iDiv = bar.indexOf("tdb-bardiv");
+    const iSeg = bar.indexOf("tdb-vseg");
+    expect(iLine).toBeGreaterThan(-1);
+    expect(iBegin).toBeGreaterThan(iLine);
+    expect(iChip).toBeGreaterThan(iBegin);
+    expect(iDiv).toBeGreaterThan(iChip);
+    expect(iSeg).toBeGreaterThan(iDiv); // the toggle stays the bar's rightmost resident
+    expect(rule(".tdb-barvt")).toContain("margin-left: auto");
+    const d = rule(".tdb-bardiv");
+    expect(d).toContain("width: 1px");
+    expect(d).toContain("height: 20px");
+    expect(d).toContain("background: var(--container-head-rule)");
+  });
+  it("the 36px bar holds the 28px pills WITHOUT growing", () => {
+    expect(rule(".tdb-dochead")).toContain("height: var(--container-head-h)"); // still the token, unchanged
+    const p = rule(".tdb-btnp.sm, .tdb-rvchip.sm");
+    expect(p).toContain("height: 28px");
+    expect(p).toContain("font-size: 11px"); // one step down from the hero's 12.5
+    expect(p).toContain("padding: 0 12px");
+    // 28 + 26 (toggle) both clear 36 — and nothing in the bar is taller than the bar
+    expect(rule(".tdb-vseg")).toContain("height: 26px");
+  });
+  it("below the MEASURED collapse tier the pills go icon-only, labels carried by aria/title", () => {
+    expect(rule(".tdb-wrap")).toContain("--tdb-bar-collapse: 680px");
+    expect(css).toContain("@media (max-width: 679.98px) {");
+    expect(css).toContain(".tdb-btnp.sm i, .tdb-rvchip.sm i { display: none; }");
+    expect(bar).toContain('aria-label="Begin focused session"');
+    expect(bar).toContain('title="Begin focused session"');
+    expect(bar).toContain("aria-label={`Last week in review — week ${reviewWin.weekNumber}`}");
+    expect(bar).toContain("<i>Begin focused session</i>");
+    expect(bar).toContain("<i>Last week in review</i>");
+    // the toggle NEVER collapses
+    const collapse = css.slice(css.indexOf("@media (max-width: 679.98px) {"));
+    expect(collapse.slice(0, collapse.indexOf("}\n"))).not.toContain("tdb-vseg");
+    // nothing wraps instead: the bar's line and cluster stay on one line
+    expect(rule(".tdb-barvt")).not.toContain("flex-wrap");
+  });
+  it("the hero is title + search ONLY", () => {
+    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
+    expect(hero).toContain("tdb-ask"); // the title
+    expect(hero).toContain("tdb-bigsearch"); // the search
+    expect(hero).not.toContain("tdb-herobegin");
+    expect(hero).not.toContain("tdb-rvchip");
+    expect(css).not.toContain(".tdb-heropair"); // the old seat is gone
+  });
+  it("the session unmounts the pair FROM THE BAR and returns it; the bar + toggle ride the bar's own exit", () => {
+    expect(page).toContain('{heroSession.slot?.kind !== "session" && (');
+    expect(page).toContain('<span className={`tdb-barpair${heroSession.clearing ? " insession" : ""}`}>');
+    expect(rule(".tdb-barpair.insession")).toContain("opacity: 0");
+    // the bar itself is the choreography's EXIT_BAR — it leaves with the sheet, not with the pair
+    const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
+    expect(stage).toContain('export const EXIT_BAR = ".tdb-dochead"');
+    expect(stage).not.toContain("tdb-barpair"); // the pair is not separately choreographed
+  });
+  it("TAB ORDER: search → the bar's controls left-to-right → the filter rail", () => {
+    // the render helpers are DEFINED below the return, so DOM order is the CALL order
+    const iHero = page.indexOf("{renderHero()}");
+    const iBar = page.indexOf('className="tdb-dochead"');
+    const iRail = page.indexOf("{renderRail()}");
+    expect(iHero).toBeLessThan(iBar); // the hero's search comes first
+    expect(iBar).toBeLessThan(iRail); // then the bar's controls, then the rail
+    expect(rule(".tdb-fside")).toContain("order: -1"); // …and the rail keeps its LEFT seat
+    expect(page.indexOf("function renderHero")).toBeGreaterThan(iRail); // (the helper-below-return law)
+  });
+});

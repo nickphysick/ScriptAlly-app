@@ -279,9 +279,10 @@ describe("v9 P1 — THE FRAME: the bar exempt · the pair out · In focus + prog
   });
   it("the Begin/review pair and the search LEAVE for the session and return with the exit", () => {
     expect(page).toContain('{heroSession.slot?.kind !== "session" && (');
-    expect(page).toContain('<div className={`tdb-heropair${heroSession.clearing ? " insession" : ""}`}>');
-    expect(rule(".tdb-heropair.insession")).toContain("opacity: 0");
-    expect(rule(".tdb-heropair.insession")).toContain("pointer-events: none");
+    // the settlement: the pair's seat moved to the sheet's bar — the same fade-then-unmount
+    expect(page).toContain('<span className={`tdb-barpair${heroSession.clearing ? " insession" : ""}`}>');
+    expect(rule(".tdb-barpair.insession")).toContain("opacity: 0");
+    expect(rule(".tdb-barpair.insession")).toContain("pointer-events: none");
     expect(css).toContain(".tdb-srchrow.insession .tdb-bigsearch"); // the search still fades in its slot
   });
   it("the title is 'In focus' — 'Clearing the desk' is replaced, both directions still crossfade", () => {

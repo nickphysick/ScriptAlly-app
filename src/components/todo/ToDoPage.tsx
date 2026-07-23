@@ -807,7 +807,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {renderHero()}
         {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
-          {renderRail()}
+          {/* the settlement P3 — TAB ORDER: search → the bar's controls (left to right) → the
+              filter rail. The sheet therefore leads in the DOM and the rail takes its left
+              seat through `order: -1`, so the reading order and the visual order both hold. */}
           {/* ── polish P3: THE CENTRE STACK — three sibling lifted containers, 812 wide,
               16 apart: the review card · the sheet · the Pro colleague. ── */}
           <div className="tdb-centre">
@@ -833,9 +835,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   the rail counts derive from, so it re-derives live under search/filter; lining
                   + tabular figures keep the numerals on the baseline at a steady width. */}
               <span className="tdb-bartext">Showing {shownX} of {shownY} items on your list</span>
-              <span className="tdb-vseg" role="group" aria-label="View">
-                <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
-                <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
+              {/* THE SETTLEMENT P3 — the bar's right cluster, left to right: the pair, a 20px
+                  hairline divider, then the view toggle, which keeps its seat as the bar's
+                  rightmost resident. Below --tdb-bar-collapse the pills go icon-only (their
+                  labels carried by aria-label + title) BEFORE any text wraps; the toggle
+                  never collapses. */}
+              <span className="tdb-barvt">
+                {heroSession.slot?.kind !== "session" && (
+                  <span className={`tdb-barpair${heroSession.clearing ? " insession" : ""}`}>
+                    <button type="button" className="tdb-btnp sm tdb-herobegin" disabled={boardCards.length === 0} aria-label="Begin focused session" title="Begin focused session" onClick={() => setSession({ queue: boardCards })}>
+                      <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
+                      <i>Begin focused session</i>
+                    </button>
+                    {/* hero-pair P2 — unread by WEIGHT, not ornament: unopened = full ink,
+                        opened = muted; the same flags drive it. */}
+                    {reviewWin && (reviewSeen || reviewDismissed) && (
+                      <button type="button" className={`tdb-rvchip sm${reviewSeen ? " seen" : ""}`} aria-label={`Last week in review — week ${reviewWin.weekNumber}`} title={`Last week in review · WK ${reviewWin.weekNumber}`} onClick={openReview}>
+                        <RewindGlyph />
+                        <i>Last week in review</i>
+                      </button>
+                    )}
+                    <span className="tdb-bardiv" aria-hidden />
+                  </span>
+                )}
+                <span className="tdb-vseg" role="group" aria-label="View">
+                  <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
+                  <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
+                </span>
               </span>
             </div>
             <div className="tdb-sheetbody">
@@ -921,6 +947,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             />
           )}
           </div>
+          {renderRail()}
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
               masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
@@ -1087,22 +1114,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </span>
           )}
         </div>
-        {heroSession.slot?.kind !== "session" && (
-        <div className={`tdb-heropair${heroSession.clearing ? " insession" : ""}`}>
-          <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
-            <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
-            Begin focused session
-          </button>
-          {/* hero-pair P2 — unread by WEIGHT, not ornament: unopened = full ink, opened =
-              muted; the same flags drive it. The rewind sits at the play's exact seat. */}
-          {reviewWin && (reviewSeen || reviewDismissed) && (
-            <button type="button" className={`tdb-rvchip${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
-              <RewindGlyph />
-              Last week in review
-            </button>
-          )}
-        </div>
-        )}
       </>
     );
   }
