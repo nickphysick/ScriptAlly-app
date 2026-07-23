@@ -124,6 +124,20 @@ describe("settlement P2 — the search, grown, and the clearance band", () => {
     expect(css.match(/\n\.tdb-srchrow \{/g)!.length).toBe(1);
     expect(css.match(/\.tdb-srchrow\s*\{[^}]*margin:/g)!.length).toBe(1);
   });
+  it("the band is EMPTY and independent of the head height — the token is its guaranteed floor", () => {
+    // the hero's last child is the search row: nothing (label, chip, shadow) sits in the band
+    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
+    const iSearch = hero.indexOf("tdb-srchrow");
+    expect(hero.slice(iSearch)).not.toContain("tdb-btnp");
+    expect(hero.slice(iSearch)).not.toContain("tdb-rvchip");
+    // the container row adds its own air ABOVE the token's floor; neither is negative, so the
+    // real clear ground is the sum and can never fall below --tdb-search-clear
+    const ws = rule(".tdb-ws");
+    expect(ws).toMatch(/padding: \d+px 0 \d+px/);
+    expect(ws).not.toContain("margin-top: -"); // nothing pulls the containers up into the band
+    // and the band does not move when the header height changes
+    expect(rule(".tdb-srchrow")).not.toContain("--container-head-h");
+  });
   it("the v9 sub-slot spacing law still holds with the taller pill", () => {
     const slot = rule(".tdb-srchrow");
     expect(slot).toContain("min-height: var(--tdb-search-h)"); // the slot tracks the pill exactly
