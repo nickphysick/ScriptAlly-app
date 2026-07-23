@@ -60,7 +60,7 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
     expect(page).toContain('onClick={slot.onEnd}>END SESSION ✕</button>');
   });
   it("the ritual lines: the three, italic Playfair 19 ink-muted, 780ms each, reported up per line", () => {
-    expect(ss).toContain('RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => { setLine(i); onHero({ clearing: true, slot: { kind: "ritual", index: i } }); }));');
+    expect(ss).toContain('RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => onHero({ clearing: true, slot: { kind: "ritual", index: i } })));');
     const l = rule(".tdb-fsrit span");
     expect(l).toContain("font-style: italic");
     expect(l).toContain("font-size: 19px");
@@ -99,6 +99,32 @@ describe("v7 P3 — the gather + morph (the deck retired; the pile fully fades)"
     expect(ss).toContain('style={{ top: geo.wrapTop, left: curtW, right: curtW }}');
     expect(rule(".tdb-fsseat")).toContain("left: 50%"); // centre of the inset wrap
     expect(ss).toContain("const seatLeft = window.innerWidth / 2 - GATHER.sessionCardW / 2;");
+  });
+});
+
+describe("v7 P5 — wiring + the supersession sweep", () => {
+  it("the state machine: board → gather → session → close → board; back + END SESSION land safely", () => {
+    expect(ss).toContain('const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");');
+    expect(ss).toContain('window.addEventListener("popstate", onPop);'); // browser back → onClose
+    expect(ss).toContain("onEnd: () => setPhase(\"close\") }".replace(/\\/g, "")); // END SESSION (rendered in the hero) closes the session
+    expect(page).toContain('onClick={slot.onEnd}>END SESSION ✕</button>');
+  });
+  it("the overture plays every session (no seen-flag); its skip is instant; the styled set strips on any exit", () => {
+    expect(ss).not.toContain("localStorage");
+    expect(ss).toContain("const styled = useRef<Set<HTMLElement>>(new Set());");
+    expect(ss).toContain('for (const el of styled.current) el.style.cssText = "";');
+  });
+  it("the v6 presentation is EXTINCT: no pool, no deck, no sweep/rise/skip-down, no subtitle, no room bar", () => {
+    for (const dead of ["tdb-fspool", "tdb-fsdeck", "tdb-fssub", "tdb-fsslot", "tdbRise", "tdbSweepOff", "tdbSkipDown", "POOL OF LIGHT", "Focused session</div>", "tdb-ssbar", "tdb-ssroom"]) {
+      expect(ss).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+  });
+  it("focus-art stays reserved and unused; the tour's Begin copy still speaks true of the session", () => {
+    expect(ss).not.toContain("focus-art");
+    expect(page).not.toContain("import focusArt");
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain("Begin a focused session");
   });
 });
 
@@ -187,7 +213,7 @@ describe("v7 P4 — the card + the carriage (transition A)", () => {
   });
 });
 
-describe("final P4 — the close, in place", () => {
+describe("v7 P5 — the close, in place", () => {
   it("the LAST card sweeps off before the close mounts (the deferral); the pool leaves with the branch", () => {
     expect(ss).toContain("const willClose = !order.slice(index + 1).some((x) => liveKeys.has(x.key));");
     expect(ss).toContain('at(clearAtMs, () => { setDeal(null); dealRef.current = false; if (willClose) setPhase("close"); });');
@@ -207,9 +233,10 @@ describe("final P4 — the close, in place", () => {
     expect(ss).toContain('onClick={() => setReviewOpen((v) => !v)}>Review what you did</button>');
     expect(css).toContain(".tdb-sssd.done { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2));");
   });
-  it("Back to your desk REVERSES the opening compressed (~700ms): the styles unwind, then strip, then close", () => {
+  it("Back to your desk REVERSES the opening compressed (~700ms): curtains withdraw + dim lifts + title back, then strip + close", () => {
     expect(ss).toContain('onClick={backToDesk}>Back to your desk</button>');
-    expect(ss).toContain("el.style.transition = `transform ${GATHER.reverseMs}ms ease, opacity ${GATHER.reverseMs}ms ease, background ${GATHER.reverseMs}ms ease, border-color ${GATHER.reverseMs}ms ease, box-shadow ${GATHER.reverseMs}ms ease`;");
+    expect(ss).toContain("setCurtains(false); // the curtains withdraw + the dim lifts WITH the reassembly");
+    expect(ss).toContain("onHero({ clearing: false, slot: null }); // the title crossfades back WITH the reassembly");
     expect(ss).toContain("window.setTimeout(() => { stripAll(); onClose(); }, GATHER.reverseMs + 60);");
   });
   it("the board is already correct via the shared derivation — the session WRITES NOTHING (no sync)", () => {

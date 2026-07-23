@@ -2,25 +2,22 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE FOCUSED SESSION — FINAL (the in-place design, design-refs/session-final.html v6.1):
- * the chrome and the "What's on your desk?" title NEVER leave; the board transforms around
- * them. The GATHER (sidebars slide away, the sheet dissolves, every other item flies onto
- * the first task, the pile morphs to the centred rest) → the POOL OF LIGHT (the card is the
- * one heavy object on a bright desk) → the DEAL at the rest line → the CLOSE in place, with
- * Back to your desk reassembling the board. This supersedes the dark-room presentation
- * (veil/spotlight/room) entirely.
+ * THE FOCUSED SESSION — v7 (design-refs/session-v7.html): IN PLACE — the chrome and the
+ * "What's on your desk?" title NEVER leave; the title crossfades to "Clearing the desk" and
+ * the board transforms around it. The GATHER → the CURTAINS + DIM (the stage wings + a
+ * slight wash; the card stays bright) → the CARRIAGE at the rest line (handled: stamp →
+ * slide out left, the next slides in from the right; skip: no stamp, the requeue slides in)
+ * → the CLOSE in place, Back to your desk reassembling the board. Supersedes the room (v5)
+ * and pool-of-light (v6) packs.
  *
  * The ENGINE is unchanged: the board's own queue (boardCards order, captured at launch) and
- * the page's existing primitives — this component is presentation + session bookkeeping
- * only; it writes NOTHING.
+ * the page's existing primitives — presentation + session bookkeeping only; it writes
+ * NOTHING. The hero's title + sub-slot are driven up through onHero.
  *
- * Refs: session-final.html (the master choreography, both views) · session-focus-signal.html
- * option 5 (the pool; 0–4 rejected) · session-content.html frame A/D (the card's content +
- * the close's ledger) · session-deal.html option A (stamp/sweep/rise).
+ * Refs: session-v7.html (the master; transition A only) · session-content.html frame A/D.
  *
- * Z law: the overlay sits at 48 — beneath the journey flow (50), the toast (60) and the ask
- * (90), above the board. Inside the seat: the pool(0) < the deck edges(1) < the skip
- * clone(2) < the card(3) < the handled clone(4).
+ * Z: the overlay sits at 48 (beneath the flow 50, the toast 60, the ask 90). Inside it: the
+ * dim(0) < the card(3) < the curtains(6, at the edges only).
  */
 import React, { useEffect, useRef, useState } from "react";
 import { BoardCard } from "../../lib/todoBoard";
@@ -69,7 +66,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   const [handled, setHandled] = useState<BoardCard[]>([]);
   const [skipped, setSkipped] = useState<BoardCard[]>([]);
   const startedAt = useRef(Date.now());
-  // THE DEAL — the leaving clone + the rise; dealRef guards the vanish effect
+  // THE CARRIAGE — the leaving clone + the incoming slide; dealRef guards the vanish effect
   const [deal, setDeal] = useState<{ card: BoardCard; kind: "handled" | "skip" } | null>(null);
   const [rose, setRose] = useState(false);
   const dealRef = useRef(false);
@@ -88,7 +85,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
 
   // ── the gather's own progress ──
   const [composed, setComposed] = useState(reduce); // the settled session composition
-  const [line, setLine] = useState(-1);
   const [bigOn, setBigOn] = useState(reduce);
   // measured geometry: the subtitle under the title, the ritual/session line in the
   // search's vacated slot, the seat region below the hero, the card's rest offset
@@ -129,14 +125,13 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
     onHero({ clearing: true, slot: null });
-    if (!wrapEl) { setLine(-1); setBigOn(true); setComposed(true); setPhase("session"); return; }
+    if (!wrapEl) { setBigOn(true); setComposed(true); setPhase("session"); return; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_LEFT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_RIGHT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_FADE))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_BAR))) { mark(el); el.style.transition = "none"; el.style.transform = "translateY(-130%)"; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(DISSOLVE))) { mark(el); el.style.transition = "none"; el.style.background = "transparent"; el.style.borderColor = "transparent"; el.style.boxShadow = "none"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(GATHER_SELECTOR))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
-    setLine(-1);
     setBigOn(true);
     setComposed(true);
     setPhase("session");
@@ -180,7 +175,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     });
     // 2 — the ritual lines in the search's vacated slot
     onHero({ clearing: true, slot: null }); // the title crossfades to "Clearing the desk" as the session begins
-    RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => { setLine(i); onHero({ clearing: true, slot: { kind: "ritual", index: i } }); }));
+    RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => onHero({ clearing: true, slot: { kind: "ritual", index: i } })));
     // 3 — the gather: every other item flies onto the first task's footprint
     at(GATHER.gatherStartMs, () => {
       if (!wrapEl || composedRef.current) return;
@@ -235,7 +230,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
         // the edges settle in as the morph lands; the session line takes the slot
         at(GATHER.edgesAtMs, () => {
           composedRef.current = true;
-          setLine(-1);
           setComposed(true);
           setPhase("session"); // the sync effect fills the session line
         });
@@ -316,8 +310,8 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     if (i >= order.length) { setPhase("close"); return; }
     setIndex(i);
   }
-  /** HANDLED (its write already landed — the vanish drove this): the DEAL runs — the stamp
-   *  lands and holds, the sheet sweeps off left, the next rises with the advance. */
+  /** HANDLED (its write already landed — the vanish drove this): the CARRIAGE runs — the
+   *  stamp lands and holds, the card slides out left, the next slides in from the right. */
   function markHandledAdvance(c: BoardCard) {
     if (dealRef.current) return;
     dealRef.current = true;
