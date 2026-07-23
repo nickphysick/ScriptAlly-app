@@ -421,3 +421,56 @@ describe("v9 P3 — the carriage + the close against the PAGE", () => {
     expect(ss).toContain(">Review what you did</button>");
   });
 });
+
+describe("v9 P4 — THE QUIET EXIT (option 3) — and it works", () => {
+  it("it is the underlined mono line at the stage foot, not a pill, not a plate, no icon", () => {
+    const e = rule(".tdb-fsexit");
+    expect(e).toContain("font-size: 11px");
+    expect(e).toContain("letter-spacing: 0.18em");
+    expect(e).toContain("color: #5d4d40");
+    expect(e).toContain("var(--f12-mono)");
+    expect(e).toContain("border: none");
+    expect(e).not.toContain("border-radius");
+    expect(e).not.toContain("background: #"); // no plate, no fill
+    // centred at the foot, ≥28px above the bottom, with a ≥44px hit area
+    expect(e).toContain("left: 50%");
+    expect(e).toContain("transform: translateX(-50%)");
+    expect(e).toContain("bottom: 28px");
+    expect(e).toContain("height: 44px");
+    // the rule: 1px #c9bcae, 3px below the text (11px from the mid of an 11px line)
+    const a = rule(".tdb-fsexit::after");
+    expect(a).toContain("height: 1px");
+    expect(a).toContain("background: #c9bcae");
+    expect(rule(".tdb-fsexit:hover")).toContain("color: var(--ink)");
+    expect(rule(".tdb-fsexit:hover::after")).toContain("background: var(--ink)");
+    expect(ss).toContain(">END SESSION</button>");
+    expect(ss).not.toContain("END SESSION ✕"); // the v7 hero link is gone
+  });
+  it("IT WORKS: it lives in the overlay (which no longer eats pointers) and closes early", () => {
+    expect(ss).toContain('<button type="button" className="tdb-fsexit" onClick={() => setPhase("close")}>');
+    expect(ss).toContain('{phase !== "close" && composed && (');
+    expect(css).toContain(".tdb-ss button, .tdb-ss a, .tdb-fsskip { pointer-events: auto; }");
+    expect(rule(".tdb-fsexit")).toContain("z-index: 7"); // above the page, inside the wrap
+    // ending early keeps live tasks → the close reads "Good session."
+    expect(ss).toContain("const anyLive = order.some((x) => liveKeys.has(x.key));");
+    expect(ss).toContain('{anyLive ? "Good session." : "Desk cleared."}');
+  });
+  it("the exit reverses the opening (~700ms) and browser back takes the SAME road", () => {
+    expect(ss).toContain("function backToDesk() {");
+    expect(ss).toContain("setCurtains(false)");
+    expect(ss).toContain("onHero({ clearing: false, slot: null })");
+    expect(ss).toContain("window.setTimeout(() => { stripAll(); onClose(); }, GATHER.reverseMs + 60);");
+    expect(ss).toContain("const onPop = () => backToDesk();");
+    expect(ss).not.toContain("const onPop = () => onClose();");
+  });
+  it("THE DERIVATION ASSERTION: the board is already correct — the session keeps no counts to sync", () => {
+    // the session holds NO board state: the queue is handed in, live-ness is handed in
+    expect(ss).toContain("liveKeys");
+    expect(ss).not.toContain("useMemo(() => buildBoard");
+    expect(ss).not.toContain("boardCards =");
+    for (const w of ["refresh(", "reload(", "invalidate(", "setBoard("]) expect(ss).not.toContain(w);
+    // the board's own derivation drives both the board and the session's live set
+    expect(page).toContain("liveKeys={new Set(boardCards.map((c) => c.key))}");
+    expect(page).toContain("onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}");
+  });
+});

@@ -749,6 +749,13 @@ button.tdb-tdot { cursor: pointer; }
 @keyframes tdbCarriageIn { from { transform: translateX(120%); } }
 @keyframes tdbCarriageBack { from { transform: translateX(-120%); } }
 @keyframes tdbCarriageOutR { to { transform: translateX(120%); opacity: 0; } }
+/* ── v9 P4 — THE QUIET EXIT (option 3): mono 11px, .18em, #5d4d40, a 1px #c9bcae rule 3px
+   below the text, centred at the stage foot (≥28px above the bottom) with a ≥44px invisible
+   hit area. No icon, no pill, no plate. Hover takes the text and the rule to ink. ── */
+.tdb-fsexit { position: absolute; left: 50%; transform: translateX(-50%); bottom: 28px; height: 44px; padding: 0 18px; background: none; border: none; font-family: var(--f12-mono); font-size: 11px; letter-spacing: 0.18em; color: #5d4d40; cursor: pointer; z-index: 7; display: flex; align-items: center; }
+.tdb-fsexit::after { content: ""; position: absolute; left: 18px; right: 18px; top: 50%; margin-top: 11px; height: 1px; background: #c9bcae; transition: background 200ms; }
+.tdb-fsexit:hover { color: var(--ink); }
+.tdb-fsexit:hover::after { background: var(--ink); }
 /* THE CLOSE, IN PLACE (frame D) — the same centre region on the bare ground */
 .tdb-ssclose { text-align: center; padding: 0 0 10px; animation: tdbSesIn 500ms ease; }
 .tdb-ssclose h1 { font-family: var(--f12-serif); font-size: 46px; font-weight: 700; color: var(--ink); }

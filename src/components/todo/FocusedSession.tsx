@@ -81,12 +81,14 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   useEffect(() => {
     if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();
   }, [phase]);
-  // browser back lands safely on the board (the unmount guard strips every inline style)
+  // v9 — browser back takes THE SAME ROAD as the quiet exit: the full reverse, not a jump cut
+  // (the unmount guard still strips every inline style if anything unmounts first).
   useEffect(() => {
-    const onPop = () => onClose();
+    const onPop = () => backToDesk();
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── the gather's own progress ──
   const [composed, setComposed] = useState(reduce); // the settled session composition
@@ -490,6 +492,13 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
               </div>
             </div>
           </>
+        )}
+        {phase !== "close" && composed && (
+          // ── v9 P4 — THE QUIET EXIT (session-v9-exit.html option 3): the least a control can
+          // be while existing. An underlined mono line at the stage foot, centred, with a
+          // generous invisible hit area. It lives in the OVERLAY (not the hero the overlay
+          // lies over), which is why it is finally clickable.
+          <button type="button" className="tdb-fsexit" onClick={() => setPhase("close")}>END SESSION</button>
         )}
         {phase === "close" && (
           // ── THE CLOSE, IN PLACE (frame D) — the same centre region; the subtitle and the
