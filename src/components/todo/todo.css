@@ -672,17 +672,18 @@ button.tdb-tdot { cursor: pointer; }
 /* the seat region below the hero */
 .tdb-fswrap { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; }
 .tdb-fsseat { position: absolute; left: 50%; width: 500px; margin-left: -250px; }
-.tdb-fsdeck { position: absolute; left: 0; right: 0; top: 0; height: 60%; background: var(--white, #fff); border: 1px solid #ddd3c6; border-radius: 16px; z-index: 1; animation: tdbSesIn 400ms ease; }
-.tdb-fsdeck.d1 { transform: translateY(7px) scale(0.975); }
-.tdb-fsdeck.d2 { transform: translateY(14px) scale(0.95); opacity: 0.7; }
-/* ── P2: THE POOL OF LIGHT (session-focus-signal.html option 5 — options 0–4 all
-   REJECTED): no page treatment; the session card is the one heavy object
-   on a bright desk. The lit seat deepens the shadow; the soft elliptical pool sits beneath,
-   wider than the card, at z 0 — under the deck edges (1), under the card (3). Both arrive
-   with the morph's landing and leave with the close. ── */
-.tdb-fscard { position: relative; width: 500px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 16px; box-shadow: 0 20px 50px rgba(58, 28, 20, 0.22); overflow: hidden; z-index: 3; opacity: 0; transition: box-shadow 500ms ease; }
-.tdb-fsseat.lit .tdb-fscard { box-shadow: 0 26px 60px rgba(58, 28, 20, 0.38); }
-.tdb-fspool { position: absolute; left: 50%; top: 55%; transform: translate(-50%, -30%); width: 640px; height: 200px; border-radius: 50%; background: radial-gradient(ellipse, rgba(58, 28, 20, 0.14), transparent 65%); z-index: 0; pointer-events: none; animation: tdbSesIn 500ms ease; }
+/* ── v7 P2: THE CURTAINS + THE DIM (session-v7.html) — the ONLY focus treatment (the pool of
+   light + the deck edges are retired): ink panels close from the screen edges (the stage
+   wings) and a SLIGHT wash dims the work area below the hero. The card renders above the dim
+   at full brightness. z inside .tdb-ss: dim(0) < card(3) < curtains(6) — the curtains sit at
+   the edges, the centred card never under them. ── */
+.tdb-fsdim { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(58, 28, 20, 0.16); opacity: 0; transition: opacity 900ms ease; z-index: 0; pointer-events: none; }
+.tdb-fsdim.on { opacity: 1; }
+.tdb-fscurt { position: absolute; top: 0; bottom: 0; background: linear-gradient(90deg, #1d100c, #2a1a13); z-index: 6; transition: transform 1100ms cubic-bezier(0.3, 0.7, 0.2, 1); }
+.tdb-fscurt.l { left: 0; transform: translateX(-100%); }
+.tdb-fscurt.r { right: 0; transform: translateX(100%); background: linear-gradient(270deg, #1d100c, #2a1a13); }
+.tdb-fscurt.on { transform: translateX(0); }
+.tdb-fscard { position: relative; width: 500px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 16px; box-shadow: 0 18px 46px rgba(58, 28, 20, 0.28); overflow: hidden; z-index: 3; opacity: 0; }
 .tdb-fscard.on { opacity: 1; }
 .tdb-fscard .tdb-band { padding: 7px 15px; min-height: 0; display: flex; align-items: center; }
 .tdb-fslane { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: var(--ink-2); }
@@ -732,8 +733,8 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-ssreviewlist { border-top: 1px solid var(--hairline); margin-top: 4px; padding-top: 4px; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-ask.t1, .tdb-ask.t2, .tdb-fsrit span, .tdb-heroslot { transition: none; animation: none; }
-  .tdb-fsses, .tdb-fsdeck, .tdb-ssnext, .tdb-ssclose, .tdb-fspool { animation: none; }
-  .tdb-fscard { transition: none; }
+  .tdb-fsses, .tdb-ssnext, .tdb-ssclose { animation: none; }
+  .tdb-fsdim, .tdb-fscurt { transition: none; }
   .tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.rise, .tdb-ssstamp { animation: none; }
 }
 

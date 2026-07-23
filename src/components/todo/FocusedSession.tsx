@@ -27,6 +27,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   gatherTransform, staggerFor, restTop, GATHER, DEAL, RITUAL_LINES,
   EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR,
+  curtainWidth, CURTAIN,
 } from "../../lib/sessionStage";
 import { whereThisStands, STATUS_OWED } from "../../lib/sessionContext";
 import { useScriptAllyDb } from "../../lib/db";
@@ -93,6 +94,10 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   // measured geometry: the subtitle under the title, the ritual/session line in the
   // search's vacated slot, the seat region below the hero, the card's rest offset
   const [geo, setGeo] = useState({ subTop: 120, slotTop: 160, wrapTop: 210, restY: 40 });
+  // v7 — the curtains + the dim: on with the gather, off with the reverse; the width is a
+  // token by viewport so the card wrap can inset by it (the curtains clip nothing).
+  const [curtains, setCurtains] = useState(reduce);
+  const [curtW, setCurtW] = useState(curtainWidth(window.innerWidth));
   const bigRef = useRef<HTMLDivElement | null>(null);
   const timers = useRef<number[]>([]);
   const styled = useRef<Set<HTMLElement>>(new Set());
@@ -105,6 +110,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   };
 
   function measure() {
+    setCurtW(curtainWidth(window.innerWidth));
     const title = wrapEl?.querySelector<HTMLElement>(".tdb-ask");
     const slot = wrapEl?.querySelector<HTMLElement>(".tdb-srchrow");
     const tr = title?.getBoundingClientRect();
@@ -145,9 +151,11 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     const onResize = () => measure();
     window.addEventListener("resize", onResize);
     if (reduce) {
+      setCurtains(true);
       applyComposedInstant();
       return () => { window.removeEventListener("resize", onResize); stripAll(); };
     }
+    requestAnimationFrame(() => setCurtains(true)); // the curtains close as the session begins
     if (!wrapEl) { applyComposedInstant(); return () => window.removeEventListener("resize", onResize); }
     // 1 — the board's furniture leaves; the sheet dissolves; the items float on the desk
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_LEFT))) {
@@ -257,6 +265,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
 
   /** Back to your desk — the compressed reassembly (~700ms), then every style strips. */
   function backToDesk() {
+    setCurtains(false); // the curtains withdraw + the dim lifts WITH the reassembly
     onHero({ clearing: false, slot: null }); // the title crossfades back WITH the reassembly
     for (const el of styled.current) {
       el.style.transition = `transform ${GATHER.reverseMs}ms ease, opacity ${GATHER.reverseMs}ms ease, background ${GATHER.reverseMs}ms ease, border-color ${GATHER.reverseMs}ms ease, box-shadow ${GATHER.reverseMs}ms ease`;
@@ -379,18 +388,19 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       onKeyDown={phase === "gather" && !composed ? jumpToComposed : undefined}
       tabIndex={-1}>
       {/* v7 — the hero's title + sub-slot are driven up through onHero (ToDoPage renders them
-          in the real stacked-flow hero); this overlay carries only the board region below. */}
-      {/* the seat region below the hero — the card + the close live here */}
-      <div className="tdb-fswrap" style={{ top: geo.wrapTop }}>
+          in the real stacked-flow hero); this overlay carries the curtains, the dim + the card. */}
+      {/* the DIM: a slight wash over the work area below the hero — the card renders above it */}
+      <div className={`tdb-fsdim${curtains ? " on" : ""}`} style={{ top: geo.wrapTop }} aria-hidden />
+      {/* the CURTAINS: ink panels close from the screen edges (the stage wings) */}
+      <div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW }} aria-hidden />
+      <div className={`tdb-fscurt r${curtains ? " on" : ""}`} style={{ width: curtW }} aria-hidden />
+      {/* the seat region below the hero — the card + the close live here, INSET by the curtains */}
+      <div className="tdb-fswrap" style={{ top: geo.wrapTop, left: curtW, right: curtW }}>
         {phase !== "close" && current && (
           <>
-            <div className={`tdb-fsseat${composed ? " lit" : ""}`} style={{ top: geo.restY }}>
-              {/* P2 — THE POOL OF LIGHT (option 5): no page treatment; the card carries the
-                  mode. The pool + the deep shadow arrive with the morph's landing and leave
-                  with the close (this whole branch unmounts at phase "close"). */}
-              {composed && <div className="tdb-fspool" aria-hidden />}
-              {edgesOn && remaining >= 2 && <div className="tdb-fsdeck d2" aria-hidden />}
-              {edgesOn && remaining >= 1 && <div className="tdb-fsdeck d1" aria-hidden />}
+            <div className="tdb-fsseat" style={{ top: geo.restY }}>
+              {/* v7 — no pool, no deck: the curtains + dim carry the mode (the deck-edge motif
+                  is retired; P3 fades the gathered pile fully). */}
               {deal && (
                 <div className={`tdb-fsleave ${deal.kind}${reduce ? " static" : ""}`} aria-hidden>
                   <div className="tdb-fscard lv">

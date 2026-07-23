@@ -90,6 +90,24 @@ export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // white/border/shadow dissolve
 export const GATHER_SELECTOR = ".tdb-cell, .tdb-gbar, .tdb-gpage, .tdb-lrow, .tdb-lsub, .tdb-lpage, .tdb-laddrow";
 
 /**
+ * v7 — THE CURTAINS + THE DIM (session-v7.html). The ink panels close in from the screen
+ * edges; a slight wash dims the work area (never the card). Width: 200px at ≥1500px viewport,
+ * else proportional (~13vw, floor 96) so a laptop keeps the curtains narrower.
+ */
+export function curtainWidth(vw: number): number {
+  return vw >= 1500 ? 200 : Math.max(96, Math.round(vw * 0.13));
+}
+export const CURTAIN = {
+  closeMs: 1100, // the panels close (and withdraw) over this
+  dimMs: 900, // the wash settles / lifts
+  dimDelayMs: 500, // the dim follows the curtains starting to close
+  dim: 0.16, // rgba(58,28,20,.16) — SLIGHT (no vignette, no heavy dark)
+  fullWidthVw: 1500,
+  fullWidthPx: 200,
+  floorPx: 96,
+} as const;
+
+/**
  * THE DEAL's timing spine (session-deal.html option A at the rest line). The stamp lands
  * with its pop, holds the beat, the sheet sweeps off left, and the next rises from the
  * stack 180ms into the sweep; the advance (the session line + next-up) fires WITH the rise.

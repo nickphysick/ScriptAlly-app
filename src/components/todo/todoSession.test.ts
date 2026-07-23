@@ -79,28 +79,37 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
   });
 });
 
-describe("final P2 — the pool of light (option 5; every other treatment rejected)", () => {
-  it("the lit seat deepens the card's shadow to the ref's order; the pool is the soft ellipse beneath", () => {
-    expect(css).toContain(".tdb-fsseat.lit .tdb-fscard { box-shadow: 0 26px 60px rgba(58, 28, 20, 0.38); }");
-    const pool = rule(".tdb-fspool");
-    expect(pool).toContain("background: radial-gradient(ellipse, rgba(58, 28, 20, 0.14), transparent 65%)");
-    expect(pool).toContain("width: 640px"); // wider than the 500 card
-    expect(rule(".tdb-fscard")).toContain("transition: box-shadow 500ms ease"); // the deepening rides the landing
+describe("v7 P2 — the curtains + the dim (pool of light + deck edges retired)", () => {
+  it("the curtains: ink panels close from L/R with the gradient toward centre; responsive width; 1.1s", () => {
+    expect(css).toContain(".tdb-fscurt { position: absolute; top: 0; bottom: 0; background: linear-gradient(90deg, #1d100c, #2a1a13);");
+    expect(rule(".tdb-fscurt")).toContain("transition: transform 1100ms");
+    expect(css).toContain(".tdb-fscurt.r { right: 0; transform: translateX(100%); background: linear-gradient(270deg, #1d100c, #2a1a13); }");
+    expect(css).toContain(".tdb-fscurt.on { transform: translateX(0); }");
+    // the width is a viewport token; the wrap insets by it (the curtains clip nothing)
+    expect(ss).toContain('<div className={`tdb-fscurt l${curtains ? " on" : ""}`} style={{ width: curtW }} aria-hidden />');
+    expect(ss).toContain('style={{ top: geo.wrapTop, left: curtW, right: curtW }}'); // the card wrap inset
+    expect(ss).toContain("const [curtW, setCurtW] = useState(curtainWidth(window.innerWidth));");
+    expect(ss).toContain("setCurtW(curtainWidth(window.innerWidth));"); // remeasured on resize
   });
-  it("z-order: the pool(0) under the deck edges(1) under the card(3)", () => {
-    expect(rule(".tdb-fspool")).toContain("z-index: 0");
-    expect(rule(".tdb-fsdeck")).toContain("z-index: 1");
+  it("curtainWidth: 200 at ≥1500, else ~13vw floored at 96", () => {
+    // (the maths itself is unit-tested in sessionStage.test.ts; here we bind the usage)
+    expect(ss).toContain("curtainWidth,");
+  });
+  it("the dim: a SLIGHT rgba(58,28,20,.16) wash over the work area, the card exempt (renders above it)", () => {
+    const d = rule(".tdb-fsdim");
+    expect(d).toContain("background: rgba(58, 28, 20, 0.16)");
+    expect(d).toContain("z-index: 0"); // under the card (z 3)
     expect(rule(".tdb-fscard")).toContain("z-index: 3");
+    expect(rule(".tdb-fscurt")).toContain("z-index: 6"); // above the card; at the edges only
+    expect(ss).toContain('<div className={`tdb-fsdim${curtains ? " on" : ""}`} style={{ top: geo.wrapTop }} aria-hidden />');
   });
-  it("presence is bound to the composed session and leaves with the close; it follows the card's seat through the deals", () => {
-    expect(ss).toContain('{composed && <div className="tdb-fspool" aria-hidden />}');
-    expect(ss).toContain('className={`tdb-fsseat${composed ? " lit" : ""}`}'); // the state class rides the CONTAINER
-    // the pool lives inside the phase !== "close" branch — the close unmounts it
-    const branch = ss.slice(ss.indexOf('{phase !== "close" && current && ('), ss.indexOf('{phase === "close" && ('));
-    expect(branch).toContain("tdb-fspool");
+  it("both present ONLY during the session: on with the gather, withdraw on Back to your desk", () => {
+    expect(ss).toContain("requestAnimationFrame(() => setCurtains(true)); // the curtains close as the session begins");
+    expect(ss).toContain("setCurtains(false); // the curtains withdraw + the dim lifts WITH the reassembly");
+    expect(ss).toContain("const [curtains, setCurtains] = useState(reduce);"); // reduced motion starts closed
   });
-  it("the rejected treatments are absent: no vignette, no ground shift, no inset frame, no ribbon", () => {
-    for (const dead of ["vignette", "tdb-fsvig", "tdb-fsframe", "tdb-fsribbon", "radial-gradient(ellipse 72%"]) {
+  it("the pool of light + the deck edges are EXTINCT (retired in v7)", () => {
+    for (const dead of ["tdb-fspool", "tdb-fsdeck", "tdb-fsseat.lit", "radial-gradient(ellipse, rgba(58, 28, 20, 0.14)", "0 26px 60px"]) {
       expect(ss).not.toContain(dead);
       expect(css).not.toContain(dead);
     }
@@ -139,11 +148,9 @@ describe("final P3 — the card + the deal at the rest line", () => {
     expect(ss).toContain("const next = [...rest, c0]; // the requeue — to the session order's end");
     expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setOrder(next); setPhase("close"); return; }');
   });
-  it("the stack thins 2 → 1 → 0 with the LIVE queue; the true count lives in the session line; next-up updates", () => {
-    expect(ss).toContain("const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;");
-    expect(ss).toContain('{edgesOn && remaining >= 2 && <div className="tdb-fsdeck d2" aria-hidden />}');
-    expect(ss).toContain('{edgesOn && remaining >= 1 && <div className="tdb-fsdeck d1" aria-hidden />}');
-    expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // the next LIVE — never a ghost
+  it("v7: no residual stack (deck edges retired); the true count lives in the session line; next-up is the next LIVE", () => {
+    expect(ss).not.toContain("tdb-fsdeck");
+    expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // never a ghost
     expect(ss).toContain(">NEXT UP · <i>{nextUp.title}</i></div>");
   });
   it("reduced motion: instant swaps; the stamp appears without its pop", () => {
