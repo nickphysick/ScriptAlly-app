@@ -42,6 +42,40 @@ const fmtDay = (iso: string): string => {
 /** The last word of a display name — the template's short form ("Jonathan Marsh" → "Marsh"). */
 const surname = (name: string): string => name.trim().split(/\s+/).slice(-1)[0] ?? name;
 
+/** How many outstanding names the sentence will carry before it says "+n more". */
+export const NAME_CAP = 3;
+
+/**
+ * v9 — THE NAME LIST, at the TEMPLATE level. A writer with two live queries to the same agent
+ * (or the same name cased differently) must never read "Reed, Reed" — the template dedupes on
+ * the rendered short form, case-insensitively, keeps first-seen order, and caps the sentence
+ * at three with a "+{n} more" tail. The malformed sentence is impossible here regardless of
+ * what the caller collected.
+ */
+export function nameList(names: string[], cap: number = NAME_CAP): string {
+  const seen = new Set<string>();
+  const shown: string[] = [];
+  for (const n of names) {
+    const short = surname(n);
+    const k = short.toLocaleLowerCase();
+    if (!short || seen.has(k)) continue;
+    seen.add(k);
+    shown.push(short);
+  }
+  if (shown.length <= cap) return shown.join(", ");
+  return `${shown.slice(0, cap).join(", ")} +${shown.length - cap} more`;
+}
+
+/** The distinct count behind that list — the sentence's number must match its names. */
+export function distinctNames(names: string[]): number {
+  const seen = new Set<string>();
+  for (const n of names) {
+    const k = surname(n).toLocaleLowerCase();
+    if (k) seen.add(k);
+  }
+  return seen.size;
+}
+
 /**
  * Compose the summary. Clause by clause; each clause requires ALL of its facts — a missing
  * field drops the clause. Returns "" when nothing can be said (the card then hides).
@@ -50,7 +84,11 @@ export function whereThisStands(i: StandInput): string {
   const parts: string[] = [];
   if (i.kind === "offer") {
     if (i.offerDate && fmtDay(i.offerDate)) parts.push(`Offer received ${fmtDay(i.offerDate)}.`);
-    if (i.outstanding && i.outstanding.length > 0) parts.push(`${i.outstanding.length} still out (${i.outstanding.map(surname).join(", ")}).`);
+    if (i.outstanding && i.outstanding.length > 0) {
+      // the COUNT is the distinct count, so the number and the names always agree
+      const n = distinctNames(i.outstanding);
+      if (n > 0) parts.push(`${n} still out (${nameList(i.outstanding)}).`);
+    }
     if (i.agentName) parts.push(`Convention says you nudge them with the news and set ${surname(i.agentName)} a reply-by date.`);
   } else if (i.kind === "awaiting-send") {
     if (i.sentDate && fmtDay(i.sentDate)) parts.push(`Queried ${fmtDay(i.sentDate)}.`);

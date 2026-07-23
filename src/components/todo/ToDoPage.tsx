@@ -547,6 +547,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // the focused session (the session pack): the queue = the ENGINE's own boardCards order,
   // captured at launch; the cinematic container drives it.
   const [session, setSession] = useState<{ queue: BoardCard[] } | null>(null);
+  // the inverses the undo toast already carries, kept by card key so the session's REDO can
+  // offer "Undo handled" on a card it stamped (see doneToast — no parallel undo store)
+  const doneUndos = useRef<Map<string, () => Promise<void>>>(new Map());
   // v7 — the hero in session: the title crossfade + the fixed sub-slot's single occupant are
   // driven by the FocusedSession through this ONE lifted view-model (the hero stays a real
   // stacked flow — nothing absolutely positioned over the board).
@@ -672,13 +675,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
     return !!q && getPrimaryAction(q.status as QueryStatus).kind === "mark-sent";
   }
+  // v9 — the session's REDO can offer "Undo handled" on a card it stamped. It calls back to
+  // THE SAME inverse the undo toast already carries, remembered by card key — there is no
+  // parallel undo store and no second inverse anywhere in the app.
+  function doneToast(c: BoardCard, fn: () => Promise<void>) {
+    doneUndos.current.set(c.key, fn);
+    flash(`Done — “${c.title}”`, { label: "Undo", fn });
+  }
+
   async function quickDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
       await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
       setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on Today.`, undo });
-      flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
       return;
     }
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
@@ -688,7 +699,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from the quick rail");
       const undo = () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE);
       setOverlay(c.key, { kind: "receipt", lane: "hk", title: `${c.who || "Query"} — closed`, line: "Logged as no response — not a rejection, so your response rate stays honest." , undo });
-      flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
       return;
     }
     if (c.taskType === "nudge_overdue") {
@@ -703,7 +714,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         if (acts[0]?.id) await deleteActivity(acts[0].id);
       };
       setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line: receiptLine(p, today), undo });
-      flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
       return;
     }
     const action = getPrimaryAction(q.status as QueryStatus);
@@ -726,7 +737,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       openFlowCards([c]);
     };
     setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line, undo, edit });
-    flash(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+    doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
   }
 
   // Grouped-card ⏸ fork actions — mute scopes, stated plainly. Nothing is ever deleted.
@@ -948,6 +959,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}
           onQuickComplete={quickDone}
           canQuickComplete={sessionCanQuick}
+          canUndoHandled={(c) => doneUndos.current.has(c.key)}
+          onUndoHandled={async (c) => { const fn = doneUndos.current.get(c.key); if (fn) { doneUndos.current.delete(c.key); await fn(); } }}
           onHero={setHeroSession}
           onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}
         />

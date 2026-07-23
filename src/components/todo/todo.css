@@ -682,7 +682,7 @@ button.tdb-tdot { cursor: pointer; }
 @keyframes tdbSesIn { from { opacity: 0; } }
 /* the seat region below the hero */
 .tdb-fswrap { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; }
-.tdb-fsseat { position: absolute; left: 50%; width: 500px; margin-left: -250px; }
+.tdb-fsseat { position: absolute; left: 50%; width: 600px; margin-left: -300px; } /* v9 — the page's width */
 /* ── v7 P2: THE CURTAINS + THE DIM (session-v7.html) — the ONLY focus treatment (the pool of
    light + the deck edges are retired): ink panels close from the screen edges (the stage
    wings) and a SLIGHT wash dims the work area below the hero. The card renders above the dim
@@ -696,37 +696,57 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-fscurt.l { left: 0; transform: translateX(-100%); }
 .tdb-fscurt.r { right: 0; transform: translateX(100%); background: linear-gradient(270deg, #1d100c, #2a1a13); }
 .tdb-fscurt.on { transform: translateX(0); }
-.tdb-fscard { position: relative; width: 500px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 16px; box-shadow: 0 18px 46px rgba(58, 28, 20, 0.28); overflow: hidden; z-index: 3; opacity: 0; }
-.tdb-fscard.on { opacity: 1; }
-.tdb-fscard .tdb-band { padding: 7px 15px; min-height: 0; display: flex; align-items: center; }
-.tdb-fslane { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: var(--ink-2); }
-.tdb-fscardc { padding: 16px 20px 18px; }
-.tdb-fscardc h2 { font-family: var(--f12-serif); font-size: 21px; font-weight: 700; line-height: 1.15; color: var(--ink); }
-.tdb-fsms { font-family: var(--f12-serif); font-style: italic; font-size: 11px; color: var(--ink-2); margin-top: 3px; }
-.tdb-ssctx { margin-top: 11px; background: #fbf8f3; border: 1px solid var(--hairline); border-radius: 10px; padding: 9px 11px; font-size: 10px; color: #5d4d40; line-height: 1.5; }
-.tdb-ssctx b { font-family: var(--f12-mono); font-size: 6px; letter-spacing: 0.13em; color: var(--faint); display: block; margin-bottom: 3px; font-weight: 600; }
+/* ── v9 — THE MANUSCRIPT PAGE (session-v9-page.html composition A). No card grammar: one
+   generous white page with a deep shadow, a mono running head in accent red, the task as a
+   Playfair title, the manuscript · agent in italics, the context as PROSE under a hairline
+   rule, split actions, and a running footer. ── */
+.tdb-fspage { position: relative; width: 600px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 8px; box-shadow: 0 22px 54px rgba(58, 28, 20, 0.26); padding: 38px 54px 30px; box-sizing: border-box; z-index: 3; opacity: 0; }
+.tdb-fspage.on { opacity: 1; }
+/* the running head: TEXT, not chrome — no pill, no family band */
+.tdb-fsrun { display: flex; gap: 12px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.16em; color: #8a7a6d; text-transform: uppercase; }
+.tdb-fsrun.urgent { color: #b5563e; }
+.tdb-fspage h2 { font-family: var(--f12-serif); font-size: 27px; font-weight: 700; line-height: 1.16; color: var(--ink); margin-top: 10px; }
+.tdb-fsms { font-family: var(--f12-serif); font-style: italic; font-size: 12px; color: var(--ink-2); margin-top: 5px; }
+/* the context as PROSE — a hairline rule above it, never a box */
+.tdb-fsbody { font-size: 11.5px; color: #4d4238; line-height: 1.7; margin-top: 16px; border-top: 1px solid var(--hairline); padding-top: 14px; }
+/* the split: the ink primary (and the ✓) left, the quiet text links right */
+.tdb-fsacts { display: flex; gap: 8px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
+.tdb-fsquiet { margin-left: auto; display: flex; gap: 16px; align-items: center; }
+.tdb-fstl { background: none; border: none; padding: 0; font-size: 10.5px; color: #6b5a4e; cursor: pointer; text-decoration: underline; text-decoration-color: #c9bcae; text-underline-offset: 3px; }
+.tdb-fstl:hover { color: var(--ink); text-decoration-color: var(--ink); }
+.tdb-fstl:disabled { opacity: 0.4; cursor: default; }
+/* the running footer — a book's, not a toolbar's */
+.tdb-fspfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+.tdb-fspfoot .l { display: flex; gap: 14px; align-items: center; }
+.tdb-fsnav { background: none; border: none; padding: 0; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.12em; color: #8a7a6d; cursor: pointer; }
+.tdb-fsnav:hover { color: var(--ink); }
+.tdb-fsnav:disabled { opacity: 0.35; cursor: default; }
+.tdb-fsnav.und { color: #b5563e; }
 .tdb-ssacts { display: flex; gap: 8px; margin-top: 13px; flex-wrap: wrap; }
 .tdb-ssb { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 33px; padding: 0 15px; border-radius: 99px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em; line-height: 1; cursor: pointer; opacity: 0; }
 .tdb-ssb.on { opacity: 1; }
 .tdb-ssb.bp { background: #2a1a13; border: 1px solid #1d100c; color: #f3e7da; }
 .tdb-ssbig { height: 33px; padding: 0 13px; font-size: 10px; }
-.tdb-ssnext { position: absolute; left: 0; right: 0; text-align: center; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; color: var(--faint); animation: tdbSesIn 400ms ease; }
-.tdb-ssnext i { font-style: normal; color: #6b5a4e; }
 /* THE CARRIAGE at the rest line (session-v7.html transition A): the leaving clone */
 .tdb-fsleave { position: absolute; inset: 0; z-index: 4; }
 .tdb-fsleave.skip { z-index: 2; } /* down AND BEHIND — beneath the risen card */
-.tdb-fsleave .tdb-fscard.lv { position: absolute; inset: 0; height: 100%; opacity: 1; }
+.tdb-fsleave .tdb-fspage.lv { position: absolute; inset: 0; height: 100%; opacity: 1; overflow: hidden; }
 /* v7 — the carriage: handled + skip both slide the outgoing card straight out LEFT (handled
    waits for the stamp's hold); the incoming slides in from the RIGHT, overlapping. */
 .tdb-fsleave.handled { animation: tdbCarriageOut 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) 440ms forwards; }
 .tdb-fsleave.skip { animation: tdbCarriageOut 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) forwards; }
 .tdb-fsleave.static { animation: none; }
-.tdb-ssstamp { position: absolute; right: 16px; top: 40px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1.5px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: 0 2px 6px rgba(90, 110, 88, 0.3); animation: tdbStampIn 350ms cubic-bezier(0.2, 0.9, 0.3, 1.5) both; z-index: 5; }
+.tdb-ssstamp { position: absolute; right: 22px; top: 26px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1.5px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: 0 2px 6px rgba(90, 110, 88, 0.3); animation: tdbStampIn 350ms cubic-bezier(0.2, 0.9, 0.3, 1.5) both; z-index: 5; }
 .tdb-fsleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }
-.tdb-fscard.carriagein { animation: tdbCarriageIn 500ms cubic-bezier(0.2, 0.85, 0.3, 1.1); }
+.tdb-fspage.carriagein { animation: tdbCarriageIn 500ms cubic-bezier(0.2, 0.85, 0.3, 1.1); }
+/* v9 — the REDO reverses the carriage: the outgoing goes right, the incoming arrives from the left */
+.tdb-fspage.carriageback { animation: tdbCarriageBack 500ms cubic-bezier(0.2, 0.85, 0.3, 1.1); }
+.tdb-fsleave.back { animation: tdbCarriageOutR 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) forwards; }
 @keyframes tdbStampIn { from { transform: rotate(-8deg) scale(0); } to { transform: rotate(-8deg) scale(1); } }
 @keyframes tdbCarriageOut { to { transform: translateX(-120%); opacity: 0; } }
 @keyframes tdbCarriageIn { from { transform: translateX(120%); } }
+@keyframes tdbCarriageBack { from { transform: translateX(-120%); } }
+@keyframes tdbCarriageOutR { to { transform: translateX(120%); opacity: 0; } }
 /* THE CLOSE, IN PLACE (frame D) — the same centre region on the bare ground */
 .tdb-ssclose { text-align: center; padding: 40px 0 30px; animation: tdbSesIn 500ms ease; }
 .tdb-ssclose h1 { font-family: var(--f12-serif); font-size: 46px; font-weight: 700; color: var(--ink); }
@@ -747,9 +767,9 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-ssreviewlist { border-top: 1px solid var(--hairline); margin-top: 4px; padding-top: 4px; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-ask.t1, .tdb-ask.t2, .tdb-fsrit span, .tdb-heroslot { transition: none; animation: none; }
-  .tdb-fsses, .tdb-ssnext, .tdb-ssclose { animation: none; }
+  .tdb-fsprog, .tdb-ssclose { animation: none; }
   .tdb-fsdim, .tdb-fscurt { transition: none; }
-  .tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.carriagein, .tdb-ssstamp { animation: none; }
+  .tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fsleave.back, .tdb-fspage.carriagein, .tdb-fspage.carriageback, .tdb-ssstamp { animation: none; }
 }
 
 /* ── doc pass P5: THE UNDO TOAST (ref A §4) — the ink pill, bottom-centre above the help

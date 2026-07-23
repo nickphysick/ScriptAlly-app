@@ -6,7 +6,7 @@
  * field drops its clause; nothing is ever guessed).
  */
 import { describe, it, expect } from "vitest";
-import { whereThisStands, STATUS_OWED } from "./sessionContext";
+import { whereThisStands, STATUS_OWED, nameList, distinctNames } from "./sessionContext";
 
 describe("whereThisStands — the template per kind", () => {
   it("offer: date · outstanding (surnames) · the convention line", () => {
@@ -61,5 +61,26 @@ describe("the omission law", () => {
     expect(STATUS_OWED["Partial Requested"]).toBe("partial");
     expect(STATUS_OWED["Full Requested"]).toBe("full manuscript");
     expect(STATUS_OWED["Revise & Resubmit"]).toBe("revised manuscript");
+  });
+});
+
+describe("v9 — the outstanding names: dedupe, cap, and a count that matches", () => {
+  it("the same agent twice reads ONCE (the 'Reed, Reed' fault, killed at the template)", () => {
+    expect(nameList(["Alice Reed", "Alice Reed"])).toBe("Reed");
+    expect(nameList(["Priya Raman", "priya RAMAN"])).toBe("Raman"); // case-insensitive
+    expect(distinctNames(["Alice Reed", "Alice Reed", "Jonathan Marsh"])).toBe(2);
+  });
+  it("more than three names becomes '+n more'", () => {
+    expect(nameList(["A One", "B Two", "C Three", "D Four", "E Five"])).toBe("One, Two, Three +2 more");
+    expect(nameList(["A One", "B Two", "C Three"])).toBe("One, Two, Three");
+  });
+  it("the offer sentence's number is the DISTINCT count, so number and names agree", () => {
+    const out = whereThisStands({ kind: "offer", outstanding: ["Alice Reed", "Alice Reed", "Jonathan Marsh"] });
+    expect(out).toContain("2 still out (Reed, Marsh).");
+    expect(out).not.toContain("Reed, Reed");
+  });
+  it("no names, no clause (the omission law holds)", () => {
+    expect(whereThisStands({ kind: "offer", outstanding: [] })).not.toContain("still out");
+    expect(nameList([])).toBe("");
   });
 });

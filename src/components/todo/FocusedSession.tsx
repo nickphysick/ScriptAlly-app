@@ -49,13 +49,16 @@ export interface FocusedSessionProps {
   onQuickComplete: (card: BoardCard) => Promise<void> | void;
   canQuickComplete: (card: BoardCard) => boolean;
   /** v7 — report the hero's in-session state up (the title crossfade + the sub-slot occupant). */
+  /** v9 — the REDO's takeback: the board's own inverse (the undo toast's), by card. */
+  canUndoHandled: (c: BoardCard) => boolean;
+  onUndoHandled: (c: BoardCard) => void | Promise<void>;
   onHero: (h: HeroSession) => void;
   onClose: () => void;
 }
 
 const LANE_LABEL: Record<string, string> = { do: "URGENT", hk: "HOUSEKEEPING", nt: "NOTES" };
 
-export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, liveKeys, onOpenJourney, onQuickComplete, canQuickComplete, onHero, onClose }) => {
+export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, liveKeys, onOpenJourney, onQuickComplete, canQuickComplete, canUndoHandled, onUndoHandled, onHero, onClose }) => {
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const { queries, agents } = useScriptAllyDb();
   const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");
@@ -67,8 +70,10 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   const [skipped, setSkipped] = useState<BoardCard[]>([]);
   const startedAt = useRef(Date.now());
   // THE CARRIAGE — the leaving clone + the incoming slide; dealRef guards the vanish effect
-  const [deal, setDeal] = useState<{ card: BoardCard; kind: "handled" | "skip" } | null>(null);
+  const [deal, setDeal] = useState<{ card: BoardCard; kind: "handled" | "skip" | "back" } | null>(null);
   const [rose, setRose] = useState(false);
+  // v9 — the REDO's incoming page arrives from the LEFT (the carriage reversed)
+  const [roseBack, setRoseBack] = useState(false);
   const dealRef = useRef(false);
   // the close — the frozen timer + the review expansion
   const closedAt = useRef<number | null>(null);
@@ -279,7 +284,14 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   // ── the engine (unchanged): where-this-stands · advance · handled · skip ──
   const current = order[index];
   const total = order.length;
+  /** v9 — a page REDONE after it was stamped arrives with its stamp still on it. */
+  const stampedCurrent = !!current && handled.some((x) => x.key === current.key);
   const lane = (c: BoardCard) => LANE_LABEL[c.stream] ?? "";
+  /** v9 — the running head: the tag and the lane AS TEXT (no pill chrome, no family band). */
+  const runHead = (c: BoardCard): string[] => {
+    const first = c.taskType === "offer_received" ? `★ ${c.due}` : c.due;
+    return [first, lane(c)].filter(Boolean) as string[];
+  };
   const isOffer = (c: BoardCard) => c.taskType === "offer_received";
   /** "Where this stands" — assembled from EXISTING derived fields only (the template lib
    *  omits any clause whose fact is missing; "" hides the card). */
@@ -335,6 +347,19 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   /** Skip for now — no stamp: the sheet slides to the BOTTOM of the stack (down and behind,
    *  the honest requeue — the engine has no requeue of its own; recon) and the next rises.
    *  Skipping the last live task ends the session. */
+  /** v9 — ‹ PREVIOUS · REDO: the carriage runs BACKWARDS. The current page slides out RIGHT,
+   *  the previous slides in from the LEFT and becomes current again — handled or not. A page
+   *  that was stamped arrives WITH its stamp and offers the board's own takeback. */
+  function goPrevious() {
+    if (index <= 0 || dealRef.current) return;
+    dealRef.current = true;
+    if (!reduce) setDeal({ card: current, kind: "back" });
+    const step = () => { setIndex(index - 1); setRoseBack(true); setRose(true); };
+    at(reduce ? 0 : CARRIAGE.overlapMs, step);
+    at(reduce ? 20 : CARRIAGE.slideOutMs + 60, () => { setDeal(null); dealRef.current = false; });
+    at((reduce ? 20 : CARRIAGE.slideOutMs + 60) + CARRIAGE.slideInMs, () => { setRose(false); setRoseBack(false); });
+  }
+
   function skipCurrent() {
     if (!current || dealRef.current) return;
     const c0 = current;
@@ -403,46 +428,57 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
                   is retired; P3 fades the gathered pile fully). */}
               {deal && (
                 <div className={`tdb-fsleave ${deal.kind}${reduce ? " static" : ""}`} aria-hidden>
-                  <div className="tdb-fscard lv">
-                    <div className={`tdb-band ${deal.card.stream}`}>
-                      <span className={`tdb-tag due${deal.card.taskType === "offer_received" ? " offer" : ""}`}>{deal.card.taskType === "offer_received" ? `★ ${deal.card.due}` : deal.card.due}</span>
+                  <div className="tdb-fspage lv">
+                    <div className={`tdb-fsrun${deal.card.taskType === "offer_received" ? " urgent" : ""}`}>
+                      {runHead(deal.card).map((w, i2) => <span key={w + i2}>{w}</span>)}
                     </div>
-                    <div className="tdb-fscardc">
-                      <h2>{deal.card.title}</h2>
-                      {(deal.card.subtitle || deal.card.who) && (
-                        <div className="tdb-fsms">{[deal.card.subtitle, deal.card.who].filter(Boolean).join(" · ")}</div>
-                      )}
-                    </div>
+                    <h2>{deal.card.title}</h2>
+                    {(deal.card.subtitle || deal.card.who) && (
+                      <div className="tdb-fsms">{[deal.card.subtitle, deal.card.who].filter(Boolean).join(" · ")}</div>
+                    )}
                   </div>
                   {deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}
                 </div>
               )}
-              <div ref={bigRef} className={`tdb-fscard${bigOn ? " on" : ""}${rose ? " carriagein" : ""}`}>
-                <div className={`tdb-band ${current.stream}`}>
-                  <span className={`tdb-tag due${isOffer(current) ? " offer" : ""}`}>{isOffer(current) ? `★ ${current.due}` : current.due}</span>
-                  <span className="tdb-fslane">{lane(current)}</span>
+              {/* v9 — THE MANUSCRIPT PAGE (session-v9-page.html, composition A): no card
+                  grammar at all. One generous white page — a mono running head, the task
+                  typeset as a title, the context written as PROSE under a hairline rule, the
+                  actions split (the ink primary left, the quiet text links right), and
+                  prev/next as a book's running footer. */}
+              <div ref={bigRef} className={`tdb-fspage${bigOn ? " on" : ""}${rose ? " carriagein" : ""}${roseBack ? " carriageback" : ""}`}>
+                <div className={`tdb-fsrun${isOffer(current) ? " urgent" : ""}`}>
+                  {runHead(current).map((w, i2) => <span key={w + i2}>{w}</span>)}
                 </div>
-                <div className="tdb-fscardc">
-                  <h2>{current.title}</h2>
-                  {(current.subtitle || current.who) && (
-                    <div className="tdb-fsms">{[current.subtitle, current.who].filter(Boolean).join(" · ")}</div>
+                <h2>{current.title}</h2>
+                {(current.subtitle || current.who) && (
+                  <div className="tdb-fsms">{[current.subtitle, current.who].filter(Boolean).join(" · ")}</div>
+                )}
+                {standFor(current) && <p className="tdb-fsbody">{standFor(current)}</p>}
+                <div className="tdb-fsacts">
+                  <button type="button" className="tdb-ssb bp on" disabled={!!deal} onClick={() => onOpenJourney(current)}>Action now</button>
+                  {canQuickComplete(current) && (
+                    <button type="button" className="tdb-btnh em tdb-ssbig" disabled={!!deal} onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
                   )}
-                  {standFor(current) && (
-                    <div className="tdb-ssctx"><b>WHERE THIS STANDS</b>{standFor(current)}</div>
-                  )}
-                  <div className="tdb-ssacts">
-                    <button type="button" className="tdb-ssb bp on" disabled={!!deal} onClick={() => onOpenJourney(current)}>Action now</button>
-                    {canQuickComplete(current) && (
-                      <button type="button" className="tdb-btnh em tdb-ssbig" disabled={!!deal} onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
+                  <span className="tdb-fsquiet">
+                    <button type="button" className="tdb-fstl" disabled={!!deal} onClick={() => onOpenJourney(current)}>＋ Today’s list</button>
+                    <button type="button" className="tdb-fstl" disabled={!!deal} onClick={() => onOpenJourney(current)}>🕐 Snooze or dismiss</button>
+                  </span>
+                </div>
+                {/* the running footer — the book's own navigation */}
+                <div className="tdb-fspfoot">
+                  <span className="l">
+                    {index > 0 ? (
+                      <button type="button" className="tdb-fsnav" disabled={!!deal} onClick={goPrevious}>‹ PREVIOUS · REDO</button>
+                    ) : <i />}
+                    {stampedCurrent && canUndoHandled(current) && (
+                      <button type="button" className="tdb-fsnav und" onClick={() => onUndoHandled(current)}>UNDO HANDLED</button>
                     )}
-                    <button type="button" className="tdb-btnh tdb-ssbig" disabled={!!deal} onClick={skipCurrent}>Skip for now</button>
-                  </div>
+                  </span>
+                  <button type="button" className="tdb-fsnav" disabled={!!deal} onClick={skipCurrent}>SKIP · NEXT ›</button>
                 </div>
+                {stampedCurrent && <span className="tdb-ssstamp on" aria-hidden>✓</span>}
               </div>
             </div>
-            {composed && nextUp && (
-              <div className="tdb-ssnext" style={{ top: geo.restY - 26 }}>NEXT UP · <i>{nextUp.title}</i></div>
-            )}
           </>
         )}
         {phase === "close" && (

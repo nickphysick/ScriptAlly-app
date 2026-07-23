@@ -15,6 +15,7 @@ const here = __dirname;
 const ss = readFileSync(join(here, "FocusedSession.tsx"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const css = readFileSync(join(here, "todo.css"), "utf8");
+const sc = readFileSync(join(here, "..", "..", "lib", "sessionContext.ts"), "utf8");
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
@@ -146,7 +147,7 @@ describe("v7 P2 — the curtains + the dim (pool of light + deck edges retired)"
     const d = rule(".tdb-fsdim");
     expect(d).toContain("background: rgba(58, 28, 20, 0.16)");
     expect(d).toContain("z-index: 0"); // under the card (z 3)
-    expect(rule(".tdb-fscard")).toContain("z-index: 3");
+    expect(rule(".tdb-fspage")).toContain("z-index: 3");
     expect(rule(".tdb-fscurt")).toContain("z-index: 6"); // above the card; at the edges only
     expect(ss).toContain('<div className={`tdb-fsdim${curtains ? " on" : ""}`} style={{ top: geo.wrapTop }} aria-hidden />');
   });
@@ -164,11 +165,10 @@ describe("v7 P2 — the curtains + the dim (pool of light + deck edges retired)"
 });
 
 describe("v7 P4 — the card + the carriage (transition A)", () => {
-  it("frame-A content: family band + tag + lane, Playfair title, the italic line, WHERE THIS STANDS from templates", () => {
-    expect(ss).toContain('<span className="tdb-fslane">{lane(current)}</span>');
-    expect(rule(".tdb-fscardc h2")).toContain("font-size: 21px");
-    expect(ss).toContain("{standFor(current) && (");
-    expect(ss).toContain(">WHERE THIS STANDS</b>");
+  it("the content derivation stands (v9 typesets it as a page — see v9 P2 for the presentation)", () => {
+    expect(ss).toContain("const runHead = (c: BoardCard): string[]"); // the lane rides the running head
+    expect(rule(".tdb-fspage h2")).toContain("font-size: 27px");
+    expect(ss).toContain("{standFor(current) && <p");
     expect(ss).toContain('if (c.userTaskId) return "";'); // notes say nothing
     expect(ss).toContain("owed: q ? STATUS_OWED[q.status as string] : undefined");
   });
@@ -176,7 +176,7 @@ describe("v7 P4 — the card + the carriage (transition A)", () => {
     expect(ss).toContain('onClick={() => onOpenJourney(current)}>Action now</button>');
     expect(ss).toContain("{canQuickComplete(current) && (");
     expect(ss).toContain('onClick={() => onQuickComplete(current)}>✓ Mark handled</button>');
-    expect(ss).toContain("onClick={skipCurrent}>Skip for now</button>");
+    expect(ss).toContain("SKIP · NEXT ›"); // v9 — skip is the running footer's right side
     expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}');
     expect(page).toContain("onQuickComplete={quickDone}");
     expect(page).toContain('if (c.taskType === "offer_received") return false;'); // the standing no-one-tap rule
@@ -190,7 +190,7 @@ describe("v7 P4 — the card + the carriage (transition A)", () => {
     expect(ss).toContain("at(advanceAtMs, () => { if (!willClose) { advancePast(index + 1); setRose(true); } });"); // + the session-line advance; the last defers the close
     expect(css).toContain(".tdb-fsleave.handled { animation: tdbCarriageOut 500ms cubic-bezier(0.55, 0.05, 0.55, 0.95) 440ms forwards; }");
     expect(css).toContain("@keyframes tdbCarriageOut { to { transform: translateX(-120%); opacity: 0; } }");
-    expect(css).toContain(".tdb-fscard.carriagein { animation: tdbCarriageIn 500ms cubic-bezier(0.2, 0.85, 0.3, 1.1); }");
+    expect(css).toContain(".tdb-fspage.carriagein { animation: tdbCarriageIn 500ms cubic-bezier(0.2, 0.85, 0.3, 1.1); }");
     expect(css).toContain("@keyframes tdbCarriageIn { from { transform: translateX(120%); } }");
   });
   it("skip: NO stamp — the same out-left slide; the engine's requeue decides what slides in (to the session order's end)", () => {
@@ -203,11 +203,11 @@ describe("v7 P4 — the card + the carriage (transition A)", () => {
   it("v7: no residual stack (deck edges retired); the true count lives in the session line; next-up is the next LIVE", () => {
     expect(ss).not.toContain("tdb-fsdeck");
     expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // never a ghost
-    expect(ss).toContain(">NEXT UP · <i>{nextUp.title}</i></div>");
+    expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // v9 — the derivation stands; the floating line is gone
   });
   it("reduced motion: instant swaps; the stamp appears without its pop", () => {
     expect(css).toContain(".tdb-fsleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
-    expect(css).toContain(".tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.carriagein, .tdb-ssstamp { animation: none; }");
+    expect(css).toContain(".tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fsleave.back, .tdb-fspage.carriagein, .tdb-fspage.carriageback, .tdb-ssstamp { animation: none; }");
   });
 });
 
@@ -311,3 +311,86 @@ describe("v9 P1 — THE FRAME: the bar exempt · the pair out · In focus + prog
     expect(ss).toContain('window.addEventListener("resize", onResize)');
   });
 });expect(page).toContain('<span className="tdb-fsfrac">{slot.i} / {slot.n}</span>'); // v9 — the progress row
+
+describe("v9 P2 — THE MANUSCRIPT PAGE (composition A) + the running footer", () => {
+  it("the page, not a card: 600px, radius 8, 38/54 padding, a deep shadow — the card grammar is gone", () => {
+    const p = rule(".tdb-fspage");
+    expect(p).toContain("width: 600px");
+    expect(p).toContain("border-radius: 8px");
+    expect(p).toContain("padding: 38px 54px 30px");
+    expect(p).toContain("box-shadow: 0 22px 54px rgba(58, 28, 20, 0.26)");
+    for (const dead of ["tdb-fscard", "tdb-fscardc", "tdb-fslane", "tdb-ssctx"]) {
+      expect(ss).not.toContain(dead);
+      expect(css).not.toContain(dead + " ");
+    }
+    expect(ss).not.toContain('<div className={`tdb-band ${current.stream}`}>'); // no family band on the page
+    expect(rule(".tdb-fsseat")).toContain("width: 600px"); // the seat follows the page
+  });
+  it("the running head is TEXT in accent red — no pill chrome", () => {
+    expect(ss).toContain("const runHead = (c: BoardCard): string[]");
+    expect(ss).toContain('<div className={`tdb-fsrun${isOffer(current) ? " urgent" : ""}`}>');
+    expect(rule(".tdb-fsrun")).toContain("var(--f12-mono)");
+    expect(rule(".tdb-fsrun.urgent")).toContain("#b5563e");
+    expect(rule(".tdb-fsrun")).not.toContain("border-radius");
+    expect(ss).not.toContain('className={`tdb-tag due${isOffer(current)'); // the tag pill left the page
+  });
+  it("the title, the italic line and the context as PROSE under a hairline rule (never a box)", () => {
+    expect(rule(".tdb-fspage h2")).toContain("font-size: 27px");
+    expect(rule(".tdb-fspage h2")).toContain("var(--f12-serif)");
+    expect(rule(".tdb-fsms")).toContain("font-style: italic");
+    expect(ss).toContain('{standFor(current) && <p className="tdb-fsbody">{standFor(current)}</p>}');
+    const b = rule(".tdb-fsbody");
+    expect(b).toContain("border-top: 1px solid var(--hairline)");
+    expect(b).toContain("line-height: 1.7");
+    expect(b).not.toContain("background");
+    expect(b).not.toContain("border-radius");
+    expect(ss).not.toContain("WHERE THIS STANDS"); // the eyebrow went with the box
+  });
+  it("the actions SPLIT: the ink primary (and ✓ Mark handled) left, the quiet links right", () => {
+    expect(rule(".tdb-fsquiet")).toContain("margin-left: auto");
+    expect(ss).toContain("＋ Today’s list");
+    expect(ss).toContain("🕐 Snooze or dismiss");
+    expect(ss).toContain("✓ Mark handled"); // kept, restyled onto the page
+    const l = rule(".tdb-fstl");
+    expect(l).toContain("text-decoration: underline");
+    expect(l).toContain("border: none");
+  });
+  it("the running footer carries PREVIOUS · REDO and SKIP · NEXT — the floating NEXT UP line is gone", () => {
+    expect(ss).toContain("‹ PREVIOUS · REDO");
+    expect(ss).toContain("SKIP · NEXT ›");
+    expect(rule(".tdb-fspfoot")).toContain("justify-content: space-between");
+    expect(ss).not.toContain("tdb-ssnext");
+    expect(css).not.toContain("tdb-ssnext");
+    expect(ss).not.toContain("NEXT UP");
+  });
+  it("REDO reverses the carriage; a stamped page returns stamped and offers the BOARD's own inverse", () => {
+    expect(ss).toContain("function goPrevious()");
+    expect(ss).toContain("if (index <= 0 || dealRef.current) return;");
+    expect(ss).toContain('setDeal({ card: current, kind: "back" })');
+    expect(css).toContain("@keyframes tdbCarriageBack { from { transform: translateX(-120%); } }");
+    expect(css).toContain("@keyframes tdbCarriageOutR { to { transform: translateX(120%); opacity: 0; } }");
+    expect(ss).toContain("const stampedCurrent = !!current && handled.some((x) => x.key === current.key);");
+    expect(ss).toContain("{stampedCurrent && canUndoHandled(current) && (");
+    expect(ss).toContain("onClick={() => onUndoHandled(current)}");
+    // ONE inverse in the app: the toast's, remembered by key — no parallel undo store
+    expect(page).toContain("function doneToast(c: BoardCard, fn: () => Promise<void>) {");
+    expect(page).toContain("doneUndos.current.set(c.key, fn);");
+    expect(page).toContain('flash(`Done — “${c.title}”`, { label: "Undo", fn });');
+    expect(page).toContain("canUndoHandled={(c) => doneUndos.current.has(c.key)}");
+  });
+  it("the session still writes NOTHING — the takeback is the board's callback, not a session write", () => {
+    for (const w of ["updateQueryStatus", "upsertTaskFlag", "updateUserTask", "logNudge", "addDoc", "setDoc"]) {
+      expect(ss).not.toContain(w);
+    }
+  });
+});
+
+describe("v9 P2 — the template fix: the name list cannot repeat itself", () => {
+  it("the sentence dedupes on the short form (case-insensitively), caps at three, and counts distinctly", () => {
+    expect(sc).toContain("export function nameList(");
+    expect(sc).toContain("export function distinctNames(");
+    expect(sc).toContain("const n = distinctNames(i.outstanding);");
+    expect(sc).toContain("parts.push(`${n} still out (${nameList(i.outstanding)}).`);");
+    expect(sc).not.toContain("i.outstanding.map(surname).join(\", \")");
+  });
+});
