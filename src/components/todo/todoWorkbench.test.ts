@@ -139,7 +139,7 @@ describe("v4 P6 — empty-state copy + sweep", () => {
       expect(css).not.toContain(stale.replace("\\", ""));
     }
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    expect(tour).toContain('sel: ".tdb-fsb2"');
+    expect(tour).toContain('sel: ".tdb-herobegin"'); // hero-pair P5: Begin moved to the pair
   });
 });
 
@@ -302,6 +302,25 @@ describe("toolbelt P3 — sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain("Action now, Today\\u2019s list, or snooze"); // the .ts carries the \\u2019 escape
     expect(tour).not.toContain("done, Today, or later");
+  });
+});
+
+describe("hero-pair P5 — sweep", () => {
+  it("the toolbelt-era clothes are extinct: no stack gap, no cream chip fill, no mono pills, no dot, no fsb2", () => {
+    expect(rule(".tdb-fside")).not.toContain("gap");
+    expect(rule(".tdb-rvchip")).not.toContain("#f3e7da"); // cream lives on the ink primary's TEXT only
+    expect(rule(".tdb-fpill")).not.toContain("--f12-mono");
+    for (const dead of ["tdb-rvnew", "tdb-fsb2", "renderToolbelt"]) {
+      expect(page).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+  });
+  it("the tour speaks the new board: Begin in the pair, Show all as the reset", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('sel: ".tdb-herobegin"');
+    expect(tour).not.toContain("tdb-fsb2");
+    expect(tour).toContain("Show all brings everything back");
+    expect(tour).not.toContain("RESET");
   });
 });
 

@@ -24,7 +24,7 @@ export interface TourStop {
 
 export const TOUR_STOPS: TourStop[] = [
   {
-    sel: ".tdb-fsb2",  // v4: the button lives in the rail now
+    sel: ".tdb-herobegin",  // hero-pair P5: Begin sits in the pair beneath the search
     h: "Say go, any time.",
     p: "Begin a focused session — it walks your whole desk for you, one sheet at a time, no distractions.",
     cta: "Next →",
@@ -39,7 +39,7 @@ export const TOUR_STOPS: TourStop[] = [
     // the rail's pills ≥1428; the ⚲ FILTER pill fronting the drawer below
     sel: ".tdb-fpill, .tdb-fpillbtn",
     h: "Narrow the desk.",
-    p: "Quiet filters with live counts: click one to see only that kind of work. RESET brings everything back.",
+    p: "Quiet filters with live counts: click one to see only that kind of work. Show all brings everything back.",
     cta: "Next →",
   },
   {
