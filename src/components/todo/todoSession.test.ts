@@ -16,6 +16,7 @@ const ss = readFileSync(join(here, "FocusedSession.tsx"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const css = readFileSync(join(here, "todo.css"), "utf8");
 const sc = readFileSync(join(here, "..", "..", "lib", "sessionContext.ts"), "utf8");
+const GATHER_SRC = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
@@ -37,7 +38,7 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
     expect(css).toContain(".tdb-ask.t1.out { opacity: 0; }");
     expect(css).toContain(".tdb-ask.t2.in { opacity: 1; }");
     // FocusedSession drives it BOTH ways: clearing:true on start, clearing:false on Back to desk
-    expect(ss).toContain('onHero({ clearing: true, slot: null }); // the title crossfades to "Clearing the desk" as the session begins');
+    expect(ss).toContain('onHero({ clearing: true, slot: null }); // the title crossfades to "In focus" as the session begins');
     expect(ss).toContain("onHero({ clearing: false, slot: null }); // the title crossfades back WITH the reassembly");
   });
   it("the spacing law: the hero is a stacked flow — the sub-slot is FIXED HEIGHT with even gaps; no absolute over the board", () => {
@@ -202,8 +203,7 @@ describe("v7 P4 — the card + the carriage (transition A)", () => {
   });
   it("v7: no residual stack (deck edges retired); the true count lives in the session line; next-up is the next LIVE", () => {
     expect(ss).not.toContain("tdb-fsdeck");
-    expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // never a ghost
-    expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // v9 — the derivation stands; the floating line is gone
+    expect(ss).not.toContain("nextUp"); // v9 — the floating line AND its derivation are gone
   });
   it("reduced motion: instant swaps; the stamp appears without its pop", () => {
     expect(css).toContain(".tdb-fsleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
@@ -472,5 +472,31 @@ describe("v9 P4 — THE QUIET EXIT (option 3) — and it works", () => {
     // the board's own derivation drives both the board and the session's live set
     expect(page).toContain("liveKeys={new Set(boardCards.map((c) => c.key))}");
     expect(page).toContain("onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}");
+  });
+});
+
+describe("v9 P5 — the supersession sweep", () => {
+  it("the v7/v6 presentation is EXTINCT in source, styles and copy", () => {
+    for (const dead of ["Clearing the desk", "tdb-fscard", "tdb-fscardc", "tdb-fslane", "tdb-ssctx",
+                        "tdb-ssnext", "tdb-fsses", "tdb-fsend", "nextUp", "NEXT UP", "END SESSION ✕"]) {
+      expect(ss).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+    expect(page).not.toContain("Clearing the desk");
+    expect(page).not.toContain("slot.onEnd");
+  });
+  it("the state machine still walks from BOTH views and lands safely every way out", () => {
+    expect(ss).toContain('const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");');
+    expect(ss).toContain("const items = Array.from(wrapEl.querySelectorAll<HTMLElement>(GATHER_SELECTOR))");
+    expect(GATHER_SRC).toContain(".tdb-lrow"); // the ledger's rows gather too
+    expect(ss).toContain("const onPop = () => backToDesk();");
+    expect(ss).toContain("window.setTimeout(() => { stripAll(); onClose(); }, GATHER.reverseMs + 60);");
+    expect(ss).toContain("return () => { window.removeEventListener(\"resize\", onResize); stripAll(); };");
+  });
+  it("the tour's targets survive the session (nothing it points at moved)", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('.tdb-herobegin'); // still the hero pair's play button, at rest
+    for (const sel of [".tdb-bigsearch", ".tdb-rvchip"]) expect(tour).toContain(sel);
+    expect(tour).not.toContain("tdb-fsexit"); // the session's own controls are not tour steps
   });
 });

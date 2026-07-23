@@ -2,22 +2,26 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE FOCUSED SESSION — v7 (design-refs/session-v7.html): IN PLACE — the chrome and the
- * "What's on your desk?" title NEVER leave; the title crossfades to "Clearing the desk" and
- * the board transforms around it. The GATHER → the CURTAINS + DIM (the stage wings + a
- * slight wash; the card stays bright) → the CARRIAGE at the rest line (handled: stamp →
- * slide out left, the next slides in from the right; skip: no stamp, the requeue slides in)
- * → the CLOSE in place, Back to your desk reassembling the board. Supersedes the room (v5)
- * and pool-of-light (v6) packs.
+ * THE FOCUSED SESSION — v9, THE DEFINITIVE SPEC (design-refs/session-v9-journey.html): IN
+ * PLACE — the chrome and the hero NEVER leave; the title crossfades to "In focus" over a
+ * progress bar and the board transforms around it. The APP BAR IS EXEMPT: the curtains and
+ * the dim begin at its bottom edge. The GATHER → the CURTAINS + DIM (the stage wings + a
+ * slight wash; the page stays bright) → THE MANUSCRIPT PAGE at the rest line, the CARRIAGE
+ * between tasks (handled: stamp → out left, the next in from the right; skip: no stamp;
+ * REDO: the same carriage reversed) → the CLOSE in the same centre, the quiet exit line at
+ * the stage foot, and Back to your desk reassembling the board. Supersedes the room (v5),
+ * the pool of light (v6) and the curtains-only v7.
  *
  * The ENGINE is unchanged: the board's own queue (boardCards order, captured at launch) and
  * the page's existing primitives — presentation + session bookkeeping only; it writes
- * NOTHING. The hero's title + sub-slot are driven up through onHero.
+ * NOTHING (the REDO's takeback calls the board's own inverse). The hero's title + slot are
+ * driven up through onHero.
  *
- * Refs: session-v7.html (the master; transition A only) · session-content.html frame A/D.
+ * Refs: session-v9-journey.html (the master, six frames) · session-v9-page.html composition
+ * A · session-v9-header.html V2 · session-v9-exit.html option 3.
  *
- * Z: the overlay sits at 48 (beneath the flow 50, the toast 60, the ask 90). Inside it: the
- * dim(0) < the card(3) < the curtains(6, at the edges only).
+ * Z: the overlay sits at 48 (beneath the flow 50, the toast 60, the ask 90) and passes
+ * pointers through. Inside it: the dim(0) < the page(3) < the curtains(6) < the exit(7).
  */
 import React, { useEffect, useRef, useState } from "react";
 import { BoardCard } from "../../lib/todoBoard";
@@ -187,7 +191,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
       }
     });
     // 2 — the ritual lines in the search's vacated slot
-    onHero({ clearing: true, slot: null }); // the title crossfades to "Clearing the desk" as the session begins
+    onHero({ clearing: true, slot: null }); // the title crossfades to "In focus" as the session begins
     RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => onHero({ clearing: true, slot: { kind: "ritual", index: i } })));
     // 3 — the gather: every other item flies onto the first task's footprint
     at(GATHER.gatherStartMs, () => {
@@ -392,8 +396,8 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     if (!liveKeys.has(current.key)) markHandledAdvance(current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveKeys, phase, index, order]);
-  // v7 — the hero's sub-slot follows the session: the mono TASK i OF n line while working, and
-  // it empties at the close (the title stays "Clearing the desk" until Back to your desk).
+  // v9 — the hero's sub-slot follows the session: the progress row while working, and
+  // it empties at the close (the title stays "In focus" until Back to your desk).
   useEffect(() => {
     if (phase === "session" && composed) onHero({ clearing: true, slot: { kind: "session", i: Math.min(index + 1, total), n: total } });
     else if (phase === "close") onHero({ clearing: true, slot: null });
@@ -410,8 +414,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, phase, composed]);
 
-  // P3 — the whisper names the next LIVE task (dead entries fast-forward silently anyway)
-  const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));
   const anyLive = order.some((x) => liveKeys.has(x.key));
 
   // ── render — everything positioned from the MEASURED board (the title stays real) ──

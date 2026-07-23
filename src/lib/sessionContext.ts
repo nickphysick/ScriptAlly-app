@@ -2,8 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "WHERE THIS STANDS" (session P2) — the room sheet's context card: a short derived summary
- * composed from the query's state via TEMPLATES, never free generation. Every fact arrives as
+ * THE SESSION PAGE'S CONTEXT (v9: set as PROSE under the page's hairline rule; formerly the
+ * boxed "where this stands" card) — a short derived summary composed from the query's state
+ * via TEMPLATES, never free generation. Every fact arrives as
  * an input the caller derived from existing fields; a missing field OMITS its clause, never
  * guesses. An empty composition means the card does not render (notes carry no derived facts).
  */
