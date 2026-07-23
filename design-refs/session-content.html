@@ -1,0 +1,113 @@
+<!-- design-refs/session-content.html — Downloads todo-fix18.html (23 Jul 16:41), committed with final P1.
+  NORMATIVE for the session sheet's CONTENT anatomy (frame A: family band + tag, Playfair
+  title, the italic manuscript · agent line, the Where-this-stands context card, the three
+  actions) and the close's LEDGER (frame D). Its frame B (the pulse transition) and its
+  DARK-ROOM FRAMING are SUPERSEDED by the in-place design (session-final.html). -->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The focused session - the rest of the storyboard</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:46px 0 12px;width:1100px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.55}
+.frame{width:1100px;background:var(--oat);border-radius:14px;box-shadow:0 8px 22px rgba(58,28,20,.16);padding:0 0 30px;overflow:hidden}
+.sesbar{display:flex;align-items:center;gap:14px;padding:16px 26px;border-bottom:1px solid var(--hair)}
+.sesbar .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;color:#8a7a6d}
+.sesbar .prog{flex:1;height:4px;border-radius:2px;background:#e3d8c8;overflow:hidden}
+.sesbar .prog b{display:block;height:100%;width:25%;background:var(--ink);border-radius:2px}
+.sesbar .exit{font-size:11px;font-weight:600;color:#6b5a4e;border-bottom:1px solid var(--hair);padding-bottom:1px;cursor:pointer}
+.room{display:flex;flex-direction:column;align-items:center;padding-top:34px}
+.tsheet{width:560px;background:var(--white);border:1px solid #d8cfc4;border-radius:18px;box-shadow:0 16px 44px rgba(58,28,20,.16);overflow:hidden}
+.tsheet .bd{padding:9px 18px;border-bottom:1px solid var(--pink-b);background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));display:flex;align-items:center;gap:9px}
+.tg{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;border-radius:99px;padding:3px 10px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tsheet .bc{padding:22px 26px 24px}
+.tsheet h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;line-height:1.15}
+.tsheet .ms{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#7a6a5e;margin-top:5px}
+.ctx{margin-top:16px;background:#fbf8f3;border:1px solid var(--hair2);border-radius:11px;padding:12px 14px;font-size:11.5px;color:#5d4d40;line-height:1.55}
+.ctx b{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;color:#a5988c;display:block;margin-bottom:4px}
+.tacts{display:flex;gap:9px;margin-top:20px}
+.bp{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:42px;padding:0 22px;font-size:12.5px;font-weight:600}
+.hl{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 18px;border-radius:99px;font-size:11.5px;font-weight:700;background:var(--paper);border:1px solid var(--ink);color:var(--ink)}
+.hq{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 16px;border-radius:99px;font-size:11.5px;font-weight:600;background:var(--paper);border:1px solid var(--hair);color:#6b5a4e}
+.nextup{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#a5988c}
+.nextup i{font-style:normal;color:#6b5a4e}
+/* frame B: transition triptych */
+.trip{display:flex;gap:18px;justify-content:center;padding:26px}
+.mini{width:330px;background:var(--white);border:1px solid var(--hair);border-radius:12px;padding:14px;box-sizing:border-box}
+.mini .cap{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;color:#a5988c;margin-bottom:10px}
+.mcard{background:var(--white);border:1px solid #d8cfc4;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(58,28,20,.1);position:relative}
+.mcard .b{height:20px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.mcard .c{padding:10px 12px;font-family:'Playfair Display',serif;font-size:12px;font-weight:600}
+.stamp{position:absolute;right:10px;top:14px;width:34px;height:34px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1.5px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:16px;transform:rotate(-8deg);box-shadow:0 2px 6px rgba(90,110,88,.3)}
+.ghosttrail{position:relative;height:64px;overflow:hidden;border-radius:10px;border:1.5px dashed var(--hair)}
+.ghosttrail .g{position:absolute;left:56%;top:10px;width:200px;height:44px;background:var(--white);border:1px solid #d8cfc4;border-radius:9px;opacity:.45;transform:rotate(3deg)}
+.ghosttrail .g2{left:76%;opacity:.18;transform:rotate(6deg)}
+.pulse{position:relative;height:64px;border-radius:10px;background:#241511;display:flex;align-items:center;justify-content:center}
+.pulse .halo{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(253,250,245,.25),transparent 65%)}
+.pulse .pc{position:relative;width:190px;height:40px;background:var(--white);border-radius:8px;border:1px solid #d8cfc4}
+/* frame D: close */
+.closebed{text-align:center;padding:44px 0 30px}
+.closebed h1{font-family:'Playfair Display',serif;font-size:46px;font-weight:700}
+.closebed .sub{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#7a6a5e;margin-top:8px}
+.sumcard{width:430px;margin:24px auto 0;background:var(--white);border:1px solid var(--hair);border-radius:14px;padding:16px 20px;box-shadow:0 8px 24px rgba(58,28,20,.12)}
+.sumrow{display:flex;align-items:center;gap:11px;padding:8px 2px;border-bottom:1px solid var(--hair2);font-size:12px;color:#4d4238}
+.sumrow:last-child{border-bottom:none}
+.sumrow .sd{width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:8px}
+.sumrow .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:#8a7a6d}
+.closec{display:flex;gap:12px;justify-content:center;margin-top:24px}
+</style></head><body><div class="lbl">A &middot; THE SESSION ROOM (AFTER &ldquo;BEGIN SESSION&rdquo;) <em>&mdash; the veil lifts to a quiet room on the oat ground: a slim session bar (progress, count, End session), ONE task as a large sheet &mdash; title, manuscript &middot; agent, a &ldquo;where this stands&rdquo; context card derived from the query&rsquo;s state, and three actions: Action now (opens the journey INSIDE the session), Mark handled, Skip for now. The footer whispers what&rsquo;s next. Nothing else exists.</em></div><div class="frame">
+<div class="sesbar"><span class="k">FOCUSED SESSION &middot; TASK 1 OF 4</span><span class="prog"><b></b></span><span class="k">URGENT</span><span class="exit">End session &#10005;</span></div>
+<div class="room">
+<div class="tsheet"><div class="bd"><span class="tg">&#9733; OFFER</span></div>
+<div class="bc"><h2>Tom Ellery has made an offer</h2><div class="ms">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="ctx"><b>WHERE THIS STANDS</b>Offer received 19 Jul. Two fulls still out (Marsh, O&rsquo;Rourke). Convention says you nudge them with the news and set Tom a reply-by date.</div>
+<div class="tacts"><span class="bp">Action now</span><span class="hl">&#10003; Mark handled</span><span class="hq">Skip for now</span></div>
+</div></div>
+<div class="nextup">NEXT UP &middot; <i>Send your full to Jonathan Marsh</i></div>
+</div></div><div class="lbl">B &middot; BETWEEN TASKS <em>&mdash; three beats: the sage stamp lands on Done; the sheet leaves via its nearest edge (the desk grammar continuing); one dark pulse with a single spotlight bloom and the next task is simply there &mdash; the full wander is the OPENING&rsquo;s theatre only, mid-session it would grate.</em></div><div class="frame"><div class="trip">
+<div class="mini"><div class="cap">1 &middot; DONE &mdash; THE SAGE STAMP LANDS (&sim;350MS, ROTATED, WITH A SOFT THUD-SCALE)</div>
+<div class="mcard"><div class="b"></div><div class="c">Tom Ellery has made an offer</div><span class="stamp">&#10003;</span></div></div>
+<div class="mini"><div class="cap">2 &middot; THE SHEET LEAVES VIA ITS NEAREST EDGE &mdash; THE DESK GRAMMAR AGAIN; THE PROGRESS BAR TICKS FORWARD</div>
+<div class="ghosttrail"><span class="g"></span><span class="g g2"></span></div></div>
+<div class="mini"><div class="cap">3 &middot; A ONE-BEAT DARK PULSE &mdash; THE SPOTLIGHT BLOOMS ONCE &mdash; AND THE NEXT TASK IS THERE. NO WANDER MID-SESSION.</div>
+<div class="pulse"><span class="halo"></span><span class="pc"></span></div></div>
+</div></div><div class="lbl">D &middot; THE CLOSE <em>&mdash; &ldquo;Desk cleared.&rdquo; large on the bare ground, the review&rsquo;s own line as the sub, a small honest ledger (handled / snoozed / time), and two exits. If tasks remain when the user ends early, the headline softens to &ldquo;Good session.&rdquo; with the same ledger.</em></div><div class="frame"><div class="closebed">
+<h1>Desk cleared.</h1>
+<div class="sub">Every box ticked turns the dial in your favour.</div>
+<div class="sumcard">
+<div class="sumrow"><span class="sd">&#10003;</span>Handled<span class="n">3</span></div>
+<div class="sumrow"><span class="sd" style="background:var(--white);border-style:dashed;color:transparent"></span>Snoozed to tomorrow<span class="n">1</span></div>
+<div class="sumrow"><span class="sd" style="background:#f4f3f1;border-color:#dbd9d4;color:#8a857d">&#9202;</span>Session length<span class="n">11 MIN</span></div>
+</div>
+<div class="closec"><span class="bp">Back to your desk</span><span class="hq" style="height:42px">Review what you did</span></div>
+</div></div></body></html>

@@ -2,9 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE FOCUSED SESSION — source/rule-text locks (jsdom mounts nothing; the stage maths is
- * REAL-unit-tested in sessionStage.test.ts). The engine invariant: the queue is the board's
- * own boardCards order; the container is presentation + session bookkeeping only.
+ * THE FOCUSED SESSION — FINAL (the in-place design): source/rule-text locks (jsdom mounts
+ * nothing; the stage maths is REAL-unit-tested in sessionStage.test.ts). The engine
+ * invariant: the queue is the board's own boardCards order; the container is presentation +
+ * session bookkeeping only and writes nothing.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
@@ -20,205 +21,153 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("session P1 — the opening", () => {
-  it("Begin launches the SESSION with the engine's own queue (boardCards order, captured at launch)", () => {
+describe("final P1 — the gather (in place: the chrome + title never leave)", () => {
+  it("Begin launches the session with the engine's own queue; the overlay is TRANSPARENT (no ground, no veil)", () => {
     expect(page).toContain('onClick={() => setSession({ queue: boardCards })}>');
-    expect(page).toContain("const [session, setSession] = useState<{ queue: BoardCard[] } | null>(null);");
     expect(page).toContain("queue={session.queue}");
-    expect(page).not.toContain("setFlow({ items: boardCards.map"); // the old whole-board walk entry is superseded
+    expect(rule(".tdb-ss")).not.toContain("background"); // the real title + chrome show through
+    expect(ss).not.toContain("canvas"); // the dark-room veil left with the room pack
   });
-  it("the sequence: darken → fly (nearest edges, staggered) → the three ritual lines → the reveal → the pair", () => {
-    expect(ss).toContain("setDimOn(true); // 1 — the slow darken (1.1s wash)");
-    expect(ss).toContain("at(OPENING.flyDelayMs, flyOut); // 2 — the desk clears via nearest edges");
-    expect(ss).toContain("RITUAL_LINES.forEach((_, i) => at(OPENING.linesDelayMs + i * OPENING.lineMs, () => setLine(i)));");
-    expect(ss).toContain("at(i * OPENING.flyStaggerMs, () => {"); // the stagger
-    expect(ss).toContain("nearestEdgeFly(r.left + r.width / 2, r.top + r.height / 2, r.width, r.height, W, H)");
-    expect(ss).toContain("at(OPENING.spotDelayMs, wander);");
-    expect(ss).toContain("at(OPENING.pairDelayMs, () => setPairOn(1));");
-    expect(ss).toContain("at(OPENING.pairDelayMs + OPENING.pairGapMs, () => setPairOn(2));");
-    expect(rule(".tdb-ssdim")).toContain("transition: background 1100ms ease");
-    expect(rule(".tdb-ssdim.on")).toContain("rgba(26, 13, 9, 0.74)");
+  it("the exits: sidebars slide ∓140% · search/pair/free-cards/headings fade · the bar exits up · the sheet dissolves", () => {
+    expect(ss).toContain("el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`;");
+    expect(ss).toContain("el.style.transform = `translateX(${GATHER.exitSlidePct}%)`;");
+    expect(ss).toContain('el.style.transform = "translateY(-130%)";'); // the document bar
+    expect(ss).toContain('el.style.background = "transparent"; el.style.borderColor = "transparent"; el.style.boxShadow = "none";'); // the dissolve — items float
+    expect(ss).toContain("querySelectorAll<HTMLElement>(EXIT_FADE)");
   });
-  it("the lines: the three ritual strings verbatim from the lib, italic Playfair 34, cream", () => {
-    expect(ss).toContain("{RITUAL_LINES.map((l, i) => (");
-    const l = rule(".tdb-sslines span");
+  it("the ritual lines play in the SEARCH'S VACATED SLOT — italic Playfair 19, ink-muted, 780ms each", () => {
+    expect(ss).toContain("RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => setLine(i)));");
+    const l = rule(".tdb-fsrit span");
     expect(l).toContain("font-style: italic");
-    expect(l).toContain("font-size: 34px");
-    expect(l).toContain("color: #f3e7da");
+    expect(l).toContain("font-size: 19px");
+    expect(l).toContain("color: #6b5a4e");
+    expect(ss).toContain('style={{ top: geo.slotTop }}'); // the measured slot, not a hard-coded seat
   });
-  it("THE REVEAL INVARIANT: the card mounts BENEATH the veil (z 2 < 3) inside the overlay — visible only in the beam", () => {
-    expect(rule(".tdb-ssfirst")).toContain("z-index: 2");
-    expect(rule(".tdb-ssveil")).toContain("z-index: 3");
-    expect(ss).toContain('ctx.fillStyle = `rgba(26,13,9,${OPENING.veilTo})`;'); // the 0.9 full dark
-    expect(ss).toContain('ctx.globalCompositeOperation = "destination-out";'); // the punched beam
-    expect(ss).toContain("draw(-999, -999, 1);"); // mounts unseen — the light must FIND it
-    expect(ss).toContain("setFirstOn(true);");
+  it("the gather: every other item flies onto the FIRST task (engine-first via data-tdbkey), staggered, z below it", () => {
+    expect(ss).toContain("const firstKey = queue[0]?.key ?? \"\";");
+    expect(ss).toContain('[data-tdbkey="${');
+    expect(page).toContain("data-tdbkey={c.key}"); // the board rows/cells carry their keys
+    expect(ss).toContain("const s = staggerFor(flyers.length + 1);");
+    expect(ss).toContain("gatherTransform({ left: r.left, top: r.top, width: r.width, height: r.height }");
+    expect(ss).toContain("el.style.opacity = String(GATHER.gatherOpacity);"); // ~85% behind the first
+    expect(ss).toContain('el.style.zIndex = String(Math.max(1, 20 - i));'); // beneath …
+    expect(ss).toContain('firstEl.style.zIndex = "30";'); // … the first, never covered
+    expect(ss).toContain('const m = wrapEl.querySelector<HTMLElement>(".tdb-mainc")?.getBoundingClientRect();'); // the collapsed-member fallback
   });
-  it("skip: ANY click or keypress during the sequence jumps to the final composition", () => {
-    expect(ss).toContain('onPointerDown={phase === "opening" && !openingFinal ? jumpToFinal : undefined}');
-    expect(ss).toContain('onKeyDown={phase === "opening" && !openingFinal ? jumpToFinal : undefined}');
-    expect(ss).toContain("if (finalRef.current || phase !== \"opening\") return;");
-    expect(ss).toContain("timers.current.forEach((t) => window.clearTimeout(t));");
+  it("the morph: the pile grows in one motion to the computed rest (min 24 top clearance, remeasured on resize)", () => {
+    expect(ss).toContain("const gRestY = restTop(g.regionH, g.cardH);");
+    expect(ss).toContain("big.style.transform = `translate(${dx}px, ${dy}px) scale(${sc})`;");
+    expect(ss).toContain("big.style.transition = `transform ${GATHER.morphMs}ms cubic-bezier(.25,.8,.3,1.05)`;");
+    expect(ss).toContain('big.style.transform = "none";');
+    expect(ss).toContain("const onResize = () => measure();");
+    expect(ss).toContain("setEdgesOn(true);"); // the deck edges settle in at the rest line
   });
-  it("reduced motion starts at the final composition; the css transitions go quiet with it", () => {
-    expect(ss).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;');
-    expect(ss).toContain("const [openingFinal, setOpeningFinal] = useState(reduce);");
-    expect(css).toContain(".tdb-ssdim, .tdb-ssveil, .tdb-sslines span, .tdb-ssb, .tdb-ssfirst { transition: none; }");
+  it("the subtitle + the session line take their seats as the gather lands", () => {
+    expect(ss).toContain(">Focused session</div>");
+    expect(rule(".tdb-fssub")).toContain("font-style: italic");
+    expect(ss).toContain("FOCUSED SESSION · TASK <b>{Math.min(index + 1, total)}</b> OF <b>{total}</b>");
+    expect(ss).toContain('onClick={() => setPhase("close")}>END SESSION ✕</button>');
+    expect(rule(".tdb-fsses")).toContain("letter-spacing: 0.18em");
   });
-  it("Back to desk reverses compressed (~600ms) and STRIPS every inline style it added — from any exit path", () => {
-    expect(ss).toContain("restoreDesk(OPENING.reverseMs);");
-    expect(ss).toContain("window.setTimeout(onClose, OPENING.reverseMs + 40);");
-    expect((ss.match(/el\.style\.cssText = el\.style\.cssText\.replace\(/g) ?? []).length).toBe(2); // the reverse + the unmount guard
+  it("skip: any click/keypress jumps to the composed state; reduced motion starts there", () => {
+    expect(ss).toContain('onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}');
+    expect(ss).toContain('onKeyDown={phase === "gather" && !composed ? jumpToComposed : undefined}');
+    expect(ss).toContain("const [composed, setComposed] = useState(reduce);");
+    expect(ss).toContain("if (reduce) {\n      applyComposedInstant();");
   });
-  it("the fly targets the board wrap's CONTENTS only — never the app chrome (the wrap-scoped query)", () => {
-    expect(ss).toContain("wrapEl.querySelectorAll<HTMLElement>(FLY_SELECTOR)");
-    expect(page).toContain("wrapEl={wrapRef.current}");
-  });
-  it("the overlay's z law: 48 — beneath the journey flow (50), the toast (60) and the ask (90)", () => {
-    expect(rule(".tdb-ss")).toContain("z-index: 48");
+  it("every styled board element is TRACKED and stripped on any exit (the styled set)", () => {
+    expect(ss).toContain("const styled = useRef<Set<HTMLElement>>(new Set());");
+    expect(ss).toContain('for (const el of styled.current) el.style.cssText = "";');
+    expect(ss).toContain("stripAll();");
   });
 });
 
-describe("session P2 — the room", () => {
-  it("the bar: FOCUSED SESSION · TASK i OF n, the live progress line, the lane label, End session", () => {
-    expect(ss).toContain("FOCUSED SESSION · TASK {Math.min(index + 1, total)} OF {total}");
-    expect(ss).toContain("width: `${Math.round(((index + 1) / Math.max(1, total)) * 100)}%`");
-    expect(rule(".tdb-ssprog")).toContain("background: #e3d8c8");
-    expect(rule(".tdb-ssprog b")).toContain("background: var(--ink)");
-    expect(ss).toContain("{lane(current)}");
-    expect(ss).toContain('onClick={() => setPhase("close")}>End session ✕</button>'); // exits to the close in its early state
-  });
-  it("the sheet: 560, family band + tag, Playfair 26 title, the italic manuscript · agent line", () => {
-    expect(rule(".tdb-ssheet")).toContain("width: 560px");
-    expect(rule(".tdb-ssheetc h2")).toContain("font-size: 26px");
-    expect(ss).toContain("{[current.subtitle, current.who].filter(Boolean).join(\" · \")}".replace(/\\/g, ""));
-    expect(rule(".tdb-ssms2")).toContain("font-style: italic");
-  });
-  it("WHERE THIS STANDS: templates from existing derived fields only; an empty composition hides the card", () => {
+describe("final P3 — the card + the deal at the rest line", () => {
+  it("frame-A content: family band + tag + lane, Playfair title, the italic line, WHERE THIS STANDS from templates", () => {
+    expect(ss).toContain('<span className="tdb-fslane">{lane(current)}</span>');
+    expect(rule(".tdb-fscardc h2")).toContain("font-size: 21px");
     expect(ss).toContain("{standFor(current) && (");
     expect(ss).toContain(">WHERE THIS STANDS</b>");
-    // the assembler reads the REAL stores through the existing derivations — never free text
-    expect(ss).toContain("whereThisStands({ kind: \"offer\", agentName, offerDate: q?.lastStatusChange, outstanding });".replace(/\\/g, ""));
-    expect(ss).toContain('getPrimaryAction(x.status as QueryStatus).ballHolder === "agent"');
-    expect(ss).toContain("owed: q ? STATUS_OWED[q.status as string] : undefined");
     expect(ss).toContain('if (c.userTaskId) return "";'); // notes say nothing
+    expect(ss).toContain("owed: q ? STATUS_OWED[q.status as string] : undefined");
   });
-  it("the actions: Action now (ink, opens the journey OVER the session) · ✓ Mark handled (gated on the honest arm) · Skip", () => {
+  it("the actions: Action now (opens the journey OVER the session) · ✓ Mark handled (gated) · Skip; the page wires the primitives", () => {
     expect(ss).toContain('onClick={() => onOpenJourney(current)}>Action now</button>');
     expect(ss).toContain("{canQuickComplete(current) && (");
     expect(ss).toContain('onClick={() => onQuickComplete(current)}>✓ Mark handled</button>');
     expect(ss).toContain("onClick={skipCurrent}>Skip for now</button>");
-    // the page: the gate mirrors quickDone's arms; offers keep the standing no-one-tap rule
-    expect(page).toContain('if (c.taskType === "offer_received") return false;');
-    expect(page).toContain('return !!q && getPrimaryAction(q.status as QueryStatus).kind === "mark-sent";');
-    expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}'); // the journey mounts at z 50, over the session
-    expect(page).toContain("onQuickComplete={quickDone}"); // the completion primitive with its undo toast
+    expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}');
+    expect(page).toContain("onQuickComplete={quickDone}");
+    expect(page).toContain('if (c.taskType === "offer_received") return false;'); // the standing no-one-tap rule
   });
-  it("the round-trip law: a completed task vanishes from liveKeys and deals as handled; a survivor resumes in place", () => {
+  it("the round-trip law: a completed task VANISHES from liveKeys and deals as handled; a survivor resumes in place", () => {
     expect(ss).toContain("if (!liveKeys.has(current.key)) markHandledAdvance(current);");
     expect(ss).toContain("setHandled((h) => (h.some((x) => x.key === c.key) ? h : [...h, c]));");
-    // Mark handled fires the primitive only — the vanish drives the advance, so a declined
-    // dup-guard honestly stays put
-    expect(ss).not.toContain("onQuickComplete(current).then");
   });
-  it("the footer whispers what's next; dead queue entries fast-forward silently", () => {
-    expect(ss).toContain(">NEXT UP · <i>{order[index + 1].title}</i></div>");
-    expect(ss).toContain("while (i < order.length && !liveKeys.has(order[i].key)) i += 1;");
-  });
-  it("skip requeues to the session order's end (the engine has no requeue — recon); skipping the last live task closes", () => {
-    expect(ss).toContain("const next = [...rest, c0]; // the requeue — to the session order's end"); // (P3 reworded the comment)
-    expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setOrder(next); setPhase("close"); return; }'); // (P3: the requeued order lands before the close)
-  });
-});
-
-describe("session P3 — the deal (option A: the paper stack)", () => {
-  it("the stack caps at TWO edges regardless of queue length; the states thin (1 left → one edge; last → none)", () => {
-    expect(ss).toContain("const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;");
-    expect(ss).toContain('{remaining >= 2 && <div className="tdb-ssdeck d2" aria-hidden />}');
-    expect(ss).toContain('{remaining >= 1 && <div className="tdb-ssdeck d1" aria-hidden />}');
-    expect(rule(".tdb-ssdeck")).toContain("scale(0.975)");
-    expect(rule(".tdb-ssdeck.d2")).toContain("scale(0.95)");
-    expect(rule(".tdb-ssdeck.d2")).toContain("opacity: 0.7");
-  });
-  it("HANDLED: stamp (rotated −8°, 350ms pop) → hold 520 → sweep off left → the next rises 180 in; the advance fires WITH the rise", () => {
-    expect(ss).toContain('setDeal({ card: c, kind: "handled" });');
+  it("the deal: stamp → hold → sweep left → the rise (450) WITH the session-line advance; skip goes down-and-behind", () => {
     expect(ss).toContain("const advanceAtMs = reduce ? 400 : DEAL.stampHoldMs + DEAL.riseDelayMs;");
     expect(ss).toContain("at(advanceAtMs, () => { advancePast(index + 1); setRose(true); });");
-    expect(css).toContain("animation: tdbStampIn 350ms cubic-bezier(0.2, 0.9, 0.3, 1.5) both;");
-    expect(css).toContain("@keyframes tdbStampIn { from { transform: rotate(-8deg) scale(0); } to { transform: rotate(-8deg) scale(1); } }");
-    expect(css).toContain(".tdb-ssleave.handled { animation: tdbSweepOff 500ms cubic-bezier(0.5, 0.05, 0.6, 1) 520ms forwards; }");
-    expect(css).toContain("@keyframes tdbSweepOff { to { transform: translateX(-160%) rotate(-5deg); opacity: 0; } }");
-    expect(css).toContain(".tdb-ssheet.rise { animation: tdbRise 400ms cubic-bezier(0.2, 0.9, 0.3, 1.15); }");
+    expect(css).toContain(".tdb-fsleave.handled { animation: tdbSweepOff 500ms cubic-bezier(0.5, 0.05, 0.6, 1) 520ms forwards; }");
+    expect(css).toContain(".tdb-fscard.rise { animation: tdbRise 450ms cubic-bezier(0.2, 0.9, 0.3, 1.15); }");
+    expect(css).toContain(".tdb-fsleave.skip { animation: tdbSkipDown 450ms ease forwards; }");
+    expect(css).toContain(".tdb-fsleave.skip { z-index: 2; }"); // down AND BEHIND
+    expect(ss).toContain("const next = [...rest, c0]; // the requeue — to the session order's end");
+    expect(ss).toContain('if (!rest.some((x) => liveKeys.has(x.key))) { setOrder(next); setPhase("close"); return; }');
   });
-  it("SKIP: no stamp — down and behind (450ms, z beneath the risen sheet) with the requeue via the session order", () => {
-    expect(ss).toContain('if (!reduce) setDeal({ card: c0, kind: "skip" });');
-    expect(ss).toContain('{deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}'); // skip stamps nothing
-    expect(css).toContain(".tdb-ssleave.skip { animation: tdbSkipDown 450ms ease forwards; }");
-    expect(css).toContain(".tdb-ssleave.skip { z-index: 1; }");
-    expect(ss).toContain("at(reduce ? 0 : DEAL.skipAdvanceMs, doRequeue);");
-  });
-  it("progress + footer sync: they read index/order, which move at the rise moment; the actions sit disabled while dealing", () => {
-    expect(ss).toContain("disabled={!!deal} onClick={() => onOpenJourney(current)}");
-    expect(ss).toContain("disabled={!!deal} onClick={skipCurrent}");
-    expect(ss).toContain("if (dealRef.current) return;"); // the vanish effect + re-entry guard
+  it("the stack thins 2 → 1 → 0 with the LIVE queue; the true count lives in the session line; next-up updates", () => {
+    expect(ss).toContain("const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;");
+    expect(ss).toContain('{edgesOn && remaining >= 2 && <div className="tdb-fsdeck d2" aria-hidden />}');
+    expect(ss).toContain('{edgesOn && remaining >= 1 && <div className="tdb-fsdeck d1" aria-hidden />}');
+    expect(ss).toContain(">NEXT UP · <i>{order[index + 1].title}</i></div>");
   });
   it("reduced motion: instant swaps; the stamp appears without its pop", () => {
-    expect(css).toContain(".tdb-ssleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
-    expect(css).toContain(".tdb-ssleave.handled, .tdb-ssleave.skip, .tdb-ssheet.rise, .tdb-ssstamp { animation: none; }");
+    expect(css).toContain(".tdb-fsleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
+    expect(css).toContain(".tdb-fsleave.handled, .tdb-fsleave.skip, .tdb-fscard.rise, .tdb-ssstamp { animation: none; }");
   });
 });
 
-describe("session P4 — the close (frame D)", () => {
-  it("the headline by state: Desk cleared. when the queue emptied · Good session. on an early exit — same ledger, no guilt copy", () => {
-    expect(ss).toContain('{order.some((x) => liveKeys.has(x.key)) ? "Good session." : "Desk cleared."}');
+describe("final P4 — the close, in place", () => {
+  it("the headline by state over the same centre region; the subtitle + session line fade with the close", () => {
+    expect(ss).toContain('{anyLive ? "Good session." : "Desk cleared."}');
     expect(ss).toContain(">Every box ticked turns the dial in your favour.</div>");
+    expect(ss).toContain('className={`tdb-fssub${composed && phase !== "close" ? " on" : ""}`}'); // the subtitle leaves at the close
+    expect(ss).toContain('{composed && phase !== "close" && (');
     expect(css.match(/\.tdb-ssclose h1 \{([^}]*)\}/)?.[1] ?? "").toContain("font-size: 46px");
   });
-  it("the honest ledger from the SESSION EVENTS: ✓ Handled n · dashed-ring Skipped (uniform destination named) · ⏱ length from the frozen timer", () => {
+  it("the honest ledger from the session events + the frozen timer; Review expands the per-task marks", () => {
     expect(ss).toContain(">Handled<span className=\"tdb-sssn\">{handled.length}</span>".replace(/\\/g, ""));
     expect(ss).toContain(">Skipped — back on your desk<span className=\"tdb-sssn\">{skipped.length}</span>".replace(/\\/g, ""));
-    expect(ss).toContain('if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();'); // the timer freezes on entry
+    expect(ss).toContain('if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();');
     expect(ss).toContain("Math.max(1, Math.round(((closedAt.current ?? Date.now()) - startedAt.current) / 60000))");
-    expect(css).toContain(".tdb-sssd.done { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2));");
-    expect(css).toContain(".tdb-sssd.skip { background: var(--white, #fff); border: 1px dashed var(--line); color: transparent; }");
-  });
-  it("Review what you did expands the ledger to the per-task list with the mark grammar (sage tick / dashed ring)", () => {
     expect(ss).toContain('onClick={() => setReviewOpen((v) => !v)}>Review what you did</button>');
-    expect(ss).toContain("{handled.map((c) => (");
-    expect(ss).toContain("{skipped.map((c) => (");
-    expect(ss).toContain('className="tdb-sssumrow sub"');
+    expect(css).toContain(".tdb-sssd.done { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2));");
   });
-  it("Back to your desk returns via onClose; the board already reflects the work — the session WRITES NOTHING (no sync)", () => {
-    expect(ss).toContain('onClick={onClose}>Back to your desk</button>');
+  it("Back to your desk REVERSES the opening compressed (~700ms): the styles unwind, then strip, then close", () => {
+    expect(ss).toContain('onClick={backToDesk}>Back to your desk</button>');
+    expect(ss).toContain("el.style.transition = `transform ${GATHER.reverseMs}ms ease, opacity ${GATHER.reverseMs}ms ease, background ${GATHER.reverseMs}ms ease, border-color ${GATHER.reverseMs}ms ease, box-shadow ${GATHER.reverseMs}ms ease`;");
+    expect(ss).toContain("window.setTimeout(() => { stripAll(); onClose(); }, GATHER.reverseMs + 60);");
+  });
+  it("the board is already correct via the shared derivation — the session WRITES NOTHING (no sync)", () => {
     for (const w of ["recordMaterialsSent", "updateQueryStatus", "upsertTaskFlag", "updateUserTask", "updateAgent", "updateUserProfile", "dismissTask", "logNudge", "addUserTask", "deleteActivity"]) {
       expect(ss).not.toContain(w);
     }
   });
 });
 
-describe("session P5 — wiring + sweep", () => {
-  it("the state machine: opening → room → deal loop → close; End session and browser back both land safely", () => {
-    expect(ss).toContain('const [phase, setPhase] = useState<"opening" | "room" | "close">("opening");');
-    expect(ss).toContain("function beginRoom() {"); // Begin session → the room
-    expect(ss).toContain('onClick={() => setPhase("close")}>End session ✕</button>');
-    expect(ss).toContain('window.addEventListener("popstate", onPop);'); // back → onClose, cleanly
-    // the unmount guard strips the board's inline styles from ANY exit path
-    expect(ss).toContain("for (const el of flown.current) el.style.cssText = el.style.cssText.replace(");
+describe("final P5 — wiring + the supersession sweep", () => {
+  it("the state machine: board → gather → session → close → board; back + END SESSION land safely", () => {
+    expect(ss).toContain('const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");');
+    expect(ss).toContain('window.addEventListener("popstate", onPop);');
   });
-  it("the overture plays EVERY session start (no seen-flag anywhere); its skip is instant", () => {
-    expect(ss).not.toContain("localStorage"); // no per-session persistence — the opening always plays
-    expect(ss).toContain("function jumpToFinal() {");
+  it("the room presentation is GONE: no veil/spotlight/dark lines/pair, no room bar, no oat ground", () => {
+    for (const dead of ["createRadialGradient", "destination-out", "requestAnimationFrame(step)", "tdb-ssdim", "tdb-ssveil", "tdb-sslines", "tdb-ssctas", "tdb-ssfirst", "tdb-ssroom", "tdb-ssbar", "tdb-ssprog", "tdb-ssheet", "tdb-ssstack", "tdb-ssdeck", "tdb-ssleave", "Begin session"]) {
+      expect(ss).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
   });
-  it("the superseded presentation: ONLY the Begin entry's whole-board walk went (P1); FocusFlow stands as the journey engine", () => {
-    expect(page).not.toContain("setFlow({ items: boardCards.map");
-    expect(page).toContain('mode: "sweep"'); // the lane sweeps stand
-    expect(page).toContain("ritual: true"); // Work the list stands
-    expect(page).toContain('mode: "weeklyReview"'); // the Sunday review stands
-    expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}'); // the journeys stand
-  });
-  it("focus-art.png stays reserved and unused; the tour's Begin copy still speaks true", () => {
+  it("the overture plays every session (no seen-flag); focus-art stays reserved and unused", () => {
+    expect(ss).not.toContain("localStorage");
     expect(ss).not.toContain("focus-art");
-    expect(page).not.toContain("import focusArt"); // the dead strip-era import swept; the asset stays reserved in assets/ (a comment may still NAME it)
+    expect(page).not.toContain("import focusArt");
   });
 });
-

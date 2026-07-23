@@ -2,24 +2,32 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * THE FOCUSED SESSION (the session pack) — the cinematic container: the opening (darken →
- * the desk clears → ritual lines → the spotlight reveal), the session room, the between-task
- * deal, and the close. The ENGINE is the board's own queue (boardCards order, captured at
- * launch) and the page's existing primitives — this component is presentation + session
- * bookkeeping only; no new write paths.
+ * THE FOCUSED SESSION — FINAL (the in-place design, design-refs/session-final.html v6.1):
+ * the chrome and the "What's on your desk?" title NEVER leave; the board transforms around
+ * them. The GATHER (sidebars slide away, the sheet dissolves, every other item flies onto
+ * the first task, the pile morphs to the centred rest) → the POOL OF LIGHT (the card is the
+ * one heavy object on a bright desk) → the DEAL at the rest line → the CLOSE in place, with
+ * Back to your desk reassembling the board. This supersedes the dark-room presentation
+ * (veil/spotlight/room) entirely.
  *
- * Refs: design-refs/session-opening.html (the opening, v3.1 — the card only exists where the
- * light is) · session-room.html frames A/D (the room + the close; frame B superseded by the
- * deal) · session-deal.html option A (the paper stack).
+ * The ENGINE is unchanged: the board's own queue (boardCards order, captured at launch) and
+ * the page's existing primitives — this component is presentation + session bookkeeping
+ * only; it writes NOTHING.
+ *
+ * Refs: session-final.html (the master choreography, both views) · session-focus-signal.html
+ * option 5 (the pool; 0–4 rejected) · session-content.html frame A/D (the card's content +
+ * the close's ledger) · session-deal.html option A (stamp/sweep/rise).
  *
  * Z law: the overlay sits at 48 — beneath the journey flow (50), the toast (60) and the ask
- * (90), above the board. Inside the opening: dim(1) < the first card(2) < the canvas veil(3)
- * < the ritual lines(4) < the pair(5) — the card mounts BENEATH the veil and is visible only
- * inside the beam.
+ * (90), above the board. Inside the seat: the pool(0) < the deck edges(1) < the skip
+ * clone(2) < the card(3) < the handled clone(4).
  */
 import React, { useEffect, useRef, useState } from "react";
 import { BoardCard } from "../../lib/todoBoard";
-import { nearestEdgeFly, wanderPoints, OPENING, RITUAL_LINES, FLY_SELECTOR, DEAL } from "../../lib/sessionStage";
+import {
+  gatherTransform, staggerFor, restTop, GATHER, DEAL, RITUAL_LINES,
+  EXIT_LEFT, EXIT_RIGHT, EXIT_FADE, EXIT_BAR, DISSOLVE, GATHER_SELECTOR,
+} from "../../lib/sessionStage";
 import { whereThisStands, STATUS_OWED } from "../../lib/sessionContext";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -28,7 +36,7 @@ import { QueryStatus } from "../../types";
 export interface FocusedSessionProps {
   /** The session queue — the engine's own boardCards order, captured at launch. */
   queue: BoardCard[];
-  /** The board wrap element — the opening flies ITS contents (never the app chrome). */
+  /** The board wrap element — the gather transforms ITS contents (never the app chrome). */
   wrapEl: HTMLElement | null;
   /** The live board keys — a task vanishing from them means the desk already reflects it. */
   liveKeys: Set<string>;
@@ -43,220 +51,218 @@ const LANE_LABEL: Record<string, string> = { do: "URGENT", hk: "HOUSEKEEPING", n
 export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, liveKeys, onOpenJourney, onQuickComplete, canQuickComplete, onClose }) => {
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
   const { queries, agents } = useScriptAllyDb();
-  const [phase, setPhase] = useState<"opening" | "room" | "close">("opening");
-  // ── session P2: the room's engine seat — the session-local ORDER (skip requeues to its
-  // end), the index, and the session's own event ledger (the close reads it). ──
+  const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");
+  // ── the engine seat (unchanged from the room pack): the session-local ORDER (skip
+  // requeues to its end), the index, and the session's own event ledger. ──
   const [order, setOrder] = useState<BoardCard[]>(queue);
   const [index, setIndex] = useState(0);
   const [handled, setHandled] = useState<BoardCard[]>([]);
   const [skipped, setSkipped] = useState<BoardCard[]>([]);
   const startedAt = useRef(Date.now());
-  // ── session P3: THE DEAL — the leaving clone + the rise; dealRef guards the vanish
-  // effect against re-firing while the choreography runs. ──
+  // THE DEAL — the leaving clone + the rise; dealRef guards the vanish effect
   const [deal, setDeal] = useState<{ card: BoardCard; kind: "handled" | "skip" } | null>(null);
   const [rose, setRose] = useState(false);
   const dealRef = useRef(false);
-  // ── session P4: the close — the session-scoped timer freezes on entry; the review list
-  // expands the ledger to per-task marks. ──
+  // the close — the frozen timer + the review expansion
   const closedAt = useRef<number | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
   useEffect(() => {
     if (phase === "close" && closedAt.current === null) closedAt.current = Date.now();
   }, [phase]);
-  // ── session P5: browser back lands safely on the board — the session closes cleanly
-  // (the opening effect's unmount guard strips every inline style it added). ──
+  // browser back lands safely on the board (the unmount guard strips every inline style)
   useEffect(() => {
     const onPop = () => onClose();
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, [onClose]);
-  // the opening's own progress — "final" = the lit-card + pair composition
-  const [openingFinal, setOpeningFinal] = useState(reduce);
-  const [line, setLine] = useState(-1); // the active ritual line
-  const [pairOn, setPairOn] = useState<0 | 1 | 2>(reduce ? 2 : 0);
-  const [firstOn, setFirstOn] = useState(reduce);
-  const [veilOn, setVeilOn] = useState(reduce);
-  const [dimOn, setDimOn] = useState(false);
 
-  const veilRef = useRef<HTMLCanvasElement | null>(null);
-  const firstRef = useRef<HTMLDivElement | null>(null);
+  // ── the gather's own progress ──
+  const [composed, setComposed] = useState(reduce); // the settled session composition
+  const [line, setLine] = useState(-1);
+  const [edgesOn, setEdgesOn] = useState(reduce);
+  const [bigOn, setBigOn] = useState(reduce);
+  // measured geometry: the subtitle under the title, the ritual/session line in the
+  // search's vacated slot, the seat region below the hero, the card's rest offset
+  const [geo, setGeo] = useState({ subTop: 120, slotTop: 160, wrapTop: 210, restY: 40 });
+  const bigRef = useRef<HTMLDivElement | null>(null);
   const timers = useRef<number[]>([]);
-  const raf = useRef<number | null>(null);
-  const flown = useRef<HTMLElement[]>([]);
-  const finalRef = useRef(reduce);
+  const styled = useRef<Set<HTMLElement>>(new Set());
+  const composedRef = useRef(reduce);
   const at = (ms: number, fn: () => void) => { timers.current.push(window.setTimeout(fn, ms)); };
+  const mark = (el: HTMLElement) => { styled.current.add(el); return el; };
+  const stripAll = () => {
+    for (const el of styled.current) el.style.cssText = "";
+    styled.current.clear();
+  };
 
-  /** The canvas veil: full dark with the soft-edged beam punched out (the ref's draw). */
-  function draw(x: number, y: number, r: number) {
-    const cv = veilRef.current;
-    const ctx = cv?.getContext("2d");
-    if (!cv || !ctx) return;
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.fillStyle = `rgba(26,13,9,${OPENING.veilTo})`;
-    ctx.fillRect(0, 0, cv.width, cv.height);
-    const g = ctx.createRadialGradient(x, y, r * 0.55, x, y, r);
-    ctx.globalCompositeOperation = "destination-out";
-    g.addColorStop(0, "rgba(0,0,0,1)");
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 7);
-    ctx.fill();
-    ctx.globalCompositeOperation = "source-over";
-  }
-  function sizeVeil() {
-    const cv = veilRef.current;
-    if (!cv) return;
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-  }
-  function lockSpot() {
-    const r = firstRef.current?.getBoundingClientRect();
-    if (!r) return;
-    draw(r.left + r.width / 2, r.top + r.height / 2, Math.max(r.width, r.height) * OPENING.spotLockScale);
+  function measure() {
+    const title = wrapEl?.querySelector<HTMLElement>(".tdb-ask");
+    const slot = wrapEl?.querySelector<HTMLElement>(".tdb-srchrow");
+    const tr = title?.getBoundingClientRect();
+    const sr = slot?.getBoundingClientRect();
+    const subTop = tr ? tr.bottom + 2 : 120;
+    const slotTop = sr ? Math.max(60, sr.top + sr.height / 2 - 12) : subTop + 40;
+    const wrapTop = (sr ? sr.bottom : slotTop + 30) + 8;
+    const regionH = Math.max(200, window.innerHeight - wrapTop);
+    const cardH = bigRef.current?.offsetHeight || 240;
+    setGeo({ subTop, slotTop, wrapTop, restY: restTop(regionH, cardH) });
+    return { subTop, slotTop, wrapTop, regionH, cardH };
   }
 
-  /** The desk clears: every visible board object flies through its nearest viewport edge. */
-  function flyOut() {
-    if (!wrapEl) return;
-    const els = Array.from(wrapEl.querySelectorAll<HTMLElement>(FLY_SELECTOR)).filter((el) => el.getClientRects().length > 0);
-    flown.current = els;
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    els.forEach((el, i) => {
-      const r = el.getBoundingClientRect();
-      const f = nearestEdgeFly(r.left + r.width / 2, r.top + r.height / 2, r.width, r.height, W, H);
-      at(i * OPENING.flyStaggerMs, () => {
-        el.style.transition = `transform ${OPENING.flyMs}ms cubic-bezier(.5,.05,.6,1), opacity ${OPENING.flyFadeMs}ms`;
-        el.style.transform = `translate(${f.tx}px, ${f.ty}px) rotate(${f.rot}deg)`;
-        el.style.opacity = "0";
-      });
-    });
-  }
-  /** The reverse (Back to desk) — compressed; then every inline style is stripped. */
-  function restoreDesk(ms: number) {
-    for (const el of flown.current) {
-      el.style.transition = `transform ${ms}ms ease, opacity ${ms}ms ease`;
-      el.style.transform = "";
-      el.style.opacity = "";
-    }
-    window.setTimeout(() => {
-      for (const el of flown.current) el.style.cssText = el.style.cssText.replace(/transition:[^;]*;?|transform:[^;]*;?|opacity:[^;]*;?/g, "");
-      flown.current = [];
-    }, ms + 60);
-  }
-  /** Skip: any input during the sequence jumps to the final composition. */
-  function jumpToFinal() {
-    if (finalRef.current || phase !== "opening") return;
-    finalRef.current = true;
+  /** The composed session state, applied instantly (the skip + reduced-motion entry). */
+  function applyComposedInstant() {
+    composedRef.current = true;
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
-    if (raf.current) cancelAnimationFrame(raf.current);
-    for (const el of flown.current) {
-      el.style.transition = "none";
-      el.style.transform = "";
-      el.style.opacity = "0";
-    }
+    if (!wrapEl) { setLine(-1); setBigOn(true); setEdgesOn(true); setComposed(true); setPhase("session"); return; }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_LEFT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_RIGHT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_FADE))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_BAR))) { mark(el); el.style.transition = "none"; el.style.transform = "translateY(-130%)"; el.style.opacity = "0"; }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(DISSOLVE))) { mark(el); el.style.transition = "none"; el.style.background = "transparent"; el.style.borderColor = "transparent"; el.style.boxShadow = "none"; }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(GATHER_SELECTOR))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
     setLine(-1);
-    setDimOn(true);
-    setVeilOn(true);
-    setFirstOn(true);
-    setPairOn(2);
-    setOpeningFinal(true);
-    requestAnimationFrame(() => { sizeVeil(); lockSpot(); });
+    setBigOn(true);
+    setEdgesOn(true);
+    setComposed(true);
+    setPhase("session");
+    requestAnimationFrame(() => measure());
   }
 
-  // ── the opening sequence (once) ──
+  // ── THE GATHER (once) ──
   useEffect(() => {
-    sizeVeil();
-    const onResize = () => { sizeVeil(); if (finalRef.current) lockSpot(); };
+    measure();
+    const onResize = () => measure();
     window.addEventListener("resize", onResize);
     if (reduce) {
-      // reduced motion starts at the final composition — no movement anywhere
-      setDimOn(true);
-      if (wrapEl) {
-        const els = Array.from(wrapEl.querySelectorAll<HTMLElement>(FLY_SELECTOR)).filter((el) => el.getClientRects().length > 0);
-        flown.current = els;
-        for (const el of els) { el.style.transition = "none"; el.style.opacity = "0"; }
+      applyComposedInstant();
+      return () => { window.removeEventListener("resize", onResize); stripAll(); };
+    }
+    if (!wrapEl) { applyComposedInstant(); return () => window.removeEventListener("resize", onResize); }
+    // 1 — the board's furniture leaves; the sheet dissolves; the items float on the desk
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_LEFT))) {
+      mark(el); el.style.transition = `transform ${GATHER.exitMs}ms cubic-bezier(.5,.05,.6,1), opacity ${GATHER.exitMs - 100}ms`;
+      el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`; el.style.opacity = "0";
+    }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_RIGHT))) {
+      mark(el); el.style.transition = `transform ${GATHER.exitMs}ms cubic-bezier(.5,.05,.6,1), opacity ${GATHER.exitMs - 100}ms`;
+      el.style.transform = `translateX(${GATHER.exitSlidePct}%)`; el.style.opacity = "0";
+    }
+    for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_FADE))) {
+      mark(el); el.style.transition = `opacity ${GATHER.searchFadeMs}ms`; el.style.opacity = "0";
+    }
+    at(300, () => {
+      if (!wrapEl) return;
+      for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_BAR))) {
+        mark(el); el.style.transition = `transform ${GATHER.docBarMs}ms, opacity ${GATHER.docBarMs - 50}ms`;
+        el.style.transform = "translateY(-130%)"; el.style.opacity = "0";
       }
-      requestAnimationFrame(() => { sizeVeil(); lockSpot(); });
-      finalRef.current = true;
-      return () => window.removeEventListener("resize", onResize);
-    }
-    setDimOn(true); // 1 — the slow darken (1.1s wash)
-    at(OPENING.flyDelayMs, flyOut); // 2 — the desk clears via nearest edges
-    RITUAL_LINES.forEach((_, i) => at(OPENING.linesDelayMs + i * OPENING.lineMs, () => setLine(i))); // 3 — the lines
-    const linesEnd = OPENING.linesDelayMs + RITUAL_LINES.length * OPENING.lineMs;
-    at(linesEnd, () => {
-      // 4 — full dark; the first card mounts UNSEEN beneath the veil; the light must find it
-      setLine(-1);
-      setVeilOn(true);
-      draw(-999, -999, 1);
-      setFirstOn(true);
-      at(OPENING.spotDelayMs, wander);
+      for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(DISSOLVE))) {
+        mark(el); el.style.transition = `background ${GATHER.dissolveMs}ms, border-color ${GATHER.dissolveMs}ms, box-shadow ${GATHER.dissolveMs}ms`;
+        el.style.background = "transparent"; el.style.borderColor = "transparent"; el.style.boxShadow = "none";
+      }
     });
-    function wander() {
-      const r = firstRef.current?.getBoundingClientRect();
-      if (!r) { finish(); return; }
-      const target = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-      const pts = wanderPoints(window.innerWidth, window.innerHeight, target);
-      let seg = 0;
-      let t0: number | null = null;
-      let from = { x: window.innerWidth / 2, y: window.innerHeight + 60 }; // enters from below
-      const ease = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
-      const step = (ts: number) => {
-        if (t0 === null) t0 = ts;
-        const dur = seg === pts.length - 1 ? OPENING.spotLockMs : OPENING.spotSegMs;
-        const t = Math.min(1, (ts - t0) / dur);
-        const e = ease(t);
-        const to = pts[seg];
-        draw(from.x + (to.x - from.x) * e, from.y + (to.y - from.y) * e, OPENING.spotRadius);
-        if (t < 1) { raf.current = requestAnimationFrame(step); return; }
-        from = to;
-        seg += 1;
-        t0 = null;
-        if (seg < pts.length) { raf.current = requestAnimationFrame(step); return; }
-        finish();
-      };
-      raf.current = requestAnimationFrame(step);
-    }
-    function finish() {
-      lockSpot();
-      finalRef.current = true;
-      setOpeningFinal(true);
-      at(OPENING.pairDelayMs, () => setPairOn(1));
-      at(OPENING.pairDelayMs + OPENING.pairGapMs, () => setPairOn(2));
-    }
+    // 2 — the ritual lines in the search's vacated slot
+    RITUAL_LINES.forEach((_, i) => at(GATHER.ritualStartMs + i * GATHER.lineMs, () => setLine(i)));
+    // 3 — the gather: every other item flies onto the first task's footprint
+    at(GATHER.gatherStartMs, () => {
+      if (!wrapEl || composedRef.current) return;
+      const items = Array.from(wrapEl.querySelectorAll<HTMLElement>(GATHER_SELECTOR)).filter((el) => el.getClientRects().length > 0);
+      const firstKey = queue[0]?.key ?? "";
+      const firstEl = wrapEl.querySelector<HTMLElement>(`[data-tdbkey="${(window.CSS?.escape ?? ((s: string) => s))(firstKey)}"]`);
+      // first-from-engine; a collapsed group hides a member's element — the sheet's centre stands in
+      const fr: DOMRect | { left: number; top: number; width: number; height: number } =
+        firstEl?.getBoundingClientRect() ??
+        (() => {
+          const m = wrapEl.querySelector<HTMLElement>(".tdb-mainc")?.getBoundingClientRect();
+          return { left: (m ? m.left + m.width / 2 : window.innerWidth / 2) - 95, top: (m ? m.top + 120 : 260), width: 190, height: 96 };
+        })();
+      const flyers = items.filter((el) => el !== firstEl);
+      const s = staggerFor(flyers.length + 1);
+      if (firstEl) { mark(firstEl); firstEl.style.position = "relative"; firstEl.style.zIndex = "30"; }
+      flyers.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        const f = gatherTransform({ left: r.left, top: r.top, width: r.width, height: r.height }, { left: fr.left, top: fr.top, width: fr.width, height: fr.height }, i + 1);
+        at(i * s, () => {
+          mark(el);
+          el.style.transition = `transform ${GATHER.flyMs}ms cubic-bezier(.4,.1,.3,1), opacity ${GATHER.flyMs - 150}ms`;
+          el.style.transform = `translate(${f.dx}px, ${f.dy}px) scale(${f.scale}) rotate(${f.rot}deg)`;
+          el.style.opacity = String(GATHER.gatherOpacity);
+          el.style.zIndex = String(Math.max(1, 20 - i));
+        });
+      });
+      // 4 — the morph: the pile grows in one motion to the rest position
+      const gatherEnd = flyers.length * s + GATHER.flyMs;
+      at(gatherEnd, () => {
+        if (composedRef.current) return;
+        const g = measure();
+        const gRestY = restTop(g.regionH, g.cardH);
+        const big = bigRef.current;
+        if (big) {
+          const seatLeft = window.innerWidth / 2 - GATHER.sessionCardW / 2;
+          const dx = fr.left - seatLeft;
+          const dy = fr.top - (g.wrapTop + gRestY);
+          const sc = fr.width / GATHER.sessionCardW;
+          big.style.transition = "none";
+          big.style.transform = `translate(${dx}px, ${dy}px) scale(${sc})`;
+          setBigOn(true);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            big.style.transition = `transform ${GATHER.morphMs}ms cubic-bezier(.25,.8,.3,1.05)`;
+            big.style.transform = "none";
+          }));
+        }
+        for (const el of [...flyers, ...(firstEl ? [firstEl] : [])]) {
+          el.style.transition = "opacity 300ms";
+          el.style.opacity = "0";
+        }
+        // the edges settle in as the morph lands; the session line takes the slot
+        at(GATHER.edgesAtMs, () => {
+          composedRef.current = true;
+          setEdgesOn(true);
+          setLine(-1);
+          setComposed(true);
+          setPhase("session");
+        });
+      });
+    });
     return () => {
       window.removeEventListener("resize", onResize);
       timers.current.forEach((t) => window.clearTimeout(t));
-      if (raf.current) cancelAnimationFrame(raf.current);
       // never leave a wrecked board behind (unmount from any path)
-      for (const el of flown.current) el.style.cssText = el.style.cssText.replace(/transition:[^;]*;?|transform:[^;]*;?|opacity:[^;]*;?/g, "");
+      stripAll();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Back to desk — the compressed rewind: veil lifts, cards return from their edges. */
+  /** Skip the overture: any click/keypress jumps to the composed session state. */
+  function jumpToComposed() {
+    if (composedRef.current || phase !== "gather") return;
+    if (wrapEl) {
+      for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(GATHER_SELECTOR))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
+    }
+    if (bigRef.current) { bigRef.current.style.transition = "none"; bigRef.current.style.transform = "none"; }
+    applyComposedInstant();
+  }
+
+  /** Back to your desk — the compressed reassembly (~700ms), then every style strips. */
   function backToDesk() {
-    setVeilOn(false);
-    setDimOn(false);
-    setFirstOn(false);
-    setPairOn(0);
-    restoreDesk(OPENING.reverseMs);
-    window.setTimeout(onClose, OPENING.reverseMs + 40);
-  }
-  function beginRoom() {
-    setPhase("room");
+    for (const el of styled.current) {
+      el.style.transition = `transform ${GATHER.reverseMs}ms ease, opacity ${GATHER.reverseMs}ms ease, background ${GATHER.reverseMs}ms ease, border-color ${GATHER.reverseMs}ms ease, box-shadow ${GATHER.reverseMs}ms ease`;
+      el.style.transform = "";
+      el.style.opacity = "";
+      el.style.background = "";
+      el.style.borderColor = "";
+      el.style.boxShadow = "";
+      el.style.zIndex = "";
+    }
+    window.setTimeout(() => { stripAll(); onClose(); }, GATHER.reverseMs + 60);
   }
 
-  const first = queue[0];
-  const lane = (c: BoardCard) => LANE_LABEL[c.stream] ?? "";
-  const isOffer = (c: BoardCard) => c.taskType === "offer_received";
-
-  // ── session P2: the room ──
+  // ── the engine (unchanged): where-this-stands · advance · handled · skip ──
   const current = order[index];
   const total = order.length;
+  const lane = (c: BoardCard) => LANE_LABEL[c.stream] ?? "";
+  const isOffer = (c: BoardCard) => c.taskType === "offer_received";
   /** "Where this stands" — assembled from EXISTING derived fields only (the template lib
    *  omits any clause whose fact is missing; "" hides the card). */
   function standFor(c: BoardCard): string {
@@ -292,10 +298,8 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     if (i >= order.length) { setPhase("close"); return; }
     setIndex(i);
   }
-  /** The current task is HANDLED (its write already landed — the vanish drove this): the
-   *  DEAL runs — the stamp lands and holds, the sheet sweeps off left, the next rises with
-   *  the advance (progress + footer tick WITH the rise). Reduced motion: the stamp appears
-   *  without its pop for a beat, then the instant swap. */
+  /** HANDLED (its write already landed — the vanish drove this): the DEAL runs — the stamp
+   *  lands and holds, the sheet sweeps off left, the next rises with the advance. */
   function markHandledAdvance(c: BoardCard) {
     if (dealRef.current) return;
     dealRef.current = true;
@@ -321,8 +325,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     if (!reduce) setDeal({ card: c0, kind: "skip" });
     const doRequeue = () => {
       setOrder(next);
-      // the slot now holds what WAS next; fast-forward any dead entries (the wrap can land
-      // back on the skipped task itself once everything between has gone)
       let i = index;
       while (i < next.length && !liveKeys.has(next[i].key)) i += 1;
       if (i >= next.length) { setPhase("close"); return; }
@@ -338,119 +340,93 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   // in place. (Mark handled itself only fires the primitive; the vanish drives the advance,
   // so a declined dup-guard honestly stays put.)
   useEffect(() => {
-    if (phase !== "room" || !current || dealRef.current) return;
+    if (phase !== "session" || !current || dealRef.current) return;
     if (!liveKeys.has(current.key)) markHandledAdvance(current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveKeys, phase, index, order]);
 
-  // ── render ──
+  const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;
+  const anyLive = order.some((x) => liveKeys.has(x.key));
+
+  // ── render — everything positioned from the MEASURED board (the title stays real) ──
   return (
     <div className="tdb-ss" role="dialog" aria-modal="true" aria-label="Focused session"
-      onPointerDown={phase === "opening" && !openingFinal ? jumpToFinal : undefined}
-      onKeyDown={phase === "opening" && !openingFinal ? jumpToFinal : undefined}
+      onPointerDown={phase === "gather" && !composed ? jumpToComposed : undefined}
+      onKeyDown={phase === "gather" && !composed ? jumpToComposed : undefined}
       tabIndex={-1}>
-      {phase === "opening" && (
-        <>
-          <div className={`tdb-ssdim${dimOn ? " on" : ""}`} aria-hidden />
-          {first && (
-            <div ref={firstRef} className={`tdb-ssfirst${firstOn ? " on" : ""}`} aria-hidden={!openingFinal}>
-              <div className={`tdb-sscard ${first.stream}`}>
-                <div className={`tdb-band ${first.stream}`}>
-                  <span className={`tdb-tag due${isOffer(first) ? " offer" : ""}`}>{isOffer(first) ? `★ ${first.due}` : first.due}</span>
-                </div>
-                <div className="tdb-sscardc">
-                  <h3>{first.title}</h3>
-                  <div className="tdb-ssms">{[first.subtitle, `1 of ${queue.length}`, lane(first).toLowerCase()].filter(Boolean).join(" · ")}</div>
-                </div>
-              </div>
-            </div>
-          )}
-          <canvas ref={veilRef} className={`tdb-ssveil${veilOn ? " on" : ""}`} aria-hidden />
-          <div className="tdb-sslines" aria-live="polite">
+      {/* the "Focused session" subtitle under the standing title */}
+      <div className={`tdb-fssub${composed && phase !== "close" ? " on" : ""}`} style={{ top: geo.subTop }}>Focused session</div>
+      {/* the ritual lines / the session line — the search's vacated slot */}
+      <div className="tdb-fsslot" style={{ top: geo.slotTop }}>
+        {phase === "gather" && !composed && (
+          <div className="tdb-fsrit" aria-live="polite">
             {RITUAL_LINES.map((l, i) => (
               <span key={l} className={line === i ? "on" : line > i ? "off" : ""}>{l}</span>
             ))}
           </div>
-          <div className="tdb-ssctas">
-            <button type="button" className={`tdb-ssb bp${pairOn >= 1 ? " on" : ""}`} onClick={beginRoom}>▶ Begin session</button>
-            <button type="button" className={`tdb-ssb bw${pairOn >= 2 ? " on" : ""}`} onClick={backToDesk}>Back to desk</button>
+        )}
+        {composed && phase !== "close" && (
+          <div className="tdb-fsses">
+            FOCUSED SESSION · TASK <b>{Math.min(index + 1, total)}</b> OF <b>{total}</b> ·{" "}
+            <button type="button" className="tdb-fsend" onClick={() => setPhase("close")}>END SESSION ✕</button>
           </div>
-        </>
-      )}
-      {phase === "room" && current && (
-        // ── session P2: THE ROOM (session-room.html frame A) — one task, centred; nothing
-        // else exists. Action now opens the journey OVER the session (z 50 > 48) and a
-        // surviving task resumes in place; a completed one vanishes from liveKeys and deals.
-        <div className="tdb-ssroom">
-          <div className="tdb-ssbar">
-            <span className="tdb-ssk">FOCUSED SESSION · TASK {Math.min(index + 1, total)} OF {total}</span>
-            <span className="tdb-ssprog" aria-hidden><b style={{ width: `${Math.round(((index + 1) / Math.max(1, total)) * 100)}%` }} /></span>
-            <span className="tdb-ssk">{lane(current)}</span>
-            <button type="button" className="tdb-ssexit" onClick={() => setPhase("close")}>End session ✕</button>
-          </div>
-          <div className="tdb-ssroomc">
-            {/* P3 — the STACK: at most two sheet-edges peek beneath (the true count lives in
-                the bar); the leaving clone deals over the top. */}
-            <div className="tdb-ssstack">
-              {(() => {
-                const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;
-                return (
-                  <>
-                    {remaining >= 2 && <div className="tdb-ssdeck d2" aria-hidden />}
-                    {remaining >= 1 && <div className="tdb-ssdeck d1" aria-hidden />}
-                  </>
-                );
-              })()}
+        )}
+      </div>
+      {/* the seat region below the hero — the stack, the card, the close all live here */}
+      <div className="tdb-fswrap" style={{ top: geo.wrapTop }}>
+        {phase !== "close" && current && (
+          <>
+            <div className="tdb-fsseat" style={{ top: geo.restY }}>
+              {edgesOn && remaining >= 2 && <div className="tdb-fsdeck d2" aria-hidden />}
+              {edgesOn && remaining >= 1 && <div className="tdb-fsdeck d1" aria-hidden />}
               {deal && (
-                <div className={`tdb-ssleave ${deal.kind}${reduce ? " static" : ""}`} aria-hidden>
-                  <div className="tdb-ssheet lv">
+                <div className={`tdb-fsleave ${deal.kind}${reduce ? " static" : ""}`} aria-hidden>
+                  <div className="tdb-fscard lv">
                     <div className={`tdb-band ${deal.card.stream}`}>
                       <span className={`tdb-tag due${deal.card.taskType === "offer_received" ? " offer" : ""}`}>{deal.card.taskType === "offer_received" ? `★ ${deal.card.due}` : deal.card.due}</span>
                     </div>
-                    <div className="tdb-ssheetc">
+                    <div className="tdb-fscardc">
                       <h2>{deal.card.title}</h2>
-                      {deal.card.subtitle && <div className="tdb-ssms2">{deal.card.subtitle}</div>}
+                      {deal.card.subtitle && <div className="tdb-fsms">{deal.card.subtitle}</div>}
                     </div>
                   </div>
                   {deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}
                 </div>
               )}
-            <div className={`tdb-ssheet${rose ? " rise" : ""}`}>
-              <div className={`tdb-band ${current.stream}`}>
-                <span className={`tdb-tag due${isOffer(current) ? " offer" : ""}`}>{isOffer(current) ? `★ ${current.due}` : current.due}</span>
-              </div>
-              <div className="tdb-ssheetc">
-                <h2>{current.title}</h2>
-                {(current.subtitle || current.who) && (
-                  <div className="tdb-ssms2">{[current.subtitle, current.who].filter(Boolean).join(" · ")}</div>
-                )}
-                {standFor(current) && (
-                  <div className="tdb-ssctx"><b>WHERE THIS STANDS</b>{standFor(current)}</div>
-                )}
-                <div className="tdb-ssacts">
-                  <button type="button" className="tdb-ssb bp on" disabled={!!deal} onClick={() => onOpenJourney(current)}>Action now</button>
-                  {canQuickComplete(current) && (
-                    <button type="button" className="tdb-btnh em tdb-ssbig" disabled={!!deal} onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
+              <div ref={bigRef} className={`tdb-fscard${bigOn ? " on" : ""}${rose ? " rise" : ""}`}>
+                <div className={`tdb-band ${current.stream}`}>
+                  <span className={`tdb-tag due${isOffer(current) ? " offer" : ""}`}>{isOffer(current) ? `★ ${current.due}` : current.due}</span>
+                  <span className="tdb-fslane">{lane(current)}</span>
+                </div>
+                <div className="tdb-fscardc">
+                  <h2>{current.title}</h2>
+                  {(current.subtitle || current.who) && (
+                    <div className="tdb-fsms">{[current.subtitle, current.who].filter(Boolean).join(" · ")}</div>
                   )}
-                  <button type="button" className="tdb-btnh tdb-ssbig" disabled={!!deal} onClick={skipCurrent}>Skip for now</button>
+                  {standFor(current) && (
+                    <div className="tdb-ssctx"><b>WHERE THIS STANDS</b>{standFor(current)}</div>
+                  )}
+                  <div className="tdb-ssacts">
+                    <button type="button" className="tdb-ssb bp on" disabled={!!deal} onClick={() => onOpenJourney(current)}>Action now</button>
+                    {canQuickComplete(current) && (
+                      <button type="button" className="tdb-btnh em tdb-ssbig" disabled={!!deal} onClick={() => onQuickComplete(current)}>✓ Mark handled</button>
+                    )}
+                    <button type="button" className="tdb-btnh tdb-ssbig" disabled={!!deal} onClick={skipCurrent}>Skip for now</button>
+                  </div>
                 </div>
               </div>
             </div>
-            </div>
-            {order[index + 1] && (
-              <div className="tdb-ssnext">NEXT UP · <i>{order[index + 1].title}</i></div>
+            {composed && order[index + 1] && (
+              <div className="tdb-ssnext" style={{ top: geo.restY - 26 }}>NEXT UP · <i>{order[index + 1].title}</i></div>
             )}
-          </div>
-        </div>
-      )}
-      {phase === "close" && (
-        // ── session P4: THE CLOSE (frame D) — the bare ground; "Desk cleared." when the
-        // queue emptied, "Good session." on an early exit (same ledger, no guilt copy).
-        // Completed work is already on the board via the shared derivation — the session
-        // holds NO local state that needs syncing (and writes nothing, ever).
-        <div className="tdb-ssroom">
+          </>
+        )}
+        {phase === "close" && (
+          // ── THE CLOSE, IN PLACE (frame D) — the same centre region; the subtitle and the
+          // session line have faded; Back to your desk reassembles the board. The session
+          // holds NO local state needing sync and writes NOTHING.
           <div className="tdb-ssclose">
-            <h1>{order.some((x) => liveKeys.has(x.key)) ? "Good session." : "Desk cleared."}</h1>
+            <h1>{anyLive ? "Good session." : "Desk cleared."}</h1>
             <div className="tdb-ssub">Every box ticked turns the dial in your favour.</div>
             <div className="tdb-sssum">
               <div className="tdb-sssumrow"><span className="tdb-sssd done" aria-hidden>✓</span>Handled<span className="tdb-sssn">{handled.length}</span></div>
@@ -470,14 +446,14 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
               )}
             </div>
             <div className="tdb-ssexits">
-              <button type="button" className="tdb-ssb bp on" onClick={onClose}>Back to your desk</button>
+              <button type="button" className="tdb-ssb bp on" onClick={backToDesk}>Back to your desk</button>
               {(handled.length > 0 || skipped.length > 0) && (
                 <button type="button" className="tdb-btnh tdb-ssbig" onClick={() => setReviewOpen((v) => !v)}>Review what you did</button>
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

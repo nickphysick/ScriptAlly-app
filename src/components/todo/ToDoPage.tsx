@@ -1274,7 +1274,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const isOffer = c.taskType === "offer_received";
     const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
     return (
-      <div key={c.key} className="tdb-lrow" role="button" tabIndex={0}
+      <div key={c.key} data-tdbkey={c.key} className="tdb-lrow" role="button" tabIndex={0}
         onClick={() => openFlowCards([c])}
         onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
         {ledgerDot(c)}
@@ -1301,7 +1301,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function runMemberRow(c: BoardCard) {
     const committed = onList(c);
     return (
-      <div key={c.key} className="tdb-lsub" role="button" tabIndex={0}
+      <div key={c.key} data-tdbkey={c.key} className="tdb-lsub" role="button" tabIndex={0}
         onClick={() => openFlowCards([c])}
         onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
         <div className="tdb-lbody">
@@ -1552,7 +1552,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     // never changes size; the SURFACE (absolute inside it) carries the only border/background/
     // radius/shadow and grows downward over whatever lies beneath — one continuous outline.
     return (
-      <div key={c.key} className={`tdb-cell${gin ? " gin" : ""}`}>
+      <div key={c.key} data-tdbkey={c.key} className={`tdb-cell${gin ? " gin" : ""}`}>
         <div className={`tdb-tile ${c.stream}${hov ? " hov" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`}
           onClick={() => openFlowCards([c])}
           onMouseEnter={() => armVerbs(c.key)} onMouseLeave={disarmVerbs}
