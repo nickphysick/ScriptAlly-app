@@ -1,0 +1,125 @@
+/**
+ * TodoShell — the To-do workspace frame (design-refs/todo-workspace-shell.html, todo-fix48).
+ * Parchment chrome across the sidebar and the breadcrumb bar, joined by matching borders so
+ * they read as one continuous shell. The active-state law is parchment-only (the white card),
+ * never a burgundy fill. Tokens govern the widths, the chrome fill and the collapse tier.
+ */
+.tsh-root {
+  /* the parchment chrome — one fill, one joining border across sidebar + bar */
+  --tsh-chrome: #f2ede7;
+  --tsh-chrome-border: #e4dbcd;
+  --tsh-nav-w: 212px;
+  --tsh-nav-icon-w: 60px;
+  --tsh-collapse: 1100px;
+  /* the white-card active law (NEVER burgundy) */
+  --tsh-active-bg: #fdfcfa;
+  --tsh-active-border: #e0d6c6;
+  --tsh-active-ink: #2f2419;
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--white, #fffdf9);
+}
+
+/* ── the sidebar ── */
+.tsh-nav {
+  width: var(--tsh-nav-w);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  border-right: 1px solid var(--tsh-chrome-border);
+  background: var(--tsh-chrome);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  transition: width 220ms cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.tsh-brand { display: flex; align-items: center; gap: 8px; font-family: var(--f12-serif); font-size: 16px; font-weight: 800; color: #2f2419; padding: 2px 8px 12px; white-space: nowrap; overflow: hidden; }
+.tsh-brandmark { flex: 0 0 auto; }
+.tsh-nk { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.16em; color: #a5988c; padding: 9px 8px 5px; text-transform: uppercase; }
+
+/* nav rows — one grammar for workspace items, filter rows and the foot */
+.tsh-ni {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 34px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0 11px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #4d4238;
+  cursor: pointer;
+  text-align: left;
+}
+.tsh-ni:hover { background: #f6f1ea; }
+.tsh-ic { width: 14px; flex: 0 0 auto; text-align: center; color: #8a7a6d; font-size: 11px; }
+.tsh-nlab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tsh-n { margin-left: auto; font-family: var(--f12-mono); font-size: 9px; color: #a5988c; }
+/* THE ACTIVE-STATE LAW — the soft white card; never a burgundy fill */
+.tsh-ni.on {
+  background: var(--tsh-active-bg);
+  border-color: var(--tsh-active-border);
+  color: var(--tsh-active-ink);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.05);
+}
+.tsh-ni.on:hover { background: var(--tsh-active-bg); }
+
+.tsh-filter { display: flex; flex-direction: column; gap: 2px; }
+.tsh-spacer { margin-top: auto; }
+
+/* ── the main column: the bar + the body ── */
+.tsh-mainwrap { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.tsh-bcbar {
+  flex: 0 0 auto;
+  height: 42px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--tsh-chrome-border);
+  background: var(--tsh-chrome);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+}
+.tsh-bc { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; color: #a5988c; display: inline-flex; align-items: center; }
+.tsh-bcseg { font: inherit; color: #a5988c; cursor: pointer; }
+.tsh-bcseg:hover { color: #5d4037; }
+.tsh-bcsep { margin: 0 6px; color: #c9bba9; }
+.tsh-bc b { color: #2f2419; font-family: var(--f12-serif); font-size: 13px; letter-spacing: 0; font-weight: 800; margin-left: 6px; }
+
+/* the search, a white pill in the bar's right region before the account */
+.tsh-search {
+  margin-left: auto;
+  width: 250px;
+  height: 30px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--tsh-active-border);
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 13px;
+}
+.tsh-search input { flex: 1; min-width: 0; border: none; background: none; outline: none; font-size: 10.5px; color: var(--ink, #2b2118); }
+.tsh-search input::placeholder { color: #a59a8c; }
+.tsh-search .tsh-mag { flex: 0 0 auto; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: #8a7a6d; }
+.tsh-search:focus-within { border-color: #c9bba9; }
+
+.tsh-body { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
+
+/* ── the collapse tier: an icon rail below --tsh-collapse ── */
+@media (max-width: 1099.98px) {
+  .tsh-nav { width: var(--tsh-nav-icon-w); padding: 14px 8px; }
+  .tsh-brandtx, .tsh-nlab, .tsh-n, .tsh-nk { display: none; }
+  .tsh-ni { justify-content: center; padding: 0; gap: 0; }
+  .tsh-ic { width: auto; }
+  .tsh-search { width: 190px; }
+}
+@media (prefers-reduced-motion: reduce) { .tsh-nav { transition: none; } }

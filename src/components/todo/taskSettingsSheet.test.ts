@@ -40,7 +40,7 @@ describe("TaskSettingsSheet — source locks", () => {
     expect(sheet).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
   });
   it("the entry button + the fork doorway both open the sheet", () => {
-    expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}'); // Final Shape: the rail-foot row
+    expect(page).toContain('label: "Task settings", icon: "\u2699", onClick: () => setSettingsOpen(true)'); // the shell foot opens the sheet
     expect(page).toContain("{settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}");
   });
 });

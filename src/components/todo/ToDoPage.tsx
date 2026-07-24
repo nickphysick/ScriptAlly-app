@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { F12Page, F12Account } from "../shell/F12Shell";
+import { TodoShell, TodoNavItem, TodoFootItem } from "../shell/TodoShell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -255,19 +255,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // exactly one mounts and the state never forks (halt (c) clear).
   const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1239.98px)").matches);
   const [todayPopOpen, setTodayPopOpen] = useState(false);
-  // Final Shape P6 — the compact break (<1428): the rail becomes an OVERLAY DRAWER behind the
-  // ⚲ FILTER pill beside the floating search (focus-trapped; Esc/scrim closes).
-  const [compact, setCompact] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1427.98px)").matches);
+  // THE WORKSPACE SHELL (todo-fix48) — the collapse tier: below --tsh-collapse (1100) the
+  // sidebar folds to an icon rail and its FILTER section becomes the ⚲ icon opening the
+  // existing overlay drawer (focus-trapped; Esc/scrim closes). Tokened to match todoShell.css.
+  const [shellCollapsed, setShellCollapsed] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1099.98px)").matches);
 
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1427.98px)");
-    const on = () => setCompact(mq.matches);
+    const mq = window.matchMedia("(max-width: 1099.98px)");
+    const on = () => setShellCollapsed(mq.matches);
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  useEffect(() => { if (!compact) setFilterDrawerOpen(false); }, [compact]);
+  useEffect(() => { if (!shellCollapsed) setFilterDrawerOpen(false); }, [shellCollapsed]);
   // the drawer's focus trap + Esc (P6 a11y): Tab cycles inside the panel; Esc/scrim closes
   useEffect(() => {
     if (!filterDrawerOpen) return;
@@ -793,8 +794,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDraft("");
   }
 
+  // THE WORKSPACE SHELL (todo-fix48) — the sidebar's WORKSPACE nav (routes per railNav, with
+  // derived counts on Queries + To-do) and its foot. There is no CTA and no REVIEW row here.
+  const workspaceNav: TodoNavItem[] = [
+    { key: "dashboard", label: "Dashboard", icon: "⌂", onClick: () => onNavigate("dashboard") },
+    { key: "queries", label: "Queries", icon: "✉", count: liveQueryCount(queries), onClick: () => onNavigate("queries") },
+    { key: "agents", label: "Agents", icon: "♟", onClick: () => onNavigate("agents") },
+    { key: "todo", label: "To-do", icon: "✓", count: boardCards.length, onClick: () => onNavigate("todo") },
+    { key: "packages", label: "Packages", icon: "▧", onClick: () => onNavigate("manuscripts", "Submission packages") },
+  ];
+  const shellFoot: TodoFootItem[] = [
+    { key: "settings", label: "Task settings", icon: "⚙", onClick: () => setSettingsOpen(true) },
+    { key: "help", label: "Help centre", icon: "?", onClick: () => window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")) },
+  ];
+
   return (
-    <F12Page tools={<F12Account onClick={() => onNavigate("account")} />}>
+    <TodoShell
+      workspace={workspaceNav}
+      activeKey="todo"
+      filterSection={renderFilterSection()}
+      foot={shellFoot}
+      crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
+      crumbCurrent="To-do"
+      searchValue={search}
+      onSearchChange={setSearch}
+      searchRef={searchRef}
+      onAccount={() => onNavigate("account")}
+      collapsed={shellCollapsed}
+      onFilterIcon={() => setFilterDrawerOpen(true)}
+    >
       <div className={`tdb-wrap${todayShown ? "" : " today-off"}`} ref={wrapRef}>
         {/* ── the workbench row (Option B, todo-workbench-shell-v1.html): floating drawer
             (sticky, foldable) beside a CENTRED ~1150px content column — max-width discipline at
@@ -807,11 +835,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {renderHero()}
         {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
-          {/* the settlement (sage) — TAB ORDER: search → the sidebar's pair → its pills → the
-              sheet. The sidebar leads in the DOM again, as it sits on the left. */}
-          {renderRail()}
-          {/* ── polish P3: THE CENTRE STACK — three sibling lifted containers, 812 wide,
-              16 apart: the review card · the sheet · the Pro colleague. ── */}
+          {/* THE WORKSPACE SHELL (todo-fix48) — the filters live in the sidebar now; the body
+              is the centre stack (the panel arrives in Phase 2) beside the Today corner. */}
           <div className="tdb-centre">
           {reviewWin && !reviewSeen && !reviewDismissed && (
             <div className="tdb-rvbox">
@@ -969,7 +994,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}
         />
       )}
-    </F12Page>
+    </TodoShell>
   );
 
   // ── State A: the new desk (zero queries AND zero agents) — one welcome card replaces the three
@@ -1021,77 +1046,58 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ⌘K home and live-filters both views; the narrow Today chip rides beside it. ──
   function renderHero() {
     return (
-      <>
-        {/* v4 P1 — the hero sits on the bare page ground: no band, no border, CENTRED; the
-            search stacks directly beneath it. The focused-session button lives in the rail. */}
-        <div className="tdb-hero">
+      // THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle
+      // left, the session CTA pair on the right. The search has moved to the breadcrumb bar.
+      <div className="tdb-herohead">
+        <div className="tdb-herol">
           {/* v7 — the gentle title crossfade (opacity only, 800ms): the stacked pair share the
               line; nothing shifts (the sub-slot below is fixed height). */}
           <h1 className={`tdb-ask t1${heroSession.clearing ? " out" : ""}`}>What’s on your desk?</h1>
           <h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>In focus</h1>
+          {/* the sub-slot below the title: the subtitle at rest → the ritual lines → the v9
+              progress row, one crossfading occupant in a fixed-height band (the spacing law). */}
+          <div className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}>
+            <p className="tdb-herosub">Urgent tasks, housekeeping, and notes. Here’s everything on your to-do list.</p>
+            {heroSession.slot && (() => {
+              const slot = heroSession.slot;
+              return (
+                <div className="tdb-heroslot" aria-live="polite">
+                  {slot.kind === "ritual" ? (
+                    <div className="tdb-fsrit">
+                      {RITUAL_LINES.map((l, i) => (
+                        <span key={l} className={slot.index === i ? "on" : slot.index > i ? "off" : ""}>{l}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    // v9 — the progress treatment (session-v9-header.html V2): a thin ink bar on
+                    // #ddd2c2 with a Playfair fraction beside it. No kicker, no other text.
+                    <div className="tdb-fsprog" aria-label={`Task ${slot.i} of ${slot.n}`}>
+                      <span className="tdb-fsbar" aria-hidden><b style={{ width: `${progressPct(slot.i, slot.n)}%` }} /></span>
+                      <span className="tdb-fsfrac">{slot.i} / {slot.n}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
         </div>
-        {/* hero-pair P1 (todo-hero-pair.html variant B): Begin + the review chip sit centred
-            beneath the search with 24px of clear air; both size to content. The chip renders
-            only in its AFTERLIFE state (opened/dismissed — the banner's complement); Begin
-            re-centres alone otherwise. The pair is hero furniture — it never folds into the
-            rail's compact drawer. */}
-        <div className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}>
-          {/* doc pass P1 — 380px; the ⌘K advert is gone (the shortcut itself still focuses
-              here); the glass grows to a 19px stroke icon in a 34px oat roundel at the right */}
-          <span className="tdb-bigsearch">
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search"
-              aria-label="Search your desk"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-            />
-            <span className="tdb-mag" aria-hidden>
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
-            </span>
-          </span>
-          {/* v7 — the sub-slot's session occupant: the ritual lines during the opening, then the
-              mono session line. It crossfades over the faded search WITHIN the fixed slot. */}
-          {heroSession.slot && (() => {
-            const slot = heroSession.slot;
-            return (
-              <div className="tdb-heroslot" aria-live="polite">
-                {slot.kind === "ritual" ? (
-                  <div className="tdb-fsrit">
-                    {RITUAL_LINES.map((l, i) => (
-                      <span key={l} className={slot.index === i ? "on" : slot.index > i ? "off" : ""}>{l}</span>
-                    ))}
-                  </div>
-                ) : (
-                  // v9 — the progress treatment (session-v9-header.html V2): a thin ink bar on
-                  // #ddd2c2 with a Playfair fraction beside it. No kicker, no other text.
-                  <div className="tdb-fsprog" aria-label={`Task ${slot.i} of ${slot.n}`}>
-                    <span className="tdb-fsbar" aria-hidden><b style={{ width: `${progressPct(slot.i, slot.n)}%` }} /></span>
-                    <span className="tdb-fsfrac">{slot.i} / {slot.n}</span>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-          {compact && (
-            <button type="button" className="tdb-fpillbtn" aria-haspopup="dialog" aria-expanded={filterDrawerOpen} onClick={() => setFilterDrawerOpen((v) => !v)}>
-              ⚲ FILTER · {shownX}/{shownY}
+        {/* the CTA pair: the ink Begin pill with the underlined review link centred beneath it.
+            It unmounts for the session (the opening owns the departure). */}
+        {heroSession.slot?.kind !== "session" && (
+          <div className={`tdb-heroright${heroSession.clearing ? " insession" : ""}`}>
+            <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
+              <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
+              Begin focused session
             </button>
-          )}
-          {narrow && (
-            <span className="tdb-todaypopwrap">
-              <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
-                Today · {committedCards.length} TO GO
+            {reviewWin && (reviewSeen || reviewDismissed) && (
+              <button type="button" className={`tdb-revlink${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
+                <RewindGlyph />
+                Last week in review
               </button>
-              {todayPopOpen && (
-                <div className="tdb-todaypop" role="dialog" aria-label="Today">{renderTodayPanel()}</div>
-              )}
-            </span>
-          )}
-        </div>
-      </>
+            )}
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -1139,36 +1145,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
   // ── hero-pair P1: the toolbelt stack is RETIRED — Begin + the chip live under the hero;
   // the left column begins directly with the filter card. ──
-  function renderFilterCard() {
+  // ── THE WORKSPACE SHELL (todo-fix48) — the FILTER section: the existing quiet-pill filter
+  // rows, carrying ALL their reactive behaviour (facet counts, zero-count dimming, the struck
+  // old totals via fnFace, the active-search chip). The REVIEW & FILTER band, the CTA pair and
+  // the Task-settings row have LEFT this card — the sidebar's FILTER kicker heads it, the pair
+  // lives in the hero, and Task settings + Help ride the sidebar foot. ──
+  function renderFilterSection() {
     return (
       <>
-        <div className="tdb-rsech fc1">REVIEW &amp; FILTER{searchActive && (
-          <button type="button" className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
+        {searchActive && (
+          <button type="button" className="tdb-fq tsh-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
             “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
           </button>
-        )}</div>
-        {/* THE SETTLEMENT (sage) — the pair's seat: stacked full-width at the top of the
-            sidebar's body, Begin first (ink) then the review chip (white), above a hairline
-            with the filter pills unchanged beneath. In session they simply LEAVE WITH THE
-            SIDEBAR — its slide is the only animation; the unmount happens off-screen. */}
-        {heroSession.slot?.kind !== "session" && (
-          <>
-            <div className="tdb-sbpair">
-              <button type="button" className="tdb-btnp sb tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
-                <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
-                Begin focused session
-              </button>
-              {/* hero-pair P2 — unread by WEIGHT, not ornament: unopened = full ink, opened =
-                  muted; the same flags drive it. */}
-              {reviewWin && (reviewSeen || reviewDismissed) && (
-                <button type="button" className={`tdb-rvchip sb${reviewSeen ? " seen" : ""}`} title={`WK ${reviewWin.weekNumber}`} onClick={openReview}>
-                  <RewindGlyph />
-                  Last week in review
-                </button>
-              )}
-            </div>
-            <span className="tdb-sbdiv" aria-hidden />
-          </>
         )}
         {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
             the narrowed meta lives in the sheet's corner line */}
@@ -1186,29 +1174,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <button type="button" className={`tdb-fpill d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
           <span className="tdb-dotc" aria-hidden />Today’s list<span className="tdb-fn">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>
         </button>
-        <div className="tdb-fsfoot">
-          <button type="button" className="tdb-setrow" onClick={() => setSettingsOpen(true)}>
-            <svg className="tdb-cog" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="3.2" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>Task settings
-          </button>
-        </div>
       </>
     );
   }
-  function renderRail() {
-    if (compact) return null; // <1428 the toolbelt lives in the overlay drawer (the ⚲ FILTER pill)
-    return (
-      <aside className="tdb-fside" aria-label="Filters">
-        <div className="tdb-fbox">{renderFilterCard()}</div>
-      </aside>
-    );
-  }
+  // the collapsed icon-rail's filter overlay (< --tsh-collapse): the FILTER section, reused
   function renderFilterDrawer() {
-    if (!compact || !filterDrawerOpen) return null;
+    if (!filterDrawerOpen) return null;
     return (
       <div className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters">
         <div className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)} />
         <div className="tdb-fdpanel" ref={drawerRef}>
-          <div className="tdb-fbox">{renderFilterCard()}</div>
+          <div className="tdb-rsech fc1">FILTER</div>
+          <div className="tdb-fbox">{renderFilterSection()}</div>
         </div>
       </div>
     );

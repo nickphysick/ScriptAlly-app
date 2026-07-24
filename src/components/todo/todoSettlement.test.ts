@@ -95,142 +95,27 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   });
 });
 
-describe("settlement P2 — the search, grown, and the clearance band", () => {
-  it("one step up: 460 × 46, font 13, and the responsive floor kept", () => {
-    const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-search-w: 460px");
-    expect(w).toContain("--tdb-search-h: 46px");
-    const bs = rule(".tdb-bigsearch");
-    expect(bs).toContain("width: var(--tdb-search-w)");
-    expect(bs).toContain("height: var(--tdb-search-h)");
-    expect(bs).toContain("font-size: 13px");
-    expect(bs).toContain("max-width: calc(100vw - 2 * var(--tdb-edge))"); // the floor: it never overruns the gutter
-    expect(rule(".tdb-bigsearch input")).toContain("font-size: 13px");
+describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", () => {
+  // The sage settlement seated the search in the sheet's bar and the CTA pair at the sidebar's
+  // top. The workspace shell moves the search into the breadcrumb bar (a white pill) and the
+  // CTA pair into the hero. These locks re-point to the new seats; the reactive filter
+  // behaviour they used to guard lives on in todoWorkspaceShell.test.ts.
+  it("the search is the shell's bar pill, not a hero/sheet pill", () => {
+    expect(page).toContain("searchValue={search}");
+    expect(page).toContain("searchRef={searchRef}");
+    expect(page).not.toContain("tdb-bigsearch"); // the grown hero pill retired from the JSX (its dead rule is swept in P5)
   });
-  it("the mag roundel scales with it (32px), placement and behaviour unchanged", () => {
-    const m = rule(".tdb-mag");
-    expect(m).toContain("width: 32px");
-    expect(m).toContain("height: 32px");
-    expect(m).toContain("margin-left: auto"); // still the right-hand glass
-    expect(page).toContain('placeholder="Search"');
-    expect(page).toContain("ref={searchRef}"); // ⌘K still lands here
+  it("the CTA pair is in the hero; there is NO CTA in the sidebar", () => {
+    const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    expect(heroFn).toContain("tdb-herobegin");
+    const filterFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
+    expect(filterFn).not.toContain("tdb-herobegin");
+    expect(page).not.toContain("tdb-sbpair"); // the sidebar-seated pair retired
   });
-  it("THE CLEARANCE: ≥40px of clear ground below the pill, as a token, at every tier", () => {
-    expect(rule(".tdb-wrap")).toContain("--tdb-search-clear: 40px");
-    expect(rule(".tdb-srchrow")).toContain("margin: 20px 0 var(--tdb-search-clear)");
-    // it is the ROW's own bottom margin — no child can collapse through it — and NOTHING
-    // redefines it or the token anywhere else in the sheet, so it holds at every width tier
-    expect(css.match(/--tdb-search-clear:/g)!.length).toBe(1);
-    expect(css.match(/\n\.tdb-srchrow \{/g)!.length).toBe(1);
-    expect(css.match(/\.tdb-srchrow\s*\{[^}]*margin:/g)!.length).toBe(1);
-  });
-  it("the band is EMPTY and independent of the head height — the token is its guaranteed floor", () => {
-    // the hero's last child is the search row: nothing (label, chip, shadow) sits in the band
-    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
-    const iSearch = hero.indexOf("tdb-srchrow");
-    expect(hero.slice(iSearch)).not.toContain("tdb-btnp");
-    expect(hero.slice(iSearch)).not.toContain("tdb-rvchip");
-    // the container row adds its own air ABOVE the token's floor; neither is negative, so the
-    // real clear ground is the sum and can never fall below --tdb-search-clear
-    const ws = rule(".tdb-ws");
-    expect(ws).toMatch(/padding: \d+px 0 \d+px/);
-    expect(ws).not.toContain("margin-top: -"); // nothing pulls the containers up into the band
-    // and the band does not move when the header height changes
-    expect(rule(".tdb-srchrow")).not.toContain("--container-head-h");
-  });
-  it("the v9 sub-slot spacing law still holds with the taller pill", () => {
-    const slot = rule(".tdb-srchrow");
-    expect(slot).toContain("min-height: var(--tdb-search-h)"); // the slot tracks the pill exactly
-    expect(slot).toContain("position: relative"); // the single crossfading occupant rides it
-    expect(rule(".tdb-heroslot")).toContain("position: absolute; inset: 0");
-    // the session's region is MEASURED from the row's real bottom, so a taller pill just moves it
-    const ss = readFileSync(join(here, "FocusedSession.tsx"), "utf8");
-    expect(ss).toContain("const region = sessionRegion(sr ? sr.bottom : slotTop + 30, window.innerHeight);");
-  });
-});
-
-describe("settlement P3 — REVIEW & FILTER: the pair at the sidebar's top", () => {
-  const card = page.slice(page.indexOf("function renderFilterCard"), page.indexOf("function renderRail"));
-  it("the sidebar's band retitles to REVIEW & FILTER, on the same sage as the others", () => {
-    expect(card).toContain('<div className="tdb-rsech fc1">REVIEW &amp; FILTER');
-    expect(page).not.toContain('className="tdb-rsech fc1">FILTER');
-    expect(rule(".tdb-rsech")).toContain("background: var(--container-head-bg)");
-  });
-  it("the pair is STACKED full-width at the top of the body: Begin (ink) then review (white)", () => {
-    const iPair = card.indexOf("tdb-sbpair");
-    const iBegin = card.indexOf("tdb-herobegin");
-    const iChip = card.indexOf("tdb-rvchip");
-    const iDiv = card.indexOf("tdb-sbdiv");
-    const iPill = card.indexOf("railPill");
-    expect(iPair).toBeGreaterThan(-1);
-    expect(iBegin).toBeGreaterThan(iPair);
-    expect(iChip).toBeGreaterThan(iBegin); // Begin first, the review chip second
-    expect(iDiv).toBeGreaterThan(iChip); // the hairline closes the seat
-    expect(iPill).toBeGreaterThan(iDiv); // the filter pills follow, unchanged
-    const st = rule(".tdb-sbpair");
-    expect(st).toContain("flex-direction: column");
-    expect(st).toContain("gap: 7px");
-    expect(st).toContain("padding: 11px 9px 4px");
-    const btn = rule(".tdb-btnp.sb, .tdb-rvchip.sb");
-    expect(btn).toContain("width: 100%");
-    expect(btn).toContain("height: var(--tdb-sbpair-h)");
-    expect(btn).toContain("justify-content: center"); // centred labels
-    expect(rule(".tdb-wrap")).toContain("--tdb-sbpair-h: 34px");
-    // the ink primary + white secondary treatments themselves are untouched
-    expect(rule(".tdb-btnp")).toContain("#2a1a13");
-    expect(rule(".tdb-rvchip")).toContain("background: var(--white, #fff)");
-    expect(rule(".tdb-sbdiv")).toContain("height: 1px");
-  });
-  it("the sheet's bar keeps ONLY its Playfair line and the view toggle — no pair, no divider", () => {
-    const bar = page.slice(page.indexOf('className="tdb-dochead"'), page.indexOf('className="tdb-sheetbody"'));
-    expect(bar).toContain("tdb-bartext");
-    expect(bar).toContain("tdb-vseg");
-    expect(bar).not.toContain("tdb-herobegin");
-    expect(bar).not.toContain("tdb-rvchip");
-    expect(bar).not.toContain("tdb-bardiv");
-    expect(rule(".tdb-vseg")).toContain("margin-left: auto"); // it holds the right on its own
-    for (const dead of ["tdb-barvt", "tdb-barpair", "tdb-bardiv", "tdb-bar-collapse"]) {
-      expect(css).not.toContain(dead);
-      expect(page).not.toContain(dead);
-    }
-  });
-  it("the hero is title + search ONLY", () => {
-    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
-    expect(hero).toContain("tdb-ask");
-    expect(hero).toContain("tdb-bigsearch");
-    expect(hero).not.toContain("tdb-herobegin");
-    expect(hero).not.toContain("tdb-rvchip");
-    expect(css).not.toContain(".tdb-heropair");
-  });
-  it("in session the pair leaves WITH THE SIDEBAR — one animation, no orphaned fade", () => {
-    expect(card).toContain('{heroSession.slot?.kind !== "session" && (');
-    // no fade of its own: the sidebar's slide is the whole departure
-    expect(css).not.toContain(".tdb-sbpair.insession");
-    expect(css).not.toContain(".tdb-barpair.insession");
-    const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
-    expect(stage).toContain('export const EXIT_LEFT = ".tdb-fside"'); // the sidebar is the mover
-    expect(stage).not.toContain("tdb-sbpair"); // the pair is not separately choreographed
-  });
-  it("NO WRAP at the narrowest supported width — measured, so no font step is needed", () => {
-    // 248px rail − 18 card inset − 24 pill padding = 206px of label room; the worst-case
-    // label (Begin, 12.5px, with its glyph) measures 133px → 73px of slack. Ellipsis is
-    // forbidden and unreachable; the size stays a token for any future rail width.
-    expect(rule(".tdb-wrap")).toContain("--tdb-rail: 248px");
-    expect(rule(".tdb-wrap")).toContain("--tdb-sbpair-fs: 12.5px");
-    expect(rule(".tdb-btnp.sb, .tdb-rvchip.sb")).toContain("font-size: var(--tdb-sbpair-fs)");
-    expect(rule(".tdb-btnp.sb, .tdb-rvchip.sb")).toContain("white-space: nowrap");
-    expect(rule(".tdb-btnp.sb, .tdb-rvchip.sb")).not.toContain("text-overflow"); // never an ellipsis on a label
-  });
-  it("TAB ORDER: search → the sidebar's pair → its pills → the sheet", () => {
-    // the render helpers are DEFINED below the return, so DOM order is the CALL order
-    const iHero = page.indexOf("{renderHero()}");
-    const iRail = page.indexOf("{renderRail()}");
-    const iSheet = page.indexOf('className="tdb-dochead"');
-    expect(iHero).toBeLessThan(iRail);
-    expect(iRail).toBeLessThan(iSheet);
-    expect(rule(".tdb-fside")).not.toContain("order:"); // the natural order is the right one again
-    // and within the sidebar: the pair precedes the pills
-    expect(card.indexOf("tdb-sbpair")).toBeLessThan(card.indexOf("tdb-sbdiv"));
+  it("the sage 42px header tokens survive for the surfaces that still wear them", () => {
+    // Today's header + the collapsed filter overlay's FILTER band still read the sage source
+    expect(rule(".tdb-wrap")).toContain("--container-head-h: 42px");
+    expect(rule(".tdb-th")).toContain("background: var(--container-head-bg)");
   });
 });
 
@@ -260,13 +145,12 @@ describe("settlement P4 — the sweep", () => {
     expect(css).toContain(".tdb-band"); // the card band grammar
     expect(rule(".tdb-tag")).toContain("background: var(--white)"); // white tag pills
   });
-  it("the tour still lands: Begin's anchor followed the seat into the sidebar", () => {
+  it("the tour still lands: Begin's anchor rode to the hero (the workspace shell)", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".tdb-herobegin"');
-    expect(tour).toContain("the settlement: Begin sits at the SIDEBAR's top");
-    expect(page).toContain('className="tdb-btnp sb tdb-herobegin"'); // the anchor exists at that seat
-    // every other stop's anchor still exists in the board
-    for (const sel of [".tdb-bigsearch", ".tdb-fpill, .tdb-fpillbtn", ".tdb-rvchip", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2, .tdb-todaychip"]) {
+    expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // the anchor exists at that (hero) seat
+    // every other stop's anchor still exists in the board or the shell
+    for (const sel of [".tdb-fpill, .tdb-fpillbtn", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2, .tdb-todaychip"]) {
       expect(tour).toContain(sel);
       for (const one of sel.split(", ")) expect(css).toContain(one);
     }

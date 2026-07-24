@@ -16,19 +16,30 @@ const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "todo.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
+// THE WORKSPACE SHELL (todo-fix48): the sidebar/chrome moved into TodoShell + todoShell.css.
+const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
+const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
 
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
   return m[1];
 };
+const tshRule = (sel: string): string => {
+  const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+  if (!m) throw new Error(`tsh rule not found: ${sel}`);
+  return m[1];
+};
 
 describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares are extinct)", () => {
   it("248px sticky white panel, locked left; the assembly is 1364", () => {
-    expect(rule(".tdb-wrap")).toContain("--tdb-asm: 1364px; --tdb-rail: 248px;");
-    expect(rule(".tdb-fside")).toContain("width: var(--tdb-rail)");
-    expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
-    expect(page).toContain('<aside className="tdb-fside" aria-label="Filters">');
+    // THE WORKSPACE SHELL (todo-fix48): the floating rail is retired — the FILTER rows live
+    // in the always-on parchment sidebar (TodoShell) as its FILTER section.
+    expect(tshRule(".tsh-nav")).toContain("width: var(--tsh-nav-w)");
+    expect(tshRule(".tsh-root")).toContain("--tsh-nav-w: 212px");
+    expect(tsh).toContain('<aside className="tsh-nav"');
+    expect(page).toContain("filterSection={renderFilterSection()}");
+    expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');
   });
   it("SHOW: seven vertical pills in the locked order, 34px rows, dot left + count right, zero 40%", () => {
     for (const call of ['railPill("Offers", "offers", fc.offers, "p")', 'railPill("Agent waiting", "overToYou", fc.overToYou, "p")', 'railPill("Materials", "materials", fc.materials, "lat")', 'railPill("Wish lists", "mswl", fc.mswl, "lat")', 'railPill("Stale", "stale", fc.stale, "lat")', 'railPill("Snoozed", "snoozed", fc.snoozed, "lat")', 'railPill("Notes", "notes", fc.notes, "y")']) {
@@ -63,21 +74,21 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(nar).not.toContain("#7c3a2a");
     expect(page).not.toContain("tdb-frst");
     expect(css).not.toContain("tdb-frst");
-    const sec = page.indexOf('>REVIEW &amp; FILTER{searchActive');
     const sa = page.indexOf("Show all<span");
-    expect(sa).toBeGreaterThan(sec);
-    expect(sa).toBeLessThan(page.indexOf('railPill("Offers"'));
-    expect(page).toContain('>REVIEW &amp; FILTER{searchActive && ('); // the settlement: retitled; the header keeps the query chip
+    expect(sa).toBeLessThan(page.indexOf('railPill("Offers"')); // Show all leads the facets
+    expect(tsh).toContain('<div className="tsh-nk tsh-filterhead" aria-hidden>FILTER</div>'); // the sidebar's FILTER kicker heads the section
+    expect(page).not.toContain("REVIEW &amp; FILTER"); // the band retired with the floating card
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
-    expect(page).toContain('className="tdb-btnp sb tdb-herobegin" disabled={boardCards.length === 0}'); // session P1: Begin launches the cinematic session over the same engine queue
+    expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0}'); // the shell: Begin launches the session over the same engine queue
     expect(page).toContain("onClick={() => setSession({ queue: boardCards })}");
-    expect(rule(".tdb-btnp")).toContain("height: 42px"); // the law's base; the hero seat lifts to 44
-    expect(rule(".tdb-btnp.sb, .tdb-rvchip.sb")).toContain("height: var(--tdb-sbpair-h)"); // the settlement: stacked in the sidebar
-    const panel = page.slice(page.indexOf("function renderFilterCard"), page.indexOf("function renderRail"));
-    expect(panel.indexOf(">REVIEW &amp; FILTER{")).toBeGreaterThan(-1);
-    expect(panel).toContain('className="tdb-setrow"');
-    expect(panel).toContain("tdb-herobegin"); // the settlement: Begin leads the sidebar's body
+    expect(rule(".tdb-btnp")).toContain("height: 42px");
+    // the CTA pair lives in the HERO (right side); there is no CTA in the sidebar
+    const filterFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
+    expect(filterFn).not.toContain("tdb-herobegin");
+    expect(filterFn).not.toContain("Begin focused session");
+    const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    expect(heroFn).toContain("tdb-herobegin");
   });
   it("the lens below a divider; the same state the search composes with", () => {
     expect(page.indexOf('className="tdb-fdivider"')).toBeLessThan(page.indexOf("Today’s list<span"));
@@ -85,8 +96,11 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain("matchesSearch(c, search, sctx)");
   });
   it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
-    expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
-    expect(page).toContain('<svg className="tdb-cog" width="20" height="20"'); // frame P3: the bare cog, no roundel
+    // Task settings + Help centre are the shell FOOT now; the FILTER section carries no setrow
+    expect(page).toContain('{ key: "settings", label: "Task settings", icon: "\u2699", onClick: () => setSettingsOpen(true) }');
+    expect(page).toContain('{ key: "help", label: "Help centre"');
+    const filterFn2 = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
+    expect(filterFn2).not.toContain("tdb-setrow");
     // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
     // names (tdb-prok2 / tdb-progoP) don't false-trip the ban
     for (const stale of [/tdb-prosq/, /tdb-prok(?!2)/, /tdb-progo(?!P)/]) {
@@ -166,7 +180,7 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect(em).toContain("font-weight: 700");
   });
   it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
-    expect(page).toContain('className="tdb-btnp sb tdb-herobegin"'); // Begin (the sidebar's pair)
+    expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // Begin (the hero pair)
     expect((page.match(/className="tdb-btnp sm"/g) ?? []).length).toBe(1); // Work the list (Today)
     expect(page).toContain('className="tdb-btnp sm tdb-rvopen2"'); // Open it › (the review banner)
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(3); // the full ink census — three, nowhere else
@@ -235,10 +249,10 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
 describe("frame P4 — sweep", () => {
   it("the press primitives + the roundel are extinct; the tour's review stop targets the rail row", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    expect(tour).toContain('".tdb-rvchip"'); // toolbelt P3: the chip is the standing home
+    expect(tour).toContain('".tdb-revlink"'); // the workspace shell: the review link in the hero
     expect(tour).not.toContain("tdb-rvbox");
     expect(tour).not.toContain("tdb-rvrow");
-    expect(tour).toContain("or the chip beneath Begin");
+    expect(tour).toContain("beneath Begin");
     expect(page).not.toContain("tdb-cta");
     expect(css).not.toContain("tdb-cta");
     expect(page).not.toContain("tdb-sic");
@@ -373,16 +387,14 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
   });
 });
 
-describe("hero-pair P2 — the white rewind chip", () => {
-  it("white fill, ink text + border, Begin's height/typography; the gap matches the play's seat exactly", () => {
-    const c = rule(".tdb-rvchip");
-    expect(c).toContain("background: var(--white, #fff)");
-    expect(c).toContain("color: #2a1a13");
-    expect(c).toContain("border: 1px solid #1d100c");
-    for (const decl of ["height: 44px", "font-size: 12.5px", "font-weight: 600", "letter-spacing: 0.02em", "gap: 8px"]) {
-      expect(c).toContain(decl);
-    }
-    expect(rule(".tdb-btnp")).toContain("gap: 8px"); // the play's seat — the SAME gap token
+describe("hero-pair P2 — the review is an underlined text link (the shell's .revlink)", () => {
+  it("underlined text, quiet ink, hover darkens text + rule together", () => {
+    const c = rule(".tdb-revlink");
+    expect(c).toContain("border-bottom: 1px solid #c9bcae");
+    expect(c).toContain("color: #5d5245");
+    expect(c).toContain("font-size: 11px");
+    expect(rule(".tdb-revlink:hover")).toContain("color: #2a1a13");
+    expect(rule(".tdb-revlink:hover")).toContain("border-color: #2a1a13");
   });
   it("the ↺ rewind (TypeGlyph grammar, 12px) leads the label; the dot is GONE", () => {
     expect(page).toContain("const RewindGlyph: React.FC<{ size?: number }> = ({ size = 12 }) => (");
@@ -393,45 +405,42 @@ describe("hero-pair P2 — the white rewind chip", () => {
     expect(css).not.toContain("tdb-rvnew");
   });
   it("unread by WEIGHT: unopened = full ink; opened softens glyph + label to muted; the same flags; weekly reset", () => {
-    expect(page).toContain("className={`tdb-rvchip sb${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // the settlement: stacked in the sidebar
-    expect(css).toContain(".tdb-rvchip.seen { color: #6b5a4e; }"); // currentColor carries the glyph with it
+    expect(page).toContain("className={`tdb-revlink${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // the shell: the review link in the hero
+    expect(css).toContain(".tdb-revlink.seen { color: #8a7d6e; }"); // opened softens it
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week resets
   });
 });
 
 describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the hero)", () => {
-  it("Begin + the chip stack at the sidebar's top, full width within the card", () => {
-    const pr = rule(".tdb-sbpair");
-    expect(pr).toContain("display: flex");
-    expect(pr).toContain("flex-direction: column");
-    const sb = page.slice(page.indexOf('className="tdb-sbpair"'), page.indexOf('className="tdb-sbdiv"'));
-    expect(sb).toContain('className="tdb-btnp sb tdb-herobegin"');
-    expect(sb).toContain("className={`tdb-rvchip sb${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, "")); // P2's weight-state template
-    expect(rule(".tdb-btnp.sb, .tdb-rvchip.sb")).toContain("width: 100%"); // full width in the card
-    expect(rule(".tdb-herobegin")).toContain("box-shadow: 0 1px 4px rgba(29, 16, 12, 0.18)");
+  it("Begin (ink) + the review link stack on the hero's right; the pair is hero furniture", () => {
+    const hr = rule(".tdb-heroright");
+    expect(hr).toContain("flex-direction: column");
+    expect(hr).toContain("align-items: center");
+    const right = page.slice(page.indexOf('className={`tdb-heroright'), page.indexOf("// the CTA pair"));
+    const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    expect(heroFn).toContain('className="tdb-btnp tdb-herobegin"');
+    expect(heroFn).toContain("className={`tdb-revlink${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, ""));
   });
-  it("the chip renders ONLY in its afterlife state; Begin re-centres alone otherwise; the appearance fades in", () => {
+  it("the review link renders ONLY in its afterlife state; Begin stands alone otherwise", () => {
     expect(page).toContain("{reviewWin && (reviewSeen || reviewDismissed) && (");
-    expect(css).toContain(".tdb-sbpair .tdb-rvchip { animation: tdbChipIn 200ms ease; }");
-    expect(css).toContain("@keyframes tdbChipIn");
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-sbpair .tdb-rvchip { animation: none; } }");
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
   });
-  it("the toolbelt stack container is REMOVED: the left column begins with the filter card; the drawer matches", () => {
+  it("the FILTER section is ONE source: the sidebar consumes it, the collapsed drawer reuses it", () => {
     expect(page).not.toContain("renderToolbelt");
-    expect(rule(".tdb-fside")).not.toContain("gap");
-    expect((page.match(/<div className="tdb-fbox">\{renderFilterCard\(\)\}<\/div>/g) ?? []).length).toBe(2); // aside + drawer
-    const cardFn = page.slice(page.indexOf("function renderFilterCard"), page.indexOf("function renderRail"));
-    expect(cardFn).toContain("tdb-herobegin"); // the settlement: the pair's seat IS the filter card's top
-    expect(cardFn).toContain("tdb-rvchip"); // the settlement: the review chip seats under Begin at the card's top
+    expect(page).not.toContain("renderRail"); // the floating rail is gone
+    expect(page).toContain("filterSection={renderFilterSection()}"); // the sidebar
+    expect(page).toContain('<div className="tdb-fbox">{renderFilterSection()}</div>'); // the collapsed overlay
+    const cardFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
+    expect(cardFn).not.toContain("tdb-herobegin"); // no CTA in the sidebar
+    expect(cardFn).not.toContain("tdb-setrow"); // Task settings is the shell foot
   });
-  it("the foot: a bare 20px cog + label, same wiring; the roundel selector is gone", () => {
-    expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
+  it("the foot: Task settings + Help centre are the shell's foot rows, same wiring", () => {
+    expect(page).toContain('label: "Task settings", icon: "\u2699", onClick: () => setSettingsOpen(true)');
+    expect(page).toContain('label: "Help centre"');
+    expect(tsh).toContain("{foot.map((f) =>"); // the shell renders them at the sidebar foot
     expect(page).not.toContain("tdb-sic");
-    expect(css).not.toContain("tdb-sic");
-    expect(rule(".tdb-cog")).toContain("flex: 0 0 auto");
   });
 });
 
@@ -503,7 +512,7 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
   });
   it("the FILTER header grows the removable query chip: pink tag law, quoted uppercased term, ✕ clears the search", () => {
     expect(page).toContain("“{search.trim().toUpperCase()}” <span aria-hidden>✕</span>");
-    expect(page).toContain('className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}');
+    expect(page).toContain('className="tdb-fq tsh-fq" aria-label="Clear the search" onClick={() => setSearch("")}'); // the chip rides the sidebar FILTER section
     const q = rule(".tdb-fq");
     expect(q).toContain("color: #7c3a2a");
     expect(q).toContain("background: var(--pink-t)");
@@ -560,7 +569,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
     expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setFilterDrawerOpen(false); return; }');
     expect(page).toContain("if (e.shiftKey && document.activeElement === first)");
     expect(page).toContain('className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)}');
-    expect((page.match(/<div className="tdb-fbox">\{renderFilterCard\(\)\}<\/div>/g) ?? []).length).toBe(2);
+    expect((page.match(/<div className="tdb-fbox">\{renderFilterSection\(\)\}<\/div>/g) ?? []).length).toBe(1); // the collapsed overlay; the sidebar consumes the section via the shell prop
   });
   it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
     expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(1); // the Lane builder (the ledger grew its own washed heading, doc pass P4)
@@ -629,43 +638,32 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
 });
 
 describe("Final Shape P1 — the hero + the floating search", () => {
-  it("v4: the hero is CENTRED on the bare ground — no band, no border, title over search", () => {
-    expect(rule(".tdb-hero")).toContain("text-align: center");
-    expect(rule(".tdb-hero")).not.toContain("background");
-    expect(rule(".tdb-hero")).not.toContain("border");
+  it("THE WORKSPACE SHELL: the hero is title + subtitle left, the CTA pair right (the search moved to the bar)", () => {
     expect(page).toContain('>What’s on your desk?</h1>'); // v7: the crossfade pair (t1/t2)
-    expect(rule(".tdb-ask")).toContain("font-size: 64px"); // polish: 64
-    expect(rule(".tdb-ask")).toContain("letter-spacing: -0.015em");
-    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
-    expect(hero).not.toContain("Begin focused session"); // the settlement: the hero is title + search only
-    expect(hero).not.toContain("tdb-barpair");
+    expect(rule(".tdb-ask")).toContain("font-size: 64px"); // polish: 64 (P2 tunes the scale)
+    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    expect(hero).toContain("tdb-herohead"); // the plain-page hero row
+    expect(hero).toContain("Begin focused session"); // the CTA pair lives here now
+    expect(hero).toContain("Here’s everything on your to-do list."); // the subtitle
+    expect(hero).not.toContain("tdb-bigsearch"); // the search is NOT in the hero
   });
-  it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
-    const sr = rule(".tdb-srchrow");
-    expect(sr).toContain("justify-content: center");
-    expect(sr).toContain("margin: 20px 0 var(--tdb-search-clear)"); // the settlement: the clearance band below
-    const bs = rule(".tdb-bigsearch");
-    expect(bs).toContain("width: var(--tdb-search-w)"); // the settlement: grown to 460
-    expect(bs).toContain("height: var(--tdb-search-h)");
-    expect(page).toContain('placeholder="Search"'); // polish: exactly "Search"
+  it("the search relocated to the breadcrumb bar as a white pill — same state, same ⌘K target", () => {
+    // the pill is the shell's, wired to the page's ONE search state
+    expect(page).toContain("searchValue={search}");
+    expect(page).toContain("onSearchChange={setSearch}");
+    expect(page).toContain("searchRef={searchRef}");
+    expect(tsh).toContain('<span className="tsh-search">');
+    expect(tsh).toContain("value={searchValue}");
+    expect(tshRule(".tsh-search")).toContain("background: #fff");
+    expect(tshRule(".tsh-search")).toContain("border: 1px solid var(--tsh-active-border)");
     expect(page).toContain("matchesSearch(c, search, sctx)");
+    // the hero's old floating-pill selectors are gone
+    expect(page).not.toContain('placeholder="Search"');
+    expect(page).not.toContain('<span className="tdb-mag" aria-hidden>');
   });
-  it("doc pass P1 — the ⌘K ADVERT is gone (the shortcut works on); the 19px glass rides the right-hand oat roundel", () => {
+  it("the ⌘K advert is gone and the shortcut still focuses the (relocated) search", () => {
     expect(page).not.toContain("<kbd aria-hidden>⌘K</kbd>");
-    expect(css).not.toContain(".tdb-bigsearch kbd");
-    // the icon: 19px stroke glass inside the 34px oat roundel, AFTER the input (right end)
-    expect(page).toContain('<span className="tdb-mag" aria-hidden>');
-    expect(page).toContain('<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"');
-    const input = page.indexOf("ref={searchRef}");
-    expect(page.indexOf('className="tdb-mag"')).toBeGreaterThan(input);
-    const mag = rule(".tdb-mag");
-    expect(mag).toContain("width: 32px"); // the settlement: the roundel scales with the grown pill
-    expect(mag).toContain("border-radius: 50%");
-    expect(mag).toContain("background: var(--oat)");
-    expect(mag).toContain("margin-left: auto");
-    // ⌘K still focuses the pill — the handler survives the badge
     expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)');
-    // the reactive rail composes with the same search state, untouched
     expect(page).toContain("const searchActive = search.trim().length > 0;");
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes); Esc chain: search then filters", () => {
@@ -720,7 +718,7 @@ describe("doc pass P6 — sweep", () => {
   });
   it("the reactive rail rode through; the heights hold on the law's primitives (rewritten in frame P2)", () => {
     expect(page).toContain("const searchFc = searchActive");
-    expect(page).toContain('>REVIEW &amp; FILTER{searchActive && (');
+    expect(page).toContain('{searchActive && ('); // the query chip is conditional in renderFilterSection
     expect(rule(".tdb-btnp")).toContain("height: 42px");
     expect(rule(".tdb-btnp.sm")).toContain("height: 34px");
     expect(rule(".tdb-btnh")).toContain("height: 34px");
@@ -974,9 +972,8 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
 
 describe("II·B P3 — the companion rail (one panel, two mounts, one state)", () => {
   it("mount parity: BOTH homes call the SAME renderTodayPanel, XOR'd on narrow (no fork — halt (c) clear)", () => {
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2);
-    expect(page).toContain('"Today", ALWAYS ON'); // VI P1: the column is unconditional ≥1200
-    expect(page).toContain("{narrow && (");
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // the wide aside; the narrow chip retired — the corner pop-up arrives in Shell P3
+    expect(page).toContain('"Today", ALWAYS ON'); // the column is unconditional ≥1200
     expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
@@ -985,14 +982,14 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
     expect(page.indexOf('className="tdb-mainc"')).toBeLessThan(page.indexOf('tdb-railr${todayLeaving'));
   });
   it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
-    expect(page).toContain("Today · {committedCards.length} TO GO");
+    expect(page).not.toContain("Today · {committedCards.length} TO GO"); // the hero chip retired — search owns the bar
     expect(page).toContain("`${committedCards.length} OF ${MAX_TODAY}`"); // VI P1: the header's count face
   });
-  it("popover a11y: dialog role, aria-expanded on the chip, Esc + click-away close, reduced-motion honoured", () => {
-    expect(page).toContain('aria-haspopup="dialog" aria-expanded={todayPopOpen}');
-    expect(page).toContain('<div className="tdb-todaypop" role="dialog" aria-label="Today">');
+  it("the hero's narrow Today chip is retired (Shell P3 rebuilds Today as the corner pop-up)", () => {
+    // the search-row chip left with the search's move to the bar; the popover machinery (state,
+    // Esc, click-away, reduced-motion) survives for the corner form the next phase mounts
+    expect(page).not.toContain('aria-haspopup="dialog" aria-expanded={todayPopOpen}');
     expect(page).toContain('if (e.key === "Escape") setTodayPopOpen(false);');
-    expect(page).toContain('t.closest(".tdb-todaypop") || t.closest(".tdb-todaychip")');
     expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }");
   });
   it("the breakpoint belt: the column hides <1240 in CSS too; narrow closes the popover on widen", () => {
@@ -1105,13 +1102,14 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("BREAKPOINTS (P6 final): <1428 the rail is an overlay drawer behind ⚲ FILTER beside the search; <1240 the Today popover", () => {
-    expect(page).toContain('window.matchMedia("(max-width: 1427.98px)")');
-    expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }");
-    expect(page).toContain("⚲ FILTER · {shownX}/{shownY}"); // (multi-line JSX — no leading >)
+  it("BREAKPOINTS: < --tsh-collapse the sidebar folds to an icon rail whose ⚲ opens the filter overlay", () => {
+    expect(page).toContain('window.matchMedia("(max-width: 1099.98px)")'); // the shell collapse tier
+    expect(tshCss).toContain("@media (max-width: 1099.98px) {"); // the icon-rail tier
+    expect(tsh).toContain('onFilterIcon'); // the folded FILTER icon opens the overlay
+    expect(page).toContain("onFilterIcon={() => setFilterDrawerOpen(true)}");
     expect(page).toContain('className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters"');
-    expect(page).toContain('<div className="tdb-fbox">{renderFilterCard()}</div>');
-    expect((page.match(/<div className="tdb-fbox">\{renderFilterCard\(\)\}<\/div>/g) ?? []).length).toBe(2); // aside + drawer, one panel
+    expect(page).toContain('<div className="tdb-fbox">{renderFilterSection()}</div>');
+    expect((page.match(/<div className="tdb-fbox">\{renderFilterSection\(\)\}<\/div>/g) ?? []).length).toBe(1); // the collapsed overlay only
     expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
     expect(page).not.toContain("tdb-ric"); // the icon rail is extinct
   });
@@ -1142,7 +1140,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     // render, which the root ErrorBoundary turns into an app-wide "Something went wrong"
     // (ToDoPage is a persistent slot on every workspace route). Bit twice: openSundayReview
     // (4d4fbed) and GHOST_BARS (this lock's trigger). Pure gates can't see it — this scan can.
-    const ret = page.indexOf("return (\n    <F12Page");
+    const ret = page.indexOf("return (\n    <TodoShell");
     expect(ret).toBeGreaterThan(0);
     const deadZone = page.slice(ret);
     expect(deadZone).not.toMatch(/^  (const|let) /m);
@@ -1208,7 +1206,7 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
     expect(css).not.toContain("tdb-reelpg");
   });
   it("ONE help entry point: the AppShell FAB (menu on /todo) — none on the page itself", () => {
-    for (const stale of ["tdb-dhelp", "helpOpen", "Help centre", "Replay the tour"]) {
+    for (const stale of ["tdb-dhelp", "helpOpen", "Replay the tour"]) { // Help centre is now the shell foot's label — a valid page string
       expect(page).not.toContain(stale);
     }
     expect(page).toContain('window.addEventListener("sa:todo-replay-tour"'); // the board still listens
@@ -1240,7 +1238,7 @@ describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
 
 describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
   it("VI P1: ONE face — the column is always mounted ≥1200; the tab, drawer and empty-rail state are extinct", () => {
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2); // column + narrow popover — never a third copy
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // the wide aside; the corner pop-up arrives in Shell P3
     for (const stale of ["tdb-ttab", "emptyRailOpen", "sa.todoRail"]) {
       expect(page).not.toContain(stale);
       expect(css).not.toContain(stale);

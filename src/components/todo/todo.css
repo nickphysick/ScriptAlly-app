@@ -45,15 +45,23 @@
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
 .tdb-hero { padding: 40px 0 0; text-align: center; position: relative; }
+/* ── THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle
+   left, the session CTA pair on the right. The search lives in the breadcrumb bar now. ── */
+.tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 4px 2px 0; }
+.tdb-herol { min-width: 0; text-align: left; }
+.tdb-herosub { font-size: 11px; color: #8a7d6e; margin-top: 4px; }
+.tdb-heroright { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 9px; flex: 0 0 auto; }
+.tdb-heroright.insession { opacity: 0; pointer-events: none; transition: opacity 400ms; }
+/* the review is an underlined text LINK now (the ref's .revlink), not a chip — hover darkens
+   the text and the rule together (currentColor carries the rewind glyph with them). */
+.tdb-revlink { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #5d5245; border-bottom: 1px solid #c9bcae; padding-bottom: 2px; cursor: pointer; }
+.tdb-revlink:hover { color: #2a1a13; border-color: #2a1a13; }
+.tdb-revlink.seen { color: #8a7d6e; }
 /* v7 — the sub-slot: fixed height so nothing below shifts and nothing overlaps; hosts exactly
-   ONE occupant at a time — the search at rest → the ritual lines → the mono session line —
-   crossfading within it. ≥10px even gaps above/below. */
-/* THE SETTLEMENT — the clearance law: a minimum --tdb-search-clear of clear ground between
-   the search pill's bottom edge and the top of the container row. It is a real bottom
-   margin on the row (not a child's), so nothing occupies it and no sibling's collapsed
-   margin can eat it; it holds at every width tier and survived the pair leaving the hero. */
-.tdb-srchrow { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 20px 0 var(--tdb-search-clear); min-height: var(--tdb-search-h); position: relative; z-index: 6; }
-.tdb-srchrow.insession .tdb-bigsearch, .tdb-srchrow.insession .tdb-fpillbtn, .tdb-srchrow.insession .tdb-todaypopwrap { opacity: 0; pointer-events: none; transition: opacity 400ms; }
+   ONE occupant at a time — the subtitle at rest → the ritual lines → the v9 progress row —
+   crossfading within it. The clearance below still holds (--tdb-search-clear). */
+.tdb-srchrow { display: flex; align-items: center; margin: 8px 0 0; min-height: var(--tdb-search-h); position: relative; }
+.tdb-srchrow.insession .tdb-herosub { opacity: 0; pointer-events: none; transition: opacity 400ms; }
 .tdb-heroslot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; animation: tdbSesIn 400ms ease; }
 /* ── THE SETTLEMENT (sage, final) — the pair's seat: the TOP OF THE SIDEBAR's body, under the
    REVIEW & FILTER band. Stacked full-width within the card, Begin first (ink primary) then the

@@ -24,14 +24,14 @@ export interface TourStop {
 
 export const TOUR_STOPS: TourStop[] = [
   {
-    sel: ".tdb-herobegin",  // the settlement: Begin sits at the SIDEBAR's top, over the filter pills
+    sel: ".tdb-herobegin",  // the workspace shell: Begin sits on the hero's right, over the subtitle
     h: "Say go, any time.",
     p: "Begin a focused session — it walks your whole desk for you, one sheet at a time, no distractions.",
     cta: "Next →",
   },
   {
-    sel: ".tdb-bigsearch",
-    h: "Search floats above it all.",
+    sel: ".tsh-search",  // the workspace shell: the search is a white pill in the breadcrumb bar
+    h: "Search from the bar.",
     p: "One pill for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",
     cta: "Next →",
   },
@@ -43,8 +43,8 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // toolbelt P3: the free-standing chip beneath Begin is the standing home
-    sel: ".tdb-rvchip",
+    // the workspace shell: the review is the underlined link beneath Begin in the hero
+    sel: ".tdb-revlink",
     h: "Your week, reviewed.",
     p: "Every box ticked turns the dial in your favour \u2014 open it from the banner, or the chip beneath Begin.",
     cta: "Next →",

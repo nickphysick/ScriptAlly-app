@@ -12,9 +12,9 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
   it("is exactly the six stops in order: hero → search → pills → review card → a card → Today", () => {
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
       ".tdb-herobegin",
-      ".tdb-bigsearch",
+      ".tsh-search",
       ".tdb-fpill, .tdb-fpillbtn",
-      ".tdb-rvchip",
+      ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       ".tdb-today2, .tdb-todaychip",
     ]);
@@ -24,7 +24,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
   it("copy snapshot", () => {
     expect(TOUR_STOPS.map((s) => s.h)).toEqual([
       "Say go, any time.",
-      "Search floats above it all.",
+      "Search from the bar.",
       "Narrow the desk.",
       "Your week, reviewed.",
       "Every card works the same.",

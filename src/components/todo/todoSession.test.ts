@@ -43,9 +43,9 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
   });
   it("the spacing law: the hero is a stacked flow — the sub-slot is FIXED HEIGHT with even gaps; no absolute over the board", () => {
     const slot = rule(".tdb-srchrow");
-    expect(slot).toContain("min-height: var(--tdb-search-h)"); // the slot tracks the pill; it never collapses when the search leaves
+    expect(slot).toContain("min-height: var(--tdb-search-h)"); // the sub-slot is fixed-height; it never collapses when its occupant swaps
     expect(slot).toContain("align-items: center");
-    expect(slot).toContain("margin: 20px 0 var(--tdb-search-clear)"); // the settlement: the clearance band below
+    expect(slot).toContain("position: relative"); // the single crossfading occupant rides it
     // the ONE intended overlap is the title crossfade pair; the sub-slot content is a real child
     expect(page).toContain('className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}');
     expect(page).not.toContain("style={{ top: geo.subTop }}"); // the v6 measured overlay is gone
@@ -55,7 +55,7 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
   });
   it("the sub-slot hosts EXACTLY ONE occupant: search at rest → ritual → the progress row (v9); the search fades in session", () => {
     expect(page).toContain('<div className="tdb-heroslot" aria-live="polite">');
-    expect(css).toContain(".tdb-srchrow.insession .tdb-bigsearch"); // the search fades within the slot
+    expect(css).toContain(".tdb-srchrow.insession .tdb-herosub"); // the subtitle fades within the slot; the ritual/progress crossfade over it
     expect(rule(".tdb-heroslot")).toContain("position: absolute; inset: 0");
     expect(page).toContain('<span className="tdb-fsfrac">{slot.i} / {slot.n}</span>');
     expect(page).not.toContain("FOCUSED SESSION · TASK"); // the prefix + the subtitle are dropped in v7
@@ -279,13 +279,12 @@ describe("v9 P1 — THE FRAME: the bar exempt · the pair out · In focus + prog
   });
   it("the Begin/review pair and the search LEAVE for the session and return with the exit", () => {
     expect(page).toContain('{heroSession.slot?.kind !== "session" && (');
-    // the settlement: the pair's seat moved to the sheet's bar — the same fade-then-unmount
-    // the settlement (sage): the pair's seat is the SIDEBAR's top — it leaves with its
-    // container's slide (one animation, not two) and the unmount lands off-screen
+    // the workspace shell: the pair is the hero's right cluster — it fades out for the session
+    // (the .insession state) and returns on exit; the subtitle fades within the sub-slot
     expect(page).toContain('{heroSession.slot?.kind !== "session" && (');
-    expect(page).toContain('<div className="tdb-sbpair">');
-    expect(css).not.toContain(".tdb-sbpair.insession");
-    expect(css).toContain(".tdb-srchrow.insession .tdb-bigsearch"); // the search still fades in its slot
+    expect(page).toContain('className={`tdb-heroright${heroSession.clearing ? " insession" : ""}`}');
+    expect(css).toContain(".tdb-heroright.insession");
+    expect(css).toContain(".tdb-srchrow.insession .tdb-herosub"); // the subtitle still fades in its slot
   });
   it("the title is 'In focus' — 'Clearing the desk' is replaced, both directions still crossfade", () => {
     expect(page).toContain(">In focus</h1>");
@@ -499,7 +498,7 @@ describe("v9 P5 — the supersession sweep", () => {
   it("the tour's targets survive the session (nothing it points at moved)", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('.tdb-herobegin'); // still the hero pair's play button, at rest
-    for (const sel of [".tdb-bigsearch", ".tdb-rvchip"]) expect(tour).toContain(sel);
+    for (const sel of [".tsh-search", ".tdb-herobegin"]) expect(tour).toContain(sel);
     expect(tour).not.toContain("tdb-fsexit"); // the session's own controls are not tour steps
   });
 });
