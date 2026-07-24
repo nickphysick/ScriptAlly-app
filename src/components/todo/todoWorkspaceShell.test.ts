@@ -216,8 +216,9 @@ describe("shell P2 — the panel + proportions", () => {
   it("the spacing tokens: 26px hero→panel gap, ~40px workspace gutter", () => {
     expect(cssRule(".tdb-wrap")).toContain("--tdb-hero-gap: 26px");
     expect(cssRule(".tdb-centre")).toContain("gap: var(--tdb-hero-gap)");
-    expect(cssRule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 26px");
-    expect(cssRule(".tdb-wrap")).toContain("--tdb-edge: 40px");
+    expect(cssRule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 0");
+    // SHELL POLISH P1: the workspace gutter is the centred column's, not the wrap's edge
+    expect(cssRule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
   });
   it("the pastille card bands are byte-untouched (the shell reframes, it does not retint)", () => {
     // the family band tokens + the card grammar stand exactly as deployed

@@ -805,14 +805,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       onFilterIcon={() => setFilterDrawerOpen(true)}
     >
       <div className="tdb-wrap today-off" ref={wrapRef}>
-        {/* ── the workbench row (Option B, todo-workbench-shell-v1.html): floating drawer
-            (sticky, foldable) beside a CENTRED ~1150px content column — max-width discipline at
-            every viewport, surplus pools as symmetric desk. The old full-bleed header band +
-            .tdb-ribbon are RETIRED (the masthead is recomposed inside the column); Walk me
-            through lives in the drawer now. ── */}
-        {/* ── Final Shape P1: THE HERO — two objects only (Playfair 42 headline · ink Begin
-            focused session), paper full-bleed, contents locked to the assembly — and THE
-            FLOATING SEARCH breaking the hero's bottom edge by half its height. ── */}
+        {/* SHELL POLISH P1 — THE CENTRED COLUMN: the hero row and the panel live on ONE
+            max-width column (~1360px), centred with equal side gutters that grow with the
+            viewport. The title sits flush with the panel's left edge, the CTA/review pair flush
+            with its right — one column, one pair of edges. A ≥44px gap sits under the bar. */}
+        <div className="tdb-col">
         {renderHero()}
         {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
@@ -929,6 +926,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             )}
           </div>
           </div>
+        </div>
         </div>
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
             bottom-right of the workspace, minimising to a pill; absent when the list is empty. */}

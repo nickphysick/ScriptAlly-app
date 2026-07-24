@@ -21,19 +21,23 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
 /* the workspace shell: the hero→panel gap is the row's top padding; the wrap's --tdb-edge
    gutter keeps the content off the workspace edges (nothing touches). */
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: var(--tdb-hero-gap) 0 26px; } /* the assembly work row */
+/* SHELL POLISH P1 — the centred max-width column: the hero + the panel share ONE column
+   and ONE pair of edges. The ≥44px chrome gap is its top padding; the equal side gutters
+   grow with the viewport (margin-inline auto past the cap). */
+.tdb-col { max-width: var(--tdb-col-max); margin-inline: auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: var(--tdb-hero-gap) 0 0; } /* the hero→panel gap */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
 /* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),
    812 wide, 16 apart. The stack owns the width token + the 220ms Today transition; each
    container fills it. */
-.tdb-centre { width: var(--tdb-sheet); flex: 0 0 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); transition: width 220ms ease; }
+.tdb-centre { width: 100%; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); }
 /* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: one thin warm-grey bordered container
    wrapping the items row, both card sections and the colophon. */
 .tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--tdb-panel-bd); border-radius: var(--tdb-panel-r); padding: var(--tdb-panel-pad); }
@@ -52,7 +56,7 @@
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
 /* ── THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle
    left, the session CTA pair on the right. The search lives in the breadcrumb bar now. ── */
-.tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 4px 2px 0; }
+.tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 0; }
 .tdb-herol { min-width: 0; text-align: left; position: relative; }
 .tdb-herosub { font-size: 11px; color: #8a7d6e; margin-top: 4px; }
 .tdb-heroright { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 9px; flex: 0 0 auto; }

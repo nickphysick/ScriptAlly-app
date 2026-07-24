@@ -460,13 +460,13 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
     expect(rule(".tdb-wrap")).toContain("--tdb-cardw: 250px"); // ONE card width for every cell at every tier
   });
   it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
-    const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-edge: 40px;"); // the workspace shell: ~40px workspace gutter
-    expect(w).toContain("padding: 0 var(--tdb-edge) 48px");
+    // SHELL POLISH P1: the gutters moved to the centred column; the wrap is the bare scroller
+    expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
+    expect(rule(".tdb-col")).toContain("max-width: var(--tdb-col-max)");
+    expect(rule(".tdb-col")).toContain("margin-inline: auto");
   });
   it("the transition branch: the tier steps ride the SAME 220ms width mechanics as the Today mount; reduced motion instant", () => {
     expect(rule(".tdb-asm")).toContain("transition: width 220ms ease");
-    expect(rule(".tdb-centre")).toContain("transition: width 220ms ease");
     expect(css).toContain(".tdb-asm, .tdb-centre { transition: none; }");
     // the run sheet consumes the same widths: both views render inside .tdb-mainc (width 100% of the stack)
     expect(rule(".tdb-mainc")).toContain("width: 100%");
@@ -535,7 +535,7 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }");
     expect(css).toContain(".tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
     expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))");
-    expect(rule(".tdb-centre")).toContain("transition: width 220ms ease"); // the stack carries the Today width step
+    expect(rule(".tdb-asm")).toContain("transition: width 220ms ease"); // the assembly carries the width step
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
     expect(css).toContain(".tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }");
@@ -609,7 +609,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(mainc).toBeGreaterThan(box);
     expect(banner).toBeGreaterThan(body); // the colophon moved INSIDE the panel, after the body
     const c = rule(".tdb-centre");
-    expect(c).toContain("width: var(--tdb-sheet)");
+    expect(c).toContain("width: 100%"); // SHELL POLISH P1: the panel fills the centred column
     expect(c).toContain("flex-direction: column");
     expect(c).toContain("gap: var(--tdb-hero-gap)"); // the 26px hero→panel gap
     expect(rule(".tdb-mainc")).toContain("width: 100%");
@@ -950,7 +950,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 26px"); // the workspace shell: the hero→panel gap
+    expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 0"); // the hero→panel gap (the column owns the outer gutters)
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
     expect(rule(".tdb-grid")).toContain("gap: var(--g12)"); // P4: the grid is the card-gutter consumer
