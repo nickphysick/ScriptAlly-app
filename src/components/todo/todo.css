@@ -58,7 +58,8 @@
    left, the session CTA pair on the right. The search lives in the breadcrumb bar now. ── */
 .tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 0; }
 .tdb-herol { min-width: 0; text-align: left; position: relative; }
-.tdb-herosub { font-size: 11px; color: #8a7d6e; margin-top: 4px; }
+/* SHELL POLISH P2 — the subtitle: Playfair 17, regular, warm grey, tight to the title */
+.tdb-herosub { font-family: var(--f12-serif); font-size: 17px; font-weight: 400; color: #7a6a5e; margin-top: 6px; }
 .tdb-heroright { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 9px; flex: 0 0 auto; }
 .tdb-heroright.insession { opacity: 0; pointer-events: none; transition: opacity 400ms; }
 /* the review is an underlined text LINK now (the ref's .revlink), not a chip — hover darkens

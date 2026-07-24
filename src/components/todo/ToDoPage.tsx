@@ -1029,7 +1029,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* the sub-slot below the title: the subtitle at rest → the ritual lines → the v9
               progress row, one crossfading occupant in a fixed-height band (the spacing law). */}
           <div className={`tdb-srchrow${heroSession.slot ? " insession" : ""}`}>
-            <p className="tdb-herosub">Urgent tasks, housekeeping, and notes. Here’s everything on your to-do list.</p>
+            <p className="tdb-herosub">Urgent tasks, housekeeping, notes. Here’s everything on your to-do list.</p>
             {heroSession.slot && (() => {
               const slot = heroSession.slot;
               return (

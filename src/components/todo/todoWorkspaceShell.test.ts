@@ -163,10 +163,10 @@ describe("shell P2 — the hero: plain on the page, the CTA-over-link pair", () 
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
     expect(hero).toContain("tdb-herohead");
     expect(hero).toContain(">What’s on your desk?</h1>");
-    expect(hero).toContain("Urgent tasks, housekeeping, and notes. Here’s everything on your to-do list.");
+    expect(hero).toContain("Urgent tasks, housekeeping, notes. Here’s everything on your to-do list."); // P2: "and notes" → "notes"
     expect(cssRule(".tdb-herohead")).toContain("display: flex");
     expect(cssRule(".tdb-ask")).toContain("font-size: 33px"); // the ref's ~33px
-    expect(cssRule(".tdb-herosub")).toContain("color: #8a7d6e"); // the quiet grey subtitle
+    expect(cssRule(".tdb-herosub")).toContain("color: #7a6a5e"); // P2: the warm-grey Playfair subtitle
   });
   it("the CTA pair: the ink Begin pill with the underlined review link beneath it (rewind via TypeGlyph)", () => {
     const right = cssRule(".tdb-heroright");

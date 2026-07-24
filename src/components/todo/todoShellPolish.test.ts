@@ -51,3 +51,18 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
     expect(rule(".tdb-wrap")).not.toContain("padding: 0 var(--tdb-edge)");
   });
 });
+
+describe("shell polish P2 — the subtitle", () => {
+  it("Playfair 17, regular, warm grey #7a6a5e, ~6px under the title", () => {
+    const sub = rule(".tdb-herosub");
+    expect(sub).toContain("font-family: var(--f12-serif)");
+    expect(sub).toContain("font-size: 17px");
+    expect(sub).toContain("font-weight: 400");
+    expect(sub).toContain("color: #7a6a5e");
+    expect(sub).toContain("margin-top: 6px");
+  });
+  it("the copy: 'and notes' becomes 'notes' (exact string)", () => {
+    expect(page).toContain("Urgent tasks, housekeeping, notes. Here’s everything on your to-do list.");
+    expect(page).not.toContain("housekeeping, and notes");
+  });
+});
