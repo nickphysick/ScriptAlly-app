@@ -64,14 +64,18 @@ describe("the gather's spine", () => {
     expect(GATHER.sessionCardW).toBe(500);
   });
   it("the exit selectors: sidebars slide, chrome fades, the bar exits up, the sheet dissolves; nothing nests", () => {
-    expect(EXIT_LEFT).toBe(".tdb-fside");
-    expect(EXIT_RIGHT).toBe(".tdb-railr");
-    expect(EXIT_FADE).not.toContain(".tdb-bigsearch"); // v7: the HERO owns the search/pair crossfade
+    // the workspace shell (todo-fix48): the sidebar exits via the shell's `.tsh-clearing` class
+    // (it names the sidebar for intent); the Today corner + the hero pair/subtitle exit in-wrap
+    expect(EXIT_LEFT).toBe(".tsh-nav");
+    expect(EXIT_RIGHT).toBe(".tdb-tdpop, .tdb-tdpill"); // the Today corner leaves
+    expect(EXIT_FADE).not.toContain(".tdb-bigsearch"); // the search moved to the bar
+    expect(EXIT_FADE).toContain(".tdb-heroright"); // the CTA pair fades
+    expect(EXIT_FADE).toContain(".tdb-herosub"); // the subtitle fades (the progress row takes its slot)
     expect(EXIT_FADE).toContain(".tdb-lh2");
-    expect(EXIT_BAR).toBe(".tdb-dochead");
-    expect(DISSOLVE).toBe(".tdb-mainc, .tdb-lsec");
+    expect(EXIT_BAR).toBe(".tdb-dochead"); // the panel's items row
+    expect(DISSOLVE).toBe(".tdb-mainc, .tdb-lsec"); // the panel dissolves
     // the gatherables are the items, never their dissolving containers
-    for (const shell of [".tdb-mainc", ".tdb-lsec", ".tdb-fside", ".tdb-railr", ".tdb-wrap"]) {
+    for (const shell of [".tdb-mainc", ".tdb-lsec", ".tsh-nav", ".tdb-tdpop", ".tdb-wrap"]) {
       expect(GATHER_SELECTOR.split(", ")).not.toContain(shell);
     }
     expect(GATHER_SELECTOR).toContain(".tdb-cell");

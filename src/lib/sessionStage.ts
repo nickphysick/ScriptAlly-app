@@ -113,11 +113,15 @@ export const GATHER = {
 } as const;
 
 /** The exit choreography's selectors (the board transforms; the chrome + title stay). */
-export const EXIT_LEFT = ".tdb-fside"; // the filter card slides off left
-export const EXIT_RIGHT = ".tdb-railr"; // Today slides off right
-export const EXIT_FADE = ".tdb-rvbox, .tdb-colo, .tdb-lh2, .tdb-lsech"; // the centre's free cards + the headings fade (v7: the HERO owns the search/pair crossfade — see ToDoPage renderHero)
-export const EXIT_BAR = ".tdb-dochead"; // the document bar slides up and out
-export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // white/border/shadow dissolve; the items float
+// THE WORKSPACE SHELL (todo-fix48) — the opening's furniture exit. The SIDEBAR + the bar
+// SEARCH are chrome OUTSIDE the session's wrapEl, so they exit via the shell's own
+// `.tsh-clearing` class (toggled from the session state) — EXIT_LEFT names the sidebar for
+// intent, the class does the slide. Everything else is IN-WRAP and exits here.
+export const EXIT_LEFT = ".tsh-nav"; // the nav sidebar slides off left (via the shell class)
+export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"; // the Today corner leaves
+export const EXIT_FADE = ".tdb-rvbox, .tdb-heroright, .tdb-herosub, .tdb-lh2, .tdb-lsech"; // the review banner, the hero pair + subtitle, the section headings fade
+export const EXIT_BAR = ".tdb-dochead"; // the panel's items row slides up and out
+export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // the panel's border + contents dissolve; the items float
 /** The gatherable items — cards, group bars, or ledger rows, whichever view is up. */
 export const GATHER_SELECTOR = ".tdb-cell, .tdb-gbar, .tdb-gpage, .tdb-lrow, .tdb-lsub, .tdb-lpage, .tdb-laddrow";
 

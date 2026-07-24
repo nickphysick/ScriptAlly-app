@@ -270,3 +270,47 @@ describe("shell P3 — Today, back in its corner", () => {
     expect(cssRule(".tdb-toast")).toContain("z-index: 60");
   });
 });
+
+describe("shell P4 — the session, rewired to the shell", () => {
+  const ss = readFileSync(join(here, "FocusedSession.tsx"), "utf8");
+  const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
+  const pageCss = readFileSync(join(here, "todo.css"), "utf8");
+  it("the engine/templates/carriage/close/quiet-line are UNCHANGED — only the choreography retargets", () => {
+    expect(ss).toContain('const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");');
+    expect(ss).toContain("function goPrevious()"); // the carriage
+    expect(ss).toContain(">END SESSION</button>"); // the quiet-line exit
+    expect(ss).toContain("function backToDesk()"); // the reverse
+  });
+  it("the opening: the sidebar slides off left + the search fades via the shell class", () => {
+    expect(page).toContain("clearing={heroSession.clearing}"); // driven by the session state
+    expect(tsh).toContain('${clearing ? " tsh-clearing" : ""}');
+    expect(tshCss).toContain(".tsh-clearing .tsh-nav { transform: translateX(-100%); opacity: 0; }");
+    expect(tshCss).toContain(".tsh-clearing .tsh-search { opacity: 0; pointer-events: none; }");
+    // EXIT_LEFT names the sidebar for intent; the in-wrap furniture exits through the gather
+    expect(stage).toContain('export const EXIT_LEFT = ".tsh-nav"');
+    expect(stage).toContain('export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"'); // Today leaves
+  });
+  it("the bcbar STAYS (v9's app-bar exemption) — only its search fades", () => {
+    // the curtains still begin at the measured board top (below the bcbar)
+    expect(ss).toContain("const barBottom = Math.max(0, wrapEl?.getBoundingClientRect().top ?? 0);");
+    // the bcbar has no clearing rule — it is not slid or faded
+    expect(tshCss).not.toContain(".tsh-clearing .tsh-bcbar");
+  });
+  it("the session hero: title crossfades in place, the subtitle fades, the progress row takes its slot", () => {
+    expect(page).toContain(">What’s on your desk?</h1>");
+    expect(page).toContain(">In focus</h1>");
+    expect(pageCss).toContain(".tdb-srchrow.insession .tdb-herosub"); // the subtitle fades
+    expect(page).toContain('<div className="tdb-fsprog"'); // the progress row renders where the subtitle stood
+    // the ≥48px clear-band law still governs (the region is measured from the sub-slot bottom)
+    expect(ss).toContain("const region = sessionRegion(sr ? sr.bottom : slotTop + 30, window.innerHeight);");
+  });
+  it("the exit reverses to the NEW seats: nav slides home, search returns, Today comes back", () => {
+    // clearing is false only at rest / after Back to your desk (backToDesk reports clearing:false)
+    expect(ss).toContain("onHero({ clearing: false, slot: null })");
+    // the pair + the Today corner remount by their normal conditions on exit (React), not orphaned
+    expect(page).toContain('{heroSession.slot?.kind !== "session" && (');
+    expect(page).toContain("{renderTodayCorner()}");
+    // browser back still closes-first then reverses (unchanged v9 wiring)
+    expect(ss).toContain("const onPop = () => backToDesk();");
+  });
+});

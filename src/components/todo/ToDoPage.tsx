@@ -801,6 +801,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       searchRef={searchRef}
       onAccount={() => onNavigate("account")}
       collapsed={shellCollapsed}
+      clearing={heroSession.clearing}
       onFilterIcon={() => setFilterDrawerOpen(true)}
     >
       <div className="tdb-wrap today-off" ref={wrapRef}>

@@ -62,6 +62,8 @@ export interface TodoShellProps {
   onAccount: () => void;
   /** Icon-rail mode (< --tsh-collapse): labels become tooltips, the filter section folds. */
   collapsed?: boolean;
+  /** A focused session is opening/running: the sidebar slides off left, the search fades. */
+  clearing?: boolean;
   /** In the icon rail, the filter icon opens the page's existing overlay. */
   onFilterIcon?: () => void;
   children: React.ReactNode;
@@ -70,9 +72,9 @@ export interface TodoShellProps {
 export const TodoShell: React.FC<TodoShellProps> = ({
   workspace, activeKey, filterSection, foot, crumbParents = [], crumbCurrent,
   searchValue, onSearchChange, searchRef, searchPlaceholder = "Search your list…",
-  onAccount, collapsed = false, onFilterIcon, children,
+  onAccount, collapsed = false, clearing = false, onFilterIcon, children,
 }) => (
-  <div className={`t-f12 tsh-root${collapsed ? " tsh-collapsed" : ""}`}>
+  <div className={`t-f12 tsh-root${collapsed ? " tsh-collapsed" : ""}${clearing ? " tsh-clearing" : ""}`}>
     <aside className="tsh-nav" aria-label="Workspace navigation">
       <div className="tsh-brand"><span className="tsh-brandmark" aria-hidden>✈</span><span className="tsh-brandtx">ScriptAlly</span></div>
 
