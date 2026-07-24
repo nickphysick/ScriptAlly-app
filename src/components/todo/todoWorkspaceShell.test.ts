@@ -47,8 +47,9 @@ describe("shell P1 — the sidebar: anatomy, sections, counts", () => {
     let last = -1;
     for (const l of order) { const i = page.indexOf(`label: "${l}"`); expect(i).toBeGreaterThan(last); last = i; }
     // the counts: live queries on Queries, the board total on To-do; the rest have none
-    expect(page).toContain('label: "Queries", icon: "✉", count: liveQueryCount(queries)');
-    expect(page).toContain('label: "To-do", icon: "✓", count: boardCards.length');
+    expect(page).toContain('label: "Queries", icon: <Send size={16} />, count: liveQueryCount(queries)');
+    expect(page).toContain('label: "To-do", icon: <ListTodo size={16} />, count: boardCards.length');
+    expect(page).toContain('import { LayoutGrid, Send, Users, ListTodo, FileStack'); // the drawer's lucide set
     expect(page).toContain("activeKey=\"todo\"");
     // the routes come from the current nav model (onNavigate)
     expect(page).toContain('onClick: () => onNavigate("dashboard")');
@@ -65,18 +66,18 @@ describe("shell P1 — the sidebar: anatomy, sections, counts", () => {
 });
 
 describe("shell P1 — the active-state law: the white card, NEVER burgundy", () => {
-  it("an active nav item inverts to the soft white card", () => {
+  it("an active nav item takes the drawer's faint parchment fill ONLY (P4: the white card retired)", () => {
     const on = rule(".tsh-ni.on");
     expect(on).toContain("background: var(--tsh-active-bg)");
-    expect(on).toContain("border-color: var(--tsh-active-border)");
     expect(on).toContain("color: var(--tsh-active-ink)");
-    expect(on).toContain("font-weight: 700");
-    expect(rule(".tsh-root")).toContain("--tsh-active-bg: #fdfcfa");
-    expect(rule(".tsh-root")).toContain("--tsh-active-border: #e0d6c6");
+    expect(on).toContain("font-weight: 600");
+    expect(on).not.toContain("border"); // no border
+    expect(on).not.toContain("box-shadow"); // no shadow
+    expect(rule(".tsh-root")).toContain("--tsh-active-bg: var(--rail-pill, #f1e9df)"); // the drawer's fill
   });
   it("no burgundy fill anywhere in the nav styles (the law, asserted)", () => {
-    for (const burgundy of ["#7c3a2a", "#5d4037", "#f5c7c2", "#f3e3dc", "#f5e2da"]) {
-      // the sidebar chrome never wears the burgundy nav-pill fill
+    for (const burgundy of ["#7c3a2a", "#f5c7c2", "#f3e3dc", "#f5e2da"]) {
+      // the sidebar chrome never wears a burgundy fill
       expect(rule(".tsh-ni")).not.toContain(burgundy);
       expect(rule(".tsh-ni.on")).not.toContain(burgundy);
     }

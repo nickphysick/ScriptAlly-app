@@ -20,6 +20,7 @@
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { TodoShell, TodoNavItem, TodoFootItem } from "../shell/TodoShell";
+import { LayoutGrid, Send, Users, ListTodo, FileStack, Settings as SettingsIcon, HelpCircle } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -777,15 +778,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE WORKSPACE SHELL (todo-fix48) — the sidebar's WORKSPACE nav (routes per railNav, with
   // derived counts on Queries + To-do) and its foot. There is no CTA and no REVIEW row here.
   const workspaceNav: TodoNavItem[] = [
-    { key: "dashboard", label: "Dashboard", icon: "⌂", onClick: () => onNavigate("dashboard") },
-    { key: "queries", label: "Queries", icon: "✉", count: liveQueryCount(queries), onClick: () => onNavigate("queries") },
-    { key: "agents", label: "Agents", icon: "♟", onClick: () => onNavigate("agents") },
-    { key: "todo", label: "To-do", icon: "✓", count: boardCards.length, onClick: () => onNavigate("todo") },
-    { key: "packages", label: "Packages", icon: "▧", onClick: () => onNavigate("manuscripts", "Submission packages") },
+    { key: "dashboard", label: "Dashboard", icon: <LayoutGrid size={16} />, onClick: () => onNavigate("dashboard") },
+    { key: "queries", label: "Queries", icon: <Send size={16} />, count: liveQueryCount(queries), onClick: () => onNavigate("queries") },
+    { key: "agents", label: "Agents", icon: <Users size={16} />, onClick: () => onNavigate("agents") },
+    { key: "todo", label: "To-do", icon: <ListTodo size={16} />, count: boardCards.length, onClick: () => onNavigate("todo") },
+    { key: "packages", label: "Packages", icon: <FileStack size={16} />, onClick: () => onNavigate("manuscripts", "Submission packages") },
   ];
   const shellFoot: TodoFootItem[] = [
-    { key: "settings", label: "Task settings", icon: "⚙", onClick: () => setSettingsOpen(true) },
-    { key: "help", label: "Help centre", icon: "?", onClick: () => window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")) },
+    { key: "settings", label: "Task settings", icon: <SettingsIcon size={16} />, onClick: () => setSettingsOpen(true) },
+    { key: "help", label: "Help centre", icon: <HelpCircle size={16} />, onClick: () => window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")) },
   ];
 
   return (

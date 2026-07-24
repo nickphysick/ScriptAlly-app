@@ -49,10 +49,10 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     let last = -1;
     for (const l of order) { const i = page.indexOf(`railPill("${l}"`); expect(i).toBeGreaterThan(last); last = i; }
     const f = rule(".tdb-fpill");
-    expect(f).toContain("height: 34px");
-    expect(f).toContain("border-radius: 10px"); // format 3: soft rectangle, not a pill
-    expect(f).toContain("font-size: 12px");
-    expect(f).toContain("font-weight: 500");
+    expect(f).toContain("height: 35px"); // P4: the drawer's row height
+    expect(f).toContain("border-radius: 9px"); // the drawer's radius
+    expect(f).toContain("font-size: 12.5px");
+    expect(f).toContain("font-weight: 450");
     expect(f).not.toContain("--f12-mono"); // the mono grammar retired
     expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
     const n = rule(".tdb-fpill .tdb-fn");
@@ -60,18 +60,19 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(n).toContain("font-size: 10px");
     expect(n).toContain("font-variant-numeric: tabular-nums");
   });
-  it("hero-pair P3: 'Show all' (sentence case, exactly) leads as the default-selected reset; ONE ink-ring selected grammar", () => {
+  it("hero-pair P3: 'Show all' (sentence case) leads as the default-selected reset; P4 faint-fill selected grammar", () => {
     expect(page).toContain('className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}');
     expect(page).toContain('Show all<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>'); // the match total during search
     expect(page).not.toContain("SHOW ALL<span"); // explicitly not capitals
+    // P4: the ink outline is retired — active filter rows take the drawer's faint parchment fill
     const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("border-color: var(--ink)");
-    expect(sel).toContain("box-shadow: inset 0 0 0 1px var(--ink)");
-    expect(sel).toContain("font-weight: 700");
+    expect(sel).toContain("background: var(--rail-pill, #f1e9df)");
+    expect(sel).not.toContain("box-shadow");
+    expect(sel).not.toContain("border-color: var(--ink)");
     expect(css).not.toContain(".tdb-fpill.sel::before"); // no tick glyph
     const nar = rule(".tdb-fpill.nar");
-    expect(nar).toContain("box-shadow: inset 0 0 0 1px var(--ink)"); // the narrowed rows wear the same clothes
-    expect(nar).not.toContain("#7c3a2a");
+    expect(nar).toContain("background: var(--rail-pill, #f1e9df)"); // the narrowed rows wear the same faint fill
+    expect(nar).not.toContain("inset 0 0 0 1px var(--ink)");
     expect(page).not.toContain("tdb-frst");
     expect(css).not.toContain("tdb-frst");
     const sa = page.indexOf("Show all<span");
@@ -97,7 +98,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
   });
   it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
     // Task settings + Help centre are the shell FOOT now; the FILTER section carries no setrow
-    expect(page).toContain('{ key: "settings", label: "Task settings", icon: "\u2699", onClick: () => setSettingsOpen(true) }');
+    expect(page).toContain('{ key: "settings", label: "Task settings", icon: <SettingsIcon size={16} />, onClick: () => setSettingsOpen(true) }');
     expect(page).toContain('{ key: "help", label: "Help centre"');
     const filterFn2 = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
     expect(filterFn2).not.toContain("tdb-setrow");
@@ -436,7 +437,7 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     expect(cardFn).not.toContain("tdb-setrow"); // Task settings is the shell foot
   });
   it("the foot: Task settings + Help centre are the shell's foot rows, same wiring", () => {
-    expect(page).toContain('label: "Task settings", icon: "\u2699", onClick: () => setSettingsOpen(true)');
+    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={16} />, onClick: () => setSettingsOpen(true)');
     expect(page).toContain('label: "Help centre"');
     expect(tsh).toContain("{foot.map((f) =>"); // the shell renders them at the sidebar foot
     expect(page).not.toContain("tdb-sic");

@@ -153,19 +153,21 @@
    pill grammar retires — sentence-case sans rows in 10px-radius boxes; the reactive
    machinery (nar/dim/z, struck counts, the query chip) rides unchanged. The app's body sans
    stands in for the ref's Inter (the standing body-font convention). */
-.tdb-fpill { display: flex; align-items: center; gap: 10px; margin: 0 10px 6px; height: 34px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 10px; padding: 0 12px; font-size: 12px; font-weight: 500; color: #4d4238; cursor: pointer; flex: 0 0 auto; }
-.tdb-fpill:hover { background: var(--paper); }
+/* SHELL POLISH P4 — the filter rows read in the drawer's grammar: borderless, the faint
+   hover, radius 9; the family dot + count stay. */
+.tdb-fpill { display: flex; align-items: center; gap: 12px; margin: 0 0 2px; height: 35px; width: 100%; box-sizing: border-box; border: none; background: transparent; border-radius: 9px; padding: 0 10px; font-size: 12.5px; font-weight: 450; color: var(--rail-itemtx, #5a4a40); cursor: pointer; flex: 0 0 auto; transition: background 0.12s; }
+.tdb-fpill:hover { background: var(--rail-hov, #f7f3ed); }
 .tdb-fpill .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
 .tdb-fpill.d-p .tdb-dotc { background: var(--dot-p); }
 .tdb-fpill.d-lat .tdb-dotc { background: var(--dot-lat); }
 .tdb-fpill.d-y .tdb-dotc { background: var(--dot-y); }
 .tdb-fpill.d-s .tdb-dotc { background: var(--dot-s); }
-.tdb-fpill .tdb-fn { margin-left: auto; font-size: 10px; color: #a5988c; font-variant-numeric: tabular-nums; }
+.tdb-fpill .tdb-fn { margin-left: auto; font-size: 10px; color: var(--rail-label, #9c8878); font-variant-numeric: tabular-nums; }
 .tdb-fpill.z { opacity: 0.4; }
 .tdb-fpill.dim { opacity: 0.4; }
-.tdb-fpill.nar { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; color: var(--ink); }
-/* v4 P2 — the rail's lead button + the SHOW ALL selected pill (the RESET row is gone) */
-.tdb-fpill.sel { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); font-weight: 700; color: var(--ink); } /* no tick — the ring is the mark */
+.tdb-fpill.nar { background: var(--rail-pill, #f1e9df); font-weight: 600; color: var(--rail-ink, #2b2118); }
+/* SHELL POLISH P4 — Show all selected + narrowed rows: the faint fill, no ink outline */
+.tdb-fpill.sel { background: var(--rail-pill, #f1e9df); font-weight: 600; color: var(--rail-ink, #2b2118); }
 .tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
 .tdb-fsfoot { margin-top: 10px; border-top: 1px solid var(--hairline); padding: 12px; }
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }

@@ -109,3 +109,66 @@ describe("shell polish P3 — sticker cards", () => {
     expect(css).not.toContain(".tdb-lrow.do"); // no family sticker on ledger rows
   });
 });
+
+describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
+  const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
+  const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+  const tRule = (sel: string): string => {
+    const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`tsh rule not found: ${sel}`);
+    return m[1];
+  };
+  it("the shell reads the drawer's shared --rail-* tokens (extracted, not duplicated)", () => {
+    const root = tRule(".tsh-root");
+    expect(root).toContain("--tsh-active-bg: var(--rail-pill, #f1e9df)");
+    expect(root).toContain("--tsh-hov: var(--rail-hov, #f7f3ed)");
+    expect(root).toContain("--tsh-label: var(--rail-label, #9c8878)");
+    expect(root).toContain("--tsh-hair: var(--rail-hair, #e7ddd2)");
+    expect(root).toContain("--tsh-itemtx: var(--rail-itemtx, #5a4a40)");
+  });
+  it("section labels are the drawer's mono, hairline-ruled beneath (WORKSPACE + FILTER both)", () => {
+    const nk = tRule(".tsh-nk");
+    expect(nk).toContain("font-family: var(--f12-mono)");
+    expect(nk).toContain("font-size: 9.5px");
+    expect(nk).toContain("letter-spacing: 0.18em");
+    expect(nk).toContain("color: var(--tsh-label)");
+    expect(nk).toContain("border-bottom: 1px solid var(--tsh-hair)"); // the hairline rule
+    expect(tsh).toContain(">WORKSPACE<");
+    expect(tsh).toContain('className="tsh-nk tsh-filterhead"'); // FILTER wears the same
+  });
+  it("rows are the drawer's grammar: icon + label, its height/radius/type, muted counts", () => {
+    const ni = tRule(".tsh-ni");
+    expect(ni).toContain("height: 35px");
+    expect(ni).toContain("border-radius: 9px");
+    expect(ni).toContain("gap: 12px");
+    expect(ni).toContain("font-size: 12.5px");
+    expect(ni).toContain("color: var(--tsh-itemtx)");
+    expect(tRule(".tsh-ic")).toContain("width: 16px"); // the drawer's 16px icon
+    expect(tRule(".tsh-n")).toContain("color: var(--tsh-label)"); // muted count
+    // the icons are the drawer's lucide set (TypeGlyph is locked to material types — see report)
+    expect(page).toContain("import { LayoutGrid, Send, Users, ListTodo, FileStack");
+    expect(page).toContain("icon: <Send size={16} />");
+  });
+  it("ACTIVE = the faint parchment fill ONLY — no border, no outline, no shadow; never burgundy", () => {
+    const on = tRule(".tsh-ni.on");
+    expect(on).toContain("background: var(--tsh-active-bg)");
+    expect(on).not.toContain("border");
+    expect(on).not.toContain("box-shadow");
+    expect(on).not.toContain("outline");
+    for (const burgundy of ["#7c3a2a", "#f5c7c2", "#f3e3dc"]) expect(on).not.toContain(burgundy);
+    // the white-card variant from the shell pack is retired
+    expect(tshCss).not.toContain("#fdfcfa");
+  });
+  it("the filter rows share it: active = faint fill, the ink outline retired; reactive bits carry over", () => {
+    const sel = rule(".tdb-fpill.sel");
+    expect(sel).toContain("background: var(--rail-pill, #f1e9df)");
+    expect(sel).not.toContain("box-shadow");
+    expect(sel).not.toContain("border-color: var(--ink)");
+    expect(rule(".tdb-fpill.nar")).toContain("background: var(--rail-pill, #f1e9df)");
+    // the reactive behaviour is untouched: the dot, the count, zero-dimming, the struck totals, the chip
+    expect(rule(".tdb-fpill .tdb-dotc")).toContain("border-radius: 50%");
+    expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
+    expect(css).toContain(".tdb-fn .tdb-was"); // the struck old total
+    expect(page).toContain('className="tdb-fq tsh-fq"'); // the active-search chip
+  });
+});
