@@ -959,6 +959,16 @@ deltas):
   step (`6px`, `translate(-1px,-1px)`). The pastille bands + white pills are unchanged; the grid
   gap (`--tdb-grid-gap 14px`) ≥ the offset so blocks never touch. The ledger rows, the Today
   pop-up and the session page are NOT stickers.
+- **EQUAL GUTTERS + FLUID TRACKS (alignment fix, todo-fix50):** the centred column's side
+  gutters are equal — the wrap is the sole scroller with `scrollbar-gutter: stable both-edges`
+  (tsh-body clips), so no scrollbar asymmetry shifts it. The card grid is FLUID —
+  `grid-template-columns: repeat(N, 1fr)` — so cards grow to fill the panel's inner width (no
+  dead space right of the last column); the tier changes the COUNT only (3-up standard, 4-up at
+  ≥1700). The old "today-off → 4-up everywhere" rule is retired.
+- **THE WARM ACTIVE FILL (alignment fix):** the selected fill is `#e6ddcf` — the sidebar's own
+  parchment (`#f2ede7`) one step deeper, zero green — hover `#ece5d9`. The shell owns these two
+  values directly (it no longer reads the app's sage `--rail-pill #e9ece4`); nav items and
+  filter rows share them, still with no border/outline/shadow.
 - **THE DRAWER-GRAMMAR SIDEBAR:** the sidebar mirrors the app NavDrawer via the shared `--rail-*`
   tokens — mono `.18em` section labels hairline-ruled beneath, icon+label rows in the drawer's
   height/radius/type (lucide icons), muted counts. **The active state — nav items AND filter

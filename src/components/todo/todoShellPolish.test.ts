@@ -270,3 +270,23 @@ describe("alignment fixes P2 — the warm active fill (no green cast)", () => {
     expect(css).not.toContain("var(--rail-hov");
   });
 });
+
+describe("alignment fixes P3 — the sweep", () => {
+  it("no fixed-width grid track survives (the grid is fully fluid)", () => {
+    expect(css).not.toContain("repeat(3, var(--tdb-cardw))");
+    expect(css).not.toContain("repeat(4, var(--tdb-cardw))");
+  });
+  it("no live sage/green fill read survives in the sidebar scope", () => {
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(tshCss).not.toContain("--rail-pill");
+    expect(css).not.toContain("var(--rail-pill");
+    expect(css).not.toContain("var(--rail-hov");
+  });
+  it("themes.md records the fluid-track law + the active-fill pair", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("EQUAL GUTTERS + FLUID TRACKS");
+    expect(themes).toContain("THE WARM ACTIVE FILL");
+    expect(themes).toContain("#e6ddcf");
+    expect(themes).toContain("scrollbar-gutter: stable both-edges");
+  });
+});
