@@ -24,6 +24,12 @@ export interface TourStop {
 
 export const TOUR_STOPS: TourStop[] = [
   {
+    sel: ".spine-rail",  // the hardback spine: the category rail
+    h: "Your whole workspace, spined.",
+    p: "Switch between Dashboard, Querying, Agents and Manuscripts from the rail — you're in Querying now.",
+    cta: "Next →",
+  },
+  {
     sel: ".tdb-herobegin",  // the workspace shell: Begin sits on the hero's right, over the subtitle
     h: "Say go, any time.",
     p: "Begin a focused session — it walks your whole desk for you, one sheet at a time, no distractions.",
@@ -36,10 +42,10 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // the sidebar's filter rows; the collapsed ⚲ icon fronting the overlay below
-    sel: ".tdb-fpill, .tsh-filtericon",
+    // the hardback spine: the filters live in the panel's context zone
+    sel: ".tdb-fpill",
     h: "Narrow the desk.",
-    p: "Quiet filters with live counts: click one to see only that kind of work. Show all brings everything back.",
+    p: "Quiet filters with live counts in the panel: click one to see only that kind of work. Show all brings everything back.",
     cta: "Next →",
   },
   {

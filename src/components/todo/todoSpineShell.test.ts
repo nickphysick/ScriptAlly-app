@@ -216,3 +216,31 @@ describe("spine — the search (panel header) + the brand, carried from the cent
     expect(page).toContain('onBrand={() => onNavigate("dashboard")}');
   });
 });
+
+describe("spine P5 — the sweep", () => {
+  it("the single-column sidebar + its collapsed filter-drawer are extinct", () => {
+    const css = readFileSync(join(here, "todo.css"), "utf8");
+    for (const dead of [".tsh-nav", ".tsh-brand", ".tsh-brandword", ".tsh-ni ", ".tsh-nk", ".tsh-filter"]) {
+      expect(tshCss).not.toContain(dead);
+    }
+    // the old collapsed filter drawer + its band are gone (the panel context zone replaced them)
+    for (const dead of ["tdb-fdrawer", "tdb-fdpanel", "tdb-fdscrim", "tdb-rsech", "tdb-fbox"]) {
+      expect(css).not.toContain(dead);
+      expect(page).not.toContain(dead);
+    }
+  });
+  it("themes.md records the hardback spine as the final shell", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## The hardback spine (settled — the final To-do shell)");
+    expect(themes).toContain("THE INK RAIL");
+    expect(themes).toContain("THE PARCHMENT PANEL");
+    expect(themes).toContain("THE PARCHMENT L");
+  });
+  it("the tour retargets: the category-rail step + the filters-in-panel step", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('sel: ".spine-rail"'); // the category rail step
+    expect(tour).toContain('sel: ".tdb-fpill"'); // filters-in-panel (no .tsh-filtericon)
+    expect(tour).not.toContain(".tsh-filtericon");
+    for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".tdb-revlink", ".tdb-today2"]) expect(tour).toContain(sel);
+  });
+});

@@ -511,13 +511,14 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
   });
   it("the FILTER header grows the removable query chip: pink tag law, quoted uppercased term, ✕ clears the search", () => {
     expect(page).toContain("“{search.trim().toUpperCase()}” <span aria-hidden>✕</span>");
-    expect(page).toContain('className="tdb-fq tsh-fq" aria-label="Clear the search" onClick={() => setSearch("")}'); // the chip rides the sidebar FILTER section
+    expect(page).toContain('className="tdb-fq tsh-fq" aria-label="Clear the search" onClick={() => setSearch("")}'); // the chip rides the panel context zone
     const q = rule(".tdb-fq");
     expect(q).toContain("color: #7c3a2a");
     expect(q).toContain("background: var(--pink-t)");
     expect(q).toContain("border: 1px solid var(--pink-b)");
     expect(q).toContain("border-radius: 99px");
-    expect(rule(".tdb-rsech")).toContain("display: flex"); // the band carries the chip row
+    // the chip is the first child of renderFilterSection, above the pills (in the panel context)
+    expect(page.indexOf('className="tdb-fq tsh-fq"')).toBeLessThan(page.indexOf("Show all<span"));
   });
   it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
     expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");

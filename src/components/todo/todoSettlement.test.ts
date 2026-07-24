@@ -22,7 +22,7 @@ const rule = (sel: string): string => {
 /** The three container headers, by their real selectors. */
 // the workspace shell: the sheet's dochead became the panel's plain items row; the sage
 // family is now the filter band (in the collapsed drawer) + Today's header.
-const HEADS = [".tdb-rsech", ".tdb-th"];
+const HEADS = [".tdb-th"]; // the spine retired the sage FILTER band (.tdb-rsech); Today keeps the sage head
 
 describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere", () => {
   it("the tokens exist once, on the wrap, and carry the settled values", () => {
@@ -67,13 +67,11 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
     expect(css).toContain("--hk-sage");
   });
   it("header typography stays per container: mono FILTER warmed, Playfair lines in the warm ink", () => {
-    expect(rule(".tdb-rsech")).toContain("color: var(--container-head-mono)");
-    expect(rule(".tdb-rsech")).toContain("var(--f12-mono)");
+    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)"); // Today's mono count
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's Playfair title
     expect(rule(".tdb-th .tdb-t")).toContain("var(--f12-serif)");
   });
   it("the header inks join the sage family: mono labels #5a6e58, Playfair lines #3d4a3b", () => {
-    expect(rule(".tdb-rsech")).toContain("color: var(--container-head-mono)"); // the sidebar's mono label
     expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)"); // Today's count
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title (a sage head)
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title
@@ -82,7 +80,7 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
     expect(rule(".tdb-wrap")).toContain("--container-head-ink: #3d4a3b");
   });
   it("radius continuity: each header takes ITS container's top radii", () => {
-    for (const sel of HEADS) expect(rule(sel + (sel === ".tdb-rsech" ? ".fc1" : ""))).toContain("border-radius: 15px 15px 0 0");
+    for (const sel of HEADS) expect(rule(sel)).toContain("border-radius: 15px 15px 0 0");
     expect(rule(".tdb-today2")).toContain("border-radius: 14px"); // the corner card
     expect(rule(".tdb-mainc")).toContain("border-radius: var(--tdb-panel-r)"); // the panel is 14, not a 16 card
   });

@@ -999,3 +999,33 @@ deltas):
   `/scriptally-logo-new.png` + the `ScriptAllyLogo` wordmark), at the NavDrawer's proportions,
   linking home — no fabricated glyphs.
 
+## The hardback spine (settled — the final To-do shell)
+
+The To-do shell's final architecture (design-refs/spine-shell.html, todo-fix54) — supersedes
+every prior single-column sidebar section (workspace-shell, polish). Three columns inside `.t-f12`:
+
+- **THE INK RAIL** (`.spine-rail`): 54px, full height, owning the top-left corner. Fill
+  `--spine-rail-bg #2a1a13`, right rule `--spine-rail-rule #1d100c`; the real logo mark at its
+  head, then the app categories as icon buttons (Dashboard · Querying · Agents · Manuscripts),
+  Settings at the foot. Idle icon `--spine-ricon #a8917f`; **active = the ink-native square**
+  `--spine-ron #4a3226` with the icon in cream `--spine-ricon-on #f3e7da` — the rail is the one
+  place the parchment-highlight law can't apply, so the ink square is its equivalent. Never
+  burgundy.
+- **THE PARCHMENT PANEL** (`.spine-panel`): 196px, full height, `--spine-pan #f5f0e8` / right
+  rule `--spine-pbd #e0d6c6`. The real wordmark at its head; a mono category label + the pages
+  (icon + label + count); then the context zone — a ruled mono label (`.spine-nk`, hairline
+  `--spine-prule`) + the current page's dynamic content (To-do → the filter rows, full reactive
+  parity). Foot: Task settings + Help centre.
+- **THE PARCHMENT L**: the breadcrumb bar wears the panel's own `--spine-pan` fill and
+  `--spine-pbd` rule (the same tokens, not lookalikes), so panel + bar read as one continuous
+  cream L inside the dark spine. The content body below is the page's own ground.
+- **THE PANEL ACTIVE LAW**: the warm parchment fill `--spine-pon #e6ddcf` (hover `#ece5d9`), fill
+  only — no border, shadow or outline; page rows and filter rows alike. Never burgundy.
+- **SESSION**: the rail persists (chrome); the panel leaves the flow (absolute) so the content
+  region reclaims its width and the v9 curtains + centred column recompute against the region
+  right of the RAIL, then the panel slides off left and returns on exit.
+- **TIERS**: below `--tsh-collapse` (1100px) the panel collapses to a rail-triggered overlay
+  (scrim; dismiss on outside-click or Escape); the rail stays, no hamburger returns.
+
+*(The bar is the shell's own `.tsh-bcbar`; HubHeaderBar is never mounted here and is untouched.)*
+
