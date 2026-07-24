@@ -445,20 +445,18 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
 });
 
 describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
-  it("the tier media: asm 1624 + sheet 1072 + a 4-up grid, tokens only (never a hard card width)", () => {
+  it("the tier media: JUST the 4-up fluid grid — the competing --tdb-asm width machinery is gone", () => {
     const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
     expect(m).toBeTruthy();
     const tier = m![1];
-    expect(tier).toContain("--tdb-asm: 1624px; --tdb-sheet: 1072px;");
-    expect(tier).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }"); // ALIGNMENT FIX: fluid tracks
-    expect(tier).not.toContain("250px"); // no magic card width
+    expect(tier).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }");
+    expect(tier).not.toContain("--tdb-asm"); // CENTRING FIX: the second geometry owner is retired
+    expect(tier).not.toContain("250px");
   });
-  it("the matrix: 3-up standard, 4-up ONLY at ≥1700 (the always-4 today-off rule retired)", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // ALIGNMENT FIX: fluid 3-up standard
-    expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }"); // the width token stays
+  it("the matrix: 3-up standard, 4-up ONLY at ≥1700; no --tdb-asm width machinery survives", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // fluid 3-up standard
+    expect(css).not.toContain("--tdb-asm"); // CENTRING FIX: the whole asm-width tier is stripped
     expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4 grid rule is gone
-    expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }");
-    expect(rule(".tdb-wrap")).toContain("--tdb-cardw: 250px"); // ONE card width for every cell at every tier
   });
   it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
     // SHELL POLISH P1: the gutters moved to the centred column; the wrap is the bare scroller
@@ -466,11 +464,11 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
     expect(rule(".tdb-col")).toContain("max-width: var(--tdb-col-max)");
     expect(rule(".tdb-col")).toContain("margin-inline: auto");
   });
-  it("the transition branch: the tier steps ride the SAME 220ms width mechanics as the Today mount; reduced motion instant", () => {
-    expect(rule(".tdb-asm")).toContain("transition: width 220ms ease");
-    expect(css).toContain(".tdb-asm, .tdb-centre { transition: none; }");
-    // the run sheet consumes the same widths: both views render inside .tdb-mainc (width 100% of the stack)
-    expect(rule(".tdb-mainc")).toContain("width: 100%");
+  it("the work row fills the column — no fixed width, no auto margin, no transition (centring fix)", () => {
+    expect(rule(".tdb-asm")).toContain("width: 100%");
+    expect(rule(".tdb-asm")).not.toContain("margin");
+    expect(rule(".tdb-asm")).not.toContain("transition");
+    expect(rule(".tdb-mainc")).toContain("width: 100%"); // both views render inside the one panel
   });
 });
 
@@ -533,11 +531,10 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(page).toContain('className="tdb-wrap today-off"'); // the board is always full-width; Today floats
   });
   it("the grid steps 4-up ⇄ 3-up via the ≥1700 tier; the cards FLOW to fill (fluid tracks)", () => {
-    expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }");
     expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // 3-up standard, fluid
     const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
     expect(m![1]).toContain("repeat(4, 1fr)"); // 4-up at the wide tier
-    expect(rule(".tdb-asm")).toContain("transition: width 220ms ease");
+    expect(rule(".tdb-asm")).toContain("width: 100%"); // CENTRING FIX: the row fills the column
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
     expect(css).toContain(".tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }");
@@ -1020,22 +1017,18 @@ describe("II·B P4 — one tag grammar + card polish", () => {
   });
 });
 
-describe("Width v4 — the centred assembly tokens (Final Shape)", () => {
-  it("the token set on the wrap: asm 1364 · rail 248 · sheet 812 · vp 774 · cardw 250 · Today 256", () => {
+describe("Width v4 — SUPERSEDED: the .tdb-col is the single geometry owner (centring fix)", () => {
+  it("the competing --tdb-asm/--tdb-sheet assembly-width tokens are gone", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-asm: 1364px;");
-    expect(w).toContain("--tdb-rail: 248px;");
-    expect(w).toContain("--tdb-sheet: 812px;");
-    expect(w).toContain("--tdb-vp: 774px;");
-    expect(w).toContain("--tdb-cardw: 250px;");
-    expect(w).toContain("--tdb-today: 256px;");
-    expect(w).toContain("--tdb-gutter: var(--g24);");
-    expect(w).toContain("--tdb-appnav: 49px;");
+    expect(w).not.toContain("--tdb-asm");
+    expect(w).not.toContain("--tdb-sheet");
+    expect(w).toContain("--tdb-cardw: 250px;"); // the card token stays (the fork-face flex-basis)
   });
-  it("the assembly centres; the arithmetic is the LAWS' 248+24+812+24+256", () => {
-    expect(rule(".tdb-asm")).toContain("width: var(--tdb-asm); margin: 0 auto;");
-    // the assembly centres on the token; the Today column left it (Today is a corner pop-up now)
-    expect(rule(".tdb-wrap.today-off")).toContain("--tdb-asm"); // the full-width board width
+  it("the work row no longer owns geometry — .tdb-col does, alone", () => {
+    expect(rule(".tdb-asm")).toContain("width: 100%");
+    expect(rule(".tdb-asm")).not.toContain("margin");
+    expect(rule(".tdb-col")).toContain("max-width: var(--tdb-col-max)");
+    expect(rule(".tdb-col")).toContain("margin-inline: auto");
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {

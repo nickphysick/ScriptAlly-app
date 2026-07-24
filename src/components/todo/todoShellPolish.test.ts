@@ -290,3 +290,50 @@ describe("alignment fixes P3 — the sweep", () => {
     expect(themes).toContain("scrollbar-gutter: stable both-edges");
   });
 });
+
+describe("centring fix P1 — the single geometry owner (architecture, not pixels)", () => {
+  // jsdom cannot measure viewport layout, so this asserts the ARCHITECTURE the pack prescribes:
+  // one element (.tdb-col, the page-col) owns the horizontal geometry; no other element in the
+  // content chain carries a max-width, an auto margin, or a one-sided horizontal padding. The
+  // pixel symmetry is the report's manual devtools step (1440/1920).
+  const CHAIN = [".tdb-ws", ".tdb-centre", ".tdb-mainc", ".tdb-sheetbody", ".tdb-grid"]; // grid ← … ← col
+  it("the NAMED CULPRIT is removed: .tdb-asm no longer owns width/margin (it competed with .tdb-col)", () => {
+    const asm = rule(".tdb-asm");
+    expect(asm).toContain("width: 100%");
+    expect(asm).not.toContain("var(--tdb-asm)"); // the fixed assembly width is gone
+    expect(asm).not.toContain("margin"); // the competing auto-centre is gone
+    // regression grep on the exact property that was found: no element sets width to --tdb-asm
+    expect(css).not.toContain("width: var(--tdb-asm)");
+  });
+  it(".tdb-col is the SOLE geometry owner — max-width + auto margins + symmetric padding", () => {
+    const col = rule(".tdb-col");
+    expect(col).toContain("max-width: var(--tdb-col-max)");
+    expect(col).toContain("margin-inline: auto");
+    expect(col).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px"); // equal L/R via one token
+  });
+  it("NO other chain element carries a max-width, an auto margin, or a one-sided horizontal pad", () => {
+    for (const sel of CHAIN) {
+      const r = rule(sel);
+      expect(r, `${sel} max-width`).not.toContain("max-width");
+      expect(r, `${sel} margin auto`).not.toMatch(/margin[^;]*auto/);
+      expect(r, `${sel} margin-inline`).not.toContain("margin-inline");
+      // a one-sided horizontal pad is the classic left-heavy bug; the panel's symmetric inset is fine
+      expect(r, `${sel} padding-left`).not.toContain("padding-left");
+      expect(r, `${sel} padding-right`).not.toContain("padding-right");
+    }
+    // the main region right of the sidebar carries no horizontal padding of its own
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    const bodyRule = tshCss.match(/\n\.tsh-body\s*\{([^}]*)\}/)![1];
+    expect(bodyRule).not.toContain("padding");
+  });
+  it("widths derive from the container, never from vw units (in the content chain)", () => {
+    // the col + its chain use container-relative widths; the only vw in the file is on fixed/
+    // absolute OVERLAYS (modals, toasts, the flow sheet) — never the centred content chain
+    expect(rule(".tdb-col")).not.toContain("vw");
+    for (const sel of CHAIN) expect(rule(sel)).not.toContain("vw");
+    // the vw users are all overlays, asserted position:fixed/absolute
+    for (const sel of [".tdb-amodal", ".tdb-toast", ".tdb-ffwrap"]) {
+      expect(rule(sel)).toMatch(/position: (fixed|absolute|relative)/);
+    }
+  });
+});

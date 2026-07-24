@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -30,6 +30,9 @@
 /* SHELL POLISH P1 — the centred max-width column: the hero + the panel share ONE column
    and ONE pair of edges. The ≥44px chrome gap is its top padding; the equal side gutters
    grow with the viewport (margin-inline auto past the cap). */
+/* THE SINGLE GEOMETRY OWNER (the pack's .page-col): the ONLY element in the content chain
+   with a max-width, auto margins or horizontal padding. Everything (hero, panel) rides inside
+   it; no ancestor or descendant in the chain adds a competing horizontal box. */
 .tdb-col { max-width: var(--tdb-col-max); margin-inline: auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
 .tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: var(--tdb-hero-gap) 0 0; } /* the hero→panel gap */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
@@ -53,7 +56,10 @@
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
-.tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
+/* CENTRING FIX — .tdb-asm is NO LONGER a geometry owner: it filled a fixed assembly width
+   and centred itself (margin:0 auto), competing with .tdb-col and bleeding right below ~1440.
+   Now it simply fills the column; .tdb-col is the SINGLE geometry owner. */
+.tdb-asm { width: 100%; }
 /* ── THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle
    left, the session CTA pair on the right. The search lives in the breadcrumb bar now. ── */
 .tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 0; }
@@ -555,10 +561,6 @@ button.tdb-tdot { cursor: pointer; }
 /* ALIGNMENT FIX P1 — 3-up is the STANDARD tier; 4-up only at ≥1700 (below). The old
    'today-off → 4-up at every width' rule is retired (Today is the corner pop-up now, so the
    wrap is always today-off — that rule forced 4-up everywhere). */
-.tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }
-@media (prefers-reduced-motion: reduce) { .tdb-asm, .tdb-centre { transition: none; } }
-/* the compact break (P6): the rail leaves the flow for the overlay drawer */
-@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }
 /* ── doc pass P2 — THE ≥1700 WIDTH TIER (todo-doc-pass-a.html §2): 4-up WITH Today — sheet 1072,
    assembly 248+24+1072+24+256 = 1624; it fits because the edge gutter is 32 (1624+64 = 1688).
    The full matrix: Today hidden → 4-up at every tier (the today-off rules, (0,2,0), outrank
@@ -567,7 +569,6 @@ button.tdb-tdot { cursor: pointer; }
    width transitions on .tdb-asm/.tdb-centre carry the step (same mechanics as the Today
    mount; column count reflows; reduced-motion instant via the shared override). ── */
 @media (min-width: 1700px) {
-  .tdb-wrap { --tdb-asm: 1624px; --tdb-sheet: 1072px; }
   .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }
 }
 /* ── THE WORKSPACE SHELL (todo-fix48) — TODAY, BACK IN ITS CORNER: the floating card fixed to
