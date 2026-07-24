@@ -112,6 +112,10 @@ describe("spine P2 — the parchment panel", () => {
     expect(page).toContain('railPill("Offers", "offers", fc.offers, "p")');
     // context renders ONLY when a label is given (pages without context end after their list)
     expect(tsh).toContain("{contextLabel && (");
+    // the migrated filter rows sit flush in the context zone, on the panel's warm tokens
+    expect(rule(".spine-ctx .tdb-fpill")).toContain("height: 32px");
+    expect(rule(".spine-ctx .tdb-fpill")).toContain("color: var(--spine-ptx)");
+    expect(rule(".spine-ctx .tdb-fpill .tdb-fn")).toContain("color: var(--spine-pmut)");
   });
   it("the panel active law: the warm parchment fill ONLY (no border/shadow/outline; never burgundy)", () => {
     const on = rule(".spine-ni.on");
