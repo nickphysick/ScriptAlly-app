@@ -176,7 +176,11 @@ describe("spine P4 — session + width tiers", () => {
   it("the RAIL persists through the session; only the PANEL slides off left and returns", () => {
     expect(page).toContain("clearing={heroSession.clearing}");
     expect(tsh).toContain('${clearing ? " spine-clearing" : ""}');
-    expect(tshCss).toContain(".spine-clearing .spine-panel { transform: translateX(-100%); opacity: 0; }");
+    // in session the panel leaves the FLOW (absolute) so the content region reclaims its width —
+    // the curtains + centred column recompute against the region right of the RAIL — then slides
+    expect(rule(".spine-clearing .spine-panel")).toContain("position: absolute");
+    expect(rule(".spine-clearing .spine-panel")).toContain("transform: translateX(-100%)");
+    expect(rule(".spine-root")).toContain("position: relative"); // the absolute panel's context
     expect(tshCss).not.toContain(".spine-clearing .spine-rail"); // the rail stays (chrome)
     const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
     expect(stage).toContain('export const EXIT_LEFT = ".spine-panel"'); // the panel is the mover now
@@ -189,8 +193,11 @@ describe("spine P4 — session + width tiers", () => {
     expect(collapse).toContain(".spine-panelopen .spine-panel { transform: translateX(0); }");
     expect(tshCss).toContain(".spine-scrim"); // the scrim
     expect(tsh).toContain("onClick={onPanelDismiss}"); // dismiss on outside click
+    // the TRIGGER: when collapsed, tapping the active rail category opens the panel overlay
+    expect(tsh).toContain("onClick={collapsed && c.active && onPanelOpen ? onPanelOpen : c.onClick}");
+    expect(page).toContain("onPanelOpen={() => setPanelOpen(true)}");
+    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setPanelOpen(false); }'); // Esc dismiss
     expect(page).not.toContain("hamburger");
-    expect(page).not.toContain("☰ MENU");
     // the rail remains at every tier (never hidden by the collapse media)
     expect(collapse).not.toContain(".spine-rail { display: none");
   });

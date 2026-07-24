@@ -800,6 +800,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       onBrand={() => onNavigate("dashboard")}
       collapsed={shellCollapsed}
       panelOpen={panelOpen}
+      onPanelOpen={() => setPanelOpen(true)}
       onPanelDismiss={() => setPanelOpen(false)}
       clearing={heroSession.clearing}
     >

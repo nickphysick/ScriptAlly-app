@@ -78,22 +78,26 @@ export interface TodoShellProps {
   onBrand: () => void;
   /** < --tsh-collapse: the panel collapses to a rail-triggered overlay. */
   collapsed?: boolean;
-  /** Whether the collapsed panel overlay is open. */
+  /** The collapsed panel overlay: its open state + open/dismiss handlers. */
   panelOpen?: boolean;
+  onPanelOpen?: () => void;
   onPanelDismiss?: () => void;
   /** A focused session is opening/running: the panel slides off left (the rail persists). */
   clearing?: boolean;
   children: React.ReactNode;
 }
 
-const RailIcon: React.FC<{ c: SpineCategory }> = ({ c }) => (
+const RailIcon: React.FC<{ c: SpineCategory; collapsed: boolean; onPanelOpen?: () => void }> = ({ c, collapsed, onPanelOpen }) => (
   <button
     type="button"
     className={`spine-rli${c.active ? " on" : ""}`}
-    onClick={c.onClick}
+    // WIDTH TIERS — when the panel is collapsed, tapping the ACTIVE category opens the panel
+    // overlay (its pages are already current); the others route.
+    onClick={collapsed && c.active && onPanelOpen ? onPanelOpen : c.onClick}
     title={c.label}
     aria-label={c.label}
     aria-current={c.active ? "page" : undefined}
+    aria-expanded={collapsed && c.active ? onPanelOpen != null : undefined}
   >
     <span className="spine-ric" aria-hidden>{c.icon}</span>
   </button>
@@ -102,7 +106,7 @@ const RailIcon: React.FC<{ c: SpineCategory }> = ({ c }) => (
 export const TodoShell: React.FC<TodoShellProps> = ({
   categories, railFoot, panelCategory, pages, contextLabel, contextContent, foot,
   crumbParents = [], crumbCurrent, onAccount, onBrand,
-  collapsed = false, panelOpen = false, onPanelDismiss, clearing = false, children,
+  collapsed = false, panelOpen = false, onPanelOpen, onPanelDismiss, clearing = false, children,
 }) => (
   <div className={`t-f12 spine-root${collapsed ? " spine-collapsed" : ""}${panelOpen ? " spine-panelopen" : ""}${clearing ? " spine-clearing" : ""}`}>
     {/* THE RAIL — chrome; it persists through the session and owns the top-left corner. */}
@@ -111,9 +115,9 @@ export const TodoShell: React.FC<TodoShellProps> = ({
         <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={30} height={30} />
       </button>
       <nav className="spine-railnav" aria-label="Categories">
-        {categories.map((c) => <RailIcon key={c.key} c={c} />)}
+        {categories.map((c) => <RailIcon key={c.key} c={c} collapsed={collapsed} onPanelOpen={onPanelOpen} />)}
       </nav>
-      <div className="spine-railfoot"><RailIcon c={railFoot} /></div>
+      <div className="spine-railfoot"><RailIcon c={railFoot} collapsed={collapsed} onPanelOpen={onPanelOpen} /></div>
     </aside>
 
     {/* THE PANEL — the active category's pages + the current page's context. */}
