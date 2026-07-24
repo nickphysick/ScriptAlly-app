@@ -314,3 +314,59 @@ describe("shell P4 — the session, rewired to the shell", () => {
     expect(ss).toContain("const onPop = () => backToDesk();");
   });
 });
+
+describe("shell P5 — the sweep + the record", () => {
+  const pageCss = readFileSync(join(here, "todo.css"), "utf8");
+  it("the retired seats + rail-Today + old hero search are extinct in source and styles", () => {
+    for (const dead of ["tdb-bigsearch", "tdb-sbpair", "tdb-sbdiv", "tdb-barvt", "tdb-barpair",
+                        "tdb-bardiv", "tdb-heropair", "tdb-railr", "tdb-todaypop", "tdb-todaychip",
+                        "tdb-fpillbtn", "F12Page"]) {
+      expect(page).not.toContain(dead);
+      expect(pageCss).not.toContain(dead);
+    }
+    // the old filter-rail aside is gone; the sidebar is the shell's
+    expect(page).not.toContain('<aside className="tdb-fside"');
+    expect(page).not.toContain("renderRail");
+  });
+  it("the dead exploration tokens are gone (the search/pair seat tokens)", () => {
+    for (const tok of ["--tdb-sbpair-h", "--tdb-sbpair-fs", "--tdb-search-w", "--tdb-search-clear"]) {
+      expect(pageCss).not.toContain(tok);
+    }
+  });
+  it("themes.md records the workspace shell as settled and marks the sage structure superseded", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## To-do workspace shell (settled)");
+    expect(themes).toContain("THE PARCHMENT CHROME PAIR");
+    expect(themes).toContain("THE WHITE-CARD ACTIVE LAW (never burgundy)");
+    expect(themes).toContain("THE PANEL");
+    expect(themes).toContain("TODAY'S CORNER FORM");
+    expect(themes).toContain("the pastille bands are SIGNAL");
+    expect(themes).toContain("container structure SUPERSEDED by the workspace shell");
+  });
+  it("the tour lands on the new seats end to end", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    // Begin (hero) · search (bar) · filters (sidebar) · review (hero link) · cards · Today (corner)
+    for (const sel of [".tdb-herobegin", ".tsh-search", ".tdb-fpill, .tsh-filtericon", ".tdb-revlink", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
+      expect(tour).toContain(sel);
+    }
+    // every anchor still exists in the board or the shell
+    expect(pageCss).toContain(".tdb-fpill"); // filters in the sidebar section
+    expect(pageCss).toContain(".tdb-today2"); // the corner card
+    expect(pageCss).toContain(".tdb-revlink"); // the hero review link
+    expect(tsh).toContain('className="tsh-search"'); // the bar search
+  });
+  it("the full state machine walks: board → filter → session (both views) → close → exit", () => {
+    // filtering via the sidebar section (the reactive rows the shell hosts)
+    expect(page).toContain("filterSection={renderFilterSection()}");
+    // Begin launches the session over the engine's own queue
+    expect(page).toContain("onClick={() => setSession({ queue: boardCards })}");
+    // the session's phases + the reverse are intact
+    const ss = readFileSync(join(here, "FocusedSession.tsx"), "utf8");
+    expect(ss).toContain('const [phase, setPhase] = useState<"gather" | "session" | "close">("gather");');
+    expect(ss).toContain("function backToDesk()");
+    // both views (cards ⇄ ledger) still gather (the selector covers cells + ledger rows)
+    const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
+    expect(stage).toContain(".tdb-cell");
+    expect(stage).toContain(".tdb-lrow");
+  });
+});

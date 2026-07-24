@@ -36,8 +36,8 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // the rail's pills ≥1428; the ⚲ FILTER pill fronting the drawer below
-    sel: ".tdb-fpill, .tdb-fpillbtn",
+    // the sidebar's filter rows; the collapsed ⚲ icon fronting the overlay below
+    sel: ".tdb-fpill, .tsh-filtericon",
     h: "Narrow the desk.",
     p: "Quiet filters with live counts: click one to see only that kind of work. Show all brings everything back.",
     cta: "Next →",

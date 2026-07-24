@@ -124,7 +124,7 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
 describe("settlement P4 — the sweep", () => {
   it("themes.md records the sage settlement and marks the stone step superseded", () => {
     const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
-    expect(themes).toContain("## To-do containers — sage (settled)");
+    expect(themes).toContain("## To-do containers — sage (settled — pastille colours)");
     expect(themes).toContain("THE SAGE TRIO");
     expect(themes).toContain("THE 42px LAW");
     expect(themes).toContain("THE REVIEW & FILTER SEAT");
@@ -152,7 +152,7 @@ describe("settlement P4 — the sweep", () => {
     expect(tour).toContain('sel: ".tdb-herobegin"');
     expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // the anchor exists at that (hero) seat
     // every other stop's anchor still exists in the board or the shell
-    for (const sel of [".tdb-fpill, .tdb-fpillbtn", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
+    for (const sel of [".tdb-fpill", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
       expect(tour).toContain(sel);
       for (const one of sel.split(", ")) expect(css).toContain(one);
     }

@@ -1,7 +1,7 @@
 /**
  * To-do WORKBENCH (F12) — design refs: todo-workbench-shell-v1.html (Option B — drawer shell,
  * masthead, card view), todo-ledger-v1.html (the ledger), todo-focus-flow.html (the FOCUS FLOW —
- * the one completion surface). Renders inside `F12Page` (`.t-f12 f12-root`), so every colour is a
+ * the one completion surface). Renders inside the TodoShell (`.t-f12 tsh-root`), so every colour is a
  * `.t-f12` token — NO capp/bold/edn. Classes are `tdb-` prefixed.
  */
 
@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-sbpair-h: 34px; --tdb-sbpair-fs: 12.5px; --tdb-search-w: 460px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-gutter-x: 40px; --tdb-sect-fs: 17px; --tdb-search-h: 46px; --tdb-search-clear: 40px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -45,12 +45,11 @@
    the sage document band is retired for the panel. */
 .tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 0 0 9px; margin-bottom: 4px; background: none; border-bottom: 1px solid var(--tdb-panel-hair); box-sizing: border-box; }
 .tdb-sheetbody { padding: 0; }
-@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-centre { width: 100%; } }
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-centre { width: 100%; } }
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
-.tdb-hero { padding: 26px 0 0; position: relative; }
 /* ── THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle
    left, the session CTA pair on the right. The search lives in the breadcrumb bar now. ── */
 .tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 4px 2px 0; }
@@ -65,32 +64,12 @@
 .tdb-revlink.seen { color: #8a7d6e; }
 /* v7 — the sub-slot: fixed height so nothing below shifts and nothing overlaps; hosts exactly
    ONE occupant at a time — the subtitle at rest → the ritual lines → the v9 progress row —
-   crossfading within it. The clearance below still holds (--tdb-search-clear). */
+   crossfading within it. The clearance below is the hero's own margin. */
 .tdb-srchrow { display: flex; align-items: center; margin: 8px 0 0; min-height: var(--tdb-search-h); position: relative; }
 .tdb-srchrow.insession .tdb-herosub { opacity: 0; pointer-events: none; transition: opacity 400ms; }
 .tdb-heroslot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; animation: tdbSesIn 400ms ease; }
-/* ── THE SETTLEMENT (sage, final) — the pair's seat: the TOP OF THE SIDEBAR's body, under the
-   REVIEW & FILTER band. Stacked full-width within the card, Begin first (ink primary) then the
-   review chip (white secondary), both centred-label at --tdb-sbpair-h, above a hairline with
-   the filter pills unchanged beneath. The hero is title + search only; the sheet's bar keeps
-   only its line and the toggle. ── */
-.tdb-sbpair { display: flex; flex-direction: column; gap: 7px; padding: 11px 9px 4px; }
-.tdb-btnp.sb, .tdb-rvchip.sb { width: 100%; height: var(--tdb-sbpair-h); padding: 0 12px; font-size: var(--tdb-sbpair-fs); justify-content: center; white-space: nowrap; box-shadow: none; }
-/* MEASURED at the sidebar's 248px: 206px of label room against a 133px worst-case label
-   (Begin, 12.5px, with its glyph) — 73px of slack, so no tier wraps and no font step is
-   needed; the size stays a token so a future rail width has one knob. Ellipsis is forbidden
-   and impossible here: the labels never reach the edge. */
-.tdb-sbdiv { display: block; height: 1px; background: #eee8dd; margin: 8px 9px 2px; }
+/* the ink Begin pill's soft lift, in the hero's CTA pair */
 .tdb-herobegin { box-shadow: 0 1px 4px rgba(29, 16, 12, 0.18); }
-.tdb-sbpair .tdb-rvchip { animation: tdbChipIn 200ms ease; }
-@keyframes tdbChipIn { from { opacity: 0; transform: translateY(4px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-sbpair .tdb-rvchip { animation: none; } }
-/* doc pass P1 (todo-doc-pass-a.html §1): 380px, right-hand 19px glass in the oat roundel */
-.tdb-bigsearch { width: var(--tdb-search-w); max-width: calc(100vw - 2 * var(--tdb-edge)); height: var(--tdb-search-h); box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 8px 0 20px; color: var(--muted); font-size: 13px; }
-.tdb-mag { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--oat); color: var(--ink); flex: 0 0 auto; }
-.tdb-bigsearch input { flex: 1; min-width: 0; border: none; background: none; font-size: 13px; color: var(--ink); outline: none; }
-.tdb-bigsearch input::placeholder { color: var(--muted); }
-.tdb-bigsearch:focus-within { border-color: var(--ink-2); }
 /* the workspace shell (ref .main h1): the plain-page hero title, ~33px, left-aligned */
 .tdb-ask { font-family: var(--f12-serif); font-size: 33px; font-weight: 700; color: #2b2118; line-height: 1.12; letter-spacing: -0.01em; }
 /* v7 — the gentle title crossfade (opacity only, 800ms). The pair share the line: t1 in flow,
@@ -136,7 +115,6 @@
    verbs never scroll away); the rail's three squares are short and never scroll. Budget at 900px:
    900 − 49 (appnav) − 48 (gutters) = 803 ≫ ≈370 for a full Today. Scrollbars: thin, hairline,
    hover-visible, gutter stable. ── */
-.tdb-fside, .tdb-railr { position: sticky; top: var(--tdb-gutter); max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2)); display: flex; flex-direction: column; }
 .tdb-tmid2 { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
 .tdb-tmid2:hover, .tdb-tmid2:focus-within { scrollbar-color: var(--hairline) transparent; }
 /* ── THE FILTER RAIL (Final Shape P2, ref .fside) — 248px sticky white panel: SHOW label,
@@ -144,7 +122,6 @@
    the lens below a divider, and the top-bordered foot (Task-settings row + the Pro square). ── */
 /* hero-pair P1: the toolbelt stack is retired — the aside is the plain positioning wrapper
    and the left column begins directly with the filter card (.tdb-fbox). */
-.tdb-fside { width: var(--tdb-rail); flex: 0 0 auto; }
 .tdb-fbox { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 3px 14px rgba(58, 28, 20, 0.08); overflow: hidden; display: flex; flex-direction: column; }
 /* frame P3 — the SECTION HEADER bands (todo-frame-v5.html .rsech): the rail + the sheet's
    bar share one grey system. .nt2 drops the top rule when the band follows the review row's
@@ -236,8 +213,6 @@
 @media (prefers-reduced-motion: reduce) { .tdb-amodal { animation: none; } .tdb-amlive { animation: none; } .tdb-dtick.spin { animation: none; } }
 /* the FILTER DRAWER (<1428, P6): the rail's panel as a focus-trapped overlay behind the
    ⚲ FILTER pill beside the floating search. */
-.tdb-fpillbtn { height: 46px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 0 18px; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.08em; font-weight: 700; color: var(--ink-2); cursor: pointer; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); flex: 0 0 auto; }
-.tdb-fpillbtn:hover { border-color: var(--ink-2); }
 .tdb-fdrawer { position: fixed; inset: 0; z-index: 60; }
 .tdb-fdscrim { position: absolute; inset: 0; background: rgba(30, 26, 22, 0.35); }
 .tdb-fdpanel { position: absolute; top: 0; left: 0; bottom: 0; width: var(--tdb-rail); background: var(--white, #fff); border-right: 1px solid var(--line); box-shadow: 0 10px 34px rgba(58, 28, 20, 0.25); overflow-y: auto; padding-bottom: 12px; }
@@ -553,18 +528,12 @@ button.tdb-tdot { cursor: pointer; }
 
 /* ── VI P1: the Today COLUMN — always on ≥1200px (no collapsed state, no tab) — + the masthead
    chip/popover below. Still the natural home for future companions; 12px stack gaps (ref .rcol). ── */
-.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; gap: 14px; } /* 256 per width v3 */
-@media (max-width: 1239.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
 /* v4 P3 — CONDITIONAL TODAY: empty → the board runs 4-up (sheet 1072, assembly 1344); active →
    3-up (sheet 812, assembly 1364). Cards stay 250 throughout; the widths transition 220ms while
    Today slides in/out. */
 .tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }
 .tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }
-.tdb-railr.in { animation: tdbTodayIn 220ms ease; }
-@keyframes tdbTodayIn { from { opacity: 0; transform: translateX(24px); } }
-.tdb-railr.out { animation: tdbTodayOut 220ms ease forwards; }
-@keyframes tdbTodayOut { to { opacity: 0; transform: translateX(24px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; } .tdb-asm, .tdb-centre { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .tdb-asm, .tdb-centre { transition: none; } }
 /* the compact break (P6): the rail leaves the flow for the overlay drawer */
 @media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }
 /* ── doc pass P2 — THE ≥1700 WIDTH TIER (todo-doc-pass-a.html §2): 4-up WITH Today — sheet 1072,

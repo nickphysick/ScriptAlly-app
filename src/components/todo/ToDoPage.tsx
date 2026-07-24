@@ -2,11 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ToDoPage — THE FINAL SHAPE (design-refs/todo-final.html, THE LAWS v4). Top: the stripped
- * HERO (the centred headline over the floating search, bare ground). Left: the
- * FILTER RAIL (vertical quiet pills + settings/Pro foot). Centre: the 812 sheet hosting both
- * views (the wrapped grid · the run sheet) under the resident review. Right: Today (or its
- * narrow chip beside the search).
+ * ToDoPage — THE WORKSPACE SHELL (design-refs/todo-workspace-shell.html, todo-fix48). The page
+ * renders inside TodoShell: the parchment navigation sidebar (WORKSPACE + the FILTER section +
+ * foot) and the breadcrumb bar (with the search pill). The page itself is the hero (title +
+ * subtitle + the CTA-over-link pair) and ONE bordered panel (the items row, both card sections
+ * and the Pro colophon). Today lives in its bottom-right corner pop-up.
  *
  * Presentation + view-model only — the task engine, taskFlags and every write path are untouched;
  * lane renames are UI labels (UserTask / taskType enums unchanged in code). The pure view-model is

@@ -321,7 +321,7 @@ describe("toolbelt P3 — sweep", () => {
 
 describe("hero-pair P5 — sweep", () => {
   it("the toolbelt-era clothes are extinct: no stack gap, no cream chip fill, no mono pills, no dot, no fsb2", () => {
-    expect(rule(".tdb-fside")).not.toContain("gap");
+    expect(css).not.toContain(".tdb-fside"); // the floating filter rail is retired
     expect(rule(".tdb-rvchip")).not.toContain("#f3e7da"); // cream lives on the ink primary's TEXT only
     expect(rule(".tdb-fpill")).not.toContain("--f12-mono");
     for (const dead of ["tdb-rvnew", "tdb-fsb2", "renderToolbelt"]) {
@@ -934,9 +934,9 @@ describe("A1 → Final Shape — the hero band (supersedes the strip)", () => {
     expect(page).not.toContain("tdb-herorow");
     expect(page).not.toContain("tdb-strip");
   });
-  it("the hero is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
-    expect(rule(".tdb-hero")).not.toContain("sticky");
-    expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
+  it("the hero is not sticky (scrolls away); the workspace shell owns the sidebar now", () => {
+    expect(css).not.toContain(".tdb-hero {"); // the old hero wrapper is gone
+    expect(css).not.toContain(".tdb-fside, .tdb-railr"); // the floating flanks retired for the shell + corner
   });
 });
 describe("A2 → Final Shape — the batch copy + roundels live on the run-sheet row", () => {
@@ -951,7 +951,6 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 26px"); // the workspace shell: the hero→panel gap
-    expect(rule(".tdb-fside, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
     expect(rule(".tdb-grid")).toContain("gap: var(--g12)"); // P4: the grid is the card-gutter consumer
@@ -1033,9 +1032,8 @@ describe("Width v4 — the centred assembly tokens (Final Shape)", () => {
   });
   it("the assembly centres; the arithmetic is the LAWS' 248+24+812+24+256", () => {
     expect(rule(".tdb-asm")).toContain("width: var(--tdb-asm); margin: 0 auto;");
-    expect(css).toContain("filter rail 248 · 24 · sheet 812");
-    expect(css).toContain("Today 256 = 1364px");
-    expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
+    // the assembly centres on the token; the Today column left it (Today is a corner pop-up now)
+    expect(rule(".tdb-wrap.today-off")).toContain("--tdb-asm"); // the full-width board width
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
@@ -1217,12 +1215,9 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
 });
 
 describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
-  it("the shared rule: sticky at the gutter, viewport-capped via the appnav token, flex column", () => {
-    const shared = rule(".tdb-fside, .tdb-railr");
-    expect(shared).toContain("position: sticky; top: var(--tdb-gutter)");
-    expect(shared).toContain("max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2))");
-    expect(shared).toContain("display: flex; flex-direction: column;");
-    expect(css).toContain("THE COLUMN SCROLL CONTRACT");
+  it("the Today corner is the sole internally-scrolling column now (the flanks retired)", () => {
+    expect(css).not.toContain(".tdb-fside, .tdb-railr"); // the shared flank rule is gone
+    expect(rule(".tdb-tdpop")).toContain("max-height: min(70vh, 560px)"); // the corner caps + scrolls
   });
   it("Today keeps fixed head/foot with ONE scrolling middle; verbs never scroll away", () => {
     expect(rule(".tdb-tmid2")).toContain("overflow-y: auto; min-height: 0;");

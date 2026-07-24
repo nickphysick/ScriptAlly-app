@@ -868,7 +868,14 @@ Rule-text-locked in `todoTagLaw.test.ts`.
 *(The stone pair `#f5f3f0`/`#e6e2db` at 36px, and the Begin/review pair seated in the sheet's
 bar, were one exploration step — `todo-fix39`. Both are superseded by the sage settlement.)*
 
-## To-do containers — sage (settled)
+## To-do containers — sage ⚠️ container structure SUPERSEDED by the workspace shell (below); the sage pastille COLOURS it settled still hold
+
+(The sage 42px headers + the REVIEW & FILTER sidebar-seated pair were one exploration step —
+todo-fix40. The workspace shell (todo-fix48) rebuilds the frame: the parchment sidebar, the
+panel, the corner Today. The sage headers survive only on Today's card + the collapsed filter
+overlay; the pastille card colours are untouched throughout.)
+
+## To-do containers — sage (settled — pastille colours)
 
 The colour question is **closed**. The soft pastille card system stands exactly as deployed —
 pink urgency, latte housekeeping, butter notes, white tag pills — and is not revisited: **the
@@ -899,3 +906,37 @@ stone included, are exploration history and are not refs).
 
 *(No blush set was ever adopted: `todo-blush-prompt.md` was superseded before it ran, and the
 board carries no blush or greige tokens.)*
+
+## To-do workspace shell (settled)
+
+The redesign's FINAL structure (ref `design-refs/todo-workspace-shell.html` = todo-fix48,
+normative; fix31–fix47 — the blush/stone/sage settlements included — are exploration history,
+superseded). The soft pastille card system is **settled and untouched** — pink urgency, latte
+housekeeping, butter notes, white tag pills — because **the pastille bands are SIGNAL**; the
+frame around them is furniture and does not compete.
+
+- **THE PARCHMENT CHROME PAIR:** the always-on navigation sidebar (`.tsh-nav`, ~212px) and the
+  breadcrumb bar (`.tsh-bcbar`) share one fill `#f2ede7` (`--tsh-chrome`) and are joined by
+  `#e4dbcd` borders (`--tsh-chrome-border`) so they read as one continuous shell. The sidebar
+  is brand → WORKSPACE nav → a slotted FILTER section → Task settings + Help centre foot; the
+  bar carries the QUERYING / To-do crumb, the search white pill, and the account block.
+- **THE WHITE-CARD ACTIVE LAW (never burgundy):** an active nav item or filter row inverts to
+  the soft white card — `#fdfcfa` fill, `#e0d6c6` hairline, whisper shadow, ink text, weight
+  700 (`.tsh-ni.on`). A burgundy fill is forbidden anywhere in the nav.
+- **THE PANEL:** one thin warm-grey bordered container (`.tdb-mainc`, `#fff`, `--tdb-panel-bd
+  #e2dbd0`, radius 14, 22px padding) wraps the whole working area — the items row, both card
+  sections, and the Pro colophon.
+- **THE ITEMS LINE:** the panel's top row — Playfair `{n} items` when unfiltered, `Showing {x}
+  of {y} items` when a filter or search narrows — with the unchanged cards/ledger toggle right
+  and a hairline beneath. No text tabs, no Sort button.
+- **THE HERO PAIR:** the hero is plain on the page — title (~33px) + quiet-grey subtitle left,
+  the ink Begin pill with the underlined "Last week in review" link beneath it right. The
+  search is not a hero element; it lives in the bar.
+- **TODAY'S CORNER FORM:** a floating white card fixed bottom-right (`.tdb-tdpop`, 250px,
+  `#ddd2c2` hairline, radius 14, deep shadow), minimising to a pill (state persisted), absent
+  when empty, reusing the one renderTodayPanel (sage completion circles, Work the list).
+- **Below --tsh-collapse (1100px)** the sidebar folds to an icon rail (tooltips; the FILTER
+  section → a ⚲ icon opening the existing overlay). A focused session slides the sidebar off
+  left and fades the bar search via `.tsh-clearing`, the breadcrumb bar staying (the v9
+  app-bar exemption).
+
