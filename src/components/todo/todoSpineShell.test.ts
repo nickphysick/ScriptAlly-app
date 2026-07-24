@@ -153,9 +153,22 @@ describe("spine P3 — the bar joins the page", () => {
     expect(tsh).not.toContain("tsh-search"); // the search is not in the bar
     expect(page).toContain('<span className="tdb-hsearch">'); // it is the panel-header pill
   });
+  it("the L is seamless: the bar's fill + rule are the SAME tokens as the panel's (not lookalikes)", () => {
+    // the panel's right rule and the bar's bottom rule read the one --spine-pbd; both fills the
+    // one --spine-pan — so the corner has no seam, and a retone moves both together
+    expect(rule(".tsh-bcbar")).toContain("background: var(--spine-pan)");
+    expect(rule(".spine-panel")).toContain("background: var(--spine-pan)");
+    expect(rule(".tsh-bcbar")).toContain("border-bottom: 1px solid var(--spine-pbd)");
+    expect(rule(".spine-panel")).toContain("border-right: 1px solid var(--spine-pbd)");
+    // the content body below the bar is NOT parchment — the L is just the panel + bar
+    expect(rule(".tsh-body")).not.toContain("var(--spine-pan)");
+  });
   it("HubHeaderBar source is UNTOUCHED (the wrapper approach — the shell paints its own bar)", () => {
-    for (const mine of ["spine-", "TodoShell", "todo-fix54", "hardback"]) expect(hub).not.toContain(mine);
-    expect(hub).toContain("export const HubHeaderBar");
+    for (const mine of ["spine-", "TodoShell", "todo-fix54", "hardback", "tsh-"]) expect(hub).not.toContain(mine);
+    // the wrapper approach: the To-do bar is the shell's own .tsh-bcbar, never HubHeaderBar
+    expect(page).not.toContain("HubHeaderBar");
+    expect(hub).toContain("export const HubHeaderBar"); // its own grammar, intact
+    expect(hub).toContain("qhbar");
   });
 });
 
