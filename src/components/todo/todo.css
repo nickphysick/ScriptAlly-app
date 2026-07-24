@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -315,7 +315,8 @@
 /* Final Shape P4 — THE WRAPPED GRID (reels retired): three fixed 250px columns, every card
    visible, one vertical scroll — no pagers, no partials, no snap, no scrollport clipping (the
    hover overlay + Later menu overflow freely; the wrap is the only scroller). */
-.tdb-grid { display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--g12); padding: 6px 0 4px; }
+/* the grid gap clears the sticker block (≥ --tdb-sticker-off) so blocks never touch */
+.tdb-grid { display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--tdb-grid-gap); padding: 6px 0 4px; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-vwrap, .tdb-vinner, .tdb-tile, .tdb-gcard { transition: none; }
   .tdb-tile.hov, .tdb-gcard.hov { transform: none; }
@@ -438,6 +439,17 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-cell:hover, .tdb-cell:focus-within { z-index: 30; }
 .tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; min-height: 100%; }
 .tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
+/* ── SHELL POLISH P3 — STICKER CARDS: a 1.5px ink border + a hard offset block behind (no
+   blur) in the card's family colour. The pastille bands + white tag pills inside are
+   untouched; the ledger rows, the Today pop-up and the session page are NOT stickers. ── */
+.tdb-tile.do, .tdb-tile.hk, .tdb-tile.nt, .tdb-gcard { border: var(--tdb-sticker-bw) solid var(--tdb-sticker-bd); transition: box-shadow 0.18s ease, transform 0.18s ease; }
+.tdb-tile.do { box-shadow: var(--tdb-sticker-off) var(--tdb-sticker-off) 0 var(--tdb-sticker-pink); }
+.tdb-tile.hk, .tdb-gcard { box-shadow: var(--tdb-sticker-off) var(--tdb-sticker-off) 0 var(--tdb-sticker-latte); }
+.tdb-tile.nt { box-shadow: var(--tdb-sticker-off) var(--tdb-sticker-off) 0 var(--tdb-sticker-butter); }
+/* the hover: a subtle lift — the block grows one step, the card nudges up-and-left */
+.tdb-tile.do.hov { box-shadow: var(--tdb-sticker-off-hov) var(--tdb-sticker-off-hov) 0 var(--tdb-sticker-pink); transform: translate(-1px, -1px); }
+.tdb-tile.hk.hov, .tdb-gcard.hov { box-shadow: var(--tdb-sticker-off-hov) var(--tdb-sticker-off-hov) 0 var(--tdb-sticker-latte); transform: translate(-1px, -1px); }
+.tdb-tile.nt.hov { box-shadow: var(--tdb-sticker-off-hov) var(--tdb-sticker-off-hov) 0 var(--tdb-sticker-butter); transform: translate(-1px, -1px); }
 .tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); } /* the z raise rides the CELL (detail P1) */
 /* the default ring dies; keyboard focus = a 2px ink outline riding the surface's radius */
 .tdb-tile:focus, .tdb-gcard:focus { outline: none; }

@@ -579,7 +579,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
 
 describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
   it("the grid: repeat(3, cardw) + g12, ALL cards rendered (no truncation, no pagers)", () => {
-    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--g12)");
+    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--tdb-grid-gap)");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("tdb-reelpg");
   });
@@ -687,7 +687,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
   it("Final Shape P4 — THE WRAPPED GRID: 3 fixed columns, all cards, one scroll; reels/snap stay retired", () => {
     expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, var(--tdb-cardw))");
-    expect(rule(".tdb-grid")).toContain("gap: var(--g12)");
+    expect(rule(".tdb-grid")).toContain("gap: var(--tdb-grid-gap)");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("reelFit");
     expect(page).not.toContain("laneFit");
@@ -953,7 +953,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 0"); // the hero→panel gap (the column owns the outer gutters)
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
-    expect(rule(".tdb-grid")).toContain("gap: var(--g12)"); // P4: the grid is the card-gutter consumer
+    expect(rule(".tdb-grid")).toContain("gap: var(--tdb-grid-gap)"); // P3: the grid gap clears the sticker block
   });
 });
 
