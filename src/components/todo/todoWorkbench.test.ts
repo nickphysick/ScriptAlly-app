@@ -66,12 +66,12 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).not.toContain("SHOW ALL<span"); // explicitly not capitals
     // P4: the ink outline is retired — active filter rows take the drawer's faint parchment fill
     const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("background: var(--rail-pill, #f1e9df)");
+    expect(sel).toContain("background: var(--tsh-active-bg)"); // P2: the shell's warm faint fill
     expect(sel).not.toContain("box-shadow");
     expect(sel).not.toContain("border-color: var(--ink)");
     expect(css).not.toContain(".tdb-fpill.sel::before"); // no tick glyph
     const nar = rule(".tdb-fpill.nar");
-    expect(nar).toContain("background: var(--rail-pill, #f1e9df)"); // the narrowed rows wear the same faint fill
+    expect(nar).toContain("background: var(--tsh-active-bg)"); // the narrowed rows wear the same warm fill
     expect(nar).not.toContain("inset 0 0 0 1px var(--ink)");
     expect(page).not.toContain("tdb-frst");
     expect(css).not.toContain("tdb-frst");

@@ -13,11 +13,13 @@
   --tsh-nav-w: 212px;
   --tsh-nav-icon-w: 60px;
   --tsh-collapse: 1100px;
-  /* SHELL POLISH P4 — the drawer's grammar (the same --rail-* tokens the NavDrawer reads;
-     its fallbacks are the shared values). The active state is the faint parchment fill ONLY. */
-  --tsh-active-bg: var(--rail-pill, #f1e9df);
+  /* ALIGNMENT FIX P2 — the active fill is the sidebar's OWN parchment (#f2ede7), one step
+     deeper, zero green cast. The app's --rail-pill is sage (#e9ece4, theme-editor retone), so
+     the shell does NOT read it — it owns these two warm values; the warm --rail-* neutrals
+     (label/hair/itemtx) are still shared. */
+  --tsh-active-bg: #e6ddcf;
+  --tsh-hov: #ece5d9;
   --tsh-active-ink: var(--rail-ink, #2b2118);
-  --tsh-hov: var(--rail-hov, #f7f3ed);
   --tsh-label: var(--rail-label, #9c8878);
   --tsh-hair: var(--rail-hair, #e7ddd2);
   --tsh-itemtx: var(--rail-itemtx, #5a4a40);

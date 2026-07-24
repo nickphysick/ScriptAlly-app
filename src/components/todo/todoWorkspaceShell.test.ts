@@ -73,7 +73,7 @@ describe("shell P1 — the active-state law: the white card, NEVER burgundy", ()
     expect(on).toContain("font-weight: 600");
     expect(on).not.toContain("border"); // no border
     expect(on).not.toContain("box-shadow"); // no shadow
-    expect(rule(".tsh-root")).toContain("--tsh-active-bg: var(--rail-pill, #f1e9df)"); // the drawer's fill
+    expect(rule(".tsh-root")).toContain("--tsh-active-bg: #e6ddcf"); // ALIGNMENT FIX P2: the sidebar's own warm parchment (no green)
   });
   it("no burgundy fill anywhere in the nav styles (the law, asserted)", () => {
     for (const burgundy of ["#7c3a2a", "#f5c7c2", "#f3e3dc", "#f5e2da"]) {

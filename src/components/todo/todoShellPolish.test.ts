@@ -120,8 +120,10 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
   };
   it("the shell reads the drawer's shared --rail-* tokens (extracted, not duplicated)", () => {
     const root = tRule(".tsh-root");
-    expect(root).toContain("--tsh-active-bg: var(--rail-pill, #f1e9df)");
-    expect(root).toContain("--tsh-hov: var(--rail-hov, #f7f3ed)");
+    // ALIGNMENT FIX P2: the active fill + hover are the shell's OWN warm parchment (the app's
+    // --rail-pill is sage); the warm neutrals stay shared
+    expect(root).toContain("--tsh-active-bg: #e6ddcf");
+    expect(root).toContain("--tsh-hov: #ece5d9");
     expect(root).toContain("--tsh-label: var(--rail-label, #9c8878)");
     expect(root).toContain("--tsh-hair: var(--rail-hair, #e7ddd2)");
     expect(root).toContain("--tsh-itemtx: var(--rail-itemtx, #5a4a40)");
@@ -159,12 +161,12 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
     // the white-card variant from the shell pack is retired
     expect(tshCss).not.toContain("#fdfcfa");
   });
-  it("the filter rows share it: active = faint fill, the ink outline retired; reactive bits carry over", () => {
+  it("the filter rows share it: active = the warm faint fill, the ink outline retired; reactive bits carry over", () => {
     const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("background: var(--rail-pill, #f1e9df)");
+    expect(sel).toContain("background: var(--tsh-active-bg)"); // the shell's warm fill (P2)
     expect(sel).not.toContain("box-shadow");
     expect(sel).not.toContain("border-color: var(--ink)");
-    expect(rule(".tdb-fpill.nar")).toContain("background: var(--rail-pill, #f1e9df)");
+    expect(rule(".tdb-fpill.nar")).toContain("background: var(--tsh-active-bg)");
     // the reactive behaviour is untouched: the dot, the count, zero-dimming, the struck totals, the chip
     expect(rule(".tdb-fpill .tdb-dotc")).toContain("border-radius: 50%");
     expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
@@ -231,5 +233,40 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
     expect(gap).toBeGreaterThanOrEqual(off);
     // the batch + Expand-n cells are grid items → they stretch with their 1fr tracks
     expect(rule(".tdb-cell.b")).toContain("height: var(--tdb-cardh-g)");
+  });
+});
+
+describe("alignment fixes P2 — the warm active fill (no green cast)", () => {
+  const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+  const tRule = (sel: string): string => {
+    const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`tsh rule not found: ${sel}`);
+    return m[1];
+  };
+  it("the active fill is #e6ddcf and the hover #ece5d9 — the sidebar's parchment, one step deeper", () => {
+    const root = tRule(".tsh-root");
+    expect(root).toContain("--tsh-active-bg: #e6ddcf");
+    expect(root).toContain("--tsh-hov: #ece5d9");
+    expect(root).toContain("--tsh-chrome: #f2ede7"); // the base parchment the fill deepens
+  });
+  it("applied to nav items AND filter rows; still no border/outline/shadow", () => {
+    const on = tRule(".tsh-ni.on");
+    expect(on).toContain("background: var(--tsh-active-bg)");
+    expect(on).not.toContain("border");
+    expect(on).not.toContain("box-shadow");
+    expect(on).not.toContain("outline");
+    expect(rule(".tdb-fpill.sel")).toContain("background: var(--tsh-active-bg)");
+    expect(rule(".tdb-fpill.nar")).toContain("background: var(--tsh-active-bg)");
+    expect(rule(".tdb-fpill:hover")).toContain("background: var(--tsh-hov)");
+  });
+  it("the green-cast token (--rail-pill / the sage #e9ece4) is not READ anywhere in the sidebar scope", () => {
+    // the shell no longer reads the app's sage nav-pill; a mention survives only in a comment
+    const liveTsh = tshCss.replace(/\/\*[\s\S]*?\*\//g, ""); // strip comments
+    expect(liveTsh).not.toContain("--rail-pill");
+    expect(liveTsh).not.toContain("#e9ece4");
+    expect(liveTsh).not.toContain("var(--rail-hov"); // the sage-adjacent hover read is gone too
+    // and the filter rows in todo.css don't read the sage pill either
+    expect(css).not.toContain("var(--rail-pill");
+    expect(css).not.toContain("var(--rail-hov");
   });
 });
