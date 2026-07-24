@@ -850,18 +850,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <button type="button" className="tdb-rvx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
             </div>
           )}
-          {/* THE SHEET — unchanged internally, minus the docband + banner it loses */}
-          <div className="tdb-mainc">
-            {/* doc pass P3 — THE DOCUMENT HEADER: a warm-grey toolbar band across the sheet's
-                full top edge, BOTH views (it sits outside the view branch): meta left, the
-                restyled segment right. The body padding starts below the band. */}
-            <div className="tdb-dochead">
-              {/* detail P2 — the bar line: normal-weight Playfair reading the SAME shownX/shownY
-                  the rail counts derive from, so it re-derives live under search/filter; lining
-                  + tabular figures keep the numerals on the baseline at a steady width. */}
-              <span className="tdb-bartext">Showing {shownX} of {shownY} items on your list</span>
-              {/* THE SETTLEMENT (sage) — the bar holds only its Playfair line and the view
-                  toggle at the far right. The pair's seat is the sidebar's top. */}
+          {/* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: ONE thin-bordered container wrapping
+              the whole working area — the items row, both card sections, and the Pro colophon. */}
+          <div className="tdb-mainc tdb-panel">
+            {/* the items row: the Playfair line left ("{n} items" unfiltered → "Showing {x} of
+                {y} items" whenever a filter/search narrows), the view toggle right, hairline
+                beneath. No Cards/Ledger text tabs, no Sort button. */}
+            <div className="tdb-dochead tdb-items">
+              <span className="tdb-bartext">
+                {active ? `Showing ${shownX} of ${shownY} items` : `${shownY} items`}
+              </span>
               <span className="tdb-vseg" role="group" aria-label="View">
                 <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
                 <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
@@ -938,17 +936,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         )}
             </div>
+            {/* THE COLOPHON — moved INSIDE the panel (the shell), keeping its gating + copy */}
+            {!isProUser(currentUser) && (
+              <ProBanner
+                hkCount={tiles.housekeeping}
+                totalCount={shownY}
+                rows={assistantRows}
+                onPreview={() => setAssistantOpen(true)}
+                onWhatsInPro={() => onNavigate("plans")}
+              />
+            )}
           </div>
-          {/* THE COLOPHON — the page's foot note on the bare ground (detail P4) */}
-          {!isProUser(currentUser) && (
-            <ProBanner
-              hkCount={tiles.housekeeping}
-              totalCount={shownY}
-              rows={assistantRows}
-              onPreview={() => setAssistantOpen(true)}
-              onWhatsInPro={() => onNavigate("plans")}
-            />
-          )}
           </div>
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the

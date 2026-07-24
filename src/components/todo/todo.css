@@ -21,34 +21,40 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-sbpair-h: 34px; --tdb-sbpair-fs: 12.5px; --tdb-search-w: 460px; --tdb-search-h: 46px; --tdb-search-clear: 40px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-sbpair-h: 34px; --tdb-sbpair-fs: 12.5px; --tdb-search-w: 460px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-gutter-x: 40px; --tdb-sect-fs: 17px; --tdb-search-h: 46px; --tdb-search-clear: 40px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 50px 0 26px; } /* the assembly work row; detail P2: 22 + the pack's +28 air above all three columns */
+/* the workspace shell: the hero→panel gap is the row's top padding; the wrap's --tdb-edge
+   gutter keeps the content off the workspace edges (nothing touches). */
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: var(--tdb-hero-gap) 0 26px; } /* the assembly work row */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
 /* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),
    812 wide, 16 apart. The stack owns the width token + the 220ms Today transition; each
    container fills it. */
-.tdb-centre { width: var(--tdb-sheet); flex: 0 0 auto; min-width: 0; display: flex; flex-direction: column; gap: 16px; transition: width 220ms ease; }
-.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 0; }
+.tdb-centre { width: var(--tdb-sheet); flex: 0 0 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); transition: width 220ms ease; }
+/* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: one thin warm-grey bordered container
+   wrapping the items row, both card sections and the colophon. */
+.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--tdb-panel-bd); border-radius: var(--tdb-panel-r); padding: var(--tdb-panel-pad); }
 /* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */
 /* frame P1 (todo-frame-v5.html): the bar lightens — no centred title, meta left / toggle right only */
-.tdb-dochead { display: flex; align-items: center; gap: 10px; height: var(--container-head-h); padding: 0 var(--container-head-pad); background: var(--container-head-bg); border-bottom: 1px solid var(--container-head-rule); border-radius: 15px 15px 0 0; box-sizing: border-box; }
-.tdb-sheetbody { padding: 16px 18px 18px; }
+/* the items row (ref .tabs/.items): the Playfair line + the toggle, a hairline beneath;
+   the sage document band is retired for the panel. */
+.tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 0 0 9px; margin-bottom: 4px; background: none; border-bottom: 1px solid var(--tdb-panel-hair); box-sizing: border-box; }
+.tdb-sheetbody { padding: 0; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-centre { width: 100%; } }
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
-.tdb-hero { padding: 40px 0 0; text-align: center; position: relative; }
+.tdb-hero { padding: 26px 0 0; position: relative; }
 /* ── THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle
    left, the session CTA pair on the right. The search lives in the breadcrumb bar now. ── */
 .tdb-herohead { display: flex; align-items: flex-start; gap: 18px; padding: 4px 2px 0; }
-.tdb-herol { min-width: 0; text-align: left; }
+.tdb-herol { min-width: 0; text-align: left; position: relative; }
 .tdb-herosub { font-size: 11px; color: #8a7d6e; margin-top: 4px; }
 .tdb-heroright { margin-left: auto; display: flex; flex-direction: column; align-items: center; gap: 9px; flex: 0 0 auto; }
 .tdb-heroright.insession { opacity: 0; pointer-events: none; transition: opacity 400ms; }
@@ -85,12 +91,13 @@
 .tdb-bigsearch input { flex: 1; min-width: 0; border: none; background: none; font-size: 13px; color: var(--ink); outline: none; }
 .tdb-bigsearch input::placeholder { color: var(--muted); }
 .tdb-bigsearch:focus-within { border-color: var(--ink-2); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
+/* the workspace shell (ref .main h1): the plain-page hero title, ~33px, left-aligned */
+.tdb-ask { font-family: var(--f12-serif); font-size: 33px; font-weight: 700; color: #2b2118; line-height: 1.12; letter-spacing: -0.01em; }
 /* v7 — the gentle title crossfade (opacity only, 800ms). The pair share the line: t1 in flow,
    t2 absolute over it — the ONE intended overlap (a crossfade cannot be done without it); the
    sub-slot below never overlaps and never shifts. */
 .tdb-ask.t1, .tdb-ask.t2 { transition: opacity 800ms ease; }
-.tdb-ask.t2 { position: absolute; left: 0; right: 0; top: 40px; opacity: 0; pointer-events: none; }
+.tdb-ask.t2 { position: absolute; left: 0; right: 0; top: 0; opacity: 0; pointer-events: none; }
 .tdb-ask.t1.out { opacity: 0; }
 .tdb-ask.t2.in { opacity: 1; }
 /* (the strip census retired — the counts live on the filter rail's pills) */
@@ -628,7 +635,7 @@ button.tdb-tdot { cursor: pointer; }
    currentColor cup; ink "Open it ›" ⇄ ghost "View again" on the derived boolean. No ✕, ever. ── */
 /* detail P2 — the bar line (todo-detail-a.html §2): lining + tabular figures — Playfair's
    oldstyle figures dip below the baseline and shift width as counts change */
-.tdb-bartext { font-family: var(--f12-serif); font-size: 12.5px; font-weight: 700; color: var(--container-head-ink); font-variant-numeric: lining-nums tabular-nums; } /* hero-pair P4: bold */
+.tdb-bartext { font-family: var(--f12-serif); font-size: 15px; font-weight: 700; color: #2b2118; font-variant-numeric: lining-nums tabular-nums; } /* hero-pair P4: bold */
 /* the segment restyled to sit on grey (ref B): paler track, its own border; the active chip
    keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
 /* on sage: a translucent track with the shared rule; the active chip is unchanged */

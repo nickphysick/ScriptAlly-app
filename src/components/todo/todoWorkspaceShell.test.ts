@@ -151,3 +151,77 @@ describe("shell P1 — HubHeaderBar source is UNTOUCHED (locked component)", () 
     expect(hub).toContain("qhbar");
   });
 });
+
+describe("shell P2 — the hero: plain on the page, the CTA-over-link pair", () => {
+  const pageCss = readFileSync(join(here, "todo.css"), "utf8");
+  const cssRule = (sel: string): string => {
+    const m = pageCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`rule not found: ${sel}`);
+    return m[1];
+  };
+  it("the hero is plain on the page (no container): title + subtitle left, the pair right", () => {
+    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    expect(hero).toContain("tdb-herohead");
+    expect(hero).toContain(">What’s on your desk?</h1>");
+    expect(hero).toContain("Urgent tasks, housekeeping, and notes. Here’s everything on your to-do list.");
+    expect(cssRule(".tdb-herohead")).toContain("display: flex");
+    expect(cssRule(".tdb-ask")).toContain("font-size: 33px"); // the ref's ~33px
+    expect(cssRule(".tdb-herosub")).toContain("color: #8a7d6e"); // the quiet grey subtitle
+  });
+  it("the CTA pair: the ink Begin pill with the underlined review link beneath it (rewind via TypeGlyph)", () => {
+    const right = cssRule(".tdb-heroright");
+    expect(right).toContain("flex-direction: column");
+    expect(right).toContain("align-items: center");
+    expect(page).toContain("<RewindGlyph />"); // the TypeGlyph-grammar rewind on the link
+    const l = cssRule(".tdb-revlink");
+    expect(l).toContain("border-bottom: 1px solid #c9bcae");
+    expect(cssRule(".tdb-revlink:hover")).toContain("color: #2a1a13"); // hover darkens text + rule
+    // the search is NOT a hero element — it lives in the bar
+    expect(page).not.toContain("tdb-bigsearch");
+  });
+});
+
+describe("shell P2 — the panel + proportions", () => {
+  const pageCss = readFileSync(join(here, "todo.css"), "utf8");
+  const cssRule = (sel: string): string => {
+    const m = pageCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`rule not found: ${sel}`);
+    return m[1];
+  };
+  it("ONE bordered panel wraps the items row, both sections and the colophon", () => {
+    const m = cssRule(".tdb-mainc");
+    expect(m).toContain("border: 1px solid var(--tdb-panel-bd)");
+    expect(m).toContain("border-radius: var(--tdb-panel-r)");
+    expect(m).toContain("padding: var(--tdb-panel-pad)");
+    expect(cssRule(".tdb-wrap")).toContain("--tdb-panel-bd: #e2dbd0");
+    expect(cssRule(".tdb-wrap")).toContain("--tdb-panel-r: 14px");
+    // the colophon moved INSIDE the panel, keeping its gating + copy
+    const body = page.indexOf('className="tdb-sheetbody"');
+    const banner = page.indexOf("<ProBanner");
+    const maincClose = page.indexOf('{/* THE COLOPHON — moved INSIDE');
+    expect(banner).toBeGreaterThan(body);
+    expect(maincClose).toBeGreaterThan(body);
+    expect(page).toContain("{!isProUser(currentUser) && ("); // gating intact
+  });
+  it("the items line has BOTH forms, driven by the filter state", () => {
+    expect(page).toContain("`Showing ${shownX} of ${shownY} items`"); // narrowed
+    expect(page).toContain("`${shownY} items`"); // unfiltered
+    expect(page).toContain("{active ? `Showing"); // the filter state decides
+    // the toggle is the unchanged component, the hairline beneath, no text tabs / Sort
+    expect(page).toContain('className="tdb-vseg" role="group" aria-label="View"');
+    expect(cssRule(".tdb-dochead")).toContain("border-bottom: 1px solid var(--tdb-panel-hair)");
+    expect(page).not.toContain(">Cards</"); // no text tabs
+    expect(page).not.toContain(">Sort<");
+  });
+  it("the spacing tokens: 26px hero→panel gap, ~40px workspace gutter", () => {
+    expect(cssRule(".tdb-wrap")).toContain("--tdb-hero-gap: 26px");
+    expect(cssRule(".tdb-centre")).toContain("gap: var(--tdb-hero-gap)");
+    expect(cssRule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 26px");
+    expect(cssRule(".tdb-wrap")).toContain("--tdb-edge: 40px");
+  });
+  it("the pastille card bands are byte-untouched (the shell reframes, it does not retint)", () => {
+    // the family band tokens + the card grammar stand exactly as deployed
+    for (const t of ["--pink-t", "--lat-1", "--note-t"]) expect(pageCss).toContain(t);
+    expect(pageCss).toContain(".tdb-band");
+  });
+});

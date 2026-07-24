@@ -20,7 +20,9 @@ const rule = (sel: string): string => {
   return m[1];
 };
 /** The three container headers, by their real selectors. */
-const HEADS = [".tdb-rsech", ".tdb-dochead", ".tdb-th"];
+// the workspace shell: the sheet's dochead became the panel's plain items row; the sage
+// family is now the filter band (in the collapsed drawer) + Today's header.
+const HEADS = [".tdb-rsech", ".tdb-th"];
 
 describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere", () => {
   it("the tokens exist once, on the wrap, and carry the settled values", () => {
@@ -67,14 +69,13 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   it("header typography stays per container: mono FILTER warmed, Playfair lines in the warm ink", () => {
     expect(rule(".tdb-rsech")).toContain("color: var(--container-head-mono)");
     expect(rule(".tdb-rsech")).toContain("var(--f12-mono)");
-    expect(rule(".tdb-bartext")).toContain("color: var(--container-head-ink)");
-    expect(rule(".tdb-bartext")).toContain("var(--f12-serif)");
+    expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's Playfair title
     expect(rule(".tdb-th .tdb-t")).toContain("var(--f12-serif)");
   });
   it("the header inks join the sage family: mono labels #5a6e58, Playfair lines #3d4a3b", () => {
     expect(rule(".tdb-rsech")).toContain("color: var(--container-head-mono)"); // the sidebar's mono label
     expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)"); // Today's count
-    expect(rule(".tdb-bartext")).toContain("color: var(--container-head-ink)"); // the bar's Playfair line
+    expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title (a sage head)
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title
     // the values themselves, once, on the wrap
     expect(rule(".tdb-wrap")).toContain("--container-head-mono: #5a6e58");
@@ -82,7 +83,8 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   });
   it("radius continuity: each header takes ITS container's top radii", () => {
     for (const sel of HEADS) expect(rule(sel + (sel === ".tdb-rsech" ? ".fc1" : ""))).toContain("border-radius: 15px 15px 0 0");
-    for (const c of [".tdb-mainc", ".tdb-today2", ".tdb-fbox"]) expect(rule(c)).toContain("border-radius: 16px");
+    expect(rule(".tdb-today2")).toContain("border-radius: 16px");
+    expect(rule(".tdb-mainc")).toContain("border-radius: var(--tdb-panel-r)"); // the panel is 14, not a 16 card
   });
   it("the view toggle restyles onto sage; the active chip is unchanged", () => {
     const t = rule(".tdb-vseg");

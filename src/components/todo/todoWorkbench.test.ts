@@ -211,22 +211,21 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
 });
 
 describe("doc pass P3 — the document header (the grey toolbar band)", () => {
-  it("the band spans the sheet's top on BOTH views: it sits before the view branch, meta left + segment right", () => {
-    const head = page.indexOf('className="tdb-dochead"');
+  it("THE ITEMS ROW spans the panel's top on BOTH views: it sits before the view branch, line left + toggle right", () => {
+    const head = page.indexOf('className="tdb-dochead tdb-items"');
     const body = page.indexOf('className="tdb-sheetbody"');
     const branch = page.indexOf('desk === "new-desk"');
-    expect(head).toBeGreaterThan(page.indexOf('className="tdb-mainc"'));
+    expect(head).toBeGreaterThan(page.indexOf('className="tdb-mainc tdb-panel"'));
     expect(head).toBeLessThan(body);
     expect(body).toBeLessThan(branch); // the branch (cards ⇄ ledger ⇄ desk states) lives inside the body
-    expect(page).not.toContain("tdb-sheethead"); // the corner row's container is superseded
+    expect(page).not.toContain("tdb-sheethead");
     expect(css).not.toContain("tdb-sheethead");
   });
-  it("frame P1 — the lighter greys: wash, rule, on-grey meta ink; NO title node in the bar", () => {
+  it("the items row is PLAIN (no sage band): a hairline beneath, no title node", () => {
     const b = rule(".tdb-dochead");
-    expect(b).toContain("background: var(--container-head-bg)"); // the settlement: one stone fill
-    expect(b).toContain("border-bottom: 1px solid var(--container-head-rule)");
-    expect(rule(".tdb-bartext")).toContain("color: var(--container-head-ink)"); // the settlement: the warm head ink
-    expect(page).not.toContain("tdb-doct"); // the centred "To do" idea is dropped
+    expect(b).toContain("background: none"); // the sage document band retired for the panel
+    expect(b).toContain("border-bottom: 1px solid var(--tdb-panel-hair)");
+    expect(page).not.toContain("tdb-doct");
     expect(page).not.toContain(">To do<");
   });
   it("frame P1 — the segment on the paler ground: #faf9f8 track, #dbd9d4 border, 30×22 chips", () => {
@@ -241,8 +240,8 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
     expect(on).not.toContain("box-shadow"); // frame P2: the half-press died with the press
   });
   it("radius continuity WITHOUT overflow:hidden (sticky must survive): the band's own 15px top corners", () => {
-    expect(rule(".tdb-dochead")).toContain("border-radius: 15px 15px 0 0");
     expect(rule(".tdb-mainc")).not.toContain("overflow"); // hidden would re-scope the lane headings' sticky
+    expect(rule(".tdb-dochead")).not.toContain("border-radius"); // the plain items row has no card corners of its own
   });
 });
 
@@ -340,10 +339,10 @@ describe("hero-pair P5 — sweep", () => {
 });
 
 describe("hero-pair P4 — the bold bar · the inline composer · the dialog sweep", () => {
-  it("the bar line is Playfair 700 (size + numeric variants unchanged)", () => {
+  it("the items line is Playfair 700 (the panel's line; numeric variants unchanged)", () => {
     const t = rule(".tdb-bartext");
     expect(t).toContain("font-weight: 700");
-    expect(t).toContain("font-size: 12.5px"); // the settlement: the bar line sits inside 36px
+    expect(t).toContain("font-size: 15px"); // the workspace shell: the panel's items line
     expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
   });
   it("the composer: white notes-family card, Caveat autofocus growing, the mono hint, quiet Cancel + emphasised Save", () => {
@@ -462,7 +461,7 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
   });
   it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-edge: 32px;");
+    expect(w).toContain("--tdb-edge: 40px;"); // the workspace shell: ~40px workspace gutter
     expect(w).toContain("padding: 0 var(--tdb-edge) 48px");
   });
   it("the transition branch: the tier steps ride the SAME 220ms width mechanics as the Today mount; reduced motion instant", () => {
@@ -600,26 +599,28 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet · Pro colleague — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
     const box = page.indexOf('className="tdb-rvbox"');
-    const mainc = page.indexOf('className="tdb-mainc"');
+    const mainc = page.indexOf('className="tdb-mainc tdb-panel"');
+    const body = page.indexOf('className="tdb-sheetbody"');
     const banner = page.indexOf("<ProBanner");
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
     expect(mainc).toBeGreaterThan(box);
-    expect(banner).toBeGreaterThan(mainc);
+    expect(banner).toBeGreaterThan(body); // the colophon moved INSIDE the panel, after the body
     const c = rule(".tdb-centre");
     expect(c).toContain("width: var(--tdb-sheet)");
     expect(c).toContain("flex-direction: column");
-    expect(c).toContain("gap: 16px");
+    expect(c).toContain("gap: var(--tdb-hero-gap)"); // the 26px hero→panel gap
     expect(rule(".tdb-mainc")).toContain("width: 100%");
     expect(page).not.toContain("tdb-docband");
     expect(css).not.toContain("tdb-docband");
   });
   it("detail P2 — the bar line: Playfair sentence off the SAME shared derivation, lining+tabular figures; the segment right", () => {
-    expect(page).toContain(">Showing {shownX} of {shownY} items on your list</span>"); // live under search — the reactive-rail derivation
+    expect(page).toContain("`Showing ${shownX} of ${shownY} items`"); // live under search — the reactive-rail derivation
+    expect(page).toContain("`${shownY} items`"); // the unfiltered form
     const t = rule(".tdb-bartext");
     expect(t).toContain("font-family: var(--f12-serif)");
-    expect(t).toContain("font-size: 12.5px"); // the settlement
-    expect(t).toContain("font-weight: 700"); // hero-pair P4: the bar line goes bold
+    expect(t).toContain("font-size: 15px"); // the workspace shell
+    expect(t).toContain("font-weight: 700");
     expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
     expect(page).not.toContain("tdb-shmeta"); // the mono meta is gone
     expect(css).not.toContain("tdb-shmeta");
@@ -640,7 +641,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
 describe("Final Shape P1 — the hero + the floating search", () => {
   it("THE WORKSPACE SHELL: the hero is title + subtitle left, the CTA pair right (the search moved to the bar)", () => {
     expect(page).toContain('>What’s on your desk?</h1>'); // v7: the crossfade pair (t1/t2)
-    expect(rule(".tdb-ask")).toContain("font-size: 64px"); // polish: 64 (P2 tunes the scale)
+    expect(rule(".tdb-ask")).toContain("font-size: 33px"); // the workspace shell: the plain-page hero title
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
     expect(hero).toContain("tdb-herohead"); // the plain-page hero row
     expect(hero).toContain("Begin focused session"); // the CTA pair lives here now
@@ -947,7 +948,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-ws")).toContain("padding: 50px 0 26px"); // the assembly work row (v2)
+    expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 26px"); // the workspace shell: the hero→panel gap
     expect(rule(".tdb-fside, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
@@ -1037,14 +1038,14 @@ describe("Width v4 — the centred assembly tokens (Final Shape)", () => {
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
-  it("THE SHEET: both views render inside the white panel (radius 16, hairline; the body pads below the band)", () => {
+  it("THE SHEET: both views render inside the white PANEL (radius 14, the warm hairline border)", () => {
     const m = rule(".tdb-mainc");
     expect(m).toContain("width: 100%");
-    expect(m).toContain("border-radius: 16px");
-    expect(m).toContain("padding: 0"); // doc pass P3: the band is full-bleed; the body carries the padding
-    expect(rule(".tdb-sheetbody")).toContain("padding: 16px 18px 18px");
-    // one sheet, both views: the ledger + the lanes render inside .tdb-mainc (no second panel)
-    const mainc = page.indexOf('className="tdb-mainc"');
+    expect(m).toContain("border-radius: var(--tdb-panel-r)"); // the panel
+    expect(m).toContain("padding: var(--tdb-panel-pad)"); // the panel owns the padding
+    expect(rule(".tdb-sheetbody")).toContain("padding: 0");
+    // one panel, both views: the ledger + the lanes render inside .tdb-mainc (no second panel)
+    const mainc = page.indexOf('className="tdb-mainc tdb-panel"');
     expect(mainc).toBeGreaterThan(0);
     expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
   });
