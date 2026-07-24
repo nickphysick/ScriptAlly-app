@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * TodoShell — the To-do workspace frame (design-refs/todo-workspace-shell.html, todo-fix48).
- * ONE shared component: an always-on parchment navigation sidebar (WORKSPACE + a slotted
- * FILTER section + a foot), and a parchment breadcrumb bar joined to it by matching borders,
- * with the search relocated into the bar as a white pill before the account block. The page's
- * own content (hero + panel) renders as children in the body region.
+ * ONE shared component: an always-on parchment navigation sidebar (the real brand + WORKSPACE
+ * + a slotted FILTER section + a foot), and a parchment breadcrumb bar (breadcrumb + user)
+ * joined to it by matching borders. The search lives in the page's PANEL HEADER now, not the
+ * bar. The page's own content (hero + panel) renders as children in the body region.
  *
  * Built for /todo (the nav is centralised through railNav; the shell mounts here while the
  * NavDrawer keeps serving the other routes — see reports/todo-workspace-shell.md). It reuses
@@ -14,9 +14,9 @@
  * the breadcrumb is drawn here from plain text (QUERYING / To-do), so the locked header
  * components are untouched.
  *
- * The ACTIVE-STATE LAW is parchment-only: an active nav item or filter row inverts to the soft
- * white card (#fdfcfa fill, #e0d6c6 hairline, whisper shadow, ink text, weight 700) — NEVER a
- * burgundy fill (asserted in todoWorkspaceShell.test.ts). Below --tsh-collapse the sidebar
+ * The ACTIVE-STATE LAW is the faint parchment fill only (--tsh-active-bg #e6ddcf, no
+ * border/shadow/outline) — NEVER a burgundy fill (asserted in todoWorkspaceShell.test.ts).
+ * Below --tsh-collapse the sidebar
  * folds to an icon rail (labels → tooltips; the FILTER section → a filter icon opening the
  * page's existing overlay).
  */

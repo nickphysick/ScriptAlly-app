@@ -424,3 +424,23 @@ describe("centring fix P2B — the real brand in the corner", () => {
     expect(readFileSync(join(pub, "scriptally-title-v2.png")).length).toBeGreaterThan(0);
   });
 });
+
+describe("centring fix P3 — the sweep", () => {
+  it("the dead bar-search styles are gone", () => {
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    expect(tshCss).not.toContain(".tsh-search");
+    expect(tshCss).not.toContain(".tsh-mag");
+  });
+  it("no --tdb-asm / --tdb-sheet assembly-width remnant survives", () => {
+    expect(css).not.toContain("--tdb-asm");
+    expect(css).not.toContain("--tdb-sheet");
+  });
+  it("themes.md records the geometry-owner law + the panel-header search + the real brand", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## To-do — true centring + the panel-header search (forensic fix)");
+    expect(themes).toContain("THE SINGLE GEOMETRY OWNER");
+    expect(themes).toContain("THE PANEL-HEADER SEARCH");
+    expect(themes).toContain("THE REAL BRAND");
+    expect(themes).toContain("The named culprit was `.tdb-asm`");
+  });
+});

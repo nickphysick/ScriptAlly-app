@@ -567,13 +567,10 @@ button.tdb-tdot { cursor: pointer; }
 /* ALIGNMENT FIX P1 — 3-up is the STANDARD tier; 4-up only at ≥1700 (below). The old
    'today-off → 4-up at every width' rule is retired (Today is the corner pop-up now, so the
    wrap is always today-off — that rule forced 4-up everywhere). */
-/* ── doc pass P2 — THE ≥1700 WIDTH TIER (todo-doc-pass-a.html §2): 4-up WITH Today — sheet 1072,
-   assembly 248+24+1072+24+256 = 1624; it fits because the edge gutter is 32 (1624+64 = 1688).
-   The full matrix: Today hidden → 4-up at every tier (the today-off rules, (0,2,0), outrank
-   this media's .tdb-wrap); Today visible → 4-up from 1700, 3-up below. Cards stay
-   var(--tdb-cardw) at every tier — the tier changes the COUNT, never the card. The 220ms
-   width transitions on .tdb-asm/.tdb-centre carry the step (same mechanics as the Today
-   mount; column count reflows; reduced-motion instant via the shared override). ── */
+/* ── THE ≥1700 WIDTH TIER: the fluid grid steps 3-up → 4-up. The card COUNT changes; the
+   fluid 1fr tracks grow the cards to fill the panel either way. (The old fixed-width
+   assembly machinery — .tdb-asm width + its assembly-width tier tokens — was retired by the
+   centring fix; .tdb-col is the single geometry owner.) ── */
 @media (min-width: 1700px) {
   .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }
 }

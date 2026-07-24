@@ -976,3 +976,26 @@ deltas):
   no shadow, no outline, never burgundy. The white-card active variant is retired, and so is the
   ink outline on the selected filter.
 
+## To-do — true centring + the panel-header search (forensic fix)
+
+- **THE SINGLE GEOMETRY OWNER:** exactly one element in the content chain — `.tdb-col` (the
+  page-col) — carries a `max-width`, auto margins and one equal `padding-inline` token; the
+  main region right of the sidebar has no horizontal padding of its own, and no other chain
+  element (`.tdb-ws`/`.tdb-asm`, `.tdb-centre`, `.tdb-mainc`, `.tdb-grid`) carries a max-width,
+  an auto margin or a one-sided horizontal pad. Widths derive from the container, never from
+  `vw` (the vw users are all fixed/absolute overlays). **The named culprit was `.tdb-asm`** — a
+  second owner (`width: var(--tdb-asm)` + `margin: 0 auto`) that bled the content right below
+  ~1440; it now just fills the column, and the whole `--tdb-asm`/`--tdb-sheet` assembly-width
+  tier is gone.
+- **THE PANEL-HEADER SEARCH:** the breadcrumb bar is breadcrumb + user only; the big search
+  pill (460×46, white, warm hairline, soft shadow, "Search your list…", 32px oat roundel — the
+  settled large design, tokened `--tdb-hsearch-w/-h`) lives ABSOLUTE-CENTRED in the panel's
+  items row (`left:50%`, translate) so the "{n} items" line and the view toggle can't push it
+  off-centre. Its width has a container-relative floor
+  (`min(--tdb-hsearch-w, calc(100% - --tdb-hsearch-reserve))`), never a vw. No hairline beneath
+  the row; the view toggle stands the pill's full 46px band (shared token). The search fades
+  with the panel in a session (EXIT_FADE) and returns on exit.
+- **THE REAL BRAND:** the sidebar corner uses the app's actual assets (the paper-plane mark
+  `/scriptally-logo-new.png` + the `ScriptAllyLogo` wordmark), at the NavDrawer's proportions,
+  linking home — no fabricated glyphs.
+
