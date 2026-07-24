@@ -113,11 +113,11 @@ export const GATHER = {
 } as const;
 
 /** The exit choreography's selectors (the board transforms; the chrome + title stay). */
-// THE WORKSPACE SHELL (todo-fix48) — the opening's furniture exit. The SIDEBAR + the bar
-// SEARCH are chrome OUTSIDE the session's wrapEl, so they exit via the shell's own
-// `.tsh-clearing` class (toggled from the session state) — EXIT_LEFT names the sidebar for
-// intent, the class does the slide. Everything else is IN-WRAP and exits here.
-export const EXIT_LEFT = ".tsh-nav"; // the nav sidebar slides off left (via the shell class)
+// THE HARDBACK SPINE (todo-fix54) — the opening's furniture exit. The RAIL persists (chrome,
+// like the bar); the PANEL is the mover, exiting via the shell's own `.spine-clearing` class
+// (toggled from the session state) — EXIT_LEFT names the panel for intent, the class does the
+// slide. The panel-header search fades via EXIT_FADE. Everything else is IN-WRAP and exits here.
+export const EXIT_LEFT = ".spine-panel"; // the panel slides off left (the rail stays)
 export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"; // the Today corner leaves
 export const EXIT_FADE = ".tdb-rvbox, .tdb-heroright, .tdb-herosub, .tdb-hsearch, .tdb-lh2, .tdb-lsech"; // the review banner, the hero pair + subtitle, the section headings fade
 export const EXIT_BAR = ".tdb-dochead"; // the panel's items row slides up and out

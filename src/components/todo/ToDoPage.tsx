@@ -19,8 +19,8 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { TodoShell, TodoNavItem, TodoFootItem } from "../shell/TodoShell";
-import { LayoutGrid, Send, Users, ListTodo, FileStack, Settings as SettingsIcon, HelpCircle } from "lucide-react";
+import { TodoShell, SpineCategory, SpinePage, SpineFootItem } from "../shell/TodoShell";
+import { LayoutGrid, Send, Users, ListTodo, Book, Settings as SettingsIcon, HelpCircle } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -256,33 +256,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // existing overlay drawer (focus-trapped; Esc/scrim closes). Tokened to match todoShell.css.
   const [shellCollapsed, setShellCollapsed] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1099.98px)").matches);
 
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
+  // THE HARDBACK SPINE — below --tsh-collapse the panel is a rail-triggered overlay (the
+  // filters live in the panel's context zone, so they ride the overlay for free).
+  const [panelOpen, setPanelOpen] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1099.98px)");
     const on = () => setShellCollapsed(mq.matches);
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  useEffect(() => { if (!shellCollapsed) setFilterDrawerOpen(false); }, [shellCollapsed]);
-  // the drawer's focus trap + Esc (P6 a11y): Tab cycles inside the panel; Esc/scrim closes
+  useEffect(() => { if (!shellCollapsed) setPanelOpen(false); }, [shellCollapsed]);
+  // the collapsed panel overlay dismisses on Escape (outside-click is the scrim's job)
   useEffect(() => {
-    if (!filterDrawerOpen) return;
-    const panel = drawerRef.current;
-    panel?.querySelector<HTMLElement>("button, [tabindex]")?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.stopPropagation(); setFilterDrawerOpen(false); return; }
-      if (e.key !== "Tab" || !panel) return;
-      const focusables = Array.from(panel.querySelectorAll<HTMLElement>("button, [href], input, [tabindex]:not([tabindex='-1'])"));
-      if (!focusables.length) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
+    if (!panelOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setPanelOpen(false); } };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [filterDrawerOpen]);
+  }, [panelOpen]);
   // Masthead search — the input + ⌘K focus mechanics land here (Phase 1); live filtering is
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
@@ -775,33 +765,43 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDraft("");
   }
 
-  // THE WORKSPACE SHELL (todo-fix48) — the sidebar's WORKSPACE nav (routes per railNav, with
-  // derived counts on Queries + To-do) and its foot. There is no CTA and no REVIEW row here.
-  const workspaceNav: TodoNavItem[] = [
-    { key: "dashboard", label: "Dashboard", icon: <LayoutGrid size={16} />, onClick: () => onNavigate("dashboard") },
-    { key: "queries", label: "Queries", icon: <Send size={16} />, count: liveQueryCount(queries), onClick: () => onNavigate("queries") },
-    { key: "agents", label: "Agents", icon: <Users size={16} />, onClick: () => onNavigate("agents") },
-    { key: "todo", label: "To-do", icon: <ListTodo size={16} />, count: boardCards.length, onClick: () => onNavigate("todo") },
-    { key: "packages", label: "Packages", icon: <FileStack size={16} />, onClick: () => onNavigate("manuscripts", "Submission packages") },
+  // THE HARDBACK SPINE (todo-fix54) — the RAIL's categories (each routes to its default page;
+  // on /todo the active category is Querying). The panel shows Querying's pages + the To-do
+  // context (filters). Icons are lucide (TypeGlyph is locked to material types — see report).
+  const railCategories: SpineCategory[] = [
+    { key: "dashboard", label: "Dashboard", icon: <LayoutGrid size={16} />, onClick: () => onNavigate("dashboard"), active: false },
+    { key: "querying", label: "Querying", icon: <Send size={16} />, onClick: () => onNavigate("queries"), active: true },
+    { key: "agents", label: "Agents", icon: <Users size={16} />, onClick: () => onNavigate("agents"), active: false },
+    { key: "manuscripts", label: "Manuscripts", icon: <Book size={16} />, onClick: () => onNavigate("manuscripts"), active: false },
   ];
-  const shellFoot: TodoFootItem[] = [
-    { key: "settings", label: "Task settings", icon: <SettingsIcon size={16} />, onClick: () => setSettingsOpen(true) },
-    { key: "help", label: "Help centre", icon: <HelpCircle size={16} />, onClick: () => window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")) },
+  const railSettings: SpineCategory = { key: "settings", label: "Settings", icon: <SettingsIcon size={16} />, onClick: () => onNavigate("account"), active: false };
+  // the active category (Querying)'s pages; To-do is the current page
+  const panelPages: SpinePage[] = [
+    { key: "queries", label: "Queries Hub", icon: <Send size={14} />, count: liveQueryCount(queries), onClick: () => onNavigate("queries"), active: false },
+    { key: "todo", label: "To-do", icon: <ListTodo size={14} />, count: boardCards.length, onClick: () => onNavigate("todo"), active: true },
+  ];
+  const panelFoot: SpineFootItem[] = [
+    { key: "settings", label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true) },
+    { key: "help", label: "Help centre", icon: <HelpCircle size={14} />, onClick: () => window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")) },
   ];
 
   return (
     <TodoShell
-      workspace={workspaceNav}
-      activeKey="todo"
-      filterSection={renderFilterSection()}
-      foot={shellFoot}
+      categories={railCategories}
+      railFoot={railSettings}
+      panelCategory="QUERYING"
+      pages={panelPages}
+      contextLabel="TO-DO · FILTERS"
+      contextContent={renderFilterSection()}
+      foot={panelFoot}
       crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
       crumbCurrent="To-do"
       onAccount={() => onNavigate("account")}
       onBrand={() => onNavigate("dashboard")}
       collapsed={shellCollapsed}
+      panelOpen={panelOpen}
+      onPanelDismiss={() => setPanelOpen(false)}
       clearing={heroSession.clearing}
-      onFilterIcon={() => setFilterDrawerOpen(true)}
     >
       <div className="tdb-wrap today-off" ref={wrapRef}>
         {/* SHELL POLISH P1 — THE CENTRED COLUMN: the hero row and the panel live on ONE
@@ -810,7 +810,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             with its right — one column, one pair of edges. A ≥44px gap sits under the bar. */}
         <div className="tdb-col">
         {renderHero()}
-        {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
           {/* THE WORKSPACE SHELL (todo-fix48) — the filters live in the sidebar now; the body
               is the centre stack (the panel arrives in Phase 2) beside the Today corner. */}
@@ -1162,19 +1161,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-dotc" aria-hidden />Today’s list<span className="tdb-fn">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>
         </button>
       </>
-    );
-  }
-  // the collapsed icon-rail's filter overlay (< --tsh-collapse): the FILTER section, reused
-  function renderFilterDrawer() {
-    if (!filterDrawerOpen) return null;
-    return (
-      <div className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters">
-        <div className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)} />
-        <div className="tdb-fdpanel" ref={drawerRef}>
-          <div className="tdb-rsech fc1">FILTER</div>
-          <div className="tdb-fbox">{renderFilterSection()}</div>
-        </div>
-      </div>
     );
   }
 

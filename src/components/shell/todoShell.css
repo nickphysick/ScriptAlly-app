@@ -1,30 +1,35 @@
 /**
- * TodoShell — the To-do workspace frame (design-refs/todo-workspace-shell.html, todo-fix48;
- * shell-polish amendment). Parchment chrome across the sidebar and the breadcrumb bar, joined
- * by matching borders as one continuous shell. The sidebar reads in the app NavDrawer's
- * grammar (shared --rail-* tokens): mono hairline-ruled section labels, icon+label rows, and
- * the drawer's FAINT PARCHMENT FILL for the active state — never a border, shadow or burgundy.
- * Tokens govern the widths, the chrome fill and the collapse tier.
+ * TodoShell — THE HARDBACK SPINE (design-refs/spine-shell.html, todo-fix54). A 54px ink rail +
+ * a 196px parchment panel + the content region, all inside the `.t-f12` token layer. The rail
+ * is the one place the parchment-highlight law can't apply (there is no parchment there) — its
+ * active state is an ink-native #4a3226 square. The panel + bar wear the same parchment so they
+ * read as one cream L inside the dark spine. Panel active fill: the warm #e6ddcf (hover #ece5d9),
+ * fill only. Supersedes the single-column sidebar of the workspace-shell + polish packs.
  */
-.tsh-root {
-  /* the parchment chrome — one fill, one joining border across sidebar + bar */
-  --tsh-chrome: #f2ede7;
-  --tsh-chrome-border: #e4dbcd;
-  --tsh-nav-w: 212px;
-  --tsh-nav-icon-w: 60px;
-  --tsh-collapse: 1100px;
-  /* ALIGNMENT FIX P2 — the active fill is the sidebar's OWN parchment (#f2ede7), one step
-     deeper, zero green cast. The app's --rail-pill is sage (#e9ece4, theme-editor retone), so
-     the shell does NOT read it — it owns these two warm values; the warm --rail-* neutrals
-     (label/hair/itemtx) are still shared. */
-  --tsh-active-bg: #e6ddcf;
-  --tsh-hov: #ece5d9;
-  --tsh-active-ink: var(--rail-ink, #2b2118);
-  --tsh-label: var(--rail-label, #9c8878);
-  --tsh-hair: var(--rail-hair, #e7ddd2);
-  --tsh-itemtx: var(--rail-itemtx, #5a4a40);
-  /* the search pill keeps its own hairline border (the shell's, not the nav row's) */
+.spine-root {
+  /* the RAIL (ink) */
+  --spine-rail-w: 54px;
+  --spine-rail-bg: #2a1a13;
+  --spine-rail-rule: #1d100c;
+  --spine-ricon: #a8917f;      /* idle rail icon */
+  --spine-ricon-on: #f3e7da;   /* active icon — cream */
+  --spine-ron: #4a3226;        /* active square */
+  /* the PANEL (parchment) */
+  --spine-panel-w: 196px;
+  --spine-pan: #f5f0e8;
+  --spine-pbd: #e0d6c6;        /* right rule (shared with the bar) */
+  --spine-pink: #2f2419;       /* wordmark / active-row ink */
+  --spine-ptx: #4d4238;        /* row text */
+  --spine-picon: #8a7a6d;      /* row icon */
+  --spine-pmut: #a5988c;       /* count */
+  --spine-plab: #8a7a66;       /* mono label */
+  --spine-prule: #ddd2c0;      /* label hairline */
+  /* the panel active fill (warm parchment, one step deeper — fill only, never burgundy) */
+  --spine-pon: #e6ddcf;
+  --spine-phov: #ece5d9;
+  /* the search pill's own hairline (reused by the panel-header pill in todo.css) */
   --tsh-active-border: #e0d6c6;
+  --tsh-collapse: 1100px;
   display: flex;
   height: 100%;
   min-height: 0;
@@ -32,71 +37,90 @@
   background: var(--white, #fffdf9);
 }
 
-/* ── the sidebar ── */
-.tsh-nav {
-  width: var(--tsh-nav-w);
+/* ── THE RAIL ── */
+.spine-rail {
+  width: var(--spine-rail-w);
   flex: 0 0 auto;
   box-sizing: border-box;
-  border-right: 1px solid var(--tsh-chrome-border);
-  background: var(--tsh-chrome);
-  padding: 14px 12px;
+  background: var(--spine-rail-bg);
+  border-right: 1px solid var(--spine-rail-rule);
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  overflow-y: auto;
-  transition: width 220ms cubic-bezier(0.22, 0.8, 0.3, 1), transform 700ms cubic-bezier(0.5, 0.05, 0.6, 1), opacity 600ms;
+  align-items: center;
+  padding: 12px 0;
+  gap: 7px;
+  z-index: 5;
 }
-/* CENTRING/BRAND — the real mark + wordmark, home link; a bare button, drawer proportions */
-.tsh-brand { display: flex; align-items: center; gap: 5px; width: 100%; padding: 4px 8px 12px; background: none; border: none; cursor: pointer; overflow: hidden; }
-.tsh-brandmark { flex: 0 0 auto; display: block; }
-.tsh-brandword { display: flex; overflow: hidden; min-width: 0; }
-/* the drawer's section label: mono 9.5, .18em, with a hairline rule beneath */
-.tsh-nk { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.18em; color: var(--tsh-label); padding: 14px 10px 6px; text-transform: uppercase; border-bottom: 1px solid var(--tsh-hair); margin: 0 0 4px; }
+.spine-logo { width: 30px; height: 30px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; padding: 0; flex: 0 0 auto; }
+.spine-logo img { display: block; width: 30px; height: 30px; }
+.spine-railnav { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.spine-railfoot { margin-top: auto; }
+.spine-rli { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: var(--spine-ricon); padding: 0; transition: background 0.12s, color 0.12s; }
+.spine-rli:hover { color: var(--spine-ricon-on); }
+.spine-rli.on { background: var(--spine-ron); color: var(--spine-ricon-on); }
+.spine-ric { display: flex; align-items: center; justify-content: center; }
+.spine-ric svg { width: 16px; height: 16px; }
 
-/* nav rows — one grammar for workspace items, filter rows and the foot */
-.tsh-ni {
+/* ── THE PANEL ── */
+.spine-panel {
+  width: var(--spine-panel-w);
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  background: var(--spine-pan);
+  border-right: 1px solid var(--spine-pbd);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 11px;
+  overflow-y: auto;
+  z-index: 4;
+}
+.spine-word { display: flex; padding: 0 6px 12px; background: none; border: none; cursor: pointer; overflow: hidden; min-width: 0; }
+.spine-cat { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.2em; color: var(--spine-plab); padding: 2px 6px 6px; text-transform: uppercase; }
+
+/* panel rows — one grammar for page rows, filter rows and the foot */
+.spine-ni {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
   width: 100%;
-  height: 35px;
+  height: 32px;
   box-sizing: border-box;
   border: none;
   border-radius: 9px;
   padding: 0 10px;
-  font-size: 12.5px;
-  font-weight: 450;
-  color: var(--tsh-itemtx);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--spine-ptx);
   cursor: pointer;
   text-align: left;
   background: transparent;
   transition: background 0.12s;
 }
-.tsh-ni:hover { background: var(--tsh-hov); }
-.tsh-ic { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 auto; color: #8a7a6d; }
-.tsh-ic svg { width: 16px; height: 16px; }
-.tsh-nlab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tsh-n { margin-left: auto; font-family: var(--f12-mono); font-size: 9px; color: var(--tsh-label); }
-/* SHELL POLISH P4 — THE ACTIVE STATE: the drawer's faint parchment fill ONLY. No border, no
-   shadow, no outline; never burgundy. Nav items and filter rows share it. */
-.tsh-ni.on {
-  background: var(--tsh-active-bg);
-  color: var(--tsh-active-ink);
-  font-weight: 600;
-}
-.tsh-ni.on:hover { background: var(--tsh-active-bg); }
+.spine-ni:hover { background: var(--spine-phov); }
+.spine-ic { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; flex: 0 0 auto; color: var(--spine-picon); }
+.spine-ic svg { width: 14px; height: 14px; }
+.spine-nlab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.spine-n { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; color: var(--spine-pmut); }
+/* THE PANEL ACTIVE LAW — the warm parchment fill ONLY (no border/shadow/outline; never burgundy) */
+.spine-ni.on { background: var(--spine-pon); color: var(--spine-pink); font-weight: 700; }
+.spine-ni.on:hover { background: var(--spine-pon); }
 
-.tsh-filter { display: flex; flex-direction: column; gap: 2px; }
-.tsh-spacer { margin-top: auto; }
+/* the context zone's ruled mono label + its dynamic content */
+.spine-nk { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.2em; color: var(--spine-plab); padding: 14px 6px 5px; text-transform: uppercase; border-bottom: 1px solid var(--spine-prule); margin: 0 2px 6px; }
+.spine-ctx { display: flex; flex-direction: column; gap: 2px; }
+.spine-spacer { margin-top: auto; }
+.spine-panelfoot { display: flex; flex-direction: column; gap: 2px; }
 
-/* ── the main column: the bar + the body ── */
+/* ── the content region: the bar + the body ── */
 .tsh-mainwrap { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+/* THE BAR JOINS THE PAGE — it wears the panel's parchment + rule, so bar + panel read as one
+   cream L. (The wrapper approach: the shell paints its own bar tokens; HubHeaderBar untouched.) */
 .tsh-bcbar {
   flex: 0 0 auto;
   height: 42px;
   box-sizing: border-box;
-  border-bottom: 1px solid var(--tsh-chrome-border);
-  background: var(--tsh-chrome);
+  border-bottom: 1px solid var(--spine-pbd);
+  background: var(--spine-pan);
   display: flex;
   align-items: center;
   gap: 14px;
@@ -107,25 +131,30 @@
 .tsh-bcseg:hover { color: #5d4037; }
 .tsh-bcsep { margin: 0 6px; color: #c9bba9; }
 .tsh-bc b { color: #2f2419; font-family: var(--f12-serif); font-size: 13px; letter-spacing: 0; font-weight: 800; margin-left: 6px; }
-/* CENTRING/SEARCH — the search left the bar; the account is pushed to the right on its own */
 .tsh-bcbar .f12-who { margin-left: auto; }
 
-/* ALIGNMENT FIX P1 — ONE scroller: tsh-body clips and column-lays the wrap; the wrap
-   scrolls with a symmetric scrollbar gutter so the centred column's gutters stay EQUAL. */
 .tsh-body { flex: 1; min-height: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; }
 
-/* ── the collapse tier: an icon rail below --tsh-collapse ── */
-@media (max-width: 1099.98px) {
-  .tsh-nav { width: var(--tsh-nav-icon-w); padding: 14px 8px; }
-  .tsh-brandword, .tsh-nlab, .tsh-n, .tsh-nk { display: none; }
-  .tsh-brand { justify-content: center; gap: 0; padding: 4px 0 12px; }
-  .tsh-ni { justify-content: center; padding: 0; gap: 0; }
-  .tsh-ic { width: auto; }
-}
-@media (prefers-reduced-motion: reduce) { .tsh-nav { transition: none; } }
+/* ── SESSION — the RAIL persists (chrome, like the bar); only the PANEL slides off left and
+   returns on exit. The board's own furniture exits through the session's in-wrap gather. ── */
+.spine-panel { transition: transform 700ms cubic-bezier(0.5, 0.05, 0.6, 1), opacity 600ms; }
+.spine-clearing .spine-panel { transform: translateX(-100%); opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .spine-panel { transition: none; } }
 
-/* ── THE WORKSPACE SHELL (todo-fix48) — the focused session's chrome exit. The bcbar STAYS
-   (v9's app-bar exemption); only the sidebar slides off left and the search fades, both
-   returning on exit. The board's own furniture exits through the session's in-wrap gather. ── */
-.tsh-clearing .tsh-nav { transform: translateX(-100%); opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .tsh-nav { transition: none; } }
+/* ── WIDTH TIERS — below --tsh-collapse the panel COLLAPSES to a rail-triggered overlay; the
+   rail remains, no hamburger returns. Tapping a rail category opens the panel over a scrim. ── */
+.spine-scrim { position: fixed; inset: 0; z-index: 44; background: rgba(26, 13, 9, 0.28); }
+@media (max-width: 1099.98px) {
+  .spine-panel {
+    position: fixed;
+    top: 0;
+    left: var(--spine-rail-w);
+    bottom: 0;
+    z-index: 45;
+    transform: translateX(-110%);
+    box-shadow: 6px 0 24px rgba(26, 13, 9, 0.24);
+  }
+  .spine-panelopen .spine-panel { transform: translateX(0); }
+  .spine-clearing .spine-panel { transform: translateX(-110%); }
+}
+@media (prefers-reduced-motion: reduce) { .spine-panel { transition: none; } }

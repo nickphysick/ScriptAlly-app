@@ -118,55 +118,47 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
     return m[1];
   };
-  it("the shell reads the drawer's shared --rail-* tokens (extracted, not duplicated)", () => {
-    const root = tRule(".tsh-root");
-    // ALIGNMENT FIX P2: the active fill + hover are the shell's OWN warm parchment (the app's
-    // --rail-pill is sage); the warm neutrals stay shared
-    expect(root).toContain("--tsh-active-bg: #e6ddcf");
-    expect(root).toContain("--tsh-hov: #ece5d9");
-    expect(root).toContain("--tsh-label: var(--rail-label, #9c8878)");
-    expect(root).toContain("--tsh-hair: var(--rail-hair, #e7ddd2)");
-    expect(root).toContain("--tsh-itemtx: var(--rail-itemtx, #5a4a40)");
+  it("the spine's panel owns its warm parchment tokens directly (the drawer-grammar superseded)", () => {
+    const root = tRule(".spine-root");
+    expect(root).toContain("--spine-pon: #e6ddcf");
+    expect(root).toContain("--spine-phov: #ece5d9");
+    expect(root).toContain("--spine-plab: #8a7a66");
+    expect(root).toContain("--spine-prule: #ddd2c0");
   });
   it("section labels are the drawer's mono, hairline-ruled beneath (WORKSPACE + FILTER both)", () => {
-    const nk = tRule(".tsh-nk");
+    const nk = tRule(".spine-nk");
     expect(nk).toContain("font-family: var(--f12-mono)");
-    expect(nk).toContain("font-size: 9.5px");
-    expect(nk).toContain("letter-spacing: 0.18em");
-    expect(nk).toContain("color: var(--tsh-label)");
-    expect(nk).toContain("border-bottom: 1px solid var(--tsh-hair)"); // the hairline rule
-    expect(tsh).toContain(">WORKSPACE<");
-    expect(tsh).toContain('className="tsh-nk tsh-filterhead"'); // FILTER wears the same
+    expect(nk).toContain("color: var(--spine-plab)");
+    expect(nk).toContain("border-bottom: 1px solid var(--spine-prule)"); // the ruled context label
+    expect(tsh).toContain('<div className="spine-cat"'); // the category label
+    expect(tsh).toContain('<div className="spine-nk"'); // the context label
   });
   it("rows are the drawer's grammar: icon + label, its height/radius/type, muted counts", () => {
-    const ni = tRule(".tsh-ni");
-    expect(ni).toContain("height: 35px");
+    const ni = tRule(".spine-ni");
+    expect(ni).toContain("height: 32px");
     expect(ni).toContain("border-radius: 9px");
-    expect(ni).toContain("gap: 12px");
-    expect(ni).toContain("font-size: 12.5px");
-    expect(ni).toContain("color: var(--tsh-itemtx)");
-    expect(tRule(".tsh-ic")).toContain("width: 16px"); // the drawer's 16px icon
-    expect(tRule(".tsh-n")).toContain("color: var(--tsh-label)"); // muted count
-    // the icons are the drawer's lucide set (TypeGlyph is locked to material types — see report)
-    expect(page).toContain("import { LayoutGrid, Send, Users, ListTodo, FileStack");
+    expect(ni).toContain("color: var(--spine-ptx)");
+    expect(tRule(".spine-ic")).toContain("width: 14px"); // the panel row icon
+    expect(tRule(".spine-n")).toContain("color: var(--spine-pmut)"); // muted count
+    // the icons are lucide (TypeGlyph is locked to material types — see report)
+    expect(page).toContain("import { LayoutGrid, Send, Users, ListTodo, Book");
     expect(page).toContain("icon: <Send size={16} />");
   });
   it("ACTIVE = the faint parchment fill ONLY — no border, no outline, no shadow; never burgundy", () => {
-    const on = tRule(".tsh-ni.on");
-    expect(on).toContain("background: var(--tsh-active-bg)");
+    const on = tRule(".spine-ni.on");
+    expect(on).toContain("background: var(--spine-pon)");
     expect(on).not.toContain("border");
     expect(on).not.toContain("box-shadow");
     expect(on).not.toContain("outline");
     for (const burgundy of ["#7c3a2a", "#f5c7c2", "#f3e3dc"]) expect(on).not.toContain(burgundy);
-    // the white-card variant from the shell pack is retired
-    expect(tshCss).not.toContain("#fdfcfa");
+    expect(tshCss).not.toContain("#fdfcfa"); // the white-card variant stays retired
   });
   it("the filter rows share it: active = the warm faint fill, the ink outline retired; reactive bits carry over", () => {
     const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("background: var(--tsh-active-bg)"); // the shell's warm fill (P2)
+    expect(sel).toContain("background: var(--spine-pon)"); // the panel's warm fill
     expect(sel).not.toContain("box-shadow");
     expect(sel).not.toContain("border-color: var(--ink)");
-    expect(rule(".tdb-fpill.nar")).toContain("background: var(--tsh-active-bg)");
+    expect(rule(".tdb-fpill.nar")).toContain("background: var(--spine-pon)");
     // the reactive behaviour is untouched: the dot, the count, zero-dimming, the struck totals, the chip
     expect(rule(".tdb-fpill .tdb-dotc")).toContain("border-radius: 50%");
     expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
@@ -244,20 +236,21 @@ describe("alignment fixes P2 — the warm active fill (no green cast)", () => {
     return m[1];
   };
   it("the active fill is #e6ddcf and the hover #ece5d9 — the sidebar's parchment, one step deeper", () => {
-    const root = tRule(".tsh-root");
-    expect(root).toContain("--tsh-active-bg: #e6ddcf");
-    expect(root).toContain("--tsh-hov: #ece5d9");
-    expect(root).toContain("--tsh-chrome: #f2ede7"); // the base parchment the fill deepens
+    const root = tRule(".spine-root");
+    expect(root).toContain("--spine-pon: #e6ddcf"); // the panel active fill (warm parchment)
+    expect(root).toContain("--spine-phov: #ece5d9");
+    expect(root).toContain("--spine-pan: #f5f0e8"); // the base panel parchment the fill deepens
   });
   it("applied to nav items AND filter rows; still no border/outline/shadow", () => {
-    const on = tRule(".tsh-ni.on");
-    expect(on).toContain("background: var(--tsh-active-bg)");
+    const on = tRule(".spine-ni.on");
+    expect(on).toContain("background: var(--spine-pon)");
     expect(on).not.toContain("border");
     expect(on).not.toContain("box-shadow");
     expect(on).not.toContain("outline");
-    expect(rule(".tdb-fpill.sel")).toContain("background: var(--tsh-active-bg)");
-    expect(rule(".tdb-fpill.nar")).toContain("background: var(--tsh-active-bg)");
-    expect(rule(".tdb-fpill:hover")).toContain("background: var(--tsh-hov)");
+    // the filter rows (in the panel context zone) take the same warm fill
+    expect(rule(".tdb-fpill.sel")).toContain("background: var(--spine-pon)");
+    expect(rule(".tdb-fpill.nar")).toContain("background: var(--spine-pon)");
+    expect(rule(".tdb-fpill:hover")).toContain("background: var(--spine-phov)");
   });
   it("the green-cast token (--rail-pill / the sage #e9ece4) is not READ anywhere in the sidebar scope", () => {
     // the shell no longer reads the app's sage nav-pill; a mention survives only in a comment
@@ -389,34 +382,34 @@ describe("centring fix P2 — the big search in the panel header", () => {
     const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
     expect(stage).toContain(".tdb-hsearch"); // in the gather's fade list
     const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
-    expect(tshCss).not.toContain(".tsh-clearing .tsh-search"); // the orphan is gone
-    expect(tshCss).toContain(".tsh-clearing .tsh-nav"); // the sidebar still slides
+    expect(tshCss).not.toContain(".tsh-search"); // no bar search
+    expect(tshCss).toContain(".spine-clearing .spine-panel"); // the panel slides (the rail stays)
   });
 });
 
 describe("centring fix P2B — the real brand in the corner", () => {
   const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
   it("the placeholder glyph + text are gone; the real assets are mounted (no inline recreations)", () => {
-    expect(tsh).not.toContain('aria-hidden>✈</span>'); // the fabricated paper-plane glyph
-    expect(tsh).not.toContain('<span className="tsh-brandtx">ScriptAlly</span>'); // the text placeholder
-    // the app's real mark image + the real wordmark component (same as the NavDrawer)
+    expect(tsh).not.toContain("aria-hidden>✈</span>"); // no fabricated glyph
+    expect(tsh).not.toContain('<span className="tsh-brandtx">ScriptAlly</span>');
+    // the real mark (rail) + the real wordmark (panel), both the actual assets
     expect(tsh).toContain('src="/scriptally-logo-new.png"');
     expect(tsh).toContain("import { ScriptAllyLogo }");
-    expect(tsh).toContain("<ScriptAllyLogo heightPx={38} />");
+    expect(tsh).toContain("<ScriptAllyLogo heightPx={30} />");
   });
   it("the mark + wordmark order, alt text, and the home-route link", () => {
-    const brand = tsh.slice(tsh.indexOf('className="tsh-brand"'), tsh.indexOf("</button>"));
-    expect(brand.indexOf("scriptally-logo-new.png")).toBeLessThan(brand.indexOf("ScriptAllyLogo")); // mark then wordmark
-    expect(tsh).toContain('alt="" aria-hidden="true"'); // the mark is decorative; the wordmark's own alt="ScriptAlly"
-    expect(tsh).toContain('aria-label="ScriptAlly — go to dashboard"'); // the link's accessible name
+    // the mark leads (rail head), the wordmark follows (panel head)
+    expect(tsh.indexOf("scriptally-logo-new.png")).toBeLessThan(tsh.indexOf("<ScriptAllyLogo"));
+    expect(tsh).toContain('alt="" aria-hidden="true"'); // the mark is decorative; the wordmark carries alt="ScriptAlly"
+    expect(tsh).toContain('aria-label="ScriptAlly — go to dashboard"');
     expect(tsh).toContain("onClick={onBrand}");
-    expect(page).toContain('onBrand={() => onNavigate("dashboard")}'); // wired home
+    expect(page).toContain('onBrand={() => onNavigate("dashboard")}');
   });
-  it("the mark stays in the collapsed icon rail; the wordmark hides", () => {
+  it("the rail (with the mark) persists at the narrow tier; the panel collapses to an overlay", () => {
     const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
     const collapse = tshCss.slice(tshCss.indexOf("@media (max-width: 1099.98px)"));
-    expect(collapse).toContain(".tsh-brandword");
-    expect(collapse).not.toContain(".tsh-brandmark { display: none");
+    expect(collapse).not.toContain(".spine-rail { display: none"); // the rail (mark) stays
+    expect(collapse).toContain("position: fixed"); // the panel (wordmark) becomes the overlay
   });
   it("the real asset files exist in public/", () => {
     const pub = join(here, "..", "..", "..", "public");

@@ -66,7 +66,7 @@ describe("the gather's spine", () => {
   it("the exit selectors: sidebars slide, chrome fades, the bar exits up, the sheet dissolves; nothing nests", () => {
     // the workspace shell (todo-fix48): the sidebar exits via the shell's `.tsh-clearing` class
     // (it names the sidebar for intent); the Today corner + the hero pair/subtitle exit in-wrap
-    expect(EXIT_LEFT).toBe(".tsh-nav");
+    expect(EXIT_LEFT).toBe(".spine-panel"); // the spine: the panel is the mover; the rail persists
     expect(EXIT_RIGHT).toBe(".tdb-tdpop, .tdb-tdpill"); // the Today corner leaves
     expect(EXIT_FADE).not.toContain(".tdb-bigsearch"); // the search moved to the bar
     expect(EXIT_FADE).toContain(".tdb-heroright"); // the CTA pair fades
@@ -75,7 +75,7 @@ describe("the gather's spine", () => {
     expect(EXIT_BAR).toBe(".tdb-dochead"); // the panel's items row
     expect(DISSOLVE).toBe(".tdb-mainc, .tdb-lsec"); // the panel dissolves
     // the gatherables are the items, never their dissolving containers
-    for (const shell of [".tdb-mainc", ".tdb-lsec", ".tsh-nav", ".tdb-tdpop", ".tdb-wrap"]) {
+    for (const shell of [".tdb-mainc", ".tdb-lsec", ".spine-panel", ".tdb-tdpop", ".tdb-wrap"]) {
       expect(GATHER_SELECTOR.split(", ")).not.toContain(shell);
     }
     expect(GATHER_SELECTOR).toContain(".tdb-cell");

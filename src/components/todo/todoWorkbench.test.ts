@@ -35,10 +35,11 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
   it("248px sticky white panel, locked left; the assembly is 1364", () => {
     // THE WORKSPACE SHELL (todo-fix48): the floating rail is retired — the FILTER rows live
     // in the always-on parchment sidebar (TodoShell) as its FILTER section.
-    expect(tshRule(".tsh-nav")).toContain("width: var(--tsh-nav-w)");
-    expect(tshRule(".tsh-root")).toContain("--tsh-nav-w: 212px");
-    expect(tsh).toContain('<aside className="tsh-nav"');
-    expect(page).toContain("filterSection={renderFilterSection()}");
+    // THE HARDBACK SPINE: the filters live in the parchment PANEL's context zone
+    expect(tshRule(".spine-panel")).toContain("width: var(--spine-panel-w)");
+    expect(tshRule(".spine-root")).toContain("--spine-panel-w: 196px");
+    expect(tsh).toContain('<aside className="spine-panel"');
+    expect(page).toContain("contextContent={renderFilterSection()}");
     expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');
   });
   it("SHOW: seven vertical pills in the locked order, 34px rows, dot left + count right, zero 40%", () => {
@@ -66,19 +67,19 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).not.toContain("SHOW ALL<span"); // explicitly not capitals
     // P4: the ink outline is retired — active filter rows take the drawer's faint parchment fill
     const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("background: var(--tsh-active-bg)"); // P2: the shell's warm faint fill
+    expect(sel).toContain("background: var(--spine-pon)"); // the panel's warm faint fill
     expect(sel).not.toContain("box-shadow");
     expect(sel).not.toContain("border-color: var(--ink)");
     expect(css).not.toContain(".tdb-fpill.sel::before"); // no tick glyph
     const nar = rule(".tdb-fpill.nar");
-    expect(nar).toContain("background: var(--tsh-active-bg)"); // the narrowed rows wear the same warm fill
+    expect(nar).toContain("background: var(--spine-pon)"); // the narrowed rows wear the same warm fill
     expect(nar).not.toContain("inset 0 0 0 1px var(--ink)");
     expect(page).not.toContain("tdb-frst");
     expect(css).not.toContain("tdb-frst");
     const sa = page.indexOf("Show all<span");
     expect(sa).toBeLessThan(page.indexOf('railPill("Offers"')); // Show all leads the facets
-    expect(tsh).toContain('<div className="tsh-nk tsh-filterhead" aria-hidden>FILTER</div>'); // the sidebar's FILTER kicker heads the section
-    expect(page).not.toContain("REVIEW &amp; FILTER"); // the band retired with the floating card
+    expect(page).toContain('contextLabel="TO-DO · FILTERS"'); // the ruled context label heads the filters
+    expect(page).not.toContain("REVIEW &amp; FILTER");
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
     expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0}'); // the shell: Begin launches the session over the same engine queue
@@ -98,8 +99,8 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
   });
   it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
     // Task settings + Help centre are the shell FOOT now; the FILTER section carries no setrow
-    expect(page).toContain('{ key: "settings", label: "Task settings", icon: <SettingsIcon size={16} />, onClick: () => setSettingsOpen(true) }');
-    expect(page).toContain('{ key: "help", label: "Help centre"');
+    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true)');
+    expect(page).toContain('label: "Help centre"');
     const filterFn2 = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
     expect(filterFn2).not.toContain("tdb-setrow");
     // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
@@ -429,17 +430,17 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
   });
   it("the FILTER section is ONE source: the sidebar consumes it, the collapsed drawer reuses it", () => {
     expect(page).not.toContain("renderToolbelt");
-    expect(page).not.toContain("renderRail"); // the floating rail is gone
-    expect(page).toContain("filterSection={renderFilterSection()}"); // the sidebar
-    expect(page).toContain('<div className="tdb-fbox">{renderFilterSection()}</div>'); // the collapsed overlay
+    expect(page).not.toContain("renderRail");
+    expect(page).not.toContain("renderFilterDrawer"); // the collapsed drawer is retired — the panel IS the overlay
+    expect(page).toContain("contextContent={renderFilterSection()}"); // ONE mount, in the panel context zone
     const cardFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
-    expect(cardFn).not.toContain("tdb-herobegin"); // no CTA in the sidebar
-    expect(cardFn).not.toContain("tdb-setrow"); // Task settings is the shell foot
+    expect(cardFn).not.toContain("tdb-herobegin"); // no CTA in the filters
+    expect(cardFn).not.toContain("tdb-setrow"); // Task settings is the panel foot
   });
   it("the foot: Task settings + Help centre are the shell's foot rows, same wiring", () => {
-    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={16} />, onClick: () => setSettingsOpen(true)');
+    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true)');
     expect(page).toContain('label: "Help centre"');
-    expect(tsh).toContain("{foot.map((f) =>"); // the shell renders them at the sidebar foot
+    expect(tsh).toContain("{foot.map("); // the shell renders them at the PANEL foot
     expect(page).not.toContain("tdb-sic");
   });
 });
@@ -565,11 +566,12 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("A11Y: the drawer is focus-trapped (Tab cycles, Esc closes, scrim click closes); one panel, two mounts", () => {
-    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setFilterDrawerOpen(false); return; }');
-    expect(page).toContain("if (e.shiftKey && document.activeElement === first)");
-    expect(page).toContain('className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)}');
-    expect((page.match(/<div className="tdb-fbox">\{renderFilterSection\(\)\}<\/div>/g) ?? []).length).toBe(1); // the collapsed overlay; the sidebar consumes the section via the shell prop
+  it("A11Y: the collapsed panel overlay dismisses on Escape + scrim; the filters ride it (one mount)", () => {
+    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setPanelOpen(false); }');
+    expect(tsh).toContain('onClick={onPanelDismiss}'); // the scrim dismisses
+    // ONE filter mount: the panel's context zone (no second collapsed drawer)
+    expect((page.match(/contextContent=\{renderFilterSection\(\)\}/g) ?? []).length).toBe(1);
+    expect(page).not.toContain("tdb-fdrawer");
   });
   it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
     expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(1); // the Lane builder (the ledger grew its own washed heading, doc pass P4)
@@ -1095,16 +1097,16 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("BREAKPOINTS: < --tsh-collapse the sidebar folds to an icon rail whose ⚲ opens the filter overlay", () => {
-    expect(page).toContain('window.matchMedia("(max-width: 1099.98px)")'); // the shell collapse tier
-    expect(tshCss).toContain("@media (max-width: 1099.98px) {"); // the icon-rail tier
-    expect(tsh).toContain('onFilterIcon'); // the folded FILTER icon opens the overlay
-    expect(page).toContain("onFilterIcon={() => setFilterDrawerOpen(true)}");
-    expect(page).toContain('className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters"');
-    expect(page).toContain('<div className="tdb-fbox">{renderFilterSection()}</div>');
-    expect((page.match(/<div className="tdb-fbox">\{renderFilterSection\(\)\}<\/div>/g) ?? []).length).toBe(1); // the collapsed overlay only
-    expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")'); // the narrow-Today driver retired with the corner
-    expect(page).not.toContain("tdb-ric"); // the icon rail is extinct
+  it("BREAKPOINTS: < --tsh-collapse the PANEL collapses to a rail-triggered overlay; the rail persists", () => {
+    expect(page).toContain('window.matchMedia("(max-width: 1099.98px)")'); // the collapse tier
+    expect(tshCss).toContain("@media (max-width: 1099.98px) {");
+    expect(page).toContain("panelOpen={panelOpen}");
+    expect(page).toContain("onPanelDismiss={() => setPanelOpen(false)}");
+    const collapse = tshCss.slice(tshCss.indexOf("@media (max-width: 1099.98px)"));
+    expect(collapse).toContain("position: fixed"); // the panel overlays
+    expect(collapse).not.toContain(".spine-rail { display: none"); // the rail stays
+    expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")');
+    expect(page).not.toContain("tdb-fdrawer"); // the old collapsed drawer is extinct
   });
   it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
     expect((page.match(/role="button"/g) ?? []).length).toBeGreaterThanOrEqual(4); // cards + run rows

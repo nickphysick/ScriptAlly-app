@@ -2,41 +2,54 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TodoShell — the To-do workspace frame (design-refs/todo-workspace-shell.html, todo-fix48).
- * ONE shared component: an always-on parchment navigation sidebar (the real brand + WORKSPACE
- * + a slotted FILTER section + a foot), and a parchment breadcrumb bar (breadcrumb + user)
- * joined to it by matching borders. The search lives in the page's PANEL HEADER now, not the
- * bar. The page's own content (hero + panel) renders as children in the body region.
+ * TodoShell — THE HARDBACK SPINE (design-refs/spine-shell.html, todo-fix54; supersedes the
+ * single-column sidebar of the workspace-shell + polish packs). Three columns inside the
+ * `.t-f12` token layer:
  *
- * Built for /todo (the nav is centralised through railNav; the shell mounts here while the
- * NavDrawer keeps serving the other routes — see reports/todo-workspace-shell.md). It reuses
- * the `.t-f12` token layer (pastilles, fonts, F12Account) and touches no locked component:
- * the breadcrumb is drawn here from plain text (QUERYING / To-do), so the locked header
- * components are untouched.
+ *   .spine-rail   — a 54px full-height INK rail (#2a1a13) owning the top-left corner, beside
+ *                   everything incl. the bar. The real logo mark at its head, then the app's
+ *                   CATEGORIES as icon buttons (Dashboard · Querying · Agents · Manuscripts)
+ *                   with Settings at the foot. Active = a #4a3226 rounded square, icon cream
+ *                   #f3e7da — the rail is the one place the parchment-highlight law can't apply
+ *                   (there is no parchment here); the ink square is its native equivalent.
+ *                   Never burgundy.
+ *   .spine-panel  — a 196px parchment (#f5f0e8) column: the real wordmark at its head, then the
+ *                   active category's PAGES (icon + label + count), then the current page's
+ *                   CONTEXT zone (To-do → the filter rows, full reactive parity). Foot: the
+ *                   utility rows (Task settings + Help centre).
+ *   .tsh-mainwrap — the content region: the breadcrumb bar (wearing the panel's parchment, so
+ *                   bar + panel read as one cream L) over the page body (children).
  *
- * The ACTIVE-STATE LAW is the faint parchment fill only (--tsh-active-bg #e6ddcf, no
- * border/shadow/outline) — NEVER a burgundy fill (asserted in todoWorkspaceShell.test.ts).
- * Below --tsh-collapse the sidebar
- * folds to an icon rail (labels → tooltips; the FILTER section → a filter icon opening the
- * page's existing overlay).
+ * Active-fill law (panel): the warm parchment fill #e6ddcf (hover #ece5d9), fill only — no
+ * border, shadow or outline; page rows and filter rows alike. Touches no locked component: the
+ * crumb is drawn here from plain text, so the locked header components are untouched.
  */
 import React from "react";
 import { F12Account } from "./F12Shell";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import "./todoShell.css";
 
-export interface TodoNavItem {
+/** A rail category (routes to its default page; the rail reflects the current route). */
+export interface SpineCategory {
   key: string;
   label: string;
-  /** A decorative glyph (unicode or small node) — never load-bearing; the label carries meaning. */
   icon: React.ReactNode;
-  /** Router path; the shell calls onNavigate(tab, sub?) via the resolver the caller passes. */
   onClick: () => void;
-  /** Derived count shown right-aligned (Queries, To-do); omit for the rest. */
-  count?: number;
+  active: boolean;
 }
 
-export interface TodoFootItem {
+/** A panel page row (icon + label + optional derived count). */
+export interface SpinePage {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  count?: number;
+  onClick: () => void;
+  active: boolean;
+}
+
+/** A panel foot utility (Task settings · Help centre). */
+export interface SpineFootItem {
   key: string;
   label: string;
   icon: React.ReactNode;
@@ -44,81 +57,108 @@ export interface TodoFootItem {
 }
 
 export interface TodoShellProps {
-  /** The WORKSPACE nav rows (Dashboard · Queries · Agents · To-do · Packages). */
-  workspace: TodoNavItem[];
-  /** Which workspace key is lit (always "todo" here, but the shell is route-agnostic). */
-  activeKey: string;
-  /** The FILTER section's rows — the page owns them so they carry all reactive behaviour. */
-  filterSection: React.ReactNode;
-  /** The foot rows (Task settings · Help centre). */
-  foot: TodoFootItem[];
+  /** The rail's categories, in order; one is `active`. */
+  categories: SpineCategory[];
+  /** The rail's foot item (Settings). */
+  railFoot: SpineCategory;
+  /** The active category's mono label (e.g. "QUERYING"). */
+  panelCategory: string;
+  /** The active category's page rows. */
+  pages: SpinePage[];
+  /** The current page's context zone: a ruled mono label + its dynamic content (To-do only). */
+  contextLabel?: string;
+  contextContent?: React.ReactNode;
+  /** The panel foot utilities. */
+  foot: SpineFootItem[];
   /** The breadcrumb: parents (navigable) then the bold current page. */
   crumbParents?: { label: string; onClick: () => void }[];
   crumbCurrent: string;
   onAccount: () => void;
-  /** The brand's home-route link (→ dashboard, mirroring the NavDrawer). */
+  /** The brand's home-route link (the logo/wordmark → dashboard). */
   onBrand: () => void;
-  /** Icon-rail mode (< --tsh-collapse): labels become tooltips, the filter section folds. */
+  /** < --tsh-collapse: the panel collapses to a rail-triggered overlay. */
   collapsed?: boolean;
-  /** A focused session is opening/running: the sidebar slides off left, the search fades. */
+  /** Whether the collapsed panel overlay is open. */
+  panelOpen?: boolean;
+  onPanelDismiss?: () => void;
+  /** A focused session is opening/running: the panel slides off left (the rail persists). */
   clearing?: boolean;
-  /** In the icon rail, the filter icon opens the page's existing overlay. */
-  onFilterIcon?: () => void;
   children: React.ReactNode;
 }
 
+const RailIcon: React.FC<{ c: SpineCategory }> = ({ c }) => (
+  <button
+    type="button"
+    className={`spine-rli${c.active ? " on" : ""}`}
+    onClick={c.onClick}
+    title={c.label}
+    aria-label={c.label}
+    aria-current={c.active ? "page" : undefined}
+  >
+    <span className="spine-ric" aria-hidden>{c.icon}</span>
+  </button>
+);
+
 export const TodoShell: React.FC<TodoShellProps> = ({
-  workspace, activeKey, filterSection, foot, crumbParents = [], crumbCurrent,
-  onAccount, onBrand, collapsed = false, clearing = false, onFilterIcon, children,
+  categories, railFoot, panelCategory, pages, contextLabel, contextContent, foot,
+  crumbParents = [], crumbCurrent, onAccount, onBrand,
+  collapsed = false, panelOpen = false, onPanelDismiss, clearing = false, children,
 }) => (
-  <div className={`t-f12 tsh-root${collapsed ? " tsh-collapsed" : ""}${clearing ? " tsh-clearing" : ""}`}>
-    <aside className="tsh-nav" aria-label="Workspace navigation">
-      {/* CENTRING/BRAND — the app's real mark + wordmark, at the NavDrawer's proportions,
-          linking home; no fabricated glyphs. */}
-      <button type="button" className="tsh-brand" onClick={onBrand} aria-label="ScriptAlly — go to dashboard">
-        <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={34} height={34} className="tsh-brandmark" />
-        <span className="tsh-brandword"><ScriptAllyLogo heightPx={38} /></span>
+  <div className={`t-f12 spine-root${collapsed ? " spine-collapsed" : ""}${panelOpen ? " spine-panelopen" : ""}${clearing ? " spine-clearing" : ""}`}>
+    {/* THE RAIL — chrome; it persists through the session and owns the top-left corner. */}
+    <aside className="spine-rail" aria-label="Categories">
+      <button type="button" className="spine-logo" onClick={onBrand} aria-label="ScriptAlly — go to dashboard">
+        <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={30} height={30} />
+      </button>
+      <nav className="spine-railnav" aria-label="Categories">
+        {categories.map((c) => <RailIcon key={c.key} c={c} />)}
+      </nav>
+      <div className="spine-railfoot"><RailIcon c={railFoot} /></div>
+    </aside>
+
+    {/* THE PANEL — the active category's pages + the current page's context. */}
+    <aside className="spine-panel" aria-label="Pages and filters">
+      <button type="button" className="spine-word" onClick={onBrand} aria-label="ScriptAlly — go to dashboard">
+        <ScriptAllyLogo heightPx={30} />
       </button>
 
-      <div className="tsh-nk" aria-hidden>WORKSPACE</div>
-      <nav aria-label="Workspace">
-        {workspace.map((n) => (
+      <div className="spine-cat" aria-hidden>{panelCategory}</div>
+      <nav aria-label={panelCategory}>
+        {pages.map((pg) => (
           <button
-            key={n.key}
+            key={pg.key}
             type="button"
-            className={`tsh-ni${n.key === activeKey ? " on" : ""}`}
-            aria-current={n.key === activeKey ? "page" : undefined}
-            title={collapsed ? n.label : undefined}
-            onClick={n.onClick}
+            className={`spine-ni${pg.active ? " on" : ""}`}
+            aria-current={pg.active ? "page" : undefined}
+            onClick={pg.onClick}
           >
-            <span className="tsh-ic" aria-hidden>{n.icon}</span>
-            <span className="tsh-nlab">{n.label}</span>
-            {typeof n.count === "number" && <span className="tsh-n">{n.count}</span>}
+            <span className="spine-ic" aria-hidden>{pg.icon}</span>
+            <span className="spine-nlab">{pg.label}</span>
+            {typeof pg.count === "number" && <span className="spine-n">{pg.count}</span>}
           </button>
         ))}
       </nav>
 
-      {/* The FILTER section: its rows are the page's, carrying counts, zero-dimming, the struck
-          old totals and the active-search chip. Collapsed, it folds to a single filter icon
-          that opens the page's existing overlay. */}
-      <div className="tsh-nk tsh-filterhead" aria-hidden>FILTER</div>
-      {collapsed ? (
-        <button type="button" className="tsh-ni tsh-filtericon" title="Filter" aria-label="Filter" onClick={onFilterIcon}>
-          <span className="tsh-ic" aria-hidden>⚲</span>
-        </button>
-      ) : (
-        <div className="tsh-filter">{filterSection}</div>
+      {contextLabel && (
+        <>
+          <div className="spine-nk" aria-hidden>{contextLabel}</div>
+          <div className="spine-ctx">{contextContent}</div>
+        </>
       )}
 
-      <div className="tsh-spacer" />
-
-      {foot.map((f) => (
-        <button key={f.key} type="button" className="tsh-ni" title={collapsed ? f.label : undefined} onClick={f.onClick}>
-          <span className="tsh-ic" aria-hidden>{f.icon}</span>
-          <span className="tsh-nlab">{f.label}</span>
-        </button>
-      ))}
+      <div className="spine-spacer" />
+      <div className="spine-panelfoot">
+        {foot.map((f) => (
+          <button key={f.key} type="button" className="spine-ni" onClick={f.onClick}>
+            <span className="spine-ic" aria-hidden>{f.icon}</span>
+            <span className="spine-nlab">{f.label}</span>
+          </button>
+        ))}
+      </div>
     </aside>
+
+    {/* the collapsed-panel scrim (below --tsh-collapse; dismiss on outside click) */}
+    {collapsed && panelOpen && <div className="spine-scrim" onClick={onPanelDismiss} aria-hidden />}
 
     <div className="tsh-mainwrap">
       <div className="tsh-bcbar">
@@ -131,8 +171,6 @@ export const TodoShell: React.FC<TodoShellProps> = ({
           ))}
           <b>{crumbCurrent}</b>
         </span>
-        {/* CENTRING/SEARCH — the bar returns to breadcrumb + user; the search moved to the
-            panel's items row. F12Account is pushed right by its own margin-left:auto. */}
         <F12Account onClick={onAccount} />
       </div>
       <div className="tsh-body">{children}</div>
