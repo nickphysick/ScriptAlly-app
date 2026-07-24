@@ -12,7 +12,7 @@ describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () =
   it("is exactly the six stops in order: hero → search → pills → review card → a card → Today", () => {
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
       ".tdb-herobegin",
-      ".tsh-search",
+      ".tdb-hsearch",
       ".tdb-fpill, .tsh-filtericon",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",

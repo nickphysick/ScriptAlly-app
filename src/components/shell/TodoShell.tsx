@@ -54,11 +54,6 @@ export interface TodoShellProps {
   /** The breadcrumb: parents (navigable) then the bold current page. */
   crumbParents?: { label: string; onClick: () => void }[];
   crumbCurrent: string;
-  /** The search pill, wired to the page's ONE search state (the ⌘K target stays here). */
-  searchValue: string;
-  onSearchChange: (v: string) => void;
-  searchRef?: React.Ref<HTMLInputElement>;
-  searchPlaceholder?: string;
   onAccount: () => void;
   /** Icon-rail mode (< --tsh-collapse): labels become tooltips, the filter section folds. */
   collapsed?: boolean;
@@ -71,7 +66,6 @@ export interface TodoShellProps {
 
 export const TodoShell: React.FC<TodoShellProps> = ({
   workspace, activeKey, filterSection, foot, crumbParents = [], crumbCurrent,
-  searchValue, onSearchChange, searchRef, searchPlaceholder = "Search your list…",
   onAccount, collapsed = false, clearing = false, onFilterIcon, children,
 }) => (
   <div className={`t-f12 tsh-root${collapsed ? " tsh-collapsed" : ""}${clearing ? " tsh-clearing" : ""}`}>
@@ -129,20 +123,8 @@ export const TodoShell: React.FC<TodoShellProps> = ({
           ))}
           <b>{crumbCurrent}</b>
         </span>
-        <span className="tsh-search">
-          <input
-            ref={searchRef}
-            type="text"
-            placeholder={searchPlaceholder}
-            aria-label="Search your list"
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Escape") { onSearchChange(""); (e.target as HTMLInputElement).blur(); } }}
-          />
-          <span className="tsh-mag" aria-hidden>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
-          </span>
-        </span>
+        {/* CENTRING/SEARCH — the bar returns to breadcrumb + user; the search moved to the
+            panel's items row. F12Account is pushed right by its own margin-left:auto. */}
         <F12Account onClick={onAccount} />
       </div>
       <div className="tsh-body">{children}</div>

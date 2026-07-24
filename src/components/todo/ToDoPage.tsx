@@ -797,9 +797,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       foot={shellFoot}
       crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
       crumbCurrent="To-do"
-      searchValue={search}
-      onSearchChange={setSearch}
-      searchRef={searchRef}
       onAccount={() => onNavigate("account")}
       collapsed={shellCollapsed}
       clearing={heroSession.clearing}
@@ -832,12 +829,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: ONE thin-bordered container wrapping
               the whole working area — the items row, both card sections, and the Pro colophon. */}
           <div className="tdb-mainc tdb-panel">
-            {/* the items row: the Playfair line left ("{n} items" unfiltered → "Showing {x} of
-                {y} items" whenever a filter/search narrows), the view toggle right, hairline
-                beneath. No Cards/Ledger text tabs, no Sort button. */}
+            {/* CENTRING/SEARCH — the items row: the Playfair "{n} items" line left, the view
+                toggle right, and THE BIG SEARCH PILL absolute-centred between them (so the
+                flanks never push it off-centre). No hairline beneath — the cards' top edge
+                separates. The row grows to seat the 46px pill; items line + pill + toggle sit
+                on one aligned band. */}
             <div className="tdb-dochead tdb-items">
               <span className="tdb-bartext">
                 {active ? `Showing ${shownX} of ${shownY} items` : `${shownY} items`}
+              </span>
+              <span className="tdb-hsearch">
+                <input
+                  ref={searchRef}
+                  type="text"
+                  placeholder="Search your list…"
+                  aria-label="Search your list"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+                />
+                <span className="tdb-hmag" aria-hidden>
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
+                </span>
               </span>
               <span className="tdb-vseg" role="group" aria-label="View">
                 <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>

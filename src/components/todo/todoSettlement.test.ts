@@ -102,10 +102,10 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
   // top. The workspace shell moves the search into the breadcrumb bar (a white pill) and the
   // CTA pair into the hero. These locks re-point to the new seats; the reactive filter
   // behaviour they used to guard lives on in todoWorkspaceShell.test.ts.
-  it("the search is the shell's bar pill, not a hero/sheet pill", () => {
-    expect(page).toContain("searchValue={search}");
-    expect(page).toContain("searchRef={searchRef}");
-    expect(page).not.toContain("tdb-bigsearch"); // the grown hero pill retired from the JSX (its dead rule is swept in P5)
+  it("the search is the panel-header pill, not a hero/sheet/bar pill", () => {
+    expect(page).toContain('<span className="tdb-hsearch">');
+    expect(page).toContain("ref={searchRef}");
+    expect(page).not.toContain("tdb-bigsearch");
   });
   it("the CTA pair is in the hero; there is NO CTA in the sidebar", () => {
     const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));

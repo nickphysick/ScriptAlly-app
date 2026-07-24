@@ -225,7 +225,7 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
   it("the items row is PLAIN (no sage band): a hairline beneath, no title node", () => {
     const b = rule(".tdb-dochead");
     expect(b).toContain("background: none"); // the sage document band retired for the panel
-    expect(b).toContain("border-bottom: 1px solid var(--tdb-panel-hair)");
+    expect(rule(".tdb-items")).toContain("border-bottom: none"); // CENTRING/SEARCH: no hairline beneath the items row
     expect(page).not.toContain("tdb-doct");
     expect(page).not.toContain(">To do<");
   });
@@ -649,19 +649,18 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(hero).toContain("Here’s everything on your to-do list."); // the subtitle
     expect(hero).not.toContain("tdb-bigsearch"); // the search is NOT in the hero
   });
-  it("the search relocated to the breadcrumb bar as a white pill — same state, same ⌘K target", () => {
-    // the pill is the shell's, wired to the page's ONE search state
-    expect(page).toContain("searchValue={search}");
-    expect(page).toContain("onSearchChange={setSearch}");
-    expect(page).toContain("searchRef={searchRef}");
-    expect(tsh).toContain('<span className="tsh-search">');
-    expect(tsh).toContain("value={searchValue}");
-    expect(tshRule(".tsh-search")).toContain("background: #fff");
-    expect(tshRule(".tsh-search")).toContain("border: 1px solid var(--tsh-active-border)");
+  it("the search relocated to the PANEL HEADER as the big centred pill — same state, same ⌘K target", () => {
+    expect(page).toContain('<span className="tdb-hsearch">'); // in the items row now
+    expect(page).toContain('placeholder="Search your list…"');
+    expect(page).toContain("value={search}");
+    expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
+    expect(page).toContain("ref={searchRef}"); // the ⌘K target moved with it
+    expect(rule(".tdb-hsearch")).toContain("background: #fff");
+    expect(rule(".tdb-hsearch")).toContain("border: 1px solid var(--tsh-active-border)");
     expect(page).toContain("matchesSearch(c, search, sctx)");
-    // the hero's old floating-pill selectors are gone
-    expect(page).not.toContain('placeholder="Search"');
-    expect(page).not.toContain('<span className="tdb-mag" aria-hidden>');
+    // the search left the bar and the old hero pill stays gone
+    expect(tsh).not.toContain("tsh-search");
+    expect(page).not.toContain("tdb-bigsearch");
   });
   it("the ⌘K advert is gone and the shortcut still focuses the (relocated) search", () => {
     expect(page).not.toContain("<kbd aria-hidden>⌘K</kbd>");

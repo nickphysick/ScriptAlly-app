@@ -105,6 +105,8 @@
 .tsh-bcseg:hover { color: #5d4037; }
 .tsh-bcsep { margin: 0 6px; color: #c9bba9; }
 .tsh-bc b { color: #2f2419; font-family: var(--f12-serif); font-size: 13px; letter-spacing: 0; font-weight: 800; margin-left: 6px; }
+/* CENTRING/SEARCH — the search left the bar; the account is pushed to the right on its own */
+.tsh-bcbar .f12-who { margin-left: auto; }
 
 /* the search, a white pill in the bar's right region before the account */
 .tsh-search {
@@ -143,6 +145,4 @@
    (v9's app-bar exemption); only the sidebar slides off left and the search fades, both
    returning on exit. The board's own furniture exits through the session's in-wrap gather. ── */
 .tsh-clearing .tsh-nav { transform: translateX(-100%); opacity: 0; }
-.tsh-search { transition: opacity 400ms; }
-.tsh-clearing .tsh-search { opacity: 0; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .tsh-nav, .tsh-search { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .tsh-nav { transition: none; } }

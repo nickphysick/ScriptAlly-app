@@ -119,7 +119,7 @@ export const GATHER = {
 // intent, the class does the slide. Everything else is IN-WRAP and exits here.
 export const EXIT_LEFT = ".tsh-nav"; // the nav sidebar slides off left (via the shell class)
 export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"; // the Today corner leaves
-export const EXIT_FADE = ".tdb-rvbox, .tdb-heroright, .tdb-herosub, .tdb-lh2, .tdb-lsech"; // the review banner, the hero pair + subtitle, the section headings fade
+export const EXIT_FADE = ".tdb-rvbox, .tdb-heroright, .tdb-herosub, .tdb-hsearch, .tdb-lh2, .tdb-lsech"; // the review banner, the hero pair + subtitle, the section headings fade
 export const EXIT_BAR = ".tdb-dochead"; // the panel's items row slides up and out
 export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // the panel's border + contents dissolve; the items float
 /** The gatherable items — cards, group bars, or ledger rows, whichever view is up. */

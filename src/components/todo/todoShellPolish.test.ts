@@ -194,7 +194,7 @@ describe("shell polish P5 — the sweep + the record", () => {
   it("the tour anchors are all live post-polish", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).not.toContain("tdb-todaychip"); // the removed chip is gone from the tour
-    for (const sel of [".tdb-herobegin", ".tsh-search", ".tdb-fpill", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
+    for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".tdb-fpill", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
       expect(tour).toContain(sel);
     }
   });
@@ -335,5 +335,61 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
     for (const sel of [".tdb-amodal", ".tdb-toast", ".tdb-ffwrap"]) {
       expect(rule(sel)).toMatch(/position: (fixed|absolute|relative)/);
     }
+  });
+});
+
+describe("centring fix P2 — the big search in the panel header", () => {
+  it("the bar holds no search (breadcrumb + user only)", () => {
+    const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
+    expect(tsh).not.toContain("tsh-search");
+    expect(tsh).not.toContain("searchValue");
+    expect(tsh).toContain("<F12Account"); // just the user block after the crumb
+  });
+  it("the pill is absolute-centred in the items row — the flanks can't push it off-centre", () => {
+    const p = rule(".tdb-hsearch");
+    expect(p).toContain("position: absolute");
+    expect(p).toContain("left: 50%");
+    expect(p).toContain("transform: translate(-50%, -50%)");
+    expect(rule(".tdb-items")).toContain("position: relative"); // the containing block
+  });
+  it("the pill is the settled large design: 460×46, white, warm hairline, soft shadow, oat roundel", () => {
+    const w = rule(".tdb-wrap");
+    expect(w).toContain("--tdb-hsearch-w: 460px");
+    expect(w).toContain("--tdb-hsearch-h: 46px");
+    const p = rule(".tdb-hsearch");
+    expect(p).toContain("height: var(--tdb-hsearch-h)");
+    expect(p).toContain("background: #fff");
+    expect(p).toContain("border: 1px solid var(--tsh-active-border)");
+    expect(p).toContain("box-shadow: 0 6px 18px rgba(58, 28, 20, 0.08)");
+    expect(page).toContain('placeholder="Search your list…"');
+    const mag = rule(".tdb-hmag");
+    expect(mag).toContain("width: 32px");
+    expect(mag).toContain("background: var(--oat)");
+  });
+  it("NO hairline beneath the row; the toggle stands the pill's full 46px band (shared token)", () => {
+    expect(rule(".tdb-items")).toContain("border-bottom: none");
+    expect(rule(".tdb-items .tdb-vseg")).toContain("height: var(--tdb-hsearch-h)"); // same token as the pill
+    // the active-chip law is unchanged (white + ink ring)
+    expect(rule(".tdb-vseg button.on")).toContain("border: 1px solid var(--ink)");
+  });
+  it("the responsive floor is container-relative (never vw): shrinks before colliding with the flanks", () => {
+    expect(rule(".tdb-hsearch")).toContain("width: min(var(--tdb-hsearch-w), calc(100% - var(--tdb-hsearch-reserve)))");
+    expect(rule(".tdb-hsearch")).not.toContain("vw");
+    expect(rule(".tdb-wrap")).toContain("--tdb-hsearch-reserve:");
+  });
+  it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount", () => {
+    expect(page).toContain("value={search}");
+    expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
+    expect(page).toContain('className="tdb-fq tsh-fq"'); // the query chip stays in the sidebar
+    expect(page).toContain("{active ? `Showing ${shownX} of ${shownY} items`"); // the count line
+    expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)'); // ⌘K → searchRef
+    expect(page).toContain("ref={searchRef}");
+  });
+  it("session: the search leaves with the panel (EXIT_FADE), no orphaned bar-clearing target", () => {
+    const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
+    expect(stage).toContain(".tdb-hsearch"); // in the gather's fade list
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    expect(tshCss).not.toContain(".tsh-clearing .tsh-search"); // the orphan is gone
+    expect(tshCss).toContain(".tsh-clearing .tsh-nav"); // the sidebar still slides
   });
 });

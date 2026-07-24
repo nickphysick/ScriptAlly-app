@@ -30,7 +30,7 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tsh-search",  // the workspace shell: the search is a white pill in the breadcrumb bar
+    sel: ".tdb-hsearch",  // centring/search: the big pill is centred in the panel header
     h: "Search from the bar.",
     p: "One pill for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",
     cta: "Next →",

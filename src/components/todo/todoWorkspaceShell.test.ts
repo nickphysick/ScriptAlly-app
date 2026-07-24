@@ -95,31 +95,26 @@ describe("shell P1 — the parchment chrome: one continuous shell", () => {
     expect(rule(".tsh-bcbar")).toContain("background: var(--tsh-chrome)");
     expect(rule(".tsh-bcbar")).toContain("border-bottom: 1px solid var(--tsh-chrome-border)");
   });
-  it("the breadcrumb keeps its anatomy (QUERYING / To-do) and gains the search as a white pill", () => {
+  it("the breadcrumb keeps its anatomy (QUERYING / To-do) + user; the search LEFT the bar", () => {
     expect(page).toContain('crumbCurrent="To-do"');
     expect(page).toContain('crumbParents={[{ label: "QUERYING"');
     expect(tsh).toContain("<b>{crumbCurrent}</b>");
-    // the search white pill sits in the bar's right region, before the account block
-    const iSearch = tsh.indexOf('className="tsh-search"');
-    const iAccount = tsh.indexOf("<F12Account");
-    expect(iSearch).toBeGreaterThan(-1);
-    expect(iAccount).toBeGreaterThan(iSearch);
-    expect(rule(".tsh-search")).toContain("background: #fff");
-    expect(rule(".tsh-search")).toContain("border: 1px solid var(--tsh-active-border)");
-    expect(rule(".tsh-search")).toContain("margin-left: auto");
+    // CENTRING/SEARCH: the bar is breadcrumb + user only; the account holds the right on its own
+    expect(tsh).not.toContain("tsh-search");
+    expect(tsh).toContain("<F12Account");
+    expect(rule(".tsh-bcbar .f12-who")).toContain("margin-left: auto");
   });
 });
 
 describe("shell P1 — the search relocation + the retired hamburger", () => {
-  it("the search moved to the bar, same handler + the ⌘K target preserved", () => {
-    expect(page).toContain("searchValue={search}");
-    expect(page).toContain("onSearchChange={setSearch}");
-    expect(page).toContain("searchRef={searchRef}");
-    expect(tsh).toContain("onChange={(e) => onSearchChange(e.target.value)}");
-    expect(tsh).toContain("ref={searchRef}");
+  it("the search moved to the PANEL HEADER, same handler + the ⌘K target preserved", () => {
+    expect(page).toContain('<span className="tdb-hsearch">');
+    expect(page).toContain("value={search}");
+    expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
+    expect(page).toContain("ref={searchRef}");
     expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)'); // ⌘K still lands
-    // the old hero search pill is gone from the page
     expect(page).not.toContain("tdb-bigsearch");
+    expect(tsh).not.toContain("tsh-search"); // gone from the bar
   });
   it("the shell draws its own breadcrumb (no CrumbStrip / drawer hamburger on /todo)", () => {
     expect(page).not.toContain("F12Page"); // the To-do route no longer uses the F12 header wrapper
@@ -210,7 +205,7 @@ describe("shell P2 — the panel + proportions", () => {
     expect(page).toContain("{active ? `Showing"); // the filter state decides
     // the toggle is the unchanged component, the hairline beneath, no text tabs / Sort
     expect(page).toContain('className="tdb-vseg" role="group" aria-label="View"');
-    expect(cssRule(".tdb-dochead")).toContain("border-bottom: 1px solid var(--tdb-panel-hair)");
+    expect(cssRule(".tdb-items")).toContain("border-bottom: none"); // CENTRING/SEARCH: no hairline beneath now
     expect(page).not.toContain(">Cards</"); // no text tabs
     expect(page).not.toContain(">Sort<");
   });
@@ -287,7 +282,10 @@ describe("shell P4 — the session, rewired to the shell", () => {
     expect(page).toContain("clearing={heroSession.clearing}"); // driven by the session state
     expect(tsh).toContain('${clearing ? " tsh-clearing" : ""}');
     expect(tshCss).toContain(".tsh-clearing .tsh-nav { transform: translateX(-100%); opacity: 0; }");
-    expect(tshCss).toContain(".tsh-clearing .tsh-search { opacity: 0; pointer-events: none; }");
+    // CENTRING/SEARCH: the search left the bar — it fades with the panel via EXIT_FADE, no
+    // orphaned bar-clearing rule survives
+    expect(tshCss).not.toContain(".tsh-clearing .tsh-search");
+    expect(stage).toContain(".tdb-hsearch"); // the header search is in the gather's fade list
     // EXIT_LEFT names the sidebar for intent; the in-wrap furniture exits through the gather
     expect(stage).toContain('export const EXIT_LEFT = ".tsh-nav"');
     expect(stage).toContain('export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"'); // Today leaves
@@ -348,14 +346,14 @@ describe("shell P5 — the sweep + the record", () => {
   it("the tour lands on the new seats end to end", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     // Begin (hero) · search (bar) · filters (sidebar) · review (hero link) · cards · Today (corner)
-    for (const sel of [".tdb-herobegin", ".tsh-search", ".tdb-fpill, .tsh-filtericon", ".tdb-revlink", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
+    for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".tdb-fpill, .tsh-filtericon", ".tdb-revlink", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
       expect(tour).toContain(sel);
     }
     // every anchor still exists in the board or the shell
     expect(pageCss).toContain(".tdb-fpill"); // filters in the sidebar section
     expect(pageCss).toContain(".tdb-today2"); // the corner card
     expect(pageCss).toContain(".tdb-revlink"); // the hero review link
-    expect(tsh).toContain('className="tsh-search"'); // the bar search
+    expect(pageCss).toContain(".tdb-hsearch"); // the panel-header search
   });
   it("the full state machine walks: board → filter → session (both views) → close → exit", () => {
     // filtering via the sidebar section (the reactive rows the shell hosts)

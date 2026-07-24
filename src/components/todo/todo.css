@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -50,7 +50,13 @@
 /* frame P1 (todo-frame-v5.html): the bar lightens — no centred title, meta left / toggle right only */
 /* the items row (ref .tabs/.items): the Playfair line + the toggle, a hairline beneath;
    the sage document band is retired for the panel. */
-.tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 0 0 9px; margin-bottom: 4px; background: none; border-bottom: 1px solid var(--tdb-panel-hair); box-sizing: border-box; }
+/* the base document header (kept for any compact-slab consumer) */
+.tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 0 0 9px; margin-bottom: 4px; background: none; box-sizing: border-box; }
+/* CENTRING/SEARCH — the panel's items row: {n} items left · toggle right · the big search
+   pill absolute-centred between them. Grows to seat the 46px band; NO hairline beneath
+   (the cards' top edge separates). */
+.tdb-items { position: relative; min-height: var(--tdb-hsearch-h); align-items: center; padding: 4px 0 10px; margin-bottom: 0; border-bottom: none; }
+.tdb-items .tdb-bartext, .tdb-items .tdb-vseg { position: relative; z-index: 1; }
 .tdb-sheetbody { padding: 0; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-centre { width: 100%; } }
 
@@ -645,6 +651,19 @@ button.tdb-tdot { cursor: pointer; }
 /* on sage: a translucent track with the shared rule; the active chip is unchanged */
 .tdb-vseg { margin-left: auto; height: 26px; box-sizing: border-box; border: 1px solid var(--container-head-rule); background: rgba(255, 255, 255, 0.55); border-radius: 99px; display: inline-flex; align-items: center; padding: 2px; gap: 2px; }
 .tdb-vseg button { width: 26px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
+/* in the items row the toggle stands the pill's full 46px band (chips scale; the
+   white+ink-ring active chip law is unchanged) */
+.tdb-items .tdb-vseg { height: var(--tdb-hsearch-h); padding: 4px; gap: 3px; }
+.tdb-items .tdb-vseg button { width: 42px; height: 38px; font-size: 15px; }
+/* THE BIG SEARCH PILL — absolute-centred in the row so the flanks never push it off-centre;
+   the settled large design (460×46, white, warm hairline, soft shadow, oat roundel). The
+   width has a container-relative floor (min of the token and the row minus a reserve for the
+   flanks) so it shrinks before ever colliding — never a vw unit. */
+.tdb-hsearch { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; width: min(var(--tdb-hsearch-w), calc(100% - var(--tdb-hsearch-reserve))); height: var(--tdb-hsearch-h); box-sizing: border-box; background: #fff; border: 1px solid var(--tsh-active-border); border-radius: 99px; box-shadow: 0 6px 18px rgba(58, 28, 20, 0.08); display: flex; align-items: center; gap: 11px; padding: 0 8px 0 20px; }
+.tdb-hsearch input { flex: 1; min-width: 0; border: none; background: none; outline: none; font-size: 13px; color: var(--ink); }
+.tdb-hsearch input::placeholder { color: #a59a8c; }
+.tdb-hsearch:focus-within { border-color: #c9bba9; }
+.tdb-hmag { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--oat); color: var(--ink); flex: 0 0 auto; }
 .tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-sizing: border-box; } /* selected = white + ink ring (frame P2: the press language died) */
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
