@@ -172,3 +172,28 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
     expect(page).toContain('className="tdb-fq tsh-fq"'); // the active-search chip
   });
 });
+
+describe("shell polish P5 — the sweep + the record", () => {
+  const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+  it("the outlined-filter + white-card active styles this replaced are extinct", () => {
+    expect(tshCss).not.toContain("#fdfcfa"); // the white-card fill
+    expect(css).not.toContain("box-shadow: inset 0 0 0 1px var(--ink)"); // the ink outline on filters
+    // the active nav + filter states carry NO border/shadow/outline
+    for (const s of ["border-color: var(--ink)"]) expect(css.match(new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).not.toContainEqual(undefined);
+  });
+  it("themes.md records the polish amendment", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## To-do workspace shell — polish amendment (settled)");
+    expect(themes).toContain("THE CENTRED COLUMN");
+    expect(themes).toContain("STICKER CARDS");
+    expect(themes).toContain("THE DRAWER-GRAMMAR SIDEBAR");
+    expect(themes).toContain("white-card active variant is retired");
+  });
+  it("the tour anchors are all live post-polish", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).not.toContain("tdb-todaychip"); // the removed chip is gone from the tour
+    for (const sel of [".tdb-herobegin", ".tsh-search", ".tdb-fpill", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
+      expect(tour).toContain(sel);
+    }
+  });
+});

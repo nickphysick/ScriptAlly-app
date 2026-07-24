@@ -339,7 +339,7 @@ describe("shell P5 — the sweep + the record", () => {
     const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
     expect(themes).toContain("## To-do workspace shell (settled)");
     expect(themes).toContain("THE PARCHMENT CHROME PAIR");
-    expect(themes).toContain("THE WHITE-CARD ACTIVE LAW (never burgundy)");
+    expect(themes).toContain("THE ACTIVE-STATE LAW (never burgundy)"); // amended by the polish (faint fill)
     expect(themes).toContain("THE PANEL");
     expect(themes).toContain("TODAY'S CORNER FORM");
     expect(themes).toContain("the pastille bands are SIGNAL");

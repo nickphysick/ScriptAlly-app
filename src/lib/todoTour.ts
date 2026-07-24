@@ -56,7 +56,7 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-today2, .tdb-todaychip",
+    sel: ".tdb-today2",  // the shell: Today lives in the corner pop-up
     h: "Today lives beside your work.",
     p: "Your committed list and everything you\u2019ve done today, struck through as you go.",
     cta: "Done",

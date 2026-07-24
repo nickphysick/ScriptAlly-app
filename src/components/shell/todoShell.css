@@ -1,8 +1,10 @@
 /**
- * TodoShell — the To-do workspace frame (design-refs/todo-workspace-shell.html, todo-fix48).
- * Parchment chrome across the sidebar and the breadcrumb bar, joined by matching borders so
- * they read as one continuous shell. The active-state law is parchment-only (the white card),
- * never a burgundy fill. Tokens govern the widths, the chrome fill and the collapse tier.
+ * TodoShell — the To-do workspace frame (design-refs/todo-workspace-shell.html, todo-fix48;
+ * shell-polish amendment). Parchment chrome across the sidebar and the breadcrumb bar, joined
+ * by matching borders as one continuous shell. The sidebar reads in the app NavDrawer's
+ * grammar (shared --rail-* tokens): mono hairline-ruled section labels, icon+label rows, and
+ * the drawer's FAINT PARCHMENT FILL for the active state — never a border, shadow or burgundy.
+ * Tokens govern the widths, the chrome fill and the collapse tier.
  */
 .tsh-root {
   /* the parchment chrome — one fill, one joining border across sidebar + bar */

@@ -920,9 +920,9 @@ frame around them is furniture and does not compete.
   `#e4dbcd` borders (`--tsh-chrome-border`) so they read as one continuous shell. The sidebar
   is brand → WORKSPACE nav → a slotted FILTER section → Task settings + Help centre foot; the
   bar carries the QUERYING / To-do crumb, the search white pill, and the account block.
-- **THE WHITE-CARD ACTIVE LAW (never burgundy):** an active nav item or filter row inverts to
-  the soft white card — `#fdfcfa` fill, `#e0d6c6` hairline, whisper shadow, ink text, weight
-  700 (`.tsh-ni.on`). A burgundy fill is forbidden anywhere in the nav.
+- **THE ACTIVE-STATE LAW (never burgundy) ⚠️ AMENDED by the polish below:** the white-card
+  active variant is retired — active nav items and filter rows now take the NavDrawer's faint
+  parchment fill only (`--rail-pill #f1e9df`, no border/shadow/outline). Never burgundy.
 - **THE PANEL:** one thin warm-grey bordered container (`.tdb-mainc`, `#fff`, `--tdb-panel-bd
   #e2dbd0`, radius 14, 22px padding) wraps the whole working area — the items row, both card
   sections, and the Pro colophon.
@@ -939,4 +939,30 @@ frame around them is furniture and does not compete.
   section → a ⚲ icon opening the existing overlay). A focused session slides the sidebar off
   left and fades the bar search via `.tsh-clearing`, the breadcrumb bar staying (the v9
   app-bar exemption).
+
+## To-do workspace shell — polish amendment (settled)
+
+Five fixes over the deployed shell (an amendment; the shell section above stands, with these
+deltas):
+
+- **THE CENTRED COLUMN:** the hero row and the panel share ONE centred max-width column
+  (`.tdb-col`, `--tdb-col-max 1360px`, `margin-inline:auto`) with equal side gutters
+  (`--tdb-col-gutter`) that grow with the viewport. The title sits flush with the panel's left
+  edge, the CTA/review pair flush with its right. A `--tdb-chrome-gap` (≥44px) of air sits under
+  the breadcrumb bar.
+- **THE SUBTITLE:** Playfair 17px regular in warm grey `#7a6a5e`, ~6px under the title. Copy:
+  "Urgent tasks, housekeeping, notes. Here's everything on your to-do list." ("and notes" →
+  "notes").
+- **STICKER CARDS:** the family task cards (both sections + batch) wear a 1.5px ink border
+  (`--tdb-sticker-bd #3a1c14`) and a hard offset block behind (`--tdb-sticker-off 5px`, no blur)
+  in the family colour — pink `#f2cec1` / latte `#eee5d4` / butter `#eedfae`. Hover lifts one
+  step (`6px`, `translate(-1px,-1px)`). The pastille bands + white pills are unchanged; the grid
+  gap (`--tdb-grid-gap 14px`) ≥ the offset so blocks never touch. The ledger rows, the Today
+  pop-up and the session page are NOT stickers.
+- **THE DRAWER-GRAMMAR SIDEBAR:** the sidebar mirrors the app NavDrawer via the shared `--rail-*`
+  tokens — mono `.18em` section labels hairline-ruled beneath, icon+label rows in the drawer's
+  height/radius/type (lucide icons), muted counts. **The active state — nav items AND filter
+  rows alike — is the drawer's faint parchment fill ONLY** (`--rail-pill #f1e9df`): no border,
+  no shadow, no outline, never burgundy. The white-card active variant is retired, and so is the
+  ink outline on the selected filter.
 
