@@ -225,3 +225,48 @@ describe("shell P2 — the panel + proportions", () => {
     expect(pageCss).toContain(".tdb-band");
   });
 });
+
+describe("shell P3 — Today, back in its corner", () => {
+  const pageCss = readFileSync(join(here, "todo.css"), "utf8");
+  const cssRule = (sel: string): string => {
+    const m = pageCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`rule not found: ${sel}`);
+    return m[1];
+  };
+  it("the corner pop-up: floating white card bottom-right, #ddd2c2 border, deep shadow, ~250px", () => {
+    const pop = cssRule(".tdb-tdpop");
+    expect(pop).toContain("position: fixed");
+    expect(pop).toContain("right: 26px");
+    expect(pop).toContain("bottom: 24px");
+    expect(pop).toContain("width: 250px");
+    const card = cssRule(".tdb-today2");
+    expect(card).toContain("border: 1px solid #ddd2c2");
+    expect(card).toContain("border-radius: 14px");
+    expect(card).toContain("box-shadow: 0 14px 38px rgba(58, 28, 20, 0.22)");
+    // serif Today + mono count come from the reused renderTodayPanel header
+    expect(page).toContain('<b className="tdb-t">Today</b>');
+    expect(page).toContain("`${committedCards.length} OF ${MAX_TODAY}`");
+  });
+  it("minimise → the pill, the state persisted; restore reopens the card", () => {
+    expect(page).toContain('localStorage.getItem("sa.todoTodayMin")');
+    expect(page).toContain('localStorage.setItem("sa.todoTodayMin", v ? "1" : "0")');
+    expect(page).toContain('onClick={() => toggleTodayMin(true)}'); // the minimise control
+    expect(page).toContain('onClick={() => toggleTodayMin(false)}'); // the pill restores
+    expect(page).toContain('if (todayMin) {'); // the pill branch
+    expect(cssRule(".tdb-tdpill")).toContain("position: fixed");
+    expect(cssRule(".tdb-tdmin")).toContain("position: absolute"); // top-right of the card
+  });
+  it("rows + footer are the EXISTING primitives (sage circles, Work the list), unchanged", () => {
+    // the corner reuses the one renderTodayPanel — the completion primitives + the flow
+    expect(page).toContain("function renderTodayPanel()");
+    expect(page).toContain('{renderTodayPanel()}'); // the corner's body
+    expect(page).toContain('setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });'); // Work the list
+    expect(page).toContain(">Work the list</button>");
+    expect(cssRule(".tdb-tddot")).toContain("var(--hk-sage)"); // the pill's sage dot (existing glyph scale)
+  });
+  it("absent when empty; z above the panel and below the toasts", () => {
+    expect(page).toContain("if (!todayShown) return null;");
+    expect(cssRule(".tdb-tdpop")).toContain("z-index: 45"); // panel < 45 < toast 60
+    expect(cssRule(".tdb-toast")).toContain("z-index: 60");
+  });
+});

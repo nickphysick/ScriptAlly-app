@@ -578,19 +578,30 @@ button.tdb-tdot { cursor: pointer; }
   .tdb-wrap { --tdb-asm: 1624px; --tdb-sheet: 1072px; }
   .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }
 }
-.tdb-todaypopwrap { position: relative; flex: none; }
-.tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
-.tdb-todaychip:hover { filter: brightness(0.98); }
-.tdb-todaychip:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
-.tdb-todaypop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 45; width: 300px; box-shadow: var(--sh-3); border-radius: 12px; animation: tdbPopDown 0.16s ease-out; }
-@keyframes tdbPopDown { from { opacity: 0; transform: translateY(-6px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }
+/* ── THE WORKSPACE SHELL (todo-fix48) — TODAY, BACK IN ITS CORNER: the floating card fixed to
+   the workspace's bottom-right (ref .tdpop), minimising to a pill. z above the panel, below
+   the toasts (60) and modals. ── */
+.tdb-tdpop { position: fixed; right: 26px; bottom: 24px; width: 250px; max-height: min(70vh, 560px); z-index: 45; display: flex; flex-direction: column; }
+.tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }
+.tdb-tdpop.out { animation: tdbTodayOut 220ms ease forwards; }
+/* the minimise control, top-right of the card */
+.tdb-tdmin { position: absolute; top: 9px; right: 11px; z-index: 2; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 15px; line-height: 1; color: #8a7a6d; background: none; border: none; cursor: pointer; }
+.tdb-tdmin:hover { background: #f2ede7; color: var(--ink); }
+/* the minimised pill/FAB */
+.tdb-tdpill { position: fixed; right: 26px; bottom: 24px; z-index: 45; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 99px; background: var(--white, #fff); border: 1px solid #ddd2c2; box-shadow: 0 8px 22px rgba(58, 28, 20, 0.18); font-family: var(--f12-serif); font-size: 13px; font-weight: 700; color: #2b2118; cursor: pointer; }
+.tdb-tdpill:hover { border-color: #c9bba9; }
+.tdb-tddot { width: 8px; height: 8px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); flex: 0 0 auto; }
+@keyframes tdbTodayIn { from { opacity: 0; transform: translateY(14px); } }
+@keyframes tdbTodayOut { to { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) { .tdb-tdpop.in, .tdb-tdpop.out { animation: none; } }
 
 /* ── the "Today" CARD (VI P1, todo-right-column-v1.html .today) — the cardx family: paper,
    hairline, radius 16, floating shadow. Plain paper header (Playfair "Today" + the mono right
    slot: date when empty ⇄ "{n} OF 5"); the middle region holds committed rows above the dashed
    ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
-.tdb-today2 { flex: 0 1 auto; min-height: 0; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); display: flex; flex-direction: column; overflow: hidden; } /* v4: lifted white */
+/* the corner card (ref .tdpop): white, #ddd2c2 hairline, radius 14, deep shadow; it fills the
+   fixed .tdb-tdpop wrapper and scrolls internally. */
+.tdb-today2 { flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid #ddd2c2; border-radius: 14px; box-shadow: 0 14px 38px rgba(58, 28, 20, 0.22); display: flex; flex-direction: column; overflow: hidden; }
 /* the settlement (sage, final): Today's diary-sage head is the FAMILY — its two siblings
    joined it. One sage source (--container-head-*), one height; the sage glyphs (row dots,
    completion ticks, the StatusDot incoming states) are untouched beside it. */

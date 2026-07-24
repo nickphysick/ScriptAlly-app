@@ -83,7 +83,7 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   });
   it("radius continuity: each header takes ITS container's top radii", () => {
     for (const sel of HEADS) expect(rule(sel + (sel === ".tdb-rsech" ? ".fc1" : ""))).toContain("border-radius: 15px 15px 0 0");
-    expect(rule(".tdb-today2")).toContain("border-radius: 16px");
+    expect(rule(".tdb-today2")).toContain("border-radius: 14px"); // the corner card
     expect(rule(".tdb-mainc")).toContain("border-radius: var(--tdb-panel-r)"); // the panel is 14, not a 16 card
   });
   it("the view toggle restyles onto sage; the active chip is unchanged", () => {
@@ -152,7 +152,7 @@ describe("settlement P4 — the sweep", () => {
     expect(tour).toContain('sel: ".tdb-herobegin"');
     expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // the anchor exists at that (hero) seat
     // every other stop's anchor still exists in the board or the shell
-    for (const sel of [".tdb-fpill, .tdb-fpillbtn", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2, .tdb-todaychip"]) {
+    for (const sel of [".tdb-fpill, .tdb-fpillbtn", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
       expect(tour).toContain(sel);
       for (const one of sel.split(", ")) expect(css).toContain(one);
     }

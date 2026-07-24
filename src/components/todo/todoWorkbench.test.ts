@@ -526,10 +526,10 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
 });
 
 describe("v4 P3 — conditional Today + the 4-up board", () => {
-  it("Today mounts only with content (committed OR done today); the wrap flags today-off", () => {
+  it("Today mounts only with content (committed OR done today); the corner floats over a full-width board", () => {
     expect(page).toContain("const todayActive = committedCards.length > 0 || doneN > 0;");
-    expect(page).toContain("{!narrow && todayShown && (");
-    expect(page).toContain('className={`tdb-wrap${todayShown ? "" : " today-off"}`}');
+    expect(page).toContain("if (!todayShown) return null;"); // the corner is absent when empty
+    expect(page).toContain('className="tdb-wrap today-off"'); // the board is always full-width; Today floats
   });
   it("the grid steps 4-up ⇄ 3-up via tokens; cards stay 250 (only the count changes)", () => {
     expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }");
@@ -538,17 +538,19 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(rule(".tdb-centre")).toContain("transition: width 220ms ease"); // the stack carries the Today width step
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
-    expect(css).toContain(".tdb-railr.in { animation: tdbTodayIn 220ms ease; }");
-    expect(css).toContain(".tdb-railr.out { animation: tdbTodayOut 220ms ease forwards; }");
+    expect(css).toContain(".tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }");
+    expect(css).toContain(".tdb-tdpop.out { animation: tdbTodayOut 220ms ease forwards; }");
     expect(page).toContain("window.setTimeout(() => { setTodayShown(false); setTodayLeaving(false); }, 220);");
     expect(page).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;');
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; }");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-tdpop.in, .tdb-tdpop.out { animation: none; } }");
   });
-  it("the Today panel: lifted white card with the diary-sage header (the pack's hexes)", () => {
-    expect(rule(".tdb-today2")).toContain("box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14)");
-    expect(rule(".tdb-th")).toContain("background: var(--container-head-bg)"); // the settlement: stone, not sage
+  it("the corner card: white, #ddd2c2 hairline, radius 14, deep shadow (ref .tdpop)", () => {
+    const c = rule(".tdb-today2");
+    expect(c).toContain("border: 1px solid #ddd2c2");
+    expect(c).toContain("border-radius: 14px");
+    expect(c).toContain("box-shadow: 0 14px 38px rgba(58, 28, 20, 0.22)");
+    expect(rule(".tdb-th")).toContain("background: var(--container-head-bg)"); // Today's header keeps the sage
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)");
-    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)");
   });
 });
 
@@ -971,31 +973,30 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
   });
 });
 
-describe("II·B P3 — the companion rail (one panel, two mounts, one state)", () => {
-  it("mount parity: BOTH homes call the SAME renderTodayPanel, XOR'd on narrow (no fork — halt (c) clear)", () => {
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // the wide aside; the narrow chip retired — the corner pop-up arrives in Shell P3
-    expect(page).toContain('"Today", ALWAYS ON'); // the column is unconditional ≥1200
-    expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
+describe("shell P3 — Today, in its corner (the companion rail retired)", () => {
+  it("ONE renderTodayPanel, mounted once, inside the corner pop-up", () => {
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // the corner is the only home
+    expect(page).toContain("function renderTodayCorner()");
+    expect(page).toContain("{renderTodayCorner()}");
   });
-  it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
-    expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
-    expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky"); // the shared contract
-    expect(page.indexOf('className="tdb-mainc"')).toBeLessThan(page.indexOf('tdb-railr${todayLeaving'));
+  it("the corner floats bottom-right of the workspace (ref .tdpop), fixed", () => {
+    const c = rule(".tdb-tdpop");
+    expect(c).toContain("position: fixed");
+    expect(c).toContain("right: 26px");
+    expect(c).toContain("bottom: 24px");
+    expect(c).toContain("width: 250px");
+    expect(c).toContain("z-index: 45"); // above the panel, below the toasts (60)
   });
-  it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
-    expect(page).not.toContain("Today · {committedCards.length} TO GO"); // the hero chip retired — search owns the bar
-    expect(page).toContain("`${committedCards.length} OF ${MAX_TODAY}`"); // VI P1: the header's count face
+  it("the header keeps the committed count face; the corner is absent when the list is empty", () => {
+    expect(page).toContain("`${committedCards.length} OF ${MAX_TODAY}`"); // the header's count face
+    expect(page).toContain("if (!todayShown) return null;"); // empty → nothing
+    expect(page).not.toContain("Today · {committedCards.length} TO GO"); // the old hero chip is gone
   });
-  it("the hero's narrow Today chip is retired (Shell P3 rebuilds Today as the corner pop-up)", () => {
-    // the search-row chip left with the search's move to the bar; the popover machinery (state,
-    // Esc, click-away, reduced-motion) survives for the corner form the next phase mounts
-    expect(page).not.toContain('aria-haspopup="dialog" aria-expanded={todayPopOpen}');
-    expect(page).toContain('if (e.key === "Escape") setTodayPopOpen(false);');
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }");
-  });
-  it("the breakpoint belt: the column hides <1240 in CSS too; narrow closes the popover on widen", () => {
-    expect(css).toContain("@media (max-width: 1239.98px) { .tdb-railr { display: none; } }");
-    expect(page).toContain("useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);");
+  it("the wide rail + the narrow popover machinery are retired", () => {
+    expect(page).not.toContain("tdb-railr");
+    expect(page).not.toContain("todayPopOpen");
+    expect(page).not.toContain("aria-haspopup=\"dialog\" aria-expanded={todayPopOpen}");
+    expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")'); // the narrow driver is gone
   });
 });
 
@@ -1111,7 +1112,7 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
     expect(page).toContain('className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters"');
     expect(page).toContain('<div className="tdb-fbox">{renderFilterSection()}</div>');
     expect((page.match(/<div className="tdb-fbox">\{renderFilterSection\(\)\}<\/div>/g) ?? []).length).toBe(1); // the collapsed overlay only
-    expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
+    expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")'); // the narrow-Today driver retired with the corner
     expect(page).not.toContain("tdb-ric"); // the icon rail is extinct
   });
   it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
@@ -1225,7 +1226,7 @@ describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
   });
   it("Today keeps fixed head/foot with ONE scrolling middle; verbs never scroll away", () => {
     expect(rule(".tdb-tmid2")).toContain("overflow-y: auto; min-height: 0;");
-    expect(rule(".tdb-today2")).toContain("flex: 0 1 auto; min-height: 0;");
+    expect(rule(".tdb-today2")).toContain("flex: 1 1 auto; min-height: 0;"); // fills the corner wrapper
     const card = page.slice(page.indexOf('className="tdb-today2"'), page.indexOf('className="tdb-tf2"'));
     expect(card).toContain('className="tdb-tmid2"');
   });
@@ -1239,7 +1240,7 @@ describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
 
 describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
   it("VI P1: ONE face — the column is always mounted ≥1200; the tab, drawer and empty-rail state are extinct", () => {
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // the wide aside; the corner pop-up arrives in Shell P3
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // ONE mount, in the corner pop-up
     for (const stale of ["tdb-ttab", "emptyRailOpen", "sa.todoRail"]) {
       expect(page).not.toContain(stale);
       expect(css).not.toContain(stale);

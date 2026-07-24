@@ -250,11 +250,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     });
   };
   // (the ledger's selection/keyboard/kebab machinery retired with the run sheet — Final Shape P5)
-  // ── II·B P3: the companion rail ↔ masthead chip. ONE Today panel (renderTodayPanel), TWO
-  // mounts — the right column ≥1240px, the strip-chip popover below — XOR'd on `narrow`, so
-  // exactly one mounts and the state never forks (halt (c) clear).
-  const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1239.98px)").matches);
-  const [todayPopOpen, setTodayPopOpen] = useState(false);
   // THE WORKSPACE SHELL (todo-fix48) — the collapse tier: below --tsh-collapse (1100) the
   // sidebar folds to an icon rail and its FILTER section becomes the ⚲ icon opening the
   // existing overlay drawer (focus-trapped; Esc/scrim closes). Tokened to match todoShell.css.
@@ -287,25 +282,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
   }, [filterDrawerOpen]);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1239.98px)");
-    const on = () => setNarrow(mq.matches);
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
-  }, []);
-  useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);
-  useEffect(() => {
-    if (!todayPopOpen) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && (t.closest(".tdb-todaypop") || t.closest(".tdb-todaychip"))) return;
-      setTodayPopOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setTodayPopOpen(false); };
-    document.addEventListener("pointerdown", onDown);
-    window.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("pointerdown", onDown); window.removeEventListener("keydown", onKey); };
-  }, [todayPopOpen]);
   // Masthead search — the input + ⌘K focus mechanics land here (Phase 1); live filtering is
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
@@ -581,6 +557,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const todayActive = committedCards.length > 0 || doneN > 0;
   const [todayShown, setTodayShown] = useState(false);
   const [todayLeaving, setTodayLeaving] = useState(false);
+  // THE WORKSPACE SHELL (todo-fix48) — Today is back in its corner pop-up: a minimise control
+  // collapses it to a pill, the state persisted.
+  const [todayMin, setTodayMin] = useState<boolean>(() => { try { return localStorage.getItem("sa.todoTodayMin") === "1"; } catch { return false; } });
+  const toggleTodayMin = (v: boolean) => { setTodayMin(v); try { localStorage.setItem("sa.todoTodayMin", v ? "1" : "0"); } catch { /* private mode */ } };
   useEffect(() => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (todayActive) { setTodayShown(true); setTodayLeaving(false); return; }
@@ -823,7 +803,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       collapsed={shellCollapsed}
       onFilterIcon={() => setFilterDrawerOpen(true)}
     >
-      <div className={`tdb-wrap${todayShown ? "" : " today-off"}`} ref={wrapRef}>
+      <div className="tdb-wrap today-off" ref={wrapRef}>
         {/* ── the workbench row (Option B, todo-workbench-shell-v1.html): floating drawer
             (sticky, foldable) beside a CENTRED ~1150px content column — max-width discipline at
             every viewport, surplus pools as symmetric desk. The old full-bleed header band +
@@ -948,15 +928,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             )}
           </div>
           </div>
-          {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
-              every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
-              masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
-          {!narrow && todayShown && (
-            <aside className={`tdb-railr${todayLeaving ? " out" : " in"}`} aria-label="Today">
-              {renderTodayPanel()}
-            </aside>
-          )}
         </div>
+        {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
+            bottom-right of the workspace, minimising to a pill; absent when the list is empty. */}
+        {renderTodayCorner()}
       </div>
 
       {assistantOpen && (
@@ -1193,6 +1168,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // (rollover Keep/Clear, committed rows + take-off, Help me pick, Work the list); the anatomy is
   // the ref card: plain paper header (date ⇄ "{n} OF 5"), committed items above a dashed
   // ghost-row invitation (todayGhosts), the collapsed-by-default done row, two footer verbs. ──
+  // THE WORKSPACE SHELL (todo-fix48) — the Today corner: the floating card (or its minimised
+  // pill), bottom-right of the workspace, absent when the list is empty. The card reuses the
+  // one renderTodayPanel (checklist + Work the list) and adds a minimise control.
+  function renderTodayCorner() {
+    if (!todayShown) return null;
+    if (todayMin) {
+      return (
+        <button type="button" className="tdb-tdpill" onClick={() => toggleTodayMin(false)} aria-label="Open Today" title="Open Today">
+          <span className="tdb-tddot" aria-hidden />Today · {committedCards.length}
+        </button>
+      );
+    }
+    return (
+      <div className={`tdb-tdpop${todayLeaving ? " out" : " in"}`} role="complementary" aria-label="Today">
+        <button type="button" className="tdb-tdmin" aria-label="Minimise Today" title="Minimise" onClick={() => toggleTodayMin(true)}>–</button>
+        {renderTodayPanel()}
+      </div>
+    );
+  }
   function renderTodayPanel() {
     const ghosts = todayGhosts(committedCards.length, doneN);
     return (
