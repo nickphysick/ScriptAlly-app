@@ -450,13 +450,13 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
     expect(m).toBeTruthy();
     const tier = m![1];
     expect(tier).toContain("--tdb-asm: 1624px; --tdb-sheet: 1072px;");
-    expect(tier).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
-    expect(tier).not.toContain("250px"); // the card token, never a magic width
+    expect(tier).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }"); // ALIGNMENT FIX: fluid tracks
+    expect(tier).not.toContain("250px"); // no magic card width
   });
-  it("the matrix: base 3-up · today-off 4-up everywhere (higher specificity than the tier) · compact unchanged", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))"); // <1700, Today visible → 1512 runs 3-up
-    expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }"); // (0,2,0) beats the media's .tdb-wrap
-    expect(css).toContain(".tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
+  it("the matrix: 3-up standard, 4-up ONLY at ≥1700 (the always-4 today-off rule retired)", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // ALIGNMENT FIX: fluid 3-up standard
+    expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }"); // the width token stays
+    expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4 grid rule is gone
     expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }");
     expect(rule(".tdb-wrap")).toContain("--tdb-cardw: 250px"); // ONE card width for every cell at every tier
   });
@@ -532,11 +532,12 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(page).toContain("if (!todayShown) return null;"); // the corner is absent when empty
     expect(page).toContain('className="tdb-wrap today-off"'); // the board is always full-width; Today floats
   });
-  it("the grid steps 4-up ⇄ 3-up via tokens; cards stay 250 (only the count changes)", () => {
+  it("the grid steps 4-up ⇄ 3-up via the ≥1700 tier; the cards FLOW to fill (fluid tracks)", () => {
     expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }");
-    expect(css).toContain(".tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
-    expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))");
-    expect(rule(".tdb-asm")).toContain("transition: width 220ms ease"); // the assembly carries the width step
+    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // 3-up standard, fluid
+    const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
+    expect(m![1]).toContain("repeat(4, 1fr)"); // 4-up at the wide tier
+    expect(rule(".tdb-asm")).toContain("transition: width 220ms ease");
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
     expect(css).toContain(".tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }");
@@ -580,7 +581,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
 
 describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
   it("the grid: repeat(3, cardw) + g12, ALL cards rendered (no truncation, no pagers)", () => {
-    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--tdb-grid-gap)");
+    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--tdb-grid-gap)");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("tdb-reelpg");
   });
@@ -686,8 +687,8 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   });
 });
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
-  it("Final Shape P4 — THE WRAPPED GRID: 3 fixed columns, all cards, one scroll; reels/snap stay retired", () => {
-    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, var(--tdb-cardw))");
+  it("Final Shape P4 — THE WRAPPED GRID: 3 fluid columns, all cards, one scroll; reels/snap stay retired", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, 1fr)");
     expect(rule(".tdb-grid")).toContain("gap: var(--tdb-grid-gap)");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("reelFit");
@@ -1049,10 +1050,9 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     expect(mainc).toBeGreaterThan(0);
     expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
   });
-  it("the grid: identical 250px columns from the one token; cards never stretch; no pagers, no partials", () => {
-    expect(rule(".tdb-wrap")).toContain("--tdb-cardw: 250px;");
-    expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))");
-    expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)"); // the in-flow overlay faces keep the slot
+  it("the grid: fluid columns that fill the panel; the cards flow larger; no pagers, no partials", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // ALIGNMENT FIX: fluid, fills the panel
+    expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)"); // the in-flow overlay faces keep their slot
     expect(page).not.toContain("tdb-reelpg");
     expect(page).not.toContain("tdb-reeltrack");
     expect(css).not.toContain("tdb-pg ");

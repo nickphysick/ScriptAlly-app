@@ -197,3 +197,39 @@ describe("shell polish P5 — the sweep + the record", () => {
     }
   });
 });
+
+describe("alignment fixes P1 — equal gutters + the grid fills the panel", () => {
+  const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+  const tRule = (sel: string): string => {
+    const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`tsh rule not found: ${sel}`);
+    return m[1];
+  };
+  it("ONE scroller with a symmetric scrollbar gutter — the centred column can't sit left-heavy", () => {
+    // tsh-body clips + column-lays; the wrap is the sole scroller and reserves the gutter both sides
+    expect(tRule(".tsh-body")).toContain("overflow: hidden");
+    expect(tRule(".tsh-body")).toContain("display: flex");
+    expect(rule(".tdb-wrap")).toContain("overflow-y: auto");
+    expect(rule(".tdb-wrap")).toContain("scrollbar-gutter: stable both-edges");
+    // the column centres with equal side padding + auto margins (no one-sided inset)
+    expect(rule(".tdb-col")).toContain("margin-inline: auto");
+    expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
+    expect(rule(".tdb-col")).not.toMatch(/padding-left|padding-right/);
+  });
+  it("the grid is FLUID (1fr tracks) so cards fill the panel — no dead space right of the last column", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, 1fr)");
+    expect(rule(".tdb-grid")).not.toContain("var(--tdb-cardw)"); // no fixed card width in the grid
+  });
+  it("the tier changes the COUNT only: 3-up standard, 4-up ONLY at ≥1700 (the always-4 rule retired)", () => {
+    const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
+    expect(m![1]).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }");
+    expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4-everywhere rule is gone
+  });
+  it("the sticker clearance still holds at the grown sizes (the gap ≥ the offset)", () => {
+    const gap = parseInt(/--tdb-grid-gap:\s*(\d+)px/.exec(rule(".tdb-wrap"))![1], 10);
+    const off = parseInt(/--tdb-sticker-off:\s*(\d+)px/.exec(rule(".tdb-wrap"))![1], 10);
+    expect(gap).toBeGreaterThanOrEqual(off);
+    // the batch + Expand-n cells are grid items → they stretch with their 1fr tracks
+    expect(rule(".tdb-cell.b")).toContain("height: var(--tdb-cardh-g)");
+  });
+});

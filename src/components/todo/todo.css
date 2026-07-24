@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -317,8 +317,10 @@
 /* Final Shape P4 — THE WRAPPED GRID (reels retired): three fixed 250px columns, every card
    visible, one vertical scroll — no pagers, no partials, no snap, no scrollport clipping (the
    hover overlay + Later menu overflow freely; the wrap is the only scroller). */
-/* the grid gap clears the sticker block (≥ --tdb-sticker-off) so blocks never touch */
-.tdb-grid { display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--tdb-grid-gap); padding: 6px 0 4px; }
+/* ALIGNMENT FIX P1 — FLUID TRACKS: repeat(N, 1fr) so the cards grow to fill the panel's
+   inner width (no dead space right of the last column); the tier changes the COUNT (3 → 4 at
+   ≥1700), never the card. The gap clears the sticker block (≥ --tdb-sticker-off). */
+.tdb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--tdb-grid-gap); padding: 6px 0 4px; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-vwrap, .tdb-vinner, .tdb-tile, .tdb-gcard { transition: none; }
   .tdb-tile.hov, .tdb-gcard.hov { transform: none; }
@@ -550,8 +552,10 @@ button.tdb-tdot { cursor: pointer; }
 /* v4 P3 — CONDITIONAL TODAY: empty → the board runs 4-up (sheet 1072, assembly 1344); active →
    3-up (sheet 812, assembly 1364). Cards stay 250 throughout; the widths transition 220ms while
    Today slides in/out. */
+/* ALIGNMENT FIX P1 — 3-up is the STANDARD tier; 4-up only at ≥1700 (below). The old
+   'today-off → 4-up at every width' rule is retired (Today is the corner pop-up now, so the
+   wrap is always today-off — that rule forced 4-up everywhere). */
 .tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }
-.tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }
 @media (prefers-reduced-motion: reduce) { .tdb-asm, .tdb-centre { transition: none; } }
 /* the compact break (P6): the rail leaves the flow for the overlay drawer */
 @media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }
@@ -564,7 +568,7 @@ button.tdb-tdot { cursor: pointer; }
    mount; column count reflows; reduced-motion instant via the shared override). ── */
 @media (min-width: 1700px) {
   .tdb-wrap { --tdb-asm: 1624px; --tdb-sheet: 1072px; }
-  .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }
+  .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }
 }
 /* ── THE WORKSPACE SHELL (todo-fix48) — TODAY, BACK IN ITS CORNER: the floating card fixed to
    the workspace's bottom-right (ref .tdpop), minimising to a pill. z above the panel, below

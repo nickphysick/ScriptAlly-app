@@ -123,7 +123,9 @@
 .tsh-search .tsh-mag { flex: 0 0 auto; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: #8a7a6d; }
 .tsh-search:focus-within { border-color: #c9bba9; }
 
-.tsh-body { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
+/* ALIGNMENT FIX P1 — ONE scroller: tsh-body clips and column-lays the wrap; the wrap
+   scrolls with a symmetric scrollbar gutter so the centred column's gutters stay EQUAL. */
+.tsh-body { flex: 1; min-height: 0; overflow: hidden; position: relative; display: flex; flex-direction: column; }
 
 /* ── the collapse tier: an icon rail below --tsh-collapse ── */
 @media (max-width: 1099.98px) {
