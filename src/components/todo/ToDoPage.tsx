@@ -798,6 +798,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
       crumbCurrent="To-do"
       onAccount={() => onNavigate("account")}
+      onBrand={() => onNavigate("dashboard")}
       collapsed={shellCollapsed}
       clearing={heroSession.clearing}
       onFilterIcon={() => setFilterDrawerOpen(true)}

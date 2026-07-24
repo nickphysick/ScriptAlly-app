@@ -46,8 +46,10 @@
   overflow-y: auto;
   transition: width 220ms cubic-bezier(0.22, 0.8, 0.3, 1), transform 700ms cubic-bezier(0.5, 0.05, 0.6, 1), opacity 600ms;
 }
-.tsh-brand { display: flex; align-items: center; gap: 8px; font-family: var(--f12-serif); font-size: 16px; font-weight: 800; color: #2f2419; padding: 2px 8px 12px; white-space: nowrap; overflow: hidden; }
-.tsh-brandmark { flex: 0 0 auto; }
+/* CENTRING/BRAND — the real mark + wordmark, home link; a bare button, drawer proportions */
+.tsh-brand { display: flex; align-items: center; gap: 5px; width: 100%; padding: 4px 8px 12px; background: none; border: none; cursor: pointer; overflow: hidden; }
+.tsh-brandmark { flex: 0 0 auto; display: block; }
+.tsh-brandword { display: flex; overflow: hidden; min-width: 0; }
 /* the drawer's section label: mono 9.5, .18em, with a hairline rule beneath */
 .tsh-nk { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.18em; color: var(--tsh-label); padding: 14px 10px 6px; text-transform: uppercase; border-bottom: 1px solid var(--tsh-hair); margin: 0 0 4px; }
 
@@ -134,7 +136,8 @@
 /* ── the collapse tier: an icon rail below --tsh-collapse ── */
 @media (max-width: 1099.98px) {
   .tsh-nav { width: var(--tsh-nav-icon-w); padding: 14px 8px; }
-  .tsh-brandtx, .tsh-nlab, .tsh-n, .tsh-nk { display: none; }
+  .tsh-brandword, .tsh-nlab, .tsh-n, .tsh-nk { display: none; }
+  .tsh-brand { justify-content: center; gap: 0; padding: 4px 0 12px; }
   .tsh-ni { justify-content: center; padding: 0; gap: 0; }
   .tsh-ic { width: auto; }
   .tsh-search { width: 190px; }

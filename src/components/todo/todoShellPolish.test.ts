@@ -393,3 +393,34 @@ describe("centring fix P2 — the big search in the panel header", () => {
     expect(tshCss).toContain(".tsh-clearing .tsh-nav"); // the sidebar still slides
   });
 });
+
+describe("centring fix P2B — the real brand in the corner", () => {
+  const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
+  it("the placeholder glyph + text are gone; the real assets are mounted (no inline recreations)", () => {
+    expect(tsh).not.toContain('aria-hidden>✈</span>'); // the fabricated paper-plane glyph
+    expect(tsh).not.toContain('<span className="tsh-brandtx">ScriptAlly</span>'); // the text placeholder
+    // the app's real mark image + the real wordmark component (same as the NavDrawer)
+    expect(tsh).toContain('src="/scriptally-logo-new.png"');
+    expect(tsh).toContain("import { ScriptAllyLogo }");
+    expect(tsh).toContain("<ScriptAllyLogo heightPx={38} />");
+  });
+  it("the mark + wordmark order, alt text, and the home-route link", () => {
+    const brand = tsh.slice(tsh.indexOf('className="tsh-brand"'), tsh.indexOf("</button>"));
+    expect(brand.indexOf("scriptally-logo-new.png")).toBeLessThan(brand.indexOf("ScriptAllyLogo")); // mark then wordmark
+    expect(tsh).toContain('alt="" aria-hidden="true"'); // the mark is decorative; the wordmark's own alt="ScriptAlly"
+    expect(tsh).toContain('aria-label="ScriptAlly — go to dashboard"'); // the link's accessible name
+    expect(tsh).toContain("onClick={onBrand}");
+    expect(page).toContain('onBrand={() => onNavigate("dashboard")}'); // wired home
+  });
+  it("the mark stays in the collapsed icon rail; the wordmark hides", () => {
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    const collapse = tshCss.slice(tshCss.indexOf("@media (max-width: 1099.98px)"));
+    expect(collapse).toContain(".tsh-brandword");
+    expect(collapse).not.toContain(".tsh-brandmark { display: none");
+  });
+  it("the real asset files exist in public/", () => {
+    const pub = join(here, "..", "..", "..", "public");
+    expect(readFileSync(join(pub, "scriptally-logo-new.png")).length).toBeGreaterThan(0);
+    expect(readFileSync(join(pub, "scriptally-title-v2.png")).length).toBeGreaterThan(0);
+  });
+});

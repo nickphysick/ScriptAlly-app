@@ -28,7 +28,9 @@ describe("shell P1 — the sidebar: anatomy, sections, counts", () => {
   it("one shared component with the three sections: brand → WORKSPACE → FILTER slot → foot", () => {
     expect(tsh).toContain("export const TodoShell");
     expect(tsh).toContain('<aside className="tsh-nav"');
-    expect(tsh).toContain('<div className="tsh-brand">');
+    expect(tsh).toContain('className="tsh-brand"'); // the brand button (real assets)
+    expect(tsh).toContain('src="/scriptally-logo-new.png"'); // the real paper-plane mark
+    expect(tsh).toContain("<ScriptAllyLogo heightPx={38} />"); // the real wordmark
     // the two kickers, in order, and the foot after the spacer
     const iWork = tsh.indexOf(">WORKSPACE<");
     const iFilter = tsh.indexOf(">FILTER<");
@@ -129,7 +131,7 @@ describe("shell P1 — the collapse tier", () => {
     expect(rule(".tsh-root")).toContain("--tsh-collapse: 1100px");
     expect(tshCss).toContain("@media (max-width: 1099.98px) {");
     // the labels become tooltips; the icon rail narrows
-    expect(tshCss).toContain(".tsh-brandtx, .tsh-nlab, .tsh-n, .tsh-nk { display: none; }");
+    expect(tshCss).toContain(".tsh-brandword, .tsh-nlab, .tsh-n, .tsh-nk { display: none; }"); // the wordmark hides; the mark stays
     expect(tsh).toContain('title={collapsed ? n.label : undefined}'); // the tooltip carries the label
     expect(tsh).toContain('className="tsh-ni tsh-filtericon"'); // the folded FILTER icon
     expect(page).toContain("onFilterIcon={() => setFilterDrawerOpen(true)}"); // opens the existing overlay

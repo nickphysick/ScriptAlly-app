@@ -22,6 +22,7 @@
  */
 import React from "react";
 import { F12Account } from "./F12Shell";
+import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import "./todoShell.css";
 
 export interface TodoNavItem {
@@ -55,6 +56,8 @@ export interface TodoShellProps {
   crumbParents?: { label: string; onClick: () => void }[];
   crumbCurrent: string;
   onAccount: () => void;
+  /** The brand's home-route link (→ dashboard, mirroring the NavDrawer). */
+  onBrand: () => void;
   /** Icon-rail mode (< --tsh-collapse): labels become tooltips, the filter section folds. */
   collapsed?: boolean;
   /** A focused session is opening/running: the sidebar slides off left, the search fades. */
@@ -66,11 +69,16 @@ export interface TodoShellProps {
 
 export const TodoShell: React.FC<TodoShellProps> = ({
   workspace, activeKey, filterSection, foot, crumbParents = [], crumbCurrent,
-  onAccount, collapsed = false, clearing = false, onFilterIcon, children,
+  onAccount, onBrand, collapsed = false, clearing = false, onFilterIcon, children,
 }) => (
   <div className={`t-f12 tsh-root${collapsed ? " tsh-collapsed" : ""}${clearing ? " tsh-clearing" : ""}`}>
     <aside className="tsh-nav" aria-label="Workspace navigation">
-      <div className="tsh-brand"><span className="tsh-brandmark" aria-hidden>✈</span><span className="tsh-brandtx">ScriptAlly</span></div>
+      {/* CENTRING/BRAND — the app's real mark + wordmark, at the NavDrawer's proportions,
+          linking home; no fabricated glyphs. */}
+      <button type="button" className="tsh-brand" onClick={onBrand} aria-label="ScriptAlly — go to dashboard">
+        <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={34} height={34} className="tsh-brandmark" />
+        <span className="tsh-brandword"><ScriptAllyLogo heightPx={38} /></span>
+      </button>
 
       <div className="tsh-nk" aria-hidden>WORKSPACE</div>
       <nav aria-label="Workspace">
