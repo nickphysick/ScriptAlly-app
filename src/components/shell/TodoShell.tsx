@@ -13,10 +13,11 @@
  *                   #f3e7da — the rail is the one place the parchment-highlight law can't apply
  *                   (there is no parchment here); the ink square is its native equivalent.
  *                   Never burgundy.
- *   .spine-panel  — a 260px parchment (#f5f0e8) column: the real wordmark at its head, then the
- *                   active category's PAGES (icon + label + count), then the current page's
- *                   CONTEXT zone (To-do → the filter rows, full reactive parity). Foot: the
- *                   utility rows (Task settings + Help centre).
+ *   .spine-panel  — a 260px parchment (#f5f0e8) column: the real wordmark at its head over a
+ *                   breathing head, then the active category's PAGES (icon + label + count), then
+ *                   the current page's CONTEXT zone (To-do → the chip bench). Foot: an optional
+ *                   promo card (To-do → the blue Pro sticker) above the utility rows (Task
+ *                   settings + Help centre).
  *   .tsh-mainwrap — the content region: the breadcrumb bar (wearing the panel's parchment, so
  *                   bar + panel read as one cream L) over the page body (children).
  *

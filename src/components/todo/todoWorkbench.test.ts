@@ -304,7 +304,7 @@ describe("hero-pair P5 — sweep", () => {
   it("the toolbelt-era clothes are extinct: no stack gap, no cream chip fill, no mono pills, no dot, no fsb2", () => {
     expect(css).not.toContain(".tdb-fside"); // the floating filter rail is retired
     expect(rule(".tdb-rvchip")).not.toContain("#f3e7da"); // cream lives on the ink primary's TEXT only
-    expect(rule(".tdb-fpill")).not.toContain("--f12-mono");
+    expect(css).not.toContain(".tdb-fpill"); // panel-final P4: the filter ROW-LIST is fully extinct
     for (const dead of ["tdb-rvnew", "tdb-fsb2", "renderToolbelt"]) {
       expect(page).not.toContain(dead);
       expect(css).not.toContain(dead);

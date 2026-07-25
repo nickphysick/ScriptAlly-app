@@ -1015,7 +1015,9 @@ every prior single-column sidebar section (workspace-shell, polish). Three colum
   rule `--spine-pbd #e0d6c6`. The real wordmark at its head; a mono category label + the pages
   (icon + label + count); then the context zone — a ruled mono label (`.spine-nk`, hairline
   `--spine-prule`) + the current page's dynamic content (To-do → the filter rows, full reactive
-  parity). Foot: Task settings + Help centre.
+  parity). Foot: Task settings + Help centre. *(⚠️ AMENDED by "The panel (settled)" below: 260px,
+  a breathing head, the chip bench replacing the row-list, the `.spine-nk` label retired, and a
+  blue Pro sticker at the foot.)*
 - **THE PARCHMENT L**: the breadcrumb bar wears the panel's own `--spine-pan` fill and
   `--spine-pbd` rule (the same tokens, not lookalikes), so panel + bar read as one continuous
   cream L inside the dark spine. The content body below is the page's own ground.
@@ -1028,4 +1030,44 @@ every prior single-column sidebar section (workspace-shell, polish). Three colum
   (scrim; dismiss on outside-click or Escape); the rail stays, no hamburger returns.
 
 *(The bar is the shell's own `.tsh-bcbar`; HubHeaderBar is never mounted here and is untouched.)*
+
+## The panel (settled) — geometry, the chip bench, the blue sticker
+
+The parchment panel's final form (panel-final pack; refs `design-refs/panel-geometry.html` fix56
+· `panel-chip-bench.html` fix59·W1 · `pro-card.html` fix57·opt5). AMENDS the spine's panel bullet
+above; the rail, the bar, the L, the session and the tiers are unchanged.
+
+- **GEOMETRY** — the panel is **260px** (`--spine-panel-w`, from 196). One tokened TYPE SCALE on
+  `.spine-root`: nav rows `--spine-row-h 38px` / `--spine-row-fs 13px`, the count `--spine-count-fs
+  10px`, the mono section labels `--spine-lab-fs 7.5px` at the wider tracking `--spine-lab-tr
+  0.22em`. The wordmark is up a step (the real `ScriptAllyLogo` artwork, 34 — sized by prop, not a
+  font token). **THE BREATHING HEAD**: `--spine-head-clear 28px` rides the wordmark's bottom
+  padding, and `.spine-cat` (the first content node) carries no top padding — so the offset from
+  the wordmark to the first content IS the token, ≥28px of clear air.
+- **THE THREE-GRAMMAR PRINCIPLE** — the panel now speaks three distinct verbs, and each has its own
+  shape so nothing reads as another: **rows NAVIGATE** (`.spine-ni` — the pages; the warm-parchment
+  active fill `--spine-pon`, fill only), **chips TOGGLE** (`.spine-chip` — the filters; a control
+  surface, never a nav pill), **the sticker OFFERS** (`.spine-pro` — Pro; the board's card
+  language). Reading a filter as navigation was the fault the bench cures.
+- **THE CHIP BENCH** (`.spine-bench`) — the context zone is a control surface, not a second nav
+  list: an inset deeper-parchment card (`--spine-bench-bg #ece4d4` / border `--spine-bench-bd
+  #dbcfb8` / radius 12) headed by the funnel + a mono `FILTER` label + a `Clear` link shown ONLY
+  when a facet is narrowing. The facets are wrapping TOGGLE CHIPS: **All** leads as the Show-all
+  reset; a **selected** chip fills deep ink (`--spine-chip-on-bg #3a2c20` / cream `#f3e7da`); an
+  **idle** chip is parchment (`--spine-chip-bg #f5f0e8`) with a `--spine-chip-bd #cbbc9e` border; a
+  **zero-count** chip fades to 45% but stays rendered (never hidden, never reordered). The active
+  search rides in the same grammar as a dismissable ✕ chip. The selection MODEL is unchanged (the
+  solo-then-membership `togglePill` set); the ruled `.spine-nk` label and the Today's-list lens are
+  retired (Today lives in the corner pop-up). The funnel is lucide `Funnel` (TypeGlyph is locked to
+  material types).
+- **THE BLUE PRO STICKER** (`.spine-pro`) — the board's own sticker language turned on Pro, seated
+  at the panel's foot (above Help; below the spacer, so it sits at the foot on a tall viewport and
+  scrolls as content on a short one — never pinned). A warm-white ground `--spine-pro-bg #fdf6f2`, a
+  1.5px ink border `--spine-pro-bd #3a1c14` and a **4px offset block in pastille blue**
+  `--spine-pro-block #c2cfda` — **the ONLY blue sticker in the app**, the blue shadow the
+  assistant's colour. Inside: a slate `✦ SCRIPTALLY PRO` pill (`--spine-pro-pill-bg #6A89A7`), the
+  Playfair "Hand over the housekeeping", the live-derived "{x} of your {y} tasks could run in the
+  background whilst you write." (the numbers from the existing colophon derivation, never
+  hardcoded), and "Meet the assistant →" in slate-link style opening the preview modal. Gated
+  `plan !== Pro`; no close control. It is the successor to the retired content-panel colophon.
 

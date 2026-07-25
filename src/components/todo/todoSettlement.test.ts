@@ -149,8 +149,12 @@ describe("settlement P4 — the sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".tdb-herobegin"');
     expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // the anchor exists at that (hero) seat
+    // panel-final: the filter step now anchors the chip bench (its CSS lives in the shell)
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    expect(tour).toContain(".spine-bench");
+    expect(tshCss).toContain(".spine-bench");
     // every other stop's anchor still exists in the board or the shell
-    for (const sel of [".tdb-fpill", ".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
+    for (const sel of [".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
       expect(tour).toContain(sel);
       for (const one of sel.split(", ")) expect(css).toContain(one);
     }

@@ -49,16 +49,14 @@ describe("panel-final P1 — panel geometry + the breathing head", () => {
     expect(ni).toContain("height: var(--spine-row-h)");
     expect(ni).toContain("font-size: var(--spine-row-fs)");
     expect(shell(".spine-n")).toContain("font-size: var(--spine-count-fs)");
-    // both mono labels (category + context) take the label size AND the wider tracking
-    for (const sel of [".spine-cat", ".spine-nk"]) {
-      expect(shell(sel)).toContain("font-size: var(--spine-lab-fs)");
-      expect(shell(sel)).toContain("letter-spacing: var(--spine-lab-tr)");
-    }
+    // the category mono label takes the label size AND the wider tracking (the context .spine-nk
+    // label was retired in P2 — the chip bench heads itself)
+    expect(shell(".spine-cat")).toContain("font-size: var(--spine-lab-fs)");
+    expect(shell(".spine-cat")).toContain("letter-spacing: var(--spine-lab-tr)");
     // the pre-final literals are gone from these rules
     expect(shell(".spine-ni")).not.toMatch(/height:\s*32px/);
     expect(shell(".spine-ni")).not.toMatch(/font-size:\s*11\.5px/);
     expect(shell(".spine-cat")).not.toMatch(/6\.5px/);
-    expect(shell(".spine-nk")).not.toMatch(/6\.5px/);
   });
 
   it("the wordmark is up a step — the real brand artwork, sized 34 (not the 30 it was)", () => {

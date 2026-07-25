@@ -14,7 +14,7 @@ describe("TOUR_STOPS — seven stops (the spine adds the category rail), Done on
       ".spine-rail",
       ".tdb-herobegin",
       ".tdb-hsearch",
-      ".tdb-fpill",
+      ".spine-bench",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       ".tdb-today2",

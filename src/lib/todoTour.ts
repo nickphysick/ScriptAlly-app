@@ -42,8 +42,8 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // the hardback spine: the filters live in the panel's context zone
-    sel: ".tdb-fpill",
+    // panel-final: the filters are the chip bench in the panel's context zone
+    sel: ".spine-bench",
     h: "Narrow the desk.",
     p: "Quiet filters with live counts in the panel: click one to see only that kind of work. Show all brings everything back.",
     cta: "Next →",

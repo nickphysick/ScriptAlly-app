@@ -183,7 +183,7 @@ describe("shell polish P5 — the sweep + the record", () => {
   it("the tour anchors are all live post-polish", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).not.toContain("tdb-todaychip"); // the removed chip is gone from the tour
-    for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".tdb-fpill", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
+    for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".spine-bench", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
       expect(tour).toContain(sel);
     }
   });
@@ -238,16 +238,16 @@ describe("alignment fixes P2 — the warm active fill (no green cast)", () => {
     expect(root).toContain("--spine-phov: #ece5d9");
     expect(root).toContain("--spine-pan: #f5f0e8"); // the base panel parchment the fill deepens
   });
-  it("applied to nav items AND filter rows; still no border/outline/shadow", () => {
+  it("the warm fill is the NAV-ITEM active law; the bench chips carry their own ink-fill selection", () => {
     const on = tRule(".spine-ni.on");
     expect(on).toContain("background: var(--spine-pon)");
     expect(on).not.toContain("border");
     expect(on).not.toContain("box-shadow");
     expect(on).not.toContain("outline");
-    // the filter rows (in the panel context zone) take the same warm fill
-    expect(rule(".tdb-fpill.sel")).toContain("background: var(--spine-pon)");
-    expect(rule(".tdb-fpill.nar")).toContain("background: var(--spine-pon)");
-    expect(rule(".tdb-fpill:hover")).toContain("background: var(--spine-phov)");
+    // panel-final: the filter ROW-LIST is retired — a selected bench chip fills deep ink (a
+    // deliberate divergence from the nav's warm fill; a tinted fill would read as a nav pill)
+    expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
+    expect(tRule(".spine-chip.on")).not.toContain("outline");
   });
   it("the green-cast token (--rail-pill / the sage #e9ece4) is not READ anywhere in the sidebar scope", () => {
     // the shell no longer reads the app's sage nav-pill; a mention survives only in a comment

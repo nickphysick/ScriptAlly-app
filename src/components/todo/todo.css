@@ -148,46 +148,15 @@
 .tdb-rvchip { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; box-sizing: border-box; padding: 0 20px; line-height: 1; background: var(--white, #fff); border: 1px solid #1d100c; color: #2a1a13; border-radius: 99px; box-shadow: 0 2px 8px rgba(58, 28, 20, 0.08); font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; flex: 0 0 auto; white-space: nowrap; }
 .tdb-rvchip:hover { background: var(--paper); }
 .tdb-rvchip.seen { color: #6b5a4e; }
-/* polish P4 — the removable query chip (the pink tag law) + the struck old total */
-.tdb-fq { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #7c3a2a; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; min-width: 0; max-width: 100%; }
-.tdb-fq:hover { border-color: #7c3a2a; }
-.tdb-fn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
-/* hero-pair P3 — FORMAT 3 (todo-filter-formats.html option 3, soft rectangles): the mono
-   pill grammar retires — sentence-case sans rows in 10px-radius boxes; the reactive
-   machinery (nar/dim/z, struck counts, the query chip) rides unchanged. The app's body sans
-   stands in for the ref's Inter (the standing body-font convention). */
-/* SHELL POLISH P4 — the filter rows read in the drawer's grammar: borderless, the faint
-   hover, radius 9; the family dot + count stay. */
-.tdb-fpill { display: flex; align-items: center; gap: 12px; margin: 0 0 2px; height: 35px; width: 100%; box-sizing: border-box; border: none; background: transparent; border-radius: 9px; padding: 0 10px; font-size: 12.5px; font-weight: 450; color: var(--rail-itemtx, #5a4a40); cursor: pointer; flex: 0 0 auto; transition: background 0.12s; }
-.tdb-fpill:hover { background: var(--spine-phov); }
-.tdb-fpill .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-.tdb-fpill.d-p .tdb-dotc { background: var(--dot-p); }
-.tdb-fpill.d-lat .tdb-dotc { background: var(--dot-lat); }
-.tdb-fpill.d-y .tdb-dotc { background: var(--dot-y); }
-.tdb-fpill.d-s .tdb-dotc { background: var(--dot-s); }
-.tdb-fpill .tdb-fn { margin-left: auto; font-size: 10px; color: var(--rail-label, #9c8878); font-variant-numeric: tabular-nums; }
-.tdb-fpill.z { opacity: 0.4; }
-.tdb-fpill.dim { opacity: 0.4; }
-.tdb-fpill.nar { background: var(--spine-pon); font-weight: 600; color: var(--spine-pink); }
-/* the active filter rows take the shell's warm fill (no green cast, no ink outline) */
-.tdb-fpill.sel { background: var(--spine-pon); font-weight: 600; color: var(--spine-pink); }
-.tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
+/* panel-final P2/P4 — the query chip, the struck total and the filter row-list (the old
+   filter-pill family) are RETIRED: the panel's context zone is the chip bench now (the spine
+   classes in todoShell.css). The struck-total treatment lives on at .spine-chipn .tdb-was. */
 .tdb-fsfoot { margin-top: 10px; border-top: 1px solid var(--hairline); padding: 12px; }
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
 .tdb-setrow:hover { background: var(--paper); }
 .tdb-cog { flex: 0 0 auto; color: #4d4238; } /* frame P3: the bare 20px cog — the roundel is gone */
-/* ── detail P4: THE COLOPHON (todo-detail-a.html §3 + -b.html §2) — the page's foot note on
-   the BARE ground (no card): centred, the slate spark breaking the hairline rule; lining
-   figures; text links. Pro's slate identity; gated non-Pro as before. ── */
-.tdb-colo { position: relative; text-align: center; padding: 26px 0 12px; border-top: 1px solid var(--line); }
-.tdb-colospark { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--oat); padding: 0 12px; color: #6A89A7; font-size: 14px; }
-.tdb-colok { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.17em; color: #6A89A7; margin-bottom: 7px; }
-.tdb-colo h4 { font-family: var(--f12-serif); font-size: 22px; font-weight: 700; color: var(--ink); }
-.tdb-colo p { font-size: 11.5px; color: #5d4d40; margin-top: 5px; font-variant-numeric: lining-nums; }
-.tdb-colo p b { color: #3d5872; }
-.tdb-cololinks { margin-top: 12px; display: flex; gap: 24px; justify-content: center; }
-.tdb-cololink { background: none; border: none; border-bottom: 1px solid #b9cad9; padding: 0 0 1px; color: #557393; font-size: 12.5px; font-weight: 700; cursor: pointer; }
-.tdb-cololink.g { color: #8a7a6d; border-bottom-color: var(--line); }
+/* panel-final P4 — the content-panel COLOPHON (.tdb-colo* / .tdb-cololink*) is RETIRED; its
+   successor is the blue Pro sticker at the panel foot (.spine-pro* in todoShell.css). */
 .tdb-demok { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #8fa4b8; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .tdb-drow { display: flex; align-items: center; gap: 9px; padding: 7px 2px; border-bottom: 1px solid #edf2f7; font-size: 10.5px; color: var(--ink-2); }
 .tdb-drow:last-child { border-bottom: none; }

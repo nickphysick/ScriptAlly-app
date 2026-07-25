@@ -233,7 +233,7 @@ describe("spine P5 — the sweep", () => {
   it("the tour retargets: the category-rail step + the filters-in-panel step", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".spine-rail"'); // the category rail step
-    expect(tour).toContain('sel: ".tdb-fpill"'); // filters-in-panel (no .tsh-filtericon)
+    expect(tour).toContain('sel: ".spine-bench"'); // filters-in-panel: the chip bench (no .tsh-filtericon)
     expect(tour).not.toContain(".tsh-filtericon");
     for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".tdb-revlink", ".tdb-today2"]) expect(tour).toContain(sel);
   });
