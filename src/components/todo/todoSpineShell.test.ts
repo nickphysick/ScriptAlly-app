@@ -77,10 +77,11 @@ describe("spine P1 — the ink rail", () => {
 });
 
 describe("spine P2 — the parchment panel", () => {
-  it("geometry/material: ~196px, full height beside the rail, parchment #f5f0e8, right rule #e0d6c6", () => {
+  it("geometry/material: ~260px, full height beside the rail, parchment #f5f0e8, right rule #e0d6c6", () => {
     const p = rule(".spine-panel");
     expect(p).toContain("width: var(--spine-panel-w)");
-    expect(rule(".spine-root")).toContain("--spine-panel-w: 196px");
+    // panel-final P1 widened the panel 196 → 260; the token stays the sole width owner
+    expect(rule(".spine-root")).toContain("--spine-panel-w: 260px");
     expect(p).toContain("background: var(--spine-pan)");
     expect(p).toContain("border-right: 1px solid var(--spine-pbd)");
     expect(rule(".spine-root")).toContain("--spine-pan: #f5f0e8");
@@ -211,7 +212,7 @@ describe("spine — the search (panel header) + the brand, carried from the cent
   });
   it("the brand assets are the real files, relocated: mark → rail, wordmark → panel", () => {
     expect(tsh).toContain('src="/scriptally-logo-new.png"');
-    expect(tsh).toContain("<ScriptAllyLogo heightPx={30} />");
+    expect(tsh).toContain("<ScriptAllyLogo heightPx={34} />"); // panel-final P1: the wordmark up a step (30 → 34)
     expect(tsh).toContain('aria-label="ScriptAlly — go to dashboard"');
     expect(page).toContain('onBrand={() => onNavigate("dashboard")}');
   });

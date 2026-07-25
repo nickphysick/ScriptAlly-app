@@ -37,7 +37,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     // in the always-on parchment sidebar (TodoShell) as its FILTER section.
     // THE HARDBACK SPINE: the filters live in the parchment PANEL's context zone
     expect(tshRule(".spine-panel")).toContain("width: var(--spine-panel-w)");
-    expect(tshRule(".spine-root")).toContain("--spine-panel-w: 196px");
+    expect(tshRule(".spine-root")).toContain("--spine-panel-w: 260px"); // panel-final P1 widened 196 → 260
     expect(tsh).toContain('<aside className="spine-panel"');
     expect(page).toContain("contextContent={renderFilterSection()}");
     expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');

@@ -135,7 +135,7 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
   });
   it("rows are the drawer's grammar: icon + label, its height/radius/type, muted counts", () => {
     const ni = tRule(".spine-ni");
-    expect(ni).toContain("height: 32px");
+    expect(ni).toContain("height: var(--spine-row-h)"); // panel-final P1: the height is now a scale token (38px)
     expect(ni).toContain("border-radius: 9px");
     expect(ni).toContain("color: var(--spine-ptx)");
     expect(tRule(".spine-ic")).toContain("width: 14px"); // the panel row icon
@@ -395,7 +395,7 @@ describe("centring fix P2B — the real brand in the corner", () => {
     // the real mark (rail) + the real wordmark (panel), both the actual assets
     expect(tsh).toContain('src="/scriptally-logo-new.png"');
     expect(tsh).toContain("import { ScriptAllyLogo }");
-    expect(tsh).toContain("<ScriptAllyLogo heightPx={30} />");
+    expect(tsh).toContain("<ScriptAllyLogo heightPx={34} />"); // panel-final P1: the wordmark up a step (30 → 34)
   });
   it("the mark + wordmark order, alt text, and the home-route link", () => {
     // the mark leads (rail head), the wordmark follows (panel head)

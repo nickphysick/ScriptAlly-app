@@ -1,6 +1,6 @@
 /**
  * TodoShell — THE HARDBACK SPINE (design-refs/spine-shell.html, todo-fix54). A 54px ink rail +
- * a 196px parchment panel + the content region, all inside the `.t-f12` token layer. The rail
+ * a 260px parchment panel + the content region, all inside the `.t-f12` token layer. The rail
  * is the one place the parchment-highlight law can't apply (there is no parchment there) — its
  * active state is an ink-native #4a3226 square. The panel + bar wear the same parchment so they
  * read as one cream L inside the dark spine. Panel active fill: the warm #e6ddcf (hover #ece5d9),
@@ -15,8 +15,8 @@
   --spine-ricon: #a8917f;      /* idle rail icon */
   --spine-ricon-on: #f3e7da;   /* active icon — cream */
   --spine-ron: #4a3226;        /* active square */
-  /* the PANEL (parchment) */
-  --spine-panel-w: 196px;
+  /* the PANEL (parchment) — geometry: panel-final P1 (design-refs/panel-geometry.html) */
+  --spine-panel-w: 260px;
   --spine-pan: #f5f0e8;
   --spine-pbd: #e0d6c6;        /* right rule (shared with the bar) */
   --spine-pink: #2f2419;       /* wordmark / active-row ink */
@@ -28,6 +28,13 @@
   /* the panel active fill (warm parchment, one step deeper — fill only, never burgundy) */
   --spine-pon: #e6ddcf;
   --spine-phov: #ece5d9;
+  /* the panel TYPE SCALE (panel-final P1) — one source for every size the panel wears */
+  --spine-row-h: 38px;         /* nav-row height */
+  --spine-row-fs: 13px;        /* nav-row label */
+  --spine-count-fs: 10px;      /* the trailing count */
+  --spine-lab-fs: 7.5px;       /* mono section labels (category + context) */
+  --spine-lab-tr: 0.22em;      /* their wider tracking */
+  --spine-head-clear: 28px;    /* the breathing head: clear space beneath the wordmark */
   /* the search pill's own hairline (reused by the panel-header pill in todo.css) */
   --tsh-active-border: #e0d6c6;
   --tsh-collapse: 1100px;
@@ -75,8 +82,8 @@
   overflow-y: auto;
   z-index: 4;
 }
-.spine-word { display: flex; padding: 0 6px 12px; background: none; border: none; cursor: pointer; overflow: hidden; min-width: 0; }
-.spine-cat { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.2em; color: var(--spine-plab); padding: 2px 6px 6px; text-transform: uppercase; }
+.spine-word { display: flex; padding: 0 6px var(--spine-head-clear); background: none; border: none; cursor: pointer; overflow: hidden; min-width: 0; }
+.spine-cat { font-family: var(--f12-mono); font-size: var(--spine-lab-fs); letter-spacing: var(--spine-lab-tr); color: var(--spine-plab); padding: 0 6px 6px; text-transform: uppercase; }
 
 /* panel rows — one grammar for page rows, filter rows and the foot */
 .spine-ni {
@@ -84,12 +91,12 @@
   align-items: center;
   gap: 9px;
   width: 100%;
-  height: 32px;
+  height: var(--spine-row-h);
   box-sizing: border-box;
   border: none;
   border-radius: 9px;
   padding: 0 10px;
-  font-size: 11.5px;
+  font-size: var(--spine-row-fs);
   font-weight: 500;
   color: var(--spine-ptx);
   cursor: pointer;
@@ -101,13 +108,13 @@
 .spine-ic { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; flex: 0 0 auto; color: var(--spine-picon); }
 .spine-ic svg { width: 14px; height: 14px; }
 .spine-nlab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.spine-n { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; color: var(--spine-pmut); }
+.spine-n { margin-left: auto; font-family: var(--f12-mono); font-size: var(--spine-count-fs); color: var(--spine-pmut); }
 /* THE PANEL ACTIVE LAW — the warm parchment fill ONLY (no border/shadow/outline; never burgundy) */
 .spine-ni.on { background: var(--spine-pon); color: var(--spine-pink); font-weight: 700; }
 .spine-ni.on:hover { background: var(--spine-pon); }
 
 /* the context zone's ruled mono label + its dynamic content */
-.spine-nk { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.2em; color: var(--spine-plab); padding: 14px 6px 5px; text-transform: uppercase; border-bottom: 1px solid var(--spine-prule); margin: 0 2px 6px; }
+.spine-nk { font-family: var(--f12-mono); font-size: var(--spine-lab-fs); letter-spacing: var(--spine-lab-tr); color: var(--spine-plab); padding: 14px 6px 5px; text-transform: uppercase; border-bottom: 1px solid var(--spine-prule); margin: 0 2px 6px; }
 .spine-word:hover, .spine-logo:hover { opacity: 0.82; }
 .spine-ctx { display: flex; flex-direction: column; gap: 2px; }
 /* P2 — the migrated filter rows sit flush in the panel's context zone: the panel's row
