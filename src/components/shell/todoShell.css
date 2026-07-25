@@ -35,6 +35,18 @@
   --spine-lab-fs: 7.5px;       /* mono section labels (category + context) */
   --spine-lab-tr: 0.22em;      /* their wider tracking */
   --spine-head-clear: 28px;    /* the breathing head: clear space beneath the wordmark */
+  /* THE CHIP BENCH (panel-final P2) — the context zone's control-surface card + its chips */
+  --spine-bench-bg: #ece4d4;   /* the inset deeper-parchment card */
+  --spine-bench-bd: #dbcfb8;
+  --spine-bench-lab: #7a6a48;  /* the funnel + FILTER label */
+  --spine-bench-clr: #a5988c;  /* the Clear text link */
+  --spine-bench-clr-bd: #d4c6a8;
+  --spine-chip-bg: #f5f0e8;    /* an idle chip (parchment on the deeper card) */
+  --spine-chip-bd: #cbbc9e;
+  --spine-chip-tx: #4d4238;
+  --spine-chip-on-bg: #3a2c20; /* a selected chip — deep ink fill, cream text */
+  --spine-chip-on-bd: #2a1a13;
+  --spine-chip-on-tx: #f3e7da;
   /* the search pill's own hairline (reused by the panel-header pill in todo.css) */
   --tsh-active-border: #e0d6c6;
   --tsh-collapse: 1100px;
@@ -117,6 +129,20 @@
 .spine-nk { font-family: var(--f12-mono); font-size: var(--spine-lab-fs); letter-spacing: var(--spine-lab-tr); color: var(--spine-plab); padding: 14px 6px 5px; text-transform: uppercase; border-bottom: 1px solid var(--spine-prule); margin: 0 2px 6px; }
 .spine-word:hover, .spine-logo:hover { opacity: 0.82; }
 .spine-ctx { display: flex; flex-direction: column; gap: 2px; }
+/* ── THE CHIP BENCH (panel-final P2) — the context zone as a control surface, not a nav list ── */
+.spine-bench { margin: 12px 2px 0; background: var(--spine-bench-bg); border: 1px solid var(--spine-bench-bd); border-radius: 12px; padding: 9px 8px 11px; box-sizing: border-box; }
+.spine-benchhead { display: flex; align-items: center; gap: 7px; padding: 2px 4px 8px; color: var(--spine-bench-lab); }
+.spine-funnel { display: inline-flex; color: var(--spine-bench-lab); }
+.spine-funnel svg { width: 12px; height: 12px; }
+.spine-benchhead b { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.2em; font-weight: 600; color: var(--spine-bench-lab); }
+.spine-benchclr { margin-left: auto; background: none; border: none; padding: 0 0 1px; font-size: 9px; font-weight: 600; color: var(--spine-bench-clr); border-bottom: 1px solid var(--spine-bench-clr-bd); cursor: pointer; }
+.spine-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px; }
+.spine-chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 11px; border-radius: 99px; border: 1px solid var(--spine-chip-bd); background: var(--spine-chip-bg); font-size: 10px; font-weight: 600; color: var(--spine-chip-tx); cursor: pointer; }
+.spine-chip.on { background: var(--spine-chip-on-bg); border-color: var(--spine-chip-on-bd); color: var(--spine-chip-on-tx); }
+.spine-chip.zero { opacity: 0.45; }
+.spine-chipn { font-size: 8px; opacity: 0.65; }
+/* the struck prior total during search (fnFace renders <s class="tdb-was"> inside the count) */
+.spine-chipn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
 /* P2 — the migrated filter rows sit flush in the panel's context zone: the panel's row
    metrics (32px, radius 9) + its warm tokens govern; the family dot + count stay. */
 .spine-ctx .tdb-fpill { margin: 0 0 2px; height: 32px; font-size: 11.5px; color: var(--spine-ptx); }

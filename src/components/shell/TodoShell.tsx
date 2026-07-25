@@ -65,8 +65,8 @@ export interface TodoShellProps {
   panelCategory: string;
   /** The active category's page rows. */
   pages: SpinePage[];
-  /** The current page's context zone: a ruled mono label + its dynamic content (To-do only). */
-  contextLabel?: string;
+  /** The current page's context zone — its own self-headed control surface (To-do → the chip
+   *  bench). The ruled mono label was retired in panel-final P2: the bench heads itself. */
   contextContent?: React.ReactNode;
   /** The panel foot utilities. */
   foot: SpineFootItem[];
@@ -104,7 +104,7 @@ const RailIcon: React.FC<{ c: SpineCategory; collapsed: boolean; onPanelOpen?: (
 );
 
 export const TodoShell: React.FC<TodoShellProps> = ({
-  categories, railFoot, panelCategory, pages, contextLabel, contextContent, foot,
+  categories, railFoot, panelCategory, pages, contextContent, foot,
   crumbParents = [], crumbCurrent, onAccount, onBrand,
   collapsed = false, panelOpen = false, onPanelOpen, onPanelDismiss, clearing = false, children,
 }) => (
@@ -143,12 +143,7 @@ export const TodoShell: React.FC<TodoShellProps> = ({
         ))}
       </nav>
 
-      {contextLabel && (
-        <>
-          <div className="spine-nk" aria-hidden>{contextLabel}</div>
-          <div className="spine-ctx">{contextContent}</div>
-        </>
-      )}
+      {contextContent && <div className="spine-ctx">{contextContent}</div>}
 
       <div className="spine-spacer" />
       <div className="spine-panelfoot">

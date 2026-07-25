@@ -20,7 +20,7 @@
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { TodoShell, SpineCategory, SpinePage, SpineFootItem } from "../shell/TodoShell";
-import { LayoutGrid, Send, Users, ListTodo, Book, Settings as SettingsIcon, HelpCircle } from "lucide-react";
+import { LayoutGrid, Send, Users, ListTodo, Book, Settings as SettingsIcon, HelpCircle, Funnel } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -281,7 +281,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
   const filtersRef = useRef<TodoFilterState>(DEFAULT_FILTERS);
   filtersRef.current = filters;
-  const setF = (k: keyof TodoFilterState, v: boolean) => setFilters((f) => ({ ...f, [k]: v }));
   const searchRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -791,7 +790,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       railFoot={railSettings}
       panelCategory="QUERYING"
       pages={panelPages}
-      contextLabel="TO-DO · FILTERS"
       contextContent={renderFilterSection()}
       foot={panelFoot}
       crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
@@ -1093,14 +1091,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // the lens below a divider; narrowed = included band-fill burgundy + the SHOWING x OF y ·
   // RESET row under SHOW. Foot: the Task-settings row + the Pro square (non-Pro only). The
   // Focus square is GONE — the hero owns the focused session. ──
-  function railPill(label: string, key: FilterType, count: number, dot: "p" | "lat" | "y") {
+  // panel-final P2 — THE CHIP BENCH: the facets as wrapping TOGGLE CHIPS. The selection model is
+  // UNCHANGED (togglePill — the solo-then-membership set); the chip only re-dresses the pill. A
+  // selected chip fills deep ink; a zero-count chip fades to 45% but stays rendered.
+  function benchChip(label: string, key: FilterType, count: number) {
     const on = filters[key];
-    const cls = resting ? "" : on ? " nar" : " dim";
-    // P4: zero-match pills DIM in place (the existing 40%) — never hidden, never reordered
     const live = searchFc ? searchFc[key] : count;
     return (
-      <button type="button" className={`tdb-fpill d-${dot}${cls}${live === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
-        <span className="tdb-dotc" aria-hidden />{label}<span className="tdb-fn">{fnFace(count, live)}</span>
+      <button type="button" className={`spine-chip${!resting && on ? " on" : ""}${live === 0 ? " zero" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
+        {label}<span className="spine-chipn">{fnFace(count, live)}</span>
       </button>
     );
   }
@@ -1130,38 +1129,43 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
-  // ── hero-pair P1: the toolbelt stack is RETIRED — Begin + the chip live under the hero;
-  // the left column begins directly with the filter card. ──
-  // ── THE WORKSPACE SHELL (todo-fix48) — the FILTER section: the existing quiet-pill filter
-  // rows, carrying ALL their reactive behaviour (facet counts, zero-count dimming, the struck
-  // old totals via fnFace, the active-search chip). The REVIEW & FILTER band, the CTA pair and
-  // the Task-settings row have LEFT this card — the sidebar's FILTER kicker heads it, the pair
-  // lives in the hero, and Task settings + Help ride the sidebar foot. ──
+  // ── panel-final P2 — THE CHIP BENCH (design-refs/panel-chip-bench.html · W1): the context zone
+  // is a FILTER workbench, not a nav list. An inset deeper-parchment card, self-headed by the
+  // funnel + FILTER + a Clear link (shown only when a facet is narrowing); the facets as wrapping
+  // toggle chips (All leads as the reset/Show-all). The active-search string rides in the same
+  // grammar as a dismissable chip. Baked: Today's list does NOT join the bench — it lives in the
+  // corner pop-up, so its old lens row is retired here (filters.todayOnly is untouched, dormant).
+  // Every reactive behaviour carries over verbatim (counts, struck totals via fnFace, zero-fade).
   function renderFilterSection() {
     return (
-      <>
-        {searchActive && (
-          <button type="button" className="tdb-fq tsh-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
-            “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
+      <div className="spine-bench">
+        <div className="spine-benchhead">
+          <span className="spine-funnel" aria-hidden><Funnel size={12} /></span>
+          <b>FILTER</b>
+          {!resting && (
+            <button type="button" className="spine-benchclr" onClick={() => setFilters({ ...DEFAULT_FILTERS })}>Clear</button>
+          )}
+        </div>
+        <div className="spine-chips">
+          {searchActive && (
+            <button type="button" className="spine-chip q" aria-label="Clear the search" onClick={() => setSearch("")}>
+              “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
+            </button>
+          )}
+          {/* All is the default-selected chip AND the Show-all reset (filters only; the query
+              chip clears the search) */}
+          <button type="button" className={`spine-chip all${resting ? " on" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>
+            All<span className="spine-chipn">{fnFace(shownY, searchTotal ?? shownY)}</span>
           </button>
-        )}
-        {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
-            the narrowed meta lives in the sheet's corner line */}
-        <button type="button" className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>
-          Show all<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>
-        </button>
-        {railPill("Offers", "offers", fc.offers, "p")}
-        {railPill("Agent waiting", "overToYou", fc.overToYou, "p")}
-        {railPill("Materials", "materials", fc.materials, "lat")}
-        {railPill("Wish lists", "mswl", fc.mswl, "lat")}
-        {railPill("Stale", "stale", fc.stale, "lat")}
-        {railPill("Snoozed", "snoozed", fc.snoozed, "lat")}
-        {railPill("Notes", "notes", fc.notes, "y")}
-        <div className="tdb-fdivider" aria-hidden />
-        <button type="button" className={`tdb-fpill d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
-          <span className="tdb-dotc" aria-hidden />Today’s list<span className="tdb-fn">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>
-        </button>
-      </>
+          {benchChip("Offers", "offers", fc.offers)}
+          {benchChip("Agent waiting", "overToYou", fc.overToYou)}
+          {benchChip("Materials", "materials", fc.materials)}
+          {benchChip("Wish lists", "mswl", fc.mswl)}
+          {benchChip("Stale", "stale", fc.stale)}
+          {benchChip("Snoozed", "snoozed", fc.snoozed)}
+          {benchChip("Notes", "notes", fc.notes)}
+        </div>
+      </div>
     );
   }
 

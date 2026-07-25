@@ -125,13 +125,14 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
     expect(root).toContain("--spine-plab: #8a7a66");
     expect(root).toContain("--spine-prule: #ddd2c0");
   });
-  it("section labels are the drawer's mono, hairline-ruled beneath (WORKSPACE + FILTER both)", () => {
-    const nk = tRule(".spine-nk");
-    expect(nk).toContain("font-family: var(--f12-mono)");
-    expect(nk).toContain("color: var(--spine-plab)");
-    expect(nk).toContain("border-bottom: 1px solid var(--spine-prule)"); // the ruled context label
-    expect(tsh).toContain('<div className="spine-cat"'); // the category label
-    expect(tsh).toContain('<div className="spine-nk"'); // the context label
+  it("the category section label is the drawer's mono (the FILTER label is now the bench's own header)", () => {
+    const cat = tRule(".spine-cat");
+    expect(cat).toContain("font-family: var(--f12-mono)");
+    expect(cat).toContain("color: var(--spine-plab)");
+    expect(tsh).toContain('<div className="spine-cat"'); // the category label stands
+    // panel-final P2: the ruled 'TO-DO · FILTERS' context label is retired — the bench self-heads
+    expect(tsh).not.toContain('className="spine-nk"');
+    expect(page).toContain('className="spine-benchhead"'); // the bench's own funnel + FILTER header
   });
   it("rows are the drawer's grammar: icon + label, its height/radius/type, muted counts", () => {
     const ni = tRule(".spine-ni");
@@ -153,17 +154,13 @@ describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
     for (const burgundy of ["#7c3a2a", "#f5c7c2", "#f3e3dc"]) expect(on).not.toContain(burgundy);
     expect(tshCss).not.toContain("#fdfcfa"); // the white-card variant stays retired
   });
-  it("the filter rows share it: active = the warm faint fill, the ink outline retired; reactive bits carry over", () => {
-    const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("background: var(--spine-pon)"); // the panel's warm fill
-    expect(sel).not.toContain("box-shadow");
-    expect(sel).not.toContain("border-color: var(--ink)");
-    expect(rule(".tdb-fpill.nar")).toContain("background: var(--spine-pon)");
-    // the reactive behaviour is untouched: the dot, the count, zero-dimming, the struck totals, the chip
-    expect(rule(".tdb-fpill .tdb-dotc")).toContain("border-radius: 50%");
-    expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
-    expect(css).toContain(".tdb-fn .tdb-was"); // the struck old total
-    expect(page).toContain('className="tdb-fq tsh-fq"'); // the active-search chip
+  it("the chips carry the reactive behaviour: selected = the ink fill, zero fades, the search chip", () => {
+    // panel-final P2: the filter ROW-LIST is retired — the bench CHIPS carry the reactive behaviour
+    expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)"); // selected = ink fill
+    expect(tRule(".spine-chip.on")).not.toContain("box-shadow");
+    expect(tRule(".spine-chip.zero")).toContain("opacity: 0.45"); // zero-count fades, still rendered
+    expect(tRule(".spine-chipn .tdb-was")).toContain("line-through"); // the struck prior total
+    expect(page).toContain('className="spine-chip q"'); // the active-search chip, chip grammar
   });
 });
 
@@ -373,7 +370,7 @@ describe("centring fix P2 — the big search in the panel header", () => {
   it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount", () => {
     expect(page).toContain("value={search}");
     expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
-    expect(page).toContain('className="tdb-fq tsh-fq"'); // the query chip stays in the sidebar
+    expect(page).toContain('className="spine-chip q"'); // panel-final P2: the query chip now rides the bench
     expect(page).toContain("{active ? `Showing ${shownX} of ${shownY} items`"); // the count line
     expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)'); // ⌘K → searchRef
     expect(page).toContain("ref={searchRef}");

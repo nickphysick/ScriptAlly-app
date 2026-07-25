@@ -42,43 +42,21 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain("contextContent={renderFilterSection()}");
     expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');
   });
-  it("SHOW: seven vertical pills in the locked order, 34px rows, dot left + count right, zero 40%", () => {
-    for (const call of ['railPill("Offers", "offers", fc.offers, "p")', 'railPill("Agent waiting", "overToYou", fc.overToYou, "p")', 'railPill("Materials", "materials", fc.materials, "lat")', 'railPill("Wish lists", "mswl", fc.mswl, "lat")', 'railPill("Stale", "stale", fc.stale, "lat")', 'railPill("Snoozed", "snoozed", fc.snoozed, "lat")', 'railPill("Notes", "notes", fc.notes, "y")']) {
-      expect(page).toContain(call); // hero-pair P3: sentence case
-    }
+  it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal)", () => {
+    // the vertical row-list rail is RETIRED — the facets are wrapping chips (benchChip), same order
     const order = ["Offers", "Agent waiting", "Materials", "Wish lists", "Stale", "Snoozed", "Notes"];
     let last = -1;
-    for (const l of order) { const i = page.indexOf(`railPill("${l}"`); expect(i).toBeGreaterThan(last); last = i; }
-    const f = rule(".tdb-fpill");
-    expect(f).toContain("height: 35px"); // P4: the drawer's row height
-    expect(f).toContain("border-radius: 9px"); // the drawer's radius
-    expect(f).toContain("font-size: 12.5px");
-    expect(f).toContain("font-weight: 450");
-    expect(f).not.toContain("--f12-mono"); // the mono grammar retired
-    expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
-    const n = rule(".tdb-fpill .tdb-fn");
-    expect(n).toContain("margin-left: auto");
-    expect(n).toContain("font-size: 10px");
-    expect(n).toContain("font-variant-numeric: tabular-nums");
-  });
-  it("hero-pair P3: 'Show all' (sentence case) leads as the default-selected reset; P4 faint-fill selected grammar", () => {
-    expect(page).toContain('className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}');
-    expect(page).toContain('Show all<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>'); // the match total during search
-    expect(page).not.toContain("SHOW ALL<span"); // explicitly not capitals
-    // P4: the ink outline is retired — active filter rows take the drawer's faint parchment fill
-    const sel = rule(".tdb-fpill.sel");
-    expect(sel).toContain("background: var(--spine-pon)"); // the panel's warm faint fill
-    expect(sel).not.toContain("box-shadow");
-    expect(sel).not.toContain("border-color: var(--ink)");
-    expect(css).not.toContain(".tdb-fpill.sel::before"); // no tick glyph
-    const nar = rule(".tdb-fpill.nar");
-    expect(nar).toContain("background: var(--spine-pon)"); // the narrowed rows wear the same warm fill
-    expect(nar).not.toContain("inset 0 0 0 1px var(--ink)");
-    expect(page).not.toContain("tdb-frst");
-    expect(css).not.toContain("tdb-frst");
-    const sa = page.indexOf("Show all<span");
-    expect(sa).toBeLessThan(page.indexOf('railPill("Offers"')); // Show all leads the facets
-    expect(page).toContain('contextLabel="TO-DO · FILTERS"'); // the ruled context label heads the filters
+    for (const l of order) { const i = page.indexOf(`benchChip("${l}"`); expect(i).toBeGreaterThan(last); last = i; }
+    // All leads as the Show-all reset, before the facets, with the match total during search
+    const all = page.indexOf("spine-chip all");
+    expect(all).toBeGreaterThan(-1);
+    expect(all).toBeLessThan(page.indexOf('benchChip("Offers"'));
+    expect(page).toContain("fnFace(shownY, searchTotal ?? shownY)");
+    // selected = the ink fill; a zero chip fades but renders (never hidden, never reordered)
+    expect(tshRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
+    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.45");
+    // the ruled 'TO-DO · FILTERS' label + the old REVIEW & FILTER band are retired
+    expect(page).not.toContain('contextLabel="TO-DO · FILTERS"');
     expect(page).not.toContain("REVIEW &amp; FILTER");
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
@@ -92,10 +70,11 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
     expect(heroFn).toContain("tdb-herobegin");
   });
-  it("the lens below a divider; the same state the search composes with", () => {
-    expect(page.indexOf('className="tdb-fdivider"')).toBeLessThan(page.indexOf("Today’s list<span"));
-    expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
-    expect(page).toContain("matchesSearch(c, search, sctx)");
+  it("panel-final P2: the Today's-list lens is retired from the panel (it lives in the corner pop-up)", () => {
+    expect(page).not.toContain("Today’s list<span"); // the lens row is gone from the filters
+    expect(page).not.toContain('setF("todayOnly"'); // its only setter was removed
+    expect(page).not.toContain('className="tdb-fdivider"'); // the divider above it is gone
+    expect(page).toContain("matchesSearch(c, search, sctx)"); // the board still composes filters × search
   });
   it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
     // Task settings + Help centre are the shell FOOT now; the FILTER section carries no setrow
@@ -500,25 +479,20 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
   });
   it("the struck pair renders during search only, and only when the count CHANGED", () => {
     expect(page).toContain("searchActive && live !== base ? (<><s className=\"tdb-was\">{base}</s>{live}</>) : (<>{base}</>)");
-    expect(page).toContain('{label}<span className="tdb-fn">{fnFace(count, live)}</span>');
-    expect(page).toContain("Today’s list<span className=\"tdb-fn\">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>".replace(/\\/g, "")); // P3: sentence case
-    expect(css).toContain(".tdb-fn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }");
+    expect(page).toContain('{label}<span className="spine-chipn">{fnFace(count, live)}</span>'); // the chip's count wraps fnFace
+    // the struck prior total keeps its treatment inside the chip count
+    expect(tshRule(".spine-chipn .tdb-was")).toContain("text-decoration: line-through");
   });
-  it("zero-match pills DIM in place (the live count keys the existing 40%) — never hidden, never reordered", () => {
+  it("zero-match chips DIM in place (the live count keys the fade) — never hidden, never reordered", () => {
     expect(page).toContain("const live = searchFc ? searchFc[key] : count;");
-    expect(page).toContain("${live === 0 ? \" z\" : \"\"}".replace(/\\/g, ""));
-    expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
+    expect(page).toContain('live === 0 ? " zero" : ""');
+    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.45");
   });
-  it("the FILTER header grows the removable query chip: pink tag law, quoted uppercased term, ✕ clears the search", () => {
+  it("the bench grows the removable query chip: quoted uppercased term, ✕ clears the search", () => {
     expect(page).toContain("“{search.trim().toUpperCase()}” <span aria-hidden>✕</span>");
-    expect(page).toContain('className="tdb-fq tsh-fq" aria-label="Clear the search" onClick={() => setSearch("")}'); // the chip rides the panel context zone
-    const q = rule(".tdb-fq");
-    expect(q).toContain("color: #7c3a2a");
-    expect(q).toContain("background: var(--pink-t)");
-    expect(q).toContain("border: 1px solid var(--pink-b)");
-    expect(q).toContain("border-radius: 99px");
-    // the chip is the first child of renderFilterSection, above the pills (in the panel context)
-    expect(page.indexOf('className="tdb-fq tsh-fq"')).toBeLessThan(page.indexOf("Show all<span"));
+    expect(page).toContain('className="spine-chip q" aria-label="Clear the search" onClick={() => setSearch("")}'); // the chip rides the bench
+    // the query chip is the first child of the chip row, before the All chip
+    expect(page.indexOf('className="spine-chip q"')).toBeLessThan(page.indexOf("spine-chip all"));
   });
   it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
     expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");
@@ -1152,9 +1126,9 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
       expect(src).not.toContain("oday’s list"); // catches Today's/today's alike
       // (Deck v2 legalised the uppercase form: the lens pill + sage chip are named TODAY'S LIST)
     }
-    // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms);
-    // hero-pair P3 added the lens row's sentence-case "Today's list" — exactly three
-    expect((page.match(/oday’s list/g) ?? []).length).toBe(3);
+    // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms only);
+    // panel-final P2 retired the filter lens row, so its sentence-case copy is gone — exactly two
+    expect((page.match(/oday’s list/g) ?? []).length).toBe(2);
     expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // via the shared constant — the two literals live in VERB_LABELS alone
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)

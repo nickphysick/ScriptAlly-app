@@ -101,22 +101,15 @@ describe("spine P2 — the parchment panel", () => {
     expect(page).toContain('label: "To-do", icon: <ListTodo size={14} />, count: boardCards.length, onClick: () => onNavigate("todo"), active: true');
     expect(tsh).toContain('{typeof pg.count === "number" && <span className="spine-n">{pg.count}</span>}');
   });
-  it("context zone: a ruled mono label naming the page, then the migrated filter rows (To-do only)", () => {
-    expect(page).toContain('contextLabel="TO-DO · FILTERS"');
+  it("context zone: the self-headed chip bench renders in the context slot (To-do only)", () => {
+    // panel-final P2: the ruled 'TO-DO · FILTERS' label + the migrated row list are retired — the
+    // bench heads itself. The shell now renders whatever contextContent is given, gated on it.
     expect(page).toContain("contextContent={renderFilterSection()}");
-    expect(tsh).toContain('<div className="spine-nk"'); // the ruled label
-    expect(tsh).toContain('<div className="spine-ctx">{contextContent}</div>');
-    expect(rule(".spine-nk")).toContain("border-bottom: 1px solid var(--spine-prule)"); // the rule
-    // the filter section's reactive behaviour rides along, unchanged
-    expect(page).toContain('className="tdb-fq tsh-fq"'); // the query chip
-    expect(page).toContain("fnFace(shownY, searchTotal ?? shownY)"); // the struck totals
-    expect(page).toContain('railPill("Offers", "offers", fc.offers, "p")');
-    // context renders ONLY when a label is given (pages without context end after their list)
-    expect(tsh).toContain("{contextLabel && (");
-    // the migrated filter rows sit flush in the context zone, on the panel's warm tokens
-    expect(rule(".spine-ctx .tdb-fpill")).toContain("height: 32px");
-    expect(rule(".spine-ctx .tdb-fpill")).toContain("color: var(--spine-ptx)");
-    expect(rule(".spine-ctx .tdb-fpill .tdb-fn")).toContain("color: var(--spine-pmut)");
+    expect(tsh).toContain("{contextContent && <div className=\"spine-ctx\">{contextContent}</div>}");
+    expect(page).not.toContain('contextLabel="TO-DO · FILTERS"'); // the ruled label is gone
+    expect(tsh).not.toContain('className="spine-nk"'); // no ruled context label rendered
+    // the bench itself; its full grammar is locked in todoPanelFinal.test.ts (P2)
+    expect(page).toContain('className="spine-bench"');
   });
   it("the panel active law: the warm parchment fill ONLY (no border/shadow/outline; never burgundy)", () => {
     const on = rule(".spine-ni.on");
