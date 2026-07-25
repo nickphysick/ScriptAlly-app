@@ -47,6 +47,17 @@
   --spine-chip-on-bg: #3a2c20; /* a selected chip — deep ink fill, cream text */
   --spine-chip-on-bd: #2a1a13;
   --spine-chip-on-tx: #f3e7da;
+  /* THE BLUE PRO STICKER (panel-final P3) — the board's card language turned on Pro */
+  --spine-pro-bg: #fdf6f2;     /* warm-white ground */
+  --spine-pro-bd: #3a1c14;     /* the ink border */
+  --spine-pro-block: #c2cfda;  /* the 4px offset block — the ONLY blue sticker in the app */
+  --spine-pro-pill-bg: #6A89A7; /* the slate pill */
+  --spine-pro-pill-bd: #587991;
+  --spine-pro-pill-tx: #f4f8fb;
+  --spine-pro-title: #4a241a;
+  --spine-pro-desc: #7a5a4c;
+  --spine-pro-link: #5f7d99;   /* the slate "Meet the assistant →" link */
+  --spine-pro-link-bd: #a9bccb;
   /* the search pill's own hairline (reused by the panel-header pill in todo.css) */
   --tsh-active-border: #e0d6c6;
   --tsh-collapse: 1100px;
@@ -143,6 +154,14 @@
 .spine-chipn { font-size: 8px; opacity: 0.65; }
 /* the struck prior total during search (fnFace renders <s class="tdb-was"> inside the count) */
 .spine-chipn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
+/* ── THE BLUE PRO STICKER (panel-final P3) — at the panel's foot, above the utilities; the spacer
+ *    above it pushes it down on a tall viewport, and it scrolls as content on a short one ── */
+.spine-promo { margin: 4px 2px 14px; }
+.spine-pro { position: relative; box-sizing: border-box; background: var(--spine-pro-bg); border: 1.5px solid var(--spine-pro-bd); border-radius: 12px; box-shadow: 4px 4px 0 var(--spine-pro-block); padding: 13px 15px 14px; }
+.spine-pro-pill { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 11px; border-radius: 99px; background: var(--spine-pro-pill-bg); border: 1px solid var(--spine-pro-pill-bd); color: var(--spine-pro-pill-tx); font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.18em; }
+.spine-pro-title { margin-top: 9px; font-family: var(--f12-serif); font-weight: 700; font-size: 15.5px; color: var(--spine-pro-title); }
+.spine-pro-desc { margin-top: 5px; font-size: 11px; line-height: 1.5; color: var(--spine-pro-desc); }
+.spine-pro-link { display: inline-block; margin-top: 10px; padding: 0 0 2px; background: none; border: none; border-bottom: 1.5px solid var(--spine-pro-link-bd); font-size: 11.5px; font-weight: 700; color: var(--spine-pro-link); cursor: pointer; }
 /* P2 — the migrated filter rows sit flush in the panel's context zone: the panel's row
    metrics (32px, radius 9) + its warm tokens govern; the family dot + count stay. */
 .spine-ctx .tdb-fpill { margin: 0 0 2px; height: 32px; font-size: 11.5px; color: var(--spine-ptx); }

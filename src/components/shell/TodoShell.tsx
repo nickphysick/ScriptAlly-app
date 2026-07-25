@@ -68,6 +68,9 @@ export interface TodoShellProps {
   /** The current page's context zone — its own self-headed control surface (To-do → the chip
    *  bench). The ruled mono label was retired in panel-final P2: the bench heads itself. */
   contextContent?: React.ReactNode;
+  /** A promo card seated at the panel's foot, above the utilities — scrolls as content, never
+   *  pinned (To-do → the blue Pro sticker, panel-final P3). Absent when there's nothing to offer. */
+  panelPromo?: React.ReactNode;
   /** The panel foot utilities. */
   foot: SpineFootItem[];
   /** The breadcrumb: parents (navigable) then the bold current page. */
@@ -104,7 +107,7 @@ const RailIcon: React.FC<{ c: SpineCategory; collapsed: boolean; onPanelOpen?: (
 );
 
 export const TodoShell: React.FC<TodoShellProps> = ({
-  categories, railFoot, panelCategory, pages, contextContent, foot,
+  categories, railFoot, panelCategory, pages, contextContent, panelPromo, foot,
   crumbParents = [], crumbCurrent, onAccount, onBrand,
   collapsed = false, panelOpen = false, onPanelOpen, onPanelDismiss, clearing = false, children,
 }) => (
@@ -146,6 +149,7 @@ export const TodoShell: React.FC<TodoShellProps> = ({
       {contextContent && <div className="spine-ctx">{contextContent}</div>}
 
       <div className="spine-spacer" />
+      {panelPromo && <div className="spine-promo">{panelPromo}</div>}
       <div className="spine-panelfoot">
         {foot.map((f) => (
           <button key={f.key} type="button" className="spine-ni" onClick={f.onClick}>

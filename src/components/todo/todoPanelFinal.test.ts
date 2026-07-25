@@ -17,6 +17,7 @@ const here = __dirname;
 const shellCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
 const shellTsx = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+const promo = readFileSync(join(here, "AssistantPromo.tsx"), "utf8");
 
 /** Read a single CSS rule body by exact selector (first match). */
 const ruleIn = (css: string) => (sel: string): string => {
@@ -152,5 +153,39 @@ describe("panel-final P2 — the chip bench", () => {
     expect(bench).not.toContain("todayOnly");
     expect(page).not.toContain('setF("todayOnly"');
     expect(page).not.toContain("const setF ="); // the lens's only setter is removed
+  });
+});
+
+describe("panel-final P3 — the blue Pro sticker (shell integration)", () => {
+  it("seated at the panel foot via panelPromo — above the utilities, below the spacer", () => {
+    // TodoShell renders the promo between the spacer and the foot (so the spacer pushes it down
+    // on a tall viewport; it scrolls as content on a short one — the panel is overflow-y:auto)
+    expect(shellTsx).toContain('{panelPromo && <div className="spine-promo">{panelPromo}</div>}');
+    const promoAt = shellTsx.indexOf('className="spine-promo"');
+    expect(promoAt).toBeGreaterThan(shellTsx.indexOf('className="spine-spacer"'));
+    expect(promoAt).toBeLessThan(shellTsx.indexOf('className="spine-panelfoot"'));
+    expect(shell(".spine-panel")).toContain("overflow-y: auto"); // scrolls as content, never pinned
+  });
+
+  it("gated to non-Pro only; the count is live-derived from the existing colophon numbers", () => {
+    expect(page).toContain("panelPromo={!isProUser(currentUser) ? (");
+    expect(page).toContain("<ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
+    // the derived line uses props (never hardcoded), option 5's wording, opening the preview modal
+    const sticker = promo.slice(promo.indexOf("export const ProSticker"), promo.indexOf("export const AssistantModal"));
+    expect(sticker).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
+    expect(sticker).toContain("onClick={onPreview}>Meet the assistant →");
+  });
+
+  it("the sticker is the board's card language turned blue — the ONLY blue sticker in the app", () => {
+    const root = shell(".spine-root");
+    expect(root).toContain("--spine-pro-bg: #fdf6f2"); // warm-white ground
+    expect(root).toContain("--spine-pro-bd: #3a1c14"); // the ink border
+    expect(root).toContain("--spine-pro-block: #c2cfda"); // the pastille-blue offset block
+    expect(root).toContain("--spine-pro-pill-bg: #6A89A7"); // the slate pill
+    const card = shell(".spine-pro");
+    expect(card).toContain("border: 1.5px solid var(--spine-pro-bd)");
+    expect(card).toContain("box-shadow: 4px 4px 0 var(--spine-pro-block)"); // the 4px blue block
+    expect(shell(".spine-pro-title")).toContain("font-family: var(--f12-serif)"); // Playfair title
+    expect(shell(".spine-pro-link")).toContain("color: var(--spine-pro-link)"); // the slate link
   });
 });

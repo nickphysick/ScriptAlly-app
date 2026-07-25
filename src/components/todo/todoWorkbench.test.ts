@@ -574,16 +574,15 @@ describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
 });
 
 describe("polish P3 — the centre stack: three sibling containers", () => {
-  it("review card · sheet · Pro colleague — siblings inside .tdb-centre; the sheet holds neither", () => {
+  it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
     const box = page.indexOf('className="tdb-rvbox"');
     const mainc = page.indexOf('className="tdb-mainc tdb-panel"');
-    const body = page.indexOf('className="tdb-sheetbody"');
-    const banner = page.indexOf("<ProBanner");
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
     expect(mainc).toBeGreaterThan(box);
-    expect(banner).toBeGreaterThan(body); // the colophon moved INSIDE the panel, after the body
+    // panel-final P3: the Pro colophon LEFT the content stack for the panel-foot blue sticker
+    expect(page).not.toContain("<ProBanner");
     const c = rule(".tdb-centre");
     expect(c).toContain("width: 100%"); // SHELL POLISH P1: the panel fills the centred column
     expect(c).toContain("flex-direction: column");

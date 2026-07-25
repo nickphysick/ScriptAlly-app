@@ -21,52 +21,40 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("detail P4 — THE COLOPHON (the colleague banner is retired)", () => {
-  it("sits at the stack's foot on the BARE ground — no card chrome; the spark breaks the rule", () => {
-    expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain("hkCount={tiles.housekeeping}");
-    expect(page).toContain("totalCount={shownY}");
-    const banner = page.indexOf("<ProBanner");
-    expect(banner).toBeGreaterThan(page.indexOf('className="tdb-mainc"'));
-    const colo = css.match(/\.tdb-colo \{([^}]*)\}/)?.[1] ?? "";
-    expect(colo).toContain("text-align: center");
-    expect(colo).toContain("border-top: 1px solid var(--line)");
-    expect(colo).not.toContain("background"); // bare ground — no card
-    expect(colo).not.toContain("box-shadow");
-    const spark = css.match(/\.tdb-colospark \{([^}]*)\}/)?.[1] ?? "";
-    expect(spark).toContain("top: -11px");
-    expect(spark).toContain("background: var(--oat)"); // the ground shows through the break
-    expect(promo).toContain('<span className="tdb-colospark" aria-hidden>✦</span>');
+describe("panel-final P3 — THE BLUE STICKER (supersedes the colophon)", () => {
+  const sticker = promo.slice(promo.indexOf("export const ProSticker"), promo.indexOf("export const AssistantModal"));
+  it("the component IS the blue sticker: the slate pill, the Playfair title, the slate link", () => {
+    expect(sticker).toContain('<div className="spine-pro">');
+    expect(sticker).toContain('<span className="spine-pro-pill"><span aria-hidden>✦</span>SCRIPTALLY PRO</span>');
+    expect(sticker).toContain('<div className="spine-pro-title">Hand over the housekeeping</div>');
+    expect(sticker).toContain('<button type="button" className="spine-pro-link" onClick={onPreview}>Meet the assistant →</button>');
+    // the colophon component is extinct (markup + name)
+    expect(promo).not.toContain("tdb-colo");
+    expect(promo).not.toContain("ProBanner");
   });
-  it("anatomy + the VERBATIM wording with live-derived counts (bold pair slate, lining figures)", () => {
-    expect(promo).toContain(">SCRIPTALLY PRO</div>");
-    expect(promo).toContain("<h4>Hand over the housekeeping</h4>");
-    expect(promo).toContain("The assistant carries out your agent research for you.");
-    expect(promo).toContain("<b>{hkCount} of your current {totalCount} tasks</b> could be handled in the background");
-    expect(promo).toContain("whilst you write.");
-    expect(css).toContain(".tdb-colo p b { color: #3d5872; }");
-    expect(css.match(/\.tdb-colo p \{([^}]*)\}/)?.[1] ?? "").toContain("font-variant-numeric: lining-nums");
+  it("the count is live-derived from props, never hardcoded; the copy is option 5's", () => {
+    expect(sticker).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
+    expect(sticker).not.toMatch(/\d+ of your \d+/); // no literal numbers baked in
+    expect(sticker).not.toMatch(/hours?/i); // the hours clause stays omitted (never fabricated)
   });
-  it("the links: Meet the assistant → opens the preview modal; What's in Pro routes; gating unchanged", () => {
-    expect(promo).toContain('className="tdb-cololink" onClick={onPreview}>Meet the assistant →</button>');
-    expect(promo).toContain('className="tdb-cololink g" onClick={onWhatsInPro}>What’s in Pro</button>');
-    expect(page).toContain("onPreview={() => setAssistantOpen(true)}");
-    expect(page).toContain('onWhatsInPro={() => onNavigate("plans")}');
-    const link = css.match(/\.tdb-cololink \{([^}]*)\}/)?.[1] ?? "";
-    expect(link).toContain("color: #557393");
-    expect(link).toContain("border-bottom: 1px solid #b9cad9");
+  it("gating + wiring: mounted only for non-Pro, at the panel foot, opening the preview modal", () => {
+    expect(page).toContain("panelPromo={!isProUser(currentUser) ? (");
+    expect(page).toContain("<ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
+    // the content-panel colophon mount is gone
+    expect(page).not.toContain("<ProBanner");
+    expect(page).not.toContain('onWhatsInPro={() => onNavigate("plans")}');
   });
-  it("the colleague banner is EXTINCT; the marker stands at the modal's data source", () => {
-    // bounded: FocusFlow's .tdb-propill (the slate Pro pill) is a live namesake — the ban
-    // covers the colleague's own family only
+  it("NO dismiss control — the sticker cannot be closed (the colophon had none either)", () => {
+    expect(sticker).not.toMatch(/dismiss|onClose|onDismiss/i);
+    expect(sticker).not.toContain("✕");
+    expect(sticker).not.toMatch(/aria-label="Close"/i);
+  });
+  it("the colleague banner stays EXTINCT (bounded: FocusFlow's .tdb-propill is a live namesake)", () => {
     for (const f of [promo, page, css]) {
       expect(f).not.toMatch(/tdb-pro(?!pill)/);
     }
     expect(promo).not.toContain("Leave the admin to me");
     expect(page).toContain('// TODO(pro-assistant): replace canned theatre with real single-task free run ("Try one free")');
-  });
-  it("the hours clause stays OMITTED (never fabricated)", () => {
-    expect(promo).not.toMatch(/hours?/i);
   });
 });
 

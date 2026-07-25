@@ -42,7 +42,7 @@ import { FocusedSession, HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
-import { ProBanner, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
+import { ProSticker, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
@@ -791,6 +791,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       panelCategory="QUERYING"
       pages={panelPages}
       contextContent={renderFilterSection()}
+      panelPromo={!isProUser(currentUser) ? (
+        <ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
+      ) : undefined}
       foot={panelFoot}
       crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
       crumbCurrent="To-do"
@@ -927,16 +930,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         )}
             </div>
-            {/* THE COLOPHON — moved INSIDE the panel (the shell), keeping its gating + copy */}
-            {!isProUser(currentUser) && (
-              <ProBanner
-                hkCount={tiles.housekeeping}
-                totalCount={shownY}
-                rows={assistantRows}
-                onPreview={() => setAssistantOpen(true)}
-                onWhatsInPro={() => onNavigate("plans")}
-              />
-            )}
+            {/* panel-final P3: the content-panel colophon RETIRED — its successor is the blue Pro
+                sticker at the panel's foot (mounted via TodoShell's panelPromo). */}
           </div>
           </div>
         </div>

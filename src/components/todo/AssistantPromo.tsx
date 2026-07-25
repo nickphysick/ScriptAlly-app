@@ -22,29 +22,23 @@ export interface AssistantTaskRow {
 /** The canned timing chips — scripted, not measured (the preview's honesty line covers this). */
 const CANNED_TIMES = ["41S", "28S", "36S", "52S"];
 
-export const ProBanner: React.FC<{
+export const ProSticker: React.FC<{
   hkCount: number;
   totalCount: number;
-  rows: AssistantTaskRow[];
   onPreview: () => void;
-  onWhatsInPro: () => void;
-}> = ({ hkCount, totalCount, onPreview, onWhatsInPro }) => (
-  // THE COLOPHON (detail P4; todo-detail-a.html §3 composition + todo-detail-b.html §2
-  // wording, verbatim) — the page's foot note on the BARE ground, no card: the slate spark
-  // breaks the hairline rule; counts live-derived, lining figures. Pro's slate identity.
-  <div className="tdb-colo">
-    <span className="tdb-colospark" aria-hidden>✦</span>
-    <div className="tdb-colok">SCRIPTALLY PRO</div>
-    <h4>Hand over the housekeeping</h4>
-    <p>
-      The assistant carries out your agent research for you.{" "}
-      <b>{hkCount} of your current {totalCount} tasks</b> could be handled in the background
-      whilst you write.
-    </p>
-    <div className="tdb-cololinks">
-      <button type="button" className="tdb-cololink" onClick={onPreview}>Meet the assistant →</button>
-      <button type="button" className="tdb-cololink g" onClick={onWhatsInPro}>What’s in Pro</button>
+}> = ({ hkCount, totalCount, onPreview }) => (
+  // panel-final P3 — THE BLUE STICKER (design-refs/pro-card.html · option 5): the board's own
+  // card language turned on Pro — a warm-white ground, an ink border and a 4px offset block in
+  // pastille blue (the ONLY blue sticker in the app; the blue shadow = the assistant's colour),
+  // with a slate pill inside. The count is live-derived (never hardcoded); the sticker is
+  // permanent — it succeeds the retired colophon, and sits at the panel's foot.
+  <div className="spine-pro">
+    <span className="spine-pro-pill"><span aria-hidden>✦</span>SCRIPTALLY PRO</span>
+    <div className="spine-pro-title">Hand over the housekeeping</div>
+    <div className="spine-pro-desc">
+      {hkCount} of your {totalCount} tasks could run in the background whilst you write.
     </div>
+    <button type="button" className="spine-pro-link" onClick={onPreview}>Meet the assistant →</button>
   </div>
 );
 
