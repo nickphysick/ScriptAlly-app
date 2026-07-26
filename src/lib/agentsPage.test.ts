@@ -386,18 +386,8 @@ describe("desk rule — provenance footer", () => {
   });
 });
 
-describe("desk rule — compact emptiness artefacts", () => {
-  it("the community skeleton tiles are gone (compact strip only)", () => {
-    const agents = readCss(resolvePath(__dirname, "../components/Agents.tsx"), "utf8");
-    expect(agents.includes("ag-ph-tile")).toBe(false);
-    expect(agents.includes("ag-commstrip")).toBe(true);
-    expect(agents.includes("ag-colophon")).toBe(true);
-    expect(agents.includes("f12-lfoot")).toBe(true); // the F12 list footer replaced ag-listfoot
-    // The pane-foot command bar is retired (F12): the slim meta footer carries the provenance.
-    expect(agents.includes("ag-cmdbar")).toBe(false);
-    expect(agents.includes("f12-panefoot")).toBe(true);
-  });
-});
+/* "desk rule — compact emptiness artefacts" retired with the F12 Contact List page: its sole test
+   asserted F12 markup inside Agents.tsx, which the Agent list rebuild replaced. */
 
 describe("masthead pulse line — Your database · N on file · I idle", () => {
   it("idle = agents with no query (the Not-queried set), derived not stored", () => {

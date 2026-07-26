@@ -1,0 +1,137 @@
+/**
+ * Agent list — page chrome (design authority: design-refs/agent-list-mockup.html).
+ *
+ * Everything is scoped under `.aglist` so the mockup's generic class names (.page, .grid, .fchip…)
+ * can't leak into the rest of the app. Two deliberate divergences from the mockup file:
+ *   · body copy uses the app's Source Sans Pro, not the mockup's Inter (long-standing app rule);
+ *   · the root owns its own scroll, because the page mounts in a bare `fill`+`clip` StagePage and
+ *     the stage itself must never scroll.
+ *
+ * CASCADE TRAP (hit during design): a bare `.search input` loses to any global `input[type=text]`
+ * rule at equal specificity, which re-applies a border, padding and focus ring inside the pill.
+ * The search input below out-specifies it (`.aglist .agl-search input[type="text"]`) and zeroes
+ * border, box-shadow, padding, radius and the focus treatment. Do not weaken those selectors.
+ */
+
+.aglist {
+  /* ink + paper */
+  --agl-ink: #311e19;
+  --agl-ink-head: #2b2017;
+  --agl-ink-body: #48443f;
+  --agl-ink-muted: #786a60;
+  --agl-ink-label: #8a7d6e;
+  --agl-cream: #f5efe7;
+  --agl-paper: #ffffff;
+  --agl-hair: rgba(49, 30, 25, 0.14);
+  --agl-chip-on: #392d20;
+
+  /* the three card states: sage = active queries · pink = no active queries · grey = closed */
+  --agl-sage-band: #dce0d9; --agl-sage-cast: #cfd6cc; --agl-sage-rule: #8a9e88;
+  --agl-pink-band: #f5e2da; --agl-pink-cast: #efd5ca; --agl-pink-rule: #e8c8bc;
+  --agl-grey-band: #eae8e4; --agl-grey-cast: #e2dfda; --agl-grey-rule: #b8b3ab;
+
+  height: 100%;
+  overflow-y: auto;
+  background: var(--agl-paper);
+  color: var(--agl-ink-body);
+}
+
+.aglist .agl-page { max-width: 1280px; margin: 0 auto; padding: 48px 40px 120px; }
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+.aglist .agl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.aglist .agl-crumb {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--agl-ink-label);
+}
+.aglist .agl-crumb .cur { color: var(--agl-ink-head); }
+.aglist .agl-h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px; font-weight: 700; color: var(--agl-ink-head);
+  letter-spacing: -0.015em; margin-top: 10px; line-height: 1.05;
+}
+.aglist .agl-sub {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; color: var(--agl-ink-muted); font-weight: 400; margin-top: 10px;
+}
+.aglist .agl-head .agl-btn-add { margin-top: 14px; flex: none; padding: 11px 20px; font-size: 13px; }
+
+/* ── controls: filter chips + search ────────────────────────────────────── */
+.aglist .agl-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 34px 0 14px; }
+.aglist .agl-fchip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: inherit; font-size: 13px; font-weight: 500; color: var(--agl-ink-body);
+  background: var(--agl-cream); border: 1px solid var(--agl-hair); border-radius: 999px;
+  padding: 7px 14px; cursor: pointer; transition: all .15s; user-select: none;
+}
+.aglist .agl-fchip:hover { border-color: rgba(49, 30, 25, .4); }
+.aglist .agl-fchip.on { background: var(--agl-chip-on); color: var(--agl-cream); border-color: var(--agl-chip-on); }
+.aglist .agl-fchip .n { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; opacity: .55; }
+.aglist .agl-spacer { flex: 1; }
+
+.aglist .agl-search {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--agl-paper); border: 1.5px solid var(--agl-ink); border-radius: 999px;
+  padding: 9px 16px; min-width: 250px;
+}
+.aglist .agl-search svg { flex: none; color: var(--agl-ink-body); }
+/* out-specifies any global input[type=text] rule — see the cascade-trap note above */
+.aglist .agl-search input[type="text"] {
+  border: none; outline: none; background: none; box-shadow: none;
+  padding: 0; border-radius: 0; margin: 0; height: auto; min-height: 0;
+  font-family: inherit; font-size: 13px; color: var(--agl-ink-body); flex: 1; min-width: 0;
+}
+.aglist .agl-search input[type="text"]:focus,
+.aglist .agl-search input[type="text"]:focus-visible {
+  border: none; outline: none; box-shadow: none;
+}
+.aglist .agl-search input[type="text"]::placeholder { color: #c3b6a6; }
+
+/* ── legend + count line ────────────────────────────────────────────────── */
+.aglist .agl-legend { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
+.aglist .agl-leg {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--agl-ink-label);
+}
+.aglist .agl-leg .sw { width: 22px; height: 13px; border: 1.25px solid var(--agl-ink); border-radius: 3px; flex: none; }
+.aglist .agl-leg.dim { opacity: .62; }
+.aglist .agl-countline {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--agl-ink-label); margin-bottom: 16px;
+}
+
+/* ── grid ───────────────────────────────────────────────────────────────── */
+.aglist .agl-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 26px 22px; align-items: start;
+}
+
+/* ── buttons (shared with the card faces from Phase 2) ──────────────────── */
+.aglist .agl-btn {
+  font-family: inherit; font-size: 12px; font-weight: 500; border-radius: 999px;
+  padding: 8px 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  transition: all .15s;
+}
+.aglist .agl-btn-dark { background: var(--agl-ink); color: var(--agl-cream); border: 1.5px solid var(--agl-ink); }
+.aglist .agl-btn-dark:hover { background: #443027; }
+.aglist .agl-btn-ghost { background: var(--agl-paper); color: var(--agl-ink-body); border: 1.5px solid var(--agl-ink); }
+.aglist .agl-btn-ghost:hover { background: var(--agl-cream); }
+.aglist .agl-btn[disabled] {
+  background: var(--agl-paper); border: 1px solid var(--agl-hair); color: #c3b6a6;
+  box-shadow: none; cursor: not-allowed;
+}
+
+/* ── empty states ───────────────────────────────────────────────────────── */
+.aglist .agl-empty {
+  grid-column: 1 / -1; text-align: center; padding: 70px 20px;
+  border: 1.5px dashed rgba(49, 30, 25, .25); border-radius: 12px; color: var(--agl-ink-muted);
+}
+.aglist .agl-empty .big { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--agl-ink-head); margin-bottom: 6px; }
+.aglist .agl-empty .small { font-size: 13px; font-weight: 300; }
+
+@media (max-width: 640px) {
+  .aglist .agl-page { padding: 28px 18px 90px; }
+  .aglist .agl-h1 { font-size: 38px; }
+  .aglist .agl-search { min-width: 0; width: 100%; }
+}

@@ -3,7 +3,7 @@
  * nav run). Left cluster is now: menu button (opens the app-wide NavDrawer) → ScriptAlly mark
  * + wordmark (→ dashboard) → hairline divider → breadcrumb. The breadcrumb renders the parent
  * segment(s) in mono small caps and the CURRENT PAGE NAME in Playfair at ~19px (proper case
- * from the crumb table's `title`) — e.g. `QUERYING / Queries Hub`, `AGENTS / Contact List`.
+ * from the crumb table's `title`) — e.g. `QUERYING / Queries Hub`, `AGENTS / Agent list`.
  *
  * The root "SCRIPTALLY" segment is no longer drawn as text — the mark + wordmark carry it
  * (and navigate to the dashboard). Still rendered by StagePage above the capped column on

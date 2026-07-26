@@ -247,6 +247,13 @@ export interface Agent {
   // Pinned to the top of the agents list (a "Pinned" group above every sort). Pure list ordering —
   // no effect on suggestions, stats or Up next. Absent === not pinned (never null).
   pinned?: boolean;
+  // Agent photo, stored inline as a data URL (centre-cropped square, 256×256, JPEG q0.82 ≈ 15–30KB).
+  // Deliberately NOT Firebase Storage — the agent doc carries it. Absent === the initials avatar.
+  image?: string;
+  // The note pinned to this agent's card, referencing a doc id in the per-agent `notes`
+  // subcollection. One pin max. Absent — or dangling, once that note is deleted — means the card
+  // preview falls back to the latest note.
+  pinnedNoteId?: string;
 }
 
 export interface CommunityAgent {
