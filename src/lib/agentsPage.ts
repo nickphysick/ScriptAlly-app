@@ -54,8 +54,11 @@ export function filterAgents(
 ): Agent[] {
   const term = search.trim().toLowerCase();
   return agents.filter((a) => {
-    if (sub === "open" && a.submissionStatus !== SubmissionStatus.OPEN) return false;
-    if (sub === "closed" && a.submissionStatus === SubmissionStatus.OPEN) return false;
+    // UNKNOWN is retired at the UI layer and READS AS OPEN (decision 3 / amendment C): the only
+    // closed state is an explicit CLOSED, so door state, fade, stamp and chip counts can never
+    // disagree for an Unknown agent. Mirrors isDoorOpen() in agentList.ts, which the live page uses.
+    if (sub === "open" && a.submissionStatus === SubmissionStatus.CLOSED) return false;
+    if (sub === "closed" && a.submissionStatus !== SubmissionStatus.CLOSED) return false;
     const q = agentQueried(a.id, queries);
     if (queried === "yes" && !q) return false;
     if (queried === "no" && q) return false;

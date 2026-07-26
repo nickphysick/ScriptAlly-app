@@ -14,6 +14,7 @@
 import React, { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
+import { AgentCard } from "./AgentCard";
 import {
   AGENT_LIST_CHIPS,
   AgentListFilter,
@@ -31,7 +32,7 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
-  const { agents, queries } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities } = useScriptAllyDb();
 
   const [filter, setFilter] = useState<AgentListFilter>("all");
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -44,6 +45,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
 
   // Phase 6 wires the real draft-agent flow; the header button is a stub until then.
   const onAddAgent = () => onNavigate?.("agents", "Add an agent");
+  // Phase 3 turns this into the flip; for now the pencil is inert.
+  const onEdit = (_agentId: string) => {};
+  const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
   return (
     <div className="aglist">
@@ -120,7 +124,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
               )}
             </div>
           )}
-          {/* Cards land here in Phase 2. */}
+          {visible.map((agent) => (
+            <AgentCard
+              key={agent.id}
+              agent={agent}
+              queries={queries}
+              manuscripts={manuscripts}
+              activities={activities}
+              onEdit={onEdit}
+              onLogQuery={onLogQuery}
+            />
+          ))}
         </div>
       </div>
     </div>

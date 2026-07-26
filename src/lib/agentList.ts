@@ -13,7 +13,7 @@
  *     the UI layer: it READS as open (no stamp, no fade, no closed-chip membership) and is only
  *     ever written as "Open"/"Closed", so an agent migrates off Unknown on its first saved edit.
  */
-import { Agent, Query, QueryStatus, SubmissionStatus } from "../types";
+import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus } from "../types";
 
 /** Terminal query statuses — everything else, INCLUDING Offer, counts as an active query. */
 export const TERMINAL_STATUSES: readonly QueryStatus[] = [
@@ -153,4 +153,128 @@ export function metaTokens(agent: Agent): string[] {
   const tokens = [weeks && weeks > 0 ? `~${weeks} wks` : "response unknown", methodShort(agent)];
   if (agent.noResponseMeansNo === true) tokens.push("No reply = no");
   return tokens;
+}
+
+/** "3 Apr 2026" — the mockup's stamp/bubble date format. */
+export function formatCardDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/** The exact activity detail `updateAgent` stamps when the door is shut — the stamp date's source. */
+export const CLOSED_DETAIL = "Submission status updated to Closed";
+
+/**
+ * "LAST UPDATED {date}" on the closed stamp — DERIVED, never stored: the newest AGENT_UPDATED
+ * activity that recorded the door closing, falling back to `lastCheckedDate`. Activities carry no
+ * agentId, so they're matched on the description `updateAgent` writes ("… for {name} at {agency}").
+ */
+export function closedStampDate(agent: Agent, activities: Activity[]): string {
+  let newest = 0;
+  for (const act of activities) {
+    if (act.activityType !== ActivityType.AGENT_UPDATED) continue;
+    if ((act.details || "").trim() !== CLOSED_DETAIL) continue;
+    if (!(act.description || "").includes(agent.name)) continue;
+    const t = Date.parse(act.date);
+    if (!Number.isNaN(t) && t > newest) newest = t;
+  }
+  const iso = newest ? new Date(newest).toISOString() : agent.lastCheckedDate;
+  return iso ? formatCardDate(iso) : "";
+}
+
+export interface CardHistoryEntry {
+  queryId: string;
+  status: QueryStatus;
+  /** The manuscript this query was for — the label beside the dot. */
+  title: string;
+}
+
+/** The card's history strip: one real StatusDot per query, oldest first, manuscript titles resolved. */
+export function cardHistory(agent: Agent, queries: Query[], manuscripts: Manuscript[]): CardHistoryEntry[] {
+  return queriesForAgent(agent.id, queries).map((q) => ({
+    queryId: q.id,
+    status: q.status,
+    title: manuscripts.find((m) => m.id === q.manuscriptId)?.title ?? "Untitled manuscript",
+  }));
+}
+
+/** The wishlist row: at most three genre chips plus an overflow count. */
+export function wishlistChips(agent: Agent, max = 3): { shown: string[]; more: number } {
+  const all = (agent.genres || []).filter(Boolean);
+  return { shown: all.slice(0, max), more: Math.max(0, all.length - max) };
+}
+
+/**
+ * The card's one-line materials summary. Reads BOTH stored shapes — the legacy `string[]` and the
+ * `materialsForm` object (Phase 5 owns the full editor shims) — and never prefixes the free-text
+ * "Other" entry, which reads as its own words. Null when nothing is recorded.
+ */
+export function materialsSummary(agent: Agent): string | null {
+  const raw = agent.materialsWanted as unknown;
+  const parts: string[] = [];
+
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (typeof item === "string") {
+        if (item.trim()) parts.push(item.trim());
+      } else if (item && typeof item === "object") {
+        // structured QueryMaterial-ish entry: { type, quantity? }
+        const o = item as { type?: string; quantity?: string | number };
+        const label = (o.type || "").trim();
+        if (label) parts.push(o.quantity ? `${label} (${o.quantity})` : label);
+      }
+    }
+  } else if (raw && typeof raw === "object") {
+    const f = raw as {
+      queryLetter?: boolean; synopsis?: boolean;
+      pages?: { selected?: boolean; count?: string | number };
+      chapters?: { selected?: boolean; count?: string | number };
+      words?: { selected?: boolean; count?: string | number };
+      other?: { selected?: boolean; value?: string };
+    };
+    if (f.queryLetter) parts.push("Query letter");
+    if (f.synopsis) parts.push("Synopsis");
+    // Multiple sample units can be selected on legacy data — render one entry each, never collapse.
+    for (const [key, unit] of [["chapters", "chapters"], ["pages", "pages"], ["words", "words"]] as const) {
+      const cell = f[key];
+      if (cell?.selected) {
+        const n = String(cell.count ?? "").trim();
+        parts.push(n ? `Opening sample (${n} ${unit})` : "Opening sample");
+      }
+    }
+    if (f.other?.selected && (f.other.value || "").trim()) parts.push(f.other.value!.trim());
+  }
+
+  return parts.length ? parts.join("  ·  ") : null;
+}
+
+export interface NotePreview {
+  text: string;
+  pinned: boolean;
+}
+
+/**
+ * The card's note preview: the pinned note when one is resolvable, else the latest.
+ *
+ * PHASE 2 SCOPE: the grid does not subscribe to every agent's `notes` subcollection (that would be
+ * one listener per card), so this reads the legacy flat `agent.notes` string. Phase 5 decides how
+ * the subcollection reaches the card — see the report. `notes` here is the already-loaded list for
+ * an agent when a caller has one (the editor does), and empty otherwise.
+ */
+export function notePreview(
+  agent: Agent,
+  notes: { id: string; text: string; createdAt: string }[] = [],
+): NotePreview | null {
+  if (notes.length) {
+    if (agent.pinnedNoteId) {
+      const pinned = notes.find((n) => n.id === agent.pinnedNoteId);
+      if (pinned) return { text: pinned.text, pinned: true };
+    }
+    const latest = notes[notes.length - 1];
+    return latest ? { text: latest.text, pinned: false } : null;
+  }
+  const flat = (agent.notes || "").trim();
+  return flat ? { text: flat, pinned: false } : null;
 }

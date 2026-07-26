@@ -80,9 +80,11 @@ describe("agentsPage · filterAgents", () => {
   const unknown = mkAgent({ id: "a3", name: "Unknown Agent", agency: "Foxglove", submissionStatus: SubmissionStatus.UNKNOWN });
   const queries = [mkQuery({ agentId: "a1" })];
 
-  it("availability chips: open keeps only OPEN; closed keeps everything not open", () => {
-    expect(filterAgents([open, closed, unknown], queries, "open", "all", "").map((a) => a.id)).toEqual(["a1"]);
-    expect(filterAgents([open, closed, unknown], queries, "closed", "all", "").map((a) => a.id)).toEqual(["a2", "a3"]);
+  it("availability chips: UNKNOWN reads as OPEN — only an explicit Closed shuts the door", () => {
+    // Amendment C: was "closed keeps everything not open", which put Unknown agents behind the
+    // closed chip while the page showed their door open. Decision 3 wins.
+    expect(filterAgents([open, closed, unknown], queries, "open", "all", "").map((a) => a.id)).toEqual(["a1", "a3"]);
+    expect(filterAgents([open, closed, unknown], queries, "closed", "all", "").map((a) => a.id)).toEqual(["a2"]);
   });
 
   it("queried chips split on any query on record", () => {

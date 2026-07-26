@@ -23,8 +23,14 @@ import {
   methodShort,
   metaTokens,
   AGENT_LIST_CHIPS,
+  CLOSED_DETAIL,
+  closedStampDate,
+  cardHistory,
+  wishlistChips,
+  materialsSummary,
+  notePreview,
 } from "./agentList";
-import { Agent, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
+import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 
 const mkAgent = (over: Partial<Agent>): Agent => ({
   id: "a1",
@@ -167,5 +173,98 @@ describe("agentList · meta line (absence is a first-class state)", () => {
     expect(methodShort(mkAgent({ submissionMethod: SubmissionMethod.EMAIL }))).toBe("Email");
     expect(methodShort({ submissionMethod: "Other" as SubmissionMethod, agentNotes: "QueryManager" })).toBe("QueryManager");
     expect(methodShort({ submissionMethod: "Other" as SubmissionMethod, agentNotes: "" })).toBe("Other");
+  });
+});
+
+describe("agentList · closed stamp date (derived, no new stored field)", () => {
+  const closedAgent = mkAgent({ name: "Rosalind Achebe", submissionStatus: SubmissionStatus.CLOSED, lastCheckedDate: "2026-01-09T00:00:00.000Z" });
+  const mkAct = (over: Partial<Activity>): Activity => ({
+    id: "x", userId: "u1", queryId: "", manuscriptId: "",
+    activityType: ActivityType.AGENT_UPDATED,
+    description: "You updated details for Rosalind Achebe at Hartley & Co",
+    date: "2026-05-01T00:00:00.000Z", details: CLOSED_DETAIL, ...over,
+  });
+
+  it("takes the NEWEST closing activity for this agent", () => {
+    expect(closedStampDate(closedAgent, [
+      mkAct({ id: "a", date: "2026-05-01T00:00:00.000Z" }),
+      mkAct({ id: "b", date: "2026-06-20T00:00:00.000Z" }),
+    ])).toBe("20 Jun 2026");
+  });
+
+  it("ignores other agents, other activity types, and non-closing details", () => {
+    expect(closedStampDate(closedAgent, [
+      mkAct({ id: "other", description: "You updated details for Someone Else at Elsewhere", date: "2026-07-01T00:00:00.000Z" }),
+      mkAct({ id: "open", details: "Submission status updated to Open", date: "2026-07-02T00:00:00.000Z" }),
+      mkAct({ id: "type", activityType: ActivityType.AGENT_ADDED, date: "2026-07-03T00:00:00.000Z" }),
+    ])).toBe("9 Jan 2026"); // → the lastCheckedDate fallback
+  });
+
+  it("falls back to lastCheckedDate when nothing matches", () => {
+    expect(closedStampDate(closedAgent, [])).toBe("9 Jan 2026");
+  });
+});
+
+describe("agentList · card history + wishlist", () => {
+  it("history is one entry per query, oldest first, with the manuscript title resolved", () => {
+    const ms = [{ id: "m1", title: "Salt and Starlight" } as Manuscript];
+    const qs = [
+      mkQuery({ id: "q2", dateSent: "2026-06-01T00:00:00.000Z", status: QueryStatus.FULL_REQUESTED }),
+      mkQuery({ id: "q1", dateSent: "2026-01-01T00:00:00.000Z", status: QueryStatus.QUERIED }),
+    ];
+    expect(cardHistory(mkAgent({}), qs, ms)).toEqual([
+      { queryId: "q1", status: QueryStatus.QUERIED, title: "Salt and Starlight" },
+      { queryId: "q2", status: QueryStatus.FULL_REQUESTED, title: "Salt and Starlight" },
+    ]);
+  });
+
+  it("wishlist shows three chips plus an overflow count", () => {
+    expect(wishlistChips(mkAgent({ genres: ["Crime", "Mystery"] }))).toEqual({ shown: ["Crime", "Mystery"], more: 0 });
+    expect(wishlistChips(mkAgent({ genres: ["A", "B", "C", "D", "E"] }))).toEqual({ shown: ["A", "B", "C"], more: 2 });
+  });
+});
+
+describe("agentList · materials summary (reads both stored shapes)", () => {
+  it("legacy string[]", () => {
+    expect(materialsSummary(mkAgent({ materialsWanted: ["Query Letter", "Synopsis"] }))).toBe("Query Letter  ·  Synopsis");
+  });
+
+  it("materialsForm object, with the sample unit named", () => {
+    const form = { queryLetter: true, synopsis: false, pages: { selected: true, count: "10" }, chapters: { selected: false, count: "" }, words: { selected: false, count: "" }, other: { selected: false, value: "" } };
+    expect(materialsSummary(mkAgent({ materialsWanted: form as never }))).toBe("Query letter  ·  Opening sample (10 pages)");
+  });
+
+  it("multiple legacy sample units each get their own entry — never collapsed", () => {
+    const form = { pages: { selected: true, count: "10" }, chapters: { selected: true, count: "3" }, words: { selected: false }, other: { selected: false } };
+    expect(materialsSummary(mkAgent({ materialsWanted: form as never }))).toBe("Opening sample (3 chapters)  ·  Opening sample (10 pages)");
+  });
+
+  it("the Other text reads as its own words — never an 'Other —' prefix", () => {
+    const form = { other: { selected: true, value: "First five pages pasted in the email body" } };
+    const out = materialsSummary(mkAgent({ materialsWanted: form as never }));
+    expect(out).toBe("First five pages pasted in the email body");
+    expect(out).not.toMatch(/Other/);
+  });
+
+  it("null when nothing is recorded", () => {
+    expect(materialsSummary(mkAgent({ materialsWanted: [] }))).toBeNull();
+  });
+});
+
+describe("agentList · note preview", () => {
+  const notes = [
+    { id: "n1", text: "oldest", createdAt: "2026-01-01T00:00:00.000Z" },
+    { id: "n2", text: "newest", createdAt: "2026-03-01T00:00:00.000Z" },
+  ];
+  it("prefers the pinned note", () => {
+    expect(notePreview(mkAgent({ pinnedNoteId: "n1" }), notes)).toEqual({ text: "oldest", pinned: true });
+  });
+  it("falls back to the latest when the pin is absent or dangling", () => {
+    expect(notePreview(mkAgent({}), notes)).toEqual({ text: "newest", pinned: false });
+    expect(notePreview(mkAgent({ pinnedNoteId: "gone" }), notes)).toEqual({ text: "newest", pinned: false });
+  });
+  it("without a loaded subcollection it reads the legacy flat note", () => {
+    expect(notePreview(mkAgent({ notes: "Met at Harrogate." }))).toEqual({ text: "Met at Harrogate.", pinned: false });
+    expect(notePreview(mkAgent({ notes: "" }))).toBeNull();
   });
 });
