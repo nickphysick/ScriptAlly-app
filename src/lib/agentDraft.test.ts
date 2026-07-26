@@ -15,6 +15,8 @@ import {
   validateDraft,
   diffDraft,
   isDiffEmpty,
+  nrnState,
+  nrnSubtitle,
 } from "./agentDraft";
 import { Agent, SubmissionMethod, SubmissionStatus } from "../types";
 
@@ -162,5 +164,20 @@ describe("agentDraft · the diff is the whole write", () => {
     const a = mkAgent({ country: "GB" });
     expect(diffDraft(a, { ...draftFromAgent(a), country: "US" }).changed.country).toBe("US");
     expect(diffDraft(a, { ...draftFromAgent(a), country: "" }).changed.country).toBe("");
+  });
+});
+
+describe("agentDraft · no-response-means-no tri-state (amendment A)", () => {
+  it("unset is its own state — greyed label, never struck, and says so", () => {
+    expect(nrnState(undefined)).toBe("unset");
+    expect(nrnSubtitle(undefined)).toBe("Not stated.");
+  });
+  it("the strike grammar begins only once the writer sets false", () => {
+    expect(nrnState(false)).toBe("off");
+    expect(nrnSubtitle(false)).toBe("Worth chasing, even if the response window has elapsed.");
+  });
+  it("true reads as the pass", () => {
+    expect(nrnState(true)).toBe("on");
+    expect(nrnSubtitle(true)).toBe("Past the window, treat silence as a pass.");
   });
 });

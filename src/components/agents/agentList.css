@@ -379,3 +379,148 @@
   margin-bottom: 12px; line-height: 1.45;
 }
 .aglist .agl-errstrip svg { flex: none; margin-top: 1px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EDITOR FIELDS — Contact + Wishlist (Phase 4)
+   Inputs are scoped to `.aglist` and set their own border/padding/focus so no
+   global input[type=text] rule can reach in (the cascade trap, again).
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.17em; color: var(--agl-ink-label); margin-bottom: 5px; display: block;
+}
+.aglist .agl-field { margin-bottom: 12px; }
+.aglist .agl-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.aglist .agl-pane-sub { font-size: 11.5px; color: var(--agl-ink-muted); font-weight: 300; margin-bottom: 13px; line-height: 1.5; }
+.aglist .agl-hint { font-size: 11px; color: var(--agl-ink-muted); font-weight: 300; margin-top: 6px; }
+
+.aglist .agl-in,
+.aglist input[type="text"].agl-in,
+.aglist textarea.agl-in,
+.aglist select.agl-in {
+  width: 100%; background: var(--agl-paper); border: 1px solid var(--agl-hair); border-radius: 8px;
+  padding: 9px 12px; font-size: 13px; color: var(--agl-ink-body); font-family: inherit;
+  outline: none; transition: all .15s; resize: none; box-shadow: none; margin: 0;
+}
+.aglist .agl-in:focus,
+.aglist input[type="text"].agl-in:focus,
+.aglist textarea.agl-in:focus,
+.aglist select.agl-in:focus {
+  border-color: var(--agl-ink); box-shadow: 0 0 0 3px rgba(49, 30, 25, .07); outline: none;
+}
+.aglist .agl-in::placeholder { color: #c3b6a6; }
+.aglist select.agl-in {
+  cursor: pointer; appearance: none; padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23786a60' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+
+/* ── the door: a full-width segmented control (mockup fills it INK, not the band) ── */
+.aglist .agl-door {
+  display: flex; border: 1.5px solid var(--agl-ink); border-radius: 999px;
+  overflow: hidden; background: var(--agl-paper); margin-bottom: 16px;
+}
+.aglist .agl-door button {
+  flex: 1; appearance: none; border: none; background: none; padding: 9px 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--agl-ink-label);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.aglist .agl-door button + button { border-left: 1.5px solid var(--agl-ink); }
+.aglist .agl-door button.on { background: var(--agl-ink); color: var(--agl-cream); }
+.aglist .agl-door button:not(.on):hover { color: var(--agl-ink-body); background: var(--agl-cream); }
+
+/* ── the live-queries caution: revealed only while the response field has focus ── */
+.aglist .agl-caution {
+  display: none; font-size: 11px; color: #7c3a2a; font-weight: 400; line-height: 1.5;
+  background: var(--agl-pink-band); border: 1px solid #e8c8bc; border-radius: 8px;
+  padding: 8px 11px; margin-top: 7px;
+}
+.aglist .agl-field:focus-within .agl-caution { display: block; }
+
+/* ── no-response-means-no, formatted as a field beside the response time ── */
+.aglist .agl-nrn label { transition: color .18s; }
+/* struck only once the writer has SET it false; an unstated switch is greyed, not struck */
+.aglist .agl-nrn.off label { text-decoration: line-through; color: #b3a695; }
+.aglist .agl-nrn.unset label { color: #b3a695; }
+.aglist .agl-nrn .ctlrow { display: flex; align-items: center; gap: 10px; min-height: 36px; }
+.aglist .agl-nrn .subl { font-size: 10px; color: var(--agl-ink-muted); font-weight: 300; line-height: 1.35; flex: 1; margin: 0; }
+
+.aglist .agl-sw {
+  width: 44px; height: 24px; border-radius: 999px; border: 1.5px solid var(--agl-ink);
+  background: var(--agl-grey-band); position: relative; cursor: pointer; flex: none;
+  transition: background .2s; padding: 0;
+}
+.aglist .agl-sw::after {
+  content: ''; position: absolute; top: 50%; left: 3px; transform: translateY(-50%);
+  width: 15px; height: 15px; border-radius: 50%; background: var(--agl-paper);
+  border: 1.25px solid var(--agl-ink); box-shadow: 0.5px 1px 0 rgba(49, 30, 25, .25);
+  transition: transform .2s ease;
+}
+/* decision 5: toggle "on" fills use the card's band colour */
+.aglist .agl-sw.on { background: var(--agl-band); }
+.aglist .agl-sw.on::after { transform: translate(20px, -50%); }
+
+.aglist .agl-method-other { margin-top: 8px; }
+
+/* ── socials: plain hairline rows, no card fill ─────────────────────────── */
+.aglist .agl-soc-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 9px; }
+.aglist .agl-soc-row {
+  display: flex; align-items: center; gap: 9px;
+  border-bottom: 1px solid var(--agl-hair); padding: 8px 2px;
+}
+.aglist .agl-soc-row .plat {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--agl-ink-label); flex: none; min-width: 74px;
+}
+.aglist .agl-soc-row .hnd {
+  font-size: 12.5px; color: var(--agl-ink-body); flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.aglist .agl-x {
+  cursor: pointer; opacity: .45; font-size: 14px; line-height: 1; flex: none;
+  background: none; border: none; padding: 0 3px; color: inherit;
+}
+.aglist .agl-x:hover { opacity: 1; }
+.aglist .agl-soc-add { display: grid; grid-template-columns: 118px 1fr auto; gap: 7px; margin-bottom: 4px; }
+.aglist .agl-soc-add select.agl-in { padding-top: 8px; padding-bottom: 8px; font-size: 12px; }
+
+/* ── genre chips ────────────────────────────────────────────────────────── */
+.aglist .agl-editables { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.aglist .agl-echip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500;
+  color: var(--agl-ink-body); background: var(--agl-cream); border: 1px solid var(--agl-hair);
+  border-radius: 999px; padding: 4px 7px 4px 11px;
+}
+.aglist .agl-add-row { display: flex; gap: 7px; margin-bottom: 14px; }
+.aglist .agl-add-row .agl-in { flex: 1; }
+
+/* ── country picker (thin, mockup-styled; behaviour mirrors CountryCombobox) ── */
+.aglist .agl-cc { position: relative; }
+.aglist .agl-cc-control {
+  display: flex; align-items: center; gap: 8px; width: 100%; cursor: pointer; text-align: left;
+  background: var(--agl-paper); border: 1px solid var(--agl-hair); border-radius: 8px;
+  padding: 9px 12px; font-size: 13px; font-family: inherit; color: var(--agl-ink-body);
+  transition: all .15s;
+}
+.aglist .agl-cc-control:focus-visible,
+.aglist .agl-cc.open .agl-cc-control { border-color: var(--agl-ink); box-shadow: 0 0 0 3px rgba(49, 30, 25, .07); outline: none; }
+.aglist .agl-cc-control .ph { color: #c3b6a6; }
+.aglist .agl-cc-control .chev { margin-left: auto; flex: none; opacity: .55; }
+.aglist .agl-cc-menu {
+  position: absolute; left: 0; right: 0; top: calc(100% + 5px); z-index: 40;
+  background: var(--agl-paper); border: 1.5px solid var(--agl-ink); border-radius: 10px;
+  box-shadow: 0 10px 26px rgba(49, 30, 25, .16); padding: 7px; max-height: 232px; overflow-y: auto;
+}
+.aglist .agl-cc-menu .grp {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--agl-ink-label); padding: 6px 8px 4px;
+}
+.aglist .agl-cc-o {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer; border-radius: 7px;
+  padding: 7px 8px; font-size: 12.5px; font-family: inherit; color: var(--agl-ink-body);
+}
+.aglist .agl-cc-o:hover, .aglist .agl-cc-o.sel { background: var(--agl-cream); }
+.aglist .agl-cc-o .fi { flex: none; }
+.aglist .agl-cc-empty { padding: 9px 8px; font-size: 12px; font-style: italic; color: var(--agl-ink-muted); }

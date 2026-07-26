@@ -127,6 +127,22 @@ export function blankDraft(id: string): AgentDraft {
   };
 }
 
+/**
+ * The no-response-means-no field's tri-state grammar (decision 8 + amendment A):
+ *   · unset  — switch off, label GREYED (not struck), "Not stated."
+ *   · true   — switch on,  label plain,  "Past the window…"
+ *   · false  — switch off, label STRUCK, "Worth chasing…"
+ * The strike grammar begins only once the writer has actually set a value.
+ */
+export type NrnState = "on" | "off" | "unset";
+export const nrnState = (v?: boolean): NrnState => (v === undefined ? "unset" : v ? "on" : "off");
+export const nrnSubtitle = (v?: boolean): string =>
+  v === undefined
+    ? "Not stated."
+    : v
+      ? "Past the window, treat silence as a pass."
+      : "Worth chasing, even if the response window has elapsed.";
+
 export interface DraftError {
   tab: AgentEditorTab;
   msg: string;

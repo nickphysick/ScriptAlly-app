@@ -27,6 +27,7 @@ import {
 } from "../../lib/agentDraft";
 import { deleteField } from "firebase/firestore";
 import { Agent } from "../../types";
+import { agentRelationship } from "../../lib/agentList";
 import {
   AGENT_LIST_CHIPS,
   AgentListFilter,
@@ -106,11 +107,28 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     discard();
   }, [agents, draft, discard, updateAgent]);
 
-  // Escape discards the draft (never commits) while a card is open.
+  // ── Escape cascade (three stages, in order) ───────────────────────────────
+  // 1. An open popup consumes Escape and closes itself — AgentCountryPicker listens on the
+  //    CAPTURE phase and calls stopImmediatePropagation, so this bubble-phase handler never runs
+  //    for that key. Dismissing a dropdown must never discard the draft.
+  // 2. Focus in a field → blur it, draft untouched.
+  // 3. Nothing focused → discard the draft and flip back. No confirmation: silent discard matches
+  //    switching cards, and a modal here would be heavier than the risk.
   useEffect(() => {
     if (!flippedId) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.preventDefault(); discard(); }
+      if (e.key !== "Escape") return;
+      const el = document.activeElement as HTMLElement | null;
+      const inField =
+        !!el &&
+        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
+      if (inField) {
+        e.preventDefault();
+        el!.blur();
+        return;
+      }
+      e.preventDefault();
+      discard();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -221,6 +239,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                     error={error}
                     onImageError={(msg) => setError({ tab: "contact", msg })}
                     isNew={false}
+                    hasActiveQueries={agentRelationship(agent.id, queries) === "active"}
                   />
                 ) : null
               }
