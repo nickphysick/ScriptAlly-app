@@ -59,6 +59,10 @@ const PinGlyph: React.FC = () => (
 
 interface AgentCardProps {
   agent: Agent;
+  /** True while this card is the one flipped open (one at a time — the parent enforces it). */
+  flipped?: boolean;
+  /** The editor face, mounted only for the flipped card. */
+  editor?: React.ReactNode;
   queries: Query[];
   manuscripts: Manuscript[];
   activities: Activity[];
@@ -68,7 +72,7 @@ interface AgentCardProps {
   onLogQuery: (agent: Agent) => void;
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery }) => {
+export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor }) => {
   const stateClass = agentStateClass(agent, queries);
   const open = isDoorOpen(agent);
   const history = cardHistory(agent, queries, manuscripts);
@@ -79,7 +83,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
 
   return (
     <div className={`agl-scene ${stateClass}`}>
-      <div className="agl-rotor">
+      <div className={`agl-rotor${flipped ? " flipped" : ""}`}>
         <div className="agl-facef">
           <div className="agl-acard">
             <div className="agl-band">
@@ -209,6 +213,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
             </div>
           </div>
         </div>
+        {/* Back face — pre-rotated 180° in CSS; mounted only while flipped so the editor's
+            draft state is created fresh on open and torn down on close. */}
+        <div className="agl-faceb" aria-hidden={!flipped}>{flipped ? editor : null}</div>
       </div>
     </div>
   );

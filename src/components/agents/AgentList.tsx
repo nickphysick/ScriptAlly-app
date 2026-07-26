@@ -11,10 +11,22 @@
  *
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { AgentCard } from "./AgentCard";
+import { AgentEditor } from "./AgentEditor";
+import {
+  AgentDraft,
+  AgentEditorTab,
+  DraftError,
+  diffDraft,
+  draftFromAgent,
+  isDiffEmpty,
+  validateDraft,
+} from "../../lib/agentDraft";
+import { deleteField } from "firebase/firestore";
+import { Agent } from "../../types";
 import {
   AGENT_LIST_CHIPS,
   AgentListFilter,
@@ -32,7 +44,7 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
-  const { agents, queries, manuscripts, activities } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, updateAgent } = useScriptAllyDb();
 
   const [filter, setFilter] = useState<AgentListFilter>("all");
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -43,10 +55,74 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     [agents, queries, filter, search],
   );
 
+  // ── Flip + buffered draft (decision 1) ────────────────────────────────────
+  // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
+  // mutates the draft only; Done validates, diffs and commits a SINGLE updateAgent call; Escape
+  // (or opening another card) discards it. Nothing here writes per keystroke.
+  const [flippedId, setFlippedId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<AgentDraft | null>(null);
+  const [tab, setTab] = useState<AgentEditorTab>("contact");
+  const [error, setError] = useState<DraftError | null>(null);
+
+  const discard = useCallback(() => {
+    setFlippedId(null);
+    setDraft(null);
+    setError(null);
+  }, []);
+
+  const onEdit = useCallback(
+    (agentId: string) => {
+      const agent = agents.find((a) => a.id === agentId);
+      if (!agent) return;
+      setFlippedId(agentId);
+      setDraft(draftFromAgent(agent));
+      setTab("contact");
+      setError(null);
+    },
+    [agents],
+  );
+
+  const onDone = useCallback(async () => {
+    if (!draft) return;
+    const invalid = validateDraft(draft);
+    if (invalid) {
+      setError(invalid);
+      setTab(invalid.tab);
+      return;
+    }
+    const original = agents.find((a) => a.id === draft.id);
+    if (!original) return discard();
+
+    const diff = diffDraft(original, draft);
+    if (!isDiffEmpty(diff)) {
+      // deleteField() for values the writer cleared, so absence round-trips as absence rather
+      // than a stored 0/false (the repo's existing unset convention).
+      const payload: Partial<Agent> = { ...diff.changed };
+      for (const key of diff.deletes) {
+        (payload as Record<string, unknown>)[key] = deleteField();
+      }
+      await updateAgent(draft.id, payload);
+    }
+    discard();
+  }, [agents, draft, discard, updateAgent]);
+
+  // Escape discards the draft (never commits) while a card is open.
+  useEffect(() => {
+    if (!flippedId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); discard(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [flippedId, discard]);
+
+  // A card that scrolls out of the filtered set takes its draft with it.
+  useEffect(() => {
+    if (flippedId && !visible.some((a) => a.id === flippedId)) discard();
+  }, [visible, flippedId, discard]);
+
   // Phase 6 wires the real draft-agent flow; the header button is a stub until then.
   const onAddAgent = () => onNavigate?.("agents", "Add an agent");
-  // Phase 3 turns this into the flip; for now the pencil is inert.
-  const onEdit = (_agentId: string) => {};
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
   return (
@@ -133,6 +209,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
               activities={activities}
               onEdit={onEdit}
               onLogQuery={onLogQuery}
+              flipped={flippedId === agent.id}
+              editor={
+                draft && flippedId === agent.id ? (
+                  <AgentEditor
+                    draft={draft}
+                    onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))}
+                    tab={tab}
+                    onTab={setTab}
+                    onDone={() => void onDone()}
+                    error={error}
+                    onImageError={(msg) => setError({ tab: "contact", msg })}
+                    isNew={false}
+                  />
+                ) : null
+              }
             />
           ))}
         </div>
