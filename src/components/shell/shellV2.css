@@ -240,8 +240,10 @@
 .sv2-msadd svg { width: 13px; height: 13px; }
 .sv2-msadd:hover { background: var(--shell-inset); }
 
-/* ── task pills — two cream pills, fill-based ── */
-.sv2-pills { display: flex; gap: 9px; padding: 0 6px; margin-top: 20px; flex: none; }
+/* ── task pills — two cream pills, fill-based. 26px module rhythm (fixes pack): the desk
+   group opens out upward into the spacer's slack; the spacer still gives way first at short
+   viewports. ── */
+.sv2-pills { display: flex; gap: 9px; padding: 0 6px; margin-top: 26px; flex: none; }
 .sv2-tpill {
   flex: 1;
   display: flex;
@@ -263,7 +265,7 @@
 .sv2-tl { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--shell-muted); }
 
 /* ── action strip — four equal fill tiles; BLUE IS RESERVED FOR PRO ── */
-.sv2-strip4 { display: flex; gap: 9px; padding: 0 6px; margin-top: 20px; flex: none; }
+.sv2-strip4 { display: flex; gap: 9px; padding: 0 6px; margin-top: 26px; flex: none; }
 .sv2-gt {
   flex: 1;
   height: 44px;
@@ -292,7 +294,7 @@
 
 /* ── upgrade row — slate is Pro's colour; hover never goes burgundy ── */
 .sv2-upg {
-  margin-top: 22px;
+  margin-top: 26px;
   display: flex;
   align-items: center;
   gap: 10px;
