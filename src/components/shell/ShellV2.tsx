@@ -132,11 +132,11 @@ export const ShellTopBar: React.FC<{
   const crumb = shellCrumbForPath(pathname);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
-  // ⌘K — focus the global search. The dashboard top bar and the To-do page own their own
-  // route-local ⌘K registrations (one live owner per route, the long-standing invariant), so
-  // this handler stands down on those routes.
+  // ⌘K — focus the global search. The To-do page owns its route-local ⌘K registration (one
+  // live owner per route, the long-standing invariant), so this handler stands down there.
+  // The dashboard's DashTopBar retired in Phase 7 — this bar owns dashboard ⌘K now.
   useEffect(() => {
-    if (routeKey === "dashboard" || routeKey === "todo") return;
+    if (routeKey === "todo") return;
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();

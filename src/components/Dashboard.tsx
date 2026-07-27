@@ -56,7 +56,6 @@ import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
 // v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
 // with focus slot → stat row → Fortnight → What's live; timeline in the right-edge drawer).
-import { DashTopBar } from "./dashboard/DashTopBar";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { FocusGreeting } from "./dashboard/FocusGreeting";
 import { TimelineDrawer } from "./dashboard/TimelineDrawer";
@@ -1611,16 +1610,9 @@ export const Dashboard: React.FC<{
       )}
 
       <div className={`sa-dash${slot.focus !== null ? " split-open" : ""}`}>
-        <DashTopBar
-          userName={getUserFirstName()}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery ?? (() => {})}
-          onNavigate={onNavigate}
-          onSettings={() => onNavigate("account")}
-          onAccount={() => onNavigate("account")}
-          active={isDashRoute}
-        />
-
+        {/* DashTopBar retired (shell rollout Phase 7): the v2 shell's top bar carries the
+            search (and now owns dashboard ⌘K), the sidebar carries settings/account, and the
+            greeting header's kicker carries the date. */}
         <FocusGreeting
           firstName={getUserFirstName()}
           queries={queries}
@@ -1630,8 +1622,6 @@ export const Dashboard: React.FC<{
           todoPanel={todoPanel}
           onSendQuery={() => onNavigate("queries", "Send a query")}
           onRecordResponse={() => setRecordResponseScreenOpen(true)}
-          onAddAgent={() => onNavigate("agents", "Add an agent")}
-          onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
         />
 
         {/* Full-width stat row — collapses while a focus is open (.split-open above) */}
