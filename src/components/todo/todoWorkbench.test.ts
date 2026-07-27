@@ -245,7 +245,7 @@ describe("detail P5 — sweep", () => {
       expect(page).not.toContain(dead);
       expect(css).not.toContain(dead);
     }
-    expect(css).not.toMatch(/tdb-pro(?!pill)/); // the colleague family; FocusFlow's propill lives
+    expect(css).not.toMatch(/tdb-pro(?!pill|strip)/); // the colleague family; FocusFlow's propill + P5's prostrip live
     expect(page).not.toContain("tdb-rvcupb"); // todo rebuild P3: the cup asset went with the banner
   });
   it("no tour step touches the bar text or the Pro area (recon: nothing to retarget)", () => {

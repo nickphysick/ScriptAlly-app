@@ -22,23 +22,25 @@ export interface AssistantTaskRow {
 /** The canned timing chips — scripted, not measured (the preview's honesty line covers this). */
 const CANNED_TIMES = ["41S", "28S", "36S", "52S"];
 
-export const ProSticker: React.FC<{
+/** THE PRO STRIP (todo rebuild P5 — ref .prostrip): the Pro card leaves the top-right band for
+ *  a full-width strip at the FOOT of the page, 50px below the last section. Card surface,
+ *  hairline, a slate PRO pill, a Playfair title, one line of body and a slate text link —
+ *  NO blue fill and no heavy shadow (the blue offset sticker is retired with the two-column
+ *  band it sat in). The count stays live-derived, never hardcoded. */
+export const ProStrip: React.FC<{
   hkCount: number;
   totalCount: number;
   onPreview: () => void;
 }> = ({ hkCount, totalCount, onPreview }) => (
-  // panel-final P3 — THE BLUE STICKER (design-refs/pro-card.html · option 5): the board's own
-  // card language turned on Pro — a warm-white ground, an ink border and a 4px offset block in
-  // pastille blue (the ONLY blue sticker in the app; the blue shadow = the assistant's colour),
-  // with a slate pill inside. The count is live-derived (never hardcoded); the sticker is
-  // permanent — it succeeds the retired colophon, and sits at the panel's foot.
-  <div className="spine-pro">
-    <span className="spine-pro-pill"><span aria-hidden>✦</span>SCRIPTALLY PRO</span>
-    <div className="spine-pro-title">Hand over the housekeeping</div>
-    <div className="spine-pro-desc">
-      {hkCount} of your {totalCount} tasks could run in the background whilst you write.
+  <div className="tdb-prostrip">
+    <span className="tdb-prostrip-pill">PRO</span>
+    <div className="tdb-prostrip-mid">
+      <div className="tdb-prostrip-t">Hand over the housekeeping</div>
+      <div className="tdb-prostrip-d">
+        {hkCount} of your {totalCount} tasks could run in the background whilst you write.
+      </div>
     </div>
-    <button type="button" className="spine-pro-link" onClick={onPreview}>Meet the assistant →</button>
+    <button type="button" className="tdb-prostrip-lk" onClick={onPreview}>Meet the assistant →</button>
   </div>
 );
 

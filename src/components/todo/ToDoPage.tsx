@@ -41,7 +41,7 @@ import { FocusedSession, HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
-import { ProSticker, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
+import { ProStrip, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
@@ -864,11 +864,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               </button>
             </span>
           </div>
-          {!isProUser(currentUser) && (
-            <div className="tdb-stickerseat">
-              <ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
-            </div>
-          )}
           <div className="tdb-board">
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
@@ -940,6 +935,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         )}
           </div>
+          {/* THE PRO STRIP (todo rebuild P5) — the page FOOT, 50px below the last section. */}
+          {!isProUser(currentUser) && (
+            <ProStrip hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
+          )}
           </div>
         </div>
         </div>

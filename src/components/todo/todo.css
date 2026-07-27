@@ -95,7 +95,15 @@
 .tdb-vtog button { width: 30px; height: 28px; border: 0; background: none; border-radius: 8px; display: grid; place-items: center; color: var(--muted, #9c8878); cursor: pointer; }
 .tdb-vtog button svg { width: 14px; height: 14px; }
 .tdb-vtog button.on { background: var(--shell-canvas, #fdfbf8); color: var(--ink); }
-.tdb-stickerseat { margin-top: 18px; }
+/* THE PRO STRIP (todo rebuild P5 — ref .prostrip): full width at the page foot, 50px below the
+   last section. Card surface + hairline, a slate PRO pill, Playfair title, one line of body and
+   a slate text link. No blue fill, no heavy shadow. */
+.tdb-prostrip { display: flex; align-items: center; gap: 14px; margin-top: 50px; background: var(--card, #fdfaf5); border: 1px solid var(--line); border-radius: 14px; padding: 15px 17px; }
+.tdb-prostrip-pill { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; background: #6A89A7; color: #fff; border-radius: 6px; padding: 3px 7px; flex: none; }
+.tdb-prostrip-mid { flex: 1; min-width: 0; }
+.tdb-prostrip-t { font-family: var(--f12-serif); font-size: 16px; color: var(--ink); }
+.tdb-prostrip-d { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+.tdb-prostrip-lk { font-size: 12.5px; color: #6A89A7; background: none; border: 0; border-bottom: 1px solid #c3d2df; padding: 0 0 1px; cursor: pointer; flex: none; }
 /* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */

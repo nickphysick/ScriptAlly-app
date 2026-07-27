@@ -102,26 +102,23 @@ describe("the filter chips — bare on the control line (todo rebuild P1)", () =
   });
 });
 
-describe("the blue Pro sticker — relocated to the page body (shell follow-up P3)", () => {
+describe("the Pro STRIP — the page foot (todo rebuild P5)", () => {
   it("gated to non-Pro only; the count is live-derived; it opens the assistant preview", () => {
     expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain("<ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
-    const sticker = promo.slice(promo.indexOf("export const ProSticker"), promo.indexOf("export const AssistantModal"));
-    expect(sticker).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
-    expect(sticker).toContain("onClick={onPreview}>Meet the assistant →");
+    expect(page).toContain("<ProStrip hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
+    const strip = promo.slice(promo.indexOf("export const ProStrip"), promo.indexOf("export const AssistantModal"));
+    expect(strip).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
+    expect(strip).toContain("onClick={onPreview}>Meet the assistant →");
   });
 
-  it("the sticker is the board's card language turned blue — the ONLY blue sticker in the app", () => {
-    const root = shell(".spine-root");
-    expect(root).toContain("--spine-pro-bg: #fdf6f2"); // warm-white ground
-    expect(root).toContain("--spine-pro-bd: #3a1c14"); // the ink border
-    expect(root).toContain("--spine-pro-block: #c2cfda"); // the pastille-blue offset block
-    expect(root).toContain("--spine-pro-pill-bg: #6A89A7"); // the slate pill
-    const card = shell(".spine-pro");
-    expect(card).toContain("border: 1.5px solid var(--spine-pro-bd)");
-    expect(card).toContain("box-shadow: 4px 4px 0 var(--spine-pro-block)"); // the 4px blue block
-    expect(shell(".spine-pro-title")).toContain("font-family: var(--f12-serif)"); // Playfair title
-    expect(shell(".spine-pro-link")).toContain("color: var(--spine-pro-link)"); // the slate link
+  it("the BLUE STICKER is retired with the two-column band: no blue fill, no offset block, no heavy shadow", () => {
+    expect(page).not.toContain("ProSticker");
+    expect(promo).not.toContain("spine-pro");
+    const r = ruleIn(pageCss)(".tdb-prostrip");
+    expect(r).not.toContain("box-shadow");
+    expect(r).toContain("background: var(--card, #fdfaf5)");
+    // slate stays Pro's colour on the pill + link only
+    expect(ruleIn(pageCss)(".tdb-prostrip-pill")).toContain("background: #6A89A7");
   });
 });
 
