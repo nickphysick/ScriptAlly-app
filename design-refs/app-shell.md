@@ -14,7 +14,16 @@ the capsule). **Flyouts pack (27 Jul, later):** the collapsed rail carries quick
 (supersedes "rail only"); the panel AUTO-COLLAPSES on every navigation (expansion is manual,
 until the next navigation); `PageHeader` ends with ONE variant — full — on every routed page
 except the dashboard, which returned to its ORIGINAL centred greeting header (compact and
-greeting variants deleted).
+greeting variants deleted). **Rail-section-select pack (27 Jul, latest): the rail selects a
+SECTION, never a page** — a multi-destination icon expands the panel and opens its accordion
+section (never navigates, never collapses; clicking your own section still expands); a
+single-destination icon (Dashboard — and Setup, as the config models it) navigates, or expands
+when you're already there (expanded no-ops). The rail highlight stays truthful to the CURRENT
+PAGE while the accordion browses. Abandoning a browse (Escape — which closes the expanded
+panel however it was opened — or a click into page content) collapses and snaps the accordion
+back to the current page's section. The dedicated expand control is retired: expansion =
+section icons, on-Dashboard Dashboard click, ⌘\; the flyout footer is its only on-screen
+advertisement, and the tuck keeps collapse discoverable.
 
 ## The design in one paragraph
 
