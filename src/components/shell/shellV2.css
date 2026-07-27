@@ -48,7 +48,10 @@
 }
 .sv2-rib svg { width: 18px; height: 18px; }
 .sv2-rib:hover { background: var(--shell-inset); }
-.sv2-rib.on { background: var(--pink); color: var(--burg); }
+/* THE ACTIVE LAW (fixes pack): active = the GROUND token — a window cut through to the page
+   ground. Never pink (retired from nav states; it stays the button/content accent), never
+   burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
+.sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
 .sv2-railspacer { flex: 1; }
 /* The rail-foot avatar chip — the account link under Setup. */
 .sv2-railav {
@@ -116,8 +119,9 @@
 .sv2-asec.open { color: var(--shell-ink); font-weight: 500; }
 .sv2-asec.open .sv2-ai { color: var(--burg); }
 .sv2-asec.open .sv2-acv { transform: rotate(90deg); }
-/* THE ACTIVE LAW (unchanged in the new idiom): parchment/pink FILLS only — never burgundy. */
-.sv2-asec.sv2-flat.on { background: var(--pink); color: var(--shell-ink); font-weight: 500; }
+/* THE ACTIVE LAW (fixes pack): active = GROUND fill, ink text, burgundy icon — never pink,
+   never burgundy fills. One law, both columns (rail ribs + panel rows). */
+.sv2-asec.sv2-flat.on { background: var(--shell-ground); color: var(--shell-ink); font-weight: 500; }
 .sv2-asec.sv2-flat.on .sv2-ai { color: var(--burg); }
 .sv2-akids { overflow: hidden; max-height: 0; transition: max-height 0.26s ease; }
 .sv2-akids.open { max-height: 160px; }
@@ -138,7 +142,7 @@
   transition: background 0.16s;
 }
 .sv2-akid:hover { background: var(--shell-inset); }
-.sv2-akid.on { background: var(--pink); color: var(--shell-ink); }
+.sv2-akid.on { background: var(--shell-ground); color: var(--shell-ink); }
 .sv2-aklbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sv2-akct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 

@@ -6,6 +6,12 @@ scheme below-documented in git history** (`scriptally-shell-v2.html` + scheme 1 
 the dark rail, the tab tongue, the masthead rule/kicker and the canvas-lightness law are all
 retired.
 
+**Spec-derived deltas (the fixes pack, 27 Jul browser review — the mockup predates these):**
+nav active = the GROUND token, pink retired from nav states; the panel COLLAPSES (the rail is
+its collapsed state, ⌘\, persisted); 26px desk-group rhythm; the save-state chip removed; ONE
+shell for the whole signed-in app (FocusShell retired — /account, /plans and /help render in
+the capsule).
+
 ## The design in one paragraph
 
 Three rounded capsules — icon rail, nav panel, content plane — float on a shared warm ground
@@ -65,8 +71,11 @@ avatar chip at the bottom.
    meter, no benefit copy. Hidden for Pro users.
 8. **User block** — hairline above: avatar chip, name, plan. (No utility buttons in this idiom.)
 
-**The nav active-state law survives the restyle: parchment/pink fills only — no burgundy fills,
-no burgundy ticks, ever.**
+**The nav active-state law (fixes pack): active = GROUND fill `#e7e0d5` — the row reads as a
+window cut through to the page ground — ink text, burgundy icon, same radii; one law for the
+rail ribs and both panel row kinds. Hover stays the interior fill `#f2ede7` (adjacent tones —
+browser-check the distinction). Soft pink is RETIRED from nav states everywhere; it survives as
+the primary-button colour and content accent. Never pink, never burgundy, in nav states.**
 
 ## Content capsule
 
