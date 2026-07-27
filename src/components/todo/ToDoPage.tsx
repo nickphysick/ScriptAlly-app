@@ -125,39 +125,52 @@ type Overlay =
   | { kind: "fork"; single: boolean }
   ;
 
-/** One board SECTION (workbench P2 — the horizontal reels are RETIRED): coloured header row over a
- *  wrapping auto-fill card grid. No scroll machinery — the page scrolls, the grid wraps. The
- *  Final Shape: the section wrapper is `tdb-lane`; the sticky heading is the shared lh2 grammar. */
+/** THE SECTION HEADING (todo rebuild P1 — ref design-refs/scriptally-todo-sectioned.html).
+ *  SECTIONING IS TYPOGRAPHIC: a Playfair heading with its count beside it in mono, closed by a
+ *  2px rule whose left 96px carries the lane's identity colour. No box, no bar, no header
+ *  actions — nesting on this page ends at the content capsule → cards. Shared by BOTH item
+ *  views so cards and rows sit under identical headings.
+ *
+ *  Deliberately absent (and reported): the lane play button ("Focus on {label}") and the Notes
+ *  ＋ went with the header bar — a heading is a heading. No "Clear this section": not built. */
+export const SectionHead: React.FC<{
+  cls: string; // "do" | "hk" | "nt" — the identity colour of the rule's 96px stub
+  label: string;
+  count: number;
+  /** Deck v2: when the deck narrows this section, the heading appends "x OF y · FILTERED". */
+  filtered?: { x: number; y: number; showAll: () => void } | null;
+}> = ({ cls, label, count, filtered }) => (
+  <>
+    <div className="tdb-sec">
+      <h2>{label}</h2>
+      <span className="tdb-cn">{count}</span>
+      {filtered && (
+        <span className="tdb-secfilt">
+          {filtered.x} OF {filtered.y} · FILTERED · <button type="button" onClick={filtered.showAll}>SHOW ALL</button>
+        </span>
+      )}
+    </div>
+    <div className={`tdb-secrule ${cls}`} aria-hidden />
+  </>
+);
+
+/** One board SECTION — the heading above a wrapping auto-fill card grid. No scroll machinery:
+ *  the page scrolls, the grid wraps. */
 const Lane: React.FC<{
   cls: string;
   label: string;
   count: number;
   isEmpty: boolean;
   onAdd?: () => void;
-  onFocusedSession?: () => void; // "Focus on {label}" (launches the focus flow's sweep mode; handler unchanged)
+  onFocusedSession?: () => void; // retained in the signature; the section heading no longer offers it
   /** Deck v2: when the deck narrows this lane, the heading appends "x OF y · FILTERED · SHOW ALL". */
   filtered?: { x: number; y: number; showAll: () => void } | null;
   emptyNode?: React.ReactNode;
-  strip?: React.ReactNode; // rendered between the header and the grid (e.g. muted-rules recovery chips)
+  strip?: React.ReactNode; // rendered between the heading and the grid (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, filtered, emptyNode, strip, children }) => {
-  // Final Shape P4 — THE WRAPPED GRID: reels, pagers, snap and paging are retired. Three fixed
-  // 250px columns, every card visible, one vertical scroll. The band-less heading (play 28 ·
-  // Playfair 19 · 24×3 family underline · count chip) is STICKY within the page scroll, backed
-  // by the sheet's white so rows slide beneath cleanly. Notes keep ＋ instead of play.
-  return (
+}> = ({ cls, label, count, isEmpty, filtered, emptyNode, strip, children }) => (
   <div className={`tdb-lane ${cls}`} id={`tdb-lane-${cls}`}>
-    <div className={`tdb-lh2 ${cls === "do" ? "p" : cls === "hk" ? "lat" : "n"}`}>
-      {onFocusedSession && !isEmpty && (
-        <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}>
-          <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
-        </button>
-      )}
-      {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
-      <span className="tdb-lgt">{label}</span>
-      <span className="tdb-ln">{count}</span>
-      {filtered && <span className="tdb-lhfilt">{filtered.x} OF {filtered.y} · FILTERED · <button type="button" onClick={filtered.showAll}>SHOW ALL</button></span>}
-    </div>
+    <SectionHead cls={cls} label={label} count={count} filtered={filtered} />
     {strip}
     {isEmpty ? (
       <div className="tdb-emptylane">{emptyNode}</div>
@@ -165,8 +178,7 @@ const Lane: React.FC<{
       <div className="tdb-grid">{children}</div>
     )}
   </div>
-  );
-};
+);
 
 export interface ToDoPageProps {
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
@@ -782,50 +794,43 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <button type="button" className="tdb-rvx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
             </div>
           )}
-          {/* Shell follow-up P3: the spine panel retired — the chip bench + the blue Pro
-              sticker live in the page body (no home in the v2 shell; the pack says leave them
-              here and report — placement is on the in-browser checklist). */}
-          <div className="tdb-benchseat">
-            <div className="tdb-benchgrow">{renderFilterSection()}</div>
-            {!isProUser(currentUser) && (
-              <div className="tdb-stickerseat">
-                <ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
-              </div>
-            )}
+          {/* THE CONTROL LINE (todo rebuild P1) — the filter chips and the list controls are ONE
+              row, not two stacked bands: chips left, a flexible spacer, then the list search and
+              the view toggle. No container, no label slab — the filter slab's funnel/FILTER head
+              and the board panel both went with it. The "{n} items" line went too: the All chip's
+              struck total already carries the narrowed count. */}
+          <div className="tdb-ctrl">
+            {renderFilterChips()}
+            <span className="tdb-ctrlsp" />
+            <span className="tdb-bsearch">
+              <span className="tdb-bsmag" aria-hidden>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
+              </span>
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder="Search your list…"
+                aria-label="Search your list"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+              />
+            </span>
+            <span className="tdb-vtog" role="group" aria-label="View">
+              <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} aria-label="Cards" title="Cards" onClick={() => pickView("cards")}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+              </button>
+              <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} aria-label="Rows" title="Rows" onClick={() => pickView("ledger")}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+              </button>
+            </span>
           </div>
-
-          {/* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: ONE thin-bordered container wrapping
-              the whole working area — the items row, both card sections, and the Pro colophon. */}
-          <div className="tdb-mainc tdb-panel">
-            {/* CENTRING/SEARCH — the items row: the Playfair "{n} items" line left, the view
-                toggle right, and THE BIG SEARCH PILL absolute-centred between them (so the
-                flanks never push it off-centre). No hairline beneath — the cards' top edge
-                separates. The row grows to seat the 46px pill; items line + pill + toggle sit
-                on one aligned band. */}
-            <div className="tdb-dochead tdb-items">
-              <span className="tdb-bartext">
-                {active ? `Showing ${shownX} of ${shownY} items` : `${shownY} items`}
-              </span>
-              <span className="tdb-hsearch">
-                <input
-                  ref={searchRef}
-                  type="text"
-                  placeholder="Search your list…"
-                  aria-label="Search your list"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-                />
-                <span className="tdb-hmag" aria-hidden>
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
-                </span>
-              </span>
-              <span className="tdb-vseg" role="group" aria-label="View">
-                <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
-                <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
-              </span>
+          {!isProUser(currentUser) && (
+            <div className="tdb-stickerseat">
+              <ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
             </div>
-            <div className="tdb-sheetbody">
+          )}
+          <div className="tdb-board">
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -895,9 +900,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         )}
-            </div>
-            {/* panel-final P3: the content-panel colophon RETIRED — its successor is the blue Pro
-                sticker, seated beside the bench in the page body (shell follow-up P3). */}
           </div>
           </div>
         </div>
@@ -1097,17 +1099,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // grammar as a dismissable chip. Baked: Today's list does NOT join the bench — it lives in the
   // corner pop-up, so its old lens row is retired here (filters.todayOnly is untouched, dormant).
   // Every reactive behaviour carries over verbatim (counts, struck totals via fnFace, zero-fade).
-  function renderFilterSection() {
+  function renderFilterChips() {
     return (
-      <div className="spine-bench">
-        <div className="spine-benchhead">
-          <span className="spine-funnel" aria-hidden><Funnel size={12} /></span>
-          <b>FILTER</b>
-          {!resting && (
-            <button type="button" className="spine-benchclr" onClick={() => setFilters({ ...DEFAULT_FILTERS })}>Clear</button>
-          )}
-        </div>
-        <div className="spine-chips">
+      <>
           {searchActive && (
             <button type="button" className="spine-chip q" aria-label="Clear the search" onClick={() => setSearch("")}>
               “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
@@ -1125,8 +1119,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {benchChip("Stale", "stale", fc.stale)}
           {benchChip("Snoozed", "snoozed", fc.snoozed)}
           {benchChip("Notes", "notes", fc.notes)}
-        </div>
-      </div>
+      </>
     );
   }
 
@@ -1361,53 +1354,41 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </React.Fragment>
     );
   }
-  function ledgerHeading(cls: "p" | "l" | "n", lane: "do" | "hk" | "nt", id: string, label: string, count: number, onSession?: () => void, onAdd?: () => void) {
-    const folded = ledgerFold[lane];
-    return (
-      <div className={`tdb-lsech ${cls}`} id={id} role="button" tabIndex={0} aria-expanded={!folded}
-        onClick={() => toggleFold(lane)}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); toggleFold(lane); } }}>
-        {onSession && (
-          <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={(e) => { e.stopPropagation(); onSession(); }}>
-            <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
-          </button>
-        )}
-        {onAdd && <button type="button" className="tdb-cadd" onClick={(e) => { e.stopPropagation(); onAdd(); }} aria-label="Add a note">＋</button>}
-        <span className="tdb-lst">{label}</span>
-        <span className="tdb-lscc">{count}</span>
-        <span className="tdb-lsfold" aria-hidden>{folded ? "▸" : "▾"}</span>
-      </div>
-    );
+  /** Both views now sit under the SAME typographic heading (todo rebuild P1) — the ledger's own
+   *  header bar went with the cards': its fold control (▸/▾), play button and ＋ were part of
+   *  that bar. `ledgerFold`/`toggleFold` are left in place, dormant, rather than chased down. */
+  function ledgerHeading(lane: "do" | "hk" | "nt", id: string, label: string, count: number) {
+    return <span id={id}><SectionHead cls={lane} label={label} count={count} /></span>;
   }
   function renderLedger() {
     return (
       <div className="tdb-runsheet">
         {doSorted.length > 0 && (
-          <section className={`tdb-lsec p${ledgerFold.do ? " folded" : ""}`}>
-            {ledgerHeading("p", "do", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent, () => setFlow({ items: doSorted.map((card) => ({ kind: "card", card })), mode: "sweep" }))}
-            {!ledgerFold.do && doSorted.map(runRow)}
+          <section className="tdb-lsec p">
+            {ledgerHeading("do", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent)}
+            <div className="tdb-rows">{doSorted.map(runRow)}</div>
           </section>
         )}
         {(vGroups.length > 0 || vStale.length > 0) && (
-          <section className={`tdb-lsec l${ledgerFold.hk ? " folded" : ""}`}>
-            {ledgerHeading("l", "hk", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping, () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }))}
-            {!ledgerFold.hk && hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}
+          <section className="tdb-lsec l">
+            {ledgerHeading("hk", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping)}
+            <div className="tdb-rows">{hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}</div>
           </section>
         )}
         {/* detail P3 — the ☰ view keeps Notes to self even when EMPTY (parity with the cards'
             lane): the dashed add-row invites, wired to the same addTask. The lane still hides
             under an active narrow with no matches, exactly as the cards view hides its lanes. */}
         {(!active || vNt.length > 0) && (
-          <section className={`tdb-lsec n${ledgerFold.nt ? " folded" : ""}`}>
-            {ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes, undefined, addTask)}
-            {!ledgerFold.nt && (vNt.length > 0 ? (
-              <>
+          <section className="tdb-lsec n">
+            {ledgerHeading("nt", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes)}
+            {vNt.length > 0 ? (
+              <div className="tdb-rows">
                 {composerAt === "ledger" && renderComposer()}
                 {vNt.map(runRow)}
-              </>
+              </div>
             ) : composerAt === "ledger" ? renderComposer() : (
               <button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>
-            ))}
+            )}
           </section>
         )}
       </div>

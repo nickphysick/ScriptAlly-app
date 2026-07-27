@@ -41,19 +41,39 @@
    812 wide, 16 apart. The stack owns the width token + the 220ms Today transition; each
    container fills it. */
 .tdb-centre { width: 100%; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); }
-/* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: one thin warm-grey bordered container
-   wrapping the items row, both card sections and the colophon. The board container wears the
-   in-page grouping tone (canvas scheme 1, shell follow-up P1): one step below the canvas,
-   cards raised above it. */
-.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--shell-panel, #f5efe8); border: 1px solid var(--tdb-panel-bd); border-radius: var(--tdb-panel-r); padding: var(--tdb-panel-pad); }
+/* ── THE REBUILD (todo rebuild P1 — ref design-refs/scriptally-todo-sectioned.html) ─────────
+   NO GROUP CONTAINERS. The board panel (.tdb-mainc), the filter slab (.spine-bench) and the
+   lane header bars (.tdb-lh2 / .tdb-lsech) are DELETED: this page predates the capsule shell
+   and was built as a self-contained world with its own containers and ground. Nesting now ends
+   at content capsule → cards, with nothing in between. Sectioning is TYPOGRAPHIC — a heading,
+   a rule, and air. ── */
+.tdb-board { width: 100%; box-sizing: border-box; }
 
-/* Shell follow-up P3 — the relocated control surfaces' seat: the bench grows, the blue Pro
-   sticker holds a card width beside it; they stack when narrow. */
-.tdb-benchseat { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
-.tdb-benchgrow { flex: 1 1 420px; min-width: 0; }
-.tdb-benchgrow .spine-bench { margin: 0; }
-.tdb-stickerseat { flex: 0 1 300px; }
-.tdb-stickerseat .spine-promo { margin: 0; }
+/* THE SECTION HEADING: Playfair 27 with the count beside it in mono; 46px of air above, the
+   rule 22px clear of the items below. */
+.tdb-sec { display: flex; align-items: baseline; gap: 12px; margin: 46px 0 5px; }
+.tdb-sec h2 { font-family: var(--f12-serif); font-size: 27px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+.tdb-sec .tdb-cn { font-family: var(--f12-mono); font-size: 10px; color: var(--muted, #9c8878); }
+.tdb-secfilt { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; color: var(--muted, #9c8878); margin-left: auto; }
+.tdb-secfilt button { font: inherit; letter-spacing: inherit; border: 0; background: none; padding: 0; color: var(--burgundy, #7c3a2a); cursor: pointer; text-decoration: underline; }
+/* THE RULE: 2px full width, its left 96px carrying the section's identity colour. */
+.tdb-secrule { height: 2px; margin-bottom: 22px; border-radius: 2px; background: linear-gradient(90deg, #ece3da 0 96px, #ece3da 96px); }
+.tdb-secrule.do { background: linear-gradient(90deg, #e8c8bc 0 96px, #ece3da 96px); }
+.tdb-secrule.hk { background: linear-gradient(90deg, #c3cfc0 0 96px, #ece3da 96px); }
+.tdb-secrule.nt { background: linear-gradient(90deg, #ece3da 0 96px, #ece3da 96px); }
+
+/* THE CONTROL LINE: chips left, spacer, list search, view toggle — ONE row, no container. */
+.tdb-ctrl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 44px; }
+.tdb-ctrlsp { flex: 1; min-width: 14px; }
+.tdb-bsearch { display: flex; align-items: center; gap: 9px; width: 228px; height: 34px; padding: 0 12px; box-sizing: border-box; background: var(--shell-inset, #efe8df); border-radius: 11px; color: var(--muted, #9c8878); flex: none; }
+.tdb-bsearch input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 12.5px; color: var(--ink); }
+.tdb-bsearch input::placeholder { color: var(--muted, #9c8878); }
+.tdb-bsmag { display: flex; flex: none; }
+.tdb-vtog { display: flex; gap: 4px; background: var(--shell-inset, #efe8df); border-radius: 10px; padding: 3px; flex: none; }
+.tdb-vtog button { width: 30px; height: 28px; border: 0; background: none; border-radius: 8px; display: grid; place-items: center; color: var(--muted, #9c8878); cursor: pointer; }
+.tdb-vtog button svg { width: 14px; height: 14px; }
+.tdb-vtog button.on { background: var(--shell-canvas, #fdfbf8); color: var(--ink); }
+.tdb-stickerseat { margin-top: 18px; }
 /* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */
@@ -61,13 +81,9 @@
 /* the items row (ref .tabs/.items): the Playfair line + the toggle, a hairline beneath;
    the sage document band is retired for the panel. */
 /* the base document header (kept for any compact-slab consumer) */
-.tdb-dochead { display: flex; align-items: center; gap: 10px; padding: 0 0 9px; margin-bottom: 4px; background: none; box-sizing: border-box; }
 /* CENTRING/SEARCH — the panel's items row: {n} items left · toggle right · the big search
    pill absolute-centred between them. Grows to seat the 46px band; NO hairline beneath
    (the cards' top edge separates). */
-.tdb-items { position: relative; min-height: var(--tdb-hsearch-h); align-items: center; padding: 4px 0 10px; margin-bottom: 0; border-bottom: none; }
-.tdb-items .tdb-bartext, .tdb-items .tdb-vseg { position: relative; z-index: 1; }
-.tdb-sheetbody { padding: 0; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-centre { width: 100%; } }
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
@@ -266,17 +282,12 @@
    are RETIRED — exact-fit + snap + the header pagers own the overflow affordance. ── */
 .tdb-lanes { display: flex; flex-direction: column; }
 .tdb-lane { margin-bottom: var(--g24); }
-/* Deck v2 P4 — the BAND-LESS lane heading (ref .lh2), ONE grammar in both views: play (30) ·
-   Playfair 20 title with the 25×3 family underline (pink / --lat-mark / note-yellow) · count
-   chip · [x OF y · FILTERED · SHOW ALL] · ‹ › pagers right (28, dimmed at the ends). 16px clear
-   below; the reel viewport carries the hover-lift padding. */
-.tdb-lh2 { display: flex; align-items: center; gap: 11px; margin: 0 0 16px; position: sticky; top: 0; z-index: 10; background: var(--white, #fff); padding: 8px 4px 6px; }
-.tdb-lh2 .tdb-lgt { position: relative; padding-bottom: 5px; font-size: 19px; }
-.tdb-lh2 .tdb-lgt::after { content: ""; position: absolute; left: 1px; bottom: 0; width: 24px; height: 3px; border-radius: 2px; }
-.tdb-lh2.p .tdb-lgt::after { background: var(--pink-b); }
-.tdb-lh2.lat .tdb-lgt::after { background: var(--lat-mark); }
-.tdb-lh2.n .tdb-lgt::after { background: var(--note-b); }
-.tdb-lh2 .tdb-ln { margin-bottom: 4px; }
+/* (todo rebuild P1) RETIRED with the containers: the items row (.tdb-dochead/.tdb-items/
+   .tdb-bartext), the bordered view segment (.tdb-vseg) and the big centred search pill
+   (.tdb-hsearch/.tdb-hmag). Their successors are .tdb-ctrl's bare chips, .tdb-bsearch and
+   .tdb-vtog. */
+/* (todo rebuild P1) The lane HEADER BAR (.tdb-lh2 — sticky band, play button, family underline,
+   count chip) is DELETED. Its successor is the typographic .tdb-sec heading + .tdb-secrule. */
 .tdb-lhfilt { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--muted); }
 .tdb-lhfilt button { border: none; background: none; padding: 0; font: inherit; color: #7c3a2a; font-weight: 700; cursor: pointer; }
 /* the lane-head PLAY BUTTON (28px, Final Shape scale) — full wording in title/aria */
@@ -294,10 +305,9 @@
 /* Final Shape P4 — THE WRAPPED GRID (reels retired): three fixed 250px columns, every card
    visible, one vertical scroll — no pagers, no partials, no snap, no scrollport clipping (the
    hover overlay + Later menu overflow freely; the wrap is the only scroller). */
-/* ALIGNMENT FIX P1 — FLUID TRACKS: repeat(N, 1fr) so the cards grow to fill the panel's
-   inner width (no dead space right of the last column); the tier changes the COUNT (3 → 4 at
-   ≥1700), never the card. The gap clears the sticker block (≥ --tdb-sticker-off). */
-.tdb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--tdb-grid-gap); padding: 6px 0 4px; }
+/* THE CARD GRID (todo rebuild P1): auto-fill tracks with a 272px floor — with the board panel
+   gone the grid answers to the content capsule, so the column COUNT follows the width. */
+.tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 14px; padding: 0; }
 @media (prefers-reduced-motion: reduce) {
   .tdb-vwrap, .tdb-vinner, .tdb-tile, .tdb-gcard { transition: none; }
   .tdb-tile.hov, .tdb-gcard.hov { transform: none; }
@@ -310,15 +320,9 @@
    within the page scroll on a wash-coloured backing; clicking one folds the section
    (chevron; persisted sa.todoLedgerFold). ── */
 .tdb-runsheet { display: flex; flex-direction: column; }
-.tdb-lsec { border-radius: 14px; padding: 6px 16px 10px; margin-bottom: 16px; border: 1px solid transparent; }
-.tdb-lsec.p { background: linear-gradient(180deg, #fbf1ed, #faeee9); border-color: #f3ddd4; }
-.tdb-lsec.l { background: linear-gradient(180deg, #faf6ee, #f8f3e8); border-color: #ede4d2; }
-.tdb-lsec.n { background: linear-gradient(180deg, #fbf8ec, #f9f5e4); border-color: #ece2c6; } /* detail P3: the pack's hexes supersede the doc-pass derived whisper */
-.tdb-lsec.folded { padding-bottom: 6px; }
-.tdb-lsech { display: flex; align-items: center; gap: 11px; margin: 0 -16px; padding: 10px 18px 8px; position: sticky; top: 0; z-index: 10; border-radius: 13px 13px 0 0; cursor: pointer; }
-.tdb-lsec.p .tdb-lsech { background: #fbf1ed; }
-.tdb-lsec.l .tdb-lsech { background: #faf6ee; }
-.tdb-lsec.n .tdb-lsech { background: #fbf8ec; }
+/* (todo rebuild P1) The rows view's TINTED SECTION CONTAINERS and their sticky header bars are
+   DELETED — both views now sit under the same typographic heading, on the bare capsule. */
+.tdb-lsec { padding: 0; margin: 0; border: 0; background: none; }
 .tdb-lsech:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .tdb-lst { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
 .tdb-lscc { font-family: var(--f12-mono); font-size: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; color: var(--ink-2); }
@@ -536,9 +540,8 @@ button.tdb-tdot { cursor: pointer; }
    fluid 1fr tracks grow the cards to fill the panel either way. (The old fixed-width
    assembly machinery — .tdb-asm width + its assembly-width tier tokens — was retired by the
    centring fix; .tdb-col is the single geometry owner.) ── */
-@media (min-width: 1700px) {
-  .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }
-}
+/* (todo rebuild P1) The ≥1700 4-up TIER is retired: auto-fill tracks with a 272px floor derive
+   the column count from the available width, so the breakpoint has nothing left to say. */
 /* ── THE WORKSPACE SHELL (todo-fix48) — TODAY, BACK IN ITS CORNER: the floating card fixed to
    the workspace's bottom-right (ref .tdpop), minimising to a pill. z above the panel, below
    the toasts (60) and modals. ── */
@@ -607,26 +610,15 @@ button.tdb-tdot { cursor: pointer; }
    currentColor cup; ink "Open it ›" ⇄ ghost "View again" on the derived boolean. No ✕, ever. ── */
 /* detail P2 — the bar line (todo-detail-a.html §2): lining + tabular figures — Playfair's
    oldstyle figures dip below the baseline and shift width as counts change */
-.tdb-bartext { font-family: var(--f12-serif); font-size: 15px; font-weight: 700; color: #2b2118; font-variant-numeric: lining-nums tabular-nums; } /* hero-pair P4: bold */
 /* the segment restyled to sit on grey (ref B): paler track, its own border; the active chip
    keeps the half-pressed ink treatment — white fill now (paper vanished against the grey) */
 /* on sage: a translucent track with the shared rule; the active chip is unchanged */
-.tdb-vseg { margin-left: auto; height: 26px; box-sizing: border-box; border: 1px solid var(--container-head-rule); background: rgba(255, 255, 255, 0.55); border-radius: 99px; display: inline-flex; align-items: center; padding: 2px; gap: 2px; }
-.tdb-vseg button { width: 26px; height: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 10px; color: #8a857d; border: none; background: none; cursor: pointer; }
 /* in the items row the toggle stands the pill's full 46px band (chips scale; the
    white+ink-ring active chip law is unchanged) */
-.tdb-items .tdb-vseg { height: var(--tdb-hsearch-h); padding: 4px; gap: 3px; }
-.tdb-items .tdb-vseg button { width: 42px; height: 38px; font-size: 15px; }
 /* THE BIG SEARCH PILL — absolute-centred in the row so the flanks never push it off-centre;
    the settled large design (460×46, white, warm hairline, soft shadow, oat roundel). The
    width has a container-relative floor (min of the token and the row minus a reserve for the
    flanks) so it shrinks before ever colliding — never a vw unit. */
-.tdb-hsearch { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; width: min(var(--tdb-hsearch-w), calc(100% - var(--tdb-hsearch-reserve))); height: var(--tdb-hsearch-h); box-sizing: border-box; background: #fff; border: 1px solid var(--tsh-active-border); border-radius: 99px; box-shadow: 0 6px 18px rgba(58, 28, 20, 0.08); display: flex; align-items: center; gap: 11px; padding: 0 8px 0 20px; }
-.tdb-hsearch input { flex: 1; min-width: 0; border: none; background: none; outline: none; font-size: 13px; color: var(--ink); }
-.tdb-hsearch input::placeholder { color: #a59a8c; }
-.tdb-hsearch:focus-within { border-color: #c9bba9; }
-.tdb-hmag { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--oat); color: var(--ink); flex: 0 0 auto; }
-.tdb-vseg button.on { background: var(--white, #fff); color: var(--ink); border: 1px solid var(--ink); box-sizing: border-box; } /* selected = white + ink ring (frame P2: the press language died) */
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
    none is introduced (the fence records the resolution). */

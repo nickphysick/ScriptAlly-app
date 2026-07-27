@@ -13,8 +13,8 @@ describe("TOUR_STOPS — seven stops (the spine adds the category rail), Done on
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
       ".spine-rail",
       ".tdb-herobegin",
-      ".tdb-hsearch",
-      ".spine-bench",
+      ".tdb-bsearch",
+      ".tdb-ctrl",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       ".tdb-today2",
@@ -35,7 +35,7 @@ describe("TOUR_STOPS — seven stops (the spine adds the category rail), Done on
     expect(TOUR_STOPS[0].p).toContain("from the rail"); // the spine's category rail
     expect(TOUR_STOPS[1].p).toContain("focused session");
     expect(TOUR_STOPS[2].p).toContain("⌘K");
-    expect(TOUR_STOPS[3].p).toContain("Show all brings everything back");
+    expect(TOUR_STOPS[3].p).toContain("All brings everything back"); // todo rebuild P1: the reset chip is "All"
     expect(TOUR_STOPS[4].p).toContain("turns the dial in your favour");
     expect(TOUR_STOPS[5].p).toContain("Hover for the actions");
     expect(TOUR_STOPS[5].p).toContain("Batches expand in place");

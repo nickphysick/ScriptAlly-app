@@ -36,16 +36,16 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-hsearch",  // centring/search: the big pill is centred in the panel header
+    sel: ".tdb-bsearch",  // todo rebuild P1: the search sits on the control line
     h: "Search from the bar.",
-    p: "One pill for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",
+    p: "One field for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",
     cta: "Next →",
   },
   {
-    // panel-final: the filters are the chip bench in the panel's context zone
-    sel: ".spine-bench",
+    // todo rebuild P1: the filters are bare chips on the control line (the bench slab is gone)
+    sel: ".tdb-ctrl",
     h: "Narrow the desk.",
-    p: "Quiet filters with live counts in the panel: click one to see only that kind of work. Show all brings everything back.",
+    p: "Quiet filters with live counts: click one to see only that kind of work. All brings everything back.",
     cta: "Next →",
   },
   {

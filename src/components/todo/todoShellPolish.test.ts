@@ -92,10 +92,11 @@ describe("shell polish P3 — sticker cards", () => {
     expect(rule(".tdb-wrap")).toContain("--tdb-sticker-off-hov: 6px");
   });
   it("the grid gap clears the block: the gap ≥ the offset (blocks never touch)", () => {
-    const gap = parseInt(/--tdb-grid-gap:\s*(\d+)px/.exec(rule(".tdb-wrap"))![1], 10);
+    // todo rebuild P1: the grid states its own 14px gap (the mockup's), no longer the token.
+    const gap = parseInt(/gap:\s*(\d+)px/.exec(rule(".tdb-grid"))![1], 10);
     const off = parseInt(/--tdb-sticker-off:\s*(\d+)px/.exec(rule(".tdb-wrap"))![1], 10);
+    expect(gap).toBe(14);
     expect(gap).toBeGreaterThanOrEqual(off);
-    expect(rule(".tdb-grid")).toContain("gap: var(--tdb-grid-gap)");
   });
   it("the pastille bands + white tag pills inside are UNCHANGED (the sticker is on the card only)", () => {
     expect(rule(".tdb-band.hk")).toContain("linear-gradient(180deg, var(--lat-1), var(--lat-2))"); // the latte band, untouched
@@ -117,13 +118,13 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
     return m[1];
   };
-  it("the chips carry the reactive behaviour: selected = the ink fill, zero fades, the search chip", () => {
-    expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)"); // selected = ink fill
+  it("the chips carry the reactive behaviour: selected = the SOFT PINK, zero fades, the search chip", () => {
+    expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)"); // todo rebuild P1: pink, not ink
     expect(tRule(".spine-chip.on")).not.toContain("box-shadow");
     expect(tRule(".spine-chip.zero")).toContain("opacity: 0.45"); // zero-count fades, still rendered
     expect(tRule(".spine-chipn .tdb-was")).toContain("line-through"); // the struck prior total
     expect(page).toContain('className="spine-chip q"'); // the active-search chip, chip grammar
-    expect(page).toContain('className="spine-benchhead"'); // the bench's own funnel + FILTER header
+    expect(tshCss).not.toContain("spine-benchhead"); // the bench's funnel + FILTER header is deleted
     expect(tshCss).not.toContain("#fdfcfa"); // the white-card variant stays retired
   });
 });
@@ -147,9 +148,12 @@ describe("shell polish P5 — the sweep + the record", () => {
   it("the tour anchors are all live post-polish", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).not.toContain("tdb-todaychip"); // the removed chip is gone from the tour
-    for (const sel of [".tdb-herobegin", ".tdb-hsearch", ".spine-bench", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
+    // todo rebuild P1: the search + filter anchors moved to the control line's classes.
+    for (const sel of [".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
       expect(tour).toContain(sel);
     }
+    expect(tour).not.toContain(".tdb-hsearch");
+    expect(tour).not.toContain(".spine-bench");
   });
 });
 
@@ -172,13 +176,12 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).not.toMatch(/padding-left|padding-right/);
   });
-  it("the grid is FLUID (1fr tracks) so cards fill the panel — no dead space right of the last column", () => {
-    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, 1fr)");
+  it("the grid is FLUID (todo rebuild P1: auto-fill on a 272px floor) — the width sets the count", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(auto-fill, minmax(272px, 1fr))");
     expect(rule(".tdb-grid")).not.toContain("var(--tdb-cardw)"); // no fixed card width in the grid
   });
-  it("the tier changes the COUNT only: 3-up standard, 4-up ONLY at ≥1700 (the always-4 rule retired)", () => {
-    const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
-    expect(m![1]).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }");
+  it("the ≥1700 4-up TIER is retired — auto-fill derives the count, so no breakpoint governs it", () => {
+    expect(css).not.toContain("@media (min-width: 1700px)");
     expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4-everywhere rule is gone
   });
   it("the sticker clearance still holds at the grown sizes (the gap ≥ the offset)", () => {
@@ -241,7 +244,8 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
   // one element (.tdb-col, the page-col) owns the horizontal geometry; no other element in the
   // content chain carries a max-width, an auto margin, or a one-sided horizontal padding. The
   // pixel symmetry is the report's manual devtools step (1440/1920).
-  const CHAIN = [".tdb-ws", ".tdb-centre", ".tdb-mainc", ".tdb-sheetbody", ".tdb-grid"]; // grid ← … ← col
+  // todo rebuild P1: the panel + sheet body are deleted; the chain is now col → ws → centre → board → grid
+  const CHAIN = [".tdb-ws", ".tdb-centre", ".tdb-board", ".tdb-grid"]; // grid ← … ← col
   it("the NAMED CULPRIT is removed: .tdb-asm no longer owns width/margin (it competed with .tdb-col)", () => {
     const asm = rule(".tdb-asm");
     expect(asm).toContain("width: 100%");
@@ -287,43 +291,32 @@ describe("centring fix P2 — the big search in the panel header", () => {
     expect(tshCss).not.toContain(".tsh-bcbar");
     expect(tshCss).not.toContain(".tsh-search");
   });
-  it("the pill is absolute-centred in the items row — the flanks can't push it off-centre", () => {
-    const p = rule(".tdb-hsearch");
-    expect(p).toContain("position: absolute");
-    expect(p).toContain("left: 50%");
-    expect(p).toContain("transform: translate(-50%, -50%)");
-    expect(rule(".tdb-items")).toContain("position: relative"); // the containing block
+  // todo rebuild P1: the BIG CENTRED PILL is retired with the items row it was centred in. The
+  // search is now a 228px fill field at the right of the one control line — no absolute
+  // centring to defend, no flanks to balance, no white card, no roundel.
+  it("the centred pill is EXTINCT — no absolute centring, no white card, no oat roundel", () => {
+    expect(css).not.toMatch(/\.tdb-hsearch\s*\{/);
+    expect(css).not.toMatch(/\.tdb-hmag\s*\{/);
+    expect(css).not.toMatch(/\.tdb-items\s*\{/);
   });
-  it("the pill is the settled large design: 460×46, white, warm hairline, soft shadow, oat roundel", () => {
-    const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-hsearch-w: 460px");
-    expect(w).toContain("--tdb-hsearch-h: 46px");
-    const p = rule(".tdb-hsearch");
-    expect(p).toContain("height: var(--tdb-hsearch-h)");
-    expect(p).toContain("background: #fff");
-    expect(p).toContain("border: 1px solid var(--tsh-active-border)");
-    expect(p).toContain("box-shadow: 0 6px 18px rgba(58, 28, 20, 0.08)");
+  it("the search is the control line's fill field: 228px, fill background, no border", () => {
+    const p = rule(".tdb-bsearch");
+    expect(p).toContain("width: 228px");
+    expect(p).toContain("height: 34px");
+    expect(p).toContain("background: var(--shell-inset, #efe8df)");
+    expect(p).not.toMatch(/border:|box-shadow:/);
     expect(page).toContain('placeholder="Search your list…"');
-    const mag = rule(".tdb-hmag");
-    expect(mag).toContain("width: 32px");
-    expect(mag).toContain("background: var(--oat)");
   });
-  it("NO hairline beneath the row; the toggle stands the pill's full 46px band (shared token)", () => {
-    expect(rule(".tdb-items")).toContain("border-bottom: none");
-    expect(rule(".tdb-items .tdb-vseg")).toContain("height: var(--tdb-hsearch-h)"); // same token as the pill
-    // the active-chip law is unchanged (white + ink ring)
-    expect(rule(".tdb-vseg button.on")).toContain("border: 1px solid var(--ink)");
-  });
-  it("the responsive floor is container-relative (never vw): shrinks before colliding with the flanks", () => {
-    expect(rule(".tdb-hsearch")).toContain("width: min(var(--tdb-hsearch-w), calc(100% - var(--tdb-hsearch-reserve)))");
-    expect(rule(".tdb-hsearch")).not.toContain("vw");
-    expect(rule(".tdb-wrap")).toContain("--tdb-hsearch-reserve:");
+  it("the field derives from the container, never from vw", () => {
+    expect(rule(".tdb-bsearch")).not.toContain("vw");
   });
   it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount", () => {
     expect(page).toContain("value={search}");
     expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
-    expect(page).toContain('className="spine-chip q"'); // panel-final P2: the query chip now rides the bench
-    expect(page).toContain("{active ? `Showing ${shownX} of ${shownY} items`"); // the count line
+    expect(page).toContain('className="spine-chip q"'); // panel-final P2: the query chip rides the chips
+    // (todo rebuild P1: the "Showing x of y items" line is retired — the All chip's struck
+    // total carries the narrowed count now.)
+    expect(page).not.toContain("${shownX} of ${shownY} items");
     expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)'); // ⌘K → searchRef
     expect(page).toContain("ref={searchRef}");
   });

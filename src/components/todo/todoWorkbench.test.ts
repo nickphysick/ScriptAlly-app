@@ -32,12 +32,12 @@ const tshRule = (sel: string): string => {
 };
 
 describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares are extinct)", () => {
-  it("248px sticky white panel, locked left; the assembly is 1364", () => {
-    // THE WORKSPACE SHELL (todo-fix48): the floating rail is retired — the FILTER rows live
-    // in the always-on parchment sidebar (TodoShell) as its FILTER section.
-    // Shell follow-up P3: the spine panel retired — the bench renders in the page body
-    expect(page).toContain('<div className="tdb-benchgrow">{renderFilterSection()}</div>');
+  it("the filters are chips on the CONTROL LINE — rail, sidebar and bench slab all retired", () => {
+    // todo rebuild P1: the last container went; the chips ride bare on the one control row.
+    expect(page).toContain("{renderFilterChips()}");
+    expect(page).toContain('<div className="tdb-ctrl">');
     expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');
+    expect(page).not.toContain("tdb-benchgrow");
   });
   it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal)", () => {
     // the vertical row-list rail is RETIRED — the facets are wrapping chips (benchChip), same order
@@ -172,9 +172,9 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
   });
   it("fixed heights + centring hold: the Today pair sits level; the toggle's active chip = white + ink ring, shadowless", () => {
     expect(css).toContain(".tdb-tf2 .tdb-btnh, .tdb-tf2 .tdb-btnp { flex: 1; padding: 0; white-space: nowrap; }");
-    const on = rule(".tdb-vseg button.on");
-    expect(on).toContain("background: var(--white, #fff)");
-    expect(on).toContain("border: 1px solid var(--ink)");
+    // todo rebuild P1: the bordered segment is retired — the active chip takes the capsule surface.
+    const on = rule(".tdb-vtog button.on");
+    expect(on).toContain("background: var(--shell-canvas, #fdfbf8)");
     expect(on).not.toContain("box-shadow");
   });
   it("the press is EXTINCT: no offset shadows, no translate steps, no press reduced-motion branch, no cta classes", () => {
@@ -187,37 +187,36 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
 });
 
 describe("doc pass P3 — the document header (the grey toolbar band)", () => {
-  it("THE ITEMS ROW spans the panel's top on BOTH views: it sits before the view branch, line left + toggle right", () => {
-    const head = page.indexOf('className="tdb-dochead tdb-items"');
-    const body = page.indexOf('className="tdb-sheetbody"');
+  it("THE ITEMS ROW is RETIRED (todo rebuild P1): its search + toggle joined the control line, above the board", () => {
+    const ctrl = page.indexOf('<div className="tdb-ctrl">');
+    const board = page.indexOf('<div className="tdb-board">');
     const branch = page.indexOf('desk === "new-desk"');
-    expect(head).toBeGreaterThan(page.indexOf('className="tdb-mainc tdb-panel"'));
-    expect(head).toBeLessThan(body);
-    expect(body).toBeLessThan(branch); // the branch (cards ⇄ ledger ⇄ desk states) lives inside the body
+    expect(ctrl).toBeLessThan(board);
+    expect(board).toBeLessThan(branch); // the branch (cards ⇄ rows ⇄ desk states) lives inside the board
+    expect(page).not.toContain("tdb-dochead");
+    expect(page).not.toContain("tdb-sheetbody");
     expect(page).not.toContain("tdb-sheethead");
     expect(css).not.toContain("tdb-sheethead");
   });
-  it("the items row is PLAIN (no sage band): a hairline beneath, no title node", () => {
-    const b = rule(".tdb-dochead");
-    expect(b).toContain("background: none"); // the sage document band retired for the panel
-    expect(rule(".tdb-items")).toContain("border-bottom: none"); // CENTRING/SEARCH: no hairline beneath the items row
+  it("the '{n} items' line went with it — the All chip's struck total already carries the narrowed count", () => {
+    expect(page).not.toContain("${shownX} of ${shownY} items");
+    expect(page).not.toContain("tdb-bartext");
     expect(page).not.toContain("tdb-doct");
     expect(page).not.toContain(">To do<");
   });
-  it("frame P1 — the segment on the paler ground: #faf9f8 track, #dbd9d4 border, 30×22 chips", () => {
-    const t = rule(".tdb-vseg");
-    expect(t).toContain("background: rgba(255, 255, 255, 0.55)"); // the settlement: the toggle sits on sage
-    expect(t).toContain("border: 1px solid var(--container-head-rule)"); // the settlement
-    expect(t).toContain("height: 26px"); // the settlement: inside the 36px bar
-    expect(rule(".tdb-vseg button")).toContain("height: 20px"); // the settlement: the toggle sits on a 36px bar
-    const on = rule(".tdb-vseg button.on");
-    expect(on).toContain("background: var(--white, #fff)");
-    expect(on).toContain("border: 1px solid var(--ink)");
-    expect(on).not.toContain("box-shadow"); // frame P2: the half-press died with the press
+  it("the view toggle is the control line's fill segment (todo rebuild P1)", () => {
+    const t = rule(".tdb-vtog");
+    expect(t).toContain("background: var(--shell-inset, #efe8df)"); // fill container
+    expect(t).toContain("padding: 3px");
+    expect(rule(".tdb-vtog button")).toContain("width: 30px");
+    expect(rule(".tdb-vtog button.on")).toContain("background: var(--shell-canvas, #fdfbf8)"); // active takes the capsule
+    expect(css).not.toContain(".tdb-vseg {"); // the bordered sage segment is extinct
   });
-  it("radius continuity WITHOUT overflow:hidden (sticky must survive): the band's own 15px top corners", () => {
-    expect(rule(".tdb-mainc")).not.toContain("overflow"); // hidden would re-scope the lane headings' sticky
-    expect(rule(".tdb-dochead")).not.toContain("border-radius"); // the plain items row has no card corners of its own
+  it("NO CONTAINER is left to keep radius continuity with: the board is a bare div", () => {
+    expect(css).not.toContain(".tdb-mainc {");
+    const b = rule(".tdb-board");
+    expect(b).not.toMatch(/border:|border-radius:/);
+    expect(b).not.toContain("background:");
   });
 });
 
@@ -266,8 +265,9 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
     const r = rule(".tdb-laddrow");
     expect(r).toContain("border: 1.5px dashed #d9c87a");
     expect(r).toContain("justify-content: center");
-    expect(rule(".tdb-lsec.n")).toContain("background: linear-gradient(180deg, #fbf8ec, #f9f5e4)");
-    expect(rule(".tdb-lsec.n")).toContain("border-color: #ece2c6");
+    // todo rebuild P1: the WASH is gone — sections are typographic, so no tinted container.
+    expect(css).not.toContain(".tdb-lsec.n {");
+    expect(rule(".tdb-lsec")).toContain("background: none");
   });
   it("the clock snooze: the plain outline clock leads the label in BOTH views from the ONE constant; moon + chevron dead", () => {
     // the clock follows TypeGlyph's grammar as a page-scoped sibling — TypeGlyph itself is
@@ -309,17 +309,15 @@ describe("hero-pair P5 — sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".tdb-herobegin"');
     expect(tour).not.toContain("tdb-fsb2");
-    expect(tour).toContain("Show all brings everything back");
+    expect(tour).toContain("All brings everything back"); // todo rebuild P1: the chip is "All"
     expect(tour).not.toContain("RESET");
   });
 });
 
 describe("hero-pair P4 — the bold bar · the inline composer · the dialog sweep", () => {
-  it("the items line is Playfair 700 (the panel's line; numeric variants unchanged)", () => {
-    const t = rule(".tdb-bartext");
-    expect(t).toContain("font-weight: 700");
-    expect(t).toContain("font-size: 15px"); // the workspace shell: the panel's items line
-    expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
+  it("the items line is RETIRED (todo rebuild P1) — the section headings carry the counts now", () => {
+    expect(css).not.toMatch(/\.tdb-bartext\s*\{/);
+    expect(rule(".tdb-sec .tdb-cn")).toContain("font-family: var(--f12-mono)"); // the count beside each heading
   });
   it("the composer: white notes-family card, Caveat autofocus growing, the mono hint, quiet Cancel + emphasised Save", () => {
     const c = rule(".tdb-composer");
@@ -402,14 +400,14 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
   });
-  it("the FILTER section is ONE source: the sidebar consumes it, the collapsed drawer reuses it", () => {
+  it("the FILTER chips are ONE source, mounted once on the control line", () => {
     expect(page).not.toContain("renderToolbelt");
     expect(page).not.toContain("renderRail");
-    expect(page).not.toContain("renderFilterDrawer"); // the collapsed drawer is retired — the panel IS the overlay
-    expect(page).toContain('<div className="tdb-benchgrow">{renderFilterSection()}</div>'); // ONE mount, in the page body (follow-up P3)
-    const cardFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
+    expect(page).not.toContain("renderFilterDrawer"); // the collapsed drawer is retired
+    expect((page.match(/renderFilterChips\(\)/g) ?? []).length).toBe(2); // the definition + the one mount
+    const cardFn = page.slice(page.indexOf("function renderFilterChips"), page.indexOf("function renderTodayCorner"));
     expect(cardFn).not.toContain("tdb-herobegin"); // no CTA in the filters
-    expect(cardFn).not.toContain("tdb-setrow"); // Task settings is the panel foot
+    expect(cardFn).not.toContain("tdb-setrow");
   });
   it("Task settings + Help centre live in the v2 sidebar now; the sheet + its open event stay in the page", () => {
     // Shell follow-up P3: the panel foot retired — the v2 sidebar's user block carries both
@@ -421,17 +419,12 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
 });
 
 describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
-  it("the tier media: JUST the 4-up fluid grid — the competing --tdb-asm width machinery is gone", () => {
-    const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
-    expect(m).toBeTruthy();
-    const tier = m![1];
-    expect(tier).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, 1fr); }");
-    expect(tier).not.toContain("--tdb-asm"); // CENTRING FIX: the second geometry owner is retired
-    expect(tier).not.toContain("250px");
+  it("the WIDTH TIER is retired (todo rebuild P1) — auto-fill derives the count from the width", () => {
+    expect(css).not.toContain("@media (min-width: 1700px)");
+    expect(css).not.toContain("--tdb-asm"); // CENTRING FIX: the second geometry owner stays retired
   });
-  it("the matrix: 3-up standard, 4-up ONLY at ≥1700; no --tdb-asm width machinery survives", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // fluid 3-up standard
-    expect(css).not.toContain("--tdb-asm"); // CENTRING FIX: the whole asm-width tier is stripped
+  it("the matrix: one fluid rule, a 272px floor, no breakpoint and no asm-width machinery", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(272px, 1fr))");
     expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4 grid rule is gone
   });
   it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
@@ -444,7 +437,7 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
     expect(rule(".tdb-asm")).toContain("width: 100%");
     expect(rule(".tdb-asm")).not.toContain("margin");
     expect(rule(".tdb-asm")).not.toContain("transition");
-    expect(rule(".tdb-mainc")).toContain("width: 100%"); // both views render inside the one panel
+    expect(rule(".tdb-board")).toContain("width: 100%"); // both views render on the one bare board
   });
 });
 
@@ -502,10 +495,9 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(page).toContain("if (!todayShown) return null;"); // the corner is absent when empty
     expect(page).toContain('className="tdb-wrap today-off"'); // the board is always full-width; Today floats
   });
-  it("the grid steps 4-up ⇄ 3-up via the ≥1700 tier; the cards FLOW to fill (fluid tracks)", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // 3-up standard, fluid
-    const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
-    expect(m![1]).toContain("repeat(4, 1fr)"); // 4-up at the wide tier
+  it("the grid FLOWS to fill: auto-fill tracks on a 272px floor, no tier (todo rebuild P1)", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(272px, 1fr))");
+    expect(css).not.toContain("@media (min-width: 1700px)");
     expect(rule(".tdb-asm")).toContain("width: 100%"); // CENTRING FIX: the row fills the column
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
@@ -537,29 +529,40 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("ONE bench mount in the page body (the collapse-tier overlay retired with the shell)", () => {
-    // Shell follow-up P3: no panel, no scrim, no second drawer — the bench renders once.
-    expect((page.match(/renderFilterSection\(\)/g) ?? []).length).toBe(2); // the definition + the one mount
+  it("ONE chip mount on the control line (the collapse-tier overlay retired with the shell)", () => {
+    expect((page.match(/renderFilterChips\(\)/g) ?? []).length).toBe(2); // the definition + the one mount
     expect(page).not.toContain("tdb-fdrawer");
   });
-  it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
-    expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(1); // the Lane builder (the ledger grew its own washed heading, doc pass P4)
+  it("A11Y: ONE section-heading builder, shared by both views (no duplicate heading grammars)", () => {
+    expect((page.match(/export const SectionHead/g) ?? []).length).toBe(1);
+    expect(page).not.toContain("tdb-lh2");
+    expect(page).not.toContain("tdb-lsech");
   });
 });
 
-describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
-  it("the grid: repeat(3, cardw) + g12, ALL cards rendered (no truncation, no pagers)", () => {
-    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--tdb-grid-gap)");
+describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebuild P1)", () => {
+  it("the grid: auto-fill on a 272px floor, ALL cards rendered (no truncation, no pagers)", () => {
+    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 14px");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("tdb-reelpg");
   });
-  it("the heading is sticky within the page scroll, sheet-backed, at the final scale (28/19/24×3)", () => {
-    const h = rule(".tdb-lh2");
-    expect(h).toContain("position: sticky; top: 0;");
-    expect(h).toContain("background: var(--white, #fff)");
-    expect(rule(".tdb-lh2 .tdb-lgt")).toContain("font-size: 19px");
-    expect(rule(".tdb-lh2 .tdb-lgt::after")).toContain("width: 24px; height: 3px");
-    expect(rule(".tdb-playb")).toContain("width: 28px; height: 28px");
+  it("the heading is TYPOGRAPHIC and static: Playfair 27 + a mono count over a 2px identity rule", () => {
+    const h = rule(".tdb-sec");
+    expect(h).toContain("margin: 46px 0 5px"); // 46px above each heading
+    expect(rule(".tdb-sec h2")).toContain("font-size: 27px");
+    expect(rule(".tdb-sec h2")).toContain("letter-spacing: -0.01em");
+    expect(rule(".tdb-sec .tdb-cn")).toContain("font-family: var(--f12-mono)");
+    const r = rule(".tdb-secrule");
+    expect(r).toContain("height: 2px");
+    expect(r).toContain("margin-bottom: 22px"); // 22px below the rule
+    // the 96px identity stub, one colour per section
+    expect(rule(".tdb-secrule.do")).toContain("#e8c8bc 0 96px");
+    expect(rule(".tdb-secrule.hk")).toContain("#c3cfc0 0 96px");
+    expect(rule(".tdb-secrule.nt")).toContain("#ece3da 0 96px");
+    // nothing sticky, no play button, no bar
+    expect(h).not.toContain("position: sticky");
+    expect(css).not.toContain(".tdb-lh2 {");
+    expect(page).not.toContain("tdb-playb");
   });
   it("the hover invariants hold (the hotfix suite re-asserts the cell/surface law)", () => {
     expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)");
@@ -571,35 +574,30 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
     const box = page.indexOf('className="tdb-rvbox"');
-    const mainc = page.indexOf('className="tdb-mainc tdb-panel"');
+    const board = page.indexOf('className="tdb-board"');
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
-    expect(mainc).toBeGreaterThan(box);
+    expect(board).toBeGreaterThan(box);
     // panel-final P3: the Pro colophon LEFT the content stack for the panel-foot blue sticker
     expect(page).not.toContain("<ProBanner");
     const c = rule(".tdb-centre");
     expect(c).toContain("width: 100%"); // SHELL POLISH P1: the panel fills the centred column
     expect(c).toContain("flex-direction: column");
     expect(c).toContain("gap: var(--tdb-hero-gap)"); // the 26px hero→panel gap
-    expect(rule(".tdb-mainc")).toContain("width: 100%");
+    expect(rule(".tdb-board")).toContain("width: 100%"); // todo rebuild P1: a bare board, no panel
     expect(page).not.toContain("tdb-docband");
     expect(css).not.toContain("tdb-docband");
   });
-  it("detail P2 — the bar line: Playfair sentence off the SAME shared derivation, lining+tabular figures; the segment right", () => {
-    expect(page).toContain("`Showing ${shownX} of ${shownY} items`"); // live under search — the reactive-rail derivation
-    expect(page).toContain("`${shownY} items`"); // the unfiltered form
-    const t = rule(".tdb-bartext");
-    expect(t).toContain("font-family: var(--f12-serif)");
-    expect(t).toContain("font-size: 15px"); // the workspace shell
-    expect(t).toContain("font-weight: 700");
-    expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
+  it("detail P2 — the BAR LINE is retired (todo rebuild P1); the toggle keeps its two views", () => {
+    expect(page).not.toContain("${shownX} of ${shownY} items"); // the count line went with the items row
+    expect(css).not.toContain(".tdb-bartext {");
     expect(page).not.toContain("tdb-shmeta"); // the mono meta is gone
     expect(css).not.toContain("tdb-shmeta");
     expect(page).not.toContain("OPEN · SHOWING"); // no mono remnant
-    expect(page).toContain('className="tdb-vseg" role="group" aria-label="View"');
-    expect(page).toContain('onClick={() => pickView("cards")}>▦</button>');
-    expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
-    expect(rule(".tdb-vseg")).toContain("border-radius: 99px"); // the settlement: the right cluster carries the margin now
+    expect(page).toContain('className="tdb-vtog" role="group" aria-label="View"');
+    expect(page).toContain('onClick={() => pickView("cards")}');
+    expect(page).toContain('onClick={() => pickView("ledger")}');
+    expect(rule(".tdb-vtog")).toContain("border-radius: 10px"); // the mockup's fill segment
   });
   it("ONE review surface repo-wide: the rvbox; the strip banner classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
@@ -619,14 +617,14 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(hero).toContain("Here’s everything on your to-do list."); // the subtitle
     expect(hero).not.toContain("tdb-bigsearch"); // the search is NOT in the hero
   });
-  it("the search relocated to the PANEL HEADER as the big centred pill — same state, same ⌘K target", () => {
-    expect(page).toContain('<span className="tdb-hsearch">'); // in the items row now
+  it("the search relocated to the CONTROL LINE as a fill field — same state, same ⌘K target", () => {
+    expect(page).toContain('<span className="tdb-bsearch">'); // todo rebuild P1: on the control line
     expect(page).toContain('placeholder="Search your list…"');
     expect(page).toContain("value={search}");
     expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
     expect(page).toContain("ref={searchRef}"); // the ⌘K target moved with it
-    expect(rule(".tdb-hsearch")).toContain("background: #fff");
-    expect(rule(".tdb-hsearch")).toContain("border: 1px solid var(--tsh-active-border)");
+    expect(css).not.toMatch(/\.tdb-hsearch\s*\{/); // the big centred pill is extinct
+    expect(rule(".tdb-bsearch")).toContain("background: var(--shell-inset, #efe8df)");
     expect(page).toContain("matchesSearch(c, search, sctx)");
     // the old hero pill stays gone
     expect(page).not.toContain("tdb-bigsearch");
@@ -652,9 +650,9 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   });
 });
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
-  it("Final Shape P4 — THE WRAPPED GRID: 3 fluid columns, all cards, one scroll; reels/snap stay retired", () => {
-    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, 1fr)");
-    expect(rule(".tdb-grid")).toContain("gap: var(--tdb-grid-gap)");
+  it("Final Shape P4 — THE WRAPPED GRID: auto-fill columns, all cards, one scroll; reels/snap stay retired", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(auto-fill, minmax(272px, 1fr))");
+    expect(rule(".tdb-grid")).toContain("gap: 14px");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("reelFit");
     expect(page).not.toContain("laneFit");
@@ -667,8 +665,8 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
     expect(rule(".tdb-tile")).not.toContain("min-height");
     expect(rule(".tdb-body")).toContain("padding: 10px 12px 12px");
   });
-  it("VI P3: the Focus pill became the PLAY BUTTON — full wording in title/aria; Batch fix stands", () => {
-    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
+  it("VI P3 → todo rebuild P1: the lane PLAY BUTTON is retired with the header bar; the batch lead stands", () => {
+    expect(page).not.toContain("tdb-playb"); // a heading is a heading — no actions on it
     expect(page).toContain('onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>'); // the batch card's lead (toolbelt P2 parity)
     expect(page).not.toContain("Fix together");
     expect(page).not.toContain(">▶ Focus on"); // the pill text is extinct in both views
@@ -773,39 +771,31 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).toContain('view === "ledger" ? renderLedger() : (');
     expect(page).toContain('localStorage.setItem("sa.todoView"');
   });
-  it("washed sections: whisper pink/latte per ref A + the DERIVED notes whisper; rows are white cards inside", () => {
-    expect(rule(".tdb-lsec.p")).toContain("background: linear-gradient(180deg, #fbf1ed, #faeee9)");
-    expect(rule(".tdb-lsec.p")).toContain("border-color: #f3ddd4");
-    expect(rule(".tdb-lsec.l")).toContain("background: linear-gradient(180deg, #faf6ee, #f8f3e8)");
-    expect(rule(".tdb-lsec.l")).toContain("border-color: #ede4d2");
-    expect(rule(".tdb-lsec.n")).toContain("#fbf8ec"); // detail P3: the pack's hexes superseded the derived whisper
-    expect(rule(".tdb-lsec")).toContain("border-radius: 14px");
+  it("the WASHED SECTIONS are retired (todo rebuild P1) — no tinted container; rows are cards on the bare capsule", () => {
+    for (const sel of [".tdb-lsec.p {", ".tdb-lsec.l {", ".tdb-lsec.n {"]) expect(css).not.toContain(sel);
+    const sec = rule(".tdb-lsec");
+    expect(sec).toContain("background: none");
+    expect(sec).toContain("border: 0");
     const row = rule(".tdb-lrow");
     expect(row).toContain("background: var(--white, #fff)");
     expect(row).toContain("border-radius: 11px");
     expect(row).toContain("border: 1px solid var(--line)");
     expect(row).toContain("margin-bottom: 8px");
   });
-  it("the heading on the wash: play · Playfair 19 · count chip; STICKY with wash-coloured backing", () => {
-    expect(rule(".tdb-lst")).toContain("font-size: 19px");
-    expect(rule(".tdb-lsech")).toContain("position: sticky; top: 0");
-    expect(css).toContain(".tdb-lsec.p .tdb-lsech { background: #fbf1ed; }");
-    expect(css).toContain(".tdb-lsec.l .tdb-lsech { background: #faf6ee; }");
-    expect(css).toContain(".tdb-lsec.n .tdb-lsech { background: #fbf8ec; }");
-    expect(page).toContain('ledgerHeading("p", "do", "tdb-lane-do", "Urgent"');
-    expect(page).toContain('ledgerHeading("l", "hk", "tdb-lane-hk", "Housekeeping"');
-    expect(page).toContain('ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self"');
+  it("BOTH views share ONE typographic heading (todo rebuild P1) — the washed sticky bar is extinct", () => {
+    expect(css).not.toMatch(/\.tdb-lsech[\s.{]/);
+    expect(page).toContain('ledgerHeading("do", "tdb-lane-do", "Urgent"');
+    expect(page).toContain('ledgerHeading("hk", "tdb-lane-hk", "Housekeeping"');
+    expect(page).toContain('ledgerHeading("nt", "tdb-lane-nt", "Notes to self"');
+    expect(page).toContain("<SectionHead cls={lane} label={label} count={count} />"); // the shared builder
   });
-  it("collapse: heading click folds (the play button opts out via stopPropagation); chevron + aria; persisted per-lane", () => {
-    expect(page).toContain("onClick={() => toggleFold(lane)}");
-    expect(page).toContain("aria-expanded={!folded}");
-    expect(page).toContain("onClick={(e) => { e.stopPropagation(); onSession(); }}");
-    expect(page).toContain('{folded ? "▸" : "▾"}');
-    expect(page).toContain('localStorage.setItem("sa.todoLedgerFold", JSON.stringify(next))');
-    expect(page).toContain('localStorage.getItem("sa.todoLedgerFold")');
-    expect(page).toContain("{!ledgerFold.do && doSorted.map(runRow)}");
-    expect(page).toContain("{!ledgerFold.hk && hkTop.map((r) => (r.kind === \"group\" ? runBatchRow(r.g) : runRow(r.c)))}".replace(/\\/g, ""));
-    expect(page).toContain("{!ledgerFold.nt && (vNt.length > 0 ? ("); // detail P3 + the P4 composer branch
+  it("COLLAPSE is retired with the header bar (todo rebuild P1): a heading is a heading, not a control", () => {
+    // The fold lived on .tdb-lsech, which the typographic section replaces. ledgerFold /
+    // toggleFold are left in place, dormant, rather than chased down (reported, not deleted).
+    expect(page).not.toContain("onClick={() => toggleFold(lane)}");
+    expect(page).not.toContain('{folded ? "▸" : "▾"}');
+    expect(page).not.toContain("{!ledgerFold.do &&");
+    expect(page).toContain("{doSorted.map(runRow)}"); // rows render unconditionally now
   });
   it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
     expect(rule(".tdb-lacts")).toContain("align-self: center");
@@ -919,8 +909,8 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 0"); // the hero→panel gap (the column owns the outer gutters)
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
-    expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
-    expect(rule(".tdb-grid")).toContain("gap: var(--tdb-grid-gap)"); // P3: the grid gap clears the sticker block
+    expect(rule(".tdb-sec")).toContain("margin: 46px 0 5px"); // todo rebuild P1: the typographic rhythm
+    expect(rule(".tdb-grid")).toContain("gap: 14px"); // P3: the grid gap still clears the sticker block
   });
 });
 
@@ -934,8 +924,10 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
     for (const gone of ["YOUR DESK", "tdb-fgl", "tdb-frow", "tdb-cbi", "tdb-newnote", "tdb-dwalk"]) {
       expect(page).not.toContain(gone);
     }
-    expect(page).toContain('{onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}');
-    expect(page).toContain('undefined, addTask)'); // the run sheet's Notes heading ＋
+    // todo rebuild P1: the heading ＋ went with the header bar; "Add task or note" is the page
+    // header's own action. The rows view keeps its dashed add-row.
+    expect(page).not.toContain("tdb-cadd");
+    expect(page).toContain('className="tdb-laddrow" onClick={addTask}');
   });
 });
 
@@ -973,10 +965,11 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).not.toContain("tdb-kd");
     expect(css).not.toContain("tdb-kick");
   });
-  it("the cards view keeps the band-less lh2 heading; the ledger's washed heading is doc-pass P4's deliberate divergence", () => {
-    expect(page).toContain("tdb-lh2 ${cls ===");
-    expect(page).toContain('className={`tdb-lsech ${cls}`}'); // the ledger's own heading (washed, foldable)
-    expect((page.match(/tdb-playb/g) ?? []).length).toBeGreaterThanOrEqual(2);
+  it("BOTH views share ONE heading builder (todo rebuild P1) — the divergence is over", () => {
+    expect(page).not.toContain("tdb-lh2");
+    expect(page).not.toContain("tdb-lsech");
+    expect(page).not.toContain("tdb-playb");
+    expect((page.match(/<SectionHead /g) ?? []).length).toBe(2); // the Lane + the rows view
   });
   it("the batch card's Never + footer CTA are extinct (the contract); the hide lives in ☾ LATER", () => {
     expect(page).not.toContain("tdb-gnever");
@@ -1000,19 +993,17 @@ describe("Width v4 — SUPERSEDED: the .tdb-col is the single geometry owner (ce
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
-  it("THE SHEET: both views render inside the white PANEL (radius 14, the warm hairline border)", () => {
-    const m = rule(".tdb-mainc");
-    expect(m).toContain("width: 100%");
-    expect(m).toContain("border-radius: var(--tdb-panel-r)"); // the panel
-    expect(m).toContain("padding: var(--tdb-panel-pad)"); // the panel owns the padding
-    expect(rule(".tdb-sheetbody")).toContain("padding: 0");
-    // one panel, both views: the ledger + the lanes render inside .tdb-mainc (no second panel)
-    const mainc = page.indexOf('className="tdb-mainc tdb-panel"');
-    expect(mainc).toBeGreaterThan(0);
+  it("THE PANEL is gone (todo rebuild P1): both views render on the bare board, capsule → cards", () => {
+    expect(css).not.toMatch(/\.tdb-mainc\s*\{/);
+    expect(css).not.toMatch(/\.tdb-sheetbody\s*\{/);
+    const b = rule(".tdb-board");
+    expect(b).toContain("width: 100%");
+    expect(b).not.toMatch(/border:|border-radius:|padding:/); // no container clothing at all
+    expect(page.indexOf('className="tdb-board"')).toBeGreaterThan(0);
     expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
   });
-  it("the grid: fluid columns that fill the panel; the cards flow larger; no pagers, no partials", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(3, 1fr)"); // ALIGNMENT FIX: fluid, fills the panel
+  it("the grid: fluid columns that fill the capsule; the cards flow larger; no pagers, no partials", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(272px, 1fr))"); // fills the capsule
     expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)"); // the in-flow overlay faces keep their slot
     expect(page).not.toContain("tdb-reelpg");
     expect(page).not.toContain("tdb-reeltrack");
@@ -1026,7 +1017,7 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
   it("THE LATTE LAW: bands/underline/post-it/dot latte; coffee survives only in journey-sheet headers", () => {
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
     expect(rule(".tdb-band.hk")).toContain("var(--lat-1)");
-    expect(rule(".tdb-lh2.lat .tdb-lgt::after")).toContain("var(--lat-mark)");
+    expect(rule(".tdb-secrule.hk")).toContain("#c3cfc0"); // todo rebuild P1: the section rule carries the family colour
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
     expect(flow).toContain("cof"); // the journey-sheet family keeps coffee
   });
@@ -1146,15 +1137,10 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
 });
 
 describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
-  it("a play button leads each lane head in BOTH views, full wording in title+aria, same handlers", () => {
-    // cards view: the Lane's onFocusedSession; ledger view: the section's onSession — unchanged
-    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
-    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={(e) => { e.stopPropagation(); onSession(); }}'); // ledgerHeading (the fold click must not fire)
-    expect(page).toContain('<path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" />');
-    const b = rule(".tdb-playb");
-    expect(b).toContain("width: 28px; height: 28px; border-radius: 50%"); // Final Shape: 28
-    expect(b).toContain("border: 1px solid rgba(58, 28, 20, 0.16)");
-    expect(css).toContain(".tdb-playb:hover { transform: scale(1.06); }");
+  it("the lane PLAY BUTTON is retired in BOTH views (todo rebuild P1) — REPORTED as orphaning the sweep", () => {
+    // Baked 1 leaves a section as heading + rule + air. The per-lane "Focus on {label}" sweep
+    // entry went with the bar; its handler (setFlow mode:"sweep") keeps no other trigger.
+    expect(page).not.toContain("tdb-playb");
     expect(css).not.toContain("tdb-lgs"); // the pill is extinct
     expect(css).not.toContain("tdb-lanedot"); // the lane dot went with it (ref head)
   });
@@ -1206,8 +1192,7 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
       expect(flow).not.toContain(stale);
       expect(tour).not.toContain(stale);
     }
-    expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
-    expect(page).toMatch(/e\.stopPropagation\(\); onSession\(\)/); // the ledger heading shares the wording (play opts out of the fold click)
-    expect(page).toContain("Begin focused session"); // the rail owns the walk (v4 P2)
+    expect(page).not.toContain("Focus on ${label}"); // todo rebuild P1: the lane play button is retired
+    expect(page).toContain("Begin focused session"); // the hero's CTA (Phase 4 retires it)
   });
 });

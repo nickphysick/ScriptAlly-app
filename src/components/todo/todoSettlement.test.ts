@@ -82,16 +82,15 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   it("radius continuity: each header takes ITS container's top radii", () => {
     for (const sel of HEADS) expect(rule(sel)).toContain("border-radius: 15px 15px 0 0");
     expect(rule(".tdb-today2")).toContain("border-radius: 14px"); // the corner card
-    expect(rule(".tdb-mainc")).toContain("border-radius: var(--tdb-panel-r)"); // the panel is 14, not a 16 card
+    // (todo rebuild P1) the board PANEL is gone — there is no container radius left to continue.
+    expect(css).not.toContain(".tdb-mainc {");
   });
-  it("the view toggle restyles onto sage; the active chip is unchanged", () => {
-    const t = rule(".tdb-vseg");
-    expect(t).toContain("background: rgba(255, 255, 255, 0.55)");
-    expect(t).toContain("border: 1px solid var(--container-head-rule)");
-    expect(t).toContain("height: 26px"); // inside the 42px bar
-    const on = rule(".tdb-vseg button.on");
-    expect(on).toContain("background: var(--white, #fff)");
-    expect(on).toContain("border: 1px solid var(--ink)");
+  it("the view toggle is the control line's fill segment (the sage bar it sat in is gone)", () => {
+    const t = rule(".tdb-vtog");
+    expect(t).toContain("background: var(--shell-inset, #efe8df)"); // fill container
+    expect(t).toContain("border-radius: 10px");
+    expect(rule(".tdb-vtog button.on")).toContain("background: var(--shell-canvas, #fdfbf8)"); // active takes the capsule
+    expect(css).not.toContain(".tdb-vseg {"); // the bordered sage segment is retired
   });
 });
 
@@ -100,10 +99,11 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
   // top. The workspace shell moves the search into the breadcrumb bar (a white pill) and the
   // CTA pair into the hero. These locks re-point to the new seats; the reactive filter
   // behaviour they used to guard lives on in todoWorkspaceShell.test.ts.
-  it("the search is the panel-header pill, not a hero/sheet/bar pill", () => {
-    expect(page).toContain('<span className="tdb-hsearch">');
+  it("the search is the control line's fill field (todo rebuild P1 — the panel-header pill is gone)", () => {
+    expect(page).toContain('<span className="tdb-bsearch">');
     expect(page).toContain("ref={searchRef}");
     expect(page).not.toContain("tdb-bigsearch");
+    expect(page).not.toContain('className="tdb-hsearch"');
   });
   it("the CTA pair is in the hero; there is NO CTA in the sidebar", () => {
     const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
@@ -149,10 +149,10 @@ describe("settlement P4 — the sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".tdb-herobegin"');
     expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // the anchor exists at that (hero) seat
-    // panel-final: the filter step now anchors the chip bench (its CSS lives in the shell)
+    // todo rebuild P1: the filter step anchors the CONTROL LINE (the bench slab is deleted)
     const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
-    expect(tour).toContain(".spine-bench");
-    expect(tshCss).toContain(".spine-bench");
+    expect(tour).toContain(".tdb-ctrl");
+    expect(tshCss).not.toContain(".spine-bench {");
     // every other stop's anchor still exists in the board or the shell
     for (const sel of [".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
       expect(tour).toContain(sel);

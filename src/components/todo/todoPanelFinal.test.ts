@@ -15,6 +15,7 @@ import { join } from "node:path";
 
 const here = __dirname;
 const shellCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+const pageCss = readFileSync(join(here, "todo.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const promo = readFileSync(join(here, "AssistantPromo.tsx"), "utf8");
 
@@ -26,33 +27,37 @@ const ruleIn = (css: string) => (sel: string): string => {
 };
 const shell = ruleIn(shellCss);
 
-describe("the chip bench — relocated to the page body (shell follow-up P3)", () => {
-  const bench = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderTodayCorner"));
+describe("the filter chips — bare on the control line (todo rebuild P1)", () => {
+  const bench = page.slice(page.indexOf("function renderFilterChips"), page.indexOf("function renderTodayCorner"));
   const chipFn = page.slice(page.indexOf("function benchChip"), page.indexOf("function renderComposer"));
 
-  it("ONE bench mount, seated in the body beside the Pro sticker", () => {
-    expect(page).toContain('<div className="tdb-benchgrow">{renderFilterSection()}</div>');
-    expect(bench).toContain('<div className="spine-bench">');
+  it("the chips mount INSIDE the control line — the bench slab and its funnel/FILTER head are gone", () => {
+    expect(page).toContain('<div className="tdb-ctrl">');
+    expect(page).toContain("{renderFilterChips()}");
+    expect(page).not.toContain('className="spine-bench"');
+    expect(page).not.toContain("spine-benchhead");
+    expect(page).not.toContain("<b>FILTER</b>");
+    expect(page).not.toContain("spine-benchclr");
+    expect(page).not.toContain("tdb-benchgrow"); // the two-column bench seat went with the slab
     expect(bench).not.toContain("tdb-fpill"); // the old row-list class stays gone
+    expect(shellCss).not.toContain(".spine-bench {");
   });
 
-  it("the bench card: the deeper-parchment inset, its own tokens, radius 12", () => {
-    const root = shell(".spine-root");
-    expect(root).toContain("--spine-bench-bg: #ece4d4");
-    expect(root).toContain("--spine-bench-bd: #dbcfb8");
-    const card = shell(".spine-bench");
-    expect(card).toContain("background: var(--spine-bench-bg)");
-    expect(card).toContain("border: 1px solid var(--spine-bench-bd)");
-    expect(card).toContain("border-radius: 12px");
-  });
-
-  it("the header: the funnel + the mono FILTER label + a Clear link shown ONLY when a facet narrows", () => {
-    expect(bench).toContain('<div className="spine-benchhead">');
-    expect(bench).toContain("<Funnel size={12} />"); // lucide (TypeGlyph is locked to material types)
-    expect(bench).toContain("<b>FILTER</b>");
-    expect(bench).toContain("{!resting && ("); // Clear renders only when a narrower facet is active
-    expect(bench).toContain('className="spine-benchclr" onClick={() => setFilters({ ...DEFAULT_FILTERS })}');
-    expect(shell(".spine-benchhead b")).toContain("font-family: var(--f12-mono)"); // FILTER is mono
+  it("ONE row, not two bands: chips, a flexible spacer, then the list search and the view toggle", () => {
+    const ctrl = page.slice(page.indexOf('<div className="tdb-ctrl">'), page.indexOf('<div className="tdb-board">'));
+    expect(ctrl.indexOf("{renderFilterChips()}")).toBeLessThan(ctrl.indexOf("tdb-ctrlsp"));
+    expect(ctrl.indexOf("tdb-ctrlsp")).toBeLessThan(ctrl.indexOf("tdb-bsearch"));
+    expect(ctrl.indexOf("tdb-bsearch")).toBeLessThan(ctrl.indexOf("tdb-vtog"));
+    const row = ruleIn(pageCss)(".tdb-ctrl");
+    expect(row).toContain("display: flex");
+    expect(row).toContain("margin-top: 44px"); // 44px above the row
+    expect(ruleIn(pageCss)(".tdb-ctrlsp")).toContain("flex: 1");
+    expect(ruleIn(pageCss)(".tdb-bsearch")).toContain("width: 228px");
+    expect(ruleIn(pageCss)(".tdb-bsearch")).toContain("background: var(--shell-inset, #efe8df)"); // fill, no border
+    expect(ruleIn(pageCss)(".tdb-bsearch")).not.toContain("border:");
+    // the toggle: fill container, the active segment takes the capsule surface
+    expect(ruleIn(pageCss)(".tdb-vtog")).toContain("background: var(--shell-inset, #efe8df)");
+    expect(ruleIn(pageCss)(".tdb-vtog button.on")).toContain("background: var(--shell-canvas, #fdfbf8)");
   });
 
   it("the facets are wrapping toggle chips; All leads as the Show-all reset", () => {
@@ -62,22 +67,29 @@ describe("the chip bench — relocated to the page body (shell follow-up P3)", (
     for (const [label, key] of [["Offers", "offers"], ["Agent waiting", "overToYou"], ["Materials", "materials"], ["Wish lists", "mswl"], ["Stale", "stale"], ["Snoozed", "snoozed"], ["Notes", "notes"]]) {
       expect(bench).toContain(`benchChip("${label}", "${key}"`);
     }
-    expect(shell(".spine-chips")).toContain("flex-wrap: wrap");
+    expect(ruleIn(pageCss)(".tdb-ctrl")).toContain("flex-wrap: wrap");
   });
 
   it("THE SELECTION MODEL IS UNCHANGED — chips call togglePill; one active facet, never multi-select", () => {
     expect(chipFn).toContain("setFilters((f) => togglePill(f, key))"); // the identical handler
     expect(chipFn).toContain("aria-pressed={!resting && on}");
-    expect(chipFn).toContain('!resting && on ? " on" : ""'); // selected = the ink fill
+    expect(chipFn).toContain('!resting && on ? " on" : ""');
     expect(chipFn).toContain('live === 0 ? " zero" : ""'); // zero-count = faded, still rendered
+  });
+
+  it("NO DARK PILL: a selected chip is the Form 11 soft-pink with a burgundy label, on a fill-idle chip", () => {
     const chip = shell(".spine-chip");
     expect(chip).toContain("background: var(--spine-chip-bg)");
-    expect(chip).toContain("border: 1px solid var(--spine-chip-bd)");
+    expect(chip).toContain("border: 0"); // fill-based, never a hairline-bordered pill
+    expect(chip).toContain("border-radius: 99px");
     expect(shell(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
-    expect(shell(".spine-chip.on")).toContain("color: var(--spine-chip-on-tx)");
+    expect(shell(".spine-root")).toContain("--spine-chip-bg: #efe8df"); // the interior fill
+    expect(shell(".spine-root")).toContain("--spine-chip-on-bg: #f5e2da"); // soft pink, NOT #3a2c20
+    expect(shell(".spine-root")).toContain("--spine-chip-on-tx: #7c3a2a"); // burgundy label
+    expect(shellCss).not.toContain("#3a2c20"); // the deep-ink chip fill is extinct
+    // a zero-count chip fades AND stops being interactive
     expect(shell(".spine-chip.zero")).toContain("opacity: 0.45");
-    expect(shell(".spine-root")).toContain("--spine-chip-on-bg: #3a2c20");
-    expect(shell(".spine-root")).toContain("--spine-chip-on-tx: #f3e7da");
+    expect(shell(".spine-chip.zero")).toContain("pointer-events: none");
   });
 
   it("the active search rides as a dismissable chip; the Today's-list lens stays retired (baked)", () => {

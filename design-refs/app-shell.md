@@ -146,6 +146,29 @@ Setup's flyout = Task settings (navigates to /todo and fires `sa:open-task-setti
 sheet lives in that page) + Help centre. Rows are real buttons (Tab + Enter); no fuller
 menu-key system. Expanded panel = no flyouts.
 
+## The To-do page — NO GROUP CONTAINERS (ref `scriptally-todo-sectioned.html`)
+
+The To-do page predates the capsule shell: it was built as a self-contained world with its own
+containers, ground and CTA language, and the bright content capsule exposed all of it. The
+governing principle of the rebuild:
+
+**Nesting on this page ends at content capsule → cards, with nothing in between.** The board
+panel, the filter slab and the lane header bars are deleted. **Sectioning is typographic**: a
+Playfair 27px heading with its count beside it in mono, closed by a 2px rule whose left 96px
+carries the section's identity colour (Urgent `#e8c8bc` · Housekeeping `#c3cfc0` · remainder
+`#ece3da`); 46px above each heading, 22px below the rule. Both item views — cards and rows —
+sit under the same headings, so there is ONE heading builder (`SectionHead`), not one per view.
+
+A heading is a heading: no header actions on it. No "Clear this section" (not built — never
+render a dead control), and the lane play button and Notes ＋ went with the bar.
+
+**One control line, not two bands:** filter chips left (fill `#efe8df`, 99px radius, active =
+the Form 11 soft-pink with a burgundy label, zero-count chips at 45% and non-interactive), a
+flexible spacer, then the list search (fill, no border, 228px) and the view toggle (fill
+container, the active segment takes the capsule surface). 44px above the row, no container, no
+label slab. The old "{n} items" line is retired — the All chip's struck total carries the
+narrowed count.
+
 ## Open questions (unchanged)
 
 The To-do page header; Agents' eight actions; the dashboard's four CTAs vs the header pair;

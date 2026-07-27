@@ -498,7 +498,8 @@ describe("v9 P5 — the supersession sweep", () => {
   it("the tour's targets survive the session (nothing it points at moved)", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('.tdb-herobegin'); // still the hero pair's play button, at rest
-    for (const sel of [".tdb-hsearch", ".tdb-herobegin"]) expect(tour).toContain(sel);
+    // todo rebuild P1: the search anchor moved to the control line's field
+    for (const sel of [".tdb-bsearch", ".tdb-herobegin"]) expect(tour).toContain(sel);
     expect(tour).not.toContain("tdb-fsexit"); // the session's own controls are not tour steps
   });
 });

@@ -6,18 +6,14 @@
  * WRAPPER, kept as the token carrier so the cascade (and the surviving artefact locks) hold.
  */
 .spine-root {
-  /* THE CHIP BENCH (panel-final P2) — the context zone's control-surface card + its chips */
-  --spine-bench-bg: #ece4d4;   /* the inset deeper-parchment card */
-  --spine-bench-bd: #dbcfb8;
-  --spine-bench-lab: #7a6a48;  /* the funnel + FILTER label */
-  --spine-bench-clr: #a5988c;  /* the Clear text link */
-  --spine-bench-clr-bd: #d4c6a8;
-  --spine-chip-bg: #f5f0e8;    /* an idle chip (parchment on the deeper card) */
-  --spine-chip-bd: #cbbc9e;
-  --spine-chip-tx: #4d4238;
-  --spine-chip-on-bg: #3a2c20; /* a selected chip — deep ink fill, cream text */
-  --spine-chip-on-bd: #2a1a13;
-  --spine-chip-on-tx: #f3e7da;
+  /* THE FILTER CHIPS (todo rebuild P1) — the bench SLAB is gone; the chips ride bare on the
+     control line. Idle = the interior fill; selected = the Form 11 soft-pink with a burgundy
+     label (the deep-ink fill retired with every other dark pill on this page). */
+  --spine-chip-bg: #efe8df;    /* an idle chip — the interior fill */
+  --spine-chip-tx: #6a615a;
+  --spine-chip-hov: #e7dfd3;
+  --spine-chip-on-bg: #f5e2da; /* a selected chip — soft pink, burgundy label */
+  --spine-chip-on-tx: #7c3a2a;
   /* THE BLUE PRO STICKER (panel-final P3) — the board's card language turned on Pro */
   --spine-pro-bg: #fdf6f2;     /* warm-white ground */
   --spine-pro-bd: #3a1c14;     /* the ink border */
@@ -40,18 +36,15 @@
   overflow: hidden;
 }
 
-/* ── THE CHIP BENCH — the control surface, now seated in the page body ── */
-.spine-bench { margin: 12px 2px 0; background: var(--spine-bench-bg); border: 1px solid var(--spine-bench-bd); border-radius: 12px; padding: 9px 8px 11px; box-sizing: border-box; }
-.spine-benchhead { display: flex; align-items: center; gap: 7px; padding: 2px 4px 8px; color: var(--spine-bench-lab); }
-.spine-funnel { display: inline-flex; color: var(--spine-bench-lab); }
-.spine-funnel svg { width: 12px; height: 12px; }
-.spine-benchhead b { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.2em; font-weight: 600; color: var(--spine-bench-lab); }
-.spine-benchclr { margin-left: auto; background: none; border: none; padding: 0 0 1px; font-size: 9px; font-weight: 600; color: var(--spine-bench-clr); border-bottom: 1px solid var(--spine-bench-clr-bd); cursor: pointer; }
-.spine-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px; }
-.spine-chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 11px; border-radius: 99px; border: 1px solid var(--spine-chip-bd); background: var(--spine-chip-bg); font-size: 10px; font-weight: 600; color: var(--spine-chip-tx); cursor: pointer; }
-.spine-chip.on { background: var(--spine-chip-on-bg); border-color: var(--spine-chip-on-bd); color: var(--spine-chip-on-tx); }
-.spine-chip.zero { opacity: 0.45; }
-.spine-chipn { font-size: 8px; opacity: 0.65; }
+/* ── THE FILTER CHIPS — bare on the control line (the .spine-bench slab and its funnel/FILTER
+   head are DELETED: no group containers on this page). ── */
+.spine-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 99px; border: 0; background: var(--spine-chip-bg); font-size: 12px; color: var(--spine-chip-tx); cursor: pointer; }
+.spine-chip:hover { background: var(--spine-chip-hov); }
+.spine-chip.on { background: var(--spine-chip-on-bg); color: var(--spine-chip-on-tx); }
+.spine-chip.on .spine-chipn { color: var(--spine-chip-on-tx); }
+/* a zero-count chip fades but stays rendered — and stops being interactive */
+.spine-chip.zero { opacity: 0.45; cursor: default; pointer-events: none; }
+.spine-chipn { font-family: var(--f12-mono); font-size: 9.5px; color: #9c8878; }
 /* the struck prior total during search (fnFace renders <s class="tdb-was"> inside the count) */
 .spine-chipn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
 

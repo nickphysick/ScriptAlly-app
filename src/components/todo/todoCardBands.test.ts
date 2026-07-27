@@ -65,10 +65,13 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(rule(".tdb-cell")).toContain("z-index: 1");
     expect(css).toContain(".tdb-cell:hover, .tdb-cell:focus-within { z-index: 30; }");
     expect(css).toContain(".tdb-lrow:hover, .tdb-lrow:focus-within { z-index: 30; }"); // the ledger's open menu clears them too
-    expect(rule(".tdb-lh2")).toContain("z-index: 10"); // what the raise must beat
-    expect(rule(".tdb-lsech")).toContain("z-index: 10");
-    // the ancestor audit: no clipper, no stacking-context creator between cell and sheet body
-    for (const sel of [".tdb-grid", ".tdb-lane", ".tdb-lanes", ".tdb-sheetbody", ".tdb-mainc"]) {
+    // (todo rebuild P1) There is nothing left to beat: the STICKY headings — the lane header bar
+    // .tdb-lh2 and the ledger's .tdb-lsech — went with the containers. Sections are typographic
+    // and static, so the cell's raise clears them by default.
+    expect(css).not.toContain(".tdb-lh2 {");
+    expect(css).not.toContain(".tdb-lsech {");
+    // the ancestor audit: no clipper, no stacking-context creator between cell and the board
+    for (const sel of [".tdb-grid", ".tdb-lane", ".tdb-lanes", ".tdb-board"]) {
       let r = "";
       try { r = rule(sel); } catch { continue; } // .tdb-lanes has no own rule — nothing to audit
       expect(r).not.toContain("overflow: hidden");
