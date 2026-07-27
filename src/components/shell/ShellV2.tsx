@@ -21,7 +21,6 @@ import { useLocation } from "react-router-dom";
 import { LayoutGrid, Send, Users, Book, Settings, PanelLeft } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { weekOfQuerying } from "../../lib/dashboardStats";
-import { PAGE_GRAIN } from "../../lib/designTokens";
 import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { SHELL_SECTIONS, SHELL_SETUP, shellCrumbForPath, shellSectionKeyForPath } from "./shellV2Nav";
@@ -34,10 +33,10 @@ const SECTION_ICONS: Record<string, React.ComponentType<{ "aria-hidden"?: boolea
   shelf: Book,
 };
 
-/** The paper-plane brand mark (mockup .mark), white on the dark rail. */
+/** The paper-plane brand glyph (capsule mockup .mk) — small, burgundy, top of the rail. */
 const Mark: React.FC = () => (
   <svg className="sv2-mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1L21.7 2.3Zm-2.4 2.2L10 13.8 6 12.3l13.3-5.1v-.2Z" />
+    <path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z" />
   </svg>
 );
 
@@ -48,9 +47,12 @@ export const ShellRail: React.FC<{
   onNavigatePath: (path: string) => void;
 }> = ({ onNavigatePath }) => {
   const { pathname } = useLocation();
+  const { currentUser } = useScriptAllyDb();
   const activeKey = shellSectionKeyForPath(pathname);
+  const initials = (currentUser?.name ?? "")
+    .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return (
-    <nav className="sv2-rail" aria-label="Sections">
+    <nav className="sv2-rail sv2-cap" aria-label="Sections">
       <Mark />
       <div className="sv2-railnav">
         {SHELL_SECTIONS.map((section) => {
@@ -60,23 +62,38 @@ export const ShellRail: React.FC<{
             <button
               key={section.key}
               type="button"
-              className={on ? "sv2-railbtn on" : "sv2-railbtn"}
+              className={on ? "sv2-rib on" : "sv2-rib"}
               aria-current={on ? "page" : undefined}
+              title={section.caption}
+              aria-label={section.caption}
               onClick={() => onNavigatePath(section.path)}
             >
               <Icon aria-hidden="true" />
-              <span>{section.caption}</span>
             </button>
           );
         })}
       </div>
       <div className="sv2-railspacer" />
-      <div className="sv2-railfoot">
-        <button type="button" className="sv2-railbtn" onClick={() => onNavigatePath(SHELL_SETUP.path)}>
-          <Settings aria-hidden="true" />
-          <span>{SHELL_SETUP.caption}</span>
+      <button
+        type="button"
+        className="sv2-rib"
+        title={SHELL_SETUP.caption}
+        aria-label={SHELL_SETUP.caption}
+        onClick={() => onNavigatePath(SHELL_SETUP.path)}
+      >
+        <Settings aria-hidden="true" />
+      </button>
+      {currentUser && (
+        <button
+          type="button"
+          className="sv2-railav"
+          title="Account"
+          aria-label="Account"
+          onClick={() => onNavigatePath("/account")}
+        >
+          {initials}
         </button>
-      </div>
+      )}
     </nav>
   );
 };
@@ -93,7 +110,7 @@ export const ShellSide: React.FC<{
   const { queries } = useScriptAllyDb();
   const crumb = shellCrumbForPath(pathname);
   return (
-    <aside className="sv2-side" style={{ backgroundImage: PAGE_GRAIN }} aria-hidden={tucked || undefined}>
+    <aside className="sv2-side sv2-cap" aria-hidden={tucked || undefined}>
       <div className="sv2-side-inner">
         <div className="sv2-mh">
           <div className="sv2-mhtop">
@@ -169,7 +186,7 @@ export const ShellTopBar: React.FC<{
       <div className="sv2-grow" />
       <div className="sv2-gsearch">
         <NavSearch
-          variant="rail"
+          variant="capsule"
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onNavigate={onNavigate}

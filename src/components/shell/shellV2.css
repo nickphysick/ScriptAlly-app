@@ -1,59 +1,70 @@
-/* ── App-shell v2 chrome (ref design-refs/scriptally-shell-v2.html) ──────────────────────────
-   Surfaces + spacing come from the --shell-* tokens (index.css :root). The DISPLAY of every
-   sv2 element is class + media-query driven — never inline — per the shell CSS footgun (inline
-   display beats breakpoint rules). The v2 chrome is desktop-only (≥768px); below md the slim
-   bar + BottomTabBar carry on unchanged. Reduced motion: transitions off, same behaviour. ── */
+/* ── App-shell CAPSULE chrome (ref design-refs/scriptally-capsule-shell.html) ─────────────────
+   Three rounded capsules — rail, panel, content plane — float on the grained ground with 14px
+   gutters. Surfaces + geometry come from the --shell-* tokens (index.css :root). The DISPLAY
+   of every sv2 element is class + media-query driven — never inline — per the shell CSS
+   footgun. Desktop-only (≥768px): below md the ground padding/radius stand down and the slim
+   bar + BottomTabBar carry on unchanged. The tab tongue, captions and the dark rail are
+   RETIRED. Reduced motion: transitions off, same behaviour. ── */
 
-/* ── icon rail ── */
+/* ── the ground + the capsules ── */
+@media (min-width: 768px) {
+  .sv2-app { padding: var(--shell-cap-gap); gap: var(--shell-cap-gap); }
+  .sv2-cap { border-radius: var(--shell-cap-radius); box-shadow: var(--shell-cap-shadow); }
+}
+/* The content plane — the third capsule; the stage scrolls INSIDE it. */
+.sv2-plane { background: var(--shell-canvas); overflow: hidden; }
+
+/* ── rail capsule ── */
 .sv2-rail { display: none; }
 @media (min-width: 768px) {
   .sv2-rail {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 74px;
+    width: 70px;
     flex: none;
     background: var(--shell-rail);
-    padding: 16px 0 14px;
+    padding: 20px 0;
     overflow: hidden;
   }
 }
-.sv2-mark { width: 30px; height: 30px; color: #fff; opacity: 0.95; margin-bottom: 22px; flex: none; }
-.sv2-railnav { display: flex; flex-direction: column; gap: 4px; width: 100%; align-items: stretch; padding: 0 8px; }
-.sv2-railbtn {
-  width: 100%;
-  padding: 9px 0 7px;
+.sv2-mark { width: 24px; height: 24px; color: var(--burg); margin-bottom: 24px; flex: none; }
+.sv2-railnav { display: flex; flex-direction: column; align-items: center; }
+/* Ribs — icon-only squares; tooltips carry the names (no captions in this idiom). */
+.sv2-rib {
+  width: 42px;
+  height: 42px;
   border: 0;
   background: transparent;
   cursor: pointer;
-  border-radius: 10px;
-  color: #a49a92; /* rail-dim (mockup --rail-dim; the pack's token table covers surfaces only) */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  transition: background 0.18s, color 0.18s;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: #a89a8a; /* resting rib ink (mockup literal) */
+  margin-bottom: 8px;
+  transition: background 0.16s, color 0.16s;
 }
-.sv2-railbtn svg { width: 19px; height: 19px; }
-.sv2-railbtn span {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 7.5px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-.sv2-railbtn:hover { background: rgba(255, 255, 255, 0.07); color: #e8e0d8; }
-/* The tab tongue: squared right edge bleeding 8px into the sidebar, so rail + panel read as
-   one folder. The active label takes the rail hue on the light tongue. */
-.sv2-railbtn.on {
-  background: var(--shell-side);
-  color: var(--shell-rail);
-  margin-right: -8px;
-  border-radius: 10px 0 0 10px;
-}
+.sv2-rib svg { width: 18px; height: 18px; }
+.sv2-rib:hover { background: var(--shell-inset); }
+.sv2-rib.on { background: var(--pink); color: var(--burg); }
 .sv2-railspacer { flex: 1; }
-.sv2-railfoot { width: 100%; padding: 0 8px; }
+/* The rail-foot avatar chip — the account link under Setup. */
+.sv2-railav {
+  width: 36px;
+  height: 36px;
+  border-radius: 99px;
+  border: 1px solid rgba(124, 58, 42, 0.25);
+  background: var(--shell-card);
+  display: grid;
+  place-items: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  color: var(--burg);
+  cursor: pointer;
+  margin-top: 6px;
+}
 
-/* ── sidebar frame ── */
+/* ── panel capsule ── */
 .sv2-side { display: none; }
 @media (min-width: 768px) {
   .sv2-side {
@@ -63,12 +74,11 @@
     flex: none;
     min-width: 0;
     overflow: hidden;
-    background-color: var(--shell-side); /* the paper grain rides as an inline background-image */
-    border-right: 1px solid var(--shell-side-edge);
+    background-color: var(--shell-side); /* one capsule surface — no edge, no grain of its own */
     transition: width 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s;
   }
 }
-.sv2-tucked .sv2-side { width: 0; opacity: 0; pointer-events: none; border-right: 0; }
+.sv2-tucked .sv2-side { width: 0; opacity: 0; pointer-events: none; }
 /* Fixed inner width so the contents never reflow during the tuck slide. */
 .sv2-side-inner {
   width: 288px;
@@ -115,16 +125,16 @@
 }
 .sv2-mhkick .sv2-sect { color: var(--shell-ink-soft); }
 
-/* ── top bar ── */
+/* ── top bar (inside the content capsule) ── */
 .sv2-topbar { display: none; }
 @media (min-width: 768px) {
   .sv2-topbar {
     display: flex;
     align-items: center;
     gap: 14px;
-    height: 56px;
+    height: 58px;
     flex: none;
-    padding: 0 24px;
+    padding: 0 26px;
     background: var(--shell-topbar);
     border-bottom: 1px solid var(--shell-line-soft);
   }
@@ -141,20 +151,20 @@
 }
 .sv2-crumb b { color: var(--shell-ink); font-weight: 500; }
 .sv2-crumb .sv2-sl { opacity: 0.5; }
+/* Fill-based chip — no border in the capsule idiom. */
 .sv2-state {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 11px;
   color: var(--shell-ink-soft);
-  padding: 4px 9px;
+  padding: 4px 10px;
   border-radius: 99px;
   background: var(--shell-inset);
-  border: 1px solid var(--shell-line-soft);
 }
 .sv2-state i { width: 6px; height: 6px; border-radius: 99px; background: var(--sage); display: block; }
 .sv2-grow { flex: 1; }
-.sv2-gsearch { width: 300px; flex: none; }
+.sv2-gsearch { width: 280px; flex: none; }
 
 /* ── sidebar contents (Phase 3) ── */
 

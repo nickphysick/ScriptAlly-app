@@ -34,11 +34,13 @@ const at = (path: string, node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
 
 describe("v2 shell — smoke renders", () => {
-  it("rail: four sections + Setup, tab tongue on the active section", () => {
+  it("rail capsule: four section ribs + Setup + the avatar; pink active, no captions, no tongue", () => {
     const html = at("/queries", <ShellRail onNavigatePath={() => {}} />);
-    expect(html).toContain("sv2-rail");
-    for (const caption of ["Desk", "Queries", "Agents", "Shelf", "Setup"]) expect(html).toContain(caption);
-    expect(html).toContain("sv2-railbtn on");
+    expect(html).toContain("sv2-rail sv2-cap");
+    for (const tip of ["Desk", "Queries", "Agents", "Shelf", "Setup"]) expect(html).toContain(`title="${tip}"`);
+    expect(html).toContain("sv2-rib on");
+    expect(html).not.toContain("sv2-railbtn"); // captioned buttons + the tab tongue are retired
+    expect(html).toContain("sv2-railav"); // the rail-foot account chip
   });
 
   it("sidebar frame: masthead with the real wordmark artwork + the section kicker + the account-level week", () => {

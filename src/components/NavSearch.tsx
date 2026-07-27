@@ -26,8 +26,10 @@ interface NavSearchProps {
    * "rail" is the AppShell sidebar presentation: full-width pill (the rail is ~216px), never
    * autofocused, no breakpoint hiding (the rail itself is desktop-only). Behaviour is otherwise
    * identical to desktop — same typeahead, same result navigation.
+   * "capsule" is the capsule-shell top bar: full-width CREAM FILL pill, no border (the capsule
+   * idiom's fill-based chrome), radius 11. Behaviour identical to rail.
    */
-  variant?: "desktop" | "mobile" | "rail";
+  variant?: "desktop" | "mobile" | "rail" | "capsule";
   /** Optional ref to the input — lets the rail focus it from the ⌘K shortcut. */
   inputRef?: React.RefObject<HTMLInputElement | null>;
 }
@@ -35,7 +37,8 @@ interface NavSearchProps {
 export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuery, onNavigate, variant = "desktop", inputRef }) => {
   const isMobile = variant === "mobile";
   const isRail = variant === "rail";
-  const fullWidth = isMobile || isRail;
+  const isCapsule = variant === "capsule";
+  const fullWidth = isMobile || isRail || isCapsule;
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const suggestions = useSearchSuggestions({ searchQuery, setSearchQuery, onNavigate, wrapRef });
@@ -43,10 +46,13 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
 
   return (
     <div ref={wrapRef} className={fullWidth ? "relative w-full" : "relative max-sm:hidden"} style={{ flexShrink: 0 }}>
-      {/* Search pill (parchment, as before) */}
+      {/* Search pill — parchment card everywhere except the capsule top bar, whose chrome is
+          fill-based: cream fill, no border (capsule shell). */}
       <div
         className="flex items-center gap-2"
-        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: fullWidth ? "100%" : 240 }}
+        style={isCapsule
+          ? { background: "var(--shell-inset)", borderRadius: 11, padding: "0 12px", height: 34, boxSizing: "border-box", width: "100%" }
+          : { background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: fullWidth ? "100%" : 240 }}
       >
         <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
         <input

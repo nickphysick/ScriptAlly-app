@@ -19,7 +19,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { burgundy, parchment, FONT_SERIF } from "../../lib/designTokens";
+import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { ShellSidebarBody } from "./ShellSidebar";
 import { Nav } from "../Nav";
@@ -174,9 +174,12 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
   return (
     <div
-      className={`${THEME_CLASS[theme]}${sideTucked ? " sv2-tucked" : ""}`}
+      className={`${THEME_CLASS[theme]} sv2-app${sideTucked ? " sv2-tucked" : ""}`}
       data-sa-ground=""
-      style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#F5F0EA" }}
+      // The capsule GROUND — the warm grained field all three capsules float on (the paper
+      // grain reuses the canonical PAGE_GRAIN data-URI inline; the CSS parser rejects it in
+      // .css files). Padding + gap arrive with the .sv2-app class at ≥768px.
+      style={{ display: "flex", height: "100vh", overflow: "hidden", backgroundColor: "var(--shell-ground)", backgroundImage: PAGE_GRAIN }}
     >
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
           only (class + media query in shellV2.css — never inline display). The interim layers
@@ -185,7 +188,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       <ShellSide tucked={sideTucked} onToggleTuck={() => setTuck((v) => !v)}>
         <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} />
       </ShellSide>
-      <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
+      <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}
         <div className="md:hidden" style={{ flexShrink: 0 }}>
           <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
