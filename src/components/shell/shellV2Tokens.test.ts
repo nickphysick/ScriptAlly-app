@@ -16,7 +16,7 @@ const css = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
 const BAKED: Record<string, string> = {
   "--shell-ground": "#e7e0d5",
   "--shell-rail": "#f1ebe3",
-  "--shell-side": "#f8f4ee",
+  "--shell-side": "#f6f1ea",
   "--shell-canvas": "#fdfbf8",
   "--shell-card": "#fdfaf5",
   "--shell-panel": "#f2ede7",
@@ -57,7 +57,7 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
   it("surfaces + fills", () => {
     expect(dt.shellGround).toBe("#e7e0d5");
     expect(dt.shellRail).toBe("#f1ebe3");
-    expect(dt.shellSide).toBe("#f8f4ee");
+    expect(dt.shellSide).toBe("#f6f1ea");
     expect(dt.shellCanvas).toBe("#fdfbf8");
     expect(dt.shellCard).toBe("#fdfaf5");
     expect(dt.shellPanel).toBe("#f2ede7");

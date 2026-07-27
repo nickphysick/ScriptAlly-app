@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Sidebar, final</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --pink-band:#f3e0d6; --slate:#6a89a7;
+  --ground:#e7e0d5; --dark-s:#f1ebe3; --light-s:#f6f1ea; --plane-s:#fdfbf8; --fill:#ece5db;
+  --card:#fdfaf5; --line:#e3d9cf; --linesoft:#e8dfd4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.app{height:100vh;display:flex;gap:14px;padding:14px}
+.cap{border-radius:20px;box-shadow:0 10px 30px rgba(58,28,20,.09)}
+
+/* ── sidebar ── */
+.side{flex:none;position:relative;display:flex;flex-direction:column;padding:16px 0 13px;overflow:hidden;
+  transition:width .28s cubic-bezier(.4,0,.2,1), background-color .28s ease}
+body.collapsed .side{width:62px;background:var(--dark-s)}
+body.expanded .side{width:280px;background:var(--light-s)}
+
+/* the spine — darker gutter, only when expanded */
+.side::before{content:"";position:absolute;left:0;top:0;bottom:0;width:62px;background:var(--dark-s);
+  opacity:0;transition:opacity .28s ease}
+body.expanded.spine .side::before{opacity:1}
+
+/* every row shares one shape */
+.row{position:relative;display:flex;align-items:center;height:42px;margin:0 7px 2px;border-radius:11px;cursor:pointer;flex:none;transition:background .15s}
+.row .g{width:48px;flex:none;display:grid;place-items:center}
+.row .g svg{width:18px;height:18px;color:#a89a8a;transition:color .15s}
+.row .l{flex:1;min-width:0;display:flex;align-items:center;gap:9px;padding-right:12px;font-size:13.5px;color:var(--ink-soft);white-space:nowrap}
+.row .l .lb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.row .cv{width:11px;height:11px;color:#c4b8a9;flex:none;transition:transform .2s}
+.row:hover{background:var(--fill)}
+.row.on{background:var(--ground)}
+.row.on .g svg{color:var(--burgundy)}
+.row.on .l{color:var(--ink);font-weight:500}
+.row.open .g svg{color:var(--burgundy)}
+.row.open .l{color:var(--ink);font-weight:500}
+.row.open .cv{transform:rotate(90deg)}
+body.collapsed .row .l{display:none}
+.row.tall{height:50px}
+
+/* what disappears on collapse */
+body.collapsed .drop{display:none}
+
+/* brand */
+.brand{height:44px;margin-bottom:12px}
+.brand:hover{background:none;cursor:default}
+.brand .g svg{width:21px;height:21px;color:var(--burgundy)}
+.brand .wm{font-family:"Playfair Display",serif;font-size:19.5px;color:var(--ink)}
+
+/* children */
+.kids{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.kids.open{max-height:160px}
+body.collapsed .kids{max-height:0}
+.krow{display:flex;align-items:center;height:35px;margin:0 7px 2px;border-radius:10px;cursor:pointer;transition:background .15s}
+.krow .g{width:48px;flex:none}
+.krow .l{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding-right:12px;font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
+.krow .l .lb{flex:1;overflow:hidden;text-overflow:ellipsis}
+.krow .ct{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
+.krow:hover{background:var(--fill)}
+.krow.on{background:var(--ground)}
+.krow.on .l{color:var(--ink)}
+
+.gap{flex:1;min-height:12px}
+.hr{height:1px;background:var(--linesoft);margin:11px 13px;flex:none}
+.slab{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:2px 0 6px 55px;flex:none;white-space:nowrap}
+
+/* bottom glyphs */
+.tile{width:34px;height:34px;border-radius:10px;background:linear-gradient(160deg,#dce0d9,#d0d6cc);border:1px solid rgba(124,58,42,.2);display:grid;place-items:center;color:var(--sage-deep);font-family:"Playfair Display",serif;font-size:11.5px}
+.t1{font-family:"Playfair Display",serif;font-size:14px;line-height:1.2;display:block;overflow:hidden;text-overflow:ellipsis}
+.t2{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px;display:block}
+.stack{flex:1;min-width:0}
+.plus{width:34px;height:34px;border-radius:10px;background:var(--pink);border:1px solid var(--pink-line);display:grid;place-items:center}
+.plus svg{width:16px;height:16px;color:var(--burgundy)}
+.row.new .l{color:var(--burgundy);font-weight:500}
+.row.new:hover{background:var(--pink)}
+.propill{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.09em;background:var(--slate);color:#fff;border-radius:5px;padding:3px 6px}
+.row.pro .l{font-weight:500;color:var(--ink)}
+.av{width:33px;height:33px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:11.5px;color:var(--burgundy)}
+.un{font-size:12.5px;color:var(--ink);display:block}
+.ur{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;display:block}
+
+/* popover */
+.popwrap{position:relative;flex:none}
+.pop{position:absolute;left:7px;bottom:calc(100% + 6px);width:246px;background:var(--plane-s);border:1px solid var(--line);border-radius:15px;box-shadow:0 16px 40px rgba(58,28,20,.18);padding:7px;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .15s,transform .15s;z-index:50}
+.popwrap.open .pop{opacity:1;transform:translateY(0);pointer-events:auto}
+.pop .pk{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:8px 11px 7px}
+.prow{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:10px;font-size:13px;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+.prow:hover{background:var(--fill);color:var(--ink)}
+.prow svg{width:15px;height:15px;color:#a89a8a;flex:none}
+.prow:hover svg{color:var(--burgundy)}
+.prow .lb{flex:1}
+.prow .kb{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:#bcb0a3;border:1px solid var(--linesoft);border-radius:5px;padding:1px 5px}
+.pdiv{height:1px;background:var(--linesoft);margin:6px 11px}
+
+/* content */
+.plane{flex:1;min-width:0;background:var(--plane-s);display:flex;flex-direction:column;overflow:hidden}
+.tb{height:58px;flex:none;display:flex;align-items:center;gap:14px;padding:0 26px;border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.grow{flex:1}
+.gs{display:flex;align-items:center;gap:9px;width:280px;height:34px;padding:0 11px;background:var(--fill);border-radius:11px;color:var(--muted);font-size:12.5px}
+.gs svg{width:14px;height:14px}
+.pg{flex:1;overflow:hidden;padding:34px 40px}
+h1.t{font-family:"Playfair Display",serif;font-size:37px;font-weight:500;letter-spacing:-.015em;line-height:1.05}
+.sub{font-family:"Playfair Display",serif;font-size:16px;color:var(--ink-soft);margin-top:10px}
+.phr{height:1px;background:var(--linesoft);margin:22px 0 26px}
+.sec{display:flex;align-items:baseline;gap:12px;margin-bottom:5px}
+.sec h2{font-family:"Playfair Display",serif;font-size:26px;font-weight:500}
+.sec .cn{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted)}
+.secrule{height:2px;border-radius:2px;margin-bottom:22px;background:linear-gradient(90deg,var(--pink-line) 0 96px,var(--linesoft) 96px)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(266px,1fr));gap:14px}
+.cd{background:#fff;border:1px solid var(--ink);border-radius:10px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07)}
+.cd .bn{padding:7px 12px;border-bottom:1px solid var(--ink);background:var(--pink-band)}
+.cd .bn span{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase}
+.cd .bd{padding:13px}
+.cd .ct2{font-family:"Playfair Display",serif;font-size:15px;line-height:1.3}
+.cd .cs{font-family:"Playfair Display",serif;font-style:italic;font-size:12px;color:var(--ink-soft);margin-top:5px}
+
+.tog{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;gap:6px;background:#fdfbf8;border-radius:99px;padding:6px;box-shadow:0 10px 28px rgba(58,28,20,.2)}
+.tog button{border:0;background:transparent;font:inherit;font-size:12px;padding:7px 14px;border-radius:99px;cursor:pointer;color:var(--ink-soft);white-space:nowrap}
+.tog button.on{background:var(--ink);color:#fff}
+.tog .div{width:1px;background:#e3d9cf;margin:4px 3px}
+</style>
+</head>
+<body class="expanded spine">
+
+<div class="app">
+
+  <aside class="cap side">
+
+    <div class="row brand drop">
+      <span class="g"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg></span>
+      <span class="l"><span class="wm">ScriptAlly</span></span>
+    </div>
+
+    <div class="row" id="dash">
+      <span class="g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+      <span class="l"><span class="lb">Dashboard</span></span>
+    </div>
+
+    <div class="row open" data-sec="q">
+      <span class="g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></span>
+      <span class="l"><span class="lb">Querying</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+    </div>
+    <div class="kids open" data-kids="q">
+      <div class="krow"><span class="g"></span><span class="l"><span class="lb">Queries Hub</span><span class="ct">20</span></span></div>
+      <div class="krow on"><span class="g"></span><span class="l"><span class="lb">To-do</span><span class="ct">44</span></span></div>
+      <div class="krow"><span class="g"></span><span class="l"><span class="lb">Packages</span><span class="ct">0</span></span></div>
+    </div>
+
+    <div class="row" data-sec="a">
+      <span class="g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg></span>
+      <span class="l"><span class="lb">Agents</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+    </div>
+    <div class="kids" data-kids="a">
+      <div class="krow"><span class="g"></span><span class="l"><span class="lb">Agent list</span><span class="ct">16</span></span></div>
+      <div class="krow"><span class="g"></span><span class="l"><span class="lb">Discover</span></span></div>
+    </div>
+
+    <div class="row" data-sec="s">
+      <span class="g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></span>
+      <span class="l"><span class="lb">Shelf</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+    </div>
+    <div class="kids" data-kids="s">
+      <div class="krow"><span class="g"></span><span class="l"><span class="lb">Manuscripts</span><span class="ct">2</span></span></div>
+      <div class="krow"><span class="g"></span><span class="l"><span class="lb">Comparable titles</span></span></div>
+    </div>
+
+    <div class="gap"></div>
+
+    <div class="slab drop">Working on</div>
+    <div class="row tall drop">
+      <span class="g"><span class="tile">MD</span></span>
+      <span class="l"><span class="stack"><span class="t1">Murphy's Day Out</span><span class="t2">20 queries · 16 active</span></span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg></span>
+    </div>
+
+    <div class="hr drop"></div>
+
+    <div class="popwrap drop" id="popwrap">
+      <div class="pop">
+        <div class="pk">Create</div>
+        <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span class="lb">Log a query</span><span class="kb">⌘L</span></div>
+        <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg><span class="lb">Record a response</span><span class="kb">⌘R</span></div>
+        <div class="pdiv"></div>
+        <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.2"/><path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"/><path d="M18 8.5v5M15.5 11h5"/></svg><span class="lb">Add an agent</span></div>
+        <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H16v9"/><path d="M5 4.5v15A1.5 1.5 0 0 0 6.5 21H12"/><path d="M18 15v6M15 18h6"/></svg><span class="lb">Add a manuscript</span></div>
+      </div>
+      <div class="row new tall" id="newrow">
+        <span class="g"><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></span>
+        <span class="l"><span class="lb">New</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#bcb0a3">⌘N</span></span>
+      </div>
+    </div>
+
+    <div class="row pro tall drop">
+      <span class="g"><span class="propill">PRO</span></span>
+      <span class="l"><span class="lb">Upgrade to Pro</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+    </div>
+
+    <div class="row">
+      <span class="g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg></span>
+      <span class="l"><span class="lb">Settings</span></span>
+    </div>
+
+    <div class="row tall">
+      <span class="g"><span class="av">ML</span></span>
+      <span class="l"><span class="stack"><span class="un">Michael Li</span><span class="ur">Free plan</span></span></span>
+    </div>
+
+  </aside>
+
+  <main class="cap plane">
+    <div class="tb">
+      <span class="crumb">Querying / <b>To-do</b></span>
+      <div class="grow"></div>
+      <div class="gs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…</div>
+    </div>
+    <div class="pg">
+      <h1 class="t">What's on your desk?</h1>
+      <div class="sub">Urgent tasks, housekeeping, notes. Here's everything on your to-do list.</div>
+      <div class="phr"></div>
+      <div class="sec"><h2>Urgent</h2><span class="cn">3</span></div>
+      <div class="secrule"></div>
+      <div class="cards">
+        <div class="cd"><div class="bn"><span>★ Offer</span></div><div class="bd"><div class="ct2">Tom Ellery has made an offer</div><div class="cs">Murphy's Day Out</div></div></div>
+        <div class="cd"><div class="bn"><span>Agent waiting</span></div><div class="bd"><div class="ct2">Send your full to Jonathan Marsh</div><div class="cs">Murphy's Day Out</div></div></div>
+        <div class="cd"><div class="bn"><span>Agent waiting</span></div><div class="bd"><div class="ct2">Send your partial to Daniel O'Rourke</div><div class="cs">Murphy's Day Out</div></div></div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<div class="tog">
+  <button class="on" data-st="expanded">Expanded</button>
+  <button data-st="collapsed">Collapsed</button>
+  <span class="div"></span>
+  <button class="on" data-sp="spine">Spine on</button>
+  <button data-sp="nospine">Spine off</button>
+</div>
+
+<script>
+let state='expanded', sp='spine';
+function paint(){
+  document.body.className=state+(sp==='spine'?' spine':'');
+  document.querySelectorAll('[data-st]').forEach(b=>b.classList.toggle('on',b.dataset.st===state));
+  document.querySelectorAll('[data-sp]').forEach(b=>b.classList.toggle('on',b.dataset.sp===sp));
+}
+document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{state=b.dataset.st;paint();});
+document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{sp=b.dataset.sp;paint();});
+
+const pw=document.getElementById('popwrap');
+document.getElementById('newrow').onclick=e=>{e.stopPropagation();pw.classList.toggle('open');};
+document.addEventListener('click',()=>pw.classList.remove('open'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')pw.classList.remove('open');});
+pw.querySelector('.pop').onclick=e=>e.stopPropagation();
+
+document.querySelectorAll('.row[data-sec]').forEach(s=>s.onclick=()=>{
+  const k=s.dataset.sec, was=s.classList.contains('open');
+  document.querySelectorAll('.row[data-sec]').forEach(x=>x.classList.remove('open'));
+  document.querySelectorAll('.kids').forEach(x=>x.classList.remove('open'));
+  if(!was){s.classList.add('open');document.querySelector('[data-kids="'+k+'"]').classList.add('open');}
+});
+document.querySelectorAll('.krow').forEach(k=>k.onclick=e=>{
+  e.stopPropagation();
+  document.querySelectorAll('.krow').forEach(x=>x.classList.remove('on'));
+  document.getElementById('dash').classList.remove('on');
+  k.classList.add('on');
+});
+document.getElementById('dash').onclick=function(){
+  document.querySelectorAll('.krow').forEach(x=>x.classList.remove('on'));
+  this.classList.add('on');
+};
+paint();
+</script>
+</body>
+</html>

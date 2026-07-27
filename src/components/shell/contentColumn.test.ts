@@ -44,7 +44,7 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
     // ShellRail + ShellSide are the desktop navigation, siblings of the content column — so no
     // nav chrome can inherit the max-width. The cap wrapper lives only inside StagePage.
     expect(shell.includes("<NavDrawer")).toBe(false); // the drawer is gone
-    expect(shell).toContain("<ShellRail");
+    expect(shell).toContain("<ShellSide"); // one-sidebar pack: the rail merged into it
     expect(shell).toContain("<ShellSide");
     expect(shell).toContain("flex: 1, minWidth: 0, minHeight: 0, display: \"flex\"");
     expect(shell.slice(0, shell.indexOf("StagePage")).includes("sa-content-col")).toBe(false);
