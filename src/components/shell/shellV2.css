@@ -1,0 +1,165 @@
+/* ── App-shell v2 chrome (ref design-refs/scriptally-shell-v2.html) ──────────────────────────
+   Surfaces + spacing come from the --shell-* tokens (index.css :root). The DISPLAY of every
+   sv2 element is class + media-query driven — never inline — per the shell CSS footgun (inline
+   display beats breakpoint rules). The v2 chrome is desktop-only (≥768px); below md the slim
+   bar + BottomTabBar carry on unchanged. Reduced motion: transitions off, same behaviour. ── */
+
+/* ── icon rail ── */
+.sv2-rail { display: none; }
+@media (min-width: 768px) {
+  .sv2-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 74px;
+    flex: none;
+    background: var(--shell-rail);
+    padding: 16px 0 14px;
+    overflow: hidden;
+  }
+}
+.sv2-mark { width: 30px; height: 30px; color: #fff; opacity: 0.95; margin-bottom: 22px; flex: none; }
+.sv2-railnav { display: flex; flex-direction: column; gap: 4px; width: 100%; align-items: stretch; padding: 0 8px; }
+.sv2-railbtn {
+  width: 100%;
+  padding: 9px 0 7px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  color: #a49a92; /* rail-dim (mockup --rail-dim; the pack's token table covers surfaces only) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.18s, color 0.18s;
+}
+.sv2-railbtn svg { width: 19px; height: 19px; }
+.sv2-railbtn span {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.sv2-railbtn:hover { background: rgba(255, 255, 255, 0.07); color: #e8e0d8; }
+/* The tab tongue: squared right edge bleeding 8px into the sidebar, so rail + panel read as
+   one folder. The active label takes the rail hue on the light tongue. */
+.sv2-railbtn.on {
+  background: var(--shell-side);
+  color: var(--shell-rail);
+  margin-right: -8px;
+  border-radius: 10px 0 0 10px;
+}
+.sv2-railspacer { flex: 1; }
+.sv2-railfoot { width: 100%; padding: 0 8px; }
+
+/* ── sidebar frame ── */
+.sv2-side { display: none; }
+@media (min-width: 768px) {
+  .sv2-side {
+    display: flex;
+    flex-direction: column;
+    width: 288px;
+    flex: none;
+    min-width: 0;
+    overflow: hidden;
+    background-color: var(--shell-side); /* the paper grain rides as an inline background-image */
+    border-right: 1px solid var(--shell-side-edge);
+    transition: width 0.42s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s;
+  }
+}
+.sv2-tucked .sv2-side { width: 0; opacity: 0; pointer-events: none; border-right: 0; }
+/* Fixed inner width so the contents never reflow during the tuck slide. */
+.sv2-side-inner {
+  width: 288px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--shell-gutter) var(--shell-gutter);
+}
+
+/* masthead */
+.sv2-mh { flex: none; padding: 18px 0 0; }
+.sv2-mhtop { display: flex; align-items: center; justify-content: space-between; }
+.sv2-mhname {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  letter-spacing: -0.012em;
+  line-height: 1;
+  color: var(--shell-ink);
+}
+.sv2-tuck {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--shell-muted);
+  display: grid;
+  place-items: center;
+  transition: background 0.16s, color 0.16s;
+}
+.sv2-tuck:hover { background: rgba(124, 58, 42, 0.07); color: var(--burg); }
+.sv2-tuck svg { width: 15px; height: 15px; }
+/* The dominant masthead rule — ink at half strength; one of the sidebar's only three rules. */
+.sv2-mhrule { height: 1px; background: var(--shell-ink); opacity: 0.5; margin: 10px 0 8px; }
+.sv2-mhkick {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.sv2-mhkick .sv2-sect { color: var(--shell-ink-soft); }
+
+/* ── top bar ── */
+.sv2-topbar { display: none; }
+@media (min-width: 768px) {
+  .sv2-topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 56px;
+    flex: none;
+    padding: 0 24px;
+    background: var(--shell-topbar);
+    border-bottom: 1px solid var(--shell-line-soft);
+  }
+}
+.sv2-crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+}
+.sv2-crumb b { color: var(--shell-ink); font-weight: 500; }
+.sv2-crumb .sv2-sl { opacity: 0.5; }
+.sv2-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--shell-ink-soft);
+  padding: 4px 9px;
+  border-radius: 99px;
+  background: var(--shell-inset);
+  border: 1px solid var(--shell-line-soft);
+}
+.sv2-state i { width: 6px; height: 6px; border-radius: 99px; background: var(--sage); display: block; }
+.sv2-grow { flex: 1; }
+.sv2-gsearch { width: 300px; flex: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sv2-side,
+  .sv2-railbtn,
+  .sv2-tuck {
+    transition: none;
+  }
+}

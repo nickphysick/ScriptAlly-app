@@ -140,3 +140,8 @@ export const shellGutter = 16; // sidebar side gutter (px)
 export const shellGroup = 24; // between sidebar groups (px)
 export const shellWithin = 8; // within a sidebar group (px)
 export const shellCardPad = 12; // sidebar card padding (px)
+// chrome inks + recessed fill — mockup-derived (the pack's baked table covers surfaces only)
+export const shellInk = "#2e2723"; // chrome ink
+export const shellInkSoft = "#6a615a"; // secondary chrome ink
+export const shellMuted = "#9c8878"; // muted chrome ink (=== labelColor — role twin, kept named)
+export const shellInset = "#f2ede7"; // recessed fills (chips, hover washes)

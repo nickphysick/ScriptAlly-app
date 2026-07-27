@@ -24,6 +24,10 @@ const BAKED: Record<string, string> = {
   "--shell-group": "24px",
   "--shell-within": "8px",
   "--shell-card-pad": "12px",
+  "--shell-ink": "#2e2723",
+  "--shell-ink-soft": "#6a615a",
+  "--shell-muted": "#9c8878",
+  "--shell-inset": "#f2ede7",
 };
 
 describe("app-shell v2 tokens — index.css", () => {
@@ -44,6 +48,10 @@ describe("app-shell v2 tokens — designTokens.ts twins agree", () => {
     expect(dt.shellLine).toBe("#e3d9cf");
     expect(dt.shellLineSoft).toBe("#ece3da");
     expect(dt.shellSideEdge).toBe("rgba(124,58,42,.14)");
+    expect(dt.shellInk).toBe("#2e2723");
+    expect(dt.shellInkSoft).toBe("#6a615a");
+    expect(dt.shellMuted).toBe("#9c8878");
+    expect(dt.shellInset).toBe("#f2ede7");
   });
   it("spacing scale", () => {
     expect(dt.shellGutter).toBe(16);

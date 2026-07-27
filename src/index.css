@@ -57,6 +57,11 @@
   --shell-group: 24px;                /* between groups */
   --shell-within: 8px;                /* within a group */
   --shell-card-pad: 12px;             /* card padding */
+  /* chrome inks + recessed fill — mockup-derived (the pack's baked table covers surfaces only) */
+  --shell-ink: #2e2723;               /* chrome ink — masthead name, crumb current, ledger counts */
+  --shell-ink-soft: #6a615a;          /* secondary chrome ink — kicker section, chip text */
+  --shell-muted: #9c8878;             /* muted chrome ink — crumb, captions, resting icons */
+  --shell-inset: #f2ede7;             /* recessed fills — save-state chip, hover washes, kbd chips */
 }
 
 /* Top-nav search placeholder — Playfair Display 500 16px (typed text stays Source Sans Pro 12px,

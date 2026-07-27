@@ -17,8 +17,10 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF } from "../../lib/designTokens";
+import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -137,20 +139,66 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     [drawerOpen]
   );
 
+  // v2 shell — sidebar tuck (ref scriptally-shell-v2.html). Persisted under the app's `sa.`
+  // localStorage convention; ⌘\ toggles (skipped while an editable has focus). The rail stays
+  // visible when tucked, and a rail click untucks — the mockup's only untuck path is the chord,
+  // which is not enough affordance in the product.
+  const [sideTucked, setSideTucked] = useState<boolean>(() => {
+    try { return localStorage.getItem("sa.shellSideTucked") === "1"; } catch { return false; }
+  });
+  const setTuck = useCallback((next: boolean | ((v: boolean) => boolean)) => {
+    setSideTucked((prev) => {
+      const value = typeof next === "function" ? next(prev) : next;
+      try { localStorage.setItem("sa.shellSideTucked", value ? "1" : "0"); } catch { /* private mode */ }
+      return value;
+    });
+  }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+        const t = e.target as HTMLElement | null;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+        e.preventDefault();
+        setTuck((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setTuck]);
+
+  // Chrome navigation — router-direct (new-code rule), clearing the global search the way the
+  // handleNavigate bridge does on real navigation. Rail clicks also untuck the sidebar.
+  const navigate = useNavigate();
+  const goPath = useCallback(
+    (path: string) => {
+      setSearchQuery("");
+      setTuck(false);
+      navigate(path);
+    },
+    [navigate, setSearchQuery, setTuck]
+  );
+
   return (
     <NavDrawerProvider value={drawerCtx}>
     <div
-      className={THEME_CLASS[theme]}
+      className={`${THEME_CLASS[theme]}${sideTucked ? " sv2-tucked" : ""}`}
       data-sa-ground=""
       style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#F5F0EA" }}
     >
-      {/* The persistent rail is RETIRED (overnight nav run) — navigation lives in the NavDrawer,
-          opened from the header menu buttons. The content column reclaims the full width. */}
+      {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
+          only (class + media query in shellV2.css — never inline display). The NavDrawer stays
+          mounted below while the per-page header strips that trigger it are retired page by
+          page in the later rollout phases. */}
+      <ShellRail onNavigatePath={goPath} />
+      <ShellSide tucked={sideTucked} onToggleTuck={() => setTuck((v) => !v)} />
       <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}
         <div className="md:hidden" style={{ flexShrink: 0 }}>
           <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
+
+        {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
+        <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
 
         {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
             the fixed BottomTabBar (was on the legacy shell's <main>). */}
