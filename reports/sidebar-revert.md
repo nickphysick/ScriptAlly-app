@@ -17,7 +17,7 @@ components, `AppShell`'s mount, `shellV2.css`, three lock files, the design ref 
 plus `index.css`/`designTokens.ts` carrying only the `--shell-side` token move. Nothing
 non-sidebar rode along, so the revert is exact.
 
-**Revert SHA:** `f012ade` — `shell: revert merged sidebar, restore rail and panel`.
+**Revert SHA:** `088dbba` — `shell: revert merged sidebar, restore rail and panel`.
 
 ## Gates
 
