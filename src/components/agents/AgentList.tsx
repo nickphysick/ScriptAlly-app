@@ -13,6 +13,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
+import { PageHeader } from "../shell/PageHeader";
 import { useScriptAllyDb } from "../../lib/db";
 import { AgentCard } from "./AgentCard";
 import { AgentEditor } from "./AgentEditor";
@@ -347,19 +348,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   return (
     <div className="aglist">
       <div className="agl-page">
-        <div className="agl-head">
-          <div>
-            <div className="agl-crumb">
-              Querying &nbsp;/&nbsp; <span className="cur">Agents</span>
-            </div>
-            <h1 className="agl-h1">Your agent list</h1>
-            <p className="agl-sub">Everyone you're querying, watching, or saving for later.</p>
-          </div>
-          <button type="button" className="agl-btn agl-btn-dark agl-btn-add" onClick={onAddAgent}>
-            <Plus width={14} height={14} aria-hidden="true" />
-            Add new agent
-          </button>
-        </div>
+        {/* The standard page header (shell rollout Phase 5) — compact per the rollout map. The
+            old block's own crumb (the v2 top bar draws it now), the sub line and the dark Add
+            pill (no dark-pill CTA exists under the header law) are all retired — see the
+            rollout report. */}
+        <PageHeader
+          variant="compact"
+          title="Your agent list"
+          actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
+        />
 
         <div className="agl-controls">
           {AGENT_LIST_CHIPS.map((chip) => (

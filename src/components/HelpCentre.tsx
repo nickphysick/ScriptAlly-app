@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+import { PageHeader } from "./shell/PageHeader";
 import { 
   BookOpen, 
   Search, 
   Compass, 
-  Layers, 
-  HelpCircle, 
-  Clock, 
+  Layers,
+  Clock,
   FileText, 
   UploadCloud,
   ChevronRight, 
@@ -167,20 +167,13 @@ export function HelpCentre() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 md:py-12 animate-fade-in font-sans" id="help-centre-page">
-      {/* Header section with brand-aligned aesthetic styling */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FAF1EF] border border-[#7c3a2a]/15 text-[#7c3a2a] rounded-full text-[10px] font-bold tracking-wider uppercase mb-3">
-          <HelpCircle className="w-3.5 h-3.5 stroke-[2.5]" />
-          Knowledge Resource
-        </div>
-        <h1 className="font-serif text-3.5xl md:text-4xl text-[#3a1c14] font-semibold tracking-tight leading-none mb-3">
-          ScriptAlly Help Centre
-        </h1>
-        <p className="text-[#a08070] text-sm max-w-2xl mx-auto font-light leading-relaxed">
-          Welcome to your querying command centre manual. Discover expert tips and tools for tracking submissions, 
-          discovering literary representation, and moving closer to publication.
-        </p>
-      </div>
+      {/* The standard page header (shell rollout Phase 5) — full variant, deliberately
+          zero-action: nothing here warrants a header verb (flagged for a browser check). */}
+      <PageHeader
+        variant="full"
+        title="ScriptAlly Help Centre"
+        description="Welcome to your querying command centre manual. Discover expert tips and tools for tracking submissions, discovering literary representation, and moving closer to publication."
+      />
 
       {/* Styled search engine bar */}
       <div className="relative max-w-xl mx-auto mb-10">

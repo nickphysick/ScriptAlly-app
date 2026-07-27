@@ -23,9 +23,9 @@ import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
 import { PackageShowcase } from "./packages/PackageShowcase";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
-import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
-import { ChromeSlab } from "./shell/ChromeSlab";
-import { ChevronDown, Lock } from "lucide-react";
+import { FONT_SERIF } from "../lib/designTokens";
+import { PageHeader } from "./shell/PageHeader";
+import { ChevronDown } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
   const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
@@ -126,13 +126,6 @@ export const SubmissionPackages: React.FC = () => {
     </svg>
   );
 
-  // Slate Pro pill (app convention: slate text on a slate-tint pill + lock).
-  const proPill = (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "4px 10px" }}>
-      <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> Pro
-    </span>
-  );
-
   // Header right slot: the manuscript selector chip. One manuscript = plain; 2+ = a switcher menu.
   const chipShell: React.CSSProperties = {
     display: "inline-flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600,
@@ -188,16 +181,18 @@ export const SubmissionPackages: React.FC = () => {
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
       `}</style>
 
-      <ChromeSlab
-        grand
-        title={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-            Package Workshop{proPill}
-          </span>
-        }
-        meta={activeMs ? `${msPackages.length} ${msPackages.length === 1 ? "package" : "packages"}` : undefined}
-        tools={activeMs ? msSelector : undefined}
+      {/* The standard page header (shell rollout Phase 5) — full variant. The grand slab's
+          Pro pill and package-count pulse are dropped with it (no title-adornment/meta slots
+          under the header law); the manuscript selector keeps its function in the row below
+          the rule until the sidebar switcher is live-wired — see the rollout report. */}
+      <PageHeader
+        variant="full"
+        title="Package Workshop"
+        description="Bundle your materials once, then send them without rebuilding each time."
       />
+      {activeMs && msSelector && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12 }}>{msSelector}</div>
+      )}
 
       {!activeMs ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>

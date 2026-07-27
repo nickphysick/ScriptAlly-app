@@ -21,7 +21,7 @@ import { destroyManifest } from "../lib/cascade";
 import { ConfirmDestroy } from "./ConfirmDestroy";
 import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
-import { ChromeSlab, MASTHEAD_CTA_STYLE } from "./shell/ChromeSlab";
+import { PageHeader } from "./shell/PageHeader";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check, ChevronDown } from "lucide-react";
 import { isShelvedPresentation, activeQueryCount } from "../lib/manuscriptPage";
 import { manuscriptComps } from "../lib/comps";
@@ -142,25 +142,20 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   // "In submission" = manuscripts with ≥1 active (non-closed) query — activeQueryCount over each
   // manuscript's scoped queries (the same pipeline predicate the field roster uses).
-  const inSubmission = manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length;
-
   return (
     <div className="msv1">
-      <ChromeSlab
-        onNavigate={onNavigate}
-        grand
+      {/* The standard page header (shell rollout Phase 5) — full variant. The grand slab's
+          "N manuscripts · M in submission" pulse line is dropped with it (no meta slot under
+          the header law) — see the rollout report. */}
+      <PageHeader
+        variant="full"
         title="Your manuscripts"
-        meta={`${manuscripts.length} ${manuscripts.length === 1 ? "manuscript" : "manuscripts"} · ${inSubmission} in submission`}
-        tools={
-          <button
-            type="button"
-            style={MASTHEAD_CTA_STYLE}
-            onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-          >
-            <Plus style={{ width: 15, height: 15 }} />
-            Add manuscript
-          </button>
-        }
+        actions={[{
+          label: "Add manuscript",
+          icon: <Plus aria-hidden="true" />,
+          onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
+          primary: true,
+        }]}
       />
       <div className="msv-wrap">
         {ordered.length === 0 ? (
