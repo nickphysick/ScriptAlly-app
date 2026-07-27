@@ -1,0 +1,92 @@
+/**
+ * PageHeader locks (Phase 4): each variant renders its skeleton, the closing rule is always
+ * present, the description is omitted on compact and greeting, and a third action cannot
+ * survive — rejected by the tuple type at compile time and sliced at runtime. Rendered via
+ * renderToStaticMarkup (structure and classes only — layout is a browser check, per the
+ * jsdom limits noted in the pack).
+ */
+import { describe, it, expect } from "vitest";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { PageHeader, PageHeaderAction, PageHeaderActions } from "./PageHeader";
+
+const two: PageHeaderActions = [
+  { label: "Task settings", onClick: () => {} },
+  { label: "Add task or note", onClick: () => {}, primary: true },
+];
+
+describe("PageHeader — full", () => {
+  const html = renderToStaticMarkup(
+    <PageHeader variant="full" title="What's on your desk?" description="Urgent tasks, housekeeping, notes." actions={two} />
+  );
+  it("renders title, description, both actions and the rule", () => {
+    expect(html).toContain("svh--full");
+    expect(html).toContain("on your desk?"); // (the apostrophe HTML-escapes in static markup)
+    expect(html).toContain("Urgent tasks, housekeeping, notes.");
+    expect(html).toContain("svh-rule");
+    expect(html).toContain("svh-btn-ghost");
+    expect(html).toContain("svh-btn-primary");
+  });
+});
+
+describe("PageHeader — compact", () => {
+  const html = renderToStaticMarkup(
+    <PageHeader variant="compact" title="Queries Hub" description="should never show" actions={two} />
+  );
+  it("renders the title and rule but omits the description", () => {
+    expect(html).toContain("svh--compact");
+    expect(html).toContain("Queries Hub");
+    expect(html).not.toContain("should never show");
+    expect(html).toContain("svh-rule");
+  });
+});
+
+describe("PageHeader — greeting", () => {
+  const html = renderToStaticMarkup(
+    <PageHeader
+      variant="greeting"
+      title="Good morning, Nick"
+      kicker="Sunday 27 July · Week nine of querying"
+      description="should never show"
+      actions={two}
+    />
+  );
+  it("renders the kicker above the title, omits the description, keeps the rule", () => {
+    expect(html).toContain("svh--greeting");
+    expect(html.indexOf("Week nine")).toBeLessThan(html.indexOf("Good morning, Nick"));
+    expect(html).not.toContain("should never show");
+    expect(html).toContain("svh-rule");
+  });
+});
+
+describe("PageHeader — the two-action maximum", () => {
+  it("slices a third action at runtime (the tuple type already rejects it at compile time)", () => {
+    const three = [
+      { label: "One", onClick: () => {} },
+      { label: "Two", onClick: () => {} },
+      { label: "Three", onClick: () => {} },
+    ] as unknown as PageHeaderActions;
+    const html = renderToStaticMarkup(<PageHeader variant="full" title="T" actions={three} />);
+    expect(html).toContain("One");
+    expect(html).toContain("Two");
+    expect(html).not.toContain("Three");
+  });
+
+  it("renders no actions container when none are given", () => {
+    const html = renderToStaticMarkup(<PageHeader variant="full" title="Help centre" />);
+    expect(html).not.toContain("svh-acts");
+    expect(html).toContain("svh-rule");
+  });
+
+  it("type-level: a PageHeaderAction[] of three does not satisfy PageHeaderActions", () => {
+    // Compile-time documentation — @ts-expect-error proves the tuple rejection.
+    const three: PageHeaderAction[] = [
+      { label: "One", onClick: () => {} },
+      { label: "Two", onClick: () => {} },
+      { label: "Three", onClick: () => {} },
+    ];
+    // @ts-expect-error — three actions must not typecheck
+    const rejected: PageHeaderActions = three;
+    expect(rejected.length).toBe(3);
+  });
+});

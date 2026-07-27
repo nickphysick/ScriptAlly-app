@@ -1,0 +1,72 @@
+/* ── PageHeader (ref design-refs/scriptally-shell-v2.html .pagehead) ─────────────────────────
+   Full / compact / greeting variants; surfaces + inks from the --shell-* tokens, the primary
+   button from the canonical Form 11 pink trio (--pink/--pink-b/--pink-h). ── */
+
+.svh { margin-bottom: 26px; }
+.svh-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+.svh-txt { min-width: 0; }
+.svh-kicker {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  margin-bottom: 10px;
+}
+.svh-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 40px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  color: var(--shell-ink);
+}
+.svh-sub {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  color: var(--shell-ink-soft);
+  margin-top: 10px;
+}
+.svh-acts { display: flex; align-items: center; gap: 10px; flex: none; padding-bottom: 5px; }
+.svh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
+  border: 1px solid;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s;
+}
+.svh-btn svg { width: 15px; height: 15px; flex: none; }
+.svh-btn-ghost { background: var(--shell-card); border-color: var(--shell-line); color: var(--shell-ink); }
+.svh-btn-ghost svg { color: var(--shell-muted); }
+.svh-btn-ghost:hover { background: #fff; border-color: var(--pink-b); }
+.svh-btn-primary { background: var(--pink); border-color: var(--pink-b); color: var(--burg); }
+.svh-btn-primary svg { color: var(--burg); }
+.svh-btn-primary:hover { background: var(--pink-h); }
+/* The rule that closes every header — everything below it is page content. */
+.svh-rule { height: 1px; background: var(--shell-line-soft); margin-top: 22px; }
+
+/* compact — list/detail pages */
+.svh--compact { margin-bottom: 18px; }
+.svh--compact .svh-top { align-items: center; }
+.svh--compact .svh-title { font-size: 24px; }
+.svh--compact .svh-sub { display: none; }
+.svh--compact .svh-acts { padding-bottom: 0; }
+.svh--compact .svh-btn { height: 34px; font-size: 12px; }
+.svh--compact .svh-rule { margin-top: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .svh-btn { transition: none; }
+}
