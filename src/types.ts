@@ -254,6 +254,14 @@ export interface Agent {
   // subcollection. One pin max. Absent — or dangling, once that note is deleted — means the card
   // preview falls back to the latest note.
   pinnedNoteId?: string;
+  // DENORMALISED display cache — a deliberate, documented exception to derived-over-stored. The
+  // card face shows a note preview, but notes live in a subcollection, so deriving it per card
+  // would mean one listener per card. Safe because there is exactly ONE writer (the Agent list's
+  // buffered Done commit, which posts/deletes notes through the same path), nothing derives
+  // correctness from it (no status, count or task rule reads it), and it is a cache, not a fact.
+  // Self-heals: opening an agent and pressing Done recomputes it against the resolved notes.
+  // "" means "no notes"; absent means "never computed" (legacy/imported rows repair on next edit).
+  notePreview?: string;
 }
 
 export interface CommunityAgent {

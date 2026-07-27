@@ -14,6 +14,7 @@
  *     ever written as "Open"/"Closed", so an agent migrates off Unknown on its first saved edit.
  */
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus } from "../types";
+import { materialRowsFromAgent, summaryFromRows } from "./agentMaterials";
 
 /** Terminal query statuses — everything else, INCLUDING Offer, counts as an active query. */
 export const TERMINAL_STATUSES: readonly QueryStatus[] = [
@@ -207,47 +208,16 @@ export function wishlistChips(agent: Agent, max = 3): { shown: string[]; more: n
 }
 
 /**
- * The card's one-line materials summary. Reads BOTH stored shapes — the legacy `string[]` and the
- * `materialsForm` object (Phase 5 owns the full editor shims) — and never prefixes the free-text
- * "Other" entry, which reads as its own words. Null when nothing is recorded.
+ * The card's one-line materials summary — ONE source with the editor: the canonical string[] is
+ * parsed into the four editor rows and summarised from those, so the face and the Materials tab
+ * can never disagree. The free-text Other reads as its own words, never an "Other —" prefix.
  */
 export function materialsSummary(agent: Agent): string | null {
-  const raw = agent.materialsWanted as unknown;
-  const parts: string[] = [];
-
-  if (Array.isArray(raw)) {
-    for (const item of raw) {
-      if (typeof item === "string") {
-        if (item.trim()) parts.push(item.trim());
-      } else if (item && typeof item === "object") {
-        // structured QueryMaterial-ish entry: { type, quantity? }
-        const o = item as { type?: string; quantity?: string | number };
-        const label = (o.type || "").trim();
-        if (label) parts.push(o.quantity ? `${label} (${o.quantity})` : label);
-      }
-    }
-  } else if (raw && typeof raw === "object") {
-    const f = raw as {
-      queryLetter?: boolean; synopsis?: boolean;
-      pages?: { selected?: boolean; count?: string | number };
-      chapters?: { selected?: boolean; count?: string | number };
-      words?: { selected?: boolean; count?: string | number };
-      other?: { selected?: boolean; value?: string };
-    };
-    if (f.queryLetter) parts.push("Query letter");
-    if (f.synopsis) parts.push("Synopsis");
-    // Multiple sample units can be selected on legacy data — render one entry each, never collapse.
-    for (const [key, unit] of [["chapters", "chapters"], ["pages", "pages"], ["words", "words"]] as const) {
-      const cell = f[key];
-      if (cell?.selected) {
-        const n = String(cell.count ?? "").trim();
-        parts.push(n ? `Opening sample (${n} ${unit})` : "Opening sample");
-      }
-    }
-    if (f.other?.selected && (f.other.value || "").trim()) parts.push(f.other.value!.trim());
-  }
-
-  return parts.length ? parts.join("  ·  ") : null;
+  const stored = Array.isArray(agent.materialsWanted) ? (agent.materialsWanted as unknown[]) : [];
+  const asStrings = stored.map((x) =>
+    typeof x === "string" ? x : String((x as { type?: string })?.type || ""),
+  ).filter(Boolean);
+  return summaryFromRows(materialRowsFromAgent(asStrings));
 }
 
 export interface NotePreview {

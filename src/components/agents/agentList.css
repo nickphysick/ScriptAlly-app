@@ -524,3 +524,98 @@
 .aglist .agl-cc-o:hover, .aglist .agl-cc-o.sel { background: var(--agl-cream); }
 .aglist .agl-cc-o .fi { flex: none; }
 .aglist .agl-cc-empty { padding: 9px 8px; font-size: 12px; font-style: italic; color: var(--agl-ink-muted); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MATERIALS — document rows (Phase 5, mockup option C)
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-docrow {
+  display: flex; align-items: center; gap: 11px; flex-wrap: wrap;
+  border: 1.25px solid var(--agl-hair); border-radius: 9px; padding: 9px 11px; margin-bottom: 8px;
+  cursor: pointer; transition: all .15s; background: var(--agl-paper); width: 100%; text-align: left;
+  font-family: inherit;
+}
+.aglist .agl-docrow.on { border-color: var(--agl-ink); box-shadow: 2.5px 2.5px 0 var(--agl-band); }
+.aglist .agl-glyph {
+  width: 26px; height: 32px; flex: none; border: 1.25px solid var(--agl-ink);
+  border-radius: 3px 8px 3px 3px; background: #fdfaf5; position: relative;
+  opacity: .35; transition: opacity .15s;
+}
+.aglist .agl-docrow.on .agl-glyph { opacity: 1; }
+.aglist .agl-glyph::before {
+  content: ''; position: absolute; top: 0; right: 0; width: 8px; height: 8px;
+  border-left: 1.25px solid var(--agl-ink); border-bottom: 1.25px solid var(--agl-ink);
+  border-radius: 0 8px 0 3px; background: var(--agl-band);
+}
+.aglist .agl-glyph .lines { position: absolute; left: 4px; right: 4px; top: 13px; }
+.aglist .agl-glyph .lines i { display: block; height: 1.5px; background: var(--agl-ink); opacity: .5; margin-bottom: 3px; border-radius: 1px; }
+.aglist .agl-glyph .lines i:nth-child(2) { width: 70%; }
+.aglist .agl-docrow .nm { font-size: 12.5px; color: var(--agl-ink-body); }
+.aglist .agl-docrow.on .nm { font-weight: 500; color: var(--agl-ink-head); }
+.aglist .agl-docrow .state {
+  margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #c3b6a6;
+}
+.aglist .agl-docrow .ctl { margin-left: auto; display: flex; align-items: center; gap: 7px; }
+.aglist .agl-step { display: inline-flex; align-items: center; border: 1.25px solid var(--agl-ink); border-radius: 7px; overflow: hidden; }
+.aglist .agl-step button {
+  appearance: none; border: none; background: var(--agl-paper); width: 21px; height: 26px;
+  font-size: 13px; color: var(--agl-ink-head); cursor: pointer; line-height: 1; padding: 0;
+}
+.aglist .agl-step button:hover { background: var(--agl-cream); }
+.aglist .agl-step input[type="text"] {
+  width: 50px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  color: var(--agl-ink-head); border: none; border-left: 1.25px solid var(--agl-ink);
+  border-right: 1.25px solid var(--agl-ink); border-radius: 0; height: 26px; padding: 0 2px;
+  background: #fdfaf5; outline: none; box-shadow: none; margin: 0;
+}
+.aglist .agl-useg { display: inline-flex; border: 1.25px solid var(--agl-ink); border-radius: 7px; overflow: hidden; }
+.aglist .agl-useg button {
+  appearance: none; border: none; background: var(--agl-paper); padding: 6px 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--agl-ink-label); cursor: pointer;
+}
+.aglist .agl-useg button + button { border-left: 1.25px solid var(--agl-ink); }
+.aglist .agl-useg button.on { background: var(--agl-ink); color: var(--agl-cream); }
+.aglist .agl-otherfield { flex-basis: 100%; margin-top: 2px; }
+.aglist .agl-otherfield input[type="text"] { font-size: 12px; padding: 7px 10px; }
+.aglist .agl-othertext { flex-basis: 100%; margin-top: 2px; font-size: 12.5px; color: var(--agl-ink-head); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NOTES — chat bubbles (Phase 5)
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-pane.chat { display: flex; flex-direction: column; height: 100%; }
+.aglist .agl-chat {
+  flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column;
+  gap: 9px; padding: 2px 2px 10px;
+}
+.aglist .agl-bubble {
+  background: var(--agl-cream); border: 1px solid var(--agl-hair); border-radius: 11px;
+  padding: 9px 11px; position: relative;
+}
+.aglist .agl-bubble.pinned { border-color: rgba(124, 58, 42, .45); }
+.aglist .agl-ribbon {
+  display: flex; align-items: center; gap: 6px; margin: -9px -11px 8px; padding: 5px 11px;
+  background: rgba(124, 58, 42, .10); border-radius: 10px 10px 0 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #7c3a2a;
+}
+.aglist .agl-bubble .btext { font-size: 12.5px; line-height: 1.5; color: var(--agl-ink-body); white-space: pre-wrap; }
+.aglist .agl-bubble .bdate {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--agl-ink-label); margin-top: 6px;
+}
+/* ONE hover action bar beneath the text — worded chips, never icon-only, never a floating × */
+.aglist .agl-bactions { display: flex; gap: 6px; margin-top: 7px; opacity: 0; transition: opacity .14s; }
+.aglist .agl-bubble:hover .agl-bactions,
+.aglist .agl-bubble:focus-within .agl-bactions { opacity: 1; }
+.aglist .agl-bchip {
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--agl-ink-label);
+  background: var(--agl-paper); border: 1px solid var(--agl-hair); border-radius: 999px; padding: 3px 9px;
+}
+.aglist .agl-bchip:hover { color: var(--agl-ink-head); border-color: rgba(49, 30, 25, .38); }
+.aglist .agl-bchip svg { width: 9px; height: 9px; }
+.aglist .agl-chat-empty { font-size: 12.5px; font-style: italic; font-weight: 300; color: var(--agl-ink-muted); padding: 6px 2px; }
+.aglist .agl-note-in { display: flex; gap: 7px; align-items: flex-end; margin-top: auto; padding-top: 8px; }
+.aglist .agl-note-in textarea { flex: 1; min-height: 38px; max-height: 96px; resize: none; }

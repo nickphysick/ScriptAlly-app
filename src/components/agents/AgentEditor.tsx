@@ -18,6 +18,12 @@ import { AgentDraft, AgentEditorTab, DraftError, nrnState, nrnSubtitle } from ".
 import { agentInitials } from "../../lib/agentDisplay";
 import { compressAgentImage, AgentImageError } from "../../lib/agentImage";
 import { AgentCountryPicker } from "./AgentCountryPicker";
+import {
+  MaterialRow, SAMPLE_UNITS, SampleUnit, formatAmount, snapToUnit, stepAmount,
+} from "../../lib/agentMaterials";
+import { AgentNote, FLAT_NOTE_ID } from "../../lib/agentNotes";
+import { formatCardDate } from "../../lib/agentList";
+import { Pin, PinOff, Trash2 } from "lucide-react";
 import { SubmissionMethod } from "../../types";
 
 /** Decision 9's platform list — deliberately its own, not agentOptions.SOCIAL_PLATFORMS. */
@@ -48,15 +54,29 @@ interface AgentEditorProps {
   isNew: boolean;
   /** Drives the response-time caution — true when this agent has any non-terminal query. */
   hasActiveQueries: boolean;
+  /** The notes to render — stored (minus buffered deletions) plus buffered additions. */
+  notes: AgentNote[];
+  /** FALSE until the subcollection listener resolves; gates the empty-state copy, never a write. */
+  notesLoaded: boolean;
+  onPostNote: (text: string) => void;
+  onDeleteNote: (id: string) => void;
+  onPinNote: (id: string | undefined) => void;
 }
 
 export const AgentEditor: React.FC<AgentEditorProps> = ({
   draft, onChange, tab, onTab, onDone, error, onImageError, isNew, hasActiveQueries,
+  notes, notesLoaded, onPostNote, onDeleteNote, onPinNote,
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [genreInput, setGenreInput] = useState("");
   const [socPlatform, setSocPlatform] = useState(PLATFORMS[0]);
   const [socHandle, setSocHandle] = useState("");
+  const [noteInput, setNoteInput] = useState("");
+  const [otherEditing, setOtherEditing] = useState(false);
+
+  /** Patch one materials row by index — rows are positional because legacy data can carry two samples. */
+  const patchRow = (index: number, patch: Partial<MaterialRow>) =>
+    onChange({ materials: draft.materials.map((r, i) => (i === index ? ({ ...r, ...patch } as MaterialRow) : r)) });
 
   const addGenre = () => {
     const g = genreInput.trim();
@@ -165,7 +185,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
             <span>{error.msg}</span>
           </div>
         )}
-        <div className="agl-pane" key={tab} role="tabpanel">
+        <div className={`agl-pane${tab === "notes" ? " chat" : ""}`} key={tab} role="tabpanel">
           {tab === "contact" && (
             <>
               {/* the door — mockup fills the active segment INK (the band drives the switch below) */}
@@ -361,8 +381,158 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
             </>
           )}
 
-          {tab === "materials" && <p className="agl-placeholder">Materials rows arrive in Phase 5.</p>}
-          {tab === "notes" && <p className="agl-placeholder">Notes arrive in Phase 5.</p>}
+          {tab === "materials" && (
+            <>
+              <p className="agl-pane-sub">
+                Tick what this agent asks for. The opening sample takes an amount; anything unusual goes under Other.
+              </p>
+              {draft.materials.map((row, i) => (
+                <div
+                  key={`${row.key}-${i}`}
+                  className={`agl-docrow${row.on ? " on" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={row.on}
+                  onClick={() => {
+                    if (row.key === "other" && !row.on) { patchRow(i, { on: true }); setOtherEditing(true); return; }
+                    if (row.key === "sample" && !row.on) {
+                      patchRow(i, { on: true, amount: snapToUnit((row as { unit: SampleUnit }).unit) });
+                      return;
+                    }
+                    patchRow(i, { on: !row.on });
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); (e.currentTarget as HTMLElement).click(); } }}
+                >
+                  <span className="agl-glyph" aria-hidden="true"><span className="lines"><i /><i /><i /></span></span>
+                  <span className="nm">
+                    {row.name}
+                    {row.key === "synopsis" && row.on && row.pages.trim() ? ` · ${formatAmount(row.pages)} pages` : ""}
+                  </span>
+
+                  {!row.on && <span className="state">Not asked for</span>}
+
+                  {row.on && row.kind === "qty" && (
+                    <span className="ctl" onClick={(e) => e.stopPropagation()}>
+                      <span className="agl-step">
+                        <button type="button" aria-label="Less" onClick={() => patchRow(i, { amount: stepAmount(row.amount, row.unit, -1) })}>−</button>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={row.amount}
+                          aria-label={`Amount in ${row.unit.toLowerCase()}`}
+                          onChange={(e) => patchRow(i, { amount: e.target.value })}
+                        />
+                        <button type="button" aria-label="More" onClick={() => patchRow(i, { amount: stepAmount(row.amount, row.unit, 1) })}>+</button>
+                      </span>
+                      <span className="agl-useg" role="group" aria-label="Sample unit">
+                        {SAMPLE_UNITS.map((u) => (
+                          <button
+                            key={u}
+                            type="button"
+                            className={row.unit === u ? "on" : ""}
+                            aria-pressed={row.unit === u}
+                            /* switching unit SNAPS to that unit's default — never a fake conversion */
+                            onClick={() => patchRow(i, { unit: u, amount: snapToUnit(u) })}
+                          >
+                            {u}
+                          </button>
+                        ))}
+                      </span>
+                    </span>
+                  )}
+
+                  {row.on && row.kind === "text" && (
+                    <span className="agl-otherfield" onClick={(e) => e.stopPropagation()}>
+                      {otherEditing || !row.text.trim() ? (
+                        <input
+                          type="text"
+                          className="agl-in"
+                          autoFocus
+                          value={row.text}
+                          placeholder="What else do they ask for?"
+                          aria-label="Other materials"
+                          onChange={(e) => patchRow(i, { text: e.target.value })}
+                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setOtherEditing(false); } }}
+                          onBlur={() => setOtherEditing(false)}
+                        />
+                      ) : (
+                        /* committed: the row reads as its entered text; clicking re-opens editing */
+                        <span
+                          className="agl-othertext"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setOtherEditing(true)}
+                          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); setOtherEditing(true); } }}
+                        >
+                          {row.text}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {tab === "notes" && (
+            <>
+              <div className="agl-chat">
+                {notes.length ? (
+                  notes.map((note) => {
+                    const pinned = draft.pinnedNoteId === note.id;
+                    return (
+                      <div className={`agl-bubble${pinned ? " pinned" : ""}`} key={note.id}>
+                        {pinned && (
+                          <div className="agl-ribbon" aria-hidden="true">
+                            <Pin width={9} height={9} /> Pinned to your card
+                          </div>
+                        )}
+                        <div className="btext">{note.text}</div>
+                        {note.createdAt && <div className="bdate">{formatCardDate(note.createdAt)}</div>}
+                        <div className="agl-bactions">
+                          <button type="button" className="agl-bchip" onClick={() => onPinNote(pinned ? undefined : note.id)}>
+                            {pinned ? <PinOff aria-hidden="true" /> : <Pin aria-hidden="true" />}
+                            {pinned ? "Unpin" : "Pin to card"}
+                          </button>
+                          <button type="button" className="agl-bchip" onClick={() => onDeleteNote(note.id)}>
+                            <Trash2 aria-hidden="true" /> Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="agl-chat-empty">
+                    {notesLoaded ? "Nothing noted yet — what did they say?" : "Loading notes…"}
+                  </p>
+                )}
+              </div>
+              <div className="agl-note-in">
+                <textarea
+                  className="agl-in"
+                  rows={1}
+                  value={noteInput}
+                  placeholder="Write a note… (Enter posts, Shift+Enter for a new line)"
+                  aria-label="Write a note"
+                  onChange={(e) => setNoteInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (noteInput.trim()) { onPostNote(noteInput.trim()); setNoteInput(""); }
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="agl-btn agl-btn-ghost agl-btn-sm"
+                  disabled={!noteInput.trim()}
+                  onClick={() => { if (noteInput.trim()) { onPostNote(noteInput.trim()); setNoteInput(""); } }}
+                >
+                  Post
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

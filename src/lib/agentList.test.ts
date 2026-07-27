@@ -224,26 +224,23 @@ describe("agentList · card history + wishlist", () => {
   });
 });
 
-describe("agentList · materials summary (reads both stored shapes)", () => {
-  it("legacy string[]", () => {
-    expect(materialsSummary(mkAgent({ materialsWanted: ["Query Letter", "Synopsis"] }))).toBe("Query Letter  ·  Synopsis");
+describe("agentList · materials summary (the canonical string[] — one source with the editor)", () => {
+  it("summarises the stored strings through the editor's own row model", () => {
+    expect(materialsSummary(mkAgent({ materialsWanted: ["Query letter", "Synopsis"] }))).toBe("Query letter  ·  Synopsis");
   });
 
-  it("materialsForm object, with the sample unit named", () => {
-    const form = { queryLetter: true, synopsis: false, pages: { selected: true, count: "10" }, chapters: { selected: false, count: "" }, words: { selected: false, count: "" }, other: { selected: false, value: "" } };
-    expect(materialsSummary(mkAgent({ materialsWanted: form as never }))).toBe("Query letter  ·  Opening sample (10 pages)");
+  it("names the sample unit", () => {
+    expect(materialsSummary(mkAgent({ materialsWanted: ["First 10 pages"] }))).toBe("Opening sample (10 pages)");
   });
 
-  it("multiple legacy sample units each get their own entry — never collapsed", () => {
-    const form = { pages: { selected: true, count: "10" }, chapters: { selected: true, count: "3" }, words: { selected: false }, other: { selected: false } };
-    expect(materialsSummary(mkAgent({ materialsWanted: form as never }))).toBe("Opening sample (3 chapters)  ·  Opening sample (10 pages)");
+  it("a quantified Synopsis reads as 'Synopsis · 2 pages'", () => {
+    expect(materialsSummary(mkAgent({ materialsWanted: ["Synopsis (2 pages)"] }))).toBe("Synopsis · 2 pages");
   });
 
   it("the Other text reads as its own words — never an 'Other —' prefix", () => {
-    const form = { other: { selected: true, value: "First five pages pasted in the email body" } };
-    const out = materialsSummary(mkAgent({ materialsWanted: form as never }));
-    expect(out).toBe("First five pages pasted in the email body");
-    expect(out).not.toMatch(/Other/);
+    const out = materialsSummary(mkAgent({ materialsWanted: ["Query letter", "A one-page pitch in the email body"] }));
+    expect(out).toMatch(/A one-page pitch in the email body/);
+    expect(out).not.toMatch(/Other —/);
   });
 
   it("null when nothing is recorded", () => {

@@ -170,3 +170,157 @@ export function materialsCountErrors(s: AgentMaterialsState): Set<string> {
   }
   return bad;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   AGENT LIST — the four-row document editor (decisions 11–12, as ruled)
+   ──────────────────────────────────────────────────────────────────────────────
+   The Materials tab has EXACTLY four rows: Query letter · Synopsis · Opening
+   sample · Other. "Author bio" and "Full manuscript" were deliberately dropped in
+   favour of Other, so this editor never renders them AND STRIPS them on every
+   commit — legacy flags decay on the agent's next edit rather than lurking.
+
+   Storage is unchanged: the canonical `string[]` via buildAgentMaterials /
+   parseAgentMaterials above. No new shape is introduced.
+
+   Unit physics (decision 11) drive the stepper — per-unit step, floor and default,
+   and switching unit SNAPS to that unit's default rather than fake-converting.
+   MAT_QTY remains the storage-level range, so the stepper clamps to its maxima too.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+export type SampleUnit = "Chapters" | "Pages" | "Words";
+export const SAMPLE_UNITS: readonly SampleUnit[] = ["Chapters", "Pages", "Words"];
+
+/** The MAT_OPTS pill each sample unit stores as. */
+export const SAMPLE_PILL: Record<SampleUnit, string> = {
+  Chapters: "Sample chapters",
+  Pages: "Sample pages",
+  Words: "Sample words",
+};
+
+/** Decision 11's physics. `max` comes from MAT_QTY so the stepper and storage agree. */
+export const UNIT_CFG: Record<SampleUnit, { step: number; min: number; def: number; max: number }> = {
+  Chapters: { step: 1, min: 1, def: 3, max: MAT_QTY["Sample chapters"].max },
+  Pages: { step: 5, min: 1, def: 10, max: MAT_QTY["Sample pages"].max },
+  Words: { step: 500, min: 500, def: 5000, max: MAT_QTY["Sample words"].max },
+};
+
+/** Pills this editor deliberately drops on write (see the header). */
+export const STRIPPED_PILLS = ["Author bio", "Full manuscript"] as const;
+
+export const formatAmount = (n: number | string): string => {
+  const v = typeof n === "number" ? n : parseInt(String(n).replace(/,/g, ""), 10);
+  return Number.isNaN(v) ? "" : v.toLocaleString("en-GB");
+};
+export const parseAmount = (raw: string): number => parseInt(String(raw ?? "").replace(/,/g, ""), 10);
+
+export type MaterialRow =
+  | { key: "queryLetter"; kind: "binary"; name: string; on: boolean }
+  /** Synopsis is BINARY here, but preserves any stored page count for display. */
+  | { key: "synopsis"; kind: "binary"; name: string; on: boolean; pages: string }
+  | { key: "sample"; kind: "qty"; name: string; on: boolean; unit: SampleUnit; amount: string }
+  | { key: "other"; kind: "text"; name: string; on: boolean; text: string };
+
+export const MATERIAL_ROW_NAMES = {
+  queryLetter: "Query letter",
+  synopsis: "Synopsis",
+  sample: "Opening sample",
+  other: "Other",
+} as const;
+
+/**
+ * Stored materials → editor rows. Several sample units can be selected on legacy data, so ONE
+ * quantity row is emitted per selected unit rather than collapsing them (decision 12).
+ */
+export function materialRowsFromAgent(materialsWanted: readonly string[] | undefined): MaterialRow[] {
+  const s = parseAgentMaterials(materialsWanted);
+  const has = (o: string) => s.selected.includes(o);
+
+  const rows: MaterialRow[] = [
+    { key: "queryLetter", kind: "binary", name: MATERIAL_ROW_NAMES.queryLetter, on: has("Query letter") },
+    { key: "synopsis", kind: "binary", name: MATERIAL_ROW_NAMES.synopsis, on: has("Synopsis"), pages: s.counts["Synopsis"] || "" },
+  ];
+
+  const units = SAMPLE_UNITS.filter((u) => has(SAMPLE_PILL[u]));
+  if (units.length) {
+    for (const u of units) {
+      rows.push({ key: "sample", kind: "qty", name: MATERIAL_ROW_NAMES.sample, on: true, unit: u, amount: s.counts[SAMPLE_PILL[u]] || "" });
+    }
+  } else {
+    rows.push({ key: "sample", kind: "qty", name: MATERIAL_ROW_NAMES.sample, on: false, unit: "Chapters", amount: "" });
+  }
+
+  rows.push({ key: "other", kind: "text", name: MATERIAL_ROW_NAMES.other, on: has("Other"), text: s.otherText });
+  return rows;
+}
+
+/**
+ * Editor rows → the canonical `string[]`. Author bio and Full manuscript are NOT re-emitted, so a
+ * legacy agent sheds them on its next Materials commit. An unticked Synopsis drops its page count.
+ */
+export function materialsWantedFromRows(rows: MaterialRow[]): string[] {
+  const state = emptyMaterials();
+  for (const r of rows) {
+    if (r.key === "queryLetter" && r.on) state.selected.push("Query letter");
+    else if (r.key === "synopsis" && r.on) {
+      state.selected.push("Synopsis");
+      if (r.pages.trim()) state.counts["Synopsis"] = r.pages.trim();
+    } else if (r.key === "sample" && r.on) {
+      const pill = SAMPLE_PILL[r.unit];
+      state.selected.push(pill);
+      const n = parseAmount(r.amount);
+      if (!Number.isNaN(n)) state.counts[pill] = String(n);
+    } else if (r.key === "other" && r.on && r.text.trim()) {
+      state.selected.push("Other");
+      state.otherText = r.text.trim();
+    }
+  }
+  // belt and braces: the two dropped pills can never survive a commit
+  state.selected = state.selected.filter((p) => !STRIPPED_PILLS.includes(p as (typeof STRIPPED_PILLS)[number]));
+  return buildAgentMaterials(state);
+}
+
+/** Switching unit snaps to that unit's default — never a fake conversion. */
+export const snapToUnit = (unit: SampleUnit): string => String(UNIT_CFG[unit].def);
+
+/** Stepper arithmetic: floored by decision 11, capped by MAT_QTY. */
+export function stepAmount(raw: string, unit: SampleUnit, direction: 1 | -1): string {
+  const cfg = UNIT_CFG[unit];
+  const current = parseAmount(raw);
+  const base = Number.isNaN(current) ? cfg.def : current;
+  return String(Math.min(cfg.max, Math.max(cfg.min, base + direction * cfg.step)));
+}
+
+/** The card-face summary. The Other row reads as its own words — never an "Other —" prefix. */
+export function summaryFromRows(rows: MaterialRow[]): string | null {
+  const parts: string[] = [];
+  for (const r of rows) {
+    if (!r.on) continue;
+    if (r.kind === "qty") {
+      const amt = r.amount ? formatAmount(r.amount) : "";
+      parts.push(amt ? `${r.name} (${amt} ${r.unit.toLowerCase()})` : r.name);
+    } else if (r.kind === "text") {
+      if (r.text.trim()) parts.push(r.text.trim());
+    } else if (r.key === "synopsis" && r.pages.trim()) {
+      parts.push(`${r.name} · ${formatAmount(r.pages)} pages`);
+    } else parts.push(r.name);
+  }
+  return parts.length ? parts.join("  ·  ") : null;
+}
+
+/** Materials validation for Done: a selected sample needs an amount at/above its NAMED floor. */
+export function validateMaterials(rows: MaterialRow[]): { msg: string } | null {
+  for (const r of rows) {
+    if (r.kind === "qty" && r.on) {
+      const cfg = UNIT_CFG[r.unit];
+      const n = parseAmount(r.amount);
+      if (!String(r.amount).trim() || Number.isNaN(n) || n < cfg.min) {
+        const floor = cfg.min > 1 ? ` (at least ${formatAmount(cfg.min)} ${r.unit.toLowerCase()})` : "";
+        return { msg: `Enter how much of the opening sample they ask for${floor}.` };
+      }
+    }
+    if (r.kind === "text" && r.on && !r.text.trim()) {
+      return { msg: "Explain what 'Other' materials are requested." };
+    }
+  }
+  return null;
+}

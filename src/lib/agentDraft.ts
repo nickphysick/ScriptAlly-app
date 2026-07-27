@@ -16,6 +16,8 @@
  * removes the key rather than storing a zero or a false that would read as a decision.
  */
 import { Agent, AgentSocial, SubmissionMethod, SubmissionStatus } from "../types";
+import { MaterialRow, materialRowsFromAgent, materialsWantedFromRows, validateMaterials } from "./agentMaterials";
+import { NotesDraft, emptyNotesDraft } from "./agentNotes";
 
 export type AgentEditorTab = "contact" | "wishlist" | "materials" | "notes";
 
@@ -46,8 +48,10 @@ export interface AgentDraft {
   socials: AgentSocial[];
   /** The pinned note's subcollection doc id (Phase 5 wires the pinning UI). */
   pinnedNoteId?: string;
-  /** Carried verbatim until Phase 5 owns the materials editor, so it round-trips untouched. */
-  materialsWanted: Agent["materialsWanted"];
+  /** The four document rows (Phase 5). Committed back through the canonical string[] encoder. */
+  materials: MaterialRow[];
+  /** Buffered note posts / deletions / the flat-note migration — committed by Done, never live. */
+  notes: NotesDraft;
 }
 
 const s = (v: unknown): string => (typeof v === "string" ? v : "");
@@ -86,7 +90,12 @@ export function draftFromAgent(a: Agent): AgentDraft {
     image: a.image,
     socials: legacySocials(a),
     pinnedNoteId: a.pinnedNoteId,
-    materialsWanted: a.materialsWanted,
+    materials: materialRowsFromAgent(
+      Array.isArray(a.materialsWanted)
+        ? (a.materialsWanted as unknown[]).map((x) => (typeof x === "string" ? x : String((x as { type?: string })?.type || ""))).filter(Boolean)
+        : [],
+    ),
+    notes: emptyNotesDraft(),
   };
 }
 
@@ -123,7 +132,8 @@ export function blankDraft(id: string): AgentDraft {
     image: undefined,
     socials: [],
     pinnedNoteId: undefined,
-    materialsWanted: [],
+    materials: materialRowsFromAgent([]),
+    notes: emptyNotesDraft(),
   };
 }
 
@@ -163,6 +173,8 @@ export function validateDraft(d: AgentDraft): DraftError | null {
   if (d.submissionMethod === "Other" && !d.methodOther.trim()) {
     return { tab: "contact", msg: "Describe the 'Other' submission method." };
   }
+  const mats = validateMaterials(d.materials);
+  if (mats) return { tab: "materials", msg: mats.msg };
   return null;
 }
 
@@ -244,6 +256,14 @@ export function diffDraft(original: Agent, d: AgentDraft): DraftDiff {
   }
 
   if (!sameSocials(d.socials, original.socials || [])) changed.socials = d.socials.map((x) => ({ ...x }));
+
+  // Materials round-trip through the canonical string[] encoder; the two retired pills (Author bio,
+  // Full manuscript) are stripped there, so legacy flags decay on this commit.
+  const nextMaterials = materialsWantedFromRows(d.materials);
+  const origMaterials = Array.isArray(original.materialsWanted) ? (original.materialsWanted as string[]) : [];
+  if (nextMaterials.length !== origMaterials.length || nextMaterials.some((m, i) => m !== origMaterials[i])) {
+    changed.materialsWanted = nextMaterials;
+  }
 
   if ((d.pinnedNoteId || "") !== (original.pinnedNoteId || "")) {
     if (d.pinnedNoteId) changed.pinnedNoteId = d.pinnedNoteId;

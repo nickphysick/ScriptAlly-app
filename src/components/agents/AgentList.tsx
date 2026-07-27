@@ -25,7 +25,11 @@ import {
   isDiffEmpty,
   validateDraft,
 } from "../../lib/agentDraft";
-import { deleteField } from "firebase/firestore";
+import { collection, deleteDoc, deleteField, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "../../lib/firebase";
+import {
+  AgentNote, FLAT_NOTE_ID, effectiveNotes, emptyNotesDraft, notePreviewWrite, resolvePin,
+} from "../../lib/agentNotes";
 import { Agent } from "../../types";
 import { agentRelationship } from "../../lib/agentList";
 import {
@@ -45,7 +49,7 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
-  const { agents, queries, manuscripts, activities, updateAgent } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, updateAgent, currentUser } = useScriptAllyDb();
 
   const [filter, setFilter] = useState<AgentListFilter>("all");
   const [search, setSearch] = useState(searchQuery?.trim() || "");
@@ -64,12 +68,48 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   const [draft, setDraft] = useState<AgentDraft | null>(null);
   const [tab, setTab] = useState<AgentEditorTab>("contact");
   const [error, setError] = useState<DraftError | null>(null);
+  // ONE notes listener, for the OPEN card only — never one per card in the grid.
+  const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
+  const [notesLoaded, setNotesLoaded] = useState(false);
 
   const discard = useCallback(() => {
     setFlippedId(null);
     setDraft(null);
     setError(null);
+    setStoredNotes([]);
+    setNotesLoaded(false);
   }, []);
+
+  // Subscribe to the open agent's notes subcollection. `notesLoaded` only turns true once the
+  // listener actually resolves — the notePreview recompute is gated on it, because an unresolved
+  // listener is indistinguishable from "no notes" and would wipe a valid preview on Done.
+  useEffect(() => {
+    setStoredNotes([]);
+    setNotesLoaded(false);
+    if (!flippedId || !currentUser) return;
+    const ref = collection(db, "users", currentUser.id, "agents", flippedId, "notes");
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        const list: AgentNote[] = [];
+        snap.forEach((d) => {
+          const data = d.data() as { text?: string; createdAt?: { toDate?: () => Date } | string };
+          list.push({
+            id: d.id,
+            text: String(data.text ?? ""),
+            createdAt:
+              typeof data.createdAt === "object" && data.createdAt?.toDate
+                ? data.createdAt.toDate().toISOString()
+                : String(data.createdAt ?? ""),
+          });
+        });
+        setStoredNotes(list);
+        setNotesLoaded(true);
+      },
+      (e) => handleFirestoreError(e, OperationType.LIST, `users/${currentUser.id}/agents/${flippedId}/notes`),
+    );
+    return () => unsub();
+  }, [flippedId, currentUser?.id]);
 
   const onEdit = useCallback(
     (agentId: string) => {
@@ -83,6 +123,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     [agents],
   );
 
+  // What the Notes pane shows: stored minus buffered deletions, plus buffered additions, with the
+  // legacy flat note as the oldest bubble until it migrates.
+  const openAgent = flippedId ? agents.find((a) => a.id === flippedId) ?? null : null;
+  const visibleNotes = draft
+    ? effectiveNotes(storedNotes, draft.notes, { flatNote: openAgent?.notes, dateAdded: openAgent?.dateAdded })
+    : [];
+
   const onDone = useCallback(async () => {
     if (!draft) return;
     const invalid = validateDraft(draft);
@@ -95,6 +142,52 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     if (!original) return discard();
 
     const diff = diffDraft(original, draft);
+
+    // ── notes: the buffered posts / deletions / flat-note migration, committed HERE so the agent
+    // write and the note documents land together (one writer — what makes notePreview safe).
+    if (currentUser) {
+      const notesCol = collection(db, "users", currentUser.id, "agents", draft.id, "notes");
+      try {
+        for (const id of draft.notes.deletedIds) {
+          if (id !== FLAT_NOTE_ID) await deleteDoc(doc(notesCol, id));
+        }
+        for (const pending of draft.notes.added) {
+          await setDoc(doc(notesCol, pending.tempId), { text: pending.text, createdAt: pending.createdAt });
+        }
+        // the legacy flat note becomes a real, pinnable bubble carrying its original timestamp,
+        // and the flat field is blanked in the SAME commit
+        if (draft.notes.migratedFlat && (original.notes || "").trim()) {
+          const migratedId = `note-${Math.random().toString(36).slice(2, 11)}`;
+          await setDoc(doc(notesCol, migratedId), {
+            text: original.notes.trim(),
+            createdAt: original.dateAdded || new Date().toISOString(),
+          });
+          diff.changed.notes = "";
+        }
+      } catch (e) {
+        handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${draft.id}/notes`);
+      }
+    }
+
+    // ── notePreview (the documented derived-over-stored exception). Recompute against the notes
+    // as they will be AFTER this commit, gated on the listener having resolved.
+    const committedNotes = effectiveNotes(storedNotes, draft.notes, {
+      flatNote: draft.notes.migratedFlat ? original.notes : undefined,
+      dateAdded: original.dateAdded,
+    });
+    const livePin = resolvePin(committedNotes, draft.pinnedNoteId);
+    if ((livePin || "") !== (draft.pinnedNoteId || "")) {
+      if (livePin) diff.changed.pinnedNoteId = livePin;
+      else if (original.pinnedNoteId) diff.deletes.push("pinnedNoteId");
+    }
+    const preview = notePreviewWrite({
+      loaded: notesLoaded,
+      notes: committedNotes,
+      pinnedNoteId: livePin,
+      stored: original.notePreview,
+    });
+    if (preview !== undefined) diff.changed.notePreview = preview;
+
     if (!isDiffEmpty(diff)) {
       // deleteField() for values the writer cleared, so absence round-trips as absence rather
       // than a stored 0/false (the repo's existing unset convention).
@@ -105,7 +198,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       await updateAgent(draft.id, payload);
     }
     discard();
-  }, [agents, draft, discard, updateAgent]);
+  }, [agents, draft, discard, updateAgent, currentUser, storedNotes, notesLoaded]);
 
   // ── Escape cascade (three stages, in order) ───────────────────────────────
   // 1. An open popup consumes Escape and closes itself — AgentCountryPicker listens on the
@@ -240,6 +333,43 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                     onImageError={(msg) => setError({ tab: "contact", msg })}
                     isNew={false}
                     hasActiveQueries={agentRelationship(agent.id, queries) === "active"}
+                    notes={visibleNotes}
+                    notesLoaded={notesLoaded}
+                    onPostNote={(text) =>
+                      setDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              notes: {
+                                ...d.notes,
+                                // posting is what migrates the legacy flat note (decision 13)
+                                migratedFlat: d.notes.migratedFlat || !!(agent.notes || "").trim(),
+                                added: [
+                                  ...d.notes.added,
+                                  { tempId: `note-${Math.random().toString(36).slice(2, 11)}`, text, createdAt: new Date().toISOString() },
+                                ],
+                              },
+                            }
+                          : d,
+                      )
+                    }
+                    onDeleteNote={(id) =>
+                      setDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              // deleting the pinned note clears the pin; the preview falls back to latest
+                              pinnedNoteId: d.pinnedNoteId === id ? undefined : d.pinnedNoteId,
+                              notes: {
+                                ...d.notes,
+                                deletedIds: [...d.notes.deletedIds, id],
+                                added: d.notes.added.filter((p) => p.tempId !== id),
+                              },
+                            }
+                          : d,
+                      )
+                    }
+                    onPinNote={(id) => setDraft((d) => (d ? { ...d, pinnedNoteId: id } : d))}
                   />
                 ) : null
               }
