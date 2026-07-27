@@ -710,16 +710,10 @@
 @media (prefers-reduced-motion: reduce) {
   .stage-page-on { animation: none; }
 }
-/* Cappuccino-only Form 11 inset frame on the Queries Hub bar — square, burgundy. SCOPED under
-   .t-capp so it never leaks into Bold Pastille (a mockup bug once did). */
-.t-capp .qhbar::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border: 1px solid #7c3a2a;
-  border-radius: 0;
-  pointer-events: none;
-}
+/* The Cappuccino-only .qhbar inset frame is RETIRED (shell rollout Phase 6) with its sole
+   carrier, the dead HubHeaderBar — the rule had no live render site (Queries dropped its qhbar
+   copies in the F12 rebuild), so nothing visual changes. If the hub ever regains a Capp CARD
+   masthead, reintroduce the frame scoped to that container — never unscoped. */
 
 /* ── Theme-editor paint overrides — CAPPUCCINO ONLY (2026-07-08). Narrow, per-component colours
    picked on-page; scoped under .t-capp so they never touch Bold/Editorial. Most paint picks landed

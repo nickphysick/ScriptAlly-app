@@ -8,14 +8,13 @@
  * pixels are Nick's in-browser list (the page is auth-gated).
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
 const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
-const hub = readFileSync(join(here, "..", "shell", "HubHeaderBar.tsx"), "utf8");
 const rule = (sel: string): string => {
   const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
@@ -157,12 +156,11 @@ describe("spine P3 — the bar joins the page", () => {
     // the content body below the bar is NOT parchment — the L is just the panel + bar
     expect(rule(".tsh-body")).not.toContain("var(--spine-pan)");
   });
-  it("HubHeaderBar source is UNTOUCHED (the wrapper approach — the shell paints its own bar)", () => {
-    for (const mine of ["spine-", "TodoShell", "todo-fix54", "hardback", "tsh-"]) expect(hub).not.toContain(mine);
-    // the wrapper approach: the To-do bar is the shell's own .tsh-bcbar, never HubHeaderBar
+  it("HubHeaderBar stays out of the To-do shell (and is now deleted outright — shell rollout Phase 6)", () => {
+    // the wrapper approach: the To-do bar is the shell's own .tsh-bcbar, never HubHeaderBar —
+    // whose dead source (zero render sites) was removed with the Queries-hub phase.
     expect(page).not.toContain("HubHeaderBar");
-    expect(hub).toContain("export const HubHeaderBar"); // its own grammar, intact
-    expect(hub).toContain("qhbar");
+    expect(existsSync(join(here, "..", "shell", "HubHeaderBar.tsx"))).toBe(false);
   });
 });
 

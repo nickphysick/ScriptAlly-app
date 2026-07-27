@@ -88,10 +88,10 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     expect(src.includes("Actions toolbar")).toBe(false);
   });
 
-  it("the mark-sent popover is anchored to the primary ribbon tile (single home)", () => {
-    // The primary tile routes markSentTriggerRef through primaryRef only on the writer's turn.
-    expect(src).toContain("const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined");
-    expect(src).toContain("ref={primaryRef}");
+  it("the mark-sent popover is anchored to the record header's contextual primary (single home)", () => {
+    // Shell rollout Phase 6: the contextual primary moved from the control bar to the reading
+    // pane's record header; it routes markSentTriggerRef only on the writer's turn.
+    expect(src).toContain("ref={heroIsMark ? markSentTriggerRef : undefined}");
     expect(src).toContain("triggerRef={markSentTriggerRef}"); // the popover consumes the same ref
   });
 

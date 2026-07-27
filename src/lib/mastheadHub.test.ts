@@ -44,9 +44,12 @@ describe("ChromeSlab — the grand variant", () => {
 });
 
 describe("Queries hub — the grand masthead is RETIRED (F12 shell, overnight run)", () => {
-  it("Queries mounts no ChromeSlab; the F12 header (CrumbStrip via F12Page) carries the page name", () => {
-    // The breadcrumb + list footer carry what the masthead + pulse line used to say.
+  it("Queries mounts no ChromeSlab; the compact PageHeader carries the page name (shell rollout Phase 6)", () => {
+    // The v2 shell's top bar draws the crumb; the compact header + list footer carry what the
+    // masthead + pulse line used to say.
     expect(queries.includes("<ChromeSlab")).toBe(false);
-    expect(queries).toContain("<F12Page");
+    expect(queries.includes("<F12Page")).toBe(false);
+    expect(queries).toContain('title="Queries Hub"');
+    expect(queries).toContain('variant="compact"');
   });
 });

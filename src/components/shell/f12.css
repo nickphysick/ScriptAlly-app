@@ -62,6 +62,11 @@
 /* ── control bar — two zones locked to the panes by --listw (chrome revision: 56px; the left
    zone sits flush with the list pane's left edge, the right zone is inset 20px from both of
    the reading pane's edges) ── */
+/* The compact page-header seat (shell rollout Phase 6) — the same centred column as the
+   control bar / body, holding the app-standard PageHeader above the F12 work area. */
+.f12-hd2 { flex: none; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 16px var(--gut) 0; }
+.f12-hd2 .svh { margin-bottom: 0; }
+
 /* asymmetric vertical padding (more on top) drops the buttons toward the content below rather
    than centring them mid-bar — they were reading closer to the breadcrumb than the panes. */
 .f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 15px var(--gut) 3px; }

@@ -13,7 +13,8 @@
  *
  * The old multi-view builder (FirstVisitHome / PackagesHome / Composer / MaterialsManager /
  * MaterialsRail / JourneyStrip / PackageStats view / WorkedExample / the MaterialModal popup) was
- * retired for the workshop; the packageMetrics engine + TypeGlyph + HubHeaderBar/ChromeSlab stay.
+ * retired for the workshop; the packageMetrics engine + TypeGlyph stay (the masthead is the
+ * app-standard PageHeader since the shell rollout — HubHeaderBar is deleted, ChromeSlab unused here).
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";

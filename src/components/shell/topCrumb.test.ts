@@ -90,10 +90,11 @@ describe("crumb tokens — per-theme smoke (rule-text lock)", () => {
 });
 
 describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () => {
-  it("the ChromeSlab is retired from Queries; the F12Page shell (CrumbStrip header) replaces it", () => {
+  it("the ChromeSlab is retired from Queries; the headerless .t-f12 root + compact PageHeader replace it (shell rollout Phase 6)", () => {
     const queries = readFileSync(resolve(__dirname, "../Queries.tsx"), "utf8");
     expect(queries.includes("<ChromeSlab")).toBe(false);
-    expect(queries).toContain("<F12Page");
+    expect(queries.includes("<F12Page")).toBe(false);
+    expect(queries).toContain('className="t-f12 f12-root"');
     expect(queries.includes('className="qhbar"')).toBe(false);
   });
 

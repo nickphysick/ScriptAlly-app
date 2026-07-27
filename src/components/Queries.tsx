@@ -29,7 +29,8 @@ import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, 
 import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { F12Page, F12Account, IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { PageHeader } from "./shell/PageHeader";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
@@ -1852,12 +1853,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   selectedQueryIdRef.current = selectedQueryId;
 
   return (
-    /* ── F12 shell (ref queries-hub-v18.html): white full-bleed header (CrumbStrip repainted by
-       the .t-f12 tokens); the only right-side item is the account cluster — export/help/the CTA
-       all left this bar (chrome revision; the CTA moved to the control bar's left zone). ── */
-    <F12Page
-      tools={<F12Account onClick={() => onNavigate?.("account")} />}
-    >
+    /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
+       and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
+       retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
+       header is the compact PageHeader in the centred column below. ── */
+    <div className="t-f12 f12-root">
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -2428,6 +2428,39 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             via the f12-ctl / f12-chips / f12-body classes. ── */}
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
 
+        {/* ── The compact page header (shell rollout Phase 6): title inline with Export + Log
+            query, rule beneath. Export runs the existing filtered-CSV handler (the list foot
+            keeps its copy for now — same handler, flagged in the report); Log query is the
+            existing interception, relocated here from the control bar's left zone. ── */}
+        <div className="f12-hd2">
+          <PageHeader
+            variant="compact"
+            title="Queries Hub"
+            actions={queries.length > 0
+              ? [
+                  {
+                    label: "Export",
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5" /><path d="M4 19h16" /></svg>,
+                    onClick: () => { if (sortedList.length > 0) handleExportFilteredCSV(); },
+                  },
+                  {
+                    label: "Log query",
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
+                    onClick: () => onNavigate?.("queries", "Log a query"),
+                    primary: true,
+                  },
+                ]
+              : [
+                  {
+                    label: "Log query",
+                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
+                    onClick: () => onNavigate?.("queries", "Log a query"),
+                    primary: true,
+                  },
+                ]}
+          />
+        </div>
+
         {queries.length === 0 ? (
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
@@ -2508,40 +2541,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           const sel = !!(activeQuery && activeAgent && activeMs);
           const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
           const ctrlAction = status ? getPrimaryAction(status) : null;
-          const isMark = ctrlAction?.kind === "mark-sent";
           const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
           const waitingOnAgent = ctrlAction?.ballHolder === "agent";
           const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
-          const primaryLabel = isClosed ? "Reopen"
-            : (isMark && ctrlAction?.kind === "mark-sent") ? (ctrlAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
-            : "Record response";
-          const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined;
-          // Demoted to a shortcut (5a): the contextual CTA keeps its label but now scrolls to the
-          // composer + focuses it — one recording flow, two entrances. The composer's chips carry
-          // the actual writes (mark-sent → MarkSentPopover, Offer/R&R → rich form, etc.).
-          const onPrimary = !sel ? undefined : () => composerRef.current?.focus();
 
           return (
             <div className="f12-ctl">
-              {/* Left zone — flush with the list pane's left edge: the pink CTA + Import data.
-                  (Filter/Sort moved into the list-pane head as icon triggers — phase 4.) */}
-              <div className="f12-zone-list">
-                <button type="button" className="f12-btn-pri" onClick={() => onNavigate?.("queries", "Log a query")}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-                  Log a query
-                </button>
-                <button type="button" className="f12-btn-sec" onClick={() => onNavigate?.("import")} title="Smart Import — bring in your existing spreadsheet">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 20h16" /></svg>
-                  Import data
-                </button>
-              </div>
+              {/* Left zone retired (shell rollout Phase 6): Log a query moved into the page
+                  header; Import data dropped — the sidebar's Shelf › Import covers the entry
+                  (rollout report). The bar keeps only the record verbs, right-aligned. */}
+              <div className="f12-zone-list" />
 
-              {/* Right zone — inset 20px from both pane edges; verbs, then the link group, then danger. */}
+              {/* Right zone — inset 20px from both pane edges; verbs, then the link group, then danger.
+                  The contextual primary now lives on the reading pane's record header. */}
               <div className="f12-zone-read">
-                <button ref={primaryRef} type="button" className="f12-act" disabled={!sel} onClick={onPrimary}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                  {primaryLabel}
-                </button>
                 <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                   <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
@@ -2799,6 +2812,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 {(() => {
                   const nameplate = agentPrimary(activeAgent);
                   const initials = agentInitials(activeAgent);
+                  // The record header's contextual action (shell rollout Phase 6) — relocated
+                  // from the control bar, same derivation + composer-shortcut behaviour + the
+                  // Mark-sent anchor ref. The plane ornament yields its seat to the action.
+                  const heroAction = getPrimaryAction(activeQuery.status as QueryStatus);
+                  const heroClosed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
+                  const heroIsMark = heroAction.kind === "mark-sent" && !heroClosed;
+                  const heroLabel = heroClosed ? "Reopen"
+                    : heroAction.kind === "mark-sent" ? (heroAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
+                    : "Record response";
                   return (
                     <div className="f12-hero" style={{ margin: "20px 20px 0", flexShrink: 0 }}>
                       <span className="f12-bigav" aria-hidden="true">{initials}</span>
@@ -2807,11 +2829,22 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
                           <div className="f12-ha">{activeAgent.agency}</div>
                         )}
-                        <span className="f12-hs">{statusDisplayLabel(activeQuery)}</span>
+                        {/* The status badge draws the real StatusDot — never a recreation. */}
+                        <span className="f12-hs" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                          <StatusDot status={activeQuery.status} overrideSize={13} />
+                          {statusDisplayLabel(activeQuery)}
+                        </span>
                       </div>
-                      <span aria-hidden="true" style={{ marginLeft: "auto", flexShrink: 0, width: 52, height: 52, borderRadius: "50%", background: "var(--paper)", border: "1px solid var(--hairline)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--faint)" }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z" /></svg>
-                      </span>
+                      <button
+                        ref={heroIsMark ? markSentTriggerRef : undefined}
+                        type="button"
+                        className="f12-btn-pri"
+                        style={{ marginLeft: "auto", flexShrink: 0 }}
+                        onClick={() => composerRef.current?.focus()}
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                        {heroLabel}
+                      </button>
                     </div>
                   );
                 })()}
@@ -3331,6 +3364,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       </AnimatePresence>
     </div>
     </div>
-    </F12Page>
+    </div>
   );
 };
