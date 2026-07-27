@@ -1624,6 +1624,8 @@ export const Dashboard: React.FC<{
           todoPanel={todoPanel}
           onSendQuery={() => onNavigate("queries", "Send a query")}
           onRecordResponse={() => setRecordResponseScreenOpen(true)}
+          onAddAgent={() => onNavigate("agents", "Add an agent")}
+          onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
         />
 
         {/* Full-width stat row — collapses while a focus is open (.split-open above) */}

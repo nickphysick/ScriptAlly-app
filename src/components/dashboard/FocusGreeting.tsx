@@ -19,6 +19,8 @@ import { PageHeader } from "../shell/PageHeader";
 const CTA_ICONS = {
   send: <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" aria-hidden="true"><path d="M21 3L10 14" /><path d="M21 3l-7 18-4-7-7-4 18-7z" /></svg>,
   record: <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" aria-hidden="true"><path d="M9 14L4 9l5-5" /><path d="M4 9h11a5 5 0 0 1 5 5v1" /></svg>,
+  agent: <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" aria-hidden="true"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><path d="M18 8v6M15 11h6" /></svg>,
+  manuscript: <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z" /></svg>,
 };
 
 interface FocusGreetingProps {
@@ -31,6 +33,8 @@ interface FocusGreetingProps {
   todoPanel: React.ReactNode;
   onSendQuery: () => void;
   onRecordResponse: () => void;
+  onAddAgent: () => void;
+  onAddManuscript: () => void;
 }
 
 export const FocusGreeting: React.FC<FocusGreetingProps> = ({
@@ -42,6 +46,8 @@ export const FocusGreeting: React.FC<FocusGreetingProps> = ({
   todoPanel,
   onSendQuery,
   onRecordResponse,
+  onAddAgent,
+  onAddManuscript,
 }) => {
   const chipRef = useRef<HTMLButtonElement>(null);
   const sideRef = useRef<HTMLDivElement>(null);
@@ -77,12 +83,11 @@ export const FocusGreeting: React.FC<FocusGreetingProps> = ({
 
   return (
     <div className={`sa-greet${split ? " split" : ""}`}>
-      {/* Left-aligned per the standard header — the centred hero treatment is retired
-          (shell rollout Phase 7); the chip + minis + focus mechanics stay as content. */}
-      <div className="sa-greet-main" style={{ textAlign: "left" }}>
-        {/* The greeting header (shell rollout Phase 7): date kicker above the greeting title,
-            the two most-used actions (Add agent / Add manuscript moved to the sidebar's action
-            tiles — rollout report), the closing rule. */}
+      {/* Shell follow-up Phase 2: the greeting HEADER stays (kicker · salutation · two actions
+          · rule); everything below the rule is the pre-rollout body — centred chip, the four
+          CTAs, minis, the locked focus-slot mechanics. Which two of the four CTAs survive is
+          Nick's open call; until then the header pair and the CTA row coexist. */}
+      <div className="sa-greet-main">
         <PageHeader
           variant="greeting"
           kicker={`${longDate(now)} · ${weekOfQuerying(queries, now)} of querying`}
@@ -105,6 +110,13 @@ export const FocusGreeting: React.FC<FocusGreetingProps> = ({
             <span>{chipText(urgentCount)}</span>
             <svg className="sa-chip-chev" width={10} height={10} viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
           </button>
+        </div>
+        <div className="sa-greet-ctas">
+          <button type="button" className="sa-cta" onClick={onSendQuery}>{CTA_ICONS.send}Send query</button>
+          <button type="button" className="sa-cta" onClick={onRecordResponse}>{CTA_ICONS.record}Record a response</button>
+          <span className="sa-cta-div" aria-hidden="true" />
+          <button type="button" className="sa-cta" onClick={onAddAgent}>{CTA_ICONS.agent}Add agent</button>
+          <button type="button" className="sa-cta" onClick={onAddManuscript}>{CTA_ICONS.manuscript}Add manuscript</button>
         </div>
 
         {/* Mini stats while a focus is open — the focused metric's mini is absent. */}

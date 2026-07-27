@@ -26,7 +26,7 @@
   --dc-rem-ink: #b08e80;
   --dc-shadow-float: 0 4px 14px rgba(58, 28, 20, 0.08), 0 1px 3px rgba(58, 28, 20, 0.05);
   --dc-shadow-lift: 0 14px 32px rgba(58, 28, 20, 0.15), 0 3px 8px rgba(58, 28, 20, 0.08);
-  --dc-panel-bg: #f4efe7;
+  --dc-panel-bg: var(--shell-panel); /* the in-page grouping tone (canvas scheme 1) — was #f4efe7 */
   --dc-panel-bd: 1px solid #e9ded0;
   --dc-panel-rad: 22px;
   --dc-panel-sh: 0 10px 34px rgba(58, 28, 20, 0.09);
