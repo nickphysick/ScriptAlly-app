@@ -21,60 +21,13 @@
  */
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { CrumbStrip } from "./CrumbStrip";
-import { useScriptAllyDb } from "../../lib/db";
 import "./f12.css";
 
-/* ── page scaffold ── */
-
-export const F12Page: React.FC<{
-  /** Header right cluster (export/help icon buttons + the one filled CTA). */
-  tools?: React.ReactNode;
-  children: React.ReactNode;
-}> = ({ tools, children }) => (
-  <div className="t-f12 f12-root">
-    <div className="f12-hdwrap">
-      <CrumbStrip />
-      {tools && <div className="f12-hdtools">{tools}</div>}
-    </div>
-    {children}
-  </div>
-);
-
-/* ── header pieces ── */
-
-export const Icirc: React.FC<{ title: string; onClick?: () => void; children: React.ReactNode }> = ({ title, onClick, children }) => (
-  <button type="button" className="f12-icirc" title={title} aria-label={title} onClick={onClick}>
-    {children}
-  </button>
-);
-
-/** The header's only right-side item (chrome revision): pink initials avatar + the user's full
- *  name, one link to their account. Renders nothing signed-out. */
-export const F12Account: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  const { currentUser } = useScriptAllyDb();
-  if (!currentUser) return null;
-  const initials = currentUser.name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  return (
-    <button type="button" className="f12-who" onClick={onClick} title="Account settings" aria-label="Account settings">
-      <span className="f12-av2" aria-hidden="true">{initials}</span>
-      <span className="f12-nm2">{currentUser.name}</span>
-    </button>
-  );
-};
-
-export const F12Primary: React.FC<{ onClick?: () => void; children: React.ReactNode }> = ({ onClick, children }) => (
-  <button type="button" className="f12-primary" onClick={onClick}>
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-    {children}
-  </button>
-);
+/* ── page scaffold + header pieces RETIRED (shell follow-up P3) ──
+   F12Page / Icirc / F12Primary / F12Account are deleted: the v2 shell draws the chrome they
+   drew, Queries renders its own headerless .t-f12 root, and the To-do breadcrumb bar died with
+   the hardback spine. The control-bar triggers + popovers below stay — Queries and the
+   reading-pane timeline still consume them. ── */
 
 /* ── control-bar trigger + popover ── */
 

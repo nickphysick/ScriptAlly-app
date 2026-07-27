@@ -19,7 +19,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Plus, Copy, Check, Pencil, X, AlertTriangle, Sparkles, Lock, RefreshCw, BookOpen, Star } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
-import { ChromeSlab } from "../shell/ChromeSlab";
+import { PageHeader } from "../shell/PageHeader";
 import { FormShell } from "../forms/FormShell";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
@@ -561,18 +561,17 @@ export const ComparableTitlesPage: React.FC<{
 
   const editingComp = formState && formState.index != null ? comps[formState.index] : undefined;
 
-  const pulse = activeMs
-    ? `${[activeMs.ageCategory, activeMs.genre].filter(Boolean).join(" ")} · ${counts.total} ${counts.total === 1 ? "comp" : "comps"} · ${counts.inQuery} in your query`
-    : (manuscripts.length === 0 ? "No manuscripts yet" : undefined);
-
   return (
     <div className="ctpage">
-      <ChromeSlab
-        grand
-        title="Comparable titles"
-        meta={pulse}
-        tools={activeMs ? <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} /> : undefined}
-      />
+      {/* The standard page header (shell follow-up P3) — ChromeSlab retired. The pulse line is
+          dropped with it (no meta slot under the header law); the manuscript selector keeps its
+          function in the row below the rule until the sidebar switcher is live-wired. */}
+      <PageHeader variant="full" title="Comparable titles" />
+      {activeMs && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12, marginBottom: 12 }}>
+          <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
+        </div>
+      )}
 
       <div className="ct-desk">
         {!activeMs ? (

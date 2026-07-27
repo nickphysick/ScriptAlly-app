@@ -110,57 +110,21 @@ describe("shell polish P3 — sticker cards", () => {
   });
 });
 
-describe("shell polish P4 — the sidebar in the drawer's grammar", () => {
-  const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
+describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar retired; the bench chips carry on in the page body", () => {
   const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
   const tRule = (sel: string): string => {
     const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
     return m[1];
   };
-  it("the spine's panel owns its warm parchment tokens directly (the drawer-grammar superseded)", () => {
-    const root = tRule(".spine-root");
-    expect(root).toContain("--spine-pon: #e6ddcf");
-    expect(root).toContain("--spine-phov: #ece5d9");
-    expect(root).toContain("--spine-plab: #8a7a66");
-    expect(root).toContain("--spine-prule: #ddd2c0");
-  });
-  it("the category section label is the drawer's mono (the FILTER label is now the bench's own header)", () => {
-    const cat = tRule(".spine-cat");
-    expect(cat).toContain("font-family: var(--f12-mono)");
-    expect(cat).toContain("color: var(--spine-plab)");
-    expect(tsh).toContain('<div className="spine-cat"'); // the category label stands
-    // panel-final P2: the ruled 'TO-DO · FILTERS' context label is retired — the bench self-heads
-    expect(tsh).not.toContain('className="spine-nk"');
-    expect(page).toContain('className="spine-benchhead"'); // the bench's own funnel + FILTER header
-  });
-  it("rows are the drawer's grammar: icon + label, its height/radius/type, muted counts", () => {
-    const ni = tRule(".spine-ni");
-    expect(ni).toContain("height: var(--spine-row-h)"); // panel-final P1: the height is now a scale token (38px)
-    expect(ni).toContain("border-radius: 9px");
-    expect(ni).toContain("color: var(--spine-ptx)");
-    expect(tRule(".spine-ic")).toContain("width: 14px"); // the panel row icon
-    expect(tRule(".spine-n")).toContain("color: var(--spine-pmut)"); // muted count
-    // the icons are lucide (TypeGlyph is locked to material types — see report)
-    expect(page).toContain("import { LayoutGrid, Send, Users, ListTodo, Book");
-    expect(page).toContain("icon: <Send size={16} />");
-  });
-  it("ACTIVE = the faint parchment fill ONLY — no border, no outline, no shadow; never burgundy", () => {
-    const on = tRule(".spine-ni.on");
-    expect(on).toContain("background: var(--spine-pon)");
-    expect(on).not.toContain("border");
-    expect(on).not.toContain("box-shadow");
-    expect(on).not.toContain("outline");
-    for (const burgundy of ["#7c3a2a", "#f5c7c2", "#f3e3dc"]) expect(on).not.toContain(burgundy);
-    expect(tshCss).not.toContain("#fdfcfa"); // the white-card variant stays retired
-  });
   it("the chips carry the reactive behaviour: selected = the ink fill, zero fades, the search chip", () => {
-    // panel-final P2: the filter ROW-LIST is retired — the bench CHIPS carry the reactive behaviour
     expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)"); // selected = ink fill
     expect(tRule(".spine-chip.on")).not.toContain("box-shadow");
     expect(tRule(".spine-chip.zero")).toContain("opacity: 0.45"); // zero-count fades, still rendered
     expect(tRule(".spine-chipn .tdb-was")).toContain("line-through"); // the struck prior total
     expect(page).toContain('className="spine-chip q"'); // the active-search chip, chip grammar
+    expect(page).toContain('className="spine-benchhead"'); // the bench's own funnel + FILTER header
+    expect(tshCss).not.toContain("#fdfcfa"); // the white-card variant stays retired
   });
 });
 
@@ -197,9 +161,10 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
     return m[1];
   };
   it("ONE scroller with a symmetric scrollbar gutter — the centred column can't sit left-heavy", () => {
-    // tsh-body clips + column-lays; the wrap is the sole scroller and reserves the gutter both sides
-    expect(tRule(".tsh-body")).toContain("overflow: hidden");
-    expect(tRule(".tsh-body")).toContain("display: flex");
+    // the page root clips + column-lays (follow-up P3: .spine-root took over tsh-body's contract);
+    // the wrap is the sole scroller and reserves the gutter both sides
+    expect(tRule(".spine-root")).toContain("overflow: hidden");
+    expect(tRule(".spine-root")).toContain("display: flex");
     expect(rule(".tdb-wrap")).toContain("overflow-y: auto");
     expect(rule(".tdb-wrap")).toContain("scrollbar-gutter: stable both-edges");
     // the column centres with equal side padding + auto margins (no one-sided inset)
@@ -232,20 +197,10 @@ describe("alignment fixes P2 — the warm active fill (no green cast)", () => {
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
     return m[1];
   };
-  it("the active fill is #e6ddcf and the hover #ece5d9 — the sidebar's parchment, one step deeper", () => {
-    const root = tRule(".spine-root");
-    expect(root).toContain("--spine-pon: #e6ddcf"); // the panel active fill (warm parchment)
-    expect(root).toContain("--spine-phov: #ece5d9");
-    expect(root).toContain("--spine-pan: #f5f0e8"); // the base panel parchment the fill deepens
-  });
-  it("the warm fill is the NAV-ITEM active law; the bench chips carry their own ink-fill selection", () => {
-    const on = tRule(".spine-ni.on");
-    expect(on).toContain("background: var(--spine-pon)");
-    expect(on).not.toContain("border");
-    expect(on).not.toContain("box-shadow");
-    expect(on).not.toContain("outline");
-    // panel-final: the filter ROW-LIST is retired — a selected bench chip fills deep ink (a
-    // deliberate divergence from the nav's warm fill; a tinted fill would read as a nav pill)
+  it("the panel active-fill law left with the panel (follow-up P3); the bench chips carry their own ink-fill selection", () => {
+    expect(tshCss).not.toContain(".spine-ni"); // the panel rows are gone
+    // panel-final: a selected bench chip fills deep ink (a deliberate divergence from the old
+    // nav warm fill; a tinted fill would read as a nav pill)
     expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
     expect(tRule(".spine-chip.on")).not.toContain("outline");
   });
@@ -311,10 +266,8 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
       expect(r, `${sel} padding-left`).not.toContain("padding-left");
       expect(r, `${sel} padding-right`).not.toContain("padding-right");
     }
-    // the main region right of the sidebar carries no horizontal padding of its own
-    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
-    const bodyRule = tshCss.match(/\n\.tsh-body\s*\{([^}]*)\}/)![1];
-    expect(bodyRule).not.toContain("padding");
+    // (the tsh-body main region died with the shell — follow-up P3; .spine-root carries no
+    // horizontal padding either, asserted via its rule in the scroller lock above)
   });
   it("widths derive from the container, never from vw units (in the content chain)", () => {
     // the col + its chain use container-relative widths; the only vw in the file is on fixed/
@@ -329,11 +282,10 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
 });
 
 describe("centring fix P2 — the big search in the panel header", () => {
-  it("the bar holds no search (breadcrumb + user only)", () => {
-    const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
-    expect(tsh).not.toContain("tsh-search");
-    expect(tsh).not.toContain("searchValue");
-    expect(tsh).toContain("<F12Account"); // just the user block after the crumb
+  it("the breadcrumb bar retired with the shell (follow-up P3) — no bar, no bar search", () => {
+    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    expect(tshCss).not.toContain(".tsh-bcbar");
+    expect(tshCss).not.toContain(".tsh-search");
   });
   it("the pill is absolute-centred in the items row — the flanks can't push it off-centre", () => {
     const p = rule(".tdb-hsearch");
@@ -380,34 +332,11 @@ describe("centring fix P2 — the big search in the panel header", () => {
     expect(stage).toContain(".tdb-hsearch"); // in the gather's fade list
     const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
     expect(tshCss).not.toContain(".tsh-search"); // no bar search
-    expect(tshCss).toContain(".spine-clearing .spine-panel"); // the panel slides (the rail stays)
+    expect(tshCss).not.toContain(".spine-clearing"); // the session panel-slide died with the panel (follow-up P3)
   });
 });
 
-describe("centring fix P2B — the real brand in the corner", () => {
-  const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
-  it("the placeholder glyph + text are gone; the real assets are mounted (no inline recreations)", () => {
-    expect(tsh).not.toContain("aria-hidden>✈</span>"); // no fabricated glyph
-    expect(tsh).not.toContain('<span className="tsh-brandtx">ScriptAlly</span>');
-    // the real mark (rail) + the real wordmark (panel), both the actual assets
-    expect(tsh).toContain('src="/scriptally-logo-new.png"');
-    expect(tsh).toContain("import { ScriptAllyLogo }");
-    expect(tsh).toContain("<ScriptAllyLogo heightPx={34} />"); // panel-final P1: the wordmark up a step (30 → 34)
-  });
-  it("the mark + wordmark order, alt text, and the home-route link", () => {
-    // the mark leads (rail head), the wordmark follows (panel head)
-    expect(tsh.indexOf("scriptally-logo-new.png")).toBeLessThan(tsh.indexOf("<ScriptAllyLogo"));
-    expect(tsh).toContain('alt="" aria-hidden="true"'); // the mark is decorative; the wordmark carries alt="ScriptAlly"
-    expect(tsh).toContain('aria-label="ScriptAlly — go to dashboard"');
-    expect(tsh).toContain("onClick={onBrand}");
-    expect(page).toContain('onBrand={() => onNavigate("dashboard")}');
-  });
-  it("the rail (with the mark) persists at the narrow tier; the panel collapses to an overlay", () => {
-    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
-    const collapse = tshCss.slice(tshCss.indexOf("@media (max-width: 1099.98px)"));
-    expect(collapse).not.toContain(".spine-rail { display: none"); // the rail (mark) stays
-    expect(collapse).toContain("position: fixed"); // the panel (wordmark) becomes the overlay
-  });
+describe("centring fix P2B — superseded (shell follow-up P3): the spine corner brand retired with the shell; the assets live on", () => {
   it("the real asset files exist in public/", () => {
     const pub = join(here, "..", "..", "..", "public");
     expect(readFileSync(join(pub, "scriptally-logo-new.png")).length).toBeGreaterThan(0);

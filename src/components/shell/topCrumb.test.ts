@@ -95,7 +95,14 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
     expect(queries.includes("<ChromeSlab")).toBe(false);
     expect(queries.includes("<F12Page")).toBe(false);
     expect(queries).toContain('className="t-f12 f12-root"');
+    expect(queries).toContain('title="Queries Hub"'); // the compact PageHeader carries the name
+    expect(queries).toContain('variant="compact"');
     expect(queries.includes('className="qhbar"')).toBe(false);
+  });
+
+  it("ChromeSlab and CrumbStrip are deleted outright (shell follow-up P3) — PageHeader + the v2 top bar own the job", () => {
+    expect(existsSync(resolve(__dirname, "./ChromeSlab.tsx"))).toBe(false);
+    expect(existsSync(resolve(__dirname, "./CrumbStrip.tsx"))).toBe(false);
   });
 
   it("TopCrumbStrip is retired (the slab is the sole crumb chrome)", () => {

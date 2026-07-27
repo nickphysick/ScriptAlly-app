@@ -16,8 +16,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "todo.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
-// THE WORKSPACE SHELL (todo-fix48): the sidebar/chrome moved into TodoShell + todoShell.css.
-const tsh = readFileSync(join(here, "..", "shell", "TodoShell.tsx"), "utf8");
+// Shell follow-up P3: TodoShell is deleted; todoShell.css survives TRIMMED (the chip bench +
+// Pro sticker + their tokens, relocated to the page body).
 const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
 
 const rule = (sel: string): string => {
@@ -35,11 +35,8 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
   it("248px sticky white panel, locked left; the assembly is 1364", () => {
     // THE WORKSPACE SHELL (todo-fix48): the floating rail is retired — the FILTER rows live
     // in the always-on parchment sidebar (TodoShell) as its FILTER section.
-    // THE HARDBACK SPINE: the filters live in the parchment PANEL's context zone
-    expect(tshRule(".spine-panel")).toContain("width: var(--spine-panel-w)");
-    expect(tshRule(".spine-root")).toContain("--spine-panel-w: 260px"); // panel-final P1 widened 196 → 260
-    expect(tsh).toContain('<aside className="spine-panel"');
-    expect(page).toContain("contextContent={renderFilterSection()}");
+    // Shell follow-up P3: the spine panel retired — the bench renders in the page body
+    expect(page).toContain('<div className="tdb-benchgrow">{renderFilterSection()}</div>');
     expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');
   });
   it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal)", () => {
@@ -76,10 +73,8 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).not.toContain('className="tdb-fdivider"'); // the divider above it is gone
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the board still composes filters × search
   });
-  it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
-    // Task settings + Help centre are the shell FOOT now; the FILTER section carries no setrow
-    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true)');
-    expect(page).toContain('label: "Help centre"');
+  it("v4 P5 → follow-up P3: the FILTER section carries no setrow (Task settings lives in the v2 sidebar; the sheet opens on its event)", () => {
+    expect(page).toContain("sa:open-task-settings");
     const filterFn2 = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
     expect(filterFn2).not.toContain("tdb-setrow");
     // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
@@ -411,15 +406,16 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     expect(page).not.toContain("renderToolbelt");
     expect(page).not.toContain("renderRail");
     expect(page).not.toContain("renderFilterDrawer"); // the collapsed drawer is retired — the panel IS the overlay
-    expect(page).toContain("contextContent={renderFilterSection()}"); // ONE mount, in the panel context zone
+    expect(page).toContain('<div className="tdb-benchgrow">{renderFilterSection()}</div>'); // ONE mount, in the page body (follow-up P3)
     const cardFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
     expect(cardFn).not.toContain("tdb-herobegin"); // no CTA in the filters
     expect(cardFn).not.toContain("tdb-setrow"); // Task settings is the panel foot
   });
-  it("the foot: Task settings + Help centre are the shell's foot rows, same wiring", () => {
-    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true)');
-    expect(page).toContain('label: "Help centre"');
-    expect(tsh).toContain("{foot.map("); // the shell renders them at the PANEL foot
+  it("Task settings + Help centre live in the v2 sidebar now; the sheet + its open event stay in the page", () => {
+    // Shell follow-up P3: the panel foot retired — the v2 sidebar's user block carries both
+    // links; the sheet still mounts here and opens via the sa:open-task-settings event.
+    expect(page).toContain("sa:open-task-settings");
+    expect(page).toContain("setSettingsOpen(true)");
     expect(page).not.toContain("tdb-sic");
   });
 });
@@ -541,11 +537,9 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("A11Y: the collapsed panel overlay dismisses on Escape + scrim; the filters ride it (one mount)", () => {
-    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setPanelOpen(false); }');
-    expect(tsh).toContain('onClick={onPanelDismiss}'); // the scrim dismisses
-    // ONE filter mount: the panel's context zone (no second collapsed drawer)
-    expect((page.match(/contextContent=\{renderFilterSection\(\)\}/g) ?? []).length).toBe(1);
+  it("ONE bench mount in the page body (the collapse-tier overlay retired with the shell)", () => {
+    // Shell follow-up P3: no panel, no scrim, no second drawer — the bench renders once.
+    expect((page.match(/renderFilterSection\(\)/g) ?? []).length).toBe(2); // the definition + the one mount
     expect(page).not.toContain("tdb-fdrawer");
   });
   it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
@@ -634,8 +628,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(rule(".tdb-hsearch")).toContain("background: #fff");
     expect(rule(".tdb-hsearch")).toContain("border: 1px solid var(--tsh-active-border)");
     expect(page).toContain("matchesSearch(c, search, sctx)");
-    // the search left the bar and the old hero pill stays gone
-    expect(tsh).not.toContain("tsh-search");
+    // the old hero pill stays gone
     expect(page).not.toContain("tdb-bigsearch");
   });
   it("the ⌘K advert is gone and the shortcut still focuses the (relocated) search", () => {
@@ -1071,15 +1064,10 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("BREAKPOINTS: < --tsh-collapse the PANEL collapses to a rail-triggered overlay; the rail persists", () => {
-    expect(page).toContain('window.matchMedia("(max-width: 1099.98px)")'); // the collapse tier
-    expect(tshCss).toContain("@media (max-width: 1099.98px) {");
-    expect(page).toContain("panelOpen={panelOpen}");
-    expect(page).toContain("onPanelDismiss={() => setPanelOpen(false)}");
-    const collapse = tshCss.slice(tshCss.indexOf("@media (max-width: 1099.98px)"));
-    expect(collapse).toContain("position: fixed"); // the panel overlays
-    expect(collapse).not.toContain(".spine-rail { display: none"); // the rail stays
+  it("BREAKPOINTS: the spine collapse tier retired with the shell (follow-up P3) — no page matchMedia tier remains", () => {
+    expect(page).not.toContain('window.matchMedia("(max-width: 1099.98px)")');
     expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")');
+    expect(tshCss).not.toContain("@media (max-width: 1099.98px)");
     expect(page).not.toContain("tdb-fdrawer"); // the old collapsed drawer is extinct
   });
   it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
@@ -1109,7 +1097,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     // render, which the root ErrorBoundary turns into an app-wide "Something went wrong"
     // (ToDoPage is a persistent slot on every workspace route). Bit twice: openSundayReview
     // (4d4fbed) and GHOST_BARS (this lock's trigger). Pure gates can't see it — this scan can.
-    const ret = page.indexOf("return (\n    <TodoShell");
+    const ret = page.indexOf('return (\n    <div className="t-f12 spine-root">');
     expect(ret).toBeGreaterThan(0);
     const deadZone = page.slice(ret);
     expect(deadZone).not.toMatch(/^  (const|let) /m);

@@ -37,8 +37,8 @@ describe("panel-final P3 — THE BLUE STICKER (supersedes the colophon)", () => 
     expect(sticker).not.toMatch(/\d+ of your \d+/); // no literal numbers baked in
     expect(sticker).not.toMatch(/hours?/i); // the hours clause stays omitted (never fabricated)
   });
-  it("gating + wiring: mounted only for non-Pro, at the panel foot, opening the preview modal", () => {
-    expect(page).toContain("panelPromo={!isProUser(currentUser) ? (");
+  it("gating + wiring: mounted only for non-Pro, seated in the page body (follow-up P3), opening the preview modal", () => {
+    expect(page).toContain("{!isProUser(currentUser) && (");
     expect(page).toContain("<ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
     // the content-panel colophon mount is gone
     expect(page).not.toContain("<ProBanner");

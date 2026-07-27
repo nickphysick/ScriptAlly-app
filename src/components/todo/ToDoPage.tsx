@@ -19,8 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { TodoShell, SpineCategory, SpinePage, SpineFootItem } from "../shell/TodoShell";
-import { LayoutGrid, Send, Users, ListTodo, Book, Settings as SettingsIcon, HelpCircle, Funnel } from "lucide-react";
+import { Funnel } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -48,6 +47,9 @@ import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import "./todo.css";
+// The relocated control surfaces' styles + tokens (the chip bench + the Pro sticker) — the
+// hardback-spine SHELL itself retired in the shell follow-up; its stylesheet survives trimmed.
+import "../shell/todoShell.css";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -251,28 +253,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     });
   };
   // (the ledger's selection/keyboard/kebab machinery retired with the run sheet — Final Shape P5)
-  // THE WORKSPACE SHELL (todo-fix48) — the collapse tier: below --tsh-collapse (1100) the
-  // sidebar folds to an icon rail and its FILTER section becomes the ⚲ icon opening the
-  // existing overlay drawer (focus-trapped; Esc/scrim closes). Tokened to match todoShell.css.
-  const [shellCollapsed, setShellCollapsed] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1099.98px)").matches);
-
-  // THE HARDBACK SPINE — below --tsh-collapse the panel is a rail-triggered overlay (the
-  // filters live in the panel's context zone, so they ride the overlay for free).
-  const [panelOpen, setPanelOpen] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1099.98px)");
-    const on = () => setShellCollapsed(mq.matches);
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
-  }, []);
-  useEffect(() => { if (!shellCollapsed) setPanelOpen(false); }, [shellCollapsed]);
-  // the collapsed panel overlay dismisses on Escape (outside-click is the scrim's job)
-  useEffect(() => {
-    if (!panelOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setPanelOpen(false); } };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [panelOpen]);
+  // (the hardback-spine collapse tier retired with the shell — shell follow-up P3: the v2 shell
+  // owns chrome responsiveness; the bench lives in the page body at every width.)
   // Masthead search — the input + ⌘K focus mechanics land here (Phase 1); live filtering is
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
@@ -771,47 +753,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDraft("");
   }
 
-  // THE HARDBACK SPINE (todo-fix54) — the RAIL's categories (each routes to its default page;
-  // on /todo the active category is Querying). The panel shows Querying's pages + the To-do
-  // context (filters). Icons are lucide (TypeGlyph is locked to material types — see report).
-  const railCategories: SpineCategory[] = [
-    { key: "dashboard", label: "Dashboard", icon: <LayoutGrid size={16} />, onClick: () => onNavigate("dashboard"), active: false },
-    { key: "querying", label: "Querying", icon: <Send size={16} />, onClick: () => onNavigate("queries"), active: true },
-    { key: "agents", label: "Agents", icon: <Users size={16} />, onClick: () => onNavigate("agents"), active: false },
-    { key: "manuscripts", label: "Manuscripts", icon: <Book size={16} />, onClick: () => onNavigate("manuscripts"), active: false },
-  ];
-  const railSettings: SpineCategory = { key: "settings", label: "Settings", icon: <SettingsIcon size={16} />, onClick: () => onNavigate("account"), active: false };
-  // the active category (Querying)'s pages; To-do is the current page
-  const panelPages: SpinePage[] = [
-    { key: "queries", label: "Queries Hub", icon: <Send size={14} />, count: liveQueryCount(queries), onClick: () => onNavigate("queries"), active: false },
-    { key: "todo", label: "To-do", icon: <ListTodo size={14} />, count: boardCards.length, onClick: () => onNavigate("todo"), active: true },
-  ];
-  const panelFoot: SpineFootItem[] = [
-    { key: "settings", label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true) },
-    { key: "help", label: "Help centre", icon: <HelpCircle size={14} />, onClick: () => window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")) },
-  ];
-
+  // Shell follow-up P3: the hardback-spine TodoShell is RETIRED — the v2 shell (rail, sidebar,
+  // top bar) provides the chrome it drew. The page root keeps the `spine-root` class as the
+  // token carrier for the two relocated survivors (the chip bench + the Pro sticker), whose
+  // styles live on in the trimmed todoShell.css.
   return (
-    <TodoShell
-      categories={railCategories}
-      railFoot={railSettings}
-      panelCategory="QUERYING"
-      pages={panelPages}
-      contextContent={renderFilterSection()}
-      panelPromo={!isProUser(currentUser) ? (
-        <ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
-      ) : undefined}
-      foot={panelFoot}
-      crumbParents={[{ label: "QUERYING", onClick: () => onNavigate("queries") }]}
-      crumbCurrent="To-do"
-      onAccount={() => onNavigate("account")}
-      onBrand={() => onNavigate("dashboard")}
-      collapsed={shellCollapsed}
-      panelOpen={panelOpen}
-      onPanelOpen={() => setPanelOpen(true)}
-      onPanelDismiss={() => setPanelOpen(false)}
-      clearing={heroSession.clearing}
-    >
+    <div className="t-f12 spine-root">
       <div className="tdb-wrap today-off" ref={wrapRef}>
         {/* SHELL POLISH P1 — THE CENTRED COLUMN: the hero row and the panel live on ONE
             max-width column (~1360px), centred with equal side gutters that grow with the
@@ -835,6 +782,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <button type="button" className="tdb-rvx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
             </div>
           )}
+          {/* Shell follow-up P3: the spine panel retired — the chip bench + the blue Pro
+              sticker live in the page body (no home in the v2 shell; the pack says leave them
+              here and report — placement is on the in-browser checklist). */}
+          <div className="tdb-benchseat">
+            <div className="tdb-benchgrow">{renderFilterSection()}</div>
+            {!isProUser(currentUser) && (
+              <div className="tdb-stickerseat">
+                <ProSticker hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
+              </div>
+            )}
+          </div>
+
           {/* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: ONE thin-bordered container wrapping
               the whole working area — the items row, both card sections, and the Pro colophon. */}
           <div className="tdb-mainc tdb-panel">
@@ -938,7 +897,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         )}
             </div>
             {/* panel-final P3: the content-panel colophon RETIRED — its successor is the blue Pro
-                sticker at the panel's foot (mounted via TodoShell's panelPromo). */}
+                sticker, seated beside the bench in the page body (shell follow-up P3). */}
           </div>
           </div>
         </div>
@@ -981,7 +940,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}
         />
       )}
-    </TodoShell>
+    </div>
   );
 
   // ── State A: the new desk (zero queries AND zero agents) — one welcome card replaces the three

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { ChromeSlab } from "./shell/ChromeSlab";
+import { PageHeader } from "./shell/PageHeader";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { parseLegacyComps } from "../lib/comps";
@@ -656,9 +656,11 @@ export const ImportCsv: React.FC<{
 
   return (
     <div className="min-h-screen pb-16 font-sans text-[#3a1c14]">
-      {/* ── ChromeSlab (Option A): crumb + title on the unified surface — supersedes the old
-            centred "migration desk" branding block. ── */}
-      <ChromeSlab onNavigate={onNavigate} title="Import" meta="CSV MIGRATION DESK" />
+      {/* The standard page header (shell follow-up P3) — ChromeSlab retired; the "CSV MIGRATION
+          DESK" meta line is dropped with it (no meta slot under the header law). */}
+      <div className="max-w-4xl mx-auto px-4">
+        <PageHeader variant="full" title="Import" />
+      </div>
       <div className="max-w-4xl mx-auto px-4 pt-8">
 
         <p className="text-xs text-stone-500 text-center max-w-lg mx-auto leading-relaxed mb-8">

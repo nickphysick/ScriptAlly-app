@@ -39,8 +39,9 @@ describe("TaskSettingsSheet — source locks", () => {
     expect(sheet).toContain("mutedTaskRules: (muted ?? []).filter((k) => k !== r.rule)");
     expect(sheet).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
   });
-  it("the entry button + the fork doorway both open the sheet", () => {
-    expect(page).toContain('label: "Task settings", icon: <SettingsIcon size={14} />, onClick: () => setSettingsOpen(true)'); // the shell foot opens the sheet
+  it("the entry + the fork doorway both open the sheet (follow-up P3: the entry is the v2 sidebar's event)", () => {
+    expect(page).toContain("sa:open-task-settings"); // the sidebar's Task-settings button dispatches; the page listens
+    expect(page).toContain("setSettingsOpen(true)");
     expect(page).toContain("{settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}");
   });
 });

@@ -55,7 +55,7 @@ import {
 } from "../lib/discoverAgents";
 import { getHomeCountry, flagFor, agentLocation } from "../lib/territory";
 import { FONT_SERIF, FONT_SANS, FONT_MONO } from "../lib/designTokens";
-import { ChromeSlab } from "./shell/ChromeSlab";
+import { PageHeader } from "./shell/PageHeader";
 import { BookOpen, ShieldCheck, Check, Plus, Bookmark, BookmarkCheck, X, Send } from "lucide-react";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/discover.css";
@@ -310,17 +310,10 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
 
   return (
     <div className="dv2">
-      {/* ── Page header — the unified GRAND ChromeSlab masthead (matches Queries/Agents): 54px
-            title + a mono pulse line; the full-bleed crumb is drawn by CrumbStrip above. No CTA
-            (add actions live on the cards + the batch tray). Pulse hidden on the first-run sell. ── */}
-      <ChromeSlab
-        onNavigate={onNavigate}
-        grand
-        title="Discover new agents"
-        meta={!firstRun
-          ? `Ranked matches · ${visible.length} ${visible.length === 1 ? "agent" : "agents"}${trust.lastCheckedLabel ? ` · Last checked ${trust.lastCheckedLabel}` : ""}`
-          : undefined}
-      />
+      {/* The standard page header (shell follow-up P3) — ChromeSlab retired; the ranked-matches
+          pulse line is dropped with it (no meta slot under the header law — rollout report).
+          No CTA: add actions live on the cards + the batch tray. */}
+      <PageHeader variant="full" title="Discover new agents" />
       <div className="dv-wrap">
         {firstRun ? (
           /* ── First-run / zero-matches feature sell — hero + benefits + adaptive action strip +

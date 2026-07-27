@@ -42,8 +42,18 @@
    container fills it. */
 .tdb-centre { width: 100%; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); }
 /* THE WORKSPACE SHELL (todo-fix48) — THE PANEL: one thin warm-grey bordered container
-   wrapping the items row, both card sections and the colophon. */
-.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--tdb-panel-bd); border-radius: var(--tdb-panel-r); padding: var(--tdb-panel-pad); }
+   wrapping the items row, both card sections and the colophon. The board container wears the
+   in-page grouping tone (canvas scheme 1, shell follow-up P1): one step below the canvas,
+   cards raised above it. */
+.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--shell-panel, #f5efe8); border: 1px solid var(--tdb-panel-bd); border-radius: var(--tdb-panel-r); padding: var(--tdb-panel-pad); }
+
+/* Shell follow-up P3 — the relocated control surfaces' seat: the bench grows, the blue Pro
+   sticker holds a card width beside it; they stack when narrow. */
+.tdb-benchseat { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin: 0 0 14px; }
+.tdb-benchgrow { flex: 1 1 420px; min-width: 0; }
+.tdb-benchgrow .spine-bench { margin: 0; }
+.tdb-stickerseat { flex: 0 1 300px; }
+.tdb-stickerseat .spine-promo { margin: 0; }
 /* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */

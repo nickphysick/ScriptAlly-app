@@ -39,12 +39,13 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
     expect(shell).toContain('background: "var(--shell-canvas)"'); // painted once, on the stage
   });
 
-  it("nav chrome is OUTSIDE the cap — the rail is retired and the drawer overlays, never wrapped", () => {
-    // The persistent rail was retired (overnight nav run): the content column is the flex root's
-    // first child, and navigation is the fixed-position NavDrawer overlay — so no nav chrome can
-    // inherit the max-width. The cap wrapper lives only inside StagePage.
-    expect(shell.includes("<Rail ")).toBe(false); // the in-flow rail is gone
-    expect(shell).toContain("<NavDrawer"); // the drawer overlay replaces it
+  it("nav chrome is OUTSIDE the cap — the v2 rail + sidebar flank the content column, never wrapped", () => {
+    // Shell follow-up P3: NavDrawer retired (its last trigger left with CrumbStrip); the v2
+    // ShellRail + ShellSide are the desktop navigation, siblings of the content column — so no
+    // nav chrome can inherit the max-width. The cap wrapper lives only inside StagePage.
+    expect(shell.includes("<NavDrawer")).toBe(false); // the drawer is gone
+    expect(shell).toContain("<ShellRail");
+    expect(shell).toContain("<ShellSide");
     expect(shell).toContain("flex: 1, minWidth: 0, minHeight: 0, display: \"flex\"");
     expect(shell.slice(0, shell.indexOf("StagePage")).includes("sa-content-col")).toBe(false);
   });

@@ -17,7 +17,7 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
@@ -25,8 +25,6 @@ import { ShellSidebarBody } from "./ShellSidebar";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
-import { CrumbStrip } from "./CrumbStrip";
-import { NavDrawer, NavDrawerProvider } from "./NavDrawer";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 
@@ -75,13 +73,12 @@ export const StagePage: React.FC<{
   // locked (fill/fillColumn) pages. A crumbed contentVariant slot is a flex column so the crumb
   // is flex:none above the flex:1 capped column; flow slots stack as blocks (content-height).
   const isFillCol = layout === "fillColumn" || (contentVariant && layout === "fill");
+  // CrumbStrip retired (shell follow-up P3): the v2 top bar draws the one breadcrumb; the slot
+  // keeps only the width-cap column.
   const body = contentVariant ? (
-    <>
-      <CrumbStrip />
-      <div className={`sa-content-col sa-content-col--${contentVariant}${layout !== "flow" ? " sa-content-col--fill" : ""}`}>
-        {children}
-      </div>
-    </>
+    <div className={`sa-content-col sa-content-col--${contentVariant}${layout !== "flow" ? " sa-content-col--fill" : ""}`}>
+      {children}
+    </div>
   ) : (
     children
   );
@@ -130,16 +127,11 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     if (el) el.scrollTop = scrollMemo.current[routeKey] ?? 0;
   }, [routeKey]);
 
-  // App-wide nav drawer — AppShell owns the open state; triggers (CrumbStrip / DashTopBar
-  // menu buttons) and the drawer itself consume it through NavDrawerProvider.
-  const [drawerOpen, setDrawerOpen] = useState(false);
   // VI P3 — the help FAB's /todo two-item menu returns (the workbench-era route hide is
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
-  const drawerCtx = useMemo(
-    () => ({ open: drawerOpen, setOpen: setDrawerOpen, toggle: () => setDrawerOpen((v) => !v) }),
-    [drawerOpen]
-  );
+  // (NavDrawer retired — shell follow-up P3: its last trigger left with CrumbStrip; the v2
+  // rail + sidebar are the desktop navigation, the slim bar + BottomTabBar the mobile.)
 
   // v2 shell — sidebar tuck (ref scriptally-shell-v2.html). Persisted under the app's `sa.`
   // localStorage convention; ⌘\ toggles (skipped while an editable has focus). The rail stays
@@ -181,16 +173,14 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   );
 
   return (
-    <NavDrawerProvider value={drawerCtx}>
     <div
       className={`${THEME_CLASS[theme]}${sideTucked ? " sv2-tucked" : ""}`}
       data-sa-ground=""
       style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#F5F0EA" }}
     >
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
-          only (class + media query in shellV2.css — never inline display). The NavDrawer stays
-          mounted below while the per-page header strips that trigger it are retired page by
-          page in the later rollout phases. */}
+          only (class + media query in shellV2.css — never inline display). The interim layers
+          (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
       <ShellRail onNavigatePath={goPath} />
       <ShellSide tucked={sideTucked} onToggleTuck={() => setTuck((v) => !v)}>
         <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} />
@@ -282,13 +272,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
       <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} />
 
-      {/* App-wide nav drawer — closed by default; opens from the header menu buttons (1b). */}
-      <NavDrawer onNavigate={onNavigate} />
-
       {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
           from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}
       {import.meta.env.DEV && <BackgroundLab theme={theme} />}
     </div>
-    </NavDrawerProvider>
   );
 };
