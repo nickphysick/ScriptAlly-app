@@ -158,8 +158,8 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
   it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
     expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // Begin (the hero pair)
     expect((page.match(/className="tdb-btnp sm"/g) ?? []).length).toBe(1); // Work the list (Today)
-    expect(page).toContain('className="tdb-btnp sm tdb-rvopen2"'); // Open it › (the review banner)
-    expect((page.match(/tdb-btnp/g) ?? []).length).toBe(3); // the full ink census — three, nowhere else
+    // todo rebuild P3: the review banner's ink pill became the featured card's soft-pink View.
+    expect((page.match(/tdb-btnp/g) ?? []).length).toBe(2); // the shrinking ink census
     expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
     expect(page).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
     expect(page).toContain('className="tdb-btnh" onClick={() => toggleToday(c)}');
@@ -246,7 +246,7 @@ describe("detail P5 — sweep", () => {
       expect(css).not.toContain(dead);
     }
     expect(css).not.toMatch(/tdb-pro(?!pill)/); // the colleague family; FocusFlow's propill lives
-    expect(page).toContain('className="tdb-rvcupb"'); // the review banner's cup — the asset's remaining user
+    expect(page).not.toContain("tdb-rvcupb"); // todo rebuild P3: the cup asset went with the banner
   });
   it("no tour step touches the bar text or the Pro area (recon: nothing to retarget)", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
@@ -573,7 +573,7 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
 describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
-    const box = page.indexOf('className="tdb-rvbox"');
+    const box = page.indexOf('className="tdb-feat"'); // todo rebuild P3: the featured card
     const board = page.indexOf('className="tdb-board"');
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
@@ -599,11 +599,12 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).toContain('onClick={() => pickView("ledger")}');
     expect(rule(".tdb-vtog")).toContain("border-radius: 10px"); // the mockup's fill segment
   });
-  it("ONE review surface repo-wide: the rvbox; the strip banner classes are extinct", () => {
+  it("ONE review surface repo-wide: the featured card; the banner + strip classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
     expect(css).not.toContain("tdb-rvhead");
-    expect((page.match(/tdb-rvbox/g) ?? []).length).toBe(1);
-    expect(page).toContain(">Open it ›</button>"); // frame P3: the flip died with the afterlife
+    expect(page).not.toContain("tdb-rvbox");
+    expect((page.match(/className="tdb-feat"/g) ?? []).length).toBe(1);
+    expect(page).not.toContain(">Open it ›</button>"); // superseded by View
   });
 });
 

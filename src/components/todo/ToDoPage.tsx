@@ -782,16 +782,54 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* THE WORKSPACE SHELL (todo-fix48) — the filters live in the sidebar now; the body
               is the centre stack (the panel arrives in Phase 2) beside the Today corner. */}
           <div className="tdb-centre">
+          {/* THE FEATURED REVIEW CARD (todo rebuild P3 — ref .feat): a full-width block directly
+              beneath the header rule, with NO section heading of its own. Renders only while a
+              review is waiting; Dismiss hides it for that review WITHOUT marking it read (the
+              header's own "Last week in review" action still opens it). */}
           {reviewWin && !reviewSeen && !reviewDismissed && (
-            <div className="tdb-rvbox">
-              <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
-              <div className="tdb-rvhx">
-                <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
-                <b>Last week in review</b>
-                <p>Every box ticked turns the dial in your favour.</p>
+            <div className="tdb-feat">
+              <div className="tdb-feattxt">
+                <div className="tdb-feath">
+                  <h3>Last week in review</h3>
+                  <span className="tdb-featbadge">Ready</span>
+                </div>
+                <div className="tdb-featd">
+                  Week {reviewWin.weekNumber} is ready to look back on. Every box ticked turns the dial in your favour.
+                </div>
+                <div className="tdb-featb">
+                  <button type="button" className="tdb-featbtn pri" onClick={openReview}>
+                    View
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m9 6 6 6-6 6" /></svg>
+                  </button>
+                  <button type="button" className="tdb-featbtn" onClick={dismissReviewWeek}>Dismiss</button>
+                </div>
               </div>
-              <button type="button" className="tdb-btnp sm tdb-rvopen2" onClick={openReview}>Open it ›</button>
-              <button type="button" className="tdb-rvx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
+              {/* PLACEHOLDER ARTWORK (the mockup's teacup-and-envelopes) — flagged in the run
+                  report: this slot would suit a commissioned illustration. */}
+              <div className="tdb-featart" aria-hidden>
+                <svg viewBox="0 0 288 186" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="150" cy="86" r="72" fill="#f5e2da" opacity=".5" />
+                  <g fill="none" stroke="#7c3a2a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <g transform="rotate(-9 60 140)"><rect x="24" y="116" width="74" height="48" rx="5" fill="#fdfaf5" /></g>
+                    <g transform="rotate(-3 68 132)">
+                      <rect x="34" y="108" width="74" height="48" rx="5" fill="#ffffff" />
+                      <path d="M34 113l37 26 37-26" />
+                    </g>
+                    <ellipse cx="176" cy="163" rx="52" ry="9" fill="#f3e0d6" />
+                    <path d="M140 108h72l-6 34a12 12 0 0 1-11.9 10h-36.2A12 12 0 0 1 146 142Z" fill="#fdfaf5" />
+                    <ellipse cx="176" cy="108" rx="36" ry="7.5" fill="#e8c8bc" />
+                    <path d="M212 116a15 15 0 0 1 0 22" />
+                  </g>
+                  <g fill="none" stroke="#8a9e88" strokeWidth="1.5" strokeLinecap="round" opacity=".85">
+                    <path d="M160 92c7-11-7-17 0-28" />
+                    <path d="M176 87c7-13-7-19 0-32" />
+                    <path d="M192 92c7-11-7-17 0-28" />
+                  </g>
+                </svg>
+              </div>
+              <button type="button" className="tdb-featx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg>
+              </button>
             </div>
           )}
           {/* THE CONTROL LINE (todo rebuild P1) — the filter chips and the list controls are ONE

@@ -62,6 +62,28 @@
 .tdb-secrule.hk { background: linear-gradient(90deg, #c3cfc0 0 96px, #ece3da 96px); }
 .tdb-secrule.nt { background: linear-gradient(90deg, #ece3da 0 96px, #ece3da 96px); }
 
+/* THE FEATURED REVIEW CARD (todo rebuild P3 — ref .feat): a full-width block directly beneath
+   the header rule, warm diagonal gradient, hairline, radius 16. Left = title + pink badge +
+   body + two actions; right = the 288px illustration panel, bottom-aligned and bleeding to the
+   card's edge. A close control rides top-right in addition to Dismiss. */
+.tdb-feat { display: flex; align-items: stretch; margin-top: 26px; background: linear-gradient(103deg, #fdf9f4 0%, #faf1e8 58%, #f6e8dd 100%); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; position: relative; }
+.tdb-feattxt { flex: 1; min-width: 0; padding: 26px 10px 26px 30px; }
+.tdb-feath { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+.tdb-feath h3 { font-family: var(--f12-serif); font-size: 26px; font-weight: 500; letter-spacing: -0.012em; line-height: 1.1; color: var(--ink); margin: 0; }
+.tdb-featbadge { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; background: var(--pink-btn, #f5e2da); color: var(--burgundy, #7c3a2a); border: 1px solid #e8c8bc; border-radius: 99px; padding: 4px 10px; }
+.tdb-featd { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-top: 11px; max-width: 50ch; }
+.tdb-featb { display: flex; gap: 10px; margin-top: 19px; }
+/* the two actions — View is the Form 11 soft-pink primary, Dismiss the parchment ghost */
+.tdb-featbtn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card, #fdfaf5); color: var(--ink); font-size: 12.5px; white-space: nowrap; cursor: pointer; }
+.tdb-featbtn svg { width: 15px; height: 15px; }
+.tdb-featbtn.pri { background: var(--pink-btn, #f5e2da); border-color: #e8c8bc; color: var(--burgundy, #7c3a2a); }
+.tdb-featart { width: 288px; flex: none; align-self: flex-end; display: block; }
+.tdb-featart svg { display: block; width: 100%; height: auto; }
+.tdb-featx { position: absolute; top: 13px; right: 13px; width: 27px; height: 27px; border: 0; border-radius: 8px; display: grid; place-items: center; color: var(--muted, #9c8878); cursor: pointer; background: rgba(253, 250, 245, 0.7); }
+.tdb-featx:hover { background: var(--card, #fdfaf5); color: var(--ink); }
+.tdb-featx svg { width: 13px; height: 13px; }
+@media (max-width: 780px) { .tdb-featart { display: none; } }
+
 /* THE CONTROL LINE: chips left, spacer, list search, view toggle — ONE row, no container. */
 .tdb-ctrl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 44px; }
 .tdb-ctrlsp { flex: 1; min-width: 14px; }

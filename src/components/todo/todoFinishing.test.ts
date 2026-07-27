@@ -116,7 +116,9 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
     // frame P3: the banner shows only while UNSEEN and UNDISMISSED; its button is always the
     // ink "Open it ›" (an opened week never re-shows the banner, so the View-again flip died)
     expect(page).toContain("{reviewWin && !reviewSeen && !reviewDismissed && (");
-    expect(page).toContain('className="tdb-btnp sm tdb-rvopen2" onClick={openReview}>Open it ›</button>');
+    // todo rebuild P3: the banner became the FEATURED CARD — its primary is the soft-pink
+    // "View" (no ink pill anywhere on this page now).
+    expect(page).toContain('className="tdb-featbtn pri" onClick={openReview}');
     expect(page).not.toContain("View again");
   });
   it("frame P3 — the ✕ persists PER-WEEK (sa. prefs, no data writes); a new week resets both flags", () => {
@@ -124,7 +126,8 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
     expect(page).toContain('localStorage.setItem("sa.todoReviewSeen", reviewWin.key)');
     expect(page).toContain('localStorage.setItem("sa.todoReviewDismissed", reviewWin.key)');
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week = reset
-    expect(page).toContain('aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>');
+    expect(page).toContain('aria-label="Dismiss for this week" onClick={dismissReviewWeek}'); // the close control
+    expect(page).toContain('className="tdb-featbtn" onClick={dismissReviewWeek}>Dismiss</button>'); // and Dismiss
     expect(page).not.toContain("reviewHidden"); // the session-only hide is superseded
     expect(page).not.toContain("reviewSurface");
     for (const stale of ["tdb-rvbanner", "tdb-rvbar", "tdb-rvcard", "tdb-rvx2", "tdb-rvgo2", "renderReviewAfterlife"]) {
@@ -132,22 +135,22 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
       expect(css).not.toContain(stale);
     }
   });
-  it("the RVBOX anatomy (polish P3): lifted white card, uncircled 46px currentColor cup, kicker, Playfair 15 title, one-line sub", () => {
-    expect(cup).toContain('stroke="currentColor"');
-    expect(page).toContain('<span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />');
-    expect(page).toContain("THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}");
-    expect(page).toContain("<b>Last week in review</b>");
-    expect(page).toContain("<p>Every box ticked turns the dial in your favour.</p>");
-    const cupRule = css.match(/\.tdb-rvcupb \{([^}]*)\}/)?.[1] ?? "";
-    expect(cupRule).toContain("width: 46px");
-    expect(cupRule).toContain("color: var(--ink)");
-    expect(cupRule).not.toContain("border-radius"); // uncircled
-    const box = css.match(/\.tdb-rvbox \{([^}]*)\}/)?.[1] ?? "";
-    expect(box).toContain("background: var(--white, #fff)");
+  it("THE FEATURED CARD anatomy (todo rebuild P3): warm gradient, Playfair 26 + pink badge, 50ch body, two actions, the 288px art panel", () => {
+    expect(page).toContain("<h3>Last week in review</h3>");
+    expect(page).toContain('<span className="tdb-featbadge">Ready</span>');
+    expect(page).toContain("Every box ticked turns the dial in your favour.");
+    const box = css.match(/\.tdb-feat \{([^}]*)\}/)?.[1] ?? "";
+    expect(box).toContain("linear-gradient(103deg, #fdf9f4 0%, #faf1e8 58%, #f6e8dd 100%)");
     expect(box).toContain("border-radius: 16px");
-    expect(box).toContain("box-shadow: 0 5px 18px rgba(58, 28, 20, 0.11)");
+    expect(box).toContain("border: 1px solid var(--line)");
+    expect(box).toContain("margin-top: 26px"); // directly beneath the header rule
+    expect(css).toMatch(/\.tdb-feath h3 \{[^}]*font-size: 26px/);
+    expect(css).toMatch(/\.tdb-featd \{[^}]*max-width: 50ch/);
+    expect(css).toMatch(/\.tdb-featart \{[^}]*width: 288px/);
+    expect(css).toMatch(/\.tdb-featart \{[^}]*align-self: flex-end/); // bottom-aligned, bleeding to the edge
+    // exactly two actions in the card body — nothing else
+    expect((page.match(/className="tdb-featbtn/g) ?? []).length).toBe(2);
     expect(css).not.toContain("#fbf7f0"); // the docband's parchment gradient died with it
-    expect(css).toMatch(/\.tdb-rvhx b \{[^}]*font-size: 15px/);
     expect(page).not.toContain("tdb-rvhead"); // the strip banner is gone — ONE surface, the review card
   });
   it("the mode itself is untouched: the banner button opens weeklyReview over the same set", () => {
