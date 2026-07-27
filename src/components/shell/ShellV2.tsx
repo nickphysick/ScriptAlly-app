@@ -181,12 +181,8 @@ export const ShellTopBar: React.FC<{
           <b>{crumb.page}</b>
         </div>
       )}
-      {/* Save-state chip — presentational for now: no live pending-writes source exists
-          (flagged in the rollout report); the chrome reserves the slot the pack bakes. */}
-      <div className="sv2-state">
-        <i aria-hidden="true" />
-        All changes saved
-      </div>
+      {/* The save-state chip is REMOVED (fixes pack Phase 4): crumb left, search right,
+          nothing else. It was purely presentational — no save-state logic existed to keep. */}
       <div className="sv2-grow" />
       <div className="sv2-gsearch">
         <NavSearch

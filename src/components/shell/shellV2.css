@@ -385,18 +385,6 @@
 }
 .sv2-crumb b { color: var(--shell-ink); font-weight: 500; }
 .sv2-crumb .sv2-sl { opacity: 0.5; }
-/* Fill-based chip — no border in the capsule idiom. */
-.sv2-state {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--shell-ink-soft);
-  padding: 4px 10px;
-  border-radius: 99px;
-  background: var(--shell-inset);
-}
-.sv2-state i { width: 6px; height: 6px; border-radius: 99px; background: var(--sage); display: block; }
 .sv2-grow { flex: 1; }
 .sv2-gsearch { width: 280px; flex: none; }
 

@@ -89,12 +89,13 @@ describe("v2 shell — smoke renders", () => {
     expect(html).not.toContain("sv2-iconbtn"); // the user block carries no utility buttons now
   });
 
-  it("top bar: crumb + save-state chip + the shared NavSearch (capsule cream fill)", () => {
+  it("top bar: crumb left, search right, nothing else (the save-state chip is removed)", () => {
     const html = at("/manuscripts", <ShellTopBar routeKey="manuscripts" searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} />);
     expect(html).toContain("sv2-topbar");
     expect(html).toContain("Shelf"); // crumb section
     expect(html).toContain("Manuscripts"); // crumb page (bold current)
-    expect(html).toContain("All changes saved");
+    expect(html).not.toContain("All changes saved"); // fixes pack Phase 4
+    expect(html).not.toContain("sv2-state");
     expect(html).toContain("nav-search-field"); // the real NavSearch, not a fork
   });
 });
