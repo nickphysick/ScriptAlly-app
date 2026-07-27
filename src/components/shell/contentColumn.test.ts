@@ -32,10 +32,11 @@ describe("content-column tokens + wrapper", () => {
 });
 
 describe("StagePage — the ONE wrapper (not scattered per page)", () => {
-  it("takes a contentVariant, wraps children in the capped column, paints the desk in the margins", () => {
+  it("takes a contentVariant and wraps children in the capped column — the slot paints NOTHING (canvas scheme 1: the stage owns the ground)", () => {
     expect(shell).toContain("contentVariant?: \"work\" | \"read\"");
     expect(shell).toContain("sa-content-col sa-content-col--${contentVariant}");
-    expect(shell).toContain('background: "var(--desk)"');
+    expect(shell.includes('background: "var(--desk)"')).toBe(false);
+    expect(shell).toContain('background: "var(--shell-canvas)"'); // painted once, on the stage
   });
 
   it("nav chrome is OUTSIDE the cap — the rail is retired and the drawer overlays, never wrapped", () => {

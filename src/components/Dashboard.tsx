@@ -1511,7 +1511,9 @@ export const Dashboard: React.FC<{
   return (
     <div
       className="min-h-screen pb-16 font-sans"
-      style={{ background: "var(--desk, #e8ddd0)", color: bodyInk }}
+      // No bespoke ground (canvas scheme 1) — the taupe desk inverted the depth model; the page
+      // inherits the stage's canvas like every other page.
+      style={{ color: bodyInk }}
     >
 
       {/* ── Guided empty state for brand-new users ── */}

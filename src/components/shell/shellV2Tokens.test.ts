@@ -17,6 +17,7 @@ const BAKED: Record<string, string> = {
   "--shell-topbar": "#faf6f2",
   "--shell-canvas": "#faf6f2",
   "--shell-card": "#fdfaf5",
+  "--shell-panel": "#f5efe8",
   "--shell-line": "#e3d9cf",
   "--shell-line-soft": "#ece3da",
   "--shell-side-edge": "rgba(124,58,42,.14)",
@@ -45,6 +46,7 @@ describe("app-shell v2 tokens — designTokens.ts twins agree", () => {
     expect(dt.shellTopbar).toBe("#faf6f2");
     expect(dt.shellCanvas).toBe("#faf6f2");
     expect(dt.shellCard).toBe("#fdfaf5");
+    expect(dt.shellPanel).toBe("#f5efe8");
     expect(dt.shellLine).toBe("#e3d9cf");
     expect(dt.shellLineSoft).toBe("#ece3da");
     expect(dt.shellSideEdge).toBe("rgba(124,58,42,.14)");
@@ -58,5 +60,20 @@ describe("app-shell v2 tokens — designTokens.ts twins agree", () => {
     expect(dt.shellGroup).toBe(24);
     expect(dt.shellWithin).toBe(8);
     expect(dt.shellCardPad).toBe(12);
+  });
+});
+
+/** Relative luminance of a #rrggbb hex (linear-ish weighting is enough for an ordering lock). */
+const lum = (hex: string): number => {
+  const h = hex.replace("#", "");
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+describe("the depth law — content raised, chrome receding (scheme 1, Raised light)", () => {
+  it("card > canvas > panel > sidebar in lightness; no page may invert this", () => {
+    expect(lum(dt.shellCard)).toBeGreaterThan(lum(dt.shellCanvas));
+    expect(lum(dt.shellCanvas)).toBeGreaterThan(lum(dt.shellPanel));
+    expect(lum(dt.shellPanel)).toBeGreaterThan(lum(dt.shellSide));
   });
 });

@@ -94,8 +94,9 @@ export const StagePage: React.FC<{
         ...(layout !== "flow" ? { height: "100%" } : {}),
         ...(isFillCol ? { flexDirection: "column" as const } : {}),
         ...(clip ? { overflow: "hidden" } : {}),
-        // contentVariant → the desk fills the margins; else the page's own background prop.
-        ...(contentVariant ? { background: "var(--desk)" } : background ? { background } : {}),
+        // The slot paints NOTHING (canvas scheme 1): the stage's var(--shell-canvas) shows
+        // through everywhere; the legacy `background` prop survives for any future explicit use.
+        ...(background ? { background } : {}),
         minWidth: 0,
       }}
     >
@@ -210,7 +211,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           ref={stageRef}
           className="pb-[76px] md:pb-0"
           onScroll={(e) => { scrollMemo.current[routeKey] = (e.target as HTMLElement).scrollTop; }}
-          style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative" }}
+          // The ONE canvas (scheme 1, "Raised light"): painted here, inherited by every page —
+          // no page sets a bespoke ground, and the canvas stays lighter than the sidebar (the
+          // depth law, locked in shellV2Tokens.test.ts).
+          style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "var(--shell-canvas)" }}
         >
           {children}
         </div>

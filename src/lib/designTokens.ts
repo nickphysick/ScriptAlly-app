@@ -133,6 +133,7 @@ export const shellSide = "#f1ebe4"; // sidebar panel ground
 export const shellTopbar = "#faf6f2"; // top bar — === canvas by design
 export const shellCanvas = "#faf6f2"; // content canvas ground
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
+export const shellPanel = "#f5efe8"; // in-page grouping surface — one step below the canvas
 export const shellLine = "#e3d9cf"; // standard hairline
 export const shellLineSoft = "#ece3da"; // soft hairline
 export const shellSideEdge = "rgba(124,58,42,.14)"; // sidebar right-edge tint (drawn 1px solid)

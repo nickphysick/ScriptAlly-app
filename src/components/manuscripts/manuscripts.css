@@ -16,7 +16,7 @@
   --msv-huec: var(--sd-centre);
   height: 100%;
   overflow-y: auto;
-  background: var(--desk);
+  /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas */
   color: var(--msv-ink);
   padding: 22px 28px 48px; /* masthead gutter mirrors the Queries hub (22px top / 28px sides) */
 }

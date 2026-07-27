@@ -32,7 +32,8 @@
 
   height: 100%;
   overflow-y: auto;
-  background: var(--agl-paper);
+  /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas; --agl-paper
+     survives for the cards and buttons that read it */
   color: var(--agl-ink-body);
 }
 

@@ -49,6 +49,9 @@
   --shell-topbar: #faf6f2;            /* top bar — deliberately === canvas so the bar reads as the page */
   --shell-canvas: #faf6f2;            /* content canvas ground */
   --shell-card: #fdfaf5;              /* card surface on the canvas (=== parchment) */
+  --shell-panel: #f5efe8;             /* in-page grouping surface — one step BELOW the canvas
+                                         (scheme 1 "Raised light"; the depth law: card > canvas
+                                         > panel > sidebar in lightness, locked in the test) */
   --shell-line: #e3d9cf;              /* standard hairline */
   --shell-line-soft: #ece3da;         /* soft hairline (partitions, top-bar base) */
   --shell-side-edge: rgba(124,58,42,.14); /* sidebar right edge — drawn 1px solid, burgundy-tinted */

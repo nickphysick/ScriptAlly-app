@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Page background</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --slate:#6a89a7; --sage:#8a9e88;
+  --rail:#2e2622; --railtext:#a49a92; --side:#f1ebe4; --line:#e3d9cf; --linesoft:#ece3da;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:#ddd4c8;color:var(--ink);-webkit-font-smoothing:antialiased;padding:0 0 70px}
+.wrap{max-width:1320px;margin:0 auto;padding:38px 26px 0}
+.kicker{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#7f7568}
+h1{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-spacing:-.015em;margin-top:8px}
+.lede{font-family:"Playfair Display",serif;font-size:15.5px;color:#5f574f;margin-top:8px;max-width:740px}
+
+.ctrls{display:flex;gap:26px;margin-top:24px;flex-wrap:wrap;align-items:flex-start}
+.cgroup .cl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#7f7568;margin-bottom:8px}
+.pill{border:1px solid #c3b7a8;background:#e9e0d4;border-radius:99px;padding:7px 15px;cursor:pointer;font:inherit;font-size:12.5px;margin-right:7px;transition:background .16s,border-color .16s}
+.pill:hover{border-color:var(--burgundy)}
+.pill.on{background:var(--rail);color:#fff;border-color:var(--rail)}
+
+#stage{margin-top:20px;border:1px solid #c3b7a8;border-radius:14px;overflow:hidden;height:660px;display:flex;box-shadow:0 12px 32px rgba(58,28,20,.14);
+  --canvas:#faf6f2; --card:#fdfaf5; --sub:#f5efe8}
+
+.rl{width:74px;flex:none;background:var(--rail);display:flex;flex-direction:column;align-items:center;padding:15px 0}
+.mk{width:26px;height:26px;color:var(--railtext);flex:none}
+.rnav{display:flex;flex-direction:column;gap:3px;width:100%;padding:0 8px;margin-top:18px}
+.rb{width:100%;padding:9px 0 7px;border-radius:10px;color:var(--railtext);display:flex;flex-direction:column;align-items:center;gap:5px}
+.rb svg{width:18px;height:18px}
+.rb span{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase}
+.rb.on{background:var(--side);color:#2b2622;margin-right:-8px;border-radius:10px 0 0 10px}
+
+.sd{width:280px;flex:none;background:var(--side);padding:0 16px 16px;display:flex;flex-direction:column;border-right:1px solid rgba(124,58,42,.14);overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E")}
+.mh{padding:17px 0 0;flex:none}
+.mhname{font-family:"Playfair Display",serif;font-size:21px;letter-spacing:-.012em;line-height:1}
+.mhrule{height:1px;background:var(--ink);opacity:.5;margin:10px 0 8px}
+.mhkick{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.sl{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:22px 2px 8px;flex:none}
+.nb{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:13.5px}
+.nb svg{width:16px;height:16px;color:var(--muted);flex:none}
+.nb .lb{flex:1}
+.nb .ct{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);background:var(--card);border:1px solid var(--linesoft);border-radius:99px;padding:1px 7px}
+.nb.on{background:var(--canvas);box-shadow:inset 0 0 0 1px var(--line)}
+.part{height:1px;background:var(--linesoft);margin:22px 0;flex:none}
+.ms{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px;display:flex;align-items:center;gap:10px;flex:none}
+.ms .tile{width:34px;height:34px;border-radius:7px;flex:none;background:linear-gradient(160deg,#dce0d9,#d0d6cc);border:1px solid rgba(124,58,42,.22);display:grid;place-items:center;color:var(--sage-deep);font-family:"Playfair Display",serif;font-size:12px}
+.ms .t1{font-family:"Playfair Display",serif;font-size:14px;line-height:1.2}
+.ms .t2{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.desk{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px;flex:none}
+.dh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px}
+.dh .dt{font-family:"Playfair Display",serif;font-size:13.5px}
+.dh .dv{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
+.dr{display:flex;align-items:center;gap:9px;padding:5px 0}
+.pip{width:9px;height:9px;border-radius:2px;flex:none;box-shadow:inset 0 0 0 1px rgba(46,39,35,.09)}
+.dn{font-size:12.5px}.ldr{flex:1;border-bottom:1px dotted #cfc2b4;transform:translateY(-3px)}
+.dc{font-family:"Playfair Display",serif;font-size:15px;min-width:20px;text-align:right}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:none}
+.act{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:11px;box-shadow:2px 2px 0 rgba(46,39,35,.05);display:flex;flex-direction:column;gap:9px}
+.act svg{width:15px;height:15px;color:var(--burgundy)}
+.act span{font-size:11px}
+.air{flex:1;min-height:10px}
+.pro{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:12.5px;color:var(--ink-soft);flex:none}
+.pro i{width:7px;height:7px;border-radius:99px;background:var(--slate);flex:none}
+.pro .t{flex:1}
+.usr{margin-top:8px;border-top:1px solid var(--line);padding-top:11px;display:flex;align-items:center;gap:10px;flex:none}
+.av{width:32px;height:32px;border-radius:99px;flex:none;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:12px;color:var(--burgundy)}
+.un{font-size:12.5px}
+.ur{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.07em}
+
+/* plane */
+.pl{flex:1;background:var(--canvas);display:flex;flex-direction:column;min-width:0;overflow:hidden;transition:background .25s}
+.tb{height:54px;flex:none;border-bottom:1px solid var(--linesoft);display:flex;align-items:center;gap:14px;padding:0 24px}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.grow{flex:1}
+.gs{display:flex;align-items:center;gap:9px;width:250px;height:33px;padding:0 10px;background:var(--card);border:1px solid var(--line);border-radius:9px;color:var(--muted);font-size:12.5px}
+.gs svg{width:14px;height:14px}
+.pgb{flex:1;padding:24px 28px;overflow:hidden}
+.phtop{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.kick2{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+h2.t{font-family:"Playfair Display",serif;font-size:33px;font-weight:500;letter-spacing:-.015em;line-height:1.05}
+.sub{font-family:"Playfair Display",serif;font-size:15px;color:var(--ink-soft);margin-top:8px}
+.pa{display:flex;gap:9px;flex:none;padding-bottom:3px}
+.btn{display:inline-flex;align-items:center;gap:7px;height:35px;padding:0 14px;border-radius:9px;border:1px solid;font-size:12px;white-space:nowrap}
+.btn svg{width:14px;height:14px}
+.bg1{background:var(--card);border-color:var(--line);color:var(--ink)}
+.bg1 svg{color:var(--muted)}
+.bg2{background:var(--pink);border-color:var(--pink-line);color:var(--burgundy)}
+.bg2 svg{color:var(--burgundy)}
+.phr{height:1px;background:var(--linesoft);margin:18px 0 20px}
+
+/* dashboard body */
+.dashbody{display:none}
+#stage.pgDash .dashbody{display:block}
+#stage.pgDash .todobody{display:none}
+#stage.pgDash .kick2{display:block}
+#stage.pgDash .sub{display:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.stt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stt .l2{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stt .v2{font-family:"Playfair Display",serif;font-size:30px;margin-top:8px;line-height:1}
+.stt .p2{display:inline-block;font-size:10px;color:var(--ink-soft);background:var(--sub);border:1px solid var(--linesoft);border-radius:99px;padding:2px 8px;margin-top:8px}
+.diary{margin-top:16px;background:var(--sub);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.diary .dt3{font-family:"Playfair Display",serif;font-size:24px;line-height:1.1}
+.diary .row3{display:flex;gap:12px;margin-top:14px}
+.diary .day{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.diary .day.today{border-color:var(--sage);box-shadow:0 0 0 1px var(--sage)}
+.diary .dl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.diary .dv3{font-family:"Playfair Display",serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:9px}
+
+/* to-do body */
+.todobody{display:none}
+#stage.pgTodo .todobody{display:block}
+#stage.pgTodo .kick2{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-size:12px}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.board{background:var(--sub);border:1px solid var(--line);border-radius:14px;padding:18px}
+.lane{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.lane .lt{font-family:"Playfair Display",serif;font-size:18px}
+.lane .lc{font-family:"JetBrains Mono",monospace;font-size:9px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:2px 8px;color:var(--ink-soft)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.cd{background:#fff;border:1px solid var(--ink);border-radius:9px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07)}
+.cd .bn{padding:6px 11px;border-bottom:1px solid var(--ink);background:#f3e0d6}
+.cd .bn span{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+.cd .bd{padding:12px}
+.cd .ct2{font-family:"Playfair Display",serif;font-size:14px;line-height:1.3}
+.cd .cs{font-family:"Playfair Display",serif;font-style:italic;font-size:11.5px;color:var(--ink-soft);margin-top:5px}
+
+.meta{margin-top:16px;font-size:12px;color:#5f574f;line-height:1.6;max-width:940px}
+.meta b{color:var(--ink);font-weight:500}
+.model{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;border-radius:99px;padding:3px 9px;margin-right:8px}
+.m-raised{background:#e2eadf;border:1px solid #c8d6c4;color:#4c6349}
+.m-flat{background:#eee6db;border:1px solid #ddd0c0;color:#7a6a58}
+.m-sunk{background:#f7e7dd;border:1px solid #e8c8bc;color:#8a4a32}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#2b2622;color:#fff;padding:11px 26px;display:flex;align-items:center;gap:16px;z-index:60}
+.bar .l{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+.bar .v{font-family:"JetBrains Mono",monospace;font-size:11px;flex:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">ScriptAlly · Shell lab · Sheet 9</div>
+  <h1>Page background</h1>
+  <div class="lede">Chrome is fixed — rail <code>#2e2622</code>, sidebar <code>#f1ebe4</code>. Only the canvas, the card and the in-page panel change. Switch between the two page types to check the scheme holds on both.</div>
+
+  <div class="ctrls">
+    <div class="cgroup">
+      <div class="cl">Scheme</div>
+      <div id="schemes"></div>
+    </div>
+    <div class="cgroup">
+      <div class="cl">Page</div>
+      <button class="pill on" data-pg="pgDash">Dashboard</button>
+      <button class="pill" data-pg="pgTodo">To-do</button>
+    </div>
+  </div>
+
+  <div id="stage" class="pgDash">
+    <div class="rl">
+      <svg class="mk" viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Zm-2.4 2.2L10 13.8 6 12.3l13.3-5.1v-.2Z"/></svg>
+      <div class="rnav">
+        <div class="rb on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Desk</span></div>
+        <div class="rb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span>Queries</span></div>
+        <div class="rb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg><span>Agents</span></div>
+        <div class="rb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg><span>Shelf</span></div>
+      </div>
+    </div>
+
+    <div class="sd">
+      <div class="mh">
+        <div class="mhname">ScriptAlly</div>
+        <div class="mhrule"></div>
+        <div class="mhkick"><span>Desk</span><span>Week 139</span></div>
+      </div>
+      <div class="sl">Pages</div>
+      <div class="nb on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lb">Dashboard</span></div>
+      <div class="part"></div>
+      <div class="ms"><div class="tile">MD</div><div style="flex:1"><div class="t1">Murphy's Day Out</div><div class="t2">20 queries · 16 active</div></div></div>
+      <div class="desk">
+        <div class="dh"><span class="dt">Tasks &amp; reminders</span><span class="dv">44</span></div>
+        <div class="dr"><i class="pip" style="background:#eabfab"></i><span class="dn">Urgent</span><span class="ldr"></span><span class="dc">3</span></div>
+        <div class="dr"><i class="pip" style="background:#b7c5b4"></i><span class="dn">Housekeeping</span><span class="ldr"></span><span class="dc">41</span></div>
+      </div>
+      <div class="sl">Actions</div>
+      <div class="acts">
+        <div class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span>Log query</span></div>
+        <div class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg><span>Record response</span></div>
+      </div>
+      <div class="air"></div>
+      <div class="pro"><i></i><span class="t">Unlock your full query log</span><span style="color:var(--muted)">›</span></div>
+      <div class="usr"><div class="av">ML</div><div style="flex:1"><div class="un">Michael Li</div><div class="ur">Free plan</div></div></div>
+    </div>
+
+    <div class="pl">
+      <div class="tb">
+        <span class="crumb" id="crumb">Desk / <b>Dashboard</b></span>
+        <div class="grow"></div>
+        <div class="gs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…</div>
+      </div>
+      <div class="pgb">
+        <div class="phtop">
+          <div>
+            <div class="kick2">Monday 27 July · Week 139 of querying</div>
+            <h2 class="t" id="ttl">Good morning, Michael</h2>
+            <div class="sub">Urgent tasks, housekeeping, notes.</div>
+          </div>
+          <div class="pa">
+            <span class="btn bg1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>Record a response</span>
+            <span class="btn bg2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>Send query</span>
+          </div>
+        </div>
+        <div class="phr"></div>
+
+        <div class="dashbody">
+          <div class="stats">
+            <div class="stt"><div class="l2">Queries sent</div><div class="v2">20</div><div class="p2">0 this week</div></div>
+            <div class="stt"><div class="l2">Active queries</div><div class="v2">15</div><div class="p2">12 awaiting a reply</div></div>
+            <div class="stt"><div class="l2">Agents</div><div class="v2">16</div><div class="p2">0 idle</div></div>
+            <div class="stt"><div class="l2">Responses</div><div class="v2">11</div><div class="p2">55% rate</div></div>
+          </div>
+          <div class="diary">
+            <div class="dt3">Dates for the diary</div>
+            <div class="row3">
+              <div class="day"><div class="dl"><span>Sun</span><span>26 Jul</span></div><div class="dv3">A quiet day.</div></div>
+              <div class="day today"><div class="dl"><span>Today</span><span>27 Jul</span></div><div class="dv3">Nothing due today.</div></div>
+              <div class="day"><div class="dl"><span>Tue</span><span>28 Jul</span></div><div class="dv3">A quiet day.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="todobody">
+          <div class="chips"><span class="chip on">All 44</span><span class="chip">Offers 1</span><span class="chip">Agent waiting 2</span><span class="chip">Materials 16</span><span class="chip">Stale 10</span></div>
+          <div class="board">
+            <div class="lane"><span class="lt">Urgent</span><span class="lc">3</span></div>
+            <div class="cards">
+              <div class="cd"><div class="bn"><span>★ Offer</span></div><div class="bd"><div class="ct2">Tom Ellery has made an offer</div><div class="cs">Murphy's Day Out</div></div></div>
+              <div class="cd"><div class="bn"><span>Agent waiting</span></div><div class="bd"><div class="ct2">Send your full to Jonathan Marsh</div><div class="cs">Murphy's Day Out</div></div></div>
+              <div class="cd"><div class="bn"><span>Agent waiting</span></div><div class="bd"><div class="ct2">Send your partial to Daniel O'Rourke</div><div class="cs">Murphy's Day Out</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta" id="meta"></div>
+</div>
+
+<div class="bar"><span class="l">Canvas</span><span class="v" id="val"></span></div>
+
+<script>
+const S=[
+ {t:"1",n:"Raised light",canvas:"#faf6f2",card:"#fdfaf5",sub:"#f5efe8",model:"raised",
+  why:"<b>What most of your pages do now.</b> Canvas sits ~3% lighter than the sidebar, so the work reads as raised and the chrome recedes. In-page panels step back down to group content. The safest, most conventional answer."},
+ {t:"2",n:"Raised bright",canvas:"#fbf8f4",card:"#ffffff",sub:"#f4eee7",model:"raised",
+  why:"<b>Same model, more separation.</b> Pure white cards on a near-white canvas — crisper, and the To-do post-its sing. But white cards on a warm canvas start to read cool, and the paper metaphor thins."},
+ {t:"3",n:"Flat cream",canvas:"#f1ebe4",card:"#fdfaf5",sub:"#f7f2ec",model:"flat",
+  why:"<b>Canvas equals sidebar.</b> One continuous ground, no boundary at all between chrome and work — cards become the only raised thing on screen. Calmest of the six, and the sidebar's right-hand hairline does all the dividing."},
+ {t:"4",n:"Sunken taupe",canvas:"#e9dfd2",card:"#fdfaf5",sub:"#f2ebe1",model:"sunken",
+  why:"<b>What your dashboard does now, applied everywhere.</b> Canvas darker than the sidebar, so content sits in a well and cards lift hard off it. Handsome and distinctly 'desk mat' — but it inverts the depth model, so chrome now advances and content recedes."},
+ {t:"5",n:"Sunken soft",canvas:"#eee6db",card:"#fdfaf5",sub:"#f6f0e7",model:"sunken",
+  why:"<b>The dashboard's idea, dialled back.</b> Still sunken, but only a step below the sidebar rather than three. Keeps the card lift without the app feeling like it dimmed."},
+ {t:"6",n:"Sepia",canvas:"#f7efe1",card:"#fdfaf5",sub:"#f2e9d9",model:"flat",
+  why:"<b>Warm reading canvas.</b> Roughly level with the sidebar but pushed toward Kindle sepia. Gentlest for long sessions; cards need their hairline to stay legible against it."}
+];
+const stage=document.getElementById('stage'),val=document.getElementById('val'),meta=document.getElementById('meta'),host=document.getElementById('schemes');
+host.innerHTML=S.map((s,i)=>`<button class="pill${i===0?' on':''}" data-i="${i}">${s.t} · ${s.n}</button>`).join('');
+function apply(i){
+  const s=S[i];
+  stage.style.setProperty('--canvas',s.canvas);
+  stage.style.setProperty('--card',s.card);
+  stage.style.setProperty('--sub',s.sub);
+  val.textContent=s.n+'   —   canvas '+s.canvas+'   card '+s.card+'   panel '+s.sub+'   ·   sidebar #f1ebe4';
+  meta.innerHTML='<span class="model m-'+s.model+'">'+s.model+'</span>'+s.why;
+  host.querySelectorAll('.pill').forEach((el,n)=>el.classList.toggle('on',n===i));
+}
+host.querySelectorAll('.pill').forEach(el=>el.onclick=()=>apply(+el.dataset.i));
+document.querySelectorAll('[data-pg]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-pg]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  stage.className=b.dataset.pg;
+  document.getElementById('crumb').innerHTML = b.dataset.pg==='pgDash' ? 'Desk / <b>Dashboard</b>' : 'Querying / <b>To-do</b>';
+  document.getElementById('ttl').textContent = b.dataset.pg==='pgDash' ? 'Good morning, Michael' : "What's on your desk?";
+});
+apply(0);
+</script>
+</body>
+</html>

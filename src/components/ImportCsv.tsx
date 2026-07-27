@@ -655,7 +655,7 @@ export const ImportCsv: React.FC<{
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFAF7] pb-16 font-sans text-[#3a1c14]">
+    <div className="min-h-screen pb-16 font-sans text-[#3a1c14]">
       {/* ── ChromeSlab (Option A): crumb + title on the unified surface — supersedes the old
             centred "migration desk" branding block. ── */}
       <ChromeSlab onNavigate={onNavigate} title="Import" meta="CSV MIGRATION DESK" />
