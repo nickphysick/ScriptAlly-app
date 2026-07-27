@@ -53,22 +53,8 @@
    burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
 .sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
 .sv2-railspacer { flex: 1; }
-/* The collapsed rail's expand control — the two-pane glyph beneath the brand (flyouts ref). */
-.sv2-railtuck {
-  width: 34px;
-  height: 34px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  color: var(--shell-muted);
-  margin: -8px 0 16px;
-  transition: background 0.16s, color 0.16s;
-}
-.sv2-railtuck:hover { background: var(--shell-inset); color: var(--shell-ink); }
-.sv2-railtuck svg { width: 16px; height: 16px; }
+/* (The dedicated expand control is retired — rail-section-select P2; section icons, the
+   flyout footer and ⌘\ carry expansion now.) */
 /* The rib whose flyout is open holds its hover look while the pointer travels across. */
 .sv2-rib.hovering { background: var(--shell-inset); color: var(--shell-ink); }
 .sv2-rib.on.hovering { background: var(--shell-ground); color: var(--burg); }
@@ -489,7 +475,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sv2-fly,
-  .sv2-railtuck,
   .sv2-side,
   .sv2-rib,
   .sv2-tuck,

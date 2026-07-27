@@ -210,18 +210,10 @@ export const ShellRail: React.FC<{
   return (
     <nav className="sv2-rail sv2-cap" aria-label="Sections">
       <Mark />
-      {/* The expand control — the two-pane glyph beneath the brand, only while collapsed. */}
-      {collapsed && (
-        <button
-          type="button"
-          className="sv2-railtuck"
-          title="Expand sidebar (⌘\)"
-          aria-label="Show the panel"
-          onClick={onExpand}
-        >
-          <PanelLeft aria-hidden="true" />
-        </button>
-      )}
+      {/* (The dedicated expand control is RETIRED — rail-section-select pack P2. Expansion
+          comes from any section icon, the Dashboard icon when already on Dashboard, and ⌘\;
+          the flyout footer advertises it, and the panel's tuck control keeps collapse
+          discoverable.) */}
       <div className="sv2-railnav">
         {SHELL_RAIL.map((rib) => {
           const Icon = RAIL_ICONS[rib.key];

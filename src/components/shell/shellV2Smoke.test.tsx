@@ -55,16 +55,17 @@ describe("v2 shell — smoke renders", () => {
     expect(html).not.toContain("week one"); // the kicker (weekOfQuerying) left the panel
   });
 
-  it("panel collapse (fixes pack): the rail carries the expand toggle only while collapsed; the hide is a container-class CSS transition", () => {
+  it("panel collapse: the dedicated expand control is RETIRED (rail-section-select P2); the tuck + flyout footer carry the affordances", () => {
     const collapsed = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed onExpand={() => {}} />);
-    expect(collapsed).toContain('aria-label="Show the panel"');
-    const expanded = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed={false} />);
-    expect(expanded).not.toContain('aria-label="Show the panel"');
-    // the collapsed panel hides via the container's state class (structure only — the slide,
-    // the widened content reflow and the gap collapse are browser checks)
+    expect(collapsed).not.toContain("sv2-railtuck"); // the expand button is gone
+    expect(collapsed).not.toContain('aria-label="Show the panel"');
+    // the panel's tuck control stays (asserted in the panel-frame test: "Hide the panel"), and
+    // the flyout footer's "Expand sidebar · ⌘\" stays (asserted in the flyout test) — both are
+    // now load-bearing. The hide itself is still the container-class CSS transition:
     const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
     expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*width: 0/s);
     expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*margin-left: calc\(-1 \* var\(--shell-cap-gap\)\)/s);
+    expect(css).not.toContain(".sv2-railtuck {"); // its styles went with it
   });
 
   it("rail flyouts (flyouts pack): hover targets on the four sections while collapsed — never Dashboard, none expanded", () => {
