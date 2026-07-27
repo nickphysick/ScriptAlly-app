@@ -18,7 +18,7 @@ import { LayoutGrid, Send, Users, Book, Settings, PanelLeft } from "lucide-react
 import { useScriptAllyDb } from "../../lib/db";
 import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
-import { SHELL_RAIL, SHELL_SETUP, shellCrumbForPath, shellSectionKeyForPath } from "./shellV2Nav";
+import { SHELL_RAIL, SHELL_SETUP, SHELL_SETUP_PATHS, shellCrumbForPath, shellSectionKeyForPath } from "./shellV2Nav";
 import "./shellV2.css";
 
 const RAIL_ICONS: Record<string, React.ComponentType<{ "aria-hidden"?: boolean | "true" }>> = {
@@ -87,7 +87,8 @@ export const ShellRail: React.FC<{
       <div className="sv2-railspacer" />
       <button
         type="button"
-        className="sv2-rib"
+        className={SHELL_SETUP_PATHS.has(pathname) ? "sv2-rib on" : "sv2-rib"}
+        aria-current={SHELL_SETUP_PATHS.has(pathname) ? "page" : undefined}
         title={SHELL_SETUP.caption}
         aria-label={SHELL_SETUP.caption}
         onClick={() => onNavigatePath(SHELL_SETUP.path)}

@@ -224,7 +224,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           .ashell-help-fab { display: none !important; }
         }
       `}</style>
-      <button
+      {routeKey !== "help" && <button
         type="button"
         className="ashell-help-fab"
         onClick={() => {
@@ -245,8 +245,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         }}
       >
         ?
-      </button>
-      {helpMenuOpen && (
+      </button>}
+      {helpMenuOpen && routeKey !== "help" && (
         <>
           <div style={{ position: "fixed", inset: 0, zIndex: 39 }} onClick={() => setHelpMenuOpen(false)} />
           <div

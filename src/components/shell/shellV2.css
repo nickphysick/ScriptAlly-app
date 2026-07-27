@@ -386,6 +386,9 @@
 .sv2-crumb b { color: var(--shell-ink); font-weight: 500; }
 .sv2-crumb .sv2-sl { opacity: 0.5; }
 .sv2-grow { flex: 1; }
+/* The re-homed focus-family reading column (fixes P5) — FocusShell's 860px measure, kept so
+   Account / Plans / Help layouts move across unchanged. */
+.sv2-focuscol { width: 100%; max-width: 860px; margin: 0 auto; padding: 16px 32px 90px; }
 .sv2-gsearch { width: 280px; flex: none; }
 
 @media (prefers-reduced-motion: reduce) {

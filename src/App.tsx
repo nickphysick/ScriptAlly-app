@@ -41,7 +41,6 @@ import { RecordResponseScreen } from "./components/RecordResponseScreen";
 import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
-import { FocusShell } from "./components/shell/FocusShell";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
@@ -549,22 +548,9 @@ function AppContent() {
     );
   }
 
-  // ── Focus tier (authed — the guard above already ran): slim-bar chrome, no rail. The
-  // workspace AppShell unmounts on these routes by design (the rail disappears); page-local
-  // workspace state resets on a tier crossing, while Firestore data lives in DbProvider above.
-  if (tier === "focus") {
-    return (
-      <FocusShell path={path} user={currentUser} onNavigate={handleNavigate}>
-        {path === "/account" ? (
-          <AccountSettings onNavigate={handleNavigate} />
-        ) : path === "/plans" ? (
-          <PlansPage />
-        ) : (
-          <HelpCentre />
-        )}
-      </FocusShell>
-    );
-  }
+  // (The focus tier is RETIRED — capsule fixes P5: /account, /plans and /help are workspace
+  // routes now, rendered in the one capsule shell below. FocusShell is deleted; the shell
+  // census is capsule (signed-in) · marketing (logged-out) · onboarding-outside.)
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
@@ -648,8 +634,23 @@ function AppContent() {
         </StagePage>
 
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).
-            /pricing, /plans, /help and /account left this shell for the marketing/focus tiers
-            (see the tier branches above) — the workspace keeps only its own routes. */}
+            /account, /plans and /help are BACK in this shell (capsule fixes P5 — the focus
+            tier is retired); only /pricing stays out, on the marketing tier. */}
+        {routeKey === "account" && (
+          <StagePage active>
+            <div className="sv2-focuscol"><AccountSettings onNavigate={handleNavigate} /></div>
+          </StagePage>
+        )}
+        {routeKey === "plans" && (
+          <StagePage active>
+            <div className="sv2-focuscol"><PlansPage /></div>
+          </StagePage>
+        )}
+        {routeKey === "help" && (
+          <StagePage active>
+            <div className="sv2-focuscol"><HelpCentre /></div>
+          </StagePage>
+        )}
         {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
         {routeKey === "email-import-dev" && (
           <StagePage active><EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} /></StagePage>

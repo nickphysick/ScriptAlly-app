@@ -28,6 +28,7 @@ import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountCard } from "./MountCard";
+import { PageHeader } from "./shell/PageHeader";
 import {
   pageGround,
   PAGE_GRAIN,
@@ -874,13 +875,14 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
         .acct-rail-item:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
       `}</style>
 
-      <div className="relative" style={{ zIndex: 1, maxWidth: 1040, margin: "0 auto", padding: "40px 16px 0" }}>
-        <h1 style={{ fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 500, color: headingInk, lineHeight: 1.15, marginBottom: 4 }}>
-          Account settings
-        </h1>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 14, color: mutedInk, marginBottom: 28 }}>
-          Manage your profile, plan and preferences.
-        </p>
+      <div className="relative" style={{ zIndex: 1, maxWidth: 1040, margin: "0 auto", padding: "12px 16px 0" }}>
+        {/* The standard page header (capsule fixes P5 — re-homed from FocusShell into the
+            capsule shell): full variant replaces the bespoke h1 + sub. */}
+        <PageHeader
+          variant="full"
+          title="Account settings"
+          description="Manage your profile, plan and preferences."
+        />
 
         <div className="flex flex-col md:flex-row" style={{ gap: 24, alignItems: "flex-start" }}>
           <div className="w-full md:w-56 md:flex-shrink-0">

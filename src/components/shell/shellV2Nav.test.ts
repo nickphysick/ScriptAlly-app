@@ -9,6 +9,7 @@ import {
   SHELL_RAIL,
   SHELL_SECTIONS,
   SHELL_SETUP,
+  SHELL_SETUP_PATHS,
   shellCrumbForPath,
   shellPageForPath,
   shellSectionKeyForPath,
@@ -58,11 +59,20 @@ describe("shellV2Nav — path matching", () => {
     expect(shellSectionKeyForPath("/")).toBeNull();
   });
 
-  it("builds the crumb — Section / Page; the flat Dashboard is its own name; Import keeps a crumb off-nav", () => {
+  it("builds the crumb — Section / Page; the flat Dashboard is its own name; off-nav routes keep crumbs", () => {
     expect(shellCrumbForPath("/todo")).toEqual({ section: "Querying", page: "To-do" });
     expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Agent list" });
     expect(shellCrumbForPath("/dashboard")).toEqual({ section: "Dashboard", page: "Dashboard" });
     expect(shellCrumbForPath("/import")).toEqual({ section: "Shelf", page: "Import" });
-    expect(shellCrumbForPath("/plans")).toBeNull();
+    // the re-homed focus family (fixes P5): Setup crumbs, no accordion entries
+    expect(shellCrumbForPath("/account")).toEqual({ section: "Setup", page: "Account" });
+    expect(shellCrumbForPath("/plans")).toEqual({ section: "Setup", page: "Plans" });
+    expect(shellCrumbForPath("/help")).toEqual({ section: "Setup", page: "Help centre" });
+    expect(shellCrumbForPath("/nope")).toBeNull();
+  });
+
+  it("the Setup family lights the Setup rib, not a section rib (fixes P5)", () => {
+    expect([...SHELL_SETUP_PATHS].sort()).toEqual(["/account", "/help", "/plans"]);
+    for (const p of SHELL_SETUP_PATHS) expect(shellSectionKeyForPath(p)).toBeNull();
   });
 });

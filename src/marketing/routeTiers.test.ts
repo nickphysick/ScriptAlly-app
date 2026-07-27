@@ -1,12 +1,12 @@
 /**
- * Locks for the route-tier model (design ref: design-refs/chrome-overview-v1.html): which
- * shell wraps which path, the auth-aware marketing nav states, and the focus breadcrumb.
- * The guard behaviour itself lives in App.tsx ordering — these tests pin the resolution
- * table App.tsx branches on (repo convention: pure node tests, no DOM).
+ * Locks for the route-tier model: which shell wraps which path + the auth-aware marketing nav
+ * states. The focus tier is RETIRED (capsule fixes P5) — every signed-in route is workspace,
+ * rendered in the one capsule shell. The guard behaviour itself lives in App.tsx ordering —
+ * these tests pin the resolution table App.tsx branches on (pure node tests, no DOM).
  */
 
 import { describe, it, expect } from "vitest";
-import { tierForPath, focusCrumb, MARKETING_PATHS, FOCUS_PATHS, WORKSPACE_PATHS } from "./routeTiers";
+import { tierForPath, MARKETING_PATHS, WORKSPACE_PATHS } from "./routeTiers";
 import { marketingNavState } from "./marketingNav";
 
 describe("tierForPath", () => {
@@ -15,15 +15,15 @@ describe("tierForPath", () => {
     expect(tierForPath("/pricing")).toBe("marketing");
   });
 
-  it("puts account, plans and help in the focus tier", () => {
-    expect(tierForPath("/account")).toBe("focus");
-    expect(tierForPath("/plans")).toBe("focus");
-    expect(tierForPath("/help")).toBe("focus");
+  it("the focus tier is retired — account, plans and help are workspace routes (capsule fixes P5)", () => {
+    expect(tierForPath("/account")).toBe("workspace");
+    expect(tierForPath("/plans")).toBe("workspace");
+    expect(tierForPath("/help")).toBe("workspace");
   });
 
   it("keeps every workspace route in the workspace tier", () => {
     for (const p of [
-      "/dashboard", "/queries", "/agents", "/agents/discover",
+      "/dashboard", "/queries", "/todo", "/agents", "/agents/discover",
       "/manuscripts", "/manuscripts/packages", "/import", "/email-import-dev",
     ]) {
       expect(tierForPath(p)).toBe("workspace");
@@ -36,14 +36,13 @@ describe("tierForPath", () => {
   });
 
   it("assigns every path to exactly one tier (no overlaps between the sets)", () => {
-    const all = [...MARKETING_PATHS, ...FOCUS_PATHS, ...WORKSPACE_PATHS];
+    const all = [...MARKETING_PATHS, ...WORKSPACE_PATHS];
     expect(new Set(all).size).toBe(all.length);
   });
 
-  it("moved the old secondary routes out of the workspace set", () => {
-    for (const p of ["/pricing", "/plans", "/help", "/account"]) {
-      expect(WORKSPACE_PATHS.has(p)).toBe(false);
-    }
+  it("public pricing stays out of the workspace set", () => {
+    expect(WORKSPACE_PATHS.has("/pricing")).toBe(false);
+    expect(WORKSPACE_PATHS.has("/")).toBe(false);
   });
 });
 
@@ -67,13 +66,5 @@ describe("marketingNavState", () => {
   it("falls back to the email initial, then W", () => {
     expect(marketingNavState({ email: "writer@example.com" }).avatarInitial).toBe("W");
     expect(marketingNavState({ name: "  " }).avatarInitial).toBe("W");
-  });
-});
-
-describe("focusCrumb", () => {
-  it("renders the mono breadcrumb per the chrome ref", () => {
-    expect(focusCrumb("/account")).toBe("/ ACCOUNT");
-    expect(focusCrumb("/plans")).toBe("/ PLANS");
-    expect(focusCrumb("/help")).toBe("/ HELP");
   });
 });

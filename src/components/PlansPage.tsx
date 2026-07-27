@@ -9,9 +9,8 @@
  */
 import React from "react";
 import { MountPanel } from "./MountPanel";
+import { PageHeader } from "./shell/PageHeader";
 import {
-  pageGround,
-  PAGE_GRAIN,
   parchment,
   sageBandGradient,
   sageBandRule,
@@ -322,8 +321,8 @@ const FounderCard: React.FC = () => (
 );
 
 export const PlansPage: React.FC = () => (
-  <div className="min-h-screen pb-16 font-sans" style={{ background: pageGround, color: bodyInk }}>
-    <div aria-hidden="true" style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }} />
+  // No bespoke ground (capsule law — fixes P5 re-homing): the page inherits the content capsule.
+  <div className="min-h-screen pb-16 font-sans" style={{ color: bodyInk }}>
 
     {/* scoped CSS: CTA hovers (inline can't express :hover) + founder row stacks below 640px */}
     <style>{`
@@ -337,16 +336,11 @@ export const PlansPage: React.FC = () => (
       }
     `}</style>
 
-    <div className="relative" style={{ zIndex: 1, maxWidth: 880, margin: "0 auto", padding: "48px 16px 0" }}>
-      {/* page header (not a card) */}
-      <header style={{ textAlign: "center", marginBottom: 32 }}>
-        <h1 style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 500, color: headingInk, lineHeight: 1.15, margin: 0 }}>
-          Choose your <span style={{ fontStyle: "italic", color: burgundy }}>plan</span>
-        </h1>
-        <p style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: sageText, marginTop: 10 }}>
-          ScriptAlly · two tiers
-        </p>
-      </header>
+    <div className="relative" style={{ zIndex: 1, maxWidth: 880, margin: "0 auto", padding: "12px 16px 0" }}>
+      {/* The standard page header (capsule fixes P5 — re-homed from FocusShell): full variant
+          replaces the centred italic hero; the mono "ScriptAlly · two tiers" strapline is
+          dropped, not restyled (rollout report). */}
+      <PageHeader variant="full" title="Choose your plan" />
 
       {/* plan cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 20, marginBottom: 20 }}>

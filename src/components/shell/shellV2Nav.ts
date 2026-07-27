@@ -65,12 +65,19 @@ export const SHELL_RAIL = [
   { key: "shelf", caption: "Shelf", path: "/manuscripts" },
 ] as const;
 
-/** Setup — the rail item above the avatar. Navigates OUT of the workspace tier. */
+/** Setup — the rail item above the avatar (capsule fixes P5: /account now renders in the
+ *  capsule shell like everything signed-in). */
 export const SHELL_SETUP = { key: "setup", caption: "Setup", path: "/account" } as const;
 
-/** Off-nav routes that still deserve a breadcrumb (Import left the nav — baked). */
-const CRUMB_EXTRAS: Record<string, { section: string; page: string }> = {
-  "/import": { section: "Shelf", page: "Import" },
+/** The Setup family — off-nav workspace routes that light the Setup rib (fixes P5). */
+export const SHELL_SETUP_PATHS = new Set(["/account", "/plans", "/help"]);
+
+/** Off-nav routes that still deserve a breadcrumb; `rail` names the rib they light (if any). */
+const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashboard" | ShellV2Section["key"] | null }> = {
+  "/import": { section: "Shelf", page: "Import", rail: "shelf" },
+  "/account": { section: "Setup", page: "Account", rail: null },
+  "/plans": { section: "Setup", page: "Plans", rail: null },
+  "/help": { section: "Setup", page: "Help centre", rail: null },
 };
 
 /** The page (and its owning section, null for the flat Dashboard) an exact pathname maps to. */
@@ -91,7 +98,7 @@ export function shellSectionKeyForPath(
   pathname: string
 ): "dashboard" | ShellV2Section["key"] | null {
   const hit = shellPageForPath(pathname);
-  if (!hit) return pathname in CRUMB_EXTRAS ? "shelf" : null;
+  if (!hit) return CRUMB_EXTRAS[pathname]?.rail ?? null;
   return hit.section ? hit.section.key : "dashboard";
 }
 
@@ -100,7 +107,7 @@ export function shellCrumbForPath(
   pathname: string
 ): { section: string; page: string } | null {
   const extra = CRUMB_EXTRAS[pathname];
-  if (extra) return extra;
+  if (extra) return { section: extra.section, page: extra.page };
   const hit = shellPageForPath(pathname);
   if (!hit) return null;
   return { section: hit.section ? hit.section.label : hit.page.label, page: hit.page.label };
