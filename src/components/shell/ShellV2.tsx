@@ -132,7 +132,12 @@ export const ShellRail: React.FC<{
   /** The rail selects a SECTION (rail-section-select pack): expand the panel and open this
    *  accordion section (null = open none — the on-Dashboard expand). Never navigates. */
   onBrowse?: (section: ShellV2Section["key"] | null) => void;
-}> = ({ onNavigatePath, collapsed = false, onExpand, onBrowse }) => {
+  /** The accordion's open section (rail-icon-toggle pack) — AppShell owns it; the click
+   *  policy keys COLLAPSE off this, never off the route's section. */
+  openSection?: ShellV2Section["key"] | null;
+  /** The OPEN section's icon toggles the panel shut (rail-icon-toggle pack). */
+  onCollapse?: () => void;
+}> = ({ onNavigatePath, collapsed = false, onExpand, onBrowse, openSection = null, onCollapse }) => {
   const { pathname } = useLocation();
   const { currentUser } = useScriptAllyDb();
   const counts = useShellNavCounts();
@@ -229,9 +234,10 @@ export const ShellRail: React.FC<{
               aria-label={rib.caption}
               onClick={() => {
                 setFly(null);
-                const plan = railClickPlan(rib.key, pathname, collapsed);
+                const plan = railClickPlan(rib.key, pathname, collapsed, openSection);
                 if (plan.kind === "navigate") onNavigatePath(plan.path);
                 else if (plan.kind === "browse") onBrowse?.(plan.section);
+                else onCollapse?.();
               }}
               {...(hasFly ? ribFlyProps(rib.key as FlyoutKey) : {})}
             >
@@ -249,9 +255,10 @@ export const ShellRail: React.FC<{
         aria-label={SHELL_SETUP.caption}
         onClick={() => {
           setFly(null);
-          const plan = railClickPlan("setup", pathname, collapsed);
+          const plan = railClickPlan("setup", pathname, collapsed, openSection);
           if (plan.kind === "navigate") onNavigatePath(plan.path);
           else if (plan.kind === "browse") onBrowse?.(plan.section);
+          else onCollapse?.();
         }}
         {...ribFlyProps("setup")}
       >

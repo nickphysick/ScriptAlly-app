@@ -22,7 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { ShellSidebarBody } from "./ShellSidebar";
-import { ShellV2Section } from "./shellV2Nav";
+import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -156,43 +156,57 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     });
   }, []);
 
-  // The rail selects a SECTION (rail-section-select pack): a browse expands the panel and
-  // steers the accordion via the `browse` channel — it never navigates and never collapses
-  // (collapse belongs to ⌘\ and the tuck alone). `browsing` marks a rail-initiated expansion
-  // so an ABANDONED browse — Escape, or a click into page content outside the panel/rail —
-  // collapses again; the sidebar's on-collapse effect snaps the accordion back to the section
-  // containing the current page, so panel state never drifts from the user's location.
-  const [browse, setBrowse] = useState<{ sec: ShellV2Section["key"] | null; n: number } | null>(null);
+  // The rail selects a SECTION (rail-section-select pack), and — rail-icon-toggle pack — the
+  // OPEN section's icon toggles the panel shut. The accordion's open section is OWNED HERE so
+  // the rail's click policy can read the REAL open section at click time (collapse keys off
+  // the open section, never the route's — the two differ while browsing). Route changes steer
+  // it; ANY collapse snaps it back to the current page's section, so the panel never drifts;
+  // "querying" seeds a fresh expanded mount on a sectionless route (the old sidebar default).
+  const { pathname } = useLocation();
+  const routeSec = shellPageForPath(pathname)?.section?.key ?? null;
+  const [openSec, setOpenSec] = useState<ShellV2Section["key"] | null>(() => routeSec ?? "querying");
+  useEffect(() => { if (routeSec) setOpenSec(routeSec); }, [routeSec]);
+  useEffect(() => { if (panelCollapsed) setOpenSec(routeSec ?? null); }, [panelCollapsed, routeSec]);
+  const onToggleSection = useCallback((key: ShellV2Section["key"]) => {
+    setOpenSec((prev) => (prev === key ? null : key));
+  }, []);
+  // A browse expands the panel and steers the accordion — it never navigates. `browsing` marks
+  // a rail-initiated expansion so an ABANDONED browse (Escape, or a click into page content
+  // outside the panel/rail) collapses again. (The old {sec, n} bump channel is gone — the
+  // state lives here now, so a browse is plain assignment.)
   const [browsing, setBrowsing] = useState(false);
   const onBrowse = useCallback((sec: ShellV2Section["key"] | null) => {
     setPanel(false);
     setBrowsing(true);
-    setBrowse((b) => ({ sec, n: (b?.n ?? 0) + 1 }));
+    setOpenSec(sec);
+  }, [setPanel]);
+  // One collapse path for the rail toggle, Escape and the outside click — ends any live browse.
+  const collapsePanel = useCallback(() => {
+    setPanel(true);
+    setBrowsing(false);
   }, [setPanel]);
   // Escape closes the expanded panel regardless of how it was opened (no focus trap exists).
   useEffect(() => {
     if (panelCollapsed) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      setPanel(true);
-      setBrowsing(false);
+      collapsePanel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [panelCollapsed, setPanel]);
+  }, [panelCollapsed, collapsePanel]);
   // Abandon-a-browse: a pointer-down in page content (outside the panel AND the rail — rail
-  // clicks are section switches, not abandonment) while a rail-initiated browse is open.
+  // clicks are section switches or the toggle, never abandonment) while a browse is open.
   useEffect(() => {
     if (panelCollapsed || !browsing) return;
     const onDown = (e: PointerEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && (t.closest(".sv2-side") || t.closest(".sv2-rail"))) return;
-      setPanel(true);
-      setBrowsing(false);
+      collapsePanel();
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
-  }, [panelCollapsed, browsing, setPanel]);
+  }, [panelCollapsed, browsing, collapsePanel]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
@@ -222,7 +236,6 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // navigation. Observed on the full pathname — routeKey alone would miss sibling moves like
   // /agents ↔ /agents/discover. The persisted key still tracks within-page toggling, but the
   // collapse-on-navigate wins on route change. First render is exempt (nothing was navigated).
-  const { pathname } = useLocation();
   const firstPath = useRef(true);
   useEffect(() => {
     if (firstPath.current) { firstPath.current = false; return; }
@@ -243,9 +256,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
           only (class + media query in shellV2.css — never inline display). The interim layers
           (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
-      <ShellRail onNavigatePath={goPath} collapsed={panelCollapsed} onExpand={togglePanel} onBrowse={onBrowse} />
+      <ShellRail onNavigatePath={goPath} collapsed={panelCollapsed} onExpand={togglePanel} onBrowse={onBrowse} openSection={openSec} onCollapse={collapsePanel} />
       <ShellSide collapsed={panelCollapsed} onCollapse={togglePanel}>
-        <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} browse={browse} collapsed={panelCollapsed} />
+        <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} openSection={openSec} onToggleSection={onToggleSection} />
       </ShellSide>
       <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}

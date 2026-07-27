@@ -102,29 +102,39 @@ export function shellSectionKeyForPath(
   return hit.section ? hit.section.key : "dashboard";
 }
 
-/** The rail's click POLICY (rail-section-select pack): the rail selects a SECTION — it never
- *  picks a page. An icon with more than one destination BROWSES (expand the panel + open its
- *  accordion section, no navigation); exactly one destination navigates; already at the single
- *  destination → collapsed expands for browsing (no section open), expanded no-ops. A rail
- *  click never does nothing, and never collapses. Derived from the config — SHELL_SECTIONS
- *  pages counts, never a hardcoded list. NOTE (report flag): the pack's table lists Setup as a
- *  section icon, but the accordion has no Setup section — the config models Setup as ONE
- *  configured path, so it derives as single-destination and navigates. */
+/** The rail's click POLICY (rail-section-select pack, AMENDED by rail-icon-toggle): the rail
+ *  selects a SECTION — it never picks a page — and the icon of the section that is ALREADY
+ *  OPEN in the accordion TOGGLES the panel shut. Collapse keys off the OPEN section, never the
+ *  section of the page you happen to be on (the two differ while browsing — the decisive
+ *  point). An icon with more than one destination browses (expand + open, no navigation) or,
+ *  when its section is the open one, collapses; exactly one destination navigates; already at
+ *  the single destination → collapsed expands (no section open), expanded collapses when no
+ *  section is open, or switches to the no-section view when one is (the table's implicit
+ *  cell). Every cell does something — no no-op remains. Derived from the config —
+ *  SHELL_SECTIONS pages counts, never a hardcoded list. NOTE (standing report flag): the
+ *  accordion has no Setup section, so Setup derives as single-destination and navigates. */
 export type RailClickPlan =
   | { kind: "navigate"; path: string }
   | { kind: "browse"; section: ShellV2Section["key"] | null }
-  | { kind: "noop" };
+  | { kind: "collapse" };
 
 export function railClickPlan(
   ribKey: "dashboard" | ShellV2Section["key"] | "setup",
   pathname: string,
-  collapsed: boolean
+  collapsed: boolean,
+  openSection: ShellV2Section["key"] | null
 ): RailClickPlan {
   const section = SHELL_SECTIONS.find((s) => s.key === ribKey);
-  if (section && section.pages.length > 1) return { kind: "browse", section: section.key };
+  if (section && section.pages.length > 1) {
+    if (!collapsed && openSection === section.key) return { kind: "collapse" }; // the toggle
+    return { kind: "browse", section: section.key };
+  }
   // Single destination (Dashboard; Setup as configured — see the note above).
   const path = ribKey === "setup" ? SHELL_SETUP.path : SHELL_DASHBOARD.path;
-  if (pathname === path) return collapsed ? { kind: "browse", section: null } : { kind: "noop" };
+  if (pathname === path) {
+    if (collapsed) return { kind: "browse", section: null };
+    return openSection === null ? { kind: "collapse" } : { kind: "browse", section: null };
+  }
   return { kind: "navigate", path };
 }
 

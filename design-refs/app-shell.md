@@ -14,15 +14,23 @@ the capsule). **Flyouts pack (27 Jul, later):** the collapsed rail carries quick
 (supersedes "rail only"); the panel AUTO-COLLAPSES on every navigation (expansion is manual,
 until the next navigation); `PageHeader` ends with ONE variant — full — on every routed page
 except the dashboard, which returned to its ORIGINAL centred greeting header (compact and
-greeting variants deleted). **Rail-section-select pack (27 Jul, latest): the rail selects a
-SECTION, never a page** — a multi-destination icon expands the panel and opens its accordion
-section (never navigates, never collapses; clicking your own section still expands); a
-single-destination icon (Dashboard — and Setup, as the config models it) navigates, or expands
-when you're already there (expanded no-ops). The rail highlight stays truthful to the CURRENT
-PAGE while the accordion browses. Abandoning a browse (Escape — which closes the expanded
-panel however it was opened — or a click into page content) collapses and snaps the accordion
-back to the current page's section. The dedicated expand control is retired: expansion =
-section icons, on-Dashboard Dashboard click, ⌘\; the flyout footer is its only on-screen
+greeting variants deleted). **Rail-section-select pack (27 Jul), AMENDED by the
+rail-icon-toggle pack (27 Jul, latest): the rail selects a SECTION, never a page — and the
+icon of the section that is ALREADY OPEN toggles the panel shut.** Collapse keys off the
+section currently OPEN in the accordion, never the section of the page you happen to be on
+(the two differ while browsing: on To-do with Agents browsed open, clicking Querying SWITCHES
+to Querying and stays expanded — it does not collapse). The table: while collapsed, a section
+icon expands and opens that section (no navigation); Dashboard navigates from elsewhere, or
+expands with no section open when you're already on it. While expanded, the OPEN section's
+icon collapses; a different section's icon switches the open section (no navigation, stays
+expanded); Dashboard-from-elsewhere navigates (auto-collapse fires as normal); Dashboard on
+Dashboard collapses when no section is open, or switches to the no-section view when one is.
+Every cell does something — the old no-op is gone, and ⌘\ and the tuck still collapse; they
+are simply no longer the only ways. The rail highlight stays truthful to the CURRENT PAGE
+while the accordion browses. Abandoning a browse (Escape — which closes the expanded panel
+however it was opened — or a click into page content) collapses and snaps the accordion back
+to the current page's section. The dedicated expand control is retired: expansion = section
+icons, on-Dashboard Dashboard click, ⌘\; the flyout footer is its only on-screen
 advertisement, and the tuck keeps collapse discoverable.
 
 ## The design in one paragraph

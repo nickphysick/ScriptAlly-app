@@ -78,34 +78,47 @@ describe("shellV2Nav — path matching", () => {
   });
 });
 
-describe("railClickPlan — the rail selects a section (behaviour table, config-derived)", () => {
-  it("multi-destination sections BROWSE, collapsed or expanded — never navigate", () => {
+describe("railClickPlan — the rail selects a section; the OPEN section's icon toggles (amended table)", () => {
+  it("collapsed: section icons expand and open their section — never navigate", () => {
     for (const key of ["querying", "agents", "shelf"] as const) {
-      expect(railClickPlan(key, "/dashboard", true)).toEqual({ kind: "browse", section: key });
-      expect(railClickPlan(key, "/dashboard", false)).toEqual({ kind: "browse", section: key });
+      expect(railClickPlan(key, "/dashboard", true, null)).toEqual({ kind: "browse", section: key });
     }
-    // clicking the section you are already in still browses (it never toggles shut)
-    expect(railClickPlan("querying", "/queries", false)).toEqual({ kind: "browse", section: "querying" });
   });
 
-  it("Dashboard: elsewhere navigates; already there → collapsed expands (no section open), expanded no-ops", () => {
-    expect(railClickPlan("dashboard", "/queries", true)).toEqual({ kind: "navigate", path: "/dashboard" });
-    expect(railClickPlan("dashboard", "/queries", false)).toEqual({ kind: "navigate", path: "/dashboard" });
-    expect(railClickPlan("dashboard", "/dashboard", true)).toEqual({ kind: "browse", section: null });
-    expect(railClickPlan("dashboard", "/dashboard", false)).toEqual({ kind: "noop" });
+  it("expanded: the ALREADY-OPEN section's icon collapses; a different section switches, never navigates", () => {
+    expect(railClickPlan("querying", "/queries", false, "querying")).toEqual({ kind: "collapse" });
+    expect(railClickPlan("agents", "/queries", false, "agents")).toEqual({ kind: "collapse" });
+    expect(railClickPlan("querying", "/queries", false, "agents")).toEqual({ kind: "browse", section: "querying" });
+    expect(railClickPlan("shelf", "/queries", false, "agents")).toEqual({ kind: "browse", section: "shelf" });
   });
 
-  it("Setup derives as single-destination FROM THE CONFIG (no accordion section exists — report flag) and navigates", () => {
-    expect(railClickPlan("setup", "/queries", true)).toEqual({ kind: "navigate", path: "/account" });
-    expect(railClickPlan("setup", "/account", true)).toEqual({ kind: "browse", section: null });
-    expect(railClickPlan("setup", "/account", false)).toEqual({ kind: "noop" });
+  it("THE WORKED EXAMPLE: on To-do, Agents open, click Querying → switch to Querying, stay expanded — collapse keys off the OPEN section, never the page's section", () => {
+    expect(railClickPlan("querying", "/todo", false, "agents")).toEqual({ kind: "browse", section: "querying" });
   });
 
-  it("no plan ever collapses, and no click does nothing while collapsed", () => {
+  it("Dashboard: elsewhere navigates; already there → collapsed expands (no section open); expanded + none open collapses; expanded + a section open switches to the no-section view (the implicit cell)", () => {
+    expect(railClickPlan("dashboard", "/queries", true, null)).toEqual({ kind: "navigate", path: "/dashboard" });
+    expect(railClickPlan("dashboard", "/queries", false, "querying")).toEqual({ kind: "navigate", path: "/dashboard" });
+    expect(railClickPlan("dashboard", "/dashboard", true, null)).toEqual({ kind: "browse", section: null });
+    expect(railClickPlan("dashboard", "/dashboard", false, null)).toEqual({ kind: "collapse" });
+    expect(railClickPlan("dashboard", "/dashboard", false, "agents")).toEqual({ kind: "browse", section: null });
+  });
+
+  it("Setup (standing flag: single-destination as configured) mirrors Dashboard's symmetry", () => {
+    expect(railClickPlan("setup", "/queries", true, null)).toEqual({ kind: "navigate", path: "/account" });
+    expect(railClickPlan("setup", "/account", true, null)).toEqual({ kind: "browse", section: null });
+    expect(railClickPlan("setup", "/account", false, null)).toEqual({ kind: "collapse" });
+    expect(railClickPlan("setup", "/account", false, "shelf")).toEqual({ kind: "browse", section: null });
+  });
+
+  it("every cell does something — no no-op remains, and no collapsed click collapses", () => {
     for (const key of ["dashboard", "querying", "agents", "shelf", "setup"] as const) {
       for (const at of ["/dashboard", "/queries", "/account"]) {
-        const plan = railClickPlan(key, at, true);
-        expect(plan.kind === "navigate" || plan.kind === "browse").toBe(true); // never noop collapsed
+        for (const open of [null, "querying", "agents"] as const) {
+          const plan = railClickPlan(key, at, true, open);
+          expect(plan.kind === "navigate" || plan.kind === "browse").toBe(true); // collapsed never collapses
+          expect((railClickPlan(key, at, false, open) as { kind: string }).kind).not.toBe("noop");
+        }
       }
     }
   });

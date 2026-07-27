@@ -98,9 +98,11 @@ describe("v2 shell — smoke renders", () => {
     expect(css).toMatch(/\.sv2-frow\.on \{ background: var\(--shell-ground\)/);
   });
 
-  it("panel contents: accordion (Dashboard flat, route section open), pills, action strip, upgrade row, user block", () => {
-    const html = at("/queries", <ShellSidebarBody onNavigate={() => {}} onNavigatePath={() => {}} />);
-    // the accordion — Dashboard flat + the three sections; the route's section renders open
+  it("panel contents: accordion (Dashboard flat, the CONTROLLED open section renders open), pills, action strip, upgrade row, user block", () => {
+    // The accordion's open section is OWNED BY AppShell (rail-icon-toggle pack) — the sidebar
+    // is controlled; here we pass the section AppShell would derive for /queries.
+    const html = at("/queries", <ShellSidebarBody onNavigate={() => {}} onNavigatePath={() => {}} openSection="querying" onToggleSection={() => {}} />);
+    // the accordion — Dashboard flat + the three sections; the controlled section renders open
     expect(html).toContain("sv2-asec sv2-flat");
     for (const lb of ["Dashboard", "Querying", "Agents", "Shelf"]) expect(html).toContain(lb);
     expect(html).toContain("sv2-akids open");

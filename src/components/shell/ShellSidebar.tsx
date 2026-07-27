@@ -63,12 +63,12 @@ export const ShellSidebarBody: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
   /** Router-direct path navigation (clears the global search) — AppShell's goPath. */
   onNavigatePath: (path: string) => void;
-  /** Rail-driven browsing (rail-section-select pack): steer the accordion to this section
-   *  (null = open none); `n` bumps so repeat clicks on the same section re-fire. */
-  browse?: { sec: "querying" | "agents" | "shelf" | null; n: number } | null;
-  /** ANY collapse snaps the accordion back to the current page's section (never drifts). */
-  collapsed?: boolean;
-}> = ({ onNavigate, onNavigatePath, browse, collapsed = false }) => {
+  /** The accordion's open section — OWNED BY AppShell (rail-icon-toggle pack) so the rail's
+   *  click policy can read the real open section at click time. null = none open. */
+  openSection: "querying" | "agents" | "shelf" | null;
+  /** Accordion header click — AppShell toggles the section open/shut. */
+  onToggleSection: (key: "querying" | "agents" | "shelf") => void;
+}> = ({ onNavigate, onNavigatePath, openSection, onToggleSection }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, packages,
   } = useScriptAllyDb();
@@ -88,22 +88,8 @@ export const ShellSidebarBody: React.FC<{
   const total = tiles.urgent + tiles.housekeeping + tiles.notes;
   const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: total });
   const hit = shellPageForPath(pathname);
-
-  // ── accordion — one section open at a time, following the route ──
-  const routeSection = hit?.section?.key ?? null;
-  const [openSec, setOpenSec] = useState<string | null>(routeSection ?? "querying");
-  useEffect(() => {
-    if (routeSection) setOpenSec(routeSection);
-  }, [routeSection]);
-  // Rail-driven browsing steers the accordion (rail-section-select pack)…
-  useEffect(() => {
-    if (browse) setOpenSec(browse.sec);
-  }, [browse]);
-  // …and ANY collapse snaps it back to the section containing the current page, so the panel
-  // never drifts from the user's actual location (abandoned browses included).
-  useEffect(() => {
-    if (collapsed) setOpenSec(routeSection ?? null);
-  }, [collapsed, routeSection]);
+  // (The accordion's open-section state LIVES IN AppShell now — rail-icon-toggle pack: the
+  // rail's click policy must read it, so one owner. Route-sync + snap-on-collapse moved up.)
 
   // ── manuscript switcher ──
   const [storedMsId, setStoredMsId] = useState<string | null>(() => {
@@ -149,14 +135,14 @@ export const ShellSidebarBody: React.FC<{
 
         {SHELL_SECTIONS.map((section) => {
           const Icon = SECTION_ICONS[section.key];
-          const open = openSec === section.key;
+          const open = openSection === section.key;
           return (
             <React.Fragment key={section.key}>
               <button
                 type="button"
                 className={`sv2-asec${open ? " open" : ""}`}
                 aria-expanded={open}
-                onClick={() => setOpenSec(open ? null : section.key)}
+                onClick={() => onToggleSection(section.key)}
               >
                 <Icon className="sv2-ai" aria-hidden="true" />
                 <span className="sv2-albl">{section.label}</span>
