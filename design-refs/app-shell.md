@@ -91,10 +91,21 @@ panel, centred on the brand mark; while collapsed the same glyph appears in the 
 the brand glyph and expands it. `⌘\` toggles (registered at shell level so it works on every
 route, including /todo where the top bar's ⌘K stands down). Collapsed = the panel hides via
 the container's `sv2-collapsed` class (CSS width/opacity/margin transition — the negative
-margin swallows the capsule gap so the content plane widens by 288 + 14px); the rail's
-tooltips carry the labels. No hover flyout, no mini-panel. Persisted in
+margin swallows the capsule gap so the content plane widens by 288 + 14px). Persisted in
 `localStorage["sa.shellSideTucked"]` (the sa. UI-pref convention; the flat shell's key,
 reused). Works identically on every routed page — no opt-outs.
+
+**Rail flyouts (flyouts pack — supersedes "no hover flyout, no mini-panel"; ref
+`scriptally-rail-flyouts.html`):** while collapsed, hovering (or focusing) a section rib opens
+a floating quick-nav capsule 12px off the rail, top-aligned to the icon and viewport-clamped:
+capsule surface, radius 16, shadow `0 14px 38px rgba(58,28,20,.16)`, 8px padding, ~212px
+min-width. Contents: mono section kicker → page rows (15px icon, muted → burgundy on
+hover/active · label · mono count right; hover = interior fill, active = GROUND — the nav law
+everywhere) → a `line-soft` hairline and the "Expand sidebar · ⌘\" footer. A ~140ms grace
+timer carries the pointer rib → flyout. Dashboard has NO flyout (straight link, tooltip only);
+Setup's flyout = Task settings (navigates to /todo and fires `sa:open-task-settings` — the
+sheet lives in that page) + Help centre. Rows are real buttons (Tab + Enter); no fuller
+menu-key system. Expanded panel = no flyouts.
 
 ## Open questions (unchanged)
 

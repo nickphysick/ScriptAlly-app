@@ -29,7 +29,7 @@ vi.mock("../../lib/db", () => ({
   }),
 }));
 
-import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
+import { FLYOUT_SECTIONS, ShellFlyout, ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { ShellSidebarBody } from "./ShellSidebar";
 
 const at = (path: string, node: React.ReactNode) =>
@@ -65,6 +65,36 @@ describe("v2 shell — smoke renders", () => {
     const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
     expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*width: 0/s);
     expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*margin-left: calc\(-1 \* var\(--shell-cap-gap\)\)/s);
+  });
+
+  it("rail flyouts (flyouts pack): hover targets on the four sections while collapsed — never Dashboard, none expanded", () => {
+    expect([...FLYOUT_SECTIONS]).toEqual(["querying", "agents", "shelf", "setup"]); // Dashboard absent (baked)
+    const collapsed = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed onExpand={() => {}} />);
+    for (const key of FLYOUT_SECTIONS) expect(collapsed).toContain(`data-fly="${key}"`);
+    expect(collapsed).not.toContain('data-fly="dashboard"');
+    const expanded = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed={false} />);
+    expect(expanded).not.toContain("data-fly");
+    expect(expanded).not.toContain("sv2-fly"); // flyouts render only while collapsed (and on hover)
+  });
+
+  it("the flyout capsule: kicker, page rows with counts, active row on the GROUND fill, the Expand footer", () => {
+    const rows = [
+      { key: "queries-hub", label: "Queries Hub", icon: <span />, count: 20, active: true, onClick: () => {} },
+      { key: "todo", label: "To-do", icon: <span />, count: 44, active: false, onClick: () => {} },
+    ];
+    const html = renderToStaticMarkup(
+      <ShellFlyout kicker="Querying" rows={rows} onExpand={() => {}} top={80} show onMouseEnter={() => {}} onMouseLeave={() => {}} />
+    );
+    expect(html).toContain("sv2-fly show");
+    expect(html).toContain("Querying"); // the mono kicker
+    expect(html).toContain("Queries Hub");
+    expect(html).toContain(">20<"); // the mono count
+    expect(html).toContain("sv2-frow on"); // the active row class…
+    expect(html).toContain("Expand sidebar");
+    expect(html).toContain("⌘\\");
+    // …whose fill is the GROUND (the nav law), locked at the rule text:
+    const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+    expect(css).toMatch(/\.sv2-frow\.on \{ background: var\(--shell-ground\)/);
   });
 
   it("panel contents: accordion (Dashboard flat, route section open), pills, action strip, upgrade row, user block", () => {

@@ -33,6 +33,25 @@ import {
 /** The shared active-manuscript key (the Package Workshop / Comps / Manuscripts convention). */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
+/** The live nav counts (flyouts pack) — the SAME recipe the panel uses, exposed as a hook so
+ *  the collapsed rail's flyouts read identical numbers. Pure derivation over in-memory state;
+ *  the rail and the panel each memoise their own copy (cheap, and never disagreeing). */
+export function useShellNavCounts(): Record<string, number> {
+  const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, packages } = useScriptAllyDb();
+  const tiles = useMemo(
+    () => sidebarBoardTiles({
+      tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
+      now: Date.now(), mutedTaskRules: currentUser?.mutedTaskRules,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
+  );
+  return sideNavCounts({
+    queries, agents, manuscripts, packages,
+    todoTotal: tiles.urgent + tiles.housekeeping + tiles.notes,
+  });
+}
+
 const SECTION_ICONS: Record<string, React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>> = {
   querying: Send,
   agents: Users,

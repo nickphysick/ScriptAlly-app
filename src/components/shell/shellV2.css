@@ -53,6 +53,102 @@
    burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
 .sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
 .sv2-railspacer { flex: 1; }
+/* The collapsed rail's expand control — the two-pane glyph beneath the brand (flyouts ref). */
+.sv2-railtuck {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--shell-muted);
+  margin: -8px 0 16px;
+  transition: background 0.16s, color 0.16s;
+}
+.sv2-railtuck:hover { background: var(--shell-inset); color: var(--shell-ink); }
+.sv2-railtuck svg { width: 16px; height: 16px; }
+/* The rib whose flyout is open holds its hover look while the pointer travels across. */
+.sv2-rib.hovering { background: var(--shell-inset); color: var(--shell-ink); }
+.sv2-rib.on.hovering { background: var(--shell-ground); color: var(--burg); }
+
+/* ── rail flyouts (collapsed only; ref scriptally-rail-flyouts.html) ── */
+.sv2-fly {
+  position: fixed;
+  left: calc(var(--shell-cap-gap) + 70px + 12px); /* 12px off the rail capsule */
+  min-width: 212px;
+  background: var(--shell-canvas);
+  border-radius: 16px;
+  box-shadow: 0 14px 38px rgba(58, 28, 20, 0.16);
+  padding: 8px;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-6px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+.sv2-fly.show { opacity: 1; pointer-events: auto; transform: translateX(0); }
+.sv2-fk {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  padding: 8px 12px 7px;
+}
+.sv2-frow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  color: var(--shell-ink-soft);
+  text-align: left;
+}
+.sv2-frow svg { width: 15px; height: 15px; color: #a89a8a; flex: none; }
+.sv2-frow:hover svg,
+.sv2-frow.on svg { color: var(--burg); }
+.sv2-frow:hover { background: var(--shell-inset); color: var(--shell-ink); }
+/* The nav active law — ground fill, in the flyout too. */
+.sv2-frow.on { background: var(--shell-ground); color: var(--shell-ink); }
+.sv2-flbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2-fct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
+.sv2-ff {
+  margin-top: 6px;
+  border-top: 1px solid var(--shell-line-soft);
+  padding: 8px 12px 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  color: var(--shell-muted);
+  text-align: left;
+}
+.sv2-ff:hover { color: var(--shell-ink); }
+.sv2-fkb {
+  margin-left: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  border: 1px solid var(--shell-line);
+  border-radius: 5px;
+  padding: 1px 5px;
+  background: var(--shell-card);
+}
+
 /* The rail-foot avatar chip — the account link under Setup. */
 .sv2-railav {
   width: 36px;
@@ -392,6 +488,8 @@
 .sv2-gsearch { width: 280px; flex: none; }
 
 @media (prefers-reduced-motion: reduce) {
+  .sv2-fly,
+  .sv2-railtuck,
   .sv2-side,
   .sv2-rib,
   .sv2-tuck,
