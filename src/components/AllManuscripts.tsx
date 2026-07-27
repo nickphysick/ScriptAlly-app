@@ -150,6 +150,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
       <PageHeader
         variant="full"
         title="Your manuscripts"
+        description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
         actions={[{
           label: "Add manuscript",
           icon: <Plus aria-hidden="true" />,

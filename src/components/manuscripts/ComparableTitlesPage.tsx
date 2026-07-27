@@ -566,7 +566,11 @@ export const ComparableTitlesPage: React.FC<{
       {/* The standard page header (shell follow-up P3) — ChromeSlab retired. The pulse line is
           dropped with it (no meta slot under the header law); the manuscript selector keeps its
           function in the row below the rule until the sidebar switcher is live-wired. */}
-      <PageHeader variant="full" title="Comparable titles" />
+      <PageHeader
+        variant="full"
+        title="Comparable titles"
+        description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+      />
       {activeMs && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12, marginBottom: 12 }}>
           <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />

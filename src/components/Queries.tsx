@@ -2434,8 +2434,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             existing interception, relocated here from the control bar's left zone. ── */}
         <div className="f12-hd2">
           <PageHeader
-            variant="compact"
+            variant="full"
             title="Queries Hub"
+            description="Every query you've sent, and exactly where each one stands."
             actions={queries.length > 0
               ? [
                   {

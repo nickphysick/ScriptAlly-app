@@ -58,14 +58,7 @@
 /* The rule that closes every header — everything below it is page content. */
 .svh-rule { height: 1px; background: var(--shell-line-soft); margin-top: 22px; }
 
-/* compact — list/detail pages */
-.svh--compact { margin-bottom: 18px; }
-.svh--compact .svh-top { align-items: center; }
-.svh--compact .svh-title { font-size: 24px; }
-.svh--compact .svh-sub { display: none; }
-.svh--compact .svh-acts { padding-bottom: 0; }
-.svh--compact .svh-btn { height: 34px; font-size: 12px; }
-.svh--compact .svh-rule { margin-top: 14px; }
+/* (The compact variant is RETIRED — flyouts pack P3: one header grammar app-wide.) */
 
 @media (prefers-reduced-motion: reduce) {
   .svh-btn { transition: none; }

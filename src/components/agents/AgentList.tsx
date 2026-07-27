@@ -348,13 +348,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   return (
     <div className="aglist">
       <div className="agl-page">
-        {/* The standard page header (shell rollout Phase 5) — compact per the rollout map. The
-            old block's own crumb (the v2 top bar draws it now), the sub line and the dark Add
-            pill (no dark-pill CTA exists under the header law) are all retired — see the
-            rollout report. */}
+        {/* The standard page header — FULL variant (flyouts pack P3: the compact variant is
+            retired; one header grammar app-wide). The description resurrects the page's own
+            original sub line. */}
         <PageHeader
-          variant="compact"
+          variant="full"
           title="Your agent list"
+          description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
         />
 

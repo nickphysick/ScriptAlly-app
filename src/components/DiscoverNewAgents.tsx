@@ -313,7 +313,11 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       {/* The standard page header (shell follow-up P3) — ChromeSlab retired; the ranked-matches
           pulse line is dropped with it (no meta slot under the header law — rollout report).
           No CTA: add actions live on the cards + the batch tray. */}
-      <PageHeader variant="full" title="Discover new agents" />
+      <PageHeader
+        variant="full"
+        title="Discover new agents"
+        description="Agents worth a look, matched to what you write." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+      />
       <div className="dv-wrap">
         {firstRun ? (
           /* ── First-run / zero-matches feature sell — hero + benefits + adaptive action strip +

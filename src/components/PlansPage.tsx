@@ -340,7 +340,11 @@ export const PlansPage: React.FC = () => (
       {/* The standard page header (capsule fixes P5 — re-homed from FocusShell): full variant
           replaces the centred italic hero; the mono "ScriptAlly · two tiers" strapline is
           dropped, not restyled (rollout report). */}
-      <PageHeader variant="full" title="Choose your plan" />
+      <PageHeader
+        variant="full"
+        title="Choose your plan"
+        description="Free covers the tracking; Pro adds the tools that think alongside you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+      />
 
       {/* plan cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 20, marginBottom: 20 }}>

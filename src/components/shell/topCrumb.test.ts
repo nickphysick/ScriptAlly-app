@@ -95,8 +95,8 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
     expect(queries.includes("<ChromeSlab")).toBe(false);
     expect(queries.includes("<F12Page")).toBe(false);
     expect(queries).toContain('className="t-f12 f12-root"');
-    expect(queries).toContain('title="Queries Hub"'); // the compact PageHeader carries the name
-    expect(queries).toContain('variant="compact"');
+    expect(queries).toContain('title="Queries Hub"'); // the PageHeader carries the name
+    expect(queries).toContain('variant="full"'); // flyouts P3: the compact variant is retired
     expect(queries.includes('className="qhbar"')).toBe(false);
   });
 

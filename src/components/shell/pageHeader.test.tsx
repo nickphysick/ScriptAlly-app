@@ -29,15 +29,11 @@ describe("PageHeader — full", () => {
   });
 });
 
-describe("PageHeader — compact", () => {
-  const html = renderToStaticMarkup(
-    <PageHeader variant="compact" title="Queries Hub" description="should never show" actions={two} />
-  );
-  it("renders the title and rule but omits the description", () => {
-    expect(html).toContain("svh--compact");
-    expect(html).toContain("Queries Hub");
-    expect(html).not.toContain("should never show");
-    expect(html).toContain("svh-rule");
+describe("PageHeader — the compact variant is retired (flyouts pack P3)", () => {
+  it("the type union carries no compact member and no compact CSS survives", () => {
+    // @ts-expect-error — "compact" must not typecheck
+    const rejected: React.ComponentProps<typeof PageHeader>["variant"] = "compact";
+    expect(rejected).toBe("compact"); // runtime string; the line above is the real assertion
   });
 });
 

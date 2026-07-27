@@ -659,7 +659,11 @@ export const ImportCsv: React.FC<{
       {/* The standard page header (shell follow-up P3) — ChromeSlab retired; the "CSV MIGRATION
           DESK" meta line is dropped with it (no meta slot under the header law). */}
       <div className="max-w-4xl mx-auto px-4">
-        <PageHeader variant="full" title="Import" />
+        <PageHeader
+          variant="full"
+          title="Import"
+          description="Bring your existing spreadsheet across — agents, queries and dates, matched for you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+        />
       </div>
       <div className="max-w-4xl mx-auto px-4 pt-8">
 

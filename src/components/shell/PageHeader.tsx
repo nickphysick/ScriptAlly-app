@@ -7,10 +7,8 @@
  * actions bottom-right on the description's baseline → a hairline rule closing the header.
  * Everything below the rule is page content.
  *
- * ONE component, three variants by prop:
- *   full     — content pages: 40px Playfair title, description shown.
- *   compact  — list/detail pages: 24px title inline with the actions, description omitted,
- *              tighter rule.
+ * Variants (the flyouts pack retired compact — one header grammar app-wide):
+ *   full     — every routed page: 40px Playfair title, description shown.
  *   greeting — dashboard only: mono date kicker ABOVE the title, description omitted. Same
  *              skeleton, same actions, same rule.
  *
@@ -33,9 +31,9 @@ export interface PageHeaderAction {
 export type PageHeaderActions = [] | [PageHeaderAction] | [PageHeaderAction, PageHeaderAction];
 
 export interface PageHeaderProps {
-  variant: "full" | "compact" | "greeting";
+  variant: "full" | "greeting";
   title: string;
-  /** Rendered on the full variant only (compact and greeting omit it by design). */
+  /** Rendered on the full variant only (greeting omits it by design). */
   description?: string;
   /** The mono line above the title — the greeting variant's date line. */
   kicker?: string;
