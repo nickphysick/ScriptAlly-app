@@ -20,7 +20,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
-import { ShellSide, ShellTopBar } from "./ShellV2";
+import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { ShellSidebarBody } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { Nav } from "../Nav";
@@ -256,21 +256,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
           only (class + media query in shellV2.css — never inline display). The interim layers
           (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
-      {/* ONE SIDEBAR (one-sidebar pack): the rail and the panel merged into a single capsule
-          that changes width. ShellSide owns the capsule + the hover flyouts and hands each row
-          its flyout hooks; ShellSidebarBody renders the rows. */}
-      <ShellSide collapsed={panelCollapsed} onNavigatePath={goPath} onExpand={togglePanel}>
-        {(ribProps) => (
-          <ShellSidebarBody
-            onNavigate={onNavigate}
-            onNavigatePath={goPath}
-            openSection={openSec}
-            collapsed={panelCollapsed}
-            onBrowse={onBrowse}
-            onCollapse={collapsePanel}
-            ribProps={ribProps}
-          />
-        )}
+      <ShellRail onNavigatePath={goPath} collapsed={panelCollapsed} onExpand={togglePanel} onBrowse={onBrowse} openSection={openSec} onCollapse={collapsePanel} />
+      <ShellSide collapsed={panelCollapsed} onCollapse={togglePanel}>
+        <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} openSection={openSec} onToggleSection={onToggleSection} />
       </ShellSide>
       <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}

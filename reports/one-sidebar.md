@@ -1,5 +1,12 @@
 # One sidebar — run report
 
+> ## ⛔ REVERTED
+> This design shipped to dev and was **reverted** on Nick's browser review (`shell: revert
+> merged sidebar, restore rail and panel`). Uniform row weight removed the grouping that made
+> the panel legible, and the lower half read as a flat list of unrelated items. The report is
+> kept as the record of the attempt — see `reports/sidebar-revert.md`, and the lesson recorded
+> in `design-refs/app-shell.md`. **The two-capsule rail + panel is the live design.**
+
 **Branch:** `claude-il` · **Date:** 27 Jul 2026 · Follows `reports/todo-rebuild.md`.
 Ref: `design-refs/scriptally-sidebar-final.html` (copied in).
 

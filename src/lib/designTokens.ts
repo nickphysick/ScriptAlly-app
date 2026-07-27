@@ -132,7 +132,7 @@ export const statusParchment = "#fdfaf5"; // offer tick
    is kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
 export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
 export const shellRail = "#f1ebe3"; // RAIL capsule — the deepest surface
-export const shellSide = "#f6f1ea"; // the SIDEBAR expanded (one-sidebar supersedes #f8f4ee)
+export const shellSide = "#f8f4ee"; // PANEL capsule — one step above the rail
 export const shellCanvas = "#fdfbf8"; // CONTENT capsule — brightest; its top bar too
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
 export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill

@@ -19,17 +19,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  LayoutGrid, Send, Users, Book, ChevronRight, ChevronsUpDown, Plus, Reply, UserPlus, BookPlus, Settings,
+  LayoutGrid, Send, Users, Book, ChevronRight, ChevronsUpDown, Plus, Reply, UserPlus, BookPlus,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
 import { invokeCapture } from "./railNav";
-import {
-  SHELL_DASHBOARD, SHELL_SECTIONS, SHELL_SETUP_PATHS, ShellV2Section,
-  railClickPlan, shellPageForPath, shellSectionKeyForPath,
-} from "./shellV2Nav";
-import { ScriptAllyLogo } from "../ScriptAllyLogo";
-import { Mark } from "./ShellV2";
+import { SHELL_DASHBOARD, SHELL_SECTIONS, shellPageForPath } from "./shellV2Nav";
 import {
   SHELL_PRO_COPY, manuscriptInitials, manuscriptSubtitle, resolveActiveManuscript,
   sideNavCounts, sidebarBoardTiles, taskPills,
@@ -68,18 +63,12 @@ export const ShellSidebarBody: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
   /** Router-direct path navigation (clears the global search) — AppShell's goPath. */
   onNavigatePath: (path: string) => void;
-  /** The accordion's open section — OWNED BY AppShell (rail-icon-toggle pack) so the row's
+  /** The accordion's open section — OWNED BY AppShell (rail-icon-toggle pack) so the rail's
    *  click policy can read the real open section at click time. null = none open. */
   openSection: "querying" | "agents" | "shelf" | null;
-  /** ONE capsule, two widths (one-sidebar pack): collapsed hides every label region. */
-  collapsed?: boolean;
-  /** Rail-driven browsing — expand + open this section (null = open none). Never navigates. */
-  onBrowse?: (section: ShellV2Section["key"] | null) => void;
-  /** The open section's row toggles the capsule shut (rail-icon-toggle, unchanged). */
-  onCollapse?: () => void;
-  /** Hover flyout hooks — supplied by the capsule so a collapsed row can still reach a page. */
-  ribProps?: (key: string) => Record<string, unknown>;
-}> = ({ onNavigate, onNavigatePath, openSection, collapsed = false, onBrowse, onCollapse, ribProps = () => ({}) }) => {
+  /** Accordion header click — AppShell toggles the section open/shut. */
+  onToggleSection: (key: "querying" | "agents" | "shelf") => void;
+}> = ({ onNavigate, onNavigatePath, openSection, onToggleSection }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, packages,
   } = useScriptAllyDb();
@@ -99,40 +88,6 @@ export const ShellSidebarBody: React.FC<{
   const total = tiles.urgent + tiles.housekeeping + tiles.notes;
   const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: total });
   const hit = shellPageForPath(pathname);
-  const routeRib = shellSectionKeyForPath(pathname); // the highlight stays truthful to the PAGE
-
-  // ── the row click POLICY is unchanged (rail-selects-a-section + rail-icon-toggle): one
-  // element now carries it, so a section row browses, the open section's row collapses, and a
-  // single-destination row navigates. The accordion header and the rail rib were two controls
-  // for one idea; merged, `railClickPlan` is that idea's single home. ──
-  const onRowClick = (key: string) => {
-    const plan = railClickPlan(key as "dashboard" | ShellV2Section["key"] | "setup", pathname, collapsed, openSection);
-    if (plan.kind === "navigate") onNavigatePath(plan.path);
-    else if (plan.kind === "browse") onBrowse?.(plan.section);
-    else onCollapse?.();
-  };
-
-  // ── the CREATE popover (one-sidebar P3) — the four existing capture contracts, unchanged ──
-  const [newOpen, setNewOpen] = useState(false);
-  const newRef = useRef<HTMLDivElement>(null);
-  const runCapture = (kind: "query" | "record" | "agent" | "manuscript") => {
-    setNewOpen(false);
-    if (kind === "manuscript") onNavigate("manuscripts", "Add a manuscript");
-    else invokeCapture(kind, onNavigate);
-  };
-  useEffect(() => {
-    if (!newOpen) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && newRef.current?.contains(t)) return;
-      setNewOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.preventDefault(); setNewOpen(false); } };
-    document.addEventListener("pointerdown", onDown);
-    window.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("pointerdown", onDown); window.removeEventListener("keydown", onKey); };
-  }, [newOpen]);
-  useEffect(() => { if (collapsed) setNewOpen(false); }, [collapsed]);
   // (The accordion's open-section state LIVES IN AppShell now — rail-icon-toggle pack: the
   // rail's click policy must read it, so one owner. Route-sync + snap-on-collapse moved up.)
 
@@ -166,101 +121,85 @@ export const ShellSidebarBody: React.FC<{
 
   return (
     <>
-      {/* ── THE ONE SIDEBAR (one-sidebar pack — ref design-refs/scriptally-sidebar-final.html) ──
-          The rail and the panel are ONE capsule that changes width. EVERY item is the same row
-          shape: a 48px glyph cell then a label region. The glyph sits at the same x in both
-          states — collapsing hides the label region and NOTHING else. Rows that do not survive
-          collapse carry `drop`. ── */}
-      <div className="sv2-row sv2-brand drop">
-        <span className="sv2-g" aria-hidden="true"><Mark /></span>
-        <span className="sv2-l"><span className="sv2-wm"><ScriptAllyLogo heightPx={22} /></span></span>
-      </div>
+      {/* ── Accordion nav ── */}
+      <nav className="sv2-acc" aria-label="Pages">
+        <button
+          type="button"
+          className={`sv2-asec sv2-flat${pathname === SHELL_DASHBOARD.path ? " on" : ""}`}
+          aria-current={pathname === SHELL_DASHBOARD.path ? "page" : undefined}
+          onClick={() => onNavigatePath(SHELL_DASHBOARD.path)}
+        >
+          <LayoutGrid className="sv2-ai" aria-hidden="true" />
+          <span className="sv2-albl">{SHELL_DASHBOARD.label}</span>
+        </button>
 
-      {/* Dashboard — flat, no children */}
-      <button
-        type="button"
-        className={`sv2-row${pathname === SHELL_DASHBOARD.path ? " on" : ""}`}
-        aria-current={pathname === SHELL_DASHBOARD.path ? "page" : undefined}
-        title={collapsed ? SHELL_DASHBOARD.label : undefined}
-        onClick={() => onRowClick("dashboard")}
-        {...ribProps("dashboard")}
-      >
-        <span className="sv2-g" aria-hidden="true"><LayoutGrid /></span>
-        <span className="sv2-l"><span className="sv2-lb">{SHELL_DASHBOARD.label}</span></span>
-      </button>
+        {SHELL_SECTIONS.map((section) => {
+          const Icon = SECTION_ICONS[section.key];
+          const open = openSection === section.key;
+          return (
+            <React.Fragment key={section.key}>
+              <button
+                type="button"
+                className={`sv2-asec${open ? " open" : ""}`}
+                aria-expanded={open}
+                onClick={() => onToggleSection(section.key)}
+              >
+                <Icon className="sv2-ai" aria-hidden="true" />
+                <span className="sv2-albl">{section.label}</span>
+                <ChevronRight className="sv2-acv" aria-hidden="true" />
+              </button>
+              <div className={`sv2-akids${open ? " open" : ""}`}>
+                {section.pages.map((page) => {
+                  const on = hit?.page.key === page.key;
+                  const count = counts[page.key];
+                  return (
+                    <button
+                      key={page.key}
+                      type="button"
+                      className={`sv2-akid${on ? " on" : ""}`}
+                      aria-current={on ? "page" : undefined}
+                      onClick={() => onNavigatePath(page.path)}
+                    >
+                      <span className="sv2-aklbl">{page.label}</span>
+                      {count !== undefined && <span className="sv2-akct">{count}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </React.Fragment>
+          );
+        })}
+      </nav>
 
-      {SHELL_SECTIONS.map((section) => {
-        const Icon = SECTION_ICONS[section.key];
-        const open = !collapsed && openSection === section.key;
-        const lit = routeRib === section.key;
-        return (
-          <React.Fragment key={section.key}>
-            <button
-              type="button"
-              className={`sv2-row${lit ? " on" : ""}${open ? " open" : ""}`}
-              aria-expanded={open}
-              title={collapsed ? section.label : undefined}
-              onClick={() => onRowClick(section.key)}
-              {...ribProps(section.key)}
-            >
-              <span className="sv2-g" aria-hidden="true"><Icon /></span>
-              <span className="sv2-l">
-                <span className="sv2-lb">{section.label}</span>
-                <ChevronRight className="sv2-cv" aria-hidden="true" />
-              </span>
-            </button>
-            {/* children indent INSIDE the label region; their glyph cell is empty */}
-            <div className={`sv2-kids${open ? " open" : ""}`}>
-              {section.pages.map((page) => {
-                const on = hit?.page.key === page.key;
-                const count = counts[page.key];
-                return (
-                  <button
-                    key={page.key}
-                    type="button"
-                    className={`sv2-krow${on ? " on" : ""}`}
-                    aria-current={on ? "page" : undefined}
-                    onClick={() => onNavigatePath(page.path)}
-                  >
-                    <span className="sv2-g" aria-hidden="true" />
-                    <span className="sv2-l">
-                      <span className="sv2-lb">{page.label}</span>
-                      {count !== undefined && <span className="sv2-ct">{count}</span>}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </React.Fragment>
-        );
-      })}
+      <div className="sv2-half" />
 
-      <div className="sv2-gap" />
-
-      {/* ── the bottom cluster ── */}
-      <div className="sv2-slab drop">Working on</div>
+      {/* ── Manuscript row — bare (no card) ── */}
       {activeMs ? (
-        <div className="sv2-mswrap drop" ref={deckRef}>
+        <div className="sv2-mswrap" ref={deckRef}>
           <button
             type="button"
-            className="sv2-row tall"
+            className="sv2-ms2"
             onClick={() => setMsOpen((v) => !v)}
             aria-expanded={msOpen}
             aria-haspopup="listbox"
           >
-            <span className="sv2-g" aria-hidden="true"><span className="sv2-tile">{manuscriptInitials(activeMs.title)}</span></span>
-            <span className="sv2-l">
-              <span className="sv2-stack">
-                <span className="sv2-t1">{activeMs.title}</span>
-                <span className="sv2-t2">{manuscriptSubtitle(activeMs, msQueries(activeMs.id))}</span>
-              </span>
-              <ChevronsUpDown className="sv2-cv" aria-hidden="true" />
+            <span className="sv2-mstile" aria-hidden="true">{manuscriptInitials(activeMs.title)}</span>
+            <span className="sv2-mstxt">
+              <span className="sv2-mst1">{activeMs.title}</span>
+              <span className="sv2-mst2">{manuscriptSubtitle(activeMs, msQueries(activeMs.id))}</span>
             </span>
+            <span className="sv2-mschev" aria-hidden="true"><ChevronsUpDown /></span>
           </button>
           {msOpen && (
             <div className="sv2-mspop" role="listbox" aria-label="Manuscripts">
               {manuscripts.map((m) => (
-                <div key={m.id} role="option" aria-selected={m.id === activeMs.id} className="sv2-msrow" onClick={() => pickManuscript(m.id)}>
+                <div
+                  key={m.id}
+                  role="option"
+                  aria-selected={m.id === activeMs.id}
+                  className="sv2-msrow"
+                  onClick={() => pickManuscript(m.id)}
+                >
                   <span className="sv2-msn">{m.title}</span>
                   <span className="sv2-msc">{manuscriptSubtitle(m, msQueries(m.id))}</span>
                 </div>
@@ -273,76 +212,61 @@ export const ShellSidebarBody: React.FC<{
           )}
         </div>
       ) : (
-        <button type="button" className="sv2-row tall drop" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
-          <span className="sv2-g" aria-hidden="true"><span className="sv2-tile">+</span></span>
-          <span className="sv2-l">
-            <span className="sv2-stack">
-              <span className="sv2-t1">Add a manuscript</span>
-              <span className="sv2-t2">Your book goes here</span>
-            </span>
+        <button type="button" className="sv2-ms2" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
+          <span className="sv2-mstile" aria-hidden="true">+</span>
+          <span className="sv2-mstxt">
+            <span className="sv2-mst1">Add a manuscript</span>
+            <span className="sv2-mst2">Your book goes here</span>
           </span>
         </button>
       )}
 
-      <div className="sv2-hr drop" />
-
-      {/* NEW — the create popover (one-sidebar P3) */}
-      <div className={`sv2-popwrap drop${newOpen ? " open" : ""}`} ref={newRef}>
-        <div className="sv2-pop" role="menu" aria-label="Create">
-          <div className="sv2-pk">Create</div>
-          <button type="button" className="sv2-prow" role="menuitem" onClick={() => runCapture("query")}>
-            <Send aria-hidden="true" /><span className="sv2-lb">Log a query</span><span className="sv2-kb">⌘L</span>
+      {/* ── Task pills — Urgent / House ── */}
+      <div className="sv2-pills">
+        {pills.map((pill) => (
+          <button key={pill.key} type="button" className="sv2-tpill" onClick={() => onNavigatePath("/todo")}>
+            <i className={`sv2-pip sv2-pip-${pill.key}`} aria-hidden="true" />
+            <span className="sv2-tn">{pill.count}</span>
+            <span className="sv2-tl">{pill.label}</span>
           </button>
-          <button type="button" className="sv2-prow" role="menuitem" onClick={() => runCapture("record")}>
-            <Reply aria-hidden="true" /><span className="sv2-lb">Record a response</span><span className="sv2-kb">⌘R</span>
-          </button>
-          <div className="sv2-pdiv" />
-          <button type="button" className="sv2-prow" role="menuitem" onClick={() => runCapture("agent")}>
-            <UserPlus aria-hidden="true" /><span className="sv2-lb">Add an agent</span>
-          </button>
-          <button type="button" className="sv2-prow" role="menuitem" onClick={() => runCapture("manuscript")}>
-            <BookPlus aria-hidden="true" /><span className="sv2-lb">Add a manuscript</span>
-          </button>
-        </div>
-        <button type="button" className="sv2-row new tall" aria-expanded={newOpen} aria-haspopup="menu" onClick={() => setNewOpen((v) => !v)}>
-          <span className="sv2-g" aria-hidden="true"><span className="sv2-plus"><Plus /></span></span>
-          <span className="sv2-l"><span className="sv2-lb">New</span><span className="sv2-kbd">⌘N</span></span>
-        </button>
+        ))}
       </div>
 
+      {/* ── Action strip — the existing capture contracts; blue is reserved for Pro ── */}
+      <div className="sv2-strip4">
+        <button type="button" className="sv2-gt sv2-gt1" title="Log query" aria-label="Log query" onClick={() => invokeCapture("query", onNavigate)}>
+          <Send aria-hidden="true" />
+        </button>
+        <button type="button" className="sv2-gt sv2-gt2" title="Record response" aria-label="Record response" onClick={() => invokeCapture("record", onNavigate)}>
+          <Reply aria-hidden="true" />
+        </button>
+        <button type="button" className="sv2-gt sv2-gt3" title="Add agent" aria-label="Add agent" onClick={() => invokeCapture("agent", onNavigate)}>
+          <UserPlus aria-hidden="true" />
+        </button>
+        <button type="button" className="sv2-gt sv2-gt3" title="Add manuscript" aria-label="Add manuscript" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
+          <BookPlus aria-hidden="true" />
+        </button>
+      </div>
+      <div className="sv2-gcap" aria-hidden="true">Log · Respond · Agent · Manuscript</div>
+
+      {/* ── Upgrade row — slate is Pro's colour; hover never goes burgundy ── */}
       {showUpgrade && (
-        <button type="button" className="sv2-row pro tall drop" onClick={() => onNavigatePath("/plans")}>
-          <span className="sv2-g" aria-hidden="true"><span className="sv2-propill">PRO</span></span>
-          <span className="sv2-l"><span className="sv2-lb">{SHELL_PRO_COPY}</span><ChevronRight className="sv2-cv" aria-hidden="true" /></span>
+        <button type="button" className="sv2-upg" onClick={() => onNavigatePath("/plans")}>
+          <span className="sv2-propill">PRO</span>
+          <span className="sv2-upgt">{SHELL_PRO_COPY}</span>
+          <ChevronRight className="sv2-upgchev" aria-hidden="true" />
         </button>
       )}
 
-      {/* SETTINGS — its own row (one-sidebar P2): it must survive collapse, so it can no longer
-          live as a gear inside the user row. */}
-      <button
-        type="button"
-        className={`sv2-row${SHELL_SETUP_PATHS.has(pathname) ? " on" : ""}`}
-        aria-current={SHELL_SETUP_PATHS.has(pathname) ? "page" : undefined}
-        title={collapsed ? "Settings" : undefined}
-        onClick={() => onRowClick("setup")}
-        {...ribProps("setup")}
-      >
-        <span className="sv2-g" aria-hidden="true"><Settings /></span>
-        {/* The row reads "Settings" (the pack's wording); the nav CONFIG still calls this
-            family "Setup" for the crumb + flyout kicker — flagged, not unified here. */}
-        <span className="sv2-l"><span className="sv2-lb">Settings</span></span>
-      </button>
-
+      {/* ── User block ── */}
       {currentUser && (
-        <button type="button" className="sv2-row tall" onClick={() => onNavigatePath("/account")}>
-          <span className="sv2-g" aria-hidden="true"><span className="sv2-av">{initials}</span></span>
-          <span className="sv2-l">
-            <span className="sv2-stack">
-              <span className="sv2-un">{currentUser.name}</span>
-              <span className="sv2-ur">{currentUser.plan === UserPlan.PRO ? "Pro plan" : "Free plan"}</span>
-            </span>
+        <div className="sv2-usr">
+          <span className="sv2-av" aria-hidden="true">{initials}</span>
+          <span className="sv2-ub">
+            <span className="sv2-un">{currentUser.name}</span>
+            <span className="sv2-ur">{currentUser.plan === UserPlan.PRO ? "Pro plan" : "Free plan"}</span>
           </span>
-        </button>
+        </div>
       )}
     </>
   );

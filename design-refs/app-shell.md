@@ -54,7 +54,7 @@ above it, content is brightest.
 |---|---|---|
 | Ground (behind all three capsules) | `--shell-ground` | `#e7e0d5` + the paper-grain SVG at ~.03 |
 | **Rail** capsule — deepest | `--shell-rail` | `#f1ebe3` |
-| **Sidebar** expanded — one step above | `--shell-side` | `#f6f1ea` (one-sidebar; was `#f8f4ee`) |
+| **Panel** capsule — one step above | `--shell-side` | `#f8f4ee` |
 | **Content** capsule (incl. its top bar) | `--shell-canvas` | `#fdfbf8` |
 | Interior fill (search, chips, pills, hovers) | `--shell-inset` | `#efe8df` — moved WITH the panel |
 | Card | `--shell-card` | `#fdfaf5` |
@@ -74,47 +74,64 @@ below every capsule but above the ground — so a fill still reads as an inset e
 and the nav's active state (the ground token) stays deeper than any hover. No page sets its own
 background — content inherits the content capsule.
 
-## THE ONE SIDEBAR (one-sidebar pack — ref `scriptally-sidebar-final.html`)
+## ⛔ TRIED AND REVERTED — the merged "one sidebar" (27 Jul)
 
-**Supersedes the rail capsule + panel capsule.** They are ONE capsule that changes width.
-Nothing moves position between the states.
+**Do not propose this again from scratch.** The rail and panel were merged into a single capsule
+that changed width (62px `#f1ebe3` collapsed ⇄ 280px `#f6f1ea` expanded), with every item —
+brand, nav, manuscript, New, Pro, Settings, user — rendered as one uniform row shape (a 48px
+glyph cell + a label region), so that collapsing hid only the labels. It shipped to dev and was
+**reverted after Nick's browser review**.
 
-| State | Width | Background |
-|---|---|---|
-| Collapsed | **62px** | `--shell-rail` `#f1ebe3` |
-| Expanded | **280px** | `--shell-side` `#f6f1ea` |
+**Why it failed, in his words:** *uniform row weight removed the grouping that made the panel
+legible, and the lower half read as a flat list of unrelated items.* The merge was structurally
+clean — the glyphs genuinely held position, and the behaviours survived — but the thing that
+made the panel readable was the VARIETY of its rows: a nav item, a manuscript card, a Pro row
+and a user block are different kinds of object, and flattening them into one shape destroyed the
+grouping. **The lesson is about row weight and grouping, not about the number of capsules.** If
+the two-capsule geometry is revisited, the panel's internal variety has to survive it.
 
-Width and background-colour transition together, `.28s cubic-bezier(.4,0,.2,1)`. **No spine, no
-tinted gutter, no divider** — one flat tone at any moment. Ground and content capsule unchanged:
-still three surfaces, one fewer capsule.
+The attempt is recorded in `reports/one-sidebar.md` (with its own reverted banner) and in the
+reverted commit `5ee7fd7`; its mockup was `scriptally-sidebar-final.html`, removed with the
+revert. The sections below are the LIVE two-capsule design.
 
-**Every row is the same shape — this is structure, not styling.** Brand, nav sections,
-manuscript, New, Pro, Settings and user each render as one row: a **48px glyph cell**, then a
-label region. Rows carry `margin: 0 7px`, `border-radius: 11px`, height 42px (50px for the
-taller bottom rows). The glyph sits at the same x in both states, so **collapsing hides the
-label region and nothing else** — no repositioning, no re-layout, no swapping one component for
-another. Accordion children indent within the label region; their glyph cell is empty.
+## Rail capsule
 
-**Order, top to bottom:** brand · Dashboard · Querying (+children) · Agents (+children) · Shelf
-(+children) · spacer · "Working on" · manuscript row · divider · New · Upgrade to Pro ·
-Settings · user. The manuscript switcher is at the BOTTOM; there is no task-count line.
+70px, capsule surface. Burgundy brand glyph top (24px), then section icons — Dashboard,
+Querying, Agents, Shelf — 42px ribs, 13px radius; active `#f5e2da` fill + burgundy icon; hover
+interior fill; `title` tooltips, **no captions, no tab tongue**. Spacer, then Setup, then the
+avatar chip at the bottom.
 
-**Collapse keeps navigation icons, Settings and the avatar. Nothing else.** Brand, "Working on",
-the manuscript row, the divider, New and Pro all carry `drop`. **Settings is its own row** — it
-can no longer be a gear inside the user row, because it must survive collapse; the user row
-keeps avatar, name and plan only.
+## Panel capsule (top → bottom)
 
-**New** uses a pink glyph tile and opens a **create popover** above it (content-capsule surface,
-`line` hairline, 15px radius, `0 16px 40px rgba(58,28,20,.18)`): a mono "Create" kicker, then Log
-a query `⌘L`, Record a response `⌘R`, a hairline, Add an agent, Add a manuscript. Closes on
-outside click and Escape. The four capture contracts are unchanged.
+1. **Brand mark** — the real ScriptAlly artwork (`ScriptAllyLogo` → `/scriptally-title-v2.png`),
+   large and centred, ~28–34px tall (40px allowance if it reads small — judge in browser),
+   aspect preserved, never restyled; ~26px clear below. The Playfair wordmark, ink rule and mono
+   kicker are retired (`weekOfQuerying` still lives in dashboardStats for the dashboard).
+2. **Accordion nav** — generous rows (13–14px type, 13px vertical pad, 14px radius).
+   **Dashboard is a flat link** (active = pink fill on the row). Sections: Querying (Queries
+   Hub · To-do · Packages), Agents (Agent list · Discover), Shelf (Manuscripts · Comparable
+   titles). One open at a time, following the route; open = ink text, medium weight, burgundy
+   icon, chevron rotated. Children indent 44px, **no vertical hairline**; active child = pink
+   fill; counts right-aligned mono muted. Import is off the nav (reachable from the Queries
+   empty state).
+3. Flexible spacer.
+4. **Manuscript row** — bare: sage-gradient initials tile, Playfair title, mono
+   `20 queries · 16 active`, up/down chevron.
+5. **Task pills** — two cream pills: pip + Playfair count + mono label (`Urgent` / `House`),
+   derived from the To-do board's own selectors.
+6. **Action strip** — four equal fill tiles, 44px, radius 12: Log query (pink/burgundy), Record
+   response (sage band/deep), Add agent + Add manuscript (both tan `#efe7db`/`#8a7358` — **blue
+   is reserved for Pro**). Mono caption below: `Log · Respond · Agent · Manuscript`.
+7. **Upgrade row** — card surface, `line` hairline, radius 12: solid slate `PRO` pill (mono,
+   white) · `Upgrade to Pro` 12.5px medium · chevron. Hover goes slate, never burgundy. No
+   meter, no benefit copy. Hidden for Pro users.
+8. **User block** — hairline above: avatar chip, name, plan. (No utility buttons in this idiom.)
 
-**Behaviour is carried over untouched:** rail-selects-a-section, the open section's row toggling
-the capsule shut, auto-collapse on navigation, and the hover flyouts. One element carries them
-now, so `railClickPlan` is their single home — the accordion header and the rail rib were two
-controls for one idea. The flyouts matter MORE here: with one capsule there is no second
-container to reveal, so hovering a collapsed row is the only way to reach a page without
-expanding.
+**The nav active-state law (fixes pack): active = GROUND fill `#e7e0d5` — the row reads as a
+window cut through to the page ground — ink text, burgundy icon, same radii; one law for the
+rail ribs and both panel row kinds. Hover stays the interior fill `#f2ede7` (adjacent tones —
+browser-check the distinction). Soft pink is RETIRED from nav states everywhere; it survives as
+the primary-button colour and content accent. Never pink, never burgundy, in nav states.**
 
 ## Content capsule
 

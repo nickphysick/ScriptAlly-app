@@ -16,120 +16,53 @@
 /* The content plane — the third capsule; the stage scrolls INSIDE it. */
 .sv2-plane { background: var(--shell-canvas); overflow: hidden; }
 
-/* ── THE ONE SIDEBAR (one-sidebar pack — ref design-refs/scriptally-sidebar-final.html) ──────
-   The rail capsule and the panel capsule are GONE: one capsule changes width. 62px on the dark
-   tone collapsed, 280px on the light tone expanded, both transitioning together. NO SPINE, no
-   tinted gutter, no divider — one flat tone at any moment.
-
-   EVERY row is the same shape: a 48px glyph cell then a label region. The glyph therefore sits
-   at the same x in both states, and collapsing hides the label region and NOTHING else — no
-   repositioning, no re-layout, no swapping one component for another. Accordion children
-   indent inside the label region; their glyph cell is empty. ── */
-.sv2-side { display: none; }
+/* ── rail capsule ── */
+.sv2-rail { display: none; }
 @media (min-width: 768px) {
-  .sv2-side {
+  .sv2-rail {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    width: 70px;
     flex: none;
-    position: relative;
-    width: 280px;
-    background-color: var(--shell-side);
-    padding: 16px 0 13px;
+    background: var(--shell-rail);
+    padding: 20px 0;
     overflow: hidden;
-    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.28s ease;
   }
-  .sv2-collapsed .sv2-side { width: 62px; background-color: var(--shell-rail); }
 }
-
-/* the ONE row shape */
-.sv2-row {
-  position: relative; display: flex; align-items: center; flex: none;
-  height: 42px; margin: 0 7px 2px; padding: 0; border: 0; background: none;
-  border-radius: 11px; cursor: pointer; text-align: left; width: calc(100% - 14px);
-  transition: background 0.15s;
+.sv2-mark { width: 24px; height: 24px; color: var(--burg); margin-bottom: 24px; flex: none; }
+.sv2-railnav { display: flex; flex-direction: column; align-items: center; }
+/* Ribs — icon-only squares; tooltips carry the names (no captions in this idiom). */
+.sv2-rib {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: #a89a8a; /* resting rib ink (mockup literal) */
+  margin-bottom: 8px;
+  transition: background 0.16s, color 0.16s;
 }
-.sv2-row.tall { height: 50px; }
-.sv2-g { width: 48px; flex: none; display: grid; place-items: center; }
-.sv2-g svg { width: 18px; height: 18px; color: #a89a8a; transition: color 0.15s; }
-.sv2-l { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding-right: 12px; font-size: 13.5px; color: var(--shell-ink-soft); white-space: nowrap; }
-.sv2-lb { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.sv2-cv { width: 11px; height: 11px; color: #c4b8a9; flex: none; transition: transform 0.2s; }
-.sv2-row:hover { background: var(--shell-inset); }
-/* THE NAV ACTIVE LAW, unchanged: active = the GROUND token; hover = the interior fill. */
-.sv2-row.on { background: var(--shell-ground); }
-.sv2-row.on .sv2-g svg, .sv2-row.open .sv2-g svg { color: var(--burg); }
-.sv2-row.on .sv2-l, .sv2-row.open .sv2-l { color: var(--shell-ink); font-weight: 500; }
-.sv2-row.open .sv2-cv { transform: rotate(90deg); }
-/* COLLAPSE HIDES THE LABEL REGION — and nothing else. */
-.sv2-collapsed .sv2-l { display: none; }
-/* …plus the rows that do not survive collapse at all. */
-.sv2-collapsed .drop { display: none; }
-
-/* brand */
-.sv2-brand { height: 44px; margin-bottom: 12px; cursor: default; }
-.sv2-brand:hover { background: none; }
-.sv2-brand .sv2-mark { width: 21px; height: 21px; color: var(--burg); }
-.sv2-wm { display: flex; align-items: center; }
-
-/* accordion children — indented INSIDE the label region (empty glyph cell) */
-.sv2-kids { overflow: hidden; max-height: 0; transition: max-height 0.25s ease; flex: none; }
-.sv2-kids.open { max-height: 160px; }
-.sv2-collapsed .sv2-kids { max-height: 0; }
-.sv2-krow {
-  display: flex; align-items: center; height: 35px; margin: 0 7px 2px; padding: 0; border: 0;
-  background: none; border-radius: 10px; cursor: pointer; width: calc(100% - 14px);
-  transition: background 0.15s;
-}
-.sv2-krow .sv2-g { width: 48px; flex: none; }
-.sv2-krow .sv2-l { font-size: 12.5px; gap: 8px; }
-.sv2-ct { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--shell-muted); }
-.sv2-krow:hover { background: var(--shell-inset); }
-.sv2-krow.on { background: var(--shell-ground); }
-.sv2-krow.on .sv2-l { color: var(--shell-ink); }
-
-.sv2-gap { flex: 1; min-height: 12px; }
-.sv2-hr { height: 1px; background: var(--shell-line-soft); margin: 11px 13px; flex: none; }
-.sv2-slab { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-muted); padding: 2px 0 6px 55px; flex: none; white-space: nowrap; }
-
-/* the bottom rows' glyphs — all seated in the same 48px cell */
-.sv2-tile { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(160deg, #dce0d9, #d0d6cc); border: 1px solid rgba(124, 58, 42, 0.2); display: grid; place-items: center; color: #5a6e58; font-family: var(--font-serif); font-size: 11.5px; }
-.sv2-stack { flex: 1; min-width: 0; }
-.sv2-t1 { font-family: var(--font-serif); font-size: 14px; line-height: 1.2; display: block; overflow: hidden; text-overflow: ellipsis; }
-.sv2-t2 { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--shell-muted); margin-top: 3px; display: block; }
-.sv2-plus { width: 34px; height: 34px; border-radius: 10px; background: var(--pink); border: 1px solid var(--pink-b); display: grid; place-items: center; }
-.sv2-plus svg { width: 16px; height: 16px; color: var(--burg); }
-.sv2-row.new .sv2-l { color: var(--burg); font-weight: 500; }
-.sv2-row.new:hover { background: var(--pink); }
-.sv2-kbd { font-family: "JetBrains Mono", monospace; font-size: 9px; color: #bcb0a3; }
-.sv2-propill { font-family: "JetBrains Mono", monospace; font-size: 7px; letter-spacing: 0.09em; background: #6a89a7; color: #fff; border-radius: 5px; padding: 3px 6px; }
-.sv2-row.pro .sv2-l { font-weight: 500; color: var(--shell-ink); }
-.sv2-av { width: 33px; height: 33px; border-radius: 99px; background: var(--shell-card); border: 1px solid rgba(124, 58, 42, 0.25); display: grid; place-items: center; font-family: var(--font-serif); font-size: 11.5px; color: var(--burg); }
-.sv2-un { font-size: 12.5px; color: var(--shell-ink); display: block; }
-.sv2-ur { font-family: "JetBrains Mono", monospace; font-size: 8px; color: var(--shell-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; display: block; }
-
-/* THE CREATE POPOVER (one-sidebar P3) — the flyouts' anatomy, opening UPWARD from the New row. */
-.sv2-popwrap { position: relative; flex: none; }
-.sv2-pop {
-  position: absolute; left: 7px; bottom: calc(100% + 6px); width: 246px;
-  background: var(--shell-canvas); border: 1px solid var(--shell-line); border-radius: 15px;
-  box-shadow: 0 16px 40px rgba(58, 28, 20, 0.18); padding: 7px;
-  opacity: 0; transform: translateY(6px); pointer-events: none;
-  transition: opacity 0.15s, transform 0.15s; z-index: 50;
-}
-.sv2-popwrap.open .sv2-pop { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.sv2-pk { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--shell-muted); padding: 8px 11px 7px; }
-.sv2-prow { display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 11px; border: 0; background: none; border-radius: 10px; font-size: 13px; color: var(--shell-ink-soft); cursor: pointer; white-space: nowrap; text-align: left; }
-.sv2-prow:hover { background: var(--shell-inset); color: var(--shell-ink); }
-.sv2-prow svg { width: 15px; height: 15px; color: #a89a8a; flex: none; }
-.sv2-prow:hover svg { color: var(--burg); }
-.sv2-prow .sv2-lb { flex: 1; }
-.sv2-kb { font-family: "JetBrains Mono", monospace; font-size: 8.5px; color: #bcb0a3; border: 1px solid var(--shell-line-soft); border-radius: 5px; padding: 1px 5px; }
-.sv2-pdiv { height: 1px; background: var(--shell-line-soft); margin: 6px 11px; }
+.sv2-rib svg { width: 18px; height: 18px; }
+.sv2-rib:hover { background: var(--shell-inset); }
+/* THE ACTIVE LAW (fixes pack): active = the GROUND token — a window cut through to the page
+   ground. Never pink (retired from nav states; it stays the button/content accent), never
+   burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
+.sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
+.sv2-railspacer { flex: 1; }
+/* (The dedicated expand control is retired — rail-section-select P2; section icons, the
+   flyout footer and ⌘\ carry expansion now.) */
+/* The rib whose flyout is open holds its hover look while the pointer travels across. */
+.sv2-rib.hovering { background: var(--shell-inset); color: var(--shell-ink); }
+.sv2-rib.on.hovering { background: var(--shell-ground); color: var(--burg); }
 
 /* ── rail flyouts (collapsed only; ref scriptally-rail-flyouts.html) ── */
 .sv2-fly {
   position: fixed;
-  left: calc(var(--shell-cap-gap) + 62px + 12px); /* 12px off the merged capsule */
+  left: calc(var(--shell-cap-gap) + 70px + 12px); /* 12px off the rail capsule */
   min-width: 212px;
   background: var(--shell-canvas);
   border-radius: 16px;
@@ -203,22 +136,171 @@
 }
 
 /* The rail-foot avatar chip — the account link under Setup. */
+.sv2-railav {
+  width: 36px;
+  height: 36px;
+  border-radius: 99px;
+  border: 1px solid rgba(124, 58, 42, 0.25);
+  background: var(--shell-card);
+  display: grid;
+  place-items: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  color: var(--burg);
+  cursor: pointer;
+  margin-top: 6px;
+}
 
 /* ── panel capsule ── */
+.sv2-side { display: none; }
+@media (min-width: 768px) {
+  .sv2-side {
+    display: flex;
+    flex-direction: column;
+    width: 288px;
+    flex: none;
+    min-width: 0;
+    overflow: hidden;
+    background-color: var(--shell-side); /* one capsule surface — no edge, no grain of its own */
+    transition: width 0.26s ease, opacity 0.2s ease, margin-left 0.26s ease;
+  }
+}
 /* PANEL COLLAPSE (fixes pack) — the rail IS the collapsed state; no flyouts, no mini-panel.
    The negative margin swallows the flex gap so the content capsule widens by the full
    288 + 14px; the fixed-width inner column keeps the contents from reflowing mid-slide. */
+.sv2-collapsed .sv2-side {
+  width: 0;
+  opacity: 0;
+  margin-left: calc(-1 * var(--shell-cap-gap));
+  pointer-events: none;
+  box-shadow: none;
+}
+.sv2-side-inner {
+  width: 288px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px 18px;
+  overflow-y: auto;
+}
 
 /* The brand row — the artwork centred, the tuck toggle vertically centred on it, top-right. */
+.sv2-wmrow { position: relative; flex: none; margin: 0 0 26px; }
+.sv2-wm { display: flex; justify-content: center; flex: none; }
+.sv2-tuck {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--shell-muted);
+  display: grid;
+  place-items: center;
+  transition: background 0.16s, color 0.16s;
+}
+.sv2-tuck:hover { background: var(--shell-inset); color: var(--burg); }
+.sv2-tuck svg { width: 15px; height: 15px; }
 
 /* ── accordion nav — generous rows, no hairlines anywhere ── */
+.sv2-acc { display: flex; flex-direction: column; gap: 4px; flex: none; }
+.sv2-asec {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 13px 14px;
+  border: 0;
+  background: transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  color: var(--shell-ink-soft);
+  text-align: left;
+  transition: background 0.16s;
+}
+.sv2-asec .sv2-ai { width: 17px; height: 17px; color: #a89a8a; flex: none; transition: color 0.16s; }
 .sv2-albl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2-asec .sv2-acv { width: 12px; height: 12px; color: #c4b8a9; flex: none; transition: transform 0.22s; }
+.sv2-asec:hover { background: var(--shell-inset); }
+.sv2-asec.open { color: var(--shell-ink); font-weight: 500; }
+.sv2-asec.open .sv2-ai { color: var(--burg); }
+.sv2-asec.open .sv2-acv { transform: rotate(90deg); }
 /* THE ACTIVE LAW (fixes pack): active = GROUND fill, ink text, burgundy icon — never pink,
    never burgundy fills. One law, both columns (rail ribs + panel rows). */
+.sv2-asec.sv2-flat.on { background: var(--shell-ground); color: var(--shell-ink); font-weight: 500; }
+.sv2-asec.sv2-flat.on .sv2-ai { color: var(--burg); }
+.sv2-akids { overflow: hidden; max-height: 0; transition: max-height 0.26s ease; }
+.sv2-akids.open { max-height: 160px; }
+.sv2-akid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 14px 9px 44px; /* the 44px indent — NO vertical hairline beside children (baked) */
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  color: var(--shell-ink-soft);
+  text-align: left;
+  transition: background 0.16s;
+}
+.sv2-akid:hover { background: var(--shell-inset); }
+.sv2-akid.on { background: var(--shell-ground); color: var(--shell-ink); }
+.sv2-aklbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2-akct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 
+.sv2-half { flex: 1; min-height: 28px; }
 
 /* ── manuscript row — bare (no card, no deck edges) ── */
 .sv2-mswrap { position: relative; flex: none; margin-top: 20px; }
+.sv2-ms2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.sv2-mstile {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex: none;
+  background: linear-gradient(160deg, #dce0d9, #d0d6cc); /* sage band pair (canonical gradient) */
+  border: 1px solid rgba(124, 58, 42, 0.2);
+  display: grid;
+  place-items: center;
+  color: var(--sage-d);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14px;
+}
+.sv2-mstxt { min-width: 0; flex: 1; display: block; }
+.sv2-mst1 { display: block; font-family: "Playfair Display", Georgia, serif; font-size: 15px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv2-mst2 {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  margin-top: 4px;
+}
+.sv2-mschev { margin-left: auto; color: var(--shell-muted); flex: none; }
+.sv2-mschev svg { width: 13px; height: 13px; display: block; }
 .sv2-mspop {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -243,12 +325,74 @@
 /* ── task pills — two cream pills, fill-based. 26px module rhythm (fixes pack): the desk
    group opens out upward into the spacer's slack; the spacer still gives way first at short
    viewports. ── */
+.sv2-pills { display: flex; gap: 9px; padding: 0 6px; margin-top: 26px; flex: none; }
+.sv2-tpill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: var(--shell-inset);
+  border-radius: 99px;
+  padding: 9px 13px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--shell-ink);
+}
+.sv2-pip { width: 8px; height: 8px; border-radius: 2px; flex: none; }
 /* Pip colours — baked: urgent blush / housekeeping sage. */
+.sv2-pip-urgent { background: #eabfab; }
 .sv2-pip-housekeeping { background: #b7c5b4; }
+.sv2-tn { font-family: "Playfair Display", Georgia, serif; font-size: 15px; line-height: 1; }
+.sv2-tl { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--shell-muted); }
 
 /* ── action strip — four equal fill tiles; BLUE IS RESERVED FOR PRO ── */
+.sv2-strip4 { display: flex; gap: 9px; padding: 0 6px; margin-top: 26px; flex: none; }
+.sv2-gt {
+  flex: 1;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: filter 0.16s;
+}
+.sv2-gt svg { width: 18px; height: 18px; }
+.sv2-gt:hover { filter: brightness(0.97); }
+.sv2-gt1 { background: var(--pink); color: var(--burg); }
+.sv2-gt2 { background: #dce0d9; color: var(--sage-d); } /* sage band */
+.sv2-gt3 { background: #efe7db; color: #8a7358; } /* tan — Add agent AND Add manuscript (baked) */
+.sv2-gcap {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  text-align: center;
+  margin-top: 9px;
+  flex: none;
+}
 
 /* ── upgrade row — slate is Pro's colour; hover never goes burgundy ── */
+.sv2-upg {
+  margin-top: 26px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--shell-card);
+  border: 1px solid var(--shell-line);
+  border-radius: 12px;
+  padding: 11px 13px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--shell-ink);
+  text-align: left;
+  transition: border-color 0.16s, box-shadow 0.16s;
+  flex: none;
+}
+.sv2-upg:hover { border-color: var(--slate); box-shadow: 0 2px 10px rgba(106, 137, 167, 0.14); }
 .sv2-propill {
   font-family: "JetBrains Mono", monospace;
   font-size: 7.5px;
@@ -259,8 +403,19 @@
   padding: 3px 7px;
   flex: none;
 }
+.sv2-upgt { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv2-upgchev { width: 12px; height: 12px; color: var(--shell-muted); flex: none; }
 
 /* ── user block ── */
+.sv2-usr {
+  border-top: 1px solid var(--shell-line-soft);
+  margin: 14px 4px 0;
+  padding: 13px 4px 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
 .sv2-av {
   width: 34px;
   height: 34px;
@@ -274,6 +429,7 @@
   font-size: 12px;
   color: var(--burg);
 }
+.sv2-ub { flex: 1; min-width: 0; display: block; }
 .sv2-un { display: block; font-size: 12.5px; line-height: 1.2; color: var(--shell-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sv2-ur {
   display: block;
@@ -321,12 +477,16 @@
 .sv2-gsearch { width: 280px; flex: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .sv2-side,
   .sv2-fly,
-  .sv2-row,
-  .sv2-row .sv2-cv,
-  .sv2-kids,
-  .sv2-krow,
-  .sv2-pop,
-  .sv2-prow { transition: none; }
+  .sv2-side,
+  .sv2-rib,
+  .sv2-tuck,
+  .sv2-asec,
+  .sv2-asec .sv2-acv,
+  .sv2-akids,
+  .sv2-akid,
+  .sv2-gt,
+  .sv2-upg {
+    transition: none;
+  }
 }
