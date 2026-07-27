@@ -776,11 +776,20 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     const sec = rule(".tdb-lsec");
     expect(sec).toContain("background: none");
     expect(sec).toContain("border: 0");
+    // todo rebuild P2 — the ROW is the mockup's hairline card: card surface, radius 13, a
+    // hover that lifts the border and adds a soft shadow.
     const row = rule(".tdb-lrow");
-    expect(row).toContain("background: var(--white, #fff)");
-    expect(row).toContain("border-radius: 11px");
+    expect(row).toContain("background: var(--card, #fdfaf5)");
+    expect(row).toContain("border-radius: 13px");
     expect(row).toContain("border: 1px solid var(--line)");
-    expect(row).toContain("margin-bottom: 8px");
+    expect(row).toContain("margin-bottom: 10px");
+    expect(rule(".tdb-lrow:hover")).toContain("box-shadow: 0 3px 12px rgba(58, 28, 20, 0.07)");
+    // the 42px tinted family tile, one colour per family
+    expect(rule(".tdb-ltile")).toContain("width: 42px; height: 42px; border-radius: 12px");
+    expect(rule(".tdb-ltile.do")).toContain("var(--pink-b"); // pink band for urgent
+    expect(rule(".tdb-ltile.hk")).toContain("var(--lat-1"); // sage/latte band for housekeeping
+    expect(rule(".tdb-lbt")).toContain("font-size: 16px"); // Playfair 16 title
+    expect(rule(".tdb-lbms")).toContain("font-style: italic"); // italic Playfair subtitle
   });
   it("BOTH views share ONE typographic heading (todo rebuild P1) — the washed sticky bar is extinct", () => {
     expect(css).not.toMatch(/\.tdb-lsech[\s.{]/);
@@ -795,7 +804,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).not.toContain("onClick={() => toggleFold(lane)}");
     expect(page).not.toContain('{folded ? "▸" : "▾"}');
     expect(page).not.toContain("{!ledgerFold.do &&");
-    expect(page).toContain("{doSorted.map(runRow)}"); // rows render unconditionally now
+    expect(page).toContain('{doSorted.map((c) => runRow(c, "do"))}'); // rows render unconditionally now
   });
   it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
     expect(rule(".tdb-lacts")).toContain("align-self: center");

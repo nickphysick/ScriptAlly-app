@@ -327,7 +327,20 @@
 .tdb-lst { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
 .tdb-lscc { font-family: var(--f12-mono); font-size: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; color: var(--ink-2); }
 .tdb-lsfold { margin-left: auto; font-size: 10px; color: var(--muted); }
-.tdb-lrow { position: relative; display: flex; align-items: center; gap: 14px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; }
+/* THE ROW (todo rebuild P2 — ref .row): a hairline card on the bare capsule; the border lifts
+   and a soft shadow arrives on hover. 42px tinted family tile left (it SEATS the completion
+   dot — see the reconcile in ToDoPage), Playfair title over an italic Playfair subtitle, the
+   mono tag pill and the chevron right. */
+.tdb-lrow { position: relative; display: flex; align-items: center; gap: 14px; background: var(--card, #fdfaf5); border: 1px solid var(--line); border-radius: 13px; padding: 13px 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+.tdb-lrow:hover { border-color: #cfc2b4; box-shadow: 0 3px 12px rgba(58, 28, 20, 0.07); }
+.tdb-ltile { width: 42px; height: 42px; border-radius: 12px; flex: none; display: grid; place-items: center; }
+.tdb-ltile.do { background: var(--pink-b, #f2cec1); color: var(--burgundy, #7c3a2a); }
+.tdb-ltile.hk { background: var(--lat-1, #f5efe6); color: var(--lat-ink, #8a7048); }
+.tdb-ltile.nt { background: var(--note-b, #eedfae); color: #8a7048; }
+.tdb-ltags { display: flex; align-items: center; gap: 8px; flex: none; }
+.tdb-lgo { display: flex; flex: none; color: var(--muted, #9c8878); }
+.tdb-lgo svg { width: 14px; height: 14px; }
+.tdb-rows { display: flex; flex-direction: column; }
 .tdb-lrow:hover, .tdb-lrow:focus-within { z-index: 30; } /* the ledger's expanding surface (the open menu) clears the sticky headings too */
 .tdb-laddrow { display: flex; align-items: center; justify-content: center; width: 100%; box-sizing: border-box; padding: 13px 16px; margin-bottom: 2px; background: none; border: 1.5px dashed #d9c87a; border-radius: 11px; font-size: 11px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
 .tdb-laddrow:hover { background: rgba(255, 255, 255, 0.5); }
@@ -372,10 +385,10 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-lbody { flex: 1; min-width: 0; }
 .tdb-tagline { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
 .tdb-lbody .tdb-chipon { margin-left: 0; } /* beside the tag — never pushed to the row's end */
-.tdb-lbt { font-family: var(--f12-serif); font-size: 14.5px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.tdb-lbt { font-family: var(--f12-serif); font-size: 16px; font-weight: 500; line-height: 1.25; color: var(--ink); }
 .tdb-lbt.batch { font-weight: 700; }
 .tdb-lbt.batch b { font-size: 17px; font-weight: 700; }
-.tdb-lbms { font-family: var(--f12-serif); font-style: italic; font-size: 10px; color: var(--ink-2); margin-top: 2px; }
+.tdb-lbms { font-family: var(--f12-serif); font-style: italic; font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
 .tdb-lbsub { font-size: 10.5px; color: var(--sub); line-height: 1.5; margin-top: 3px; }
 .tdb-minibar { height: 5px; border-radius: 3px; background: #ece5d8; margin-top: 8px; overflow: hidden; max-width: 320px; }
 .tdb-minibar i { display: block; height: 100%; background: var(--ink); }

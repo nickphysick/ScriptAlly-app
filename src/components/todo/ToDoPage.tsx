@@ -1255,7 +1255,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </button>
     );
   }
-  function runRow(c: BoardCard) {
+  /** THE ROW (todo rebuild P2 — ref .row): a hairline card carrying a 42px tinted family tile,
+   *  a Playfair title over an italic Playfair subtitle, the mono tag pill right, then a
+   *  chevron; the border lifts and a soft shadow arrives on hover.
+   *
+   *  RECONCILE (reported): the mockup's tile is decorative, but the leading slot on the live
+   *  row is the COMPLETION control (the dot that becomes a tick on hover). Rather than lose
+   *  that, the dot is SEATED INSIDE the tile — the tile brings the mockup's tint and size, the
+   *  dot keeps its behaviour. The action cluster likewise stays: the mockup draws no row
+   *  actions, but Action-now / Today / Later are the row's working surface. */
+  function runRow(c: BoardCard, fam: "do" | "hk" | "nt" = "do") {
     const committed = onList(c);
     const isOffer = c.taskType === "offer_received";
     const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
@@ -1263,21 +1272,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <div key={c.key} data-tdbkey={c.key} className="tdb-lrow" role="button" tabIndex={0}
         onClick={() => openFlowCards([c])}
         onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
-        {ledgerDot(c)}
+        <span className={`tdb-ltile ${fam}`}>{ledgerDot(c)}</span>
         <div className="tdb-lbody">
-          <div className="tdb-tagline">
-            <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
-            {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
-            {committed && <span className="tdb-chipon">✓ TODAY</span>}
-          </div>
           <h3 className="tdb-lbt">{c.title}</h3>
           {c.subtitle && <div className="tdb-lbms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+        </div>
+        <div className="tdb-ltags">
+          <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
+          {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
+          {committed && <span className="tdb-chipon">✓ TODAY</span>}
         </div>
         <div className="tdb-lacts" onClick={(e) => e.stopPropagation()}>
           <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
           <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}</button>
           {laterMenu(c)}
         </div>
+        <span className="tdb-lgo" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
       </div>
     );
   }
@@ -1366,13 +1378,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {doSorted.length > 0 && (
           <section className="tdb-lsec p">
             {ledgerHeading("do", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent)}
-            <div className="tdb-rows">{doSorted.map(runRow)}</div>
+            <div className="tdb-rows">{doSorted.map((c) => runRow(c, "do"))}</div>
           </section>
         )}
         {(vGroups.length > 0 || vStale.length > 0) && (
           <section className="tdb-lsec l">
             {ledgerHeading("hk", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping)}
-            <div className="tdb-rows">{hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}</div>
+            <div className="tdb-rows">{hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c, "hk")))}</div>
           </section>
         )}
         {/* detail P3 — the ☰ view keeps Notes to self even when EMPTY (parity with the cards'
@@ -1384,7 +1396,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {vNt.length > 0 ? (
               <div className="tdb-rows">
                 {composerAt === "ledger" && renderComposer()}
-                {vNt.map(runRow)}
+                {vNt.map((c) => runRow(c, "nt"))}
               </div>
             ) : composerAt === "ledger" ? renderComposer() : (
               <button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>
