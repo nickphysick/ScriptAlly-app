@@ -123,3 +123,20 @@ export const statusClosedTrack = "#e4ddd2"; // closed track
 export const statusClosedFill = "#efeae2"; // closed centre fill
 export const statusClosedMark = "#b3a896"; // closed ×
 export const statusParchment = "#fdfaf5"; // offer tick
+
+/* ── App-shell v2 chrome (ref design-refs/scriptally-shell-v2.html; the rollout pack's baked
+   table wins where the mockup drifts — rail #2e2622, not the mockup's #2b2622). JS twins of
+   the --shell-* custom properties in index.css :root, for inline-style consumers; the pair is
+   kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
+export const shellRail = "#2e2622"; // icon-rail ground (dark umber)
+export const shellSide = "#f1ebe4"; // sidebar panel ground
+export const shellTopbar = "#faf6f2"; // top bar — === canvas by design
+export const shellCanvas = "#faf6f2"; // content canvas ground
+export const shellCard = "#fdfaf5"; // card surface (=== parchment)
+export const shellLine = "#e3d9cf"; // standard hairline
+export const shellLineSoft = "#ece3da"; // soft hairline
+export const shellSideEdge = "rgba(124,58,42,.14)"; // sidebar right-edge tint (drawn 1px solid)
+export const shellGutter = 16; // sidebar side gutter (px)
+export const shellGroup = 24; // between sidebar groups (px)
+export const shellWithin = 8; // within a sidebar group (px)
+export const shellCardPad = 12; // sidebar card padding (px)

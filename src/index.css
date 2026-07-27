@@ -37,6 +37,28 @@
   --gold: #a8842c;    /* sample-pages ink · star glint */
 }
 
+/* ── App-shell v2 chrome tokens (ref design-refs/scriptally-shell-v2.html; the rollout pack's
+   baked table WINS where the mockup drifts — rail is #2e2622 there, #2b2622 in the mockup's
+   --rail). Theme-independent (the v2 shell has one fixed palette), so they live on :root beside
+   the brand constants, prefixed --shell- and named by ROLE, not colour. NOTE: designTokens.ts
+   carries JS twins (shellRail …) for inline-style consumers — the same flagged duplication as
+   the pink trio above; the pair is kept in step by shellV2Tokens.test.ts. ── */
+:root {
+  --shell-rail: #2e2622;              /* icon-rail ground (dark umber) */
+  --shell-side: #f1ebe4;              /* sidebar panel ground (paper grain rides in the component) */
+  --shell-topbar: #faf6f2;            /* top bar — deliberately === canvas so the bar reads as the page */
+  --shell-canvas: #faf6f2;            /* content canvas ground */
+  --shell-card: #fdfaf5;              /* card surface on the canvas (=== parchment) */
+  --shell-line: #e3d9cf;              /* standard hairline */
+  --shell-line-soft: #ece3da;         /* soft hairline (partitions, top-bar base) */
+  --shell-side-edge: rgba(124,58,42,.14); /* sidebar right edge — drawn 1px solid, burgundy-tinted */
+  /* sidebar spacing scale */
+  --shell-gutter: 16px;               /* panel side gutter */
+  --shell-group: 24px;                /* between groups */
+  --shell-within: 8px;                /* within a group */
+  --shell-card-pad: 12px;             /* card padding */
+}
+
 /* Top-nav search placeholder — Playfair Display 500 16px (typed text stays Source Sans Pro 12px,
    set inline on the input). Colour stays the muted #c8b8a8 from the placeholder-[#c8b8a8] utility. */
 .nav-search-field::placeholder {
