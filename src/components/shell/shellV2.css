@@ -156,10 +156,328 @@
 .sv2-grow { flex: 1; }
 .sv2-gsearch { width: 300px; flex: none; }
 
+/* ── sidebar contents (Phase 3) ── */
+
+/* Section labels — no trailing rules (only three horizontal rules exist in the panel). */
+.sv2-seclabel {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  margin: var(--shell-group) 2px var(--shell-within);
+  flex: none;
+}
+.sv2-partition { flex: none; height: 1px; background: var(--shell-line-soft); margin: var(--shell-group) 0 0; }
+
+/* Pages nav — the soft parchment highlight is the ONLY active treatment (no burgundy, ever). */
+.sv2-nav { display: flex; flex-direction: column; gap: 2px; flex: none; }
+.sv2-navbtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--shell-ink);
+  font-size: 13.5px;
+  text-align: left;
+  transition: background 0.16s;
+}
+.sv2-navlbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2-navcnt {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: var(--shell-muted);
+  background: var(--shell-card);
+  border: 1px solid var(--shell-line-soft);
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+.sv2-navbtn:hover { background: rgba(124, 58, 42, 0.05); }
+.sv2-navbtn.on { background: var(--shell-canvas); box-shadow: inset 0 0 0 1px var(--shell-line); }
+.sv2-navbtn.on .sv2-navcnt { color: var(--shell-ink); border-color: var(--shell-line); }
+
+/* Manuscript switcher — the paper deck: two offset paper edges beneath the card. */
+.sv2-msdeck { position: relative; flex: none; margin-top: var(--shell-group); }
+.sv2-msdeck::before,
+.sv2-msdeck::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  border: 1px solid var(--shell-line);
+  border-radius: 11px;
+  background: var(--shell-card);
+  pointer-events: none;
+}
+.sv2-msdeck::before { bottom: -4px; height: 12px; opacity: 0.75; }
+.sv2-msdeck::after { bottom: -7px; left: 11px; right: 11px; height: 12px; opacity: 0.5; }
+.sv2-ms {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  background: var(--shell-card);
+  border: 1px solid var(--shell-line);
+  border-radius: 11px;
+  padding: var(--shell-card-pad);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.sv2-ms:hover { border-color: var(--pink-b); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.05); }
+.sv2-mstile {
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
+  flex: none;
+  background: linear-gradient(160deg, #dce0d9, #d0d6cc); /* sage band pair (canonical gradient) */
+  border: 1px solid rgba(124, 58, 42, 0.22);
+  display: grid;
+  place-items: center;
+  color: var(--sage-d);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  box-shadow: inset 0 0 0 1px rgba(253, 250, 245, 0.5);
+}
+.sv2-mstxt { min-width: 0; flex: 1; display: block; }
+.sv2-mst1 {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sv2-mst2 {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  margin-top: 4px;
+}
+.sv2-mschev { color: var(--shell-muted); flex: none; }
+.sv2-mschev svg { width: 13px; height: 13px; display: block; }
+.sv2-mspop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--shell-card);
+  border: 1px solid var(--shell-line);
+  border-radius: 11px;
+  box-shadow: 0 12px 28px rgba(58, 28, 20, 0.13);
+  padding: 5px;
+}
+.sv2-msrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.sv2-msrow:hover { background: var(--shell-inset); }
+.sv2-msn { font-family: "Playfair Display", Georgia, serif; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2-msc { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--shell-muted); flex: none; text-transform: uppercase; letter-spacing: 0.05em; }
+.sv2-msdiv { height: 1px; background: var(--shell-line-soft); margin: 4px 6px; }
+.sv2-msadd {
+  padding: 8px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--burg);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.sv2-msadd svg { width: 13px; height: 13px; }
+.sv2-msadd:hover { background: var(--shell-inset); }
+
+/* Tasks & reminders — the contents ledger. */
+.sv2-desk {
+  margin-top: var(--shell-group);
+  flex: none;
+  background: var(--shell-card);
+  border: 1px solid var(--shell-line);
+  border-radius: 11px;
+  padding: var(--shell-card-pad);
+}
+.sv2-dh { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--shell-within); }
+.sv2-dt { font-family: "Playfair Display", Georgia, serif; font-size: 14px; color: var(--shell-ink); }
+.sv2-dv {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  color: var(--shell-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sv2-drow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: calc(100% + 12px);
+  padding: 6px 6px;
+  margin: 0 -6px;
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  color: var(--shell-ink);
+  transition: background 0.16s;
+}
+.sv2-drow:hover { background: var(--shell-inset); }
+.sv2-pip { width: 9px; height: 9px; border-radius: 2px; flex: none; box-shadow: inset 0 0 0 1px rgba(46, 39, 35, 0.09); }
+/* Pip colours — baked: urgent blush / housekeeping sage / notes kraft. */
+.sv2-pip-urgent { background: #eabfab; }
+.sv2-pip-housekeeping { background: #b7c5b4; }
+.sv2-pip-notes { background: #dccdbc; }
+.sv2-dn { font-size: 12.5px; }
+.sv2-ldr { flex: 1; border-bottom: 1px dotted #cfc2b4; transform: translateY(-3px); }
+.sv2-dc { font-family: "Playfair Display", Georgia, serif; font-size: 16px; line-height: 1; min-width: 22px; text-align: right; }
+.sv2-emptynote { font-size: 11.5px; line-height: 1.5; color: var(--shell-muted); padding: 6px 0 2px; max-width: 22em; }
+
+/* Actions — 2×2 white tiles with the offset shadow. */
+.sv2-acts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--shell-within); flex: none; }
+.sv2-act {
+  position: relative;
+  background: #fff;
+  border: 1px solid #d9cec2; /* baked action-tile border */
+  border-radius: 9px;
+  padding: var(--shell-card-pad);
+  box-shadow: 2px 2px 0 rgba(46, 39, 35, 0.055); /* baked offset shadow */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--shell-ink);
+  transition: border-color 0.16s, box-shadow 0.16s, transform 0.16s;
+}
+.sv2-act svg { width: 16px; height: 16px; color: var(--burg); }
+.sv2-actlb { font-size: 11.5px; line-height: 1.2; }
+.sv2-act:hover {
+  border-color: var(--pink-b);
+  box-shadow: 3px 3px 0 rgba(124, 58, 42, 0.1);
+  transform: translate(-1px, -1px);
+}
+.sv2-act:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 rgba(124, 58, 42, 0.1); }
+
+.sv2-air { flex: 1; min-height: var(--shell-group); }
+
+/* Pro — one line: slate dot, text, chevron, dismiss on hover. No card, no meter. */
+.sv2-pro {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 6px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--shell-ink-soft);
+  transition: background 0.16s, color 0.16s;
+}
+.sv2-pro:hover { background: rgba(106, 137, 167, 0.09); color: var(--shell-ink); }
+.sv2-prodot { width: 7px; height: 7px; border-radius: 99px; background: var(--slate); flex: none; }
+.sv2-protxt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv2-proarrow { color: var(--shell-muted); flex: none; font-size: 13px; }
+.sv2-prox {
+  opacity: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--shell-muted);
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1;
+  transition: opacity 0.16s;
+  padding: 0;
+}
+.sv2-pro:hover .sv2-prox { opacity: 0.7; }
+
+/* User block — hairline above; Form 11 avatar chip. */
+.sv2-userblk {
+  margin-top: var(--shell-within);
+  flex: none;
+  border-top: 1px solid var(--shell-line);
+  padding-top: var(--shell-card-pad);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sv2-av {
+  width: 34px;
+  height: 34px;
+  border-radius: 99px;
+  flex: none;
+  background: var(--shell-card);
+  border: 1px solid rgba(124, 58, 42, 0.25);
+  display: grid;
+  place-items: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  color: var(--burg);
+}
+.sv2-ub { flex: 1; min-width: 0; display: block; }
+.sv2-un { display: block; font-size: 12.5px; line-height: 1.2; color: var(--shell-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sv2-ur {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  color: var(--shell-muted);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.sv2-iconbtn {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--shell-muted);
+  display: grid;
+  place-items: center;
+  transition: background 0.16s, color 0.16s;
+  flex: none;
+}
+.sv2-iconbtn:hover { background: rgba(124, 58, 42, 0.07); color: var(--burg); }
+.sv2-iconbtn svg { width: 15px; height: 15px; }
+
 @media (prefers-reduced-motion: reduce) {
   .sv2-side,
   .sv2-railbtn,
-  .sv2-tuck {
+  .sv2-tuck,
+  .sv2-navbtn,
+  .sv2-ms,
+  .sv2-drow,
+  .sv2-act,
+  .sv2-pro,
+  .sv2-iconbtn {
     transition: none;
   }
 }

@@ -21,6 +21,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
+import { ShellSidebarBody } from "./ShellSidebar";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -190,7 +191,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           mounted below while the per-page header strips that trigger it are retired page by
           page in the later rollout phases. */}
       <ShellRail onNavigatePath={goPath} />
-      <ShellSide tucked={sideTucked} onToggleTuck={() => setTuck((v) => !v)} />
+      <ShellSide tucked={sideTucked} onToggleTuck={() => setTuck((v) => !v)}>
+        <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} />
+      </ShellSide>
       <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}
         <div className="md:hidden" style={{ flexShrink: 0 }}>

@@ -596,6 +596,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     window.addEventListener("sa:todo-replay-tour", onReplay);
     return () => window.removeEventListener("sa:todo-replay-tour", onReplay);
   }, []);
+  // The v2 shell sidebar's Task-settings button opens the sheet from outside the page — the
+  // same window-event pattern as the tour replay (the page stays mounted behind other routes).
+  useEffect(() => {
+    const onOpen = () => setSettingsOpen(true);
+    window.addEventListener("sa:open-task-settings", onOpen);
+    return () => window.removeEventListener("sa:open-task-settings", onOpen);
+  }, []);
   const endTour = () => {
     setTourOpen(false);
     if (!currentUser?.tourSeenAt) void updateUserProfile({ tourSeenAt: new Date().toISOString() });
