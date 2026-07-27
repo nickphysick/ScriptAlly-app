@@ -173,6 +173,7 @@ export const ShellSidebarBody: React.FC<{
 
       <div className="sv2-half" />
 
+      <div className="sv2-slab">Working on</div>
       {/* ── Manuscript row — bare (no card) ── */}
       {activeMs ? (
         <div className="sv2-mswrap" ref={deckRef}>
@@ -232,6 +233,9 @@ export const ShellSidebarBody: React.FC<{
         ))}
       </div>
 
+      {/* "Quick actions" names the GROUP; the caption below still names each tile — without
+          it the four icons are unlabelled again (baked: the caption stays). */}
+      <div className="sv2-slab">Quick actions</div>
       {/* ── Action strip — the existing capture contracts; blue is reserved for Pro ── */}
       <div className="sv2-strip4">
         <button type="button" className="sv2-gt sv2-gt1" title="Log query" aria-label="Log query" onClick={() => invokeCapture("query", onNavigate)}>

@@ -94,6 +94,36 @@ The attempt is recorded in `reports/one-sidebar.md` (with its own reverted banne
 reverted commit `5ee7fd7`; its mockup was `scriptally-sidebar-final.html`, removed with the
 revert. The sections below are the LIVE two-capsule design.
 
+## Shared sidebar rhythm (sidebar-refinements — ref `scriptally-sidebar-refined.html`)
+
+The rail and the panel are two capsules but ONE vertical rhythm. Three values are defined once,
+beside the other `--shell-*` tokens in `index.css`, and **both** components read them — if either
+carried its own numbers they would drift the first time one was touched.
+
+| Token | Value | Read by |
+|---|---|---|
+| `--shell-head-h` | `56px` | the panel masthead AND the rail head block |
+| `--shell-row-h` | `44px` | the panel nav row's height AND the rail rib's `40px + calc(row − 40)` gap |
+| `--shell-pad-t` | `14px` | both capsules' top padding |
+| `--shell-kid-h` | `37px` | the accordion child pitch — **the panel alone** |
+| `--shell-quiet` | `#b3a598` | the group headings' ink (a role-named tertiary label colour) |
+
+Within a 44px row the icon sits in a **40px hit area**, vertically centred, in both components.
+
+**Alignment holds only with the accordion CLOSED — that is the only state it needs to hold in.**
+When a section expands the panel rows shift down and **the rail stays fixed**: no tracking, no
+spacers, no sympathetic animation. Lock-tested.
+
+**Brand mark:** the masthead block is 56px starting 14px from the top, and the mark is the real
+brand image at ~27px, height-constrained with its aspect preserved. The rail's plane glyph grows
+to match and sits in the same 56px block, so the two read as one line across both capsules.
+
+**Group headings** in the panel's lower half: **"Working on"** above the manuscript row and the
+task pills, **"Quick actions"** above the four action tiles — mono 7.5px `.17em` uppercase in
+`--shell-quiet`, a step lighter than `--shell-muted` so they group without competing. The
+"Log · Respond · Agent · Manuscript" caption beneath the tiles **stays**: the heading names the
+group, the caption still names each tile.
+
 ## Rail capsule
 
 70px, capsule surface. Burgundy brand glyph top (24px), then section icons — Dashboard,

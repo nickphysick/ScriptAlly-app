@@ -61,6 +61,15 @@
   --shell-inset: #efe8df;             /* THE interior fill — search fields, chips, pills, hover states */
   --shell-line: #e3d9cf;              /* interior hairline */
   --shell-line-soft: #ece3da;         /* soft interior hairline (top-bar base, partitions) */
+  /* SHARED SIDEBAR RHYTHM (sidebar-refinements) — the RAIL and the PANEL must read the SAME
+     numbers or they drift apart the first time either is touched. Alignment is required only
+     with the accordion CLOSED; when a section expands the panel rows shift and the rail stays
+     fixed, deliberately. --shell-kid-h belongs to the panel alone. */
+  --shell-head-h: 56px;               /* masthead / rail head block */
+  --shell-row-h: 44px;                /* nav row pitch — BOTH components */
+  --shell-kid-h: 37px;                /* accordion child pitch — the panel alone */
+  --shell-pad-t: 14px;                /* top padding — BOTH components */
+  --shell-quiet: #b3a598;             /* quiet/tertiary label ink — the group headings */
   --shell-cap-radius: 20px;           /* capsule corner */
   --shell-cap-gap: 14px;              /* capsule gap AND page padding */
   --shell-cap-shadow: 0 10px 30px rgba(58,28,20,.09); /* the float */

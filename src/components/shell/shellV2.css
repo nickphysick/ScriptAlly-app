@@ -26,16 +26,20 @@
     width: 70px;
     flex: none;
     background: var(--shell-rail);
-    padding: 20px 0;
+    padding: var(--shell-pad-t) 0 20px;
     overflow: hidden;
   }
 }
-.sv2-mark { width: 24px; height: 24px; color: var(--burg); margin-bottom: 24px; flex: none; }
+/* The rail's head BLOCK — the same 56px at the same 14px top as the panel's masthead, so the
+   two brand marks read as one line across both capsules. */
+.sv2-railhead { height: var(--shell-head-h); display: grid; place-items: center; flex: none; }
+.sv2-mark { width: 27px; height: 27px; color: var(--burg); flex: none; }
 .sv2-railnav { display: flex; flex-direction: column; align-items: center; }
 /* Ribs — icon-only squares; tooltips carry the names (no captions in this idiom). */
 .sv2-rib {
-  width: 42px;
-  height: 42px;
+  /* 40px hit area inside the 44px row pitch — the shared rhythm, in both components. */
+  width: 40px;
+  height: 40px;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -43,7 +47,7 @@
   display: grid;
   place-items: center;
   color: #a89a8a; /* resting rib ink (mockup literal) */
-  margin-bottom: 8px;
+  margin-bottom: calc(var(--shell-row-h) - 40px);
   transition: background 0.16s, color 0.16s;
 }
 .sv2-rib svg { width: 18px; height: 18px; }
@@ -180,12 +184,13 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 24px 18px 18px;
+  padding: var(--shell-pad-t) 18px 18px;
   overflow-y: auto;
 }
 
 /* The brand row — the artwork centred, the tuck toggle vertically centred on it, top-right. */
-.sv2-wmrow { position: relative; flex: none; margin: 0 0 26px; }
+/* The masthead BLOCK — 56px, matching the rail's head block exactly (shared token). */
+.sv2-wmrow { position: relative; flex: none; height: var(--shell-head-h); display: flex; align-items: center; margin: 0; }
 .sv2-wm { display: flex; justify-content: center; flex: none; }
 .sv2-tuck {
   position: absolute;
@@ -213,7 +218,8 @@
   align-items: center;
   gap: 13px;
   width: 100%;
-  padding: 13px 14px;
+  height: var(--shell-row-h); /* the shared nav row pitch */
+  padding: 0 14px;
   border: 0;
   background: transparent;
   border-radius: 14px;
@@ -242,7 +248,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 14px 9px 44px; /* the 44px indent — NO vertical hairline beside children (baked) */
+  height: var(--shell-kid-h); /* the child pitch — the PANEL alone (the rail has no children) */
+  padding: 0 14px 0 44px; /* the 44px indent — NO vertical hairline beside children (baked) */
   border: 0;
   background: transparent;
   border-radius: 12px;
@@ -258,6 +265,9 @@
 .sv2-aklbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sv2-akct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 
+/* GROUP HEADINGS (sidebar-refinements) — two quiet mono labels grouping the panel's lower
+   half. A step lighter than --shell-muted so they group without competing with the rows. */
+.sv2-slab { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--shell-quiet); padding: 0 5px 9px; flex: none; }
 .sv2-half { flex: 1; min-height: 28px; }
 
 /* ── manuscript row — bare (no card, no deck edges) ── */

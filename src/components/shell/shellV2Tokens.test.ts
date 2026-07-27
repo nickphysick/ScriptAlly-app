@@ -23,6 +23,11 @@ const BAKED: Record<string, string> = {
   "--shell-inset": "#efe8df",
   "--shell-line": "#e3d9cf",
   "--shell-line-soft": "#ece3da",
+  "--shell-head-h": "56px",
+  "--shell-row-h": "44px",
+  "--shell-kid-h": "37px",
+  "--shell-pad-t": "14px",
+  "--shell-quiet": "#b3a598",
   "--shell-cap-radius": "20px",
   "--shell-cap-gap": "14px",
   "--shell-cap-shadow": "0 10px 30px rgba(58,28,20,.09)",
@@ -138,5 +143,81 @@ describe("the ground gutter — equal on both edges", () => {
     expect(drawer).toContain("bottom: var(--shell-cap-gap)");
     expect(drawer).toContain("right: var(--shell-cap-gap)");
     expect(drawer).toContain("translateX(calc(102% + var(--shell-cap-gap)))"); // the closed park clears it
+  });
+});
+
+/**
+ * The SHARED SIDEBAR RHYTHM (sidebar-refinements). The point of these tokens is that the rail
+ * and the panel cannot drift: both must READ them rather than carry their own numbers. jsdom
+ * cannot measure alignment, so this locks the referencing — the visual result is a browser check.
+ */
+describe("the shared sidebar rhythm — rail and panel read the SAME tokens", () => {
+  const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+  const rule = (sel: string): string => {
+    const m = shellCss.match(new RegExp("(?:^|\\n)\\s*" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+    if (!m) throw new Error(`rule not found: ${sel}`);
+    return m[1];
+  };
+
+  it("TOP PADDING is one token, referenced by BOTH capsules", () => {
+    // (.sv2-rail has two rules — the mobile display:none and the desktop block; assert the file)
+    expect(shellCss).toContain("padding: var(--shell-pad-t) 0 20px");
+    expect(rule(".sv2-side-inner")).toContain("padding: var(--shell-pad-t) 18px 18px");
+  });
+
+  it("the HEAD BLOCK is one token, referenced by BOTH capsules — the two brand marks share a line", () => {
+    expect(rule(".sv2-railhead")).toContain("height: var(--shell-head-h)");
+    expect(rule(".sv2-wmrow")).toContain("height: var(--shell-head-h)");
+  });
+
+  it("the NAV ROW PITCH is one token: the panel row IS 44px, and the rail's 40px rib + its gap make 44", () => {
+    expect(rule(".sv2-asec")).toContain("height: var(--shell-row-h)");
+    const rib = rule(".sv2-rib");
+    expect(rib).toContain("width: 40px"); // the 40px hit area inside the 44px pitch
+    expect(rib).toContain("height: 40px");
+    expect(rib).toContain("margin-bottom: calc(var(--shell-row-h) - 40px)"); // derived, never a literal 4px
+  });
+
+  it("the CHILD pitch belongs to the panel alone — the rail has no children to pitch", () => {
+    expect(rule(".sv2-akid")).toContain("height: var(--shell-kid-h)");
+    expect(shellCss).not.toMatch(/\.sv2-rail[^{]*\{[^}]*--shell-kid-h/s);
+  });
+
+  it("NEITHER component keeps a hard-coded twin of a shared value", () => {
+    for (const sel of [".sv2-rail", ".sv2-side-inner", ".sv2-asec", ".sv2-railhead", ".sv2-wmrow"]) {
+      const r = rule(sel);
+      expect(r, `${sel} literal 56`).not.toMatch(/height: 56px/);
+      expect(r, `${sel} literal 44`).not.toMatch(/height: 44px/);
+      expect(r, `${sel} literal 14 pad`).not.toMatch(/padding: 14px/);
+      expect(r, `${sel} literal 20 pad-top`).not.toMatch(/padding: 20px 0;/);
+    }
+  });
+
+  it("the RAIL does not respond to accordion state — alignment holds with the accordion CLOSED only", () => {
+    // no rule pairs the rail with an open section, and no spacer tracks the accordion
+    expect(shellCss).not.toMatch(/\.sv2-rail[^{\n]*(open|akids)/);
+    const rail = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+    const railFn = rail.slice(rail.indexOf("export const ShellRail"), rail.indexOf("export const ShellSide"));
+    expect(railFn).not.toContain("openSection === "); // it receives the value for railClickPlan only
+    expect(railFn).not.toContain("sv2-railspacer-");
+  });
+
+  it("the GROUP HEADINGS: two quiet mono labels, and the tile caption SURVIVES", () => {
+    const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
+    expect(body).toContain('<div className="sv2-slab">Working on</div>');
+    expect(body).toContain('<div className="sv2-slab">Quick actions</div>');
+    expect(body).toContain("Log · Respond · Agent · Manuscript"); // the caption stays (baked)
+    const slab = rule(".sv2-slab");
+    expect(slab).toContain("font-size: 7.5px");
+    expect(slab).toContain("letter-spacing: 0.17em");
+    expect(slab).toContain("text-transform: uppercase");
+    expect(slab).toContain("color: var(--shell-quiet)"); // the role-named token, not a one-off hex
+    expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
+  });
+
+  it("the brand mark is height-constrained at the larger size, aspect preserved", () => {
+    const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+    expect(v2).toContain("<ScriptAllyLogo heightPx={27} />"); // ~27px, up from 30px box/~20px cap
+    expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail glyph grows to match
   });
 });

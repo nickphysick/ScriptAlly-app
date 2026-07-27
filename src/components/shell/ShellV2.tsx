@@ -214,7 +214,7 @@ export const ShellRail: React.FC<{
 
   return (
     <nav className="sv2-rail sv2-cap" aria-label="Sections">
-      <Mark />
+      <div className="sv2-railhead"><Mark /></div>
       {/* (The dedicated expand control is RETIRED — rail-section-select pack P2. Expansion
           comes from any section icon, the Dashboard icon when already on Dashboard, and ⌘\;
           the flyout footer advertises it, and the panel's tuck control keeps collapse
@@ -306,7 +306,7 @@ export const ShellSide: React.FC<{
           The tuck toggle sits top-right, vertically centred on the mark (fixes pack). */}
       <div className="sv2-wmrow">
         <div className="sv2-wm">
-          <ScriptAllyLogo heightPx={30} />
+          <ScriptAllyLogo heightPx={27} />
         </div>
         <button
           type="button"
