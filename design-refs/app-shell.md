@@ -10,7 +10,11 @@ retired.
 nav active = the GROUND token, pink retired from nav states; the panel COLLAPSES (the rail is
 its collapsed state, ⌘\, persisted); 26px desk-group rhythm; the save-state chip removed; ONE
 shell for the whole signed-in app (FocusShell retired — /account, /plans and /help render in
-the capsule).
+the capsule). **Flyouts pack (27 Jul, later):** the collapsed rail carries quick-nav FLYOUTS
+(supersedes "rail only"); the panel AUTO-COLLAPSES on every navigation (expansion is manual,
+until the next navigation); `PageHeader` ends with ONE variant — full — on every routed page
+except the dashboard, which returned to its ORIGINAL centred greeting header (compact and
+greeting variants deleted).
 
 ## The design in one paragraph
 

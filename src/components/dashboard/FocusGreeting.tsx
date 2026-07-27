@@ -14,7 +14,6 @@ import { chipText, longDate, salutation, weekOfQuerying } from "../../lib/dashbo
 import { Query } from "../../types";
 import { FocusKey, FocusSlot } from "./focusSlot";
 import { StatDef, StatFocusPanel, StatMini } from "./DashboardStatsRow";
-import { PageHeader } from "../shell/PageHeader";
 
 const CTA_ICONS = {
   send: <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" aria-hidden="true"><path d="M21 3L10 14" /><path d="M21 3l-7 18-4-7-7-4 18-7z" /></svg>,
@@ -83,20 +82,21 @@ export const FocusGreeting: React.FC<FocusGreetingProps> = ({
 
   return (
     <div className={`sa-greet${split ? " split" : ""}`}>
-      {/* Shell follow-up Phase 2: the greeting HEADER stays (kicker · salutation · two actions
-          · rule); everything below the rule is the pre-rollout body — centred chip, the four
-          CTAs, minis, the locked focus-slot mechanics. Which two of the four CTAs survive is
-          Nick's open call; until then the header pair and the CTA row coexist. */}
+      {/* Flyouts pack Phase 4: the ORIGINAL centred greeting header returns (recovered from
+          f38168d, the commit before the greeting-variant adoption) — mono eyebrow (date · the
+          account-level weekOfQuerying) over the plain Playfair salutation, centred with the
+          chip and the four CTAs beneath, on the capsule surface. The PageHeader greeting
+          variant is retired with it; the four-CTA row is once again the page's only action
+          surface (the header-pair duplication resolves itself). */}
       <div className="sa-greet-main">
-        <PageHeader
-          variant="greeting"
-          kicker={`${longDate(now)} · ${weekOfQuerying(queries, now)} of querying`}
-          title={`${salutation(now)}, ${firstName}`}
-          actions={[
-            { label: "Record a response", icon: CTA_ICONS.record, onClick: onRecordResponse },
-            { label: "Send query", icon: CTA_ICONS.send, onClick: onSendQuery, primary: true },
-          ]}
-        />
+        <div className="sa-greet-eyebrow">
+          <span>{longDate(now)}</span>
+          <span>·</span>
+          <span>{weekOfQuerying(queries, now)} of querying</span>
+        </div>
+        <h1 className="sa-greet-hi">
+          {salutation(now)}, <em>{firstName}</em>
+        </h1>
         <div>
           <button
             ref={chipRef}

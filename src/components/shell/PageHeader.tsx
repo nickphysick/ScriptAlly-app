@@ -7,10 +7,9 @@
  * actions bottom-right on the description's baseline → a hairline rule closing the header.
  * Everything below the rule is page content.
  *
- * Variants (the flyouts pack retired compact — one header grammar app-wide):
- *   full     — every routed page: 40px Playfair title, description shown.
- *   greeting — dashboard only: mono date kicker ABOVE the title, description omitted. Same
- *              skeleton, same actions, same rule.
+ * ONE variant (the flyouts pack retired compact AND greeting — the dashboard returned to its
+ * original centred header): full — 40px Playfair title, optional Playfair description, up to
+ * two actions, the closing rule. Every routed page except the dashboard renders it.
  *
  * Actions: maximum two, enforced in the type (a tuple union) AND with a runtime slice for
  * un-typed call sites. Secondary = parchment + hairline; primary = the Form 11 soft-pink
@@ -31,25 +30,22 @@ export interface PageHeaderAction {
 export type PageHeaderActions = [] | [PageHeaderAction] | [PageHeaderAction, PageHeaderAction];
 
 export interface PageHeaderProps {
-  variant: "full" | "greeting";
+  /** One variant remains; the prop survives (optional) so existing `variant="full"` call
+   *  sites stand unchanged. */
+  variant?: "full";
   title: string;
-  /** Rendered on the full variant only (greeting omits it by design). */
   description?: string;
-  /** The mono line above the title — the greeting variant's date line. */
-  kicker?: string;
   actions?: PageHeaderActions;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({ variant, title, description, kicker, actions }) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({ title, description, actions }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
-  const showDescription = variant === "full" && !!description;
   return (
-    <header className={`svh svh--${variant}`}>
+    <header className="svh svh--full">
       <div className="svh-top">
         <div className="svh-txt">
-          {kicker && <div className="svh-kicker">{kicker}</div>}
           <h1 className="svh-title">{title}</h1>
-          {showDescription && <div className="svh-sub">{description}</div>}
+          {description && <div className="svh-sub">{description}</div>}
         </div>
         {acts.length > 0 && (
           <div className="svh-acts">

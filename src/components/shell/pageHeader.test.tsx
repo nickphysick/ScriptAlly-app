@@ -37,21 +37,14 @@ describe("PageHeader — the compact variant is retired (flyouts pack P3)", () =
   });
 });
 
-describe("PageHeader — greeting", () => {
-  const html = renderToStaticMarkup(
-    <PageHeader
-      variant="greeting"
-      title="Good morning, Nick"
-      kicker="Sunday 27 July · Week nine of querying"
-      description="should never show"
-      actions={two}
-    />
-  );
-  it("renders the kicker above the title, omits the description, keeps the rule", () => {
-    expect(html).toContain("svh--greeting");
-    expect(html.indexOf("Week nine")).toBeLessThan(html.indexOf("Good morning, Nick"));
-    expect(html).not.toContain("should never show");
-    expect(html).toContain("svh-rule");
+describe("PageHeader — the greeting variant is retired (flyouts pack P4)", () => {
+  it("the type union carries no greeting member and no kicker prop survives", () => {
+    // @ts-expect-error — "greeting" must not typecheck
+    const rejected: React.ComponentProps<typeof PageHeader>["variant"] = "greeting";
+    expect(rejected).toBe("greeting"); // runtime string; the line above is the real assertion
+    // @ts-expect-error — the kicker prop left with the variant
+    const props: React.ComponentProps<typeof PageHeader> = { title: "T", kicker: "K" };
+    expect(props.title).toBe("T");
   });
 });
 

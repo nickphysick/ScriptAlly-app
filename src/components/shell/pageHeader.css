@@ -11,14 +11,6 @@
   flex-wrap: wrap;
 }
 .svh-txt { min-width: 0; }
-.svh-kicker {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--shell-muted);
-  margin-bottom: 10px;
-}
 .svh-title {
   font-family: "Playfair Display", Georgia, serif;
   font-size: 40px;
