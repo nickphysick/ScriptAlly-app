@@ -47,6 +47,12 @@
 .svh-btn-primary { background: var(--pink); border-color: var(--pink-b); color: var(--burg); }
 .svh-btn-primary svg { color: var(--burg); }
 .svh-btn-primary:hover { background: var(--pink-h); }
+/* THE HOUSE DISABLED TREATMENT (todo rebuild P4): paper fill, hairline border, faint text, no
+   shadow, cursor:not-allowed. Never dashed, never opacity-only — an inert control still reads
+   as a control. Wins over both variants' own fills. */
+.svh-btn:disabled,
+.svh-btn:disabled:hover { background: var(--shell-card); border-color: var(--shell-line-soft); color: #bcb0a3; box-shadow: none; cursor: not-allowed; }
+.svh-btn:disabled svg { color: #cfc4b7; }
 /* The rule that closes every header — everything below it is page content. */
 .svh-rule { height: 1px; background: var(--shell-line-soft); margin-top: 22px; }
 

@@ -42,6 +42,7 @@ import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { ProSticker, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
+import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
@@ -777,7 +778,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             viewport. The title sits flush with the panel's left edge, the CTA/review pair flush
             with its right — one column, one pair of edges. A ≥44px gap sits under the bar. */}
         <div className="tdb-col">
-        {renderHero()}
+        {renderPageHeader()}
         <div className="tdb-asm tdb-ws">
           {/* THE WORKSPACE SHELL (todo-fix48) — the filters live in the sidebar now; the body
               is the centre stack (the panel arrives in Phase 2) beside the Today corner. */}
@@ -1030,6 +1031,40 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // date, no counts, no census squares (the counts live on the rail's pills; focus-art.png is
   // reserved for the focused session's opening screen, not this page). The search pill is the
   // ⌘K home and live-filters both views; the narrow Today chip rides beside it. ──
+  /** THE PAGE HEADER (todo rebuild P4) — the app-wide `PageHeader`, full variant, with exactly
+   *  two actions: "Last week in review" (ghost; the house disabled treatment when no review
+   *  exists) and "Add task or note" (the soft-pink primary).
+   *
+   *  ⚠️ RED GATE, REPORTED: "Begin focused session" is retired here, and it was the ONLY thing
+   *  that ever called setSession — so `FocusedSession` (and the hero's title crossfade, ritual
+   *  lines and progress slot, which it drove through setHeroSession) is now UNREACHABLE from
+   *  the UI. Per the pack, nothing further is deleted: `session`, `heroSession`, `HeroSession`,
+   *  `FocusedSession`, `renderHero` below and all their CSS stay in place, dormant, awaiting a
+   *  new entry point. */
+  function renderPageHeader() {
+    return (
+      <PageHeader
+        title="What’s on your desk?"
+        description="Urgent tasks, housekeeping, notes. Here’s everything on your to-do list."
+        actions={[
+          {
+            label: "Last week in review",
+            onClick: openReview,
+            disabled: !reviewWin,
+            icon: <RewindGlyph />,
+          },
+          {
+            label: "Add task or note",
+            onClick: addTask,
+            primary: true,
+            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>,
+          },
+        ]}
+      />
+    );
+  }
+  /** DORMANT (todo rebuild P4): the bespoke hero — the focused session's title crossfade,
+   *  ritual lines and progress slot. Kept whole rather than deleted; see the red gate above. */
   function renderHero() {
     return (
       // THE WORKSPACE SHELL (todo-fix48) — the hero, plain on the page: the title + subtitle

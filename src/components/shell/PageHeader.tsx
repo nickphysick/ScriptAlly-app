@@ -24,6 +24,9 @@ export interface PageHeaderAction {
   icon?: React.ReactNode;
   /** The Form 11 soft-pink primary. At most one per header, rendered where given (rightmost by convention). */
   primary?: boolean;
+  /** The HOUSE disabled treatment (todo rebuild P4): paper fill, hairline border, faint text,
+   *  no shadow, cursor:not-allowed — never dashed, never opacity-only. */
+  disabled?: boolean;
 }
 
 /** Max two actions — the tuple union makes a third a type error. */
@@ -55,6 +58,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, description, acti
                 type="button"
                 className={action.primary ? "svh-btn svh-btn-primary" : "svh-btn svh-btn-ghost"}
                 onClick={action.onClick}
+                disabled={action.disabled}
               >
                 {action.icon}
                 {action.label}

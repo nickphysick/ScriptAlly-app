@@ -23,7 +23,7 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
   it("the hero AND the panel live on ONE centred max-width column", () => {
     // the JSX wraps both in .tdb-col
     const col = page.indexOf('<div className="tdb-col">');
-    const hero = page.indexOf("{renderHero()}");
+    const hero = page.indexOf("{renderPageHeader()}"); // todo rebuild P4: the app-wide header
     const ws = page.indexOf('className="tdb-asm tdb-ws"');
     expect(col).toBeGreaterThan(0);
     expect(hero).toBeGreaterThan(col);

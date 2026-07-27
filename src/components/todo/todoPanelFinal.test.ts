@@ -124,3 +124,41 @@ describe("the blue Pro sticker — relocated to the page body (shell follow-up P
     expect(shell(".spine-pro-link")).toContain("color: var(--spine-pro-link)"); // the slate link
   });
 });
+
+describe("the To-do PAGE HEADER — exactly two actions (todo rebuild P4)", () => {
+  const hdr = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+
+  it("adopts the app-wide PageHeader (full) with the page's title + description", () => {
+    expect(page).toContain('import { PageHeader } from "../shell/PageHeader"');
+    expect(page).toContain("{renderPageHeader()}");
+    expect(hdr).toContain("<PageHeader");
+    expect(hdr).toContain("title=\"What\u2019s on your desk?\"");
+    expect(hdr).toContain("Urgent tasks, housekeeping, notes.");
+  });
+
+  it("exactly two: 'Last week in review' (ghost, disabled with no review) and 'Add task or note' (pink primary)", () => {
+    expect((hdr.match(/label:/g) ?? []).length).toBe(2);
+    expect(hdr).toContain('label: "Last week in review"');
+    expect(hdr).toContain("disabled: !reviewWin"); // the house disabled treatment when none exists
+    expect(hdr).not.toMatch(/label: "Last week in review",[\s\S]{0,120}primary: true/); // it is the ghost
+    expect(hdr).toContain('label: "Add task or note"');
+    expect(hdr).toContain("onClick: addTask");
+    expect(hdr).toContain("primary: true");
+  });
+
+  it("BEGIN FOCUSED SESSION is retired from the header — and NOTHING further was deleted (red gate)", () => {
+    expect(hdr).not.toContain("Begin focused session");
+    expect(hdr).not.toContain("tdb-herobegin");
+    // the feature itself is untouched, dormant: its state, its component and the hero that
+    // hosted its crossfade all survive, awaiting a new entry point.
+    expect(page).toContain("const [session, setSession] = useState");
+    expect(page).toContain("<FocusedSession");
+    expect(page).toContain("function renderHero()");
+    expect(page).toContain("Begin focused session"); // still present in the dormant hero
+  });
+
+  it("NO DARK PILL survives in the page's own CTAs: the header's primary is the soft-pink", () => {
+    const ph = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
+    expect(ph).toContain(".svh-btn-primary { background: var(--pink)");
+  });
+});

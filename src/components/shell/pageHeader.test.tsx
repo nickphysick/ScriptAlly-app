@@ -6,6 +6,8 @@
  * jsdom limits noted in the pack).
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { PageHeader, PageHeaderAction, PageHeaderActions } from "./PageHeader";
@@ -65,6 +67,22 @@ describe("PageHeader — the two-action maximum", () => {
     const html = renderToStaticMarkup(<PageHeader variant="full" title="Help centre" />);
     expect(html).not.toContain("svh-acts");
     expect(html).toContain("svh-rule");
+  });
+
+  it("the HOUSE DISABLED treatment (todo rebuild P4): a real disabled button, never opacity-only, never dashed", () => {
+    const html = renderToStaticMarkup(
+      <PageHeader variant="full" title="What’s on your desk?" actions={[{ label: "Last week in review", onClick: () => {}, disabled: true }]} />,
+    );
+    expect(html).toContain("disabled"); // the attribute, so it is inert to click AND to Enter
+    const css = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
+    const rule = css.match(/\.svh-btn:disabled,\n\.svh-btn:disabled:hover \{([^}]*)\}/)?.[1] ?? "";
+    expect(rule).toContain("background: var(--shell-card)"); // paper fill
+    expect(rule).toContain("border-color: var(--shell-line-soft)"); // hairline border
+    expect(rule).toContain("color: #bcb0a3"); // faint text
+    expect(rule).toContain("box-shadow: none");
+    expect(rule).toContain("cursor: not-allowed");
+    expect(rule).not.toContain("opacity"); // never opacity-only
+    expect(rule).not.toContain("dashed"); // never dashed
   });
 
   it("type-level: a PageHeaderAction[] of three does not satisfy PageHeaderActions", () => {
