@@ -93,7 +93,10 @@ route, including /todo where the top bar's ⌘K stands down). Collapsed = the pa
 the container's `sv2-collapsed` class (CSS width/opacity/margin transition — the negative
 margin swallows the capsule gap so the content plane widens by 288 + 14px). Persisted in
 `localStorage["sa.shellSideTucked"]` (the sa. UI-pref convention; the flat shell's key,
-reused). Works identically on every routed page — no opt-outs.
+reused). Works identically on every routed page — no opt-outs. **Auto-collapse (flyouts pack,
+baked option a): every route navigation returns the panel to the rail; expansion is manual and
+lasts until the next navigation** (observed on the full pathname; query-param changes such as
+`?q=` deep-selection do not collapse).
 
 **Rail flyouts (flyouts pack — supersedes "no hover flyout, no mini-panel"; ref
 `scriptally-rail-flyouts.html`):** while collapsed, hovering (or focusing) a section rib opens

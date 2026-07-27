@@ -18,7 +18,7 @@
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { ShellSidebarBody } from "./ShellSidebar";
@@ -172,6 +172,19 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     },
     [navigate, setSearchQuery]
   );
+
+  // Auto-collapse on navigation (flyouts pack, baked option a): EVERY route change returns the
+  // panel to the rail; expansion is manual (⌘\ / the expand control) and lasts until the next
+  // navigation. Observed on the full pathname — routeKey alone would miss sibling moves like
+  // /agents ↔ /agents/discover. The persisted key still tracks within-page toggling, but the
+  // collapse-on-navigate wins on route change. First render is exempt (nothing was navigated).
+  const { pathname } = useLocation();
+  const firstPath = useRef(true);
+  useEffect(() => {
+    if (firstPath.current) { firstPath.current = false; return; }
+    setPanelCollapsed(true);
+    try { localStorage.setItem("sa.shellSideTucked", "1"); } catch { /* private mode */ }
+  }, [pathname]);
 
   return (
     <div
