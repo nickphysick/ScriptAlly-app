@@ -1,68 +1,82 @@
-# App shell v2 — design reference
+# App shell — CAPSULE system (design reference)
 
-Written against the **supplied** mockup `design-refs/scriptally-shell-v2.html` (Nick's file, copied into this directory with Phase 1 of the rollout) plus the rollout pack's baked decisions — **not** spec-derived. Where the two differ, the pack's table wins (noted inline).
+Written against the **supplied** mockup `design-refs/scriptally-capsule-shell.html` (Nick's file,
+copied in with capsule Phase 1) — mockup-derived, not spec-derived. **Supersedes the flat v2
+scheme below-documented in git history** (`scriptally-shell-v2.html` + scheme 1 "Raised light"):
+the dark rail, the tab tongue, the masthead rule/kicker and the canvas-lightness law are all
+retired.
 
-## Surface tokens
+## The design in one paragraph
 
-One source pair, locked in step by `shellV2Tokens.test.ts`: CSS custom properties on `:root` in `index.css` (`--shell-*`) + JS twins in `designTokens.ts` (`shell*`). Named by role, never by colour.
+Three rounded capsules — icon rail, nav panel, content plane — float on a shared warm ground
+with a faint paper grain showing through 14px gutters. Depth is expressed by geometry (white
+paper on darker ground), not by tone steps between chrome surfaces. Inside the capsules, chrome
+controls are **fill-based** — cream fills, no hairline-bordered pills. Ink-bordered content
+cards (To-do post-its, Hub cards) are objects *on* the paper and keep their borders.
+
+## Tokens
+
+One source pair, locked in step by `shellV2Tokens.test.ts`: CSS custom properties on `:root` in
+`index.css` (`--shell-*`) + JS twins in `designTokens.ts` (`shell*`).
 
 | Role | Token | Value |
 |---|---|---|
-| Icon rail | `--shell-rail` | `#2e2622` *(pack table wins; mockup had `#2b2622`)* |
-| Sidebar | `--shell-side` | `#f1ebe4` + paper grain (the canonical `PAGE_GRAIN`, inline — the Tailwind v4 CSS parser rejects data-URIs in .css) |
-| Top bar | `--shell-topbar` | `#faf6f2` (=== canvas, by design) |
-| Content canvas | `--shell-canvas` | `#faf6f2` |
-| Card | `--shell-card` | `#fdfaf5` (=== parchment) |
-| Line | `--shell-line` | `#e3d9cf` |
-| Line, soft | `--shell-line-soft` | `#ece3da` |
-| Sidebar right edge | `--shell-side-edge` | `rgba(124,58,42,.14)`, drawn 1px solid |
-| Chrome ink | `--shell-ink` | `#2e2723` *(mockup-derived; the pack's table covers surfaces only)* |
-| Chrome ink, soft | `--shell-ink-soft` | `#6a615a` |
-| Chrome muted | `--shell-muted` | `#9c8878` |
-| Recessed fill | `--shell-inset` | `#f2ede7` (save-state chip, hover washes) |
+| Ground (behind all three capsules) | `--shell-ground` | `#e7e0d5` + the paper-grain SVG at ~.03 |
+| Capsule surface (rail, panel, plane, bar) | `--shell-rail/-side/-topbar/-canvas` | `#fdfbf8` — one surface, locked equal |
+| Interior fill (search, chips, pills, hovers) | `--shell-inset` (and `--shell-panel`, folded in) | `#f2ede7` |
+| Card | `--shell-card` | `#fdfaf5` |
+| Line / line-soft (interior hairlines only) | `--shell-line` / `--shell-line-soft` | `#e3d9cf` / `#ece3da` |
+| Capsule radius / gap+page padding / shadow | `--shell-cap-radius/-gap/-shadow` | `20px` / `14px` / `0 10px 30px rgba(58,28,20,.09)` |
 
-## Spacing scale (sidebar)
+**The depth law (lock-tested):** ground darker than capsule surface; the four chrome surfaces
+are one colour; the interior fill sits between them. No page sets its own background — content
+inherits the content capsule.
 
-Panel width **288px** · rail **74px** · gutter **16** (`--shell-gutter`) · between groups **24** (`--shell-group`) · within a group **8** (`--shell-within`) · card padding **12** (`--shell-card-pad`).
+## Rail capsule
 
-## Rail
+70px, capsule surface. Burgundy brand glyph top (24px), then section icons — Dashboard,
+Querying, Agents, Shelf — 42px ribs, 13px radius; active `#f5e2da` fill + burgundy icon; hover
+interior fill; `title` tooltips, **no captions, no tab tongue**. Spacer, then Setup, then the
+avatar chip at the bottom.
 
-74px, icons **with** mono captions (7.5px, `.09em`, uppercase): Desk / Queries / Agents / Shelf + Setup pinned bottom. Active = the **tab tongue**: `margin-right:-8px`, `border-radius:10px 0 0 10px`, background = sidebar colour — rail and panel read as one folder. Nav model in `shellV2Nav.ts` (unit-locked): **To-do and Packages file under Querying** (product grammar, not URL shape); Comps and Import stay on the Shelf.
+## Panel capsule (top → bottom)
 
-## Sidebar anatomy (top → bottom)
+1. **Brand mark** — the real ScriptAlly artwork (`ScriptAllyLogo` → `/scriptally-title-v2.png`),
+   large and centred, ~28–34px tall (40px allowance if it reads small — judge in browser),
+   aspect preserved, never restyled; ~26px clear below. The Playfair wordmark, ink rule and mono
+   kicker are retired (`weekOfQuerying` still lives in dashboardStats for the dashboard).
+2. **Accordion nav** — generous rows (13–14px type, 13px vertical pad, 14px radius).
+   **Dashboard is a flat link** (active = pink fill on the row). Sections: Querying (Queries
+   Hub · To-do · Packages), Agents (Agent list · Discover), Shelf (Manuscripts · Comparable
+   titles). One open at a time, following the route; open = ink text, medium weight, burgundy
+   icon, chevron rotated. Children indent 44px, **no vertical hairline**; active child = pink
+   fill; counts right-aligned mono muted. Import is off the nav (reachable from the Queries
+   empty state).
+3. Flexible spacer.
+4. **Manuscript row** — bare: sage-gradient initials tile, Playfair title, mono
+   `20 queries · 16 active`, up/down chevron.
+5. **Task pills** — two cream pills: pip + Playfair count + mono label (`Urgent` / `House`),
+   derived from the To-do board's own selectors.
+6. **Action strip** — four equal fill tiles, 44px, radius 12: Log query (pink/burgundy), Record
+   response (sage band/deep), Add agent + Add manuscript (both tan `#efe7db`/`#8a7358` — **blue
+   is reserved for Pro**). Mono caption below: `Log · Respond · Agent · Manuscript`.
+7. **Upgrade row** — card surface, `line` hairline, radius 12: solid slate `PRO` pill (mono,
+   white) · `Upgrade to Pro` 12.5px medium · chevron. Hover goes slate, never burgundy. No
+   meter, no benefit copy. Hidden for Pro users.
+8. **User block** — hairline above: avatar chip, name, plan. (No utility buttons in this idiom.)
 
-Masthead (ScriptAlly Playfair 22 · ink rule at 50% · mono kicker: section name + `weekOfQuerying` — the account-level derivation, never manuscript-scoped; tuck control on the top row, `sa.shellSideTucked`, ⌘\, rail-click untucks) → **Pages** nav → partition → manuscript **paper deck** (Playfair first-two-word initials tile; subtitle `16 queries · 11 active`, `shelved` wins; persists `scriptally_active_manuscript_id`) → **Tasks & reminders** ledger (counts by the To-do board's own selectors via `lib/shellSidebar.ts`; pips urgent `#eabfab` / housekeeping `#b7c5b4` / notes `#dccdbc`; **zero rows hidden**; all-zero → the quiet note) → **Actions** 2×2 white tiles (`#d9cec2` border, `2px 2px 0 rgba(46,39,35,.055)` shadow, burgundy icons; the existing capture contracts — no new forms; keyboard hints deliberately omitted until real bindings exist) → flexible spacer → **Pro line** ("Unlock your full query log", slate dot, chevron, hover ×; session dismiss; hidden for Pro) → **user block** (hairline top; 34px parchment avatar chip, `rgba(124,58,42,.25)` border, Playfair initials; task-settings + help icon buttons).
+**The nav active-state law survives the restyle: parchment/pink fills only — no burgundy fills,
+no burgundy ticks, ever.**
 
-**Only three horizontal rules** exist in the panel: the masthead rule (ink, dominant), the partition (`line-soft`), the user-block rule (`line`). Section labels carry no trailing rule.
+## Content capsule
 
-## The nav active-state law
+58px top bar inside the capsule (`line-soft` bottom hairline): crumb left · save-state chip ·
+`NavSearch` right (cream fill, no border; ⌘K wiring unchanged). `PageHeader` renders inside the
+capsule as-is (all three variants; primary = Form 11 soft-pink). Page scroll happens inside the
+capsule, never on the window.
 
-**Parchment highlight only**: `background: var(--shell-canvas)` + `inset 0 0 0 1px var(--shell-line)`. **No burgundy tick, no burgundy fill, ever** (the repeatedly-reverted regression). Counts sit in small parchment pill chips.
+## Open questions (unchanged)
 
-## Top bar
-
-56px, canvas-coloured, `line-soft` bottom border: breadcrumb (`Section / Page`, mono, current bold) · save-state chip (presentational until a pending-writes source exists) · spacer · the shared `NavSearch` (rail variant, 300px), focused by ⌘K (stands down on /todo, which owns its own registration).
-
-## PageHeader — three variants, one component
-
-`shell/PageHeader.tsx`. Title → optional description → **max two actions** (tuple-typed + runtime slice) bottom-right on the description's baseline → a `line-soft` rule closing the header. Everything below the rule is page content.
-
-- **full** — content pages. 40px Playfair 500 title, description shown.
-- **compact** — list/detail pages. 24px title inline with the actions, description omitted, tighter rule.
-- **greeting** — dashboard only. Mono date kicker above the title, description omitted.
-
-Secondary = parchment + hairline (`--shell-card`/`--shell-line`). **Primary = the Form 11 soft-pink button** (`--pink`/`--pink-b`, burgundy label). There is no dark-pill CTA anywhere in the app.
-
-## Rollout map — as landed
-
-| Page | Header | State |
-|---|---|---|
-| Dashboard | Greeting | ✅ (chip + focus-slot mechanics untouched below the rule) |
-| Queries Hub | Compact | ✅ (record header carries the StatusDot badge + contextual primary) |
-| To-do | Full | ⛔ skipped — the header is the live session apparatus; Nick decides |
-| Packages | Full | ✅ (manuscript selector in a row below the rule, pending sidebar live-wiring) |
-| Manuscripts | Full | ✅ |
-| Contact list | Compact | ✅ |
-| Help centre | Full, zero-action | ✅ (browser-check the empty right side) |
-| Agents dashboard · Task settings · Brand Studio | — | no such pages exist |
-| Onboarding | — | excluded (outside the shell) |
+Rail collapse / panel tuck (the flat shell's tuck was retired with the masthead); the To-do
+page header; Agents' eight actions; the dashboard's four CTAs vs the header pair; the
+manuscript switcher's live wiring.

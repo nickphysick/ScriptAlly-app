@@ -124,25 +124,27 @@ export const statusClosedFill = "#efeae2"; // closed centre fill
 export const statusClosedMark = "#b3a896"; // closed ×
 export const statusParchment = "#fdfaf5"; // offer tick
 
-/* ── App-shell v2 chrome (ref design-refs/scriptally-shell-v2.html; the rollout pack's baked
-   table wins where the mockup drifts — rail #2e2622, not the mockup's #2b2622). JS twins of
-   the --shell-* custom properties in index.css :root, for inline-style consumers; the pair is
+/* ── App-shell CAPSULE tokens (ref design-refs/scriptally-capsule-shell.html — supersedes the
+   flat scheme). Three capsules share ONE surface on a darker grained ground; chrome controls
+   are fill-based. JS twins of the --shell-* custom properties in index.css :root; the pair is
    kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
-export const shellRail = "#2e2622"; // icon-rail ground (dark umber)
-export const shellSide = "#f1ebe4"; // sidebar panel ground
-export const shellTopbar = "#faf6f2"; // top bar — === canvas by design
-export const shellCanvas = "#faf6f2"; // content canvas ground
+export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
+export const shellRail = "#fdfbf8"; // rail capsule surface (the dark umber rail is retired)
+export const shellSide = "#fdfbf8"; // panel capsule surface
+export const shellTopbar = "#fdfbf8"; // the content capsule's bar surface
+export const shellCanvas = "#fdfbf8"; // content capsule surface — pages inherit
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
-export const shellPanel = "#f5efe8"; // in-page grouping surface — one step below the canvas
-export const shellLine = "#e3d9cf"; // standard hairline
-export const shellLineSoft = "#ece3da"; // soft hairline
-export const shellSideEdge = "rgba(124,58,42,.14)"; // sidebar right-edge tint (drawn 1px solid)
+export const shellPanel = "#f2ede7"; // in-page grouping surface — the interior-fill family
+export const shellInset = "#f2ede7"; // THE interior fill (search, chips, pills, hovers)
+export const shellLine = "#e3d9cf"; // interior hairline
+export const shellLineSoft = "#ece3da"; // soft interior hairline
+export const shellCapRadius = 20; // capsule corner (px)
+export const shellCapGap = 14; // capsule gap AND page padding (px)
+export const shellCapShadow = "0 10px 30px rgba(58,28,20,.09)"; // the float
 export const shellGutter = 16; // sidebar side gutter (px)
 export const shellGroup = 24; // between sidebar groups (px)
 export const shellWithin = 8; // within a sidebar group (px)
 export const shellCardPad = 12; // sidebar card padding (px)
-// chrome inks + recessed fill — mockup-derived (the pack's baked table covers surfaces only)
 export const shellInk = "#2e2723"; // chrome ink
 export const shellInkSoft = "#6a615a"; // secondary chrome ink
 export const shellMuted = "#9c8878"; // muted chrome ink (=== labelColor — role twin, kept named)
-export const shellInset = "#f2ede7"; // recessed fills (chips, hover washes)
