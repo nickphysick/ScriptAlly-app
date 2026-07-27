@@ -114,9 +114,9 @@
   transition: all .15s;
 }
 .aglist .agl-btn-dark { background: var(--agl-ink); color: var(--agl-cream); border: 1.5px solid var(--agl-ink); }
-.aglist .agl-btn-dark:hover { background: #443027; }
+.aglist .agl-btn-dark:not([disabled]):hover { background: #443027; }
 .aglist .agl-btn-ghost { background: var(--agl-paper); color: var(--agl-ink-body); border: 1.5px solid var(--agl-ink); }
-.aglist .agl-btn-ghost:hover { background: var(--agl-cream); }
+.aglist .agl-btn-ghost:not([disabled]):hover { background: var(--agl-cream); }
 .aglist .agl-btn[disabled] {
   background: var(--agl-paper); border: 1px solid var(--agl-hair); color: #c3b6a6;
   box-shadow: none; cursor: not-allowed;
@@ -619,3 +619,16 @@
 .aglist .agl-chat-empty { font-size: 12.5px; font-style: italic; font-weight: 300; color: var(--agl-ink-muted); padding: 6px 2px; }
 .aglist .agl-note-in { display: flex; gap: 7px; align-items: flex-end; margin-top: auto; padding-top: 8px; }
 .aglist .agl-note-in textarea { flex: 1; min-height: 38px; max-height: 96px; resize: none; }
+
+/* small select for the sort + location controls in the chrome row */
+.aglist .agl-select-sm {
+  width: auto; flex: none; padding: 7px 28px 7px 13px; font-size: 12px; border-radius: 999px;
+  border: 1px solid var(--agl-hair); background-color: var(--agl-cream);
+}
+
+/* pending note grammar — the interface must not claim durability it doesn't have */
+.aglist .agl-bubble.pending { background: var(--agl-paper); border-style: dashed; }
+.aglist .agl-bubble.pending .btext { color: var(--agl-ink-muted); }
+.aglist .agl-bubble.struck .btext { text-decoration: line-through; color: var(--agl-ink-label); }
+.aglist .agl-bubble.struck { opacity: .72; }
+.aglist .agl-bubble .bdate.unsaved { color: #a9724f; }

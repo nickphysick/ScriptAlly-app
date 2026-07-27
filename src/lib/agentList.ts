@@ -15,6 +15,7 @@
  */
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus } from "../types";
 import { materialRowsFromAgent, summaryFromRows } from "./agentMaterials";
+import { agentTerritory } from "./agentsPage";
 
 /** Terminal query statuses — everything else, INCLUDING Offer, counts as an active query. */
 export const TERMINAL_STATUSES: readonly QueryStatus[] = [
@@ -110,8 +111,71 @@ export function matchesAgentSearch(agent: Agent, search: string): boolean {
   return (agent.name || "").toLowerCase().includes(q) || (agent.agency || "").toLowerCase().includes(q);
 }
 
-export const visibleAgents = (agents: Agent[], queries: Query[], filter: AgentListFilter, search: string): Agent[] =>
-  agents.filter((a) => matchesAgentFilter(a, queries, filter) && matchesAgentSearch(a, search));
+export const visibleAgents = (
+  agents: Agent[],
+  queries: Query[],
+  filter: AgentListFilter,
+  search: string,
+  opts: { sort?: AgentListSort; location?: AgentLocationFilter; homeCountry?: string } = {},
+): Agent[] =>
+  sortAgentList(
+    agents.filter(
+      (a) =>
+        matchesAgentFilter(a, queries, filter) &&
+        matchesAgentSearch(a, search) &&
+        matchesAgentLocation(a, opts.location ?? "all", opts.homeCountry ?? ""),
+    ),
+    opts.sort ?? DEFAULT_AGENT_SORT,
+  );
+
+/* ── Sort + location (restored in Phase 6; the F12 page had both) ──────────── */
+
+export type AgentListSort = "rating" | "resp" | "added" | "az";
+
+/**
+ * THE DEFAULT ORDER, stated explicitly so the grid can't drift: highest star rating first, then
+ * alphabetically within a tier. An unstated default is how grids rot as they grow.
+ */
+export const DEFAULT_AGENT_SORT: AgentListSort = "rating";
+
+export const AGENT_SORT_OPTIONS: readonly { key: AgentListSort; label: string }[] = [
+  { key: "rating", label: "Star rating" },
+  { key: "resp", label: "Response time" },
+  { key: "added", label: "Date added" },
+  { key: "az", label: "Name A–Z" },
+];
+
+/** Unrated / unstated sort LAST in their respective orders — absence is not a zero. */
+export function sortAgentList(agents: Agent[], sort: AgentListSort): Agent[] {
+  const byName = (a: Agent, b: Agent) => (a.name || "").localeCompare(b.name || "");
+  const list = [...agents];
+  switch (sort) {
+    case "az":
+      return list.sort(byName);
+    case "resp":
+      return list.sort((a, b) => {
+        const av = a.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : Infinity;
+        const bv = b.responseTimeWeeks && b.responseTimeWeeks > 0 ? b.responseTimeWeeks : Infinity;
+        return av - bv || byName(a, b);
+      });
+    case "added":
+      return list.sort((a, b) => Date.parse(b.dateAdded || "0") - Date.parse(a.dateAdded || "0") || byName(a, b));
+    default:
+      return list.sort((a, b) => (b.starRating || 0) - (a.starRating || 0) || byName(a, b));
+  }
+}
+
+export type AgentLocationFilter = "all" | "domestic" | "international";
+
+export const AGENT_LOCATION_OPTIONS: readonly { key: AgentLocationFilter; label: string }[] = [
+  { key: "all", label: "Anywhere" },
+  { key: "domestic", label: "My market" },
+  { key: "international", label: "International" },
+];
+
+/** Location reads the REAL `agent.country` (ISO) against the user's home market. */
+export const matchesAgentLocation = (agent: Agent, filter: AgentLocationFilter, homeCountry: string): boolean =>
+  filter === "all" ? true : agentTerritory(agent, homeCountry) === filter;
 
 export type AgentListCounts = Record<AgentListFilter, number>;
 

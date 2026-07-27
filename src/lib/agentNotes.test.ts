@@ -13,6 +13,7 @@ import {
   computeNotePreview,
   effectiveNotes,
   emptyNotesDraft,
+  committedNotes,
   notePreviewWrite,
   resolvePin,
 } from "./agentNotes";
@@ -78,13 +79,27 @@ describe("agentNotes · effectiveNotes (buffered adds, deletes and the flat-note
     expect(out.map((x) => x.text)).toEqual(["newest"]);
   });
 
-  it("buffered deletions disappear and buffered additions land last", () => {
+  it("buffered deletions are SHOWN struck (not removed) and additions land last, marked pending", () => {
     const out = effectiveNotes([older, newer], {
       added: [{ tempId: "t1", text: "just typed", createdAt: "2026-05-01T00:00:00.000Z" }],
       deletedIds: ["n1"],
       migratedFlat: false,
     });
-    expect(out.map((x) => x.text)).toEqual(["newest", "just typed"]);
+    // the deleted bubble stays visible, struck — so Escape reads as a visible undo
+    expect(out.map((x) => x.text)).toEqual(["oldest", "newest", "just typed"]);
+    expect(out.find((x) => x.id === "n1")?.pendingDelete).toBe(true);
+    expect(out.find((x) => x.id === "t1")?.pending).toBe(true);
+  });
+
+  it("committedNotes is what Done will actually leave behind", () => {
+    const out = effectiveNotes([older, newer], {
+      added: [{ tempId: "t1", text: "just typed", createdAt: "2026-05-01T00:00:00.000Z" }],
+      deletedIds: ["n1"],
+      migratedFlat: false,
+    });
+    const after = committedNotes(out);
+    expect(after.map((x) => x.text)).toEqual(["newest", "just typed"]);
+    expect(after.every((x) => x.pending === undefined && x.pendingDelete === undefined)).toBe(true);
   });
 
   it("stored notes sort oldest-first regardless of arrival order", () => {

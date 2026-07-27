@@ -28,17 +28,25 @@ import {
 import { collection, deleteDoc, deleteField, doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../../lib/firebase";
 import {
-  AgentNote, FLAT_NOTE_ID, effectiveNotes, emptyNotesDraft, notePreviewWrite, resolvePin,
+  AgentNote, FLAT_NOTE_ID, committedNotes, computeNotePreview, effectiveNotes, notePreviewWrite, resolvePin,
 } from "../../lib/agentNotes";
-import { Agent } from "../../types";
+import { Agent, SubmissionMethod, SubmissionStatus } from "../../types";
+import { materialsWantedFromRows } from "../../lib/agentMaterials";
 import { agentRelationship } from "../../lib/agentList";
 import {
   AGENT_LIST_CHIPS,
+  AGENT_LOCATION_OPTIONS,
+  AGENT_SORT_OPTIONS,
   AgentListFilter,
+  AgentListSort,
+  AgentLocationFilter,
+  DEFAULT_AGENT_SORT,
   agentCountLine,
   agentListCounts,
   visibleAgents,
 } from "../../lib/agentList";
+import { getHomeCountry } from "../../lib/territory";
+import { blankDraft } from "../../lib/agentDraft";
 import "./agentList.css";
 
 interface AgentListProps {
@@ -49,16 +57,24 @@ interface AgentListProps {
 }
 
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
-  const { agents, queries, manuscripts, activities, updateAgent, currentUser } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser } = useScriptAllyDb();
 
   const [filter, setFilter] = useState<AgentListFilter>("all");
   const [search, setSearch] = useState(searchQuery?.trim() || "");
+  const [sort, setSort] = useState<AgentListSort>(DEFAULT_AGENT_SORT);
+  const [location, setLocation] = useState<AgentLocationFilter>("all");
+  // A draft-only agent that isn't persisted until Done passes validation (decision 16).
+  const [newAgent, setNewAgent] = useState<Agent | null>(null);
+
+  const homeCountry = getHomeCountry(currentUser);
 
   const counts = useMemo(() => agentListCounts(agents, queries), [agents, queries]);
   const visible = useMemo(
-    () => visibleAgents(agents, queries, filter, search),
-    [agents, queries, filter, search],
+    () => visibleAgents(agents, queries, filter, search, { sort, location, homeCountry }),
+    [agents, queries, filter, search, sort, location, homeCountry],
   );
+  // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
+  const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
 
   // ── Flip + buffered draft (decision 1) ────────────────────────────────────
   // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
@@ -78,6 +94,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     setError(null);
     setStoredNotes([]);
     setNotesLoaded(false);
+    // Escape on a never-valid new card discards it entirely (decision 2).
+    setNewAgent(null);
   }, []);
 
   // Subscribe to the open agent's notes subcollection. `notesLoaded` only turns true once the
@@ -138,6 +156,60 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       setTab(invalid.tab);
       return;
     }
+    // A new agent is CREATED on its first valid Done; everything after is the ordinary diff path.
+    if (newAgent && draft.id === newAgent.id) {
+      const created = await addAgent({
+        name: draft.name.trim(),
+        agency: draft.agency.trim(),
+        email: draft.email.trim(),
+        website: draft.website.trim(),
+        ...(draft.country.trim() ? { country: draft.country.trim() } : {}),
+        ...(draft.city.trim() ? { city: draft.city.trim() } : {}),
+        genres: draft.genres,
+        mswlNotes: draft.mswlNotes,
+        submissionStatus: draft.open ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED,
+        submissionMethod: (draft.submissionMethod === "Other" ? draft.methodOther.trim() : draft.submissionMethod) as SubmissionMethod,
+        materialsWanted: materialsWantedFromRows(draft.materials),
+        notes: "",
+        ...(draft.starRating ? { starRating: draft.starRating } : {}),
+        ...(draft.responseWeeks.trim() ? { responseTimeWeeks: Number(draft.responseWeeks.trim()) } : {}),
+        ...(typeof draft.noResponseMeansNo === "boolean" ? { noResponseMeansNo: draft.noResponseMeansNo } : {}),
+        ...(draft.socials.length ? { socials: draft.socials } : {}),
+        ...(draft.image ? { image: draft.image } : {}),
+        // the preview + pin are computed from the buffered notes and ride the CREATE itself,
+        // so a brand-new agent's card is correct from its first render
+        ...(draft.notes.added.length
+          ? {
+              notePreview: computeNotePreview(
+                draft.notes.added.map((n) => ({ id: n.tempId, text: n.text, createdAt: n.createdAt })),
+                draft.pinnedNoteId,
+              ),
+              ...(draft.pinnedNoteId && draft.notes.added.some((n) => n.tempId === draft.pinnedNoteId)
+                ? { pinnedNoteId: draft.pinnedNoteId }
+                : {}),
+            }
+          : {}),
+      } as Parameters<typeof addAgent>[0]);
+      if (!created?.success) {
+        setError({ tab: "contact", msg: created?.error || "That agent couldn't be saved." });
+        return;
+      }
+      // buffered notes become real documents under the CREATED id (tempIds are the doc ids, so
+      // the pin written above stays valid)
+      if (created.id && currentUser && draft.notes.added.length) {
+        const notesCol = collection(db, "users", currentUser.id, "agents", created.id, "notes");
+        try {
+          for (const pending of draft.notes.added) {
+            await setDoc(doc(notesCol, pending.tempId), { text: pending.text, createdAt: pending.createdAt });
+          }
+        } catch (e) {
+          handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${created.id}/notes`);
+        }
+      }
+      discard();
+      return;
+    }
+
     const original = agents.find((a) => a.id === draft.id);
     if (!original) return discard();
 
@@ -171,18 +243,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
 
     // ── notePreview (the documented derived-over-stored exception). Recompute against the notes
     // as they will be AFTER this commit, gated on the listener having resolved.
-    const committedNotes = effectiveNotes(storedNotes, draft.notes, {
-      flatNote: draft.notes.migratedFlat ? original.notes : undefined,
-      dateAdded: original.dateAdded,
-    });
-    const livePin = resolvePin(committedNotes, draft.pinnedNoteId);
+    const afterCommit = committedNotes(
+      effectiveNotes(storedNotes, draft.notes, {
+        flatNote: draft.notes.migratedFlat ? original.notes : undefined,
+        dateAdded: original.dateAdded,
+      }),
+    );
+    const livePin = resolvePin(afterCommit, draft.pinnedNoteId);
     if ((livePin || "") !== (draft.pinnedNoteId || "")) {
       if (livePin) diff.changed.pinnedNoteId = livePin;
       else if (original.pinnedNoteId) diff.deletes.push("pinnedNoteId");
     }
     const preview = notePreviewWrite({
       loaded: notesLoaded,
-      notes: committedNotes,
+      notes: afterCommit,
       pinnedNoteId: livePin,
       stored: original.notePreview,
     });
@@ -198,7 +272,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       await updateAgent(draft.id, payload);
     }
     discard();
-  }, [agents, draft, discard, updateAgent, currentUser, storedNotes, notesLoaded]);
+  }, [agents, draft, discard, updateAgent, currentUser, storedNotes, notesLoaded, newAgent, addAgent]);
 
   // ── Escape cascade (three stages, in order) ───────────────────────────────
   // 1. An open popup consumes Escape and closes itself — AgentCountryPicker listens on the
@@ -227,13 +301,47 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     return () => window.removeEventListener("keydown", onKey);
   }, [flippedId, discard]);
 
-  // A card that scrolls out of the filtered set takes its draft with it.
+  // A card that scrolls out of the filtered set takes its draft with it. Checked against `shown`,
+  // not `visible` — the unsaved new agent rides only in `shown`, and checking `visible` would
+  // discard a brand-new card the instant it opened.
   useEffect(() => {
-    if (flippedId && !visible.some((a) => a.id === flippedId)) discard();
-  }, [visible, flippedId, discard]);
+    if (flippedId && !shown.some((a) => a.id === flippedId)) discard();
+  }, [shown, flippedId, discard]);
 
-  // Phase 6 wires the real draft-agent flow; the header button is a stub until then.
-  const onAddAgent = () => onNavigate?.("agents", "Add an agent");
+  /**
+   * Add a new agent (decision 16, as amended): a DRAFT-ONLY record — nothing is persisted until
+   * Done passes validation. Filter and search are cleared so it can't be born hidden, and it flips
+   * straight into the editor. Per amendment A it is born with starRating, responseTimeWeeks and
+   * noResponseMeansNo OMITTED — no invented 8 weeks, no invented 3 stars.
+   */
+  const onAddAgent = () => {
+    if (!currentUser) return;
+    const id = `new-${Math.random().toString(36).slice(2, 11)}`;
+    const stub: Agent = {
+      id,
+      userId: currentUser.id,
+      name: "",
+      agency: "",
+      email: "",
+      website: "",
+      genres: [],
+      mswlNotes: "",
+      submissionStatus: SubmissionStatus.OPEN,
+      submissionMethod: SubmissionMethod.EMAIL,
+      materialsWanted: [],
+      dateAdded: new Date().toISOString(),
+      lastCheckedDate: new Date().toISOString(),
+      notes: "",
+    };
+    setFilter("all");
+    setSearch("");
+    setLocation("all");
+    setNewAgent(stub);
+    setFlippedId(id);
+    setDraft(blankDraft(id));
+    setTab("contact");
+    setError(null);
+  };
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
   return (
@@ -266,6 +374,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             </button>
           ))}
           <div className="agl-spacer" />
+          <select
+            className="agl-in agl-select-sm"
+            value={location}
+            onChange={(e) => setLocation(e.target.value as AgentLocationFilter)}
+            aria-label="Filter by location"
+          >
+            {AGENT_LOCATION_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
+          <select
+            className="agl-in agl-select-sm"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as AgentListSort)}
+            aria-label="Sort agents"
+          >
+            {AGENT_SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>Sort · {o.label}</option>)}
+          </select>
           <div className="agl-search">
             <Search width={14} height={14} aria-hidden="true" />
             <input
@@ -296,12 +420,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
         <div className="agl-countline">{agentCountLine(visible.length, agents.length)}</div>
 
         <div className="agl-grid">
-          {visible.length === 0 && (
+          {shown.length === 0 && (
             <div className="agl-empty">
               {agents.length === 0 ? (
+                /* welcome state — a doorway, not an error */
                 <>
-                  <div className="big">No agents yet.</div>
-                  <div className="small">Add the first one and your list starts here.</div>
+                  <div className="big">Your agent list starts here.</div>
+                  <div className="small" style={{ marginBottom: 14 }}>
+                    Everyone you're querying, watching, or saving for later.
+                  </div>
+                  <button type="button" className="agl-btn agl-btn-dark" onClick={onAddAgent}>
+                    <Plus width={14} height={14} aria-hidden="true" />
+                    Add your first agent
+                  </button>
                 </>
               ) : (
                 <>
@@ -311,7 +442,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
               )}
             </div>
           )}
-          {visible.map((agent) => (
+          {shown.map((agent) => (
             <AgentCard
               key={agent.id}
               agent={agent}
@@ -331,7 +462,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                     onDone={() => void onDone()}
                     error={error}
                     onImageError={(msg) => setError({ tab: "contact", msg })}
-                    isNew={false}
+                    isNew={!!newAgent && newAgent.id === agent.id}
                     hasActiveQueries={agentRelationship(agent.id, queries) === "active"}
                     notes={visibleNotes}
                     notesLoaded={notesLoaded}

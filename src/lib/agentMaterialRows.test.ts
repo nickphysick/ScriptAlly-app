@@ -124,3 +124,75 @@ describe("agentMaterials · validation names the floor", () => {
     expect(validateMaterials(withSample("3", "Chapters"))).toBeNull();
   });
 });
+
+/**
+ * ENCODING CONVENTION LOCK. The stored form is a `string[]` where THE ARRAY IS THE DELIMITER —
+ * each material is its own element, and the free-text Other is a single element carrying the
+ * writer's prose verbatim. Nothing is packed into a delimited string, so no character the writer
+ * types can corrupt the encoding (including the interpunct that OTHER_JOIN itself uses).
+ */
+describe("agentMaterials · encode → decode → encode is stable", () => {
+  const roundTrip = (rows: MaterialRow[]) => {
+    const once = materialsWantedFromRows(rows);
+    const twice = materialsWantedFromRows(materialRowsFromAgent(once));
+    return { once, twice };
+  };
+  const build = (patch: (r: MaterialRow) => MaterialRow) => materialRowsFromAgent([]).map(patch) as MaterialRow[];
+
+  it("every row combination is stable across a second pass", () => {
+    const flags = [0, 1, 2, 3, 4, 5, 6, 7];
+    for (const mask of flags) {
+      const rows = build((r) => {
+        if (r.key === "queryLetter") return { ...r, on: !!(mask & 1) };
+        if (r.key === "synopsis") return { ...r, on: !!(mask & 2) };
+        if (r.key === "sample") return { ...r, on: !!(mask & 4), unit: "Pages", amount: "10" };
+        return r;
+      });
+      const { once, twice } = roundTrip(rows);
+      expect(twice).toEqual(once);
+    }
+  });
+
+  it("each sample unit survives a round trip with its amount", () => {
+    for (const [unit, amount] of [["Chapters", "3"], ["Pages", "10"], ["Words", "5000"]] as const) {
+      const rows = build((r) => (r.key === "sample" ? { ...r, on: true, unit, amount } : r));
+      const { once, twice } = roundTrip(rows);
+      expect(twice).toEqual(once);
+      const back = materialRowsFromAgent(once).find((r) => r.key === "sample")!;
+      expect(back.kind === "qty" && back.unit).toBe(unit);
+    }
+  });
+
+  it("Other survives punctuation the writer may legitimately type", () => {
+    const nasty = [
+      "Other: first 50 pages, double-spaced",  // colon + comma
+      "a pipe | inside",
+      "an em dash — inside",
+      'a "quote" mark',
+      "an interpunct · inside",               // OTHER_JOIN's own character
+      "first 50 pages, double-spaced",
+    ];
+    for (const text of nasty) {
+      const rows = build((r) => (r.key === "other" ? { ...r, on: true, text } : r));
+      const { once, twice } = roundTrip(rows);
+      expect(twice).toEqual(once);
+      const back = materialRowsFromAgent(once).find((r) => r.key === "other")!;
+      expect(back.kind === "text" && back.text).toBe(text);
+    }
+  });
+
+  /**
+   * KNOWN LIMIT — documented, not silently accepted. The parser classifies by WHOLE-STRING match,
+   * so Other text that is EXACTLY a recognised material name is read back as that material rather
+   * than as Other. Realistic prose never collides (it only matches whole strings); a writer typing
+   * literally "Synopsis" into Other does. Reported as a follow-up with a proposed guard — fixing it
+   * means changing the shared encoder that three other surfaces read, which is not a final-phase
+   * change to make unannounced.
+   */
+  it("documents the whole-string collision so it can't regress silently", () => {
+    const rows = build((r) => (r.key === "other" ? { ...r, on: true, text: "Synopsis" } : r));
+    const back = materialRowsFromAgent(materialsWantedFromRows(rows));
+    expect(back.find((r) => r.key === "synopsis")!.on).toBe(true);   // reclassified…
+    expect((back.find((r) => r.key === "other") as { text: string }).text).toBe(""); // …and not Other
+  });
+});

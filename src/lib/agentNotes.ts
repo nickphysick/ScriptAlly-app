@@ -27,6 +27,12 @@ export interface AgentNote {
   id: string;
   text: string;
   createdAt: string;
+  /** Typed but not yet committed — rendered muted, WITHOUT a timestamp, marked UNSAVED. The
+   *  timestamp is a commit artefact, so withholding it is truthful rather than decorative. */
+  pending?: boolean;
+  /** Marked for deletion by Done — struck through rather than removed, so Escape visibly restores
+   *  something the writer can see they didn't lose. */
+  pendingDelete?: boolean;
 }
 
 /** A note the writer has typed but not yet committed — it has no doc id until Done. */
@@ -64,12 +70,16 @@ export function effectiveNotes(
 ): AgentNote[] {
   const out: AgentNote[] = [];
   const flat = (legacy?.flatNote || "").trim();
-  if (flat && !draft.migratedFlat && !draft.deletedIds.includes(FLAT_NOTE_ID)) {
-    out.push({ id: FLAT_NOTE_ID, text: flat, createdAt: legacy?.dateAdded || "" });
+  if (flat && !draft.migratedFlat) {
+    out.push({
+      id: FLAT_NOTE_ID, text: flat, createdAt: legacy?.dateAdded || "",
+      pendingDelete: draft.deletedIds.includes(FLAT_NOTE_ID),
+    });
   }
-  for (const n of stored) if (!draft.deletedIds.includes(n.id)) out.push(n);
+  // Deletions are SHOWN struck, not removed — the buffer is visible, so Escape reads as undo.
+  for (const n of stored) out.push({ ...n, pendingDelete: draft.deletedIds.includes(n.id) });
   out.sort(byOldestFirst);
-  for (const p of draft.added) out.push({ id: p.tempId, text: p.text, createdAt: p.createdAt });
+  for (const p of draft.added) out.push({ id: p.tempId, text: p.text, createdAt: p.createdAt, pending: true });
   return out;
 }
 
@@ -77,6 +87,10 @@ export function effectiveNotes(
  * The preview text for a given note list: the pinned note when it resolves, else the latest, else
  * "". A dangling pin (its note deleted) falls back to the latest — the pin is cleared separately.
  */
+/** The notes as they will be once Done commits: struck ones gone, pending ones real. */
+export const committedNotes = (notes: AgentNote[]): AgentNote[] =>
+  notes.filter((n) => !n.pendingDelete).map(({ pending, pendingDelete, ...n }) => n);
+
 export function computeNotePreview(notes: AgentNote[], pinnedNoteId?: string): string {
   if (pinnedNoteId) {
     const pinned = notes.find((n) => n.id === pinnedNoteId);

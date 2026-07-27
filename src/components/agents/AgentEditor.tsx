@@ -201,7 +201,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
               <div className="agl-row2">
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-name">Agent name</label>
-                  <input id="agl-name" type="text" className="agl-in" value={draft.name} onChange={(e) => onChange({ name: e.target.value })} />
+                  <input id="agl-name" type="text" className="agl-in" autoFocus={isNew} value={draft.name} onChange={(e) => onChange({ name: e.target.value })} />
                 </div>
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-agency">Agency</label>
@@ -481,21 +481,31 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                   notes.map((note) => {
                     const pinned = draft.pinnedNoteId === note.id;
                     return (
-                      <div className={`agl-bubble${pinned ? " pinned" : ""}`} key={note.id}>
+                      <div
+                        className={`agl-bubble${pinned ? " pinned" : ""}${note.pending ? " pending" : ""}${note.pendingDelete ? " struck" : ""}`}
+                        key={note.id}
+                      >
                         {pinned && (
                           <div className="agl-ribbon" aria-hidden="true">
                             <Pin width={9} height={9} /> Pinned to your card
                           </div>
                         )}
                         <div className="btext">{note.text}</div>
-                        {note.createdAt && <div className="bdate">{formatCardDate(note.createdAt)}</div>}
+                        {/* a timestamp is a COMMIT artefact — an uncommitted bubble truthfully has none */}
+                        {note.pending ? (
+                          <div className="bdate unsaved">Unsaved</div>
+                        ) : note.pendingDelete ? (
+                          <div className="bdate unsaved">Deletes on done</div>
+                        ) : note.createdAt ? (
+                          <div className="bdate">{formatCardDate(note.createdAt)}</div>
+                        ) : null}
                         <div className="agl-bactions">
                           <button type="button" className="agl-bchip" onClick={() => onPinNote(pinned ? undefined : note.id)}>
                             {pinned ? <PinOff aria-hidden="true" /> : <Pin aria-hidden="true" />}
                             {pinned ? "Unpin" : "Pin to card"}
                           </button>
                           <button type="button" className="agl-bchip" onClick={() => onDeleteNote(note.id)}>
-                            <Trash2 aria-hidden="true" /> Delete
+                            <Trash2 aria-hidden="true" /> {note.pendingDelete ? "Keep" : "Delete"}
                           </button>
                         </div>
                       </div>

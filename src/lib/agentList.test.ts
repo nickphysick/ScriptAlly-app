@@ -29,6 +29,10 @@ import {
   wishlistChips,
   materialsSummary,
   notePreview,
+  DEFAULT_AGENT_SORT,
+  AGENT_SORT_OPTIONS,
+  sortAgentList,
+  matchesAgentLocation,
 } from "./agentList";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 
@@ -263,5 +267,51 @@ describe("agentList · note preview", () => {
   it("without a loaded subcollection it reads the legacy flat note", () => {
     expect(notePreview(mkAgent({ notes: "Met at Harrogate." }))).toEqual({ text: "Met at Harrogate.", pinned: false });
     expect(notePreview(mkAgent({ notes: "" }))).toBeNull();
+  });
+});
+
+describe("agentList · sort + location (restored in Phase 6)", () => {
+  it("THE DEFAULT is star rating, stated explicitly so the grid can't drift", () => {
+    expect(DEFAULT_AGENT_SORT).toBe("rating");
+    expect(AGENT_SORT_OPTIONS.map((o) => o.key)).toEqual(["rating", "resp", "added", "az"]);
+  });
+
+  it("rating: highest first, alphabetical within a tier; UNRATED sorts last", () => {
+    const five = mkAgent({ id: "5", name: "Zed", starRating: 5 });
+    const fiveA = mkAgent({ id: "5a", name: "Ada", starRating: 5 });
+    const unrated = mkAgent({ id: "u", name: "Aaron" });
+    expect(sortAgentList([unrated, five, fiveA], "rating").map((a) => a.id)).toEqual(["5a", "5", "u"]);
+  });
+
+  it("response time: fastest first, UNSTATED last (absence is not a zero)", () => {
+    const fast = mkAgent({ id: "f", responseTimeWeeks: 2 });
+    const slow = mkAgent({ id: "s", responseTimeWeeks: 12 });
+    const unknown = mkAgent({ id: "u" });
+    expect(sortAgentList([unknown, slow, fast], "resp").map((a) => a.id)).toEqual(["f", "s", "u"]);
+  });
+
+  it("date added: newest first; A–Z is alphabetical", () => {
+    const old = mkAgent({ id: "o", name: "Zed", dateAdded: "2025-01-01T00:00:00.000Z" });
+    const recent = mkAgent({ id: "r", name: "Ada", dateAdded: "2026-06-01T00:00:00.000Z" });
+    expect(sortAgentList([old, recent], "added").map((a) => a.id)).toEqual(["r", "o"]);
+    expect(sortAgentList([old, recent], "az").map((a) => a.id)).toEqual(["r", "o"]);
+  });
+
+  it("location filters on the REAL country field against the home market", () => {
+    const gb = mkAgent({ id: "gb", country: "GB" });
+    const us = mkAgent({ id: "us", country: "US" });
+    const none = mkAgent({ id: "nn" });
+    const all = [gb, us, none];
+    expect(all.filter((a) => matchesAgentLocation(a, "domestic", "GB")).map((a) => a.id)).toEqual(["gb"]);
+    expect(all.filter((a) => matchesAgentLocation(a, "international", "GB")).map((a) => a.id)).toEqual(["us"]);
+    expect(all.filter((a) => matchesAgentLocation(a, "all", "GB"))).toHaveLength(3);
+  });
+
+  it("visibleAgents composes filter + search + location + sort", () => {
+    const a = mkAgent({ id: "a", name: "Bee", country: "GB", starRating: 3 });
+    const b = mkAgent({ id: "b", name: "Ant", country: "GB", starRating: 5 });
+    const c = mkAgent({ id: "c", name: "Cat", country: "US", starRating: 5 });
+    expect(visibleAgents([a, b, c], [], "all", "", { location: "domestic", homeCountry: "GB" }).map((x) => x.id))
+      .toEqual(["b", "a"]);
   });
 });
