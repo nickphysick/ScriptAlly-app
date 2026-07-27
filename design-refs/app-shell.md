@@ -84,8 +84,19 @@ the primary-button colour and content accent. Never pink, never burgundy, in nav
 capsule as-is (all three variants; primary = Form 11 soft-pink). Page scroll happens inside the
 capsule, never on the window.
 
+## Panel collapse (fixes pack — the rail question, RESOLVED)
+
+The rail IS the panel's collapsed state. The tuck toggle (two-pane glyph) sits top-right of the
+panel, centred on the brand mark; while collapsed the same glyph appears in the rail beneath
+the brand glyph and expands it. `⌘\` toggles (registered at shell level so it works on every
+route, including /todo where the top bar's ⌘K stands down). Collapsed = the panel hides via
+the container's `sv2-collapsed` class (CSS width/opacity/margin transition — the negative
+margin swallows the capsule gap so the content plane widens by 288 + 14px); the rail's
+tooltips carry the labels. No hover flyout, no mini-panel. Persisted in
+`localStorage["sa.shellSideTucked"]` (the sa. UI-pref convention; the flat shell's key,
+reused). Works identically on every routed page — no opt-outs.
+
 ## Open questions (unchanged)
 
-Rail collapse / panel tuck (the flat shell's tuck was retired with the masthead); the To-do
-page header; Agents' eight actions; the dashboard's four CTAs vs the header pair; the
-manuscript switcher's live wiring.
+The To-do page header; Agents' eight actions; the dashboard's four CTAs vs the header pair;
+the manuscript switcher's live wiring.

@@ -14,7 +14,7 @@
  */
 import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { LayoutGrid, Send, Users, Book, Settings } from "lucide-react";
+import { LayoutGrid, Send, Users, Book, Settings, PanelLeft } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
@@ -40,7 +40,10 @@ const Mark: React.FC = () => (
 export const ShellRail: React.FC<{
   /** Navigate to a path, clearing the global search (AppShell's goPath). */
   onNavigatePath: (path: string) => void;
-}> = ({ onNavigatePath }) => {
+  /** Panel collapse (fixes pack): while collapsed, the rail carries the expand toggle. */
+  collapsed?: boolean;
+  onExpand?: () => void;
+}> = ({ onNavigatePath, collapsed = false, onExpand }) => {
   const { pathname } = useLocation();
   const { currentUser } = useScriptAllyDb();
   const activeKey = shellSectionKeyForPath(pathname);
@@ -49,6 +52,19 @@ export const ShellRail: React.FC<{
   return (
     <nav className="sv2-rail sv2-cap" aria-label="Sections">
       <Mark />
+      {/* The expand toggle — the same two-pane glyph as the panel's tuck, directly beneath the
+          brand glyph, only while the panel is away. */}
+      {collapsed && (
+        <button
+          type="button"
+          className="sv2-rib sv2-railtuck"
+          title="Show the panel (⌘\)"
+          aria-label="Show the panel"
+          onClick={onExpand}
+        >
+          <PanelLeft aria-hidden="true" />
+        </button>
+      )}
       <div className="sv2-railnav">
         {SHELL_RAIL.map((rib) => {
           const Icon = RAIL_ICONS[rib.key];
@@ -96,17 +112,30 @@ export const ShellRail: React.FC<{
 /* ── panel capsule frame ──────────────────────────────────────────────────── */
 
 export const ShellSide: React.FC<{
+  /** Panel collapse (fixes pack): hidden via the container's state class (CSS transition). */
+  collapsed?: boolean;
+  onCollapse?: () => void;
   /** The panel contents below the brand (ShellSidebarBody). */
   children?: React.ReactNode;
-}> = ({ children }) => (
-  <aside className="sv2-side sv2-cap">
+}> = ({ collapsed = false, onCollapse, children }) => (
+  <aside className="sv2-side sv2-cap" aria-hidden={collapsed || undefined}>
     <div className="sv2-side-inner">
       {/* The real brand artwork, large and centred (capsule spec item 1) — the canonical
           height-locked wordmark component; alt="ScriptAlly" rides inside it. Never restyled.
-          The Playfair wordmark, ink rule and mono kicker are retired (weekOfQuerying lives on
-          in dashboardStats for the dashboard's greeting). */}
-      <div className="sv2-wm">
-        <ScriptAllyLogo heightPx={30} />
+          The tuck toggle sits top-right, vertically centred on the mark (fixes pack). */}
+      <div className="sv2-wmrow">
+        <div className="sv2-wm">
+          <ScriptAllyLogo heightPx={30} />
+        </div>
+        <button
+          type="button"
+          className="sv2-tuck"
+          title="Hide the panel (⌘\)"
+          aria-label="Hide the panel"
+          onClick={onCollapse}
+        >
+          <PanelLeft aria-hidden="true" />
+        </button>
       </div>
       {children}
     </div>

@@ -80,7 +80,18 @@
     min-width: 0;
     overflow: hidden;
     background-color: var(--shell-side); /* one capsule surface — no edge, no grain of its own */
+    transition: width 0.26s ease, opacity 0.2s ease, margin-left 0.26s ease;
   }
+}
+/* PANEL COLLAPSE (fixes pack) — the rail IS the collapsed state; no flyouts, no mini-panel.
+   The negative margin swallows the flex gap so the content capsule widens by the full
+   288 + 14px; the fixed-width inner column keeps the contents from reflowing mid-slide. */
+.sv2-collapsed .sv2-side {
+  width: 0;
+  opacity: 0;
+  margin-left: calc(-1 * var(--shell-cap-gap));
+  pointer-events: none;
+  box-shadow: none;
 }
 .sv2-side-inner {
   width: 288px;
@@ -91,8 +102,27 @@
   overflow-y: auto;
 }
 
-/* The brand — the real artwork, large and centred; generous clear space below. */
-.sv2-wm { display: flex; justify-content: center; margin: 0 0 26px; flex: none; }
+/* The brand row — the artwork centred, the tuck toggle vertically centred on it, top-right. */
+.sv2-wmrow { position: relative; flex: none; margin: 0 0 26px; }
+.sv2-wm { display: flex; justify-content: center; flex: none; }
+.sv2-tuck {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--shell-muted);
+  display: grid;
+  place-items: center;
+  transition: background 0.16s, color 0.16s;
+}
+.sv2-tuck:hover { background: var(--shell-inset); color: var(--burg); }
+.sv2-tuck svg { width: 15px; height: 15px; }
 
 /* ── accordion nav — generous rows, no hairlines anywhere ── */
 .sv2-acc { display: flex; flex-direction: column; gap: 4px; flex: none; }
@@ -369,7 +399,9 @@
 .sv2-gsearch { width: 280px; flex: none; }
 
 @media (prefers-reduced-motion: reduce) {
+  .sv2-side,
   .sv2-rib,
+  .sv2-tuck,
   .sv2-asec,
   .sv2-asec .sv2-acv,
   .sv2-akids,

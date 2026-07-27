@@ -7,6 +7,8 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
@@ -43,13 +45,26 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("sv2-railav"); // the rail-foot account chip
   });
 
-  it("panel frame: the real wordmark artwork, large and centred — the rule + kicker are retired", () => {
-    const html = at("/todo", <ShellSide />);
+  it("panel frame: the real wordmark artwork, large and centred, with the tuck toggle beside it", () => {
+    const html = at("/todo", <ShellSide onCollapse={() => {}} />);
     expect(html).toContain("sv2-wm");
     expect(html).toContain("scriptally-title-v2.png"); // the brand asset, not Playfair text
     expect(html).toContain('alt="ScriptAlly"');
+    expect(html).toContain('aria-label="Hide the panel"'); // the tuck toggle (fixes pack)
     expect(html).not.toContain("sv2-mhrule"); // the masthead rule is gone
     expect(html).not.toContain("week one"); // the kicker (weekOfQuerying) left the panel
+  });
+
+  it("panel collapse (fixes pack): the rail carries the expand toggle only while collapsed; the hide is a container-class CSS transition", () => {
+    const collapsed = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed onExpand={() => {}} />);
+    expect(collapsed).toContain('aria-label="Show the panel"');
+    const expanded = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed={false} />);
+    expect(expanded).not.toContain('aria-label="Show the panel"');
+    // the collapsed panel hides via the container's state class (structure only — the slide,
+    // the widened content reflow and the gap collapse are browser checks)
+    const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+    expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*width: 0/s);
+    expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*margin-left: calc\(-1 \* var\(--shell-cap-gap\)\)/s);
   });
 
   it("panel contents: accordion (Dashboard flat, route section open), pills, action strip, upgrade row, user block", () => {
