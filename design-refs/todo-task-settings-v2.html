@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<!-- design-refs/todo-task-settings-v2.html — APPROVED (Jul 18). Supersedes v1
+     (todo-task-settings.html, Jul 16) which was reconciled against but NOT built (stale rows:
+     Requests-&-deadlines-always-on, Missing-reply-windows, no RITUALS). Amendment at commit:
+     DISMISSED + MUTED AS A RULE are UNDATED (no dismiss timestamp is stored); SNOOZED UNTIL keeps
+     its date. No storage/rules change. -->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task settings — sheet + entry (design ref)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* NOTE FOR BUILD: consume live .t-f12 tokens. The sheet uses the journey presentation
+   (scrim + sheet). Baked law shown in-copy: hidden types leave the post-it counts. */
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-bd:#cdb58f; --cof-i:#7a6544;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:rgba(38,20,14,.55);font-family:Inter,sans-serif;color:var(--ink);min-height:100vh;padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:34px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#e8ddd2}
+
+/* entry affordance demo */
+.corner{display:flex;gap:10px;align-items:center;background:var(--oat);border-radius:14px;padding:22px 26px}
+.helpb,.setb{width:40px;height:40px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(58,28,20,.1);color:var(--ink);font-size:15px}
+.setb svg{width:17px;height:17px}
+.helpb:hover,.setb:hover{border-color:var(--pink-b)}
+
+/* the sheet */
+.sheet{background:var(--paper);border-radius:20px;box-shadow:0 18px 60px rgba(20,8,4,.4);max-width:720px;width:100%;overflow:hidden}
+.sheet-head{display:flex;align-items:center;gap:14px;padding:20px 28px 0}
+.exit{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink);margin-left:auto}
+.body{padding:20px 40px 30px}
+.kick{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:5px 13px;color:#6b5a4e;margin-bottom:14px}
+h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;margin-bottom:6px}
+.lede{font-size:14px;color:#6b5a4e;line-height:1.5;margin-bottom:18px}
+.grp{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;margin:22px 0 8px}
+.rows{display:flex;flex-direction:column;gap:7px}
+.row{display:flex;align-items:center;gap:14px;background:var(--white);border:1px solid var(--hair);border-radius:12px;padding:13px 18px}
+.row .ic{width:30px;height:30px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ic.pink{background:var(--pink-t);border:1px solid var(--pink-b);color:#7c3a2a}
+.ic.cof{background:var(--cof-1);border:1px solid var(--cof-bd);color:var(--cof-i)}
+.ic.ink{background:var(--ink);color:var(--paper)}
+.row .tx{flex:1}
+.row .tx b{display:block;font-size:14px;font-weight:600}
+.row .tx span{font-size:12px;color:#6b5a4e;line-height:1.4}
+/* switch */
+.sw{position:relative;width:42px;height:24px;flex:0 0 auto;cursor:pointer}
+.sw input{opacity:0;width:0;height:0}
+.sw .tr{position:absolute;inset:0;border-radius:99px;background:#e6ddd1;border:1px solid var(--hair);transition:background .15s}
+.sw .tr::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.2);transition:left .15s}
+.sw input:checked + .tr{background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-color:var(--sage-bd)}
+.sw input:checked + .tr::after{left:21px}
+.always{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#8a7a6d;border:1px solid var(--hair);background:var(--paper);border-radius:99px;padding:4px 10px}
+.countnote{font-size:12px;color:#8a7a6d;font-style:italic;margin-top:10px}
+/* restore rows */
+.rrow{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--hair);border-radius:11px;padding:11px 16px}
+.rrow .tx{flex:1}
+.rrow .tx b{font-size:13.5px;font-weight:600;display:block}
+.rrow .tx span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:#8a7a6d}
+.restore{border:1px solid var(--sage-bd);background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-radius:99px;padding:6px 15px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}
+.empty-line{font-size:12.5px;color:#8a7a6d;font-style:italic;padding:6px 2px}
+</style>
+</head>
+<body>
+
+<div class="lbl">Entry — a sliders button joining the help circle, bottom-right corner of the board</div>
+<div class="corner">
+  <button class="setb" aria-label="Task settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><circle cx="9" cy="7" r="2.4" fill="#fdfaf5"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="15" cy="17" r="2.4" fill="#fdfaf5"/></svg></button>
+  <button class="helpb" aria-label="Help">?</button>
+</div>
+
+<div class="lbl">The sheet — journey presentation, three sections</div>
+<div class="sheet">
+  <div class="sheet-head"><button class="exit">✕ Back to my desk</button></div>
+  <div class="body">
+    <span class="kick">TASK SETTINGS</span>
+    <h1>What lands on your desk?</h1>
+    <p class="lede">Choose which kinds of work ScriptAlly puts in front of you. Types you switch off leave the board <b>and the post-it counts</b> — out of sight is out of mind, properly.</p>
+
+    <div class="grp">THE WORK ITSELF</div>
+    <div class="rows">
+      <div class="row"><span class="ic ink">★</span><span class="tx"><b>Offers</b><span>An offer of representation always reaches your desk.</span></span><span class="always">ALWAYS ON</span></div>
+      <div class="row"><span class="ic pink">→</span><span class="tx"><b>Your turn to send</b><span>Requested fulls, partials, and R&R resubmissions waiting on you.</span></span><label class="sw"><input type="checkbox" checked><span class="tr"></span></label></div>
+      <div class="row"><span class="ic pink">⏱</span><span class="tx"><b>Nudge reminders</b><span>Check-back dates you've set, when they arrive.</span></span><label class="sw"><input type="checkbox" checked><span class="tr"></span></label></div>
+      <div class="row"><span class="ic pink">…</span><span class="tx"><b>Stale queries</b><span>Queries silent well past the agent's usual reply time.</span></span><label class="sw"><input type="checkbox" checked><span class="tr"></span></label></div>
+    </div>
+
+    <div class="grp">HOUSEKEEPING</div>
+    <div class="rows">
+      <div class="row"><span class="ic cof">≡</span><span class="tx"><b>Missing materials lists</b><span>Agents whose submission requirements you haven't recorded.</span></span><label class="sw"><input type="checkbox" checked><span class="tr"></span></label></div>
+      <div class="row"><span class="ic cof">♡</span><span class="tx"><b>Missing wish lists</b><span>Agents without a recorded wish list.</span></span><label class="sw"><input type="checkbox"><span class="tr"></span></label></div>
+    </div>
+
+    <div class="grp">RITUALS</div>
+    <div class="rows">
+      <div class="row"><span class="ic cof">☕</span><span class="tx"><b>The Sunday review</b><span>The Sunday invitation card. The quiet "Last week in review" scrap stays either way.</span></span><label class="sw"><input type="checkbox" checked><span class="tr"></span></label></div>
+    </div>
+
+    <div class="grp">HIDDEN RIGHT NOW</div>
+    <div class="rows">
+      <div class="rrow"><span class="tx"><b>Wish lists</b><span>MUTED AS A RULE</span></span><button class="restore">Restore</button></div>
+      <div class="rrow"><span class="tx"><b>Marcus Reed silent</b><span>DISMISSED</span></span><button class="restore">Restore</button></div>
+      <div class="rrow"><span class="tx"><b>Jonathan Marsh silent</b><span>SNOOZED UNTIL 21 JUL</span></span><button class="restore">Restore</button></div>
+    </div>
+    <p class="countnote">Restoring puts it straight back on the board. Nothing here is deleted — only set aside.</p>
+  </div>
+</div>
+
+</body>
+</html>

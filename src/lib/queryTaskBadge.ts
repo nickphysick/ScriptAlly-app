@@ -7,7 +7,7 @@
  * Derived over the existing derived Task[] (db.tsx already excludes dismissed/resolved tasks), so a
  * query's `count` is its live open-task count. Tasks link back via `relatedRecordId === query.id`
  * (the same key logNudge + the To-do focus queue use). The urgent-vs-housekeeping split reuses the
- * SAME taskType classification the dashboard's "Over to you" (urgent) and "When you have a moment"
+ * SAME taskType classification the dashboard's urgent panel and "When you have a moment"
  * (housekeeping) streams draw — kept in one place here and drift-guarded against OverToYou.tsx by
  * queryTaskBadge.test.ts (a text assertion, so the lib stays pure — no component import).
  *

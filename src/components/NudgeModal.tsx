@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { ConciergeBell } from "lucide-react";
 import { FormShell } from "./forms/FormShell";
 import { CheckBackSlider } from "./forms/CheckBackSlider";
+import { nudgeDraft } from "../lib/nudgeDraft";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
@@ -61,15 +62,9 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
   }
   const sentence = sentenceParts.join(" ");
 
-  // A copyable follow-up draft — the user pastes it into their own email client (5c). Deliberately
-  // brief and warm; built from what we know (agent first name + send date). We never send it.
-  const followUpDraft = [
-    `Dear ${firstName || "there"},`,
-    "",
-    `I hope this finds you well. I'm writing to gently follow up on my query${dateSent ? `, sent on ${new Date(dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}. I remain very enthusiastic about the possibility of working together, and would be grateful for any update when you have a moment.`,
-    "",
-    "With thanks for your time,",
-  ].join("\n");
+  // A copyable follow-up draft — the user pastes it into their own email client (5c). We never send
+  // it. Shared with the To-do drawer/walkthrough via src/lib/nudgeDraft.ts (one source, no duplication).
+  const followUpDraft = nudgeDraft({ agentName, dateSent });
   const copyDraft = async () => {
     try {
       await navigator.clipboard.writeText(followUpDraft);

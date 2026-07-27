@@ -579,7 +579,7 @@ function AppContent() {
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
-  const showFooter = routeKey !== "queries" && !manuscriptsPackages;
+  const showFooter = routeKey !== "queries" && routeKey !== "todo" && !manuscriptsPackages;
 
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
@@ -621,7 +621,7 @@ function AppContent() {
 
         {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page
             scrollbar) like the Queries desk; stays mounted so its mode/filter/selection survive. */}
-        <StagePage active={routeKey === "todo"} layout="fill" clip contentVariant="work">
+        <StagePage active={routeKey === "todo"} layout="fill" clip>
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Focus flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#fff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023; --burg-soft:#8a4030;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-av:#f6d7cf; --pink-btn:#f6cfc9; --pink-btn-h:#f0bfb8;
+  --gold-t:#f6efdd; --gold-b:#e7d9b8; --gold-i:#7d621d;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420;
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58; --sage:#8a9e88;
+  --pinkC:#f8e7dc;
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --sh-2:0 1px 2px rgba(58,42,26,.05),0 4px 10px -2px rgba(58,42,26,.06);
+  --sh-sheet:0 2px 4px rgba(58,42,26,.05),0 24px 70px -18px rgba(58,42,26,.25);
+  --r-md:9px; --r-lg:12px; --r-sheet:18px;
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif; --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--body);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 120% at 78% -8%, rgba(255,250,242,.6) 0%, transparent 46%), var(--oat);
+  height:100vh;overflow:hidden;display:flex;flex-direction:column}
+button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;text-align:left}
+input,textarea{font:inherit;color:inherit}
+
+/* ===== chrome ===== */
+.chrome{flex:none;display:flex;align-items:center;gap:14px;padding:14px 26px}
+.chrome .exit{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink-2);padding:8px 14px;border-radius:99px;background:rgba(255,255,255,.55);border:1px solid var(--line);box-shadow:var(--sh-1)}
+.chrome .exit:hover{color:var(--ink);border-color:var(--ink-2)}
+.chrome .sp{flex:1}
+.qprog{display:flex;align-items:center;gap:7px}
+.qdot{width:8px;height:8px;border-radius:50%;background:#d9cdbc;transition:.25s}
+.qdot.on{background:var(--burg);transform:scale(1.25)}
+.qdot.done{background:var(--sage)}
+.chrome .count{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.chrome .pend{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--sageD);background:var(--sageC);border:1px solid var(--sage-edge);border-radius:99px;padding:4px 10px}
+
+/* ===== stage ===== */
+.stagearea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:10px 26px 20px;position:relative}
+/* the paper behind — a hint of the queue */
+.behind{position:absolute;width:min(620px,86vw);height:78%;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-sheet);transform:rotate(1.6deg) translateY(14px);opacity:.55}
+.behind.b2{transform:rotate(-1.2deg) translateY(24px);opacity:.32}
+
+.sheet{position:relative;width:min(620px,86vw);max-height:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sheet);box-shadow:var(--sh-sheet);display:flex;flex-direction:column;overflow:hidden;animation:arrive .38s cubic-bezier(.25,.9,.3,1)}
+@keyframes arrive{from{opacity:0;transform:translateY(22px) rotate(.5deg)}to{opacity:1;transform:none}}
+.sheet.leaving{animation:leave .3s cubic-bezier(.6,0,.8,.4) forwards}
+@keyframes leave{to{opacity:0;transform:translateX(60px) rotate(2deg)}}
+.sbody{flex:1;min-height:0;overflow-y:auto;padding:34px 40px 26px}
+.sfoot{flex:none;display:flex;align-items:center;gap:10px;padding:16px 40px 20px;border-top:1px solid var(--hairline);background:var(--paper)}
+.sfoot .sp{flex:1}
+.back{font-size:13px;font-weight:500;color:var(--ink-2);padding:10px 16px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--panel);box-shadow:var(--sh-1)}
+.back:hover{border-color:var(--ink-2);color:var(--ink)}
+.back[disabled]{opacity:.35;pointer-events:none}
+.skip{font-size:13px;color:var(--muted);padding:10px 13px;border-radius:var(--r-md)}
+.skip:hover{background:var(--panel);color:var(--ink)}
+.pri{font-size:14px;font-weight:600;padding:12px 22px;border-radius:var(--r-md);background:var(--ink);color:var(--panel);box-shadow:var(--sh-1)}
+.pri:hover{background:#332c25}
+.pri[disabled]{opacity:.4;pointer-events:none}
+.pri.pink{background:var(--pink-btn);color:#5a2b20}
+.pri.pink:hover{background:var(--pink-btn-h)}
+
+/* ===== sheet content grammar ===== */
+.stream{display:inline-flex;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border-radius:99px;padding:3.5px 10px;border:1px solid;margin-bottom:18px}
+.stream.do{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.stream.hk{background:var(--gold-t);border-color:var(--gold-b);color:var(--gold-i)}
+.stream.nt{background:var(--note-t);border-color:var(--note-b);color:var(--note-i)}
+.stream.off{background:var(--pink-btn);border-color:var(--pink-b);color:#5a2b20}
+.q{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.22;color:var(--ink);max-width:480px}
+.q em{font-style:italic;color:var(--burg)}
+.qsub{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.6;max-width:460px}
+.qsub b{color:var(--ink-2);font-weight:600}
+.who{display:flex;align-items:center;gap:10px;margin-top:20px}
+.bigav{width:40px;height:40px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:14px;font-weight:600;color:#5a2b20}
+.who .wn{font-weight:600;font-size:14px}
+.who .wa{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+
+/* big choice buttons — one-tap answers */
+.choices{display:flex;flex-direction:column;gap:10px;margin-top:26px}
+.choice{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--line);border-radius:var(--r-lg);background:var(--panel);transition:.14s;font-size:14.5px}
+.choice:hover{border-color:var(--ink);box-shadow:var(--sh-2)}
+.choice.on{border-color:var(--sageD);background:var(--sageC)}
+.choice .ck{width:22px;height:22px;border:1.5px solid #d2c8ba;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;transition:.14s}
+.choice.on .ck{background:var(--sageD);border-color:var(--sageD)}
+.choice.on .ck::after{content:"✓"}
+.choice .ct{font-weight:600}
+.choice .cs{font-size:12.5px;color:var(--muted);margin-top:2px}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.bigchip{font-size:14px;font-weight:500;padding:12px 18px;border:1.5px solid var(--line);border-radius:99px;background:var(--panel)}
+.bigchip:hover{border-color:var(--ink)}
+.bigchip.on{background:var(--sageC);border-color:var(--sageD);color:var(--sageD);font-weight:600}
+.inrow{display:flex;gap:12px;margin-top:26px}
+.inrow .f{flex:1}
+.f label{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.f input,.f select,.f textarea{width:100%;border:1.5px solid var(--line);border-radius:var(--r-md);padding:12px 14px;font-size:14.5px;background:var(--white)}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--ink)}
+.f textarea{min-height:96px;resize:vertical;line-height:1.6}
+.draft{margin-top:26px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;font-size:14px;line-height:1.7;color:var(--ink-2);position:relative}
+.draft::before{content:"SUGGESTED NOTE — YOURS TO SEND";font-family:var(--mono);font-size:7.5px;letter-spacing:.13em;color:var(--faint);display:block;margin-bottom:10px}
+.copybtn{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;font-weight:600;padding:10px 16px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--panel);box-shadow:var(--sh-1)}
+.copybtn:hover{border-color:var(--ink)}
+.smallprint{font-size:12px;color:var(--faint);margin-top:12px;line-height:1.6}
+
+/* timeline strip */
+.tl{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+.tle{display:flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--hairline);border-radius:99px;padding:6px 12px;font-size:12px;color:var(--ink-2)}
+.dot{width:13px;height:13px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:7px}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}.dot.q::after{content:"→";font-weight:700}
+.dot.freq{border:2px solid var(--sage);background:var(--sageC);color:var(--sageD)}.dot.freq::after{content:"←";font-weight:700}
+.tle .d{font-family:var(--mono);font-size:8px;color:var(--faint)}
+
+/* offer celebration */
+.confetti{font-size:40px;line-height:1;margin-bottom:14px;letter-spacing:6px}
+.offerq{font-family:var(--serif);font-size:31px;font-weight:600;font-style:italic;line-height:1.2;color:var(--burg);max-width:480px}
+.offernote{font-family:var(--hand);font-size:21px;color:var(--sageD);margin-top:16px;transform:rotate(-1.2deg);display:inline-block}
+
+/* batch rows */
+.brow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--hairline)}
+.brow:last-child{border:none}
+.brow .bav{width:30px;height:30px;border-radius:50%;background:var(--gold-t);border:1px solid var(--gold-b);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--gold-i);flex:none}
+.brow .bn{width:130px;flex:none}
+.brow .bnn{font-size:13.5px;font-weight:500}
+.brow .bna{font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.brow .bf{flex:1;display:flex;gap:6px;flex-wrap:wrap}
+.bc{font-size:12px;padding:7px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel)}
+.bc:hover{border-color:var(--ink)}
+.bc.on{background:var(--sageC);border-color:var(--sage-edge);color:var(--sageD);font-weight:600}
+
+/* review + done */
+.sum{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--line);border-radius:var(--r-lg);margin-top:12px;background:var(--panel)}
+.sum .verb{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;border-radius:99px;padding:3px 9px;border:1px solid;flex:none}
+.sum .verb.d{background:var(--sageC);border-color:var(--sage-edge);color:var(--sageD)}
+.sum .verb.s{background:var(--gold-t);border-color:var(--gold-b);color:var(--gold-i)}
+.sum .verb.k{background:var(--paper);border-color:var(--line);color:var(--muted)}
+.sum .st{flex:1;font-size:13.5px}
+.sum .sd{font-family:var(--mono);font-size:8px;color:var(--faint)}
+.sum .rm{color:var(--faint);padding:2px 7px;border-radius:6px}
+.sum .rm:hover{color:var(--pink-i);background:var(--pink-t)}
+.bigdone{text-align:center;padding:20px 0 10px}
+.bigdone .cir{width:64px;height:64px;border-radius:50%;background:var(--sageC);border:2px solid var(--sage);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--sageD);margin:0 auto 18px;animation:pop .4s cubic-bezier(.3,1.4,.5,1)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.bigdone .t{font-family:var(--serif);font-size:26px;font-weight:600}
+.bigdone .s{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.6;max-width:380px;margin-inline:auto}
+
+.scaf{position:fixed;left:16px;bottom:12px;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <button class="exit" onclick="tryExit()">✕ &nbsp;Back to the board</button>
+  <span class="sp"></span>
+  <div class="qprog" id="qprog"></div>
+  <span class="count" id="count"></span>
+  <span class="pend" id="pend" style="display:none"></span>
+</div>
+
+<div class="stagearea">
+  <div class="behind b2"></div>
+  <div class="behind"></div>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<div class="scaf">Focus flow · one task, one sheet, one question at a time · replaces the drawer and the modal</div>
+
+<script>
+/* ---- queue: one of each task type, to demo every journey ---- */
+const QUEUE=[
+ {kind:'offer', who:'Tom Ellery', agy:'Curtis Vane', ms:"Murphy's Day Out", ini:'TE'},
+ {kind:'send', who:'Juliet Mushens', agy:'Mushens Entertainment', ms:'The Book of Lost Clockworks', ini:'JM',
+  due:'3 days left', mats:['Full manuscript','Synopsis (1 page)','Covering email'],
+  tl:[['q','Query sent','14 Mar'],['freq','Partial requested','2 Jun'],['q','Partial sent','5 Jun'],['freq','Full requested','27 Jun']]},
+ {kind:'nudge', who:'David Higham', agy:'David Higham Associates', ms:'Lost Clockworks', ini:'DH',
+  draft:"Dear David,<br><br>I queried you on 8 January regarding THE BOOK OF LOST CLOCKWORKS, and you kindly requested the full on 29 March. I wondered whether you'd had a chance to consider it — I'd be glad to resend the materials if helpful.<br><br>With thanks,<br>Nick"},
+ {kind:'hk', rule:'window', n:4, names:[['RB','Rowan Blake','Inkwell & Stone'],['TW','Tom Watson','Watson & Vale'],['IP','Ivor Penn','Greene & Heaton'],['FA','Fen Ashby','Foxglove']]},
+ {kind:'note', title:'Ask the group about the covering email', body:'Mention the shortlisting, or let the pages speak?'}
+];
+
+let qi=0, step=0, staged=[], form={};
+
+function prog(){
+  const p=document.getElementById('qprog');
+  p.innerHTML=QUEUE.map((_,i)=>`<span class="qdot ${i<qi?'done':i===qi?'on':''}"></span>`).join('');
+  document.getElementById('count').textContent = qi>=QUEUE.length ? 'REVIEW' : `${qi+1} OF ${QUEUE.length}`;
+  const pd=document.getElementById('pend');
+  if(staged.length){ pd.style.display='inline-block'; pd.textContent=`${staged.length} STAGED — NOTHING SAVED YET`; }
+  else pd.style.display='none';
+}
+function go(fn){
+  const s=document.getElementById('sheet');
+  s.classList.add('leaving');
+  setTimeout(()=>{ s.classList.remove('leaving'); fn(); render(); },280);
+}
+function next(){ qi++; step=0; form={}; }
+function stage(label,verb,detail){ staged.push({label,verb,detail,qi}); }
+function back(){
+  if(step>0){ step--; render(); return; }
+  if(qi>0){ /* un-stage anything from the previous task */ 
+    staged=staged.filter(s=>s.qi!==qi-1); qi--; step=0; form={}; render(); }
+}
+function tryExit(){
+  if(staged.length && !confirm(`You have ${staged.length} staged change${staged.length===1?'':'s'}. Discard them?`)) return;
+  alert('(mock) → back to the board');
+}
+
+/* ---------- renderers per task type ---------- */
+function render(){
+  prog();
+  const s=document.getElementById('sheet');
+  if(qi>=QUEUE.length){ s.innerHTML=review(); return; }
+  const t=QUEUE[qi];
+  s.innerHTML = ({offer, send, nudge, hk, note})[t.kind](t);
+}
+
+/* ---- OFFER: celebrate → act ---- */
+function offer(t){
+  if(step===0) return `
+    <div class="sbody">
+      <div class="confetti">🎉 ✦ 🎉</div>
+      <div class="stream off">Offer of representation</div>
+      <div class="offerq">${t.who} wants to represent you.</div>
+      <div class="qsub">For <b>${t.ms}</b>. This is the thing all of it was for — take a breath before you do anything.</div>
+      <div class="offernote">— worth a cup of tea at least</div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()" ${qi===0&&step===0?'disabled':''}>← Back</button>
+      <span class="sp"></span>
+      <button class="skip" onclick="go(next)">Not now — leave it</button>
+      <button class="pri" onclick="step=1;render()">What happens next →</button>
+    </div>`;
+  return `
+    <div class="sbody">
+      <div class="stream off">Offer · ${t.who}</div>
+      <div class="q">Before you answer him…</div>
+      <div class="qsub">You have <b>other agents still holding your work</b>. The done thing is to let them know you've had an offer and give them a chance to respond — most writers allow one to two weeks.</div>
+      <div class="choices">
+        <button class="choice" onclick="stage('Offer — ${t.who}','k','opened response flow');go(next)">
+          <span class="ck"></span><span><span class="ct">Record his offer & notify the others</span>
+          <span class="cs">Opens the response flow — logs the offer, drafts the notify-others notes.</span></span></button>
+        <button class="choice" onclick="go(next)">
+          <span class="ck"></span><span><span class="ct">I'll deal with this outside the flow</span>
+          <span class="cs">Leaves it on the board, top of Urgent, where it belongs.</span></span></button>
+      </div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+    </div>`;
+}
+
+/* ---- SEND: why → what went out → when/how → staged ---- */
+function send(t){
+  if(step===0) return `
+    <div class="sbody">
+      <div class="stream do">Over to you · ${t.due}</div>
+      <div class="q">Send your full to <em>${t.who}</em>.</div>
+      <div class="qsub">She read the partial and asked for the <b>full manuscript</b> on 27 June. Nothing moves until you send — and this is the only pressing deadline on your desk.</div>
+      <div class="who"><span class="bigav">${t.ini}</span><span><div class="wn">${t.who}</div><div class="wa">${t.agy}</div></span></div>
+      <div class="tl">${t.tl.map(e=>`<span class="tle"><span class="dot ${e[0]}"></span>${e[1]}<span class="d">${e[2].toUpperCase()}</span></span>`).join('')}</div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="skip" onclick="go(next)">Leave it</button>
+      <button class="skip" onclick="stage('Send full — ${t.who}','s','snoozed 7 days');go(next)">Snooze</button>
+      <button class="pri" onclick="step=1;render()">I've sent it — log it →</button>
+    </div>`;
+  if(step===1){
+    form.mats=form.mats||t.mats.map(()=>false);
+    const any=form.mats.some(Boolean);
+    return `
+    <div class="sbody">
+      <div class="stream do">${t.who} · logging the send</div>
+      <div class="q">What went out?</div>
+      <div class="qsub">Tick what you actually sent — it's what we check against later.</div>
+      <div class="choices">${t.mats.map((m,i)=>`
+        <button class="choice ${form.mats[i]?'on':''}" onclick="form.mats[${i}]=!form.mats[${i}];render()">
+          <span class="ck"></span><span class="ct">${m}</span></button>`).join('')}
+      </div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="pri" ${any?'':'disabled'} onclick="step=2;render()">${any?'Next →':'Tick what you sent'}</button>
+    </div>`;
+  }
+  return `
+    <div class="sbody">
+      <div class="stream do">${t.who} · logging the send</div>
+      <div class="q">When, and how?</div>
+      <div class="inrow">
+        <div class="f"><label>Date sent</label><input type="date" value="2026-07-16" onchange="form.date=this.value"></div>
+        <div class="f"><label>How</label><select onchange="form.method=this.value"><option>Email</option><option>QueryManager</option><option>Agency form</option></select></div>
+      </div>
+      <div class="inrow"><div class="f"><label>Note to yourself (optional)</label><textarea placeholder="Anything worth remembering…"></textarea></div></div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="pri" onclick="stage('Full sent — ${t.who}','d','16 Jul · Email');go(next)">Stage it →</button>
+    </div>`;
+}
+
+/* ---- NUDGE: why → the draft → log ---- */
+function nudge(t){
+  if(step===0) return `
+    <div class="sbody">
+      <div class="stream do">96 days · no reply</div>
+      <div class="q">Time to nudge <em>${t.who}</em>?</div>
+      <div class="qsub">You sent the full on <b>3 April</b>. Their stated reply time is <b>8 weeks</b> — it's been 96 days, so a polite follow-up is fair.</div>
+      <div class="who"><span class="bigav">${t.ini}</span><span><div class="wn">${t.who}</div><div class="wa">${t.agy}</div></span></div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="skip" onclick="go(next)">Leave it</button>
+      <button class="skip" onclick="stage('Nudge — ${t.who}','s','snoozed 7 days');go(next)">Snooze</button>
+      <button class="pri" onclick="step=1;render()">Write the nudge →</button>
+    </div>`;
+  return `
+    <div class="sbody">
+      <div class="stream do">Nudging ${t.who}</div>
+      <div class="q">Here's a note you could send.</div>
+      <div class="draft">${t.draft}</div>
+      <button class="copybtn" onclick="this.textContent='✓ Copied';setTimeout(()=>this.innerHTML='⧉ &nbsp;Copy the draft',1400)">⧉ &nbsp;Copy the draft</button>
+      <div class="smallprint">ScriptAlly never sends anything for you. Copy it, send it from your own email, then stage the log below.</div>
+      <div class="inrow" style="margin-top:18px">
+        <div class="f"><label>Date nudged</label><input type="date" value="2026-07-16"></div>
+        <div class="f"><label>How</label><select><option>Email</option><option>QueryManager</option></select></div>
+      </div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="pri" onclick="stage('Nudge sent — ${t.who}','d','16 Jul · Email');go(next)">Stage it →</button>
+    </div>`;
+}
+
+/* ---- HOUSEKEEPING (grouped): payoff → rapid fill, all on one sheet ---- */
+function hk(t){
+  if(step===0) return `
+    <div class="sbody">
+      <div class="stream hk">Housekeeping · reply windows</div>
+      <div class="q"><em>${t.n} agents</em> have no reply window.</div>
+      <div class="qsub">Without one, we can't tell you when a nudge is fair — so these agents <b>never appear in your chase list</b>. It's usually on the agency's submissions page. Fill what you know; skip what you don't.</div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="skip" onclick="go(next)">Not now</button>
+      <button class="skip" onclick="stage('Reply windows','k','muted — never ask');go(next)">Never ask</button>
+      <button class="pri" onclick="step=1;render()">Fix them together →</button>
+    </div>`;
+  form.vals=form.vals||{};
+  const filled=Object.keys(form.vals).length;
+  return `
+    <div class="sbody">
+      <div class="stream hk">Reply windows · ${filled} of ${t.n} filled</div>
+      <div class="q">They usually reply within…</div>
+      <div style="margin-top:20px">${t.names.map((a,i)=>`
+        <div class="brow"><span class="bav">${a[0]}</span>
+          <span class="bn"><div class="bnn">${a[1]}</div><div class="bna">${a[2]}</div></span>
+          <span class="bf">${['4 wks','6 wks','8 wks','12 wks','None stated'].map(w=>`
+            <button class="bc ${form.vals[i]===w?'on':''}" onclick="form.vals[${i}]='${w}';render()">${w}</button>`).join('')}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="pri" ${filled?'':'disabled'} onclick="stage('Reply windows set','d','${'${filled}'} agents'.replace('${'${filled}'}',${'filled'}));go(next)">Save ${filled||''} & continue →</button>
+    </div>`;
+}
+
+/* ---- NOTE: just handle it ---- */
+function note(t){
+  return `
+    <div class="sbody">
+      <div class="stream nt">Note to self · 6 Jul</div>
+      <div class="q">${t.title}</div>
+      <div class="inrow"><div class="f"><label>Your note</label><textarea>${t.body}</textarea></div></div>
+      <div class="smallprint">Attached to <b>Juliet Mushens</b> — it also shows on her record.</div>
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="back()">← Back</button><span class="sp"></span>
+      <button class="skip" onclick="go(next)">Keep it</button>
+      <button class="pri pink" onclick="stage('Note done — covering email','d','ticked');go(next)">✓ Mark it done</button>
+    </div>`;
+}
+
+/* ---- REVIEW: staged changes, one save ---- */
+function review(){
+  const rows=staged.map((s,i)=>`
+    <div class="sum"><span class="verb ${s.verb}">${s.verb==='d'?'Done':s.verb==='s'?'Snoozed':'Noted'}</span>
+      <span class="st">${s.label}</span><span class="sd">${s.detail.toUpperCase()}</span>
+      <button class="rm" onclick="staged.splice(${i},1);render()">✕</button></div>`).join('');
+  return `
+    <div class="sbody">
+      ${staged.length?`
+        <div class="stream do" style="background:var(--sageC);border-color:var(--sage-edge);color:var(--sageD)">Ready to save</div>
+        <div class="q">You worked through <em>${staged.length} thing${staged.length===1?'':'s'}</em>.</div>
+        <div class="qsub">Nothing has been saved yet — check the list, drop anything you're not sure of, then save the lot.</div>
+        ${rows}`
+      :`<div class="bigdone"><div class="cir">✓</div><div class="t">Desk walked.</div>
+        <div class="s">You left everything as it was — sometimes that's the right call too.</div></div>`}
+    </div>
+    <div class="sfoot">
+      <button class="back" onclick="qi=QUEUE.length-1;step=0;render()">← Back</button>
+      <span class="sp"></span>
+      ${staged.length?`<button class="skip" onclick="tryExit()">Discard</button>
+      <button class="pri" onclick="finish()">Save ${staged.length} & finish</button>`
+      :`<button class="pri" onclick="alert('(mock) → board')">Back to the board</button>`}
+    </div>`;
+}
+function finish(){
+  const s=document.getElementById('sheet');
+  const n=staged.length;
+  s.innerHTML=`<div class="sbody"><div class="bigdone"><div class="cir">✓</div>
+    <div class="t">${n} saved. Desk cleared.</div>
+    <div class="s">They're logged against their queries and struck through on today's list. Go write something.</div></div></div>
+    <div class="sfoot"><span class="sp"></span><button class="pri" onclick="alert('(mock) → board')">Back to the board</button></div>`;
+  staged=[]; qi=QUEUE.length; prog();
+  document.getElementById('pend').style.display='none';
+}
+render();
+</script>
+</body>
+</html>

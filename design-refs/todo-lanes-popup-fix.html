@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-do board — exact-fit lanes · pop-up stacking · clamp (design ref)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* NOTE FOR BUILD: consume live theme tokens (.t-f12) — mockup hexes are illustrative
+   where a token exists. Fades are RETIRED by this design: exact-fit + snap + chevrons
+   replace them entirely. */
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc; --pink-i:#7c3a2a; --pink-mid:#efd5ca;
+  --pink-band:#f3e0d6; --gap:18px; --card-min:300px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--oat);font-family:Inter,sans-serif;color:var(--ink);padding-bottom:120px}
+
+.note{max-width:1520px;margin:18px auto 0;padding:0 32px;font-size:13px;color:#6b5a4e;line-height:1.5}
+.note b{color:var(--ink)}
+
+/* band header (as shipped — context) */
+.band{background:var(--paper);border-bottom:1px solid var(--hair)}
+.band-in{max-width:1520px;margin:0 auto;padding:22px 32px;display:flex;align-items:center;gap:28px}
+.h-date{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--muted);margin-bottom:5px}
+.h-title{font-family:'Playfair Display',serif;font-size:27px;font-weight:600}
+
+.col{max-width:1520px;margin:0 auto;padding:0 32px}
+
+/* lane header */
+.lane-head{display:flex;align-items:center;gap:12px;margin:26px 0 12px}
+.lane-dot{width:11px;height:11px;border-radius:50%;background:var(--pink-band);border:1px solid #e5c4b4}
+.lane-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600}
+.lane-count{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:2px 9px;color:#7a6a5e}
+.lane-rule{flex:1;height:1px;background:var(--hair)}
+.fs{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 16px;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.fs .mini{width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,var(--pink-t),var(--pink-b));border:1px solid var(--pink-b);display:flex;align-items:center;justify-content:center}
+.fs .mini svg{width:9px;height:9px;margin-left:1px;color:var(--ink)}
+
+/* chevron pagers — replace fades entirely */
+.pager{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);transition:border-color .15s,opacity .2s}
+.pager:hover{border-color:var(--pink-b)}
+.pager svg{width:14px;height:14px}
+.pager[disabled]{background:var(--paper);border:1px solid var(--hair);color:rgba(58,28,20,.28);box-shadow:none;cursor:not-allowed}
+
+/* EXACT-FIT LANE: N cards fill the row precisely; scroll-snap pages cleanly */
+.lane-scroll{display:flex;gap:var(--gap);overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}
+.lane-scroll::-webkit-scrollbar{display:none}
+.lane-scroll .card{flex:0 0 var(--cardw);scroll-snap-align:start}
+
+.card{background:var(--white);border:1px solid var(--hair);border-radius:14px;padding:18px 20px 16px;box-shadow:0 1px 2px rgba(58,28,20,.05);display:flex;flex-direction:column;min-height:224px}
+.tag{display:inline-block;align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;background:var(--pink-t);border:1px solid var(--pink-b);color:var(--pink-i);border-radius:99px;padding:4px 11px;margin-bottom:12px}
+.card h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;line-height:1.25;margin-bottom:4px}
+.card .ms{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#7a6a5e;margin-bottom:12px}
+/* THE CLAMP FIX: subtitles clamp at TWO lines, min-height absorbs it */
+.card .sub2{font-size:13px;color:#6b5a4e;line-height:1.45;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{border-top:1px solid var(--hair);padding-top:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#7a6a5e;margin-bottom:12px;margin-top:auto}
+.pill-cta{width:100%;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:9px 0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--ink);cursor:pointer}
+
+/* ============ TODAY'S LIST POP-UP — corrected stacking ============ */
+.popup{position:fixed;right:28px;bottom:28px;width:380px;max-height:calc(100vh - 120px);background:var(--paper);border:1px solid var(--hair);border-radius:16px;box-shadow:0 10px 34px rgba(58,28,20,.2);display:flex;flex-direction:column;overflow:hidden}
+.pop-head{display:flex;align-items:center;gap:10px;padding:16px 18px 12px;background:var(--pink-t);border-bottom:1px solid var(--pink-b)}
+.pop-head h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;flex:1}
+.pop-badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;border:1px solid var(--pink-b);background:var(--white);border-radius:99px;padding:3px 9px;color:var(--pink-i)}
+.pop-x{background:none;border:none;font-size:16px;cursor:pointer;color:var(--ink)}
+/* outstanding OWNS the flexible height and scrolls internally past the cap */
+.pop-list{flex:1 1 auto;min-height:0;overflow-y:auto;padding:8px 10px}
+.pop-item{display:flex;align-items:flex-start;gap:10px;padding:11px 8px;border-bottom:1px solid var(--hair)}
+.pop-item:last-child{border-bottom:none}
+.pop-dot{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);flex:0 0 auto;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:transparent}
+.pop-dot:hover{color:var(--ink)}
+.pop-item .t{flex:1}
+.pop-item .t b{display:block;font-size:13.5px;font-weight:600;line-height:1.3}
+.pop-item .t span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:#7a6a5e}
+.pop-rm{background:none;border:none;color:#b3a396;cursor:pointer;font-size:13px}
+/* done band: RENDERS ONLY when non-empty; sized to content; never steals space */
+.pop-done{flex:0 0 auto;border-top:1px solid var(--hair);background:#f4f1ea;padding:8px 10px;display:none;max-height:32vh;overflow-y:auto}
+.popup.has-done .pop-done{display:block}
+.pop-done .dh{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7a6a5e;padding:2px 8px 6px}
+.pop-done .pop-item .t b{text-decoration:line-through;color:#8d7f73}
+.pop-foot{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--hair)}
+.pop-count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#7a6a5e;flex:1}
+.btn-ghost{border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}
+.btn-ink{border:none;background:var(--ink);color:var(--paper);border-radius:99px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="band"><div class="band-in">
+  <div><div class="h-date">FRI 17 JUL</div><div class="h-title">What's on your desk?</div></div>
+</div></div>
+
+<p class="note"><b>Resize the window</b> to watch the lane flex between 3 / 4 / 5 exact-fit cards — no fades, no mid-word clipping; the chevrons page a full set with snap, and ‹ only enables once scrolled. The grouped card shows the two-line subtitle clamp. In the pop-up, tick an item's circle: the done band only appears once something is done, and never steals space from the outstanding list.</p>
+
+<div class="col">
+  <div class="lane-head">
+    <span class="lane-dot"></span><span class="lane-title">Housekeeping</span><span class="lane-count">7</span>
+    <div class="lane-rule"></div>
+    <button class="fs"><span class="mini"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></span>Focused session</button>
+    <button class="pager" id="pgL" disabled aria-label="Previous cards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <button class="pager" id="pgR" aria-label="Next cards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+  </div>
+
+  <div class="lane-scroll" id="lane">
+    <div class="card"><span class="tag">MISSING MATERIALS</span><h3><b>16</b> agents missing a materials list</h3><div class="sub2">Add what they ask to receive so your package check can flag gaps before you send anything out.</div><div class="meta">AK WT DO PR +12</div><button class="pill-cta">FIX TOGETHER →</button></div>
+    <div class="card"><span class="tag">STALE QUERY</span><h3>Jonathan Marsh silent</h3><div class="ms">Murphy's Day Out</div><div class="sub2">No reply — consider closing</div><div class="meta">JM · JONATHAN MARSH · THE MARSH AGENCY</div><button class="pill-cta">✓ ON TODAY</button></div>
+    <div class="card"><span class="tag">STALE QUERY</span><h3>Marcus Reed silent for 766 days</h3><div class="sub2">No reply — consider closing</div><div class="meta">MR · MARCUS REED · BLOOMSBURY QUILL</div><button class="pill-cta">＋ TODAY'S LIST</button></div>
+    <div class="card"><span class="tag">STALE QUERY</span><h3>Aisha Kapoor silent</h3><div class="sub2">No reply — consider closing</div><div class="meta">AK · AISHA KAPOOR · KAPOOR &amp; FRAY</div><button class="pill-cta">＋ TODAY'S LIST</button></div>
+    <div class="card"><span class="tag">STALE QUERY</span><h3>Priya Raman silent</h3><div class="sub2">No reply — consider closing</div><div class="meta">PR · PRIYA RAMAN · RAMAN LITERARY</div><button class="pill-cta">＋ TODAY'S LIST</button></div>
+    <div class="card"><span class="tag">STALE QUERY</span><h3>Curtis Vane silent</h3><div class="sub2">No reply — consider closing</div><div class="meta">CV · CURTIS VANE · GALLERY</div><button class="pill-cta">＋ TODAY'S LIST</button></div>
+    <div class="card"><span class="tag">STALE QUERY</span><h3>Will Tan silent</h3><div class="sub2">No reply — consider closing</div><div class="meta">WT · WILL TAN · TAN LITERARY</div><button class="pill-cta">＋ TODAY'S LIST</button></div>
+  </div>
+</div>
+
+<!-- Today's list pop-up — corrected stacking -->
+<div class="popup" id="popup">
+  <div class="pop-head"><h2>Today's list</h2><span class="pop-badge" id="popBadge">5 committed</span><button class="pop-x">✕</button></div>
+  <div class="pop-list" id="popList"></div>
+  <div class="pop-done" id="popDone"><div class="dh">DONE TODAY</div></div>
+  <div class="pop-foot"><span class="pop-count" id="popCount">0 OF 5 DONE TODAY</span><button class="btn-ghost">Add more</button><button class="btn-ink">Work the list</button></div>
+</div>
+
+<script>
+/* ===== EXACT-FIT LANE ===== */
+const lane = document.getElementById('lane'), pgL = document.getElementById('pgL'), pgR = document.getElementById('pgR');
+const MIN = 300, GAP = 18, FLOOR = 1, CAP = 5;
+
+function fit(){
+  const w = lane.clientWidth;
+  // N = how many cards of at least MIN width fit, clamped [FLOOR, CAP]
+  const n = Math.max(FLOOR, Math.min(CAP, Math.floor((w + GAP) / (MIN + GAP))));
+  const cardw = (w - GAP * (n - 1)) / n;
+  lane.style.setProperty('--cardw', cardw + 'px');
+  lane.dataset.n = n;
+  pagers();
+}
+function pagers(){
+  pgL.disabled = lane.scrollLeft <= 4;
+  pgR.disabled = lane.scrollLeft >= lane.scrollWidth - lane.clientWidth - 4;
+}
+function page(dir){
+  const n = +lane.dataset.n || 4;
+  const cardw = parseFloat(getComputedStyle(lane).getPropertyValue('--cardw'));
+  lane.scrollBy({left: dir * n * (cardw + GAP), behavior:'smooth'});
+}
+pgL.addEventListener('click', ()=>page(-1));
+pgR.addEventListener('click', ()=>page(1));
+lane.addEventListener('scroll', pagers, {passive:true});
+new ResizeObserver(fit).observe(lane);
+fit();
+
+/* ===== POP-UP STACKING ===== */
+const items = [
+  {t:"Tom Ellery has made an offer", m:"TOM ELLERY · CURTIS VANE"},
+  {t:"Send your full to Daniel O'Rourke", m:"DANIEL O'ROURKE · INKWELL & STONE"},
+  {t:"Send your full to Jonathan Marsh", m:"JONATHAN MARSH · THE MARSH AGENCY"},
+  {t:"Send your partial to Daniel O'Rourke", m:"DANIEL O'ROURKE · INKWELL & STONE"},
+  {t:"Resubmit your R&R to Sophie Dunn", m:"SOPHIE DUNN · CURTIS VANE"}
+].map((x,i)=>({...x, id:i, done:false}));
+
+const popup=document.getElementById('popup'), list=document.getElementById('popList'),
+      doneBand=document.getElementById('popDone'), cnt=document.getElementById('popCount');
+
+function row(it){
+  const d=document.createElement('div'); d.className='pop-item';
+  d.innerHTML=`<button class="pop-dot" aria-label="${it.done?'Undo':'Mark done'}">${it.done?'↺':'✓'}</button>
+    <span class="t"><b>${it.t}</b><span>${it.m}</span></span>
+    <button class="pop-rm" aria-label="Remove">✕</button>`;
+  d.querySelector('.pop-dot').addEventListener('click',()=>{it.done=!it.done;render();});
+  return d;
+}
+function render(){
+  list.innerHTML=''; doneBand.innerHTML='<div class="dh">DONE TODAY</div>';
+  const open=items.filter(i=>!i.done), done=items.filter(i=>i.done);
+  open.forEach(i=>list.appendChild(row(i)));
+  done.forEach(i=>doneBand.appendChild(row(i)));
+  popup.classList.toggle('has-done', done.length>0);  /* band renders ONLY when non-empty */
+  cnt.textContent=`${done.length} OF ${items.length} DONE TODAY`;
+}
+render();
+</script>
+</body>
+</html>

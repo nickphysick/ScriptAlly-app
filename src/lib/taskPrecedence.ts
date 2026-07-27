@@ -4,7 +4,7 @@
  *
  * taskPrecedence — the ONE decision for what a waiting query owes the writer: nudge, close, or
  * nothing. Extracted pure so the state matrix is unit-provable (the db.tsx generator, the dashboard
- * "Over to you" box and the Queries Hub all read the SAME predicate — they must not contradict).
+ * urgent task panel and the Queries Hub all read the SAME predicate — they must not contradict).
  *
  * The model (owner-specified redesign, not a patch):
  *   · No reply window recorded → NEITHER fires. The data_quality_poor "set a reply window" item

@@ -1,0 +1,166 @@
+<!-- design-refs/todo-frame-v5.html — Downloads todo-fix8.html (23 Jul 11:45), committed with frame P1.
+  NORMATIVE for: the lighter bar greys (#f4f3f1→#f0eeeb, rule #e5e3de, meta #8a857d; vseg track
+  #faf9f8 / #dbd9d4), the rail's section structure (Begin · REVIEW band · review row · FILTER
+  band · pills · foot) with the collapsed review row (small cup · unread dot #c96a55 · WK stamp),
+  and the bare 20px cog.
+  FENCED AS STALE WITHIN: §1's frame draws a burgundy Begin and §2's board recommends system 1+2 —
+  both SUPERSEDED by the pack's button law (system 10's tailored ink primary #2a1a13/#1d100c/cream
+  at 42/34 + hairline secondaries in two tones; no offset shadows — the press language dies).
+  The centred Playfair "To do" title in its bar is DROPPED — the bar keeps meta left / toggle
+  right only. Geometry from this ref; button colours + the bar title from the pack prose. -->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Rail sections, lighter document bar, button board</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:46px 0 12px;width:1180px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px}
+.frame{width:1180px;background:var(--oat);border-radius:12px;box-shadow:0 8px 22px rgba(58,28,20,.16);padding:26px 24px;box-sizing:border-box}
+.work{display:flex;gap:22px;align-items:flex-start}
+/* candidate button system A applied in-frame: solid burgundy + elevated white */
+.pri{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(180deg,#83402f,#7c3a2a);border:1px solid #6b3023;color:#fdf3ec;border-radius:99px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(124,58,42,.25);line-height:1;box-sizing:border-box}
+.pri:hover{background:linear-gradient(180deg,#7c3a2a,#6f3325)}
+.sec{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--white);border:1px solid #d8cfc4;color:#4d4238;border-radius:99px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(58,28,20,.08);line-height:1;box-sizing:border-box}
+.sec:hover{border-color:#c2b5a6;box-shadow:0 2px 6px rgba(58,28,20,.12)}
+/* rail with sectioned headers */
+.rail{width:248px;flex:0 0 auto;background:var(--white);border:1px solid var(--hair);border-radius:16px;box-shadow:0 3px 14px rgba(58,28,20,.08);overflow:hidden;display:flex;flex-direction:column}
+.rbegin{margin:12px 10px;height:42px;font-size:12.5px}
+.rsech{background:linear-gradient(180deg,#f4f3f1,#f0eeeb);border-top:1px solid #e5e3de;border-bottom:1px solid #e5e3de;padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;color:#8a857d}
+.rrow{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:11.5px;font-weight:600;color:#4d4238;cursor:pointer;border-bottom:1px solid var(--hair2)}
+.rrow .wk{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em;color:#a5988c}
+.rrow .new{width:7px;height:7px;border-radius:50%;background:#c96a55}
+.fpill{display:flex;align-items:center;gap:10px;margin:0 10px 6px;height:34px;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:0 13px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:#5d4d40;cursor:pointer}
+.fpill:first-of-type{margin-top:10px}
+.fpill .dotc{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.fpill .n{margin-left:auto;color:#a5988c}
+.fpill.sel{border-color:var(--ink);font-weight:700;color:var(--ink)}
+.fpill.sel::before{content:'✓';font-size:9px}
+.fdiv{height:1px;background:var(--hair2);margin:6px 16px}
+.rfoot{margin-top:8px;border-top:1px solid var(--hair2);padding:10px 14px 12px;display:flex;align-items:center;gap:11px;font-size:12px;font-weight:600;color:#4d4238;cursor:pointer}
+/* centre */
+.centre{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+.sheet{background:var(--white);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 16px rgba(58,28,20,.09);overflow:hidden}
+.dochead{background:linear-gradient(180deg,#f4f3f1,#f0eeeb);border-bottom:1px solid #e5e3de;padding:10px 18px;display:flex;align-items:center;position:relative;min-height:34px}
+.dochead .meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#8a857d}
+.dochead .doct{position:absolute;left:50%;transform:translateX(-50%);font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ink)}
+.vseg{margin-left:auto;height:30px;box-sizing:border-box;border:1px solid #dbd9d4;background:#faf9f8;border-radius:99px;display:inline-flex;align-items:center;padding:3px;gap:2px}
+.vseg span{width:30px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:99px;font-size:10px;color:#8a857d}
+.vseg span.on{background:var(--white);color:var(--ink);border:1px solid var(--ink);box-sizing:border-box}
+.sbody{padding:16px 18px 18px}
+.sech{display:flex;align-items:center;gap:11px;margin:2px 4px 12px}
+.sech .playb{width:28px;height:28px;border-radius:50%;background:var(--white);border:1px solid rgba(58,28,20,.16);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(58,28,20,.1)}
+.sech .t{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;position:relative;padding-bottom:5px}
+.sech .t::after{content:'';position:absolute;left:1px;bottom:0;width:24px;height:3px;border-radius:2px;background:var(--pink-b)}
+.sech .cc{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--oat);border:1px solid var(--hair);border-radius:99px;padding:2px 8px;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(3,250px);gap:12px}
+.card{background:var(--white);border:1px solid #d8cfc4;border-radius:12px;box-shadow:0 2px 6px rgba(58,28,20,.07);overflow:hidden}
+.card .bd{padding:6px 12px;border-bottom:1px solid var(--pink-b);background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));display:flex;align-items:center;min-height:27px;box-sizing:border-box}
+.tg{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.card .bc{padding:10px 12px 12px}
+.card h3{font-family:'Playfair Display',serif;font-size:12.5px;font-weight:600;line-height:1.3}
+.card .ms{font-family:'Playfair Display',serif;font-style:italic;font-size:10px;color:#7a6a5e;margin-top:3px}
+/* button board */
+.bstage{width:1180px;background:var(--oat);border-radius:12px;box-shadow:0 6px 16px rgba(58,28,20,.13);padding:16px 22px;display:flex;align-items:center;gap:24px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:99px;font-weight:700;cursor:pointer;height:40px;padding:0 20px;font-size:12.5px;box-sizing:border-box;line-height:1;white-space:nowrap}
+.btn.sm{height:33px;padding:0 15px;font-size:10.5px}
+.pair{background:var(--white);border:1px solid var(--hair);border-radius:14px;padding:11px;display:flex;gap:6px;margin-left:auto}
+</style></head><body><div class="lbl">1 &middot; The frame updates <em>&mdash; lighter grey document bar with bold Playfair &ldquo;To do&rdquo; centred (meta left, toggle right); the rail sectioned under grey REVIEW / FILTER headers, with the dismissed review collapsed to a row beneath Begin (unread dot &middot; week stamp); Task settings as a bare 20px cog. Buttons shown in candidate system 1+2 below.</em></div><div class="frame"><div class="work"><div class="rail">
+<span class="pri rbegin">&#9654; Begin focused session</span>
+<div class="rsech">REVIEW</div>
+<div class="rrow"><svg viewBox="0 0 104 92" width="26" height="23"><g fill="none" stroke="#3a1c14" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 26 C18 23.6 20 21.8 24 20.8 C32 18.4 56 18.4 66 20.8 C70 21.8 72 23.6 72 26 L68 55 C67 62.5 60 67.5 45 67.5 C30 67.5 23 62.5 22 55 Z"/><path d="M72 30 C84 28 92 33 92 40 C92 47 84 52 74 51"/><ellipse cx="45" cy="74" rx="41" ry="10.5"/></g></svg>Last week in review<span class="new"></span><span class="wk">WK 137</span></div>
+<div class="rsech" style="border-top:none">FILTER</div>
+<div class="fpill sel">SHOW ALL<span class="n">44</span></div>
+<div class="fpill"><span class="dotc" style="background:#e59b8f"></span>OFFERS<span class="n">1</span></div>
+<div class="fpill"><span class="dotc" style="background:#e59b8f"></span>AGENT WAITING<span class="n">3</span></div>
+<div class="fpill"><span class="dotc" style="background:#cbb995"></span>MATERIALS<span class="n">16</span></div>
+<div class="fpill"><span class="dotc" style="background:#cbb995"></span>WISH LISTS<span class="n">15</span></div>
+<div class="fpill"><span class="dotc" style="background:#cbb995"></span>STALE<span class="n">9</span></div>
+<div class="fdiv"></div>
+<div class="fpill"><span class="dotc" style="background:#9db29a"></span>TODAY&rsquo;S LIST<span class="n">1</span></div>
+<div class="rfoot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4d4238" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Task settings</div>
+</div><div class="centre"><div class="sheet">
+<div class="dochead"><span class="meta">THU 23 JUL &middot; 44 OPEN &middot; SHOWING 44</span><span class="doct">To do</span><span class="vseg"><span class="on">&#9638;</span><span>&#9776;</span></span></div>
+<div class="sbody">
+<div class="sech"><span class="playb"><svg width="9" height="10" viewBox="0 0 11 12"><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#7c3a2a"/></svg></span><span class="t">Urgent</span><span class="cc">4</span></div>
+<div class="grid"><div class="card"><div class="bd"><span class="tg">&#9733; OFFER</span></div><div class="bc"><h3>Tom Ellery has made an offer</h3><div class="ms">Murphy&rsquo;s Day Out</div></div></div><div class="card"><div class="bd"><span class="tg">AGENT WAITING</span></div><div class="bc"><h3>Send your full to Jonathan Marsh</h3><div class="ms">Murphy&rsquo;s Day Out</div></div></div><div class="card"><div class="bd"><span class="tg">AGENT WAITING</span></div><div class="bc"><h3>Send your partial to Daniel O&rsquo;Rourke</h3><div class="ms">Murphy&rsquo;s Day Out</div></div></div></div>
+</div></div></div></div></div><div class="lbl" style="margin-top:40px">2 &middot; The button board <em>&mdash; ten professional systems, each across the three real contexts; secondaries shown as elevated white throughout (swap freely).</em></div><div class="lbl">1 · Solid burgundy &nbsp;★ recommended pairing (with 2)<em>— the brand&rsquo;s deepest colour as the one true primary; unmistakable, zero gimmick.</em></div>
+<div class="bstage">
+<span class="btn" style="background:linear-gradient(180deg,#83402f,#7c3a2a);border:1px solid #6b3023;color:#fdf3ec;box-shadow:0 2px 6px rgba(124,58,42,.25);font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:linear-gradient(180deg,#83402f,#7c3a2a);border:1px solid #6b3023;color:#fdf3ec;box-shadow:0 2px 6px rgba(124,58,42,.25);font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:linear-gradient(180deg,#83402f,#7c3a2a);border:1px solid #6b3023;color:#fdf3ec;box-shadow:0 2px 6px rgba(124,58,42,.25);font-weight:700">Work the list</span></div>
+</div><div class="lbl">2 · Elevated white &nbsp;★ the recommended secondary<em>— the Stripe/Notion raised-white: paper, hairline, whisper of shadow; here shown carrying primary duty to judge it alone.</em></div>
+<div class="bstage">
+<span class="btn" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:none;border:none;color:#6b5a4e;box-shadow:none;font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:700">Work the list</span></div>
+</div><div class="lbl">3 · Tonal burgundy<em>— burgundy text on the soft-pink tint, no border; Material-style tonal; warm and modern.</em></div>
+<div class="bstage">
+<span class="btn" style="background:linear-gradient(180deg,#f5e2da,#eed3c7);border:1px solid transparent;color:#7c3a2a;font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:linear-gradient(180deg,#f5e2da,#eed3c7);border:1px solid transparent;color:#7c3a2a;font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:linear-gradient(180deg,#f5e2da,#eed3c7);border:1px solid transparent;color:#7c3a2a;font-weight:700">Work the list</span></div>
+</div><div class="lbl">4 · Soft pink bordered<em>— the dashboard CTA as-is (pink fill, pink border, burgundy text).</em></div>
+<div class="bstage">
+<span class="btn" style="background:linear-gradient(180deg,#f5e2da,#eed3c7);border:1px solid #e0bcac;color:#7c3a2a;font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:linear-gradient(180deg,#f5e2da,#eed3c7);border:1px solid #e0bcac;color:#7c3a2a;font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:linear-gradient(180deg,#f5e2da,#eed3c7);border:1px solid #e0bcac;color:#7c3a2a;font-weight:700">Work the list</span></div>
+</div><div class="lbl">5 · Espresso solid<em>— dark, but warmed to espresso with cream text; softer than the old black.</em></div>
+<div class="bstage">
+<span class="btn" style="background:#4a2a1e;border:1px solid #3a1c14;color:#f3e7da;box-shadow:0 2px 8px rgba(58,28,20,.2);font-weight:600">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:#4a2a1e;border:1px solid #3a1c14;color:#f3e7da;box-shadow:0 2px 8px rgba(58,28,20,.2);font-weight:600">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:#4a2a1e;border:1px solid #3a1c14;color:#f3e7da;box-shadow:0 2px 8px rgba(58,28,20,.2);font-weight:600">Work the list</span></div>
+</div><div class="lbl">6 · Hairline ink outline<em>— 1px ink ring, transparent; the most editorial.</em></div>
+<div class="bstage">
+<span class="btn" style="background:transparent;border:1px solid var(--ink);color:var(--ink);font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:transparent;border:1px solid var(--ink);color:var(--ink);font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:transparent;border:1px solid var(--ink);color:var(--ink);font-weight:700">Work the list</span></div>
+</div><div class="lbl">7 · Tonal oat<em>— neutral tonal: oat fill, ink text, borderless; recedes furthest while staying a shape.</em></div>
+<div class="bstage">
+<span class="btn" style="background:#e9dfd2;border:1px solid transparent;color:#3a1c14;font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:#e9dfd2;border:1px solid transparent;color:#3a1c14;font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:#e9dfd2;border:1px solid transparent;color:#3a1c14;font-weight:700">Work the list</span></div>
+</div><div class="lbl">8 · Burgundy hairline<em>— paper fill, burgundy text and hairline; quiet luxury.</em></div>
+<div class="bstage">
+<span class="btn" style="background:var(--paper);border:1px solid #b98a7b;color:#7c3a2a;font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:var(--paper);border:1px solid #b98a7b;color:#7c3a2a;font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:var(--paper);border:1px solid #b98a7b;color:#7c3a2a;font-weight:700">Work the list</span></div>
+</div><div class="lbl">9 · Deep gradient<em>— burgundy with an inner top-light; richest, most &ldquo;premium app&rdquo;.</em></div>
+<div class="bstage">
+<span class="btn" style="background:linear-gradient(180deg,#8d4936,#6b3023);border:1px solid #5d2a1e;color:#fdf3ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 7px rgba(124,58,42,.3);font-weight:700">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:linear-gradient(180deg,#8d4936,#6b3023);border:1px solid #5d2a1e;color:#fdf3ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 7px rgba(124,58,42,.3);font-weight:700">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:linear-gradient(180deg,#8d4936,#6b3023);border:1px solid #5d2a1e;color:#fdf3ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 7px rgba(124,58,42,.3);font-weight:700">Work the list</span></div>
+</div><div class="lbl">10 · Ink solid, slimmed<em>— the original dark kept but 34px, lighter weight, wider tracking; &ldquo;what you had, tailored&rdquo;.</em></div>
+<div class="bstage">
+<span class="btn" style="background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;font-size:11.5px;letter-spacing:.02em;font-weight:600">&#9654; Begin focused session</span>
+<span class="btn sm" style="background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;font-size:11.5px;letter-spacing:.02em;font-weight:600">Action now</span>
+<div class="pair"><span class="btn sm" style="background:#fff;border:1px solid #d8cfc4;color:#4d4238;box-shadow:0 1px 3px rgba(58,28,20,.08);font-weight:600">&#65291; Add more</span><span class="btn sm" style="background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;font-size:11.5px;letter-spacing:.02em;font-weight:600">Work the list</span></div>
+</div></body></html>

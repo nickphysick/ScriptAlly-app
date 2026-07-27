@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — empty states</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;450;500;600;650&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#ffffff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --sub:#5c554b; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-btn:#f6cfc9; --postit-pink:#f9d9d2;
+  --hk-sage:#dce0d9; --hk-sage-2:#d0d6cc; --hk-spine:#b9c3b3; --hk-ink:#54614f; --postit-sage:#dce0d9;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420; --postit-note:#f8ecb0;
+  --coffee:#e7dbc9; --coffee-2:#dccdb5; --coffee-edge:#d3c2a6; --coffee-ink:#6b5a41;
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58;
+  --sh-card:0 1px 2px rgba(58,42,26,.06),0 6px 16px -6px rgba(58,42,26,.10);
+  --sh-postit:0 2px 3px rgba(58,42,26,.10),0 7px 14px -4px rgba(58,42,26,.18);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif; --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;background:#e9dfd0;padding:26px 24px 60px}
+button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;text-align:left}
+.page{max-width:1240px;margin:0 auto}
+.h1{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:4px}
+.sub2{font-size:13px;color:var(--muted);margin-bottom:22px;max-width:820px;line-height:1.55}
+.seclab{display:flex;align-items:baseline;gap:10px;margin:26px 0 8px}
+.seclab .n{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--burg);border-radius:99px;padding:3px 9px}
+.seclab .t{font-family:var(--serif);font-size:16px;font-weight:600}
+.trade{font-size:12px;color:var(--muted);margin-bottom:11px;max-width:840px;line-height:1.5}
+.trade b{color:var(--ink-2)}
+.stage{background:radial-gradient(120% 120% at 80% -10%, rgba(255,250,242,.55) 0%, transparent 46%), var(--oat);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(58,42,26,.05)}
+
+/* shared board bits */
+.bar{display:flex;align-items:center;gap:22px;background:var(--white);border:1.5px solid var(--ink);border-radius:14px;padding:16px 24px;margin-bottom:18px}
+.askwrap{display:flex;flex-direction:column;gap:3px}
+.date{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ask{font-family:var(--serif);font-size:22px;font-weight:600;white-space:nowrap}
+.postits{display:flex;gap:16px;margin-left:10px}
+.postit{position:relative;width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-shadow:var(--sh-postit)}
+.postit::before{content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%) rotate(-1.5deg);width:30px;height:11px;background:rgba(255,255,255,.55);border:1px solid rgba(58,42,26,.05)}
+.postit .v{font-family:var(--hand);font-size:28px;font-weight:600;line-height:1}
+.postit .k{font-family:var(--mono);font-size:6px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;opacity:.75}
+.postit.ug{background:var(--postit-pink);transform:rotate(-2.4deg);color:#6e3325}
+.postit.hk{background:var(--postit-sage);transform:rotate(1.8deg);color:var(--hk-ink)}
+.postit.nt{background:var(--postit-note);transform:rotate(-1.2deg);color:#6b5a17}
+.postit.zero .v{opacity:.45}
+.sp{flex:1}
+.go{font-size:12.5px;font-weight:600;padding:10px 18px;border-radius:10px;background:var(--ink);color:var(--panel);white-space:nowrap}
+.go.ghost{background:var(--paper);color:var(--faint);border:1px solid var(--hairline);box-shadow:none;cursor:not-allowed}
+.reelh{display:flex;align-items:center;gap:10px;margin:0 2px 11px}
+.lanedot{width:9px;height:9px;border-radius:50%}
+.lanedot.ug{background:var(--pink-btn);outline:1px solid var(--pink-b)}
+.lanedot.hk{background:var(--hk-sage-2);outline:1px solid var(--hk-spine)}
+.lanedot.nt{background:var(--note-b);outline:1px solid #dcc98a}
+.reelh .lt{font-family:var(--serif);font-size:17px;font-weight:600}
+.reelh .ln{font-family:var(--mono);font-size:8px;font-weight:700;border-radius:99px;padding:2px 8px;background:var(--white);border:1px solid var(--line);color:var(--ink-2)}
+.reelh .rule{flex:1;height:1px;background:var(--line)}
+
+/* A: new desk */
+.newdesk{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:34px 38px;display:flex;gap:34px;align-items:center;box-shadow:var(--sh-card)}
+.newdesk .txt{flex:1}
+.newdesk h2{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.2}
+.newdesk h2 em{font-style:italic;color:var(--burg)}
+.newdesk p{font-size:13px;color:var(--sub);margin-top:9px;line-height:1.6;max-width:440px}
+.newdesk .acts{display:flex;gap:9px;margin-top:16px}
+.newdesk .pri{font-size:13px;font-weight:600;padding:11px 19px;border-radius:9px;background:var(--ink);color:var(--panel)}
+.newdesk .sec{font-size:13px;font-weight:500;padding:11px 17px;border-radius:9px;border:1px solid var(--line);color:var(--ink-2)}
+.ghoststack{position:relative;width:250px;height:150px;flex:none}
+.gc{position:absolute;width:220px;height:120px;background:var(--paper);border:1.5px dashed var(--line);border-radius:11px;padding:12px 14px}
+.gc.g1{transform:rotate(-3deg);top:18px;left:0;opacity:.6}
+.gc.g2{transform:rotate(2deg);top:4px;left:26px;background:var(--white);border-style:solid;box-shadow:var(--sh-card)}
+.gc .gl{height:8px;border-radius:99px;background:var(--hairline);margin-bottom:8px}
+.gc .gl.w60{width:60%}.gc .gl.w85{width:85%}.gc .gl.w40{width:40%}
+.gc .gtag{width:70px;height:14px;border-radius:99px;background:var(--pink-t);border:1px solid var(--pink-b);margin-bottom:10px}
+.handnote{font-family:var(--hand);font-size:20px;color:var(--coffee-ink);transform:rotate(-2deg);position:absolute;bottom:-14px;right:6px}
+
+/* B: all-clear urgent */
+.clear{display:flex;align-items:center;gap:16px;background:var(--white);border:1px solid var(--line);border-radius:11px;box-shadow:var(--sh-card);padding:18px 22px;position:relative;overflow:hidden}
+.clear::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pink-btn)}
+.clear .ic{width:40px;height:40px;border-radius:50%;background:var(--hk-sage);border:1.5px solid var(--hk-spine);display:flex;align-items:center;justify-content:center;color:var(--hk-ink);font-size:16px;flex:none}
+.clear .t2{font-family:var(--serif);font-size:17px;font-weight:600}
+.clear .s2{font-size:12px;color:var(--sub);margin-top:2px}
+.clear .hand2{margin-left:auto;font-family:var(--hand);font-size:20px;color:var(--hk-ink);transform:rotate(-1.5deg);white-space:nowrap}
+
+/* C: housekeeping clear */
+.hkclear{display:flex;align-items:center;gap:16px;background:var(--white);border:1px solid var(--line);border-radius:11px;box-shadow:var(--sh-card);padding:16px 22px;position:relative;overflow:hidden}
+.hkclear::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--hk-spine)}
+.hkclear .t2{font-family:var(--serif);font-size:16px;font-weight:600}
+.hkclear .s2{font-size:12px;color:var(--sub);margin-top:2px}
+.hkclear .barwrap{flex:1;max-width:280px;margin-left:auto}
+.pbar{height:5px;border-radius:99px;background:var(--hairline);overflow:hidden}
+.pbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--hk-sage-2),var(--hk-spine));border-radius:99px}
+.pcap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7px;letter-spacing:.06em;color:var(--muted);margin-top:4px;text-transform:uppercase}
+
+/* D: notes ghost (existing) */
+.ghostcard{width:330px;min-height:70px;border:1.5px dashed var(--note-b);border-radius:11px;display:flex;align-items:center;justify-content:center;gap:10px}
+.ghostcard .e{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted)}
+.ghostcard .g{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--note-i)}
+
+/* E: desk walked */
+.walked{text-align:center;padding:36px 20px 30px;background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card)}
+.walked .cir{width:60px;height:60px;border-radius:50%;background:var(--hk-sage);border:2px solid var(--hk-spine);display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--hk-ink);margin:0 auto 15px}
+.walked h2{font-family:var(--serif);font-size:24px;font-weight:600}
+.walked p{font-size:13px;color:var(--sub);margin-top:7px;line-height:1.6}
+.walked .strike{display:inline-flex;flex-direction:column;gap:4px;margin-top:14px;text-align:left}
+.walked .drow{display:flex;align-items:center;gap:8px}
+.walked .tick{width:13px;height:13px;border-radius:3px;background:var(--hk-ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px}
+.walked .dx{font-size:12px;color:var(--muted);text-decoration:line-through}
+.walked .hand3{font-family:var(--hand);font-size:22px;color:var(--coffee-ink);margin-top:14px;display:inline-block;transform:rotate(-1.5deg)}
+
+/* F: popup empties */
+.poprow{display:flex;gap:16px;flex-wrap:wrap}
+.pop{width:320px;background:var(--white);border:1px solid var(--coffee-edge);border-radius:16px;box-shadow:var(--sh-3);overflow:hidden}
+.poph{display:flex;align-items:center;gap:7px;padding:11px 14px;background:var(--coffee);border-bottom:1px solid var(--coffee-edge)}
+.poph .t{font-family:var(--serif);font-size:15px;font-weight:600;color:#4a3c29}
+.poph .cc{margin-left:auto;font-family:var(--mono);font-size:7.5px;font-weight:700;color:var(--coffee-ink);background:var(--white);border:1px solid var(--coffee-edge);border-radius:99px;padding:2px 7px}
+.popb{padding:12px 12px 10px}
+.tempty{border:1.5px dashed var(--coffee-edge);border-radius:9px;padding:14px 12px;text-align:center}
+.tempty .a{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--sub)}
+.tempty .b{font-family:var(--mono);font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--coffee-ink);margin-top:5px}
+.pdiv{display:flex;align-items:center;gap:8px;padding:8px 3px 4px;font-family:var(--mono);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.pdiv .l{flex:1;height:1px;background:var(--hairline)}
+.dempty{font-family:var(--serif);font-style:italic;font-size:12.5px;color:var(--faint);text-align:center;padding:8px 0 6px}
+.popf{padding:9px 12px;border-top:1px solid var(--hairline);background:var(--paper);display:flex;gap:6px}
+.popf .b{flex:1;text-align:center;font-size:11px;font-weight:600;padding:8px;border-radius:8px}
+.popf .b.p{background:var(--ink);color:var(--panel)}
+.popf .b.p.dis{background:var(--paper);color:var(--faint);border:1px solid var(--hairline);cursor:not-allowed}
+.popf .b.a{background:var(--white);border:1px solid var(--coffee-edge);color:var(--coffee-ink)}
+
+.reco{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:16px}
+.reco h3{font-family:var(--serif);font-size:15px;font-weight:600;margin-bottom:7px}
+.reco p{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:7px}
+.reco b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="h1">Empty states</div>
+  <div class="sub2">Two families: <b>empty-because-new</b> (the desk has never had anything on it — needs a doorway) and <b>empty-because-done</b> (the best news this page can deliver — needs a moment, not a grey box). The page derives which from whether any queries/agents exist at all.</div>
+
+  <!-- A -->
+  <div class="seclab"><span class="n">A</span><span class="t">New desk — no queries, no agents yet</span></div>
+  <div class="trade">Post-its show faded zeros (the counting system visibly exists, waiting). The reels don't render as three hollow shells — one welcome card replaces them, with a ghost card-stack teaching what will appear and the two real doorways in.</div>
+  <div class="stage">
+    <div class="bar">
+      <span class="askwrap"><span class="date">THU 16 JUL</span><span class="ask">What's on your desk?</span></span>
+      <span class="postits">
+        <span class="postit ug zero"><span class="v">0</span><span class="k">urgent</span></span>
+        <span class="postit hk zero"><span class="v">0</span><span class="k">housekpg</span></span>
+        <span class="postit nt zero"><span class="v">0</span><span class="k">notes</span></span>
+      </span>
+      <span class="sp"></span>
+      <button class="go ghost">Work through priorities now</button>
+    </div>
+    <div class="newdesk">
+      <div class="txt">
+        <h2>A clean desk — <em>for now.</em></h2>
+        <p>Once you're querying, this page fills itself: requests and deadlines land in <b>Urgent</b>, record tidy-ups gather in <b>Housekeeping</b>, and your own reminders live in <b>Notes to self</b>. Nothing to track by hand.</p>
+        <div class="acts">
+          <button class="pri">Start your first query →</button>
+          <button class="sec">Add agents to your contact list</button>
+        </div>
+      </div>
+      <div class="ghoststack">
+        <div class="gc g1"><div class="gl gtag"></div><div class="gl w85"></div><div class="gl w60"></div></div>
+        <div class="gc g2"><div class="gl gtag"></div><div class="gl w85"></div><div class="gl w40"></div></div>
+        <div class="handnote">— your future to-dos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="seclab"><span class="n">B</span><span class="t">Urgent empty — the dream state (established user)</span></div>
+  <div class="trade">Not a sad box: everything is with agents, and the page should say so with a straight face. A slim card replaces the reel — sage tick (done-family), the count of what's out, and a handwritten nudge back to the actual work.</div>
+  <div class="stage">
+    <div class="reelh"><span class="lanedot ug"></span><span class="lt">Urgent</span><span class="ln">0</span><span class="rule"></span></div>
+    <div class="clear">
+      <span class="ic">✓</span>
+      <div><div class="t2">Nothing needs you.</div>
+      <div class="s2">All 7 live queries are with their agents — the ball's in their court.</div></div>
+      <span class="hand2">— go write something</span>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="seclab"><span class="n">C</span><span class="t">Housekeeping empty — spotless records</span></div>
+  <div class="trade">The grouped cards' own progress language, completed: the bar at 100% is the payoff for every batch-fill they did. Quietly proud, not fireworks.</div>
+  <div class="stage">
+    <div class="reelh"><span class="lanedot hk"></span><span class="lt">Housekeeping</span><span class="ln">0</span><span class="rule"></span></div>
+    <div class="hkclear">
+      <div><div class="t2">Spotless.</div>
+      <div class="s2">Every agent record is complete and nothing has gone stale.</div></div>
+      <div class="barwrap"><div class="pbar"><i></i></div><div class="pcap"><span>56 of 56 agents complete</span><span>100%</span></div></div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="seclab"><span class="n">D</span><span class="t">Notes empty — as built</span></div>
+  <div class="trade">The dashed ghost card stands (it's an invitation, and notes have no "done" meaning to celebrate). Unchanged from the retoken candidate.</div>
+  <div class="stage">
+    <div class="reelh"><span class="lanedot nt"></span><span class="lt">Notes to self</span><span class="ln">0</span><span class="rule"></span></div>
+    <div class="ghostcard"><span class="e">Nothing jotted yet.</span><span class="g">＋ ADD A NOTE</span></div>
+  </div>
+
+  <!-- E -->
+  <div class="seclab"><span class="n">E</span><span class="t">Whole desk clear + work done today — "Desk cleared."</span></div>
+  <div class="trade">The rarest and best state: all three reels empty AND the done-log has entries. The reels collapse into one moment that shows the strikethrough evidence. If nothing was done today, states B–D render instead — this moment is <b>earned</b>, never default.</div>
+  <div class="stage">
+    <div class="walked">
+      <div class="cir">✓</div>
+      <h2>Desk cleared.</h2>
+      <p>Nothing needs you, the records are spotless, and today you cleared:</p>
+      <span class="strike">
+        <span class="drow"><span class="tick">✓</span><span class="dx">Full sent — Daniel O'Rourke</span></span>
+        <span class="drow"><span class="tick">✓</span><span class="dx">Nudge sent — David Higham</span></span>
+        <span class="drow"><span class="tick">✓</span><span class="dx">Marcus Reed — closed, no response</span></span>
+      </span><br>
+      <span class="hand3">— the waiting is the work. Go write.</span>
+    </div>
+  </div>
+
+  <!-- F -->
+  <div class="seclab"><span class="n">F</span><span class="t">Today's list pop-up — both bands empty</span></div>
+  <div class="trade">Left: fresh morning (nothing committed, nothing done). Right: committed but nothing done yet. In both, the <b>“Done today” band doesn't render at all until the first completion exists</b> — the divider and strikethrough log appear with the first tick, not before. <b>Work the list</b> stays disabled until something's committed.</div>
+  <div class="stage">
+    <div class="poprow">
+      <div class="pop">
+        <div class="poph"><span class="t">Today's list</span><span class="cc">NOTHING YET</span></div>
+        <div class="popb">
+          <div class="tempty"><div class="a">What's on the list today?</div><div class="b">COMMIT UP TO 5 FROM THE BOARD — OR LET US PICK</div></div>
+        </div>
+        <div class="popf"><button class="b a">Help me pick</button><button class="b p dis">Work the list</button></div>
+      </div>
+      <div class="pop">
+        <div class="poph"><span class="t">Today's list</span><span class="cc">2 COMMITTED</span></div>
+        <div class="popb">
+          <div style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--hairline);border-radius:8px;margin-bottom:5px"><span style="width:13px;height:13px;border-radius:50%;border:1.5px solid var(--burg);background:var(--pinkC)"></span><span style="font-size:11.5px;font-weight:500">Send your full to Daniel O'Rourke</span></div>
+          <div style="display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--hairline);border-radius:8px"><span style="width:13px;height:13px;border-radius:50%;border:1.5px dashed var(--burg)"></span><span style="font-size:11.5px;font-weight:500">Nudge David Higham</span></div>
+        </div>
+        <div class="popf"><button class="b a">Help me pick</button><button class="b p">Work the list</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="seclab"><span class="n">G</span><span class="t">Button states — the disabled grammar</span></div>
+  <div class="trade">Disabled is <b>flatter than any live button</b>: paper fill (it sinks into the page where white pops), hairline border, faint text, no shadow, <code>not-allowed</code> cursor. Never dashed (dashed = invitation to add) and never just opacity (a dimmed live button still reads as clickable).</div>
+  <div class="stage">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="go" style="cursor:default">Primary — live</button>
+      <button style="font:inherit;font-size:12.5px;font-weight:500;padding:10px 18px;border-radius:10px;background:var(--white);border:1px solid var(--line);color:var(--ink-2);box-shadow:0 1px 2px rgba(58,42,26,.05);cursor:default">Secondary — live</button>
+      <button class="go ghost">Primary — unavailable</button>
+      <span style="font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)">← paper fill · hairline · faint · no shadow</span>
+    </div>
+  </div>
+
+  <div class="reco">
+    <h3>Notes on the system</h3>
+    <p><b>The derivation is simple and already available:</b> new-desk (A) = zero queries AND zero agents; per-reel clears (B/C/D) = that lane's derived set is empty while the app has data; desk-cleared (E) = all three empty AND `clearedToday` is non-empty — the done-log is what earns the moment. No new state is stored anywhere; these are all views over what exists.</p>
+    <p><b>Voice rule across all of them:</b> empty-because-done states never apologise and never use the word "empty" — they report the truth ("all 7 are with their agents") and hand you back to the writing. The Caveat handwriting appears exactly once per state, as the human aside. And B's count ("all 7 live queries") is real data doing reassurance work — worth the one extra read it costs.</p>
+    <p>If these land, they fold into the retoken prompt as one more phase (or a small follow-up pack if the retoken's already run) — all presentational, all derived.</p>
+  </div>
+</div>
+</body>
+</html>

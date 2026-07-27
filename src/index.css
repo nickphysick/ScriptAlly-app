@@ -549,11 +549,17 @@
   --sh-btn: 0 1px 2px rgba(58, 42, 26, 0.10);
 
   --blue-t: #e7eef6; --blue-b: #d3e0ee; --blue-i: #2b4a6b;   /* you-are-here */
-  --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030;   /* needs-you */
+  --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030; --pink-deep: #6e3325;   /* needs-you; pink-deep = urgency-tag text (polish v3 two-depth tag law) */
   --pink-av: #f6d7cf;
   /* primary-button pink (chrome revision; v14/v3 omitted these — an undefined var() renders
      as NOTHING, which silently made the mockups' primary button transparent) */
   --pink-btn: #f6cfc9; --pink-btn-h: #f0bfb8;
+  --pink-hero: #f9e8e2;   /* To-do hero gradient start (board rebuild — see below) */
+
+  /* To-do board advisory + note bands. ADDITIVE (nothing existing consumed these) — continues the
+     "copy the mockup :root into .t-f12" pattern; values from design-refs/todo-workspace-v10.html. */
+  --gold-t: #f6efdd; --gold-b: #e7d9b8; --gold-i: #7d621d;   /* housekeeping (gold advisory) band */
+  --note-t: #faf0c8; --note-b: #ecdda4; --note-i: #7a6420;   /* post-it — Your-tasks band */
 
   /* sage — card header bands + the agent-header spine (LIVE diary values, see block comment) */
   --sage-band: #dce0d9; --sage-band-2: #d0d6cc; --sage-edge: #c8d0c5;
@@ -561,6 +567,41 @@
 
   --burg: #7c3a2a; --pinkC: #f8e7dc;
   --pro: #6A89A7;
+  /* StatusDot palette (ADDITIVE — .t-f12 previously lacked these, so board dots fell back off-theme).
+     One hue per theme: ring/glyph read --sd-hue, centre disc reads --sd-centre; DIRECTION is carried
+     by the dot's SHAPE, not colour (StatusDot lock). Burgundy ring + pale-pink centre = the F12
+     --burg/--pinkC status pair (literals — no :root aliasing, the .t-f12 freeze-bug rule). */
+  --sd-hue: #7c3a2a; --sd-centre: #f8e7dc;
+  /* Raised "diary" panel material — the dashboard's Dates-for-the-diary container (.dc-panel):
+     a soft float shadow + hairline + 22px radius. ADDITIVE; literals lifted here (not duplicated in
+     todo.css) so any F12 raised panel can reuse it. The To-do hero fills it PINK (--pink-hero). */
+  --float-hairline: #e9ded0; --float-rad: 22px; --float-sh: 0 10px 34px rgba(58, 28, 20, 0.09);
+
+  /* ── To-do retoken (2026-07-16, design-refs/todo-board-final-retoken.html). ADDITIVE. ──
+     COLOUR LAW for the To-do page: pink = Urgent identity · HK-SAGE (the LIVE dashboard diary
+     band values — verified against --dc-band/--sage-band above, the dashboard wins) = Housekeeping
+     identity AND the page's ONE "done" family · note-yellow = Notes · COFFEE (a darker patch of
+     the desk itself) = Today's list · burgundy = deadline signal only · ink = offer + primaries.
+     GOLD IS RETIRED from the To-do page (the --gold-* tokens above stay for any other consumer).
+     StatusDot sage (--sage/--sageC/--sageD) is a STATUS colour — LOCKED to StatusDots only. */
+  --sub: #5c554b;                                             /* option-A card sub-copy ink */
+  --postit-pink: #f9d9d2; --postit-sage: #dce0d9; --postit-note: #f8ecb0;
+  /* Today's-list head band — the BOLD-PASTILLE pink, copied as literals from the Bold theme's
+     --band / --hub-band-process (#f4c7c2; literals-only house rule — no cross-theme var()).
+     Pair + border per todo-popup-notify-scrim.html. */
+  --pop-pink: #f4c7c2; --pop-pink-2: #f0bcb6; --pop-pink-b: #e5a89f;
+  /* HOUSEKEEPING = COFFEE (the finishing pack's colour-law retune; ref todo-ideas-retune.html §1
+     — values verbatim, sitting one clear shade below the oat ground). Sage is now the
+     Today's-list family (+ done); these carry every housekeeping identity point. */
+  --hk-cof: #e9dcc8; --hk-cof-2: #e2d2b9; --hk-cof-edge: #cdb58f; --hk-cof-ink: #7a6544;
+  --hk-sage: #dce0d9; --hk-sage-2: #d0d6cc;                   /* = the diary band pair */
+  --hk-spine: #b9c3b3; --hk-ink: #54614f;
+  /* ⚠ RETIRED FROM CONSUMPTION on /todo (finishing-pack retune) — definitions kept. */
+  --coffee: #e7dbc9; --coffee-2: #dccdb5; --coffee-edge: #d3c2a6;
+  --coffee-ink: #6b5a41; --coffee-deep: #8a755a;
+  --sh-card: 0 1px 2px rgba(58, 42, 26, 0.06), 0 6px 16px -6px rgba(58, 42, 26, 0.10);
+  --sh-card-h: 0 2px 3px rgba(58, 42, 26, 0.07), 0 12px 26px -8px rgba(58, 42, 26, 0.14);
+  --sh-postit: 0 2px 3px rgba(58, 42, 26, 0.10), 0 7px 14px -4px rgba(58, 42, 26, 0.18);
 
   --listw: 334px; --gut: 12px; --maxw: 1520px;
   --r-sm: 6px; --r-md: 9px; --r-lg: 12px; --r-xl: 16px;

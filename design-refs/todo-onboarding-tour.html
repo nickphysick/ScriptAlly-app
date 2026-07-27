@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — onboarding tour mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;450;500;600;650&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#ffffff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --sub:#5c554b; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-btn:#f6cfc9; --postit-pink:#f9d9d2; --pinkC:#f8e7dc; --pink-i:#8a4030;
+  --hk-sage:#dce0d9; --hk-sage-2:#d0d6cc; --hk-spine:#b9c3b3; --hk-ink:#54614f; --postit-sage:#dce0d9;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420; --postit-note:#f8ecb0;
+  --coffee:#e7dbc9; --coffee-2:#dccdb5; --coffee-edge:#d3c2a6; --coffee-ink:#6b5a41;
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58; --sage:#8a9e88;
+  --sh-card:0 1px 2px rgba(58,42,26,.06),0 6px 16px -6px rgba(58,42,26,.10);
+  --sh-postit:0 2px 3px rgba(58,42,26,.10),0 7px 14px -4px rgba(58,42,26,.18);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --sh-sheet:0 2px 4px rgba(58,42,26,.05),0 24px 70px -18px rgba(58,42,26,.25);
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif; --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 120% at 78% -8%, rgba(255,250,242,.65) 0%, transparent 46%), var(--oat);
+  min-height:100vh;padding:18px 26px 44px;overflow-x:hidden}
+button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;text-align:left}
+.wrap{max-width:1400px;margin:0 auto;position:relative}
+
+/* ===== board (backdrop) ===== */
+.bar{display:flex;align-items:center;gap:24px;background:var(--white);border:1.5px solid var(--ink);border-radius:14px;padding:18px 26px;margin-bottom:24px}
+.askwrap{display:flex;flex-direction:column;gap:3px}
+.date{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ask{font-family:var(--serif);font-size:23px;font-weight:600;white-space:nowrap}
+.postits{display:flex;gap:18px;margin-left:12px}
+.postit{position:relative;width:74px;height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-shadow:var(--sh-postit);flex:none}
+.postit::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(-1.5deg);width:34px;height:12px;background:rgba(255,255,255,.55);border:1px solid rgba(58,42,26,.05)}
+.postit .v{font-family:var(--hand);font-size:32px;font-weight:600;line-height:1}
+.postit .k{font-family:var(--mono);font-size:6.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;opacity:.75}
+.postit.ug{background:var(--postit-pink);transform:rotate(-2.4deg);color:#6e3325}
+.postit.hk{background:var(--postit-sage);transform:rotate(1.8deg);color:var(--hk-ink)}
+.postit.nt{background:var(--postit-note);transform:rotate(-1.2deg);color:#6b5a17}
+.sp{flex:1}
+.go{font-size:13px;font-weight:600;padding:11px 20px;border-radius:10px;background:var(--ink);color:var(--panel);white-space:nowrap}
+.reelh{display:flex;align-items:center;gap:11px;margin:0 2px 12px}
+.lanedot{width:10px;height:10px;border-radius:50%}
+.lanedot.ug{background:var(--pink-btn);outline:1px solid var(--pink-b)}
+.lanedot.hk{background:var(--hk-sage-2);outline:1px solid var(--hk-spine)}
+.reelh .lt{font-family:var(--serif);font-size:18px;font-weight:600}
+.reelh .ln{font-family:var(--mono);font-size:8px;font-weight:700;border-radius:99px;padding:2px 8px;background:var(--white);border:1px solid var(--line);color:var(--ink-2)}
+.reelh .rule{flex:1;height:1px;background:var(--line)}
+.reelh .sw{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.reel{margin-bottom:22px}
+.scroller{display:flex;gap:13px;overflow:hidden;padding:2px}
+.card{flex:none;width:312px;min-height:178px;background:var(--white);border:1px solid var(--line);border-radius:11px;padding:14px 16px 13px 18px;display:flex;flex-direction:column;box-shadow:var(--sh-card);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.card.ug::before{background:var(--pink-btn)}
+.card.hk::before{background:var(--hk-spine)}
+.tag{align-self:flex-start;font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:3px 9px;border:1px solid var(--line);background:var(--white);color:var(--ink-2);margin-bottom:9px}
+.tag.warn{background:var(--burg);border-color:var(--burg);color:#fff}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:#fff}
+.mid{flex:1;min-height:0;overflow:hidden}
+.tt{font-family:var(--serif);font-size:16px;font-weight:600;line-height:1.28}
+.tsub{font-size:11.5px;color:var(--sub);margin-top:5px;line-height:1.5}
+.tsub .ms{font-family:var(--serif);font-style:italic;color:var(--ink-2)}
+.tfoot{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--hairline)}
+.dot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--burg);background:var(--pinkC);flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:var(--burg)}
+.dot::after{content:"→";font-weight:700}
+.mav{width:20px;height:20px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7.5px;font-weight:600;color:var(--ink-2)}
+.who{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex:1}
+.pill{width:100%;margin-top:9px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:8px;border:1px solid var(--line);background:var(--white);color:var(--ink-2);text-align:center}
+.kick{font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--hk-ink);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.kick .kd{width:6px;height:6px;border-radius:50%;background:var(--hk-spine)}
+.gtt{font-family:var(--serif);font-size:15.5px;font-weight:600;line-height:1.3}
+.gtt .n{font-size:19px;font-weight:700}
+.pbar{height:5px;border-radius:99px;background:var(--hairline);overflow:hidden;margin-top:8px}
+.pbar i{display:block;height:100%;width:71%;background:linear-gradient(90deg,var(--hk-sage-2),var(--hk-spine));border-radius:99px}
+.pcap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7px;letter-spacing:.06em;color:var(--muted);margin-top:4px;text-transform:uppercase}
+.fab{position:fixed;right:90px;bottom:26px;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--panel);border-radius:99px;padding:10px 17px 10px 12px;box-shadow:var(--sh-3);z-index:20}
+.fab .ring{width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--coffee-2) 0 0%, rgba(255,255,255,.18) 0% 100%);display:flex;align-items:center;justify-content:center}
+.fab .ring i{width:22px;height:22px;border-radius:50%;background:var(--ink);font-style:normal;font-family:var(--mono);font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.fab .l .a{font-family:var(--serif);font-size:13.5px;font-weight:600}
+.fab .l .b{font-family:var(--mono);font-size:7px;letter-spacing:.09em;text-transform:uppercase;opacity:.72}
+.help{position:fixed;right:26px;bottom:26px;width:42px;height:42px;border-radius:50%;background:var(--white);border:1px solid var(--line);box-shadow:var(--sh-card);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);z-index:20}
+
+/* ===== TOUR: spotlight ===== */
+#scrim{position:fixed;inset:0;z-index:100;pointer-events:none;display:none}
+#hole{position:absolute;border-radius:16px;box-shadow:0 0 0 9999px rgba(30,26,22,.55);transition:all .45s cubic-bezier(.3,.8,.3,1);outline:2px solid rgba(255,255,255,.65);outline-offset:3px}
+#coach{position:fixed;z-index:101;width:320px;background:var(--white);border:1.5px solid var(--ink);border-radius:14px;box-shadow:var(--sh-3);padding:16px 18px;display:none;transition:all .45s cubic-bezier(.3,.8,.3,1)}
+#coach .step{font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:.12em;color:var(--faint);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#coach .cdots{display:flex;gap:4px;margin-left:auto}
+#coach .cd{width:6px;height:6px;border-radius:50%;background:#ddd2c1}
+#coach .cd.on{background:var(--burg)}
+#coach .cd.dn{background:var(--hk-spine)}
+#coach h3{font-family:var(--serif);font-size:17px;font-weight:600;line-height:1.25;margin-bottom:6px}
+#coach p{font-size:12.5px;color:var(--sub);line-height:1.55}
+#coach .acts{display:flex;gap:8px;margin-top:13px;align-items:center}
+#coach .skip{font-size:11.5px;color:var(--muted)}
+#coach .skip:hover{color:var(--ink)}
+#coach .spx{flex:1}
+#coach .bk{font-size:12px;font-weight:500;padding:8px 13px;border-radius:8px;border:1px solid var(--line)}
+#coach .nx{font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:8px;background:var(--ink);color:var(--panel)}
+
+/* ===== TOUR: desk-walk sheets ===== */
+#walk{position:fixed;inset:0;z-index:110;background:radial-gradient(120% 120% at 78% -8%, rgba(255,250,242,.65) 0%, transparent 46%), var(--oat);display:none;flex-direction:column;padding:16px 26px 22px}
+#walk .chrome{display:flex;align-items:center;gap:12px;padding-bottom:10px}
+#walk .x{font-size:12.5px;font-weight:500;color:var(--ink-2);background:rgba(255,255,255,.6);border:1px solid var(--line);border-radius:99px;padding:7px 14px}
+#walk .wdots{display:flex;gap:6px;margin-left:auto}
+#walk .wd{width:7px;height:7px;border-radius:50%;background:#d9cdbc;transition:.25s}
+#walk .wd.on{background:var(--burg);transform:scale(1.25)}
+#walk .wd.dn{background:var(--hk-spine)}
+#walk .stagearea{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+#walk .behind{position:absolute;width:min(600px,86vw);height:74%;background:var(--paper);border:1px solid var(--line);border-radius:18px;transform:rotate(1.6deg) translateY(14px);opacity:.55}
+#walk .sheet{position:relative;width:min(600px,86vw);max-height:100%;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-sheet);display:flex;flex-direction:column;overflow:hidden;animation:arrive .38s cubic-bezier(.25,.9,.3,1)}
+@keyframes arrive{from{opacity:0;transform:translateY(22px) rotate(.5deg)}to{opacity:1;transform:none}}
+#walk .sb{flex:1;min-height:0;overflow-y:auto;padding:32px 38px 24px}
+#walk .stream{display:inline-flex;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border-radius:99px;padding:3.5px 10px;border:1px solid var(--line);background:var(--white);color:var(--ink-2);margin-bottom:16px}
+#walk .q{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1.24;max-width:470px}
+#walk .q em{font-style:italic;color:var(--burg)}
+#walk .qs{font-size:13.5px;color:var(--sub);margin-top:10px;line-height:1.65;max-width:460px}
+#walk .qs b{color:var(--ink);font-weight:600}
+#walk .demo{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+#walk .dchip{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;font-size:13px;font-weight:500;background:var(--white)}
+#walk .dchip .sq{width:16px;height:16px;border-radius:5px;flex:none}
+#walk .hand{font-family:var(--hand);font-size:20px;color:var(--hk-ink);margin-top:14px;transform:rotate(-1.2deg);display:inline-block}
+#walk .sf{flex:none;display:flex;align-items:center;gap:10px;padding:14px 38px 18px;border-top:1px solid var(--hairline);background:var(--paper)}
+#walk .sf .spx{flex:1}
+#walk .bk{font-size:12.5px;font-weight:500;padding:9px 15px;border-radius:9px;border:1px solid var(--line);background:var(--panel)}
+#walk .nx{font-size:13.5px;font-weight:600;padding:11px 20px;border-radius:9px;background:var(--ink);color:var(--panel)}
+#walk .bigdone{text-align:center;padding:16px 0 8px}
+#walk .cir{width:62px;height:62px;border-radius:50%;background:var(--hk-sage);border:2px solid var(--hk-spine);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--hk-ink);margin:0 auto 16px;animation:pop .4s cubic-bezier(.3,1.4,.5,1)}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.startbtn{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:200;font-size:12px;font-weight:600;padding:9px 16px;border-radius:99px;background:var(--burg);color:#fff;box-shadow:var(--sh-3)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<button class="startbtn" onclick="startTour()">▶ Replay the tour (mock: auto-runs on first visit)</button>
+
+<div class="wrap">
+  <div class="bar" id="t-bar">
+    <span class="askwrap"><span class="date">THU 16 JUL</span><span class="ask">What's on your desk?</span></span>
+    <span class="postits" id="t-postits">
+      <span class="postit ug"><span class="v">5</span><span class="k">urgent</span></span>
+      <span class="postit hk"><span class="v">40</span><span class="k">housekpg</span></span>
+      <span class="postit nt"><span class="v">0</span><span class="k">notes</span></span>
+    </span>
+    <span class="sp"></span>
+    <button class="go" id="t-work">Work through priorities now</button>
+  </div>
+
+  <div class="reel">
+    <div class="reelh"><span class="lanedot ug"></span><span class="lt">Urgent</span><span class="ln">5</span><span class="rule"></span><span class="sw">SWEEP →</span></div>
+    <div class="scroller" id="t-urgent">
+      <div class="card ug" id="t-card">
+        <span class="tag warn">3 DAYS LEFT</span>
+        <div class="mid"><div class="tt">Send your full to Daniel O'Rourke</div>
+        <div class="tsub">He asked for the full of <span class="ms">Murphy's Day Out</span> on 27 June.</div></div>
+        <div class="tfoot"><span class="dot"></span><span class="mav">DO</span><span class="who">Inkwell & Stone</span></div>
+        <button class="pill" id="t-pill">＋ Today's list</button>
+      </div>
+      <div class="card ug">
+        <span class="tag offer">★ OFFER</span>
+        <div class="mid"><div class="tt">Tom Ellery has made an offer</div>
+        <div class="tsub">For <span class="ms">Murphy's Day Out</span> — respond by 25 July.</div></div>
+        <div class="tfoot"><span class="dot" style="border-color:var(--sage);background:var(--sageC)"></span><span class="mav">TE</span><span class="who">Curtis Vane</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+      <div class="card ug">
+        <span class="tag">OVER TO YOU</span>
+        <div class="mid"><div class="tt">Send your full to Jonathan Marsh</div>
+        <div class="tsub">Requested 8 July.</div></div>
+        <div class="tfoot"><span class="dot"></span><span class="mav">JM</span><span class="who">The Marsh Agency</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="reel">
+    <div class="reelh"><span class="lanedot hk"></span><span class="lt">Housekeeping</span><span class="ln">40</span><span class="rule"></span><span class="sw">SWEEP →</span></div>
+    <div class="scroller">
+      <div class="card hk">
+        <div class="kick"><span class="kd"></span>Missing materials</div>
+        <div class="mid"><div class="gtt"><span class="n">16</span> agents missing submission material details</div>
+        <div class="tsub">Add details of what you sent so you never lose track.</div></div>
+        <div class="pbar"><i></i></div>
+        <div class="pcap"><span>40 of 56 agents complete</span><span>71%</span></div>
+      </div>
+      <div class="card hk">
+        <span class="tag">STALE QUERY</span>
+        <div class="mid"><div class="tt">Marcus Reed silent for 765 days</div>
+        <div class="tsub">No reply — consider closing.</div></div>
+        <div class="tfoot"><span class="dot" style="border-style:dashed;background:none"></span><span class="mav">MR</span><span class="who">Bloomsbury Quill</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fab" id="t-fab"><span class="ring"><i>0/0</i></span><span class="l"><span class="a">Today's list</span><span class="b">Nothing yet</span></span></div>
+<div class="help">?</div>
+
+<!-- spotlight -->
+<div id="scrim"><div id="hole"></div></div>
+<div id="coach">
+  <div class="step"><span id="c-step">1 OF 5</span><span class="cdots" id="c-dots"></span></div>
+  <h3 id="c-h"></h3><p id="c-p"></p>
+  <div class="acts">
+    <button class="skip" onclick="endAll()">Skip the tour</button>
+    <span class="spx"></span>
+    <button class="bk" id="c-bk" onclick="prevStop()">← Back</button>
+    <button class="nx" id="c-nx" onclick="nextStop()">Next →</button>
+  </div>
+</div>
+
+<!-- desk walk -->
+<div id="walk">
+  <div class="chrome">
+    <button class="x" onclick="endAll()">✕ Skip — the desk's yours</button>
+    <span class="wdots" id="w-dots"></span>
+  </div>
+  <div class="stagearea">
+    <div class="behind"></div>
+    <div class="sheet" id="w-sheet"></div>
+  </div>
+</div>
+
+<script>
+/* ---------- SPOTLIGHT PRELUDE (5 stops, ~25 words each) ---------- */
+const STOPS=[
+ {el:'t-postits', h:'Your desk, counted.', p:'Three post-its, three kinds of work: pressing things, tidy-up jobs, and your own notes. Tap one to jump to its pile.'},
+ {el:'t-urgent', h:'Urgent — where your move matters.', p:'Requests, deadlines and offers land here, most pressing first. Click any card to work through it, one question at a time.'},
+ {el:'t-pill', h:'Build a list you\'ll finish.', p:'Commit up to five things to today. Small on purpose — a finished list beats a long one.'},
+ {el:'t-fab', h:'Today lives in the corner.', p:'Your committed list and everything you\'ve done today, struck through as you go. Watch the ring fill.'},
+ {el:'t-work', h:'Or just say go.', p:'This walks your urgent pile for you — one sheet at a time, nothing saved until you approve the lot.'}
+];
+let si=-1;
+function startTour(){ si=0; document.getElementById('scrim').style.display='block'; document.getElementById('coach').style.display='block'; showStop(); }
+function showStop(){
+  const s=STOPS[si], t=document.getElementById(s.el).getBoundingClientRect();
+  const pad=10, hole=document.getElementById('hole');
+  hole.style.left=(t.left-pad)+'px'; hole.style.top=(t.top-pad)+'px';
+  hole.style.width=(t.width+pad*2)+'px'; hole.style.height=(t.height+pad*2)+'px';
+  document.getElementById('c-h').textContent=s.h;
+  document.getElementById('c-p').textContent=s.p;
+  document.getElementById('c-step').textContent=(si+1)+' OF 5';
+  document.getElementById('c-dots').innerHTML=STOPS.map((_,i)=>`<span class="cd ${i<si?'dn':i===si?'on':''}"></span>`).join('');
+  document.getElementById('c-bk').style.visibility=si?'visible':'hidden';
+  document.getElementById('c-nx').textContent = si===STOPS.length-1 ? 'Try it →' : 'Next →';
+  const coach=document.getElementById('coach');
+  let cx=t.left, cy=t.bottom+18;
+  if(cy+210>innerHeight) cy=t.top-210;
+  if(cx+330>innerWidth) cx=innerWidth-344;
+  if(cx<14) cx=14;
+  coach.style.left=cx+'px'; coach.style.top=Math.max(14,cy)+'px';
+}
+function nextStop(){ if(si<STOPS.length-1){ si++; showStop(); } else { document.getElementById('scrim').style.display='none'; document.getElementById('coach').style.display='none'; startWalk(); } }
+function prevStop(){ if(si>0){ si--; showStop(); } }
+
+/* ---------- DESK WALK (3 teaching sheets in the flow's voice) ---------- */
+const WALK=[
+ ()=>`<div class="sb">
+   <span class="stream">HOW THIS DESK WORKS</span>
+   <div class="q">Cards are things to <em>do</em>, not just read.</div>
+   <div class="qs">Click one and it opens as a sheet like this — one question per screen, big answers, <b>Back always works</b>. Nothing is saved until a review sheet shows you everything and you approve it.</div>
+   <div class="demo">
+     <span class="dchip"><span class="sq" style="background:var(--burg)"></span>Burgundy = a live deadline</span>
+     <span class="dchip"><span class="sq" style="background:var(--ink)"></span>Black ★ = an offer</span>
+     <span class="dchip"><span class="sq" style="background:var(--hk-sage-2)"></span>Sage = done, or housekeeping</span>
+   </div>
+ </div>
+ <div class="sf"><span class="spx"></span><button class="nx" onclick="wNext()">Next →</button></div>`,
+ ()=>`<div class="sb">
+   <span class="stream">TWO SPEEDS</span>
+   <div class="q">Did the work already? Don't re-do it here.</div>
+   <div class="qs">Hover any card for <b>✓ and ⏸</b>. The tick logs it in one tap with sensible defaults — <b>today · email · everything they asked</b> — and shows you a receipt you can edit or undo. The pause snoozes it for a week.</div>
+   <div class="qs" style="margin-top:8px">Offers are the exception: those always get the full moment. As they should.</div>
+   <div class="hand">— the app never sends anything for you</div>
+ </div>
+ <div class="sf"><button class="bk" onclick="wPrev()">← Back</button><span class="spx"></span><button class="nx" onclick="wNext()">Next →</button></div>`,
+ ()=>`<div class="sb">
+   <span class="stream">YOUR FIRST MOVE</span>
+   <div class="q">Commit <em>one thing</em> to today.</div>
+   <div class="qs">Press <b>＋ Today's list</b> on the card that matters most — probably the one marked <b>3 days left</b>. The corner keeps score for you from there.</div>
+   <div class="demo"><span class="dchip"><span class="sq" style="background:var(--coffee-2)"></span>Coffee corner = Today's list</span></div>
+ </div>
+ <div class="sf"><button class="bk" onclick="wPrev()">← Back</button><span class="spx"></span><button class="nx" onclick="wNext()">Take me to the card →</button></div>`,
+ ()=>`<div class="sb"><div class="bigdone">
+   <div class="cir">✓</div>
+   <div class="q" style="max-width:none">The desk's yours.</div>
+   <div class="qs" style="margin:8px auto 0;max-width:400px;text-align:center">Replay this any time from the <b>?</b> in the corner. Now — Daniel O'Rourke is waiting on that full.</div>
+ </div></div>
+ <div class="sf"><span class="spx"></span><button class="nx" onclick="endAll()">Start working</button></div>`
+];
+let wi=0;
+function startWalk(){ wi=0; document.getElementById('walk').style.display='flex'; wRender(); }
+function wRender(){
+  document.getElementById('w-sheet').innerHTML=WALK[wi]();
+  document.getElementById('w-dots').innerHTML=WALK.map((_,i)=>`<span class="wd ${i<wi?'dn':i===wi?'on':''}"></span>`).join('');
+}
+function wNext(){ if(wi<WALK.length-1){ wi++; wRender(); } }
+function wPrev(){ if(wi>0){ wi--; wRender(); } }
+function endAll(){
+  document.getElementById('scrim').style.display='none';
+  document.getElementById('coach').style.display='none';
+  document.getElementById('walk').style.display='none';
+}
+/* auto-run to demo */
+setTimeout(startTour,600);
+addEventListener('resize',()=>{ if(si>=0 && document.getElementById('scrim').style.display==='block') showStop(); });
+</script>
+</body>
+</html>

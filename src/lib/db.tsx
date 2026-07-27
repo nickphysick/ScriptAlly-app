@@ -22,7 +22,6 @@ import {
   ActivityType,
   JournalEntry,
   Note,
-  TodoNote,
   UserTask,
   DismissedTask,
   TaskFlag,
@@ -69,7 +68,7 @@ import {
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
-import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
+import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsForCascade, cascadePlan, chunkArray } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
 import { resolveGenre, matchKey } from "./genres";
@@ -80,6 +79,8 @@ import { replyTask } from "./taskPrecedence";
 import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
+import { taskSurvivesMute } from "./todoHousekeeping";
+import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -164,7 +165,7 @@ interface DbContextType {
   dismissedTasks: DismissedTask[];
   // The user's stance on derived tasks (snooze/commit/skip/resolve). Absorbs dismissedTasks.
   taskFlags: TaskFlag[];
-  upsertTaskFlag: (key: TaskFlagKey, patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean }) => Promise<void>;
+  upsertTaskFlag: (key: TaskFlagKey, patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean; unbumpSnooze?: boolean }) => Promise<void>;
   snoozeTaskFlag: (key: TaskFlagKey, days: number) => Promise<void>;
   resolveTaskFlag: (key: TaskFlagKey) => Promise<void>;
   migrateDismissedTasks: () => Promise<number>;
@@ -238,15 +239,11 @@ interface DbContextType {
   updateNote: (id: string, fields: Partial<Pick<Note, "text" | "colour" | "dueDate" | "done" | "doneAt">>) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   // To-do page Notes stream — the only stored to-do records.
-  todoNotes: TodoNote[];
-  addTodoNote: (fields: { body?: string }) => Promise<string | undefined>;
-  updateTodoNote: (id: string, fields: Partial<Pick<TodoNote, "body" | "pinned" | "done">>) => Promise<void>;
-  deleteTodoNote: (id: string) => Promise<void>;
   // User tasks — the canonical stored to-do object (record-scoped; read by the To-do board + the
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt" | "dueDate">>) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt" | "dueDate">> & { committedDate?: string | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
 
   // Activity Actions
@@ -269,7 +266,8 @@ interface DbContextType {
    * and hides-and-resurfaces the nudge_overdue task on the chosen check-back date. Never touches
    * status or responseDeadline and never counts as a response. (Distinct from dismissTask.)
    */
-  logNudge: (queryId: string, args: { checkBackDate: string; note?: string }) => Promise<{ success: boolean; error?: string }>;
+  logNudge: (queryId: string, args: { checkBackDate: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string }>;
+  recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
 
   // Clean Utilities
   cleanDuplicates: () => Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }>;
@@ -300,7 +298,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [activities, setActivities] = useState<Activity[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [todoNotes, setTodoNotes] = useState<TodoNote[]>([]);
   const [userTasks, setUserTasks] = useState<UserTask[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
   const [taskFlags, setTaskFlags] = useState<TaskFlag[]>([]);
@@ -357,7 +354,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubActivities: () => void = () => {};
     let unsubJournal: () => void = () => {};
     let unsubNotes: () => void = () => {};
-    let unsubTodoNotes: () => void = () => {};
     let unsubUserTasks: () => void = () => {};
     let unsubDismissed: () => void = () => {};
     let unsubTaskFlags: () => void = () => {};
@@ -554,15 +550,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/notes`);
         });
 
-        // To-do Notes snap (the To-do page's Notes stream — the only stored to-do records)
-        unsubTodoNotes = onSnapshot(collection(db, "users", uid, "todoNotes"), (snap) => {
-          const arr: TodoNote[] = [];
-          snap.forEach(d => arr.push(d.data() as TodoNote));
-          setTodoNotes(arr);
-        }, (error) => {
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/todoNotes`);
-        });
-
         // User tasks snap (users/{uid}/tasks) — the canonical stored, user-authored to-do object
         // (interaction layer): the To-do board AND the per-record "View tasks" popovers read this
         // ONE store. Record scope (queryId/agentId/manuscriptId) is set at creation.
@@ -611,7 +598,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       unsubActivities();
       unsubJournal();
       unsubNotes();
-      unsubTodoNotes();
       unsubUserTasks();
       unsubDismissed();
       unsubTaskFlags();
@@ -658,7 +644,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const mTitle = manuscript.title;
       const aName = agent.name;
 
-      if (q.status === QueryStatus.OFFER) {
+      if (q.status === QueryStatus.OFFER && !hasOfferDecision(q.id, activities)) {
         calculatedTasks.push({
           id: `task-offer-${q.id}`,
           priority: "urgent",
@@ -816,13 +802,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // Suppression is now taskFlags-based (dismissedTasks absorbed): a derived task is hidden while a
     // matching flag is snoozed into the future (a far-future snooze reads as an indefinite mute).
     const nowMs = now.getTime();
+    const mutedRules = currentUser?.mutedTaskRules ?? [];
     const activeTasks = calculatedTasks.filter(t => {
       const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
-      return !flag || !isFlagSuppressing(flag, nowMs);
+      // Offers are EXEMPT from snooze-HIDING (journey-logic P4): "I need time" renders the card
+      // QUIETER, never hidden — the flag survives to the board, which derives quiet/wake.
+      if (flag && isFlagSuppressing(flag, nowMs) && t.taskType !== "offer_received") return false;
+      // Rule-scope mute ("Stop asking → All of them"): silence the reminder everywhere from this one
+      // point. data_quality_poor dies only when ALL its remaining gaps are muted (todoHousekeeping).
+      const ag = t.taskType === "data_quality_poor" ? agents.find(a => a.id === t.relatedRecordId) : undefined;
+      return taskSurvivesMute(t.taskType, ag, mutedRules);
     });
 
     setTasks(activeTasks);
-  }, [queries, manuscripts, agents, taskFlags, currentUser]);
+  }, [queries, manuscripts, agents, taskFlags, activities, currentUser]);
 
   // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
   // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
@@ -1157,10 +1150,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // split). Callers order the PARENT ref LAST so a mid-way failure leaves the parent — and a clean
   // retry — intact rather than half-deleting it (D2: no un-batched sequential half-deletes).
   const commitDeletesInBatches = async (refs: DocumentReference[]) => {
-    const CHUNK = 450;
-    for (let i = 0; i < refs.length; i += CHUNK) {
+    for (const chunk of chunkArray(refs, 450)) {
       const batch = writeBatch(db);
-      for (const ref of refs.slice(i, i + CHUNK)) batch.delete(ref);
+      for (const ref of chunk) batch.delete(ref);
       await batch.commit();
     }
   };
@@ -1170,29 +1162,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const uid = currentUser.id;
     // Capture title + query count BEFORE the cascade removes them — for the durable delete record.
     const msTitle = manuscripts.find(m => m.id === id)?.title || "a manuscript";
-    const qIds = queriesForManuscript(queries, id);
+    // The ordered plan (cascade.ts, unit-locked): versions + packages → queries (each preceded by its
+    // live-fetched activity subcollection) → global-feed projections → taskFlag stances (6A: stances
+    // die with their records) → THE MANUSCRIPT LAST, so a mid-way failure leaves it (and a retry)
+    // intact — children can be stranded but never orphaned.
+    const plan = cascadePlan("manuscript", id, { queries, activities, taskFlags, versions, packages });
+    const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];
-      // Records meaningless without the manuscript: versions, submission packages, notes.
-      for (const v of versions.filter(ver => ver.manuscriptId === id)) refs.push(doc(db, "users", uid, "versions", v.id));
-      for (const p of packages.filter(pkg => pkg.manuscriptId === id)) refs.push(doc(db, "users", uid, "packages", p.id));
       try {
         const notesSnap = await getDocs(collection(db, "users", uid, "manuscripts", id, "notes"));
         notesSnap.forEach(n => refs.push(n.ref));
       } catch {
         // Best-effort: an unreadable notes subcollection must not block the delete itself.
       }
-      // Cascade the dependent queries + their per-query activity log + global-feed projections.
-      // (Previously ORPHANED — invisible in the UI yet still counting toward the free-tier limit
-      // and unrecoverable. D1/D2.)
-      for (const qid of qIds) {
-        const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
-        actSnap.forEach(a => refs.push(a.ref));
-        refs.push(doc(db, "users", uid, "queries", qid));
+      for (const d of plan.docs) {
+        if (d.col === "queries") {
+          const actSnap = await getDocs(collection(db, "users", uid, "queries", d.id, "activity"));
+          actSnap.forEach(a => refs.push(a.ref));
+        }
+        refs.push(doc(db, "users", uid, d.col, d.id));
       }
-      for (const aid of activityIdsForQueries(activities, qIds)) refs.push(doc(db, "users", uid, "activities", aid));
-      // The manuscript itself — last, so a mid-way failure leaves it (and a retry) intact.
-      refs.push(doc(db, "users", uid, "manuscripts", id));
       await commitDeletesInBatches(refs);
 
       // Durable record of the permanent delete (parity with deleteAgent): global activities feed with
@@ -1504,7 +1494,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const uid = currentUser.id;
     // Capture name + query count BEFORE the cascade removes them — for the durable delete record.
     const agentName = agents.find(a => a.id === id)?.name || "an agent";
-    const qIds = queriesForAgent(queries, id);
+    // The ordered plan (cascade.ts, unit-locked): queries (each preceded by its live-fetched activity
+    // subcollection) → global-feed projections → taskFlag stances (query-keyed AND the agent's own
+    // dq stance — 6A) → THE AGENT LAST, so a mid-way failure leaves it (and a retry) intact.
+    const plan = cascadePlan("agent", id, { queries, activities, taskFlags });
+    const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];
       // Agent notes subcollection.
@@ -1514,16 +1508,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       } catch {
         // Best-effort: an unreadable notes subcollection must not block the delete.
       }
-      // Cascade the dependent queries + their per-query activity log + global-feed projections
-      // (previously ORPHANED — invisible yet quota-consuming and unrecoverable. D1/D2).
-      for (const qid of qIds) {
-        const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
-        actSnap.forEach(a => refs.push(a.ref));
-        refs.push(doc(db, "users", uid, "queries", qid));
+      for (const d of plan.docs) {
+        if (d.col === "queries") {
+          const actSnap = await getDocs(collection(db, "users", uid, "queries", d.id, "activity"));
+          actSnap.forEach(a => refs.push(a.ref));
+        }
+        refs.push(doc(db, "users", uid, d.col, d.id));
       }
-      for (const aid of activityIdsForQueries(activities, qIds)) refs.push(doc(db, "users", uid, "activities", aid));
-      // The agent itself — last, so a mid-way failure leaves it (and a retry) intact.
-      refs.push(doc(db, "users", uid, "agents", id));
       await commitDeletesInBatches(refs);
 
       // Durable record of the permanent delete: lives in the global activities feed with NO queryId,
@@ -1557,6 +1548,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const actSnap = await getDocs(collection(db, "users", uid, "queries", queryId, "activity"));
       actSnap.forEach(a => refs.push(a.ref));
       for (const aid of activityIdsForQueries(activities, [queryId])) refs.push(doc(db, "users", uid, "activities", aid));
+      // 6A: the query's taskFlag stances die with it (same principle as the big cascades).
+      for (const fid of flagIdsForCascade(taskFlags, { queryIds: [queryId] })) refs.push(doc(db, "users", uid, "taskFlags", fid));
       // The query doc last, so a mid-way failure leaves it (and a retry) intact.
       refs.push(doc(db, "users", uid, "queries", queryId));
       await commitDeletesInBatches(refs);
@@ -2144,38 +2137,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  // ── To-do page Notes (users/{uid}/todoNotes) — mirrors the notes CRUD above. ──
-  const addTodoNote = async (fields: { body?: string }): Promise<string | undefined> => {
-    if (!currentUser) return undefined;
-    const id = "todonote-" + Math.random().toString(36).substr(2, 9);
-    const now = new Date().toISOString();
-    const newNote: TodoNote = { id, userId: currentUser.id, body: fields.body ?? "", pinned: false, done: false, createdAt: now, updatedAt: now };
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "todoNotes", id), newNote);
-      return id;
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/todoNotes/${id}`);
-      return undefined;
-    }
-  };
-
-  const updateTodoNote = async (id: string, fields: Partial<Pick<TodoNote, "body" | "pinned" | "done">>) => {
-    if (!currentUser) return;
-    try {
-      await updateDoc(doc(db, "users", currentUser.id, "todoNotes", id), { ...fields, updatedAt: new Date().toISOString() });
-    } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/todoNotes/${id}`);
-    }
-  };
-
-  const deleteTodoNote = async (id: string) => {
-    if (!currentUser) return;
-    try {
-      await deleteDoc(doc(db, "users", currentUser.id, "todoNotes", id));
-    } catch (e) {
-      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/todoNotes/${id}`);
-    }
-  };
 
   // ── User tasks (users/{uid}/tasks) — the canonical stored to-do object. Record scope is INPUT
   //    (queryId/agentId/manuscriptId), not derived state; omitted when absent (Firestore rejects
@@ -2202,10 +2163,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const updateUserTask = async (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt" | "dueDate">>) => {
+  const updateUserTask = async (
+    id: string,
+    fields: Partial<Pick<UserTask, "text" | "done" | "completedAt" | "dueDate">> & { committedDate?: string | null },
+  ) => {
     if (!currentUser) return;
+    const { committedDate, ...rest } = fields;
+    const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
+    // `null` clears the Today's-list commitment (uncommit); a string sets it.
+    if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "tasks", id), { ...fields, updatedAt: new Date().toISOString() });
+      await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/tasks/${id}`);
     }
@@ -2353,7 +2321,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const DAY_MS = 86400000;
   const upsertTaskFlag = async (
     key: TaskFlagKey,
-    patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean },
+    patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean; unbumpSnooze?: boolean },
   ) => {
     if (!currentUser) return;
     const id = taskFlagId(key);
@@ -2361,7 +2329,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // `null` in a patch CLEARS the field (full-overwrite write); `undefined` keeps the existing value.
     const resolve = (p: string | null | undefined, cur: string | undefined): string | undefined =>
       p === null ? undefined : p !== undefined ? p : cur;
-    const next: TaskFlag = { id, userId: currentUser.id, taskType: key.taskType, snoozeCount: (existing?.snoozeCount ?? 0) + (patch.bumpSnooze ? 1 : 0) };
+    // unbumpSnooze = the finishing pack's undo compensator: a snooze undo fully restores,
+    // INCLUDING the ×n count the bump added (floored at 0; no rules change — the field exists).
+    const next: TaskFlag = { id, userId: currentUser.id, taskType: key.taskType, snoozeCount: Math.max(0, (existing?.snoozeCount ?? 0) + (patch.bumpSnooze ? 1 : 0) - (patch.unbumpSnooze ? 1 : 0)) };
     const qid = key.queryId ?? existing?.queryId; if (qid) next.queryId = qid;
     const aid = key.agentId ?? existing?.agentId; if (aid) next.agentId = aid;
     const rule = key.rule ?? existing?.rule; if (rule) next.rule = rule;
@@ -2476,6 +2446,36 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);
       return { success: false, error: "Failed to log nudge." };
+    }
+  };
+
+  /** The interim offer journey's ONE completion write (journey-logic P3): the writer's decision,
+   *  never a re-log of the offer. Twin-write convention from logNudge — authoritative nested row
+   *  first (abort on fail), then the global projection under the SAME id, then recompute:
+   *  DECLINED's resultingStatus WITHDRAWN closes the query via the single deriver; ACCEPTED is
+   *  non-status (status stays OFFER; the task dies via hasOfferDecision in the engine). */
+  const recordOfferDecision = async (queryId: string, decision: OfferDecision): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) return { success: false, error: "Not signed in." };
+    const targetQ = queries.find(q => q.id === queryId);
+    if (!targetQ) return { success: false, error: "Query not found." };
+    const agent = agents.find(a => a.id === targetQ.agentId);
+    const writes = buildOfferDecisionWrites(targetQ, agent, decision, new Date());
+
+    const actId = "act-" + Math.random().toString(36).substr(2, 9);
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
+      return { success: false, error: "Failed to record the decision." };
+    }
+    // Projection twin — best-effort (the authoritative row already landed), same id.
+    await addActivity({ ...writes.activity, id: actId });
+    try {
+      await recompute(queryId);
+      return { success: true };
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId} [recordOfferDecision]`);
+      return { success: false, error: "Recorded, but the query could not be re-derived." };
     }
   };
 
@@ -2721,10 +2721,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addPersonalGenre,
         updateNote,
         deleteNote,
-        todoNotes,
-        addTodoNote,
-        updateTodoNote,
-        deleteTodoNote,
         userTasks,
         addUserTask,
         updateUserTask,
@@ -2735,6 +2731,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateUserProfile,
         dismissTask,
         logNudge,
+        recordOfferDecision,
         cleanDuplicates,
         wipeAndResetDatabase
       }}

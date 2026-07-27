@@ -1,0 +1,224 @@
+<!-- design-refs/session-v7.html — Downloads todo-fix25.html (23 Jul 19:35), the MASTER ref (live).
+  NORMATIVE for: the ink CURTAINS (close from L/R), the gentle title CROSSFADE, the slight DIM,
+  the gather-and-morph, and — from the mini row — TRANSITION A (the straight carriage) ONLY.
+  FENCED superseded within this ref: the main stage's through-the-wings transition B and minis
+  B/C/D are rejected; its title copy "Let's clear your desk" → "Clearing the desk" (the pack);
+  its hero's overlapping absolute lines → the stacked-flow spacing law (the pack). This pack
+  supersedes BOTH earlier session packs (the room v5 + the pool-of-light v6). -->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The session v7 - curtains, dim, the wings</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:44px 0 12px;width:1240px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.55}
+.stage{position:relative;width:1240px;height:560px;background:var(--oat);border:1px solid var(--hair);border-radius:14px;overflow:hidden;box-shadow:0 10px 26px rgba(58,28,20,.18)}
+.tbar{height:36px;background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;padding:0 20px;gap:12px;position:relative;z-index:70}
+.tbar .wm{font-family:'Playfair Display',serif;font-size:14px;font-weight:800}
+.hero{text-align:center;padding-top:16px;position:relative;z-index:70;height:64px}
+.hero .t{position:absolute;left:0;right:0;font-family:'Playfair Display',serif;font-size:31px;font-weight:600;letter-spacing:-.015em;transition:opacity .8s}
+.hero .t2{opacity:0}
+.hero.swap .t1{opacity:0}
+.hero.swap .t2{opacity:1}
+.sesline{position:absolute;left:0;right:0;top:46px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:#8a7a6d;opacity:0;transition:opacity .5s}
+.sesline b{color:var(--ink)}
+.work{display:flex;gap:20px;align-items:flex-start;padding:14px 26px 0;position:relative;z-index:10}
+.rail{width:190px;flex:0 0 auto;background:var(--white);border:1px solid var(--hair);border-radius:14px;height:280px;transition:transform .7s cubic-bezier(.5,.05,.6,1),opacity .6s}
+.rail.go{transform:translateX(-160%);opacity:0}
+.tdy{width:180px;flex:0 0 auto;background:var(--white);border:1px solid var(--hair);border-radius:14px;height:200px;transition:transform .7s cubic-bezier(.5,.05,.6,1),opacity .6s;overflow:hidden}
+.tdy .hd{height:30px;background:linear-gradient(180deg,#d7ddd5,#d5dbd3);border-bottom:1px solid var(--sage-bd)}
+.tdy.go{transform:translateX(160%);opacity:0}
+.sheet{flex:1;background:var(--white);border:1px solid var(--hair);border-radius:14px;overflow:hidden;transition:background .8s,border-color .8s,box-shadow .8s}
+.sheet.bare{background:transparent;border-color:transparent;box-shadow:none}
+.dochead{background:linear-gradient(180deg,#f4f3f1,#f0eeeb);border-bottom:1px solid #e5e3de;padding:7px 14px;font-family:'Playfair Display',serif;font-size:11.5px;font-weight:700;color:#4d4238;transition:transform .55s,opacity .5s}
+.dochead.go{transform:translateY(-130%);opacity:0}
+.grid{display:grid;grid-template-columns:repeat(3,190px);gap:11px;padding:14px;justify-content:center}
+.card{background:var(--white);border:1px solid #d8cfc4;border-radius:11px;box-shadow:0 2px 6px rgba(58,28,20,.07);overflow:hidden;transition:transform .6s cubic-bezier(.4,.1,.3,1),opacity .5s}
+.card .b{height:18px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.card .b.l{background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc}
+.card .c{padding:8px 10px;font-family:'Playfair Display',serif;font-size:10.5px;font-weight:600;line-height:1.3}
+/* curtains */
+.curt{position:absolute;top:0;bottom:0;width:150px;background:linear-gradient(90deg,#1d100c,#2a1a13);z-index:60;transition:transform 1.1s cubic-bezier(.3,.7,.2,1)}
+.curt.L{left:0;transform:translateX(-100%)}
+.curt.R{right:0;transform:translateX(100%);background:linear-gradient(270deg,#1d100c,#2a1a13)}
+.curt.on{transform:translateX(0)}
+/* soft dim over everything except the card */
+.dim{position:absolute;inset:0;background:rgba(58,28,20,.16);opacity:0;transition:opacity .9s;z-index:30;pointer-events:none}
+.dim.on{opacity:1}
+/* session card */
+.bigwrap{position:absolute;left:150px;right:150px;top:118px;bottom:0;z-index:50;pointer-events:none;overflow:hidden}
+.big{position:absolute;width:480px;left:50%;margin-left:-240px;background:var(--white);border:1px solid #d8cfc4;border-radius:16px;box-shadow:0 18px 46px rgba(58,28,20,.28);overflow:hidden;pointer-events:auto;opacity:0;transform-origin:top left}
+.big .bb{padding:7px 15px;border-bottom:1px solid var(--pink-b);background:linear-gradient(180deg,var(--pink-band),var(--pink-band2))}
+.tg{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;border-radius:99px;padding:2px 8px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.big .cc2{padding:15px 19px 17px}
+.big h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.big .m{font-family:'Playfair Display',serif;font-style:italic;font-size:10.5px;color:#7a6a5e;margin-top:3px}
+.acts{display:flex;gap:8px;margin-top:13px}
+.bp{display:inline-flex;align-items:center;justify-content:center;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:32px;padding:0 14px;font-size:10px;font-weight:600;cursor:pointer}
+.hl2{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border-radius:99px;font-size:9.5px;font-weight:700;background:var(--paper);border:1px solid var(--ink);color:var(--ink);cursor:pointer}
+.hq2{display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 11px;border-radius:99px;font-size:9.5px;font-weight:600;background:var(--paper);border:1px solid var(--hair);color:#6b5a4e;cursor:pointer}
+.stamp{position:absolute;right:13px;top:34px;width:32px;height:32px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1.5px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:15px;transform:rotate(-8deg) scale(0);transition:transform .3s cubic-bezier(.2,.9,.3,1.5)}
+.stamp.on{transform:rotate(-8deg) scale(1)}
+.fin{position:absolute;left:0;right:0;top:44%;text-align:center;z-index:50;opacity:0;transition:opacity .5s}
+.fin h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:700}
+.demo-btn{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;z-index:80;display:inline-flex;align-items:center;gap:8px;background:#2a1a13;color:#f3e7da;border:1px solid #1d100c;border-radius:99px;height:36px;padding:0 17px;font-size:11px;font-weight:600;cursor:pointer}
+/* variant mini-stages */
+.mrow{display:flex;gap:20px;width:1240px;flex-wrap:wrap}
+.mini{position:relative;width:395px;height:200px;background:var(--oat);border:1px solid var(--hair);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(58,28,20,.13)}
+.mini .mc{position:absolute;left:50%;top:50%;width:200px;margin:-45px 0 0 -100px;height:90px;background:var(--white);border:1px solid #d8cfc4;border-radius:11px;box-shadow:0 10px 26px rgba(58,28,20,.22);overflow:hidden}
+.mini .mc .b{height:16px;background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.mini .mc .c{padding:8px 10px;font-family:'Playfair Display',serif;font-size:9.5px;font-weight:700}
+.mini .mcurt{position:absolute;top:0;bottom:0;width:48px;background:#241511;z-index:5}
+.mini .mcurt.l{left:0}.mini .mcurt.r{right:0}
+.mini .play{position:absolute;right:10px;top:9px;z-index:20;display:inline-flex;align-items:center;background:#2a1a13;color:#f3e7da;border:1px solid #1d100c;border-radius:99px;height:26px;padding:0 12px;font-size:9px;font-weight:600;cursor:pointer}
+.mcap{font-family:'Playfair Display',serif;font-size:12.5px;font-weight:700;margin:0 0 3px}
+.mnote{font-size:10px;color:#4d4238;line-height:1.45;margin-bottom:8px;min-height:40px}
+.mopt{width:395px}
+</style></head><body><div class="lbl">V7, THE FULL SEQUENCE (LIVE &mdash; play, then work both cards) <em>&mdash; the ink CURTAINS close in from left and right (&sim;200px at full width; scaled here); the title crossfades gently to &ldquo;Let&rsquo;s clear your desk&rdquo;; a SLIGHT dim settles over everything except the cards themselves; the gather piles the rest behind the first, which grows to centre. Between tasks: the handled card exits INTO the left curtain, the next enters FROM the right &mdash; the curtains are the stage wings.</em></div><div class="stage" id="st">
+<div class="tbar"><span style="font-size:12px">&#9776;</span><span class="wm">&#9992; ScriptAlly</span></div>
+<div class="hero" id="hero"><div class="t t1">What&rsquo;s on your desk?</div><div class="t t2">Let&rsquo;s clear your desk</div>
+<div class="sesline" id="ses">TASK <b id="ti">1</b> OF <b>2</b> &nbsp;&middot;&nbsp; END SESSION &#10005;</div></div>
+<div class="work">
+<div class="rail" id="rail"></div>
+<div class="sheet" id="sheet"><div class="dochead" id="dh">Showing 44 of 44 items on your list</div><div class="grid" id="grid"><div class="card gath"><div class="b "></div><div class="c">Tom Ellery has made an offer</div></div><div class="card gath"><div class="b "></div><div class="c">Send your full to Jonathan Marsh</div></div><div class="card gath"><div class="b "></div><div class="c">Send your partial to Daniel O&rsquo;Rourke</div></div><div class="card gath"><div class="b l"></div><div class="c">16 agents missing a materials list</div></div><div class="card gath"><div class="b l"></div><div class="c">15 agents missing a wish list</div></div><div class="card gath"><div class="b l"></div><div class="c">Jonathan Marsh silent</div></div></div></div>
+<div class="tdy" id="tdy"><div class="hd"></div></div>
+</div>
+<div class="dim" id="dim"></div>
+<div class="curt L" id="cl"></div><div class="curt R" id="cr"></div>
+<div class="bigwrap"><div class="big" id="b1"><div class="bb"><span class="tg">&#9733; OFFER</span></div>
+<div class="cc2"><h2>Tom Ellery has made an offer</h2><div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="acts"><span class="bp">Action now</span><span class="hl2 done">&#10003; Mark handled</span><span class="hq2">Skip for now</span></div></div><span class="stamp">&#10003;</span></div><div class="big" id="b2"><div class="bb"><span class="tg">AGENT WAITING</span></div>
+<div class="cc2"><h2>Send your full to Jonathan Marsh</h2><div class="m">Murphy&rsquo;s Day Out &middot; Curtis Vane</div>
+<div class="acts"><span class="bp">Action now</span><span class="hl2 done">&#10003; Mark handled</span><span class="hq2">Skip for now</span></div></div><span class="stamp">&#10003;</span></div></div>
+<div class="fin" id="fin"><h1>Desk cleared.</h1></div>
+<button class="demo-btn" id="go">&#9654; Begin focused session &mdash; play it</button>
+</div><script>
+(function(){
+var restY=0;
+document.getElementById('go').addEventListener('click',function(){this.style.opacity=.2;
+document.getElementById('rail').classList.add('go');
+document.getElementById('tdy').classList.add('go');
+setTimeout(function(){document.getElementById('dh').classList.add('go');
+document.getElementById('sheet').classList.add('bare');},300);
+document.getElementById('cl').classList.add('on');           // curtains close in
+document.getElementById('cr').classList.add('on');
+document.getElementById('hero').classList.add('swap');       // title gently becomes the invitation
+setTimeout(function(){document.getElementById('dim').classList.add('on');},500); // slight dim, cards excepted
+setTimeout(gather,850);});
+function gather(){
+var items=document.querySelectorAll('.gath'),first=items[0];
+var fr=first.getBoundingClientRect();
+first.style.position='relative';first.style.zIndex=45;
+Array.prototype.forEach.call(items,function(c,i){if(i===0)return;
+var r=c.getBoundingClientRect();
+var dx=fr.left-r.left,dy=fr.top-r.top;
+setTimeout(function(){c.style.transform='translate('+dx+'px,'+dy+'px) rotate('+((i%2?1:-1)*(2+i))+'deg)';c.style.opacity=.85;c.style.zIndex=20-i;},i*90);});
+setTimeout(function(){morph(first,items)},items.length*90+560);}
+function morph(first,items){
+var big=document.getElementById('b1'),wrap=big.parentElement;
+var r=first.getBoundingClientRect(),w=wrap.getBoundingClientRect();
+var bw=480,sc=r.width/bw;
+var bh=big.offsetHeight||170;
+restY=Math.max(20,(w.height-bh)/2-10);
+big.style.transition='none';big.style.opacity=1;
+big.style.transform='translate('+((r.left-w.left)-(w.width/2-bw/2))+'px,'+(r.top-w.top)+'px) scale('+sc+')';
+Array.prototype.forEach.call(items,function(c){c.style.transition='opacity .3s';c.style.opacity=0;});
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+big.style.transition='transform .7s cubic-bezier(.25,.8,.3,1.05)';
+big.style.transform='translate(0,'+restY+'px) scale(1)';
+setTimeout(function(){document.getElementById('ses').style.opacity=1;
+var b2=document.getElementById('b2');
+b2.style.transform='translate(120%,'+restY+'px)';           // waits in the right wing
+wire(1);},760);})});}
+function wire(i){
+var big=document.getElementById('b'+i);
+big.querySelector('.done').addEventListener('click',function(){
+big.querySelector('.stamp').classList.add('on');
+setTimeout(function(){
+big.style.transition='transform .5s cubic-bezier(.55,.05,.55,.95),opacity .4s';
+big.style.transform='translate(-120%,'+restY+'px)';          // exits INTO the left curtain
+big.style.opacity=0;
+if(i===1){document.getElementById('ti').textContent='2';
+setTimeout(function(){var b2=document.getElementById('b2');
+b2.style.opacity=1;
+b2.style.transition='transform .5s cubic-bezier(.2,.85,.3,1.1)';
+b2.style.transform='translate(0,'+restY+'px)';wire(2);},170);} // enters FROM the right curtain
+else{setTimeout(function(){document.getElementById('fin').style.opacity=1;
+document.getElementById('ses').style.opacity=0;},400);}
+},440);});}
+})();
+</script><div class="lbl" style="margin-top:40px">FOUR SLIDE GRAMMARS FOR BETWEEN TASKS <em>&mdash; each live; the curtains drawn in every mini so you can judge the interplay.</em></div><div class="mrow"><div class="mopt"><div class="mcap">B &middot; Through the wings &nbsp;&#9733;</div><div class="mnote">Out into the left curtain, in from the right one &mdash; slightly scaled in flight, a beat apart. The borders become theatre wings; entrances and exits have somewhere to come from.</div>
+<div class="mini" id="mB"><span class="mcurt l"></span><span class="mcurt r"></span>
+<div class="mc" id="mBa"><div class="b"></div><div class="c">Tom Ellery has made an offer</div></div>
+<div class="mc" id="mBb" style="opacity:0"><div class="b" style="background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc"></div><div class="c">Send your full to Jonathan Marsh</div></div>
+<button class="play" data-m="mB">&#9654; Play</button></div></div><div class="mopt"><div class="mcap">A &middot; The straight carriage</div><div class="mnote">Plain horizontal: out left, in right, overlapping. Brisk and mechanical; the curtains are scenery rather than doors.</div>
+<div class="mini" id="mA"><span class="mcurt l"></span><span class="mcurt r"></span>
+<div class="mc" id="mAa"><div class="b"></div><div class="c">Tom Ellery has made an offer</div></div>
+<div class="mc" id="mAb" style="opacity:0"><div class="b" style="background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc"></div><div class="c">Send your full to Jonathan Marsh</div></div>
+<button class="play" data-m="mA">&#9654; Play</button></div></div><div class="mopt"><div class="mcap">D &middot; The push</div><div class="mnote">The incoming card pushes the outgoing off in one contiguous motion &mdash; they touch. Feels like one filmstrip; least pause, most momentum.</div>
+<div class="mini" id="mD"><span class="mcurt l"></span><span class="mcurt r"></span>
+<div class="mc" id="mDa"><div class="b"></div><div class="c">Tom Ellery has made an offer</div></div>
+<div class="mc" id="mDb" style="opacity:0"><div class="b" style="background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc"></div><div class="c">Send your full to Jonathan Marsh</div></div>
+<button class="play" data-m="mD">&#9654; Play</button></div></div><div class="mopt"><div class="mcap">C &middot; The drop &amp; rise</div><div class="mnote">Out through the top, in from the bottom. Vertical keeps the wings untouched; reads as &ldquo;filed, next drawn up&rdquo;.</div>
+<div class="mini" id="mC"><span class="mcurt l"></span><span class="mcurt r"></span>
+<div class="mc" id="mCa"><div class="b"></div><div class="c">Tom Ellery has made an offer</div></div>
+<div class="mc" id="mCb" style="opacity:0"><div class="b" style="background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc"></div><div class="c">Send your full to Jonathan Marsh</div></div>
+<button class="play" data-m="mC">&#9654; Play</button></div></div></div><script>
+(function(){
+var M={
+mA:function(a,b){a.style.transition='transform .5s cubic-bezier(.55,.05,.55,.95),opacity .4s';
+a.style.transform='translateX(-260px)';a.style.opacity=0;
+b.style.transform='translateX(260px)';b.style.opacity=1;
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+b.style.transition='transform .5s cubic-bezier(.2,.85,.3,1.1)';b.style.transform='translateX(0)';})});},
+mB:function(a,b){a.style.transition='transform .55s cubic-bezier(.6,.02,.7,.95),opacity .3s .25s';
+a.style.transform='translateX(-320px) scale(.94)';a.style.opacity=0;
+b.style.transform='translateX(320px) scale(.94)';b.style.opacity=1;
+setTimeout(function(){b.style.transition='transform .55s cubic-bezier(.2,.85,.25,1.05)';b.style.transform='translateX(0) scale(1)';},140);},
+mC:function(a,b){a.style.transition='transform .5s cubic-bezier(.5,.05,.6,1),opacity .4s';
+a.style.transform='translateY(-170px) rotate(-2deg)';a.style.opacity=0;
+b.style.transform='translateY(170px)';b.style.opacity=1;
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+b.style.transition='transform .5s cubic-bezier(.2,.85,.3,1.1)';b.style.transform='translateY(0)';})});},
+mD:function(a,b){b.style.transform='translateX(240px)';b.style.opacity=1;b.style.zIndex=2;
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+a.style.transition='transform .55s cubic-bezier(.4,.1,.4,1)';
+b.style.transition='transform .55s cubic-bezier(.4,.1,.4,1)';
+a.style.transform='translateX(-240px)';a.style.opacity=1;
+b.style.transform='translateX(0)';
+setTimeout(function(){a.style.opacity=0},420);})});}
+};
+document.querySelectorAll('.play').forEach(function(p){p.addEventListener('click',function(){
+var id=p.dataset.m;M[id](document.getElementById(id+'a'),document.getElementById(id+'b'));p.style.opacity=.2;});});
+})();
+</script></body></html>

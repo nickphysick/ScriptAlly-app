@@ -1,0 +1,87 @@
+<!-- design-refs/todo-composer.html — Downloads todo-fix11.html (23 Jul 15:18), committed with hero-pair P1.
+  NORMATIVE for: the bold bar line (§3, Playfair 700) and the inline note composer (§4 — white,
+  notes-family border #ece2c6, Caveat 19 autofocus growing, mono ⌘⏎ SAVE · ESC CANCEL hint,
+  quiet Cancel + emphasised Save note). Its §1 hero variants are SUPERSEDED by
+  todo-hero-pair.html; its §2 pill sizing is SUPERSEDED by todo-filter-formats.html option 3. -->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Hero pair, sidebar sizes, bold bar, note composer</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#cfc3b0;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5d4d40;margin:44px 0 12px;width:1100px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#4d4238;margin-left:10px;line-height:1.5}
+.bed{width:1100px;background:var(--oat);border-radius:12px;box-shadow:0 6px 16px rgba(58,28,20,.13);padding:26px 22px;box-sizing:border-box}
+.hero h1{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;text-align:center;letter-spacing:-.015em}
+.srow{display:flex;justify-content:center;margin-top:16px}
+.bigsearch{width:380px;height:46px;box-sizing:border-box;background:var(--white);border:1px solid var(--hair);border-radius:99px;box-shadow:0 10px 28px rgba(58,28,20,.12);display:flex;align-items:center;gap:11px;padding:0 8px 0 20px;color:#8a7a6d;font-size:13px}
+.bigsearch .mag{margin-left:auto;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--oat)}
+.pairrow{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.pri{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;font-weight:600;letter-spacing:.02em;height:42px;padding:0 22px;font-size:12.5px;box-sizing:border-box}
+.inv{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#f3e7da;border:1px solid #1d100c;color:#2a1a13;border-radius:99px;font-weight:600;letter-spacing:.02em;height:42px;padding:0 22px;font-size:12.5px;box-sizing:border-box}
+.inv .nd{width:7px;height:7px;border-radius:50%;background:#c96a55}
+/* sidebar sizes */
+.railmini{width:248px;background:var(--white);border:1px solid var(--hair);border-radius:14px;padding:10px;box-sizing:border-box}
+.fp{display:flex;align-items:center;gap:10px;height:34px;border:1px solid var(--hair);border-radius:99px;padding:0 13px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em;color:#5d4d40;margin-bottom:6px}
+.fp .d{width:7px;height:7px;border-radius:50%;background:#cbb995}
+.fp .n{margin-left:auto;color:#a5988c}
+.s85{font-size:8.5px}.s95{font-size:9.5px}.s95 .n{font-size:9.5px}
+.cap{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.13em;color:#a5988c;margin:0 0 8px 4px}
+/* header bold */
+.dochead{width:700px;background:linear-gradient(180deg,#f4f3f1,#f0eeeb);border:1px solid #e5e3de;border-radius:14px;padding:10px 18px;display:flex;align-items:center;box-sizing:border-box;margin:0 auto}
+.dochead .pf{font-family:'Playfair Display',serif;font-size:14.5px;color:#4d4238;font-variant-numeric:lining-nums tabular-nums}
+/* notes composer */
+.nsec{background:linear-gradient(180deg,#fbf8ec,#f9f5e4);border:1px solid #ece2c6;border-radius:14px;padding:14px 16px;width:700px;box-sizing:border-box;margin:0 auto}
+.addrow{display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px dashed #d9c87a;border-radius:11px;background:rgba(255,255,255,.55);padding:15px;color:#8a7a52;font-size:11.5px;font-weight:600}
+.composer{background:var(--white);border:1px solid #ece2c6;border-radius:11px;padding:12px 14px;box-shadow:0 4px 14px rgba(120,100,40,.1)}
+.composer textarea{width:100%;border:none;outline:none;resize:none;font-family:'Caveat',cursive;font-size:19px;color:#4d4238;background:transparent;min-height:52px;box-sizing:border-box}
+.composer .foot{display:flex;align-items:center;gap:8px;border-top:1px solid var(--hair2);padding-top:10px;margin-top:4px}
+.composer .hint{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em;color:#b8a97a}
+.composer .sv{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 16px;border-radius:99px;font-size:10.5px;font-weight:700;background:var(--paper);border:1px solid var(--ink);color:var(--ink)}
+.composer .cx{display:inline-flex;align-items:center;justify-content:center;height:30px;padding:0 14px;border-radius:99px;font-size:10.5px;font-weight:600;background:var(--paper);border:1px solid var(--hair);color:#6b5a4e}
+</style></head><body><div class="lbl">1A &middot; The pair BELOW the search &nbsp;&#9733; <em>&mdash; the hero becomes the complete command centre: question &rarr; search &rarr; the two session actions; the left column becomes pure filter.</em></div><div class="bed"><div class="hero"><h1>What&rsquo;s on your desk?</h1>
+<div class="srow"><div class="bigsearch">Search<span class="mag"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a1c14" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L21 21"/></svg></span></div></div>
+<div class="pairrow"><span class="pri">&#9654; Begin focused session</span><span class="inv">Last week in review<span class="nd"></span></span></div>
+</div><div style="display:flex;gap:18px;margin-top:26px"><div style="width:200px;height:70px;background:var(--white);border:1px solid var(--hair);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:8px;color:#a5988c;letter-spacing:.1em">FILTER CARD</div><div style="flex:1;height:70px;background:var(--white);border:1px solid var(--hair);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:JetBrains Mono,monospace;font-size:8px;color:#a5988c;letter-spacing:.1em">SHEET</div></div></div><div class="lbl">1B &middot; The pair ABOVE the search <em>&mdash; actions before search; crowds the title and demotes the search to an afterthought.</em></div><div class="bed"><div class="hero"><h1>What&rsquo;s on your desk?</h1>
+<div class="pairrow" style="margin-top:16px"><span class="pri">&#9654; Begin focused session</span><span class="inv">Last week in review<span class="nd"></span></span></div>
+<div class="srow" style="margin-top:14px"><div class="bigsearch">Search<span class="mag"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a1c14" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L21 21"/></svg></span></div></div></div></div><div class="lbl">2 &middot; Sidebar text size <em>&mdash; the pills from 8.5 to 9.5px mono (counts matching); still quiet, notably easier at arm&rsquo;s length.</em></div><div class="bed"><div style="display:flex;gap:40px;justify-content:center">
+<div><div class="cap">CURRENT &mdash; 8.5PX</div><div class="railmini"><div class="fp s85"><span class="d" style="background:#e59b8f"></span>AGENT WAITING<span class="n">3</span></div><div class="fp s85"><span class="d"></span>MATERIALS<span class="n">16</span></div><div class="fp s85"><span class="d"></span>WISH LISTS<span class="n">15</span></div></div></div>
+<div><div class="cap">PROPOSED &mdash; 9.5PX (COUNTS TOO)</div><div class="railmini"><div class="fp s95"><span class="d" style="background:#e59b8f"></span>AGENT WAITING<span class="n">3</span></div><div class="fp s95"><span class="d"></span>MATERIALS<span class="n">16</span></div><div class="fp s95"><span class="d"></span>WISH LISTS<span class="n">15</span></div></div></div>
+</div></div><div class="lbl">3 &middot; The bar line, bold <em>&mdash; current regular vs Playfair 700.</em></div><div class="bed"><div style="display:flex;flex-direction:column;gap:12px">
+<div class="dochead"><span class="pf" style="font-weight:400">Showing 44 of 44 items on your list</span></div>
+<div class="dochead"><span class="pf" style="font-weight:700">Showing 44 of 44 items on your list</span></div>
+</div></div><div class="lbl">4 &middot; Adding a note, properly <em>&mdash; the browser prompt() was a placeholder, not a design; the dashed row should transform IN PLACE into a composer: Caveat handwriting, autofocus, &#8984;&#9166; to save, Esc to cancel, saved note animating into a row/post-it.</em></div><div class="bed"><div style="display:flex;flex-direction:column;gap:16px">
+<div class="nsec"><div class="cap" style="margin-bottom:8px">REST &mdash; THE DASHED INVITATION</div><div class="addrow">&#65291;&nbsp; Add a note</div></div>
+<div class="nsec"><div class="cap" style="margin-bottom:8px">ACTIVE &mdash; THE INLINE COMPOSER (dashed row transforms in place; autofocused)</div>
+<div class="composer"><textarea>Ask Priya&rsquo;s assistant about the anthology deadline&hellip;</textarea>
+<div class="foot"><span class="hint">&#8984;&#9166; SAVE &middot; ESC CANCEL</span><span class="cx">Cancel</span><span class="sv">Save note</span></div></div></div>
+</div></div></body></html>

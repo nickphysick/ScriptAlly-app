@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!-- AMENDMENT (evening run A1, 2026-07-18): the masthead is a FULL-WIDTH PAPER BAND (--paper,
+     1px hairline base rule) spanning the viewport ABOVE the drawer+column row — not a row inside
+     the content column as Option B sketches it. Contents and the 1150px centring discipline are
+     unchanged; the band scrolls away naturally and the drawer's sticky offset is unaffected.
+     This comment amends the ref in place (never regenerated). -->
+
+<html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workspace sidebar + centred content — two arrangements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#d8cdbc}
+.opt-head{max-width:1760px}
+.frame2{max-width:1760px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* app-level top nav — the sidebar lives BELOW this */
+.appnav{background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:14px;padding:10px 24px}
+.appnav .hb{font-size:15px;color:var(--ink);cursor:pointer}
+.appnav .lg{font-family:'Playfair Display',serif;font-weight:700;font-size:16px}
+.appnav .crumb{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--muted)}
+.appnav .crumb b{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink);letter-spacing:0}
+
+/* workspace = sidebar + centred main */
+.ws{display:flex;align-items:flex-start;max-width:1720px;margin:0 auto}
+.wmain{flex:1;min-width:0}
+.wmain-in{max-width:1150px;margin:0 auto;padding:0 28px}
+
+/* masthead with search as the centrepiece control */
+.mast2{display:flex;align-items:center;gap:20px;padding:18px 0 12px}
+.mast2 .d{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;color:var(--muted);margin-bottom:2px}
+.mast2 h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:600}
+.pi{width:42px;height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(58,28,20,.14)}
+.pi b{font-family:'Playfair Display',serif;font-size:14px;line-height:1}
+.pi span{font-family:'JetBrains Mono',monospace;font-size:5px;letter-spacing:.08em;margin-top:1px}
+.scrap{width:50px;height:37px;background:var(--paper);box-shadow:0 1px 3px rgba(58,28,20,.12);transform:rotate(2deg);display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(0 5%,8% 0,94% 3%,100% 10%,98% 87%,85% 94%,60% 90%,35% 96%,10% 92%,0 84%);cursor:pointer}
+.scrap b{font-family:'Playfair Display',serif;font-style:italic;font-size:8.5px;font-weight:600;color:#5d4d40;line-height:1.1}
+.scrap u{text-decoration:none;border-bottom:1px solid var(--cof-bd);font-family:'Playfair Display',serif;font-style:italic;font-size:6.5px;color:var(--cof-i)}
+.msrch{display:flex;align-items:center;gap:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:9px 16px;color:#8a7a6d;font-size:13px;flex:0 1 340px;box-shadow:0 1px 3px rgba(58,28,20,.06)}
+.msrch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.vtg{display:inline-flex;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:3px;gap:2px}
+.vtg span{border-radius:99px;padding:6px 14px;font-size:11.5px;font-weight:600;color:#8a7a6d;cursor:pointer;display:flex;align-items:center;gap:6px}
+.vtg span.on{background:var(--ink);color:var(--paper)}
+
+/* ---------- the refined ledger ---------- */
+.tbl2{background:var(--white);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.g-head{display:grid;grid-template-columns:30px 148px 1fr 150px 210px 120px 84px;align-items:center;gap:0;background:var(--paper);border-bottom:1px solid var(--hair);padding:9px 16px}
+.g-head .gt{display:flex;align-items:center;gap:9px;grid-column:1/4}
+.g-head .gt .t{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+.g-head .gt .c{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:0 7px;color:#7a6a5e}
+.g-head .gs{grid-column:5/8;justify-self:end;display:inline-flex;align-items:center;gap:5px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer}
+.r2{display:grid;grid-template-columns:30px 148px 1fr 150px 210px 120px 84px;align-items:center;padding:0 16px;height:44px;border-bottom:1px solid var(--hair2);cursor:pointer}
+.r2:last-child{border-bottom:none}
+.r2:hover{background:#fdf9f3}
+.r2 .td{width:20px;height:20px;border-radius:50%;border:1px solid var(--hair);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent}
+.r2 .td.on{background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-color:var(--sage-bd);color:var(--sage-i)}
+.r2:hover .td{color:var(--sage-i)}
+.r2 .tag{justify-self:start}
+.r2 .ti{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:16px}
+.r2 .ms{font-family:'Playfair Display',serif;font-style:italic;font-size:11.5px;color:#8a7a6d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:16px}
+.r2 .ag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.05em;color:#7a6a5e;display:flex;gap:8px;align-items:center;white-space:nowrap;overflow:hidden}
+.r2 .dl{font-family:'JetBrains Mono',monospace;font-size:8.5px;justify-self:end;color:#8a7a6d}
+.r2 .dl.hot{color:#6e3325;font-weight:700}
+.r2 .acts{justify-self:end;display:flex;gap:4px;visibility:hidden}
+.r2:hover .acts{visibility:visible}
+.r2 .acts button{width:24px;height:24px;border-radius:7px;border:1px solid var(--hair);background:var(--white);font-size:9.5px;cursor:pointer;color:#6b5a4e}
+.r2 .prog{height:4px;background:#efe8dd;border-radius:2px;overflow:hidden;align-self:center;width:110px}
+.r2 .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--cof-1),var(--cof-2))}
+
+/* ---------- workspace sidebar (shared) ---------- */
+.wsb .sh{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#a5988c;margin:14px 4px 6px}
+.wsb .create{display:flex;align-items:center;gap:9px;width:100%;border:none;background:var(--ink);color:var(--paper);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.wsb .walk{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--ink);border-radius:12px;padding:9px 12px 9px 9px;cursor:pointer;margin-top:8px}
+.wsb .walk .disc{width:26px;height:26px;border-radius:50%;background:linear-gradient(180deg,var(--pink-t),var(--pink-b));border:1px solid var(--pink-b);display:flex;align-items:center;justify-content:center;font-size:9px}
+.wsb .walk b{font-family:'Playfair Display',serif;font-size:13.5px;display:block;line-height:1.1}
+.wsb .walk span{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;color:#8a7a6d}
+.wsb .fgrp{margin-bottom:2px}
+.wsb .fgl{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;padding:6px 4px;color:var(--ink)}
+.wsb .fgl .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:#8a7a6d}
+.wsb .ft{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 4px 5px 20px;color:#5d4d40;cursor:pointer;border-radius:7px}
+.wsb .ft:hover{background:#f4eee5}
+.wsb .ft .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a5988c}
+.wsb .ft input{accent-color:#5a6e58}
+.wsb .today2{background:var(--white);border:1px solid var(--sage-bd);border-radius:12px;overflow:hidden;margin-top:6px}
+.wsb .today2 .th{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-bottom:1px solid var(--sage-bd);padding:8px 12px}
+.wsb .today2 .th b{font-family:'Playfair Display',serif;font-size:13.5px;flex:1}
+.wsb .today2 .th .c{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--white);border:1px solid var(--sage-bd);border-radius:99px;padding:1px 7px;color:var(--sage-i)}
+.titem{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:1px solid var(--hair2);font-size:11.5px}
+.titem:last-child{border-bottom:none}
+.titem .dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--pink-b);background:var(--pink-t);flex:0 0 auto}
+.titem.done{color:#8d7f73;text-decoration:line-through}
+.titem.done .dot{background:var(--sage-1);border-color:var(--sage-bd)}
+
+/* Option A: attached column */
+.oA .wsb{width:264px;flex:0 0 auto;background:var(--paper);border-right:1px solid var(--hair);min-height:660px;padding:16px 16px 20px;position:sticky;top:0}
+/* Option B: floating drawer */
+.oB .ws{gap:26px;padding:0 26px}
+.oB .wsb{width:264px;flex:0 0 auto;background:var(--paper);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 16px rgba(58,28,20,.1);margin-top:18px;padding:16px 16px 18px;position:sticky;top:18px}
+.oB .wmain-in{padding:0}
+/* cards (for option B) */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:var(--white);border-radius:10px;padding:2px;box-shadow:0 1px 2px rgba(58,28,20,.06)}
+.frx{border:1px solid var(--hair);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;height:100%}
+.bd{padding:6px 12px;display:flex;align-items:center;min-height:26px}
+.bd.p{background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border-bottom:1px solid var(--pink-b)}
+.bd.c{background:linear-gradient(180deg,var(--cof-1),var(--cof-2));border-bottom:1px solid var(--cof-bd)}
+.bc{padding:10px 12px 11px;display:flex;flex-direction:column;gap:6px;flex:1}
+.bc h3{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;line-height:1.3}
+.bc .ms{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#7a6a5e}
+.bc .mt2{border-top:1px solid var(--hair);padding-top:7px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#7a6a5e;margin-top:auto;display:flex;gap:6px;align-items:center}
+.pb{width:100%;padding:6px 0;font-size:8.5px;border:1px solid var(--hair);background:var(--white);color:var(--ink)}
+.pb.on{border-color:var(--sage-bd);background:linear-gradient(180deg,var(--sage-1),var(--sage-2));color:var(--sage-i);font-weight:600}
+.lh{display:flex;align-items:center;gap:10px;margin:16px 0 10px}
+.lh .t{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+.lh .c{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:1px 8px;color:#7a6a5e}
+.lh .rule{flex:1;height:1px;background:var(--hair)}
+</style></head><body>
+
+<!-- ▼▼ EXPLORATION (Option A, attached column) — NOT normative. OPTION B below (floating
+     drawer) is the built design for shell, masthead and card view; the ledger table drawn inside
+     Option A is superseded by design-refs/todo-ledger-v1.html (the whole-ledger normative ref). ▼▼ -->
+<div class="opt-head"><div class="n">OPTION A</div><h2>The attached column · ledger showcase</h2><p>The workspace sidebar sits below the app nav as a quiet attached column — clearly the To-do page's furniture, not the app's. Content is a centred 1150px column in the remaining space (the ProWritingAid discipline). The ledger is rebuilt on a strict shared grid: seven columns, every row 44px, deadlines right-aligned, nothing ragged.</p></div>
+<div class="frame2 oA">
+<div class="appnav"><span class="hb">☰</span><span class="lg">✈ ScriptAlly</span><span class="crumb">QUERYING / <b>To-do</b></span><div style="flex:1"></div><span class="avac">ML</span></div>
+<div class="ws">
+  <aside class="wsb">
+    <button class="create">＋ New note</button>
+    <button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+    <div class="sh">FILTER</div>
+    <div class="fgrp"><div class="fgl"><span class="dotf p"></span>Urgent<span class="n">4</span></div>
+      <div class="ft"><input type="checkbox" checked>Offers<span class="n">2</span></div>
+      <div class="ft"><input type="checkbox" checked>Over to you<span class="n">2</span></div>
+    </div>
+    <div class="fgrp"><div class="fgl"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div>
+      <div class="ft"><input type="checkbox" checked>Missing materials<span class="n">16</span></div>
+      <div class="ft"><input type="checkbox" checked>Missing wish lists<span class="n">15</span></div>
+      <div class="ft"><input type="checkbox" checked>Stale queries<span class="n">7</span></div>
+      <div class="ft"><input type="checkbox">Snoozed<span class="n">2</span></div>
+    </div>
+    <div class="fgrp"><div class="fgl"><span class="dotf y"></span>Notes<span class="n">0</span></div></div>
+    <div class="ft" style="padding-left:4px"><input type="checkbox">✓ On today's list only<span class="n">3</span></div>
+    <div class="sh">TODAY'S LIST · 1 OF 3</div>
+    <div class="today2"><div class="th"><b>Today's list</b><span class="c">2 TO GO</span></div>
+      <div class="titem done"><span class="dot"></span>Tom Ellery has made an offer</div>
+      <div class="titem"><span class="dot"></span>Send your full to Jonathan Marsh</div>
+      <div class="titem"><span class="dot"></span>Send your partial to Daniel O'Rourke</div>
+    </div>
+  </aside>
+  <div class="wmain"><div class="wmain-in">
+    <div class="mast2">
+      <div><div class="d">SAT 18 JUL · WEEK 137</div><h1>What's on your desk?</h1></div>
+      <div style="display:flex;gap:8px">
+        <div class="pi" style="background:#f6cfc9"><b>4</b><span>URGENT</span></div>
+        <div class="pi" style="background:var(--cof-2)"><b>40</b><span>HOUSEKPG</span></div>
+        <div class="pi" style="background:var(--yel)"><b>0</b><span>NOTES</span></div>
+        <div class="scrap"><b>Last week</b><u>in review ▸</u></div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="msrch">⌕ Search your desk…<span class="k">⌘K</span></div>
+      <div class="vtg"><span>▦ Cards</span><span class="on">☰ Ledger</span></div>
+    </div>
+    <div class="tbl2">
+      <div class="g-head"><div class="gt"><span class="dotf p"></span><span class="t">Urgent</span><span class="c">4</span></div><span class="gs">▶ Focused session</span></div>
+      <div class="r2"><span class="td on">✓</span><span class="tag offer">★ OFFER</span><span class="ti">Tom Ellery has made an offer</span><span class="ms">Murphy's Day Out</span><span class="ag"><span class="avac">TE</span>CURTIS VANE</span><span class="dl hot">REPLY BY 31 JUL</span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+      <div class="r2"><span class="td"></span><span class="tag hot">9 DAYS LEFT</span><span class="ti">Reply to Tom Ellery's offer</span><span class="ms">Murphy's Day Out</span><span class="ag"><span class="avac">TE</span>CURTIS VANE</span><span class="dl hot">REPLY BY 31 JUL</span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+      <div class="r2"><span class="td on">✓</span><span class="tag">OVER TO YOU</span><span class="ti">Send your full to Jonathan Marsh</span><span class="ms">Murphy's Day Out</span><span class="ag"><span class="avac">JM</span>THE MARSH AGENCY</span><span class="dl"></span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+      <div class="r2"><span class="td on">✓</span><span class="tag">OVER TO YOU</span><span class="ti">Send your partial to Daniel O'Rourke</span><span class="ms">Murphy's Day Out</span><span class="ag"><span class="avac">DO</span>INKWELL &amp; STONE</span><span class="dl"></span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+    </div>
+    <div class="tbl2">
+      <div class="g-head"><div class="gt"><span class="dotf c"></span><span class="t">Housekeeping</span><span class="c">40</span></div><span class="gs">▶ Focused session</span></div>
+      <div class="r2"><span class="td"></span><span class="tag" style="border-color:var(--cof-bd);color:var(--cof-i)">MATERIALS</span><span class="ti"><b>16</b> agents missing a materials list</span><span class="prog"><i style="width:0%"></i></span><span class="ag">AK · WT · DO · +13</span><span class="dl">0 OF 16</span><span class="acts"><button>→</button></span></div>
+      <div class="r2"><span class="td"></span><span class="tag" style="border-color:var(--cof-bd);color:var(--cof-i)">WISH LISTS</span><span class="ti"><b>15</b> agents missing a wish list</span><span class="prog"><i style="width:6%"></i></span><span class="ag">AK · WT · DO · +12</span><span class="dl">1 OF 16</span><span class="acts"><button>→</button></span></div>
+      <div class="r2"><span class="td on">✓</span><span class="tag">STALE QUERY</span><span class="ti">Jonathan Marsh silent</span><span class="ms">consider closing</span><span class="ag"><span class="avac">JM</span>THE MARSH AGENCY</span><span class="dl">312 DAYS</span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+      <div class="r2"><span class="td"></span><span class="tag">STALE QUERY</span><span class="ti">Marcus Reed silent</span><span class="ms">consider closing</span><span class="ag"><span class="avac">MR</span>BLOOMSBURY QUILL</span><span class="dl">767 DAYS</span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+      <div class="r2"><span class="td"></span><span class="tag">SNOOZED ×2</span><span class="ti">Priya Raman silent</span><span class="ms">wakes 21 Jul</span><span class="ag"><span class="avac">PR</span>RAMAN LITERARY</span><span class="dl">21 JUL</span><span class="acts"><button>✓</button><button>⏸</button><button>→</button></span></div>
+    </div>
+  </div></div>
+</div>
+</div>
+
+<!-- ▲▲ end exploration ▲▲ -->
+<!-- OPTION B — NORMATIVE (workbench pack): floating drawer shell + masthead + card grid.
+     Live .t-f12 tokens over these mockup hexes throughout; "Batch fix" rename carried app-wide
+     on the To-do page. -->
+<div class="opt-head"><div class="n">OPTION B</div><h2>The floating drawer · cards showcase</h2><p>Same anatomy, different furniture: the sidebar is a floating rounded panel — a desk drawer pulled out beside the work — starting below the nav, sticky, not full height. Content column centred as before; card view shown here, the toggle identical in both options.</p></div>
+<div class="frame2 oB">
+<div class="appnav"><span class="hb">☰</span><span class="lg">✈ ScriptAlly</span><span class="crumb">QUERYING / <b>To-do</b></span><div style="flex:1"></div><span class="avac">ML</span></div>
+<div class="ws">
+  <aside class="wsb">
+    <button class="create">＋ New note</button>
+    <button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+    <div class="sh">FILTER</div>
+    <div class="fgrp"><div class="fgl"><span class="dotf p"></span>Urgent<span class="n">4</span></div>
+      <div class="ft"><input type="checkbox" checked>Offers<span class="n">2</span></div>
+      <div class="ft"><input type="checkbox" checked>Over to you<span class="n">2</span></div>
+    </div>
+    <div class="fgrp"><div class="fgl"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div>
+      <div class="ft"><input type="checkbox" checked>Missing materials<span class="n">16</span></div>
+      <div class="ft"><input type="checkbox" checked>Missing wish lists<span class="n">15</span></div>
+      <div class="ft"><input type="checkbox" checked>Stale queries<span class="n">7</span></div>
+      <div class="ft"><input type="checkbox">Snoozed<span class="n">2</span></div>
+    </div>
+    <div class="ft" style="padding-left:4px"><input type="checkbox">✓ On today's list only<span class="n">3</span></div>
+    <div class="sh">TODAY'S LIST · 1 OF 3</div>
+    <div class="today2"><div class="th"><b>Today's list</b><span class="c">2 TO GO</span></div>
+      <div class="titem done"><span class="dot"></span>Tom Ellery has made an offer</div>
+      <div class="titem"><span class="dot"></span>Send your full to Jonathan Marsh</div>
+      <div class="titem"><span class="dot"></span>Send your partial to Daniel O'Rourke</div>
+    </div>
+  </aside>
+  <div class="wmain"><div class="wmain-in" style="max-width:1150px;margin:0 auto">
+    <div class="mast2">
+      <div><div class="d">SAT 18 JUL · WEEK 137</div><h1>What's on your desk?</h1></div>
+      <div style="display:flex;gap:8px">
+        <div class="pi" style="background:#f6cfc9"><b>4</b><span>URGENT</span></div>
+        <div class="pi" style="background:var(--cof-2)"><b>40</b><span>HOUSEKPG</span></div>
+        <div class="pi" style="background:var(--yel)"><b>0</b><span>NOTES</span></div>
+        <div class="scrap"><b>Last week</b><u>in review ▸</u></div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="msrch">⌕ Search your desk…<span class="k">⌘K</span></div>
+      <div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div>
+    </div>
+    <div class="lh"><span class="dotf p"></span><span class="t" >Urgent</span><span class="c">4</span><div class="rule"></div></div>
+    <div class="grid">
+      <div class="card"><div class="frx"><div class="bd p"><span class="tag offer">★ OFFER</span></div><div class="bc"><h3>Tom Ellery has made an offer</h3><div class="ms">Murphy's Day Out</div><div class="mt2"><span class="avac">TE</span>CURTIS VANE</div><button class="pilbtn pb on">✓ ON TODAY'S LIST</button></div></div></div>
+      <div class="card"><div class="frx"><div class="bd p"><span class="tag hot">REPLY BY 31 JUL</span></div><div class="bc"><h3>Reply to Tom Ellery's offer</h3><div class="ms">Murphy's Day Out</div><div class="mt2"><span class="avac">TE</span>CURTIS VANE</div><button class="pilbtn pb">＋ TODAY'S LIST</button></div></div></div>
+      <div class="card"><div class="frx"><div class="bd p"><span class="tag">OVER TO YOU</span></div><div class="bc"><h3>Send your full to Jonathan Marsh</h3><div class="ms">Murphy's Day Out</div><div class="mt2"><span class="avac">JM</span>THE MARSH AGENCY</div><button class="pilbtn pb on">✓ ON TODAY'S LIST</button></div></div></div>
+      <div class="card"><div class="frx"><div class="bd p"><span class="tag">OVER TO YOU</span></div><div class="bc"><h3>Send your partial to Daniel O'Rourke</h3><div class="ms">Murphy's Day Out</div><div class="mt2"><span class="avac">DO</span>INKWELL &amp; STONE</div><button class="pilbtn pb on">✓ ON TODAY'S LIST</button></div></div></div>
+    </div>
+    <div class="lh"><span class="dotf c"></span><span class="t">Housekeeping</span><span class="c">40</span><div class="rule"></div></div>
+    <div class="grid" style="margin-bottom:24px">
+      <div class="card"><div class="frx"><div class="bd c"><span class="mono" style="font-size:8.5px;letter-spacing:.09em;color:var(--cof-i)">● MISSING MATERIALS</span></div><div class="bc"><h3><b>16</b> agents missing a materials list</h3><div class="mt2">AK WT DO +13</div><button class="pilbtn pb">BATCH FIX →</button></div></div></div>
+      <div class="card"><div class="frx"><div class="bd c"><span class="mono" style="font-size:8.5px;letter-spacing:.09em;color:var(--cof-i)">● MISSING WISH LIST</span></div><div class="bc"><h3><b>15</b> agents missing a wish list</h3><div class="mt2">AK WT DO +12</div><button class="pilbtn pb">BATCH FIX →</button></div></div></div>
+      <div class="card"><div class="frx"><div class="bd c"><span class="tag">STALE QUERY</span></div><div class="bc"><h3>Jonathan Marsh silent</h3><div class="ms">No reply — consider closing</div><div class="mt2"><span class="avac">JM</span>THE MARSH AGENCY</div><button class="pilbtn pb on">✓ ON TODAY'S LIST</button></div></div></div>
+      <div class="card"><div class="frx"><div class="bd c"><span class="tag">STALE QUERY</span></div><div class="bc"><h3>Marcus Reed silent for 767 days</h3><div class="ms">No reply — consider closing</div><div class="mt2"><span class="avac">MR</span>BLOOMSBURY QUILL</div><button class="pilbtn pb">＋ TODAY'S LIST</button></div></div></div>
+    </div>
+  </div></div>
+</div>
+</div>
+<div style="height:60px"></div>
+</body></html>

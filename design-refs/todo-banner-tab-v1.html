@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!-- NORMATIVE (Polish III) for §1 (the review BANNER — white lifted card, hairline, the copy
+     verbatim) and §3 (the tucked Today tab — 40px sage edge tab, hover unfurl, first commit
+     restores the rail) ONLY.
+     ▼ §2 (the five sidebar explorations) IS SUPERSEDED by design-refs/todo-sidebar-pair-v1.html. -->
+
+<html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner restyle · five sidebars · the tucked Today tab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:var(--oat);padding:36px 30px 100px}
+.sec{max-width:1400px;margin:0 auto}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;margin:46px 0 12px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#5d4d40;margin-left:10px}
+
+/* ---------- banner ---------- */
+.banner{background:var(--white);border:1px solid #eee7de;border-radius:14px;padding:20px 28px;display:flex;align-items:center;gap:24px;box-shadow:0 8px 26px rgba(58,28,20,.12);position:relative;max-width:1000px}
+.banner .cup{width:56px;height:56px;flex:0 0 auto;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);display:flex;align-items:center;justify-content:center;font-size:23px}
+.banner .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--sage-i);margin-bottom:5px}
+.banner h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;line-height:1.15}
+.banner .sub{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;color:#6b5a4e;margin-top:4px}
+.banner .go{margin-left:auto;border:none;background:var(--ink);color:var(--paper);border-radius:99px;padding:12px 24px;font-size:13px;font-weight:600;cursor:pointer;flex:0 0 auto}
+.banner .x{position:absolute;top:10px;right:12px;border:none;background:none;color:#b3a396;font-size:12px;cursor:pointer}
+
+/* ---------- shared drawer shell ---------- */
+.row5{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.dcol{width:270px}
+.dname{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:3px}
+.dnote{font-size:11.5px;color:#5d4d40;line-height:1.5;margin-bottom:10px;min-height:66px}
+.dw{background:var(--paper);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 16px rgba(58,28,20,.1);display:flex;flex-direction:column}
+.dw-top{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair2)}
+.vtg{display:inline-flex;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:3px;gap:2px;flex:1}
+.vtg span{flex:1;text-align:center;border-radius:99px;padding:6px 0;font-size:11px;font-weight:600;color:#8a7a6d;cursor:pointer}
+.vtg span.on{background:var(--ink);color:var(--paper)}
+.fold{width:28px;height:28px;border-radius:50%;border:1px solid var(--hair);background:var(--white);color:#8a7a6d;font-size:10px;cursor:pointer;flex:0 0 auto}
+.walk{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--ink);border-radius:12px;padding:10px 14px 10px 10px;cursor:pointer;margin:14px 14px 0}
+.walk .disc{width:28px;height:28px;border-radius:50%;background:linear-gradient(180deg,var(--pink-t),var(--pink-b));border:1px solid var(--pink-b);display:flex;align-items:center;justify-content:center;font-size:10px}
+.walk b{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;display:block;line-height:1.1}
+.walk span{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;color:#8a7a6d}
+.dw-foot{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--hair2);margin-top:12px}
+.dw-foot .fi{font-size:11.5px;font-weight:600;color:#5d4d40;cursor:pointer}
+.dw-foot .sp{flex:1}
+.cb{width:15px;height:15px;border:1.5px solid var(--ink);border-radius:4px;background:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:transparent;flex:0 0 auto}
+.cb.on{background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-color:var(--sage-i);color:var(--sage-i)}
+.cb.half{background:var(--white);border-color:var(--sage-i);color:var(--sage-i)}
+.dotf{width:9px;height:9px}
+
+/* O1 flat index */
+.o1 .fh{display:flex;align-items:center;gap:9px;padding:9px 16px 5px;font-size:12.5px;font-weight:700}
+.o1 .fh .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#8a7a6d;font-weight:400}
+.o1 .fr{display:flex;align-items:center;gap:9px;padding:5px 16px 5px 34px;font-size:12.5px;color:#4d4238;cursor:pointer;position:relative}
+.o1 .fr:hover{background:#f6f0e7}
+.o1 .fr .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a5988c}
+.o1 .fr .only{display:none;position:absolute;right:44px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:var(--sage-i);border-bottom:1px solid var(--sage-bd)}
+.o1 .fr:hover .only{display:inline}
+.o1 .div{height:1px;background:var(--hair2);margin:7px 16px}
+
+/* O2 status-first */
+.o2 .status{margin:12px 14px 0;background:var(--white);border:1px solid var(--hair);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600}
+.o2 .status .r{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#7c3a2a;border-bottom:1px solid var(--pink-b);cursor:pointer}
+.o2 .fh{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer}
+.o2 .fh .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#8a7a6d;font-weight:400}
+.o2 .fr{display:flex;align-items:center;gap:9px;padding:5px 16px 5px 40px;font-size:12.5px;color:#4d4238;cursor:pointer}
+.o2 .fr .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a5988c}
+
+/* O3 pill cloud */
+.o3 .grp{padding:10px 16px 2px}
+.o3 .gh{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#a5988c;margin-bottom:7px}
+.o3 .cloud{display:flex;flex-wrap:wrap;gap:6px}
+.o3 .pt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.09em;border-radius:99px;padding:4.5px 11px;cursor:pointer;border:1px solid}
+.o3 .pt.p{border-color:var(--pink-b);color:#7c3a2a;background:var(--white)}
+.o3 .pt.p.on{background:linear-gradient(180deg,var(--pink-t),var(--pink-b));font-weight:700}
+.o3 .pt.c{border-color:var(--cof-bd);color:var(--cof-i);background:var(--white)}
+.o3 .pt.c.on{background:linear-gradient(180deg,var(--cof-1),var(--cof-2));font-weight:700}
+.o3 .pt.off{opacity:.45}
+
+/* O4 proportions */
+.o4 .fam{padding:9px 16px 3px;cursor:pointer}
+.o4 .famr{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700}
+.o4 .famr .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#8a7a6d;font-weight:400}
+.o4 .bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:6px 0 2px}
+.o4 .fr{display:flex;align-items:center;gap:9px;padding:4.5px 16px 4.5px 34px;font-size:12px;color:#4d4238;cursor:pointer}
+.o4 .fr .sw{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+.o4 .fr .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a5988c}
+
+/* O5 quiet accordion */
+.o5 .fh{display:flex;align-items:center;gap:9px;padding:10px 16px;font-size:12.5px;font-weight:700;cursor:pointer;border-bottom:1px solid var(--hair2)}
+.o5 .fh .chev{font-size:8px;color:#8a7a6d}
+.o5 .fh .mini{margin-left:auto;display:flex;gap:4px}
+.o5 .fh .chip{font-family:'JetBrains Mono',monospace;font-size:7.5px;border-radius:99px;padding:2px 8px;border:1px solid var(--hair);color:#8a7a6d}
+.o5 .open .fr{display:flex}
+.o5 .fr{display:flex;align-items:center;gap:9px;padding:5.5px 16px 5.5px 38px;font-size:12.5px;color:#4d4238;cursor:pointer}
+.o5 .fr .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a5988c}
+
+/* ---------- tucked today tab ---------- */
+.tabrow{display:flex;gap:44px;align-items:center}
+.ttab{width:40px;height:40px;border-radius:12px 0 0 12px;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);border-right:none;display:flex;align-items:center;justify-content:center;color:var(--sage-i);font-size:15px;cursor:pointer;box-shadow:-3px 3px 10px rgba(58,28,20,.1)}
+.ttab2{display:inline-flex;align-items:center;gap:10px;border-radius:12px 0 0 12px;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);border-right:none;padding:9px 16px 9px 14px;cursor:pointer;box-shadow:-3px 3px 10px rgba(58,28,20,.12)}
+.ttab2 b{font-family:'Playfair Display',serif;font-size:13.5px;color:#2f3a2b}
+.ttab2 i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;color:var(--sage-i)}
+.ttab2 .plus{width:20px;height:20px;border-radius:50%;background:var(--white);border:1px solid var(--sage-bd);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:10px}
+.arrow{font-family:'JetBrains Mono',monospace;font-size:9px;color:#8a7a6d}
+</style></head><body>
+<div class="sec">
+<div class="lbl">1 · The banner, restyled <em>white lifted card, hairline, your copy verbatim</em></div>
+<div class="banner">
+  <span class="cup">☕</span>
+  <div>
+    <div class="k">THE SUNDAY REVIEW · WEEK 137</div>
+    <h2>Last week's progress report is ready</h2>
+    <div class="sub">Check it out — every box ticked here turns the dial in your favour.</div>
+  </div>
+  <button class="go">Begin the review →</button>
+  <button class="x">✕</button>
+</div>
+<div class="lbl">2 · Five sidebars <em>same shell (toggle top, walk, foot) — five filter souls. No sub-containers anywhere.</em></div>
+<div class="row5"><div class="dcol o1"><div class="dname">A · The flat index</div><div class="dnote">No boxes, no borders — pure typographic hierarchy on the paper. Hairlines between families only. The gift: hover any row and an <b>ONLY</b> shortcut appears — one click solos that type, one click on "All" restores. The fastest filter interaction that exists.</div>
+<div class="dw"><div class="dw-top"><div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div><button class="fold">«</button></div>
+<button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+<div style="padding-top:10px">
+<div class="fh"><span class="dotf p"></span>Urgent<span class="n">4</span></div>
+<div class="fr"><span class="cb on">✓</span>Offers<span class="only">ONLY</span><span class="n">1</span></div>
+<div class="fr"><span class="cb on">✓</span>Over to you<span class="n">3</span></div>
+<div class="div"></div>
+<div class="fh"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div>
+<div class="fr"><span class="cb on">✓</span>Missing materials<span class="n">16</span></div>
+<div class="fr"><span class="cb on">✓</span>Missing wish lists<span class="n">15</span></div>
+<div class="fr"><span class="cb on">✓</span>Stale queries<span class="n">9</span></div>
+<div class="fr" style="opacity:.5"><span class="cb"></span>Snoozed<span class="n">0</span></div>
+<div class="div"></div>
+<div class="fr" style="padding-left:16px"><span class="cb"></span>On today's list only<span class="n">0</span></div>
+</div>
+<div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></div></div><div class="dcol o2"><div class="dname">B · The honest header</div><div class="dnote">Leads with the truth every filter UI hides: a status line — "Showing 44 of 44" — that becomes "Showing 12 of 44 · RESET" the moment anything's filtered. Tri-state family checkboxes toggle whole families at once. You always know what you're not seeing.</div>
+<div class="dw"><div class="dw-top"><div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div><button class="fold">«</button></div>
+<button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+<div class="status">Showing 39 of 44<span class="r">RESET</span></div>
+<div style="padding-top:6px">
+<div class="fh"><span class="cb on">✓</span>Urgent<span class="n">4</span></div>
+<div class="fr"><span class="cb on">✓</span>Offers<span class="n">1</span></div>
+<div class="fr"><span class="cb on">✓</span>Over to you<span class="n">3</span></div>
+<div class="fh"><span class="cb half">–</span>Housekeeping<span class="n">35 OF 40</span></div>
+<div class="fr"><span class="cb on">✓</span>Missing materials<span class="n">16</span></div>
+<div class="fr"><span class="cb on">✓</span>Missing wish lists<span class="n">15</span></div>
+<div class="fr"><span class="cb"></span>Stale queries<span class="n">9</span></div>
+<div class="fh"><span class="cb"></span>Notes<span class="n">0</span></div>
+</div>
+<div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></div></div><div class="dcol o3"><div class="dname">C · The pill cloud</div><div class="dnote">The board's own tags become the controls — tap to toggle, filled when live, dim when off. No checkboxes at all; the vocabulary you already read on every card is the filter language. Most compact of the five; most tactile; counts live inside the pills.</div>
+<div class="dw"><div class="dw-top"><div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div><button class="fold">«</button></div>
+<button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+<div class="grp"><div class="gh">URGENT</div><div class="cloud">
+<span class="pt p on">★ OFFERS · 1</span><span class="pt p on">OVER TO YOU · 3</span>
+</div></div>
+<div class="grp"><div class="gh">HOUSEKEEPING</div><div class="cloud">
+<span class="pt c on">MATERIALS · 16</span><span class="pt c on">WISH LISTS · 15</span><span class="pt c">STALE · 9</span><span class="pt c off">SNOOZED · 0</span>
+</div></div>
+<div class="grp"><div class="gh">SHOW</div><div class="cloud">
+<span class="pt c" style="border-color:var(--sage-bd);color:var(--sage-i)">✓ TODAY'S LIST ONLY</span>
+</div></div>
+<div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></div></div><div class="dcol o4"><div class="dname">D · The proportions</div><div class="dnote">Each family header carries a slim proportion bar — the desk's composition at a glance (16 materials vs 9 stale, visibly). Click a segment to solo its type. The sidebar becomes a tiny truthful chart of your workload, not just a switchboard.</div>
+<div class="dw"><div class="dw-top"><div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div><button class="fold">«</button></div>
+<button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+<div style="padding-top:8px">
+<div class="fam"><div class="famr"><span class="dotf p"></span>Urgent<span class="n">4</span></div>
+<div class="bar"><span style="flex:1;background:#3a1c14"></span><span style="flex:3;background:var(--pink-band2)"></span></div></div>
+<div class="fr"><span class="cb on">✓</span><span class="sw" style="background:#3a1c14"></span>Offers<span class="n">1</span></div>
+<div class="fr"><span class="cb on">✓</span><span class="sw" style="background:var(--pink-band2)"></span>Over to you<span class="n">3</span></div>
+<div class="fam"><div class="famr"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div>
+<div class="bar"><span style="flex:16;background:var(--cof-2)"></span><span style="flex:15;background:var(--cof-1)"></span><span style="flex:9;background:var(--cof-bd)"></span></div></div>
+<div class="fr"><span class="cb on">✓</span><span class="sw" style="background:var(--cof-2)"></span>Missing materials<span class="n">16</span></div>
+<div class="fr"><span class="cb on">✓</span><span class="sw" style="background:var(--cof-1)"></span>Missing wish lists<span class="n">15</span></div>
+<div class="fr"><span class="cb on">✓</span><span class="sw" style="background:var(--cof-bd)"></span>Stale queries<span class="n">9</span></div>
+</div>
+<div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></div></div><div class="dcol o5"><div class="dname">E · The quiet accordion</div><div class="dnote">Families closed by default — the sidebar is three lines tall until you need it. Closed rows still tell the story via micro-chips (16 · 15 · 9). Open only what you're working. The calmest option, and the one that scales if task types multiply.</div>
+<div class="dw"><div class="dw-top"><div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div><button class="fold">«</button></div>
+<button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+<div style="padding-top:8px">
+<div class="fh"><span class="chev">▶</span><span class="dotf p"></span>Urgent<span class="mini"><span class="chip">1</span><span class="chip">3</span></span></div>
+<div class="open">
+<div class="fh" style="border-bottom:none"><span class="chev" style="transform:rotate(90deg)">▶</span><span class="dotf c"></span>Housekeeping<span class="mini"><span class="chip">16</span><span class="chip">15</span><span class="chip">9</span></span></div>
+<div class="fr"><span class="cb on">✓</span>Missing materials<span class="n">16</span></div>
+<div class="fr"><span class="cb on">✓</span>Missing wish lists<span class="n">15</span></div>
+<div class="fr"><span class="cb on">✓</span>Stale queries<span class="n">9</span></div>
+</div>
+<div class="fh" style="border-bottom:none"><span class="chev">▶</span><span class="dotf y"></span>Notes<span class="mini"><span class="chip">0</span></span></div>
+</div>
+<div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></div></div></div><div class="lbl">3 · The tucked Today tab <em>empty = a slim tab at the screen's right edge; hover unfurls; commitments bring the full rail back</em></div>
+<div class="tabrow">
+<span class="ttab">☑</span>
+<span class="arrow">— HOVER →</span>
+<span class="ttab2"><b>Today's list</b><i>NOTHING YET</i><span class="plus">＋</span></span>
+<span class="arrow">— FIRST COMMIT →</span>
+<span class="arrow" style="border:1px dashed var(--sage-bd);border-radius:10px;padding:10px 16px;color:var(--sage-i)">THE FULL RAIL RETURNS (264PX)</span>
+</div></div></body></html>

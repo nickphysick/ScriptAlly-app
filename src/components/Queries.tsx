@@ -1081,7 +1081,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (!agent || !ms) return false;
 
     // Whose turn — the CTA engine's queryBucket is the ONE source of truth (never re-derived):
-    // "move" = the agent replied, over to you; "waiting" = ball in the agent's court.
+    // "move" = the agent replied, your turn; "waiting" = ball in the agent's court.
     const bkt = queryBucket(q.status as QueryStatus);
     if (turnFilter === "move" && bkt !== "move") return false;
     if (turnFilter === "wait" && bkt !== "waiting") return false;
@@ -1186,7 +1186,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     >
       <PopSection label="Whose turn">
         <PRow kind="rad" on={turnFilter === "all"} label="All queries" sub="Everything, open and closed" onClick={() => setTurnFilter("all")} />
-        <PRow kind="rad" on={turnFilter === "move"} label="Your move" sub="The agent has replied — over to you" onClick={() => setTurnFilter("move")} />
+        <PRow kind="rad" on={turnFilter === "move"} label="Your move" sub="The agent has replied — your turn" onClick={() => setTurnFilter("move")} />
         <PRow kind="rad" on={turnFilter === "wait"} label="Waiting" sub="Ball is in the agent's court" onClick={() => setTurnFilter("wait")} />
       </PopSection>
       <PopSection label="Manuscript">

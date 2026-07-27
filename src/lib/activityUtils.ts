@@ -1,6 +1,12 @@
 import { Activity, ActivityType } from "../types";
 import { computeResponseDeadline } from "./responseDeadline";
 
+/** The OLD offer-recording path's celebration description ("Congratulations! You've received an
+ *  offer of representation from …") — exported so the To-do done-band's terse-label deriver keys
+ *  the "{Agent}'s offer — decision pending" mapping on the SAME pattern this file already strips
+ *  (one source, never a second regex drifting). */
+export const OFFER_RECEIVED_DESC_RE = /^Congratulations!\s+You've\s+received\s+an\s+offer\s+of\s+representation\s+from\s+/i;
+
 export const getActivityKeyAndDefaults = (description: string, activityType?: ActivityType) => {
   const normalized = (description || "").toLowerCase();
   
@@ -193,7 +199,7 @@ export const extractAgentFromText = (desc: string): { name: string; agency: stri
       /^No response received from\s+/i,
       /^Great news!\s+/i,
       /^Amazing news!\s+/i,
-      /^Congratulations!\s+You've\s+received\s+an\s+offer\s+of\s+representation\s+from\s+/i,
+      OFFER_RECEIVED_DESC_RE,
       /^Revise\s*&\s*Resubmit\s+request\s+received\s+from\s+/i,
       /^You\s+added\s+/i,
       /^You\s+updated\s+details\s+for\s+/i,

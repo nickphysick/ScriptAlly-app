@@ -1,92 +1,161 @@
 /**
- * Locks for the Ledger's stream membership, ordering, and the single command-bar action source.
- * The pipeline action delegates to getPrimaryAction, so "Mark partial as sent" / "Record response"
- * here stay identical to the focus card and the Queries command bar — pinned once, in one place.
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
  */
-
 import { describe, it, expect } from "vitest";
-import { QueryStatus, Task, Query } from "../types";
-import { doNextTasks, housekeepingTasks, isDoNext, isHousekeeping, ledgerCommandActions, DO_NEXT_TASK_TYPES, HOUSEKEEPING_TASK_TYPES } from "./todoLedger";
+import { BoardCard } from "./todoBoard";
+import { HkGroup } from "./todoHousekeeping";
+import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows, LEDGER_SECTION_CAP } from "./todoLedger";
+import { Agent, Query, QueryStatus, TaskFlag } from "../types";
 
-const task = (id: string, taskType: string, relatedRecordId: string): Task =>
-  ({ id, priority: "urgent", title: "", description: "", manuscriptTitle: "", context: "", relatedRecordId, taskType, actionLabel: "", actionPath: "queries" } as Task);
-const query = (id: string, status: QueryStatus, dates: Partial<Query> = {}): Query =>
-  ({ id, status, ...dates } as unknown as Query);
+const NOW = Date.parse("2026-07-18T12:00:00Z");
+const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
+  ({ key, stream: "do", title: "T", who: "W", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "AB", record: "", committed: false, done: false, ...over } as BoardCard);
+const q = (id: string, over: Partial<Query> = {}): Query => ({ id, agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED, ...over } as Query);
+const flag = (over: Partial<TaskFlag>): TaskFlag => ({ id: "f", userId: "u", taskType: "data_quality_poor", snoozeCount: 0, ...over } as TaskFlag);
 
-describe("stream membership", () => {
-  it("Do next = the five pipeline types; querying_unstarted / dream_agent / data_quality excluded", () => {
-    expect([...DO_NEXT_TASK_TYPES]).toEqual(["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue"]);
-    expect(isDoNext(task("t", "querying_unstarted", "m1"))).toBe(false);
-    expect(isDoNext(task("t", "dream_agent_unqueried", "a1"))).toBe(false);
-    expect(isDoNext(task("t", "data_quality_poor", "a1"))).toBe(false);
-  });
-  it("Housekeeping = data_quality_poor + no_response_close only", () => {
-    expect([...HOUSEKEEPING_TASK_TYPES]).toEqual(["data_quality_poor", "no_response_close"]);
-    expect(isHousekeeping(task("t", "data_quality_poor", "a1"))).toBe(true);
-    expect(isHousekeeping(task("t", "no_response_close", "q1"))).toBe(true);
-    expect(isHousekeeping(task("t", "nudge_overdue", "q1"))).toBe(false);
-  });
-  it("housekeepingTasks filters to the two types", () => {
-    const tasks = [task("a", "data_quality_poor", "a1"), task("b", "no_response_close", "q1"), task("c", "partial_requested", "q2")];
-    expect(housekeepingTasks(tasks).map((t) => t.id)).toEqual(["a", "b"]);
+describe("ledgerTitle — the terse row voice (cards keep their own titles)", () => {
+  it("maps every derived type; user tasks keep the writer's words", () => {
+    expect(ledgerTitle(card("k", { taskType: "offer_received" }))).toBe("Review offer");
+    expect(ledgerTitle(card("k", { taskType: "partial_requested" }))).toBe("Send partial");
+    expect(ledgerTitle(card("k", { taskType: "full_requested" }))).toBe("Send full");
+    expect(ledgerTitle(card("k", { taskType: "revise_resubmit" }))).toBe("Resubmit R&R");
+    expect(ledgerTitle(card("k", { taskType: "nudge_overdue" }))).toBe("Send a nudge");
+    expect(ledgerTitle(card("k", { taskType: "no_response_close" }))).toBe("Consider closing");
+    expect(ledgerTitle(card("k", { userTaskId: "u1", title: "Ring the printers" }))).toBe("Ring the printers");
   });
 });
 
-describe("Do next ordering — Offer pinned top, then oldest-pressing first", () => {
-  const queries = [
-    query("q1", QueryStatus.PARTIAL_REQUESTED, { partialRequestedDate: "2026-07-05T09:00:00Z" }),
-    query("q2", QueryStatus.OFFER, {}),
-    query("q3", QueryStatus.FULL_REQUESTED, { fullRequestedDate: "2026-07-01T09:00:00Z" }),
-    query("q4", QueryStatus.QUERIED, { responseDeadline: "2026-06-20T09:00:00Z", dateSent: "2026-05-01T09:00:00Z" }),
-  ];
-  const tasks = [
-    task("t-partial", "partial_requested", "q1"),
-    task("t-offer", "offer_received", "q2"),
-    task("t-full", "full_requested", "q3"),
-    task("t-nudge", "nudge_overdue", "q4"),
-  ];
-  it("puts the Offer first, then by pressing date ascending", () => {
-    // offer(q2) → nudge deadline 20 Jun (q4) → full req 1 Jul (q3) → partial req 5 Jul (q1)
-    expect(doNextTasks(tasks, queries).map((t) => t.relatedRecordId)).toEqual(["q2", "q4", "q3", "q1"]);
+describe("ledgerDetail — per-type DETAIL, consuming the card's own sources", () => {
+  it("offer → REPLY BY {date} (hot), sorted by the deadline; unset deadline → the dim dash at the far end (A2)", () => {
+    const c = card("o", { taskType: "offer_received", relatedRecordId: "q1" });
+    const d = ledgerDetail(c, { queries: [q("q1", { responseDeadline: "2026-07-31T00:00:00.000Z" })], taskFlags: [] }, NOW);
+    expect(d.label).toBe("REPLY BY 31 JUL");
+    expect(d.tone).toBe("hot");
+    expect(d.sortMs).toBe(Date.parse("2026-07-31T00:00:00.000Z"));
+    expect(ledgerDetail(c, { queries: [q("q1")], taskFlags: [] }, NOW)).toEqual({ label: "—", tone: "dim", sortMs: Number.MAX_SAFE_INTEGER });
+  });
+  it("a QUIET offer shows its wake date (the one visible-while-snoozed case)", () => {
+    const c = card("o", { taskType: "offer_received", relatedRecordId: "q1", quiet: true });
+    const d = ledgerDetail(c, {
+      queries: [q("q1", { responseDeadline: "2026-07-31T00:00:00.000Z" })],
+      taskFlags: [flag({ taskType: "offer_received", queryId: "q1", snoozedUntil: "2026-07-21T12:00:00.000Z" })],
+    }, NOW);
+    expect(d.label).toBe("WAKES 21 JUL");
+    expect(d.sortMs).toBe(Date.parse("2026-07-21T12:00:00.000Z"));
+  });
+  it("sends → REQUESTED {date} from lastStatusChange (the request status IS the current status); R&R gets its own voice", () => {
+    const send = card("s", { taskType: "full_requested", relatedRecordId: "q1" });
+    const rr = card("r", { taskType: "revise_resubmit", relatedRecordId: "q1" });
+    const ctx = { queries: [q("q1", { lastStatusChange: "2026-07-12T09:00:00.000Z" })], taskFlags: [] };
+    expect(ledgerDetail(send, ctx, NOW).label).toBe("REQUESTED 12 JUL");
+    expect(ledgerDetail(rr, ctx, NOW).label).toBe("R&R FROM 12 JUL");
+  });
+  it("stale/nudge → QUIET {n} DAYS from the SAME ambient source the card title reads", () => {
+    const c = card("st", { taskType: "no_response_close", relatedRecordId: "q1" });
+    const sent = new Date(NOW - 100 * 86400000).toISOString();
+    const d = ledgerDetail(c, { queries: [q("q1", { dateSent: sent })], taskFlags: [] }, NOW);
+    expect(d.label).toBe("QUIET 100 DAYS");
+    expect(d.sortMs).toBe(NOW - 100 * 86400000);
+  });
+  it("notes/user tasks fall back to the card's own chip", () => {
+    const c = card("n", { userTaskId: "u1", due: "Note · 6 Jul" });
+    expect(ledgerDetail(c, { queries: [], taskFlags: [] }, NOW).label).toBe("NOTE · 6 JUL");
   });
 });
 
-describe("command-bar action set (single source; pipeline delegates to getPrimaryAction)", () => {
-  it("Offer → one primary 'Record response' (exact label, no decision-CTA dressing)", () => {
-    expect(ledgerCommandActions(task("t", "offer_received", "q1"), query("q1", QueryStatus.OFFER))).toEqual([
-      { id: "record", label: "Record response", variant: "primary" },
-    ]);
+describe("DETAIL ↓ defaults", () => {
+  it("Urgent: offers pinned first (board law), then due-soonest ascending", () => {
+    const queries = [
+      q("qo", { responseDeadline: "2026-08-20T00:00:00.000Z" }),
+      q("qa", { lastStatusChange: "2026-07-16T00:00:00.000Z" }),
+      q("qb", { lastStatusChange: "2026-07-02T00:00:00.000Z" }),
+    ];
+    const rows = sortLedgerDo([
+      card("a", { taskType: "full_requested", relatedRecordId: "qa" }),
+      card("b", { taskType: "revise_resubmit", relatedRecordId: "qb" }),
+      card("o", { taskType: "offer_received", relatedRecordId: "qo" }),
+    ], { queries, taskFlags: [] }, NOW);
+    expect(rows.map((r) => r.key)).toEqual(["o", "b", "a"]); // offer pinned; 2 Jul before 16 Jul
   });
-  it("Partial Requested → 'Mark partial as sent' (from the shared map) + Snooze", () => {
-    expect(ledgerCommandActions(task("t", "partial_requested", "q1"), query("q1", QueryStatus.PARTIAL_REQUESTED))).toEqual([
-      { id: "mark-sent", label: "Mark partial as sent", variant: "primary" },
-      { id: "snooze", label: "Snooze", variant: "ghost" },
-    ]);
+  it("Housekeeping: longest-quiet first", () => {
+    const queries = [
+      q("q1", { dateSent: new Date(NOW - 300 * 86400000).toISOString() }),
+      q("q2", { dateSent: new Date(NOW - 700 * 86400000).toISOString() }),
+    ];
+    const rows = sortLedgerHk([
+      card("s1", { taskType: "no_response_close", relatedRecordId: "q1" }),
+      card("s2", { taskType: "no_response_close", relatedRecordId: "q2" }),
+    ], { queries, taskFlags: [] }, NOW);
+    expect(rows.map((r) => r.key)).toEqual(["s2", "s1"]);
   });
-  it("R&R → 'Record your resubmission' (from the shared map)", () => {
-    expect(ledgerCommandActions(task("t", "revise_resubmit", "q1"), query("q1", QueryStatus.REVISE_RESUBMIT))[0]).toEqual({
-      id: "mark-sent", label: "Record your resubmission", variant: "primary",
-    });
+});
+
+describe("batchChildren — the full cohort (grant 2's degrade on done dates)", () => {
+  const member = (id: string, name: string): HkGroup["members"][number] =>
+    ({ card: card(`m-${id}`, { initials: name.slice(0, 2).toUpperCase() }), agentName: name, agency: "Agency", agentId: id, queried: true });
+  const group: HkGroup = { rule: "dq_mswl", meta: { rule: "dq_mswl", need: "mswl", taskType: "data_quality_poor", label: "Wish lists", title: (n: number) => `${n}`, assistable: true } as HkGroup["meta"], members: [member("a1", "Aisha Kapoor")] };
+  const agents = [
+    { id: "a1", name: "Aisha Kapoor", agency: "Kapoor & Fray", mswlNotes: "" },
+    { id: "a2", name: "Priya Raman", agency: "Raman Literary", mswlNotes: "loves crime" }, // complete, flow-stamped
+    { id: "a3", name: "Will Tan", agency: "Tan Literary", mswlNotes: "quiet horror" },     // complete, never flagged
+    { id: "a4", name: "Marcus Reed", agency: "Bloomsbury", mswlNotes: "" },               // gap but item-muted (not a member)
+  ] as unknown as Agent[];
+  const flags = [flag({ agentId: "a2", resolvedAt: "2026-07-17T10:00:00.000Z" })];
+
+  it("recorded-first, then members (group order), then muted gap agents; every agent appears once", () => {
+    const kids = batchChildren(group, agents, flags);
+    expect(kids.map((k) => k.name)).toEqual(["Priya Raman", "Will Tan", "Aisha Kapoor", "Marcus Reed"]);
+    expect(kids.map((k) => k.done)).toEqual([true, true, false, false]);
   });
-  it("nudge_overdue → Send a nudge + Snooze", () => {
-    expect(ledgerCommandActions(task("t", "nudge_overdue", "q1"), query("q1", QueryStatus.QUERIED))).toEqual([
-      { id: "nudge", label: "Send a nudge", variant: "primary" },
-      { id: "snooze", label: "Snooze", variant: "ghost" },
-    ]);
+  it("✓ RECORDED is dated ONLY where the flow stamped resolvedAt — undated otherwise, never invented", () => {
+    const kids = batchChildren(group, agents, flags);
+    expect(kids[0].doneDate).toBe("17 Jul"); // Priya — stamped
+    expect(kids[1].doneDate).toBe("");       // Will — complete from the start, no date exists
   });
-  it("data_quality_poor → Edit agent details (drawer)", () => {
-    expect(ledgerCommandActions(task("t", "data_quality_poor", "a1"))).toEqual([{ id: "edit-agent", label: "Edit agent details", variant: "primary" }]);
+  it("batchDetail = the cohort progress caption", () => {
+    expect(batchDetail(group, 4)).toEqual({ pct: 75, caption: "3 OF 4" });
   });
-  it("no_response_close → Mark as no response + Still waiting", () => {
-    expect(ledgerCommandActions(task("t", "no_response_close", "q1"), query("q1", QueryStatus.QUERIED))).toEqual([
-      { id: "cnr", label: "Mark as no response", variant: "primary" },
-      { id: "still-waiting", label: "Still waiting", variant: "ghost" },
-    ]);
+});
+
+describe("truncateRows — SHOW ALL caps (top-level rows only)", () => {
+  const rows = Array.from({ length: 12 }, (_, i) => i);
+  it("caps at 8 with the hidden count; expanded shows all; ≤cap passes through", () => {
+    expect(truncateRows(rows, false)).toEqual({ visible: rows.slice(0, LEDGER_SECTION_CAP), hidden: 4 });
+    expect(truncateRows(rows, true)).toEqual({ visible: rows, hidden: 0 });
+    expect(truncateRows([1, 2], false)).toEqual({ visible: [1, 2], hidden: 0 });
   });
-  it("every stream type yields a non-empty command-bar set (the pane's sole action home)", () => {
-    for (const tt of [...DO_NEXT_TASK_TYPES, ...HOUSEKEEPING_TASK_TYPES]) {
-      const q = query("q1", QueryStatus.QUERIED);
-      expect(ledgerCommandActions(task("t", tt, "q1"), q).length).toBeGreaterThan(0);
+});
+
+describe("A2 — bare type echoes banned; unreadable dates render the dim dash", () => {
+  it("offer / send / R&R with no readable date → dim — (sort keys unchanged at the far end)", () => {
+    const ctx = { queries: [q("q1")], taskFlags: [] }; // no dates on the record at all
+    for (const t of ["offer_received", "full_requested", "partial_requested", "revise_resubmit"]) {
+      const d = ledgerDetail(card("k", { taskType: t, relatedRecordId: "q1" }), ctx, NOW);
+      expect(d.label).toBe("—");
+      expect(d.tone).toBe("dim");
+      expect(d.sortMs).toBe(Number.MAX_SAFE_INTEGER);
     }
+    // and a truly unparsable stored date degrades identically, never echoing the type
+    const bad = { queries: [q("q1", { responseDeadline: "not-a-date", lastStatusChange: "junk" })], taskFlags: [] };
+    expect(ledgerDetail(card("k", { taskType: "offer_received", relatedRecordId: "q1" }), bad, NOW).label).toBe("—");
+    expect(ledgerDetail(card("k", { taskType: "full_requested", relatedRecordId: "q1" }), bad, NOW).label).toBe("—");
+  });
+  it("batch copy snapshots — the ref's wording, one source", () => {
+    expect(batchTaskCopy("dq_materials")).toBe("Add material requirements");
+    expect(batchTaskCopy("dq_mswl")).toBe("Add wish lists");
+    expect(batchTaskCopy("dq_responseTime")).toBe("Add reply windows");
+  });
+  it("REGRESSION: the ledger layer is strictly 1:1 with its input — no fan-out, no dedup (duplicate agents = duplicate RECORDS)", () => {
+    // two queries to the same agent, same dateSent → two rows, same quiet-days, distinct keys
+    const sent = new Date(NOW - 300 * 86400000).toISOString();
+    const queries = [q("q1", { dateSent: sent }), q("q2", { agentId: "a1", dateSent: sent })];
+    const rows = sortLedgerHk([
+      card("s1", { taskType: "no_response_close", relatedRecordId: "q1", who: "Eleanor Whitfield" }),
+      card("s2", { taskType: "no_response_close", relatedRecordId: "q2", who: "Eleanor Whitfield" }),
+    ], { queries, taskFlags: [] }, NOW);
+    expect(rows).toHaveLength(2);
+    expect(new Set(rows.map((r) => r.key)).size).toBe(2);
+    expect(ledgerDetail(rows[0], { queries, taskFlags: [] }, NOW).label).toBe(ledgerDetail(rows[1], { queries, taskFlags: [] }, NOW).label);
   });
 });

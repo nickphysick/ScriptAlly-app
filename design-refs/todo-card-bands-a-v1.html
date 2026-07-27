@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>To-do card bands — Variant A (reconstruction)</title>
+<!-- ⚠ PROVENANCE: the pack named design-refs/todo-card-bands-a-v1.html (copy of
+     todo-card-bands-a-full.html from Downloads), but NO card-bands mockup was present in Downloads
+     at build time. This file is RECONSTRUCTED from the pack's detailed prose (the non-negotiable
+     structure law + the tag treatments + ~34px band + lane tints) so the design-refs archive
+     carries the named reference. When the real mockup surfaces, drop it in Downloads and reconcile.
+     Live .t-f12 tokens drove the build; the hexes below are the token values for illustration. -->
+<style>
+:root{--pink-t:#f7e3dd;--pink-b:#eecdc3;--pink-i:#8a4030;--pink-btn:#f6cfc9;--pink-deep:#6e3325;
+--hk-cof:#e9dcc8;--hk-cof-edge:#cdb58f;--hk-cof-ink:#7a6544;--note-t:#faf0c8;--note-b:#ecdda4;--note-i:#7a6420;
+--line:#e6dccd;--ink:#1e1a16;--sub:#5c554b;--white:#fff;}
+body{background:#f1e8dc;font-family:Inter,sans-serif;padding:30px;display:flex;gap:16px;flex-wrap:wrap}
+/* THE STRUCTURE LAW: rim → frame → band + body */
+.tile{width:330px;min-height:242px;background:#fff;border-radius:13px;padding:3px;box-shadow:0 2px 7px rgba(29,23,18,.07);display:flex}
+.frame{flex:1;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.band{flex:none;display:flex;align-items:center;gap:5px;min-height:34px;padding:0 14px;border-bottom:1px solid var(--line)}
+.band.do{background:var(--pink-t);border-bottom-color:var(--pink-b)}
+.band.hk{background:var(--hk-cof);border-bottom-color:var(--hk-cof-edge)}
+.band.nt{background:var(--note-t);border-bottom-color:var(--note-b)}
+.body{flex:1;padding:13px 18px 14px}
+.tag{font-family:monospace;font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:3.5px 10px}
+/* standard tag on a band → WHITE fill, pink border/ink */
+.tag.std{background:#fff;border:1px solid var(--pink-b);color:var(--pink-i)}
+/* urgency keeps deeper fill; offer keeps ink ★ */
+.tag.warn{background:var(--pink-btn);border:1px solid var(--pink-b);color:var(--pink-deep);font-weight:700}
+.tag.offer{background:var(--ink);border:1px solid var(--ink);color:#fff}
+.kick{font-family:monospace;font-size:8px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--hk-cof-ink);display:flex;align-items:center;gap:6px}
+.kd{width:6px;height:6px;border-radius:50%;background:#fff;border:1px solid var(--hk-cof-edge)}
+h3{font-family:'Playfair Display',serif;font-size:17px;margin:0 0 6px}
+p{font-size:12px;color:var(--sub);margin:0}
+</style></head><body>
+<div class="tile"><div class="frame"><div class="band do"><span class="tag warn">96 DAYS · NO REPLY</span></div><div class="body"><h3>Nudge Jonathan Marsh</h3><p>Murphy's Day Out</p></div></div></div>
+<div class="tile"><div class="frame"><div class="band hk"><span class="kick"><span class="kd"></span>MISSING WISH LISTS</span></div><div class="body"><h3>15 agents missing a wish list</h3><p>Their wish list is how we tell you who's worth querying.</p></div></div></div>
+<div class="tile"><div class="frame"><div class="band nt"><span class="tag std">NOTE · 18 JUL</span></div><div class="body"><h3>Redraft the opening pages</h3></div></div></div>
+</body></html>

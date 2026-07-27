@@ -153,3 +153,27 @@ describe("delete → un-grace, at the derivation level", () => {
     expect(deriveEscalation(overdueAmbient, { reminderMs: rec.nudgeDate ? new Date(rec.nudgeDate).getTime() : null, lastNudgeMs: rec.lastNudgeSentDate ? new Date(rec.lastNudgeSentDate).getTime() : null, now })).toBe("overdue");
   });
 });
+
+describe("eventDate — the P1 back-dating extension (journey-logic pass)", () => {
+  const NOW = new Date("2026-07-16T09:00:00.000Z");
+  const base = { checkBackDate: "2026-07-30T00:00:00.000Z" };
+  const qq = q({ status: QueryStatus.QUERIED });
+
+  it("absent → both twins and lastNudgeSentDate stamp the write moment (unchanged behaviour)", () => {
+    const w = buildNudgeWrites(qq, null, base, NOW);
+    expect(w.nested.createdAt).toBe(NOW.toISOString());
+    expect(w.activity.date).toBe(NOW.toISOString());
+    expect(w.queryUpdates.lastNudgeSentDate).toBe(NOW.toISOString());
+  });
+
+  it("present → the EVENT backdates (twins + lastNudgeSentDate) while the dismissal bookkeeping stays at write time", () => {
+    const EV = "2026-07-10T11:00:00.000Z"; // already noon-normalised by the journey layer
+    const w = buildNudgeWrites(qq, null, { ...base, eventDate: EV }, NOW);
+    expect(w.nested.createdAt).toBe(EV);
+    expect(w.activity.date).toBe(EV);
+    expect(w.queryUpdates.lastNudgeSentDate).toBe(EV); // snapshot ≡ reconcileNudge's re-derivation from nested.createdAt
+    expect(w.dismissal.dismissedDate).toBe(NOW.toISOString());
+    expect(w.dismissal.resurfaceDate).toBe("2026-07-30T00:00:00.000Z");
+    expect(w.queryUpdates.nudgeDate).toBe("2026-07-30T00:00:00.000Z"); // check-back untouched
+  });
+});

@@ -35,17 +35,28 @@ export interface ClearedTodayInput {
   now?: number;
 }
 
-export function clearedTodayCount(inp: ClearedTodayInput): number {
+/** The union members cleared today, kept as the objects passed in (generic) so callers can render
+ *  cards from them. The count and the "Cleared today" column derive from ONE source — no desync. */
+export interface ClearedToday<A, U, F> {
+  activities: A[];
+  userTasks: U[];
+  flags: F[];
+}
+
+export function clearedTodayItems<
+  A extends { activityType: string; date?: string },
+  U extends { done: boolean; completedAt?: string },
+  F extends { resolvedAt?: string },
+>(inp: { activities: A[]; userTasks: U[]; taskFlags: F[]; now?: number }): ClearedToday<A, U, F> {
   const now = inp.now ?? Date.now();
-  let n = 0;
-  for (const a of inp.activities) {
-    if (CLEARING_ACTIVITY_TYPES.has(a.activityType) && a.date && sameLocalDay(new Date(a.date).getTime(), now)) n++;
-  }
-  for (const t of inp.userTasks) {
-    if (t.done && t.completedAt && sameLocalDay(new Date(t.completedAt).getTime(), now)) n++;
-  }
-  for (const f of inp.taskFlags) {
-    if (f.resolvedAt && sameLocalDay(new Date(f.resolvedAt).getTime(), now)) n++;
-  }
-  return n;
+  return {
+    activities: inp.activities.filter((a) => CLEARING_ACTIVITY_TYPES.has(a.activityType) && !!a.date && sameLocalDay(new Date(a.date).getTime(), now)),
+    userTasks: inp.userTasks.filter((t) => t.done && !!t.completedAt && sameLocalDay(new Date(t.completedAt).getTime(), now)),
+    flags: inp.taskFlags.filter((f) => !!f.resolvedAt && sameLocalDay(new Date(f.resolvedAt).getTime(), now)),
+  };
+}
+
+export function clearedTodayCount(inp: ClearedTodayInput): number {
+  const c = clearedTodayItems(inp);
+  return c.activities.length + c.userTasks.length + c.flags.length;
 }

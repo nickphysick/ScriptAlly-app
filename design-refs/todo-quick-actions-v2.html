@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — quick complete / quick dismiss</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023; --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-av:#f6d7cf; --pink-btn:#f6cfc9;
+  --gold-t:#f6efdd; --gold-b:#e7d9b8; --gold-i:#7d621d;
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58; --sage:#8a9e88; --pinkC:#f8e7dc;
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --sh-2:0 1px 2px rgba(58,42,26,.05),0 4px 10px -2px rgba(58,42,26,.06);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --r-md:9px; --r-lg:12px;
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.4;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 120% at 78% -8%, rgba(255,250,242,.6) 0%, transparent 46%), var(--oat);min-height:100vh;padding:26px 24px 90px}
+button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;text-align:left}
+.scaf{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:14px;max-width:1240px;margin-inline:auto}
+.scaf b{color:var(--pink-i)}
+.wrap{max-width:1240px;margin:0 auto}
+.h2{font-family:var(--serif);font-size:16px;font-weight:600;margin:22px 0 4px}
+.p{font-size:12.5px;color:var(--muted);margin-bottom:12px;max-width:760px;line-height:1.55}
+.p b{color:var(--ink-2)}
+
+.lane{background:var(--paper);border:1px solid var(--pink-b);border-radius:var(--r-lg);overflow:hidden;margin-bottom:8px}
+.laneh{display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid var(--pink-b);background:var(--pink-t);color:var(--pink-i)}
+.laneh .lt{font-weight:600;font-size:13px}
+.laneh .ln{font-family:var(--mono);font-size:8.5px;font-weight:700;border-radius:99px;padding:2px 8px;background:rgba(255,255,255,.7)}
+.scroller{display:flex;gap:11px;padding:12px;overflow-x:auto}
+
+.card{position:relative;flex:none;width:322px;height:174px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:13px 15px;display:flex;flex-direction:column;overflow:hidden;transition:.18s}
+.card:hover{border-color:var(--ink-2);box-shadow:var(--sh-2)}
+.tag{align-self:flex-start;font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2.5px 8px;border:1px solid;margin-bottom:8px;background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tag.q{background:var(--panel);border-color:var(--line);color:var(--muted)}
+.tt{flex:none;font-weight:600;font-size:13.5px;line-height:1.3}
+.tt em{font-family:var(--serif);font-style:italic;color:var(--burg);font-weight:600}
+.tsub{flex:1 1 auto;min-height:0;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45;overflow:hidden}
+.tfoot{flex:none;display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--hairline)}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:7.5px}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}.dot.q::after{content:"→";font-weight:700}
+.dot.nudge{border:1.5px dashed var(--burg);color:var(--burg)}.dot.nudge::after{content:"↻";font-weight:700}
+.miniav{width:20px;height:20px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:600;color:#5a2b20;flex:none}
+.who{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tacts{flex:none;display:flex;gap:6px;margin-top:9px}
+.pill{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:8px 6px;border:1px solid;white-space:nowrap}
+.pill.t{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.pill.d{background:var(--panel);border-color:var(--line);color:var(--ink-2)}
+.pill.d:hover{background:var(--sageC);border-color:var(--sage-edge);color:var(--sageD)}
+.pill .bx{width:11px;height:11px;border:1.4px solid currentColor;border-radius:3px;opacity:.7}
+
+/* ===== the quick rail: appears on hover, top-right of the card ===== */
+.qrail{position:absolute;top:9px;right:9px;display:flex;gap:5px;opacity:0;transform:translateY(-4px);transition:.16s;z-index:3}
+.card:hover .qrail{opacity:1;transform:none}
+.qbtn{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--sh-2)}
+.qbtn.done:hover{background:var(--sageC);border-color:var(--sageD);color:var(--sageD)}
+.qbtn.dis:hover{background:var(--gold-t);border-color:var(--gold-i);color:var(--gold-i)}
+.qbtn:active{transform:scale(.92)}
+
+/* quick-complete confirm state: card flips to a receipt */
+.card.receipt{background:var(--sageC);border-color:var(--sage-edge)}
+.receiptbody{display:flex;flex-direction:column;height:100%;animation:rin .25s ease}
+@keyframes rin{from{opacity:0}to{opacity:1}}
+.receiptbody .rk{display:flex;align-items:center;gap:9px}
+.receiptbody .tick{width:22px;height:22px;border-radius:6px;background:var(--sageD);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+.receiptbody .rt{font-weight:600;font-size:13.5px;color:#33402f}
+.receiptbody .rlog{flex:1;margin-top:10px;font-size:12px;line-height:1.7;color:var(--sageD)}
+.receiptbody .rlog b{color:#33402f;font-weight:600}
+.receiptbody .racts{display:flex;gap:6px}
+.receiptbody .ra{flex:1;text-align:center;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:8px 6px;border:1px solid var(--sage-edge);background:rgba(255,255,255,.6);color:var(--sageD)}
+.receiptbody .ra:hover{background:#fff}
+
+/* dismissed state */
+.card.dismissed{opacity:.5;background:var(--paper)}
+.dismissbody{display:flex;flex-direction:column;height:100%;justify-content:center;align-items:center;gap:9px;text-align:center;animation:rin .25s ease}
+.dismissbody .dt{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--muted)}
+.dismissbody .dact{display:flex;gap:6px}
+.dismissbody .ra{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:7px 12px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
+.dismissbody .ra:hover{color:var(--ink)}
+
+/* sweep bar */
+.sweep{display:flex;align-items:center;gap:10px;margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:11px 15px;box-shadow:var(--sh-1);max-width:760px}
+.sweep .st{font-size:13px;font-weight:600}
+.sweep .ss{font-size:12px;color:var(--muted);flex:1}
+.sweep .sb{font-size:12px;font-weight:600;padding:8px 14px;border-radius:8px;background:var(--ink);color:var(--panel);white-space:nowrap}
+
+/* housekeeping + notes lane skins */
+.lane.hk{border-color:var(--gold-b)}
+.lane.hk .laneh{background:var(--gold-t);border-color:var(--gold-b);color:var(--gold-i)}
+.lane.nt{border-color:var(--note-b)}
+.lane.nt .laneh{background:var(--note-t);border-color:var(--note-b);color:var(--note-i)}
+:root{--note-t:#faf0c8;--note-b:#ecdda4;--note-i:#7a6420}
+.gcard{position:relative;flex:none;width:322px;height:174px;background:var(--panel);border:1px solid var(--gold-b);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:14px 15px;display:flex;flex-direction:column;overflow:hidden;transition:.18s}
+.gcard:hover{border-color:var(--gold-i);box-shadow:var(--sh-2)}
+.gcard .gn{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--gold-i);line-height:1}
+.gcard .gt{font-weight:600;font-size:13.5px;margin-top:4px}
+.gcard .gs{flex:1 1 auto;min-height:0;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45;overflow:hidden}
+.gcard .stack{flex:none;display:flex;align-items:center;margin-top:8px;padding-top:9px;border-top:1px solid var(--hairline)}
+.gcard .sav{width:20px;height:20px;border-radius:50%;background:var(--gold-t);border:1.5px solid var(--panel);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7px;font-weight:600;color:var(--gold-i);margin-right:-6px}
+.gcard .fix{margin-left:12px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-i)}
+.gcard .qrail .qbtn.done:hover{background:var(--gold-t);border-color:var(--gold-i);color:var(--gold-i)}
+/* inline rapid batch (the ✓ target on grouped cards) */
+.batchflip{display:flex;flex-direction:column;height:100%;animation:rin .25s ease}
+.batchflip .bh{display:flex;align-items:center;gap:8px;font-weight:600;font-size:12.5px;color:var(--gold-i)}
+.batchflip .bh .bp{margin-left:auto;font-family:var(--mono);font-size:7.5px;color:var(--faint)}
+.batchflip .rows{flex:1;min-height:0;overflow-y:auto;margin-top:7px}
+.brow2{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--hairline)}
+.brow2:last-child{border:none}
+.brow2 .bn2{width:78px;flex:none;font-size:11.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow2 .chips{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+.bc2{font-size:10px;padding:4px 8px;border-radius:99px;border:1px solid var(--line);background:var(--panel)}
+.bc2:hover{border-color:var(--ink)}
+.bc2.on{background:var(--sageC);border-color:var(--sage-edge);color:var(--sageD);font-weight:600}
+.batchflip .bfoot{flex:none;display:flex;gap:6px;margin-top:8px}
+.batchflip .ra{flex:1;text-align:center;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:7px 6px;border:1px solid var(--gold-b);background:var(--gold-t);color:var(--gold-i)}
+.batchflip .ra.save{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.batchflip .ra[disabled]{opacity:.4;pointer-events:none}
+/* never-ask fork */
+.neverfork{display:flex;flex-direction:column;height:100%;justify-content:center;gap:8px;animation:rin .25s ease}
+.neverfork .nt2{font-weight:600;font-size:13px;text-align:center;color:var(--gold-i)}
+.neverfork .nb{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:12px}
+.neverfork .nb:hover{border-color:var(--ink)}
+.neverfork .nb b{font-weight:600}
+.neverfork .ncancel{text-align:center;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+/* note card skin */
+.card.note{border-color:var(--note-b)}
+.card.note .tag{background:var(--note-t);border-color:var(--note-b);color:var(--note-i)}
+.card.note .qrail .qbtn.done:hover{background:var(--sageC);border-color:var(--sageD);color:var(--sageD)}
+.toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{display:flex;align-items:center;gap:12px;background:var(--ink);color:var(--panel);border-radius:99px;padding:10px 12px 10px 18px;box-shadow:var(--sh-3);font-size:13px;animation:rise .18s ease;white-space:nowrap}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+.toast .tb{font-family:var(--mono);font-size:9px;letter-spacing:.08em;font-weight:600;background:var(--pink-btn);color:var(--ink);padding:6px 12px;border-radius:99px}
+</style>
+</head>
+<body>
+<div class="scaf"><b>Mockup v2</b> · quick rail across all three lanes — same buttons, honest per-lane meanings · hover any card</div>
+<div class="wrap">
+
+  <div class="h2">Hover a card → the quick rail appears (✓ done · ⏸ dismiss)</div>
+  <div class="p"><b>✓ Quick done</b> logs with stated defaults — today, email, everything they asked for — and flips the card into a <b>receipt</b> showing exactly what was written, with <b>Edit details</b> and <b>Undo</b> right there. <b>⏸ Quick dismiss</b> snoozes a week, one tap. The journey stays for when you want it; this is for when you don't.</div>
+
+  <div class="lane">
+    <div class="laneh"><span class="lt">Urgent</span><span class="ln">4</span></div>
+    <div class="scroller">
+
+      <div class="card" id="c1">
+        <div class="qrail">
+          <button class="qbtn done" title="Quick done — logs with defaults" onclick="quickDone('c1')">✓</button>
+          <button class="qbtn dis" title="Quick dismiss — snooze a week" onclick="quickDismiss('c1')">⏸</button>
+        </div>
+        <span class="tag q">3 DAYS LEFT</span>
+        <div class="tt">Send your full to <em>Juliet Mushens</em></div>
+        <div class="tsub">She read the partial and asked for the full manuscript on 27 June.</div>
+        <div class="tfoot"><span class="dot q"></span><span class="miniav">JM</span><span class="who">Mushens Ent.</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+      <div class="card" id="c2">
+        <div class="qrail">
+          <button class="qbtn done" onclick="quickDone('c2','Nudge sent — David Higham')">✓</button>
+          <button class="qbtn dis" onclick="quickDismiss('c2')">⏸</button>
+        </div>
+        <span class="tag q">96 DAYS · NO REPLY</span>
+        <div class="tt">Nudge <em>David Higham</em></div>
+        <div class="tsub">Full sent 3 Apr · stated reply 8 weeks — a follow-up is fair.</div>
+        <div class="tfoot"><span class="dot nudge"></span><span class="miniav">DH</span><span class="who">D. Higham Assoc.</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+      <div class="card" id="c3">
+        <div class="qrail">
+          <button class="qbtn done" onclick="quickDone('c3','Partial sent — Felicity Blunt')">✓</button>
+          <button class="qbtn dis" onclick="quickDismiss('c3')">⏸</button>
+        </div>
+        <span class="tag q">OVER TO YOU</span>
+        <div class="tt">Send your partial to <em>Felicity Blunt</em></div>
+        <div class="tsub">The Tin Sky · first 50 pages, requested 3 July.</div>
+        <div class="tfoot"><span class="dot q"></span><span class="miniav">FB</span><span class="who">Curtis Brown</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+      <div class="card" id="c4">
+        <div class="qrail">
+          <button class="qbtn done" onclick="quickDone('c4','R&R resubmitted — Nelle Andrew')">✓</button>
+          <button class="qbtn dis" onclick="quickDismiss('c4')">⏸</button>
+        </div>
+        <span class="tag q">OVER TO YOU</span>
+        <div class="tt">Resubmit your R&R to <em>Nelle Andrew</em></div>
+        <div class="tsub">Revision round 1 — the middle act, tightened.</div>
+        <div class="tfoot"><span class="dot q"></span><span class="miniav">NA</span><span class="who">Rachel Mills</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sweep">
+    <span class="st">Caught up over the weekend?</span>
+    <span class="ss">Sweep mode walks the urgent lane with just ✓ / ⏸ / skip per card — keyboard: <b>D</b> done, <b>S</b> snooze, <b>→</b> skip.</span>
+    <button class="sb" onclick="toast('(mock) sweep mode — the focus flow, speed grammar')">Sweep the lane</button>
+  </div>
+
+  <div class="h2" style="margin-top:22px">Housekeeping — ✓ means "fix it fast", never "pretend it's fixed"</div>
+  <div class="p">On a <b>grouped</b> card, ✓ flips the card itself into a rapid chip-fill — four taps, saved, no journey. On a <b>stale query</b>, ✓ is a true quick action ("Closed — no response" receipt) because that's a one-decision write with an honest default. <b>⏸ is the star here</b> — and it forks: <b>not now</b> (a week) or <b>never ask</b> (this one / all of them).</div>
+
+  <div class="lane hk">
+    <div class="laneh"><span class="lt">Housekeeping</span><span class="ln">25</span></div>
+    <div class="scroller">
+
+      <div class="gcard" id="g1">
+        <div class="qrail">
+          <button class="qbtn done" title="Fix them fast — inline chip-fill" onclick="batchFlip('g1')">✓</button>
+          <button class="qbtn dis" title="Not now / never" onclick="neverFork('g1')">⏸</button>
+        </div>
+        <div class="gn">4</div>
+        <div class="gt">agents have no reply window</div>
+        <div class="gs">Without it we can't say when a nudge is fair — they never enter your chase list.</div>
+        <div class="stack"><span class="sav">RB</span><span class="sav">TW</span><span class="sav">IP</span><span class="sav">FA</span><span class="fix">Fix together →</span></div>
+      </div>
+
+      <div class="card" id="g2" style="border-color:var(--pink-b)">
+        <div class="qrail">
+          <button class="qbtn done" title="Close as no response — the honest default" onclick="quickClose('g2')">✓</button>
+          <button class="qbtn dis" onclick="neverFork('g2',true)">⏸</button>
+        </div>
+        <span class="tag">STALE QUERY</span>
+        <div class="tt"><em>Marcus Reed</em> silent past his window</div>
+        <div class="tsub">Their listing says no reply means no. Closing keeps your response rate honest.</div>
+        <div class="tfoot"><span class="dot nudge"></span><span class="miniav">MR</span><span class="who">Bloomsbury Quill</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="h2" style="margin-top:22px">Notes to self — nothing to log, so ✓ just ticks</div>
+  <div class="p">Your own words, your own tick. ⏸ still works — "not this week" is a real stance about a note too.</div>
+
+  <div class="lane nt">
+    <div class="laneh"><span class="lt">Notes to self</span><span class="ln">2</span></div>
+    <div class="scroller">
+
+      <div class="card note" id="n1">
+        <div class="qrail">
+          <button class="qbtn done" onclick="noteDone('n1','Ask the group about the covering email')">✓</button>
+          <button class="qbtn dis" onclick="quickDismiss('n1')">⏸</button>
+        </div>
+        <span class="tag">NOTE · 6 JUL</span>
+        <div class="tt">Ask the group about the covering email</div>
+        <div class="tsub">Mention the shortlisting, or let the pages speak?</div>
+        <div class="tfoot"><span class="miniav" style="background:var(--note-t);border:1px solid var(--note-b);color:var(--note-i)">✎</span><span class="who">On Juliet Mushens</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+      <div class="card note" id="n2">
+        <div class="qrail">
+          <button class="qbtn done" onclick="noteDone('n2','Redraft the opening line')">✓</button>
+          <button class="qbtn dis" onclick="quickDismiss('n2')">⏸</button>
+        </div>
+        <span class="tag">NOTE · 2 JUL</span>
+        <div class="tt">Redraft the opening line</div>
+        <div class="tsub">Too close to the image in Ch.3 — find something colder.</div>
+        <div class="tfoot"><span class="miniav" style="background:var(--note-t);border:1px solid var(--note-b);color:var(--note-i)">✎</span><span class="who">On The Tin Sky</span></div>
+        <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="h2" style="margin-top:26px">The rules that keep it honest</div>
+  <div class="p">
+    <b>Defaults are stated, never silent</b> — the receipt shows exactly what was logged before you move on.
+    <b>Offers are exempt</b> — an offer of representation can't be quick-anythinged; it always gets the moment.
+    <b>Notes just tick</b> — nothing to log.
+    <b>Dismiss is a stance, not a delete</b> — snoozed a week, back on the board after.
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+function quickDone(id,label){
+  const c=document.getElementById(id);
+  label=label||'Full sent — Juliet Mushens';
+  c.classList.add('receipt');
+  c.innerHTML=`<div class="receiptbody">
+    <div class="rk"><span class="tick">✓</span><span class="rt">${label}</span></div>
+    <div class="rlog">Logged: <b>today (16 Jul)</b> · via <b>email</b> · <b>everything they asked for</b>.<br>Wrong? Fix it before you move on.</div>
+    <div class="racts">
+      <button class="ra" onclick="toast('(mock) → focus sheet, pre-filled, to edit')">Edit details</button>
+      <button class="ra" onclick="undoCard('${id}')">Undo</button>
+    </div></div>`;
+  toast(`${label} — logged with defaults`, ()=>undoCard(id));
+}
+function quickDismiss(id){
+  const c=document.getElementById(id);
+  c.classList.add('dismissed');
+  const rail=c.querySelector('.qrail'); if(rail) rail.remove();
+  const kids=[...c.children]; kids.forEach(k=>k.remove());
+  c.innerHTML=`<div class="dismissbody">
+    <div class="dt">Snoozed — back in a week.</div>
+    <div class="dact"><button class="ra" onclick="undoCard('${id}')">Undo</button>
+    <button class="ra" onclick="toast('(mock) never ask again — mute scopes')">Never ask</button></div></div>`;
+  toast('Snoozed for 7 days', ()=>undoCard(id));
+}
+function undoCard(id){ location.reload(); }
+
+/* grouped housekeeping: ✓ flips the card into a rapid chip-fill */
+let bvals={};
+function batchFlip(id){
+  bvals={};
+  renderBatchFlip(id);
+}
+function renderBatchFlip(id){
+  const c=document.getElementById(id);
+  const rows=[['RB','R. Blake'],['TW','T. Watson'],['IP','I. Penn'],['FA','F. Ashby']];
+  const filled=Object.keys(bvals).length;
+  c.innerHTML=`<div class="batchflip">
+    <div class="bh">Replies within…<span class="bp">${filled} OF 4</span></div>
+    <div class="rows">${rows.map((r,i)=>`
+      <div class="brow2"><span class="bn2">${r[1]}</span>
+        <span class="chips">${['4wk','6wk','8wk','12wk','—'].map(w=>`
+          <button class="bc2 ${bvals[i]===w?'on':''}" onclick="bvals[${i}]='${w}';renderBatchFlip('${id}')">${w}</button>`).join('')}</span>
+      </div>`).join('')}
+    </div>
+    <div class="bfoot">
+      <button class="ra" onclick="undoCard('${id}')">Cancel</button>
+      <button class="ra save" ${filled?'':'disabled'} onclick="batchSave('${id}',${filled})">Save ${filled||''}</button>
+    </div></div>`;
+}
+function batchSave(id,n){
+  const c=document.getElementById(id);
+  c.classList.add('receipt'); c.style.borderColor='var(--sage-edge)';
+  c.innerHTML=`<div class="receiptbody">
+    <div class="rk"><span class="tick">✓</span><span class="rt">${n} reply window${n===1?'':'s'} set</span></div>
+    <div class="rlog">Saved to their profiles. The rest stay on the card — <b>skipping is fine</b>.</div>
+    <div class="racts"><button class="ra" onclick="undoCard('${id}')">Undo</button></div></div>`;
+  toast(`${n} reply windows saved`, ()=>undoCard(id));
+}
+
+/* stale query: ✓ = honest one-decision default */
+function quickClose(id){
+  const c=document.getElementById(id);
+  c.classList.add('receipt');
+  c.innerHTML=`<div class="receiptbody">
+    <div class="rk"><span class="tick">✓</span><span class="rt">Marcus Reed — closed</span></div>
+    <div class="rlog">Logged as <b>no response</b> — not a rejection, so your response rate stays honest.</div>
+    <div class="racts"><button class="ra" onclick="toast('(mock) → focus sheet to edit')">Edit</button>
+      <button class="ra" onclick="undoCard('${id}')">Undo</button></div></div>`;
+  toast('Closed as no response', ()=>undoCard(id));
+}
+
+/* housekeeping ⏸ forks: not now / never (this one / all) */
+function neverFork(id,single){
+  const c=document.getElementById(id);
+  const keep=c.innerHTML;
+  c.innerHTML=`<div class="neverfork">
+    <div class="nt2">Stop asking — for how long?</div>
+    <button class="nb" onclick="quickDismiss('${id}')"><b>Not now</b> — back in a week</button>
+    <button class="nb" onclick="muted('${id}','this one')"><b>Never</b> — just ${single?'this query':'these agents'}</button>
+    ${single?'':`<button class="nb" onclick="muted('${id}','the rule')"><b>Never</b> — any agent missing this</button>`}
+    <button class="ncancel" onclick="undoCard('${id}')">Cancel</button>
+  </div>`;
+}
+function muted(id,scope){
+  const c=document.getElementById(id);
+  c.classList.add('dismissed');
+  c.innerHTML=`<div class="dismissbody">
+    <div class="dt">Muted — we won't ask about ${scope} again.</div>
+    <div class="dact"><button class="ra" onclick="undoCard('${id}')">Undo</button></div></div>`;
+  toast('Muted — nothing deleted, the gap still shows on the profile', ()=>undoCard(id));
+}
+function noteDone(id,label){
+  const c=document.getElementById(id);
+  c.classList.add('receipt');
+  c.innerHTML=`<div class="receiptbody">
+    <div class="rk"><span class="tick">✓</span><span class="rt">Note done</span></div>
+    <div class="rlog"><b>${label}</b> — struck through on today's list.</div>
+    <div class="racts"><button class="ra" onclick="undoCard('${id}')">Undo</button></div></div>`;
+  toast('Note done', ()=>undoCard(id));
+}
+function toast(msg,undo){
+  const t=document.getElementById('toasts'), e=document.createElement('div'); e.className='toast';
+  e.innerHTML=`<span>${msg}</span>${undo?'<button class="tb">UNDO</button>':''}`;
+  if(undo) e.querySelector('.tb').onclick=()=>{ undo(); e.remove(); };
+  t.appendChild(e); setTimeout(()=>e.remove(),3600);
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 /**
  * The regression guard for the reply-task precedence. Every other surface (db.tsx generator,
- * dashboard "Over to you", Queries Hub) reads this — so the state matrix is proven here: exactly
+ * dashboard urgent panel, Queries Hub) reads this — so the state matrix is proven here: exactly
  * one of {nudge, close, none} fires for every row, and close SUCCEEDS nudge, never competes.
  */
 

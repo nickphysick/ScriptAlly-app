@@ -32,10 +32,6 @@ export interface User {
   // Absent === Cappuccino. NOTE: prod firestore.rules still enum-restrict this to the first two —
   // "editorial" persists only once the parked rules edit ships (see BUILD-REPORT.md).
   queriesTheme?: "cappuccino" | "bold" | "editorial";
-  // Cadence stamp for the To-do "Clear the Desk" focus ritual — written once when the ritual is
-  // completed or left (ISO String). The ONLY reader is the entry check (shouldOpenFocus); nothing
-  // derives from it, so it doesn't offend derived-over-stored. Absent === never focused.
-  todoLastFocusedAt?: string;
   // The Package Workshop guided tour has been offered once. Set true when the tour ends (finish OR
   // skip) so it never auto-runs again; the help "?" re-runs it regardless. Absent === never seen.
   // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful)
@@ -50,6 +46,11 @@ export interface User {
   // Housekeeping rules the writer has muted app-wide ("Don't ask again → All of them"). Per-item
   // mutes live on a TaskFlag instead. Muting stops the reminder; it never deletes the underlying gap.
   mutedTaskRules?: string[];
+  // The To-do board's first-visit spotlight tour has run (ISO timestamp; set on Done OR skip — the
+  // hasSeenTour pattern). Absent === never seen; the ? popover's "Replay the tour" ignores it.
+  // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful,
+  // the tour just re-offers) until that deploy lands.
+  tourSeenAt?: string;
 }
 
 /**
@@ -262,6 +263,12 @@ export interface Agent {
   // Self-heals: opening an agent and pressing Done recomputes it against the resolved notes.
   // "" means "no notes"; absent means "never computed" (legacy/imported rows repair on next edit).
   notePreview?: string;
+  // Provenance for ASSISTED-FILL values, keyed by the agent field they describe (mswlNotes /
+  // responseTimeWeeks / materialsWanted): where the value was found + when. Written ONLY when a
+  // found value is saved unedited, so a found fact is never indistinguishable from one the writer
+  // verified/typed. NOTE: rides a parked firestore.rules edit (isValidAgent + the agent-update
+  // allowlist) — saves carrying it are silently denied until that deploy lands (Nick's).
+  fieldSources?: Record<string, { source: string; foundAt: string }>;
 }
 
 export interface CommunityAgent {
@@ -385,6 +392,12 @@ export interface Query {
 export enum ActivityType {
   STATUS_CHANGED = "Status Changed",
   NUDGE_SENT = "Nudge Sent",
+  // The writer's OFFER DECISIONS (journey-logic pass P3 — Nick's Option A). ACCEPTED is
+  // non-status (the query keeps its historical OFFER status); DECLINED carries
+  // resultingStatus WITHDRAWN so recomputeQuery — the single writer of derived state —
+  // closes the query from the one honest log node.
+  OFFER_ACCEPTED = "Offer Accepted",
+  OFFER_DECLINED = "Offer Declined",
   QUERY_SENT = "Query Sent",
   MATERIALS_SENT = "Materials Sent",
   AGENT_ADDED = "Agent Added",
@@ -441,18 +454,6 @@ export interface Note {
   dueDate: string | null; // "YYYY-MM-DD" — optional; with a date the note is also a task
   done: boolean;
   doneAt: string | null; // full ISO datetime, stamped on completion
-  createdAt: string; // full ISO datetime
-  updatedAt: string; // full ISO datetime
-}
-
-// A To-do page "Notes" record — the ONLY stored to-do object (Do next / Housekeeping are derived).
-// Distinct from Note (the dashboard desk post-its): a note here is a plain body + pin + soft-archive.
-export interface TodoNote {
-  id: string;
-  userId: string;
-  body: string;
-  pinned: boolean;
-  done: boolean; // soft archive (reversible) — marking done feeds "cleared today"
   createdAt: string; // full ISO datetime
   updatedAt: string; // full ISO datetime
 }
@@ -523,4 +524,8 @@ export interface UserTask {
   // not decoration: unset = a plain to-do; set = surfaces (and renders overdue) on that day. Dates
   // are INPUT, not derived state — nothing auto-fires; a due date only surfaces, never writes.
   dueDate?: string;
+  // Today's-list commitment — ISO date-only "YYYY-MM-DD". The task's OWN scheduling on its own
+  // document (never a taskFlag — those are stances on DERIVED tasks). Set = committed to that day's
+  // list (rolls over once if the day passes); absent = not committed. Input, never derived.
+  committedDate?: string;
 }

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — Today's list placement sketches</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#fff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023; --burg-soft:#8a4030;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-av:#f6d7cf; --pink-btn:#f6cfc9; --pink-hero:#f9e8e2;
+  --gold-t:#f6efdd; --gold-b:#e7d9b8; --gold-i:#7d621d;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420;
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58; --sage:#8a9e88;
+  --pinkC:#f8e7dc;
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --sh-2:0 1px 2px rgba(58,42,26,.05),0 4px 10px -2px rgba(58,42,26,.06);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --sh-glass:0 1px 2px rgba(58,42,26,.04),0 12px 36px -12px rgba(58,42,26,.11),inset 0 1px 0 rgba(255,255,255,.6);
+  --r-md:9px; --r-lg:12px; --r-xl:16px;
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.4;-webkit-font-smoothing:antialiased;background:#e9dfd0;padding:26px 24px 60px}
+button{font:inherit;background:none;border:none;color:inherit;text-align:left;cursor:pointer}
+.page{max-width:1280px;margin:0 auto}
+.pagetitle{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:4px}
+.pagesub{font-size:13px;color:var(--muted);margin-bottom:26px;max-width:720px;line-height:1.55}
+
+.sketch{margin-bottom:34px}
+.slabel{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.slabel .n{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--burg);border-radius:99px;padding:3px 9px}
+.slabel .t{font-family:var(--serif);font-size:17px;font-weight:600}
+.strade{font-size:12px;color:var(--muted);margin-bottom:12px;max-width:760px;line-height:1.5}
+.strade b{color:var(--ink-2);font-weight:600}
+
+/* the "viewport" frame each sketch sits in */
+.frame{position:relative;background:radial-gradient(120% 120% at 80% -6%, rgba(255,250,242,.5) 0%, transparent 46%), var(--oat);
+  border:1px solid var(--line);border-radius:14px;padding:12px;overflow:hidden;box-shadow:var(--sh-1)}
+
+/* ===== slim command bar (shared by all three) ===== */
+.cbar{position:relative;overflow:hidden;border-radius:13px;display:flex;align-items:center;gap:16px;padding:11px 18px;
+  background:linear-gradient(100deg, rgba(249,232,226,.75), rgba(244,220,212,.62));
+  -webkit-backdrop-filter:blur(12px) saturate(106%);backdrop-filter:blur(12px) saturate(106%);
+  border:1px solid rgba(255,255,255,.5);box-shadow:var(--sh-glass)}
+.cbar .date{font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--pink-i);opacity:.85;white-space:nowrap}
+.cbar .hl{font-family:var(--serif);font-size:17px;font-weight:600;color:#3a2019;white-space:nowrap}
+.cbar .hl em{font-style:italic;color:var(--burg)}
+.cbar .stat{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--pink-i);white-space:nowrap}
+.cbar .stat b{font-family:var(--serif);font-size:13px;color:#3a2019;letter-spacing:0}
+.cbar .sp{flex:1}
+.cbar .u{font-size:12px;font-weight:600;padding:8px 15px;border-radius:8px;background:var(--ink);color:var(--panel);white-space:nowrap}
+.cbar .s{font-size:12px;font-weight:500;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,.6);border:1px solid var(--pink-b);color:var(--pink-i);white-space:nowrap}
+
+/* ===== lanes / cards (shared) ===== */
+.lanes{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.lane{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.lane.do{border-color:var(--pink-b)}
+.laneh{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid;font-size:12.5px;font-weight:600}
+.lane.do .laneh{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.lane.hk .laneh{background:var(--gold-t);border-color:var(--gold-b);color:var(--gold-i)}
+.lane.nt .laneh{background:var(--note-t);border-color:var(--note-b);color:var(--note-i)}
+.laneh .ln{font-family:var(--mono);font-size:8px;font-weight:700;border-radius:99px;padding:2px 7px;background:rgba(255,255,255,.7)}
+.laneh .sp{flex:1}
+.laneh .chev{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.06);font-size:12px;opacity:.8}
+.scroller{display:flex;gap:10px;padding:11px;overflow:hidden;position:relative}
+.scroller.more::after{content:"";position:absolute;top:0;bottom:0;right:0;width:46px;background:linear-gradient(90deg,transparent,var(--paper))}
+.card{flex:none;width:300px;height:166px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:12px 14px;display:flex;flex-direction:column;overflow:hidden}
+.card.do2{border-color:var(--pink-b);box-shadow:inset 3px 0 0 var(--pink-btn),var(--sh-1)}
+.tag{display:inline-block;font-family:var(--mono);font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2.5px 7px;border:1px solid;margin-bottom:7px;align-self:flex-start}
+.tag.due{background:var(--panel);border-color:var(--line);color:var(--muted)}
+.tag.warn{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tag.off{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tt{font-weight:600;font-size:13px;line-height:1.28;color:var(--ink)}
+.tt em{font-family:var(--serif);font-style:italic;color:var(--burg);font-weight:600}
+.tsub{flex:1;min-height:0;font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4;overflow:hidden}
+.tfoot{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)}
+.dot{width:13px;height:13px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:7px}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}.dot.q::after{content:"→";font-weight:700}
+.dot.nudge{border:1.5px dashed var(--burg);color:var(--burg)}.dot.nudge::after{content:"↻";font-weight:700}
+.dot.star{border:1.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}.dot.star::after{content:"★";font-size:6px}
+.miniav{width:19px;height:19px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7.5px;font-weight:600;color:#5a2b20;flex:none}
+.who{font-family:var(--mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tacts{display:flex;gap:5px;margin-top:8px}
+.pill{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;border-radius:99px;padding:7px 5px;border:1px solid;white-space:nowrap}
+.pill.t{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.pill.d{background:var(--panel);border-color:var(--line);color:var(--ink-2)}
+.pill .bx{width:10px;height:10px;border:1.3px solid currentColor;border-radius:2px;opacity:.7}
+.gcard{flex:none;width:300px;height:166px;background:var(--panel);border:1px solid var(--gold-b);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:13px 14px;display:flex;flex-direction:column;overflow:hidden}
+.gcard .gn{font-family:var(--serif);font-size:27px;font-weight:600;color:var(--gold-i);line-height:1}
+.gcard .gt{font-weight:600;font-size:12.5px;margin-top:4px}
+.gcard .gs{flex:1;min-height:0;font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4;overflow:hidden}
+.gcard .stack{display:flex;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)}
+.gcard .sav{width:19px;height:19px;border-radius:50%;background:var(--gold-t);border:1.5px solid var(--panel);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7px;font-weight:600;color:var(--gold-i);margin-right:-6px}
+.gcard .fix{margin-left:12px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-i)}
+
+/* ===== SKETCH 1 — corner FAB ===== */
+.fab{position:absolute;right:18px;bottom:18px;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--panel);border-radius:99px;padding:10px 16px 10px 12px;box-shadow:var(--sh-3);z-index:5}
+.fab .ring{width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--sage) 0 25%, rgba(255,255,255,.18) 25% 100%);display:flex;align-items:center;justify-content:center;flex:none}
+.fab .ring i{width:22px;height:22px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;font-style:normal}
+.fab .l{display:flex;flex-direction:column;line-height:1.15}
+.fab .l .a{font-family:var(--serif);font-size:14px;font-weight:600}
+.fab .l .b{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.7}
+
+/* the expanded panel (shown as an inset callout) */
+.pop{width:330px;background:var(--panel);border:1px solid var(--pink-b);border-radius:var(--r-xl);box-shadow:var(--sh-3);overflow:hidden}
+.poph{display:flex;align-items:center;gap:7px;padding:11px 14px;background:var(--pink-t);border-bottom:1px solid var(--pink-b)}
+.poph .t{font-family:var(--serif);font-size:15px;font-weight:600;color:#3a2019}
+.poph .cc{margin-left:auto;font-family:var(--mono);font-size:7.5px;font-weight:700;color:var(--pink-i);background:var(--panel);border:1px solid var(--pink-b);border-radius:99px;padding:2px 7px}
+.poph .cd{font-family:var(--mono);font-size:7.5px;font-weight:700;color:var(--sageD);background:var(--sageC);border:1px solid var(--sage-edge);border-radius:99px;padding:2px 7px}
+.popb{padding:9px 11px;display:flex;flex-direction:column;gap:5px}
+.crow{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--hairline);border-radius:7px}
+.crow .cx{font-size:11.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow .cm{font-family:var(--mono);font-size:7px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.pdiv{display:flex;align-items:center;gap:8px;padding:4px 3px 4px;font-family:var(--mono);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.pdiv .l{flex:1;height:1px;background:var(--hairline)}
+.drow{display:flex;align-items:center;gap:7px;padding:4px 8px}
+.drow .tick{width:13px;height:13px;border-radius:3px;background:var(--sageD);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;flex:none}
+.drow .dx{font-size:11px;color:var(--muted);text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.popf{padding:9px 12px;border-top:1px solid var(--hairline);background:var(--paper);display:flex;gap:6px}
+.popf .b{flex:1;text-align:center;font-size:11px;font-weight:600;padding:7px;border-radius:7px}
+.popf .b.p{background:var(--ink);color:var(--panel)}
+.popf .b.a{background:var(--pink-btn);color:#5a2b20}
+.inset{display:flex;align-items:flex-end;gap:16px;margin-top:12px;padding:14px;background:rgba(255,255,255,.4);border:1px dashed var(--line);border-radius:12px}
+.inset .cap{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);max-width:150px;line-height:1.7}
+
+/* ===== SKETCH 2 — slim strip ===== */
+.strip{display:flex;align-items:center;gap:9px;margin-top:10px;padding:9px 12px;background:var(--panel);border:1px solid var(--pink-b);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.strip .lab{font-family:var(--serif);font-size:14px;font-weight:600;color:#3a2019;white-space:nowrap}
+.strip .chip{display:flex;align-items:center;gap:6px;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:99px;padding:5px 11px;font-size:11.5px;white-space:nowrap}
+.strip .chip .dot{width:11px;height:11px}
+.strip .add{font-family:var(--mono);font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--pink-i);border:1px dashed var(--pink-b);border-radius:99px;padding:6px 11px}
+.strip .sp{flex:1}
+.strip .done{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--sageD);background:var(--sageC);border:1px solid var(--sage-edge);border-radius:99px;padding:5px 10px;white-space:nowrap}
+.strip .pick{font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:8px;background:var(--ink);color:var(--panel);white-space:nowrap}
+.strip .exp{font-family:var(--mono);font-size:14px;color:var(--muted);padding:0 4px}
+
+.reco{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:10px}
+.reco h3{font-family:var(--serif);font-size:15px;font-weight:600;margin-bottom:7px}
+.reco p{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:7px}
+.reco b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="pagetitle">Today's list — placement sketches</div>
+  <div class="pagesub">All three slim the header to a single command-bar row (recovers ~140px on its own). They differ in how much of Today's list stays <em>ambient</em> — visible at rest — versus tucked away to give the lanes more room.</div>
+
+  <!-- ===================== SKETCH 1 ===================== -->
+  <div class="sketch">
+    <div class="slabel"><span class="n">1</span><span class="t">Command bar + corner pop-up</span></div>
+    <div class="strade"><b>Most space.</b> Header is one slim row; Today's list collapses to a bottom-right button showing a progress ring + count. Click to raise the full panel. Lanes get maximum height — likely no page scroll. <b>Cost:</b> your commitments and your "done" log aren't visible at rest — you only see a count until you open it.</div>
+    <div class="frame" style="min-height:360px">
+      <div class="cbar">
+        <span class="date">Thu 16 Jul</span>
+        <span class="hl">31 need you, <em>12 pressing</em></span>
+        <span class="stat"><b>6</b> your move</span>
+        <span class="stat"><b>25</b> housekeeping</span>
+        <span class="sp"></span>
+        <button class="u">Urgent</button><button class="s">See all queries</button>
+      </div>
+      <div class="lanes">
+        <div class="lane do"><div class="laneh">Do next<span class="ln">6</span><span class="sp"></span><button class="chev">›</button></div>
+          <div class="scroller more">
+            <div class="card"><span class="tag off">Offer</span><div class="tt"><em>Tom Ellery</em> has made an offer</div><div class="tsub">Respond by 25 July · other agents still holding.</div><div class="tfoot"><span class="dot star"></span><span class="miniav">TE</span><span class="who">Curtis Vane</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+            <div class="card"><span class="tag due warn">3 DAYS LEFT</span><div class="tt">Send your full to <em>Juliet Mushens</em></div><div class="tsub">She asked for the full manuscript on 27 June.</div><div class="tfoot"><span class="dot q"></span><span class="miniav">JM</span><span class="who">Mushens Ent.</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+            <div class="card"><span class="tag due warn">96 DAYS</span><div class="tt">Nudge <em>David Higham</em></div><div class="tsub">Full sent 3 Apr · stated reply 8 weeks.</div><div class="tfoot"><span class="dot nudge"></span><span class="miniav">DH</span><span class="who">D. Higham</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+          </div>
+        </div>
+        <div class="lane hk"><div class="laneh">Housekeeping<span class="ln">25</span><span class="sp"></span><button class="chev">›</button></div>
+          <div class="scroller">
+            <div class="gcard"><div class="gn">12</div><div class="gt">agents have no reply window</div><div class="gs">Without it we can't say when a nudge is fair.</div><div class="stack"><span class="sav">RB</span><span class="sav">TW</span><span class="sav">IP</span><span class="fix">Fix together →</span></div></div>
+            <div class="gcard"><div class="gn">9</div><div class="gt">agents have no wish list</div><div class="gs">It's how we tell you who's worth querying.</div><div class="stack"><span class="sav">AG</span><span class="sav">HM</span><span class="fix">Fix together →</span></div></div>
+          </div>
+        </div>
+      </div>
+      <!-- collapsed FAB -->
+      <div class="fab"><span class="ring"><i>1/4</i></span><span class="l"><span class="a">Today</span><span class="b">1 committed · 3 done</span></span></div>
+    </div>
+    <!-- expanded state, shown as a callout -->
+    <div class="inset">
+      <div class="cap">Tap the button → the panel rises from the corner</div>
+      <div class="pop">
+        <div class="poph"><span class="t">Today's list</span><span class="cc">1 committed</span><span class="cd">3 done</span></div>
+        <div class="popb">
+          <div class="crow"><span class="dot q"></span><div style="flex:1;min-width:0"><div class="cx">Send your full to Juliet Mushens</div><div class="cm">Mushens Ent.</div></div></div>
+          <div class="pdiv"><span>Done today</span><span class="l"></span></div>
+          <div class="drow"><span class="tick">✓</span><span class="dx">Nudge sent — Fenella Str</span></div>
+          <div class="drow"><span class="tick">✓</span><span class="dx">Rowan Blake — closed, no response</span></div>
+          <div class="drow"><span class="tick">✓</span><span class="dx">Redraft the opening line</span></div>
+        </div>
+        <div class="popf"><button class="b a">Help me pick</button><button class="b p">Work the list</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SKETCH 2 ===================== -->
+  <div class="sketch">
+    <div class="slabel"><span class="n">2</span><span class="t">Command bar + slim Today strip</span></div>
+    <div class="strade"><b>The compromise.</b> Header is one row; Today's list becomes a single slim strip — committed items as inline chips, a "done" count, Help me pick — always visible. Click it (or the ⌄) to expand the full committed/done panel. Keeps your commitments <b>glanceable</b> while costing only ~54px. My lean.</div>
+    <div class="frame">
+      <div class="cbar">
+        <span class="date">Thu 16 Jul</span>
+        <span class="hl">31 need you, <em>12 pressing</em></span>
+        <span class="stat"><b>6</b> your move</span>
+        <span class="stat"><b>25</b> housekeeping</span>
+        <span class="sp"></span>
+        <button class="u">Urgent</button><button class="s">See all queries</button>
+      </div>
+      <div class="strip">
+        <span class="lab">Today</span>
+        <span class="chip"><span class="dot q"></span>Full to Juliet Mushens</span>
+        <button class="add">＋ commit up to 5</button>
+        <span class="sp"></span>
+        <span class="done">✓ 3 done today</span>
+        <button class="pick">Help me pick</button>
+        <button class="exp">⌄</button>
+      </div>
+      <div class="lanes">
+        <div class="lane do"><div class="laneh">Do next<span class="ln">6</span><span class="sp"></span><button class="chev">›</button></div>
+          <div class="scroller more">
+            <div class="card do2"><span class="tag due warn">3 DAYS LEFT</span><div class="tt">Send your full to <em>Juliet Mushens</em></div><div class="tsub">She asked for the full manuscript on 27 June.</div><div class="tfoot"><span class="dot q"></span><span class="miniav">JM</span><span class="who">Mushens Ent.</span></div><div class="tacts"><button class="pill t">✓ On today</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+            <div class="card"><span class="tag off">Offer</span><div class="tt"><em>Tom Ellery</em> has made an offer</div><div class="tsub">Respond by 25 July · others still holding.</div><div class="tfoot"><span class="dot star"></span><span class="miniav">TE</span><span class="who">Curtis Vane</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+            <div class="card"><span class="tag due">OVER TO YOU</span><div class="tt">Resubmit R&R to <em>Nelle Andrew</em></div><div class="tsub">Round 1 — tighten the middle act.</div><div class="tfoot"><span class="dot nudge"></span><span class="miniav">NA</span><span class="who">Rachel Mills</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+          </div>
+        </div>
+        <div class="lane hk"><div class="laneh">Housekeeping<span class="ln">25</span><span class="sp"></span><button class="chev">›</button></div>
+          <div class="scroller">
+            <div class="gcard"><div class="gn">12</div><div class="gt">agents have no reply window</div><div class="gs">Without it we can't say when a nudge is fair.</div><div class="stack"><span class="sav">RB</span><span class="sav">TW</span><span class="sav">IP</span><span class="fix">Fix together →</span></div></div>
+            <div class="gcard"><div class="gn">9</div><div class="gt">agents have no wish list</div><div class="gs">It's how we tell you who's worth querying.</div><div class="stack"><span class="sav">AG</span><span class="sav">HM</span><span class="fix">Fix together →</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SKETCH 3 ===================== -->
+  <div class="sketch">
+    <div class="slabel"><span class="n">3</span><span class="t">Command bar with Today built in</span></div>
+    <div class="strade"><b>Least change.</b> No separate panel or pop-up at all — Today lives <em>inside</em> the command bar: committed chips on the right of the same row, a done count, Help me pick. One bar does headline + Today. Expanding still gives the full log. Tightest vertical footprint, but the bar gets busy and drag-to-commit needs a clear target.</div>
+    <div class="frame">
+      <div class="cbar" style="flex-wrap:wrap;gap:10px 16px">
+        <span class="date">Thu 16 Jul</span>
+        <span class="hl">31 need you, <em>12 pressing</em></span>
+        <span class="sp"></span>
+        <span style="width:1px;height:22px;background:var(--pink-b)"></span>
+        <span class="stat" style="color:var(--pink-i)"><b style="color:#3a2019">Today</b></span>
+        <span class="chip" style="display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--pink-b);border-radius:99px;padding:5px 11px;font-size:11px"><span class="dot q"></span>Full to J. Mushens</span>
+        <span class="done" style="font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--sageD);background:var(--sageC);border:1px solid var(--sage-edge);border-radius:99px;padding:5px 10px">✓ 3 done</span>
+        <button class="u" style="padding:7px 13px">Urgent</button>
+      </div>
+      <div class="lanes">
+        <div class="lane do"><div class="laneh">Do next<span class="ln">6</span><span class="sp"></span><button class="chev">›</button></div>
+          <div class="scroller more">
+            <div class="card"><span class="tag due warn">3 DAYS LEFT</span><div class="tt">Send your full to <em>Juliet Mushens</em></div><div class="tsub">She asked for the full manuscript on 27 June.</div><div class="tfoot"><span class="dot q"></span><span class="miniav">JM</span><span class="who">Mushens Ent.</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+            <div class="card"><span class="tag off">Offer</span><div class="tt"><em>Tom Ellery</em> has made an offer</div><div class="tsub">Respond by 25 July · others still holding.</div><div class="tfoot"><span class="dot star"></span><span class="miniav">TE</span><span class="who">Curtis Vane</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+            <div class="card"><span class="tag due">OVER TO YOU</span><div class="tt">Send your partial to <em>Felicity Blunt</em></div><div class="tsub">The Tin Sky · first 50 pages.</div><div class="tfoot"><span class="dot q"></span><span class="miniav">FB</span><span class="who">Curtis Brown</span></div><div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div></div>
+          </div>
+        </div>
+        <div class="lane hk"><div class="laneh">Housekeeping<span class="ln">25</span><span class="sp"></span><button class="chev">›</button></div>
+          <div class="scroller">
+            <div class="gcard"><div class="gn">12</div><div class="gt">agents have no reply window</div><div class="gs">Without it we can't say when a nudge is fair.</div><div class="stack"><span class="sav">RB</span><span class="sav">TW</span><span class="sav">IP</span><span class="fix">Fix together →</span></div></div>
+            <div class="gcard"><div class="gn">9</div><div class="gt">agents have no wish list</div><div class="gs">It's how we tell you who's worth querying.</div><div class="stack"><span class="sav">AG</span><span class="sav">HM</span><span class="fix">Fix together →</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reco">
+    <h3>My read</h3>
+    <p><b>Sketch 2 (slim strip)</b> is the sweet spot. It recovers almost all the height the corner pop-up would — the strip is ~54px versus the panel's ~214px — while keeping the two things that made Today's list worth having: your <b>commitments visible at rest</b> (as chips) and a live <b>done count</b> you watch climb. One click still expands the full committed/done log when you want it.</p>
+    <p><b>Sketch 1 (corner pop-up)</b> wins only if you find you rarely look at Today while working the lanes — then hiding it entirely for maximum lane space is the right trade. <b>Sketch 3</b> is tightest but the command bar starts doing two jobs and gets crowded; I'd avoid it unless vertical space is truly desperate.</p>
+    <p>All three keep the pink-glass identity in the bar, the full-detail cards, and the done-log concept — they only move <em>where</em> Today lives.</p>
+  </div>
+</div>
+</body>
+</html>

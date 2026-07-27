@@ -1,0 +1,166 @@
+<!-- ScriptAlly fence note (the workspace-shell pack — the redesign's FINAL structure):
+     NORMATIVE — the master. The To-do page's frame rebuilt: an always-on ~212px parchment
+     navigation sidebar (WORKSPACE + FILTER + foot), the parchment chrome (#f2ede7 sidebar and
+     breadcrumb bar joined by #e4dbcd borders), a plain-text hero with the session CTA pair, ONE
+     bordered content panel, the search relocated into the breadcrumb bar as a white pill, and
+     Today restored to its bottom-right corner pop-up.
+     Active-state law: parchment white-card only (#fdfcfa fill, #e0d6c6 hairline, ink text 700) —
+     NEVER a burgundy fill. The soft pastille card system, the ledger, grouping, undo toasts and
+     the derived engine are UNTOUCHED. The v9 session's engine/templates/carriage/close hold;
+     only its choreography retargets to the new seats.
+     Boards fix31–fix47 (blush, stone, sage settlements included) are exploration history, not
+     refs — all superseded. Any conflict resolves to this file (todo-fix48).
+-->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The merged sketch - references + ScriptAlly</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#efe6da;padding:36px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#5d4d40;margin:0 0 12px;width:1340px}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#4d4238;margin-left:10px;line-height:1.55}
+.app{width:1400px;background:#fdfcfa;border-radius:16px;overflow:hidden;display:flex;min-height:700px;box-shadow:0 10px 28px rgba(58,28,20,.16);position:relative}
+/* sidebar — parchment highlight, NEVER burgundy */
+.nav{width:212px;flex:0 0 auto;border-right:1px solid #e4dbcd;padding:14px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;background:#f2ede7}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:#2f2419;padding:2px 8px 12px}
+.bigcta{display:flex;align-items:center;justify-content:center;gap:8px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:11px;height:36px;font-size:11px;font-weight:600;margin:2px 2px 10px;cursor:pointer}
+.nk{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.16em;color:#a5988c;padding:9px 8px 5px}
+.ni{display:flex;align-items:center;gap:10px;height:34px;border-radius:10px;padding:0 11px;font-size:12.5px;font-weight:500;color:#4d4238;cursor:pointer}
+.ni .ic{width:14px;text-align:center;color:#8a7a6d;font-size:11px}
+.ni.on{background:#fdfcfa;border:1px solid #e0d6c6;color:#2f2419;font-weight:700;box-shadow:0 1px 3px rgba(58,28,20,.05)}
+.ni .n{margin-left:auto;font-size:9px;color:#a5988c}
+.ghn{display:flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid #ddd2c4;color:#4d4238;border-radius:99px;height:31px;font-size:10.5px;font-weight:600;margin:4px 2px 0;cursor:pointer}
+/* main column */
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+/* the breadcrumb bar, kept */
+.bcbar{height:42px;border-bottom:1px solid #e4dbcd;display:flex;align-items:center;padding:0 22px;gap:14px;background:#f2ede7}
+.bc{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:#a5988c}
+.bc b{color:#2f2419;font-family:'Playfair Display',serif;font-size:13px;letter-spacing:0;font-weight:800;margin-left:6px}
+.bcsrch{margin-left:auto;width:250px;height:30px;background:#fff;border:1px solid #e0d6c6;border-radius:99px;display:flex;align-items:center;padding:0 13px;color:#a59a8c;font-size:10.5px;box-sizing:border-box}
+.who{font-size:10.5px;font-weight:600;color:#4d4238}
+.body2{display:flex;flex:1;min-height:0}
+.main{flex:1;padding:26px 40px 34px;box-sizing:border-box;min-width:0}
+.main h1{font-family:'Playfair Display',serif;font-size:33px;font-weight:700;color:#2b2118}
+.heroRow{display:flex;align-items:flex-start;gap:18px;padding:4px 2px 0}
+.sub2{font-size:12.5px;color:#8a7d6e;margin-top:7px}
+.heroRight{margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:9px;flex:0 0 auto}
+.revlink{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#5d5245;border-bottom:1px solid #c9bcae;padding-bottom:2px;cursor:pointer}
+.revlink:hover{color:#2a1a13;border-color:#2a1a13}
+.panel{margin-top:26px;background:#fff;border:1px solid #e2dbd0;border-radius:14px;padding:20px 24px 24px}
+.heroCta{display:inline-flex;align-items:center;gap:9px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:44px;padding:0 23px;font-size:13px;font-weight:600;cursor:pointer;flex:0 0 auto;box-shadow:0 4px 12px rgba(29,16,12,.16)}
+.main .sub{font-size:11px;color:#8a7d6e;margin-top:4px}
+/* option cards row (the PWA doorways) */
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.oc{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2dacc;border-radius:12px;padding:13px 15px;cursor:pointer}
+.oc:hover{border-color:#b9a68e}
+.oc .oic{width:36px;height:36px;border-radius:10px;background:#f6f1e8;border:1px solid #e8dfcd;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3a1c14;flex:0 0 auto}
+.oc b{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#2b2118;display:block}
+.oc span{font-size:9.5px;color:#8a7d6e;display:block;margin-top:2px}
+.tabs{display:flex;align-items:center;gap:18px;margin-top:20px;border-bottom:1px solid #efe9df}
+.items{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#2b2118;padding-bottom:9px}
+.vtg{height:28px;border:1px solid #e5ddd0;background:#faf8f4;border-radius:99px;display:inline-flex;align-items:center;padding:2px;gap:2px}
+.vc{width:28px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:99px;font-size:10px;color:#8a8074;cursor:pointer}
+.vc.on{background:#fff;border:1px solid #2a1a13;color:#2a1a13;box-sizing:border-box}
+.tr{margin-left:auto;display:flex;gap:8px;padding-bottom:7px}
+.ghs{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5ddd0;color:#5d5245;border-radius:9px;height:28px;padding:0 11px;font-size:10px;font-weight:600}
+.sect{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#2b2118;margin:18px 0 3px;display:flex;align-items:center;gap:8px}
+.sect .cnt{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#3a1c14;background:#f2ede7;border:1px solid #ddd2c4;border-radius:99px;padding:2px 7px}
+.gr{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:9px}
+.cb{background:#fff;border:1px solid #e8e0d2;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(58,28,20,.05)}
+.cb .b{height:27px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid}
+.cb.urg .b{background:linear-gradient(180deg,#f6d8cc,#f2cec1);border-color:#e8c8bc}
+.cb.hk .b{background:linear-gradient(180deg,#f5efe6,#efe7d9);border-color:#ddd0bc}
+.cb .b i{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;font-style:normal;background:#fff;border:1px solid rgba(58,28,20,.2);border-radius:99px;padding:2px 7px;color:#3a1c14}
+.cb .inner{padding:12px 16px 14px}
+.cb h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.3;color:#2b2118}
+.cb .d{font-size:11px;color:#8a7d6e;margin-top:5px;line-height:1.55}
+/* pro colophon slot as dismissible PWA-style panel */
+.ann{margin-top:20px;background:#fdf1ec;border:1px solid #ecc9ba;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:14px}
+.ann b{font-family:'Playfair Display',serif;font-size:13.5px;color:#4a241a}
+.ann span{font-size:10px;color:#7a5a4c;display:block;margin-top:2px}
+.ann .x{margin-left:auto;color:#b08a7c;font-size:12px;cursor:pointer}
+.ann .cta{display:inline-flex;align-items:center;background:#2a1a13;color:#f3e7da;border-radius:99px;height:28px;padding:0 13px;font-size:9.5px;font-weight:600;flex:0 0 auto;cursor:pointer}
+/* right rail */
+.tdpop{position:absolute;right:26px;bottom:24px;width:250px;background:#fff;border:1px solid #ddd2c2;border-radius:14px;padding:12px 13px 13px;box-shadow:0 14px 38px rgba(58,28,20,.22);z-index:20}
+.tph{display:flex;align-items:baseline;gap:8px;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#2b2118;padding:0 2px 4px}
+.tph i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:#a5988c}
+.tph .min{margin-left:auto;font-weight:400;color:#a5988c;cursor:pointer}
+.tkw{margin-top:9px;text-align:center;font-size:10.5px;font-weight:700;color:#2a1a13;border-top:1px solid #f0ebe3;padding-top:9px;cursor:pointer}
+.tk{display:flex;align-items:center;gap:9px;background:#fdfbf7;border:1px solid #eee7db;border-radius:10px;padding:9px 11px;margin-top:7px;font-size:11px;color:#3a2c22}
+.tk .cc{width:14px;height:14px;border-radius:50%;border:1.5px solid #b9c9b4;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:7px;color:#5a6e58}
+.tk.done .cc{background:linear-gradient(180deg,#d7ddd5,#d5dbd3)}
+.tk.done{opacity:.6;text-decoration:line-through}
+</style></head><body><div class="lbl">THE MERGED SKETCH, v6 <em>&mdash; header back to PLAIN TEXT on the page with the new subtitle beneath (&ldquo;Urgent tasks, housekeeping, and notes&hellip;&rdquo;); the session CTA right of it with the underlined &ldquo;&#8634; Last week in review&rdquo; link stacked below (REVIEW section gone from the sidebar); the whole content area wrapped in ONE thin warm-grey bordered panel, PWA-style; Today still in its corner.</em></div><div class="app">
+<div class="nav">
+<div class="brand">&#9992; ScriptAlly</div>
+<div class="nk">WORKSPACE</div>
+<div class="ni"><span class="ic">&#8962;</span>Dashboard</div>
+<div class="ni"><span class="ic">&#9993;</span>Queries<span class="n">18</span></div>
+<div class="ni"><span class="ic">&#9823;</span>Agents</div>
+<div class="ni on"><span class="ic">&#10003;</span>To-do<span class="n">44</span></div>
+<div class="ni"><span class="ic">&#9639;</span>Packages</div>
+<div class="nk">FILTER</div>
+<div class="ni on" style="height:28px;font-size:10.5px">Show all<span class="n">44</span></div>
+<div class="ni" style="height:28px;font-size:10.5px">Agent waiting<span class="n">3</span></div>
+<div class="ni" style="height:28px;font-size:10.5px">Materials<span class="n">16</span></div>
+<div style="margin-top:auto"></div>
+<div class="ni"><span class="ic">&#9881;</span>Task settings</div>
+<div class="ni"><span class="ic">?</span>Help centre</div>
+</div>
+<div class="mainwrap">
+<div class="bcbar"><span class="bc">QUERYING /<b>To-do</b></span><span class="bcsrch">Search your list&hellip;</span><span class="who">ML &nbsp;Michael Li</span></div>
+<div class="body2">
+<div class="main">
+<div class="heroRow">
+<div><h1>What&rsquo;s on your desk?</h1>
+<div class="sub2">Urgent tasks, housekeeping, and notes. Here&rsquo;s everything on your to-do list.</div></div>
+<div class="heroRight"><span class="heroCta">&#9654; Begin focused session</span>
+<span class="revlink">&#8634; Last week in review</span></div>
+</div>
+<div class="panel">
+<div class="tabs" style="margin-top:0"><span class="items">Showing 44 of 44 items</span><span class="tr"><span class="vtg"><span class="vc on">&#9638;</span><span class="vc">&#9776;</span></span></span></div>
+<div class="sect">Urgent<span class="cnt">4</span></div>
+<div class="gr">
+<div class="cb urg"><div class="b"><i>&#9733; OFFER</i></div><div class="inner"><h4>Tom Ellery has made an offer</h4><div class="d">Two fulls still out. Nudge them with the news.</div></div></div>
+<div class="cb urg"><div class="b"><i>AGENT WAITING</i></div><div class="inner"><h4>Send your full to Jonathan Marsh</h4><div class="d">Requested 12 July. Manuscript ready.</div></div></div>
+<div class="cb urg"><div class="b"><i>AGENT WAITING</i></div><div class="inner"><h4>Send your partial to Daniel O&rsquo;Rourke</h4><div class="d">Requested 15 July.</div></div></div>
+</div>
+<div class="ann"><span><b>Hand over the housekeeping</b><span>The assistant could handle 31 of your 40 housekeeping tasks in the background whilst you write.</span></span><span class="cta">Meet the assistant</span><span class="x">&#10005;</span></div>
+</div>
+</div></div></div>
+<div class="tdpop">
+<div class="tph"><span>Today</span><i>2 OF 5</i><b class="min">&#8722;</b></div>
+<div class="tk done"><span class="cc">&#10003;</span>Reply to Curtis Vane</div>
+<div class="tk"><span class="cc"></span>Resubmit your R&amp;R to Sophie</div>
+<div class="tk"><span class="cc"></span>Send your full to Jonathan Marsh</div>
+<div class="tkw">Work the list &rarr;</div>
+</div>
+</div></body></html>

@@ -243,6 +243,66 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
   return [...statusRows, ...nudgeRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
 }
 
+/**
+ * TimelineRows — the pipeline row list, extracted (evening run B2) so the To-do sheet can render
+ * the HUB'S OWN rows rather than imitating them. A move-without-change: the markup below is the
+ * rows.map block verbatim; QueryTimeline consumes it with its behaviour (incl. the ⋯ correction
+ * trigger) byte-identical, and the sheet renders it condensed with no menu wiring.
+ */
+export const TimelineRows: React.FC<{
+  rows: RowSpec[];
+  onMenuOpen?: (entry: TimelineEntryRef, style: React.CSSProperties) => void;
+}> = ({ rows, onMenuOpen }) => (
+  <>
+    {rows.map((row, i) => {
+      const isLast = i === rows.length - 1;
+      return (
+        <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : TL_EVENT_GAP }}>
+          <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+            <StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"} />
+            {/* P5 — the connector hairline: drawn by the CONTAINER behind the locked StatusDot (never
+                by editing it), on event nodes only, joining consecutive events and stopping at the
+                last (so it draws only with 2+ events; a single-event query gets no orphan line).
+                Colour = the theme --hairline token; length derived from TL_EVENT_GAP. */}
+            {!isLast && (
+              <div style={{ position: "absolute", top: 29, bottom: -TL_EVENT_GAP, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "var(--hairline, #e8dcd0)" }} />
+            )}
+          </div>
+          <div className="tl-rowbody" style={{ paddingTop: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
+                {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
+                {row.activityId && onMenuOpen && (
+                  <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                    <button
+                      type="button"
+                      className="tl-more"
+                      aria-label="Correct this entry"
+                      title="Correct this entry"
+                      onClick={(e) => {
+                        const r = e.currentTarget.getBoundingClientRect();
+                        onMenuOpen(
+                          { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },
+                          { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },
+                        );
+                      }}
+                    >⋯</button>
+                  </span>
+                )}
+              </span>
+            </div>
+            {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
+            {row.pills && row.pills.length > 0 && (
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </>
+);
+
 export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
@@ -262,53 +322,12 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
 
   return (
     <div>
-      {/* timeline history — oldest at the top, newest at the bottom */}
-      {rows.map((row, i) => {
-        const isLast = i === rows.length - 1;
-        return (
-          <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : TL_EVENT_GAP }}>
-            <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-              <StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"} />
-              {/* P5 — the connector hairline: drawn by the CONTAINER behind the locked StatusDot (never
-                  by editing it), on event nodes only, joining consecutive events and stopping at the
-                  last (so it draws only with 2+ events; a single-event query gets no orphan line).
-                  Colour = the theme --hairline token; length derived from TL_EVENT_GAP. */}
-              {!isLast && (
-                <div style={{ position: "absolute", top: 29, bottom: -TL_EVENT_GAP, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "var(--hairline, #e8dcd0)" }} />
-              )}
-            </div>
-            <div className="tl-rowbody" style={{ paddingTop: 4 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
-                  {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
-                  {row.activityId && (onEditEntry || onDeleteEntry) && (
-                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
-                      <button
-                        type="button"
-                        className="tl-more"
-                        aria-label="Correct this entry"
-                        title="Correct this entry"
-                        onClick={(e) => {
-                          const r = e.currentTarget.getBoundingClientRect();
-                          setMenu({
-                            entry: { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },
-                            style: { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },
-                          });
-                        }}
-                      >⋯</button>
-                    </span>
-                  )}
-                </span>
-              </div>
-              {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
-              {row.pills && row.pills.length > 0 && (
-                <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+      {/* timeline history — oldest at the top, newest at the bottom (rows extracted to
+          TimelineRows — the sheet shares them; the ⋯ wiring here is unchanged) */}
+      <TimelineRows
+        rows={rows}
+        onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
+      />
 
       {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
           The escalation is the pane's ONLY needs-you signal (the fork below stays neutral). ── */}

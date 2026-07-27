@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<!-- NORMATIVE (Polish II·B): OPTION B — THE COMPANION RAIL — for the whole layout: masthead
+     (24px vertical padding · 25px title · 62px tape-fold post-its · 58×44 scrap · 300px search),
+     the 24-grid (drawer 264 · 24 · main · 24 · rail 264; lane-head↔cards 12; card gutters 12;
+     lane↔lane 24; page edges 24), the controls-only drawer (YOUR DESK head + fold · Walk
+     flagship · one bordered FILTER group with letterpress checkboxes · demoted ＋ New note ·
+     ⚙/? foot) and the right-hand Today rail (sage panel; below 1500px it becomes a masthead
+     chip opening the same panel as a popover). Live .t-f12 tokens over these mockup hexes.
+     ▼ OPTIONS A (desk pad) AND C (drawer-becomes-Today) ARE EXPLORATION — not built. -->
+
+<html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where does Today's list live? Three homes, full width</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#d8cdbc;padding:36px 0 90px}
+.optionhead{max-width:1500px;margin:52px auto 12px;padding:0 30px}
+.optionhead:first-child{margin-top:0}
+.optionhead .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.optionhead h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin:3px 0 2px}
+.optionhead p{font-size:13px;color:#4d4238;max-width:840px;line-height:1.5}
+.frame{max-width:1500px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(58,28,20,.2);padding-bottom:28px}
+.appnav{background:var(--white);border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:14px;padding:10px 24px}
+.appnav .lg{font-family:'Playfair Display',serif;font-weight:700;font-size:16px}
+.appnav .crumb{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;color:var(--muted)}
+.mast{background:var(--paper);border-bottom:1px solid var(--hair);padding:24px 0}
+.mast-in{max-width:1440px;margin:0 auto;padding:0 30px;display:flex;align-items:center;gap:28px}
+.mast .d{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--muted);margin-bottom:5px}
+.mast h1{font-family:'Playfair Display',serif;font-size:25px;font-weight:600}
+.postit{width:62px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-shadow:0 2px 5px rgba(58,28,20,.15);position:relative}
+.postit::before{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:22px;height:9px;background:rgba(255,255,255,.55)}
+.postit b{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;line-height:1}
+.postit span{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.09em;margin-top:2px}
+.scrap{width:58px;height:44px;background:var(--paper);box-shadow:0 2px 4px rgba(58,28,20,.13);transform:rotate(2deg);display:flex;flex-direction:column;align-items:center;justify-content:center;clip-path:polygon(0 5%,8% 0,94% 3%,100% 10%,98% 87%,85% 94%,60% 90%,35% 96%,10% 92%,0 84%);cursor:pointer;margin-top:8px}
+.scrap b{font-family:'Playfair Display',serif;font-style:italic;font-size:10px;font-weight:600;color:#5d4d40;line-height:1.15}
+.scrap u{text-decoration:none;border-bottom:1px solid var(--cof-bd);font-family:'Playfair Display',serif;font-style:italic;font-size:8px;color:var(--cof-i)}
+.msrch{display:flex;align-items:center;gap:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:10px 16px;color:#8a7a6d;font-size:13px;flex:0 1 300px}
+.msrch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.vtg{display:inline-flex;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:3px;gap:2px}
+.vtg span{border-radius:99px;padding:7px 15px;font-size:11.5px;font-weight:600;color:#8a7a6d;cursor:pointer}
+.vtg span.on{background:var(--ink);color:var(--paper)}
+.ws{display:flex;gap:24px;max-width:1440px;margin:24px auto 0;padding:0 30px;align-items:flex-start}
+.dw{width:264px;flex:0 0 auto;background:var(--paper);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 16px rgba(58,28,20,.1);display:flex;flex-direction:column;position:sticky;top:24px}
+.dw-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--hair2)}
+.dw-head .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;color:#8a7a6d}
+.dw-head .fold{margin-left:auto;width:26px;height:26px;border-radius:50%;border:1px solid var(--hair);background:var(--white);color:#8a7a6d;font-size:10px;cursor:pointer}
+.dw-mid{padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.walk{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--ink);border-radius:12px;padding:10px 14px 10px 10px;cursor:pointer}
+.walk .disc{width:28px;height:28px;border-radius:50%;background:linear-gradient(180deg,var(--pink-t),var(--pink-b));border:1px solid var(--pink-b);display:flex;align-items:center;justify-content:center;font-size:10px}
+.walk b{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;display:block;line-height:1.1}
+.walk span{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;color:#8a7a6d}
+.sh{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#a5988c;margin-bottom:-8px;padding-left:2px}
+.fgrp{border:1px solid var(--hair);border-radius:12px;background:var(--white);overflow:hidden}
+.fgl{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;padding:9px 12px;border-bottom:1px solid var(--hair2)}
+.fgl .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#8a7a6d}
+.frow{display:flex;align-items:center;gap:9px;font-size:12px;padding:7px 12px 7px 30px;color:#5d4d40;cursor:pointer;border-bottom:1px solid var(--hair2)}
+.frow:last-child{border-bottom:none}
+.frow .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#a5988c}
+.frow.zero{color:#b3a396}
+.cb{width:15px;height:15px;border:1.5px solid var(--ink);border-radius:4px;background:var(--white);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:transparent;flex:0 0 auto}
+.cb.on{background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-color:var(--sage-i);color:var(--sage-i)}
+.newnote{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--ink);background:var(--white);color:var(--ink);border-radius:99px;padding:9px 0;font-size:12.5px;font-weight:600;cursor:pointer}
+.dw-foot{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--hair2)}
+.dw-foot .fi{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:#5d4d40;cursor:pointer;padding:5px 8px;border-radius:8px}
+.dw-foot .sp{flex:1}
+.today2{background:var(--white);border:1px solid var(--sage-bd);border-radius:12px;overflow:hidden}
+.today2 .th{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-bottom:1px solid var(--sage-bd);padding:9px 12px}
+.today2 .th b{font-family:'Playfair Display',serif;font-size:13.5px;flex:1}
+.today2 .th .c{font-family:'JetBrains Mono',monospace;font-size:7.5px;background:var(--white);border:1px solid var(--sage-bd);border-radius:99px;padding:1px 7px;color:var(--sage-i)}
+.titem{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--hair2);font-size:11.5px}
+.titem .dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--pink-b);background:var(--pink-t);flex:0 0 auto}
+.titem.done{color:#8d7f73;text-decoration:line-through}
+.titem.done .dot{background:var(--sage-1);border-color:var(--sage-bd)}
+.today2 .tfoot{display:flex;gap:6px;padding:8px 10px}
+.today2 .tfoot .a{flex:1;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:6px 0;font-size:10.5px;font-weight:600;text-align:center;cursor:pointer}
+.today2 .tfoot .b{flex:1;border:none;background:var(--ink);color:var(--paper);border-radius:99px;padding:6px 0;font-size:10.5px;font-weight:600;text-align:center;cursor:pointer}
+.main{flex:1;min-width:0}
+.laneh{background:linear-gradient(180deg,var(--pink-band),var(--pink-band2));border:1px solid var(--pink-b);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.laneh .t{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+.laneh .fs{margin-left:auto;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:4px 12px;font-size:11px;font-weight:600}
+.ghostrow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.ghostrow .g{background:var(--white);border:1px solid var(--hair);border-radius:10px;height:150px;opacity:.55}
+/* A: the today pad on the desk */
+.pad{width:120px;background:var(--white);border:1px solid var(--sage-bd);border-radius:10px;box-shadow:0 3px 7px rgba(58,28,20,.15);transform:rotate(-1.5deg);cursor:pointer;overflow:hidden;margin-top:2px}
+.pad .ph{background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border-bottom:1px solid var(--sage-bd);padding:6px 10px;font-family:'Playfair Display',serif;font-size:11.5px;font-weight:600}
+.pad .pl{padding:7px 10px 8px;display:flex;flex-direction:column;gap:4px}
+.pad .pl i{display:block;height:5px;border-radius:3px;background:#efe8dd;font-style:normal}
+.pad .pl i.done{background:linear-gradient(180deg,var(--sage-1),var(--sage-2))}
+.pad .pm{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em;color:var(--sage-i);padding:0 10px 7px}
+/* B: right rail */
+.rail-r{width:264px;flex:0 0 auto;position:sticky;top:24px;display:flex;flex-direction:column;gap:14px}
+</style></style></head><body>
+
+<div class="optionhead"><div class="n">OPTION A · MY RECOMMENDATION</div><h2>The desk pad</h2><p>Today's list becomes a desk object — a small lined notepad beside the post-its, tilted like the scrap, showing its lines and "2 TO GO". Click opens the familiar panel as a popover beneath it. The drawer becomes pure controls: Walk me through, filters, New note — one species, coherent at last, and short enough to fit any screen without scrolling.</p></div>
+<div class="frame">
+<div class="appnav"><span>☰</span><span class="lg">✈ ScriptAlly</span><span class="crumb">QUERYING / <b style="font-family:'Playfair Display',serif;font-size:13px;color:var(--ink)">To-do</b></span><div style="flex:1"></div><span class="avac">ML</span></div>
+<div class="mast"><div class="mast-in">
+<div><div class="d">SAT 18 JUL · WEEK 137</div><h1>What's on your desk?</h1></div>
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div class="postit" style="background:#f6cfc9"><b>4</b><span>URGENT</span></div>
+<div class="postit" style="background:var(--cof-2)"><b>40</b><span>HOUSEKPG</span></div>
+<div class="postit" style="background:var(--yel)"><b>0</b><span>NOTES</span></div>
+<div class="scrap"><b>Last week</b><u>in review ▸</u></div><div class="pad"><div class="ph">Today's list</div><div class="pl"><i></i><i></i><i class="done"></i></div><div class="pm">2 TO GO · 1 DONE ✓</div></div></div>
+<div style="flex:1"></div>
+<div class="msrch">⌕ Search your desk…<span class="k">⌘K</span></div>
+<div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div>
+</div></div>
+<div class="ws">
+<aside class="dw"><div class="dw-head"><span class="t">YOUR DESK</span><button class="fold">«</button></div>
+<div class="dw-mid"><button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button><div class="sh">FILTER</div>
+<div class="fgrp">
+<div class="fgl"><span class="dotf p"></span>Urgent<span class="n">4</span></div>
+<div class="frow"><span class="cb on">✓</span>Offers<span class="n">1</span></div>
+<div class="frow"><span class="cb on">✓</span>Over to you<span class="n">3</span></div>
+<div class="fgl"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div>
+<div class="frow"><span class="cb on">✓</span>Missing materials<span class="n">16</span></div>
+<div class="frow"><span class="cb on">✓</span>Missing wish lists<span class="n">15</span></div>
+<div class="frow"><span class="cb on">✓</span>Stale queries<span class="n">9</span></div>
+<div class="frow zero"><span class="cb"></span>Snoozed<span class="n">0</span></div>
+<div class="fgl"><span class="dotf y"></span>Notes<span class="n">0</span></div>
+<div class="frow"><span class="cb"></span>✓ On today's list only<span class="n">3</span></div>
+</div><button class="newnote">＋ New note</button></div><div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></aside>
+<div class="main"><div class="laneh"><span class="t">Urgent</span><span class="mono" style="font-size:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:1px 8px">4</span><span class="fs">▶ Begin focused session</span></div><div class="ghostrow"><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div></div><div class="ghostrow"><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div></div></div>
+</div>
+</div>
+
+<div class="optionhead"><div class="n">OPTION B</div><h2>The companion rail</h2><p>Symmetry: controls left, work centre, companion right — Today's list as a sticky right-hand rail where a day-planner naturally sits. Wide monitors earn it; below ~1500px the rail collapses into a masthead chip. The most furniture, the most glanceable.</p></div>
+<div class="frame">
+<div class="appnav"><span>☰</span><span class="lg">✈ ScriptAlly</span><span class="crumb">QUERYING / <b style="font-family:'Playfair Display',serif;font-size:13px;color:var(--ink)">To-do</b></span><div style="flex:1"></div><span class="avac">ML</span></div>
+<div class="mast"><div class="mast-in">
+<div><div class="d">SAT 18 JUL · WEEK 137</div><h1>What's on your desk?</h1></div>
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div class="postit" style="background:#f6cfc9"><b>4</b><span>URGENT</span></div>
+<div class="postit" style="background:var(--cof-2)"><b>40</b><span>HOUSEKPG</span></div>
+<div class="postit" style="background:var(--yel)"><b>0</b><span>NOTES</span></div>
+<div class="scrap"><b>Last week</b><u>in review ▸</u></div></div>
+<div style="flex:1"></div>
+<div class="msrch">⌕ Search your desk…<span class="k">⌘K</span></div>
+<div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div>
+</div></div>
+<div class="ws">
+<aside class="dw"><div class="dw-head"><span class="t">YOUR DESK</span><button class="fold">«</button></div>
+<div class="dw-mid"><button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button><div class="sh">FILTER</div>
+<div class="fgrp">
+<div class="fgl"><span class="dotf p"></span>Urgent<span class="n">4</span></div>
+<div class="frow"><span class="cb on">✓</span>Offers<span class="n">1</span></div>
+<div class="frow"><span class="cb on">✓</span>Over to you<span class="n">3</span></div>
+<div class="fgl"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div>
+<div class="frow"><span class="cb on">✓</span>Missing materials<span class="n">16</span></div>
+<div class="frow"><span class="cb on">✓</span>Missing wish lists<span class="n">15</span></div>
+<div class="frow"><span class="cb on">✓</span>Stale queries<span class="n">9</span></div>
+<div class="frow zero"><span class="cb"></span>Snoozed<span class="n">0</span></div>
+<div class="fgl"><span class="dotf y"></span>Notes<span class="n">0</span></div>
+<div class="frow"><span class="cb"></span>✓ On today's list only<span class="n">3</span></div>
+</div><button class="newnote">＋ New note</button></div><div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></aside>
+<div class="main"><div class="laneh"><span class="t">Urgent</span><span class="mono" style="font-size:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:1px 8px">4</span><span class="fs">▶ Begin focused session</span></div><div class="ghostrow"><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div></div><div class="ghostrow"><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div></div></div>
+<aside class="rail-r"><div class="today2">
+<div class="th"><b>Today's list</b><span class="c">3 COMMITTED · 1 DONE</span></div>
+<div class="titem"><span class="dot"></span>Tom Ellery has made an offer</div>
+<div class="titem"><span class="dot"></span>Send your full to Jonathan Marsh</div>
+<div class="titem done"><span class="dot"></span>Partial sent to Daniel O'Rourke</div>
+<div class="tfoot"><button class="a">＋ Add more</button><button class="b">Work the list</button></div>
+</div>
+<div class="fgrp" style="border-color:var(--hair)"><div class="fgl" style="border:none;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;color:#a5988c">DONE TODAY · 1</div></div>
+</aside>
+</div>
+</div>
+
+<div class="optionhead"><div class="n">OPTION C</div><h2>The drawer becomes "Today"</h2><p>Invert the identity: the sidebar isn't a filter panel with a list stuck in — it IS your day. Titled "Today", list first and large, Walk me through beneath it, filters demoted to a collapsed "Refine the board ▸" section. One coherent story per panel: your day on the left, the whole desk on the right.</p></div>
+<div class="frame">
+<div class="appnav"><span>☰</span><span class="lg">✈ ScriptAlly</span><span class="crumb">QUERYING / <b style="font-family:'Playfair Display',serif;font-size:13px;color:var(--ink)">To-do</b></span><div style="flex:1"></div><span class="avac">ML</span></div>
+<div class="mast"><div class="mast-in">
+<div><div class="d">SAT 18 JUL · WEEK 137</div><h1>What's on your desk?</h1></div>
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div class="postit" style="background:#f6cfc9"><b>4</b><span>URGENT</span></div>
+<div class="postit" style="background:var(--cof-2)"><b>40</b><span>HOUSEKPG</span></div>
+<div class="postit" style="background:var(--yel)"><b>0</b><span>NOTES</span></div>
+<div class="scrap"><b>Last week</b><u>in review ▸</u></div></div>
+<div style="flex:1"></div>
+<div class="msrch">⌕ Search your desk…<span class="k">⌘K</span></div>
+<div class="vtg"><span class="on">▦ Cards</span><span>☰ Ledger</span></div>
+</div></div>
+<div class="ws">
+<aside class="dw"><div class="dw-head"><span class="t" style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;letter-spacing:0;color:var(--ink);text-transform:none">Today</span><button class="fold">«</button></div>
+<div class="dw-mid">
+<div class="today2">
+<div class="th"><b>Today's list</b><span class="c">3 COMMITTED · 1 DONE</span></div>
+<div class="titem"><span class="dot"></span>Tom Ellery has made an offer</div>
+<div class="titem"><span class="dot"></span>Send your full to Jonathan Marsh</div>
+<div class="titem done"><span class="dot"></span>Partial sent to Daniel O'Rourke</div>
+<div class="tfoot"><button class="a">＋ Add more</button><button class="b">Work the list</button></div>
+</div>
+<button class="walk"><span class="disc">▶</span><span><b>Walk me through</b><span>GUIDED · 4 URGENT ITEMS</span></span></button>
+<div class="sh">REFINE THE BOARD ▸</div>
+<div class="fgrp" style="opacity:.75"><div class="fgl"><span class="dotf p"></span>Urgent<span class="n">4</span></div><div class="fgl" style="border:none"><span class="dotf c"></span>Housekeeping<span class="n">40</span></div></div>
+<button class="newnote">＋ New note</button>
+</div><div class="dw-foot"><span class="fi">⚙ Task settings</span><span class="sp"></span><span class="fi">? Help</span></div></aside>
+<div class="main"><div class="laneh"><span class="t">Urgent</span><span class="mono" style="font-size:9px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:1px 8px">4</span><span class="fs">▶ Begin focused session</span></div><div class="ghostrow"><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div></div><div class="ghostrow"><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div><div class="g"></div></div></div>
+</div>
+</div>
+
+</body></html>

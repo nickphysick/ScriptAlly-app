@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — FINAL retoken candidate</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;450;500;600;650&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#ffffff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --sub:#5c554b; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-btn:#f6cfc9; --postit-pink:#f9d9d2;
+  /* housekeeping sage — DASHBOARD DIARY VALUES (#dce0d9 → #d0d6cc), not StatusDot sage */
+  --hk-sage:#dce0d9; --hk-sage-2:#d0d6cc; --hk-spine:#b9c3b3; --hk-ink:#54614f; --postit-sage:#dce0d9;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420; --postit-note:#f8ecb0;
+  /* Today — darker coffee of the page ground */
+  --coffee:#e7dbc9; --coffee-2:#dccdb5; --coffee-edge:#d3c2a6; --coffee-ink:#6b5a41; --coffee-deep:#8a755a;
+  /* StatusDot sage (LOCKED — status only) */
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58; --sage:#8a9e88; --pinkC:#f8e7dc;
+  --sh-card:0 1px 2px rgba(58,42,26,.06),0 6px 16px -6px rgba(58,42,26,.10);
+  --sh-card-h:0 2px 3px rgba(58,42,26,.07),0 12px 26px -8px rgba(58,42,26,.14);
+  --sh-postit:0 2px 3px rgba(58,42,26,.10),0 7px 14px -4px rgba(58,42,26,.18);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif; --hand:'Caveat',cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 120% at 78% -8%, rgba(255,250,242,.65) 0%, transparent 46%), var(--oat);
+  min-height:100vh;padding:18px 26px 44px}
+button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;text-align:left}
+.scaf{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:0 auto 12px;max-width:1560px}
+.scaf b{color:var(--burg)}
+.wrap{max-width:1560px;margin:0 auto;position:relative}
+
+/* header — post-its 88px */
+.bar{display:flex;align-items:center;gap:26px;background:var(--white);border:1.5px solid var(--ink);border-radius:14px;padding:20px 28px;margin-bottom:26px}
+.askwrap{display:flex;flex-direction:column;gap:4px}
+.date{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ask{font-family:var(--serif);font-size:25px;font-weight:600;line-height:1.08;white-space:nowrap}
+.postits{display:flex;gap:22px;margin-left:16px;align-items:center}
+.postit{position:relative;width:88px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:var(--sh-postit);flex:none;transition:.18s}
+.postit::before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-1.5deg);width:40px;height:14px;background:rgba(255,255,255,.55);border:1px solid rgba(58,42,26,.05)}
+.postit .v{font-family:var(--hand);font-size:40px;font-weight:600;line-height:1}
+.postit .k{font-family:var(--mono);font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.postit.ug{background:var(--postit-pink);transform:rotate(-2.4deg);color:#6e3325}
+.postit.hk{background:var(--postit-sage);transform:rotate(1.8deg);color:var(--hk-ink)}
+.postit.nt{background:var(--postit-note);transform:rotate(-1.2deg);color:#6b5a17}
+.postit:hover{transform:rotate(0) scale(1.05)}
+.sp{flex:1}
+.go{font-size:13px;font-weight:600;padding:12px 22px;border-radius:10px;background:var(--ink);color:var(--panel)}
+.go:hover{background:#332c25}
+.tools{display:flex;gap:8px;margin:0 0 20px}
+.tool{font-size:12px;padding:7px 13px;border-radius:9px;background:var(--white);border:1px solid var(--line);box-shadow:0 1px 2px rgba(58,42,26,.05);color:var(--ink-2)}
+
+/* reels */
+.reel{margin-bottom:26px}
+.reelh{display:flex;align-items:center;gap:11px;margin-bottom:12px;padding:0 2px}
+.lanedot{width:10px;height:10px;border-radius:50%;flex:none}
+.lanedot.ug{background:var(--pink-btn);outline:1px solid var(--pink-b)}
+.lanedot.hk{background:var(--hk-sage-2);outline:1px solid var(--hk-spine)}
+.lanedot.nt{background:var(--note-b);outline:1px solid #dcc98a}
+.reelh .lt{font-family:var(--serif);font-size:19px;font-weight:600}
+.reelh .ln{font-family:var(--mono);font-size:8.5px;font-weight:700;border-radius:99px;padding:2.5px 9px;background:var(--white);border:1px solid var(--line);color:var(--ink-2)}
+.reelh .rule{flex:1;height:1px;background:var(--line);margin:0 4px}
+.reelh .sw{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.reelh .sw:hover{color:var(--ink)}
+.reelh .chev{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--white);border:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.reelh .cadd{font-size:16px;color:var(--ink-2);padding:0 4px}
+.track{position:relative}
+.scroller{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:2px 2px 6px}
+.track.more::after{content:"";position:absolute;top:0;bottom:0;right:0;width:70px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--oat))}
+
+/* cards — option A type */
+.card{flex:none;width:330px;min-height:190px;background:var(--white);border:1px solid var(--line);border-radius:11px;padding:16px 18px 15px 20px;display:flex;flex-direction:column;box-shadow:var(--sh-card);transition:.16s;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.card.ug::before{background:var(--pink-btn)}
+.card.hk::before{background:var(--hk-spine)}
+.card.nt::before{background:var(--note-b)}
+.card:hover{border-color:var(--ink);box-shadow:var(--sh-card-h);transform:translateY(-1px)}
+.tag{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:3.5px 10px;border:1px solid var(--line);background:var(--white);color:var(--ink-2);margin-bottom:10px}
+.tag.warn{background:var(--burg);border-color:var(--burg);color:#fff}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:#fff}
+.mid{flex:1 1 auto;min-height:0;overflow:hidden}
+.tt{font-family:var(--serif);font-size:17px;font-weight:600;line-height:1.28;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tsub{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tsub .ms{font-family:var(--serif);font-style:italic;color:var(--ink-2)}
+.tfoot{flex:none;display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:7.5px}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}.dot.q::after{content:"→";font-weight:700}
+.dot.freq{border:2.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}.dot.freq::after{content:"←";font-weight:700}
+.dot.nudge{border:1.5px dashed var(--burg);color:var(--burg)}.dot.nudge::after{content:"↻";font-weight:700}
+.dot.star{border:1.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}.dot.star::after{content:"★";font-size:7px}
+.mav{width:21px;height:21px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:600;color:var(--ink-2);flex:none}
+.who{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{flex:none;width:100%;margin-top:10px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:9px;border:1px solid var(--line);background:var(--white);color:var(--ink-2);text-align:center}
+.pill:hover{border-color:var(--ink);color:var(--ink)}
+.pill.on{background:var(--coffee);border-color:var(--coffee-edge);color:var(--coffee-ink)}
+
+/* grouped hk — dashboard sage */
+.kick{flex:none;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--hk-ink);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.kick .kd{width:6px;height:6px;border-radius:50%;background:var(--hk-spine)}
+.gtt{font-family:var(--serif);font-size:16.5px;font-weight:600;line-height:1.3;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gtt .n{font-size:21px;font-weight:700}
+.gsub{font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.gprog{flex:none;padding-top:9px}
+.pbar{height:5px;border-radius:99px;background:var(--hairline);overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--hk-sage-2),var(--hk-spine));border-radius:99px}
+.pcap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;color:var(--muted);margin-top:5px;text-transform:uppercase}
+.gfoot{flex:none;display:flex;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+.sav{width:21px;height:21px;border-radius:50%;background:var(--paper);border:1.5px solid var(--white);outline:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7px;font-weight:600;color:var(--ink-2);margin-right:-6px}
+.more{font-family:var(--mono);font-size:8.5px;color:var(--muted);margin-left:12px}
+.fixbtn{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--ink);border-radius:99px;padding:7px 13px;color:var(--ink);background:var(--white)}
+.fixbtn:hover{background:var(--ink);color:var(--white)}
+.emptyreel{display:flex;align-items:center}
+.ghostcard{width:330px;min-height:74px;border:1.5px dashed var(--note-b);border-radius:11px;display:flex;align-items:center;justify-content:center;gap:10px}
+.ghostcard .e{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted)}
+.ghostcard .g{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--note-i)}
+
+/* Today — coffee */
+.fab{position:fixed;right:92px;bottom:26px;display:flex;align-items:center;gap:11px;background:var(--ink);color:var(--panel);border-radius:99px;padding:10px 18px 10px 12px;box-shadow:var(--sh-3);z-index:20}
+.fab .ring{width:32px;height:32px;border-radius:50%;background:conic-gradient(var(--coffee-2) 0 33%, rgba(255,255,255,.18) 33% 100%);display:flex;align-items:center;justify-content:center;flex:none}
+.fab .ring i{width:23px;height:23px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;font-style:normal}
+.fab .l{display:flex;flex-direction:column;line-height:1.16}
+.fab .l .a{font-family:var(--serif);font-size:14px;font-weight:600}
+.fab .l .b{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.72}
+.help{position:fixed;right:26px;bottom:26px;width:44px;height:44px;border-radius:50%;background:var(--white);border:1px solid var(--line);box-shadow:var(--sh-card);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);z-index:20}
+.pop{position:fixed;right:92px;bottom:84px;width:332px;background:var(--white);border:1px solid var(--coffee-edge);border-radius:16px;box-shadow:var(--sh-3);overflow:hidden;z-index:21}
+.poph{display:flex;align-items:center;gap:7px;padding:11px 14px;background:var(--coffee);border-bottom:1px solid var(--coffee-edge)}
+.poph .t{font-family:var(--serif);font-size:15px;font-weight:600;color:#4a3c29}
+.poph .cc{margin-left:auto;font-family:var(--mono);font-size:7.5px;font-weight:700;color:var(--coffee-ink);background:var(--white);border:1px solid var(--coffee-edge);border-radius:99px;padding:2px 7px}
+.poph .cd{font-family:var(--mono);font-size:7.5px;font-weight:700;color:#fff;background:var(--sageD);border-radius:99px;padding:2.5px 7px}
+.popb{padding:9px 11px;display:flex;flex-direction:column;gap:5px}
+.crow{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--hairline);border-radius:8px}
+.crow .cx{font-size:11.5px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow .cm{font-family:var(--mono);font-size:7px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.crow .x{color:var(--faint);padding:0 3px}
+.tempty{border:1px dashed var(--coffee-edge);border-radius:8px;padding:8px;text-align:center;font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--coffee-ink);opacity:.85}
+.pdiv{display:flex;align-items:center;gap:8px;padding:4px 3px;font-family:var(--mono);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.pdiv .l{flex:1;height:1px;background:var(--hairline)}
+.drow{display:flex;align-items:center;gap:7px;padding:4px 9px}
+.drow .tick{width:13px;height:13px;border-radius:3px;background:var(--sageD);color:#fff;display:flex;align-items:center;justify-content:center;font-size:8px;flex:none}
+.drow .dx{font-size:11px;color:var(--muted);text-decoration:line-through;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.popf{padding:9px 12px;border-top:1px solid var(--hairline);background:var(--paper);display:flex;gap:6px}
+.popf .b{flex:1;text-align:center;font-size:11px;font-weight:600;padding:8px;border-radius:8px}
+.popf .b.p{background:var(--ink);color:var(--panel)}
+.popf .b.a{background:var(--white);border:1px solid var(--coffee-edge);color:var(--coffee-ink)}
+.foot{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="scaf"><b>FINAL retoken candidate</b> · option-A type · housekeeping = dashboard sage (#dce0d9 → #d0d6cc family) · today = coffee (darker page ground) · post-its 88px</div>
+<div class="wrap">
+
+  <div class="bar">
+    <span class="askwrap"><span class="date">THU 16 JUL</span><span class="ask">What's on your desk?</span></span>
+    <span class="postits">
+      <span class="postit ug"><span class="v">5</span><span class="k">urgent</span></span>
+      <span class="postit hk"><span class="v">40</span><span class="k">housekpg</span></span>
+      <span class="postit nt"><span class="v">0</span><span class="k">notes</span></span>
+    </span>
+    <span class="sp"></span>
+    <button class="go">Work through priorities now</button>
+  </div>
+
+  <div class="tools"><button class="tool">Filter</button><button class="tool">Sort</button></div>
+
+  <div class="reel">
+    <div class="reelh"><span class="lanedot ug"></span><span class="lt">Urgent</span><span class="ln">5</span><span class="rule"></span><button class="sw">SWEEP →</button><button class="chev">›</button></div>
+    <div class="track more"><div class="scroller">
+      <div class="card ug">
+        <span class="tag offer">★ OFFER</span>
+        <div class="mid"><div class="tt">Tom Ellery has made an offer</div>
+        <div class="tsub">For <span class="ms">Murphy's Day Out</span> — respond by 25 July; others are still holding your work.</div></div>
+        <div class="tfoot"><span class="dot star"></span><span class="mav">TE</span><span class="who">Curtis Vane</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+      <div class="card ug">
+        <span class="tag warn">3 DAYS LEFT</span>
+        <div class="mid"><div class="tt">Send your full to Daniel O'Rourke</div>
+        <div class="tsub">He asked for the full of <span class="ms">Murphy's Day Out</span> on 27 June.</div></div>
+        <div class="tfoot"><span class="dot q"></span><span class="mav">DO</span><span class="who">Inkwell & Stone</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+      <div class="card ug">
+        <span class="tag">OVER TO YOU</span>
+        <div class="mid"><div class="tt">Send your full to Jonathan Marsh</div>
+        <div class="tsub">He asked for the full of <span class="ms">Murphy's Day Out</span> on 8 July.</div></div>
+        <div class="tfoot"><span class="dot q"></span><span class="mav">JM</span><span class="who">The Marsh Agency</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+      <div class="card ug">
+        <span class="tag">OVER TO YOU</span>
+        <div class="mid"><div class="tt">Send your partial to Daniel O'Rourke</div>
+        <div class="tsub">First 50 pages of <span class="ms">Murphy's Day Out</span>.</div></div>
+        <div class="tfoot"><span class="dot q"></span><span class="mav">DO</span><span class="who">Inkwell & Stone</span></div>
+        <button class="pill on">✓ ON TODAY</button>
+      </div>
+      <div class="card ug">
+        <span class="tag">OVER TO YOU</span>
+        <div class="mid"><div class="tt">Resubmit your R&R to Sophie Dunn</div>
+        <div class="tsub"><span class="ms">Murphy's Day Out</span> · revision round 1.</div></div>
+        <div class="tfoot"><span class="dot freq"></span><span class="mav">SD</span><span class="who">Dunn Literary</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="reel">
+    <div class="reelh"><span class="lanedot hk"></span><span class="lt">Housekeeping</span><span class="ln">40</span><span class="rule"></span><button class="sw">SWEEP →</button><button class="chev">›</button></div>
+    <div class="track more"><div class="scroller">
+      <div class="card hk">
+        <div class="kick"><span class="kd"></span>Missing materials</div>
+        <div class="mid"><div class="gtt"><span class="n">16</span> agents missing submission material details</div>
+        <div class="gsub">Add details of what you sent so you never lose track.</div></div>
+        <div class="gprog"><div class="pbar"><i style="width:71%"></i></div>
+        <div class="pcap"><span>40 of 56 agents complete</span><span>71%</span></div></div>
+        <div class="gfoot"><span class="sav">AK</span><span class="sav">WT</span><span class="sav">DO</span><span class="sav">PR</span><span class="more">+12</span><button class="fixbtn">Fix together →</button></div>
+      </div>
+      <div class="card hk">
+        <div class="kick"><span class="kd"></span>Missing wish list</div>
+        <div class="mid"><div class="gtt"><span class="n">15</span> agents missing a wish list</div>
+        <div class="gsub">Their wish list is how we tell you who's worth querying.</div></div>
+        <div class="gprog"><div class="pbar"><i style="width:73%"></i></div>
+        <div class="pcap"><span>41 of 56 agents complete</span><span>73%</span></div></div>
+        <div class="gfoot"><span class="sav">AK</span><span class="sav">WT</span><span class="sav">DO</span><span class="more">+13</span><button class="fixbtn">Fix together →</button></div>
+      </div>
+      <div class="card hk">
+        <span class="tag">STALE QUERY</span>
+        <div class="mid"><div class="tt">Jonathan Marsh silent past his window</div>
+        <div class="tsub">No reply — closing keeps your response rate honest.</div></div>
+        <div class="tfoot"><span class="dot nudge"></span><span class="mav">JM</span><span class="who">The Marsh Agency</span></div>
+        <button class="pill on">✓ ON TODAY</button>
+      </div>
+      <div class="card hk">
+        <span class="tag">STALE QUERY</span>
+        <div class="mid"><div class="tt">Marcus Reed silent for 765 days</div>
+        <div class="tsub">No reply — consider closing.</div></div>
+        <div class="tfoot"><span class="dot nudge"></span><span class="mav">MR</span><span class="who">Bloomsbury Quill</span></div>
+        <button class="pill">＋ Today's list</button>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="reel">
+    <div class="reelh"><span class="lanedot nt"></span><span class="lt">Notes to self</span><span class="ln">0</span><span class="rule"></span><button class="cadd">＋</button></div>
+    <div class="emptyreel"><div class="ghostcard"><span class="e">Nothing jotted yet.</span><span class="g">＋ ADD A NOTE</span></div></div>
+  </div>
+
+  <div class="foot">Option-A type · dashboard-sage housekeeping · coffee Today (a darker patch of the desk itself) ↘</div>
+</div>
+
+<div class="pop">
+  <div class="poph"><span class="t">Today's list</span><span class="cc">2 COMMITTED</span><span class="cd">1 DONE</span></div>
+  <div class="popb">
+    <div class="crow"><span class="dot q"></span><div style="flex:1;min-width:0"><div class="cx">Send your partial to Daniel O'Rourke</div><div class="cm">Inkwell & Stone</div></div><button class="x">✕</button></div>
+    <div class="crow"><span class="dot nudge"></span><div style="flex:1;min-width:0"><div class="cx">Jonathan Marsh — close the stale query</div><div class="cm">The Marsh Agency</div></div><button class="x">✕</button></div>
+    <div class="tempty">COMMIT UP TO 5</div>
+    <div class="pdiv"><span>Done today</span><span class="l"></span></div>
+    <div class="drow"><span class="tick">✓</span><span class="dx">Nudge sent — Fenella Str</span></div>
+  </div>
+  <div class="popf"><button class="b a">Help me pick</button><button class="b p">Work the list</button></div>
+</div>
+<div class="fab"><span class="ring"><i>1/3</i></span><span class="l"><span class="a">Today's list</span><span class="b">2 committed · 1 done</span></span></div>
+<div class="help">?</div>
+
+</body>
+</html>
