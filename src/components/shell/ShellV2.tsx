@@ -23,8 +23,8 @@ import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { useShellNavCounts } from "./ShellSidebar";
 import {
-  SHELL_RAIL, SHELL_SECTIONS, SHELL_SETUP, SHELL_SETUP_PATHS, shellCrumbForPath,
-  shellPageForPath, shellSectionKeyForPath,
+  SHELL_RAIL, SHELL_SECTIONS, SHELL_SETUP, SHELL_SETUP_PATHS, ShellV2Section, railClickPlan,
+  shellCrumbForPath, shellPageForPath, shellSectionKeyForPath,
 } from "./shellV2Nav";
 import "./shellV2.css";
 
@@ -126,10 +126,13 @@ export const ShellFlyout: React.FC<{
 export const ShellRail: React.FC<{
   /** Navigate to a path, clearing the global search (AppShell's goPath). */
   onNavigatePath: (path: string) => void;
-  /** Panel collapse (fixes pack): while collapsed, the rail carries the expand toggle + flyouts. */
+  /** Panel collapse (fixes pack): while collapsed, the rail carries the flyouts. */
   collapsed?: boolean;
   onExpand?: () => void;
-}> = ({ onNavigatePath, collapsed = false, onExpand }) => {
+  /** The rail selects a SECTION (rail-section-select pack): expand the panel and open this
+   *  accordion section (null = open none — the on-Dashboard expand). Never navigates. */
+  onBrowse?: (section: ShellV2Section["key"] | null) => void;
+}> = ({ onNavigatePath, collapsed = false, onExpand, onBrowse }) => {
   const { pathname } = useLocation();
   const { currentUser } = useScriptAllyDb();
   const counts = useShellNavCounts();
@@ -232,7 +235,12 @@ export const ShellRail: React.FC<{
               aria-current={on ? "page" : undefined}
               title={rib.caption}
               aria-label={rib.caption}
-              onClick={() => { setFly(null); onNavigatePath(rib.path); }}
+              onClick={() => {
+                setFly(null);
+                const plan = railClickPlan(rib.key, pathname, collapsed);
+                if (plan.kind === "navigate") onNavigatePath(plan.path);
+                else if (plan.kind === "browse") onBrowse?.(plan.section);
+              }}
               {...(hasFly ? ribFlyProps(rib.key as FlyoutKey) : {})}
             >
               <Icon aria-hidden="true" />
@@ -247,7 +255,12 @@ export const ShellRail: React.FC<{
         aria-current={SHELL_SETUP_PATHS.has(pathname) ? "page" : undefined}
         title={SHELL_SETUP.caption}
         aria-label={SHELL_SETUP.caption}
-        onClick={() => { setFly(null); onNavigatePath(SHELL_SETUP.path); }}
+        onClick={() => {
+          setFly(null);
+          const plan = railClickPlan("setup", pathname, collapsed);
+          if (plan.kind === "navigate") onNavigatePath(plan.path);
+          else if (plan.kind === "browse") onBrowse?.(plan.section);
+        }}
         {...ribFlyProps("setup")}
       >
         <Settings aria-hidden="true" />

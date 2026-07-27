@@ -102,6 +102,32 @@ export function shellSectionKeyForPath(
   return hit.section ? hit.section.key : "dashboard";
 }
 
+/** The rail's click POLICY (rail-section-select pack): the rail selects a SECTION — it never
+ *  picks a page. An icon with more than one destination BROWSES (expand the panel + open its
+ *  accordion section, no navigation); exactly one destination navigates; already at the single
+ *  destination → collapsed expands for browsing (no section open), expanded no-ops. A rail
+ *  click never does nothing, and never collapses. Derived from the config — SHELL_SECTIONS
+ *  pages counts, never a hardcoded list. NOTE (report flag): the pack's table lists Setup as a
+ *  section icon, but the accordion has no Setup section — the config models Setup as ONE
+ *  configured path, so it derives as single-destination and navigates. */
+export type RailClickPlan =
+  | { kind: "navigate"; path: string }
+  | { kind: "browse"; section: ShellV2Section["key"] | null }
+  | { kind: "noop" };
+
+export function railClickPlan(
+  ribKey: "dashboard" | ShellV2Section["key"] | "setup",
+  pathname: string,
+  collapsed: boolean
+): RailClickPlan {
+  const section = SHELL_SECTIONS.find((s) => s.key === ribKey);
+  if (section && section.pages.length > 1) return { kind: "browse", section: section.key };
+  // Single destination (Dashboard; Setup as configured — see the note above).
+  const path = ribKey === "setup" ? SHELL_SETUP.path : SHELL_DASHBOARD.path;
+  if (pathname === path) return collapsed ? { kind: "browse", section: null } : { kind: "noop" };
+  return { kind: "navigate", path };
+}
+
 /** Top-bar breadcrumb — `Section / Page`; the flat Dashboard is just its own bold name. */
 export function shellCrumbForPath(
   pathname: string

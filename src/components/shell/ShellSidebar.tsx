@@ -63,7 +63,12 @@ export const ShellSidebarBody: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
   /** Router-direct path navigation (clears the global search) — AppShell's goPath. */
   onNavigatePath: (path: string) => void;
-}> = ({ onNavigate, onNavigatePath }) => {
+  /** Rail-driven browsing (rail-section-select pack): steer the accordion to this section
+   *  (null = open none); `n` bumps so repeat clicks on the same section re-fire. */
+  browse?: { sec: "querying" | "agents" | "shelf" | null; n: number } | null;
+  /** ANY collapse snaps the accordion back to the current page's section (never drifts). */
+  collapsed?: boolean;
+}> = ({ onNavigate, onNavigatePath, browse, collapsed = false }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, packages,
   } = useScriptAllyDb();
@@ -90,6 +95,15 @@ export const ShellSidebarBody: React.FC<{
   useEffect(() => {
     if (routeSection) setOpenSec(routeSection);
   }, [routeSection]);
+  // Rail-driven browsing steers the accordion (rail-section-select pack)…
+  useEffect(() => {
+    if (browse) setOpenSec(browse.sec);
+  }, [browse]);
+  // …and ANY collapse snaps it back to the section containing the current page, so the panel
+  // never drifts from the user's actual location (abandoned browses included).
+  useEffect(() => {
+    if (collapsed) setOpenSec(routeSection ?? null);
+  }, [collapsed, routeSection]);
 
   // ── manuscript switcher ──
   const [storedMsId, setStoredMsId] = useState<string | null>(() => {
