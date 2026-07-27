@@ -41,10 +41,11 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("sv2-railbtn on");
   });
 
-  it("sidebar frame: masthead with the section kicker + the account-level week", () => {
+  it("sidebar frame: masthead with the real wordmark artwork + the section kicker + the account-level week", () => {
     const html = at("/todo", <ShellSide tucked={false} onToggleTuck={() => {}} />);
     expect(html).toContain("sv2-mhname");
-    expect(html).toContain("ScriptAlly");
+    expect(html).toContain("scriptally-title-v2.png"); // the brand asset, not Playfair text (follow-up P4)
+    expect(html).toContain('alt="ScriptAlly"');
     expect(html).toContain("Querying"); // the /todo section name
     expect(html).toContain("week one"); // weekOfQuerying's empty-desk floor — never an invented value
     expect(html).toContain("sv2-mhrule");

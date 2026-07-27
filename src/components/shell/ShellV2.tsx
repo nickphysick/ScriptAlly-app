@@ -23,6 +23,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { PAGE_GRAIN } from "../../lib/designTokens";
 import { NavSearch } from "../NavSearch";
+import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { SHELL_SECTIONS, SHELL_SETUP, shellCrumbForPath, shellSectionKeyForPath } from "./shellV2Nav";
 import "./shellV2.css";
 
@@ -96,7 +97,10 @@ export const ShellSide: React.FC<{
       <div className="sv2-side-inner">
         <div className="sv2-mh">
           <div className="sv2-mhtop">
-            <div className="sv2-mhname">ScriptAlly</div>
+            {/* The real brand artwork (shell follow-up P4) — the canonical height-locked
+                wordmark component (alt="ScriptAlly" rides inside it); constrained by height,
+                aspect preserved, never restyled. */}
+            <div className="sv2-mhname"><ScriptAllyLogo heightPx={22} /></div>
             <button
               type="button"
               className="sv2-tuck"
