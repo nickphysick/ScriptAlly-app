@@ -46,18 +46,33 @@ cards (To-do post-its, Hub cards) are objects *on* the paper and keep their bord
 One source pair, locked in step by `shellV2Tokens.test.ts`: CSS custom properties on `:root` in
 `index.css` (`--shell-*`) + JS twins in `designTokens.ts` (`shell*`).
 
+**STEPPED TRIO (ref `scriptally-capsule-tone.html`, scheme D — supersedes the one-shared-surface
+law):** depth recedes leftward in three steps. The rail is the deepest surface, the panel sits
+above it, content is brightest.
+
 | Role | Token | Value |
 |---|---|---|
 | Ground (behind all three capsules) | `--shell-ground` | `#e7e0d5` + the paper-grain SVG at ~.03 |
-| Capsule surface (rail, panel, plane, bar) | `--shell-rail/-side/-topbar/-canvas` | `#fdfbf8` — one surface, locked equal |
-| Interior fill (search, chips, pills, hovers) | `--shell-inset` (and `--shell-panel`, folded in) | `#f2ede7` |
+| **Rail** capsule — deepest | `--shell-rail` | `#f1ebe3` |
+| **Panel** capsule — one step above | `--shell-side` | `#f8f4ee` |
+| **Content** capsule (incl. its top bar) | `--shell-canvas` | `#fdfbf8` |
+| Interior fill (search, chips, pills, hovers) | `--shell-inset` | `#efe8df` — moved WITH the panel |
 | Card | `--shell-card` | `#fdfaf5` |
 | Line / line-soft (interior hairlines only) | `--shell-line` / `--shell-line-soft` | `#e3d9cf` / `#ece3da` |
 | Capsule radius / gap+page padding / shadow | `--shell-cap-radius/-gap/-shadow` | `20px` / `14px` / `0 10px 30px rgba(58,28,20,.09)` |
 
-**The depth law (lock-tested):** ground darker than capsule surface; the four chrome surfaces
-are one colour; the interior fill sits between them. No page sets its own background — content
-inherits the content capsule.
+**Three role-named surfaces, no generic alias.** `--shell-topbar` is RETIRED — the top bar *is*
+the content capsule and reads `--shell-canvas` directly.
+
+**`--shell-panel` (`#f2ede7`) is NOT a chrome fill** and deliberately did not move: it is an
+in-page grouping surface (the To-do board container, the diary carousel) sitting on the
+unchanged content capsule, so its step is untouched. Recolouring it would have leaked a chrome
+change into page content.
+
+**The depth law (lock-tested):** ground < rail < panel < content, and the interior fill sits
+below every capsule but above the ground — so a fill still reads as an inset even on the rail,
+and the nav's active state (the ground token) stays deeper than any hover. No page sets its own
+background — content inherits the content capsule.
 
 ## Rail capsule
 

@@ -124,18 +124,19 @@ export const statusClosedFill = "#efeae2"; // closed centre fill
 export const statusClosedMark = "#b3a896"; // closed ×
 export const statusParchment = "#fdfaf5"; // offer tick
 
-/* ── App-shell CAPSULE tokens (ref design-refs/scriptally-capsule-shell.html — supersedes the
-   flat scheme). Three capsules share ONE surface on a darker grained ground; chrome controls
-   are fill-based. JS twins of the --shell-* custom properties in index.css :root; the pair is
-   kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
+/* ── App-shell CAPSULE tokens (ref design-refs/scriptally-capsule-tone.html scheme D "Stepped
+   trio" — supersedes the one-shared-surface law). Depth RECEDES LEFTWARD: rail deepest, panel
+   above it, content brightest, all on a darker grained ground; chrome controls are fill-based.
+   THREE role-named surfaces, no generic alias (shellTopbar retired — the top bar IS the
+   content capsule). JS twins of the --shell-* custom properties in index.css :root; the pair
+   is kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
 export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
-export const shellRail = "#fdfbf8"; // rail capsule surface (the dark umber rail is retired)
-export const shellSide = "#fdfbf8"; // panel capsule surface
-export const shellTopbar = "#fdfbf8"; // the content capsule's bar surface
-export const shellCanvas = "#fdfbf8"; // content capsule surface — pages inherit
+export const shellRail = "#f1ebe3"; // RAIL capsule — the deepest surface
+export const shellSide = "#f8f4ee"; // PANEL capsule — one step above the rail
+export const shellCanvas = "#fdfbf8"; // CONTENT capsule — brightest; its top bar too
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
-export const shellPanel = "#f2ede7"; // in-page grouping surface — the interior-fill family
-export const shellInset = "#f2ede7"; // THE interior fill (search, chips, pills, hovers)
+export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill
+export const shellInset = "#efe8df"; // THE interior fill (search, chips, pills, hovers)
 export const shellLine = "#e3d9cf"; // interior hairline
 export const shellLineSoft = "#ece3da"; // soft interior hairline
 export const shellCapRadius = 20; // capsule corner (px)

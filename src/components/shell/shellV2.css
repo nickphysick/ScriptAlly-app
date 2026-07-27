@@ -451,7 +451,7 @@
     height: 58px;
     flex: none;
     padding: 0 26px;
-    background: var(--shell-topbar);
+    background: var(--shell-canvas); /* the bar IS the content capsule (--shell-topbar retired) */
     border-bottom: 1px solid var(--shell-line-soft);
   }
 }

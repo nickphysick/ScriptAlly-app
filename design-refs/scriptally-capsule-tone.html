@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Capsule tone</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --slate:#6a89a7; --sage-band:#dce0d9; --tan:#efe7db; --tan-ink:#8a7358;
+  --ground:#e7e0d5; --line:#e3d9cf; --linesoft:#ece3da;
+  /* overridden per scheme */
+  --rail-s:#fdfbf8; --pan-s:#fdfbf8; --plane-s:#fdfbf8; --fill:#f2ede7; --card:#fdfaf5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+
+.app{height:100vh;display:flex;gap:14px;padding:14px}
+.cap{border-radius:20px;box-shadow:0 10px 30px rgba(58,28,20,.09);transition:background .25s}
+
+/* rail */
+.rail{width:70px;flex:none;background:var(--rail-s);display:flex;flex-direction:column;align-items:center;padding:20px 0}
+.rail .mk{width:24px;height:24px;color:var(--burgundy);margin-bottom:24px;flex:none}
+.rib{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#a89a8a;margin-bottom:8px;cursor:pointer}
+.rib svg{width:18px;height:18px}
+.rib:hover{background:var(--fill)}
+.rib.on{background:var(--ground);color:var(--burgundy)}
+.rail .sp{flex:1}
+.rail .av{width:36px;height:36px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:13px;color:var(--burgundy)}
+
+/* panel */
+.pan{width:288px;flex:none;background:var(--pan-s);display:flex;flex-direction:column;padding:24px 18px 18px;overflow:hidden}
+.pan .wm{font-family:"Playfair Display",serif;font-size:20px;text-align:center;margin-bottom:26px}
+.asec{display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;font-size:14px;color:var(--ink-soft);cursor:pointer}
+.asec svg.ai{width:17px;height:17px;color:#a89a8a;flex:none}
+.asec .lb{flex:1}
+.asec svg.cv{width:12px;height:12px;color:#c4b8a9}
+.asec:hover{background:var(--fill)}
+.asec.on{background:var(--ground);color:var(--ink);font-weight:500}
+.asec.on svg.ai{color:var(--burgundy)}
+.asec.open{color:var(--ink);font-weight:500}
+.asec.open svg.ai{color:var(--burgundy)}
+.asec.open svg.cv{transform:rotate(90deg)}
+.akid{display:flex;align-items:center;gap:10px;padding:9px 14px 9px 44px;border-radius:12px;font-size:13px;color:var(--ink-soft);cursor:pointer}
+.akid:hover{background:var(--fill)}
+.akid .ct{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.half{flex:1;min-height:26px}
+.ms2{display:flex;align-items:center;gap:11px;padding:4px 8px;cursor:pointer}
+.ms2 .tile{width:40px;height:40px;border-radius:12px;flex:none;background:linear-gradient(160deg,#dce0d9,#d0d6cc);border:1px solid rgba(124,58,42,.2);display:grid;place-items:center;color:var(--sage-deep);font-family:"Playfair Display",serif;font-size:14px}
+.ms2 .t1{font-family:"Playfair Display",serif;font-size:15px;line-height:1.15}
+.ms2 .t2{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.pills{display:flex;gap:9px;padding:0 6px;margin-top:26px}
+.tpill{flex:1;display:flex;align-items:center;gap:9px;background:var(--fill);border-radius:99px;padding:9px 13px}
+.pip{width:8px;height:8px;border-radius:2px;flex:none}
+.tpill .n{font-family:"Playfair Display",serif;font-size:15px;line-height:1}
+.tpill .l{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.strip4{display:flex;gap:9px;padding:0 6px;margin-top:26px}
+.gt{flex:1;height:44px;border-radius:12px;display:grid;place-items:center;cursor:pointer}
+.gt svg{width:18px;height:18px}
+.gt1{background:var(--pink);color:var(--burgundy)}
+.gt2{background:var(--sage-band);color:var(--sage-deep)}
+.gt3{background:var(--tan);color:var(--tan-ink)}
+.gcap{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:9px}
+.upg{margin-top:26px;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer}
+.upg .propill{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;background:var(--slate);color:#fff;border-radius:6px;padding:3px 7px;flex:none}
+.upg .t{flex:1;font-size:12.5px;font-weight:500}
+.usr{border-top:1px solid var(--linesoft);margin:14px 4px 0;padding:13px 4px 2px;display:flex;align-items:center;gap:10px}
+.usr .av2{width:34px;height:34px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:12px;color:var(--burgundy)}
+.usr .un{font-size:12.5px}
+.usr .ur{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+
+/* content */
+.plane{flex:1;min-width:0;background:var(--plane-s);display:flex;flex-direction:column;overflow:hidden}
+.tb{height:58px;flex:none;display:flex;align-items:center;gap:14px;padding:0 26px;border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.grow{flex:1}
+.gs{display:flex;align-items:center;gap:9px;width:280px;height:34px;padding:0 11px;background:var(--fill);border-radius:11px;color:var(--muted);font-size:12.5px}
+.gs svg{width:14px;height:14px}
+.pg{flex:1;overflow:hidden;padding:34px 40px}
+.kick{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:center}
+h1.t{font-family:"Playfair Display",serif;font-size:56px;font-weight:500;letter-spacing:-.02em;text-align:center;margin-top:14px;line-height:1}
+.att{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:22px;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft)}
+.att i{width:9px;height:9px;border-radius:99px;background:var(--burgundy)}
+.ctas{display:flex;justify-content:center;gap:11px;margin-top:22px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:12.5px;font-family:"JetBrains Mono",monospace;letter-spacing:.03em}
+.btn svg{width:15px;height:15px;color:var(--muted)}
+.hr{height:1px;background:var(--linesoft);margin:26px 60px 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:28px}
+.stt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.stt .l2{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stt .l2 svg{width:14px;height:14px;color:var(--burgundy)}
+.stt .row{display:flex;align-items:center;gap:12px;margin-top:12px}
+.stt .v2{font-family:"Playfair Display",serif;font-size:34px;line-height:1}
+.stt .p2{font-size:11px;color:var(--ink-soft);background:var(--fill);border-radius:99px;padding:4px 10px}
+
+.tog{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;display:flex;gap:6px;background:#fdfbf8;border-radius:99px;padding:6px;box-shadow:0 10px 28px rgba(58,28,20,.2)}
+.tog button{border:0;background:transparent;font:inherit;font-size:11.5px;padding:7px 13px;border-radius:99px;cursor:pointer;color:var(--ink-soft);white-space:nowrap}
+.tog button.on{background:var(--ink);color:#fff}
+.note{position:fixed;right:18px;bottom:74px;z-index:60;max-width:340px;background:#2b2622;color:#fff;border-radius:12px;padding:12px 15px;font-size:11.5px;line-height:1.6;box-shadow:0 10px 28px rgba(0,0,0,.28)}
+.note b{font-weight:500}
+.note .sw{font-family:"JetBrains Mono",monospace;font-size:9px;opacity:.6;display:block;margin-top:7px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="cap rail">
+    <svg class="mk" viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg>
+    <div class="rib on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></div>
+    <div class="sp"></div>
+    <div class="rib" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></div>
+    <div class="av">ML</div>
+  </nav>
+
+  <aside class="cap pan">
+    <div class="wm">ScriptAlly</div>
+    <div class="asec on"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lb">Dashboard</span></div>
+    <div class="asec open"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span class="lb">Querying</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+    <div class="akid">Queries Hub<span class="ct">20</span></div>
+    <div class="akid">To-do<span class="ct">44</span></div>
+    <div class="akid">Packages<span class="ct">0</span></div>
+    <div class="asec"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg><span class="lb">Agents</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+    <div class="asec"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg><span class="lb">Shelf</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+
+    <div class="half"></div>
+
+    <div class="ms2">
+      <div class="tile">MD</div>
+      <div style="flex:1"><div class="t1">Murphy's Day Out</div><div class="t2">20 queries · 16 active</div></div>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9c8878" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg>
+    </div>
+    <div class="pills">
+      <div class="tpill"><i class="pip" style="background:#eabfab"></i><span class="n">3</span><span class="l">Urgent</span></div>
+      <div class="tpill"><i class="pip" style="background:#b7c5b4"></i><span class="n">41</span><span class="l">House</span></div>
+    </div>
+    <div class="strip4">
+      <div class="gt gt1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></div>
+      <div class="gt gt2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg></div>
+      <div class="gt gt3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.2"/><path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"/><path d="M18 8.5v5M15.5 11h5"/></svg></div>
+      <div class="gt gt3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H16v9"/><path d="M5 4.5v15A1.5 1.5 0 0 0 6.5 21H12"/><path d="M18 15v6M15 18h6"/></svg></div>
+    </div>
+    <div class="gcap">Log · Respond · Agent · Manuscript</div>
+    <div class="upg"><span class="propill">PRO</span><span class="t">Upgrade to Pro</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9c8878" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+    <div class="usr"><div class="av2">ML</div><div><div class="un">Michael Li</div><div class="ur">Free plan</div></div></div>
+  </aside>
+
+  <main class="cap plane">
+    <div class="tb">
+      <span class="crumb">Dashboard</span>
+      <div class="grow"></div>
+      <div class="gs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…</div>
+    </div>
+    <div class="pg">
+      <div class="kick">Monday 27 July · Week 139 of querying</div>
+      <h1 class="t">Good afternoon, Michael</h1>
+      <div class="att"><i></i>3 things need your attention</div>
+      <div class="ctas">
+        <span class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>Send query</span>
+        <span class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>Record a response</span>
+        <span class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.2"/><path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"/><path d="M18 8.5v5M15.5 11h5"/></svg>Add agent</span>
+      </div>
+      <div class="hr"></div>
+      <div class="stats">
+        <div class="stt"><div class="l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>Queries sent</div><div class="row"><span class="v2">20</span><span class="p2">0 this week</span></div></div>
+        <div class="stt"><div class="l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 3h10M7 21h10M8 3v4l4 4 4-4V3M8 21v-4l4-4 4 4v4"/></svg>Active queries</div><div class="row"><span class="v2">15</span><span class="p2">12 awaiting</span></div></div>
+        <div class="stt"><div class="l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>Agents</div><div class="row"><span class="v2">16</span><span class="p2">0 idle</span></div></div>
+        <div class="stt"><div class="l2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Responses</div><div class="row"><span class="v2">11</span><span class="p2">55% rate</span></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="note" id="note"></div>
+<div class="tog" id="tog"></div>
+
+<script>
+const S=[
+ {k:"A",n:"Uniform (current)",rail:"#fdfbf8",pan:"#fdfbf8",plane:"#fdfbf8",fill:"#f2ede7",
+  why:"<b>All three capsules identical.</b> The gutters and shadows do all the separating. Cleanest in theory — but nothing recedes, so chrome and content compete for the same visual level. This is what prompted the question."},
+ {k:"B",n:"Chrome one step",rail:"#f8f4ee",pan:"#f8f4ee",plane:"#fdfbf8",fill:"#efe8df",
+  why:"<b>Rail and panel one step down; content brightest.</b> About 2% — enough to place content above chrome without announcing itself. Interior fills shift down in step so the cream search field and pills still read against the panel. <b>My pick.</b>"},
+ {k:"C",n:"Chrome two steps",rail:"#f4efe8",pan:"#f4efe8",plane:"#fdfbf8",fill:"#eae2d7",
+  why:"<b>Same idea, more commitment.</b> Clear hierarchy at a glance, and the content capsule genuinely glows. Cost: chrome creeps toward the ground tone, so the panel's own shadow and the gutter start doing less work — at some point the capsules stop reading as separate objects."},
+ {k:"D",n:"Stepped trio",rail:"#f1ebe3",pan:"#f8f4ee",plane:"#fdfbf8",fill:"#efe8df",
+  why:"<b>Three distinct levels — rail darkest, then panel, then content.</b> Reads as depth receding leftward, and gives the rail its own identity now that it is a real mode rather than decoration. Cost: three surface tokens to maintain, and the rail edges close to the ground."},
+ {k:"E",n:"Content brighter",rail:"#fdfbf8",pan:"#fdfbf8",plane:"#fffdfa",fill:"#f2ede7",
+  why:"<b>Chrome unchanged; content lifted toward white instead.</b> Same relationship, opposite direction — nothing gets duller, the work just gets brighter. Keeps the panel's existing fills valid, so it is the smallest change of the four. Slightly cooler overall, which fights the warm paper feel a little."}
+];
+const tog=document.getElementById('tog'), note=document.getElementById('note'), r=document.documentElement;
+tog.innerHTML=S.map((s,i)=>`<button class="${i===0?'on':''}" data-i="${i}">${s.k} · ${s.n}</button>`).join('');
+function apply(i){
+  const s=S[i];
+  r.style.setProperty('--rail-s',s.rail); r.style.setProperty('--pan-s',s.pan);
+  r.style.setProperty('--plane-s',s.plane); r.style.setProperty('--fill',s.fill);
+  note.innerHTML=s.why+`<span class="sw">rail ${s.rail} · panel ${s.pan} · content ${s.plane} · fill ${s.fill} · ground #e7e0d5</span>`;
+  tog.querySelectorAll('button').forEach((b,n)=>b.classList.toggle('on',n===i));
+}
+tog.querySelectorAll('button').forEach(b=>b.onclick=()=>apply(+b.dataset.i));
+apply(0);
+</script>
+</body>
+</html>

@@ -37,22 +37,28 @@
   --gold: #a8842c;    /* sample-pages ink · star glint */
 }
 
-/* ── App-shell CAPSULE tokens (ref design-refs/scriptally-capsule-shell.html — supersedes the
-   flat scheme AND the canvas-lightness law). Three rounded capsules — rail, panel, content
-   plane — share ONE surface and float on a darker grained ground: depth is geometry (paper on
-   ground), not tone steps between chrome surfaces. Chrome controls are FILL-based
-   (--shell-inset), never hairline-bordered pills; ink-bordered content cards are objects ON
-   the paper and keep their borders. NOTE: designTokens.ts carries JS twins (shellGround …) —
-   the flagged duplication; the pair is kept in step by shellV2Tokens.test.ts. ── */
+/* ── App-shell CAPSULE tokens (ref design-refs/scriptally-capsule-tone.html scheme D "Stepped
+   trio" — supersedes the one-shared-capsule-surface law from scriptally-capsule-shell.html).
+   Depth now RECEDES LEFTWARD in three steps: the rail is the deepest surface, the panel sits
+   above it, the content plane is brightest — all still floating on a darker grained ground.
+   THREE role-named surface tokens, no generic alias: --shell-rail, --shell-side (panel),
+   --shell-canvas (content, incl. its top bar — the retired --shell-topbar was an alias).
+   Chrome controls are FILL-based (--shell-inset), never hairline-bordered pills; ink-bordered
+   content cards are objects ON the paper and keep their borders. NOTE: designTokens.ts carries
+   JS twins (shellGround …) — the flagged duplication; the pair is kept in step by
+   shellV2Tokens.test.ts. ── */
 :root {
   --shell-ground: #e7e0d5;            /* the page ground behind all three capsules (+ paper grain) */
-  --shell-rail: #fdfbf8;              /* rail capsule surface (the dark umber rail is retired) */
-  --shell-side: #fdfbf8;              /* panel capsule surface */
-  --shell-topbar: #fdfbf8;            /* the content capsule's bar — same surface, hairline below */
-  --shell-canvas: #fdfbf8;            /* content capsule surface — pages inherit, none paints its own */
+  --shell-rail: #f1ebe3;              /* RAIL capsule — the deepest surface (stepped trio) */
+  --shell-side: #f8f4ee;              /* PANEL capsule — one step above the rail */
+  --shell-canvas: #fdfbf8;            /* CONTENT capsule — the brightest surface; its top bar too */
   --shell-card: #fdfaf5;              /* card surface (=== parchment) */
-  --shell-panel: #f2ede7;             /* in-page grouping surface — folded into the interior-fill family */
-  --shell-inset: #f2ede7;             /* THE interior fill — search fields, chips, pills, hover states */
+  /* The interior fill moved WITH the panel (#f2ede7 → #efe8df): against a #f8f4ee panel the
+     old step had all but vanished. --shell-panel did NOT move — it is an IN-PAGE grouping
+     surface (the To-do board, the diary carousel) that sits on the unchanged content capsule,
+     so its step is untouched; recolouring it would have leaked the chrome change into content. */
+  --shell-panel: #f2ede7;             /* in-page grouping surface — content, NOT chrome fill */
+  --shell-inset: #efe8df;             /* THE interior fill — search fields, chips, pills, hover states */
   --shell-line: #e3d9cf;              /* interior hairline */
   --shell-line-soft: #ece3da;         /* soft interior hairline (top-bar base, partitions) */
   --shell-cap-radius: 20px;           /* capsule corner */

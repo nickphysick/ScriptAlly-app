@@ -1,9 +1,10 @@
 /**
- * Rule-text locks for the app-shell CAPSULE tokens (ref design-refs/scriptally-capsule-shell.html
- * — supersedes the flat scheme and its canvas-lightness law). Asserts the two token homes —
- * index.css `--shell-*` and the designTokens.ts `shell*` JS twins — BOTH carry the baked values,
- * so the flagged duplication cannot drift; and locks the NEW depth law: one shared capsule
- * surface floating on a DARKER ground (depth is geometry, not tone steps between chrome).
+ * Rule-text locks for the app-shell CAPSULE tokens (ref design-refs/scriptally-capsule-tone.html
+ * scheme D "Stepped trio" — supersedes the ONE-SHARED-SURFACE law from capsule-shell.html).
+ * Asserts the two token homes — index.css `--shell-*` and the designTokens.ts `shell*` JS twins
+ * — BOTH carry the baked values, so the flagged duplication cannot drift; and locks the NEW
+ * depth law: three role-named surfaces stepping BRIGHTER left→right (rail → panel → content)
+ * over a darker ground, with no generic alias among them.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
@@ -14,13 +15,12 @@ const css = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
 
 const BAKED: Record<string, string> = {
   "--shell-ground": "#e7e0d5",
-  "--shell-rail": "#fdfbf8",
-  "--shell-side": "#fdfbf8",
-  "--shell-topbar": "#fdfbf8",
+  "--shell-rail": "#f1ebe3",
+  "--shell-side": "#f8f4ee",
   "--shell-canvas": "#fdfbf8",
   "--shell-card": "#fdfaf5",
   "--shell-panel": "#f2ede7",
-  "--shell-inset": "#f2ede7",
+  "--shell-inset": "#efe8df",
   "--shell-line": "#e3d9cf",
   "--shell-line-soft": "#ece3da",
   "--shell-cap-radius": "20px",
@@ -45,18 +45,23 @@ describe("capsule tokens — index.css", () => {
     expect(css).not.toContain("#2e2622"); // the dark umber rail
     expect(css).not.toContain("--shell-side-edge");
   });
+  it("the aliased --shell-topbar is RETIRED — the bar reads the content capsule directly", () => {
+    expect(css).not.toMatch(/--shell-topbar\s*:/); // no declaration (the retirement note may name it)
+    const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+    expect(shellCss).not.toContain("var(--shell-topbar)");
+    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*background: var\(--shell-canvas\)/s);
+  });
 });
 
 describe("capsule tokens — designTokens.ts twins agree", () => {
   it("surfaces + fills", () => {
     expect(dt.shellGround).toBe("#e7e0d5");
-    expect(dt.shellRail).toBe("#fdfbf8");
-    expect(dt.shellSide).toBe("#fdfbf8");
-    expect(dt.shellTopbar).toBe("#fdfbf8");
+    expect(dt.shellRail).toBe("#f1ebe3");
+    expect(dt.shellSide).toBe("#f8f4ee");
     expect(dt.shellCanvas).toBe("#fdfbf8");
     expect(dt.shellCard).toBe("#fdfaf5");
     expect(dt.shellPanel).toBe("#f2ede7");
-    expect(dt.shellInset).toBe("#f2ede7");
+    expect(dt.shellInset).toBe("#efe8df");
     expect(dt.shellLine).toBe("#e3d9cf");
     expect(dt.shellLineSoft).toBe("#ece3da");
     expect(dt.shellInk).toBe("#2e2723");
@@ -83,17 +88,27 @@ const lum = (hex: string): number => {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
 
-describe("the capsule depth law — paper on ground, one chrome surface", () => {
-  it("the ground is DARKER than the capsule surface (depth by geometry, not tone steps)", () => {
-    expect(lum(dt.shellGround)).toBeLessThan(lum(dt.shellCanvas));
+describe("the STEPPED TRIO depth law (scheme D) — depth recedes leftward", () => {
+  it("ground darkest, then rail, then panel, then content brightest", () => {
+    expect(lum(dt.shellGround)).toBeLessThan(lum(dt.shellRail));
+    expect(lum(dt.shellRail)).toBeLessThan(lum(dt.shellSide));
+    expect(lum(dt.shellSide)).toBeLessThan(lum(dt.shellCanvas));
   });
-  it("rail, panel, top bar and content plane share ONE surface", () => {
-    expect(dt.shellRail).toBe(dt.shellCanvas);
-    expect(dt.shellSide).toBe(dt.shellCanvas);
-    expect(dt.shellTopbar).toBe(dt.shellCanvas);
+  it("the three surfaces are DISTINCT — the one-shared-surface law is retired", () => {
+    expect(new Set([dt.shellRail, dt.shellSide, dt.shellCanvas]).size).toBe(3);
   });
-  it("the interior fill sits between capsule surface and ground", () => {
-    expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellCanvas));
+  it("the interior fill moved with the panel: darker than every capsule, lighter than the ground", () => {
+    expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellRail)); // still reads as an inset ON the rail
+    expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellSide));
     expect(lum(dt.shellInset)).toBeGreaterThan(lum(dt.shellGround));
+  });
+  it("the nav active state (GROUND) stays darker than the hover fill on every capsule", () => {
+    // The active law is unchanged (active = ground); this keeps active > hover in depth so the
+    // hierarchy survives the step. The rail's MARGINS are narrow — reported for a browser check.
+    expect(lum(dt.shellGround)).toBeLessThan(lum(dt.shellInset));
+  });
+  it("--shell-panel is IN-PAGE content, deliberately NOT moved with the chrome fill", () => {
+    expect(dt.shellPanel).toBe("#f2ede7");
+    expect(dt.shellPanel).not.toBe(dt.shellInset);
   });
 });
