@@ -466,6 +466,9 @@
   color: var(--shell-muted);
 }
 .sv2-crumb b { color: var(--shell-ink); font-weight: 500; }
+/* The dashboard's collapsed-panel crumb slot: the brand mark stands in for the hidden panel
+   (tone/crumb pack). Height-constrained to the 58px bar; the artwork keeps its own aspect. */
+.sv2-crumbmark { display: flex; align-items: center; flex: none; }
 .sv2-crumb .sv2-sl { opacity: 0.5; }
 .sv2-grow { flex: 1; }
 /* The re-homed focus-family reading column (fixes P5) — FocusShell's 860px measure, kept so

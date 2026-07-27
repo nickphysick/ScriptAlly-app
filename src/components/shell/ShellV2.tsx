@@ -23,7 +23,7 @@ import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { useShellNavCounts } from "./ShellSidebar";
 import {
-  SHELL_RAIL, SHELL_SECTIONS, SHELL_SETUP, SHELL_SETUP_PATHS, ShellV2Section, railClickPlan,
+  SHELL_DASHBOARD, SHELL_RAIL, SHELL_SECTIONS, SHELL_SETUP, SHELL_SETUP_PATHS, ShellV2Section, railClickPlan,
   shellCrumbForPath, shellPageForPath, shellSectionKeyForPath,
 } from "./shellV2Nav";
 import "./shellV2.css";
@@ -330,10 +330,17 @@ export const ShellTopBar: React.FC<{
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ routeKey, searchQuery, setSearchQuery, onNavigate }) => {
+  /** Panel collapse — the DASHBOARD crumb slot depends on it (tone/crumb pack). */
+  collapsed?: boolean;
+}> = ({ routeKey, searchQuery, setSearchQuery, onNavigate, collapsed = false }) => {
   const { pathname } = useLocation();
   const crumb = shellCrumbForPath(pathname);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  // The dashboard's crumb slot is special (tone/crumb pack): the brand lives in the panel, so
+  // when the panel goes the mark moves here; with the panel showing, the slot reads as prose.
+  // Handled at the RENDER, not in shellV2Nav — the model's "Dashboard" label is shared with the
+  // accordion row, and renaming it there would rename the nav item too.
+  const isDashboard = pathname === SHELL_DASHBOARD.path;
 
   // ⌘K — focus the global search. The To-do page owns its route-local ⌘K registration (one
   // live owner per route, the long-standing invariant), so this handler stands down there.
@@ -351,16 +358,27 @@ export const ShellTopBar: React.FC<{
 
   return (
     <header className="sv2-topbar">
-      {crumb && (
-        <div className="sv2-crumb">
-          {crumb.section !== crumb.page && (
-            <>
-              <span>{crumb.section}</span>
-              <span className="sv2-sl">/</span>
-            </>
-          )}
-          <b>{crumb.page}</b>
-        </div>
+      {isDashboard ? (
+        collapsed ? (
+          // Panel collapsed — the brand mark stands in for it (same artwork, bar-sized).
+          <div className="sv2-crumbmark">
+            <ScriptAllyLogo heightPx={22} />
+          </div>
+        ) : (
+          <div className="sv2-crumb"><b>Your dashboard</b></div>
+        )
+      ) : (
+        crumb && (
+          <div className="sv2-crumb">
+            {crumb.section !== crumb.page && (
+              <>
+                <span>{crumb.section}</span>
+                <span className="sv2-sl">/</span>
+              </>
+            )}
+            <b>{crumb.page}</b>
+          </div>
+        )
       )}
       {/* The save-state chip is REMOVED (fixes pack Phase 4): crumb left, search right,
           nothing else. It was purely presentational — no save-state logic existed to keep. */}

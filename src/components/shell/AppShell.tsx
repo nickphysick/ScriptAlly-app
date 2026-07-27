@@ -267,7 +267,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         </div>
 
         {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
+        <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} collapsed={panelCollapsed} />
 
         {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
             the fixed BottomTabBar (was on the legacy shell's <main>). */}

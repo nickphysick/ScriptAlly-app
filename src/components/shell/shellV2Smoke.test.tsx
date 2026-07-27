@@ -131,4 +131,35 @@ describe("v2 shell — smoke renders", () => {
     expect(html).not.toContain("sv2-state");
     expect(html).toContain("nav-search-field"); // the real NavSearch, not a fork
   });
+
+  describe("the dashboard crumb slot (tone/crumb pack) — brand when the panel is gone", () => {
+    const bar = (path: string, collapsed: boolean) =>
+      at(path, <ShellTopBar routeKey={path === "/dashboard" ? "dashboard" : "manuscripts"} searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} collapsed={collapsed} />);
+
+    it("dashboard + COLLAPSED renders the brand mark with its accessible name — the panel's own artwork", () => {
+      const html = bar("/dashboard", true);
+      expect(html).toContain("sv2-crumbmark");
+      expect(html).toContain('alt="ScriptAlly"');
+      expect(html).toContain("/scriptally-title-v2.png"); // the same asset the panel uses
+      expect(html).not.toContain("Your dashboard");
+    });
+
+    it("dashboard + EXPANDED renders the text, styled as the crumb", () => {
+      const html = bar("/dashboard", false);
+      expect(html).toContain("sv2-crumb");
+      expect(html).toContain("Your dashboard");
+      expect(html).not.toContain("sv2-crumbmark");
+      expect(html).not.toContain('alt="ScriptAlly"');
+    });
+
+    it("a NON-dashboard page keeps its normal crumb in BOTH states — no brand mark, no change", () => {
+      for (const collapsed of [true, false]) {
+        const html = bar("/manuscripts", collapsed);
+        expect(html).toContain("Shelf");
+        expect(html).toContain("Manuscripts");
+        expect(html).not.toContain("sv2-crumbmark");
+        expect(html).not.toContain("Your dashboard");
+      }
+    });
+  });
 });
