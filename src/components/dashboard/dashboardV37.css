@@ -363,7 +363,16 @@
 .sa-band .sa-bandm { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--band-meta, #705e46); }
 .sa-band .sa-bands { font-size: 12px; color: var(--band-strong, #4a4036); }
 
-/* ---------- timeline drawer (tl4 floating) + pull tab ---------- */
+/* ---------- timeline drawer (tl4 floating) + pull tab ----------
+   CAPSULE-AWARE INSETS (tone/crumb/padding pack): both are position:fixed — viewport-anchored
+   from the pre-capsule era, when the shell was full-bleed. The TAB sat at right:0, flush to the
+   browser edge, so it covered the ground gutter every other surface respects — that was the
+   right-gutter cause. Fixed positioning has to STAY (an absolute child would anchor to the
+   stage, the app's scroll container, and scroll away with the page), so the insets are measured
+   from the CONTENT CAPSULE instead, via --shell-cap-gap. The drawer's own 14px happened to
+   equal the gap, so it already landed on the capsule edge — tokenised here so the coincidence
+   becomes intentional and survives any change to the gap. Below 768px the capsule stands down
+   and the tab keeps its flush-to-edge idiom. */
 .sa-tltab {
   position: fixed; right: 0; top: 42%; z-index: 45;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -374,13 +383,20 @@
 .sa-tltab svg { stroke: var(--band-meta, #9c8878); }
 .sa-tltab .sa-tllbl { writing-mode: vertical-rl; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--band-meta, #9c8878); }
 .sa-tltab .sa-tlcnt { font-family: var(--font-mono); font-size: 8px; font-weight: 700; background: var(--acc, #7c3a2a); color: #fdfaf5; border-radius: 99px; padding: 1px 5px; }
+@media (min-width: 768px) {
+  /* The tab tucks against the CONTENT CAPSULE's right edge, not the browser's — so the ground
+     gutter stays equal on both sides. THE FIX. */
+  .sa-tltab { right: var(--shell-cap-gap); }
+}
 .sa-tldrawer {
-  position: fixed; top: 14px; bottom: 14px; right: 14px; width: 285px; z-index: 46;
+  position: fixed;
+  top: var(--shell-cap-gap); bottom: var(--shell-cap-gap); right: var(--shell-cap-gap);
+  width: 285px; z-index: 46;
   display: flex; flex-direction: column; overflow: hidden;
   background: var(--card, #fdfaf5);
   border: 1px solid var(--bd, #e7ddd2); border-radius: 18px;
   box-shadow: 0 6px 18px rgba(20,20,20,0.08), 0 24px 60px rgba(20,20,20,0.14);
-  transform: translateX(calc(102% + 14px));
+  transform: translateX(calc(102% + var(--shell-cap-gap)));
   transition: transform 360ms cubic-bezier(.22,.8,.3,1);
 }
 .sa-tldrawer.open { transform: none; }

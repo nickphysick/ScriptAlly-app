@@ -112,3 +112,31 @@ describe("the STEPPED TRIO depth law (scheme D) — depth recedes leftward", () 
     expect(dt.shellPanel).not.toBe(dt.shellInset);
   });
 });
+
+/**
+ * The ground gutter (tone/crumb/padding pack). jsdom cannot measure layout, so this locks the
+ * CAUSE rather than the pixels: the app container's padding stays a single symmetric value with
+ * no right-hand compensation, and the viewport-fixed dashboard drawer + pull tab measure their
+ * insets from the content capsule (--shell-cap-gap) instead of the browser edge.
+ */
+describe("the ground gutter — equal on both edges", () => {
+  const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+  const dashCss = readFileSync(resolve(__dirname, "../dashboard/dashboardV37.css"), "utf8");
+
+  it("the app container keeps ONE symmetric padding — no compensating right-hand padding", () => {
+    expect(shellCss).toMatch(/\.sv2-app \{ padding: var\(--shell-cap-gap\); gap: var\(--shell-cap-gap\); \}/);
+    expect(shellCss).not.toMatch(/\.sv2-app[^{]*\{[^}]*padding-right/);
+  });
+
+  it("the pull tab tucks against the CAPSULE edge on desktop — it no longer sits at right:0", () => {
+    expect(dashCss).toMatch(/\.sa-tltab \{ right: var\(--shell-cap-gap\); \}/);
+  });
+
+  it("the drawer's insets read the gap token, not a bare number that only coincidentally matched", () => {
+    const drawer = dashCss.match(/\.sa-tldrawer \{[^}]*\}/s)?.[0] ?? "";
+    expect(drawer).toContain("top: var(--shell-cap-gap)");
+    expect(drawer).toContain("bottom: var(--shell-cap-gap)");
+    expect(drawer).toContain("right: var(--shell-cap-gap)");
+    expect(drawer).toContain("translateX(calc(102% + var(--shell-cap-gap)))"); // the closed park clears it
+  });
+});
