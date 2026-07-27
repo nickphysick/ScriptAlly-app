@@ -34,49 +34,51 @@ const at = (path: string, node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
 
 describe("v2 shell — smoke renders", () => {
-  it("rail capsule: four section ribs + Setup + the avatar; pink active, no captions, no tongue", () => {
+  it("rail capsule: Dashboard + three section ribs + Setup + the avatar; pink active, no captions, no tongue", () => {
     const html = at("/queries", <ShellRail onNavigatePath={() => {}} />);
     expect(html).toContain("sv2-rail sv2-cap");
-    for (const tip of ["Desk", "Queries", "Agents", "Shelf", "Setup"]) expect(html).toContain(`title="${tip}"`);
+    for (const tip of ["Dashboard", "Querying", "Agents", "Shelf", "Setup"]) expect(html).toContain(`title="${tip}"`);
     expect(html).toContain("sv2-rib on");
     expect(html).not.toContain("sv2-railbtn"); // captioned buttons + the tab tongue are retired
     expect(html).toContain("sv2-railav"); // the rail-foot account chip
   });
 
-  it("sidebar frame: masthead with the real wordmark artwork + the section kicker + the account-level week", () => {
-    const html = at("/todo", <ShellSide tucked={false} onToggleTuck={() => {}} />);
-    expect(html).toContain("sv2-mhname");
-    expect(html).toContain("scriptally-title-v2.png"); // the brand asset, not Playfair text (follow-up P4)
+  it("panel frame: the real wordmark artwork, large and centred — the rule + kicker are retired", () => {
+    const html = at("/todo", <ShellSide />);
+    expect(html).toContain("sv2-wm");
+    expect(html).toContain("scriptally-title-v2.png"); // the brand asset, not Playfair text
     expect(html).toContain('alt="ScriptAlly"');
-    expect(html).toContain("Querying"); // the /todo section name
-    expect(html).toContain("week one"); // weekOfQuerying's empty-desk floor — never an invented value
-    expect(html).toContain("sv2-mhrule");
+    expect(html).not.toContain("sv2-mhrule"); // the masthead rule is gone
+    expect(html).not.toContain("week one"); // the kicker (weekOfQuerying) left the panel
   });
 
-  it("sidebar contents: nav, ledger empty note, action tiles, Pro line, user block", () => {
+  it("panel contents: accordion (Dashboard flat, route section open), pills, action strip, upgrade row, user block", () => {
     const html = at("/queries", <ShellSidebarBody onNavigate={() => {}} onNavigatePath={() => {}} />);
-    expect(html).toContain("Pages");
+    // the accordion — Dashboard flat + the three sections; the route's section renders open
+    expect(html).toContain("sv2-asec sv2-flat");
+    for (const lb of ["Dashboard", "Querying", "Agents", "Shelf"]) expect(html).toContain(lb);
+    expect(html).toContain("sv2-akids open");
     expect(html).toContain("Queries Hub");
-    expect(html).toContain("To-do");
-    expect(html).toContain("Packages");
-    // all-zero board → rows hidden, the quiet note showing, no total
-    expect(html).toContain("Tasks &amp; reminders");
-    expect(html).toContain("nothing to show right now");
-    // the four capture tiles
-    for (const lb of ["Log query", "Record response", "Add agent", "Add manuscript"]) expect(html).toContain(lb);
-    // Free plan → the Pro line with the baked copy; the user block beneath
-    expect(html).toContain("Unlock your full query log");
+    expect(html).toContain("sv2-akid on"); // /queries is the active child (pink fill only)
+    // the two task pills (empty desk → zeros, still rendered)
+    expect(html).toContain("sv2-tpill");
+    expect(html).toContain("Urgent");
+    expect(html).toContain("House");
+    // the four capture tiles carry their tooltips
+    for (const lb of ["Log query", "Record response", "Add agent", "Add manuscript"]) expect(html).toContain(`title="${lb}"`);
+    // Free plan → the upgrade row with the capsule copy; the user block beneath (no utility buttons)
+    expect(html).toContain("Upgrade to Pro");
+    expect(html).toContain("sv2-propill");
     expect(html).toContain("Nick Physick");
     expect(html).toContain("Free plan");
-    // the nav active state carries the parchment-highlight class only — no burgundy fill class exists
-    expect(html).toContain("sv2-navbtn on");
+    expect(html).not.toContain("sv2-iconbtn"); // the user block carries no utility buttons now
   });
 
-  it("top bar: crumb + save-state chip + the shared NavSearch", () => {
+  it("top bar: crumb + save-state chip + the shared NavSearch (capsule cream fill)", () => {
     const html = at("/manuscripts", <ShellTopBar routeKey="manuscripts" searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} />);
     expect(html).toContain("sv2-topbar");
-    expect(html).toContain("Manuscripts"); // crumb section
-    expect(html).toContain("Your manuscripts"); // crumb page (bold current)
+    expect(html).toContain("Shelf"); // crumb section
+    expect(html).toContain("Manuscripts"); // crumb page (bold current)
     expect(html).toContain("All changes saved");
     expect(html).toContain("nav-search-field"); // the real NavSearch, not a fork
   });

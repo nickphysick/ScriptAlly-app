@@ -2,16 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * shellV2Nav — the React-free navigation model for the v2 app shell (ref
- * design-refs/scriptally-shell-v2.html): the icon rail's four sections + the pinned Setup
- * item, each section carrying its sidebar page list. One source for the rail, the sidebar
- * Pages nav, the masthead's section kicker and the top-bar breadcrumb — the railNav.ts
- * pattern, kept as a SEPARATE model because railNav.ts still feeds the (untouched) NavDrawer.
+ * shellV2Nav — the React-free navigation model for the CAPSULE shell (ref
+ * design-refs/scriptally-capsule-shell.html). One source for the rail ribs, the panel's
+ * accordion, and the top-bar breadcrumb.
  *
- * Section→page mapping follows the mockup's product grammar, not the URL tree: Packages files
- * under Querying (a submission bundle is querying kit), while Comparable titles stays on the
- * Shelf beside its manuscript. Paths are matched EXACTLY — every page is an exact route, and
- * query strings (`/queries?q=…`) are pathname-invisible.
+ * The accordion's grammar: DASHBOARD IS A FLAT LINK (no children); three collapsible sections
+ * — Querying (Queries Hub · To-do · Packages), Agents (Agent list · Discover), Shelf
+ * (Manuscripts · Comparable titles). One section open at a time, following the route. Import
+ * is OFF the nav (baked) — it keeps a breadcrumb entry via CRUMB_EXTRAS and stays reachable
+ * from the Queries empty state. Paths are matched EXACTLY (query strings are
+ * pathname-invisible).
  */
 
 export interface ShellV2Page {
@@ -21,29 +21,18 @@ export interface ShellV2Page {
 }
 
 export interface ShellV2Section {
-  key: "desk" | "queries" | "agents" | "shelf";
-  /** Rail caption — the mono micro-label under the icon (CSS uppercases it). */
-  caption: string;
-  /** The masthead kicker + breadcrumb section name. */
-  sectionName: string;
-  /** Rail click target — the section's lead page. */
-  path: string;
+  key: "querying" | "agents" | "shelf";
+  label: string;
   pages: ShellV2Page[];
 }
 
+/** The flat Dashboard link — no chevron, no children; active = pink fill on the row. */
+export const SHELL_DASHBOARD: ShellV2Page = { key: "dashboard", label: "Dashboard", path: "/dashboard" };
+
 export const SHELL_SECTIONS: ShellV2Section[] = [
   {
-    key: "desk",
-    caption: "Desk",
-    sectionName: "Desk",
-    path: "/dashboard",
-    pages: [{ key: "dashboard", label: "Dashboard", path: "/dashboard" }],
-  },
-  {
-    key: "queries",
-    caption: "Queries",
-    sectionName: "Querying",
-    path: "/queries",
+    key: "querying",
+    label: "Querying",
     pages: [
       { key: "queries-hub", label: "Queries Hub", path: "/queries" },
       { key: "todo", label: "To-do", path: "/todo" },
@@ -52,34 +41,43 @@ export const SHELL_SECTIONS: ShellV2Section[] = [
   },
   {
     key: "agents",
-    caption: "Agents",
-    sectionName: "Agents",
-    path: "/agents",
+    label: "Agents",
     pages: [
-      { key: "agents-list", label: "Contact list", path: "/agents" },
+      { key: "agents-list", label: "Agent list", path: "/agents" },
       { key: "agents-discover", label: "Discover", path: "/agents/discover" },
     ],
   },
   {
     key: "shelf",
-    caption: "Shelf",
-    sectionName: "Manuscripts",
-    path: "/manuscripts",
+    label: "Shelf",
     pages: [
-      { key: "manuscripts", label: "Your manuscripts", path: "/manuscripts" },
+      { key: "manuscripts", label: "Manuscripts", path: "/manuscripts" },
       { key: "comps", label: "Comparable titles", path: "/manuscripts/comps" },
-      { key: "import", label: "Import", path: "/import" },
     ],
   },
 ];
 
-/** Setup — the rail-foot pinned item. Navigates OUT of the workspace tier (focus chrome). */
+/** The rail's four ribs — Dashboard + the three sections (each routes to its lead page). */
+export const SHELL_RAIL = [
+  { key: "dashboard", caption: "Dashboard", path: "/dashboard" },
+  { key: "querying", caption: "Querying", path: "/queries" },
+  { key: "agents", caption: "Agents", path: "/agents" },
+  { key: "shelf", caption: "Shelf", path: "/manuscripts" },
+] as const;
+
+/** Setup — the rail item above the avatar. Navigates OUT of the workspace tier. */
 export const SHELL_SETUP = { key: "setup", caption: "Setup", path: "/account" } as const;
 
-/** The page (and its owning section) an exact pathname belongs to; null off the map. */
+/** Off-nav routes that still deserve a breadcrumb (Import left the nav — baked). */
+const CRUMB_EXTRAS: Record<string, { section: string; page: string }> = {
+  "/import": { section: "Shelf", page: "Import" },
+};
+
+/** The page (and its owning section, null for the flat Dashboard) an exact pathname maps to. */
 export function shellPageForPath(
   pathname: string
-): { section: ShellV2Section; page: ShellV2Page } | null {
+): { section: ShellV2Section | null; page: ShellV2Page } | null {
+  if (pathname === SHELL_DASHBOARD.path) return { section: null, page: SHELL_DASHBOARD };
   for (const section of SHELL_SECTIONS) {
     for (const page of section.pages) {
       if (page.path === pathname) return { section, page };
@@ -88,15 +86,22 @@ export function shellPageForPath(
   return null;
 }
 
-/** The rail section a pathname lights, or null (focus/marketing/unknown light nothing). */
-export function shellSectionKeyForPath(pathname: string): ShellV2Section["key"] | null {
-  return shellPageForPath(pathname)?.section.key ?? null;
+/** The rail rib a pathname lights ("dashboard" | section key | null). */
+export function shellSectionKeyForPath(
+  pathname: string
+): "dashboard" | ShellV2Section["key"] | null {
+  const hit = shellPageForPath(pathname);
+  if (!hit) return pathname in CRUMB_EXTRAS ? "shelf" : null;
+  return hit.section ? hit.section.key : "dashboard";
 }
 
-/** Top-bar breadcrumb segments — `Section / Page`, current page last (bold, inert). */
+/** Top-bar breadcrumb — `Section / Page`; the flat Dashboard is just its own bold name. */
 export function shellCrumbForPath(
   pathname: string
 ): { section: string; page: string } | null {
+  const extra = CRUMB_EXTRAS[pathname];
+  if (extra) return extra;
   const hit = shellPageForPath(pathname);
-  return hit ? { section: hit.section.sectionName, page: hit.page.label } : null;
+  if (!hit) return null;
+  return { section: hit.section ? hit.section.label : hit.page.label, page: hit.page.label };
 }

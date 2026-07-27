@@ -17,7 +17,7 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
@@ -133,48 +133,24 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // (NavDrawer retired — shell follow-up P3: its last trigger left with CrumbStrip; the v2
   // rail + sidebar are the desktop navigation, the slim bar + BottomTabBar the mobile.)
 
-  // v2 shell — sidebar tuck (ref scriptally-shell-v2.html). Persisted under the app's `sa.`
-  // localStorage convention; ⌘\ toggles (skipped while an editable has focus). The rail stays
-  // visible when tucked, and a rail click untucks — the mockup's only untuck path is the chord,
-  // which is not enough affordance in the product.
-  const [sideTucked, setSideTucked] = useState<boolean>(() => {
-    try { return localStorage.getItem("sa.shellSideTucked") === "1"; } catch { return false; }
-  });
-  const setTuck = useCallback((next: boolean | ((v: boolean) => boolean)) => {
-    setSideTucked((prev) => {
-      const value = typeof next === "function" ? next(prev) : next;
-      try { localStorage.setItem("sa.shellSideTucked", value ? "1" : "0"); } catch { /* private mode */ }
-      return value;
-    });
-  }, []);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
-        const t = e.target as HTMLElement | null;
-        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
-        e.preventDefault();
-        setTuck((v) => !v);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [setTuck]);
+  // (The flat shell's sidebar tuck + ⌘\ chord retired with the masthead — capsule Phase 3;
+  // collapse behaviour is an open question, deliberately not built. The old
+  // sa.shellSideTucked localStorage key is orphaned — noted in the report.)
 
   // Chrome navigation — router-direct (new-code rule), clearing the global search the way the
-  // handleNavigate bridge does on real navigation. Rail clicks also untuck the sidebar.
+  // handleNavigate bridge does on real navigation.
   const navigate = useNavigate();
   const goPath = useCallback(
     (path: string) => {
       setSearchQuery("");
-      setTuck(false);
       navigate(path);
     },
-    [navigate, setSearchQuery, setTuck]
+    [navigate, setSearchQuery]
   );
 
   return (
     <div
-      className={`${THEME_CLASS[theme]} sv2-app${sideTucked ? " sv2-tucked" : ""}`}
+      className={`${THEME_CLASS[theme]} sv2-app`}
       data-sa-ground=""
       // The capsule GROUND — the warm grained field all three capsules float on (the paper
       // grain reuses the canonical PAGE_GRAIN data-URI inline; the CSS parser rejects it in
@@ -185,7 +161,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           only (class + media query in shellV2.css — never inline display). The interim layers
           (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
       <ShellRail onNavigatePath={goPath} />
-      <ShellSide tucked={sideTucked} onToggleTuck={() => setTuck((v) => !v)}>
+      <ShellSide>
         <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} />
       </ShellSide>
       <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>

@@ -2,33 +2,28 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ShellV2 — the v2 app-shell chrome (ref design-refs/scriptally-shell-v2.html): the 74px icon
- * rail (mono captions, tab-tongue active state), the 288px paper-grain sidebar frame with the
- * ScriptAlly masthead (section kicker + the account-level querying week), and the 56px canvas
- * top bar (breadcrumb · save-state chip · the shared NavSearch, focused by ⌘K).
+ * ShellV2 — the CAPSULE shell chrome (ref design-refs/scriptally-capsule-shell.html): the 70px
+ * icon rail capsule (burgundy plane glyph, icon-only ribs with tooltips, Setup + the avatar at
+ * the foot), the 288px panel capsule (the real brand artwork centred at its head; contents in
+ * ShellSidebar), and the content capsule's 58px top bar (breadcrumb · save-state chip · the
+ * shared NavSearch in its cream capsule variant, focused by ⌘K).
  *
- * Phase 2 of the shell rollout builds the FRAME; the sidebar contents below the masthead (nav,
- * manuscript switcher, task ledger, actions, Pro line, user block) arrive in Phase 3 through
- * ShellSide's `children` slot. Display of every sv2 element is class + media-query driven
- * (shellV2.css) — never inline. The paper grain reuses the canonical PAGE_GRAIN data-URI as an
- * inline style (the Tailwind v4 CSS parser rejects data-URIs in .css files — known trap).
- *
- * The masthead week number reuses weekOfQuerying (lib/dashboardStats) — the account-level
- * ISO-week derivation the dashboard greeting already renders; never manuscript-scoped.
+ * The flat shell's tab tongue, captions, masthead rule/kicker and tuck control are RETIRED
+ * (collapse behaviour is an open question — deliberately not built). Display of every sv2
+ * element is class + media-query driven (shellV2.css) — never inline.
  */
 import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { LayoutGrid, Send, Users, Book, Settings, PanelLeft } from "lucide-react";
+import { LayoutGrid, Send, Users, Book, Settings } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { weekOfQuerying } from "../../lib/dashboardStats";
 import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
-import { SHELL_SECTIONS, SHELL_SETUP, shellCrumbForPath, shellSectionKeyForPath } from "./shellV2Nav";
+import { SHELL_RAIL, SHELL_SETUP, shellCrumbForPath, shellSectionKeyForPath } from "./shellV2Nav";
 import "./shellV2.css";
 
-const SECTION_ICONS: Record<string, React.ComponentType<{ "aria-hidden"?: boolean | "true" }>> = {
-  desk: LayoutGrid,
-  queries: Send,
+const RAIL_ICONS: Record<string, React.ComponentType<{ "aria-hidden"?: boolean | "true" }>> = {
+  dashboard: LayoutGrid,
+  querying: Send,
   agents: Users,
   shelf: Book,
 };
@@ -40,10 +35,10 @@ const Mark: React.FC = () => (
   </svg>
 );
 
-/* ── icon rail ─────────────────────────────────────────────────────────────── */
+/* ── rail capsule ─────────────────────────────────────────────────────────── */
 
 export const ShellRail: React.FC<{
-  /** Navigate to a path, clearing the global search (and untucking the sidebar — AppShell's). */
+  /** Navigate to a path, clearing the global search (AppShell's goPath). */
   onNavigatePath: (path: string) => void;
 }> = ({ onNavigatePath }) => {
   const { pathname } = useLocation();
@@ -55,18 +50,18 @@ export const ShellRail: React.FC<{
     <nav className="sv2-rail sv2-cap" aria-label="Sections">
       <Mark />
       <div className="sv2-railnav">
-        {SHELL_SECTIONS.map((section) => {
-          const Icon = SECTION_ICONS[section.key];
-          const on = activeKey === section.key;
+        {SHELL_RAIL.map((rib) => {
+          const Icon = RAIL_ICONS[rib.key];
+          const on = activeKey === rib.key;
           return (
             <button
-              key={section.key}
+              key={rib.key}
               type="button"
               className={on ? "sv2-rib on" : "sv2-rib"}
               aria-current={on ? "page" : undefined}
-              title={section.caption}
-              aria-label={section.caption}
-              onClick={() => onNavigatePath(section.path)}
+              title={rib.caption}
+              aria-label={rib.caption}
+              onClick={() => onNavigatePath(rib.path)}
             >
               <Icon aria-hidden="true" />
             </button>
@@ -98,50 +93,27 @@ export const ShellRail: React.FC<{
   );
 };
 
-/* ── sidebar frame + masthead ─────────────────────────────────────────────── */
+/* ── panel capsule frame ──────────────────────────────────────────────────── */
 
 export const ShellSide: React.FC<{
-  tucked: boolean;
-  onToggleTuck: () => void;
-  /** Phase 3 slot — the sidebar contents below the masthead. */
+  /** The panel contents below the brand (ShellSidebarBody). */
   children?: React.ReactNode;
-}> = ({ tucked, onToggleTuck, children }) => {
-  const { pathname } = useLocation();
-  const { queries } = useScriptAllyDb();
-  const crumb = shellCrumbForPath(pathname);
-  return (
-    <aside className="sv2-side sv2-cap" aria-hidden={tucked || undefined}>
-      <div className="sv2-side-inner">
-        <div className="sv2-mh">
-          <div className="sv2-mhtop">
-            {/* The real brand artwork (shell follow-up P4) — the canonical height-locked
-                wordmark component (alt="ScriptAlly" rides inside it); constrained by height,
-                aspect preserved, never restyled. */}
-            <div className="sv2-mhname"><ScriptAllyLogo heightPx={22} /></div>
-            <button
-              type="button"
-              className="sv2-tuck"
-              onClick={onToggleTuck}
-              aria-pressed={tucked}
-              title="Tuck the sidebar (⌘\)"
-              aria-label="Tuck the sidebar"
-            >
-              <PanelLeft aria-hidden="true" />
-            </button>
-          </div>
-          <div className="sv2-mhrule" />
-          <div className="sv2-mhkick">
-            <span className="sv2-sect">{crumb?.section ?? "ScriptAlly"}</span>
-            <span>{weekOfQuerying(queries, new Date())}</span>
-          </div>
-        </div>
-        {children}
+}> = ({ children }) => (
+  <aside className="sv2-side sv2-cap">
+    <div className="sv2-side-inner">
+      {/* The real brand artwork, large and centred (capsule spec item 1) — the canonical
+          height-locked wordmark component; alt="ScriptAlly" rides inside it. Never restyled.
+          The Playfair wordmark, ink rule and mono kicker are retired (weekOfQuerying lives on
+          in dashboardStats for the dashboard's greeting). */}
+      <div className="sv2-wm">
+        <ScriptAllyLogo heightPx={30} />
       </div>
-    </aside>
-  );
-};
+      {children}
+    </div>
+  </aside>
+);
 
-/* ── top bar ──────────────────────────────────────────────────────────────── */
+/* ── top bar (inside the content capsule) ─────────────────────────────────── */
 
 export const ShellTopBar: React.FC<{
   routeKey: string;
@@ -155,7 +127,6 @@ export const ShellTopBar: React.FC<{
 
   // ⌘K — focus the global search. The To-do page owns its route-local ⌘K registration (one
   // live owner per route, the long-standing invariant), so this handler stands down there.
-  // The dashboard's DashTopBar retired in Phase 7 — this bar owns dashboard ⌘K now.
   useEffect(() => {
     if (routeKey === "todo") return;
     const onKey = (e: KeyboardEvent) => {
@@ -172,12 +143,16 @@ export const ShellTopBar: React.FC<{
     <header className="sv2-topbar">
       {crumb && (
         <div className="sv2-crumb">
-          <span>{crumb.section}</span>
-          <span className="sv2-sl">/</span>
+          {crumb.section !== crumb.page && (
+            <>
+              <span>{crumb.section}</span>
+              <span className="sv2-sl">/</span>
+            </>
+          )}
           <b>{crumb.page}</b>
         </div>
       )}
-      {/* Save-state chip — presentational for now: no live pending-writes source exists yet
+      {/* Save-state chip — presentational for now: no live pending-writes source exists
           (flagged in the rollout report); the chrome reserves the slot the pack bakes. */}
       <div className="sv2-state">
         <i aria-hidden="true" />

@@ -37,23 +37,20 @@ export function sidebarBoardTiles(input: Omit<BoardInput, "today">): LedgerTiles
   return ribbonTiles(board, hkGapCount(groups) + stale.length);
 }
 
-export interface LedgerRow {
-  key: "urgent" | "housekeeping" | "notes";
+export interface TaskPill {
+  key: "urgent" | "housekeeping";
   label: string;
   count: number;
 }
 
-/** Ledger rows with zero-count rows HIDDEN (the baked rule). Empty array === the quiet note. */
-export function ledgerRows(tiles: LedgerTiles): LedgerRow[] {
-  const rows: LedgerRow[] = [
+/** The capsule panel's two task pills (Urgent / House) — always both, live counts. Notes left
+ *  the sidebar summary with the ledger (capsule Phase 3); the board itself still shows them. */
+export function taskPills(tiles: LedgerTiles): TaskPill[] {
+  return [
     { key: "urgent", label: "Urgent", count: tiles.urgent },
-    { key: "housekeeping", label: "Housekeeping", count: tiles.housekeeping },
-    { key: "notes", label: "Notes", count: tiles.notes },
+    { key: "housekeeping", label: "House", count: tiles.housekeeping },
   ];
-  return rows.filter((r) => r.count > 0);
 }
-
-export const LEDGER_EMPTY_NOTE = "Tasks and reminders will appear here — nothing to show right now.";
 
 /** Nav count chips by shellV2Nav page key. Only cheaply-countable pages carry one. */
 export function sideNavCounts(input: {
@@ -95,5 +92,6 @@ export function resolveActiveManuscript(
   return manuscripts.find((m) => m.id === storedId) ?? manuscripts[0];
 }
 
-/** Pro line default copy — the pack's baked option A. */
-export const SHELL_PRO_COPY = "Unlock your full query log";
+/** The upgrade row's copy — the capsule pack's baked wording (supersedes the flat shell's
+ *  "Unlock your full query log" option A). */
+export const SHELL_PRO_COPY = "Upgrade to Pro";

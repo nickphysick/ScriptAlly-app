@@ -5,15 +5,14 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  LEDGER_EMPTY_NOTE,
   SHELL_PRO_COPY,
-  ledgerRows,
   localYMD,
   manuscriptInitials,
   manuscriptSubtitle,
   resolveActiveManuscript,
   sideNavCounts,
   sidebarBoardTiles,
+  taskPills,
 } from "./shellSidebar";
 import { Manuscript, Query, QueryStatus } from "../types";
 
@@ -31,16 +30,17 @@ describe("sidebarBoardTiles", () => {
   });
 });
 
-describe("ledgerRows — zero rows hidden (baked rule)", () => {
-  it("keeps only non-zero rows, in urgent → housekeeping → notes order", () => {
-    expect(ledgerRows({ urgent: 3, housekeeping: 0, notes: 2 }).map((r) => `${r.label} ${r.count}`)).toEqual([
-      "Urgent 3",
-      "Notes 2",
+describe("taskPills — the capsule panel's two pills (the ledger is superseded)", () => {
+  it("always both pills, live counts, mockup labels (House, not Housekeeping)", () => {
+    expect(taskPills({ urgent: 3, housekeeping: 41, notes: 2 })).toEqual([
+      { key: "urgent", label: "Urgent", count: 3 },
+      { key: "housekeeping", label: "House", count: 41 },
     ]);
   });
-  it("goes empty when everything is zero (the quiet note takes over)", () => {
-    expect(ledgerRows({ urgent: 0, housekeeping: 0, notes: 0 })).toEqual([]);
-    expect(LEDGER_EMPTY_NOTE).toBe("Tasks and reminders will appear here — nothing to show right now.");
+  it("zeros render as zeros — the pills never hide (notes left the sidebar summary)", () => {
+    const pills = taskPills({ urgent: 0, housekeeping: 0, notes: 5 });
+    expect(pills.map((p) => p.count)).toEqual([0, 0]);
+    expect(pills.some((p) => (p.key as string) === "notes")).toBe(false);
   });
 });
 
@@ -87,8 +87,8 @@ describe("localYMD", () => {
   });
 });
 
-describe("Pro line copy", () => {
-  it("is the pack-baked option A", () => {
-    expect(SHELL_PRO_COPY).toBe("Unlock your full query log");
+describe("Upgrade row copy", () => {
+  it("is the capsule pack's baked wording (supersedes the flat shell's option A)", () => {
+    expect(SHELL_PRO_COPY).toBe("Upgrade to Pro");
   });
 });
