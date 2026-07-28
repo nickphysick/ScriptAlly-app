@@ -23,6 +23,7 @@ import { ComponentType } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackageSaveFields } from "./packages/PackageWorkshop";
 import { WorkshopTab } from "./packages/WorkshopTab";
+import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
 import { PackageTabs, PackageTab } from "./packages/PackageTabs";
 import { PackageShowcase } from "./packages/PackageShowcase";
 import { Tour } from "./Tour";
@@ -55,6 +56,8 @@ export const SubmissionPackages: React.FC = () => {
   const [tab, setTab] = useState<PackageTab>("workshop");
   // Bumped by the header's "＋ New package" — the workshop opens a fresh draft on each change.
   const [newPkgSignal, setNewPkgSignal] = useState(0);
+  // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
+  const [scope, setScope] = useState<AnalyticsScope>("all");
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -238,14 +241,15 @@ export const SubmissionPackages: React.FC = () => {
             </div>
           ) : (
             <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
-              <div className="pkgw-nodata">
-                <h3>Nothing to measure yet</h3>
-                <p>
-                  Your packages haven&rsquo;t been attached to a query yet. Send one from the Queries Hub and this
-                  tab starts tracking what actually happens: how many agents reply, how quickly, and which version
-                  is carrying the requests.
-                </p>
-              </div>
+              <AnalyticsTab
+                versions={wsVersions}
+                packages={wsPackages}
+                queries={wsQueries}
+                agents={wsAgents}
+                activePackageId={tourActive ? null : activePkg?.id ?? null}
+                scope={scope}
+                onScope={setScope}
+              />
             </div>
           )}
         </>

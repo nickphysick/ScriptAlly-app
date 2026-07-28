@@ -16,6 +16,7 @@ import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, Quer
 import { PackageShowcase } from "./PackageShowcase";
 import { PackageTabs, PackageTab } from "./PackageTabs";
 import { WorkshopTab } from "./WorkshopTab";
+import { AnalyticsTab, AnalyticsScope } from "./AnalyticsTab";
 import { PageHeader } from "../shell/PageHeader";
 import "./packageWorkshop.css";
 import { Tour } from "../Tour";
@@ -40,16 +41,36 @@ const MOCK_PACKAGES: SubmissionPackage[] = [
   PK("p1", "Comp-led · v1", "v-ql1", "v-syn1", ""),
   PK("p2", "Hartley bespoke", "v-ql1", "v-syn1", "v-pg1"),
 ];
-const AG = (id: string, name: string, agency: string): Agent => ({ id, name, agency } as unknown as Agent);
+const AG = (id: string, name: string, agency: string): Agent => ({ id, name, agency, responseTimeWeeks: 8, noResponseMeansNo: false } as unknown as Agent);
 const MOCK_AGENTS: Agent[] = [AG("a1", "Hartley Books", "Hartley Lit"), AG("a2", "Vane & Co", ""), AG("a3", "Marsh Literary", ""), AG("a4", "Ash & Quill", "")];
-const Q = (packageId: string, i: number, status: QueryStatus): Query => ({ id: `q-${packageId}-${i}`, manuscriptId: "m", packageId, agentId: MOCK_AGENTS[i % MOCK_AGENTS.length].id, status } as unknown as Query);
-// n sends for a package, the first r of which reached a full request — enough for the analytics panel
-// to cross MIN_SENDS_FOR_CLAIM and show its full layout.
+// Dated so the analytics have real spans to work with: a send in week i, and — where the agent came
+// back — a reply 2–6 weeks later. The last send of each package is left silent and long overdue, so
+// the waiting/overdue treatments have something to render.
+const DAY = 86400000;
+const iso = (msAgo: number) => new Date(Date.parse("2026-07-28T00:00:00.000Z") - msAgo).toISOString().slice(0, 10);
+const Q = (packageId: string, i: number, status: QueryStatus, sentDaysAgo: number, replyAfterDays: number | null): Query => {
+  const base: Record<string, unknown> = {
+    id: `q-${packageId}-${i}`, manuscriptId: "m", packageId,
+    agentId: MOCK_AGENTS[i % MOCK_AGENTS.length].id, status, dateSent: iso(sentDaysAgo * DAY),
+  };
+  if (replyAfterDays !== null) {
+    const on = iso((sentDaysAgo - replyAfterDays) * DAY);
+    base.hasAgentResponded = true;
+    if (status === QueryStatus.FULL_REQUESTED) base.fullRequestedDate = on; else base.rejectedDate = on;
+  }
+  return base as unknown as Query;
+};
+/** n sends; the first r drew a full request, the next few were rejected, the last is still silent. */
 const sends = (packageId: string, n: number, r: number): Query[] =>
-  Array.from({ length: n }, (_, i) => Q(packageId, i, i < r ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED));
+  Array.from({ length: n }, (_, i) => {
+    const sentDaysAgo = 150 - i * 12;
+    if (i < r) return Q(packageId, i, QueryStatus.FULL_REQUESTED, sentDaysAgo, 14 + i * 7);
+    if (i < n - 1) return Q(packageId, i, QueryStatus.REJECTED, sentDaysAgo, 21 + i * 5);
+    return Q(packageId, i, QueryStatus.QUERIED, sentDaysAgo, null); // still out, well past any window
+  });
 const MOCK_QUERIES: Query[] = [
-  ...sends("p1", 5, 2), // 40% request rate
-  ...sends("p2", 6, 4), // 67% — the stronger package
+  ...sends("p1", 5, 1),
+  ...sends("p2", 6, 2),
 ];
 
 const proPill = (
@@ -68,6 +89,7 @@ export const PkgLab: React.FC = () => {
   const [pulseAdd, setPulseAdd] = useState(false);
   const [tab, setTab] = useState<PackageTab>("workshop");
   const [newPkgSignal, setNewPkgSignal] = useState(0);
+  const [scope, setScope] = useState<AnalyticsScope>("all");
   // Stateful so the workshop's create/save round-trips in the lab.
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
   const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES);
@@ -127,14 +149,16 @@ export const PkgLab: React.FC = () => {
         {mockSlab}
         {tab === "analytics" ? (
           <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
-            <div className="pkgw-nodata">
-              <h3>Nothing to measure yet</h3>
-              <p>
-                Your packages haven&rsquo;t been attached to a query yet. Send one from the Queries Hub and this tab
-                starts tracking what actually happens: how many agents reply, how quickly, and which version is
-                carrying the requests.
-              </p>
-            </div>
+            <AnalyticsTab
+              versions={view === "empty" ? emptyVersions : versions}
+              packages={view === "empty" ? emptyPackages : pkgs}
+              queries={view === "empty" ? [] : MOCK_QUERIES}
+              agents={MOCK_AGENTS}
+              activePackageId="p2"
+              scope={scope}
+              onScope={setScope}
+              now={Date.parse("2026-07-28T00:00:00.000Z")}
+            />
           </div>
         ) : view === "empty" ? (
           <WorkshopTab
