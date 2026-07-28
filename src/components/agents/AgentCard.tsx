@@ -17,7 +17,9 @@ import React from "react";
 import { Pencil, Send } from "lucide-react";
 import { Agent, Activity, Manuscript, Query } from "../../types";
 import { agentInitials, agentPrimary, agentSecondary } from "../../lib/agentDisplay";
+import { countryName, flagFor } from "../../lib/territory";
 import { StatusDot } from "../StatusDot";
+import "flag-icons/css/flag-icons.min.css";
 import {
   agentRelationship,
   agentStateClass,
@@ -80,6 +82,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
   const materials = materialsSummary(agent);
   const preview = notePreview(agent);
   const website = (agent.website || "").trim();
+  // WHERE they are. The flag comes from the installed flag-icons set (a class, not markup), so
+  // every country resolves without hand-drawing SVGs. Absent country ⇒ no flag; absent city ⇒ the
+  // country name stands in, because an empty line reads as missing data rather than as absence.
+  const flagClass = flagFor(agent.country);
+  const locationText = (agent.city || "").trim() || countryName(agent.country) || "";
 
   return (
     <div className={`agl-scene ${stateClass}`}>
@@ -111,6 +118,15 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
               <div className="agl-who">
                 <div className="agl-name">{agentPrimary(agent)}</div>
                 <div className="agl-agency">{agentSecondary(agent)}</div>
+                {/* WHERE they are — between the agency and the mono meta line. Rendered only when
+                    the agent actually has a location: no country and no city means nothing to say,
+                    and a placeholder would be noise on every unlocated record. */}
+                {locationText && (
+                  <div className="agl-loc">
+                    {flagClass && <span className={`fl ${flagClass}`} aria-hidden="true" />}
+                    <span className="ct">{locationText}</span>
+                  </div>
+                )}
                 <div className="agl-meta">
                   {metaTokens(agent).map((t, i) => (
                     <React.Fragment key={t}>

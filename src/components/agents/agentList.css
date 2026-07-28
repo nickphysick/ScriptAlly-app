@@ -332,6 +332,22 @@
   color: var(--agl-ink-muted); margin-top: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* ── location line: flag + city, between the agency and the meta ──────────
+   THE FLAG IS FLAT. No border, no ring, no shadow — each of those reads as a
+   bevel at 14×10 and turns a national flag into a button. Radius 1.5px and
+   overflow:hidden are the whole treatment. `flag-icons` paints via background,
+   so the size + radius here are all that's needed. */
+.aglist .agl-loc {
+  display: flex; align-items: center; gap: 7px; margin-top: 7px;
+  font-size: 11.5px; color: var(--agl-ink-muted); min-width: 0;
+}
+.aglist .agl-loc .fl {
+  width: 14px; height: 10px; flex: none; display: block;
+  border-radius: 1.5px; overflow: hidden;
+  background-size: cover; background-position: center;
+}
+.aglist .agl-loc .ct { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .aglist .agl-meta {
   display: flex; align-items: center; gap: 7px; margin-top: 7px; flex-wrap: wrap;
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px;

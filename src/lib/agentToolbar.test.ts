@@ -126,6 +126,45 @@ describe("agent list · group sections reuse the To-do board's pattern", () => {
   });
 });
 
+/**
+ * THE CARD'S LOCATION LINE (phase 5) — and the one thing the mockup draws that we deliberately
+ * do NOT build.
+ */
+describe("agent list · the location line", () => {
+  const card = readFileSync(new URL("../components/agents/AgentCard.tsx", import.meta.url), "utf8");
+
+  it("THE FLAG IS FLAT — a border, ring or shadow at 14×10 reads as a bevelled button", () => {
+    const fl = block(".aglist .agl-loc .fl");
+    expect(fl, "the flag lost its 14px width — the line's rhythm is built on the flag being smaller than the text beside it").toContain("width: 14px");
+    expect(fl, "the flag lost its 10px height").toContain("height: 10px");
+    expect(fl, "the flag radius drifted off 1.5px — sharper reads as a sticker, rounder as a chip").toContain("border-radius: 1.5px");
+    expect(fl, "the flag lost overflow:hidden, so the artwork will square off its own corners and the radius does nothing").toContain("overflow: hidden");
+    expect(fl, "a BORDER reached the flag — at this size a hairline reads as a bevel and turns a national flag into a button (the exact look this rule exists to prevent)").not.toMatch(/border:/);
+    expect(fl, "a SHADOW reached the flag — same objection: it bevels").not.toMatch(/box-shadow/);
+  });
+
+  it("sits between the agency and the mono meta, and only when there is a location to state", () => {
+    const i = card.indexOf('className="agl-agency"');
+    const loc = card.indexOf('className="agl-loc"');
+    const meta = card.indexOf('className="agl-meta"');
+    expect(loc > i, "the location line moved above the agency — it belongs under the name block, not between name and agency").toBe(true);
+    expect(loc < meta, "the location line fell below the mono meta line — it reads as part of the identity, above the response/method tokens").toBe(true);
+    expect(card, "the location line renders unconditionally — an agent with no country and no city would get an empty row, which reads as missing data rather than as nothing to say").toContain("{locationText && (");
+  });
+
+  it("the city is the useful half; the country name only stands in when no city is recorded", () => {
+    expect(card, "the fallback chain changed — the city is what a writer recognises, and the country name is the stand-in, not the other way round").toContain('(agent.city || "").trim() || countryName(agent.country)');
+  });
+
+  it("NO attention markers on this page — the mockup's 'Your move' pill is deliberately unbuilt", () => {
+    expect(
+      card,
+      "a 'Your move' pill appeared on the card — this page is REFERENCE DATA; attention and urgency belong to the To-do board alone, and duplicating them gives the same fact two homes that will disagree",
+    ).not.toMatch(/Your move/);
+    expect(card, "an urgency/attention marker crept onto the card face").not.toMatch(/urgent|overdue|attention/i);
+  });
+});
+
 describe("agent list · applied tags keep the popover honest", () => {
   it("the tags render OUTSIDE the popover, one per applied value, each removable", () => {
     expect(page, "the applied-tag row left the page — closing the popover would then hide what is filtering the list").toContain("<AgentAppliedTags");
