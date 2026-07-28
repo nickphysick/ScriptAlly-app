@@ -21,14 +21,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Filter, Rows3, Search, SlidersHorizontal } from "lucide-react";
 import {
+  AgentDoor,
   AgentFilterSet,
   AgentStanding,
   AgentTurn,
+  DOOR_LABEL,
+  DOOR_ORDER,
   STANDING_LABEL,
   STANDING_ORDER,
   TURN_LABEL,
   TURN_ORDER,
   AgentAxisCounts,
+  emptyFilterSet,
   filterCount,
 } from "../../lib/agentList";
 import { countryName } from "../../lib/territory";
@@ -220,6 +224,24 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
         ))}
 
         <div className="agl-pdiv" />
+        {/* THEIR DOOR — its own axis, not a value of "where things stand". Their submission
+            status and your query history are facts about different systems: an agency can shut
+            its doors while still holding your full, and both facts stay true. */}
+        <div className="agl-pk">
+          Their door
+          <span className="hint">Independent of your history with them</span>
+        </div>
+        {DOOR_ORDER.map((k: AgentDoor) => (
+          <Row
+            key={k}
+            label={DOOR_LABEL[k]}
+            count={counts.door[k]}
+            on={filters.door.includes(k)}
+            onToggle={() => toggle("door", k)}
+          />
+        ))}
+
+        <div className="agl-pdiv" />
         <div className="agl-pk">Star rating</div>
         {starCounts.map(({ min, n }) => (
           <Row
@@ -248,7 +270,9 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
         )}
 
         <div className="agl-pfoot">
-          <button type="button" className="lnk" onClick={() => onFilters({ standing: [], turn: [], stars: [], loc: [] })}>
+          {/* emptyFilterSet(), never a literal — a hand-written list silently misses a new facet
+              the day one is added (which is exactly what happened when the door axis arrived). */}
+          <button type="button" className="lnk" onClick={() => onFilters(emptyFilterSet())}>
             Clear all
           </button>
           {/* The primary states the live result, so ticking a box answers "how many?" before

@@ -37,12 +37,14 @@ import { agentRelationship } from "../../lib/agentList";
 import {
   AGENT_GROUP_OPTIONS,
   AGENT_SORT_OPTIONS,
+  AgentDoor,
   AgentFilterSet,
   AgentGrouping,
   AgentListSort,
   AgentStanding,
   AgentTurn,
   DEFAULT_AGENT_SORT,
+  DOOR_LABEL,
   STANDING_LABEL,
   TURN_LABEL,
   agentAxisCounts,
@@ -108,6 +110,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     return [
       ...filters.standing.map((k) => ({ label: STANDING_LABEL[k as AgentStanding], onRemove: drop("standing", k) })),
       ...filters.turn.map((k) => ({ label: TURN_LABEL[k as Exclude<AgentTurn, null>], onRemove: drop("turn", k) })),
+      ...filters.door.map((k) => ({ label: DOOR_LABEL[k as AgentDoor], onRemove: drop("door", k) })),
       ...filters.stars.map((n) => ({ label: `${"★".repeat(n)} and up`, onRemove: drop("stars", n) })),
       ...filters.loc.map((c) => ({ label: countryName(c) || c, onRemove: drop("loc", c) })),
     ];

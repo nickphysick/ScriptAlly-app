@@ -78,11 +78,26 @@ describe("agent list · the three controls are one instrument", () => {
 });
 
 describe("agent list · the filters popover", () => {
-  it("carries both axes with their hints, and the axes are labelled from ONE source", () => {
+  it("carries all THREE axes with their hints, and the axes are labelled from ONE source", () => {
     expect(bar, "the 'where things stand' section lost its hint — the hint is what teaches that the axis is exclusive").toContain("One of these applies to each agent");
-    expect(bar, "the 'whose turn' section lost its hint — without it the axis reads as a peer of standing, which is the bug this rebuild fixed").toContain("Applies within active queries");
+    expect(bar, "the 'whose turn' section lost its hint — without it the axis reads as a peer of standing, which is the bug the rebuild fixed").toContain("Applies within active queries");
+    expect(bar, "the 'their door' section lost its hint — the hint is what stops a reader treating a closed door as a kind of history").toContain("Independent of your history with them");
     expect(bar, "the popover started wording the standings itself instead of reading STANDING_LABEL").toContain("STANDING_LABEL[k]");
     expect(bar, "the popover started wording the turn values itself instead of reading TURN_LABEL").toContain("TURN_LABEL[k]");
+    expect(bar, "the popover started wording the door itself instead of reading DOOR_LABEL").toContain("DOOR_LABEL[k]");
+  });
+
+  it("THEIR DOOR is its own section, not a value inside 'where things stand'", () => {
+    // search the RENDER body only — the file's own doc comment mentions these words too
+    const body = bar.slice(bar.indexOf("export const AgentToolbar"));
+    const stand = body.indexOf("Where things stand");
+    const door = body.indexOf("Their door");
+    const turn = body.indexOf("Whose turn");
+    expect(door, "the 'Their door' section vanished — a closed door has been folded back into the standing list, which is the precedence bug in UI form").toBeGreaterThan(-1);
+    expect(door > turn && turn > stand, "the popover's section order changed — history, then whose turn within it, then their door as a separate system").toBe(true);
+    // the door values must NOT appear among the standing rows
+    const standSection = body.slice(stand, turn);
+    expect(standSection, "a door value is being rendered inside the 'where things stand' section").not.toMatch(/DOOR_LABEL|Closed for submissions/);
   });
 
   it("a ZERO-COUNT option stays visible and inert — never hidden", () => {
@@ -95,7 +110,10 @@ describe("agent list · the filters popover", () => {
   it("the footer states the LIVE result and offers a clear — it is not an Apply gate", () => {
     expect(bar, "the footer's primary stopped stating the live count — ticking a box should answer 'how many?' before you close the popover").toContain("Show {resultCount}");
     expect(bar, "the count stopped being singular-safe at one agent").toContain('resultCount === 1 ? "agent" : "agents"');
-    expect(bar, "Clear all stopped emptying every facet").toContain("onFilters({ standing: [], turn: [], stars: [], loc: [] })");
+    expect(
+      bar,
+      "Clear all went back to a hand-written facet list — it then silently misses any facet added later, which is exactly what happened when the door axis arrived; it must call emptyFilterSet()",
+    ).toContain("onFilters(emptyFilterSet())");
   });
 
   it("Escape closes the popover and goes NO further", () => {
