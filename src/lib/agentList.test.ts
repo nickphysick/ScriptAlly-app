@@ -33,6 +33,17 @@ import {
   AGENT_SORT_OPTIONS,
   sortAgentList,
   matchesAgentLocation,
+  agentStanding,
+  agentTurn,
+  agentAxisCounts,
+  STANDING_LABEL,
+  TURN_LABEL,
+  emptyFilterSet,
+  matchesFilterSet,
+  filterCount,
+  isFilterSetEmpty,
+  starTierCount,
+  locationCounts,
 } from "./agentList";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 
@@ -157,6 +168,165 @@ describe("agentList · filters, search and counts", () => {
   it("count line is singular-safe", () => {
     expect(agentCountLine(5, 5)).toBe("5 of 5 agents");
     expect(agentCountLine(0, 1)).toBe("0 of 1 agent");
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THE TWO AXES — the reconciliation locks are the point of the rebuild's phase 1.
+   The bug they exist to prevent: "Awaiting your pages" counted as a PEER of "Active
+   queries", so the filter counts summed past the agent total (12 + 3 + 4 = 19 of 16)
+   and ticking both returned the union instead of the intersection.
+   ════════════════════════════════════════════════════════════════════════════ */
+describe("agentList · axis A (where things stand) partitions the list", () => {
+  const agents = [
+    mkAgent({ id: "act" }),
+    mkAgent({ id: "wait" }),
+    mkAgent({ id: "prev" }),
+    mkAgent({ id: "nev" }),
+    mkAgent({ id: "shut", submissionStatus: SubmissionStatus.CLOSED }),
+    mkAgent({ id: "shutlive", submissionStatus: SubmissionStatus.CLOSED }),
+  ];
+  const queries = [
+    mkQuery({ id: "q1", agentId: "act", status: QueryStatus.QUERIED }),
+    mkQuery({ id: "q2", agentId: "wait", status: QueryStatus.FULL_REQUESTED }),
+    mkQuery({ id: "q3", agentId: "prev", status: QueryStatus.REJECTED }),
+    mkQuery({ id: "q4", agentId: "shutlive", status: QueryStatus.QUERIED }),
+  ];
+
+  it("AXIS A COUNTS SUM TO THE AGENT TOTAL — the invariant the old chip row broke", () => {
+    const c = agentAxisCounts(agents, queries);
+    const sum = c.standing.active + c.standing.noactive + c.standing.never + c.standing.closed;
+    expect(sum).toBe(c.total);
+    expect(c.total).toBe(agents.length);
+  });
+
+  it("every agent lands in exactly one standing", () => {
+    expect(agentStanding(agents[0], queries)).toBe("active");
+    expect(agentStanding(agents[1], queries)).toBe("active"); // awaiting pages is INSIDE active
+    expect(agentStanding(agents[2], queries)).toBe("noactive");
+    expect(agentStanding(agents[3], queries)).toBe("never");
+    expect(agentStanding(agents[4], queries)).toBe("closed");
+  });
+
+  it("the door outranks history — a closed agent with a live query still reads Closed", () => {
+    expect(agentStanding(agents[5], queries)).toBe("closed");
+    expect(agentAxisCounts(agents, queries).standing.closed).toBe(2);
+  });
+
+  it("Unknown is not Closed, so it never leaves the open standings", () => {
+    const unknown = mkAgent({ id: "u", submissionStatus: SubmissionStatus.UNKNOWN });
+    expect(agentStanding(unknown, [])).toBe("never");
+  });
+});
+
+describe("agentList · axis B (whose turn) lives INSIDE active queries", () => {
+  const agents = [
+    mkAgent({ id: "you1" }),
+    mkAgent({ id: "you2" }),
+    mkAgent({ id: "them1" }),
+    mkAgent({ id: "them2" }),
+    mkAgent({ id: "prev" }),
+    mkAgent({ id: "nev" }),
+    mkAgent({ id: "shut", submissionStatus: SubmissionStatus.CLOSED }),
+  ];
+  const queries = [
+    mkQuery({ id: "q1", agentId: "you1", status: QueryStatus.PARTIAL_REQUESTED }),
+    mkQuery({ id: "q2", agentId: "you2", status: QueryStatus.REVISE_RESUBMIT }),
+    mkQuery({ id: "q3", agentId: "them1", status: QueryStatus.QUERIED }),
+    mkQuery({ id: "q4", agentId: "them2", status: QueryStatus.FULL_SENT }),
+    mkQuery({ id: "q5", agentId: "prev", status: QueryStatus.REJECTED }),
+    mkQuery({ id: "q6", agentId: "shut", status: QueryStatus.FULL_REQUESTED }),
+  ];
+
+  it("AXIS B COUNTS SUM TO THE ACTIVE COUNT — never to the agent total", () => {
+    const c = agentAxisCounts(agents, queries);
+    expect(c.turn.you + c.turn.them).toBe(c.standing.active);
+    expect(c.turn.you + c.turn.them).toBeLessThan(c.total);
+  });
+
+  it("the axis simply does not apply outside active queries", () => {
+    expect(agentTurn(agents[4], queries)).toBeNull(); // only terminal queries
+    expect(agentTurn(agents[5], queries)).toBeNull(); // never queried
+    expect(agentTurn(agents[6], queries)).toBeNull(); // closed door outranks the live query
+  });
+
+  it("'you' is the CTA engine's writer's-turn, not a second status list", () => {
+    // the three writer's-turn statuses, straight from getPrimaryAction
+    expect(agentTurn(agents[0], queries)).toBe("you");
+    expect(agentTurn(agents[1], queries)).toBe("you");
+    expect(agentTurn(agents[2], queries)).toBe("them");
+    expect(agentTurn(agents[3], queries)).toBe("them");
+    // Offer is active but nobody owes pages — no primary writer action ⇒ them
+    expect(agentTurn(mkAgent({ id: "off" }), [mkQuery({ id: "qo", agentId: "off", status: QueryStatus.OFFER })])).toBe("them");
+  });
+
+  it("one writer's-turn query among several claims the agent", () => {
+    const multi = [
+      mkQuery({ id: "m1", agentId: "m", status: QueryStatus.QUERIED }),
+      mkQuery({ id: "m2", agentId: "m", status: QueryStatus.FULL_REQUESTED }),
+    ];
+    expect(agentTurn(mkAgent({ id: "m" }), multi)).toBe("you");
+  });
+});
+
+describe("agentList · the filter set intersects across axes", () => {
+  const you = mkAgent({ id: "you", starRating: 5, country: "GB" });
+  const them = mkAgent({ id: "them", starRating: 3, country: "US" });
+  const prev = mkAgent({ id: "prev", starRating: 4, country: "GB" });
+  const agents = [you, them, prev];
+  const queries = [
+    mkQuery({ id: "q1", agentId: "you", status: QueryStatus.PARTIAL_REQUESTED }),
+    mkQuery({ id: "q2", agentId: "them", status: QueryStatus.QUERIED }),
+    mkQuery({ id: "q3", agentId: "prev", status: QueryStatus.REJECTED }),
+  ];
+  const ids = (f: Parameters<typeof matchesFilterSet>[2]) =>
+    agents.filter((a) => matchesFilterSet(a, queries, f)).map((a) => a.id);
+
+  it("an empty set constrains nothing", () => {
+    const f = emptyFilterSet();
+    expect(isFilterSetEmpty(f)).toBe(true);
+    expect(filterCount(f)).toBe(0);
+    expect(ids(f)).toEqual(["you", "them", "prev"]);
+  });
+
+  it("standing + turn INTERSECT — the union bug, locked shut", () => {
+    // both ticked: active AND awaiting-your-pages ⇒ only the writer's-turn agent
+    expect(ids({ ...emptyFilterSet(), standing: ["active"], turn: ["you"] })).toEqual(["you"]);
+    // the old union behaviour would have returned "you" and "them" here
+    expect(ids({ ...emptyFilterSet(), standing: ["active"] })).toEqual(["you", "them"]);
+  });
+
+  it("ticks within one facet are alternatives", () => {
+    expect(ids({ ...emptyFilterSet(), standing: ["noactive", "active"] })).toEqual(["you", "them", "prev"]);
+    expect(ids({ ...emptyFilterSet(), turn: ["you", "them"] })).toEqual(["you", "them"]);
+  });
+
+  it("stars take the LOWEST tick, and location matches the ISO code", () => {
+    expect(ids({ ...emptyFilterSet(), stars: [4] })).toEqual(["you", "prev"]);
+    expect(ids({ ...emptyFilterSet(), stars: [4, 3] })).toEqual(["you", "them", "prev"]);
+    expect(ids({ ...emptyFilterSet(), loc: ["GB"] })).toEqual(["you", "prev"]);
+    expect(ids({ ...emptyFilterSet(), loc: ["GB", "US"] })).toEqual(["you", "them", "prev"]);
+  });
+
+  it("the popover's own row counts read the whole list", () => {
+    expect(starTierCount(agents, 4)).toBe(2);
+    expect(starTierCount(agents, 3)).toBe(3);
+    expect(locationCounts(agents)).toEqual([{ code: "GB", n: 2 }, { code: "US", n: 1 }]);
+  });
+});
+
+describe("agentList · axis vocabulary is worded once", () => {
+  it("standing labels reuse the existing page words — no third term for never-queried", () => {
+    expect(STANDING_LABEL.active).toBe("Active queries");
+    expect(STANDING_LABEL.noactive).toBe("No active queries");
+    expect(STANDING_LABEL.closed).toBe("Closed for submissions");
+    // the codebase says "Never queried"; the mockup's word is the same, and relationshipLabel agrees
+    expect(STANDING_LABEL.never).toBe("Never queried");
+    expect(STANDING_LABEL.never).toBe(relationshipLabel("never"));
+  });
+  it("turn labels", () => {
+    expect(TURN_LABEL.you).toBe("Awaiting your pages");
+    expect(TURN_LABEL.them).toBe("Waiting on the agent");
   });
 });
 

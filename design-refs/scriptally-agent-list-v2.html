@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<!-- Committed design reference — Agent list rebuild v2 (28 Jul 2026). APPROVED, with ONE
+     REJECTION: the burgundy "Your move" pill this file draws on cards is NOT built. The agent
+     list is reference data, not a worklist — attention and urgency states belong to the To-do
+     board alone, and duplicating them here would give the same fact two competing homes.
+     Everything else stands. Body face: the app renders Source Sans Pro, not this file's Inter
+     (long-standing app rule). -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Agent list</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9; --slate:#6a89a7; --tan:#efe7db;
+  --ground:#e7e0d5; --rail-s:#f1ebe3; --plane-s:#fdfbf8; --fill:#efe8df;
+  --card:#fdfaf5; --line:#e3d9cf; --linesoft:#ece3da;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{width:100%;font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.app{height:100vh;width:100%;display:flex;gap:12px;padding:10px}
+.cap{border-radius:18px;box-shadow:0 10px 30px rgba(58,28,20,.09)}
+
+.rail{width:64px;flex:none;background:var(--rail-s);display:flex;flex-direction:column;align-items:center;padding:14px 0 13px}
+.rail .mk{width:24px;height:24px;color:var(--burgundy);margin-bottom:20px;flex:none}
+.rib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#a89a8a;margin-bottom:6px;cursor:pointer}
+.rib svg{width:18px;height:18px}
+.rib.on{background:var(--ground);color:var(--burgundy)}
+.rail .sp{flex:1}
+.rail .av{width:34px;height:34px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:12px;color:var(--burgundy)}
+
+.plane{flex:1;min-width:0;background:var(--plane-s);display:flex;flex-direction:column;overflow:hidden}
+.tb{height:54px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.grow{flex:1}
+.gs{display:flex;align-items:center;gap:9px;width:250px;height:33px;padding:0 11px;background:var(--fill);border-radius:10px;color:var(--muted);font-size:12.5px}
+.gs svg{width:14px;height:14px}
+/* generous side padding, and the column centres on wide screens */
+.pg{flex:1;overflow-y:auto;padding:28px 60px 48px}
+.pg::-webkit-scrollbar{width:7px}
+.pg::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.inner{max-width:1240px;margin:0 auto}
+
+.phtop{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+h1.t{font-family:"Playfair Display",serif;font-size:36px;font-weight:500;letter-spacing:-.015em;line-height:1.05}
+.sub{font-family:"Playfair Display",serif;font-size:16px;color:var(--ink-soft);margin-top:9px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:11px;border:1px solid var(--pink-line);background:var(--pink);color:var(--burgundy);font-size:12.5px;white-space:nowrap;cursor:pointer}
+.btn svg{width:15px;height:15px}
+.phr{height:1px;background:var(--linesoft);margin:18px 0 0}
+
+.line{display:flex;align-items:center;gap:10px;margin-top:22px;position:relative;z-index:20}
+.srch{display:flex;align-items:center;gap:9px;flex:1;max-width:300px;height:36px;padding:0 12px;background:var(--fill);border-radius:10px;color:var(--muted);font-size:12.5px}
+.srch svg{width:14px;height:14px}
+.ctl{display:inline-flex;align-items:center;gap:9px;height:36px;padding:0 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--ink);cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s}
+.ctl:hover{border-color:#cfc2b4}
+.ctl.act{border-color:var(--pink-line);background:var(--pink);color:var(--burgundy)}
+.ctl svg{width:15px;height:15px;color:var(--muted)}
+.ctl.act svg{color:var(--burgundy)}
+.ctl .cv{width:12px;height:12px}
+.ctl .badge{font-family:"JetBrains Mono",monospace;font-size:8.5px;background:var(--burgundy);color:#fff;border-radius:99px;padding:2px 7px}
+.push{margin-left:auto}
+.cnt{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+
+.applied{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.atag{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:99px;background:var(--pink);color:var(--burgundy);font-size:11.5px;cursor:pointer}
+.atag .x{opacity:.55;font-size:10px}
+.clr{font-size:11.5px;color:var(--muted);cursor:pointer}
+.clr:hover{color:var(--ink)}
+
+.pw{position:relative}
+.pop{position:absolute;top:calc(100% + 8px);left:0;width:288px;background:var(--plane-s);border:1px solid var(--line);border-radius:15px;box-shadow:0 16px 40px rgba(58,28,20,.18);padding:8px;opacity:0;transform:translateY(-5px);pointer-events:none;transition:opacity .14s,transform .14s;z-index:60}
+.pw.open .pop{opacity:1;transform:translateY(0);pointer-events:auto}
+.pop.narrow{width:212px}
+.pk{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:9px 11px 7px}
+.pk .hint{text-transform:none;letter-spacing:0;font-family:"Inter",sans-serif;font-size:10px;color:#bcb0a3;display:block;margin-top:3px}
+.orow{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:10px;font-size:12.5px;color:var(--ink-soft);cursor:pointer}
+.orow:hover{background:var(--fill);color:var(--ink)}
+.orow .box{width:15px;height:15px;border-radius:4px;border:1.5px solid #cfc2b4;flex:none;display:grid;place-items:center;background:#fff}
+.orow.sel .box{background:var(--burgundy);border-color:var(--burgundy)}
+.orow .box svg{width:9px;height:9px;color:#fff;opacity:0}
+.orow.sel .box svg{opacity:1}
+.orow .lb{flex:1}
+.orow .ct{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
+.orow.off{opacity:.4;cursor:default}
+.orow .tick{width:14px;height:14px;color:var(--burgundy);opacity:0;flex:none}
+.orow.sel .tick{opacity:1}
+.orow .stars{color:#c8853f;font-size:11px;letter-spacing:1px}
+.pdiv{height:1px;background:var(--linesoft);margin:7px 11px}
+.pfoot{display:flex;align-items:center;gap:9px;padding:9px 8px 4px;margin-top:5px;border-top:1px solid var(--linesoft)}
+.pfoot .lnk{font-size:12px;color:var(--muted);cursor:pointer;padding-left:4px}
+.pfoot .lnk:hover{color:var(--ink)}
+.pfoot .go{margin-left:auto;display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:10px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:12px;cursor:pointer}
+
+.gsec{display:flex;align-items:baseline;gap:11px;margin:38px 0 5px}
+.gsec h2{font-family:"Playfair Display",serif;font-size:23px;font-weight:500}
+.gsec .cn{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.gsec .st2{color:#c8853f;font-size:13px;letter-spacing:2px}
+.grule{height:2px;border-radius:2px;margin-bottom:18px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:14px}
+.wrap0{margin-top:22px}
+.ac{background:#fff;border:1px solid var(--ink);border-radius:11px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07)}
+.ac .band{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid var(--ink)}
+.ac .band .st{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:3px 9px}
+.ac .band .turn{display:inline-flex;align-items:center;gap:5px;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;background:var(--burgundy);color:#fff;border-radius:99px;padding:3px 9px}
+.ac .band .stars{margin-left:auto;color:#c8853f;font-size:11px;letter-spacing:1px}
+.ac .band .ed{width:22px;height:22px;border-radius:99px;border:1px solid rgba(46,39,35,.45);display:grid;place-items:center;background:#fff;flex:none}
+.ac .band .ed svg{width:11px;height:11px}
+.ac .bd{padding:14px}
+.ac .who{display:flex;align-items:flex-start;gap:11px}
+.ac .av2{width:42px;height:42px;border-radius:99px;flex:none;background:var(--fill);border:1px solid var(--line);display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-soft)}
+.ac .nm{font-family:"Playfair Display",serif;font-size:19px;line-height:1.1;display:block}
+.ac .ag{font-family:"Playfair Display",serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:3px;display:block}
+.ac .loc{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11.5px;color:var(--ink-soft)}
+/* flat flag — no border, no shadow */
+.ac .loc .fl{width:14px;height:10px;border-radius:1.5px;flex:none;overflow:hidden;display:block}
+.ac .loc .fl svg{display:block;width:100%;height:100%}
+.ac .meta{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:7px;display:block}
+.ac .sect{margin-top:13px;padding-top:11px;border-top:1px solid var(--linesoft)}
+.ac .sl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.ac .hist{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.ac .hist .d{width:15px;height:15px;flex:none}
+.ac .none{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="cap rail">
+    <svg class="mk" viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></div>
+    <div class="rib on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></div>
+    <div class="sp"></div>
+    <div class="rib" style="margin-bottom:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></div>
+    <div class="av">ML</div>
+  </nav>
+
+  <main class="cap plane">
+    <div class="tb">
+      <span class="crumb">Agents / <b>Agent list</b></span>
+      <div class="grow"></div>
+      <div class="gs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…</div>
+    </div>
+
+    <div class="pg"><div class="inner">
+      <div class="phtop">
+        <div>
+          <h1 class="t">Your agent list</h1>
+          <div class="sub">Everyone you're querying, watching, or saving for later.</div>
+        </div>
+        <span class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add new agent</span>
+      </div>
+      <div class="phr"></div>
+
+      <div class="line">
+        <span class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search agents or agencies…</span>
+
+        <span class="pw" id="pwF">
+          <span class="ctl" id="btnF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg>Filters
+            <span class="badge" id="fbadge" style="display:none">0</span>
+            <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </span>
+          <span class="pop">
+            <div class="pk">Where things stand<span class="hint">One of these applies to each agent</span></div>
+            <div class="orow" data-f="status" data-v="active"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">Active queries</span><span class="ct">12</span></div>
+            <div class="orow" data-f="status" data-v="noactive"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">No active queries</span><span class="ct">4</span></div>
+            <div class="orow off"><span class="box"></span><span class="lb">Never queried</span><span class="ct">0</span></div>
+            <div class="orow off"><span class="box"></span><span class="lb">Closed for submissions</span><span class="ct">0</span></div>
+            <div class="pdiv"></div>
+            <div class="pk">Whose turn<span class="hint">Applies within active queries</span></div>
+            <div class="orow" data-f="turn" data-v="you"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">Awaiting your pages</span><span class="ct">3</span></div>
+            <div class="orow" data-f="turn" data-v="them"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">Waiting on the agent</span><span class="ct">9</span></div>
+            <div class="pdiv"></div>
+            <div class="pk">Star rating</div>
+            <div class="orow" data-f="stars" data-v="4"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb"><span class="stars">★★★★</span> and up</span><span class="ct">5</span></div>
+            <div class="orow" data-f="stars" data-v="3"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb"><span class="stars">★★★</span> and up</span><span class="ct">13</span></div>
+            <div class="pdiv"></div>
+            <div class="pk">Location</div>
+            <div class="orow" data-f="loc" data-v="GB"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">United Kingdom</span><span class="ct">11</span></div>
+            <div class="orow" data-f="loc" data-v="US"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">United States</span><span class="ct">3</span></div>
+            <div class="orow" data-f="loc" data-v="IE"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span><span class="lb">Ireland</span><span class="ct">2</span></div>
+            <div class="pfoot"><span class="lnk" id="clrAll">Clear all</span><span class="go" id="applyF">Show 16 agents</span></div>
+          </span>
+        </span>
+
+        <span class="pw" id="pwG">
+          <span class="ctl" id="btnG">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.6"/><rect x="3" y="14" width="18" height="6" rx="1.6"/></svg><span id="glab">Group</span>
+            <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </span>
+          <span class="pop narrow">
+            <div class="pk">Group by</div>
+            <div class="orow sel" data-g="none"><span class="lb">None</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+            <div class="orow" data-g="status"><span class="lb">Where things stand</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+            <div class="orow" data-g="turn"><span class="lb">Whose turn</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+            <div class="orow" data-g="stars"><span class="lb">Star rating</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+          </span>
+        </span>
+
+        <span class="pw" id="pwS">
+          <span class="ctl" id="btnS">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16m0 0-3-3.4M7 20l3-3.4"/><path d="M14 7h7M14 12h5M14 17h3"/></svg><span id="slab">Sort</span>
+            <svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </span>
+          <span class="pop narrow">
+            <div class="pk">Sort by</div>
+            <div class="orow sel" data-s="stars"><span class="lb">Star rating</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+            <div class="orow" data-s="name"><span class="lb">Name A–Z</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+            <div class="orow" data-s="recent"><span class="lb">Recently queried</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+            <div class="orow" data-s="speed"><span class="lb">Fastest to reply</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></div>
+          </span>
+        </span>
+
+        <span class="push"></span>
+        <span class="cnt" id="count">16 of 16</span>
+      </div>
+
+      <div class="applied" id="applied"></div>
+      <div id="body"></div>
+    </div></div>
+  </main>
+</div>
+
+<script>
+const FLAG={
+ GB:`<svg viewBox="0 0 32 22" preserveAspectRatio="none"><rect width="32" height="22" fill="#0b2f6b"/><path d="M0 0l32 22M32 0L0 22" stroke="#fff" stroke-width="4.4"/><path d="M0 0l32 22M32 0L0 22" stroke="#c8102e" stroke-width="2.2"/><path d="M16 0v22M0 11h32" stroke="#fff" stroke-width="7"/><path d="M16 0v22M0 11h32" stroke="#c8102e" stroke-width="4"/></svg>`,
+ US:`<svg viewBox="0 0 32 22" preserveAspectRatio="none"><rect width="32" height="22" fill="#fff"/><g fill="#b22234"><rect width="32" height="3.14"/><rect y="6.28" width="32" height="3.14"/><rect y="12.57" width="32" height="3.14"/><rect y="18.86" width="32" height="3.14"/></g><rect width="14" height="12.57" fill="#3c3b6e"/></svg>`,
+ IE:`<svg viewBox="0 0 32 22" preserveAspectRatio="none"><rect width="10.67" height="22" fill="#169b62"/><rect x="10.67" width="10.67" height="22" fill="#fff"/><rect x="21.33" width="10.67" height="22" fill="#ff883e"/></svg>`,
+ CA:`<svg viewBox="0 0 32 22" preserveAspectRatio="none"><rect width="32" height="22" fill="#fff"/><rect width="8" height="22" fill="#d52b1e"/><rect x="24" width="8" height="22" fill="#d52b1e"/><path d="M16 5.5l1.5 3.4 3.2-.9-1.3 3.2 2.2 1.5-2.8.6.4 3-3.2-1.9-3.2 1.9.4-3-2.8-.6 2.2-1.5-1.3-3.2 3.2.9L16 5.5Z" fill="#d52b1e"/></svg>`
+};
+/* [init, name, agency, city, cc, meta, stars, status, weeks, daysAgo, turn] */
+const AG=[
+ ["PL","Penhallow Literary","Agent not specified","London","GB","~6 wks · Email",3,"active",6,12,"them"],
+ ["AK","Aisha Kapoor","The Lantern Agency","Edinburgh","GB","~6 wks · Email",3,"active",6,4,"them"],
+ ["DO","Daniel O'Rourke","Inkwell & Stone","Dublin","IE","~6 wks · Email",3,"active",6,31,"you"],
+ ["TE","Tom Ellery","Ellery Literary","Bristol","GB","~4 wks · Email",4,"active",4,2,"you"],
+ ["JM","Jonathan Marsh","Marsh & Co","London","GB","~8 wks · Post",3,"active",8,9,"you"],
+ ["PR","Priya Raghavan","Northbank Agency","Manchester","GB","~5 wks · Email",4,"active",5,21,"them"],
+ ["EH","Elise Hartnoll","Cardew Blake","New York","US","~6 wks · Email",2,"noactive",6,64,null],
+ ["SW","Sam Whitcombe","Whitcombe & Hale","Brooklyn","US","~10 wks · Email",3,"noactive",10,88,null],
+ ["MR","Marcus Reed","Bloomsbury Quill","London","GB","~7 wks · Email",5,"active",7,17,"them"],
+ ["GP","Greg Panetta","No agency","Cork","IE","~9 wks · Email",2,"noactive",9,120,null],
+ ["WT","William Tan","Foxglove Literary","Toronto","CA","~6 wks · Email",4,"active",6,7,"them"],
+ ["SD","Sophie Dunn","Curtis Vane","Leeds","GB","~5 wks · Email",3,"active",5,44,"them"],
+ ["NO","Nadia Okonkwo","Okonkwo Literary","London","GB","~6 wks · Email",4,"active",6,23,"them"],
+ ["CB","Cara Bell","Bell & Rowan","Glasgow","GB","~7 wks · Email",3,"active",7,35,"them"],
+ ["HM","Hugh Mercer","Mercer Agency","Cardiff","GB","~8 wks · Email",3,"active",8,52,"them"],
+ ["FS","Fenella Str","Brightwater Books","New York","US","~6 wks · Email",2,"noactive",6,140,null]
+];
+const SLAB={active:"Active queries",noactive:"No active queries"};
+const TLAB={you:"Awaiting your pages",them:"Waiting on the agent"};
+const RULE={active:"#c3cfc0",noactive:"#ddd0c0",you:"#e8c8bc",them:"#c3cfc0"};
+const BAND={active:"var(--sage-band)",noactive:"var(--tan)"};
+const LOCN={GB:'United Kingdom',US:'United States',IE:'Ireland',CA:'Canada'};
+const SORTLAB={stars:'Star rating',name:'Name A–Z',recent:'Recently queried',speed:'Fastest to reply'};
+const CMP={
+  stars:(a,b)=>b[6]-a[6]||a[1].localeCompare(b[1]),
+  name:(a,b)=>a[1].localeCompare(b[1]),
+  recent:(a,b)=>a[9]-b[9],
+  speed:(a,b)=>a[8]-b[8]||a[1].localeCompare(b[1])
+};
+const star=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+let group='none', sortKey='stars', filters={status:[],turn:[],stars:[],loc:[]};
+
+function card(a){
+ const [i,n,ag,city,cc,meta,s,st,wk,dy,turn]=a;
+ return `<div class="ac">
+  <div class="band" style="background:${BAND[st]}">
+    <span class="st">${SLAB[st]}</span>
+    ${turn==='you'?'<span class="turn">Your move</span>':''}
+    <span class="stars">${star(s)}</span>
+    <span class="ed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m14.5 5.5 4 4L9 19H5v-4l9.5-9.5Z"/></svg></span>
+  </div>
+  <div class="bd">
+    <div class="who">
+      <span class="av2">${i}</span>
+      <span style="min-width:0">
+        <span class="nm">${n}</span>
+        <span class="ag">${ag}</span>
+        <span class="loc"><span class="fl">${FLAG[cc]}</span>${city}</span>
+        <span class="meta">${meta}</span>
+      </span>
+    </div>
+    <div class="sect"><div class="sl">Your history</div><div class="hist"><svg class="d" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="2"/></svg>Murphy's Day Out</div></div>
+    <div class="sect"><div class="sl">Materials wanted</div><div class="none">Nothing recorded — check their site.</div></div>
+  </div>
+ </div>`;
+}
+function visible(){
+ return AG.filter(a=>{
+   if(filters.status.length && !filters.status.includes(a[7])) return false;
+   if(filters.turn.length && !filters.turn.includes(a[10])) return false;
+   if(filters.loc.length && !filters.loc.includes(a[4])) return false;
+   if(filters.stars.length && a[6] < Math.min(...filters.stars.map(Number))) return false;
+   return true;
+ }).sort(CMP[sortKey]);
+}
+function section(title,count,rule,stars){
+ return `<div class="gsec"><h2>${title}</h2>${stars?`<span class="st2">${stars}</span>`:''}<span class="cn">${count}</span></div>
+ <div class="grule" style="background:linear-gradient(90deg,${rule} 0 88px,var(--linesoft) 88px)"></div>`;
+}
+function render(){
+ const list=visible();
+ document.getElementById('count').textContent=list.length+' of '+AG.length;
+ const b=document.getElementById('body');
+ if(group==='none'){
+   b.innerHTML='<div class="wrap0"><div class="grid">'+list.map(card).join('')+'</div></div>';
+ } else if(group==='status'){
+   b.innerHTML=['active','noactive'].map(k=>{
+     const g=list.filter(a=>a[7]===k); if(!g.length) return '';
+     return section(SLAB[k],g.length,RULE[k])+`<div class="grid">${g.map(card).join('')}</div>`;
+   }).join('');
+ } else if(group==='turn'){
+   b.innerHTML=['you','them'].map(k=>{
+     const g=list.filter(a=>a[10]===k); if(!g.length) return '';
+     return section(TLAB[k],g.length,RULE[k])+`<div class="grid">${g.map(card).join('')}</div>`;
+   }).join('')+ (()=>{const g=list.filter(a=>!a[10]);return g.length?section('No active queries',g.length,RULE.noactive)+`<div class="grid">${g.map(card).join('')}</div>`:'';})();
+ } else {
+   b.innerHTML=[5,4,3,2,1].map(s=>{
+     const g=list.filter(a=>a[6]===s); if(!g.length) return '';
+     return section(['One','Two','Three','Four','Five'][s-1]+' star'+(s>1?'s':''),g.length,'#e0c9a4',star(s))+`<div class="grid">${g.map(card).join('')}</div>`;
+   }).join('');
+ }
+ const tags=[];
+ filters.status.forEach(v=>tags.push([SLAB[v],'status',v]));
+ filters.turn.forEach(v=>tags.push([TLAB[v],'turn',v]));
+ filters.stars.forEach(v=>tags.push(['★'.repeat(+v)+' and up','stars',v]));
+ filters.loc.forEach(v=>tags.push([LOCN[v],'loc',v]));
+ const ap=document.getElementById('applied');
+ ap.innerHTML=tags.length? tags.map(([t,f,v])=>`<span class="atag" data-rm="${f}:${v}">${t} <span class="x">✕</span></span>`).join('')+'<span class="clr" id="clr2">Clear all</span>' : '';
+ const n=tags.length, bd=document.getElementById('fbadge');
+ bd.style.display=n?'inline-block':'none'; bd.textContent=n;
+ document.getElementById('btnF').classList.toggle('act',!!n);
+ document.getElementById('applyF').textContent='Show '+list.length+' agent'+(list.length===1?'':'s');
+ ap.querySelectorAll('[data-rm]').forEach(el=>el.onclick=()=>{
+   const [f,v]=el.dataset.rm.split(':');
+   filters[f]=filters[f].filter(x=>x!==v); syncBoxes(); render();
+ });
+ const c2=document.getElementById('clr2'); if(c2) c2.onclick=clearAll;
+}
+function syncBoxes(){
+ document.querySelectorAll('.orow[data-f]').forEach(el=>el.classList.toggle('sel',filters[el.dataset.f].includes(el.dataset.v)));
+}
+function clearAll(){ filters={status:[],turn:[],stars:[],loc:[]}; syncBoxes(); render(); }
+document.getElementById('clrAll').onclick=clearAll;
+document.querySelectorAll('.orow[data-f]').forEach(el=>el.onclick=e=>{
+ e.stopPropagation();
+ const f=el.dataset.f,v=el.dataset.v;
+ filters[f]=filters[f].includes(v)?filters[f].filter(x=>x!==v):[...filters[f],v];
+ syncBoxes(); render();
+});
+document.querySelectorAll('.orow[data-g]').forEach(el=>el.onclick=e=>{
+ e.stopPropagation(); group=el.dataset.g;
+ document.querySelectorAll('.orow[data-g]').forEach(x=>x.classList.remove('sel'));
+ el.classList.add('sel');
+ document.getElementById('glab').textContent = group==='none'?'Group':el.querySelector('.lb').textContent;
+ document.getElementById('btnG').classList.toggle('act',group!=='none');
+ document.getElementById('pwG').classList.remove('open'); render();
+});
+document.querySelectorAll('.orow[data-s]').forEach(el=>el.onclick=e=>{
+ e.stopPropagation(); sortKey=el.dataset.s;
+ document.querySelectorAll('.orow[data-s]').forEach(x=>x.classList.remove('sel'));
+ el.classList.add('sel');
+ const def=sortKey==='stars';
+ document.getElementById('slab').textContent=def?'Sort':SORTLAB[sortKey];
+ document.getElementById('btnS').classList.toggle('act',!def);
+ document.getElementById('pwS').classList.remove('open'); render();
+});
+function wire(w,b){
+ document.getElementById(b).onclick=e=>{
+   e.stopPropagation();
+   const el=document.getElementById(w),was=el.classList.contains('open');
+   document.querySelectorAll('.pw').forEach(x=>x.classList.remove('open'));
+   if(!was) el.classList.add('open');
+ };
+ document.querySelector('#'+w+' .pop').onclick=e=>e.stopPropagation();
+}
+wire('pwF','btnF'); wire('pwG','btnG'); wire('pwS','btnS');
+document.getElementById('applyF').onclick=e=>{e.stopPropagation();document.getElementById('pwF').classList.remove('open');};
+document.addEventListener('click',()=>document.querySelectorAll('.pw').forEach(x=>x.classList.remove('open')));
+render();
+</script>
+</body>
+</html>

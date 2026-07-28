@@ -16,6 +16,7 @@
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, SubmissionStatus } from "../types";
 import { materialRowsFromAgent, summaryFromRows } from "./agentMaterials";
 import { agentTerritory } from "./agentsPage";
+import { getPrimaryAction } from "./queryPrimaryAction";
 
 /** Terminal query statuses — everything else, INCLUDING Offer, counts as an active query. */
 export const TERMINAL_STATUSES: readonly QueryStatus[] = [
@@ -74,6 +75,97 @@ export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean =>
 export function agentStateClass(agent: Agent, queries: Query[]): "s-sage" | "s-pink" | "s-grey" {
   if (!isDoorOpen(agent)) return "s-grey";
   return agentRelationship(agent.id, queries) === "active" ? "s-sage" : "s-pink";
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE TWO AXES (rebuild v2, decision 1)
+
+   The old model treated "Awaiting your pages" as a peer of "Active queries" and it is not — it
+   is a SUBSET of active. The counts gave it away (12 active + 3 awaiting + 4 no-active = 19
+   against 16 agents) and filtering on both returned the union where a reader expects the
+   intersection. So: two independent axes.
+
+     · AXIS A — WHERE THINGS STAND. Exactly one value per agent, so the counts partition the
+       list and must sum to the total. The door OUTRANKS the relationship: an agent closed for
+       submissions reads "Closed", whatever their query history, because that is the fact that
+       governs what you can do next.
+     · AXIS B — WHOSE TURN. Only meaningful INSIDE active queries, so its counts sum to the
+       active count, not the total. Never stored: it reads the CTA engine's ball-holder
+       (`getPrimaryAction`), the same derivation the Queries command bar and the To-do flows
+       use, so this page can never disagree with them about whose move it is.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/** Axis A. Exclusive and exhaustive — every agent is exactly one of these. */
+export type AgentStanding = "active" | "noactive" | "never" | "closed";
+
+/** Axis B. `null` = the axis doesn't apply (the agent has no active query). */
+export type AgentTurn = "you" | "them" | null;
+
+/**
+ * Axis A for one agent. Closed first — the door outranks history; otherwise the relationship
+ * ("active" → live query, "noactive" → only terminal ones, "never" → none on record).
+ */
+export function agentStanding(agent: Agent, queries: Query[]): AgentStanding {
+  if (!isDoorOpen(agent)) return "closed";
+  const rel = agentRelationship(agent.id, queries);
+  return rel === "prev" ? "noactive" : rel === "never" ? "never" : "active";
+}
+
+/**
+ * Axis B for one agent, DERIVED from the CTA engine and nothing else: any live query whose
+ * primary action puts the ball in the writer's court ⇒ "you"; otherwise, if a live query
+ * exists, "them"; no live query ⇒ null (the axis doesn't apply).
+ *
+ * Reusing `getPrimaryAction` rather than re-listing statuses is the point: the writer's-turn
+ * set is defined once, and a taxonomy change lands here for free.
+ */
+export function agentTurn(agent: Agent, queries: Query[]): AgentTurn {
+  if (agentStanding(agent, queries) !== "active") return null;
+  const live = queries.filter((q) => q.agentId === agent.id && !isTerminalStatus(q.status));
+  if (!live.length) return null;
+  return live.some((q) => getPrimaryAction(q.status as QueryStatus).ballHolder === "writer") ? "you" : "them";
+}
+
+/** The wording for each axis value — one place, so filters, groups and tags all agree. */
+export const STANDING_LABEL: Record<AgentStanding, string> = {
+  active: "Active queries",
+  noactive: "No active queries",
+  never: "Never queried",
+  closed: "Closed for submissions",
+};
+
+export const TURN_LABEL: Record<Exclude<AgentTurn, null>, string> = {
+  you: "Awaiting your pages",
+  them: "Waiting on the agent",
+};
+
+export const STANDING_ORDER: readonly AgentStanding[] = ["active", "noactive", "never", "closed"];
+export const TURN_ORDER: readonly Exclude<AgentTurn, null>[] = ["you", "them"];
+
+export interface AgentAxisCounts {
+  total: number;
+  standing: Record<AgentStanding, number>;
+  /** Keyed within the active set only — `you + them === standing.active`. */
+  turn: Record<Exclude<AgentTurn, null>, number>;
+}
+
+/**
+ * Both axes counted in one pass over the WHOLE list (never the filtered view — a filter row must
+ * show what it would reveal). The two reconciliation invariants are locked in agentList.test.ts:
+ * axis A sums to the total, axis B sums to the active count.
+ */
+export function agentAxisCounts(agents: Agent[], queries: Query[]): AgentAxisCounts {
+  const out: AgentAxisCounts = {
+    total: agents.length,
+    standing: { active: 0, noactive: 0, never: 0, closed: 0 },
+    turn: { you: 0, them: 0 },
+  };
+  for (const a of agents) {
+    out.standing[agentStanding(a, queries)] += 1;
+    const t = agentTurn(a, queries);
+    if (t) out.turn[t] += 1;
+  }
+  return out;
 }
 
 export type AgentListFilter = "all" | "active" | "waiting" | "prev" | "notq" | "closed";
@@ -176,6 +268,55 @@ export const AGENT_LOCATION_OPTIONS: readonly { key: AgentLocationFilter; label:
 /** Location reads the REAL `agent.country` (ISO) against the user's home market. */
 export const matchesAgentLocation = (agent: Agent, filter: AgentLocationFilter, homeCountry: string): boolean =>
   filter === "all" ? true : agentTerritory(agent, homeCountry) === filter;
+
+/* ── the filter SET (rebuild v2): four independent facets, ANDed ─────────────
+   Within one facet the ticks are alternatives (OR); across facets they narrow (AND) — which is
+   what fixes the old union bug: ticking "Active queries" AND "Awaiting your pages" now returns
+   the intersection a reader expects, because they live on different axes. An empty facet means
+   "no constraint", never "nothing". */
+
+export interface AgentFilterSet {
+  standing: AgentStanding[];
+  turn: Exclude<AgentTurn, null>[];
+  /** Minimum star rating(s) ticked; the LOWEST tick wins, so 4+ and 3+ together read as 3+. */
+  stars: number[];
+  /** ISO country codes. */
+  loc: string[];
+}
+
+export const emptyFilterSet = (): AgentFilterSet => ({ standing: [], turn: [], stars: [], loc: [] });
+
+export const filterCount = (f: AgentFilterSet): number =>
+  f.standing.length + f.turn.length + f.stars.length + f.loc.length;
+
+export const isFilterSetEmpty = (f: AgentFilterSet): boolean => filterCount(f) === 0;
+
+export function matchesFilterSet(agent: Agent, queries: Query[], f: AgentFilterSet): boolean {
+  if (f.standing.length && !f.standing.includes(agentStanding(agent, queries))) return false;
+  if (f.turn.length) {
+    const t = agentTurn(agent, queries);
+    if (!t || !f.turn.includes(t)) return false;
+  }
+  if (f.stars.length && (agent.starRating || 0) < Math.min(...f.stars)) return false;
+  if (f.loc.length && !f.loc.includes(agent.country || "")) return false;
+  return true;
+}
+
+/** Star-tier rows: how many agents would survive a "N and up" tick, over the whole list. */
+export const starTierCount = (agents: Agent[], min: number): number =>
+  agents.filter((a) => (a.starRating || 0) >= min).length;
+
+/** Location rows: the countries actually in use, most-used first then alphabetical by code. */
+export function locationCounts(agents: Agent[]): { code: string; n: number }[] {
+  const seen = new Map<string, number>();
+  for (const a of agents) {
+    const c = (a.country || "").trim();
+    if (c) seen.set(c, (seen.get(c) || 0) + 1);
+  }
+  return [...seen.entries()]
+    .map(([code, n]) => ({ code, n }))
+    .sort((x, y) => y.n - x.n || x.code.localeCompare(y.code));
+}
 
 export type AgentListCounts = Record<AgentListFilter, number>;
 
