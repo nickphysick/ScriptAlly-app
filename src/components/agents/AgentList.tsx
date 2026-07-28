@@ -348,6 +348,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   return (
     <div className="aglist">
       <div className="agl-page">
+       {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
+           pools its surplus as symmetric margin rather than stretching the grid. */}
+       <div className="agl-inner">
         {/* The standard page header — FULL variant (flyouts pack P3: the compact variant is
             retired; one header grammar app-wide). The description resurrects the page's own
             original sub line. */}
@@ -504,6 +507,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             />
           ))}
         </div>
+       </div>
       </div>
     </div>
   );

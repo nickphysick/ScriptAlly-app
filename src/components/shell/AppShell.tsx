@@ -289,8 +289,20 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           anatomy. Desktop only: below md the account menu carries Help Centre and the bottom tab
           bar owns that corner. Display comes from the class (not inline) so the media query can
           hide it. */}
+      {/* THE GUTTER FIX (agent-list rebuild P2): the FAB and its menu are position:fixed, so they
+          measure from the BROWSER edge — which is 14px further out than every capsule. Sitting at
+          a bare right:20 they overhung the ground gutter on the right only, which is exactly the
+          left-correct/right-short signature. Both now measure from the capsule edge
+          (--shell-cap-gap) at ≥768px, the same fix the timeline pull tab took. Below md the
+          capsule stands down and the flush-to-edge idiom is correct, so the base value stays.
+          No compensating padding anywhere — the cause moved, not the symptom. */}
       <style>{`
-        .ashell-help-fab { display: flex; }
+        .ashell-help-fab { display: flex; right: 20px; }
+        .ashell-help-menu { right: 20px; }
+        @media (min-width: 768px) {
+          .ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px); }
+          .ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px); }
+        }
         @media (max-width: 767.98px) {
           .ashell-help-fab { display: none !important; }
         }
@@ -308,7 +320,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         title="Help"
         aria-label="Help"
         style={{
-          position: "fixed", bottom: 20, right: 20, width: 38, height: 38, borderRadius: "50%",
+          // `right` comes from the class above so the media query can move it to the capsule edge
+          // (inline would beat it — the shell CSS footgun).
+          position: "fixed", bottom: 20, width: 38, height: 38, borderRadius: "50%",
           background: parchment, border: "var(--bdw) solid var(--bd)", color: burgundy,
           fontFamily: FONT_SERIF, fontSize: 17, cursor: "pointer",
           boxShadow: "0 3px 12px rgba(58,28,20,0.12)", zIndex: 30,
@@ -323,8 +337,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           <div
             role="menu"
             aria-label="Help"
+            className="ashell-help-menu"
             style={{
-              position: "fixed", bottom: 66, right: 20, zIndex: 41, minWidth: 176,
+              position: "fixed", bottom: 66, zIndex: 41, minWidth: 176,
               background: parchment, border: "var(--bdw) solid var(--bd)", borderRadius: 12,
               boxShadow: "0 6px 24px rgba(58,28,20,0.16)", padding: 6, fontSize: 13,
             }}

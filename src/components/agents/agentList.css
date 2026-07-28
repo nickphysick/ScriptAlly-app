@@ -37,7 +37,12 @@
   color: var(--agl-ink-body);
 }
 
-.aglist .agl-page { max-width: 1280px; margin: 0 auto; padding: 48px 40px 120px; }
+/* THE PAGE COLUMN (rebuild v2). Padding belongs to the scroll region so the scrollbar rides the
+   page edge, not the content; the CONTENT then caps at 1240px and centres, so a wide monitor
+   pools its surplus as symmetric margin instead of stretching the grid to absurdity. Two
+   elements, two jobs — merging them would tie the cap to the padding. */
+.aglist .agl-page { padding: 28px 60px 48px; }
+.aglist .agl-inner { max-width: 1240px; margin: 0 auto; }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
 .aglist .agl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
@@ -104,8 +109,8 @@
 
 /* ── grid ───────────────────────────────────────────────────────────────── */
 .aglist .agl-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 26px 22px; align-items: start;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 14px; align-items: start;
 }
 
 /* ── buttons (shared with the card faces from Phase 2) ──────────────────── */
@@ -131,8 +136,11 @@
 .aglist .agl-empty .big { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--agl-ink-head); margin-bottom: 6px; }
 .aglist .agl-empty .small { font-size: 13px; font-weight: 300; }
 
+@media (max-width: 900px) {
+  .aglist .agl-page { padding: 24px 28px 44px; }
+}
 @media (max-width: 640px) {
-  .aglist .agl-page { padding: 28px 18px 90px; }
+  .aglist .agl-page { padding: 22px 18px 40px; }
   .aglist .agl-h1 { font-size: 38px; }
   .aglist .agl-search { min-width: 0; width: 100%; }
 }
