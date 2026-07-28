@@ -58,6 +58,8 @@ export const SubmissionPackages: React.FC = () => {
   const [newPkgSignal, setNewPkgSignal] = useState(0);
   // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
   const [scope, setScope] = useState<AnalyticsScope>("all");
+  // A recommendation asked the Workshop tab to open a particular package.
+  const [openPkg, setOpenPkg] = useState<string | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -235,6 +237,8 @@ export const SubmissionPackages: React.FC = () => {
                 onSavePackage={tourActive ? noop : savePackage}
                 onMakeActive={tourActive || !msId ? noop : (pid) => void setActivePackage(msId, pid)}
                 newPackageSignal={newPkgSignal}
+                openPackageId={openPkg}
+                onOpenedPackage={() => setOpenPkg(null)}
                 pulseAddMaterials={pulseAdd && !tourActive}
                 onDismissPulse={() => setPulseAdd(false)}
               />
@@ -249,6 +253,8 @@ export const SubmissionPackages: React.FC = () => {
                 activePackageId={tourActive ? null : activePkg?.id ?? null}
                 scope={scope}
                 onScope={setScope}
+                onOpenQueries={() => navigate("/queries")}
+                onOpenPackage={(pid) => { setTab("workshop"); setOpenPkg(pid); }}
               />
             </div>
           )}

@@ -443,3 +443,24 @@
 .pkgw-agrow .st3.rep { color: var(--pkg-sage); }
 .pkgw-agrow .st3.wait { color: var(--pkg-muted); }
 .pkgw-agrow .st3.req { color: var(--pkg-gold-ink); }
+
+/* "What to do next" — sage-bordered recommendation cards. */
+.pkgw-recs { display: flex; gap: 16px; flex-wrap: wrap; }
+.pkgw-rec3 {
+  flex: 1; min-width: 260px; background: var(--pkg-paper); border: 1px solid var(--pkg-sage);
+  border-radius: 11px; box-shadow: 2px 3px 0 rgba(90, 110, 88, .13); padding: 14px 16px;
+  display: flex; flex-direction: column;
+}
+.pkgw-rec3 .rk2 { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: var(--pkg-sage); }
+.pkgw-rec3 .rt2 { font-size: 12.5px; line-height: 1.55; margin-top: 8px; flex: 1; }
+.pkgw-rec3 .rt2 b { font-weight: 600; }
+.pkgw-rec3 .ra {
+  margin-top: 11px; display: inline-flex; align-items: center; align-self: flex-start; height: 29px;
+  padding: 0 12px; border-radius: 9px; background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
+  color: var(--pkg-burg); font-size: 11px; cursor: pointer; font-family: inherit;
+}
+.pkgw-rec3 .ra:hover { background: var(--pink-h); }
+/* Not built yet, and saying so — never a live-looking button that does nothing. */
+.pkgw-rec3 .ra--soon {
+  background: var(--pkg-card); border-color: var(--pkg-linesoft); color: #bcb0a3; cursor: default;
+}

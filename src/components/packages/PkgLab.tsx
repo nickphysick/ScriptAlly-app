@@ -90,6 +90,7 @@ export const PkgLab: React.FC = () => {
   const [tab, setTab] = useState<PackageTab>("workshop");
   const [newPkgSignal, setNewPkgSignal] = useState(0);
   const [scope, setScope] = useState<AnalyticsScope>("all");
+  const [openPkg, setOpenPkg] = useState<string | null>(null);
   // Stateful so the workshop's create/save round-trips in the lab.
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
   const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES);
@@ -158,6 +159,8 @@ export const PkgLab: React.FC = () => {
               scope={scope}
               onScope={setScope}
               now={Date.parse("2026-07-28T00:00:00.000Z")}
+              onOpenQueries={() => window.alert("→ Queries Hub (the real route navigates)")}
+              onOpenPackage={(pid) => { setTab("workshop"); setOpenPkg(pid); }}
             />
           </div>
         ) : view === "empty" ? (
@@ -181,6 +184,8 @@ export const PkgLab: React.FC = () => {
             queries={tour ? EXAMPLE_QUERIES : MOCK_QUERIES}
             activePackageId={tour ? null : "p2"}
             newPackageSignal={newPkgSignal}
+            openPackageId={openPkg}
+            onOpenedPackage={() => setOpenPkg(null)}
             onCreateVersion={tour ? () => undefined : (type, name, contentDraft) => { const id = `v-lab-${versions.length}`; setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft }]); return id; }}
             onUpdateVersion={tour ? noop : (id, f) => setVersions((vs) => vs.map((v) => (v.id === id ? { ...v, versionName: f.versionName, contentDraft: f.contentDraft } : v)))}
             onDeleteVersion={tour ? noop : (id) => setVersions((vs) => vs.filter((v) => v.id !== id))}

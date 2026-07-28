@@ -68,6 +68,9 @@ export interface WorkshopTabProps {
   onMakeActive: (packageId: string) => void;
   /** Bumped by the header's "＋ New package" button — each change opens a fresh draft. */
   newPackageSignal?: number;
+  /** A recommendation on the Analytics tab asked for this package to be opened for editing. */
+  openPackageId?: string | null;
+  onOpenedPackage?: () => void;
   /** FR4: pulse the Edit-materials affordance after the tour ends with no materials yet. */
   pulseAddMaterials?: boolean;
   onDismissPulse?: () => void;
@@ -78,7 +81,7 @@ export interface WorkshopTabProps {
 export const WorkshopTab: React.FC<WorkshopTabProps> = ({
   versions, packages, queries, activePackageId,
   onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage, onMakeActive,
-  newPackageSignal, pulseAddMaterials, onDismissPulse,
+  newPackageSignal, openPackageId, onOpenedPackage, pulseAddMaterials, onDismissPulse,
 }) => {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [editId, setEditId] = useState<string | null>(null);
@@ -140,6 +143,15 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
     newPackage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPackageSignal]);
+
+  // A recommendation ("Open {package}") hands the workshop a package to edit.
+  useEffect(() => {
+    if (!openPackageId) return;
+    setEditId(openPackageId);
+    setMatMode(false);
+    onOpenedPackage?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openPackageId]);
 
   useEffect(() => {
     if (selMat) { const v = versionById(selMat); setEdName(v?.versionName ?? ""); setEdText(v?.contentDraft ?? ""); }

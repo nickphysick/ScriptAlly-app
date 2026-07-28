@@ -20,6 +20,7 @@ import { Query, Agent, SubmissionPackage, ManuscriptVersion } from "../types";
 import { replyTask } from "./taskPrecedence";
 import { isResponse, isRequest, materialUsage, MaterialUsage, meetsSampleThreshold } from "./packageMetrics";
 
+
 /** A send that is past its reply threshold and still unanswered — the app's canonical definition. */
 export interface OverdueSend {
   query: Query;
@@ -118,4 +119,100 @@ export function rankMaterialsByReplies(
     })
     .filter((m) => m.usage.sends > 0)
     .sort((a, b) => (b.usage.replyRate ?? 0) - (a.usage.replyRate ?? 0) || b.usage.sends - a.usage.sends);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// "What to do next" — recommendations DERIVED AT READ TIME. Nothing here is stored: there is no
+// recommendations collection, no dismissal state, no scoring cached anywhere. Re-deriving on every
+// render is the point — a suggestion that outlived the data that justified it is worse than none.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** What a recommendation asks the writer to do. Only `queries` and `open-package` are real actions;
+ *  `swap` has no built flow yet and renders as a disabled, clearly-labelled affordance. */
+export type RecommendationAction = "queries" | "open-package" | "swap" | "none";
+
+export interface Recommendation {
+  id: string;
+  /** The mono kicker. */
+  kicker: string;
+  /** The body, already assembled — `bold` names the phrases the view emphasises. */
+  body: string;
+  bold: string[];
+  action: RecommendationAction;
+  actionLabel?: string;
+  /** For "open-package": which package to open. */
+  packageId?: string;
+}
+
+export interface RecommendationInput {
+  versions: ManuscriptVersion[];
+  packages: SubmissionPackage[];
+  queries: Query[];
+  agents: Agent[];
+  now: number;
+}
+
+/**
+ * Up to three suggestions, strongest signal first. Each one is only emitted when the data actually
+ * supports it — a material needs MIN_SENDS_FOR_CLAIM behind it before it can be called strong or
+ * weak, and the waiting card only appears when a send is genuinely past the agent's own reply window
+ * (via `overdueSends`, i.e. taskPrecedence). No signal, no card: this returns [] rather than padding.
+ */
+export function recommendations(inp: RecommendationInput): Recommendation[] {
+  const { versions, packages, queries, agents, now } = inp;
+  const out: Recommendation[] = [];
+  const ranked = rankMaterialsByReplies(versions, packages, queries).filter((m) => m.ranked);
+
+  // 1 — the strongest material, and where it could go next.
+  const best = ranked[0];
+  if (best && (best.usage.replyRate ?? 0) > 0) {
+    // A package that does NOT yet include it, preferring one that has never been sent.
+    const without = packages.filter((p) =>
+      ![p.queryLetterVersionId, p.synopsisVersionId, p.samplePagesVersionId].includes(best.version.id));
+    const unsent = without.find((p) => !queries.some((q) => q.packageId === p.id)) ?? without[0];
+    out.push({
+      id: "strength",
+      kicker: "★ Lean into your strength",
+      body: unsent
+        ? `Your ${best.version.versionName} has the best reply rate of anything you've sent — ${Math.round((best.usage.replyRate ?? 0) * 100)}% across ${best.usage.sends} sends${best.usage.requests > 0 ? `, and ${best.usage.requests === 1 ? "a request" : `${best.usage.requests} requests`} travelled with it` : ""}. ${unsent.packageName || "Untitled package"} doesn't include it yet.`
+        : `Your ${best.version.versionName} has the best reply rate of anything you've sent — ${Math.round((best.usage.replyRate ?? 0) * 100)}% across ${best.usage.sends} sends. It's already in every package you've built.`,
+      bold: [best.version.versionName, ...(unsent ? [unsent.packageName || "Untitled package"] : [])],
+      action: unsent ? "open-package" : "none",
+      actionLabel: unsent ? `Open ${unsent.packageName || "Untitled package"}` : undefined,
+      packageId: unsent?.id,
+    });
+  }
+
+  // 2 — the laggard, but only when there is a like-for-like replacement of the same type.
+  const worst = ranked[ranked.length - 1];
+  if (best && worst && worst.version.id !== best.version.id) {
+    const better = ranked.find((m) => m.version.componentType === worst.version.componentType && m.version.id !== worst.version.id);
+    const gap = (better?.usage.replyRate ?? 0) - (worst.usage.replyRate ?? 0);
+    if (better && gap >= 0.15) {
+      out.push({
+        id: "laggard",
+        kicker: "Underperformer",
+        body: `Your ${worst.version.versionName} trails ${better.version.versionName} on replies — ${Math.round((worst.usage.replyRate ?? 0) * 100)}% against ${Math.round((better.usage.replyRate ?? 0) * 100)}%, on comparable numbers. Worth swapping before your next batch.`,
+        bold: [worst.version.versionName, better.version.versionName],
+        action: "swap",
+        actionLabel: "Swap it in",
+      });
+    }
+  }
+
+  // 3 — sends that are past the agent's own reply window.
+  const overdue = overdueSends(queries.filter((q) => !!q.packageId), agents, now);
+  if (overdue.length > 0) {
+    const longest = overdue[0];
+    out.push({
+      id: "waiting",
+      kicker: "Waiting game",
+      body: `${overdue.length === 1 ? "One query is" : `${overdue.length} queries are`} past the agent's usual reply time — the longest has been out ${longest.weeksOut} weeks. A polite nudge is fair game.`,
+      bold: [overdue.length === 1 ? "One query" : `${overdue.length} queries`],
+      action: "queries",
+      actionLabel: "Open in Queries Hub",
+    });
+  }
+
+  return out;
 }

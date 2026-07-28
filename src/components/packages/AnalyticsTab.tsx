@@ -23,7 +23,7 @@ import {
   funnelStages, rankPackagesByReplies, medianReplyDays, medianReplyDaysAll, daysToWeeks, formatRate,
   MIN_SENDS_FOR_CLAIM, materialUsage, isSlotFilled,
 } from "../../lib/packageMetrics";
-import { overdueSends, rankMaterialsByReplies, sentToRows } from "../../lib/packageAnalytics";
+import { overdueSends, rankMaterialsByReplies, sentToRows, recommendations, Recommendation } from "../../lib/packageAnalytics";
 
 export type AnalyticsScope = "all" | string;
 
@@ -38,14 +38,27 @@ export interface AnalyticsTabProps {
   onScope: (s: AnalyticsScope) => void;
   /** Injected so the derivations stay pure and testable. */
   now?: number;
+  /** Real action: take the writer to the Queries Hub, where nudges are actually sent. */
+  onOpenQueries: () => void;
+  /** Real action: open a package on the Workshop tab. */
+  onOpenPackage: (packageId: string) => void;
 }
 
 /** A package's sends. */
 const sendsOf = (pkgId: string, queries: Query[]) => queries.filter((q) => q.packageId === pkgId);
 const pct = (r: number | null) => Math.round((r ?? 0) * 100);
 
+/** Emphasise the named phrases inside a derived sentence, without dangerouslySetInnerHTML. */
+const emphasise = (text: string, bold: string[]): React.ReactNode => {
+  const wanted = bold.filter(Boolean);
+  if (!wanted.length) return text;
+  const re = new RegExp(`(${wanted.map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "g");
+  return text.split(re).map((part, i) => (wanted.includes(part) ? <b key={i}>{part}</b> : part));
+};
+
 export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   versions, packages, queries, agents, activePackageId, scope, onScope, now = Date.now(),
+  onOpenQueries, onOpenPackage,
 }) => {
   const packaged = queries.filter((q) => !!q.packageId && packages.some((p) => p.id === q.packageId));
 
@@ -78,6 +91,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
     const best = sentPkgs.find((r) => r.ranked && r.stat.replyRate !== null) ?? null;
     const anyProvisional = sentPkgs.some((r) => !r.ranked);
     const mats = rankMaterialsByReplies(versions, packages, queries);
+    const recs: Recommendation[] = recommendations({ versions, packages, queries, agents, now });
     const bar = (n: number, d: number) => `${d > 0 ? Math.round((n / d) * 100) : 0}%`;
 
     if (f.sent === 0) {
@@ -188,11 +202,39 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
             )}
           </div>
         </div>
+
+        {recs.length > 0 && (
+          <>
+            <div className="gsec"><h2>What to do next</h2><span className="cn">DERIVED FROM YOUR RESULTS</span></div>
+            <div className="grule p" />
+            <div className="pkgw-recs">
+              {recs.map((r) => (
+                <div key={r.id} className="pkgw-rec3">
+                  <span className="rk2">{r.kicker}</span>
+                  <div className="rt2">{emphasise(r.body, r.bold)}</div>
+                  {r.action === "queries" && (
+                    <button type="button" className="ra" onClick={onOpenQueries}>{r.actionLabel}</button>
+                  )}
+                  {r.action === "open-package" && r.packageId && (
+                    <button type="button" className="ra" onClick={() => onOpenPackage(r.packageId!)}>{r.actionLabel}</button>
+                  )}
+                  {r.action === "swap" && (
+                    /* No swap flow is built. Rather than a button that quietly does nothing, this
+                       states plainly that it is coming and points at where the swap is done today. */
+                    <span className="ra ra--soon" aria-disabled="true" title="Swapping a material inside a package isn’t built yet — do it on the Workshop tab">
+                      {r.actionLabel} · coming soon
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </>
     );
   };
 
-  // ── One package in focus (P6) ─────────────────────────────────────────────
+  // ── One package in focus ──────────────────────────────────────────────────
   const focusView = (pkg: SubmissionPackage) => {
     const mine = sendsOf(pkg.id, queries);
     if (mine.length === 0) {
