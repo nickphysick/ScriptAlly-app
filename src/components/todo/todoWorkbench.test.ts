@@ -573,7 +573,7 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
 describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
-    const box = page.indexOf('className="tdb-feat"'); // todo rebuild P3: the featured card
+    const box = page.indexOf('className="tdb-brief"'); // briefing-slot P1
     const board = page.indexOf('className="tdb-board"');
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
@@ -599,12 +599,13 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).toContain('onClick={() => pickView("ledger")}');
     expect(rule(".tdb-vtog")).toContain("border-radius: 10px"); // the mockup's fill segment
   });
-  it("ONE review surface repo-wide: the featured card; the banner + strip classes are extinct", () => {
+  it("ONE review surface repo-wide: the briefing slot; the banner, card + strip classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
     expect(css).not.toContain("tdb-rvhead");
     expect(page).not.toContain("tdb-rvbox");
-    expect((page.match(/className="tdb-feat"/g) ?? []).length).toBe(1);
-    expect(page).not.toContain(">Open it ›</button>"); // superseded by View
+    expect(page).not.toContain("tdb-feat"); // the featured card is superseded
+    expect((page.match(/className="tdb-brief"/g) ?? []).length).toBe(1);
+    expect(page).not.toContain(">Open it ›</button>");
   });
 });
 

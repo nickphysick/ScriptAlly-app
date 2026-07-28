@@ -472,3 +472,50 @@ function clearedFlagCard(f: TaskFlag, i: number, input: BoardInput): BoardCard {
   const agent2 = q ? input.agents.find((x) => x.id === q.agentId) : ag;
   return { ...blankDone(`done-flag-${f.id ?? i}`), title: agent2 ? `${agentPrimary(agent2)} — sorted` : "Sorted", record: "Housekeeping", whenMs: msOf(f.resolvedAt) };
 }
+
+/* ── THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1) ─────
+   The region between the hero rule and the filter row. Every figure and every line DERIVES from
+   the existing review data — nothing is hardcoded, and a figure with no source DROPS its column
+   rather than showing a zero. ── */
+
+export interface BriefingFigure { key: "cleared" | "replies" | "focused"; value: string; label: string }
+
+/** Numbers ≤ twelve read as words in prose (the dashboard eyebrow's convention). */
+const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const spell = (n: number): string => (n <= 12 ? WORDS[n] : String(n));
+
+/** Tasks the writer ticked off inside the review window (UserTask.completedAt is the stamp). */
+export function briefingCleared(userTasks: UserTask[], win: ReviewWeek): number {
+  return userTasks.filter((t) => {
+    const t0 = t.completedAt ? Date.parse(t.completedAt) : NaN;
+    return !Number.isNaN(t0) && t0 >= win.startMs && t0 < win.endMs;
+  }).length;
+}
+
+/** The three columns, in order — each present ONLY when it has a real figure behind it.
+ *  FOCUSED always drops: the app records no time data anywhere, so it can never be honest. */
+export function briefingFigures(cleared: number, replies: number): BriefingFigure[] {
+  const out: BriefingFigure[] = [];
+  if (cleared > 0) out.push({ key: "cleared", value: String(cleared), label: "CLEARED" });
+  if (replies > 0) out.push({ key: "replies", value: String(replies), label: "REPLIES" });
+  return out;
+}
+
+/** The Playfair headline — the week summarised from the same two figures. */
+export function briefingHeadline(cleared: number, replies: number): string {
+  const parts: string[] = [];
+  if (cleared > 0) parts.push(`${spell(cleared)} ${cleared === 1 ? "task" : "tasks"} cleared`);
+  if (replies > 0) parts.push(`${spell(replies)} ${replies === 1 ? "agent" : "agents"} replied`);
+  if (!parts.length) return "A quiet week on the desk";
+  const sentence = parts.join(", ");
+  return `${cleared + replies >= 5 ? "A good week" : "Last week"}: ${sentence}`;
+}
+
+/** The grey supporting sentence — omitted entirely when nothing is worth saying. */
+export function briefingNarrative(stats: ReviewStats): string | null {
+  const bits: string[] = [];
+  if (stats.offers > 0) bits.push(stats.offers === 1 ? "An offer arrived." : `${spell(stats.offers)} offers arrived.`);
+  if (stats.sent.length > 0) bits.push(`${spell(stats.sent.length)} ${stats.sent.length === 1 ? "query" : "queries"} went out.`);
+  if (stats.quiet.length > 0) bits.push(`${spell(stats.quiet.length)} ${stats.quiet.length === 1 ? "query has" : "queries have"} gone quiet.`);
+  return bits.length ? bits.join(" ") : null;
+}
