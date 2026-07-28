@@ -88,3 +88,39 @@ describe("THE COLLAPSE LAW — the empty case contributes NO height", () => {
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
   });
 });
+
+/** P3 sweep — the remnants of every surface these two replaced. */
+describe("the sweep: nothing orphaned is left behind", () => {
+  const css = readFileSync(join(__dirname, "..", "components", "todo", "todo.css"), "utf8");
+  const shellCss = readFileSync(join(__dirname, "..", "components", "shell", "todoShell.css"), "utf8");
+  const stage = readFileSync(join(__dirname, "sessionStage.ts"), "utf8");
+  const themes = readFileSync(join(__dirname, "..", "..", "design-refs", "themes.md"), "utf8");
+
+  it("the colophon, the review banner and every Pro predecessor are gone from the stylesheets", () => {
+    for (const dead of ["tdb-colo", "cololink", "tdb-rvbox", "tdb-prostrip", "tdb-feat", "spine-pro"]) {
+      expect(css, `todo.css still has ${dead}`).not.toContain(dead);
+      expect(shellCss, `todoShell.css still has ${dead}`).not.toContain(dead);
+    }
+  });
+
+  it("the session's fade list points at the briefing, not the retired banner or headers", () => {
+    expect(stage).toContain(".tdb-brief");
+    // the constant itself no longer names it (the sweep note above it may)
+    const decl = stage.slice(stage.indexOf("export const EXIT_FADE"));
+    expect(decl.slice(0, decl.indexOf("\n"))).not.toContain(".tdb-rvbox");
+  });
+
+  it("themes.md records the collapse law, the dismiss-per-period rule, the band and the one-Pro-surface rule", () => {
+    expect(themes).toContain("## The briefing slot + assistant band");
+    expect(themes).toContain("THE COLLAPSE LAW");
+    expect(themes).toContain("DISMISS PER PERIOD");
+    expect(themes).toContain("THE ASSISTANT BAND");
+    expect(themes).toContain("ONE PRO SURFACE");
+    expect(themes).toContain("the app's only blue sticker");
+  });
+
+  it("no tour step referenced the colophon or a Pro surface — nothing to retarget", () => {
+    const tour = readFileSync(join(__dirname, "todoTour.ts"), "utf8");
+    for (const dead of ["colo", "prostrip", "ProStrip", "tdb-feat", "rvbox"]) expect(tour).not.toContain(dead);
+  });
+});

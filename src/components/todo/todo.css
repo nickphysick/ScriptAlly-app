@@ -665,7 +665,6 @@ button.tdb-tdot { cursor: pointer; }
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
    none is introduced (the fence records the resolution). */
-.tdb-rvbox { display: flex; align-items: center; gap: 16px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 5px 18px rgba(58, 28, 20, 0.11); padding: 15px 20px; }
 .tdb-rvcupb { width: 46px; flex: 0 0 auto; color: var(--ink); filter: drop-shadow(0 2px 3px rgba(58, 28, 20, 0.14)); }
 .tdb-rvcupb svg { width: 100%; height: auto; display: block; }
 .tdb-rvhx { min-width: 0; }

@@ -1071,3 +1071,36 @@ above; the rail, the bar, the L, the session and the tiers are unchanged.
   hardcoded), and "Meet the assistant →" in slate-link style opening the preview modal. Gated
   `plan !== Pro`; no close control. It is the successor to the retired content-panel colophon.
 
+## The briefing slot + assistant band (To-do — ref design-refs/briefing-slot.html)
+
+Two changes to the board's vertical rhythm, options 1 and 4 of the ref (2 and 3 rejected).
+
+**THE BRIEFING SLOT.** One region between the hero rule and the filter row, rendering the review
+briefing and nothing else: a warm panel (`#f7f2ea → #f3ece1`, border `#e2d8c6`, radius 13,
+padding 14/18) with a mono kicker, a Playfair headline carrying the week's derived summary, a
+grey supporting sentence, the derived figures, an ink "Read the review" button and a quiet ✕.
+
+**THE COLLAPSE LAW.** When dismissed, or when no fresh review exists, the slot renders **nothing
+at all** — no node, no margin, no reserved height; the filter row moves straight up under the
+hero. This is structural, not CSS: the block sits inside the fresh-and-undismissed condition and
+its 26px margin lives on the slot itself, never on a wrapper that would outlive it. Lock-tested,
+including that nothing sits between the slot and the filter row.
+
+**DISMISS PER PERIOD.** Dismissing hides this week's briefing until the next review is generated,
+at which point the slot returns with the new one (`sa.todoReviewDismissed`, keyed on the review
+window — a UI pref, never a data write).
+
+**EVERY FIGURE DERIVES.** Cleared counts `UserTask.completedAt` inside the review window; replies
+come from `weekReviewStats().back`; the headline and narrative are composed from those same
+numbers. **A figure with no data drops its column rather than showing a zero** — and FOCUSED
+always drops, because the app records no time anywhere and that column could never be honest.
+
+**THE ASSISTANT BAND.** The Pro upsell closes the page: a wide band at the foot of the content
+area, inside the same centred column, with generous space above. Warm-white `#fdf6f2`, 1.5px ink
+border, a 4px offset block in pastille blue `#c2cfda` — **the app's only blue sticker**, locked
+to one occurrence — radius 13. Slate pill, Playfair title, the derived line; the slate "Meet the
+assistant" button pinned to the band's end, opening the existing preview modal. Gating unchanged
+(non-Pro only); **no dismiss control** — a closing note is not something you clear.
+
+**ONE PRO SURFACE.** Exactly one exists on this page, and every predecessor is extinct: the
+content-panel colophon, the panel-foot blue sticker, and the card-surfaced foot strip. Locked.

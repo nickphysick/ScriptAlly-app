@@ -15,7 +15,7 @@
   --spine-chip-on-bg: #f5e2da; /* a selected chip — soft pink, burgundy label */
   --spine-chip-on-tx: #7c3a2a;
   /* (todo rebuild P5: the BLUE PRO STICKER is retired — its successor is the foot
-     .tdb-prostrip in todo.css, card-surfaced with no blue fill.) */
+     .tdb-asst in todo.css — the assistant band at the content's foot.) */
   /* the search pill's own hairline */
   --tsh-active-border: #e0d6c6;
   /* the page root itself — a fill-slot column; NO bespoke ground (canvas scheme 1) */
