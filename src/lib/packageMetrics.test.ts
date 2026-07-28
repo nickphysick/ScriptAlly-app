@@ -28,6 +28,13 @@ import {
   strongestPackage,
   bestVersionOfType,
   mostUsedVersionOfType,
+  materialUsage,
+  materialUsageLine,
+  medianReplyDays,
+  medianReplyDaysAll,
+  daysToWeeks,
+  funnelStages,
+  rankPackagesByReplies,
 } from "./packageMetrics";
 import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType, QueryMaterial, Manuscript, ManuscriptStatus } from "../types";
 
@@ -461,5 +468,92 @@ describe("mostUsedVersionOfType (the de-facto default material — derived from 
     const tie = [pkg({ id: "p1", queryLetterVersionId: "QL1" }), pkg({ id: "p2", queryLetterVersionId: "QL2" })];
     expect(mostUsedVersionOfType(ComponentType.QUERY_LETTER, versions, tie)).toBeNull();
     expect(mostUsedVersionOfType(ComponentType.SYNOPSIS, versions, tie)).toBeNull();
+  });
+});
+
+// ── Two-tab restructure: the derived selectors behind the Workshop sidebar + Analytics tab. ──
+describe("materialUsage / materialUsageLine", () => {
+  const pA = pkg({ id: "pA", queryLetterVersionId: "v1" });
+  const pB = pkg({ id: "pB", queryLetterVersionId: "v1" });
+  const pC = pkg({ id: "pC", queryLetterVersionId: "v2" });
+  const packages = [pA, pB, pC];
+
+  it("aggregates across every package the material appears in", () => {
+    const queries = [
+      q({ id: "1", packageId: "pA", status: QueryStatus.FULL_REQUESTED }),
+      q({ id: "2", packageId: "pA", status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ id: "3", packageId: "pB", status: QueryStatus.QUERIED }),
+    ];
+    const u = materialUsage("v1", packages, queries);
+    expect(u.packages).toBe(2);
+    expect(u.sends).toBe(3);
+    expect(u.replies).toBe(2);
+    expect(u.requests).toBe(1);
+    expect(u.replyRate).toBeCloseTo(2 / 3);
+  });
+
+  it("reads UNUSED when the material is in no package", () => {
+    expect(materialUsageLine(materialUsage("v-none", packages, []))).toEqual({ text: "UNUSED", hot: false });
+  });
+
+  it("is not hot until a request has travelled with it, and singularises", () => {
+    expect(materialUsageLine(materialUsage("v2", packages, []))).toEqual({ text: "IN 1 PACKAGE", hot: false });
+    const withReq = [q({ id: "1", packageId: "pC", status: QueryStatus.PARTIAL_REQUESTED })];
+    expect(materialUsageLine(materialUsage("v2", packages, withReq))).toEqual({ text: "IN 1 PACKAGE · 1 REQUEST", hot: true });
+  });
+});
+
+describe("medianReplyDays", () => {
+  it("is a true median, not the mean — one outlier must not drag it", () => {
+    const queries = [
+      q({ id: "1", packageId: "p", dateSent: "2026-01-01", rejectedDate: "2026-01-08", hasAgentResponded: true }),   //   7d
+      q({ id: "2", packageId: "p", dateSent: "2026-01-01", rejectedDate: "2026-01-15", hasAgentResponded: true }),   //  14d
+      q({ id: "3", packageId: "p", dateSent: "2026-01-01", rejectedDate: "2026-07-01", hasAgentResponded: true }),   // 181d
+    ];
+    expect(medianReplyDays("p", queries)).toBe(14);
+    expect(avgReplyDays("p", queries)).toBeGreaterThan(60); // the mean is dragged; the median is not
+  });
+
+  it("averages the middle pair on an even count, and ignores unanswered sends", () => {
+    const queries = [
+      q({ id: "1", packageId: "p", dateSent: "2026-01-01", rejectedDate: "2026-01-11", hasAgentResponded: true }), // 10d
+      q({ id: "2", packageId: "p", dateSent: "2026-01-01", rejectedDate: "2026-01-21", hasAgentResponded: true }), // 20d
+      q({ id: "3", packageId: "p", dateSent: "2026-01-01" }),                                                      // still out
+    ];
+    expect(medianReplyDays("p", queries)).toBe(15);
+    expect(medianReplyDaysAll(queries)).toBe(15);
+  });
+
+  it("is null when nothing has come back", () => {
+    expect(medianReplyDays("p", [q({ packageId: "p" })])).toBeNull();
+    expect(daysToWeeks(null)).toBeNull();
+    expect(daysToWeeks(22)).toBe("3.1 wks");
+  });
+});
+
+describe("funnelStages / rankPackagesByReplies", () => {
+  it("counts offers as their own stage inside requests", () => {
+    const f = funnelStages([
+      q({ id: "1", status: QueryStatus.OFFER }),
+      q({ id: "2", status: QueryStatus.FULL_REQUESTED }),
+      q({ id: "3", status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ id: "4", status: QueryStatus.QUERIED }),
+    ]);
+    expect(f).toMatchObject({ sent: 4, replied: 3, requests: 2, offers: 1 });
+    expect(f.replyRate).toBeCloseTo(0.75);
+  });
+
+  it("ranks by REPLY rate and sinks the never-sent, flagging the sample threshold", () => {
+    const packages = [pkg({ id: "lo", packageName: "Lo" }), pkg({ id: "hi", packageName: "Hi" }), pkg({ id: "none", packageName: "None" })];
+    const queries = [
+      ...Array.from({ length: 4 }, (_, i) => q({ id: `h${i}`, packageId: "hi", status: QueryStatus.REJECTED, hasAgentResponded: true })),
+      q({ id: "l1", packageId: "lo", status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ id: "l2", packageId: "lo", status: QueryStatus.QUERIED }),
+    ];
+    const ranked = rankPackagesByReplies(packages, queries);
+    expect(ranked.map((r) => r.pkg.id)).toEqual(["hi", "lo", "none"]);
+    expect(ranked[0].ranked).toBe(true);   // 4 sends — clears MIN_SENDS_FOR_CLAIM
+    expect(ranked[1].ranked).toBe(false);  // 2 sends — provisional
+    expect(ranked[2].stat.replyRate).toBeNull();
   });
 });

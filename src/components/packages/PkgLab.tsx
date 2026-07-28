@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, QueryStatus } from "../../types";
 import { PackageShowcase } from "./PackageShowcase";
 import { PackageTabs, PackageTab } from "./PackageTabs";
-import { PackageWorkshop } from "./PackageWorkshop";
+import { WorkshopTab } from "./WorkshopTab";
 import { PageHeader } from "../shell/PageHeader";
 import "./packageWorkshop.css";
 import { Tour } from "../Tour";
@@ -67,6 +67,7 @@ export const PkgLab: React.FC = () => {
   const [tour, setTour] = useState(false);
   const [pulseAdd, setPulseAdd] = useState(false);
   const [tab, setTab] = useState<PackageTab>("workshop");
+  const [newPkgSignal, setNewPkgSignal] = useState(0);
   // Stateful so the workshop's create/save round-trips in the lab.
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
   const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES);
@@ -87,6 +88,7 @@ export const PkgLab: React.FC = () => {
         variant="full"
         title="Package Workshop"
         description="Bundle your materials once, then send them without rebuilding each time."
+        actions={[{ label: "＋ New package", primary: true, onClick: () => { setTab("workshop"); setNewPkgSignal((n) => n + 1); } }]}
       />
       <PackageTabs tab={tab} onTab={setTab} />
     </>
@@ -121,10 +123,10 @@ export const PkgLab: React.FC = () => {
           <PackageShowcase manuscriptTitle="Murphy's Day Out" onUnlockPro={() => window.alert("Unlock with Pro → /plans")} onTryExample={() => { setView("empty"); startTour(); }} />
         </div>
       ) : (
-      <div className="pkg-root pkgw" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflow: "hidden", background: "var(--shell-canvas)" }}>
+      <div className="pkg-root pkgw" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflowY: "auto", background: "var(--shell-canvas)" }}>
         {mockSlab}
         {tab === "analytics" ? (
-          <div className="pkgw-tv pkgw-tv--scroll" role="tabpanel" aria-label="Analytics">
+          <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
             <div className="pkgw-nodata">
               <h3>Nothing to measure yet</h3>
               <p>
@@ -135,25 +137,26 @@ export const PkgLab: React.FC = () => {
             </div>
           </div>
         ) : view === "empty" ? (
-          <PackageWorkshop
+          <WorkshopTab
             versions={emptyVersions}
             packages={emptyPackages}
             queries={[]}
-            agents={MOCK_AGENTS}
+            activePackageId={null}
             onCreateVersion={(type, name, contentDraft) => { const id = `v-lab-${versions.length}`; setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft }]); return id; }}
             onUpdateVersion={noop}
             onDeleteVersion={noop}
             onSavePackage={() => `p-lab-${pkgs.length}`}
-            onStartTour={startTour}
+            onMakeActive={noop}
             pulseAddMaterials={pulseAdd}
             onDismissPulse={() => setPulseAdd(false)}
           />
         ) : (
-          <PackageWorkshop
+          <WorkshopTab
             versions={tour ? EXAMPLE_VERSIONS : versions}
             packages={tour ? EXAMPLE_PACKAGES : pkgs}
             queries={tour ? EXAMPLE_QUERIES : MOCK_QUERIES}
-            agents={tour ? EXAMPLE_AGENTS : MOCK_AGENTS}
+            activePackageId={tour ? null : "p2"}
+            newPackageSignal={newPkgSignal}
             onCreateVersion={tour ? () => undefined : (type, name, contentDraft) => { const id = `v-lab-${versions.length}`; setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft }]); return id; }}
             onUpdateVersion={tour ? noop : (id, f) => setVersions((vs) => vs.map((v) => (v.id === id ? { ...v, versionName: f.versionName, contentDraft: f.contentDraft } : v)))}
             onDeleteVersion={tour ? noop : (id) => setVersions((vs) => vs.filter((v) => v.id !== id))}
@@ -166,7 +169,7 @@ export const PkgLab: React.FC = () => {
               setPkgs((ps) => [...ps, { id, manuscriptId: "m", userId: "lab", packageName: f.packageName, queryLetterVersionId: f.queryLetterVersionId, synopsisVersionId: f.synopsisVersionId, samplePagesVersionId: f.samplePagesVersionId, status: "Active", createdDate: "2026-01-04T00:00:00.000Z" }]);
               return id;
             }}
-            onStartTour={startTour}
+            onMakeActive={noop}
           />
         )}
       </div>

@@ -87,9 +87,10 @@
 .pkgw-tab.on .n { color: var(--pkg-burg); }
 .pkgw-tab:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 3px; border-radius: 3px; }
 
-/* Tab body: the workshop fills (its panes scroll internally); analytics scrolls as a page. */
-.pkgw-tv { flex: 1; min-height: 0; padding-top: 24px; display: flex; flex-direction: column; }
-.pkgw-tv--scroll { overflow-y: auto; display: block; }
+/* Tab body: flow content. The PAGE scrolls (the agents-page model — the scroll region owns the
+   padding so the scrollbar rides the page edge), not individual panes; the viewport-fit pane model
+   the old two-window workshop used retires with it. */
+.pkgw-tv { padding-top: 24px; padding-bottom: 40px; }
 
 /* ── Shared grammar (ref .sl / .note / .panel / .gsec / .grule) ───────────────
    The section rule is the app-wide grouping pattern: Playfair heading + mono count
@@ -139,3 +140,172 @@
   margin-bottom: 8px;
 }
 .pkgw-nodata p { font-size: 13px; line-height: 1.6; color: var(--pkg-ink-soft); }
+
+/* ══ Workshop tab ══════════════════════════════════════════════════════════ */
+.pkgw-wrap2 { display: flex; gap: 26px; align-items: flex-start; }
+
+/* ── Materials sidebar ────────────────────────────────────────────────────
+   Deliberately LIGHT: a 1px hairline and no offset shadow. In this system the
+   ink-border-and-letterpress treatment is reserved for packages — materials are
+   the parts, packages are the objects. */
+.pkgw-side { width: 258px; flex: none; }
+.pkgw-side .shead { display: flex; align-items: center; margin-bottom: 11px; }
+.pkgw-side .edit {
+  margin-left: auto; font-size: 11.5px; color: var(--pkg-burg);
+  background: none; border: 0; padding: 0; cursor: pointer;
+}
+.pkgw-side .edit:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pkgw-mgrp { margin-bottom: 15px; }
+.pkgw-mgrp .sl { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.pkgw-mgrp .sl i { color: var(--pkg-burg); font-style: normal; display: inline-flex; }
+.pkgw-mchip {
+  display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+  background: var(--pkg-paper); border: 1px solid var(--pkg-line); border-radius: 10px;
+  padding: 9px 11px; margin-bottom: 7px; cursor: grab;
+  transition: border-color .15s, box-shadow .15s;
+}
+.pkgw-mchip:hover { border-color: var(--pkg-dash); box-shadow: 2px 3px 0 rgba(46, 39, 35, .06); }
+.pkgw-mchip:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.pkgw-mchip.sel { border-color: var(--pkg-burg); box-shadow: 0 0 0 2px rgba(124, 58, 42, .12); }
+.pkgw-mchip .nm2 { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; line-height: 1.1; display: block; }
+.pkgw-mchip .use {
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .05em;
+  color: var(--pkg-muted); margin-top: 3px;
+}
+.pkgw-mchip .use.hot { color: var(--pkg-sage); }
+.pkgw-mchip .grip { margin-left: auto; color: var(--pkg-dash); font-size: 11px; letter-spacing: -2px; flex: none; }
+.pkgw-mchip.dragging { opacity: .45; }
+.pkgw-mnew {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  border: 1.5px dashed var(--pkg-dash); border-radius: 10px; padding: 8px 11px;
+  color: var(--pkg-muted); font-size: 11.5px; font-style: italic; cursor: pointer; background: none;
+}
+.pkgw-mnew:hover { border-color: var(--pkg-burg); color: var(--pkg-burg); }
+.pkgw-teach { font-size: 11.5px; line-height: 1.5; color: var(--pkg-ink-soft); margin-bottom: 12px; }
+/* The FR4 pulse: after the tour ends with no materials yet. */
+@keyframes pkgwMatPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 42, .35); } 50% { box-shadow: 0 0 0 9px rgba(124, 58, 42, 0); } }
+.pkgw-side .edit.pulse { animation: pkgwMatPulse 1.8s ease-out infinite; color: var(--pkg-burg); font-weight: 600; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .pkgw-side .edit.pulse { animation: none; box-shadow: 0 0 0 3px rgba(124, 58, 42, .25); }
+}
+
+/* ── Package grid ─────────────────────────────────────────────────────────── */
+.pkgw-main { flex: 1; min-width: 0; }
+.pkgw-pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 18px; }
+
+/* The card: ink border + letterpress offset. `.fci` is the rotor (P4 flips it). */
+.pkgw-fc { perspective: 1200px; min-height: 264px; }
+.pkgw-fci { position: relative; width: 100%; height: 100%; min-height: 264px; }
+.pkgw-face {
+  position: absolute; inset: 0;
+  background: var(--pkg-paper); border: 1px solid var(--pkg-ink); border-radius: 11px;
+  overflow: hidden; box-shadow: var(--pkg-print);
+  display: flex; flex-direction: column;
+}
+/* The ACTIVE package — and nothing else in the system — earns the double outline + deeper cast. */
+.pkgw-fc.active .pkgw-face { box-shadow: var(--pkg-print-active); outline: 2px solid var(--pkg-ink); outline-offset: 2px; }
+
+.pkgw-band { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-bottom: 1px solid var(--pkg-ink); flex: none; }
+.pkgw-band.sage { background: var(--pkg-sage-band); }
+.pkgw-band.tan { background: var(--pkg-tan); }
+.pkgw-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase;
+  background: var(--pkg-paper); border: 1px solid rgba(46, 39, 35, .5); border-radius: 99px; padding: 2.5px 8px;
+  white-space: nowrap;
+}
+.pkgw-pill.solid { background: var(--pkg-burg); border-color: var(--pkg-burg); color: #fff; }
+.pkgw-req { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--pkg-sage); white-space: nowrap; }
+.pkgw-spin {
+  width: 22px; height: 22px; border-radius: 99px; border: 1px solid rgba(46, 39, 35, .45);
+  display: grid; place-items: center; background: var(--pkg-paper); cursor: pointer; flex: none; padding: 0;
+  margin-left: auto;
+}
+.pkgw-req + .pkgw-spin { margin-left: 8px; }
+.pkgw-spin:hover { border-color: var(--pkg-ink); }
+.pkgw-spin:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+.pkgw-fbd { padding: 13px 14px; flex: 1; min-height: 0; }
+.pkgw-fbd .nm { font-family: 'Playfair Display', Georgia, serif; font-size: 17.5px; line-height: 1.15; }
+.pkgw-fbd input.nm {
+  width: 100%; border: 0; background: none; padding: 0; color: var(--pkg-ink);
+  border-bottom: 1px dashed transparent;
+}
+.pkgw-fbd input.nm:hover { border-bottom-color: var(--pkg-line); }
+.pkgw-fbd input.nm:focus { outline: none; border-bottom-color: var(--pkg-burg); }
+.pkgw-rows { margin-top: 8px; }
+.pkgw-mrow {
+  display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--pkg-ink-soft);
+  padding: 6px 0; border-bottom: 1px dashed var(--pkg-linesoft);
+}
+.pkgw-mrow:last-child { border-bottom: 0; }
+.pkgw-mrow .g3 {
+  width: 20px; height: 20px; border-radius: 6px; background: var(--pkg-fill); color: var(--pkg-burg);
+  display: grid; place-items: center; flex: none;
+}
+.pkgw-mrow.dim { color: var(--pkg-dim); font-style: italic; }
+.pkgw-mrow.dim .g3 { color: var(--pkg-dash); }
+.pkgw-mrow .rm { margin-left: auto; background: none; border: 0; color: var(--pkg-muted); cursor: pointer; padding: 0 2px; font-size: 12px; }
+.pkgw-mrow .rm:hover { color: var(--pkg-burg); }
+/* Drop affordances — a type-matched slot only. */
+.pkgw-mrow.over { background: rgba(124, 58, 42, .06); border-radius: 6px; box-shadow: inset 0 0 0 1px var(--pkg-burg); }
+@keyframes pkgwFlash { 0% { background: rgba(138, 158, 136, .35); } 100% { background: transparent; } }
+.pkgw-mrow.flash { animation: pkgwFlash .5s ease-out; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { .pkgw-mrow.flash { animation: none; } }
+
+.pkgw-ffoot {
+  display: flex; align-items: center; border-top: 1px solid var(--pkg-linesoft); padding: 9px 13px;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .06em; color: var(--pkg-muted);
+  flex: none;
+}
+.pkgw-ffoot .fa2 {
+  margin-left: auto; font-family: inherit; font-size: 11px; color: var(--pkg-burg); cursor: pointer;
+  letter-spacing: 0; background: none; border: 0; padding: 0;
+}
+.pkgw-ffoot .fa2 + .fa2 { margin-left: 10px; }
+.pkgw-ffoot .fa2:disabled { color: var(--pkg-dash); cursor: not-allowed; }
+.pkgw-ffoot .fa2:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
+
+.pkgw-newp {
+  border: 1.5px dashed var(--pkg-dash); border-radius: 11px; display: grid; place-items: center;
+  min-height: 264px; color: var(--pkg-muted); cursor: pointer;
+  font-family: 'Playfair Display', Georgia, serif; font-size: 15px; background: none; width: 100%;
+}
+.pkgw-newp:hover { border-color: var(--pkg-burg); color: var(--pkg-burg); }
+
+/* ── Materials editor (behind "Edit materials →") ─────────────────────────── */
+.pkgw-med { max-width: 620px; }
+.pkgw-med .medh { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.pkgw-med .medsub { font-size: 12.5px; color: var(--pkg-ink-soft); margin-bottom: 16px; }
+.pkgw-med label { display: block; margin-bottom: 14px; }
+.pkgw-med .lb { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: var(--pkg-muted); display: block; margin-bottom: 6px; }
+.pkgw-med input[type="text"], .pkgw-med textarea {
+  width: 100%; background: var(--pkg-paper); border: 1px solid var(--pkg-line); border-radius: 9px;
+  padding: 10px 12px; font-family: inherit; font-size: 13px; color: var(--pkg-ink);
+}
+.pkgw-med textarea { min-height: 190px; resize: vertical; line-height: 1.6; }
+.pkgw-med input[type="text"]:focus, .pkgw-med textarea:focus { outline: none; border-color: var(--pkg-burg); box-shadow: 0 0 0 3px rgba(124, 58, 42, .1); }
+.pkgw-med .types { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.pkgw-med .ty {
+  display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px;
+  background: var(--pkg-card); border: 1px solid var(--pkg-line); border-radius: 10px;
+  font-size: 12px; color: var(--pkg-ink); cursor: pointer;
+}
+.pkgw-med .ty.on { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgw-med .medacts { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.pkgw-med .warn { margin-top: 14px; font-size: 12px; line-height: 1.55; color: var(--pkg-ink-soft); border-left: 2px solid var(--pkg-burg); padding-left: 11px; }
+
+/* The house button pair (matches PageHeader's .svh-btn grammar). */
+.pkgw-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px;
+  border-radius: 9px; border: 1px solid var(--pkg-line); background: var(--pkg-card);
+  color: var(--pkg-ink); font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.pkgw-btn:hover:not(:disabled) { background: var(--pkg-paper); border-color: var(--pkg-pinkline); }
+.pkgw-btn--primary { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgw-btn--primary:hover:not(:disabled) { background: var(--pink-h); }
+.pkgw-btn:disabled { background: var(--pkg-card); border-color: var(--pkg-linesoft); color: #bcb0a3; cursor: not-allowed; box-shadow: none; }
+
+@media (max-width: 900px) {
+  .pkgw-wrap2 { flex-direction: column; }
+  .pkgw-side { width: 100%; }
+}

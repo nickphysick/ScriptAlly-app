@@ -18,9 +18,11 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { resolveActivePackage } from "../lib/packageMetrics";
 import { ComponentType } from "../types";
 import { useNavigate } from "react-router-dom";
-import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
+import { PackageSaveFields } from "./packages/PackageWorkshop";
+import { WorkshopTab } from "./packages/WorkshopTab";
 import { PackageTabs, PackageTab } from "./packages/PackageTabs";
 import { PackageShowcase } from "./packages/PackageShowcase";
 import { Tour } from "./Tour";
@@ -31,7 +33,7 @@ import { ChevronDown } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile, setActivePackage } = useScriptAllyDb();
   const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -51,6 +53,8 @@ export const SubmissionPackages: React.FC = () => {
   // Which tab is showing. Component-local UI state by design — deliberately NOT persisted, so the
   // workshop is always what you land on.
   const [tab, setTab] = useState<PackageTab>("workshop");
+  // Bumped by the header's "＋ New package" — the workshop opens a fresh draft on each change.
+  const [newPkgSignal, setNewPkgSignal] = useState(0);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -77,6 +81,9 @@ export const SubmissionPackages: React.FC = () => {
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
+  // The manuscript's chosen active package — read-only here; null when unset, retired, missing or
+  // cross-manuscript. It drives the ACTIVE card treatment and which card is editable.
+  const activePkg = useMemo(() => resolveActivePackage(activeMs, msPackages), [activeMs, msPackages]);
 
   if (!currentUser) return null;
 
@@ -181,7 +188,7 @@ export const SubmissionPackages: React.FC = () => {
   }
 
   return (
-    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflow: "hidden" }}>
+    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflowY: "auto" }}>
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
@@ -195,6 +202,7 @@ export const SubmissionPackages: React.FC = () => {
         variant="full"
         title="Package Workshop"
         description="Bundle your materials once, then send them without rebuilding each time."
+        actions={activeMs ? [{ label: "＋ New package", primary: true, onClick: () => { setTab("workshop"); setNewPkgSignal((n) => n + 1); } }] : []}
       />
       {activeMs && msSelector && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12 }}>{msSelector}</div>
@@ -213,22 +221,23 @@ export const SubmissionPackages: React.FC = () => {
 
           {tab === "workshop" ? (
             <div className="pkgw-tv" role="tabpanel" aria-label="Workshop">
-              <PackageWorkshop
+              <WorkshopTab
                 versions={wsVersions}
                 packages={wsPackages}
                 queries={wsQueries}
-                agents={wsAgents}
+                activePackageId={tourActive ? null : activePkg?.id ?? null}
                 onCreateVersion={tourActive ? noop : createVersion}
                 onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
                 onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
                 onSavePackage={tourActive ? noop : savePackage}
-                onStartTour={startTour}
+                onMakeActive={tourActive || !msId ? noop : (pid) => void setActivePackage(msId, pid)}
+                newPackageSignal={newPkgSignal}
                 pulseAddMaterials={pulseAdd && !tourActive}
                 onDismissPulse={() => setPulseAdd(false)}
               />
             </div>
           ) : (
-            <div className="pkgw-tv pkgw-tv--scroll" role="tabpanel" aria-label="Analytics">
+            <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
               <div className="pkgw-nodata">
                 <h3>Nothing to measure yet</h3>
                 <p>

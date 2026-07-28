@@ -354,3 +354,136 @@ export function resolveActivePackage(manuscript: Manuscript | null | undefined, 
   if (!id) return null;
   return packages.find((p) => p.id === id && p.manuscriptId === manuscript!.id && p.status !== "Retired") ?? null;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Two-tab restructure (Workshop · Analytics) — derived selectors. Everything below is computed at
+// read time from `packages` + `queries`; no counter is ever stored. Framing rule, applied throughout:
+// REPLY RATE is the primary measure (it stabilises at querying sample sizes) and REQUESTS are
+// noteworthy EVENTS, never a rate to optimise. A request credits every material in the package that
+// was sent — so these read "in requesting packages", never "caused a request".
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** How much work one material is doing, across every package it appears in. */
+export interface MaterialUsage {
+  /** Packages that include this material. */
+  packages: number;
+  /** Queries sent with any of those packages. */
+  sends: number;
+  /** Those sends that drew a reply. */
+  replies: number;
+  /** Those sends where the agent asked for materials — an event count, never a rate. */
+  requests: number;
+  /** replies / sends — null when nothing has been sent yet. */
+  replyRate: number | null;
+}
+
+/** Per-material usage across all its packages (the sidebar's usage line + the materials panel). */
+export function materialUsage(versionId: string, packages: SubmissionPackage[], queries: Query[]): MaterialUsage {
+  const inPkgs = packagesUsingVersion(versionId, packages);
+  const ids = new Set(inPkgs.map((p) => p.id));
+  const mine = queries.filter((q) => !!q.packageId && ids.has(q.packageId));
+  const replies = mine.filter(isResponse).length;
+  return {
+    packages: inPkgs.length,
+    sends: mine.length,
+    replies,
+    requests: mine.filter(isRequest).length,
+    replyRate: rate(replies, mine.length),
+  };
+}
+
+/**
+ * The sidebar chip's usage line, verbatim per the ref: "IN 2 PACKAGES · 3 REQUESTS" / "IN 2 PACKAGES"
+ * / "UNUSED". `hot` marks a material that has travelled in a package which drew a request — the sage
+ * treatment. Pure string-building so the wording is unit-locked in one place.
+ */
+export function materialUsageLine(u: MaterialUsage): { text: string; hot: boolean } {
+  if (u.packages === 0) return { text: "UNUSED", hot: false };
+  const pkgs = `IN ${u.packages} PACKAGE${u.packages === 1 ? "" : "S"}`;
+  if (u.requests === 0) return { text: pkgs, hot: false };
+  return { text: `${pkgs} · ${u.requests} REQUEST${u.requests === 1 ? "" : "S"}`, hot: true };
+}
+
+/** Median (not mean) days from send to the agent's first move, for one package. Null when nothing
+ *  has come back. `avgReplyDays` is the older MEAN and stays for its existing callers — the two are
+ *  deliberately distinct; the two-tab views all quote the median, as the ref does. */
+export function medianReplyDays(pkgId: string, queries: Query[]): number | null {
+  const spans = replySpans(queries.filter((q) => q.packageId === pkgId));
+  return medianOf(spans);
+}
+
+/** Median reply days across every package (the all-packages KPI). */
+export function medianReplyDaysAll(queries: Query[]): number | null {
+  return medianOf(replySpans(queries.filter((q) => !!q.packageId)));
+}
+
+/** Days from send to the agent's FIRST recorded move, for each query that has one. */
+function replySpans(qs: Query[]): number[] {
+  const spans: number[] = [];
+  for (const q of qs) {
+    if (!isResponse(q) || !q.dateSent) continue;
+    const acts = [q.partialRequestedDate, q.fullRequestedDate, q.rejectedDate].filter(Boolean) as string[];
+    if (!acts.length) continue;
+    const sent = Date.parse(q.dateSent);
+    const first = Math.min(...acts.map((d) => Date.parse(d)));
+    if (!Number.isFinite(sent) || !Number.isFinite(first) || first < sent) continue;
+    spans.push((first - sent) / 86400000);
+  }
+  return spans;
+}
+
+/** True median: the mean of the middle pair on an even count. Null on an empty set. */
+function medianOf(xs: number[]): number | null {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return Math.round(s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2);
+}
+
+/** Whole weeks, one decimal — the ref quotes reply times in weeks ("3.1 wks"). */
+export const daysToWeeks = (days: number | null): string | null => (days === null ? null : `${(days / 7).toFixed(1)} wks`);
+
+/** The four funnel stages. Offers are a subset of requests, hence their own count. */
+export interface PackageFunnelStages {
+  sent: number;
+  replied: number;
+  requests: number;
+  offers: number;
+  replyRate: number | null;
+}
+
+/** Funnel over a set of queries (all packaged sends, or one package's). */
+export function funnelStages(queries: Query[]): PackageFunnelStages {
+  const sent = queries.length;
+  const replied = queries.filter(isResponse).length;
+  return {
+    sent,
+    replied,
+    requests: queries.filter(isRequest).length,
+    offers: queries.filter((q) => q.status === QueryStatus.OFFER).length,
+    replyRate: rate(replied, sent),
+  };
+}
+
+/** A package ranked by REPLY rate (the leaderboard's ordering — not the request rate, which is an
+ *  event count too small to rank on). `ranked` flags whether it clears MIN_SENDS_FOR_CLAIM. */
+export interface ReplyRankedPackage {
+  pkg: SubmissionPackage;
+  stat: PackageFunnelStages;
+  ranked: boolean;
+}
+
+/** Packages by reply rate (desc), then sends (desc), then name. No sends → sinks to the bottom. */
+export function rankPackagesByReplies(packages: SubmissionPackage[], queries: Query[]): ReplyRankedPackage[] {
+  return packages
+    .map((pkg) => {
+      const stat = funnelStages(queries.filter((q) => q.packageId === pkg.id));
+      return { pkg, stat, ranked: meetsSampleThreshold(stat.sent) };
+    })
+    .sort((a, b) => {
+      const ra = a.stat.replyRate;
+      const rb = b.stat.replyRate;
+      const byRate = ra === null && rb === null ? 0 : ra === null ? 1 : rb === null ? -1 : rb - ra;
+      return byRate || b.stat.sent - a.stat.sent || a.pkg.packageName.localeCompare(b.pkg.packageName);
+    });
+}
