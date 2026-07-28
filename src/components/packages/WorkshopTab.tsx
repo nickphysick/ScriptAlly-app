@@ -25,7 +25,7 @@ import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES, SlotSelection, emptySelection, selectionFromPackage } from "./typeMeta";
 import {
   isSlotFilled, UNFILLED_SLOT, reachedFull, isRequest, packagesUsingVersion,
-  materialUsage, materialUsageLine,
+  materialUsage, materialUsageLine, funnelStages, medianReplyDays, daysToWeeks, formatRate,
 } from "../../lib/packageMetrics";
 import { PackageSaveFields } from "./PackageWorkshop";
 
@@ -40,6 +40,19 @@ const toFields = (name: string, sel: SlotSelection): PackageSaveFields => ({
   samplePagesVersionId: sel[ComponentType.SAMPLE_PAGES] || UNFILLED_SLOT,
 });
 const sameSel = (a: SlotSelection, b: SlotSelection) => BUILDER_TYPES.every((t) => a[t] === b[t]);
+
+/** The band's flip control — a refresh arc going to results, a return arrow coming back. */
+const spinGlyph = (
+  <svg viewBox="0 0 24 24" width={11} height={11} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 12a9 9 0 019-9c2.5 0 4.8 1 6.4 2.6L21 8" /><path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 01-9 9c-2.5 0-4.8-1-6.4-2.6L3 16" /><path d="M3 21v-5h5" />
+  </svg>
+);
+const backGlyph = (
+  <svg viewBox="0 0 24 24" width={11} height={11} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 010 12h-3" />
+  </svg>
+);
 
 export interface WorkshopTabProps {
   versions: ManuscriptVersion[];
@@ -72,6 +85,13 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
   const [dragMat, setDragMat] = useState<string | null>(null);
   const [overSlot, setOverSlot] = useState<ComponentType | null>(null);
   const [flash, setFlash] = useState<ComponentType | null>(null);
+  // Which cards are showing their results face. A Set, so several can be flipped at once.
+  const [flipped, setFlipped] = useState<Set<string>>(new Set());
+  const toggleFlip = (id: string) => setFlipped((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
   // Materials editing lives behind "Edit materials →" — the main column swaps to the editor.
   const [matMode, setMatMode] = useState(false);
   const [selMat, setSelMat] = useState<string | null>(null);
@@ -245,7 +265,7 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
     </div>
   );
 
-  // ── One package card (front face; the back arrives with the flip in P4) ───
+  // ── One package card: front (build) + back (results), on a 3D rotor ──────
   const card = (id: string, d: Draft) => {
     const isTarget = id === target;
     const isActive = id === activePackageId;
@@ -258,13 +278,30 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
     const pill = isActive ? "Active" : sent > 0 ? `Sent ×${sent}` : "Draft";
     const reqLine = fulls > 0 ? `${fulls} FULL REQ ✓` : reqs > 0 ? `${reqs} REQUEST${reqs === 1 ? "" : "S"} ✓` : null;
 
+    const isFlipped = flipped.has(id);
+    const name = d.name.trim() || "Untitled package";
+    // The editable card must NOT flip on body clicks — its rows are an editing surface — so only its
+    // band button flips it. Every read-only card flips on click, per the ref.
+    const faceTap = isTarget ? undefined : () => toggleFlip(id);
+
     return (
-      <div key={id} className={`pkgw-fc${isActive ? " active" : ""}`} id={isTarget ? "tgt-bench" : undefined}>
+      <div key={id} className={`pkgw-fc${isActive ? " active" : ""}${isFlipped ? " flip" : ""}`} id={isTarget ? "tgt-bench" : undefined}>
         <div className="pkgw-fci">
-          <div className="pkgw-face">
+          {/* front — build face */}
+          <div className={`pkgw-face front${faceTap ? " tap" : ""}`} onClick={faceTap} inert={isFlipped ? true : undefined}>
             <div className={`pkgw-band ${bandTone}`}>
               <span className={`pkgw-pill${isActive ? " solid" : ""}`}>{pill}</span>
               {reqLine && <span className="pkgw-req">{reqLine}</span>}
+              {isTarget && (
+                <button
+                  type="button"
+                  className="pkgw-spin"
+                  aria-label={`Show results for ${name}`}
+                  onClick={(e) => { e.stopPropagation(); toggleFlip(id); }}
+                >
+                  {spinGlyph}
+                </button>
+              )}
             </div>
             <div className="pkgw-fbd">
               {isTarget ? (
@@ -319,7 +356,63 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
                   )}
                 </>
               ) : (
-                <span>{sent > 0 ? "TAP TO SEE RESULTS ↻" : "NOT SENT YET"}</span>
+                /* The ref's foot line IS the affordance on a read-only card, so it is a real button:
+                   the whole face stays clickable by mouse, and this is what the keyboard reaches. */
+                <button type="button" className="fa2" style={{ marginLeft: 0, letterSpacing: ".06em", fontSize: 7.5, fontFamily: "'JetBrains Mono', monospace", color: "inherit" }} aria-label={`Show results for ${name}`} onClick={(e) => { e.stopPropagation(); toggleFlip(id); }}>
+                  {sent > 0 ? "TAP TO SEE RESULTS ↻" : "NOT SENT YET ↻"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* back — results face */}
+          <div className={`pkgw-face back${faceTap ? " tap" : ""}`} onClick={faceTap} inert={isFlipped ? undefined : true}>
+            <div className="pkgw-band tan">
+              <span className="pkgw-pill">Results</span>
+              <button
+                type="button"
+                className="pkgw-spin"
+                aria-label={`Back to ${name}`}
+                onClick={(e) => { e.stopPropagation(); toggleFlip(id); }}
+              >
+                {backGlyph}
+              </button>
+            </div>
+            <div className="pkgw-fbd">
+              <div className="nm">{name}</div>
+              {sent === 0 ? (
+                <div className="note" style={{ marginTop: 14 }}>Nothing to measure yet — add a letter and send it with a query.</div>
+              ) : (
+                <>
+                  {(() => {
+                    const f = funnelStages(mine);
+                    const med = daysToWeeks(medianReplyDays(id, queries));
+                    return (
+                      <>
+                        <div className="pkgw-hero3">
+                          <span className="big">{formatRate(f.replyRate)}</span>
+                          <span className="lb"><b>of agents replied</b><span>from {sent} sent</span></span>
+                        </div>
+                        <div style={{ marginTop: 9 }}>
+                          <div className="pkgw-srow">Replies<b>{f.replied} of {sent}</b></div>
+                          {med && <div className="pkgw-srow">Median reply<b>{med}</b></div>}
+                          <div className="pkgw-srow">Requests<b className={f.requests > 0 ? "gold" : undefined}>{f.requests > 0 ? `${f.requests} ★` : "—"}</b></div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </>
+              )}
+              {!isActive && (
+                <button
+                  type="button"
+                  className="pkgw-mkact"
+                  onClick={(e) => { e.stopPropagation(); onMakeActive(id); }}
+                  disabled={!!drafts[id]?.isNew}
+                  title={drafts[id]?.isNew ? "Save this package first" : undefined}
+                >
+                  Make active
+                </button>
               )}
             </div>
           </div>
