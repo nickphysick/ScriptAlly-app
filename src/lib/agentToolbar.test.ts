@@ -116,6 +116,29 @@ describe("agent list · the filters popover", () => {
     ).toContain("onFilters(emptyFilterSet())");
   });
 
+  it("the popover FLIPS generically when it would overflow — no per-control special case", () => {
+    expect(
+      bar,
+      "the flip decision left the shared Pop component — put back per-control and every popover added later starts overflowing again",
+    ).toContain("popoverAlign({");
+    expect(
+      bar,
+      "the flip stopped measuring against the content column (.agl-inner) — measuring the window instead lets the popover sit in the page's margin, outside what the reader perceives as the page",
+    ).toContain('closest(".agl-inner")');
+    expect(
+      bar,
+      "the measurement moved out of a LAYOUT effect — deciding after paint shows the popover in the wrong place for one frame",
+    ).toContain("useLayoutEffect");
+    expect(
+      bar,
+      "the flip is being hard-coded to a control (the pack forbids a per-Sort fix); it must come from the geometry alone",
+    ).not.toMatch(/id === "sort".{0,40}(right|align)/);
+    expect(
+      block(".aglist .agl-pop.right"),
+      "the right-anchored variant lost its `left: auto` — leaving left:0 in place means right:0 does nothing and the popover never actually flips",
+    ).toContain("left: auto");
+  });
+
   it("Escape closes the popover and goes NO further", () => {
     expect(
       bar,

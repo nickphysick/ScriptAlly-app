@@ -123,6 +123,10 @@
   box-shadow: 0 16px 40px rgba(58, 28, 20, .18); padding: 8px;
   animation: aglPopIn .14s ease;
 }
+/* Left-anchored by default; `.right` hangs it from the anchor's RIGHT edge instead, applied by
+   the shared component when a left-anchored box would overflow the content column. Generic, so
+   any popover added later inherits it — nothing here knows which control it is. */
+.aglist .agl-pop.right { left: auto; right: 0; }
 @keyframes aglPopIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .aglist .agl-pop { animation: none; } }
 .aglist .agl-pk {
