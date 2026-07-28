@@ -24,6 +24,7 @@ import {
   MIN_SENDS_FOR_CLAIM, materialUsage, isSlotFilled,
 } from "../../lib/packageMetrics";
 import { overdueSends, rankMaterialsByReplies, sentToRows, recommendations, Recommendation } from "../../lib/packageAnalytics";
+import { COMMUNITY_STATS_ENABLED, displayablePercentile, percentileLabel, percentileSentence } from "../../lib/communityStats";
 
 export type AnalyticsScope = "all" | string;
 
@@ -47,6 +48,39 @@ export interface AnalyticsTabProps {
 /** A package's sends. */
 const sendsOf = (pkgId: string, queries: Query[]) => queries.filter((q) => q.packageId === pkgId);
 const pct = (r: number | null) => Math.round((r ?? 0) * 100);
+
+/**
+ * The community comparison, and what stands in its place. Every percentile on this tab goes through
+ * `displayablePercentile`, which returns null unless the flag is on, a source actually answered, the
+ * cohort clears its floor and the writer's own sample clears MIN_SENDS_FOR_CLAIM. Null is the normal
+ * answer today — the surrounding view is written to be complete without it, not to look broken.
+ */
+const PercentilePill: React.FC<{ metric: "package-reply-rate" | "material-reply-rate"; value: number | null; sends: number }> = ({ metric, value, sends }) => {
+  const p = displayablePercentile(metric, value, sends);
+  if (!p) return null;
+  return <span className={`pkgw-pctpill${p.percentile >= 90 ? " top" : ""}`}>{percentileLabel(p)}</span>;
+};
+
+/** The percentile track — the writer's dot against the cohort. Renders only when a claim is allowed. */
+const CommunityTrack: React.FC<{ value: number | null; sends: number; subject: string }> = ({ value, sends, subject }) => {
+  const p = displayablePercentile("package-reply-rate", value, sends);
+  if (!p) {
+    // Flag-off fallback: one quiet line, so the panel reads as finished rather than missing a part.
+    return COMMUNITY_STATS_ENABLED ? null : (
+      <div className="pkgw-unlock">Comparisons with other ScriptAlly writers unlock as the community grows.</div>
+    );
+  }
+  return (
+    <>
+      <div className="pkgw-ptrack">
+        <span className="med" style={{ left: "50%" }} />
+        <span className="you" style={{ left: `${p.percentile}%` }} />
+      </div>
+      <div className="pkgw-ptlab"><span>COMMUNITY LOW</span><span>MEDIAN</span><span>HIGH</span></div>
+      <div className="pkgw-bigline">{percentileSentence(p, subject)}</div>
+    </>
+  );
+};
 
 /** Emphasise the named phrases inside a derived sentence, without dangerouslySetInnerHTML. */
 const emphasise = (text: string, bold: string[]): React.ReactNode => {
@@ -117,7 +151,10 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           <div className="pkgw-kpi">
             <div className="v g">{pct(f.replyRate)}<span className="u">%</span></div>
             <div className="k">Reply rate</div>
-            <div className="d">{f.replied} of {f.sent} {f.replied === 1 ? "agent has" : "agents have"} come back to you</div>
+            <div className="d">
+              {f.replied} of {f.sent} {f.replied === 1 ? "agent has" : "agents have"} come back to you
+              {(() => { const p = displayablePercentile("package-reply-rate", f.replyRate, f.sent); return p ? <> — higher than <b>{p.percentile}%</b> of ScriptAlly writers</> : null; })()}
+            </div>
           </div>
           <div className="pkgw-kpi">
             <div className="v b">{med ? med.replace(" wks", "") : "—"}{med && <span className="u"> wks</span>}</div>
@@ -176,7 +213,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           </div>
 
           <div className="panel">
-            <div className="gsec" style={{ margin: "0 0 5px" }}><h2 style={{ fontSize: 17 }}>Materials winning replies</h2><span className="cn">ACROSS EVERY PACKAGE</span></div>
+            <div className="gsec" style={{ margin: "0 0 5px" }}><h2 style={{ fontSize: 17 }}>Materials winning replies</h2><span className="cn">{COMMUNITY_STATS_ENABLED ? "VS THE SCRIPTALLY COMMUNITY" : "ACROSS EVERY PACKAGE"}</span></div>
             <div className="grule p" style={{ marginBottom: 8 }} />
             {mats.length === 0 ? (
               <div className="note">No material has travelled yet — send a package and they will start earning a record.</div>
@@ -190,6 +227,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                       <div className="mm2">IN {m.usage.packages} {m.usage.packages === 1 ? "PACKAGE" : "PACKAGES"} · {m.usage.sends} {m.usage.sends === 1 ? "SEND" : "SENDS"}{m.usage.requests > 0 ? ` · ${m.usage.requests} ${m.usage.requests === 1 ? "REQUEST" : "REQUESTS"}` : ""}</div>
                     </span>
                     <span className="bar2"><i style={{ width: `${pct(m.usage.replyRate)}%` }} /></span>
+                    <PercentilePill metric="material-reply-rate" value={m.usage.replyRate} sends={m.usage.sends} />
                     <span className="rr">{formatRate(m.usage.replyRate)}<span>replies</span></span>
                   </div>
                 ))}
@@ -272,6 +310,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                 <span>{f.replied} of {f.sent}{med ? ` · median ${med}` : ""}</span>
               </span>
             </div>
+            <CommunityTrack value={f.replyRate} sends={f.sent} subject="package" />
             {!f.replyRate || f.sent < MIN_SENDS_FOR_CLAIM ? (
               <div className="note" style={{ marginTop: 12 }}>
                 {f.sent} {f.sent === 1 ? "send is" : "sends are"} an early read — this figure will firm up as the package travels.
