@@ -21,12 +21,14 @@ import { useScriptAllyDb } from "../lib/db";
 import { ComponentType } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
+import { PackageTabs, PackageTab } from "./packages/PackageTabs";
 import { PackageShowcase } from "./packages/PackageShowcase";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
 import { ChevronDown } from "lucide-react";
+import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
   const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
@@ -46,6 +48,9 @@ export const SubmissionPackages: React.FC = () => {
   const [tourActive, setTourActive] = useState(false);
   // Pulse the "＋ Add materials" affordance after the tour ends with no materials yet (FR4).
   const [pulseAdd, setPulseAdd] = useState(false);
+  // Which tab is showing. Component-local UI state by design — deliberately NOT persisted, so the
+  // workshop is always what you land on.
+  const [tab, setTab] = useState<PackageTab>("workshop");
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -176,7 +181,7 @@ export const SubmissionPackages: React.FC = () => {
   }
 
   return (
-    <div className="pkg-root" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflow: "hidden" }}>
+    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflow: "hidden" }}>
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
@@ -203,19 +208,38 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         </div>
       ) : (
-        <PackageWorkshop
-          versions={wsVersions}
-          packages={wsPackages}
-          queries={wsQueries}
-          agents={wsAgents}
-          onCreateVersion={tourActive ? noop : createVersion}
-          onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
-          onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
-          onSavePackage={tourActive ? noop : savePackage}
-          onStartTour={startTour}
-          pulseAddMaterials={pulseAdd && !tourActive}
-          onDismissPulse={() => setPulseAdd(false)}
-        />
+        <>
+          <PackageTabs tab={tab} onTab={setTab} />
+
+          {tab === "workshop" ? (
+            <div className="pkgw-tv" role="tabpanel" aria-label="Workshop">
+              <PackageWorkshop
+                versions={wsVersions}
+                packages={wsPackages}
+                queries={wsQueries}
+                agents={wsAgents}
+                onCreateVersion={tourActive ? noop : createVersion}
+                onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
+                onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
+                onSavePackage={tourActive ? noop : savePackage}
+                onStartTour={startTour}
+                pulseAddMaterials={pulseAdd && !tourActive}
+                onDismissPulse={() => setPulseAdd(false)}
+              />
+            </div>
+          ) : (
+            <div className="pkgw-tv pkgw-tv--scroll" role="tabpanel" aria-label="Analytics">
+              <div className="pkgw-nodata">
+                <h3>Nothing to measure yet</h3>
+                <p>
+                  Your packages haven&rsquo;t been attached to a query yet. Send one from the Queries Hub and this
+                  tab starts tracking what actually happens: how many agents reply, how quickly, and which version
+                  is carrying the requests.
+                </p>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {tourActive && (

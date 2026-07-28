@@ -14,7 +14,10 @@
 import React, { useState } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, QueryStatus } from "../../types";
 import { PackageShowcase } from "./PackageShowcase";
+import { PackageTabs, PackageTab } from "./PackageTabs";
 import { PackageWorkshop } from "./PackageWorkshop";
+import { PageHeader } from "../shell/PageHeader";
+import "./packageWorkshop.css";
 import { Tour } from "../Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./tourExample";
 import { FONT_MONO, FONT_SERIF } from "../../lib/designTokens";
@@ -63,6 +66,7 @@ export const PkgLab: React.FC = () => {
   const [view, setView] = useState<View>("showcase");
   const [tour, setTour] = useState(false);
   const [pulseAdd, setPulseAdd] = useState(false);
+  const [tab, setTab] = useState<PackageTab>("workshop");
   // Stateful so the workshop's create/save round-trips in the lab.
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
   const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES);
@@ -75,18 +79,17 @@ export const PkgLab: React.FC = () => {
   const emptyVersions: ManuscriptVersion[] = [];
   const emptyPackages: SubmissionPackage[] = [];
 
-  // Mock qhbar (the real host mounts ChromeSlab): crumb + title + Pro + manuscript chip.
+  // The real header the host mounts — the shared PageHeader (full), then the tab strip beneath it.
+  // Mirrored here rather than approximated so lab screenshots match production chrome exactly.
   const mockSlab = (
-    <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "2px 4px 6px", flexShrink: 0 }}>
-      <div>
-        <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--hdr)", opacity: 0.6 }}>Scriptally / Manuscripts / Submission Packages</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 800, color: "var(--hdr)" }}>Package Workshop</span>
-          {proPill}
-        </div>
-      </div>
-      <span style={{ marginLeft: "auto" }}>{msChip}</span>
-    </div>
+    <>
+      <PageHeader
+        variant="full"
+        title="Package Workshop"
+        description="Bundle your materials once, then send them without rebuilding each time."
+      />
+      <PackageTabs tab={tab} onTab={setTab} />
+    </>
   );
 
   return (
@@ -118,9 +121,20 @@ export const PkgLab: React.FC = () => {
           <PackageShowcase manuscriptTitle="Murphy's Day Out" onUnlockPro={() => window.alert("Unlock with Pro → /plans")} onTryExample={() => { setView("empty"); startTour(); }} />
         </div>
       ) : (
-      <div className="pkg-root" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflow: "hidden", background: "var(--desk)" }}>
+      <div className="pkg-root pkgw" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflow: "hidden", background: "var(--shell-canvas)" }}>
         {mockSlab}
-        {view === "empty" ? (
+        {tab === "analytics" ? (
+          <div className="pkgw-tv pkgw-tv--scroll" role="tabpanel" aria-label="Analytics">
+            <div className="pkgw-nodata">
+              <h3>Nothing to measure yet</h3>
+              <p>
+                Your packages haven&rsquo;t been attached to a query yet. Send one from the Queries Hub and this tab
+                starts tracking what actually happens: how many agents reply, how quickly, and which version is
+                carrying the requests.
+              </p>
+            </div>
+          </div>
+        ) : view === "empty" ? (
           <PackageWorkshop
             versions={emptyVersions}
             packages={emptyPackages}
