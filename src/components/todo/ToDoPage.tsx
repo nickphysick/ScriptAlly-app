@@ -45,7 +45,7 @@ import { FocusedSession, HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
-import { ProStrip, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
+import { AssistantBand, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
@@ -930,9 +930,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         )}
           </div>
-          {/* THE PRO STRIP (todo rebuild P5) — the page FOOT, 50px below the last section. */}
+          {/* THE ASSISTANT BAND (briefing-slot P2) — the page's closing note at the foot of the
+              content, full column width. The ONE Pro surface on this page. */}
           {!isProUser(currentUser) && (
-            <ProStrip hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
+            <AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
           )}
           </div>
         </div>

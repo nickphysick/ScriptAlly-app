@@ -22,25 +22,31 @@ export interface AssistantTaskRow {
 /** The canned timing chips — scripted, not measured (the preview's honesty line covers this). */
 const CANNED_TIMES = ["41S", "28S", "36S", "52S"];
 
-/** THE PRO STRIP (todo rebuild P5 — ref .prostrip): the Pro card leaves the top-right band for
- *  a full-width strip at the FOOT of the page, 50px below the last section. Card surface,
- *  hairline, a slate PRO pill, a Playfair title, one line of body and a slate text link —
- *  NO blue fill and no heavy shadow (the blue offset sticker is retired with the two-column
- *  band it sat in). The count stays live-derived, never hardcoded. */
-export const ProStrip: React.FC<{
+/** THE ASSISTANT BAND (briefing-slot pack P2 — ref design-refs/briefing-slot.html option 4):
+ *  the page's closing note, seated at the FOOT of the content area, full column width. Warm-white
+ *  ground, a 1.5px ink border and a 4px offset block in pastille blue — THE APP'S ONLY BLUE
+ *  STICKER (grep-locked). Left: the slate PRO pill, a Playfair title and the derived line;
+ *  right, pinned to the band's end: the slate button opening the existing preview modal.
+ *
+ *  Gating is unchanged (non-Pro only) and there is NO dismiss control — a closing note is not
+ *  something you clear. The numbers stay derived, never hardcoded.
+ *
+ *  SUPERSEDES the todo-rebuild foot strip's card surface ("no blue fill, no heavy shadow"): this
+ *  pack restores the blue sticker treatment, wide, at the foot. */
+export const AssistantBand: React.FC<{
   hkCount: number;
   totalCount: number;
   onPreview: () => void;
 }> = ({ hkCount, totalCount, onPreview }) => (
-  <div className="tdb-prostrip">
-    <span className="tdb-prostrip-pill">PRO</span>
-    <div className="tdb-prostrip-mid">
-      <div className="tdb-prostrip-t">Hand over the housekeeping</div>
-      <div className="tdb-prostrip-d">
+  <div className="tdb-asst">
+    <div className="tdb-asstmid">
+      <span className="tdb-asstpill"><span aria-hidden>✦</span> SCRIPTALLY PRO</span>
+      <div className="tdb-asstt">Hand over the housekeeping</div>
+      <div className="tdb-asstd">
         {hkCount} of your {totalCount} tasks could run in the background whilst you write.
       </div>
     </div>
-    <button type="button" className="tdb-prostrip-lk" onClick={onPreview}>Meet the assistant →</button>
+    <button type="button" className="tdb-asstbtn" onClick={onPreview}>Meet the assistant</button>
   </div>
 );
 

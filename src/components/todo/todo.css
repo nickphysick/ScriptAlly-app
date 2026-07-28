@@ -93,15 +93,17 @@
 .tdb-vtog button { width: 30px; height: 28px; border: 0; background: none; border-radius: 8px; display: grid; place-items: center; color: var(--muted, #9c8878); cursor: pointer; }
 .tdb-vtog button svg { width: 14px; height: 14px; }
 .tdb-vtog button.on { background: var(--shell-canvas, #fdfbf8); color: var(--ink); }
-/* THE PRO STRIP (todo rebuild P5 — ref .prostrip): full width at the page foot, 50px below the
-   last section. Card surface + hairline, a slate PRO pill, Playfair title, one line of body and
-   a slate text link. No blue fill, no heavy shadow. */
-.tdb-prostrip { display: flex; align-items: center; gap: 14px; margin-top: 50px; background: var(--card, #fdfaf5); border: 1px solid var(--line); border-radius: 14px; padding: 15px 17px; }
-.tdb-prostrip-pill { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; background: #6A89A7; color: #fff; border-radius: 6px; padding: 3px 7px; flex: none; }
-.tdb-prostrip-mid { flex: 1; min-width: 0; }
-.tdb-prostrip-t { font-family: var(--f12-serif); font-size: 16px; color: var(--ink); }
-.tdb-prostrip-d { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
-.tdb-prostrip-lk { font-size: 12.5px; color: #6A89A7; background: none; border: 0; border-bottom: 1px solid #c3d2df; padding: 0 0 1px; cursor: pointer; flex: none; }
+/* THE ASSISTANT BAND (briefing-slot P2 — ref option 4): the closing note at the content's foot,
+   full column width, with generous space above. Warm-white ground, 1.5px ink border and the 4px
+   pastille-blue offset block — the app's ONLY blue sticker. */
+.tdb-asst { display: flex; align-items: center; gap: 14px; margin-top: 56px; background: #fdf6f2; border: 1.5px solid #3a1c14; border-radius: 13px; box-shadow: 4px 4px 0 #c2cfda; padding: 14px 17px; }
+.tdb-asstmid { flex: 1; min-width: 0; }
+.tdb-asstpill { display: inline-flex; align-items: center; gap: 5px; background: #6A89A7; border: 1px solid #587991; color: #f4f8fb; border-radius: 99px; height: 20px; padding: 0 10px; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.18em; }
+.tdb-asstt { font-family: var(--f12-serif); font-size: 15.5px; font-weight: 700; color: #4a241a; margin-top: 6px; }
+.tdb-asstd { font-size: 11px; color: #7a5a4c; margin-top: 3px; }
+.tdb-asstbtn { display: inline-flex; align-items: center; justify-content: center; background: #6A89A7; border: 1px solid #587991; color: #f4f8fb; border-radius: 99px; height: 32px; padding: 0 15px; font-size: 10.5px; font-weight: 700; margin-left: auto; flex: 0 0 auto; cursor: pointer; }
+.tdb-asstbtn:hover { background: #5c7b96; }
+
 /* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */
@@ -209,8 +211,8 @@
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
 .tdb-setrow:hover { background: var(--paper); }
 .tdb-cog { flex: 0 0 auto; color: #4d4238; } /* frame P3: the bare 20px cog — the roundel is gone */
-/* panel-final P4 — the content-panel COLOPHON (.tdb-colo* / .tdb-cololink*) is RETIRED; its
-   successor is the blue Pro sticker at the panel foot (.spine-pro* in todoShell.css). */
+/* (The content-panel colophon and every Pro surface that succeeded it are RETIRED. The one Pro
+   surface on this page is now the assistant band at the content's foot — .tdb-asst above.) */
 .tdb-demok { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #8fa4b8; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .tdb-drow { display: flex; align-items: center; gap: 9px; padding: 7px 2px; border-bottom: 1px solid #edf2f7; font-size: 10.5px; color: var(--ink-2); }
 .tdb-drow:last-child { border-bottom: none; }
