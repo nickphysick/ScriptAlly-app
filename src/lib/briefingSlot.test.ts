@@ -76,6 +76,18 @@ describe("THE COLLAPSE LAW — the empty case contributes NO height", () => {
     expect(between.slice(between.indexOf("</button>"))).not.toContain("className=");
   });
 
+  it("ONE OWNER PER GAP — the space under the header rule cannot stack (the reported bug)", () => {
+    // It stacked three ways: .svh's 26px + .tdb-ws's 26px + .tdb-ctrl's 44px = 96px of void
+    // whenever the briefing was absent. Each gap now has exactly one owner.
+    const ws = css.match(/\.tdb-ws \{([^}]*)\}/)?.[1] ?? "";
+    expect(ws).toContain("padding: 0"); // the legacy hero→panel gap is gone (there is no panel)
+    expect(ws).not.toContain("--tdb-hero-gap");
+    expect(css).toContain(".spine-root .svh { margin-bottom: 0; }"); // the page owns its first gap
+    // so the first thing below the rule supplies the whole gap, whichever it is
+    expect(css.match(/\.tdb-brief \{([^}]*)\}/)?.[1]).toContain("margin-top: 26px");
+    expect(css.match(/\.tdb-ctrl \{([^}]*)\}/)?.[1]).toContain("margin-top: 44px");
+  });
+
   it("the spacing lives on the SLOT itself — no min-height, no fixed height, no wrapper margin", () => {
     const box = css.match(/\.tdb-brief \{([^}]*)\}/)?.[1] ?? "";
     expect(box).toContain("margin-top: 26px"); // the gap belongs to the thing that can disappear

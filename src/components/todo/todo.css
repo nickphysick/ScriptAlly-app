@@ -34,7 +34,13 @@
    with a max-width, auto margins or horizontal padding. Everything (hero, panel) rides inside
    it; no ancestor or descendant in the chain adds a competing horizontal box. */
 .tdb-col { max-width: var(--tdb-col-max); margin-inline: auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: var(--tdb-hero-gap) 0 0; } /* the hero→panel gap */
+/* ONE OWNER PER GAP (briefing-slot fix). The space under the header rule was THREE stacked
+   values — .svh's 26px, this element's 26px, and .tdb-ctrl's 44px — compounding to 96px of void
+   whenever the briefing was absent. The legacy hero→panel padding goes (there is no panel), and
+   the page neutralises the shared header margin so the gap belongs to whatever comes FIRST:
+   the briefing's own 26px, or the control row's 44px. */
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0; }
+.spine-root .svh { margin-bottom: 0; } /* the To-do page owns its own first gap (see above) */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
 /* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),

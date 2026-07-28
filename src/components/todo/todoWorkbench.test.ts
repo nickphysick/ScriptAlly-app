@@ -918,7 +918,10 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 0"); // the hero→panel gap (the column owns the outer gutters)
+    // (briefing-slot fix) the hero→panel padding is GONE — there is no panel, and it was one of
+    // three stacked owners of the gap under the header rule. The first element below the rule
+    // now supplies the whole gap; .tdb-ws contributes nothing.
+    expect(rule(".tdb-ws")).toContain("padding: 0");
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-sec")).toContain("margin: 46px 0 5px"); // todo rebuild P1: the typographic rhythm
     expect(rule(".tdb-grid")).toContain("gap: 14px"); // P3: the grid gap still clears the sticker block
