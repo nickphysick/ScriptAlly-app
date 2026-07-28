@@ -12,7 +12,7 @@
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { PageHeader } from "../shell/PageHeader";
 import { useScriptAllyDb } from "../../lib/db";
 import { AgentCard } from "./AgentCard";
@@ -35,18 +35,25 @@ import { Agent, SubmissionMethod, SubmissionStatus } from "../../types";
 import { materialsWantedFromRows } from "../../lib/agentMaterials";
 import { agentRelationship } from "../../lib/agentList";
 import {
-  AGENT_LIST_CHIPS,
-  AGENT_LOCATION_OPTIONS,
   AGENT_SORT_OPTIONS,
-  AgentListFilter,
+  AgentFilterSet,
   AgentListSort,
-  AgentLocationFilter,
+  AgentStanding,
+  AgentTurn,
   DEFAULT_AGENT_SORT,
-  agentCountLine,
-  agentListCounts,
-  visibleAgents,
+  STANDING_LABEL,
+  TURN_LABEL,
+  agentAxisCounts,
+  emptyFilterSet,
+  filterCount,
+  locationCounts,
+  matchesAgentSearch,
+  matchesFilterSet,
+  sortAgentList,
+  starTierCount,
 } from "../../lib/agentList";
-import { getHomeCountry } from "../../lib/territory";
+import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
+import { countryName } from "../../lib/territory";
 import { blankDraft } from "../../lib/agentDraft";
 import "./agentList.css";
 
@@ -60,22 +67,43 @@ interface AgentListProps {
 export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate }) => {
   const { agents, queries, manuscripts, activities, updateAgent, addAgent, currentUser } = useScriptAllyDb();
 
-  const [filter, setFilter] = useState<AgentListFilter>("all");
+  const [filters, setFilters] = useState<AgentFilterSet>(emptyFilterSet);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
   const [sort, setSort] = useState<AgentListSort>(DEFAULT_AGENT_SORT);
-  const [location, setLocation] = useState<AgentLocationFilter>("all");
   // A draft-only agent that isn't persisted until Done passes validation (decision 16).
   const [newAgent, setNewAgent] = useState<Agent | null>(null);
 
-  const homeCountry = getHomeCountry(currentUser);
+  // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
+  // can never read from the already-filtered view.
+  const counts = useMemo(() => agentAxisCounts(agents, queries), [agents, queries]);
+  const starCounts = useMemo(
+    () => [4, 3].map((min) => ({ min, n: starTierCount(agents, min) })),
+    [agents],
+  );
+  const locCounts = useMemo(() => locationCounts(agents), [agents]);
 
-  const counts = useMemo(() => agentListCounts(agents, queries), [agents, queries]);
   const visible = useMemo(
-    () => visibleAgents(agents, queries, filter, search, { sort, location, homeCountry }),
-    [agents, queries, filter, search, sort, location, homeCountry],
+    () =>
+      sortAgentList(
+        agents.filter((a) => matchesFilterSet(a, queries, filters) && matchesAgentSearch(a, search)),
+        sort,
+      ),
+    [agents, queries, filters, search, sort],
   );
   // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
   const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
+
+  /** One tag per applied value, worded from the same label maps the popover reads. */
+  const appliedTags: AppliedTag[] = useMemo(() => {
+    const drop = <K extends keyof AgentFilterSet>(facet: K, v: AgentFilterSet[K][number]) => () =>
+      setFilters((f) => ({ ...f, [facet]: (f[facet] as (typeof v)[]).filter((x) => x !== v) } as AgentFilterSet));
+    return [
+      ...filters.standing.map((k) => ({ label: STANDING_LABEL[k as AgentStanding], onRemove: drop("standing", k) })),
+      ...filters.turn.map((k) => ({ label: TURN_LABEL[k as Exclude<AgentTurn, null>], onRemove: drop("turn", k) })),
+      ...filters.stars.map((n) => ({ label: `${"★".repeat(n)} and up`, onRemove: drop("stars", n) })),
+      ...filters.loc.map((c) => ({ label: countryName(c) || c, onRemove: drop("loc", c) })),
+    ];
+  }, [filters]);
 
   // ── Flip + buffered draft (decision 1) ────────────────────────────────────
   // ONE card is open at a time. Opening clones the agent into `draft`; every editor interaction
@@ -334,9 +362,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       lastCheckedDate: new Date().toISOString(),
       notes: "",
     };
-    setFilter("all");
+    // Clear every narrowing control so the new card can't be born hidden behind a filter.
+    setFilters(emptyFilterSet());
     setSearch("");
-    setLocation("all");
     setNewAgent(stub);
     setFlippedId(id);
     setDraft(blankDraft(id));
@@ -361,65 +389,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
         />
 
-        <div className="agl-controls">
-          {AGENT_LIST_CHIPS.map((chip) => (
-            <button
-              type="button"
-              key={chip.key}
-              className={`agl-fchip${filter === chip.key ? " on" : ""}`}
-              aria-pressed={filter === chip.key}
-              onClick={() => setFilter(chip.key)}
-            >
-              {chip.label} <span className="n">{counts[chip.key]}</span>
-            </button>
-          ))}
-          <div className="agl-spacer" />
-          <select
-            className="agl-in agl-select-sm"
-            value={location}
-            onChange={(e) => setLocation(e.target.value as AgentLocationFilter)}
-            aria-label="Filter by location"
-          >
-            {AGENT_LOCATION_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-          </select>
-          <select
-            className="agl-in agl-select-sm"
-            value={sort}
-            onChange={(e) => setSort(e.target.value as AgentListSort)}
-            aria-label="Sort agents"
-          >
-            {AGENT_SORT_OPTIONS.map((o) => <option key={o.key} value={o.key}>Sort · {o.label}</option>)}
-          </select>
-          <div className="agl-search">
-            <Search width={14} height={14} aria-hidden="true" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search agents or agencies…"
-              aria-label="Search agents or agencies"
-            />
-          </div>
-        </div>
+        <AgentToolbar
+          search={search}
+          onSearch={setSearch}
+          filters={filters}
+          onFilters={setFilters}
+          counts={counts}
+          starCounts={starCounts}
+          locCounts={locCounts}
+          resultCount={visible.length}
+          total={agents.length}
+          group="none"
+          groupOptions={[{ key: "none", label: "None" }]}
+          onGroup={() => {}}
+          sort={sort}
+          sortOptions={AGENT_SORT_OPTIONS}
+          defaultSort={DEFAULT_AGENT_SORT}
+          onSort={(k) => setSort(k as AgentListSort)}
+        />
 
-        <div className="agl-legend">
-          <span className="agl-leg">
-            <span className="sw" style={{ background: "var(--agl-sage-band)" }} />
-            Active queries
-          </span>
-          <span className="agl-leg">
-            <span className="sw" style={{ background: "var(--agl-pink-band)" }} />
-            No active queries
-          </span>
-          <span className="agl-leg dim">
-            <span className="sw" style={{ background: "var(--agl-grey-band)" }} />
-            Closed for submissions
-          </span>
-        </div>
+        {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
+            filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
+        <AgentAppliedTags tags={appliedTags} onClear={() => setFilters(emptyFilterSet())} />
 
-        <div className="agl-countline">{agentCountLine(visible.length, agents.length)}</div>
-
-        <div className="agl-grid">
+        <div className="agl-grid agl-gridwrap">
           {shown.length === 0 && (
             <div className="agl-empty">
               {agents.length === 0 ? (
