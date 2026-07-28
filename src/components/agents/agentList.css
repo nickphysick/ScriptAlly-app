@@ -197,6 +197,24 @@
 
 /* ── grid ───────────────────────────────────────────────────────────────── */
 .aglist .agl-gridwrap { margin-top: 22px; }
+
+/* ── group sections ─────────────────────────────────────────────────────────
+   The SAME pattern as the To-do board's sections (.tdb-sec / .tdb-secrule):
+   a typographic Playfair heading, a mono count, and a 2px full-width rule whose
+   leading stub carries the section's identity colour. One grouping grammar
+   app-wide — a second one would make two lists that group differently look like
+   two different products. Only the stub length differs (88px here, 96px there,
+   both against their own type size). */
+.aglist .agl-gsec { display: flex; align-items: baseline; gap: 11px; margin: 38px 0 5px; }
+.aglist .agl-gsec h2 {
+  font-family: 'Playfair Display', serif; font-size: 23px; font-weight: 500;
+  color: var(--agl-ink-head); margin: 0;
+}
+.aglist .agl-gsec .cn { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--agl-muted); }
+.aglist .agl-gsec .st2 { color: #c8853f; font-size: 13px; letter-spacing: 2px; }
+.aglist .agl-grule { height: 2px; border-radius: 2px; margin-bottom: 18px; }
+/* the first section sits closer — the toolbar above it already set the distance */
+.aglist .agl-groups > section:first-child .agl-gsec { margin-top: 24px; }
 .aglist .agl-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
   gap: 14px; align-items: start;

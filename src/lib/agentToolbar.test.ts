@@ -107,6 +107,25 @@ describe("agent list · the filters popover", () => {
   });
 });
 
+describe("agent list · group sections reuse the To-do board's pattern", () => {
+  const todo = readFileSync(new URL("../components/todo/todo.css", import.meta.url), "utf8");
+
+  it("heading, count and stub-rule match the board's grammar — not a second grouping style", () => {
+    const sec = block(".aglist .agl-gsec h2");
+    expect(sec, "the section heading left Playfair — the board's sections are typographic, and a bar/pill here would make two lists that group differently look like two products").toContain("'Playfair Display'");
+    expect(sec, "the section heading weight drifted off the board's 500").toContain("font-weight: 500");
+    expect(block(".aglist .agl-gsec .cn"), "the section count left the mono face it shares with the board").toContain("'JetBrains Mono'");
+    expect(block(".aglist .agl-grule"), "the section rule left 2px — the board's rule is a 2px hairline, not a border").toContain("height: 2px");
+    // the board still draws its own version of the same thing (this is the pattern being reused)
+    expect(todo, "the To-do board's own section rule changed shape — the two are meant to stay the same idea").toContain(".tdb-secrule { height: 2px");
+  });
+
+  it("the 88px stub carries the section's identity colour, and the palette is NAMED", () => {
+    expect(page, "the stub stopped being drawn as a gradient stop — the rule must read as one line whose head is coloured, not two rules").toContain("0 88px, var(--agl-linesoft) 88px");
+    expect(page, "the stub colour stopped coming from the section, so every group would draw the same rule").toContain("${sec.stub}");
+  });
+});
+
 describe("agent list · applied tags keep the popover honest", () => {
   it("the tags render OUTSIDE the popover, one per applied value, each removable", () => {
     expect(page, "the applied-tag row left the page — closing the popover would then hide what is filtering the list").toContain("<AgentAppliedTags");

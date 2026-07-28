@@ -168,33 +168,12 @@ export function agentAxisCounts(agents: Agent[], queries: Query[]): AgentAxisCou
   return out;
 }
 
-export type AgentListFilter = "all" | "active" | "waiting" | "prev" | "notq" | "closed";
-
-export interface AgentListChip {
-  key: AgentListFilter;
-  label: string;
-}
-
-/** Chip order + wording, straight from the mockup's control row. */
-export const AGENT_LIST_CHIPS: readonly AgentListChip[] = [
-  { key: "all", label: "All" },
-  { key: "active", label: "Active queries" },
-  { key: "waiting", label: "Awaiting your pages" },
-  { key: "prev", label: "No active queries" },
-  { key: "notq", label: "Never queried" },
-  { key: "closed", label: "Closed for submissions" },
-];
-
-export function matchesAgentFilter(agent: Agent, queries: Query[], filter: AgentListFilter): boolean {
-  switch (filter) {
-    case "active": return agentRelationship(agent.id, queries) === "active";
-    case "waiting": return awaitingYourPages(agent.id, queries);
-    case "prev": return agentRelationship(agent.id, queries) === "prev";
-    case "notq": return agentRelationship(agent.id, queries) === "never";
-    case "closed": return !isDoorOpen(agent);
-    default: return true;
-  }
-}
+/* (RETIRED with the toolbar rebuild: `AGENT_LIST_CHIPS` / `matchesAgentFilter` / `visibleAgents`
+   / `agentListCounts` / the location-filter trio. They modelled "Awaiting your pages" as a PEER
+   of "Active queries" — the exact bug the two axes above exist to fix — and had no callers left
+   once the chip row went. Keeping them would have left a working, tested API that reproduces the
+   defect for whoever reached for it next. The card's own state class and the axis derivations
+   cover everything they did.) */
 
 /** Search is name OR agency, case-insensitive (the mockup's exact reach). */
 export function matchesAgentSearch(agent: Agent, search: string): boolean {
@@ -203,26 +182,9 @@ export function matchesAgentSearch(agent: Agent, search: string): boolean {
   return (agent.name || "").toLowerCase().includes(q) || (agent.agency || "").toLowerCase().includes(q);
 }
 
-export const visibleAgents = (
-  agents: Agent[],
-  queries: Query[],
-  filter: AgentListFilter,
-  search: string,
-  opts: { sort?: AgentListSort; location?: AgentLocationFilter; homeCountry?: string } = {},
-): Agent[] =>
-  sortAgentList(
-    agents.filter(
-      (a) =>
-        matchesAgentFilter(a, queries, filter) &&
-        matchesAgentSearch(a, search) &&
-        matchesAgentLocation(a, opts.location ?? "all", opts.homeCountry ?? ""),
-    ),
-    opts.sort ?? DEFAULT_AGENT_SORT,
-  );
+/* ── Sort ──────────────────────────────────────────────────────────────────── */
 
-/* ── Sort + location (restored in Phase 6; the F12 page had both) ──────────── */
-
-export type AgentListSort = "rating" | "resp" | "added" | "az";
+export type AgentListSort = "rating" | "az" | "recent" | "speed";
 
 /**
  * THE DEFAULT ORDER, stated explicitly so the grid can't drift: highest star rating first, then
@@ -232,42 +194,147 @@ export const DEFAULT_AGENT_SORT: AgentListSort = "rating";
 
 export const AGENT_SORT_OPTIONS: readonly { key: AgentListSort; label: string }[] = [
   { key: "rating", label: "Star rating" },
-  { key: "resp", label: "Response time" },
-  { key: "added", label: "Date added" },
   { key: "az", label: "Name A–Z" },
+  { key: "recent", label: "Recently queried" },
+  { key: "speed", label: "Fastest to reply" },
 ];
 
-/** Unrated / unstated sort LAST in their respective orders — absence is not a zero. */
-export function sortAgentList(agents: Agent[], sort: AgentListSort): Agent[] {
+/**
+ * When this agent was last queried — DERIVED, never stored: the newest `dateSent` across their
+ * queries, or null if they've never been queried.
+ *
+ * WHY dateSent and not a second scan of the activity feed: `dateSent` is `recomputeQuery`'s own
+ * output FROM that feed, so it already is the log's derivation, computed once and shared. A
+ * parallel scan here could disagree with it — and `Activity` carries no agentId (the closed-stamp
+ * helper has to string-match descriptions to get one), so the parallel path would also be the
+ * more fragile of the two.
+ */
+export function lastQueriedAt(agentId: string, queries: Query[]): number | null {
+  let newest: number | null = null;
+  for (const q of queries) {
+    if (q.agentId !== agentId) continue;
+    const t = Date.parse(q.dateSent || "");
+    if (!Number.isNaN(t) && (newest === null || t > newest)) newest = t;
+  }
+  return newest;
+}
+
+/**
+ * Sorting. Absence sorts LAST in every order — an unrated agent is not a zero-star agent, an
+ * agent with no stated response time is not instant, and one never queried is not "queried at the
+ * beginning of time". Name breaks every tie so the grid is stable rather than incidentally ordered.
+ */
+export function sortAgentList(agents: Agent[], sort: AgentListSort, queries: Query[] = []): Agent[] {
   const byName = (a: Agent, b: Agent) => (a.name || "").localeCompare(b.name || "");
   const list = [...agents];
   switch (sort) {
     case "az":
       return list.sort(byName);
-    case "resp":
+    case "speed":
       return list.sort((a, b) => {
         const av = a.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : Infinity;
         const bv = b.responseTimeWeeks && b.responseTimeWeeks > 0 ? b.responseTimeWeeks : Infinity;
         return av - bv || byName(a, b);
       });
-    case "added":
-      return list.sort((a, b) => Date.parse(b.dateAdded || "0") - Date.parse(a.dateAdded || "0") || byName(a, b));
+    case "recent":
+      return list.sort((a, b) => {
+        // never-queried sinks: -Infinity puts it after every real date under a descending sort
+        const av = lastQueriedAt(a.id, queries) ?? -Infinity;
+        const bv = lastQueriedAt(b.id, queries) ?? -Infinity;
+        return bv - av || byName(a, b);
+      });
     default:
       return list.sort((a, b) => (b.starRating || 0) - (a.starRating || 0) || byName(a, b));
   }
 }
 
-export type AgentLocationFilter = "all" | "domestic" | "international";
+/* ── Grouping ──────────────────────────────────────────────────────────────── */
 
-export const AGENT_LOCATION_OPTIONS: readonly { key: AgentLocationFilter; label: string }[] = [
-  { key: "all", label: "Anywhere" },
-  { key: "domestic", label: "My market" },
-  { key: "international", label: "International" },
+export type AgentGrouping = "none" | "standing" | "turn" | "stars";
+
+export const AGENT_GROUP_OPTIONS: readonly { key: AgentGrouping; label: string }[] = [
+  { key: "none", label: "None" },
+  { key: "standing", label: "Where things stand" },
+  { key: "turn", label: "Whose turn" },
+  { key: "stars", label: "Star rating" },
 ];
 
-/** Location reads the REAL `agent.country` (ISO) against the user's home market. */
-export const matchesAgentLocation = (agent: Agent, filter: AgentLocationFilter, homeCountry: string): boolean =>
-  filter === "all" ? true : agentTerritory(agent, homeCountry) === filter;
+export interface AgentGroup {
+  key: string;
+  title: string;
+  /** The 88px rule stub's colour — sage/pink/tan/gold, per the To-do board's section pattern. */
+  stub: string;
+  /** Rating groups draw their tier in stars beside the title. */
+  stars?: number;
+  agents: Agent[];
+}
+
+/** The stub palette, named by role so a future group type picks a meaning rather than a hex. */
+export const GROUP_STUB = {
+  sage: "#c3cfc0",   // active / waiting on the agent — in motion, not owed
+  pink: "#e8c8bc",   // awaiting your pages — the writer owes something
+  tan: "#ddd0c0",    // no active queries / never queried — dormant
+  grey: "#cfc8bf",   // closed for submissions
+  gold: "#e0c9a4",   // rating tiers
+} as const;
+
+const STANDING_STUB: Record<AgentStanding, string> = {
+  active: GROUP_STUB.sage,
+  noactive: GROUP_STUB.tan,
+  never: GROUP_STUB.tan,
+  closed: GROUP_STUB.grey,
+};
+
+const TURN_STUB: Record<Exclude<AgentTurn, null>, string> = {
+  you: GROUP_STUB.pink,
+  them: GROUP_STUB.sage,
+};
+
+const TIER_WORD = ["One star", "Two stars", "Three stars", "Four stars", "Five stars"];
+
+/**
+ * Split an ALREADY SORTED list into sections. Sorting stays outside so it applies WITHIN groups
+ * for free — grouping only partitions, it never reorders. Empty sections are dropped; the
+ * unrated tail gets its own honest section rather than being folded into "One star".
+ */
+export function groupAgents(
+  agents: Agent[],
+  grouping: AgentGrouping,
+  queries: Query[],
+): AgentGroup[] {
+  if (grouping === "none") return [];
+
+  const out: AgentGroup[] = [];
+  const push = (key: string, title: string, stub: string, members: Agent[], stars?: number) => {
+    if (members.length) out.push({ key, title, stub, agents: members, ...(stars ? { stars } : {}) });
+  };
+
+  if (grouping === "standing") {
+    for (const k of STANDING_ORDER) {
+      push(k, STANDING_LABEL[k], STANDING_STUB[k], agents.filter((a) => agentStanding(a, queries) === k));
+    }
+    return out;
+  }
+
+  if (grouping === "turn") {
+    for (const k of TURN_ORDER) {
+      push(k, TURN_LABEL[k], TURN_STUB[k], agents.filter((a) => agentTurn(a, queries) === k));
+    }
+    // the axis doesn't apply to everyone, and a silently-dropped remainder would be a lie
+    push("na", "No active queries", GROUP_STUB.tan, agents.filter((a) => agentTurn(a, queries) === null));
+    return out;
+  }
+
+  for (const tier of [5, 4, 3, 2, 1]) {
+    push(`s${tier}`, TIER_WORD[tier - 1], GROUP_STUB.gold, agents.filter((a) => (a.starRating || 0) === tier), tier);
+  }
+  push("s0", "Not yet rated", GROUP_STUB.tan, agents.filter((a) => !a.starRating));
+  return out;
+}
+
+/* (The domestic/international location filter is superseded: the popover filters by the actual
+   COUNTRIES in use, with counts, which is both more precise and self-explanatory. `agentTerritory`
+   still serves the card's home-market flag rule.) */
 
 /* ── the filter SET (rebuild v2): four independent facets, ANDed ─────────────
    Within one facet the ticks are alternatives (OR); across facets they narrow (AND) — which is
@@ -317,29 +384,6 @@ export function locationCounts(agents: Agent[]): { code: string; n: number }[] {
     .map(([code, n]) => ({ code, n }))
     .sort((x, y) => y.n - x.n || x.code.localeCompare(y.code));
 }
-
-export type AgentListCounts = Record<AgentListFilter, number>;
-
-/**
- * Live chip counts over the WHOLE list (never the filtered view — a chip must show what it would
- * reveal). The relationship buckets partition the list; waiting and closed cut across them.
- */
-export function agentListCounts(agents: Agent[], queries: Query[]): AgentListCounts {
-  const c: AgentListCounts = { all: agents.length, active: 0, waiting: 0, prev: 0, notq: 0, closed: 0 };
-  for (const a of agents) {
-    const rel = agentRelationship(a.id, queries);
-    if (rel === "active") c.active += 1;
-    else if (rel === "prev") c.prev += 1;
-    else c.notq += 1;
-    if (awaitingYourPages(a.id, queries)) c.waiting += 1;
-    if (!isDoorOpen(a)) c.closed += 1;
-  }
-  return c;
-}
-
-/** "12 of 20 agents" — singular-safe. */
-export const agentCountLine = (visible: number, total: number): string =>
-  `${visible} of ${total} ${total === 1 ? "agent" : "agents"}`;
 
 /** The meta line's method token: Form / the free-text Other / Email. */
 export function methodShort(agent: Pick<Agent, "submissionMethod" | "agentNotes">): string {

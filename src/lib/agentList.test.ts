@@ -15,14 +15,9 @@ import {
   awaitingYourPages,
   isDoorOpen,
   agentStateClass,
-  matchesAgentFilter,
   matchesAgentSearch,
-  visibleAgents,
-  agentListCounts,
-  agentCountLine,
   methodShort,
   metaTokens,
-  AGENT_LIST_CHIPS,
   CLOSED_DETAIL,
   closedStampDate,
   cardHistory,
@@ -32,7 +27,10 @@ import {
   DEFAULT_AGENT_SORT,
   AGENT_SORT_OPTIONS,
   sortAgentList,
-  matchesAgentLocation,
+  lastQueriedAt,
+  groupAgents,
+  AGENT_GROUP_OPTIONS,
+  GROUP_STUB,
   agentStanding,
   agentTurn,
   agentAxisCounts,
@@ -80,15 +78,14 @@ describe("agentList · relationship vocabulary", () => {
     expect(agentRelationship("a1", [mkQuery({ status: QueryStatus.REJECTED }), mkQuery({ id: "q2", status: QueryStatus.QUERIED })])).toBe("active");
   });
 
-  it("labels are worded once and shared by pill, chips and empty line", () => {
+  it("labels are worded once — the axis labels and the pill read the SAME strings", () => {
     expect(relationshipLabel("active")).toBe("Active queries");
     expect(relationshipLabel("prev")).toBe("No active queries");
     expect(relationshipLabel("never")).toBe("Never queried");
-    // the chip row reuses the same three words
-    const chipLabels = AGENT_LIST_CHIPS.map((c) => c.label);
-    expect(chipLabels).toContain("Active queries");
-    expect(chipLabels).toContain("No active queries");
-    expect(chipLabels).toContain("Never queried");
+    // the standing axis (which the popover, tags and group headings all read) agrees with the pill
+    expect(STANDING_LABEL.active).toBe(relationshipLabel("active"));
+    expect(STANDING_LABEL.noactive).toBe(relationshipLabel("prev"));
+    expect(STANDING_LABEL.never).toBe(relationshipLabel("never"));
   });
 });
 
@@ -113,11 +110,11 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
     expect(isDoorOpen(mkAgent({ submissionStatus: SubmissionStatus.CLOSED }))).toBe(false);
   });
 
-  it("an Unknown agent is NOT in the closed chip, gets no grey state, and stays queryable", () => {
+  it("an Unknown agent is NOT closed, gets no grey state, and stays queryable", () => {
     const unknown = mkAgent({ id: "u", submissionStatus: SubmissionStatus.UNKNOWN });
-    expect(matchesAgentFilter(unknown, [], "closed")).toBe(false);
+    expect(matchesFilterSet(unknown, [], { ...emptyFilterSet(), standing: ["closed"] })).toBe(false);
     expect(agentStateClass(unknown, [])).toBe("s-pink");
-    expect(agentListCounts([unknown], []).closed).toBe(0);
+    expect(agentAxisCounts([unknown], []).standing.closed).toBe(0);
   });
 
   it("closed overrides sage/pink", () => {
@@ -127,47 +124,14 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
   });
 });
 
-describe("agentList · filters, search and counts", () => {
-  const active = mkAgent({ id: "act", name: "Active Ann" });
-  const waiting = mkAgent({ id: "wait", name: "Waiting Wes" });
-  const prev = mkAgent({ id: "prev", name: "Past Pat" });
+describe("agentList · search", () => {
   const never = mkAgent({ id: "nev", name: "New Nell", agency: "Foxglove" });
-  const closed = mkAgent({ id: "shut", name: "Shut Sam", submissionStatus: SubmissionStatus.CLOSED });
-  const agents = [active, waiting, prev, never, closed];
-  const queries = [
-    mkQuery({ id: "q1", agentId: "act", status: QueryStatus.QUERIED }),
-    mkQuery({ id: "q2", agentId: "wait", status: QueryStatus.PARTIAL_REQUESTED }),
-    mkQuery({ id: "q3", agentId: "prev", status: QueryStatus.REJECTED }),
-    mkQuery({ id: "q4", agentId: "shut", status: QueryStatus.WITHDRAWN }),
-  ];
 
-  it("counts run over the whole list and the relationship buckets partition it", () => {
-    const c = agentListCounts(agents, queries);
-    expect(c.all).toBe(5);
-    expect(c.active + c.prev + c.notq).toBe(5); // partition
-    expect(c).toMatchObject({ active: 2, waiting: 1, prev: 2, notq: 1, closed: 1 });
-  });
-
-  it("each chip selects its own bucket", () => {
-    const ids = (f: Parameters<typeof matchesAgentFilter>[2]) => agents.filter((a) => matchesAgentFilter(a, queries, f)).map((a) => a.id);
-    expect(ids("all")).toEqual(["act", "wait", "prev", "nev", "shut"]);
-    expect(ids("active")).toEqual(["act", "wait"]);
-    expect(ids("waiting")).toEqual(["wait"]);
-    expect(ids("prev")).toEqual(["prev", "shut"]);
-    expect(ids("notq")).toEqual(["nev"]);
-    expect(ids("closed")).toEqual(["shut"]);
-  });
-
-  it("search matches name OR agency, case-insensitively, and composes with the filter", () => {
+  it("matches name OR agency, case-insensitively", () => {
     expect(matchesAgentSearch(never, "foxglove")).toBe(true);
     expect(matchesAgentSearch(never, "NELL")).toBe(true);
     expect(matchesAgentSearch(never, "hartley")).toBe(false);
-    expect(visibleAgents(agents, queries, "active", "wes").map((a) => a.id)).toEqual(["wait"]);
-  });
-
-  it("count line is singular-safe", () => {
-    expect(agentCountLine(5, 5)).toBe("5 of 5 agents");
-    expect(agentCountLine(0, 1)).toBe("0 of 1 agent");
+    expect(matchesAgentSearch(never, "  ")).toBe(true); // empty search constrains nothing
   });
 });
 
@@ -440,10 +404,10 @@ describe("agentList · note preview", () => {
   });
 });
 
-describe("agentList · sort + location (restored in Phase 6)", () => {
+describe("agentList · sort (the four working orders)", () => {
   it("THE DEFAULT is star rating, stated explicitly so the grid can't drift", () => {
     expect(DEFAULT_AGENT_SORT).toBe("rating");
-    expect(AGENT_SORT_OPTIONS.map((o) => o.key)).toEqual(["rating", "resp", "added", "az"]);
+    expect(AGENT_SORT_OPTIONS.map((o) => o.key)).toEqual(["rating", "az", "recent", "speed"]);
   });
 
   it("rating: highest first, alphabetical within a tier; UNRATED sorts last", () => {
@@ -453,35 +417,106 @@ describe("agentList · sort + location (restored in Phase 6)", () => {
     expect(sortAgentList([unrated, five, fiveA], "rating").map((a) => a.id)).toEqual(["5a", "5", "u"]);
   });
 
-  it("response time: fastest first, UNSTATED last (absence is not a zero)", () => {
+  it("fastest to reply: quickest first, UNSTATED last (absence is not instant)", () => {
     const fast = mkAgent({ id: "f", responseTimeWeeks: 2 });
     const slow = mkAgent({ id: "s", responseTimeWeeks: 12 });
     const unknown = mkAgent({ id: "u" });
-    expect(sortAgentList([unknown, slow, fast], "resp").map((a) => a.id)).toEqual(["f", "s", "u"]);
+    expect(sortAgentList([unknown, slow, fast], "speed").map((a) => a.id)).toEqual(["f", "s", "u"]);
   });
 
-  it("date added: newest first; A–Z is alphabetical", () => {
-    const old = mkAgent({ id: "o", name: "Zed", dateAdded: "2025-01-01T00:00:00.000Z" });
-    const recent = mkAgent({ id: "r", name: "Ada", dateAdded: "2026-06-01T00:00:00.000Z" });
-    expect(sortAgentList([old, recent], "added").map((a) => a.id)).toEqual(["r", "o"]);
-    expect(sortAgentList([old, recent], "az").map((a) => a.id)).toEqual(["r", "o"]);
+  it("A–Z is alphabetical by name", () => {
+    const z = mkAgent({ id: "o", name: "Zed" });
+    const a = mkAgent({ id: "r", name: "Ada" });
+    expect(sortAgentList([z, a], "az").map((x) => x.id)).toEqual(["r", "o"]);
   });
 
-  it("location filters on the REAL country field against the home market", () => {
-    const gb = mkAgent({ id: "gb", country: "GB" });
-    const us = mkAgent({ id: "us", country: "US" });
-    const none = mkAgent({ id: "nn" });
-    const all = [gb, us, none];
-    expect(all.filter((a) => matchesAgentLocation(a, "domestic", "GB")).map((a) => a.id)).toEqual(["gb"]);
-    expect(all.filter((a) => matchesAgentLocation(a, "international", "GB")).map((a) => a.id)).toEqual(["us"]);
-    expect(all.filter((a) => matchesAgentLocation(a, "all", "GB"))).toHaveLength(3);
+  it("recently queried: newest send first, NEVER-QUERIED last", () => {
+    const old = mkAgent({ id: "old", name: "Old Olive" });
+    const fresh = mkAgent({ id: "fresh", name: "Fresh Fred" });
+    const never = mkAgent({ id: "never", name: "Aaron Never" });
+    const queries = [
+      mkQuery({ id: "q1", agentId: "old", dateSent: "2026-01-05T00:00:00.000Z" }),
+      mkQuery({ id: "q2", agentId: "fresh", dateSent: "2026-07-01T00:00:00.000Z" }),
+    ];
+    expect(sortAgentList([never, old, fresh], "recent", queries).map((a) => a.id)).toEqual(["fresh", "old", "never"]);
   });
 
-  it("visibleAgents composes filter + search + location + sort", () => {
-    const a = mkAgent({ id: "a", name: "Bee", country: "GB", starRating: 3 });
-    const b = mkAgent({ id: "b", name: "Ant", country: "GB", starRating: 5 });
-    const c = mkAgent({ id: "c", name: "Cat", country: "US", starRating: 5 });
-    expect(visibleAgents([a, b, c], [], "all", "", { location: "domestic", homeCountry: "GB" }).map((x) => x.id))
-      .toEqual(["b", "a"]);
+  it("last-queried is DERIVED from the newest query send, not stored on the agent", () => {
+    const queries = [
+      mkQuery({ id: "q1", agentId: "a1", dateSent: "2026-01-05T00:00:00.000Z" }),
+      mkQuery({ id: "q2", agentId: "a1", dateSent: "2026-06-05T00:00:00.000Z" }),
+      mkQuery({ id: "q3", agentId: "other", dateSent: "2026-12-05T00:00:00.000Z" }),
+    ];
+    expect(lastQueriedAt("a1", queries)).toBe(Date.parse("2026-06-05T00:00:00.000Z"));
+    expect(lastQueriedAt("nobody", queries)).toBeNull();
+    // an undated query record cannot invent a date
+    expect(lastQueriedAt("x", [mkQuery({ id: "q4", agentId: "x", dateSent: "" })])).toBeNull();
+  });
+});
+
+describe("agentList · grouping partitions, it never reorders", () => {
+  const five = mkAgent({ id: "five", name: "Zoe Five", starRating: 5 });
+  const four = mkAgent({ id: "four", name: "Ada Four", starRating: 4 });
+  const unrated = mkAgent({ id: "un", name: "Unrated Ursula" });
+  const prev = mkAgent({ id: "prev", name: "Past Pat", starRating: 4 });
+  const closed = mkAgent({ id: "shut", name: "Shut Sam", submissionStatus: SubmissionStatus.CLOSED });
+  const agents = [five, four, unrated, prev, closed];
+  const queries = [
+    mkQuery({ id: "q1", agentId: "five", status: QueryStatus.FULL_REQUESTED }),
+    mkQuery({ id: "q2", agentId: "four", status: QueryStatus.QUERIED }),
+    mkQuery({ id: "q3", agentId: "prev", status: QueryStatus.REJECTED }),
+  ];
+
+  it("the option list is None + the two axes + rating", () => {
+    expect(AGENT_GROUP_OPTIONS.map((o) => o.key)).toEqual(["none", "standing", "turn", "stars"]);
+  });
+
+  it("None returns no sections at all — the grid renders flat", () => {
+    expect(groupAgents(agents, "none", queries)).toEqual([]);
+  });
+
+  it("SORT APPLIES WITHIN GROUPS — grouping only splits an already-sorted list", () => {
+    const sorted = sortAgentList(agents, "az");
+    const g = groupAgents(sorted, "standing", queries);
+    const active = g.find((s) => s.key === "active")!;
+    // alphabetical inside the section, not the input order
+    expect(active.agents.map((a) => a.name)).toEqual(["Ada Four", "Zoe Five"]);
+  });
+
+  it("every agent lands in exactly one section, and empty sections are dropped", () => {
+    const g = groupAgents(agents, "standing", queries);
+    expect(g.flatMap((s) => s.agents).length).toBe(agents.length);
+    expect(g.map((s) => s.key)).toEqual(["active", "noactive", "never", "closed"]);
+    // nobody is "never queried" once we remove that agent — the section disappears rather than showing empty
+    const g2 = groupAgents([five, four], "standing", queries);
+    expect(g2.map((s) => s.key)).toEqual(["active"]);
+  });
+
+  it("grouping by turn keeps the agents the axis DOESN'T apply to — a dropped remainder would be a lie", () => {
+    const g = groupAgents(agents, "turn", queries);
+    expect(g.map((s) => s.key)).toEqual(["you", "them", "na"]);
+    expect(g.flatMap((s) => s.agents).length).toBe(agents.length);
+    expect(g.find((s) => s.key === "you")!.agents.map((a) => a.id)).toEqual(["five"]);
+  });
+
+  it("rating groups run high→low and give the unrated their own honest section", () => {
+    const g = groupAgents(sortAgentList(agents, "rating"), "stars", queries);
+    expect(g.map((s) => s.key)).toEqual(["s5", "s4", "s0"]);
+    expect(g[0].title).toBe("Five stars");
+    expect(g[0].stars).toBe(5);
+    expect(g[2].title).toBe("Not yet rated"); // NOT folded into "One star"
+    expect(g[2].stars).toBeUndefined();
+  });
+
+  it("section titles come from the axis label maps, and stubs from the named palette", () => {
+    const g = groupAgents(agents, "standing", queries);
+    expect(g.map((s) => s.title)).toEqual([
+      STANDING_LABEL.active, STANDING_LABEL.noactive, STANDING_LABEL.never, STANDING_LABEL.closed,
+    ]);
+    expect(g.find((s) => s.key === "active")!.stub).toBe(GROUP_STUB.sage);
+    const t = groupAgents(agents, "turn", queries);
+    expect(t.find((s) => s.key === "you")!.title).toBe(TURN_LABEL.you);
+    expect(t.find((s) => s.key === "you")!.stub).toBe(GROUP_STUB.pink); // the writer owes something
+    expect(t.find((s) => s.key === "them")!.stub).toBe(GROUP_STUB.sage);
   });
 });

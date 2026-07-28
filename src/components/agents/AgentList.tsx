@@ -35,8 +35,10 @@ import { Agent, SubmissionMethod, SubmissionStatus } from "../../types";
 import { materialsWantedFromRows } from "../../lib/agentMaterials";
 import { agentRelationship } from "../../lib/agentList";
 import {
+  AGENT_GROUP_OPTIONS,
   AGENT_SORT_OPTIONS,
   AgentFilterSet,
+  AgentGrouping,
   AgentListSort,
   AgentStanding,
   AgentTurn,
@@ -45,7 +47,7 @@ import {
   TURN_LABEL,
   agentAxisCounts,
   emptyFilterSet,
-  filterCount,
+  groupAgents,
   locationCounts,
   matchesAgentSearch,
   matchesFilterSet,
@@ -70,6 +72,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   const [filters, setFilters] = useState<AgentFilterSet>(emptyFilterSet);
   const [search, setSearch] = useState(searchQuery?.trim() || "");
   const [sort, setSort] = useState<AgentListSort>(DEFAULT_AGENT_SORT);
+  const [grouping, setGrouping] = useState<AgentGrouping>("none");
   // A draft-only agent that isn't persisted until Done passes validation (decision 16).
   const [newAgent, setNewAgent] = useState<Agent | null>(null);
 
@@ -87,11 +90,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       sortAgentList(
         agents.filter((a) => matchesFilterSet(a, queries, filters) && matchesAgentSearch(a, search)),
         sort,
+        queries,
       ),
     [agents, queries, filters, search, sort],
   );
   // The unsaved new agent always rides at the front of the grid, immune to filter and sort.
   const shown = useMemo(() => (newAgent ? [newAgent, ...visible] : visible), [newAgent, visible]);
+
+  // Sections over the ALREADY SORTED list — grouping partitions, it never reorders, so whichever
+  // sort is chosen applies within each section for free.
+  const groups = useMemo(() => groupAgents(shown, grouping, queries), [shown, grouping, queries]);
 
   /** One tag per applied value, worded from the same label maps the popover reads. */
   const appliedTags: AppliedTag[] = useMemo(() => {
@@ -373,6 +381,73 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   };
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
+  /** ONE card renderer, shared by the flat grid and every group section — a second copy would
+   *  drift the moment the editor gains a prop. */
+  const renderCard = (agent: Agent) => (
+              <AgentCard
+                key={agent.id}
+                agent={agent}
+                queries={queries}
+                manuscripts={manuscripts}
+                activities={activities}
+                onEdit={onEdit}
+                onLogQuery={onLogQuery}
+                flipped={flippedId === agent.id}
+                editor={
+                  draft && flippedId === agent.id ? (
+                    <AgentEditor
+                      draft={draft}
+                      onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))}
+                      tab={tab}
+                      onTab={setTab}
+                      onDone={() => void onDone()}
+                      error={error}
+                      onImageError={(msg) => setError({ tab: "contact", msg })}
+                      isNew={!!newAgent && newAgent.id === agent.id}
+                      hasActiveQueries={agentRelationship(agent.id, queries) === "active"}
+                      notes={visibleNotes}
+                      notesLoaded={notesLoaded}
+                      onPostNote={(text) =>
+                        setDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                notes: {
+                                  ...d.notes,
+                                  // posting is what migrates the legacy flat note (decision 13)
+                                  migratedFlat: d.notes.migratedFlat || !!(agent.notes || "").trim(),
+                                  added: [
+                                    ...d.notes.added,
+                                    { tempId: `note-${Math.random().toString(36).slice(2, 11)}`, text, createdAt: new Date().toISOString() },
+                                  ],
+                                },
+                              }
+                            : d,
+                        )
+                      }
+                      onDeleteNote={(id) =>
+                        setDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                // deleting the pinned note clears the pin; the preview falls back to latest
+                                pinnedNoteId: d.pinnedNoteId === id ? undefined : d.pinnedNoteId,
+                                notes: {
+                                  ...d.notes,
+                                  deletedIds: [...d.notes.deletedIds, id],
+                                  added: d.notes.added.filter((p) => p.tempId !== id),
+                                },
+                              }
+                            : d,
+                        )
+                      }
+                      onPinNote={(id) => setDraft((d) => (d ? { ...d, pinnedNoteId: id } : d))}
+                    />
+                  ) : null
+                }
+              />
+  );
+
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -399,9 +474,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           locCounts={locCounts}
           resultCount={visible.length}
           total={agents.length}
-          group="none"
-          groupOptions={[{ key: "none", label: "None" }]}
-          onGroup={() => {}}
+          group={grouping}
+          groupOptions={AGENT_GROUP_OPTIONS}
+          onGroup={(k) => setGrouping(k as AgentGrouping)}
           sort={sort}
           sortOptions={AGENT_SORT_OPTIONS}
           defaultSort={DEFAULT_AGENT_SORT}
@@ -412,6 +487,27 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
         <AgentAppliedTags tags={appliedTags} onClear={() => setFilters(emptyFilterSet())} />
 
+        {/* GROUPED or flat. Sections come from groupAgents over the ALREADY SORTED list, so the
+            chosen sort applies within each section for free. The unsaved new card is pinned to
+            the front of the flat grid and never grouped — it has no standing to group by yet. */}
+        {grouping !== "none" && shown.length > 0 ? (
+          <div className="agl-groups">
+            {groups.map((sec) => (
+              <section key={sec.key}>
+                <div className="agl-gsec">
+                  <h2>{sec.title}</h2>
+                  {sec.stars ? <span className="st2" aria-hidden="true">{"★".repeat(sec.stars)}</span> : null}
+                  <span className="cn">{sec.agents.length}</span>
+                </div>
+                <div
+                  className="agl-grule"
+                  style={{ background: `linear-gradient(90deg, ${sec.stub} 0 88px, var(--agl-linesoft) 88px)` }}
+                />
+                <div className="agl-grid">{sec.agents.map(renderCard)}</div>
+              </section>
+            ))}
+          </div>
+        ) : (
         <div className="agl-grid agl-gridwrap">
           {shown.length === 0 && (
             <div className="agl-empty">
@@ -435,71 +531,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
               )}
             </div>
           )}
-          {shown.map((agent) => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              queries={queries}
-              manuscripts={manuscripts}
-              activities={activities}
-              onEdit={onEdit}
-              onLogQuery={onLogQuery}
-              flipped={flippedId === agent.id}
-              editor={
-                draft && flippedId === agent.id ? (
-                  <AgentEditor
-                    draft={draft}
-                    onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))}
-                    tab={tab}
-                    onTab={setTab}
-                    onDone={() => void onDone()}
-                    error={error}
-                    onImageError={(msg) => setError({ tab: "contact", msg })}
-                    isNew={!!newAgent && newAgent.id === agent.id}
-                    hasActiveQueries={agentRelationship(agent.id, queries) === "active"}
-                    notes={visibleNotes}
-                    notesLoaded={notesLoaded}
-                    onPostNote={(text) =>
-                      setDraft((d) =>
-                        d
-                          ? {
-                              ...d,
-                              notes: {
-                                ...d.notes,
-                                // posting is what migrates the legacy flat note (decision 13)
-                                migratedFlat: d.notes.migratedFlat || !!(agent.notes || "").trim(),
-                                added: [
-                                  ...d.notes.added,
-                                  { tempId: `note-${Math.random().toString(36).slice(2, 11)}`, text, createdAt: new Date().toISOString() },
-                                ],
-                              },
-                            }
-                          : d,
-                      )
-                    }
-                    onDeleteNote={(id) =>
-                      setDraft((d) =>
-                        d
-                          ? {
-                              ...d,
-                              // deleting the pinned note clears the pin; the preview falls back to latest
-                              pinnedNoteId: d.pinnedNoteId === id ? undefined : d.pinnedNoteId,
-                              notes: {
-                                ...d.notes,
-                                deletedIds: [...d.notes.deletedIds, id],
-                                added: d.notes.added.filter((p) => p.tempId !== id),
-                              },
-                            }
-                          : d,
-                      )
-                    }
-                    onPinNote={(id) => setDraft((d) => (d ? { ...d, pinnedNoteId: id } : d))}
-                  />
-                ) : null
-              }
-            />
-          ))}
+          {shown.map(renderCard)}
         </div>
+        )}
        </div>
       </div>
     </div>
