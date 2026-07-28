@@ -226,14 +226,25 @@ export const AGENT_SORT_OPTIONS: readonly { key: AgentListSort; label: string }[
 ];
 
 /**
- * When this agent was last queried — DERIVED, never stored: the newest `dateSent` across their
- * queries, or null if they've never been queried.
+ * When this agent was last queried — DERIVED, never stored.
+ *
+ * THE KEY IS `max(dateSent)` ACROSS ALL THEIR QUERIES — their most recent contact, explicitly,
+ * not whichever query the fetch happens to return first. An agent can hold queries on several
+ * manuscripts, so "the first one found" would order the grid by an arbitrary fact.
+ *
+ * SCOPE: the agent list is GLOBAL, not manuscript-scoped — it reads the whole `queries`
+ * collection from the DB context and has no manuscript selector — so the max is global too. If
+ * this page ever gains a manuscript scope, this call must be given the scoped query set, and the
+ * pulse/counts alongside it; that is a deliberate coupling, not an oversight.
  *
  * WHY dateSent and not a second scan of the activity feed: `dateSent` is `recomputeQuery`'s own
  * output FROM that feed, so it already is the log's derivation, computed once and shared. A
  * parallel scan here could disagree with it — and `Activity` carries no agentId (the closed-stamp
  * helper has to string-match descriptions to get one), so the parallel path would also be the
  * more fragile of the two.
+ *
+ * Returns null for a never-queried agent, and `sortAgentList` sinks those to the BOTTOM — an
+ * agent you have never approached is not one you contacted at the beginning of time.
  */
 export function lastQueriedAt(agentId: string, queries: Query[]): number | null {
   let newest: number | null = null;

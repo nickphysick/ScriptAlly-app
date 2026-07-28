@@ -520,6 +520,26 @@ describe("agentList · sort (the four working orders)", () => {
     expect(sortAgentList([never, old, fresh], "recent", queries).map((a) => a.id)).toEqual(["fresh", "old", "never"]);
   });
 
+  it("MULTI-QUERY AGENT: the key is max(dateSent), never the first query the fetch returns", () => {
+    // the fetch order deliberately puts the OLDER query first — the naive "first match wins"
+    // implementation would date this agent to January and bury them at the bottom of the sort
+    const multi = mkAgent({ id: "multi", name: "Multi Mary" });
+    const single = mkAgent({ id: "single", name: "Single Sid" });
+    const queries = [
+      mkQuery({ id: "old", agentId: "multi", manuscriptId: "m1", dateSent: "2026-01-10T00:00:00.000Z" }),
+      mkQuery({ id: "new", agentId: "multi", manuscriptId: "m2", dateSent: "2026-07-20T00:00:00.000Z" }),
+      mkQuery({ id: "mid", agentId: "single", manuscriptId: "m1", dateSent: "2026-04-01T00:00:00.000Z" }),
+    ];
+    expect(
+      lastQueriedAt("multi", queries),
+      "the last-queried key took the first query found rather than the newest — an agent's ordering then depends on fetch order, not on when you last contacted them",
+    ).toBe(Date.parse("2026-07-20T00:00:00.000Z"));
+    expect(
+      sortAgentList([single, multi], "recent", queries).map((a) => a.id),
+      "the two-query agent sorted below the single-query one — their July query was ignored in favour of their January one",
+    ).toEqual(["multi", "single"]);
+  });
+
   it("last-queried is DERIVED from the newest query send, not stored on the agent", () => {
     const queries = [
       mkQuery({ id: "q1", agentId: "a1", dateSent: "2026-01-05T00:00:00.000Z" }),
