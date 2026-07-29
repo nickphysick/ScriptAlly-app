@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect } from "vitest";
-import { overdueSends, sentToRows, rankMaterialsByReplies, recommendations, weeksSinceSent } from "./packageAnalytics";
+import { overdueSends, sentToRows, rankMaterialsByReplies, recommendations, weeksSinceSent, composition, compositionWidths, compositionLabel } from "./packageAnalytics";
 import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, Agent, ComponentType } from "../types";
 
 const NOW = Date.parse("2026-07-28T00:00:00.000Z");
@@ -115,5 +115,56 @@ describe("recommendations", () => {
   it("ranks materials by reply rate and ignores any that never travelled", () => {
     const ranked = rankMaterialsByReplies(base.versions, base.packages, base.queries);
     expect(ranked.map((m) => m.version.id)).toEqual(["v-strong", "v-l", "v-weak"]);
+  });
+});
+
+describe("composition — the three-part bar", () => {
+  const agents = [agent({})]; // 8-week window ⇒ nudge past ~70d, close past max(2×8×7, 90) = 112d
+
+  it("counts a reply as replied, whatever its outcome", () => {
+    const qs = [
+      q({ id: "rej", status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ id: "req", status: QueryStatus.FULL_REQUESTED }),
+    ];
+    expect(composition(qs, agents, NOW)).toMatchObject({ sent: 2, replied: 2, waiting: 0, noReply: 0, requests: 1 });
+  });
+
+  it("puts a nudge-due send in STILL WAITING, not no-reply — the divergence from overdueSends", () => {
+    const nudgeDue = q({ id: "n", dateSent: ago(90) }); // past deadline+grace, short of close
+    expect(composition([nudgeDue], agents, NOW)).toMatchObject({ waiting: 1, noReply: 0 });
+    // …while the ⚠ marker DOES fire on the very same send. Both are correct; they answer
+    // different questions. This test exists so the two are never "fixed" into agreement.
+    expect(overdueSends([nudgeDue], agents, NOW)).toHaveLength(1);
+  });
+
+  it("only calls it no-reply once replyTask says close", () => {
+    expect(composition([q({ id: "c", dateSent: ago(200) })], agents, NOW)).toMatchObject({ waiting: 0, noReply: 1 });
+  });
+
+  it("treats stated silence as an answer — noResponseMeansNo closes without ever nudging", () => {
+    const silent = [agent({ noResponseMeansNo: true })];
+    expect(composition([q({ id: "s", dateSent: ago(90) })], silent, NOW)).toMatchObject({ waiting: 0, noReply: 1 });
+  });
+
+  it("never calls a send with no recorded reply window overdue", () => {
+    const noWindow = [agent({ responseTimeWeeks: 0 })];
+    expect(composition([q({ id: "w", dateSent: ago(900) })], noWindow, NOW)).toMatchObject({ waiting: 1, noReply: 0 });
+  });
+
+  it("gives widths that sum to 100, and a label carrying the denominator", () => {
+    const c = composition([
+      q({ id: "a", status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ id: "b", status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ id: "c", dateSent: ago(90) }),
+      q({ id: "d", dateSent: ago(300) }),
+    ], agents, NOW);
+    const w = compositionWidths(c);
+    expect(Math.round(w.replied + w.waiting + w.noReply)).toBe(100);
+    expect(w.replied).toBe(50);
+    expect(compositionLabel(c)).toBe("2/4");
+  });
+
+  it("is all-zero on an empty set rather than dividing by nothing", () => {
+    expect(compositionWidths(composition([], agents, NOW))).toEqual({ replied: 0, waiting: 0, noReply: 0 });
   });
 });

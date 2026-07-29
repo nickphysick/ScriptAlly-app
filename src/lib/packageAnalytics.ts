@@ -216,3 +216,65 @@ export function recommendations(inp: RecommendationInput): Recommendation[] {
 
   return out;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPOSITION — the three-part split every bar on the packages surface now draws.
+//
+// A smooth percentage fill claims a precision three or four sends haven't got, and it silently
+// counts a query that simply hasn't come back yet as a failure. The composition form fixes both: the
+// track is the SENDS, and it is divided into what actually happened.
+//
+// ⚠️ THE BOUNDARY, AND A DELIBERATE DIVERGENCE — see reports/packages-empty-landing-bars.md.
+// "No reply" starts at replyTask() === "close" ONLY. A send that merely owes a nudge stays in
+// "still waiting", because the writer is still expected to chase it. That means this and
+// `overdueSends()` — which fires the ⚠ marker at "nudge" OR "close" — DISAGREE BY DESIGN: they answer
+// different questions ("has this gone quiet?" vs "should I chase this?"). A send can carry the ⚠
+// marker while its bar still counts it as waiting. Do not "fix" them into agreement: doing so would
+// either start calling live queries dead, or stop prompting nudges.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Composition {
+  /** The denominator — every send in this set. */
+  sent: number;
+  /** The agent came back (a request counts, since requests ⊆ responses). */
+  replied: number;
+  /** Sent, silent, and not yet past the close threshold — still live. */
+  waiting: number;
+  /** Past `replyTask() === "close"`: gone quiet. */
+  noReply: number;
+  /** Requests among the replies — an event count, drawn in gold, never a rate. */
+  requests: number;
+}
+
+/** The three-part split for a set of sends. Pure; `now` is injected. */
+export function composition(queries: Query[], agents: Agent[], now: number): Composition {
+  let replied = 0;
+  let noReply = 0;
+  let waiting = 0;
+  for (const q of queries) {
+    if (isResponse(q)) { replied += 1; continue; }
+    const agent = agents.find((a) => a.id === q.agentId);
+    const task = replyTask({
+      status: q.status,
+      dateSent: q.dateSent,
+      responseDeadline: q.responseDeadline,
+      responseTimeWeeks: agent?.responseTimeWeeks,
+      noResponseMeansNo: !!agent?.noResponseMeansNo,
+      lastNudgeSentDate: q.lastNudgeSentDate,
+      now,
+    });
+    // "close" — and only "close" — is gone quiet. "nudge" is still live.
+    if (task === "close") noReply += 1; else waiting += 1;
+  }
+  return { sent: queries.length, replied, waiting, noReply, requests: queries.filter(isRequest).length };
+}
+
+/** Percentage widths for the three segments, summing to 100 (or all zero on an empty set). */
+export function compositionWidths(c: Composition): { replied: number; waiting: number; noReply: number } {
+  if (c.sent === 0) return { replied: 0, waiting: 0, noReply: 0 };
+  const pc = (n: number) => (n / c.sent) * 100;
+  return { replied: pc(c.replied), waiting: pc(c.waiting), noReply: pc(c.noReply) };
+}
+
+/** The value label — the denominator is the whole point of this form ("3/4"). */
+export const compositionLabel = (c: Composition): string => `${c.replied}/${c.sent}`;

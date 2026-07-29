@@ -23,7 +23,7 @@ import {
   funnelStages, rankPackagesByReplies, medianReplyDays, medianReplyDaysAll, daysToWeeks, formatRate,
   MIN_SENDS_FOR_CLAIM, materialUsage, isSlotFilled,
 } from "../../lib/packageMetrics";
-import { overdueSends, rankMaterialsByReplies, sentToRows, recommendations, Recommendation } from "../../lib/packageAnalytics";
+import { overdueSends, rankMaterialsByReplies, sentToRows, recommendations, Recommendation, composition, compositionWidths, compositionLabel, Composition } from "../../lib/packageAnalytics";
 import { COMMUNITY_STATS_ENABLED, displayablePercentile, percentileLabel, percentileSentence } from "../../lib/communityStats";
 import { AnalyticsEmpty } from "./AnalyticsEmpty";
 
@@ -87,6 +87,32 @@ const CommunityTrack: React.FC<{ value: number | null; sends: number; subject: s
   );
 };
 
+/**
+ * The composition bar. The track IS the sends, split into what actually happened: replied (solid
+ * ink), still waiting (hatch), no reply (empty). Not a proportional fill — at three or four sends a
+ * percentage claims a precision the data hasn't got, and it counts a query that simply hasn't come
+ * back yet as a failure. The denominator rides the label, because the denominator is the point.
+ */
+const CompositionBar: React.FC<{ c: Composition; className?: string }> = ({ c, className }) => {
+  const w = compositionWidths(c);
+  return (
+    <span className={`pkgw-cbar${className ? ` ${className}` : ""}`} aria-hidden="true">
+      {w.replied > 0 && <i className="rep" style={{ width: `${w.replied}%` }} />}
+      {w.waiting > 0 && <i className="wait" style={{ width: `${w.waiting}%` }} />}
+      {w.noReply > 0 && <i className="non" style={{ width: `${w.noReply}%` }} />}
+    </span>
+  );
+};
+
+/** Once per panel — never per row. */
+const CompositionLegend: React.FC = () => (
+  <div className="pkgw-complegend">
+    <span><b className="k-rep" />Replied</span>
+    <span><b className="k-wait" />Still waiting</span>
+    <span><b className="k-non" />No reply</span>
+  </div>
+);
+
 /** Emphasise the named phrases inside a derived sentence, without dangerouslySetInnerHTML. */
 const emphasise = (text: string, bold: string[]): React.ReactNode => {
   const wanted = bold.filter(Boolean);
@@ -100,6 +126,11 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   onOpenQueries, onOpenPackage, onNewPackage, onTryExample,
 }) => {
   const packaged = queries.filter((q) => !!q.packageId && packages.some((p) => p.id === q.packageId));
+  /** A material's composition — every send of every package it appears in. */
+  const materialComposition = (versionId: string): Composition => {
+    const ids = new Set(packages.filter((p) => [p.queryLetterVersionId, p.synopsisVersionId, p.samplePagesVersionId].includes(versionId)).map((p) => p.id));
+    return composition(queries.filter((q) => !!q.packageId && ids.has(q.packageId)), agents, now);
+  };
 
   const scopeRow = (
     <div className="pkgw-scoper" role="tablist" aria-label="Analytics scope">
@@ -131,6 +162,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
     const anyProvisional = sentPkgs.some((r) => !r.ranked);
     const mats = rankMaterialsByReplies(versions, packages, queries);
     const recs: Recommendation[] = recommendations({ versions, packages, queries, agents, now });
+    const comp = composition(packaged, agents, now);
     const bar = (n: number, d: number) => `${d > 0 ? Math.round((n / d) * 100) : 0}%`;
 
     // First run — nothing has gone out yet. The full empty screen replaces the thin line it used to be.
@@ -169,11 +201,12 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
         <div className="gsec"><h2>Where your queries stand</h2><span className="cn">ALL TIME</span></div>
         <div className="grule" />
         <div className="panel">
+          <CompositionLegend />
           <div className="pkgw-fun">
-            <div className="pkgw-fr"><span className="fl2">Sent</span><span className="tr2"><i style={{ width: "100%", background: "var(--pkg-dash)" }} /></span><span className="fv">{f.sent}</span></div>
-            <div className="pkgw-fr"><span className="fl2">Replied</span><span className="tr2"><i style={{ width: bar(f.replied, f.sent), background: "var(--pkg-sage)" }} /></span><span className="fv">{f.replied} <span>{pct(f.replyRate)}%</span></span></div>
-            <div className="pkgw-fr"><span className="fl2">Requests</span><span className="tr2"><i style={{ width: bar(f.requests, f.sent), background: "var(--pkg-gold-bar)" }} /></span><span className="fv">{f.requests} <span>★</span></span></div>
-            <div className="pkgw-fr"><span className="fl2">Offers</span><span className="tr2"><i style={{ width: bar(f.offers, f.sent), background: "var(--pkg-burg)" }} /></span><span className="fv">{f.offers}</span></div>
+            <div className="pkgw-fr"><span className="fl2">Sent</span><CompositionBar c={comp} /><span className="fv">{f.sent}</span></div>
+            <div className="pkgw-fr"><span className="fl2">Replied</span><span className="pkgw-cbar"><i className="rep" style={{ width: bar(f.replied, f.sent) }} /><i className="non" style={{ width: bar(f.sent - f.replied, f.sent) }} /></span><span className="fv">{f.replied} <span>of {f.sent}</span></span></div>
+            <div className="pkgw-fr"><span className="fl2">Requests ★</span><span className="pkgw-cbar"><i style={{ width: bar(f.requests, f.sent), background: "var(--pkg-gold-bar)" }} /><i className="non" style={{ width: bar(f.sent - f.requests, f.sent) }} /></span><span className="fv">{f.requests} <span>★</span></span></div>
+            <div className="pkgw-fr"><span className="fl2">Offers</span><span className="pkgw-cbar"><i style={{ width: bar(f.offers, f.sent), background: "var(--pkg-burg)" }} /><i className="non" style={{ width: bar(f.sent - f.offers, f.sent) }} /></span><span className="fv">{f.offers}</span></div>
           </div>
           {(() => {
             const stillOut = f.sent - f.replied;
@@ -191,15 +224,16 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           <div className="panel">
             <div className="gsec" style={{ margin: "0 0 5px" }}><h2 style={{ fontSize: 17 }}>Package leaderboard</h2><span className="cn">BY REPLY RATE</span></div>
             <div className="grule" style={{ marginBottom: 8 }} />
+            <CompositionLegend />
             {sentPkgs.map((r, i) => (
               <div key={r.pkg.id} className={`pkgw-lbr${best?.pkg.id === r.pkg.id ? " best" : ""}`}>
                 <span className="rk">{i + 1}</span>
                 <span className="ln2">
                   <span className="lnm">{r.pkg.packageName || "Untitled package"}</span>
                   {!r.ranked && <span className="prov">provisional</span>}
-                  <div className="bar"><i style={{ width: `${pct(r.stat.replyRate)}%` }} /></div>
+                  <CompositionBar c={composition(sendsOf(r.pkg.id, queries), agents, now)} />
                 </span>
-                <span className="lv"><b>{formatRate(r.stat.replyRate)}</b>{r.stat.requests > 0 && ` · ${r.stat.requests}★`}</span>
+                <span className="lv"><b>{composition(sendsOf(r.pkg.id, queries), agents, now).replied}</b>/{r.stat.sent}{r.stat.requests > 0 && ` · ${r.stat.requests}★`}</span>
               </div>
             ))}
             {anyProvisional && (
@@ -213,6 +247,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
           <div className="panel">
             <div className="gsec" style={{ margin: "0 0 5px" }}><h2 style={{ fontSize: 17 }}>Materials winning replies</h2><span className="cn">{COMMUNITY_STATS_ENABLED ? "VS THE SCRIPTALLY COMMUNITY" : "ACROSS EVERY PACKAGE"}</span></div>
             <div className="grule p" style={{ marginBottom: 8 }} />
+            {mats.length > 0 && <CompositionLegend />}
             {mats.length === 0 ? (
               <div className="note">No material has travelled yet — send a package and they will start earning a record.</div>
             ) : (
@@ -224,9 +259,9 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                       <span className="mn2">{m.version.versionName}</span>
                       <div className="mm2">IN {m.usage.packages} {m.usage.packages === 1 ? "PACKAGE" : "PACKAGES"} · {m.usage.sends} {m.usage.sends === 1 ? "SEND" : "SENDS"}{m.usage.requests > 0 ? ` · ${m.usage.requests} ${m.usage.requests === 1 ? "REQUEST" : "REQUESTS"}` : ""}</div>
                     </span>
-                    <span className="bar2"><i style={{ width: `${pct(m.usage.replyRate)}%` }} /></span>
+                    <CompositionBar c={materialComposition(m.version.id)} />
                     <PercentilePill metric="material-reply-rate" value={m.usage.replyRate} sends={m.usage.sends} />
-                    <span className="rr">{formatRate(m.usage.replyRate)}<span>replies</span></span>
+                    <span className="rr">{compositionLabel(materialComposition(m.version.id))}<span>replied</span></span>
                   </div>
                 ))}
                 {mats.some((m) => !m.ranked) && (
@@ -336,6 +371,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
         <div className="gsec"><h2 style={{ fontSize: 17 }}>This package’s materials</h2><span className="cn">HOW THEY DO EVERYWHERE</span></div>
         <div className="grule p" />
         <div className="panel">
+          {mats.length > 0 && <CompositionLegend />}
           {mats.length === 0 ? (
             <div className="note">This package has no materials in it yet.</div>
           ) : mats.map((v) => {
@@ -347,8 +383,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
                   <span className="mn2">{v.versionName}</span>
                   <div className="mm2">IN {u.packages} {u.packages === 1 ? "PACKAGE" : "PACKAGES"} · {u.sends} {u.sends === 1 ? "SEND" : "SENDS"}</div>
                 </span>
-                <span className="bar2"><i style={{ width: `${pct(u.replyRate)}%` }} /></span>
-                <span className="rr">{formatRate(u.replyRate)}<span>replies</span></span>
+                <CompositionBar c={materialComposition(v.id)} />
+                <span className="rr">{compositionLabel(materialComposition(v.id))}<span>replied</span></span>
               </div>
             );
           })}

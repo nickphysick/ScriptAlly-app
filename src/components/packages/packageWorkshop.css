@@ -31,7 +31,10 @@
   --pkg-burg: var(--burg);
   --pkg-pink: var(--pink);
   --pkg-pinkline: var(--pink-b);
-  --pkg-sage: var(--sage-d);
+  /* NO dark sage. `--sage-d` is RETIRED from this surface (it survives elsewhere in the app):
+     a reply rate is a neutral measure, not a success state, so positive figures are INK; the things
+     that are genuinely rare-and-good — requests, ★ marks, the top decile — are GOLD. The pale
+     `--pkg-sage-band` below is untouched: it is the band tint for an active/sent package. */
   /* — the few values with no token yet (mirroring the agl / dv literals) — */
   --pkg-sage-band: #dce0d9;        /* the sage band — identical to --agl-sage-band */
   --pkg-tan: #efe7db;              /* the draft/results band */
@@ -108,7 +111,7 @@
   font-style: italic;
   font-size: 12.5px;
   color: var(--pkg-ink-soft);
-  border-left: 2px solid var(--pkg-sage);
+  border-left: 2px solid var(--pkg-pinkline);
   padding-left: 11px;
   line-height: 1.55;
 }
@@ -172,7 +175,7 @@
   font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .05em;
   color: var(--pkg-muted); margin-top: 3px;
 }
-.pkgw-mchip .use.hot { color: var(--pkg-sage); }
+.pkgw-mchip .use.hot { color: var(--pkg-gold-ink); }
 .pkgw-mchip .grip { margin-left: auto; color: var(--pkg-dash); font-size: 11px; letter-spacing: -2px; flex: none; }
 .pkgw-mchip.dragging { opacity: .45; }
 .pkgw-mnew {
@@ -237,7 +240,7 @@
   white-space: nowrap;
 }
 .pkgw-pill.solid { background: var(--pkg-burg); border-color: var(--pkg-burg); color: #fff; }
-.pkgw-req { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--pkg-sage); white-space: nowrap; }
+.pkgw-req { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--pkg-gold-ink); white-space: nowrap; }
 .pkgw-spin {
   width: 22px; height: 22px; border-radius: 99px; border: 1px solid rgba(46, 39, 35, .45);
   display: grid; place-items: center; background: var(--pkg-paper); cursor: pointer; flex: none; padding: 0;
@@ -337,7 +340,7 @@
 .pkgw-face.back .pkgw-fbd { padding: 12px 14px; }
 .pkgw-face.back .nm { font-size: 15px; }
 .pkgw-hero3 { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-.pkgw-hero3 .big { font-family: 'Playfair Display', Georgia, serif; font-size: 36px; font-weight: 600; color: var(--pkg-sage); line-height: .85; }
+.pkgw-hero3 .big { font-family: 'Playfair Display', Georgia, serif; font-size: 36px; font-weight: 600; color: var(--pkg-ink); line-height: .85; }
 .pkgw-hero3 .lb b { display: block; font-size: 12.5px; }
 .pkgw-hero3 .lb span { font-family: 'JetBrains Mono', monospace; font-size: 7px; text-transform: uppercase; color: var(--pkg-muted); display: block; margin-top: 2px; }
 .pkgw-srow {
@@ -346,7 +349,7 @@
 }
 .pkgw-srow:last-child { border-bottom: 0; }
 .pkgw-srow b { margin-left: auto; font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--pkg-ink); }
-.pkgw-srow b.g { color: var(--pkg-sage); }
+.pkgw-srow b.g { color: var(--pkg-ink); }
 .pkgw-srow b.gold { color: var(--pkg-gold-ink); }
 .pkgw-mkact {
   width: 100%; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center;
@@ -378,7 +381,7 @@
 }
 .pkgw-kpi .v { font-family: 'Playfair Display', Georgia, serif; font-size: 31px; font-weight: 600; line-height: .9; }
 .pkgw-kpi .v .u { font-size: 17px; }
-.pkgw-kpi .v.g { color: var(--pkg-sage); }
+.pkgw-kpi .v.g { color: var(--pkg-ink); }
 .pkgw-kpi .v.b { color: var(--pkg-burg); }
 .pkgw-kpi .v.gold { color: var(--pkg-gold-ink); }
 .pkgw-kpi .k {
@@ -386,7 +389,7 @@
   text-transform: uppercase; color: var(--pkg-muted); margin-top: 7px;
 }
 .pkgw-kpi .d { font-size: 10.5px; color: var(--pkg-ink-soft); margin-top: 4px; line-height: 1.45; }
-.pkgw-kpi .d b { color: var(--pkg-sage); font-weight: 600; }
+.pkgw-kpi .d b { color: var(--pkg-ink); font-weight: 600; }
 
 .pkgw-duo { display: flex; gap: 18px; align-items: stretch; flex-wrap: wrap; }
 .pkgw-duo > .panel { flex: 1; min-width: 300px; }
@@ -407,10 +410,8 @@
 .pkgw-lbr .ln2 { flex: 1; min-width: 0; }
 .pkgw-lbr .lnm { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; }
 .pkgw-lbr.best .lnm::after { content: ' ★'; color: var(--pkg-star); }
-.pkgw-lbr .bar { height: 5px; border-radius: 3px; background: var(--pkg-fill); margin-top: 5px; overflow: hidden; }
-.pkgw-lbr .bar i { display: block; height: 100%; background: var(--pkg-sage); }
 .pkgw-lbr .lv { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--pkg-muted); flex: none; }
-.pkgw-lbr .lv b { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--pkg-sage); }
+.pkgw-lbr .lv b { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--pkg-ink); }
 .pkgw-lbr .prov { font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--pkg-muted); margin-left: 6px; }
 
 /* Materials */
@@ -422,17 +423,15 @@
 }
 .pkgw-matr .mn2 { font-family: 'Playfair Display', Georgia, serif; font-size: 14px; }
 .pkgw-matr .mm2 { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .05em; color: var(--pkg-muted); margin-top: 2px; }
-.pkgw-matr .bar2 { flex: 1; height: 6px; border-radius: 3px; background: var(--pkg-fill); overflow: hidden; max-width: 220px; }
-.pkgw-matr .bar2 i { display: block; height: 100%; background: var(--pkg-sage); border-radius: 3px; }
-.pkgw-matr .rr { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--pkg-sage); width: 52px; text-align: right; flex: none; }
+.pkgw-matr .rr { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--pkg-ink); width: 52px; text-align: right; flex: none; }
 .pkgw-matr .rr span { font-family: 'JetBrains Mono', monospace; font-size: 7px; color: var(--pkg-muted); display: block; font-weight: 400; }
 .pkgw-matr.best .mn2::after { content: ' ★'; color: var(--pkg-star); }
 
 /* The request-event chip — an event, never a rate. */
 .pkgw-evchip {
-  display: inline-flex; align-items: center; gap: 7px; background: var(--pkg-paper);
-  border: 1px solid var(--pkg-sage); border-radius: 99px; padding: 5px 12px;
-  font-size: 11.5px; color: var(--pkg-sage);
+  display: inline-flex; align-items: center; gap: 7px; background: var(--pkg-gold-tint);
+  border: 1px solid #e4d5b2; border-radius: 99px; padding: 5px 12px;
+  font-size: 11.5px; color: var(--pkg-gold-ink);
 }
 .pkgw-evchip b { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; }
 
@@ -440,18 +439,18 @@
 .pkgw-agrow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--pkg-linesoft); font-size: 12.5px; }
 .pkgw-agrow:last-child { border-bottom: 0; }
 .pkgw-agrow .st3 { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-.pkgw-agrow .st3.rep { color: var(--pkg-sage); }
+.pkgw-agrow .st3.rep { color: var(--pkg-ink); }
 .pkgw-agrow .st3.wait { color: var(--pkg-muted); }
 .pkgw-agrow .st3.req { color: var(--pkg-gold-ink); }
 
 /* "What to do next" — sage-bordered recommendation cards. */
 .pkgw-recs { display: flex; gap: 16px; flex-wrap: wrap; }
 .pkgw-rec3 {
-  flex: 1; min-width: 260px; background: var(--pkg-paper); border: 1px solid var(--pkg-sage);
-  border-radius: 11px; box-shadow: 2px 3px 0 rgba(90, 110, 88, .13); padding: 14px 16px;
+  flex: 1; min-width: 260px; background: var(--pkg-paper); border: 1px solid var(--pkg-ink);
+  border-radius: 11px; box-shadow: var(--pkg-print); padding: 14px 16px;
   display: flex; flex-direction: column;
 }
-.pkgw-rec3 .rk2 { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: var(--pkg-sage); }
+.pkgw-rec3 .rk2 { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: var(--pkg-burg); }
 .pkgw-rec3 .rt2 { font-size: 12.5px; line-height: 1.55; margin-top: 8px; flex: 1; }
 .pkgw-rec3 .rt2 b { font-weight: 600; }
 .pkgw-rec3 .ra {
@@ -477,9 +476,10 @@
 .pkgw-bigline b { color: var(--pkg-ink); font-weight: 600; }
 .pkgw-pctpill {
   font-family: 'JetBrains Mono', monospace; font-size: 6.8px; letter-spacing: .07em; text-transform: uppercase;
-  background: var(--pkg-sage-band); color: var(--pkg-sage); border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none;
+  background: var(--pkg-fill); color: var(--pkg-ink-soft); border: 1px solid var(--pkg-line);
+  border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none;
 }
-.pkgw-pctpill.top { background: var(--pkg-gold-tint); color: var(--pkg-gold-ink); }
+.pkgw-pctpill.top { background: var(--pkg-gold-tint); color: var(--pkg-gold-ink); border-color: #e4d5b2; }
 /* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded. */
 .pkgw-unlock { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
 
@@ -662,3 +662,38 @@
   padding: 12px 16px; font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5;
 }
 .pkgw-commteaser svg { width: 17px; height: 17px; color: var(--slate); flex: none; }
+
+/* ══ Composition bars ══════════════════════════════════════════════════════
+   Ref design-refs/scriptally-packages-twotab.html (.bar/.bar2/.complegend), chosen over the four
+   alternatives in scriptally-bar-forms.html.
+
+   WHY THIS FORM. Sample sizes here are three or four sends. A smooth proportional fill claims a
+   precision the data hasn't got, and it silently counts a query that simply hasn't come back yet as
+   a failure. So the track IS the sends, divided into what actually happened: replied (solid ink),
+   still waiting (hatch), no reply (empty). The denominator rides the label — "3/4", not "75%" —
+   because the denominator is the whole point. Legend once per panel, never per row. */
+.pkgw-cbar {
+  display: flex; height: 11px; border-radius: 4px; overflow: hidden;
+  border: 1px solid rgba(46, 39, 35, .2);
+}
+.pkgw-cbar i { height: 100%; }
+.pkgw-cbar .rep { background: var(--pkg-ink); }
+.pkgw-cbar .wait { background: repeating-linear-gradient(45deg, #e2d8cc, #e2d8cc 3px, #efe8df 3px, #efe8df 6px); }
+.pkgw-cbar .non { background: var(--pkg-fill); }
+/* The leaderboard's sits under the name; the materials one is an inline column. */
+.pkgw-lbr .pkgw-cbar { margin-top: 6px; }
+.pkgw-matr .pkgw-cbar { flex: 1; max-width: 220px; }
+.pkgw-fr .pkgw-cbar { flex: 1; height: 16px; border-radius: 5px; }
+
+.pkgw-complegend {
+  display: flex; gap: 15px; margin-bottom: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--pkg-muted);
+}
+.pkgw-complegend span { display: flex; align-items: center; gap: 5px; }
+.pkgw-complegend b {
+  width: 11px; height: 8px; border-radius: 2px; border: 1px solid rgba(46, 39, 35, .2); display: inline-block;
+}
+.pkgw-complegend .k-rep { background: var(--pkg-ink); }
+.pkgw-complegend .k-wait { background: repeating-linear-gradient(45deg, #e2d8cc, #e2d8cc 3px, #efe8df 3px, #efe8df 6px); }
+.pkgw-complegend .k-non { background: var(--pkg-fill); }
