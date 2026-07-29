@@ -209,6 +209,17 @@ const RibbonMenuItem: React.FC<{
 );
 RibbonMenuItem.displayName = "RibbonMenuItem";
 
+/* v4 P3 — last-viewed query, remembered across visits so the hub reopens where you left it.
+   localStorage under the house `sa.` UI-prefs prefix; a lightweight preference, never a fact —
+   an id that no longer exists just falls through to the first row of the current sort. */
+const LAST_VIEWED_KEY = "sa.queries.lastViewed";
+const readLastViewedQueryId = (): string | null => {
+  try { return localStorage.getItem(LAST_VIEWED_KEY); } catch { return null; }
+};
+const writeLastViewedQueryId = (id: string | null) => {
+  try { if (id) localStorage.setItem(LAST_VIEWED_KEY, id); else localStorage.removeItem(LAST_VIEWED_KEY); } catch { /* private mode — the preference is optional */ }
+};
+
 export const Queries: React.FC<{
   searchQuery: string;
   onNavigate?: (tab: string, subPageName?: string) => void;
@@ -998,8 +1009,12 @@ export const Queries: React.FC<{
         return;
       }
     }
+    // v4 P3 — auto-select on load: the LAST-VIEWED query when it's still present. The fallback is
+    // the first row of the CURRENT SORT, applied once the sort has resolved (the effect below) —
+    // this used to grab queries[0], which is the raw array's first, not the first visible row.
     if (queries.length > 0 && !selectedQueryId) {
-      setSelectedQueryId(queries[0].id);
+      const remembered = readLastViewedQueryId();
+      if (remembered && queries.some((q) => q.id === remembered)) setSelectedQueryId(remembered);
     }
   }, [queries, selectedQueryId, activeSubPage]);
 
@@ -1945,6 +1960,18 @@ export const Queries: React.FC<{
   sortedListRef.current = sortedList;
   selectedQueryIdRef.current = selectedQueryId;
 
+  /* v4 P3 — the auto-select FALLBACK, here because it needs the resolved sort: with queries on file
+     and nothing selected (and no draft open), land on the first row the user can actually see. */
+  useEffect(() => {
+    if (creating || selectedQueryId || sortedList.length === 0) return;
+    setSelectedQueryId(sortedList[0].id);
+  }, [creating, selectedQueryId, sortedList]);
+
+  /* Remember the last-viewed query (a preference, written on change only). */
+  useEffect(() => {
+    if (selectedQueryId) writeLastViewedQueryId(selectedQueryId);
+  }, [selectedQueryId]);
+
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
@@ -2488,43 +2515,36 @@ export const Queries: React.FC<{
             </div>
 
             {/* Welcome pane — centred onboarding */}
-            <div className="f12-pane f12-detail" style={{ overflowY: "auto", alignItems: "center", justifyContent: "center", padding: 24, display: "flex" }}>
-              <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
-                <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: qdbBoldInk, marginBottom: 9 }}>No queries yet</div>
-                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: "#5a5048", lineHeight: 1.55, maxWidth: 360, margin: "0 auto 20px" }}>This is where you'll track every agent you query — what you sent, when it went, and what came back.</div>
-
-                {/* Smart Import */}
-                <div style={{ position: "relative", background: "#fcf9f3", border: "1px solid #e7ddce", borderRadius: 15, padding: "19px 21px", textAlign: "left" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 11 }}>
-                    <span style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 12, background: "#eef2f5", color: "#5e7e9c", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Sparkles style={{ width: 23, height: 23 }} />
-                    </span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 20, color: qdbBoldInk }}>Smart Import <span style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span></span>
-                  </div>
-                  <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#4f463c", lineHeight: 1.55, marginBottom: 16 }}>Upload your messy old spreadsheet and watch ScriptAlly build your whole database — every agent matched, sorted and dated, ready to track in seconds.</div>
-                  <button type="button" onClick={() => onNavigate?.("import")} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 21px", borderRadius: 11, cursor: "pointer", background: "#fff", border: "1.5px solid #9db4c6", color: "#42637e" }}>
-                    <Sparkles style={{ width: 18, height: 18 }} />
-                    Try Smart Import
-                  </button>
+            {/* GHOST PREVIEW zero-state (v4 P3; ref empty-states-ref.html, option 1) — a faded,
+                non-interactive skeleton of the real anatomy (hero + three columns) behind a centred
+                welcome card, so the CTA lands with context: you can see what the page becomes.
+                The two secondary routes (Smart Import, the import template) are kept as quiet links
+                rather than dropped with the old welcome pane. */}
+            <div className="f12-pane f12-detail" style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+              <div className="qc-ghost" aria-hidden="true">
+                <div className="qc-ghost-hero"><span className="qc-ghost-av" /><span className="qc-ghost-line" /></div>
+                <div className="qc-ghost-cols">
+                  {[60, 70, 50].map((w, i) => (
+                    <div className="qc-ghost-col" key={i}>
+                      <div className="qc-ghost-band" />
+                      <div className="qc-ghost-ln" />
+                      <div className="qc-ghost-ln" style={{ width: `${w}%` }} />
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                {/* divider */}
-                <div style={{ display: "flex", alignItems: "center", gap: 13, margin: "20px 2px 16px" }}>
-                  <div style={{ flex: 1, height: 1, background: "#e6ddce" }} />
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#a89a8b" }}>or add them yourself</span>
-                  <div style={{ flex: 1, height: 1, background: "#e6ddce" }} />
-                </div>
-
-                {/* manual add — ink-outline buttons */}
-                <div style={{ display: "flex", gap: 11, justifyContent: "center", flexWrap: "wrap" }}>
-                  <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 20px", borderRadius: 11, cursor: "pointer", background: "#fffefb", border: "1.5px solid #1d1712", color: "#1d1712" }}>
-                    <Plus style={{ width: 15, height: 15 }} />
-                    Add a query
-                  </button>
-                  <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 20px", borderRadius: 11, textDecoration: "none", background: "#fffefb", border: "1.5px solid #1d1712", color: "#1d1712" }}>
-                    <Download style={{ width: 15, height: 15 }} />
-                    Download import template
-                  </a>
+              <div className="qc-welcome">
+                <h3>Your first query starts here</h3>
+                <p>Track every submission — who has it, what you sent, and when to follow up.</p>
+                <button type="button" className="f12-btn-pri" onClick={() => openCreate()}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                  Log your first query
+                </button>
+                <div className="qc-welcome-alt">
+                  <button type="button" onClick={() => onNavigate?.("import")}>Import a spreadsheet</button>
+                  <span aria-hidden="true">·</span>
+                  <a href="/ScriptAlly-pipeline-import-template.xlsx" download>Download the template</a>
                 </div>
               </div>
             </div>
@@ -3180,6 +3200,17 @@ export const Queries: React.FC<{
                 </div>{/* end sub-cards row */}
 
               </>
+            ) : sortedList.length === 0 ? (
+              /* v4 P3 — FILTERED (or searched) TO ZERO. The page isn't empty, the view is — so no
+                 ghost preview here; a quiet note and a one-tap way back to everything. */
+              <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
+                <div className="qc-nomatch">
+                  <p>No queries match these filters.</p>
+                  {/* clears the SEARCH too — a search term is just as likely to be what emptied the
+                      view, and a button that doesn't restore the list is a dead end. */}
+                  <button type="button" className="f12-btn-sec" onClick={() => { resetAllFilters(); setListSearch(""); }}>Clear filters</button>
+                </div>
+              </div>
             ) : (
               /* No selection — placeholder fills the pane; the command bar does NOT render (Phase 2). */
               <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878" }}>

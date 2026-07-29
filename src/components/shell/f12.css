@@ -128,6 +128,31 @@
 .qc-step { flex: none; width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); font-size: 13px; line-height: 1; cursor: pointer; }
 .qc-step:hover { border-color: var(--muted); }
 
+/* ── GHOST PREVIEW zero-state (v4 P3; ref empty-states-ref.html option 1) — the page's real
+   anatomy, faded and inert, behind the welcome card. Skeleton, not decoration: it shows what the
+   pane becomes. pointer-events:none so nothing here is ever clickable. */
+.qc-ghost { position: absolute; inset: 0; padding: 18px; opacity: 0.38; filter: saturate(0.6); pointer-events: none; }
+.qc-ghost-hero { display: flex; align-items: center; gap: 14px; height: 76px; padding: 0 18px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 13px; }
+.qc-ghost-av { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--oat); }
+.qc-ghost-line { height: 12px; width: 150px; border-radius: 5px; background: var(--oat); }
+.qc-ghost-cols { display: flex; gap: 12px; height: calc(100% - 100px); }
+.qc-ghost-col { flex: 1; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+.qc-ghost-band { height: 36px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); }
+.qc-ghost-ln { height: 9px; margin: 12px 14px; border-radius: 4px; background: var(--oat); }
+
+/* the welcome card that sits over it — one primary, then the quiet alternative routes */
+.qc-welcome { position: relative; z-index: 2; margin: auto; max-width: 380px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-2); padding: 28px 34px; }
+.qc-welcome h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 20px; color: var(--ink); margin-bottom: 8px; }
+.qc-welcome p { font-size: 13px; line-height: 1.5; color: var(--muted); margin-bottom: 16px; }
+.qc-welcome .f12-btn-pri { justify-content: center; }
+.qc-welcome-alt { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; font-size: 12px; color: var(--faint); }
+.qc-welcome-alt button, .qc-welcome-alt a { font: inherit; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.qc-welcome-alt button:hover, .qc-welcome-alt a:hover { color: var(--ink); }
+
+/* filtered-to-zero — a quiet note in the pane, never the ghost (the page isn't empty, the view is) */
+.qc-nomatch { margin: auto; text-align: center; max-width: 320px; }
+.qc-nomatch p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
 /* the footer bar — requirement line, then Cancel / Save */
 .qc-foot { flex: none; display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 16px; box-shadow: var(--sh-1); }
 .qc-req { font-family: inherit; font-size: 12px; color: var(--muted); }
