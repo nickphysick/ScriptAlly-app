@@ -75,7 +75,12 @@ describe("PageHeader — the two-action maximum", () => {
     );
     expect(html).toContain("disabled"); // the attribute, so it is inert to click AND to Enter
     const css = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
-    const rule = css.match(/\.svh-btn:disabled,\n\.svh-btn:disabled:hover \{([^}]*)\}/)?.[1] ?? "";
+    // ANCHOR FIRST. `?? ""` on a missed match would leave `rule` empty, and an empty string
+    // satisfies every `.not.toContain` below — the two negative assertions would stop testing
+    // anything while still passing. Assert the rule is there before reading it.
+    const DISABLED_RULE = /\.svh-btn:disabled,\n\.svh-btn:disabled:hover \{([^}]*)\}/;
+    expect(css).toMatch(DISABLED_RULE);
+    const rule = css.match(DISABLED_RULE)![1];
     expect(rule).toContain("background: var(--shell-card)"); // paper fill
     expect(rule).toContain("border-color: var(--shell-line-soft)"); // hairline border
     expect(rule).toContain("color: #bcb0a3"); // faint text

@@ -108,17 +108,23 @@ describe("exactly one way into the guided tour", () => {
 describe("the skeleton cards are decoration, not content", () => {
   const html = emptyScreen();
   // The live "Create your first package" card is a real button; the two shells beside it are not.
-  const shells = html.split('<div class="pkgw-ghost" aria-hidden="true">').slice(1);
+  const SHELL_OPEN = '<div class="pkgw-ghost" aria-hidden="true">';
+  const SHELL_FOOT = '<div class="gfoot">';
+  const shells = html.split(SHELL_OPEN).slice(1);
 
   it("renders two of them, both aria-hidden", () => {
+    expect(html).toContain(SHELL_OPEN); // ANCHOR: the marker we slice on exists at all
     expect(shells).toHaveLength(2);
-    expect(html.match(/class="pkgw-ghost" aria-hidden="true"/g) ?? []).toHaveLength(2);
   });
 
   it("puts nothing focusable inside them", () => {
+    expect(shells).toHaveLength(2); // ANCHOR, restated locally — this `it` must not depend on the one above
     for (const shell of shells) {
-      // each shell closes on its footer — slice there, or the last one runs on into the page
-      const body = shell.split('<div class="gfoot">')[0];
+      // Each shell closes on its footer. Slice there, or the LAST one runs on into the rest of the
+      // page and drags the example band's button in with it (which is exactly what happened once).
+      expect(shell).toContain(SHELL_FOOT); // ANCHOR: the boundary exists in THIS shell
+      const body = shell.split(SHELL_FOOT)[0];
+      expect(body.length).toBeGreaterThan(0); // ANCHOR: and slicing on it left something to test
       expect(body).not.toMatch(/<button|<a |<input|tabindex/i);
     }
   });
