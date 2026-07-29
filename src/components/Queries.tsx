@@ -302,6 +302,16 @@ export const Queries: React.FC<{
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
    *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
   const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
+    /* IDEMPOTENT. Every "Log query" in the app funnels here — masthead, rail capture, dashboard,
+       agent cards, manuscript plates — and a second call used to wipe the draft you were typing
+       AND the stashed selection it needs to restore on discard, leaving the pane in create mode
+       with no row. A seeded re-entry is a no-op too: swapping the seeded agent into a live draft
+       would silently overwrite work (flagged as a decision, not implemented). The toast is what
+       stops "nothing happened" reading as a broken button. */
+    if (creating) {
+      showToast({ message: "You're already logging a query" });
+      return;
+    }
     const seedAgent = seed.agentId ? agents.find((a) => a.id === seed.agentId) ?? null : null;
     // The popup's manuscript preselect, kept: honour a seeded id when it's actually pickable, else
     // fall back to the first pickable book — so a one-manuscript library doesn't open with an empty
@@ -2612,6 +2622,8 @@ export const Queries: React.FC<{
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
                     onClick: () => onNavigate?.("queries", "Log a query"),
                     primary: true,
+                    // Already drafting? The CTA says so rather than looking live and doing nothing.
+                    disabled: creating,
                   },
                 ]
               : [
@@ -2620,12 +2632,17 @@ export const Queries: React.FC<{
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
                     onClick: () => onNavigate?.("queries", "Log a query"),
                     primary: true,
+                    // Already drafting? The CTA says so rather than looking live and doing nothing.
+                    disabled: creating,
                   },
                 ]}
           />
         </div>
 
-        {queries.length === 0 ? (
+        {/* `&& !creating`: create mode lives in the populated branch, so without this a
+            first-run "Log your first query" set a draft that NOTHING rendered — the CTA read as
+            dead. Found during the re-entry work; see the report. */}
+        {queries.length === 0 && !creating ? (
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>
@@ -2994,7 +3011,7 @@ export const Queries: React.FC<{
                   </button>
                 );
               })}
-              {sortedList.length === 0 && (
+              {sortedList.length === 0 && queries.length > 0 && (
                 <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--faint)", fontSize: 12, fontStyle: "italic" }}>
                   No queries match these filters.
                 </div>
