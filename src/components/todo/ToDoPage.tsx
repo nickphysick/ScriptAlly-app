@@ -961,8 +961,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {vStale.map((c) => renderCard(c))}
           </Lane>
           )}
-          {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
-          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0 && composerAt !== "cards"}
+          {(!active || vNt.length > 0 || overlayCards("nt").length > 0 || composerAt === "cards") && (
+          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
             filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
             emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}>
             {composerAt === "cards" && vNt.length > 0 && renderComposer()}

@@ -82,6 +82,17 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
     expect(btn).toContain("color: var(--nt-ink-tx)");
     expect(btn).toContain("border-radius: 99px");
   });
+
+  it("REGRESSION: 'Write a note' opens the composer even on an EMPTY Notes lane", () => {
+    // The bug: the nt lane's isEmpty gated on `composerAt !== "cards"`, so opening the composer
+    // flipped the lane to the GRID path — which only renders the composer when vNt > 0. On an empty
+    // lane the composer then rendered NOWHERE ("add a note does nothing"). isEmpty must NOT consult
+    // composerAt, and the Lane must render while the composer is open so its emptyNode can host it.
+    expect(page).toContain('isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}');
+    expect(page).not.toContain('overlayCards("nt").length === 0 && composerAt !== "cards"');
+    expect(page).toContain('overlayCards("nt").length > 0 || composerAt === "cards") && (');
+    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}');
+  });
 });
 
 describe("notes-and-tasks P2 — the composer + the schema", () => {
