@@ -101,6 +101,37 @@
 .f12-iconctl .f12-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: var(--panel); padding: 4px 7px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
 .f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
 
+/* ══ INLINE QUERY CREATION (v4 P2; ref create-mode-ref.html) ═══════════════════════════════
+   The draft row in the list, plus the create pane's chips / checklist / footer. Colours come
+   from the existing token set — note the checkbox tick uses the BAND sage (--sage-edge), never
+   the StatusDot trio (--sage/--sageC/--sageD), which index.css locks to StatusDots. */
+
+/* the pinned draft row — dashed, tagged, and shown regardless of the active filters */
+.f12-draft { position: relative; border: 1.5px dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md); margin: 8px 8px 10px; }
+.f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
+.f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
+.f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }
+.f12-draft.f12-filled .f12-nm { color: var(--ink); font-style: normal; font-weight: 600; }
+.f12-drafttag { position: absolute; top: -8px; left: 12px; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
+
+/* reminder chips */
+.qc-chip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; font-family: inherit; font-size: 12px; background: var(--panel); color: var(--muted); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+.qc-chip:hover { border-color: var(--muted); }
+.qc-chip.on { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); font-weight: 600; }
+
+/* the materials checklist */
+.qc-mat { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 2px; border: none; border-bottom: 1px solid var(--hairline); background: none; font-family: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; }
+.qc-mat:last-of-type { border-bottom: none; }
+.qc-mat.on { color: var(--ink); }
+.qc-ck { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid var(--line); background: var(--panel); color: transparent; font-size: 10px; padding: 0; cursor: pointer; }
+.qc-mat.on .qc-ck { background: var(--sage-edge); border-color: var(--sage-edge); color: var(--ink); }
+.qc-step { flex: none; width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); font-size: 13px; line-height: 1; cursor: pointer; }
+.qc-step:hover { border-color: var(--muted); }
+
+/* the footer bar — requirement line, then Cancel / Save */
+.qc-foot { flex: none; display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 16px; box-shadow: var(--sh-1); }
+.qc-req { font-family: inherit; font-size: 12px; color: var(--muted); }
+
 /* ── labelled pill trigger (v4 P1) — the list card's Filter / Sort controls, in the AGENT LIST
    pill grammar: icon · one-word label · chevron, identical at rest, and the shared "this control
    is doing something" pink active treatment. Geometry mirrors .agl-ctl (36px / 12px / radius 10);

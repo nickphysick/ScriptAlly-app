@@ -29,7 +29,6 @@ import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesP
 import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
 import { BrandStudio } from "./components/BrandStudio";
-import { LogQueryFocusForm } from "./components/LogQueryFocusForm";
 import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
@@ -356,13 +355,11 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isBrandStudioOpen, setIsBrandStudioOpen] = useState<boolean>(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
-  const [isLogQueryOpen, setIsLogQueryOpen] = useState<boolean>(false);
-  // Agent to preselect when the Log-a-Query overlay opens (the Agents page Send-query/Up-next
-  // seam — handleNavigate's opts.agentId). Cleared on close so the next plain open is unseeded.
-  const [logQueryAgentId, setLogQueryAgentId] = useState<string | null>(null);
-  // Manuscript to preselect on the same overlay (the manuscripts-page Send-a-query seam —
-  // opts.manuscriptId, the mirror of the agent seam). Same stow/clear lifecycle.
-  const [logQueryManuscriptId, setLogQueryManuscriptId] = useState<string | null>(null);
+  /* v4 P2 — the Log-a-Query POPUP is retired. Every "Log query" launch point in the app still
+     calls handleNavigate("queries", "Log a query"[, {agentId|manuscriptId}]); the interception now
+     routes to the Queries hub and hands it this SEED, which opens inline create mode there. A new
+     object per invocation, so a repeat press with no seeds still fires the hub's effect. */
+  const [createQuerySeed, setCreateQuerySeed] = useState<{ agentId: string | null; manuscriptId: string | null } | null>(null);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
   // Rail "+ Record a response": app-level host for the existing RecordResponseScreen (the
@@ -386,9 +383,9 @@ function AppContent() {
   // manuscript (the bookplate hero / Send-first) — every existing two-arg call is untouched.
   const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
-      setLogQueryAgentId(opts?.agentId ?? null);
-      setLogQueryManuscriptId(opts?.manuscriptId ?? null);
-      setIsLogQueryOpen(true);
+      // Inline creation lives on the hub, so this one NAVIGATES (the popup did not) and seeds it.
+      setCreateQuerySeed({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null });
+      navigate(pathFor("queries"));
       return;
     }
     if (subPageName === "Add an agent") {
@@ -600,7 +597,8 @@ function AppContent() {
           {queriesSub === "Landing" ? (
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
-            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell />
+            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
+              createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)} />
           )}
         </StagePage>
 
@@ -668,15 +666,6 @@ function AppContent() {
       </EditQueryHost>
 
       {/* Focus Mode Overlay Dialog Form */}
-      <LogQueryFocusForm
-        isOpen={isLogQueryOpen}
-        onClose={() => { setIsLogQueryOpen(false); setLogQueryAgentId(null); setLogQueryManuscriptId(null); }}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-        onNavigate={handleNavigate}
-        initialAgentId={logQueryAgentId ?? undefined}
-        initialManuscriptId={logQueryManuscriptId ?? undefined}
-      />
-
       <AddAgentFocusForm
         isOpen={isAddAgentOpen}
         onClose={() => setIsAddAgentOpen(false)}
