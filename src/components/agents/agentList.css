@@ -49,6 +49,30 @@
   color: var(--agl-ink-body);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   PAGE-LOAD MOTION (motion pack, Baked 1)
+
+   The vocabulary is the app's shared `rise` — defined ONCE in src/styles/motion.css and consumed
+   here; never a second keyframe. The sequence is header → toolbar → cards, and the CARDS STAGGER
+   BY ROW, not by card: the per-card delay is set inline by the grid, because the row depends on
+   the live column count that `repeat(auto-fill, …)` resolves at runtime, and no stylesheet can
+   know it. See src/lib/agentMotion.ts for why the rows cap at four.
+
+   `.agl-anim` is armed on mount and REMOVED once the sequence has run. That's not tidiness: these
+   animations carry fill-mode `both`, and a filled animation outranks an inline transform, so a
+   card still holding one would silently ignore a FLIP transform.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist.agl-anim .agl-head-slot { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+.aglist.agl-anim .agl-toolbar { animation: rise .28s cubic-bezier(.4, 0, .2, 1) .06s both; }
+/* the delay comes from the inline style; the duration and curve come from here */
+.aglist.agl-anim .agl-scene { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aglist.agl-anim .agl-head-slot,
+  .aglist.agl-anim .agl-toolbar,
+  .aglist.agl-anim .agl-scene { animation: none; }
+}
+
 /* THE PAGE COLUMN (rebuild v2). Padding belongs to the scroll region so the scrollbar rides the
    page edge, not the content; the CONTENT then caps at 1240px and centres, so a wide monitor
    pools its surplus as symmetric margin instead of stretching the grid to absurdity. Two

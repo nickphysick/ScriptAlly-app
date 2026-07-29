@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!-- Committed design reference — Agent list motion (29 Jul 2026). APPROVED.
+
+     THE STAGGER IS BY ROW, NOT BY CARD — recorded here so it is not "corrected" later. The
+     Queries Hub's 25ms-per-item reads well in a single column, but this is a three-or-four
+     column grid: sixteen cards at 25ms each would spend 400ms on stagger alone, and the last
+     card would land after the reader had already begun reading the first. Rows step 40ms apart
+     (120/160/200/240) and EVERY ROW PAST THE FOURTH SHARES THE FOURTH DELAY, so the sequence
+     costs the same whether the list holds twelve agents or two hundred. Verified in a browser at
+     four columns: each visual row shares exactly one delay, and sixteen cards finish in 240ms.
+
+     The `rise`/`fall` keyframes this file defines are, in the app, the SHARED vocabulary in
+     src/styles/motion.css — one definition, consumed by more than one page. This pack created
+     that shared home; the parked queries-hub-v4 prompt asserts the Hub already owned it, which it
+     never did, and must be amended to ADOPT rather than define.
+
+     Body face: the app renders Source Sans Pro, not this file's Inter (long-standing app rule). -->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Agent list motion</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9;
+  --ground:#e7e0d5; --plane:#fdfbf8; --fill:#efe8df; --card:#fdfaf5; --line:#e3d9cf; --linesoft:#ece3da;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;padding:0 0 90px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.wrap{max-width:1300px;margin:0 auto;padding:34px 40px 0}
+.kick{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#7f7568}
+h1.pg{font-family:"Playfair Display",serif;font-size:32px;font-weight:500;letter-spacing:-.015em;margin-top:8px}
+.lede{font-family:"Playfair Display",serif;font-size:15px;color:#5f574f;margin-top:8px;max-width:820px}
+
+.plane{margin-top:24px;background:var(--plane);border-radius:16px;padding:28px 30px 34px;border:1px solid #cfc3b5;overflow:hidden}
+
+/* ── the shared vocabulary ── */
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fall{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-5px)}}
+.anim .head1{animation:rise .28s var(--ease) both}
+.anim .tools{animation:rise .28s var(--ease) .06s both}
+.anim .ac{animation:rise .28s var(--ease) both}
+.anim .ac{animation-delay:.12s}
+.anim .ac.r2{animation-delay:.16s}
+.anim .ac.r3{animation-delay:.20s}
+.anim .ac.r4{animation-delay:.24s}
+.ac.arrive{animation:rise .34s var(--ease) both}
+.ac.settled{animation:none !important}
+.ac.leave{animation:fall .16s var(--ease) both}
+@media (prefers-reduced-motion: reduce){
+  .anim .head1,.anim .tools,.anim .ac,.ac.arrive,.ac.leave{animation:none}
+}
+
+.head1{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-spacing:-.015em;line-height:1.05}
+.sub{font-family:"Playfair Display",serif;font-size:15px;color:var(--ink-soft);margin-top:8px}
+.addb{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:11px;border:1px solid var(--pink-line);background:var(--pink);color:var(--burgundy);font-size:12.5px;cursor:pointer}
+.addb svg{width:15px;height:15px}
+.hr{height:1px;background:var(--linesoft);margin:16px 0 0}
+.tools{display:flex;align-items:center;gap:10px;margin-top:20px}
+.srch{display:flex;align-items:center;gap:9px;flex:1;max-width:290px;height:36px;padding:0 12px;background:var(--fill);border-radius:10px;color:var(--muted);font-size:12.5px}
+.srch svg{width:14px;height:14px}
+.ctl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:12.5px;cursor:pointer}
+.ctl svg{width:14px;height:14px;color:var(--muted)}
+.cnt{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}
+.ac{background:#fff;border:1px solid var(--ink);border-radius:11px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07);display:flex;flex-direction:column;will-change:transform}
+.band{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--ink)}
+.pill{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:3px 10px}
+.stars{margin-left:auto;color:#c8853f;font-size:11.5px;letter-spacing:1px}
+.ed{width:23px;height:23px;border-radius:99px;border:1px solid rgba(46,39,35,.45);display:grid;place-items:center;background:#fff}
+.ed svg{width:11px;height:11px}
+.bd{padding:16px;flex:1}
+.who{display:flex;align-items:flex-start;gap:12px}
+.av2{width:44px;height:44px;border-radius:99px;flex:none;background:var(--fill);border:1px solid var(--line);display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-soft)}
+.nm2{font-family:"Playfair Display",serif;font-size:20px;line-height:1.1;display:block}
+.ag{font-family:"Playfair Display",serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:4px;display:block}
+.meta{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:7px;display:block}
+.sectn{margin-top:14px;padding-top:11px;border-top:1px solid var(--linesoft)}
+.sl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.none{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft)}
+.foot{display:flex;gap:9px;padding:13px 16px;border-top:1px solid var(--linesoft)}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;border-radius:11px;font-size:12.5px;border:1px solid;flex:1}
+.b svg{width:14px;height:14px;flex:none}
+.bprim{background:var(--pink);border-color:var(--pink-line);color:var(--burgundy)}
+.bghost{background:var(--card);border-color:var(--line);color:var(--ink)}
+
+/* new-agent card */
+.ac.new .band{background:var(--sage-band)}
+.ac.new .kk{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+.f{margin-bottom:12px}
+.f label{display:block;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.f .inp{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;display:flex;align-items:center;padding:0 12px;font-size:13px;color:#bcb0a3}
+.f .inp.focus{border-color:var(--burgundy);box-shadow:0 0 0 3px rgba(124,58,42,.1);color:var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.circ{width:28px;height:28px;border-radius:99px;display:grid;place-items:center;border:1px solid;cursor:pointer}
+.circ svg{width:13px;height:13px}
+.ok{background:var(--ink);border-color:var(--ink);color:#fff}
+.no{background:#fff;border-color:rgba(46,39,35,.45);color:var(--ink)}
+
+/* controls */
+.bar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:60;display:flex;gap:6px;align-items:center;background:#fdfbf8;border-radius:99px;padding:7px;box-shadow:0 12px 30px rgba(58,28,20,.22)}
+.bar button{border:0;background:transparent;font:inherit;font-size:12.5px;padding:8px 15px;border-radius:99px;cursor:pointer;color:var(--ink)}
+.bar button:hover{background:var(--fill)}
+.bar button.pri{background:var(--ink);color:#fff}
+.bar .sep{width:1px;height:20px;background:#e3d9cf;margin:0 3px}
+.bar .tog{display:flex;gap:3px;background:var(--fill);border-radius:99px;padding:3px}
+.bar .tog span{font-size:11.5px;padding:5px 11px;border-radius:99px;cursor:pointer;color:var(--ink-soft)}
+.bar .tog span.on{background:#fff;color:var(--ink)}
+.notice{display:flex;align-items:center;gap:12px;margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;font-size:12.5px;opacity:0;transform:translateY(6px);transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.notice.show{opacity:1;transform:translateY(0)}
+.notice .lk{margin-left:auto;color:var(--burgundy);border-bottom:1px solid var(--pink-line);cursor:pointer;padding-bottom:1px;flex:none}
+.note{margin-top:22px;font-size:12.5px;color:#544c44;line-height:1.65;max-width:900px}
+.note b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="kick">ScriptAlly · Agent list · Sheet 18</div>
+  <h1 class="pg">Motion, borrowed from the Queries Hub</h1>
+  <div class="lede">Same <code>rise</code> keyframe — 7px lift and a fade, nothing scales, nothing bounces. Use the bar at the bottom.</div>
+
+  <div class="plane" id="plane">
+    <div class="head1">
+      <div>
+        <h1 class="t">Your agent list</h1>
+        <div class="sub">Everyone you're querying, watching, or saving for later.</div>
+      </div>
+      <span class="addb" id="addTop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add new agent</span>
+    </div>
+    <div class="hr"></div>
+    <div class="tools">
+      <span class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search agents or agencies…</span>
+      <span class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg>Filters</span>
+      <span class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.6"/><rect x="3" y="14" width="18" height="6" rx="1.6"/></svg>Group</span>
+      <span class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16m0 0-3-3.4M7 20l3-3.4"/><path d="M14 7h7M14 12h5M14 17h3"/></svg>Sort</span>
+      <span class="cnt" id="count">6 of 6</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="notice" id="notice"></div>
+  </div>
+
+  <div class="note" id="note"></div>
+</div>
+
+<div class="bar">
+  <button class="pri" id="replay">↻ Replay page load</button>
+  <span class="sep"></span>
+  <button id="add">+ Add agent</button>
+  <button id="save">Save agent</button>
+  <button id="discard">Discard</button>
+  <span class="sep"></span>
+  <span class="tog"><span class="on" data-f="1">Reflow smooth</span><span data-f="0">Instant</span></span>
+  <span class="sep"></span>
+  <span class="tog"><span class="on" data-m="1">Matches filters</span><span data-m="0">Filtered out</span></span>
+</div>
+
+<script>
+const PEN=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m14.5 5.5 4 4L9 19H5v-4l9.5-9.5Z"/></svg>`;
+const LOG=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>`;
+const WEB=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.8 2.6 15.2 0 18M12 3c-2.6 2.8-2.6 15.2 0 18"/></svg>`;
+const DOT=`<svg width="16" height="16" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="2"/><path d="M7 10h6m-2.2-2.2L13 10l-2.2 2.2" fill="none" stroke="#7c3a2a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+/* sorted A–Z, which is what the toolbar claims */
+let AG=[
+ ['AK','Aisha Kapoor','The Lantern Agency','~6 weeks · Email','★★★☆☆','Active queries'],
+ ['DO',"Daniel O'Rourke",'Inkwell & Stone','~6 weeks · Email','★★★☆☆','Active queries'],
+ ['EW','Eleanor Whitfield','Greenfield Literary','~4 weeks · Email','★★★☆☆','Active queries'],
+ ['FS','Fenella Str','Brightwater Books','~6 weeks · Email','★★★☆☆','No active queries'],
+ ['GP','Greg Panetta','No agency','~6 weeks · Email','★★★☆☆','Active queries'],
+ ['PL','Penhallow Literary','Agent not specified','~6 weeks · Email','★★★☆☆','Active queries']
+];
+const NEWAGENT=['MR','Marcus Reed','Bloomsbury Quill','~7 weeks · Email','★★★★☆','Never queried'];
+
+function cardHTML(a){
+ const bg=a[5]==='Active queries'?'var(--sage-band)':'var(--pink)';
+ return `<div class="band" style="background:${bg}"><span class="pill">${a[5]}</span><span class="stars">${a[4]}</span><span class="ed">${PEN}</span></div>
+  <div class="bd">
+    <div class="who"><span class="av2">${a[0]}</span><span style="min-width:0"><span class="nm2">${a[1]}</span><span class="ag">${a[2]}</span><span class="meta">${a[3]}</span></span></div>
+    <div class="sectn"><div class="sl">Your history</div><div style="display:flex;align-items:center;gap:9px;font-size:13px">${DOT}Murphy's Day Out</div></div>
+    <div class="sectn"><div class="sl">Materials wanted</div><div class="none">Nothing recorded — check their site.</div></div>
+  </div>
+  <div class="foot"><span class="b bprim">${LOG}Log query</span><span class="b bghost">${WEB}View website</span></div>`;
+}
+const grid=document.getElementById('grid');
+function paint(){
+ grid.innerHTML='';
+ AG.forEach((a,i)=>{
+   const d=document.createElement('div');
+   d.className='ac r'+(Math.floor(i/3)+1);
+   d.innerHTML=cardHTML(a);
+   grid.appendChild(d);
+ });
+ document.getElementById('count').textContent=AG.length+' of '+AG.length;
+}
+paint();
+
+let smooth=true, matches=true, hasNew=false;
+document.querySelectorAll('.tog span[data-f]').forEach(s=>s.onclick=()=>{
+ smooth=s.dataset.f==='1';
+ document.querySelectorAll('.tog span[data-f]').forEach(x=>x.classList.remove('on')); s.classList.add('on');
+});
+document.querySelectorAll('.tog span[data-m]').forEach(s=>s.onclick=()=>{
+ matches=s.dataset.m==='1';
+ document.querySelectorAll('.tog span[data-m]').forEach(x=>x.classList.remove('on')); s.classList.add('on');
+});
+
+function replay(){
+ hideNotice();
+ const p=document.getElementById('plane');
+ p.classList.remove('anim'); void p.offsetWidth; p.classList.add('anim');
+ note('load');
+}
+document.getElementById('replay').onclick=replay;
+
+/* ── FLIP ──
+   Entrance animations use fill-mode:both, and a filled animation outranks an
+   inline transform in the cascade. Every card must be marked settled (animation:none)
+   before FLIP, or the bump silently does nothing. */
+function flip(fn){
+ const cards=[...grid.children];
+ cards.forEach(c=>c.classList.add('settled'));
+ const before=new Map(cards.map(c=>[c,c.getBoundingClientRect()]));
+ fn();
+ if(!smooth) return;
+ [...grid.children].forEach(c=>{
+  const b=before.get(c); if(!b) return;
+  const a=c.getBoundingClientRect();
+  const dx=b.left-a.left, dy=b.top-a.top;
+  if(!dx && !dy) return;
+  c.style.transition='none';
+  c.style.transform='translate('+dx+'px,'+dy+'px)';
+  requestAnimationFrame(()=>{
+    c.style.transition='transform .34s cubic-bezier(.4,0,.2,1)';
+    c.style.transform='';
+  });
+ });
+}
+function newCardEl(){
+ const d=document.createElement('div');
+ d.className='ac new arrive'; d.id='newcard';
+ d.innerHTML=`<div class="band"><span class="kk">New agent</span><span class="stars" style="color:#d9cec2">☆☆☆☆☆</span>
+   <span class="circ no" id="x"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+   <span class="circ ok" id="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L19 7"/></svg></span></div>
+  <div class="bd">
+    <div class="pair">
+      <div class="f"><label>Agent name</label><div class="inp focus">Marcus Reed</div></div>
+      <div class="f"><label>Agency</label><div class="inp" style="color:var(--ink)">Bloomsbury Quill</div></div>
+    </div>
+    <div class="f"><label>Email</label><div class="inp">name@agency.co.uk</div></div>
+    <div class="pair">
+      <div class="f"><label>Country</label><div class="inp">Not set</div></div>
+      <div class="f"><label>City</label><div class="inp">London</div></div>
+    </div>
+  </div>`;
+ return d;
+}
+function addAgent(){
+ if(hasNew) return; hasNew=true; hideNotice();
+ flip(()=>grid.insertBefore(newCardEl(), grid.firstChild));
+ document.getElementById('count').textContent=(AG.length+1)+' of '+(AG.length+1);
+ document.getElementById('x').onclick=discard;
+ document.getElementById('tick').onclick=saveAgent;
+ note('add');
+}
+function discard(){
+ const n=document.getElementById('newcard'); if(!n) return;
+ hasNew=false; hideNotice();
+ n.classList.remove('arrive'); void n.offsetWidth; n.classList.add('leave');
+ n.addEventListener('animationend',()=>{
+   flip(()=>n.remove());
+   document.getElementById('count').textContent=AG.length+' of '+AG.length;
+ },{once:true});
+ note('discard');
+}
+
+/* ── save: settle in place, then travel to the sorted slot ── */
+function saveAgent(){
+ const n=document.getElementById('newcard'); if(!n) return;
+ hasNew=false;
+
+ if(!matches){
+   // does not survive the active filters — leave, then say so
+   n.classList.remove('arrive'); void n.offsetWidth; n.classList.add('leave');
+   n.addEventListener('animationend',()=>{
+     flip(()=>n.remove());
+     document.getElementById('count').textContent=AG.length+' of '+AG.length;
+     showNotice('<b>Marcus Reed saved.</b> Not shown under your current filters.','Show all agents');
+   },{once:true});
+   note('filtered');
+   return;
+ }
+
+ // 1 · become a real card, in place
+ n.classList.add('settled');
+ n.style.transition='opacity .16s cubic-bezier(.4,0,.2,1)';
+ n.style.opacity='0';
+ setTimeout(()=>{
+   n.innerHTML=cardHTML(NEWAGENT);
+   n.className='ac settled';
+   n.style.transition='opacity .2s cubic-bezier(.4,0,.2,1)';
+   n.style.opacity='1';
+   // 2 · then travel to where the sort says it belongs
+   setTimeout(()=>{
+     const idx=AG.findIndex(a=>a[1].localeCompare(NEWAGENT[1])>0);
+     flip(()=>{
+       if(idx===-1) grid.appendChild(n);
+       else grid.insertBefore(n, grid.children[idx + (indexOfNode(n)<idx?1:0)]);
+     });
+     AG.splice(idx===-1?AG.length:idx,0,NEWAGENT);
+     document.getElementById('count').textContent=AG.length+' of '+AG.length;
+     showNotice('<b>Marcus Reed saved.</b> Moved to position '+((idx===-1?AG.length:idx+1))+' under Name A–Z.','Undo');
+   },220);
+ },170);
+ note('save');
+}
+function indexOfNode(n){ return [...grid.children].indexOf(n); }
+
+const notice=document.getElementById('notice');
+function showNotice(html,link){
+ notice.innerHTML=html+(link?`<span class="lk">${link}</span>`:'');
+ notice.classList.add('show');
+}
+function hideNotice(){ notice.classList.remove('show'); }
+
+document.getElementById('add').onclick=addAgent;
+document.getElementById('addTop').onclick=addAgent;
+document.getElementById('discard').onclick=discard;
+document.getElementById('save').onclick=saveAgent;
+
+const NOTES={
+ load:'<b>Page load.</b> Header rises, toolbar 60ms behind, then cards staggered <b>by row</b> — four steps of 40ms rather than 25ms per card, so a long grid never gets slower.',
+ add:'<b>Add.</b> The new card rises in at 340ms and every card it displaces bumps across over 340ms. Slower than the load rise, so an arrival is legible as its own event.',
+ discard:'<b>Discard.</b> 160ms, lifting up as it fades — quick exit against a considered entrance. The grid then closes the gap with the same bump.',
+ save:'<b>Save.</b> Three beats: the editor crossfades into a finished card <i>in place</i> (170ms), a breath, then it travels to its sorted slot while everything between bumps around it. The notice names where it went.',
+ filtered:'<b>Saved, but filtered out.</b> The card leaves rather than sitting somewhere it does not belong — and the notice says so, with a way back. Silently vanishing is the thing to avoid.'
+};
+function note(k){ document.getElementById('note').innerHTML=NOTES[k]; }
+note('load');
+replay();
+</script>
+</body>
+</html>

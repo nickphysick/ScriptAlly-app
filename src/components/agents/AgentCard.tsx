@@ -73,9 +73,13 @@ interface AgentCardProps {
   onEdit: (agentId: string) => void;
   /** Log a query against this agent — preselects them in the focus form. */
   onLogQuery: (agent: Agent) => void;
+  /** Load-stagger delay, set by the grid (the row depends on the live column count). */
+  style?: React.CSSProperties;
+  /** Motion state driven by the grid: arriving, leaving, or settled for a FLIP measurement. */
+  motionClass?: string;
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor }) => {
+export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor, style, motionClass }) => {
   // Colour = your history; the door rides as ink (hatch + pill) and, when nothing of yours is
   // live, as the dim class. Three independent facts, three independent classes.
   const stateClass = agentStateClass(agent, queries);
@@ -96,7 +100,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
   const locationText = (agent.city || "").trim() || countryName(agent.country) || "";
 
   return (
-    <div className={`agl-scene ${cardClasses}`}>
+    <div className={`agl-scene ${cardClasses}${motionClass ? ` ${motionClass}` : ""}`} style={style} data-agent-card={agent.id}>
       <div className={`agl-rotor${flipped ? " flipped" : ""}`}>
         <div className="agl-facef">
           <div className="agl-acard">

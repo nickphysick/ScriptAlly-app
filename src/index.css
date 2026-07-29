@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+/* Shared motion vocabulary (rise/fall) — app-wide, consumed by more than one page. */
+@import "./styles/motion.css";
 
 @theme {
   --font-sans: "Source Sans Pro", system-ui, -apple-system, sans-serif;

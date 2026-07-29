@@ -11,7 +11,7 @@
  *
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { PageHeader } from "../shell/PageHeader";
 import { useScriptAllyDb } from "../../lib/db";
@@ -57,6 +57,15 @@ import {
   sortAgentList,
   starTierCount,
 } from "../../lib/agentList";
+import {
+  CARDS_START_MS,
+  LOAD_MS,
+  MAX_STAGGER_ROWS,
+  ROW_STEP_MS,
+  gridColumnCount,
+  prefersReducedMotion,
+  rowDelayMs,
+} from "../../lib/agentMotion";
 import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
 import { countryName } from "../../lib/territory";
 import { blankDraft } from "../../lib/agentDraft";
@@ -78,6 +87,33 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   const [grouping, setGrouping] = useState<AgentGrouping>("none");
   // A draft-only agent that isn't persisted until Done passes validation (decision 16).
   const [newAgent, setNewAgent] = useState<Agent | null>(null);
+
+  // ── Page-load motion (Baked 1) ────────────────────────────────────────────
+  // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
+  // run, so a filter change, a sort change or any other re-render can never re-trigger it — a page
+  // that re-animates every time you tick a checkbox is exhausting, and this animation introduces
+  // the page, it doesn't celebrate each interaction.
+  //
+  // Disarming also matters MECHANICALLY: these animations carry fill-mode `both`, and a filled
+  // animation outranks an inline transform, so cards still holding one would silently ignore the
+  // FLIP transforms that arrive in Phase 2. Clearing the class returns them to a movable state.
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [columns, setColumns] = useState(1);
+  const [loadAnim, setLoadAnim] = useState(!prefersReducedMotion());
+
+  // Measured before paint, so the very first frame already carries the right delay.
+  useLayoutEffect(() => setColumns(gridColumnCount(gridRef.current)), []);
+
+  useEffect(() => {
+    if (!loadAnim) return;
+    const done = window.setTimeout(
+      () => setLoadAnim(false),
+      CARDS_START_MS + (MAX_STAGGER_ROWS - 1) * ROW_STEP_MS + LOAD_MS + 40,
+    );
+    return () => window.clearTimeout(done);
+    // armed once, on mount — deliberately not reactive to anything
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
   // can never read from the already-filtered view.
@@ -386,10 +422,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
   /** ONE card renderer, shared by the flat grid and every group section — a second copy would
-   *  drift the moment the editor gains a prop. */
-  const renderCard = (agent: Agent) => (
+   *  drift the moment the editor gains a prop.
+   *
+   *  `index` is the card's position in its own grid, which is what the row stagger reads. The
+   *  delay is set inline because the row depends on the LIVE column count (auto-fill), which no
+   *  stylesheet can know — CSS has no way to derive a row from nth-child without the column count
+   *  baked in at authoring time. The state class stays on the container; only the number is here. */
+  const renderCard = (agent: Agent, index: number) => (
               <AgentCard
                 key={agent.id}
+                style={loadAnim ? { animationDelay: `${rowDelayMs(index, columns)}ms` } : undefined}
                 agent={agent}
                 queries={queries}
                 manuscripts={manuscripts}
@@ -455,7 +497,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   );
 
   return (
-    <div className="aglist">
+    <div className={`aglist${loadAnim ? " agl-anim" : ""}`}>
       <div className="agl-page">
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
@@ -463,12 +505,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
         {/* The standard page header — FULL variant (flyouts pack P3: the compact variant is
             retired; one header grammar app-wide). The description resurrects the page's own
             original sub line. */}
+        <div className="agl-head-slot">
         <PageHeader
           variant="full"
           title="Your agent list"
           description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
         />
+        </div>
 
         <AgentToolbar
           search={search}
@@ -498,7 +542,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             the front of the flat grid and never grouped — it has no standing to group by yet. */}
         {grouping !== "none" && shown.length > 0 ? (
           <div className="agl-groups">
-            {groups.map((sec) => (
+            {groups.map((sec, si) => (
               <section key={sec.key}>
                 <div className="agl-gsec">
                   <h2>{sec.title}</h2>
@@ -509,12 +553,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                   className="agl-grule"
                   style={{ background: `linear-gradient(90deg, ${sec.stub} 0 88px, var(--agl-linesoft) 88px)` }}
                 />
-                <div className="agl-grid">{sec.agents.map(renderCard)}</div>
+                <div className="agl-grid" ref={si === 0 ? gridRef : undefined}>{sec.agents.map(renderCard)}</div>
               </section>
             ))}
           </div>
         ) : (
-        <div className="agl-grid agl-gridwrap">
+        <div className="agl-grid agl-gridwrap" ref={gridRef}>
           {shown.length === 0 && (
             <div className="agl-empty">
               {agents.length === 0 ? (
