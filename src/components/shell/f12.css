@@ -215,6 +215,20 @@
    not additive), so the settle would be cancelled the moment the row started leaving. */
 .f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
 
+/* ── CREATE-MODE COMMAND BAR (ref qdb-focus-spotlight.html) — the record actions are replaced
+   by this while a draft is open. Same .f12-ctl seat, so the bar neither moves nor changes height
+   as it swaps. The two buttons carry qh-lit and stay above the scrim. */
+.f12-ctl-create { align-items: center; gap: 12px; }
+.qcb-ctx { display: inline-flex; align-items: center; gap: 9px; flex: none; font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); }
+.qcb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; }
+/* Advisory copy, so it yields first: it truncates rather than pushing the buttons, and below
+   1100px it goes entirely. Cancel and Save must never wrap or be pushed out of the bar. */
+.qcb-req { flex: 0 1 auto; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcb-err { color: var(--pink-i); }
+.qcb-esc { flex: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); }
+.f12-ctl-create .f12-btn-sec, .f12-ctl-create .f12-btn-pri { flex: none; white-space: nowrap; }
+@media (max-width: 1100px) { .qcb-req { display: none; } }
+
 /* ── FOCUS MODE — THE SCRIM (ref design-refs/qdb-focus-spotlight.html) ──────────────────
    SUPERSEDES the per-surface dim (.qh-dim opacity/brightness) and the darkened ground
    (--qh-focus-ground). Both are deleted, not layered under this.
@@ -359,7 +373,6 @@
 .qc-nomatch p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
 
 /* the footer bar — requirement line, then Cancel / Save */
-.qc-foot { flex: none; display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 16px; box-shadow: var(--sh-1); }
 .qc-req { font-family: inherit; font-size: 12px; color: var(--muted); }
 
 /* ── labelled pill trigger (v4 P1) — the list card's Filter / Sort controls, in the AGENT LIST

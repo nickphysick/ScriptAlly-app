@@ -12,8 +12,11 @@
  *
  * Reused verbatim, never rebuilt: AgentSearchField (the typeahead AND its inline quick-add),
  * the agent list's MaterialRow model + unit physics (snapToUnit / stepAmount), the .f12-hero /
- * .f12-card / .f12-chh column chrome, and .f12-btn-pri for the soft-pink Save (the ref draws an
- * espresso dark pill; the app has no dark-pill CTA, so the live idiom wins).
+ * .f12-card / .f12-chh column chrome.
+ *
+ * The pane has NO footer: Save, Cancel and the requirement line live in the page's command bar,
+ * which create mode takes over (ref qdb-focus-spotlight.html). Rendering them in both places
+ * would give one action two homes — and the reclaimed ~95px is what lets the columns fit.
  */
 import React, { useMemo, useState } from "react";
 import { Agent, Manuscript } from "../../types";
@@ -30,7 +33,6 @@ import {
 } from "../../lib/agentMaterials";
 import {
   CREATE_SEND_METHODS,
-  draftReady,
   materialRowsForDraft,
   reminderChipLabel,
   suggestedReminderDate,
@@ -45,10 +47,6 @@ export interface QueryCreatePaneProps {
   manuscripts: Manuscript[];
   /** The picker's inline quick-add — the same contract LogQueryFocusForm used. */
   onCreateAgent: (d: { name: string; agency: string; email: string; responseTimeWeeks?: number; starRating?: number }) => Promise<{ ok: boolean; error?: string; agent?: Agent }>;
-  onSave: () => void;
-  onCancel: () => void;
-  saving: boolean;
-  error: string | null;
 }
 
 const LABEL: React.CSSProperties = {
@@ -62,7 +60,7 @@ const FIELD: React.CSSProperties = {
 };
 
 export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
-  draft, onChange, agents, manuscripts, onCreateAgent, onSave, onCancel, saving, error,
+  draft, onChange, agents, manuscripts, onCreateAgent,
 }) => {
   const agent = useMemo(() => agents.find((a) => a.id === draft.agentId) ?? null, [agents, draft.agentId]);
   const set = (patch: Partial<QueryDraft>) => onChange({ ...draft, ...patch });
@@ -83,7 +81,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const chosenManuscript = manuscripts.find((m) => m.id === draft.manuscriptId) ?? null;
 
   const suggested = suggestedReminderDate(draft.dateSent, agent?.responseTimeWeeks);
-  const ready = draftReady(draft);
   const sample = draft.materials.find((r) => r.key === "sample") as Extract<MaterialRow, { key: "sample" }> | undefined;
   const other = draft.materials.find((r) => r.key === "other") as Extract<MaterialRow, { key: "other" }> | undefined;
 
@@ -409,21 +406,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             />
           </div>
         </div>
-      </div>
-
-      {/* ── FOOTER: what's still needed, then Cancel / Save ── */}
-      <div className="qc-foot">
-        <span className="qc-req">
-          {error
-            ? <span style={{ color: "var(--pink-i)" }}>{error}</span>
-            : "Needs an agent, a manuscript and a date — everything else can wait."}
-        </span>
-        <span style={{ flex: 1 }} />
-        <button type="button" className="f12-btn-sec" onClick={onCancel} disabled={saving}>Cancel</button>
-        <button type="button" className="f12-btn-pri" onClick={onSave} disabled={!ready || saving}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-          {saving ? "Saving…" : "Save query"}
-        </button>
       </div>
     </div>
   );

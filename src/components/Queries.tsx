@@ -2723,6 +2723,31 @@ export const Queries: React.FC<{
           const waitingOnAgent = ctrlAction?.ballHolder === "agent";
           const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
 
+          /* CREATE MODE TAKES THE BAR (ref qdb-focus-spotlight.html). The record actions are
+             REPLACED, not disabled: none of them applies to a query that doesn't exist yet, and
+             a row of dead buttons reads as breakage. Save and Cancel keep the very handlers the
+             retired pane footer called — this is a relocation, not a rewire. */
+          if (creating) {
+            const ready = createDraft ? draftReady(createDraft) : false;
+            return (
+              <div className="f12-ctl f12-ctl-create">
+                <span className="qcb-ctx"><span className="qcb-dot" aria-hidden="true" />New query</span>
+                {/* The requirement line doubles as the error slot — the same job it did in the
+                    footer, so a failed save still explains itself rather than vanishing. */}
+                <span className={`qcb-req${createError ? " qcb-err" : ""}`}>
+                  {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
+                </span>
+                <span style={{ flex: 1 }} />
+                <span className="qcb-esc">Esc to cancel</span>
+                <button type="button" className="f12-btn-sec qh-lit" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
+                <button type="button" className="f12-btn-pri qh-lit" onClick={saveCreate} disabled={!ready || createSaving}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                  {createSaving ? "Saving…" : "Save query"}
+                </button>
+              </div>
+            );
+          }
+
           return (
             <div className="f12-ctl">
               {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
@@ -3044,10 +3069,6 @@ export const Queries: React.FC<{
                   agents={agents}
                   manuscripts={pickableManuscripts(manuscripts)}
                   onCreateAgent={handleCreateAgentInline}
-                  onSave={saveCreate}
-                  onCancel={() => closeCreate()}
-                  saving={createSaving}
-                  error={createError}
                 />
               </div>
             ) : activeQuery && activeAgent && activeMs ? (
