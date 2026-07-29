@@ -7,6 +7,8 @@
  * chip counts over the whole list, search reach, and the absence-aware meta line.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   TERMINAL_STATUSES,
   AWAITING_PAGES_STATUSES,
@@ -15,6 +17,7 @@ import {
   awaitingYourPages,
   isDoorOpen,
   agentStateClass,
+  agentCardDims,
   matchesAgentSearch,
   methodShort,
   metaTokens,
@@ -119,10 +122,47 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
     expect(agentAxisCounts([unknown], []).door.closed).toBe(0);
   });
 
-  it("closed overrides sage/pink", () => {
+  /* THE COLOUR/DOOR SPLIT (agent-card-visual pack). Colour carries YOUR HISTORY only; the door
+     is ink. The old "closed overrides sage/pink" precedence is retired — it was the same class
+     of error the axis split fixed, one level down in the presentation. */
+  it("COLOUR IS HISTORY: the door never changes it, and s-grey is extinct", () => {
     const closed = mkAgent({ submissionStatus: SubmissionStatus.CLOSED });
-    expect(agentStateClass(closed, [mkQuery({})])).toBe("s-grey");
+    expect(agentStateClass(closed, [mkQuery({})])).toBe("s-sage"); // a live query, closed door
+    expect(agentStateClass(closed, [])).toBe("s-pink"); // nothing live, closed door
     expect(agentStateClass(mkAgent({}), [mkQuery({})])).toBe("s-sage");
+    expect(agentStateClass(mkAgent({}), [])).toBe("s-pink");
+  });
+
+  describe("THE DIM RULE — all four states", () => {
+    const closed = mkAgent({ id: "c", submissionStatus: SubmissionStatus.CLOSED });
+    const open = mkAgent({ id: "o" });
+    it("closed + NOT active dims", () => {
+      expect(agentCardDims(closed, [])).toBe(true);
+    });
+    it("closed + ACTIVE does NOT dim — an outstanding query does not matter less", () => {
+      expect(agentCardDims(closed, [mkQuery({ agentId: "c" })])).toBe(false);
+    });
+    it("open never dims, active or not", () => {
+      expect(agentCardDims(open, [])).toBe(false);
+      expect(agentCardDims(open, [mkQuery({ agentId: "o" })])).toBe(false);
+    });
+    it("hover restores full strength (CSS — the class is the contract)", () => {
+      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
+      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard \{ opacity: \.6; transition: opacity \.15s ease; \}/);
+      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard:hover \{ opacity: 1; \}/);
+      expect(css).not.toContain(".s-grey {"); // the door's colour is gone
+    });
+    it("the DOOR is ink: a hatch overlay beneath the band's contents, and the Closed pill", () => {
+      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
+      expect(css).toContain("repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px)");
+      expect(css).toMatch(/\.s-closed \.agl-band::after \{[^}]*pointer-events: none/s);
+      expect(css).toMatch(/\.s-closed \.agl-band > \* \{ position: relative; z-index: 1; \}/);
+      expect(css).toMatch(/\.agl-closedpill \{[^}]*background: #2e2723/s);
+      const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
+      expect(card).toContain('className="agl-closedpill"');
+      expect(card).toContain("{!open && (");
+      expect(card).toContain('s-closed');
+    });
   });
 });
 
