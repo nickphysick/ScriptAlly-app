@@ -82,8 +82,14 @@ describe("agentDraft · validation on Done", () => {
   const ok = draftFromAgent(mkAgent({}));
 
   it("name and agency are required, and route to the Contact tab", () => {
-    expect(validateDraft({ ...ok, name: "  " })).toEqual({ tab: "contact", msg: "Agent name is required." });
-    expect(validateDraft({ ...ok, agency: "" })).toEqual({ tab: "contact", msg: "Agency is required." });
+    // NAME **OR** AGENCY (the validation-trap fix): either alone is a complete record; only both
+    // empty is blocked. Requiring both trapped an existing agency-only record — unsaveable and
+    // unrevertable — even though the app renders exactly that state as valid.
+    expect(validateDraft({ ...ok, name: "  " })).toBeNull(); // agency-only saves
+    expect(validateDraft({ ...ok, agency: "" })).toBeNull(); // agent-name-only saves
+    expect(validateDraft({ ...ok, name: " ", agency: "  " })).toEqual({ tab: "contact", msg: "Give this record an agent name or an agency." });
+    // an EXISTING agency-only record opens and re-saves without touching a field
+    expect(validateDraft({ ...ok, name: "", agency: "Penhallow Literary" })).toBeNull();
   });
 
   it("response weeks is validated ONLY when non-empty (amendment A)", () => {

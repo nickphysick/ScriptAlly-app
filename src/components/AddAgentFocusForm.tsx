@@ -168,12 +168,13 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
   const buildMaterials = (): string[] => buildAgentMaterials(materialsState());
 
   const handleSubmit = async () => {
-    if (!name.trim()) {
-      setFormError("Agent name is required.");
+    // NAME **OR** AGENCY — the one rule, shared with the editor's validateDraft. This path used
+    // to require the name alone, which is why an agency-only record could be created by import
+    // (Penhallow Literary) but never re-saved by hand.
+    if (!name.trim() && !agency.trim()) {
+      setFormError("Give this record an agent name or an agency.");
       return;
     }
-    // Agency is optional (empty-and-valid): a named agent whose agency you don't know yet is a complete,
-    // valid record. The identity anchor (name) is required above; the rule admits name-or-agency.
     // Materials counts are optional (6d): a blank count emits the no-count variant ("Sample pages"),
     // matching the Edit Agent drawer — only an out-of-range number blocks Save.
     if (materialsCountErrors(materialsState()).size > 0) {

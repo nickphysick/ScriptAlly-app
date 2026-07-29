@@ -164,8 +164,14 @@ export interface DraftError {
  * Materials rules land with the materials editor in Phase 5.
  */
 export function validateDraft(d: AgentDraft): DraftError | null {
-  if (!d.name.trim()) return { tab: "contact", msg: "Agent name is required." };
-  if (!d.agency.trim()) return { tab: "contact", msg: "Agency is required." };
+  // NAME **OR** AGENCY — never both, and never the name alone. The app already treats
+  // agency-only records as legitimate (the card renders "Agent not specified" beneath the
+  // agency, and the Firestore isValidAgent rule accepts either), so requiring both trapped a
+  // valid, previously-saved record: the writer could not save it and could not revert it.
+  // Create and edit share this one validator, so the fix reaches both paths at once.
+  if (!d.name.trim() && !d.agency.trim()) {
+    return { tab: "contact", msg: "Give this record an agent name or an agency." };
+  }
   const rw = d.responseWeeks.trim();
   if (rw && (!/^\d+$/.test(rw) || Number(rw) < 1)) {
     return { tab: "contact", msg: "Typical response time must be a whole number of weeks, or left blank if you don't know." };
