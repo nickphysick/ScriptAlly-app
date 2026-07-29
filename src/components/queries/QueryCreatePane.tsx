@@ -123,10 +123,12 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               }}
             >✎</span>
             <div className="qc-picker" style={{ flex: 1, minWidth: 0, maxWidth: 460 }}>
-              {/* The pane is a page while it's open: it names the job, and "Agent" is then an
-                  ordinary field label rather than a question standing in for a heading. */}
+              {/* Format B (ref qdb-create-polish §2): the title names the job, the italic serif
+                  keeps the human phrasing as a subtitle. There is NO "Agent" field label — the
+                  search placeholder ("Search by name or agency…") already does that work, and a
+                  label above it would say the same thing twice. */}
               <h2 className="qc-head">Logging new query</h2>
-              <div style={LABEL}>Agent</div>
+              <p className="qc-sub">Who are you querying?</p>
               <AgentSearchField
                 agents={agents}
                 value=""

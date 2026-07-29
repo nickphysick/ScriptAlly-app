@@ -248,7 +248,10 @@
 /* the create pane's own heading (ref qdb-create-fixes2 §1) — Playfair, replacing the mono
    "Who are you querying?" eyebrow. The pane is a page in its own right while it is open, so it
    says what you are doing; "Agent" then reads as an ordinary field label beneath it. */
-.qc-head { font-family: var(--f12-serif); font-weight: 700; font-size: 23px; line-height: 1.15; color: var(--ink); margin-bottom: 12px; }
+.qc-head { font-family: var(--f12-serif); font-weight: 700; font-size: 23px; line-height: 1.15; color: var(--ink); }
+/* the subtitle carries the question the eyebrow used to ask — italic serif, so it reads as the
+   title's second breath rather than another label (format B). */
+.qc-sub { font-family: var(--f12-serif); font-style: italic; font-size: 14.5px; color: var(--ink-2); margin: 3px 0 12px; }
 
 /* "Sent by" — the INSET TRACK (ref qdb-create-fixes2 §2 option A): a recessed tan track with the
    active choice raised out of it as a white pill. The height is the Date sent field's 42px so the
