@@ -1,0 +1,101 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reading pane - empty states</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--page:#efe9e1;--card:#fdfcf9;--bd:#e4dcd0;--ink:#2b2118;--muted:#97897a;--sage:#dde3d8;--sageBd:#cdd6c6;--pink:#f7dfd5;--burg:#8d3f2d;--esp:#3a2d1f;--sh:0 8px 26px rgba(60,45,30,.08);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);font-family:var(--in);color:var(--ink);padding:34px 40px 90px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:24px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:26px;max-width:940px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.lab{font-family:var(--mo);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);margin-bottom:3px}
+.note{font-size:12px;color:var(--muted);margin-bottom:10px;min-height:32px}
+.pane{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);height:430px;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.mono{font-family:var(--mo);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:11px;padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid transparent}
+.btn.save{background:var(--esp);color:#f5eee2}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--bd)}
+/* ghost preview */
+.gh{position:absolute;inset:0;padding:18px;opacity:.38;filter:saturate(.6)}
+.gh .hero{border:1px solid var(--bd);border-radius:13px;height:76px;display:flex;align-items:center;gap:14px;padding:0 18px;margin-bottom:14px}
+.gh .av{width:44px;height:44px;border-radius:50%;background:#efe6da}
+.gh .l1{height:12px;width:150px;background:#ece2d4;border-radius:5px}
+.gh .cols{display:flex;gap:12px;height:calc(100% - 100px)}
+.gh .col{flex:1;border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.gh .chh{height:36px;background:var(--sage);border-bottom:1px solid var(--sageBd)}
+.gh .ln{height:9px;background:#efe6da;border-radius:4px;margin:12px 14px}
+.ovl{position:relative;z-index:2;margin:auto;text-align:center;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);padding:28px 34px;max-width:380px}
+.ovl h3{font-family:var(--pl);font-weight:700;font-size:20px;margin-bottom:8px}
+.ovl p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+/* editorial */
+.ed{margin:auto;text-align:center;max-width:430px;padding:20px}
+.ed .pl{font-size:38px;color:#d8b8a6;margin-bottom:14px;display:inline-block;transform:rotate(-8deg)}
+.ed h3{font-family:var(--pl);font-weight:700;font-size:24px;margin-bottom:10px}
+.ed p{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:20px}
+.ed .row{display:flex;gap:10px;justify-content:center}
+/* checklist */
+.ck{margin:auto;width:400px;padding:20px}
+.ck h3{font-family:var(--pl);font-weight:700;font-size:21px;margin-bottom:4px;text-align:center}
+.ck .p{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:18px}
+.st{display:flex;align-items:center;gap:12px;border:1px solid var(--bd);border-radius:12px;padding:13px 15px;margin-bottom:9px;background:#fff}
+.st .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--mo);font-size:9.5px;flex-shrink:0;border:1.5px solid var(--bd);color:var(--muted)}
+.st.done .n{background:#7e9178;border-color:#7e9178;color:#fff}
+.st.done{opacity:.6}
+.st.done .t{text-decoration:line-through}
+.st .t{font-weight:600;font-size:13.5px}
+.st .d{font-size:11.5px;color:var(--muted)}
+.st .go{margin-left:auto;color:var(--burg);font-size:12px;font-weight:600;cursor:pointer}
+/* glance */
+.gl{padding:20px;display:flex;flex-direction:column;height:100%}
+.gl h3{font-family:var(--pl);font-weight:700;font-size:19px;text-align:center;margin:8px 0 16px}
+.stats{display:flex;gap:12px;margin-bottom:14px}
+.stat{flex:1;border:1px solid var(--bd);border-radius:13px;padding:14px;text-align:center;background:#fff}
+.stat b{font-family:var(--pl);font-size:24px;display:block}
+.stat span{font-family:var(--mo);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stat.hot b{color:var(--burg)}
+.gnote{border:1px dashed #dcccb8;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#6b5b48;background:#faf5ec;margin-bottom:12px}
+.ghint{margin-top:auto;text-align:center;font-size:12px;color:var(--muted)}
+.ghint b{font-family:var(--mo);font-size:10px;background:#f1eae0;border-radius:5px;padding:2px 6px}
+</style></head>
+<body>
+<h1>Reading-pane empty states</h1>
+<div class="sub">Two cases: <b>brand-new user, no queries at all</b> (options 1–3) and <b>returning user, nothing selected</b> (option 4). Best-in-class rule of thumb: every empty state answers <i>what is this · why is it empty · what next</i>, with one primary action.</div>
+<div class="grid">
+
+<div><div class="lab">1 · Ghost preview (zero queries)</div><div class="note">A faded skeleton of the real anatomy behind a welcome card — shows what the page will become, so the CTA lands with context. (Skeleton = the "show, don't tell" pattern.)</div>
+<div class="pane">
+  <div class="gh"><div class="hero"><span class="av"></span><span class="l1"></span></div><div class="cols"><div class="col"><div class="chh"></div><div class="ln"></div><div class="ln" style="width:60%"></div></div><div class="col"><div class="chh"></div><div class="ln"></div><div class="ln" style="width:70%"></div></div><div class="col"><div class="chh"></div><div class="ln"></div><div class="ln" style="width:50%"></div></div></div></div>
+  <div class="ovl"><h3>Your first query starts here</h3><p>Track every submission — who has it, what you sent, and when to follow up.</p><button class="btn save">✈ &nbsp;Log your first query</button></div>
+</div></div>
+
+<div><div class="lab">2 · Editorial welcome (zero queries)</div><div class="note">Pure brand moment — Playfair, the paper plane, warm copy, primary + secondary action (Linear's pattern). Calmest, most "ScriptAlly".</div>
+<div class="pane"><div class="ed">
+  <span class="pl">✈</span>
+  <h3>Every query you send will live here.</h3>
+  <p>One place for who you've queried, what they received, and exactly where each conversation stands — so nothing slips.</p>
+  <div class="row"><button class="btn save">✈ &nbsp;Log your first query</button><button class="btn ghost">Browse your agents</button></div>
+</div></div></div>
+
+<div><div class="lab">3 · Get-started checklist (zero queries)</div><div class="note">The Notion activation pattern — a short checklist that acknowledges what's already done and points at the next step. Best if agents/manuscripts might also be empty.</div>
+<div class="pane"><div class="ck">
+  <h3>Ready to start querying?</h3>
+  <div class="p">Three small steps and you're tracking.</div>
+  <div class="st done"><span class="n">✓</span><div><div class="t">Add your manuscript</div><div class="d">Murphy's Day Out · added</div></div></div>
+  <div class="st"><span class="n">2</span><div><div class="t">Build your agent list</div><div class="d">Add the agents you're targeting</div></div><span class="go">Go →</span></div>
+  <div class="st"><span class="n">3</span><div><div class="t">Log your first query</div><div class="d">Then watch this space come alive</div></div><span class="go">Log →</span></div>
+</div></div></div>
+
+<div><div class="lab">4 · At-a-glance (has queries, none selected)</div><div class="note">If you don't auto-select row one, the pane earns its keep as a mini overview: the numbers you'd want anyway + the single most urgent thing + how to move.</div>
+<div class="pane"><div class="gl">
+  <h3>Your queries at a glance</h3>
+  <div class="stats">
+    <div class="stat"><b>12</b><span>Waiting</span></div>
+    <div class="stat hot"><b>6</b><span>Your move</span></div>
+    <div class="stat"><b>118<span style="font-size:11px">d</span></b><span>Longest wait</span></div>
+  </div>
+  <div class="gnote">⚑ &nbsp;<b>Jonathan Marsh</b> asked for the full on 2 Apr — it still hasn't been sent.</div>
+  <div class="ghint">Select a query to read it &nbsp;·&nbsp; <b>↑↓</b> to move through the list</div>
+</div></div></div>
+
+</div>
+</body></html>
