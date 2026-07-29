@@ -3,9 +3,10 @@
 Design refs: `design-refs/scriptally-packages-empty.html`, `design-refs/scriptally-packages-landing-newlook.html`.
 
 **Commits:** `df7bbae` refs → `28532c1` Pro header (P3) → `0c67798` workshop empty (P4) → `0dc7303`
-analytics empty (P5). Gates green per commit (tsc clean, `vite build` ✓, Vitest **1717**). No deploys.
+analytics empty (P5) → `41410cb` corrected refs → `422ffc1` composition bars + sage retirement (P2).
+Gates green per commit (tsc clean, `vite build` ✓, Vitest **1724**). No deploys.
 
-**Status: Phases 1, 3, 4, 5 landed. Phase 2 HELD (stale ref). Phases 6, 7 NOT STARTED.** Details below.
+**Status: Phases 1, 2, 3, 4, 5 landed. Phases 6, 7 HELD — product decision, not a blocker.**
 
 ---
 
@@ -116,8 +117,15 @@ Clean at start (HEAD `a170283`). The Discover stream had committed everything fo
 |---|---|---|
 | `scriptally-packages-empty.html` | ✅ current, new | Phases 4, 5 built from it |
 | `scriptally-packages-landing-newlook.html` | ✅ current, new | Phases 6, 7 (not started) |
-| `scriptally-packages-twotab.html` | ⚠️ **stale** | **Phase 2 HELD** |
-| `scriptally-bar-forms.html` | ❌ **absent** from `~/Downloads` | Reference-only — non-blocking, noted |
+| `scriptally-packages-twotab.html` | ✅ **corrected + committed** (`41410cb`) | Phase 2 built from it |
+| `scriptally-bar-forms.html` | ✅ committed, reference-only | Not built from, per the brief |
+
+**Filename artefact worth knowing.** On re-supply, the file at the plain name
+`~/Downloads/scriptally-packages-twotab.html` was *still* the stale pre-sweep copy — the browser had
+never overwritten it and saved the corrected export beside it as `…twotab (1).html` and `(2).html`.
+Both duplicates are byte-identical and both pass every gate (`complegend` 4 · `sage-deep` 0 ·
+`#5a6e58` 0 · hatch 4); `(2)` is what is committed. **Deleting the stale plain-named file would stop
+the gate failing on a filename artefact next time.**
 
 The `~/Downloads` copy of `scriptally-packages-twotab.html` is **byte-identical to the copy already
 committed** (body hashes match), and it is the pre-sweep version: **3 single-fill
@@ -130,9 +138,10 @@ The two current refs are already in the final language (zero `sage-deep` between
 which is why Phases 3–5 could proceed and why the composition form in Phase 5's preview comes from a
 **current ref** rather than from this prompt's prose.
 
-**Expect this until Phase 2 lands:** the Analytics tab's *populated* view still shows the old
-single-fill sage bars while its *empty* view teaches the new composition form. That inconsistency is
-the direct, visible cost of the held phase.
+**Resolved.** The populated and empty views now teach the same form — both a bordered three-segment
+track with a 45° hatch (the empty one greyed and slightly taller, per its own ref). Measured:
+populated `1px rgba(46,39,35,0.2)` / 11px, empty `1px rgba(46,39,35,0.14)` / 14px, both hatching at
+45deg with the identical 3px/6px rhythm.
 
 ---
 
@@ -165,19 +174,55 @@ unlike the percentile claims, which stay gated.
 
 ---
 
+## Phase 2 — what landed (`422ffc1`)
+
+**The form.** Every bar is a single track with a 1px ink-alpha hairline, split three ways: replied
+(solid ink) · still waiting (45° hatch) · no reply (empty). Legend once per panel. Labels carry the
+denominator — "5/6 · 2★", "9 of 11" — never a bare percentage. Applied to the funnel, the package
+leaderboard and the materials table, in both the all-packages and in-focus views.
+
+**Every place `--sage-deep` was removed from the packages surface** — swept IN PLACE, so no dead
+declarations remain (verified: zero `var(--pkg-sage)` outside the band):
+
+| Site | Was | Now |
+|---|---|---|
+| `.pkgw-lbr .bar i` (leaderboard) | sage fill | composition bar |
+| `.pkgw-matr .bar2 i` (materials) | sage fill | composition bar |
+| `.pkgw-fr .tr2 i` (funnel, Replied row) | sage fill | composition bar |
+| `.pkgw-hero3 .big` (card-back reply rate) | sage | **ink** |
+| `.pkgw-kpi .v.g` (KPI reply rate) | sage | **ink** |
+| `.pkgw-kpi .d b` (KPI detail bold) | sage | **ink** |
+| `.pkgw-lbr .lv b` (leaderboard value) | sage | **ink** |
+| `.pkgw-matr .rr` (material value) | sage | **ink** |
+| `.pkgw-srow b.g` (card-back stat) | sage | **ink** |
+| `.pkgw-agrow .st3.rep` ("REPLIED") | sage | **ink** |
+| `.pkgw-req` (card band request chip) | sage | **gold** |
+| `.pkgw-mchip .use.hot` ("· 3 REQUESTS") | sage | **gold** |
+| `.pkgw-evchip` (request event chip) | sage border + text | **gold** fill/border/ink |
+| `.pkgw-pctpill` (ordinary percentile) | sage-band + sage | fill + hairline + ink-soft |
+| `.pkgw-pctpill.top` | — | gold tint + gold ink + `#e4d5b2` |
+| `.pkgw-rec3` (recommendation card) | **sage border** + sage shadow | ink border + letterpress |
+| `.pkgw-rec3 .rk2` (kicker) | sage | burgundy |
+| `.pkgw .note` (italic left-rule) | sage | `--pink-line` |
+| `--pkg-sage` token | `var(--sage-d)` | **deleted** |
+| `--pkg-sage-band` | `#dce0d9` | **unchanged**, as specified |
+
+`--sage-d` elsewhere in the app is untouched. `PackageShowcase.tsx` still carries its own
+Cappuccino-scoped copy — that file belongs to Phase 6.
+
+**7 new tests** (1724 total): a reply counts however it ended · a nudge-due send is waiting, not
+no-reply · close is the boundary · stated silence closes without ever nudging · no recorded window is
+never overdue · widths sum to 100 and the label carries the denominator · an empty set is all-zero.
+One is named for the divergence and asserts both behaviours on the SAME query.
+
 ## Outstanding
 
-- **Phase 2 — composition bars + dark-sage retirement.** HELD on the stale `twotab` ref. When it
-  lands: build the bar from the `.tr3` structure already proven in Phase 5's preview, apply the
-  reassignment table, and use the predicate recorded above.
-- **Phase 6 — landing retoken.** Not started. It is the largest piece (a full rebuild of the 452-line
-  `PackageShowcase`, a new self-contained hero-visual component with a replaceable seam, scroll-
-  triggered compare lanes, and the removal of every `psw-*` keyframe) and deserves a session with room
-  to do it properly rather than a rushed tail. **The current Cappuccino landing is untouched and still
-  works** — no half-replaced state on `main`.
-- **Phase 7 — gate the landing's community claims.** Depends on Phase 6.
-- Screenshots of the landing in both flag states, and of the populated Analytics tab with composition
-  bars, belong to those phases and are not in this report.
+- **Phase 6 — landing retoken** and **Phase 7 — gate its community claims.** HELD pending a product
+  decision. **The current Cappuccino landing is untouched and still works** — no half-replaced state
+  on `main`. When they run: a full rebuild of the 452-line `PackageShowcase`, a self-contained
+  hero-visual component with a replaceable seam, scroll-triggered compare lanes, and the removal of
+  every `psw-*` keyframe.
+- Screenshots of the landing in both flag states belong to those phases.
 
 ## Lab note
 
