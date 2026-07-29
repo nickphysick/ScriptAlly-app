@@ -5,7 +5,7 @@
  * AnalyticsEmpty — the Analytics tab's first-run screen (ref design-refs/scriptally-packages-empty.html).
  *
  * Shown when no package has gone out with a query yet. Four dashed KPI shells holding em-dashes, the
- * nothing-to-measure card, a greyed preview of what will appear, and the community teaser.
+ * nothing-to-measure card, and a greyed preview of what will appear.
  *
  * The preview is doing real work: it teaches the COMPOSITION FORM before there is any data to put in
  * it. Sample sizes on this page are three or four sends, where a smooth percentage bar would claim a
@@ -13,11 +13,12 @@
  * still waiting, no reply) and a denominator, not a percentage fill. Seeing the empty shape first
  * means the first real bar is legible immediately.
  *
- * The teaser foreshadows community comparison WITHOUT claiming any data exists, so it renders
- * regardless of COMMUNITY_STATS_ENABLED. The percentile claims themselves are gated and do not.
+ * There is deliberately NO community teaser here. Foreshadowing a comparison feature that has no
+ * pipeline behind it is a promise this build cannot keep — and this screen's job is to explain what
+ * the tab does, not to advertise what it might one day do. (The flag-off line on the populated view
+ * is different: it explains why an EXISTING panel is quiet, rather than promising a new one.)
  */
 import React from "react";
-import { Users } from "lucide-react";
 
 const KPIS = ["Queries sent", "Reply rate", "Median reply time", "Requests"];
 
@@ -82,14 +83,6 @@ export const AnalyticsEmpty: React.FC<AnalyticsEmptyProps> = ({ onNewPackage, on
           <span className="pv2">—</span>
         </div>
       ))}
-    </div>
-
-    <div className="pkgw-commteaser">
-      <Users aria-hidden="true" />
-      <span>
-        Once you&rsquo;ve sent a few queries, ScriptAlly will also show how your reply rate compares with the wider
-        writing community.
-      </span>
     </div>
   </>
 );

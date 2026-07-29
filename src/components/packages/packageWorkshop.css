@@ -655,14 +655,6 @@
 .pkgw-pvrow .tr3 i.n { background: #f6f0e9; }
 .pkgw-pvrow .pv2 { width: 40px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #c4b7a8; }
 
-/* Foreshadows the comparison WITHOUT claiming any data exists — so it renders whatever the
-   community flag says; the percentile claims themselves never do. */
-.pkgw-commteaser {
-  display: flex; align-items: center; gap: 11px; margin-top: 20px;
-  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3); border-radius: 11px;
-  padding: 12px 16px; font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5;
-}
-.pkgw-commteaser svg { width: 17px; height: 17px; color: var(--slate); flex: none; }
 
 /* ══ Composition bars ══════════════════════════════════════════════════════
    Ref design-refs/scriptally-packages-twotab.html (.bar/.bar2/.complegend), chosen over the four
