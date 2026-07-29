@@ -66,7 +66,8 @@ import {
   prefersReducedMotion,
   rowDelayMs,
 } from "../../lib/agentMotion";
-import { BUMP_MS, EXIT_MS } from "../../lib/agentMotion";
+import { BUMP_MS, EXIT_MS, SAVE_BREATH_MS, SAVE_FADE_IN_MS, SAVE_FADE_OUT_MS } from "../../lib/agentMotion";
+import { saveNotice, saveOutcome, sectionFor } from "../../lib/agentSaveOutcome";
 import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
 import { countryName } from "../../lib/territory";
@@ -107,6 +108,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   // A card on its way out: it holds its place, plays `fall`, and only then is really removed —
   // otherwise the gap closes underneath it and the exit animates nothing.
   const [leavingId, setLeavingId] = useState<string | null>(null);
+  /** The saved card's beat, and the inline notice that outlives the motion. */
+  const [saveState, setSaveState] = useState<{ id: string; phase: "fadeout" | "fadein" | "breath" } | null>(null);
+  const [notice, setNotice] = useState<{
+    text: string; kind: "travel" | "filtered-out"; agentId: string; canUndo: boolean;
+  } | null>(null);
+  /** Which section the card sat in before the save — read once the outcome is computed. */
+  const sectionBeforeSave = useRef<string | null>(null);
+  /** The agent exactly as it was before the last save, so Undo can put it back. Null for a card
+   *  that was CREATED by the save — there is no previous version to restore. */
+  const undoSnapshot = useRef<Agent | null>(null);
   const [loadAnim, setLoadAnim] = useState(!prefersReducedMotion());
 
   // Measured before paint, so the very first frame already carries the right delay.
@@ -234,6 +245,102 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     }, EXIT_MS);
   }, [clearEditor, newAgent, flippedId]);
 
+  /**
+   * SAVE — three beats (Baked 4). Never one motion: a card flung across the grid the instant you
+   * press Done is unreadable, and you cannot tell whether it saved or simply went away.
+   *
+   *   1. IN PLACE, the editor crossfades into a finished card (170ms out, 200ms in). The
+   *      transformation registers before anything moves.
+   *   2. A breath — 220ms. This is the beat that makes the travel legible as a consequence.
+   *   3. The card travels to its sorted place while everything between bumps around it (340ms).
+   *
+   * Then the notice, which is not decoration: a card that travels off-screen otherwise just
+   * vanishes. The motion answers "did it save?" only for a destination you can see.
+   *
+   * Two exceptions to the travel, both deliberate:
+   *   · the card no longer matches the active filters → it LEAVES with the discard motion and the
+   *     notice says where it went. It must never silently disappear.
+   *   · grouping is on and the card changed SECTION → it falls at the old home and rises at the
+   *     new one. A card moving within a list is a shuffle and sliding is honest; a card that has
+   *     changed category flying across a heading implies a continuity that isn't there.
+   */
+  const beginSaveChoreography = useCallback(
+    (saved: Agent) => {
+      const outcome = saveOutcome(saved, {
+        agents: [...agents.filter((a) => a.id !== saved.id), saved],
+        queries,
+        filters,
+        search,
+        sort,
+        grouping,
+        sectionBefore: sectionBeforeSave.current,
+      });
+      setNotice({
+        text: saveNotice(saved.name || saved.agency, outcome),
+        kind: outcome.kind,
+        agentId: saved.id,
+        // Undo restores a PREVIOUS version; a save that created an agent has none, and undoing it
+        // would mean deletion — which this page deliberately has no affordance for.
+        canUndo: !!undoSnapshot.current,
+      });
+
+      if (prefersReducedMotion()) {
+        setSaveState(null);
+        clearEditor();
+        setNewAgent(null);
+        return;
+      }
+
+      // Beat 1a — the editor face fades OUT, in place. The card keeps its slot throughout.
+      setSaveState({ id: saved.id, phase: "fadeout" });
+
+      window.setTimeout(() => {
+        // Beat 1b — the finished card fades IN. The rotor's rotation is suppressed for this: a
+        // save is a transformation in place, not a flip back.
+        setSaveState({ id: saved.id, phase: "fadein" });
+        clearEditor();
+
+        window.setTimeout(() => {
+        // Beat 2 — the breath. Nothing moves. This is what makes the travel read as a consequence.
+        setSaveState({ id: saved.id, phase: "breath" });
+
+        window.setTimeout(() => {
+          // Beat 3 — the travel (or, for a card that has left the view, the exit).
+          if (outcome.kind === "filtered-out" || outcome.sectionChanged) {
+            setLeavingId(saved.id);
+            window.setTimeout(() => {
+              flipBefore.current = measureFlip(gridRef.current);
+              setLeavingId(null);
+              setSaveState(null);
+              setNewAgent(null);
+            }, EXIT_MS);
+            return;
+          }
+          flipBefore.current = measureFlip(gridRef.current);
+          setSaveState(null);
+          setNewAgent(null);
+        }, SAVE_BREATH_MS);
+        }, SAVE_FADE_IN_MS);
+      }, SAVE_FADE_OUT_MS);
+    },
+    [agents, queries, filters, search, sort, grouping, clearEditor],
+  );
+
+  /**
+   * Undo — restores the agent's previous field values in ONE write, mirroring the save's single
+   * write. It is offered only for an EDIT: a save that created an agent has no previous version,
+   * and undoing it would mean deleting one, which this page has no affordance for (deleteAgent
+   * has no cascade and would orphan queries).
+   */
+  const undoSave = useCallback(async () => {
+    const prev = undoSnapshot.current;
+    setNotice(null);
+    if (!prev) return;
+    flipBefore.current = measureFlip(gridRef.current);
+    await updateAgent(prev.id, prev);
+    undoSnapshot.current = null;
+  }, [updateAgent]);
+
   // Subscribe to the open agent's notes subcollection. `notesLoaded` only turns true once the
   // listener actually resolves — the notePreview recompute is gated on it, because an unresolved
   // listener is indistinguishable from "no notes" and would wipe a valid preview on Done.
@@ -292,9 +399,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       setTab(invalid.tab);
       return;
     }
+    // Where does this card sit RIGHT NOW? Read before the write, because the save may change the
+    // very fact the grouping is keyed on.
+    const beforeAgent = agents.find((a) => a.id === draft.id) ?? newAgent;
+    sectionBeforeSave.current = beforeAgent
+      ? sectionFor(beforeAgent, { agents, queries, filters, search, sort, grouping })
+      : null;
+    // Only an EXISTING agent has a previous version; a create has nothing to revert to, and
+    // "Undo" there would mean deletion, which this page deliberately has no affordance for.
+    undoSnapshot.current = agents.find((a) => a.id === draft.id) ?? null;
+
     // A new agent is CREATED on its first valid Done; everything after is the ordinary diff path.
     if (newAgent && draft.id === newAgent.id) {
-      const created = await addAgent({
+      // Built ONCE and reused: the write payload is also what the save choreography reads to work
+      // out where the card is going, so the motion can't describe a different agent than the one
+      // that landed.
+      const payload = {
         name: draft.name.trim(),
         agency: draft.agency.trim(),
         email: draft.email.trim(),
@@ -325,11 +445,21 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                 : {}),
             }
           : {}),
-      } as Parameters<typeof addAgent>[0]);
+      } as Parameters<typeof addAgent>[0];
+      const created = await addAgent(payload);
       if (!created?.success) {
+        // The write failed: the draft STAYS a draft and the error surfaces exactly as before.
+        // Nothing is adopted — a node must never claim an id that doesn't exist.
         setError({ tab: "contact", msg: created?.error || "That agent couldn't be saved." });
         return;
       }
+      // ── ID ADOPTION (gate 2). ONLY on a confirmed successful create.
+      // The draft card is keyed by a temporary id; the saved agent arrives from Firestore with a
+      // real one. Without this, React would destroy the draft node and build a fresh card — and
+      // FLIP cannot animate an element that no longer exists, so the save could never travel.
+      // Adopting the real id onto the existing node means the incoming snapshot MATCHES it and
+      // React moves the node instead of rebuilding it.
+      if (created.id) setNewAgent((n) => (n ? { ...n, id: created.id as string } : n));
       // buffered notes become real documents under the CREATED id (tempIds are the doc ids, so
       // the pin written above stays valid)
       if (created.id && currentUser && draft.notes.added.length) {
@@ -342,7 +472,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${created.id}/notes`);
         }
       }
-      discard();
+      // The saved card's outcome is computed BEFORE any motion, so the choreography and the
+      // notice can never describe different things.
+      beginSaveChoreography({
+        ...(payload as unknown as Agent),
+        id: created.id || draft.id,
+        userId: currentUser?.id || "",
+        dateAdded: newAgent.dateAdded,
+        lastCheckedDate: newAgent.lastCheckedDate,
+      });
       return;
     }
 
@@ -398,6 +536,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     });
     if (preview !== undefined) diff.changed.notePreview = preview;
 
+    const savedAgent: Agent = { ...original, ...(diff.changed as Partial<Agent>) };
+
     if (!isDiffEmpty(diff)) {
       // deleteField() for values the writer cleared, so absence round-trips as absence rather
       // than a stored 0/false (the repo's existing unset convention).
@@ -406,7 +546,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
         (payload as Record<string, unknown>)[key] = deleteField();
       }
       await updateAgent(draft.id, payload);
+      // An edit that changed something gets the full three beats — it may now sort or group
+      // somewhere else, and that move needs the same explanation a new card gets.
+      beginSaveChoreography(savedAgent);
+      return;
     }
+    // Nothing changed: no write, no motion, no notice. A no-op Done is not an event.
     discard();
   }, [agents, draft, discard, updateAgent, currentUser, storedNotes, notesLoaded, newAgent, addAgent]);
 
@@ -497,14 +642,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
               <AgentCard
                 key={agent.id}
                 style={loadAnim ? { animationDelay: `${rowDelayMs(index, columns)}ms` } : undefined}
-                motionClass={leavingId === agent.id ? "agl-leaving" : newAgent?.id === agent.id ? "agl-arriving" : undefined}
+                motionClass={[
+                  leavingId === agent.id ? "agl-leaving" : "",
+                  newAgent?.id === agent.id && !saveState ? "agl-arriving" : "",
+                  saveState?.id === agent.id ? `sv-${saveState.phase}` : "",
+                ].filter(Boolean).join(" ") || undefined}
                 agent={agent}
                 queries={queries}
                 manuscripts={manuscripts}
                 activities={activities}
                 onEdit={onEdit}
                 onLogQuery={onLogQuery}
-                flipped={flippedId === agent.id}
+                flipped={flippedId === agent.id && saveState?.id !== agent.id}
                 editor={
                   draft && flippedId === agent.id ? (
                     <AgentEditor
@@ -649,6 +798,40 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           )}
           {shown.map(renderCard)}
         </div>
+        )}
+        {/* The notice sits BENEATH the grid and persists until dismissed or superseded — a card
+            that travelled off-screen, or left because it no longer matches the filters, would
+            otherwise simply have vanished. It rises in with the same shared vocabulary. */}
+        {notice && (
+          <div className={`agl-notice${prefersReducedMotion() ? "" : " agl-notice-in"}`} role="status">
+            <span className="txt">{notice.text}</span>
+            {notice.kind === "filtered-out" ? (
+              <button
+                type="button"
+                className="act"
+                onClick={() => {
+                  setFilters(emptyFilterSet());
+                  setSearch("");
+                  setNotice(null);
+                  // let the cleared list render, then bring the card into view
+                  window.setTimeout(() => {
+                    document
+                      .querySelector(`[data-agent-card="${notice.agentId}"]`)
+                      ?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+                  }, 0);
+                }}
+              >
+                Show all agents
+              </button>
+            ) : notice.canUndo ? (
+              <button type="button" className="act" onClick={() => void undoSave()}>
+                Undo
+              </button>
+            ) : null}
+            <button type="button" className="dismiss" aria-label="Dismiss" onClick={() => setNotice(null)}>
+              ✕
+            </button>
+          </div>
         )}
        </div>
       </div>

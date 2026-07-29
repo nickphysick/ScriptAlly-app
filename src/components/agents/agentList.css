@@ -74,12 +74,48 @@
 .aglist .agl-scene.agl-arriving { animation: rise .34s cubic-bezier(.4, 0, .2, 1) both; }
 .aglist .agl-scene.agl-leaving { animation: fall .16s cubic-bezier(.4, 0, .2, 1) both; pointer-events: none; }
 
+/* SAVE — beat 1, the crossfade IN PLACE (motion pack, Baked 4). The rotor's rotation is
+   suppressed for both halves: a save is a transformation, not a flip back, and rotating here
+   would say "you're editing again" at the exact moment the writer has finished. The editor face
+   fades out, then the finished card fades in — the card never leaves its slot. */
+.aglist .agl-scene.sv-fadeout .agl-rotor,
+.aglist .agl-scene.sv-fadein .agl-rotor,
+.aglist .agl-scene.sv-breath .agl-rotor { transition: none; }
+.aglist .agl-scene.sv-fadeout .agl-faceb { opacity: 0; transition: opacity .17s ease; }
+.aglist .agl-scene.sv-fadein .agl-facef { animation: agl-savein .2s ease both; }
+@keyframes agl-savein { from { opacity: 0; } to { opacity: 1; } }
+
+/* THE NOTICE — beneath the grid, in the shared vocabulary, persisting until dismissed or
+   superseded. It exists because a card that travels off-screen, or leaves because it no longer
+   matches the filters, would otherwise simply have vanished. */
+.aglist .agl-notice {
+  display: flex; align-items: center; gap: 12px; margin-top: 22px;
+  background: var(--agl-card); border: 1px solid var(--agl-line); border-radius: 11px;
+  padding: 11px 14px; font-size: 12.5px; color: var(--agl-ink-body);
+}
+.aglist .agl-notice .txt { flex: 1; min-width: 0; }
+.aglist .agl-notice .act {
+  flex: none; font-family: inherit; font-size: 12px; cursor: pointer;
+  background: var(--agl-pink); border: 1px solid var(--agl-pinkline); color: var(--agl-burg);
+  border-radius: 9px; padding: 5px 11px;
+}
+.aglist .agl-notice .act:hover { border-color: var(--agl-burg); }
+.aglist .agl-notice .dismiss {
+  flex: none; background: none; border: none; cursor: pointer;
+  color: var(--agl-muted); font-size: 12px; padding: 2px 4px;
+}
+.aglist .agl-notice .dismiss:hover { color: var(--agl-ink-head); }
+.aglist .agl-notice-in { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+
 @media (prefers-reduced-motion: reduce) {
   .aglist.agl-anim .agl-head-slot,
   .aglist.agl-anim .agl-toolbar,
   .aglist.agl-anim .agl-scene,
   .aglist .agl-scene.agl-arriving,
-  .aglist .agl-scene.agl-leaving { animation: none; }
+  .aglist .agl-scene.agl-leaving,
+  .aglist .agl-scene.sv-fadein .agl-facef,
+  .aglist .agl-notice-in { animation: none; }
+  .aglist .agl-scene.sv-fadeout .agl-faceb { transition: none; }
 }
 
 /* THE PAGE COLUMN (rebuild v2). Padding belongs to the scroll region so the scrollbar rides the

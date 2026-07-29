@@ -153,3 +153,59 @@ describe("the load sequence is armed ONCE, on route entry", () => {
     expect(page).toContain("useState(!prefersReducedMotion())");
   });
 });
+
+describe("the save is THREE BEATS, never one", () => {
+  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
+
+  it("crossfade → breath → travel, in that order, each with its own phase", () => {
+    // anchor on the CALLS, not the state type annotation that also names the phases
+    const fadeout = list.indexOf('setSaveState({ id: saved.id, phase: "fadeout" })');
+    const fadein = list.indexOf('setSaveState({ id: saved.id, phase: "fadein" })');
+    const breath = list.indexOf('setSaveState({ id: saved.id, phase: "breath" })');
+    expect(
+      fadeout > -1 && fadein > fadeout && breath > fadein,
+      "the save's beats collapsed into one motion — a card flung across the grid the instant you press Done is unreadable, and you cannot tell whether it saved or simply went away",
+    ).toBe(true);
+  });
+
+  it("the BREATH is real — the travel does not begin the moment the crossfade ends", () => {
+    expect(
+      list,
+      "the breath was removed; the transformation and the journey now run together, so neither registers",
+    ).toContain("SAVE_BREATH_MS");
+  });
+
+  it("the crossfade suppresses the rotor — a save is a transformation, not a flip back", () => {
+    const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
+    expect(css).toMatch(/\.sv-fadeout \.agl-rotor,[\s\S]*?transition: none/);
+  });
+
+  it("the outcome is computed BEFORE the motion, so the notice and the choreography agree", () => {
+    const outcomeAt = list.indexOf("saveOutcome(saved");
+    const firstPhase = list.indexOf('setSaveState({ id: saved.id, phase: "fadeout" })');
+    expect(
+      outcomeAt > -1 && outcomeAt < firstPhase,
+      "the outcome is worked out after the motion starts — the card can then travel one way while the sentence describes another",
+    ).toBe(true);
+  });
+});
+
+describe("id adoption happens ONLY on a confirmed create", () => {
+  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
+
+  it("the real id is adopted onto the draft node after success", () => {
+    expect(
+      list,
+      "id adoption was removed — React will destroy the draft node and build a fresh card, and FLIP cannot animate an element that no longer exists, so the save can never travel",
+    ).toMatch(/if \(created\.id\) setNewAgent/);
+  });
+
+  it("a FAILED create adopts nothing and leaves the draft a draft", () => {
+    const failBlock = list.slice(list.indexOf("if (!created?.success)"), list.indexOf("ID ADOPTION"));
+    expect(
+      failBlock,
+      "the failure path now adopts an id — a node would claim an id that does not exist in the database",
+    ).not.toMatch(/setNewAgent\([^)]*created\.id/);
+    expect(failBlock).toContain("return;");
+  });
+});
