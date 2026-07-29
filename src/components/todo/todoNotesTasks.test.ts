@@ -51,7 +51,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
     expect(open).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards")');
     expect(page).toContain('const [composerMode, setComposerMode] = useState<"note" | "task">("note")'); // default note
     // the composer reads the mode (drives the P2 live transformation)
-    expect(page).toContain("`tdb-nc tdb-nc--${composerMode}`");
+    expect(page).toContain('`tdb-nc tdb-nc--${composerMode}${saveState === "failed" ? " failed" : ""}`');
   });
 
   it("the card is the nt lane's empty node ONLY (gone the moment a note exists) with an honest count", () => {
@@ -171,7 +171,7 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
   it("validation + keyboard + NO native dialogs", () => {
     // title always required; a TASK additionally requires a date
     expect(page).toContain('const composerCanSave = !!composerDraft.trim() && (composerMode === "note" || !!composerDate)');
-    expect(comp).toContain("disabled={!composerCanSave}");
+    expect(comp).toContain("disabled={!composerCanSave || savePending}"); // save-and-today P1: also disabled mid-write
     // ⌘⏎ saves · Esc runs the styled discard-confirm (only when dirty)
     expect(comp).toContain('(e.metaKey || e.ctrlKey) && e.key === "Enter"');
     expect(comp).toContain('e.key === "Escape"');

@@ -68,6 +68,7 @@ import {
 } from "firebase/firestore";
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
+import { TodoWriteError, classifyWriteError } from "./todoWrite";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsForCascade, cascadePlan, chunkArray } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
@@ -243,7 +244,7 @@ interface DbContextType {
   // User tasks — the canonical stored to-do object (record-scoped; read by the To-do board + the
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
-  addUserTask: (fields: { text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }) => Promise<string | undefined>;
+  addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }) => Promise<string | undefined>;
   updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "detail" | "done" | "completedAt" | "dueDate" | "surfaceOffset">> & { committedDate?: string | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
 
@@ -2135,11 +2136,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // ── User tasks (users/{uid}/tasks) — the canonical stored to-do object. Record scope is INPUT
   //    (queryId/agentId/manuscriptId), not derived state; omitted when absent (Firestore rejects
   //    undefined). The "N tasks" badge count stays DERIVED — nothing counts is cached here. ──
-  const addUserTask = async (fields: { text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }): Promise<string | undefined> => {
+  const addUserTask = async (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }): Promise<string | undefined> => {
     if (!currentUser) return undefined;
     const text = (fields.text ?? "").trim();
     if (!text) return undefined; // never create an empty task
-    const id = "task-" + Math.random().toString(36).substr(2, 9);
+    // The caller may supply the id (the composer needs to know it BEFORE the optimistic insert so
+    // it can hide the in-flight doc until the write resolves); otherwise generate one.
+    const id = fields.id ?? "task-" + Math.random().toString(36).substr(2, 9);
     const now = new Date().toISOString();
     const newTask: UserTask = {
       id, userId: currentUser.id, text, done: false, createdAt: now, updatedAt: now,
@@ -2155,8 +2158,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       await setDoc(doc(db, "users", currentUser.id, "tasks", id), newTask);
       return id;
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/tasks/${id}`);
-      return undefined;
+      // The save state machine needs the CODE (permission vs network); handleFirestoreError throws
+      // a message-only Error that discards it. Log without PII (its format), then throw the typed
+      // error so the composer can classify. (setDoc rejects on server denial — the optimistic local
+      // write is rolled back by the onSnapshot listener regardless.)
+      console.error(`Firestore error [WRITE] users/${currentUser.id}/tasks/${id}: ${e instanceof Error ? e.message : String(e)}`);
+      throw new TodoWriteError(classifyWriteError(e), "user task write failed");
     }
   };
 

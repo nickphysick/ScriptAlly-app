@@ -35,6 +35,7 @@ import {
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { isProUser } from "../../lib/assistFill";
+import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
@@ -210,6 +211,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [composerDetail, setComposerDetail] = useState("");     // the optional detail line
   const [composerDate, setComposerDate] = useState("");         // task only — ISO "YYYY-MM-DD"
   const [composerSurface, setComposerSurface] = useState<SurfaceOffset>("on-day"); // task only
+  // save-and-today P1 — THE SAVE STATE MACHINE: idle → pending → (saved | failed). A denied/dropped
+  // write must fail VISIBLY (never a silent close), and the optimistic insert must not flicker — so
+  // the in-flight id is hidden from the board until the write resolves.
+  const [saveState, setSaveState] = useState<"idle" | "pending" | "failed">("idle");
+  const [saveError, setSaveError] = useState<WriteErrorCode | null>(null);
+  const [pendingSaveId, setPendingSaveId] = useState<string | null>(null); // the in-flight create, hidden until resolved
+  const [saveSlow, setSaveSlow] = useState(false); // the quiet inline spinner, only past ~300ms
+  const savePending = saveState === "pending";
   // dirty = any field carries content; an outside click / Esc only prompts to discard when dirty.
   const composerDirty = !!(composerDraft.trim() || composerDetail.trim() || composerDate);
   const composerDirtyRef = useRef(composerDirty);
@@ -325,12 +334,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
   const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
   const board = useMemo(
-    () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
+    // save-and-today P1 — hide the in-flight create (pendingSaveId) so the optimistic insert never
+    // flashes: the item's node is inserted ONCE, when the write resolves, never inserted-then-removed.
+    () => assembleBoard({ tasks, userTasks: pendingSaveId ? userTasks.filter((t) => t.id !== pendingSaveId) : userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
     // mutedTaskRules is a board dep because the Sunday CARD reads it directly (nudge/dq/stale mutes
     // change `tasks` upstream, but sunday_review does not).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tasks, userTasks, queries, agents, manuscripts, taskFlags, today, currentUser?.mutedTaskRules],
+    [tasks, userTasks, pendingSaveId, queries, agents, manuscripts, taskFlags, today, currentUser?.mutedTaskRules],
   );
   // The Housekeeping lane renders the dq rules GROUPED (one card per rule, queried-first members) +
   // STALE queries as INDIVIDUAL cards (real one-off decisions, never batched). The flat board.hk
@@ -684,7 +695,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   async function quickDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
-      await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
+      // save-and-today P1 — ticking is a write like any other: it must not silently no-op. On a
+      // denied/dropped write, surface a Try-again toast rather than the old unhandled throw.
+      try {
+        await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
+      } catch {
+        flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => quickDone(c) });
+        return;
+      }
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
       setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on Today.`, undo });
       doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
@@ -781,12 +799,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // seat; save wires to the SAME addUserTask action (no new write path).
   // notes-and-tasks P1/P2 — open the composer in a chosen NATURE, at the current view's seat,
   // on a clean draft.
+  const resetSaveMachine = () => { setSaveState("idle"); setSaveError(null); setPendingSaveId(null); setSaveSlow(false); };
   const openComposer = (mode: "note" | "task") => {
     setComposerMode(mode);
     setComposerDraft("");
     setComposerDetail("");
     setComposerDate("");
     setComposerSurface("on-day");
+    resetSaveMachine();
     setComposerAt(view === "ledger" ? "ledger" : "cards");
   };
   const closeComposer = () => {
@@ -795,10 +815,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDetail("");
     setComposerDate("");
     setComposerSurface("on-day");
+    resetSaveMachine();
   };
   // Esc / Cancel: confirm the discard ONLY when the draft carries content (no native dialog —
-  // the styled useConfirmAsk). An empty composer closes silently.
+  // the styled useConfirmAsk). SUPPRESSED while a save is pending (fields are locked mid-write).
   async function tryCloseComposer() {
+    if (savePending) return;
     if (composerDirty) {
       const ok = await confirmAsk("Discard this?", { confirmLabel: "Discard", cancelLabel: "Keep editing" });
       if (!ok) return;
@@ -808,20 +830,37 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // The generic "add a note" affordances (the Notes section, the ledger add-row) open note mode;
   // the hero's "Add task or note" opens task mode.
   function addTask() { openComposer("note"); }
-  // notes-and-tasks P2 — save the draft as its nature. A NOTE stores title (+ detail); a TASK
-  // additionally stores the dueDate + the in-app surfacing lead. Title is always required; a task
-  // additionally requires a date (a dateless task would be indistinguishable from a note).
   const composerCanSave = !!composerDraft.trim() && (composerMode === "note" || !!composerDate);
+  // save-and-today P1 — THE MACHINE. On save → PENDING (button disabled, fields read-only, Esc off,
+  // the in-flight id hidden from the board so the optimistic insert never flickers). The write
+  // RESOLVES → SAVED (unhide the settled item, close in place). It THROWS → FAILED (the composer
+  // stays open with every character intact, editable again, an inline error + Try again).
   async function saveComposer() {
-    if (!composerCanSave) return;
+    if (!composerCanSave || savePending) return;
     const isTask = composerMode === "task";
-    await addUserTask({
-      text: composerDraft.trim(),
-      detail: composerDetail.trim() || undefined,
-      dueDate: isTask ? composerDate : undefined,
-      surfaceOffset: isTask ? composerSurface : undefined,
-    });
-    closeComposer();
+    const id = "task-" + Math.random().toString(36).slice(2, 11);
+    setSaveState("pending");
+    setSaveError(null);
+    setPendingSaveId(id);
+    const slow = window.setTimeout(() => setSaveSlow(true), 300);
+    try {
+      await addUserTask({
+        id,
+        text: composerDraft.trim(),
+        detail: composerDetail.trim() || undefined,
+        dueDate: isTask ? composerDate : undefined,
+        surfaceOffset: isTask ? composerSurface : undefined,
+      });
+      window.clearTimeout(slow);
+      setPendingSaveId(null); // the settled item may now render
+      closeComposer();
+    } catch (e) {
+      window.clearTimeout(slow);
+      setSaveSlow(false);
+      setPendingSaveId(null); // the optimistic insert rolled back — nothing left to hide
+      setSaveError(classifyWriteError(e));
+      setSaveState("failed");
+    }
   }
 
   // Shell follow-up P3: the hardback-spine TodoShell is RETIRED — the v2 shell (rail, sidebar,
@@ -1193,10 +1232,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       if (e.key === "Escape") { e.stopPropagation(); e.preventDefault(); tryCloseComposer(); }
     };
     return (
-      <div className={`tdb-nc tdb-nc--${composerMode}`}>
+      <div className={`tdb-nc tdb-nc--${composerMode}${saveState === "failed" ? " failed" : ""}`}>
         <div className="tdb-nc-seg" role="tablist" aria-label="Note or task">
-          <button type="button" role="tab" aria-selected={!isTask} className={`tdb-nc-sgb${isTask ? "" : " on"}`} onClick={() => setComposerMode("note")}>✎ Note</button>
-          <button type="button" role="tab" aria-selected={isTask} className={`tdb-nc-sgb${isTask ? " on" : ""}`} onClick={() => setComposerMode("task")}>✓ Task</button>
+          <button type="button" role="tab" aria-selected={!isTask} className={`tdb-nc-sgb${isTask ? "" : " on"}`} disabled={savePending} onClick={() => setComposerMode("note")}>✎ Note</button>
+          <button type="button" role="tab" aria-selected={isTask} className={`tdb-nc-sgb${isTask ? " on" : ""}`} disabled={savePending} onClick={() => setComposerMode("task")}>✓ Task</button>
         </div>
         <div className="tdb-nc-body">
           <input
@@ -1205,6 +1244,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             placeholder={isTask ? "What needs doing?" : "Jot it down…"}
             aria-label="Title"
             autoFocus
+            readOnly={savePending}
             onChange={(e) => setComposerDraft(e.target.value)}
             onKeyDown={onKey}
           />
@@ -1214,17 +1254,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             rows={1}
             placeholder="Add a little more (optional)…"
             aria-label="Detail"
+            readOnly={savePending}
             onChange={(e) => { setComposerDetail(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
             onKeyDown={onKey}
           />
           <div className="tdb-nc-meta">
             {isTask ? (
               <>
-                <span className="tdb-nc-date"><BrandDatePicker value={composerDate} onChange={setComposerDate} placeholder="Add a date" /></span>
+                <span className={`tdb-nc-date${savePending ? " lock" : ""}`}><BrandDatePicker value={composerDate} onChange={setComposerDate} placeholder="Add a date" /></span>
                 {composerDate && (
                   <label className="tdb-nc-surface">
                     <span className="tdb-nc-surflbl">Show it in Today’s list</span>
-                    <select value={composerSurface} onChange={(e) => setComposerSurface(e.target.value as SurfaceOffset)} aria-label="Show it in Today’s list">
+                    <select value={composerSurface} disabled={savePending} onChange={(e) => setComposerSurface(e.target.value as SurfaceOffset)} aria-label="Show it in Today’s list">
                       <option value="on-day">On the day</option>
                       <option value="day-before">A day early</option>
                       <option value="week-before">A week early</option>
@@ -1235,8 +1276,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ) : (
               <span className="tdb-nc-nomark">NO DATE · NOTHING WILL CHASE YOU</span>
             )}
-            <button type="button" className="tdb-nc-save" disabled={!composerCanSave} onClick={saveComposer}>{isTask ? "Add the task" : "Pin the note"}</button>
+            <button type="button" className="tdb-nc-save" disabled={!composerCanSave || savePending} onClick={saveComposer}>
+              {saveSlow && <span className="tdb-nc-spin" aria-hidden />}
+              {isTask ? "Add the task" : "Pin the note"}
+            </button>
           </div>
+          {saveState === "failed" && (
+            <div className="tdb-nc-err" role="alert">
+              <span className="tdb-nc-errtx">{saveErrorCopy(saveError ?? "unknown")}</span>
+              <button type="button" className="tdb-nc-retry" onClick={saveComposer}>Try again</button>
+            </div>
+          )}
         </div>
         <div className="tdb-nc-hint" aria-hidden>ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING</div>
       </div>

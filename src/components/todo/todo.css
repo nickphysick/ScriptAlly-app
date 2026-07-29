@@ -420,6 +420,14 @@
 .tdb-nc-save { margin-left: auto; display: inline-flex; align-items: center; height: 32px; padding: 0 15px; border-radius: 99px; background: var(--nt-ink-bg); border: 1px solid var(--nt-ink-bd); color: var(--nt-ink-tx); font-size: 12px; font-weight: 600; cursor: pointer; }
 .tdb-nc-save:disabled { opacity: 0.45; cursor: not-allowed; }
 .tdb-nc-hint { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--nt-hint); padding: 0 15px 12px; }
+/* save-and-today P1 — the machine's pending + failed chrome. */
+.tdb-nc-date.lock { pointer-events: none; }
+.tdb-nc-spin { width: 11px; height: 11px; margin-right: 7px; flex: 0 0 auto; border-radius: 50%; border: 2px solid rgba(243, 231, 218, 0.4); border-top-color: var(--nt-ink-tx); animation: ntSpin 0.7s linear infinite; }
+@keyframes ntSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tdb-nc-spin { animation: none; } }
+.tdb-nc-err { display: flex; align-items: center; gap: 10px; margin: 8px 15px 0; padding: 8px 11px; border-radius: 9px; background: #f8e2da; border: 1px solid #e8c8bc; }
+.tdb-nc-errtx { font-size: 11px; line-height: 1.4; color: #8a3a28; }
+.tdb-nc-retry { margin-left: auto; flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #8a3a28; background: none; border: none; border-bottom: 1.5px solid #d99e86; padding: 0 0 1px; cursor: pointer; }
 /* ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (frame 3): note (butter) · task (sage) ·
    promoted task (pink). Sage is the USER-CREATED family; blue is Pro-only and never appears. ── */
 .tdb-ntc { box-sizing: border-box; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 12px; overflow: hidden; box-shadow: 5px 5px 0 var(--nt-ntc-blk); }
