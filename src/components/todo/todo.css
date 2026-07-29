@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; --nt-comp-bd: #3a1c14; --nt-block-note: #eedfae; --nt-block-task: #d5dbd3; --nt-seg-bg: #faf7f1; --nt-seg-bd: #ddd2c4; --nt-seg-on-bg: #3a2c20; --nt-seg-on-bd: #2a1a13; --nt-seg-on-tx: #f3e7da; --nt-ttl: #2b2118; --nt-dtl: #5d5245; --nt-dtl-note: #6b5a4e; --nt-fld-bg: #faf7f1; --nt-fld-bd: #ddd2c4; --nt-fld-blank: #a5988c; --nt-hint: #a5988c; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; --nt-comp-bd: #3a1c14; --nt-block-note: #eedfae; --nt-block-task: #d5dbd3; --nt-seg-bg: #faf7f1; --nt-seg-bd: #ddd2c4; --nt-seg-on-bg: #3a2c20; --nt-seg-on-bd: #2a1a13; --nt-seg-on-tx: #f3e7da; --nt-ttl: #2b2118; --nt-dtl: #5d5245; --nt-dtl-note: #6b5a4e; --nt-fld-bg: #faf7f1; --nt-fld-bd: #ddd2c4; --nt-fld-blank: #a5988c; --nt-hint: #a5988c; --nt-block-due: #f2cec1; --nt-task-line: #b9c9b4; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
 /* ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
    the dashed butter card that stands in for the Notes grid when nothing is pinned. ── */
 .tdb-nte { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 20px; background: var(--nt-empty-bg); border: 1px dashed var(--nt-empty-bd); border-radius: 13px; padding: 18px 22px; }
@@ -420,6 +420,30 @@
 .tdb-nc-save { margin-left: auto; display: inline-flex; align-items: center; height: 32px; padding: 0 15px; border-radius: 99px; background: var(--nt-ink-bg); border: 1px solid var(--nt-ink-bd); color: var(--nt-ink-tx); font-size: 12px; font-weight: 600; cursor: pointer; }
 .tdb-nc-save:disabled { opacity: 0.45; cursor: not-allowed; }
 .tdb-nc-hint { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--nt-hint); padding: 0 15px 12px; }
+/* ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (frame 3): note (butter) · task (sage) ·
+   promoted task (pink). Sage is the USER-CREATED family; blue is Pro-only and never appears. ── */
+.tdb-ntc { box-sizing: border-box; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 12px; overflow: hidden; box-shadow: 5px 5px 0 var(--nt-ntc-blk); }
+.tdb-ntc.note { --nt-ntc-blk: var(--nt-block-note); }
+.tdb-ntc.task { --nt-ntc-blk: var(--nt-block-task); }
+.tdb-ntc.task.due { --nt-ntc-blk: var(--nt-block-due); }
+.tdb-ntc-b { height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 11px; border-bottom: 1px solid; }
+.tdb-ntc.note .tdb-ntc-b { background: linear-gradient(180deg, #f6eed6, #f1e5c4); border-color: #e0d3a8; }
+.tdb-ntc.task .tdb-ntc-b { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-color: var(--nt-task-line); }
+.tdb-ntc.task.due .tdb-ntc-b { background: linear-gradient(180deg, #f6d8cc, #f2cec1); border-color: #e8c8bc; }
+.tdb-ntc-tag { font-family: var(--f12-mono); font-size: 6px; letter-spacing: 0.13em; font-style: normal; background: #fff; border: 1px solid rgba(58, 28, 20, 0.2); border-radius: 99px; padding: 2px 7px; color: #3a1c14; }
+.tdb-ntc-tag.hot { font-weight: 700; border-width: 1.5px; color: #8a3a28; border-color: #e8c8bc; }
+.tdb-ntc-in { padding: 12px 14px 13px; }
+.tdb-ntc-ttl { margin: 0; font-family: var(--f12-serif); font-size: 14px; font-weight: 700; color: #2b2118; line-height: 1.3; }
+.tdb-ntc.note .tdb-ntc-ttl { font-family: Caveat, cursive; font-size: 20px; font-weight: 600; line-height: 1.15; }
+.tdb-ntc-d { font-family: var(--f12-body); font-size: 10.5px; color: #8a7d6e; margin-top: 5px; line-height: 1.5; }
+.tdb-ntc.note .tdb-ntc-d { font-family: Caveat, cursive; font-size: 14px; color: #7a6a55; }
+.tdb-ntc-ft { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding-top: 9px; border-top: 1px solid #f2ede4; }
+.tdb-ntc-dchip { display: inline-flex; align-items: center; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; background: #e9ede6; border: 1px solid #cfd8ce; border-radius: 99px; padding: 3px 8px; color: #5a6e58; }
+.tdb-ntc-dchip.due { background: #f8e2da; border-color: #e8c8bc; color: #8a3a28; }
+.tdb-ntc-surf { display: inline-flex; align-items: center; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; background: #f4efe7; border: 1px solid #e2d7c3; border-radius: 99px; padding: 3px 8px; color: #8a7a66; }
+.tdb-ntc-pin { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; color: #a89a86; }
+.tdb-ntc-tick { margin-left: auto; width: 19px; height: 19px; flex: 0 0 auto; border-radius: 50%; border: 1.5px solid var(--nt-task-line); background: #fff; cursor: pointer; }
+.tdb-ntc-tick:hover { border-color: #8aa084; background: #f0f4ee; }
 /* hero-pair P4 — the styled blocking-choice dialog (window.confirm's replacement) */
 .tdb-askwrap { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; }
 .tdb-askscrim { position: absolute; inset: 0; background: rgba(30, 26, 22, 0.4); }

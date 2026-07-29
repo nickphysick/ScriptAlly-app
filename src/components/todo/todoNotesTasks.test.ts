@@ -12,6 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { taskDueState, taskSurfaced, SURFACE_LEAD_DAYS } from "../../lib/todoBoard";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
@@ -19,6 +20,7 @@ const css = readFileSync(join(here, "todo.css"), "utf8");
 const types = readFileSync(join(here, "..", "..", "types.ts"), "utf8");
 const db = readFileSync(join(here, "..", "..", "lib", "db.tsx"), "utf8");
 const rules = readFileSync(join(here, "..", "..", "..", "firestore.rules"), "utf8");
+const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
 
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
@@ -176,5 +178,78 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
     expect(save).toContain("detail: composerDetail.trim() || undefined");
     expect(save).toContain("dueDate: isTask ? composerDate : undefined");
     expect(save).toContain("surfaceOffset: isTask ? composerSurface : undefined");
+  });
+});
+
+describe("notes-and-tasks P3 — the two natures on the board", () => {
+  const uc = board.slice(board.indexOf("function userCard"), board.indexOf("function orderDoNext"));
+  const rc = page.slice(page.indexOf("function renderUserCard"), page.indexOf("function renderCard"));
+
+  it("THE PROMOTION IS DERIVED BY THE CLOCK, not a stored flag — taskDueState is pure over (dueDate, today)", () => {
+    // the SAME task promotes as the day arrives — proof the state is a function of `today`, never written
+    expect(taskDueState("2026-08-10", "2026-08-01")).toBe("future");
+    expect(taskDueState("2026-08-10", "2026-08-10")).toBe("today");
+    expect(taskDueState("2026-08-10", "2026-08-12")).toBe("overdue");
+  });
+
+  it("surfacing is derived: a task joins Today's list `lead` days early (on-day/day-before/week-before)", () => {
+    expect(SURFACE_LEAD_DAYS).toEqual({ "on-day": 0, "day-before": 1, "week-before": 7 });
+    // due 2026-08-10 · week-before (7) → surfaces from 2026-08-03
+    expect(taskSurfaced("2026-08-10", "week-before", "2026-08-02")).toBe(false);
+    expect(taskSurfaced("2026-08-10", "week-before", "2026-08-03")).toBe(true);
+    // on-day (default) surfaces only on the day itself
+    expect(taskSurfaced("2026-08-10", "on-day", "2026-08-09")).toBe(false);
+    expect(taskSurfaced("2026-08-10", "on-day", "2026-08-10")).toBe(true);
+    expect(taskSurfaced("2026-08-10", undefined, "2026-08-10")).toBe(true); // default = on-day
+  });
+
+  it("userCard derives the nature from dueDate; a due/overdue task PROMOTES to the Urgent lane", () => {
+    expect(uc).toContain("const isTask = !!t.dueDate;"); // nature is derived from the date, never stored
+    expect(uc).toContain('nature: isTask ? "task" : "note"');
+    expect(uc).toContain('const promoted = dueState === "today" || dueState === "overdue"');
+    expect(uc).toContain('stream: promoted ? "do" : "nt"'); // due/overdue → Urgent, else Notes
+    expect(uc).toContain('initials: isTask ? "✓" : "✎"');
+    expect(uc).toContain("const surfaced = isTask && taskSurfaced(t.dueDate!, t.surfaceOffset, input.today)");
+    // the surfacing joins Today's list without writing committedDate (derived in todaySplit)
+    expect(board).toContain("c.committedDate === today || !!c.surfaced");
+    // the linked-reminder split is superseded — no reminderDue call survives in userCard
+    expect(uc).not.toContain("reminderDue(");
+  });
+
+  it("the note card: butter, ✎ NOTE, a PINNED footer, and NO completion circle", () => {
+    expect(page).toContain("if (c.nature) return renderUserCard(c);"); // renderCard delegates
+    expect(rc).toContain('{isTask ? "✓ YOUR TASK" : "✎ NOTE"}');
+    expect(rc).toContain('<span className="tdb-ntc-pin">{c.due}</span>'); // the PINNED footer (notes)
+    // the tick lives ONLY inside the isTask branch — a note never renders one
+    const noteBranch = rc.slice(rc.indexOf(") : ("), rc.length);
+    expect(noteBranch).not.toContain("tdb-ntc-tick");
+    expect(rule(".tdb-ntc.note")).toContain("--nt-ntc-blk: var(--nt-block-note)"); // butter offset
+  });
+
+  it("the task card: sage family, the completion tick → the existing quickDone + undo", () => {
+    expect(rc).toContain('onClick={() => quickDone(c)}'); // the existing completion primitive
+    expect(rc).toContain('className="tdb-ntc-tick"');
+    expect(rule(".tdb-ntc.task")).toContain("--nt-ntc-blk: var(--nt-block-task)"); // sage offset
+    expect(rule(".tdb-wrap")).toContain("--nt-block-task: #d5dbd3"); // sage
+  });
+
+  it("due-day promotion is PINK with a DUE TODAY tag; overdue keeps the state with the overdue chip", () => {
+    expect(rc).toContain('className={`tdb-ntc ${c.nature}${promoted ? " due" : ""}`}');
+    expect(rc).toContain('{c.dueState === "overdue" ? "OVERDUE" : "DUE TODAY"}');
+    expect(rc).toContain('className={`tdb-ntc-dchip${promoted ? " due" : ""}`}');
+    expect(rule(".tdb-ntc.task.due")).toContain("--nt-ntc-blk: var(--nt-block-due)"); // pink offset
+    expect(rule(".tdb-wrap")).toContain("--nt-block-due: #f2cec1"); // pink
+    // the overdue form is derived in the chip label
+    expect(board).toContain('state === "overdue" ? `OVERDUE · ${d}` : d');
+  });
+
+  it("SAGE is the user-created family — no blue anywhere on a note or task card", () => {
+    // the whole notes-and-tasks card + composer surface never uses the Pro blue
+    for (const blue of ["#c2cfda", "#6A89A7", "#587991", "#5f7d99"]) {
+      expect(rule(".tdb-ntc").includes(blue)).toBe(false);
+    }
+    // and no blue token is referenced by any .tdb-ntc rule
+    const ntcRules = css.split("\n").filter((l) => l.includes(".tdb-ntc"));
+    for (const line of ntcRules) expect(line).not.toMatch(/#c2cfda|#6A89A7|#587991/i);
   });
 });

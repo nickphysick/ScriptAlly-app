@@ -1686,8 +1686,43 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
+  // ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (design-refs/notes-and-tasks.html · frame
+  // 3): a NOTE is butter with an ✎ NOTE band, Caveat, a PINNED footer and NO completion circle; a
+  // TASK is sage (the user-created family) with a ✓ YOUR TASK band, typeset, a date chip and a
+  // completion tick (the existing quickDone + undo toast). A task PROMOTES on its due day — pink
+  // offset + band, a DUE TODAY tag — while its lane (Urgent) and Today's-list membership are
+  // derived upstream. Blue is reserved for Pro and NEVER appears here. ──
+  function renderUserCard(c: BoardCard) {
+    const isTask = c.nature === "task";
+    const promoted = c.dueState === "today" || c.dueState === "overdue";
+    const surfLead = c.surfaceOffset && c.surfaceOffset !== "on-day" ? c.surfaceOffset : null;
+    return (
+      <div key={c.key} data-tdbkey={c.key} className={`tdb-ntc ${c.nature}${promoted ? " due" : ""}`}>
+        <div className="tdb-ntc-b">
+          <i className="tdb-ntc-tag">{isTask ? "✓ YOUR TASK" : "✎ NOTE"}</i>
+          {promoted && <i className="tdb-ntc-tag hot">{c.dueState === "overdue" ? "OVERDUE" : "DUE TODAY"}</i>}
+        </div>
+        <div className="tdb-ntc-in">
+          <h4 className="tdb-ntc-ttl">{c.title}</h4>
+          {c.detail && <div className="tdb-ntc-d">{c.detail}</div>}
+          <div className="tdb-ntc-ft">
+            {isTask ? (
+              <>
+                <span className={`tdb-ntc-dchip${promoted ? " due" : ""}`}>{c.due}</span>
+                {surfLead && <span className="tdb-ntc-surf">{surfLead === "week-before" ? "SHOWS A WEEK EARLY" : "SHOWS A DAY EARLY"}</span>}
+                <button type="button" className="tdb-ntc-tick" onClick={() => quickDone(c)} aria-label={`Mark “${c.title}” done`} />
+              </>
+            ) : (
+              <span className="tdb-ntc-pin">{c.due}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
   // ── full-detail lane card (the contract): band tag (+ ✓ TODAY chip) over title + manuscript. ──
   function renderCard(c: BoardCard, gin = false) {
+    if (c.nature) return renderUserCard(c); // notes-and-tasks: user notes/tasks wear their own grammar
     const committed = onList(c);
     const ov = overlays[c.key];
     const isOffer = c.taskType === "offer_received";

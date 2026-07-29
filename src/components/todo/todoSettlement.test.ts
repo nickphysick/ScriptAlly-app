@@ -32,9 +32,11 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
     expect(w).toContain("--container-head-rule: #b9c9b4");
     expect(w).toContain("--container-head-ink: #3d4a3b");
     expect(w).toContain("--container-head-mono: #5a6e58");
-    // ONE sage source: no near-duplicate of the head fill or rule anywhere else in the sheet
+    // ONE sage source for the HEADER: the head fill is not re-hardcoded anywhere else in the sheet.
     expect(css.match(/#d7ddd5/g)!.length).toBe(1);
-    expect(css.match(/#b9c9b4/g)!.length).toBe(1);
+    // the head RULE hex #b9c9b4 is now also the notes-and-tasks task-family line (--nt-task-line) —
+    // a distinct, deliberately-tokened second source; each is sourced once, never scattered in rules.
+    expect(css.match(/#b9c9b4/g)!.length).toBe(2);
   });
   it("ALL THREE headers read the same fill, the same rule and the same height token", () => {
     for (const sel of HEADS) {
