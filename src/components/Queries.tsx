@@ -394,7 +394,8 @@ export const Queries: React.FC<{
       const agent = agents.find((a) => a.id === createDraft.agentId) ?? null;
       const res = await addQuery(draftToPayload(createDraft, agent) as any);
       if (!res.success || !res.id) {
-        // addQuery owns the free-tier gate ("you've reached 10 queries") — surface it in the bar.
+        // Whatever addQuery reports (a permission or network failure) surfaces in the footer bar.
+        // There is NO query-count limit on the free tier — that gate was never a product rule.
         setCreateError(res.error || "Couldn't save that query — please try again.");
         return;
       }

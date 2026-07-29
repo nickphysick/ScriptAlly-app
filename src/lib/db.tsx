@@ -1576,13 +1576,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
 
-    if (!bypassLimits && currentUser.plan === UserPlan.FREE && queries.length >= 10) {
-      return {
-        success: false,
-        error: "Free tier limit is 10 queries. Upgrade to Pro for unlimited query dispatches and pipeline tracking!"
-      };
-    }
-
     const agent = agents.find(a => a.id === q.agentId);
     let dead: string | undefined = undefined;
     if (agent) {
