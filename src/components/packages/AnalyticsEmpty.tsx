@@ -63,7 +63,7 @@ export const AnalyticsEmpty: React.FC<AnalyticsEmptyProps> = ({ onNewPackage, on
         <div className="ep">
           Analytics fills in the moment a package goes out with a query. You&rsquo;ll see{" "}
           <b>reply rates per package</b>, which materials the replying agents received, how long each agency takes —
-          and a nudge when someone&rsquo;s overdue.
+          and a flag on anyone who&rsquo;s overdue, with a link through to the Queries Hub to nudge them.
         </div>
         <div className="acts">
           <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={onNewPackage}>＋ Build your first package</button>
