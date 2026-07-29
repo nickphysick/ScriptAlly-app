@@ -480,8 +480,9 @@
   border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none;
 }
 .pkgw-pctpill.top { background: var(--pkg-gold-tint); color: var(--pkg-gold-ink); border-color: #e4d5b2; }
-/* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded. */
-.pkgw-unlock { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
+/* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded.
+   Named `commsoon`, not `unlock` — this surface has nothing to buy. */
+.pkgw-commsoon { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
 
 /* ══ Pro header format ═════════════════════════════════════════════════════
    Ref scriptally-packages-empty.html .phtop/.prorule/.strip, and the pattern Discover
@@ -654,14 +655,6 @@
 .pkgw-pvrow .tr3 i.n { background: #f6f0e9; }
 .pkgw-pvrow .pv2 { width: 40px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #c4b7a8; }
 
-/* Foreshadows the comparison WITHOUT claiming any data exists — so it renders whatever the
-   community flag says; the percentile claims themselves never do. */
-.pkgw-commteaser {
-  display: flex; align-items: center; gap: 11px; margin-top: 20px;
-  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3); border-radius: 11px;
-  padding: 12px 16px; font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5;
-}
-.pkgw-commteaser svg { width: 17px; height: 17px; color: var(--slate); flex: none; }
 
 /* ══ Composition bars ══════════════════════════════════════════════════════
    Ref design-refs/scriptally-packages-twotab.html (.bar/.bar2/.complegend), chosen over the four

@@ -71,8 +71,9 @@ const CommunityTrack: React.FC<{ value: number | null; sends: number; subject: s
   const p = displayablePercentile("package-reply-rate", value, sends);
   if (!p) {
     // Flag-off fallback: one quiet line, so the panel reads as finished rather than missing a part.
+    // Deliberately not "unlock" — nothing here is bought, and this route has no Pro gate to open.
     return COMMUNITY_STATS_ENABLED ? null : (
-      <div className="pkgw-unlock">Comparisons with other ScriptAlly writers unlock as the community grows.</div>
+      <div className="pkgw-commsoon">Comparisons with other ScriptAlly writers arrive as the community grows.</div>
     );
   }
   return (
