@@ -67,8 +67,13 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  // Anchor the calendar popover with position:fixed so FormShell's scroll region can't clip it.
-  const { triggerRef, menuStyle } = useFixedMenu<HTMLDivElement>(open);
+  const popRef = useRef<HTMLDivElement>(null);
+  /* Anchor the calendar popover with position:fixed so FormShell's scroll region can't clip it —
+     and place it AUTOmatically: the calendar is ~380px tall with the chips and footer, so a
+     trigger low in the window (the nudge reminder's "Pick a date", which sits under three chips
+     near the pane foot) had its month grid cut off by the viewport. `menuRef` lets the hook
+     measure the real height rather than guess at it. */
+  const { triggerRef, menuStyle } = useFixedMenu<HTMLDivElement>(open, { placement: "auto", menuRef: popRef });
 
   const selected = useMemo(() => fromISO(value), [value]);
   const today = useMemo(() => new Date(), []);
@@ -202,7 +207,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
         </svg>
       </div>
 
-      <div className="sa-dp-pop" role="dialog" style={{ ...menuStyle, minWidth: undefined }}>
+      <div ref={popRef} className="sa-dp-pop" role="dialog" style={{ ...menuStyle, minWidth: undefined }}>
         <div className="sa-dp-head">
           <div className="sa-dp-month">{MONTHS[view.getMonth()]} {view.getFullYear()}</div>
           <div className="sa-dp-nav">
