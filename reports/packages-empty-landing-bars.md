@@ -57,7 +57,7 @@ If a future change makes these agree, it will silently either (a) start calling 
 
 ### 2. `--sage-deep` / `#5a6e58` usage
 
-**On the packages surface** (this build retires it here — Phase 2, held): one definition,
+**On the packages surface** (Phase 2 retired it — the full list is further down): one definition,
 `--pkg-sage: var(--sage-d)` at `packageWorkshop.css:34`, consumed at ~12 sites — note left-rules, the
 hot usage line, the req chip, `hero3 .big`, `srow b.g`, `kpi .v.g`, `kpi .d b`, leaderboard bars,
 material bars + `rr`, percentile pills, the ev chip, and the recommendation card border. Plus
@@ -111,7 +111,7 @@ Clean at start (HEAD `a170283`). The Discover stream had committed everything fo
 
 ---
 
-## Ref audit — and which phases are held
+## Ref audit
 
 | Ref | State | Consequence |
 |---|---|---|
@@ -127,16 +127,13 @@ Both duplicates are byte-identical and both pass every gate (`complegend` 4 · `
 `#5a6e58` 0 · hatch 4); `(2)` is what is committed. **Deleting the stale plain-named file would stop
 the gate failing on a filename artefact next time.**
 
-The `~/Downloads` copy of `scriptally-packages-twotab.html` is **byte-identical to the copy already
-committed** (body hashes match), and it is the pre-sweep version: **3 single-fill
-`background:var(--sage-deep)` bars and zero hatch/composition markup**. Per the ruling that a stale
-ref must not be built from, Phase 2 — the composition bars and dark-sage retirement across the
-already-shipped Analytics tab — is held until the updated ref lands. The committed copy was left
-exactly as it was rather than overwritten with a stale file.
+*(History: on the first pass the only copy available was the pre-sweep version — 3 single-fill sage
+bars, zero hatch — so Phase 2 was held rather than built from it, and the committed ref was left
+untouched rather than overwritten with a stale file.)*
 
-The two current refs are already in the final language (zero `sage-deep` between them, hatch present),
-which is why Phases 3–5 could proceed and why the composition form in Phase 5's preview comes from a
-**current ref** rather than from this prompt's prose.
+All four refs are now current and committed. Phases 3–5 were built from the empty-states ref while
+Phase 2 waited, so the composition form in Phase 5's preview came from a **current ref** throughout —
+never inferred from prose.
 
 **Resolved.** The populated and empty views now teach the same form — both a bordered three-segment
 track with a 45° hatch (the empty one greyed and slightly taller, per its own ref). Measured:
