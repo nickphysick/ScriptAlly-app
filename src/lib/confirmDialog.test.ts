@@ -45,7 +45,7 @@ describe("the dialog wears the house treatment", () => {
     const danger = block(css, ".sa-confirm--danger .sa-confirm-ok");
     expect(danger, "the danger rule is missing").not.toBe("");
     expect(danger).toContain("background: transparent");
-    expect(danger).toContain("color: #9a3b2a");
+    expect(danger, "the destructive tone should read the shared token").toContain("var(--terra");
   });
 
   it("in a destructive dialog the SAFE action is the soft-pink primary", () => {
@@ -96,5 +96,41 @@ describe("the call sites", () => {
   it("ConfirmDestroy is deliberately NOT migrated — it guards with type-to-confirm", () => {
     const destroy = read("../components/ConfirmDestroy.tsx");
     expect(destroy, "the hard-delete guard lost its type-the-name gate").toContain("canDestroy");
+  });
+});
+
+/**
+ * A FOURTH confirm turned up after the P1 sweep: the query delete was a bespoke inline-styled
+ * modal in Queries.tsx — white card, filled red button, browser focus ring. It was in the
+ * aria-modal file list during that recon and I didn't follow it up. It now goes through the
+ * shared dialog like the others.
+ */
+describe("the query delete uses the shared dialog too", () => {
+  const src = read("../components/Queries.tsx");
+
+  it("no bespoke modal survives — state, markup and the filled red button are gone", () => {
+    expect(src, "the bespoke modal's state is back").not.toContain("isDeleteConfirmOpen");
+    expect(src, "the filled red slab is back").not.toContain('background: "#9a3b2a"');
+    expect(src).toContain('title: "Delete this query?"');
+    expect(src).toContain("danger: true");
+  });
+
+  it("the counted body survives verbatim — the count IS the safety", () => {
+    expect(src).toContain("This permanently deletes your query to");
+    expect(src).toMatch(/tracking event\{evCount > 1 \? "s" : ""\}/);
+    expect(src).toContain("This can’t be undone.");
+  });
+
+  it("the delete is bound to the query the dialog NAMED, not to whatever is selected later", () => {
+    // The shared dialog isn't force-closed on selection change (the bespoke one was), so reading
+    // activeQuery at confirm time could delete a different query.
+    expect(src).toContain("onConfirm: () => handleDeleteQuery(id)");
+    expect(src).toContain("const handleDeleteQuery = (id: string) => {");
+  });
+
+  it("the destructive tone is ONE token, so the button and the warning can't drift", () => {
+    expect(read("../index.css")).toContain("--terra: #9a3b2a");
+    expect(css).toContain("color: var(--terra");
+    expect(src).toContain('color: "var(--terra)"');
   });
 });

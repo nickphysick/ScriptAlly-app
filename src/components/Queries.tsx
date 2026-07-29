@@ -476,7 +476,6 @@ export const Queries: React.FC<{
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
   const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
@@ -524,16 +523,46 @@ export const Queries: React.FC<{
   };
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
+  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
   // global-feed twins; models deleteAgent). No undo — a cascade restore isn't offered; the counted
   // confirm below is the safety. Clear the selection so the pane doesn't dangle on a deleted id.
-  const handleDeleteQuery = () => {
-    if (!activeQuery) return;
-    const id = activeQuery.id;
-    setIsDeleteConfirmOpen(false);
+  const handleDeleteQuery = (id: string) => {
     setSelectedQueryId(null);
     void deleteQuery(id);
+  };
+
+  /* The counted confirm, now through the SHARED dialog (ToastProvider) rather than a bespoke
+     modal — so it wears the house treatment: terracotta outline on the destructive action, the
+     safe action as the soft-pink primary on the right, and the app's focus ring. The counted body
+     is unchanged: what it says is the safety, and this was only ever a styling problem. */
+  const askDeleteQuery = () => {
+    if (!activeQuery || !activeAgent) return;
+    // Bound HERE, not read at confirm time: the shared dialog (unlike the bespoke modal it
+    // replaces) isn't force-closed when the selection changes, so reading activeQuery on confirm
+    // could delete a query the dialog never named.
+    const id = activeQuery.id;
+    const agentName = agentPrimary(activeAgent) || "this agent";
+    const evCount = activities.filter(a => a.queryId === activeQuery.id).length;
+    const responded = activeQuery.hasAgentResponded === true;
+    showConfirm({
+      title: "Delete this query?",
+      danger: true,
+      confirmLabel: "Delete query",
+      cancelLabel: "Keep it",
+      body: (
+        <p style={{ margin: 0 }}>
+          This permanently deletes your query to <b style={{ color: "var(--ink)" }}>{agentName}</b>
+          {activeMs?.title ? <> for <b style={{ color: "var(--ink)" }}>{activeMs.title}</b></> : null}
+          {evCount > 0
+            ? <>, along with its <b style={{ color: "var(--ink)" }}>{evCount} tracking event{evCount > 1 ? "s" : ""}</b></>
+            : <>, along with its tracking history</>}.
+          {responded ? <> Your <b style={{ color: "var(--ink)" }}>response stats</b> will change.</> : null}{" "}
+          <b style={{ color: "var(--terra)" }}>This can’t be undone.</b>
+        </p>
+      ),
+      onConfirm: () => handleDeleteQuery(id),
+    });
   };
 
   // Toast state for Undo
@@ -2808,7 +2837,7 @@ export const Queries: React.FC<{
                     ]}
                   />
                 </div>
-                <button type="button" className="f12-act f12-del" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query">
+                <button type="button" className="f12-act f12-del" disabled={!sel} onClick={askDeleteQuery} title="Delete this query">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
                   Delete
                 </button>
@@ -2881,26 +2910,6 @@ export const Queries: React.FC<{
         {/* Delete confirmation — destructive, no undo. v3 promoted Delete to the bar (the ⋯ More menu
             was removed). The final deletion is a flagged STUB (no deleteQuery handler yet — see the
             handleDeleteQuery note above); the confirm flow itself is real. */}
-        {isDeleteConfirmOpen && activeQuery && activeAgent && (() => {
-          const agentName = agentPrimary(activeAgent) || "this agent";
-          // 5e — counted confirm: the tracking events this delete erases + the stat consequence.
-          const evCount = activities.filter(a => a.queryId === activeQuery.id).length;
-          const responded = activeQuery.hasAgentResponded === true;
-          return (
-            <div role="dialog" aria-modal="true" aria-label="Delete query" onClick={() => setIsDeleteConfirmOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(29,23,18,.42)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 16, boxShadow: "0 24px 60px rgba(29,23,18,.28)", padding: "22px 24px" }}>
-                <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 700, color: "#1a1512", marginBottom: 9 }}>Delete this query?</div>
-                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, lineHeight: 1.5, color: "#5a5048" }}>
-                  This permanently deletes your query to <b style={{ color: "#1a1512" }}>{agentName}</b>{activeMs?.title ? <> for <b style={{ color: "#1a1512" }}>{activeMs.title}</b></> : null}{evCount > 0 ? <>, along with its <b style={{ color: "#1a1512" }}>{evCount} tracking event{evCount > 1 ? "s" : ""}</b></> : <>, along with its tracking history</>}.{responded ? <> Your <b style={{ color: "#1a1512" }}>response stats</b> will change.</> : null} <b style={{ color: "#9a3b2a" }}>This can’t be undone.</b>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 20 }}>
-                  <button type="button" onClick={() => setIsDeleteConfirmOpen(false)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: "#5a5048", background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Cancel</button>
-                  <button type="button" onClick={handleDeleteQuery} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: "#fff", background: "#9a3b2a", border: "1px solid #9a3b2a", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Delete query</button>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
         {/* ── Split — list pane beside the reading pane, in the SAME centred column as the
             Contact List page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;

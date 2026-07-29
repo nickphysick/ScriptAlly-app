@@ -610,6 +610,7 @@
      create actions (ref design-refs/qdb-focus-spotlight.html). SUPERSEDES the previous approach,
      which dimmed each surface and darkened the ground; one scrim is both simpler and deeper. */
   --qh-scrim: rgba(42, 31, 21, 0.42);
+  --terra: #9a3b2a;   /* destructive tone — the confirm dialog's outline action AND its warning text */
   /* primary-button pink (chrome revision; v14/v3 omitted these — an undefined var() renders
      as NOTHING, which silently made the mockups' primary button transparent) */
   --pink-btn: #f6cfc9; --pink-btn-h: #f0bfb8;

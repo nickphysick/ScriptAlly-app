@@ -69,7 +69,7 @@
    without being the filled slab that invites the very click it should discourage. */
 .sa-confirm--danger .sa-confirm-cancel { background: var(--pink-t, #f7e3dd); border-color: var(--pink-b, #eecdc3); color: var(--pink-i, #8a4030); }
 .sa-confirm--danger .sa-confirm-cancel:hover { background: var(--pink-b, #eecdc3); }
-.sa-confirm--danger .sa-confirm-ok { background: transparent; border-color: #e0bdb2; color: #9a3b2a; }
+.sa-confirm--danger .sa-confirm-ok { background: transparent; border-color: #e0bdb2; color: var(--terra, #9a3b2a); }
 .sa-confirm--danger .sa-confirm-ok:hover { background: #fbeee9; }
 
 @keyframes sa-confirm-fade { from { opacity: 0; } to { opacity: 1; } }
