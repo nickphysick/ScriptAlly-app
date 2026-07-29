@@ -7,8 +7,8 @@
  * localStorage["scriptally_active_manuscript_id"]. This host provides the qhbar chrome (ChromeSlab:
  * crumb + title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
  * and mounts the two-tab surface for everything else. At ZERO packages the WORKSHOP'S OWN first-run
- * empty state renders — for every user on every plan. (A Pro showcase landing used to sit in front of
- * it; it was retired because this route has no Pro gate, so it was selling the feature to people who
+ * empty state renders — for every user on every plan. (A Pro-selling landing used to sit in front of
+ * it; it was retired because this route has no Pro gate, so it was pitching the feature to people who
  * already had it. If a real gate ever lands, a persuasion surface belongs at /plans or on the public
  * site, not on an authenticated route.)
  *
