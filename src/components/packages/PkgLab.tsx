@@ -25,7 +25,7 @@ import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WO
 import { FONT_MONO, FONT_SERIF } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold" | "t-edn";
-type View = "showcase" | "empty" | "full";
+type View = "showcase" | "empty" | "partial" | "full";
 
 const V = (id: string, componentType: ComponentType, versionName: string, fileName: string, contentDraft?: string): ManuscriptVersion => ({
   id, manuscriptId: "m", userId: "lab", componentType, versionName, fileAttached: true, fileName, createdDate: "2026-01-01T00:00:00.000Z", contentDraft,
@@ -102,6 +102,8 @@ export const PkgLab: React.FC = () => {
 
   // The empty view starts materials-clear so the FR4 middle + analytics empty states show.
   const emptyVersions: ManuscriptVersion[] = [];
+  // One type only — exercises both "materials but no packages" and "only one or two types".
+  const lettersOnly = versions.filter((v) => v.componentType === ComponentType.QUERY_LETTER);
   const emptyPackages: SubmissionPackage[] = [];
 
   // The real header the host mounts — the shared PageHeader (full), then the tab strip beneath it.
@@ -139,9 +141,9 @@ export const PkgLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: "1px solid var(--bd)", flexWrap: "wrap", flexShrink: 0 }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["showcase", "empty", "full"] as View[]).map((v) => (
+          {(["showcase", "empty", "partial", "full"] as View[]).map((v) => (
             <button key={v} type="button" onClick={() => { setView(v); setTour(false); setPulseAdd(false); }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
-              {v === "showcase" ? "Showcase" : v === "empty" ? "Empty workshop" : "Full workshop"}
+              {v === "showcase" ? "Showcase" : v === "empty" ? "No materials" : v === "partial" ? "Materials, no pkgs" : "Full workshop"}
             </button>
           ))}
           <button type="button" onClick={startTour} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--burg)", background: tour ? "var(--band)" : "#fffefb", color: "var(--burg)" }}>▶ Run tour</button>
@@ -167,9 +169,9 @@ export const PkgLab: React.FC = () => {
         {tab === "analytics" ? (
           <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
             <AnalyticsTab
-              versions={view === "empty" ? emptyVersions : versions}
-              packages={view === "empty" ? emptyPackages : pkgs}
-              queries={view === "empty" ? [] : MOCK_QUERIES}
+              versions={view === "full" ? versions : view === "partial" ? lettersOnly : emptyVersions}
+              packages={view === "full" ? pkgs : emptyPackages}
+              queries={view === "full" ? MOCK_QUERIES : []}
               agents={MOCK_AGENTS}
               activePackageId="p2"
               scope={scope}
@@ -181,9 +183,9 @@ export const PkgLab: React.FC = () => {
               onTryExample={startTour}
             />
           </div>
-        ) : view === "empty" ? (
+        ) : view === "empty" || view === "partial" ? (
           <div className="pkgw-tv" role="tabpanel" aria-label="Workshop"><WorkshopTab
-            versions={emptyVersions}
+            versions={view === "partial" ? lettersOnly : emptyVersions}
             packages={emptyPackages}
             queries={[]}
             activePackageId={null}

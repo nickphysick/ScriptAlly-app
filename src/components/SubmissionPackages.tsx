@@ -6,10 +6,11 @@
  * Renders inside the global AppShell stage (no nav of its own), scoped to the active manuscript via
  * localStorage["scriptally_active_manuscript_id"]. This host provides the qhbar chrome (ChromeSlab:
  * crumb + title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
- * and mounts <PackageWorkshop> for everything else. At ZERO packages it renders the PackageShowcase
- * Pro-selling landing instead — full-bleed, with its own bare Queries-Hub-idiom header (the
- * ChromeSlab card deliberately does not render on that branch); "Unlock with Pro" → /plans, "Try it
- * with example data →" enters the workshop + starts the tour.
+ * and mounts the two-tab surface for everything else. At ZERO packages the WORKSHOP'S OWN first-run
+ * empty state renders — for every user on every plan. (A Pro showcase landing used to sit in front of
+ * it; it was retired because this route has no Pro gate, so it was selling the feature to people who
+ * already had it. If a real gate ever lands, a persuasion surface belongs at /plans or on the public
+ * site, not on an authenticated route.)
  *
  * The old multi-view builder (FirstVisitHome / PackagesHome / Composer / MaterialsManager /
  * MaterialsRail / JourneyStrip / PackageStats view / WorkedExample / the MaterialModal popup) was
@@ -25,7 +26,6 @@ import { PackageSaveFields } from "./packages/PackageWorkshop";
 import { WorkshopTab } from "./packages/WorkshopTab";
 import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
 import { PackageTabs, PackageTab } from "./packages/PackageTabs";
-import { PackageShowcase } from "./packages/PackageShowcase";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
@@ -42,10 +42,6 @@ export const SubmissionPackages: React.FC = () => {
   );
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const msMenuRef = useRef<HTMLDivElement>(null);
-  // At zero packages the route shows the PackageShowcase landing; "entered" flips it to the (empty)
-  // workshop once the user takes the example-data tour link. Reset on manuscript switch so a fresh
-  // book shows its own landing. Irrelevant once a manuscript has ≥1 package (the workshop renders).
-  const [entered, setEntered] = useState(false);
   // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
   // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
   const [tourActive, setTourActive] = useState(false);
@@ -96,7 +92,6 @@ export const SubmissionPackages: React.FC = () => {
     setActiveMsId(id);
     localStorage.setItem("scriptally_active_manuscript_id", id);
     setMsMenuOpen(false);
-    setEntered(false);
   };
   const multiMs = manuscripts.length > 1;
 
@@ -122,11 +117,9 @@ export const SubmissionPackages: React.FC = () => {
     // The tour ends on the empty workshop — nudge the writer to their first real action.
     if (msVersions.length === 0) setPulseAdd(true);
   };
-  // The showcase's "Try it with example data →" enters the workshop + starts the tour (the sole
-  // workshop entry from the landing — the old Build-CTA auto-offer retired with the FR1 landing).
-  // The workshop "?" re-runs the tour any time. hasSeenTour still stamps on end.
+  // The ONE way into the guided tour: the example-data band on the workshop's empty state and the
+  // matching action on the analytics empty state both call this. hasSeenTour still stamps on end.
   const startTour = () => setTourActive(true);
-  const enterViaTour = () => { setEntered(true); setTourActive(true); };
 
   // While the tour runs the workshop shows the PURE example fixture (never persisted); otherwise the
   // real manuscript-scoped data. The example writes are no-ops (host handlers ignore them).
@@ -177,20 +170,6 @@ export const SubmissionPackages: React.FC = () => {
       )}
     </div>
   ) : null;
-
-  // Zero packages → the Pro showcase landing, full-bleed (it paints its own Cappuccino ground and
-  // carries its own Queries-Hub-idiom header — the ChromeSlab card deliberately does NOT render on
-  // this branch; the workshop keeps it). "Unlock with Pro" → /plans (the in-app upgrade route).
-  if (activeMs && msPackages.length === 0 && !entered) {
-    return (
-      <PackageShowcase
-        manuscriptTitle={activeMs.title}
-        msSelector={multiMs ? msSelector : undefined}
-        onUnlockPro={() => navigate("/plans")}
-        onTryExample={enterViaTour}
-      />
-    );
-  }
 
   return (
     <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflowY: "auto" }}>
