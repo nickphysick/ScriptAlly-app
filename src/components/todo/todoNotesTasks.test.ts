@@ -253,3 +253,26 @@ describe("notes-and-tasks P3 — the two natures on the board", () => {
     for (const line of ntcRules) expect(line).not.toMatch(/#c2cfda|#6A89A7|#587991/i);
   });
 });
+
+describe("notes-and-tasks P4 — the record + the tour", () => {
+  const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+  const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+
+  it("themes.md records the two natures, the sage=user-created / blue=Pro law, the promotion + composer specs", () => {
+    expect(themes).toContain("## Notes and tasks — the two natures");
+    expect(themes).toContain("SAGE IS THE USER-CREATED FAMILY; BLUE IS PRO");
+    expect(themes).toContain("Blue never appears on a note or task card");
+    expect(themes).toContain("THE PROMOTION RULE (derived at render, by the clock)");
+    expect(themes).toContain("in-app surfacing lead");
+    expect(themes).toMatch(/never a notification: no\s*\n?\s*push, no email/);
+    expect(themes).toContain("THE COMPOSER'S TRANSFORMATION");
+  });
+
+  it("the tour teaches the two natures at the hero's 'Add task or note'", () => {
+    expect(tour).toContain('sel: ".svh-btn-primary"');
+    expect(tour).toContain("nothing chases you"); // the note nature
+    // the target exists — PageHeader's primary action button carries that class
+    const ph = readFileSync(join(here, "..", "shell", "PageHeader.tsx"), "utf8");
+    expect(ph).toContain("svh-btn-primary");
+  });
+});

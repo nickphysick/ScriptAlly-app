@@ -1104,3 +1104,37 @@ assistant" button pinned to the band's end, opening the existing preview modal. 
 
 **ONE PRO SURFACE.** Exactly one exists on this page, and every predecessor is extinct: the
 content-panel colophon, the panel-foot blue sticker, and the card-surfaced foot strip. Locked.
+
+## Notes and tasks — the two natures (To-do; ref `design-refs/notes-and-tasks.html`, notes-and-tasks pack)
+A user-created To-do item (`UserTask`) has **two natures, DERIVED from `dueDate`** — never a
+stored status flag:
+- **A NOTE** (no `dueDate`) — pinned, dateless, **nothing chases you**. Butter card (`--nt-block-note`
+  `#eedfae` offset), an **✎ NOTE** band, **Caveat** handwriting for title + detail, a mono **PINNED
+  {date}** footer, and **NO completion circle** — a note is edited or deleted, never ticked. Lives
+  only in the Notes lane.
+- **A TASK** (has `dueDate`) — dated, joins the work. **Sage** card (`--nt-block-task` `#d5dbd3` offset,
+  `--nt-task-line` `#b9c9b4` band/tick line), a **✓ YOUR TASK** band, typeset title (Playfair) +
+  detail (Inter), a mono **date chip**, and a **completion tick** (the existing `quickDone` + undo
+  toast).
+
+**THE PROMOTION RULE (derived at render, by the clock).** On its **due day** a task inherits the
+**urgent pink** (`--nt-block-due` `#f2cec1`) offset + band, gains a **DUE TODAY** tag (**OVERDUE**
+once the day passes, with the date chip in its overdue form), sorts into the **Urgent** lane, and
+**joins Today's list**. `surfaceOffset` — an **in-app surfacing lead**, one of `on-day` / `day-before`
+/ `week-before` — joins the task to Today's list **that many days early** (never a notification: no
+push, no email; `taskDueState` / `taskSurfaced` / `SURFACE_LEAD_DAYS` are pure, and `todaySplit`
+reads a derived `surfaced` flag, writing nothing).
+
+**SAGE IS THE USER-CREATED FAMILY; BLUE IS PRO.** The task family is sage (+ pink when due).
+**Blue never appears on a note or task card** — the pastille blue is reserved for the one Pro
+surface (the assistant band). Do not colour a user card blue.
+
+**THE COMPOSER'S TRANSFORMATION (frame 2).** One composer, two natures. The type segment
+(**✎ Note** / **✓ Task**) leads; switching TRANSFORMS it live — title + detail swap **Caveat ↔
+typeset**, the offset block swaps **butter ↔ sage** (`--nt-comp-block` by mode), the **date + "Show
+it in Today's list"** fields appear only for a task (the surfacing selector only once a date is set),
+the note shows the **NO DATE · NOTHING WILL CHASE YOU** line, and the save verb changes (**Pin the
+note** / **Add the task**). Content survives every switch. Two entry points: the Notes section opens
+**note** mode, the hero "Add task or note" opens **task** mode. Title always required; a task also
+requires a date. ⌘⏎ saves; Esc runs the styled `useConfirmAsk` discard (only when dirty) — **no
+native `prompt`/`alert`/`confirm`**.
