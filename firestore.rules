@@ -372,7 +372,11 @@ service cloud.firestore {
         // notes-and-tasks: the optional detail line beneath the title.
         && (!data.keys().hasAny(['detail']) || (data.detail is string && data.detail.size() <= 16384))
         && data.done is bool
-        && (data.completedAt == null || (data.completedAt is string && data.completedAt.size() <= 64))
+        // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
+        // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
+        // for a missing map field), which silently DENIED every create (the composer never writes
+        // completedAt on create). Proven with the Rules :test API; see reports/todo-save-and-today.md.
+        && (!data.keys().hasAny(['completedAt']) || (data.completedAt is string && data.completedAt.size() <= 64))
         && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
         && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
         && (!data.keys().hasAny(['manuscriptId']) || (data.manuscriptId is string && data.manuscriptId.size() <= 128))
