@@ -155,55 +155,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
       {/* ── The three columns, in the reading pane's own chrome ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
-        {/* 1 · THE SEND */}
+        {/* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
+            to "What you sent", where it sits with the materials it went out with. */}
         <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
           <div className="f12-chh">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
-            <span>The send</span>
+            {/* a clock, not the old pulse line — the column is about WHEN now (ref §2) */}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+            <span>When you sent it</span>
           </div>
           <div style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
-            <div style={{ marginBottom: 15 }}>
-              <div style={LABEL}>Manuscript</div>
-              {onlyManuscript ? (
-                <div style={{ ...FIELD, background: "var(--paper)", color: "var(--ink-2)" }} aria-label={`Manuscript: ${onlyManuscript.title}`}>
-                  <span className="qc-bk" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
-                  </span>
-                  <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{onlyManuscript.title}</span>
-                  <span style={{ marginLeft: "auto", flex: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)" }}>Only manuscript</span>
-                </div>
-              ) : (
-                <span className="f12-popwrap" style={{ display: "block" }}>
-                  <button
-                    ref={msTrigRef}
-                    type="button"
-                    aria-haspopup="menu"
-                    aria-expanded={msMenuOpen}
-                    aria-label={`Manuscript: ${chosenManuscript?.title ?? "none chosen"}`}
-                    onClick={() => setMsMenuOpen((o) => !o)}
-                    style={{ ...FIELD, cursor: "pointer", textAlign: "left" }}
-                  >
-                    <span className="qc-bk" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
-                    </span>
-                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chosenManuscript?.title ?? manuscripts[0]?.title ?? ""}</span>
-                    <span aria-hidden="true" style={{ marginLeft: "auto", flex: "none", fontSize: 10, color: "var(--faint)" }}>▾</span>
-                  </button>
-                  <F12Menu
-                    open={msMenuOpen}
-                    onClose={() => setMsMenuOpen(false)}
-                    style={msMenuStyle}
-                    ariaLabel="Choose a manuscript"
-                    items={manuscripts.map((m) => ({
-                      label: m.title,
-                      icon: m.id === draft.manuscriptId ? <span aria-hidden="true">✓</span> : undefined,
-                      onClick: () => { set({ manuscriptId: m.id }); setMsMenuOpen(false); },
-                    }))}
-                  />
-                </span>
-              )}
-            </div>
-
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
                 at ordinary laptop heights, so the one field that needs a decision was the one you
                 had to scroll to find. */}
@@ -290,6 +250,49 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <span>What you sent</span>
           </div>
           <div style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+            <div style={{ marginBottom: 0 }}>
+              <div style={LABEL}>Manuscript</div>
+              {onlyManuscript ? (
+                <div style={{ ...FIELD, background: "var(--paper)", color: "var(--ink-2)" }} aria-label={`Manuscript: ${onlyManuscript.title}`}>
+                  <span className="qc-bk" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
+                  </span>
+                  <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{onlyManuscript.title}</span>
+                  <span style={{ marginLeft: "auto", flex: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)" }}>Only manuscript</span>
+                </div>
+              ) : (
+                <span className="f12-popwrap" style={{ display: "block" }}>
+                  <button
+                    ref={msTrigRef}
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={msMenuOpen}
+                    aria-label={`Manuscript: ${chosenManuscript?.title ?? "none chosen"}`}
+                    onClick={() => setMsMenuOpen((o) => !o)}
+                    style={{ ...FIELD, cursor: "pointer", textAlign: "left" }}
+                  >
+                    <span className="qc-bk" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
+                    </span>
+                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chosenManuscript?.title ?? manuscripts[0]?.title ?? ""}</span>
+                    <span aria-hidden="true" style={{ marginLeft: "auto", flex: "none", fontSize: 10, color: "var(--faint)" }}>▾</span>
+                  </button>
+                  <F12Menu
+                    open={msMenuOpen}
+                    onClose={() => setMsMenuOpen(false)}
+                    style={msMenuStyle}
+                    ariaLabel="Choose a manuscript"
+                    items={manuscripts.map((m) => ({
+                      label: m.title,
+                      icon: m.id === draft.manuscriptId ? <span aria-hidden="true">✓</span> : undefined,
+                      onClick: () => { set({ manuscriptId: m.id }); setMsMenuOpen(false); },
+                    }))}
+                  />
+                </span>
+              )}
+            </div>
+            {/* the hairline that separates WHICH book from WHAT went with it */}
+            <div style={{ height: 1, background: "var(--line)", margin: "15px 0" }} />
             {draft.materials.map((row) => {
               if (row.key === "sample") return null; // rendered below, with its quantity control
               if (row.key === "other") return null;
@@ -390,7 +393,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
         <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
           <div className="f12-chh">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H8l-4 4z" /></svg>
-            <span>Journal</span>
+            <span>Notes</span>
           </div>
           <div style={{ padding: "18px 16px", display: "flex", flex: 1, minHeight: 0 }}>
             <textarea

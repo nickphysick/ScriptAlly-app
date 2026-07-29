@@ -3319,7 +3319,7 @@ export const Queries: React.FC<{
                       {/* pink header band */}
                       <div className="f12-chh">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
-                        <span>Journal</span>
+                        <span>Notes</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

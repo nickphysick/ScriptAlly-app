@@ -90,7 +90,14 @@ describe("the manuscript field has two states, and neither is a native select", 
     // Scoped to the manuscript field. (The sample-unit control was the other native select on
     // this pane; it went in corrections round 2 — see queryCreateFixes2.test.ts, which asserts
     // the WHOLE pane is free of them.)
-    const msField = pane.slice(pane.indexOf("<div style={LABEL}>Manuscript</div>"), pane.indexOf("Date sent"));
+    // RE-ANCHORED: the field moved into "What you sent" (polish2 §2), so "Date sent" now comes
+    // BEFORE it and the old slice ran backwards — which yields "" and would have let every
+    // `.not.toContain` below pass while testing nothing. It ends at the divider instead.
+    const from = pane.indexOf("<div style={LABEL}>Manuscript</div>");
+    const to = pane.indexOf('height: 1, background: "var(--line)"', from);
+    expect(from, "the manuscript label is gone").toBeGreaterThan(-1);
+    expect(to, "the divider that ends the field is gone").toBeGreaterThan(from);
+    const msField = pane.slice(from, to);
     expect(msField, "the manuscript field is back on a native select").not.toContain("<select");
     expect(msField).toContain("F12Menu");
     expect(pane, "the placeholder option is retired in both states").not.toContain("Choose a manuscript…");
