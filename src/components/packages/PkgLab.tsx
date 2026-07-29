@@ -180,7 +180,7 @@ export const PkgLab: React.FC = () => {
             />
           </div>
         ) : view === "empty" ? (
-          <WorkshopTab
+          <div className="pkgw-tv" role="tabpanel" aria-label="Workshop"><WorkshopTab
             versions={emptyVersions}
             packages={emptyPackages}
             queries={[]}
@@ -190,11 +190,12 @@ export const PkgLab: React.FC = () => {
             onDeleteVersion={noop}
             onSavePackage={() => `p-lab-${pkgs.length}`}
             onMakeActive={noop}
+            onTryExample={startTour}
             pulseAddMaterials={pulseAdd}
             onDismissPulse={() => setPulseAdd(false)}
-          />
+          /></div>
         ) : (
-          <WorkshopTab
+          <div className="pkgw-tv" role="tabpanel" aria-label="Workshop"><WorkshopTab
             versions={tour ? EXAMPLE_VERSIONS : versions}
             packages={tour ? EXAMPLE_PACKAGES : pkgs}
             queries={tour ? EXAMPLE_QUERIES : MOCK_QUERIES}
@@ -215,7 +216,8 @@ export const PkgLab: React.FC = () => {
               return id;
             }}
             onMakeActive={noop}
-          />
+            onTryExample={startTour}
+          /></div>
         )}
       </div>
       )}

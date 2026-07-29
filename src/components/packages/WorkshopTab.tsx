@@ -28,6 +28,7 @@ import {
   materialUsage, materialUsageLine, funnelStages, medianReplyDays, daysToWeeks, formatRate,
 } from "../../lib/packageMetrics";
 import { PackageSaveFields } from "./PackageWorkshop";
+import { WorkshopEmpty } from "./WorkshopEmpty";
 
 /** An in-memory draft (not persisted until Save). Keyed by package id, or a temp id when new. */
 interface Draft { name: string; sel: SlotSelection; isNew: boolean; dirty: boolean }
@@ -71,6 +72,8 @@ export interface WorkshopTabProps {
   /** A recommendation on the Analytics tab asked for this package to be opened for editing. */
   openPackageId?: string | null;
   onOpenedPackage?: () => void;
+  /** The EXISTING guided tour over example data (the empty state's band uses it — never a 2nd path). */
+  onTryExample?: () => void;
   /** FR4: pulse the Edit-materials affordance after the tour ends with no materials yet. */
   pulseAddMaterials?: boolean;
   onDismissPulse?: () => void;
@@ -81,7 +84,7 @@ export interface WorkshopTabProps {
 export const WorkshopTab: React.FC<WorkshopTabProps> = ({
   versions, packages, queries, activePackageId,
   onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage, onMakeActive,
-  newPackageSignal, openPackageId, onOpenedPackage, pulseAddMaterials, onDismissPulse,
+  newPackageSignal, openPackageId, onOpenedPackage, onTryExample, pulseAddMaterials, onDismissPulse,
 }) => {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [editId, setEditId] = useState<string | null>(null);
@@ -494,15 +497,43 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
 
   const cardIds = [...packages.map((p) => p.id), ...newDraftIds];
 
+  // FIRST-RUN. Nothing at all → the full empty screen (steps, type cards, ghost packages, example
+  // band) INSTEAD of the sidebar+grid, because an empty sidebar beside an empty grid teaches nothing.
+  // Materials but no packages → the sidebar+grid render normally and the PACKAGES section degrades to
+  // its empty form, with the steps strip advanced to 2. Both derived, nothing stored.
+  const nothingYet = versions.length === 0 && packages.length === 0 && newDraftIds.length === 0;
+  const noPackagesYet = versions.length > 0 && packages.length === 0 && newDraftIds.length === 0;
+
+  if (nothingYet && !matMode) {
+    return (
+      <WorkshopEmpty
+        versions={versions}
+        onAddMaterial={(t) => { onDismissPulse?.(); setNewType(t); setSelMat(null); setMatMode(true); }}
+        onNewPackage={newPackage}
+        onTryExample={() => onTryExample?.()}
+      />
+    );
+  }
+
   return (
     <div className="pkgw-wrap2">
       {sidebar}
       <div className="pkgw-main">
         {matMode ? editorPanel() : (
+          noPackagesYet ? (
+            <WorkshopEmpty
+              versions={versions}
+              onAddMaterial={(t) => { onDismissPulse?.(); setNewType(t); setSelMat(null); setMatMode(true); }}
+              onNewPackage={newPackage}
+              onTryExample={() => onTryExample?.()}
+              packagesOnly
+            />
+          ) : (
           <div className="pkgw-pgrid">
             {cardIds.map((id) => { const d = effOf(id); return d ? card(id, d) : null; })}
             <button type="button" className="pkgw-newp" onClick={newPackage}>＋ New package</button>
           </div>
+          )
         )}
       </div>
     </div>

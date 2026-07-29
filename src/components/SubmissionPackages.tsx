@@ -254,6 +254,7 @@ export const SubmissionPackages: React.FC = () => {
                 onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
                 onSavePackage={tourActive ? noop : savePackage}
                 onMakeActive={tourActive || !msId ? noop : (pid) => void setActivePackage(msId, pid)}
+                onTryExample={startTour}
                 newPackageSignal={newPkgSignal}
                 openPackageId={openPkg}
                 onOpenedPackage={() => setOpenPkg(null)}
