@@ -65,7 +65,7 @@ describe("the draft is LOCAL until Save", () => {
     // It is emitted before sortedList.map, inside the rows container.
     const rows = queries.indexOf('className="f12-rows" role="listbox"');
     const draft = queries.indexOf("f12-drafttag", rows);
-    const map = queries.indexOf("sortedList.map", rows);
+    const map = queries.indexOf("renderList.map", rows); // v5: the list renders through renderList
     expect(rows).toBeGreaterThan(-1);
     expect(draft).toBeGreaterThan(rows);
     expect(draft, "the draft row fell inside the filtered list").toBeLessThan(map);

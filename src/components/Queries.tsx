@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useLayoutEffect, useState, useEffect, useRef } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -274,6 +274,31 @@ export const Queries: React.FC<{
   const [createError, setCreateError] = useState<string | null>(null);
   const creating = createDraft !== null;
 
+  /* ── v5 P2 · CHOREOGRAPHY STATE (ref qdb-create-motion.html) ──────────────────────────────
+     `draftIn` drives the row's grow/collapse — set on the frame AFTER the row mounts, so the
+     height transition has a real 0 to animate from. `stashedSelection` is whatever was open when
+     create mode started: entry clears the selected state, discard puts it back. `pendingSave`
+     carries the saved id plus the draft row's last top, so the REAL row can FLIP from where the
+     draft sat. `graceRow` force-shows a saved query the filters would hide, long enough to settle
+     before it collapses out behind the toast. */
+  const [draftIn, setDraftIn] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [stashedSelection, setStashedSelection] = useState<string | null>(null);
+  const [pendingSave, setPendingSave] = useState<{ id: string; fromTop: number } | null>(null);
+  const [settleId, setSettleId] = useState<string | null>(null);
+  const [graceRow, setGraceRow] = useState<{ id: string; leaving: boolean } | null>(null);
+  const draftRowRef = useRef<HTMLDivElement>(null);
+  /** Runs when the draft row has finished collapsing (its transitionend), not on a timer. */
+  const pendingDiscardRef = useRef<(() => void) | null>(null);
+
+  /** Grow the draft row in on the frame after it mounts (a transition needs a from-state that has
+   *  actually been painted). rAF, not a timer — it schedules the class flip, it doesn't animate. */
+  useEffect(() => {
+    if (!creating) return;
+    const id = requestAnimationFrame(() => setDraftIn(true));
+    return () => cancelAnimationFrame(id);
+  }, [creating]);
+
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
    *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
   const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
@@ -283,6 +308,12 @@ export const Queries: React.FC<{
     // picker and a disabled Save. (This is why logQuerySeed.ts survives the popup's retirement.)
     const manuscriptId = resolveInitialManuscriptId(seed.manuscriptId ?? undefined, pickableManuscripts(manuscripts));
     const base: QueryDraft = { ...emptyDraft({ agentId: seed.agentId, manuscriptId }), materials: materialRowsForDraft(seedAgent) };
+    // v5 P2 — stash what was open, then clear the selected state: while you're drafting, nothing
+    // else is "the query you're looking at". Discard puts it back.
+    setStashedSelection(selectedQueryId);
+    setSelectedQueryId(null);
+    setDraftIn(false);
+    setDraftSaved(false);
     setCreateBase(base);
     setCreateDraft(base);
     setCreateError(null);
@@ -323,7 +354,25 @@ export const Queries: React.FC<{
   /** Leave create mode. Untouched → silent; dirty → confirm. `then` runs once it's actually shut
    *  (so clicking another row selects it only after the draft is resolved). */
   const closeCreate = (then?: () => void) => {
-    const shut = () => { setCreateDraft(null); setCreateBase(null); setCreateError(null); then?.(); };
+    /* v5 P2 — collapse FIRST, unmount after. The draft row's height transition ending is what
+       clears the draft (see onTransitionEnd on the row), so the contents are reset only once the
+       row has actually gone — no visible flash of emptied text. The selection is restored here:
+       the stashed query if it still exists, else the first row of the current sort. */
+    const shut = () => {
+      setDraftIn(false);
+      pendingDiscardRef.current = () => {
+        setCreateDraft(null);
+        setCreateBase(null);
+        setCreateError(null);
+        setDraftSaved(false);
+        const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
+          ? stashedSelection
+          : (sortedListRef.current[0]?.id ?? null);
+        setSelectedQueryId(restore);
+        setStashedSelection(null);
+        then?.();
+      };
+    };
     if (createDraft && createBase && draftDirty(createDraft, createBase)) {
       showConfirm({
         title: "Discard this query?",
@@ -351,16 +400,39 @@ export const Queries: React.FC<{
       }
       if (createDraft.journal.trim()) await addJournalEntry(res.id, createDraft.journal.trim());
       const newId = res.id;
-      setCreateDraft(null);
-      setCreateBase(null);
-      setSelectedQueryId(newId); // the draft row becomes the real row, and stays selected
-      showToast({ message: "Query logged" });
+      /* v5 P2 — beat 1: the row sheds its draft skin IN PLACE (dashed → none, tag out, ground →
+         selected tint) before anything moves. We hold the draft row mounted and remember its top;
+         the effect below waits for the real row to arrive, then FLIPs it from exactly here, so
+         the two elements read as one row transforming rather than one vanishing and another
+         appearing. */
+      const fromTop = draftRowRef.current?.getBoundingClientRect().top ?? 0;
+      setDraftSaved(true);
+      setPendingSave({ id: newId, fromTop });
     } catch {
       setCreateError("Couldn't save that query — please try again.");
     } finally {
       setCreateSaving(false);
     }
   };
+
+  /* v5 P2 — beats 2–5. The write is async, so we wait for the saved query to actually arrive in
+     `queries` before handing over: until then the draft row stays put wearing its saved skin, and
+     there is no gap. Once it lands we drop the draft, select the new row, and let the layout
+     effect below FLIP it from the draft's old top. */
+  useEffect(() => {
+    if (!pendingSave) return;
+    const saved = queries.find((q) => q.id === pendingSave.id);
+    if (!saved) return; // the listener hasn't caught up yet
+    setCreateDraft(null);
+    setCreateBase(null);
+    setDraftSaved(false);
+    setStashedSelection(null);
+    setSelectedQueryId(pendingSave.id);
+    // Would the current filters hide it? Ask THE predicate, never a copy of it.
+    if (!matchesFilters(saved)) setGraceRow({ id: pendingSave.id, leaving: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSave, queries]);
+
 
   // The seed from App's interception — every "Log query" launch point in the app arrives here.
   useEffect(() => {
@@ -1213,7 +1285,10 @@ export const Queries: React.FC<{
     queryBucket(q.status as QueryStatus) === "waiting" &&
     !!q.responseDeadline && new Date(q.responseDeadline).getTime() < nowMs;
 
-  const filteredList = queries.filter(q => {
+  /* v5 P2 — THE filter predicate, extracted so there is exactly one. The list renders through it,
+     and the create flow asks it "would the query I just saved be visible?" — asking a copy would
+     be the classic drift bug (the row silently vanishes because the copy disagreed). */
+  const matchesFilters = (q: Query): boolean => {
     const agent = agents.find(a => a.id === q.agentId);
     const ms = manuscripts.find(m => m.id === q.manuscriptId);
 
@@ -1248,7 +1323,8 @@ export const Queries: React.FC<{
     }
 
     return true;
-  });
+  };
+  const filteredList = queries.filter(matchesFilters);
 
   // ── F12 sort (ref sort popover: Activity / Dates / Pipeline) — all derived from fields
   // already on the query; no reads. MAXT stands in for "missing" so undated rows sink.
@@ -1272,7 +1348,10 @@ export const Queries: React.FC<{
     return idx <= 6 ? 6 - idx : 10 + idx;
   };
 
-  const sortedList = [...filteredList].sort((a, b) => {
+  /* v5 P2 — THE sort comparator, extracted for the same reason as the predicate: the create
+     flow's FLIP travel asks it where the saved row belongs, and it must be the comparator the
+     list itself is ordered by, or the row animates to the wrong slot. */
+  const compareQueries = (a: Query, b: Query): number => {
     const agA = agents.find(ag => ag.id === a.agentId)?.name || "";
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
     switch (sortKey) {
@@ -1293,7 +1372,8 @@ export const Queries: React.FC<{
       case "last_activity":
       default: return lastActivityMs(b) - lastActivityMs(a);
     }
-  });
+  };
+  const sortedList = [...filteredList].sort(compareQueries);
 
   // ── F12 active-filter chips + the FILTER / SORT popovers (ref queries-hub-v14.html) ──
   const resetAllFilters = () => {
@@ -1961,7 +2041,42 @@ export const Queries: React.FC<{
 
   // Keep stable refs in sync for keydown handler (runs before each render's effects)
   sortedListRef.current = sortedList;
+  /* v5 P2 — the GRACE ROW. A query the filters would hide still gets to appear and settle, so a
+     save is never a silent no-op; it then collapses out behind the toast. It is placed by the real
+     comparator, not pinned to the top, so the brief moment it is on screen is honest about where
+     it lives. */
+  const graceQuery = graceRow ? queries.find((q) => q.id === graceRow.id) ?? null : null;
+  const renderList = graceQuery && !sortedList.some((q) => q.id === graceQuery.id)
+    ? [...sortedList, graceQuery].sort(compareQueries)
+    : sortedList;
+
   selectedQueryIdRef.current = selectedQueryId;
+
+  /* The FLIP. Measured after React has placed the row at its sorted index (the real comparator
+     did that, not us), so the travel always ends where the list actually wants it. */
+  useLayoutEffect(() => {
+    if (!pendingSave) return;
+    const el = document.getElementById(`query-row-${pendingSave.id}`);
+    if (!el) return; // not rendered yet (or hidden by a filter with no grace row)
+    // ⚠️ motion.css's trap: a filled animation outranks an inline transform. Clear any before
+    // measuring, or the invert is silently ignored.
+    el.style.animation = "none";
+    const last = el.getBoundingClientRect();
+    const delta = pendingSave.fromTop - last.top;
+    setPendingSave(null);
+    if (Math.abs(delta) > 1) {
+      el.style.transition = "none";
+      el.style.transform = `translateY(${delta}px)`;
+      void el.offsetWidth; // force reflow so the inverted position is the starting frame
+      el.style.transition = "transform 0.32s cubic-bezier(0.22, 0.9, 0.3, 1)";
+      el.style.transform = "";
+      const clear = () => { el.style.transition = ""; el.removeEventListener("transitionend", clear); };
+      el.addEventListener("transitionend", clear);
+    }
+    el.style.animation = "";
+    setSettleId(pendingSave.id); // beat 4 — the settle pulse rides on top
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSave, sortedList]);
 
   /* v4 P3 — the auto-select FALLBACK, here because it needs the resolved sort: with queries on file
      and nothing selected (and no draft open), land on the first row the user can actually see. */
@@ -2794,7 +2909,19 @@ export const Queries: React.FC<{
               {createDraft && (() => {
                 const draftAgent = createDraft.agentId ? agents.find((a) => a.id === createDraft.agentId) ?? null : null;
                 return (
-                  <div className={`f12-row f12-draft${draftAgent ? " f12-filled" : ""}`} aria-label="New query draft">
+                  <div
+                    ref={draftRowRef}
+                    className={`f12-row f12-draft${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
+                    aria-label="New query draft"
+                    // The collapse finishing is what clears the draft — so its contents are reset
+                    // only once the row has gone, never visibly blanked in place.
+                    onTransitionEnd={(e) => {
+                      if (e.propertyName !== "height" || draftIn) return;
+                      const run = pendingDiscardRef.current;
+                      pendingDiscardRef.current = null;
+                      run?.();
+                    }}
+                  >
                     <span className="f12-drafttag">Draft</span>
                     <span className="f12-av f12-av--sm" aria-hidden="true">{draftAgent ? agentInitials(draftAgent) : "—"}</span>
                     <span className="f12-mid">
@@ -2807,7 +2934,7 @@ export const Queries: React.FC<{
                   </div>
                 );
               })()}
-              {sortedList.map((q) => {
+              {renderList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);
                 const ms = manuscripts.find(m => m.id === q.manuscriptId);
                 if (!agent || !ms) return null;
@@ -2824,7 +2951,20 @@ export const Queries: React.FC<{
                     // v4 P2 — clicking another row while drafting is a click-away: resolve the
                     // draft first (silently when untouched, with a confirm when dirty), then select.
                     onClick={() => (creating ? closeCreate(() => setSelectedQueryId(q.id)) : setSelectedQueryId(q.id))}
-                    className={`f12-row${isSelected ? " f12-sel" : ""}`}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
+                    onAnimationEnd={(e) => {
+                      if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
+                      // The collapse's own end fires the toast — no timer schedules either.
+                      if (e.animationName === "f12-collapse") {
+                        setGraceRow(null);
+                        showToast({
+                          message: "Query saved — it's hidden by your current filter",
+                          undoLabel: "Show it",
+                          duration: 4000,
+                          undo: () => { resetAllFilters(); setListSearch(""); setSelectedQueryId(q.id); },
+                        });
+                      }
+                    }}
                   >
                     <span className="f12-av f12-av--sm" aria-hidden="true">{agentInitials(agent)}</span>
                     <span className="f12-mid">
@@ -2863,7 +3003,7 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className="qp-pane f12-pane f12-detail" style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className={`qp-pane f12-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>

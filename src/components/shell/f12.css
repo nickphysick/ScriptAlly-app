@@ -105,6 +105,10 @@
    The page settles in reading order: masthead → action bar → list card (rows staggered behind
    it) → hero → columns left to right. Each element rises 7px over ~220–240ms, ease-out.
 
+   v5: the keyframe is the SHARED `rise` (src/styles/motion.css), not a local twin. That file is
+   explicit that one `rise` serves the whole app — a row arriving here and a card arriving on the
+   agent list must read as the same gesture — so the v4 `qhRise` duplicate is retired.
+
    Three rules this obeys:
    · CSS ONLY. No JS timer drives any of this — `.qh-enter` is toggled on route ENTRY (the page
      stays mounted, so a mount animation would run exactly once, ever).
@@ -113,19 +117,18 @@
      would make the page a containing block for its position:fixed furniture (the footgun the
      shell's own entry class documents).
    · The APP SHELL never animates — the rail, breadcrumb and search live outside this page. */
-@keyframes qhRise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 
-.qh-enter .f12-hd2 { animation: qhRise 0.22s ease-out backwards; }
+.qh-enter .f12-hd2 { animation: rise 0.22s ease-out backwards; }
 .qh-enter .f12-ctl,
-.qh-enter .f12-chips { animation: qhRise 0.22s ease-out 0.05s backwards; }
-.qh-enter .f12-list { animation: qhRise 0.24s ease-out 0.08s backwards; }
-.qh-enter .f12-detail .f12-hero { animation: qhRise 0.24s ease-out 0.13s backwards; }
-.qh-enter .f12-detail .f12-card:nth-child(1) { animation: qhRise 0.24s ease-out 0.17s backwards; }
-.qh-enter .f12-detail .f12-card:nth-child(2) { animation: qhRise 0.24s ease-out 0.2s backwards; }
-.qh-enter .f12-detail .f12-card:nth-child(3) { animation: qhRise 0.24s ease-out 0.23s backwards; }
+.qh-enter .f12-chips { animation: rise 0.22s ease-out 0.05s backwards; }
+.qh-enter .f12-list { animation: rise 0.24s ease-out 0.08s backwards; }
+.qh-enter .f12-detail .f12-hero { animation: rise 0.24s ease-out 0.13s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(1) { animation: rise 0.24s ease-out 0.17s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(2) { animation: rise 0.24s ease-out 0.2s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(3) { animation: rise 0.24s ease-out 0.23s backwards; }
 /* rows stagger 25ms behind the list card, capped at the first ten — past that the eye reads it as
    a wave, not a settle, and a long list would still be arriving seconds later. */
-.qh-enter .f12-rows .f12-row:nth-child(-n + 10) { animation: qhRise 0.2s ease-out backwards; }
+.qh-enter .f12-rows .f12-row:nth-child(-n + 10) { animation: rise 0.2s ease-out backwards; }
 .qh-enter .f12-rows .f12-row:nth-child(1) { animation-delay: 0.12s; }
 .qh-enter .f12-rows .f12-row:nth-child(2) { animation-delay: 0.145s; }
 .qh-enter .f12-rows .f12-row:nth-child(3) { animation-delay: 0.17s; }
@@ -148,8 +151,67 @@
    from the existing token set — note the checkbox tick uses the BAND sage (--sage-edge), never
    the StatusDot trio (--sage/--sageC/--sageD), which index.css locks to StatusDots. */
 
-/* the pinned draft row — dashed, tagged, and shown regardless of the active filters */
-.f12-draft { position: relative; border: 1.5px dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md); margin: 8px 8px 10px; }
+/* ══ CREATE-FLOW CHOREOGRAPHY (v5 P2; ref qdb-create-motion.html) ═══════════════════════════
+   One motion language: the entrances reuse the SHARED `rise` (src/styles/motion.css); the row's
+   own growth and skin-shed are transitions, because they interpolate between two real states
+   rather than playing a canned gesture.
+
+   THE ROW GROWS, THE LIST DOESN'T JUMP. Because `.f12-row` has an explicit height, the draft can
+   animate height + margin + border-width from zero — and that growth is what pushes the rows
+   below down. No per-row transforms, so nothing has to be un-transformed afterwards.
+
+   ⚠️ FLIP TRAP (documented in motion.css): a filled animation outranks an inline transform. The
+   save FLIP therefore clears `style.animation` before measuring — see runSaveFlip in Queries.tsx. */
+.f12-draft {
+  /* appearance + collapsed state in ONE rule: a separate base rule below would re-assert the
+     `border` and `margin` shorthands at equal specificity and silently undo the collapse. */
+  position: relative; border: 0 dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md);
+  height: 0; margin: 0 8px; opacity: 0; overflow: hidden;
+  transition:
+    height 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
+    margin 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
+    border-width 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
+    opacity 0.22s ease 0.05s,
+    border-color 0.3s ease,
+    background 0.4s ease;
+}
+.f12-draft.f12-draft-in { height: 56px; margin: 8px 8px 10px; border-width: 1.5px; opacity: 1; }
+
+/* live fill — the monogram and name resolve as the picker lands, rather than snapping */
+.f12-draft .f12-av { transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+.f12-draft .f12-nm { transition: color 0.3s ease; }
+.f12-drafttag { transition: opacity 0.3s ease; }
+
+/* SAVE beat 1 — the row sheds its draft skin IN PLACE: dashed → none, tag out, ground → selected */
+.f12-draft.f12-draft-saved { border-color: transparent; border-style: solid; background: var(--blue-t); margin: 0 0 0 0; border-radius: 0; }
+.f12-draft.f12-draft-saved .f12-drafttag { opacity: 0; }
+
+/* SAVE beat 4 — the settle: a soft pink flash easing down to the selected tint */
+@keyframes f12-settle { from { background: var(--pink-t); } to { background: var(--blue-t); } }
+.f12-row.f12-settle { animation: f12-settle 0.9s ease-out both; }
+
+/* SAVE beat 5 — hidden by the current filter: the row collapses out AFTER the settle has read
+   (the 0.7s delay is CSS, not a timer), and the toast fires from its animationend. */
+@keyframes f12-collapse { from { height: 56px; opacity: 1; } to { height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; border-width: 0; } }
+.f12-row.f12-row-leaving { animation: f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; overflow: hidden; pointer-events: none; }
+/* both at once — separate rules would OVERRIDE rather than compose (the `animation` property is
+   not additive), so the settle would be cancelled the moment the row started leaving. */
+.f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
+
+/* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
+   whose three columns own their scrolling, and absolutely positioning it would break that (the
+   ref simplifies the scroll model away). Entering CREATE mode lags the row by 110ms so the two
+   read as one gesture; returning to reading mode has no lag. */
+.f12-pane-enter-create { animation: rise 0.18s ease-out 0.11s backwards; }
+.f12-pane-enter-read { animation: rise 0.18s ease-out backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .f12-draft, .f12-draft .f12-av, .f12-draft .f12-nm, .f12-drafttag { transition: none !important; }
+  .f12-row.f12-settle, .f12-row.f12-row-leaving,
+  .f12-pane-enter-create, .f12-pane-enter-read { animation: none !important; }
+}
+
+/* the pinned draft row — dashed, tagged, shown regardless of the active filters (see above) */
 .f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
 .f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
 .f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }

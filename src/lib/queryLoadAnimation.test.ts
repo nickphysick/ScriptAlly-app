@@ -27,19 +27,28 @@ describe("it runs on ROUTE ENTRY, not on every render", () => {
 });
 
 describe("the motion itself is CSS — no JS drives a frame", () => {
-  it("one keyframe pair: a 7px rise from transparent", () => {
-    expect(css).toContain("@keyframes qhRise { from { opacity: 0; transform: translateY(7px); }");
+  it("it ADOPTS the shared `rise` — it does not define a second keyframe of its own", () => {
+    const motion = readFileSync(new URL("../styles/motion.css", import.meta.url), "utf8");
+    expect(motion, "the shared vocabulary lost `rise`").toContain("@keyframes rise");
+    expect(css, "the page consumes the shared keyframe").toContain("animation: rise ");
+    // motion.css is explicit: one `rise` app-wide. A local twin under another name is the thing
+    // it forbids, and v4's `qhRise` was exactly that.
+    expect(css, "a local rise-alike keyframe came back").not.toMatch(/@keyframes\s+qh/i);
   });
 
   it("fill-mode is BACKWARDS, never both — a finished element must hold no transform", () => {
-    const block = css.slice(css.indexOf("@keyframes qhRise"), css.indexOf("@media (prefers-reduced-motion: reduce) {\n  .qh-enter"));
-    expect(block).toContain("backwards");
-    expect(block, "a `both` fill would leave a transform behind and trap position:fixed furniture").not.toContain(" both;");
+    const entry = css.match(/^\.qh-enter[^{]*\{[^}]*\}/gm) ?? [];
+    expect(entry.length).toBeGreaterThan(5);
+    for (const rule of entry) {
+      expect(rule, `${rule} lost its backwards fill`).toMatch(/backwards|animation-delay/);
+      expect(rule, "a `both` fill would leave a transform behind and trap position:fixed furniture").not.toContain(" both;");
+    }
   });
 
   it("no var() inside a keyframe percentage selector (the recurring silent-failure trap)", () => {
-    const kf = css.slice(css.indexOf("@keyframes qhRise"), css.indexOf("}", css.indexOf("@keyframes qhRise") + 40) + 1);
-    expect(kf).not.toContain("var(");
+    for (const kf of css.match(/@keyframes[^{]*\{[^@]*?\n\}/g) ?? []) {
+      expect(kf, `${kf.slice(0, 40)} put a var() in a keyframe — it fails silently`).not.toContain("var(");
+    }
   });
 });
 
@@ -48,7 +57,7 @@ describe("the order the page settles in", () => {
     const i = css.indexOf(sel);
     if (i === -1) return NaN;
     const rule = css.slice(i, css.indexOf("}", i));
-    const m = rule.match(/qhRise [\d.]+s ease-out (?:([\d.]+)s )?backwards/);
+    const m = rule.match(/rise [\d.]+s ease-out (?:([\d.]+)s )?backwards/);
     return m ? Number(m[1] ?? 0) : NaN;
   };
 

@@ -148,7 +148,9 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
   it("the panes are the f12 pair (list --listw / detail flex:1), never grid-cell-anchored", () => {
     // No stale gridColumn/gridRow cell styles remain on the panes — the flex column owns layout.
     expect(src.includes('className="f12-pane f12-list"')).toBe(true);
-    expect(src.includes('className="qp-pane f12-pane f12-detail"')).toBe(true);
+    // v5 P2 appended the crossfade class, so the pane's className is a template literal now —
+    // match the CLASS LIST (in order), which is what this guard is actually about.
+    expect(src).toMatch(/className=\{`qp-pane f12-pane f12-detail /);
     expect(src.includes("gridColumn: 2, gridRow:")).toBe(false);
     expect(src.includes("gridColumn: 1, gridRow:")).toBe(false);
   });
