@@ -388,6 +388,7 @@ export const Queries: React.FC<{
         title: "Discard this query?",
         danger: true,
         confirmLabel: "Discard",
+        cancelLabel: "Keep editing",
         body: <p style={{ margin: 0 }}>Nothing has been saved yet — this draft will be lost.</p>,
         onConfirm: shut,
       });
@@ -3356,7 +3357,7 @@ export const Queries: React.FC<{
                                             <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "#b3a596", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
                                             <div className="qp-noteacts" style={{ display: "flex", gap: 4 }}>
                                               <button type="button" title="Edit" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="qp-noteact"><Pencil style={{ width: 12, height: 12 }} /></button>
-                                              <button type="button" title="Delete" onClick={async () => { if (window.confirm("Delete this note?")) await deleteJournalEntry(entry.id); }} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
+                                              <button type="button" title="Delete" onClick={() => showConfirm({ title: "Delete this note?", danger: true, confirmLabel: "Delete", cancelLabel: "Keep it", body: <p style={{ margin: 0 }}>This note will be removed from the query's record.</p>, onConfirm: () => deleteJournalEntry(entry.id) })} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
                                             </div>
                                           </div>
                                         </>

@@ -35,7 +35,12 @@
    at rest (they only "worked" on hover, where :hover added a class). :where() lets every
    class-based button surface win at rest, exactly as the mockup intends. */
 :where(.f12-root button) { font: inherit; cursor: pointer; background: none; border: none; color: inherit; text-align: left; }
-.f12-root button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
+/* ⚠️ Scoped to `.t-f12`, NOT `.f12-root`. The page root carries both classes, so on-page coverage
+   is unchanged — but everything PORTALLED to document.body (F12Menu, F12Popover, the toasts, the
+   confirm dialog) is wrapped in a bare `.t-f12` div, and under the old selector those buttons fell
+   through to the browser's default focus ring. That's why the discard dialog focused blue. Any
+   future portalled surface now gets the house ring by construction. */
+.t-f12 button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
 .f12-root svg { display: block; }
 .f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
 
