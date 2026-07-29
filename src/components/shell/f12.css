@@ -24,6 +24,12 @@
   display: flex;
   flex-direction: column;
   color: var(--ink);
+  /* No ground of its own — the shell's canvas shows through. The transition is declared HERE,
+     in the ONE .f12-root rule, so focus mode's clay eases in AND out; the focus value itself
+     lives on .f12-root.qh-focus further down. A second rule for this same selector would be
+     decided by file order, which is the trap the draft row taught. */
+  background: transparent;
+  transition: background 0.24s ease;
   font-family: var(--f12-body);
   font-size: 13px;
   line-height: 1.45;
@@ -224,10 +230,18 @@
    The transition lives on `.qh-dim` and NOT inside the `.qh-focus` rule, or only the dim-IN would
    animate: removing the class removes the transition in the same recalculation, and the way back
    would snap. Nothing gets pointer-events:none — clicking a dimmed row must still run the
-   click-away/discard-confirm path, so the dimmed list stays live, just quiet. */
-.qh-dim { transition: opacity 0.22s ease, filter 0.22s ease; }
-.qh-focus .qh-dim { opacity: 0.34; filter: saturate(0.75); }
-@media (prefers-reduced-motion: reduce) { .qh-dim { transition: none; } }
+   click-away/discard-confirm path, so the dimmed list stays live, just quiet.
+
+   THE GROUND DARKENS TOO (polish2 §3). The hub paints no background of its own — the shell's
+   canvas shows through — so the darkening goes on `.f12-root` itself: it covers the whole
+   workspace and touches no shared shell file, which keeps the rail and top bar lit. */
+.f12-root.qh-focus { background: var(--qh-focus-ground); }
+
+/* Dimmed surfaces lose BRIGHTNESS as well as opacity — fading alone against a darker ground
+   reads as washed-out rather than unlit. */
+.qh-dim { transition: opacity 0.24s ease, filter 0.24s ease; }
+.qh-focus .qh-dim { opacity: 0.42; filter: brightness(0.93) saturate(0.7); }
+@media (prefers-reduced-motion: reduce) { .qh-dim, .f12-root { transition: none; } }
 
 /* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
    whose three columns own their scrolling, and absolutely positioning it would break that (the
