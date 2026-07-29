@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create mode - date picker, header, focus mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--content:#f7f3ec;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--burg:#8d3f2d;--sel:#e9edf2;--sh:0 8px 26px rgba(60,45,30,.07);--shPop:0 18px 44px rgba(60,45,30,.18);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--content);font-family:var(--in);color:var(--ink);padding:28px 34px 80px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:21px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:8px;max-width:900px}
+.lab{font-family:var(--mo);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin:26px 0 4px}
+.note{font-size:12px;color:var(--muted);margin-bottom:11px;max-width:880px}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh)}
+.row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+/* ---------- date picker ---------- */
+.field{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:0 13px;background:#fff;font-size:13.5px;height:42px;width:210px;cursor:pointer}
+.field .cal{margin-left:auto;color:#a2937f;font-size:12px}
+.dp{width:290px;padding:14px;border-radius:14px;box-shadow:var(--shPop)}
+.dphead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.dphead .m{font-family:var(--pl);font-weight:700;font-size:16px}
+.dphead .nav{margin-left:auto;display:flex;gap:4px}
+.dphead .nav span{width:28px;height:28px;border-radius:8px;border:1px solid var(--bd);display:grid;place-items:center;color:#8a7c6b;cursor:pointer;font-size:12px}
+.dphead .nav span:hover{background:#f6f0e7}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.dow b{font-family:var(--mo);font-size:8px;letter-spacing:.06em;color:var(--muted);text-align:center;font-weight:500;text-transform:uppercase}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.d{height:33px;display:grid;place-items:center;font-size:12.5px;border-radius:9px;cursor:pointer;color:var(--ink2)}
+.d:hover{background:#f4eee5}
+.d.out{color:#cbc0b0}
+.d.today{box-shadow:inset 0 0 0 1.5px var(--pinkDeep);font-weight:600}
+.d.on{background:var(--pink);color:#6b3321;font-weight:700;box-shadow:inset 0 0 0 1.5px var(--pinkDeep)}
+.dpfoot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:11px;border-top:1px solid var(--bd)}
+.dplink{font-size:12px;font-weight:600;color:var(--rose);cursor:pointer}
+.dplink.q{color:var(--muted);font-weight:500}
+.quick{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.qchip{border:1px solid var(--bd);border-radius:999px;padding:6px 11px;font-size:11.5px;color:var(--ink2);background:#fff;cursor:pointer}
+.qchip:hover{background:#f6f0e7}
+/* ---------- headers ---------- */
+.hero{display:flex;align-items:flex-start;gap:18px;padding:20px 24px;width:620px}
+.hav{width:60px;height:60px;border-radius:50%;background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.htitle{font-family:var(--pl);font-weight:700;font-size:23px}
+.hkick{font-family:var(--mo);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--rose);margin-bottom:6px}
+.hsub{font-family:var(--pl);font-style:italic;font-size:14.5px;color:var(--ink2);margin-top:3px}
+.pin{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:11px 14px;background:#fff;color:var(--muted);font-size:14px;margin-top:12px}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.hint a{color:var(--rose);font-weight:600;text-decoration:underline}
+.steps{display:flex;align-items:center;gap:7px;margin-top:10px}
+.stp{width:6px;height:6px;border-radius:50%;background:#e0d5c5}
+.stp.on{background:var(--rose)}
+/* ---------- focus mode ---------- */
+.stage{position:relative;width:100%;max-width:1080px;background:var(--content);border-radius:18px;padding:16px;border:1px solid var(--bd)}
+.dimmable{transition:opacity .22s ease, filter .22s ease}
+.stage.focus .dimmable{opacity:.34;filter:saturate(.75)}
+.mini{display:flex;gap:14px}
+.minilist{width:230px;padding:9px}
+.mrow{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;min-height:50px}
+.mrow .mg{width:28px;height:28px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:9px}
+.mrow .nm{font-family:var(--pl);font-weight:600;font-size:13px}
+.mrow .ag{font-family:var(--mo);font-size:7px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:1px}
+.mrow.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef;margin-bottom:7px;padding:calc(9px - 1.5px) calc(10px - 1.5px)}
+.dchip{margin-left:auto;background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:6.5px;letter-spacing:.1em;padding:3px 7px;border-radius:5px;text-transform:uppercase}
+.minipane{flex:1;padding:14px}
+.mtop{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mcols{display:flex;gap:10px}
+.mcol{flex:1;border:1px solid var(--bd);border-radius:11px;overflow:hidden;min-height:96px}
+.mch{background:var(--sage);border-bottom:1px solid var(--sageBd);padding:8px;text-align:center;font-size:11px;font-weight:600}
+.mmast{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 4px}
+.mmast h2{font-family:var(--pl);font-weight:700;font-size:19px}
+.mbtn{margin-left:auto;display:flex;gap:7px}
+.mb{border:1px solid var(--bd);background:#fff;border-radius:9px;padding:7px 12px;font-size:11.5px;font-weight:600}
+.mb.pink{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.mb.off{opacity:.45}
+.tog{display:inline-flex;gap:8px;margin-bottom:12px}
+.tbtn{background:#241c15;color:#f4ebdd;border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer}
+.tbtn.alt{background:transparent;color:var(--ink);border:1px solid var(--bd)}
+</style></head>
+<body>
+<h1>Create mode — three polish items</h1>
+<div class="sub">On-brand date popover · header formats · focus dimming.</div>
+
+<div class="lab">1 · Date picker — on-brand popover (replaces the system calendar)</div>
+<div class="note">Parchment surface, Playfair month, mono weekday initials, soft-pink selected day, pink ring on today. Quick chips because "today" is the answer ~90% of the time. Anchored with the same menu machinery as the manuscript and unit fields.</div>
+<div class="row">
+  <div><div class="mono" style="margin-bottom:7px">Trigger</div><div class="field">29 Jul 2026 <span class="cal">▦</span></div></div>
+  <div class="card dp">
+    <div class="dphead"><span class="m">September 2026</span><span class="nav"><span>‹</span><span>›</span></span></div>
+    <div class="dow"><b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b></div>
+    <div class="days">
+      <span class="d out">31</span><span class="d">1</span><span class="d">2</span><span class="d">3</span><span class="d">4</span><span class="d">5</span><span class="d">6</span>
+      <span class="d">7</span><span class="d">8</span><span class="d on">9</span><span class="d">10</span><span class="d">11</span><span class="d">12</span><span class="d">13</span>
+      <span class="d">14</span><span class="d">15</span><span class="d">16</span><span class="d">17</span><span class="d">18</span><span class="d">19</span><span class="d">20</span>
+      <span class="d">21</span><span class="d">22</span><span class="d">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span>
+      <span class="d">28</span><span class="d today">29</span><span class="d">30</span><span class="d out">1</span><span class="d out">2</span><span class="d out">3</span><span class="d out">4</span>
+    </div>
+    <div class="quick"><span class="qchip">Today</span><span class="qchip">Yesterday</span><span class="qchip">Last Monday</span></div>
+    <div class="dpfoot"><span class="dplink q">Clear</span><span class="dplink">Done</span></div>
+  </div>
+</div>
+
+<div class="lab">2 · Header — three formats (no duplicate "Agent" label)</div>
+<div class="note">The search placeholder does the labelling, so the standalone "Agent" label goes.</div>
+<div class="row">
+  <div class="card hero"><span class="hav">✎</span><div style="flex:1">
+    <div class="htitle">Logging new query</div>
+    <div class="pin">⌕ &nbsp;Search agents by name or agency…</div>
+    <div class="hint">Agent not listed? <a>Add a new agent now</a></div>
+  </div><span class="mono">Esc</span></div>
+
+  <div class="card hero"><span class="hav">✎</span><div style="flex:1">
+    <div class="htitle">Logging new query</div>
+    <div class="hsub">Who are you querying?</div>
+    <div class="pin">⌕ &nbsp;Search by name or agency…</div>
+    <div class="hint">Agent not listed? <a>Add a new agent now</a></div>
+  </div><span class="mono">Esc</span></div>
+
+  <div class="card hero"><span class="hav">✎</span><div style="flex:1">
+    <div class="hkick">New query · step 1 of 1</div>
+    <div class="htitle">Who are you querying?</div>
+    <div class="pin">⌕ &nbsp;Search agents by name or agency…</div>
+    <div class="hint">Agent not listed? <a>Add a new agent now</a></div>
+    <div class="steps"><span class="stp on"></span><span class="stp"></span><span class="stp"></span></div>
+  </div><span class="mono">Esc</span></div>
+</div>
+<div class="note" style="margin-top:8px"><b>A</b> title + field (leanest — my pick). <b>B</b> title + italic serif question (warmest, keeps the human phrasing as a subtitle). <b>C</b> eyebrow + question as the title, with progress dots — more wizard-like; only worth it if creation ever becomes multi-step.</div>
+
+<div class="lab">3 · Focus mode — dim everything except the pane and the draft row</div>
+<div class="note">Toggle it. Non-focus surfaces drop to ~34% and desaturate slightly; they stay clickable (clicking another row is still click-away → discard confirm). Note "Log query" greys out while drafting.</div>
+<div class="tog"><button class="tbtn" onclick="document.getElementById('stage').classList.add('focus')">Enter create mode</button><button class="tbtn alt" onclick="document.getElementById('stage').classList.remove('focus')">Exit</button></div>
+<div class="stage" id="stage">
+  <div class="mmast dimmable"><h2>Queries Hub</h2><span class="mbtn"><span class="mb">Export</span><span class="mb pink off">＋ Log query</span></span></div>
+  <div class="mini">
+    <div class="card minilist">
+      <div class="mrow draft"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><span class="dchip">Draft</span></div>
+      <div class="mrow dimmable"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div></div>
+      <div class="mrow dimmable"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div></div>
+      <div class="mrow dimmable"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div></div>
+    </div>
+    <div class="card minipane">
+      <div class="mtop"><span class="hav" style="width:40px;height:40px;font-size:13px;border-style:solid;background:var(--pink);color:#8d5a48">WT</span><div><div style="font-family:var(--pl);font-weight:700;font-size:17px">William Tan</div><div class="mono">New query</div></div></div>
+      <div class="mcols"><div class="mcol"><div class="mch">The send</div></div><div class="mcol"><div class="mch">What you sent</div></div><div class="mcol"><div class="mch">Journal</div></div></div>
+    </div>
+  </div>
+</div>
+</body></html>

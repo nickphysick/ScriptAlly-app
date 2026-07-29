@@ -16,6 +16,7 @@ const pane = read("../components/queries/QueryCreatePane.tsx");
 const picker = read("../components/AgentSearchField.tsx");
 const queries = read("../components/Queries.tsx");
 const css = read("../components/shell/f12.css");
+const formsCss = read("../components/forms/forms.css");
 const rules = read("../../firestore.rules");
 
 describe("there is NO query-count limit on the free tier", () => {
@@ -74,10 +75,13 @@ describe("the send column", () => {
   });
 
   it("every field in the column is the same height", () => {
-    // The segmented control's 42px moved into .qc-seg when it became an inset track (round 2),
-    // so the guarantee now spans both files — same number, two homes.
-    expect(pane.match(/minHeight: 42/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    // 42px now has THREE homes as each control found its right one: the shared FIELD style
+    // (manuscript), .qc-seg (the inset track), and the date picker's hub trigger. Same number,
+    // asserted wherever it lives — a field that drifts off it breaks the two-up row.
+    expect(pane, "the shared field style lost its height").toContain("minHeight: 42");
     expect(css, "the segmented track drifted off the field height").toMatch(/\.qc-seg \{[^}]*height: 42px/);
+    expect(formsCss, "the date trigger drifted off the field height")
+      .toMatch(/\.sa-dp--hub > \.sa-field \{[^}]*height: 42px/);
   });
 });
 

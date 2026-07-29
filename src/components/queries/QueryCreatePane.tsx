@@ -20,6 +20,7 @@ import { Agent, Manuscript } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
+import { BrandDatePicker } from "../forms";
 import { agentInitials, agentPrimary, agentAgencyLine } from "../../lib/agentDisplay";
 import {
   SAMPLE_UNITS,
@@ -33,6 +34,7 @@ import {
   materialRowsForDraft,
   reminderChipLabel,
   suggestedReminderDate,
+  todayInputDate,
   type QueryDraft,
 } from "../../lib/queryDraft";
 
@@ -206,13 +208,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <div style={{ display: "flex", gap: 12, marginBottom: 15 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={LABEL}>Date sent</div>
-              <input
-                type="date"
+              {/* The shared BrandDatePicker in its hub skin — never a native date input. `max`
+                  keeps the "you can't have sent it tomorrow" rule the native input enforced. */}
+              <BrandDatePicker
                 value={draft.dateSent}
-                max={new Date().toISOString().slice(0, 10)}
-                onChange={(e) => set({ dateSent: e.target.value })}
-                aria-label="Date sent"
-                style={{ ...FIELD, minHeight: 42 }}
+                onChange={(d) => set({ dateSent: d })}
+                max={todayInputDate()}
+                variant="hub"
+                ariaLabel="Date sent"
+                placeholder="Pick a date"
               />
             </div>
 
@@ -254,14 +258,17 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 </button>
               </div>
               {draft.reminder.kind === "custom" && (
-                <input
-                  type="date"
-                  value={draft.reminder.date}
-                  min={draft.dateSent || undefined}
-                  onChange={(e) => set({ reminder: { kind: "custom", date: e.target.value } })}
-                  aria-label="Reminder date"
-                  style={{ ...FIELD, marginTop: 8 }}
-                />
+                <div style={{ marginTop: 8 }}>
+                  {/* `min` keeps the native input's rule: you can't be reminded before you sent it. */}
+                  <BrandDatePicker
+                    value={draft.reminder.date}
+                    onChange={(d) => set({ reminder: { kind: "custom", date: d } })}
+                    min={draft.dateSent || undefined}
+                    variant="hub"
+                    ariaLabel="Reminder date"
+                    placeholder="Pick a date"
+                  />
+                </div>
               )}
               {draft.reminder.kind === "suggested" && (
                 <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)", marginTop: 7 }}>
