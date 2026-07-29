@@ -12,7 +12,7 @@
  * Buffered editing (decision 1): this component never writes. It mutates the draft its parent owns
  * and calls `onDone`, which validates, diffs and commits ONE update. Escape discards.
  */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AlertCircle, Camera, Check, X } from "lucide-react";
 import { AgentDraft, AgentEditorTab, DraftError, nrnState, nrnSubtitle } from "../../lib/agentDraft";
 import { agentInitials } from "../../lib/agentDisplay";
@@ -72,6 +72,18 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
   notes, notesLoaded, onPostNote, onDeleteNote, onPinNote,
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * ⚠️ `preventScroll` IS LOAD-BEARING. React's `autoFocus` (and a bare `.focus()`) scrolls the
+   * focused element into view, which lands mid-way through the smooth scroll the grid has just
+   * started and leaves the page at an arbitrary position. The symptom reads as a BROKEN SCROLL
+   * ANIMATION, not as a focus bug, so it is the kind of thing that gets chased in the wrong file.
+   * The scroll is the grid's job; focus only sets the caret.
+   */
+  useEffect(() => {
+    if (isNew) nameRef.current?.focus({ preventScroll: true });
+  }, [isNew]);
   const [genreInput, setGenreInput] = useState("");
   const [socPlatform, setSocPlatform] = useState(PLATFORMS[0]);
   const [socHandle, setSocHandle] = useState("");
@@ -232,7 +244,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
               <div className="agl-row2">
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-name">Agent name</label>
-                  <input id="agl-name" type="text" className="agl-in" autoFocus={isNew} value={draft.name} onChange={(e) => onChange({ name: e.target.value })} />
+                  <input id="agl-name" ref={nameRef} type="text" className="agl-in" value={draft.name} onChange={(e) => onChange({ name: e.target.value })} />
                 </div>
                 <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-agency">Agency</label>

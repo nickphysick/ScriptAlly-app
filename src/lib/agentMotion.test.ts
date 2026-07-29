@@ -209,3 +209,46 @@ describe("id adoption happens ONLY on a confirmed create", () => {
     expect(failBlock).toContain("return;");
   });
 });
+
+describe("Add new agent scrolls the card FULLY into view", () => {
+  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
+  const editor = readFileSync(new URL("../components/agents/AgentEditor.tsx", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
+
+  it("scrolls to the CARD on add, unconditionally — not only when the grid is off-screen", () => {
+    expect(
+      list,
+      "the scroll went back to firing only when the grid is out of view — the new-agent card is an EDITOR and far taller than a normal card, so it needs the header and toolbar scrolled away even from the top of the page",
+    ).not.toMatch(/if \(top >= 0\) return/);
+    expect(list).toMatch(/data-agent-card="\$\{newAgent\.id\}"/);
+    expect(list).toMatch(/scrollIntoView\(\{ block: "start"/);
+  });
+
+  it("ALWAYS block:'start' — a card taller than the viewport must top-align, never centre", () => {
+    const scrollCall = list.slice(list.indexOf("card?.scrollIntoView"), list.indexOf("card?.scrollIntoView") + 160);
+    expect(
+      scrollCall,
+      "the scroll block changed off 'start' — centring a card that is taller than the viewport pushes the top of the form, and the name field, off-screen",
+    ).toContain('block: "start"');
+    expect(scrollCall).not.toContain('block: "center"');
+  });
+
+  it("the offset comes from scroll-margin-top, not arithmetic at the call site", () => {
+    expect(
+      css,
+      "the card lost its scroll-margin-top — the gap beneath the top bar is now either absent or hand-computed somewhere, and it will silently go wrong the next time the bar's height changes",
+    ).toMatch(/\.agl-scene \{[^}]*scroll-margin-top: 16px/);
+  });
+
+  it("⚠️ focus uses preventScroll — otherwise it yanks the page mid-scroll", () => {
+    expect(
+      editor,
+      "the name field is focused without preventScroll (or via autoFocus, which is the same thing): focus scrolls its element into view by default, landing the page somewhere arbitrary part-way through the smooth scroll. It looks like a BROKEN SCROLL ANIMATION, not a focus bug",
+    ).toContain("focus({ preventScroll: true })");
+    expect(editor, "autoFocus came back on the name field — React's autoFocus cannot pass preventScroll").not.toMatch(/id="agl-name"[^>]*autoFocus/);
+  });
+
+  it("reduced motion scrolls instantly, but still scrolls", () => {
+    expect(list).toMatch(/behavior: prefersReducedMotion\(\) \? "auto" : "smooth"/);
+  });
+});

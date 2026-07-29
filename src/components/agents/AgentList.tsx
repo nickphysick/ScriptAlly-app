@@ -147,16 +147,33 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     return () => window.clearTimeout(done);
   });
 
-  /** Bring the place the new card will appear into view — the top of the grid, since an unsaved
-   *  card is pinned to the front. A card inserted below the fold is a card the reader never sees
-   *  arrive, which is the one failure this motion exists to prevent. */
-  const scrollInsertionPointIntoView = useCallback(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const top = grid.getBoundingClientRect().top;
-    if (top >= 0) return; // already in view — don't yank a page that was fine
-    grid.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-  }, []);
+  /**
+   * ALWAYS scroll the new card fully into view — not only when the grid happens to be off-screen.
+   *
+   * The new-agent card is an EDITOR and is far taller than an ordinary card, so even from the very
+   * top of the page the header and toolbar have to scroll away for it to fit. That is intended.
+   *
+   * `block: "start"` ALWAYS: if the card is taller than the viewport, top-aligning it keeps the top
+   * of the form (the name field the writer is about to type into) on screen. Centring a too-tall
+   * card would push its head off the top, which is the one thing worse than not scrolling.
+   *
+   * The offset beneath the top bar comes from `scroll-margin-top` on the card rather than arithmetic
+   * here, so it stays correct if the bar's height ever changes.
+   *
+   * Runs in a LAYOUT effect keyed on the new card's id: the element has to exist to be scrolled to,
+   * and this way the scroll is requested in the same frame the card is inserted — the scroll and
+   * the 340ms `rise` start TOGETHER. A 7px lift cannot fight a scroll, and sequencing them would
+   * add delay for nothing.
+   */
+  useLayoutEffect(() => {
+    if (!newAgent) return;
+    const card = document.querySelector<HTMLElement>(`[data-agent-card="${newAgent.id}"]`);
+    // scrollIntoView walks to the nearest scrollable ancestor, which is `.aglist` (height:100% +
+    // overflow-y:auto) — the page region inside the content capsule, NOT the document.
+    card?.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    // Only when the card first appears — not on every keystroke that re-renders it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newAgent?.id]);
 
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
   // can never read from the already-filtered view.
@@ -620,9 +637,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     // FIRST + settle: where is everything now? Measured BEFORE the insert, so the cards about to
     // be displaced can be sent back to their old places and released into the bump.
     flipBefore.current = measureFlip(gridRef.current);
-    // Inserting a card the reader cannot see is the failure case — bring the insertion point into
-    // view before the arrival begins, not after.
-    scrollInsertionPointIntoView();
     setNewAgent(stub);
     setFlippedId(id);
     setDraft(blankDraft(id));

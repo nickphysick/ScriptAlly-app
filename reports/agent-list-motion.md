@@ -107,6 +107,45 @@ thrash. If this ever does drop frames on a much longer list, that is the lever, 
   `deleteAgent` has no cascade and would orphan queries.
 - **A no-op Done writes nothing, animates nothing and says nothing.** It is not an event.
 
+## Amendment (29 Jul) — Add new agent always scrolls the card fully into view
+
+Baked 2's "if the grid is scrolled" was too weak: it only acted when the grid was already
+off-screen. The new-agent card is an EDITOR and far taller than an ordinary card, so even from the
+top of the page the header and toolbar have to scroll away for it to fit. Clicking **Add new agent**
+now always scrolls to the card itself.
+
+**It scrolls the CAPSULE'S REGION, not the document** — verified, and worth stating because getting
+it wrong presents as a scroll that appears to do nothing. `.aglist` carries `height:100%` +
+`overflow-y:auto`, so it is the nearest scrollable ancestor and `scrollIntoView` finds it; the
+document's own scrollTop never moved in any test.
+
+Measured from all three starting positions, at a viewport short enough that the card cannot fit
+(505px region against a 580px editor card):
+
+| Starting position | Region scrolled | Document scrolled | Gap below the bar | Card top visible |
+|---|---|---|---|---|
+| top of page | yes | **no** | 16px | yes |
+| mid-grid | yes | **no** | 16px | yes |
+| bottom of a long list | yes | **no** | 16px | yes |
+
+All three land identically. The card cannot fit entirely at that height — which is exactly why
+`block: "start"` is unconditional: top-aligning keeps the head of the form, and the name field the
+writer is about to type into, on screen. Centring would push both off the top.
+
+The 16px comes from `scroll-margin-top` on the card, not arithmetic at the call site, so it stays
+correct if the top bar's height changes.
+
+**⚠️ The focus trap, named because it does not look like a focus bug.** `element.focus()` scrolls
+its element into view by default, and React's `autoFocus` is the same call — so focusing the name
+field would land the page somewhere arbitrary part-way through the smooth scroll. The symptom reads
+as a BROKEN SCROLL ANIMATION and would be chased in the scroll code. The name field is now focused
+via a ref with `focus({ preventScroll: true })`; `autoFocus` is gone from it, and a lock forbids its
+return. The scroll is the grid's job; focus only sets the caret.
+
+The scroll and the 340ms `rise` start together, in the same layout effect that runs when the card is
+inserted — a 7px lift cannot fight a scroll, and sequencing them would add delay for nothing. Under
+reduced motion the scroll still happens, with `behavior: "auto"`.
+
 ## Browser-check list
 
 The page is auth-gated, so everything below needs a signed-in pass on dev. Standalone harnesses

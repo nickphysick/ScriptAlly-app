@@ -336,7 +336,9 @@
    rotor is the ONE rotating element, it carries preserve-3d, and it must never
    gain an `overflow` property (any value flattens 3D and mirrors the back).
    ══════════════════════════════════════════════════════════════════════════ */
-.aglist .agl-scene { perspective: 1600px; }
+/* The gap beneath the top bar when a card is scrolled to. Expressed as scroll-margin rather than
+   arithmetic at the call site, so it stays correct if the bar's height ever changes. */
+.aglist .agl-scene { perspective: 1600px; scroll-margin-top: 16px; }
 .aglist .agl-rotor {
   position: relative; height: 400px;
   transform-style: preserve-3d;
