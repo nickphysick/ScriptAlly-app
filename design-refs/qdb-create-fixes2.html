@@ -1,0 +1,107 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create pane - fixes v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--content:#f7f3ec;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--sh:0 8px 26px rgba(60,45,30,.07);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--content);font-family:var(--in);color:var(--ink);padding:28px 34px 70px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:22px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px;max-width:900px}
+.lab{font-family:var(--mo);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin:24px 0 4px}
+.note{font-size:12px;color:var(--muted);margin-bottom:10px;max-width:840px}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh)}
+.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+/* ---- 1 hero header ---- */
+.hero{display:flex;align-items:flex-start;gap:18px;padding:20px 24px;max-width:900px}
+.hav{width:62px;height:62px;border-radius:50%;background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f;display:grid;place-items:center;font-size:19px;flex-shrink:0;margin-top:22px}
+.htitle{font-family:var(--pl);font-weight:700;font-size:23px;margin-bottom:12px}
+.flab{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.pin{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:11px 14px;background:#fff;max-width:430px;color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:9px}
+.hint a{color:var(--rose);font-weight:600;text-decoration:underline;cursor:pointer}
+/* ---- 2 segmented ---- */
+.seg{display:inline-flex;background:#f3ede4;border-radius:11px;padding:3px;gap:2px;height:42px;width:100%}
+.seg button{flex:1;border:none;background:transparent;border-radius:9px;font-family:var(--in);font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;display:grid;place-items:center;line-height:1}
+.seg button.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(60,45,30,.12)}
+.segB{display:inline-flex;border:1px solid var(--bd);border-radius:11px;overflow:hidden;height:42px;background:#fff;width:100%}
+.segB button{flex:1;border:none;background:transparent;font-family:var(--in);font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;display:grid;place-items:center;line-height:1}
+.segB button+button{border-left:1px solid var(--bd)}
+.segB button.on{background:var(--pink);color:#6b3321;font-weight:600}
+/* ---- 3 stepper ---- */
+.mat{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #f1ebe1;font-size:13.5px}
+.ck{width:19px;height:19px;border-radius:6px;border:1.5px solid #cfc3b1;display:grid;place-items:center;color:#fff;font-size:10px;flex-shrink:0}
+.mat.on .ck{background:#7e9178;border-color:#7e9178}
+.qty{margin-left:auto;display:flex;align-items:center;gap:7px}
+.stp{display:inline-flex;align-items:center;border:1px solid var(--bd);border-radius:9px;overflow:hidden;height:32px;background:#fff}
+.stp button{width:28px;border:none;background:transparent;color:#8a7c6b;cursor:pointer;display:grid;place-items:center;font-size:14px;line-height:1}
+.stp button:hover{background:#f6f0e7;color:var(--ink)}
+.stp .val{width:34px;text-align:center;font-size:13px;font-weight:600;border-left:1px solid var(--bd);border-right:1px solid var(--bd);height:100%;display:grid;place-items:center}
+.unit{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--bd);border-radius:9px;height:32px;padding:0 11px;background:#fff;font-size:12.5px;cursor:pointer}
+.unit .cv{color:#a2937f;font-size:9px}
+/* ---- 4 draft row ---- */
+.listbox{width:330px;padding:10px;overflow:hidden}
+.qr{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:12px;position:relative}
+.qr .mg{width:34px;height:34px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:10.5px;flex-shrink:0}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:15px}
+.qr .ag{font-family:var(--mo);font-size:8px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.qr .dt{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted)}
+.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef;border-radius:12px;padding:10px 13px 12px}
+.draft .dtag{display:inline-block;background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:7px;letter-spacing:.1em;padding:3px 8px;border-radius:6px;text-transform:uppercase;margin-bottom:9px}
+.draft .line{display:flex;align-items:center;gap:11px}
+.draft .mg{background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f}
+.draft .nm{color:#b98a74;font-style:italic;font-weight:500}
+.col{width:430px;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:14px}
+.cb{padding:16px}
+.f{margin-bottom:15px}
+.two{display:flex;gap:12px}
+.two .f{flex:1}
+.fin{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:0 13px;background:#fff;font-size:13.5px;height:42px}
+</style></head>
+<body>
+<h1>Create pane — corrections v2</h1>
+<div class="sub">Playfair header, two segmented options, a proper stepper, and the draft row rebuilt so nothing can clip.</div>
+
+<div class="lab">1 · Header — Playfair, replaces "Who are you querying?"</div>
+<div class="card hero">
+  <span class="hav">✎</span>
+  <div style="flex:1">
+    <div class="htitle">Logging new query</div>
+    <div class="flab">Agent</div>
+    <div class="pin">⌕ &nbsp;Search by name or agency…</div>
+    <div class="hint">Agent not listed? <a>Add a new agent now</a></div>
+  </div>
+  <span class="mono" style="margin-top:4px">Esc to cancel</span>
+</div>
+
+<div class="lab">2 · "Sent by" — two on-brand options (pick one)</div>
+<div class="note"><b>A · Inset track</b> (iOS/Linear idiom): recessed tan track, active segment a raised white pill. <b>B · Divided pill</b>: single bordered field matching Date sent exactly, active segment soft-pink. B matches your field row better; A reads more like a control.</div>
+<div class="row">
+  <div class="card col"><div class="ch">A · inset track</div><div class="cb">
+    <div class="two"><div class="f"><div class="flab">Date sent</div><div class="fin">29 Jul 2026<span style="margin-left:auto;color:#a2937f;font-size:10px">▾</span></div></div>
+    <div class="f"><div class="flab">Sent by</div><div class="seg"><button class="on">Email</button><button>Form</button><button>Post</button></div></div></div>
+  </div></div>
+  <div class="card col"><div class="ch">B · divided pill</div><div class="cb">
+    <div class="two"><div class="f"><div class="flab">Date sent</div><div class="fin">29 Jul 2026<span style="margin-left:auto;color:#a2937f;font-size:10px">▾</span></div></div>
+    <div class="f"><div class="flab">Sent by</div><div class="segB"><button class="on">Email</button><button>Form</button><button>Post</button></div></div></div>
+  </div></div>
+</div>
+
+<div class="lab">3 · Sample materials — proper stepper + on-brand unit</div>
+<div class="note">Bare +/− replaced by a bordered stepper: minus · value · plus in one 32px control, hairline dividers, hover tint. Unit becomes a matching bordered trigger (app menu, not a native select).</div>
+<div class="card col"><div class="ch">What you sent</div><div class="cb">
+  <div class="mat on"><span class="ck">✓</span>Query letter</div>
+  <div class="mat on"><span class="ck">✓</span>Synopsis</div>
+  <div class="mat on"><span class="ck">✓</span>Sample materials<span class="qty"><span class="stp"><button>−</button><span class="val">3</span><button>+</button></span><span class="unit">Chapters <span class="cv">▾</span></span></span></div>
+  <div class="mat" style="border-bottom:none"><span class="ck"></span>Other…</div>
+</div></div>
+
+<div class="lab">4 · Draft row — tag in flow, nothing clipped</div>
+<div class="note">The tag sits <i>inside</i> the row's own padding as a block above the agent line, so no element ever sits outside the row box. The rows container gets top padding so the dashed border clears the search field.</div>
+<div class="card listbox">
+  <div class="draft"><span class="dtag">Draft</span><div class="line"><span class="mg">—</span><div style="flex:1"><div class="nm">Choose an agent…</div><div class="ag">New query</div></div><span class="dt">Today</span></div></div>
+  <div class="qr" style="background:#e9edf2;margin-top:4px"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><span class="dt">14 Mar</span></div>
+</div>
+</body></html>

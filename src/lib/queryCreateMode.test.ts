@@ -18,6 +18,14 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 const queries = read("../components/Queries.tsx");
 const app = read("../App.tsx");
 const pane = read("../components/queries/QueryCreatePane.tsx");
+const css = read("../components/shell/f12.css");
+
+/** One CSS rule body, anchored at a line start so a compound selector can't match instead. */
+const block = (selector: string): string => {
+  const at = css.indexOf("\n" + selector + " {");
+  if (at < 0) return "";
+  return css.slice(at, css.indexOf("}", at) + 1);
+};
 
 describe("the popup is retired", () => {
   it("LogQueryFocusForm is deleted and imported by nothing", () => {
@@ -95,8 +103,25 @@ describe("the create pane follows the live idiom, not the ref's espresso", () =>
     expect(pane).not.toContain("#3a2d1f");
   });
 
-  it("the segmented control selects with an inset ink ring and no per-segment borders", () => {
-    expect(pane).toContain("inset 0 0 0 1.5px var(--ink)");
+  /* SUPERSEDED (corrections round 2, ref qdb-create-fixes2 option A): the inset ink RING is gone.
+     It framed the active segment inside the container, which overflowed the frame and knocked the
+     label off-centre. The track is now recessed and the active segment is raised out of it. The
+     "no per-segment borders" half of the old lock survives — that was never the problem. */
+  it("the segmented control is an inset track, not a ringed segment", () => {
+    expect(pane, "the ink ring came back").not.toContain("inset 0 0 0 1.5px var(--ink)");
+    expect(pane).toContain('className="qc-seg"');
+    // Anchor every slice before reading it: a missing rule yields "" and every `.not.toContain`
+    // on an empty string passes, which is a green test that checked nothing.
+    const seg = block(".qc-seg");
+    const segBtn = block(".qc-seg button");
+    const segOn = block(".qc-seg button.on");
+    expect(seg, "the .qc-seg rule is missing").not.toBe("");
+    expect(segBtn, "the .qc-seg button rule is missing").not.toBe("");
+    expect(segOn, "the .qc-seg button.on rule is missing").not.toBe("");
+    expect(seg, "the track must be recessed — a white track is not an inset track").toContain("background: var(--oat)");
+    expect(seg, "height matches the Date sent field so the two-up row sits level").toContain("height: 42px");
+    expect(segBtn, "a per-segment border would misalign the row again").toContain("border: none");
+    expect(segOn, "the active segment is a raised white pill").toContain("background: var(--panel)");
   });
 
   it("the picker and the unit physics are REUSED, never rebuilt", () => {

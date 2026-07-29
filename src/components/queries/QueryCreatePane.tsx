@@ -115,10 +115,16 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 flex: "none", width: 76, height: 76, borderRadius: "50%", background: "var(--pink-t)",
                 border: "1.5px dashed var(--pink-b)", color: "var(--pink-i)", display: "flex",
                 alignItems: "center", justifyContent: "center", fontSize: 26,
+                /* the heading sits above the field, so the mark centres on the FIELD rather than
+                   the block — otherwise it floats level with the title and reads as a bullet */
+                marginTop: 22,
               }}
             >✎</span>
             <div className="qc-picker" style={{ flex: 1, minWidth: 0, maxWidth: 460 }}>
-              <div style={LABEL}>Who are you querying?</div>
+              {/* The pane is a page while it's open: it names the job, and "Agent" is then an
+                  ordinary field label rather than a question standing in for a heading. */}
+              <h2 className="qc-head">Logging new query</h2>
+              <div style={LABEL}>Agent</div>
               <AgentSearchField
                 agents={agents}
                 value=""
@@ -212,9 +218,10 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={LABEL}>Sent by</div>
-              {/* Segmented: ONE container frame, equal segments, NO per-segment borders (they add
-                  width and misalign the row); selection is an inset ink ring — the live idiom. */}
-              <div role="group" aria-label="Sent by" style={{ display: "flex", minHeight: 42, border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
+              {/* Inset track (.qc-seg): the segments are children of a recessed tan track, so the
+                  active pill is raised OUT of the frame rather than ringed inside it — the ink-ring
+                  version overflowed its container and pushed its own label off-centre. */}
+              <div role="group" aria-label="Sent by" className="qc-seg">
                 {CREATE_SEND_METHODS.map((m) => {
                   const on = draft.sendMethod === m.value;
                   return (
@@ -222,13 +229,8 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                       key={m.value}
                       type="button"
                       aria-pressed={on}
+                      className={on ? "on" : undefined}
                       onClick={() => set({ sendMethod: m.value })}
-                      style={{
-                        flex: 1, padding: "8px 0", border: "none", cursor: "pointer",
-                        fontFamily: "inherit", fontSize: 12.5, background: "var(--panel)",
-                        boxShadow: on ? "inset 0 0 0 1.5px var(--ink)" : "none",
-                        color: on ? "var(--ink)" : "var(--muted)", fontWeight: on ? 600 : 400,
-                      }}
                     >{m.label}</button>
                   );
                 })}

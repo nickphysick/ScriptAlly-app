@@ -74,7 +74,10 @@ describe("the send column", () => {
   });
 
   it("every field in the column is the same height", () => {
-    expect(pane.match(/minHeight: 42/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+    // The segmented control's 42px moved into .qc-seg when it became an inset track (round 2),
+    // so the guarantee now spans both files — same number, two homes.
+    expect(pane.match(/minHeight: 42/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(css, "the segmented track drifted off the field height").toMatch(/\.qc-seg \{[^}]*height: 42px/);
   });
 });
 
