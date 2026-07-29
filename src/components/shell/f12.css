@@ -210,6 +210,20 @@
    not additive), so the settle would be cancelled the moment the row started leaving. */
 .f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
 
+/* ── FOCUS MODE (ref qdb-create-polish §3) — while a draft is open, everything except the pane
+   and the draft row recedes. Deliberately NOT a scrim: an overlay would have to sit above the
+   list, which owns its own scroll and stacking context, and that is the same class of problem as
+   the clipped draft tag. Instead each receding surface carries `qh-dim` and the page root carries
+   `qh-focus`, so the dim is a state on the elements themselves.
+
+   The transition lives on `.qh-dim` and NOT inside the `.qh-focus` rule, or only the dim-IN would
+   animate: removing the class removes the transition in the same recalculation, and the way back
+   would snap. Nothing gets pointer-events:none — clicking a dimmed row must still run the
+   click-away/discard-confirm path, so the dimmed list stays live, just quiet. */
+.qh-dim { transition: opacity 0.22s ease, filter 0.22s ease; }
+.qh-focus .qh-dim { opacity: 0.34; filter: saturate(0.75); }
+@media (prefers-reduced-motion: reduce) { .qh-dim { transition: none; } }
+
 /* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
    whose three columns own their scrolling, and absolutely positioning it would break that (the
    ref simplifies the scroll model away). Entering CREATE mode lags the row by 110ms so the two

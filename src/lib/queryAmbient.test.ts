@@ -80,7 +80,9 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     // One bar above the panes. v4 P1 (ref queries-hub-v4.html .abar): the bar moved into the
     // SHARED HEADER COLUMN, so the --listw left zone that locked it to the list pane is retired —
     // the verbs simply right-align. No foot control-row cards remain.
-    expect(src).toContain('className="f12-ctl"');
+    // The bar also carries `qh-dim` since focus mode landed, so match the CLASS, not the whole
+    // attribute — an exact-attribute assertion breaks every time a state class is added.
+    expect(src).toMatch(/className="f12-ctl[ "]/);
     expect(src).not.toContain('className="f12-zone-list"'); // the spacer that locked it to the list
     expect(src).toContain('className="f12-zone-read"');
     expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(false); // foot list card gone
