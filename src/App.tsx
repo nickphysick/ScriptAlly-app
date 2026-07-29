@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { ToastProvider } from "./components/toast/ToastProvider";
+import { NotesStoreScan } from "./components/NotesStoreScan"; // ⚠️ TEMP — notes-store scan; delete with the route
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell, StagePage } from "./components/shell/AppShell";
@@ -411,6 +412,13 @@ function AppContent() {
   // false there). In prod the #/status-dots hash simply falls through to the normal app/landing.
   if (isStatusDotDemo && import.meta.env.DEV) {
     return <StatusDotDemo />;
+  }
+  // ⚠️ TEMPORARY (notes-store convergence) — DELETE this branch with the component. Deliberately NOT
+  // DEV-gated: the numbers that matter come from a PRODUCTION build run locally (npm run build →
+  // npm run preview), where import.meta.env.DEV is false. Read-only; reads only the signed-in user's
+  // own documents, rules-enforced. Sign in first, then visit #/notes-scan.
+  if (hash === "#/notes-scan") {
+    return <NotesStoreScan />;
   }
   // Dev-only review surface for the presentational plans page (same pattern as #/status-dots).
   // It's also registered in the activeTab switch below; this hash hatch lets it be reviewed
