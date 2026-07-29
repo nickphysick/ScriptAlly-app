@@ -353,3 +353,34 @@ describe("notes-store convergence — one store owns \"Notes to self\"", () => {
     expect(oty).toContain('label: "Notes to self"');
   });
 });
+
+describe("notes — the composer fits, and deleting asks first (live-use fixes)", () => {
+  it("the composer spans the grid row so its 560px cap applies; the save button never squashes", () => {
+    // the bug: as a minmax(272px,1fr) GRID ITEM the composer was squeezed to one column, so the
+    // meta row (date + surfacing + save) overflowed and "Add the task" broke out of its button.
+    const nc = rule(".tdb-nc");
+    expect(nc).toContain("grid-column: 1 / -1");
+    expect(nc).toContain("max-width: 560px");
+    const meta = rule(".tdb-nc-meta");
+    expect(meta).toContain("flex-wrap: wrap"); // at any width it wraps rather than overflowing
+    const save = rule(".tdb-nc-save");
+    expect(save).toContain("flex: 0 0 auto");
+    expect(save).toContain("white-space: nowrap"); // the label stays on one line, inside the pill
+    expect(rule(".tdb-nc-surflbl")).toContain("white-space: nowrap");
+  });
+
+  it("DELETE ASKS FIRST — the ✕ is on the card, so consent is required; the task warns harder", () => {
+    const del = page.slice(page.indexOf("async function deleteUserNote"), page.indexOf("const composerCanSave"));
+    // the confirm gates the write: nothing is deleted until it resolves true
+    expect(del).toContain("const ok = await confirmAsk(");
+    expect(del).toContain("if (!ok) return;");
+    expect(del.indexOf("await confirmAsk(")).toBeLessThan(del.indexOf("await deleteUserTask("));
+    // a task's copy names what else is lost (its date, and Today's list when it is on it)
+    expect(del).toContain("This task and its date will be removed from your board");
+    expect(del).toContain('c.committed || c.surfaced ? " and from Today’s list" : ""');
+    expect(del).toContain('confirmLabel: isTask ? "Delete the task" : "Delete the note"');
+    expect(del).toContain('cancelLabel: "Keep it"');
+    // it is the STYLED ask (no native dialog), and undo remains as the safety net after the fact
+    expect(del).toContain('label: "Undo"');
+  });
+});

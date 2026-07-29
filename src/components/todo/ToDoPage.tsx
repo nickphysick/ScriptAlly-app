@@ -836,6 +836,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // no-silent-no-op rule applies to every write, not just the composer's.
   async function deleteUserNote(c: BoardCard) {
     if (!c.userTaskId) return;
+    // Deleting is destructive and the ✕ sits on the card itself, so it ALWAYS asks first — an undo
+    // toast is a safety net, not a substitute for consent. A task warns harder than a note: it
+    // carries a date and may be committed to Today, so more is lost than a jotted line.
+    const isTask = c.nature === "task";
+    const ok = await confirmAsk(
+      isTask
+        ? `Delete “${c.title}”? This task and its date will be removed from your board${c.committed || c.surfaced ? " and from Today’s list" : ""}.`
+        : `Delete “${c.title}”?`,
+      { confirmLabel: isTask ? "Delete the task" : "Delete the note", cancelLabel: "Keep it" },
+    );
+    if (!ok) return;
     try {
       await deleteUserTask(c.userTaskId);
     } catch {

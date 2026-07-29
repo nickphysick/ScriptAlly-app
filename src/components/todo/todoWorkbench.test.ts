@@ -353,7 +353,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
       expect(f).not.toContain("window.confirm(");
     }
     expect(ask).toContain("new Promise<boolean>((resolve) => {");
-    expect((page.match(/await confirmAsk\(/g) ?? []).length).toBe(2); // the quick-✓ duplicate guard + the composer discard guard
+    expect((page.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // quick-✓ duplicate · composer discard · delete-note/task confirm
     expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
     expect(rule(".tdb-askwrap")).toContain("z-index: 90"); // above the flow (50) + toast (60) + modal (70)
     expect(page).toContain("{confirmAskNode}");
@@ -1122,7 +1122,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms); notes-and-
     // tasks P2 adds the composer's surfacing field "Show it in Today's list" (its label + aria-label)
     // — the phrase names the surface it feeds, deliberately. Exactly four now.
-    expect((page.match(/oday’s list/g) ?? []).length).toBe(4);
+    expect((page.match(/oday’s list/g) ?? []).length).toBe(5); // + the delete confirm names Today's list when the task is on it
     expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // via the shared constant — the two literals live in VERB_LABELS alone
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)
