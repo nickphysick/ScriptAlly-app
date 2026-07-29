@@ -1,0 +1,363 @@
+<!--
+  ScriptAlly — Packages: the Pro showcase landing, retokened to the new look.
+
+  PROVENANCE: SPEC-DERIVED MOCK, not a build artefact. Authored to specify the design; it is not
+  generated from, and does not run against, the app's data or components.
+
+  DATA HONESTY: every figure in it is illustrative. In particular all COMMUNITY PERCENTILE claims
+  ("higher than N% of ScriptAlly writers", "TOP 10%", "BEATS 71%") are PLACEHOLDERS — no community
+  aggregation pipeline exists, and pre-launch there is no cohort to aggregate. The build renders that
+  surface behind a default-off flag and never invents numbers at runtime. See
+  reports/community-percentiles.md.
+
+  Source of truth for: layout, tokens, copy and component grammar. Port faithfully.
+-->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Packages landing (new look)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9; --slate:#6a89a7; --tan:#efe7db;
+  --ground:#e7e0d5; --rail-s:#f1ebe3; --plane-s:#fdfbf8; --fill:#efe8df;
+  --card:#fdfaf5; --line:#e3d9cf; --linesoft:#ece3da;
+  --pro-fill:#eef2f6; --pro-line:#c6d5e2; --gold:#8a6a1f; --gold-fill:#f4ead2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.app{height:100vh;display:flex;gap:12px;padding:10px}
+.cap{border-radius:18px;box-shadow:0 10px 30px rgba(58,28,20,.09)}
+.rail{width:64px;flex:none;background:var(--rail-s);display:flex;flex-direction:column;align-items:center;padding:14px 0 13px}
+.rail .mk{width:24px;height:24px;color:var(--burgundy);margin-bottom:20px;flex:none}
+.rib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#a89a8a;margin-bottom:6px;cursor:pointer}
+.rib svg{width:18px;height:18px}
+.rib.on{background:var(--ground);color:var(--burgundy)}
+.rail .sp{flex:1}
+.rail .av{width:34px;height:34px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:12px;color:var(--burgundy)}
+.plane{flex:1;min-width:0;background:var(--plane-s);display:flex;flex-direction:column;overflow:hidden}
+.tb{height:54px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.grow{flex:1}
+.gs{display:flex;align-items:center;gap:9px;width:250px;height:33px;padding:0 11px;background:var(--fill);border-radius:10px;color:var(--muted);font-size:12.5px}
+.gs svg{width:14px;height:14px}
+.pg{flex:1;overflow-y:auto;padding:26px 56px 70px}
+.pg::-webkit-scrollbar{width:7px}
+.pg::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.inner{max-width:1240px;margin:0 auto}
+
+/* ===== PRO HEADER (same grammar as the workshop) ===== */
+.phtop{display:flex;align-items:flex-start;justify-content:space-between;gap:28px}
+.ttl{display:flex;align-items:center;gap:11px}
+h1.t{font-family:"Playfair Display",serif;font-size:36px;font-weight:500;letter-spacing:-.015em;line-height:1.05}
+.propill{display:inline-flex;align-items:center;gap:5px;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);background:var(--pro-fill);border:1px solid var(--pro-line);border-radius:99px;padding:4px 10px;position:relative;top:2px}
+.propill svg{width:10px;height:10px}
+.sub{font-family:"Playfair Display",serif;font-style:italic;font-size:16px;color:var(--ink-soft);margin-top:9px;max-width:660px;line-height:1.45}
+.ctl{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 13px;background:var(--card);border:1px solid var(--line);border-radius:11px;font-size:12.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
+.ctl:hover{border-color:#cfc2b4}
+.ctl svg{width:14px;height:14px;color:var(--muted)}
+.prorule{height:2px;background:var(--slate);opacity:.5;border-radius:2px;margin-top:18px}
+.strip{display:flex;align-items:center;gap:11px;background:var(--pro-fill);border:1px solid var(--pro-line);border-top:0;border-radius:0 0 12px 12px;padding:11px 16px}
+.strip .sh{width:20px;height:20px;color:var(--slate);flex:none}
+.strip .stx{font-size:12px;color:var(--ink-soft);line-height:1.5}
+.strip .stx b{color:var(--ink);font-weight:600}
+.strip .lnk{margin-left:auto;font-size:11.5px;color:var(--slate);white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--pro-line)}
+
+/* ===== hero ===== */
+.hero{display:flex;gap:46px;align-items:center;margin-top:44px}
+.hcopy{flex:1;min-width:0;max-width:470px}
+.kick{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--burgundy)}
+.hh{font-family:"Playfair Display",serif;font-size:44px;font-weight:500;line-height:1.08;letter-spacing:-.02em;margin-top:13px}
+.hh em{font-style:italic;font-weight:400;display:block;color:var(--ink)}
+.hp{font-size:13.5px;color:var(--ink-soft);line-height:1.7;margin-top:17px}
+.hp b{color:var(--ink);font-weight:600}
+.hcta{display:flex;align-items:center;gap:11px;margin-top:24px}
+.pro-btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 20px;border-radius:12px;background:var(--slate);border:1px solid #5b7b99;color:#fff;font-family:"Playfair Display",serif;font-size:15px;cursor:pointer;box-shadow:2px 3px 0 rgba(46,39,35,.12)}
+.pro-btn:hover{background:#5f7d99}
+.ghost-btn{display:inline-flex;align-items:center;height:42px;padding:0 16px;border-radius:12px;background:#fff;border:1px solid var(--line);color:var(--ink);font-size:12.5px;cursor:pointer}
+.ghost-btn:hover{border-color:var(--burgundy);color:var(--burgundy)}
+.trust{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:18px}
+
+/* hero visual — swappable slot */
+.hvis{flex:none;width:560px;position:relative}
+.slotnote{position:absolute;right:0;top:-24px;font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#c4b7a8}
+.card{background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);overflow:hidden}
+.band{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid var(--ink)}
+.pil{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:2.5px 8px}
+.pil.solid{background:var(--burgundy);border-color:var(--burgundy);color:#fff}
+.starp{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--gold);background:var(--gold-fill);border-radius:99px;padding:2.5px 8px}
+.hstack{display:flex;flex-direction:column;gap:14px}
+.minirow{display:flex;gap:14px}
+.mini{flex:1;background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);overflow:hidden;opacity:0;transform:translateY(9px);animation:rise .6s ease forwards}
+.mini:nth-child(1){animation-delay:.15s}
+.mini:nth-child(2){animation-delay:.3s}
+.mini:nth-child(3){animation-delay:.45s}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.mini .mb{padding:9px 11px}
+.mini .mn{font-family:"Playfair Display",serif;font-size:13px;line-height:1.15}
+.mini .ml{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.06em;color:var(--muted);margin-top:5px;line-height:1.8}
+.resc{opacity:0;transform:translateY(9px);animation:rise .6s ease .7s forwards}
+.resc .rb{padding:15px 16px}
+.rrow{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed var(--linesoft)}
+.rrow:last-of-type{border-bottom:0}
+.rrow .rn{font-family:"Playfair Display",serif;font-size:13.5px;width:132px;flex:none}
+.rrow.win .rn::after{content:' ★';color:#c8853f}
+.rrow .comp{flex:1;display:flex;height:11px;border-radius:4px;overflow:hidden;border:1px solid rgba(46,39,35,.2)}
+.rrow .comp i{height:100%;width:0;animation:grow 1.0s cubic-bezier(.3,.9,.3,1) forwards}
+.rrow .comp .rep{background:var(--ink)}
+.rrow .comp .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.rrow .comp .non{background:var(--fill)}
+.rrow:nth-of-type(1) .comp i{animation-delay:1.0s}
+.rrow:nth-of-type(2) .comp i{animation-delay:1.15s}
+@keyframes grow{to{width:var(--w)}}
+.rrow .rv{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);width:74px;text-align:right}
+.rrow .rv b{font-family:"Playfair Display",serif;font-size:13.5px;color:var(--ink)}
+.rlegend{display:flex;gap:14px;margin-bottom:9px;font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.rlegend span{display:flex;align-items:center;gap:5px}
+.rlegend b{width:11px;height:8px;border-radius:2px;border:1px solid rgba(46,39,35,.2);display:inline-block}
+.commline{display:flex;align-items:center;gap:9px;margin-top:12px;background:var(--pro-fill);border:1px solid var(--pro-line);border-radius:9px;padding:9px 12px;font-size:11.5px;color:var(--ink-soft);line-height:1.45}
+.commline b{color:var(--ink);font-weight:600}
+.commline svg{width:15px;height:15px;color:var(--slate);flex:none}
+
+/* ===== sections ===== */
+.gsec{display:flex;align-items:baseline;gap:12px;margin:0 0 5px}
+.gsec h2{font-family:"Playfair Display",serif;font-size:24px;font-weight:500}
+.gsec .cn{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.grule{height:2px;border-radius:2px;margin-bottom:18px;background:linear-gradient(90deg,var(--pink-line) 0 88px,var(--linesoft) 88px)}
+.grule.s{background:linear-gradient(90deg,#c3cfc0 0 88px,var(--linesoft) 88px)}
+.lead{font-size:13px;color:var(--ink-soft);line-height:1.65;max-width:700px;margin:-4px 0 22px}
+.sect{margin-top:56px}
+
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.tcard .tb2{padding:13px 14px}
+.tcard .tn{font-family:"Playfair Display",serif;font-size:17px}
+.tcard .mrow{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-soft);padding:6px 0;border-bottom:1px dashed var(--linesoft)}
+.tcard .mrow:last-child{border-bottom:0}
+.tcard .g3{width:19px;height:19px;border-radius:6px;background:var(--fill);color:var(--burgundy);display:grid;place-items:center;font-size:8.5px;flex:none}
+.tcard .foot2{border-top:1px solid var(--linesoft);padding:8px 14px;font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.06em;color:var(--muted);background:var(--card)}
+
+/* compare */
+.cmp{background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:20px 22px}
+.lane{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px dashed var(--linesoft)}
+.lane:last-of-type{border-bottom:0}
+.lane .ln{font-family:"Playfair Display",serif;font-size:15px;width:168px;flex:none}
+.lane .ls{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.06em;color:var(--muted);display:block;margin-top:3px}
+.lane.win .ln::after{content:' ★';color:#c8853f}
+.lane .comp{flex:1;display:flex;height:13px;border-radius:4px;overflow:hidden;border:1px solid rgba(46,39,35,.2)}
+.lane .comp i{height:100%;width:0;transition:width 1.1s cubic-bezier(.3,.9,.3,1)}
+.lane .comp .rep{background:var(--ink)}
+.lane .comp .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.lane .comp .non{background:var(--fill)}
+.play .lane .comp i{width:var(--w)}
+.clegend{display:flex;gap:16px;margin-bottom:13px;font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.clegend span{display:flex;align-items:center;gap:6px}
+.clegend b{width:12px;height:9px;border-radius:2px;border:1px solid rgba(46,39,35,.2);display:inline-block}
+.lane .pct{font-family:"JetBrains Mono",monospace;font-size:6.8px;letter-spacing:.07em;text-transform:uppercase;background:var(--fill);color:var(--ink-soft);border:1px solid var(--line);border-radius:99px;padding:3px 9px;white-space:nowrap}
+.lane .pct.top{background:var(--gold-fill);color:var(--gold);border-color:#e4d5b2}
+.lane .pct.low{background:var(--fill);color:var(--muted)}
+.lane .lv{font-family:"Playfair Display",serif;font-size:15px;color:var(--ink);width:74px;text-align:right}
+.lane.win .lv{color:var(--burgundy)}
+.reco{display:flex;align-items:center;gap:13px;margin-top:18px;background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:14px 16px}
+.reco .st{color:#c8853f;font-size:15px;flex:none}
+.reco .rt{font-size:12.5px;line-height:1.6;color:var(--ink)}
+.reco .rt b{font-weight:600}
+.reco .rb2{margin-left:auto;flex:none;display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:10px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:11.5px;cursor:pointer}
+
+/* what's included */
+.incl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.icard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:15px 16px}
+.icard .it{width:30px;height:30px;border-radius:9px;background:var(--pro-fill);color:var(--slate);display:grid;place-items:center;margin-bottom:11px}
+.icard .it svg{width:15px;height:15px}
+.icard .ih{font-family:"Playfair Display",serif;font-size:14.5px;line-height:1.2}
+.icard .id2{font-size:11.5px;color:var(--ink-soft);line-height:1.55;margin-top:6px}
+
+/* CTA band */
+.ctaband{margin-top:56px;background:var(--pink);border:1px solid var(--ink);border-radius:14px;box-shadow:3px 4px 0 rgba(46,39,35,.09);padding:30px 34px;display:flex;align-items:center;gap:30px}
+.ctaband .ch{font-family:"Playfair Display",serif;font-size:26px;font-weight:500;line-height:1.2}
+.ctaband .ch em{font-style:italic}
+.ctaband .cp{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-top:8px;max-width:520px}
+.ctaband .cacts{margin-left:auto;display:flex;flex-direction:column;gap:9px;flex:none;align-items:stretch}
+.ctaband .price{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--burgundy);text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="cap rail">
+    <svg class="mk" viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="rib on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></div>
+    <div class="sp"></div>
+    <div class="rib" style="margin-bottom:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></div>
+    <div class="av">ML</div>
+  </nav>
+
+  <main class="cap plane">
+    <div class="tb">
+      <span class="crumb">Querying / <b>Packages</b></span>
+      <div class="grow"></div>
+      <div class="gs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…</div>
+    </div>
+
+    <div class="pg"><div class="inner">
+
+      <!-- header: identical grammar to the workshop -->
+      <div class="phtop">
+        <div>
+          <div class="ttl">
+            <h1 class="t">Package Workshop</h1>
+            <span class="propill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.6 4.4 5.8v6c0 4.4 3.2 8.1 7.6 9.6 4.4-1.5 7.6-5.2 7.6-9.6v-6L12 2.6Z"/></svg>Pro</span>
+          </div>
+          <div class="sub">Bundle your materials once, then send them without rebuilding each time.</div>
+        </div>
+        <span class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6l2-1.5L12 10V4"/></svg>Murphy's Day Out<svg style="width:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      </div>
+      <div class="prorule"></div>
+      <div class="strip">
+        <svg class="sh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 2.6 4.4 5.8v6c0 4.4 3.2 8.1 7.6 9.6 4.4-1.5 7.6-5.2 7.6-9.6v-6L12 2.6Z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></svg>
+        <span class="stx"><b>Submission packages are part of ScriptAlly Pro.</b> Everything below is real — this is the workshop as you'd use it, with a fortnight of example replies.</span>
+        <span class="lnk">Compare plans</span>
+      </div>
+
+      <!-- HERO -->
+      <div class="hero">
+        <div class="hcopy">
+          <div class="kick">Submission packages</div>
+          <h1 class="hh">Find out which version<em>agents answer</em></h1>
+          <div class="hp">Build two or three versions of your submission from the same materials, then send them. ScriptAlly records what went to each agent and shows you <b>which combination gets replies</b> — and when one earns a full request, you'll know exactly what was in it.</div>
+          <div class="hcta">
+            <span class="pro-btn">Unlock with Pro</span>
+            <span class="ghost-btn">Try it with example data →</span>
+          </div>
+          <div class="trust">Built for UK querying · Your materials stay yours</div>
+        </div>
+
+        <div class="hvis">
+          <span class="slotnote">Hero visual · swappable slot</span>
+          <div class="hstack">
+            <div class="minirow">
+              <div class="mini"><div class="band" style="background:var(--sage-band)"><span class="pil solid">Active</span></div><div class="mb"><div class="mn">Character-led · v2</div><div class="ml">CHARACTER-LED LETTER<br>CHARACTER-LED SYNOPSIS</div></div></div>
+              <div class="mini"><div class="band" style="background:var(--sage-band)"><span class="pil">Sent ×3</span></div><div class="mb"><div class="mn">Comp-led · v1</div><div class="ml">COMP-LED LETTER<br>ONE-PAGE SYNOPSIS</div></div></div>
+              <div class="mini"><div class="band" style="background:var(--tan)"><span class="pil">Draft</span></div><div class="mb"><div class="mn">Hartley bespoke</div><div class="ml">CHARACTER-LED SYNOPSIS<br>CHAPTERS 1–3</div></div></div>
+            </div>
+            <div class="card resc">
+              <div class="band" style="background:var(--tan)"><span class="pil">Package analytics</span><span class="starp">★ 1 FULL REQUEST</span></div>
+              <div class="rb">
+                <div class="rlegend"><span><b style="background:#2e2723"></b>Replied</span><span><b style="background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></b>Still waiting</span><span><b style="background:#efe8df"></b>No reply</span></div>
+                <div class="rrow win"><span class="rn">Character-led · v2</span><span class="comp"><i class="rep" style="--w:75%"></i><i class="wait" style="--w:25%"></i></span><span class="rv"><b>3</b> of 4 replied</span></div>
+                <div class="rrow"><span class="rn">Comp-led · v1</span><span class="comp"><i class="rep" style="--w:67%"></i><i class="wait" style="--w:33%"></i></span><span class="rv"><b>2</b> of 3 replied</span></div>
+                <div class="rrow"><span class="rn">Hartley bespoke</span><span class="comp"><i class="non" style="--w:100%"></i></span><span class="rv">not sent</span></div>
+                <div class="commline">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg>
+                  <span>Your character-led version replies <b>higher than 82%</b> of packages in the ScriptAlly community.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONE MANUSCRIPT, SEVERAL VERSIONS -->
+      <div class="sect">
+        <div class="gsec"><h2>One manuscript, several versions</h2><span class="cn">HOW IT WORKS</span></div>
+        <div class="grule"></div>
+        <div class="lead">Write your letter, synopsis and sample pages once. Mix them into packages — a character-led pitch, a comps-led pitch, a bespoke one for the agent who asked for something specific — and send whichever suits each agency's guidelines.</div>
+        <div class="trio">
+          <div class="card tcard">
+            <div class="band" style="background:var(--sage-band)"><span class="pil solid">Active</span><span class="starp">★ 1 REQUEST</span></div>
+            <div class="tb2">
+              <div class="tn">Character-led · v2</div>
+              <div style="margin-top:9px">
+                <div class="mrow"><span class="g3">?</span>Character-led letter</div>
+                <div class="mrow"><span class="g3">≡</span>Character-led synopsis</div>
+                <div class="mrow"><span class="g3">▤</span>Chapters 1–3</div>
+              </div>
+            </div>
+            <div class="foot2">SENT ×4 · 75% REPLIED</div>
+          </div>
+          <div class="card tcard">
+            <div class="band" style="background:var(--sage-band)"><span class="pil">Sent ×3</span></div>
+            <div class="tb2">
+              <div class="tn">Comp-led · v1</div>
+              <div style="margin-top:9px">
+                <div class="mrow"><span class="g3">?</span>Comp-led letter</div>
+                <div class="mrow"><span class="g3">≡</span>One-page synopsis</div>
+                <div class="mrow"><span class="g3">▤</span>First 50 pages</div>
+              </div>
+            </div>
+            <div class="foot2">SENT ×3 · 67% REPLIED</div>
+          </div>
+          <div class="card tcard">
+            <div class="band" style="background:var(--tan)"><span class="pil">Draft</span></div>
+            <div class="tb2">
+              <div class="tn">Hartley bespoke</div>
+              <div style="margin-top:9px">
+                <div class="mrow"><span class="g3">≡</span>Character-led synopsis</div>
+                <div class="mrow"><span class="g3">▤</span>Chapters 1–3</div>
+                <div class="mrow" style="color:#b8a996;font-style:italic"><span class="g3" style="color:#cfc2b4">?</span>No letter yet</div>
+              </div>
+            </div>
+            <div class="foot2">NOT SENT YET</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARE -->
+      <div class="sect" id="cmpsec">
+        <div class="gsec"><h2>Stop guessing which letter works</h2><span class="cn">VERSION COMPARE</span></div>
+        <div class="grule s"></div>
+        <div class="lead">Every package keeps its own scorecard — reply rate, how long each agency took, and which materials travelled with it. Requests are rare, so replies are the honest signal, and ScriptAlly shows where yours sit against the wider community.</div>
+        <div class="cmp">
+          <div class="clegend"><span><b style="background:#2e2723"></b>Replied</span><span><b style="background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></b>Still waiting</span><span><b style="background:#efe8df"></b>No reply</span></div>
+          <div class="lane win"><span class="ln">Character-led · v2<span class="ls">CHAR. LETTER + CHAR. SYNOPSIS</span></span><span class="comp"><i class="rep" style="--w:75%"></i><i class="wait" style="--w:25%"></i></span><span class="pct top">TOP 10%</span><span class="lv">3 of 4</span></div>
+          <div class="lane"><span class="ln">Comp-led · v1<span class="ls">COMP LETTER + 1PP SYNOPSIS</span></span><span class="comp"><i class="rep" style="--w:67%"></i><i class="wait" style="--w:33%"></i></span><span class="pct">BEATS 61%</span><span class="lv">2 of 3</span></div>
+          <div class="lane"><span class="ln">Short &amp; sharp<span class="ls">COMP LETTER + PROLOGUE</span></span><span class="comp"><i class="rep" style="--w:33%"></i><i class="wait" style="--w:33%"></i><i class="non" style="--w:34%"></i></span><span class="pct low">BEATS 24%</span><span class="lv">1 of 3</span></div>
+        </div>
+        <div class="reco">
+          <span class="st">★</span>
+          <span class="rt">Your <b>character-led</b> package has a significantly higher reply rate than your others, and it carried the <b>full request</b> from Hartley Books. Make this your active package for future queries?</span>
+          <span class="rb2">Make active</span>
+        </div>
+      </div>
+
+      <!-- WHAT PRO INCLUDES -->
+      <div class="sect">
+        <div class="gsec"><h2>What comes with it</h2><span class="cn">INCLUDED IN PRO</span></div>
+        <div class="grule"></div>
+        <div class="incl">
+          <div class="icard"><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg></span><div class="ih">Unlimited packages</div><div class="id2">Build as many versions as you like, per manuscript.</div></div>
+          <div class="icard"><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span><div class="ih">Reply-rate analytics</div><div class="id2">Per package and per material, with median reply times.</div></div>
+          <div class="icard"><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg></span><div class="ih">Community benchmarks</div><div class="id2">See where your reply rate sits against other writers.</div></div>
+          <div class="icard"><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3v13M7 11l5 5 5-5M4 20h16"/></svg></span><div class="ih">Send in one click</div><div class="id2">Attach a package to a query — no rebuilding each time.</div></div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="ctaband">
+        <div>
+          <div class="ch">Your next letter could be <em>the one</em></div>
+          <div class="cp">Start with the version you already have. Send it, watch what comes back, and let the numbers tell you what to change — instead of rewriting in the dark.</div>
+        </div>
+        <div class="cacts">
+          <span class="pro-btn" style="justify-content:center">Unlock with Pro</span>
+          <span class="ghost-btn" style="justify-content:center">Try it with example data →</span>
+          <span class="price">£12 / month · cancel anytime</span>
+        </div>
+      </div>
+
+    </div></div>
+  </main>
+</div>
+<script>
+const sec=document.getElementById('cmpsec');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('play');o.unobserve(e.target);}}),{threshold:.35}).observe(sec);
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!--
+  ScriptAlly — Packages: first-run empty states (Workshop + Analytics).
+
+  PROVENANCE: SPEC-DERIVED MOCK, not a build artefact. Authored to specify the design; it is not
+  generated from, and does not run against, the app's data or components.
+
+  DATA HONESTY: every figure in it is illustrative. In particular all COMMUNITY PERCENTILE claims
+  ("higher than N% of ScriptAlly writers", "TOP 10%", "BEATS 71%") are PLACEHOLDERS — no community
+  aggregation pipeline exists, and pre-launch there is no cohort to aggregate. The build renders that
+  surface behind a default-off flag and never invents numbers at runtime. See
+  reports/community-percentiles.md.
+
+  Source of truth for: layout, tokens, copy and component grammar. Port faithfully.
+-->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Package Workshop: first-run empty state</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9; --slate:#6a89a7; --tan:#efe7db;
+  --ground:#e7e0d5; --rail-s:#f1ebe3; --plane-s:#fdfbf8; --fill:#efe8df;
+  --card:#fdfaf5; --line:#e3d9cf; --linesoft:#ece3da;
+  --pro-fill:#eef2f6; --pro-line:#c6d5e2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.app{height:100vh;display:flex;gap:12px;padding:10px}
+.cap{border-radius:18px;box-shadow:0 10px 30px rgba(58,28,20,.09)}
+.rail{width:64px;flex:none;background:var(--rail-s);display:flex;flex-direction:column;align-items:center;padding:14px 0 13px}
+.rail .mk{width:24px;height:24px;color:var(--burgundy);margin-bottom:20px;flex:none}
+.rib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#a89a8a;margin-bottom:6px;cursor:pointer}
+.rib svg{width:18px;height:18px}
+.rib.on{background:var(--ground);color:var(--burgundy)}
+.rail .sp{flex:1}
+.rail .av{width:34px;height:34px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.25);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:12px;color:var(--burgundy)}
+.plane{flex:1;min-width:0;background:var(--plane-s);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.tb{height:54px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.grow{flex:1}
+.gs{display:flex;align-items:center;gap:9px;width:250px;height:33px;padding:0 11px;background:var(--fill);border-radius:10px;color:var(--muted);font-size:12.5px}
+.gs svg{width:14px;height:14px}
+.pg{flex:1;overflow-y:auto;padding:26px 56px 60px}
+.pg::-webkit-scrollbar{width:7px}
+.pg::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.inner{max-width:1240px;margin:0 auto}
+
+/* ===== PRO HEADER FORMAT (Discover grammar) ===== */
+.phtop{display:flex;align-items:flex-start;justify-content:space-between;gap:28px}
+.ttl{display:flex;align-items:center;gap:11px}
+h1.t{font-family:"Playfair Display",serif;font-size:36px;font-weight:500;letter-spacing:-.015em;line-height:1.05}
+.propill{display:inline-flex;align-items:center;gap:5px;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);background:var(--pro-fill);border:1px solid var(--pro-line);border-radius:99px;padding:4px 10px;position:relative;top:2px}
+.propill svg{width:10px;height:10px}
+.sub{font-family:"Playfair Display",serif;font-style:italic;font-size:16px;color:var(--ink-soft);margin-top:9px;max-width:640px;line-height:1.45}
+.hact{display:flex;align-items:center;gap:9px;flex:none}
+.ctl{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 13px;background:var(--card);border:1px solid var(--line);border-radius:11px;font-size:12.5px;color:var(--ink);cursor:pointer;white-space:nowrap}
+.ctl:hover{border-color:#cfc2b4}
+.ctl svg{width:14px;height:14px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:11px;border:1px solid var(--pink-line);background:var(--pink);color:var(--burgundy);font-size:12.5px;cursor:pointer;white-space:nowrap}
+.btn svg{width:15px;height:15px}
+.prorule{height:2px;background:var(--slate);opacity:.5;border-radius:2px;margin:18px 0 0}
+.strip{display:flex;align-items:center;gap:11px;background:var(--pro-fill);border:1px solid var(--pro-line);border-top:0;border-radius:0 0 12px 12px;padding:11px 16px}
+.strip .sh{width:20px;height:20px;color:var(--slate);flex:none}
+.strip .stx{font-size:12px;color:var(--ink-soft);line-height:1.5}
+.strip .stx b{color:var(--ink);font-weight:600}
+.strip .lnk{margin-left:auto;font-size:11.5px;color:var(--slate);white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--pro-line)}
+
+.tabs{display:flex;gap:24px;margin-top:22px;border-bottom:1px solid var(--linesoft)}
+.tab{font-family:"Playfair Display",serif;font-size:16px;color:var(--ink-soft);padding:9px 2px;cursor:pointer;border-bottom:2px solid transparent}
+.tab.on{color:var(--burgundy);border-bottom-color:var(--burgundy)}
+.tv{display:none;padding-top:30px}
+.tv.show{display:block}
+.sl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* ===== steps ===== */
+.steps{display:flex;align-items:stretch;gap:0;margin-bottom:34px;border:1px solid var(--line);border-radius:13px;background:var(--card);overflow:hidden}
+.stp{flex:1;display:flex;align-items:flex-start;gap:12px;padding:15px 18px;position:relative}
+.stp+.stp{border-left:1px solid var(--linesoft)}
+.stp .no{width:24px;height:24px;border-radius:99px;flex:none;display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:10px;border:1px solid var(--line);background:#fff;color:var(--muted)}
+.stp.now .no{background:var(--burgundy);border-color:var(--burgundy);color:#fff}
+.stp .sh2{font-family:"Playfair Display",serif;font-size:15px;line-height:1.2}
+.stp .sd{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.5}
+.stp.now{background:#fff}
+.stp.now .sh2{color:var(--burgundy)}
+.stp.dim .sh2,.stp.dim .sd{color:#b3a494}
+
+/* ===== section rhythm ===== */
+.gsec{display:flex;align-items:baseline;gap:12px;margin:0 0 5px}
+.gsec h2{font-family:"Playfair Display",serif;font-size:22px;font-weight:500}
+.gsec .cn{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.gsec .rt{margin-left:auto;font-size:11.5px;color:var(--burgundy);cursor:pointer}
+.grule{height:2px;border-radius:2px;margin-bottom:18px;background:linear-gradient(90deg,var(--pink-line) 0 88px,var(--linesoft) 88px)}
+.grule.s{background:linear-gradient(90deg,#c3cfc0 0 88px,var(--linesoft) 88px)}
+.lead{font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:720px;margin:-4px 0 20px}
+
+/* ===== materials: three spacious type cards ===== */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.mcard{background:#fff;border:1px solid var(--ink);border-radius:11px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07);display:flex;flex-direction:column}
+.mcard .band{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid var(--ink);background:var(--tan)}
+.mcard .band .pil{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:2.5px 9px}
+.mcard .band .zero{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--muted)}
+.mcard .bd{padding:20px 18px 18px;flex:1;display:flex;flex-direction:column}
+.mcard .tile{width:42px;height:42px;border-radius:12px;background:var(--fill);color:var(--burgundy);display:grid;place-items:center;margin-bottom:13px}
+.mcard .tile svg{width:20px;height:20px}
+.mcard .mt{font-family:"Playfair Display",serif;font-size:19px;line-height:1.15}
+.mcard .md{font-size:12px;color:var(--ink-soft);line-height:1.6;margin-top:7px;flex:1}
+.mcard .eg{font-family:"Playfair Display",serif;font-style:italic;font-size:12px;color:var(--muted);margin-top:10px}
+.mcard .add{margin-top:15px;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;border-radius:10px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:12px;cursor:pointer}
+.mcard.first .add{box-shadow:0 0 0 0 rgba(124,58,42,.32);animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(124,58,42,.30)}70%{box-shadow:0 0 0 9px rgba(124,58,42,0)}100%{box-shadow:0 0 0 0 rgba(124,58,42,0)}}
+
+/* ===== ghost package shell grid ===== */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:18px}
+.ghost{background:#fff;border:1.5px dashed var(--line);border-radius:11px;overflow:hidden;min-height:236px;display:flex;flex-direction:column}
+.ghost .gband{height:34px;background:var(--linesoft);border-bottom:1.5px dashed var(--line);display:flex;align-items:center;padding:0 13px;gap:7px}
+.ghost .gpill{width:52px;height:10px;border-radius:99px;background:#e6ddd3}
+.ghost .gbd{padding:15px 14px;flex:1}
+.ghost .gline{height:13px;border-radius:4px;background:#efe8e0;width:62%}
+.ghost .grow{display:flex;align-items:center;gap:9px;margin-top:14px}
+.ghost .gt2{width:20px;height:20px;border-radius:6px;background:var(--fill);flex:none}
+.ghost .gbar{height:9px;border-radius:4px;background:#f1eae2;flex:1;max-width:150px}
+.ghost .gfoot{height:30px;border-top:1.5px dashed var(--line);background:#fdfcfa}
+.ghost.mk{border-color:var(--pink-line);background:#fff;align-items:center;justify-content:center;display:grid;place-items:center;cursor:pointer}
+.ghost.mk:hover{border-color:var(--burgundy)}
+.ghost.mk .mkin{text-align:center;padding:20px}
+.ghost.mk .plus{width:38px;height:38px;border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);display:grid;place-items:center;margin:0 auto 11px;font-size:17px}
+.ghost.mk .mkt{font-family:"Playfair Display",serif;font-size:16px}
+.ghost.mk .mks{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.5;max-width:180px}
+.gcap{display:flex;align-items:center;gap:9px;margin-top:14px;font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft)}
+.gcap .dsh{width:26px;height:1.5px;border-top:1.5px dashed var(--line)}
+
+/* ===== example-data band ===== */
+.exband{display:flex;align-items:center;gap:16px;margin-top:38px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 20px}
+.exband .ic{width:38px;height:38px;border-radius:11px;background:var(--sage-band);color:var(--ink);display:grid;place-items:center;flex:none}
+.exband .ic svg{width:18px;height:18px}
+.exband .ext{font-size:12.5px;color:var(--ink-soft);line-height:1.55}
+.exband .ext b{font-family:"Playfair Display",serif;font-weight:500;font-size:14.5px;color:var(--ink);display:block;margin-bottom:3px}
+.exband .go{margin-left:auto;display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;white-space:nowrap}
+.exband .go:hover{border-color:var(--burgundy);color:var(--burgundy)}
+
+/* ===== analytics empty ===== */
+.kpis{display:flex;gap:16px}
+.kpi{flex:1;background:#fff;border:1.5px dashed var(--line);border-radius:11px;padding:14px 16px}
+.kpi .v{font-family:"Playfair Display",serif;font-size:30px;font-weight:500;line-height:.95;color:#d8cec3}
+.kpi .k{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.anempty{background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:34px 32px;margin-top:22px;display:flex;gap:28px;align-items:center}
+.anempty .il{width:132px;flex:none}
+.anempty .eh{font-family:"Playfair Display",serif;font-size:21px;font-weight:500}
+.anempty .ep{font-size:12.5px;color:var(--ink-soft);line-height:1.65;margin-top:9px;max-width:560px}
+.anempty .ep b{color:var(--ink);font-weight:600}
+.anempty .acts{display:flex;gap:9px;margin-top:15px}
+.prev{margin-top:26px}
+.pvrow{display:flex;align-items:center;gap:12px;padding:9px 0}
+.pvrow .pl2{width:96px;font-size:11.5px;color:#b3a494;flex:none}
+.pvrow .tr3{flex:1;display:flex;height:14px;border-radius:5px;overflow:hidden;border:1px solid rgba(46,39,35,.14)}
+.pvrow .tr3 i{height:100%;background:#e7ded4}
+.pvrow .tr3 i.w{background:repeating-linear-gradient(45deg,#eee5da,#eee5da 3px,#f6f0e9 3px,#f6f0e9 6px)}
+.pvrow .tr3 i.n{background:#f6f0e9}
+.pvrow .pv2{width:40px;text-align:right;font-family:"JetBrains Mono",monospace;font-size:9px;color:#c4b7a8}
+.commteaser{display:flex;align-items:center;gap:11px;margin-top:20px;background:var(--pro-fill);border:1px solid var(--pro-line);border-radius:11px;padding:12px 16px;font-size:12px;color:var(--ink-soft);line-height:1.5}
+.commteaser svg{width:17px;height:17px;color:var(--slate);flex:none}
+
+.viewsw{position:absolute;right:18px;bottom:16px;display:flex;gap:3px;background:rgba(90,70,55,.1);border-radius:9px;padding:3px;z-index:30}
+.viewsw button{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.04em;text-transform:uppercase;border:0;background:transparent;color:#7a6b5e;padding:7px 11px;border-radius:7px;cursor:pointer}
+.viewsw button.on{background:#fff;color:var(--burgundy);box-shadow:0 1px 2px rgba(58,28,20,.14)}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="cap rail">
+    <svg class="mk" viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="rib on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></div>
+    <div class="sp"></div>
+    <div class="rib" style="margin-bottom:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></div>
+    <div class="av">ML</div>
+  </nav>
+
+  <main class="cap plane">
+    <div class="tb">
+      <span class="crumb">Querying / <b>Packages</b></span>
+      <div class="grow"></div>
+      <div class="gs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…</div>
+    </div>
+
+    <div class="pg"><div class="inner">
+
+      <!-- PRO HEADER FORMAT -->
+      <div class="phtop">
+        <div>
+          <div class="ttl">
+            <h1 class="t">Package Workshop</h1>
+            <span class="propill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.6 4.4 5.8v6c0 4.4 3.2 8.1 7.6 9.6 4.4-1.5 7.6-5.2 7.6-9.6v-6L12 2.6Z"/></svg>Pro</span>
+          </div>
+          <div class="sub">Bundle your materials once, then send them without rebuilding each time.</div>
+        </div>
+        <div class="hact">
+          <span class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6l2-1.5L12 10V4"/></svg>Murphy's Day Out<svg style="width:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+          <span class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New package</span>
+        </div>
+      </div>
+      <div class="prorule"></div>
+      <div class="strip">
+        <svg class="sh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 2.6 4.4 5.8v6c0 4.4 3.2 8.1 7.6 9.6 4.4-1.5 7.6-5.2 7.6-9.6v-6L12 2.6Z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></svg>
+        <span class="stx"><b>Every package keeps its own scorecard.</b> ScriptAlly records which letter, synopsis and pages went to each agent — so you can see which combination gets replies, rather than guessing.</span>
+        <span class="lnk">How packages work</span>
+      </div>
+
+      <div class="tabs">
+        <span class="tab on" onclick="setTab(0,this)">Workshop</span>
+        <span class="tab" onclick="setTab(1,this)">Analytics</span>
+      </div>
+
+      <!-- ============ WORKSHOP · EMPTY ============ -->
+      <div class="tv show">
+
+        <div class="steps">
+          <div class="stp now"><span class="no">1</span><span><span class="sh2">Add your materials</span><div class="sd">Your query letter, synopsis and sample pages — written here or pasted in.</div></span></div>
+          <div class="stp dim"><span class="no">2</span><span><span class="sh2">Bundle them into a package</span><div class="sd">Pick one of each. Build as many versions as you like.</div></span></div>
+          <div class="stp dim"><span class="no">3</span><span><span class="sh2">Send it with a query</span><div class="sd">Replies land against the package, and the Analytics tab does the rest.</div></span></div>
+        </div>
+
+        <div class="gsec"><h2>Start with your materials</h2><span class="cn">NOTHING ADDED YET</span></div>
+        <div class="grule"></div>
+        <div class="lead">You need at least a query letter to build a package. Most writers keep two or three versions of each piece, then test which combination agents respond to.</div>
+
+        <div class="mgrid">
+          <div class="mcard first">
+            <div class="band"><span class="pil">Query letters</span><span class="zero">0</span></div>
+            <div class="bd">
+              <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 1 1 6 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r=".8" fill="currentColor"/></svg></span>
+              <div class="mt">Query letters</div>
+              <div class="md">The pitch itself — your hook, your comps, your bio. The one piece every package needs.</div>
+              <div class="eg">e.g. "Character-led letter"</div>
+              <span class="add">＋ Add a query letter</span>
+            </div>
+          </div>
+          <div class="mcard">
+            <div class="band"><span class="pil">Synopses</span><span class="zero">0</span></div>
+            <div class="bd">
+              <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+              <div class="mt">Synopses</div>
+              <div class="md">The whole story, ending included. Agencies ask for wildly different lengths — keep a one-page and a two-page.</div>
+              <div class="eg">e.g. "One-page synopsis"</div>
+              <span class="add">＋ Add a synopsis</span>
+            </div>
+          </div>
+          <div class="mcard">
+            <div class="band"><span class="pil">Sample pages</span><span class="zero">0</span></div>
+            <div class="bd">
+              <span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M8 6h9a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"/><path d="M6 17V4a1 1 0 0 1 1-1h8"/></svg></span>
+              <div class="mt">Sample pages</div>
+              <div class="md">First three chapters, first fifty pages, prologue-first — whatever an agency's guidelines ask for.</div>
+              <div class="eg">e.g. "Chapters 1–3"</div>
+              <span class="add">＋ Add sample pages</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="gsec" style="margin-top:44px"><h2>Your packages</h2><span class="cn">NONE YET</span></div>
+        <div class="grule s"></div>
+        <div class="lead">Once you've added materials, your packages will live here — each one showing what's inside it and how it's performing.</div>
+
+        <div class="pgrid">
+          <div class="ghost mk">
+            <div class="mkin">
+              <div class="plus">＋</div>
+              <div class="mkt">Create your first package</div>
+              <div class="mks">Name it, pick one of each material, and it's ready to send.</div>
+            </div>
+          </div>
+          <div class="ghost">
+            <div class="gband"><span class="gpill"></span></div>
+            <div class="gbd">
+              <div class="gline"></div>
+              <div class="grow"><span class="gt2"></span><span class="gbar"></span></div>
+              <div class="grow"><span class="gt2"></span><span class="gbar" style="max-width:120px"></span></div>
+              <div class="grow"><span class="gt2"></span><span class="gbar" style="max-width:96px"></span></div>
+            </div>
+            <div class="gfoot"></div>
+          </div>
+          <div class="ghost">
+            <div class="gband"><span class="gpill"></span></div>
+            <div class="gbd">
+              <div class="gline" style="width:48%"></div>
+              <div class="grow"><span class="gt2"></span><span class="gbar" style="max-width:132px"></span></div>
+              <div class="grow"><span class="gt2"></span><span class="gbar" style="max-width:108px"></span></div>
+              <div class="grow"><span class="gt2"></span><span class="gbar" style="max-width:84px"></span></div>
+            </div>
+            <div class="gfoot"></div>
+          </div>
+        </div>
+        <div class="gcap"><span class="dsh"></span>This is the shape a package takes — three materials, a status, and its own results.</div>
+
+        <div class="exband">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></span>
+          <span class="ext"><b>Rather see it working first?</b>Load a worked example — three finished packages with a fortnight of agent replies — and click around. Nothing is saved to your account.</span>
+          <span class="go">Try it with example data →</span>
+        </div>
+      </div>
+
+      <!-- ============ ANALYTICS · EMPTY ============ -->
+      <div class="tv">
+        <div class="kpis">
+          <div class="kpi"><div class="v">—</div><div class="k">Queries sent</div></div>
+          <div class="kpi"><div class="v">—</div><div class="k">Reply rate</div></div>
+          <div class="kpi"><div class="v">—</div><div class="k">Median reply time</div></div>
+          <div class="kpi"><div class="v">—</div><div class="k">Requests</div></div>
+        </div>
+
+        <div class="anempty">
+          <svg class="il" viewBox="0 0 132 108" fill="none">
+            <rect x="10" y="18" width="76" height="82" rx="7" fill="#fff" stroke="#e3d9cf" stroke-width="1.5"/>
+            <rect x="10" y="18" width="76" height="16" rx="7" fill="#efe7db"/>
+            <path d="M10 34h76" stroke="#e3d9cf" stroke-width="1.5"/>
+            <rect x="20" y="46" width="44" height="6" rx="3" fill="#efe8e0"/>
+            <rect x="20" y="60" width="56" height="5" rx="2.5" fill="#f3ece5"/>
+            <rect x="20" y="72" width="34" height="5" rx="2.5" fill="#f3ece5"/>
+            <path d="M74 84c14-6 28-22 36-44" stroke="#7c3a2a" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 4" opacity=".55"/>
+            <circle cx="112" cy="38" r="7" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.8"/>
+          </svg>
+          <div>
+            <div class="eh">Nothing to measure yet</div>
+            <div class="ep">Analytics fills in the moment a package goes out with a query. You'll see <b>reply rates per package</b>, which materials the replying agents received, how long each agency takes — and a nudge when someone's overdue.</div>
+            <div class="acts"><span class="btn">＋ Build your first package</span><span class="ctl">Try it with example data</span></div>
+          </div>
+        </div>
+
+        <div class="prev">
+          <div class="sl" style="margin-bottom:8px">What appears here</div>
+          <div class="pvrow"><span class="pl2">Replied</span><span class="tr3"><i style="width:64%"></i><i class="w" style="width:22%"></i><i class="n" style="width:14%"></i></span><span class="pv2">—</span></div>
+          <div class="pvrow"><span class="pl2">Still waiting</span><span class="tr3"><i class="w" style="width:22%"></i><i class="n" style="width:78%"></i></span><span class="pv2">—</span></div>
+          <div class="pvrow"><span class="pl2">Requests ★</span><span class="tr3"><i style="width:12%"></i><i class="n" style="width:88%"></i></span><span class="pv2">—</span></div>
+        </div>
+
+        <div class="commteaser">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><path d="M16 6.2a3 3 0 0 1 0 5.6M17.5 14.8c2 .6 3.2 2.3 3.2 4.7"/></svg>
+          <span>Once you've sent a few queries, ScriptAlly will also show how your reply rate compares with the wider writing community.</span>
+        </div>
+      </div>
+
+    </div></div>
+
+    <div class="viewsw">
+      <button class="on" onclick="setTab(0,document.querySelectorAll('.tab')[0])">Workshop · empty</button>
+      <button onclick="setTab(1,document.querySelectorAll('.tab')[1])">Analytics · empty</button>
+    </div>
+  </main>
+</div>
+<script>
+function setTab(n,el){
+  document.querySelectorAll('.tv').forEach((t,i)=>t.classList.toggle('show',i===n));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.viewsw button').forEach((b,i)=>b.classList.toggle('on',i===n));
+  document.querySelector('.pg').scrollTop=0;
+}
+</script>
+</body>
+</html>
