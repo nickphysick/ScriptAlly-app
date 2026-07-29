@@ -215,6 +215,18 @@
    not additive), so the settle would be cancelled the moment the row started leaving. */
 .f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
 
+/* ── COMPACT CREATE HERO (ref qdb-focus-spotlight.html) — the height the columns needed came
+   from two places: the retired footer bar (~95px) and this (~90px). Padding tightens, the mark
+   drops to 54px, and the title/subtitle move BESIDE the search field instead of above it. Scoped
+   to .qc-hero so the reading pane's own record hero is untouched. */
+.f12-hero.qc-hero { padding: 16px 20px; gap: 16px; }
+.qc-mark { flex: none; width: 54px; height: 54px; border-radius: 50%; background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); display: flex; align-items: center; justify-content: center; font-size: 19px; }
+.qc-htxt { flex: none; min-width: 0; }
+.qc-hero .qc-head { font-size: 20px; line-height: 1.1; }
+.qc-hero .qc-sub { font-size: 13px; margin: 0; }
+/* Below the two-up width the text block would squeeze the field, so it stacks back. */
+@media (max-width: 980px) { .f12-hero.qc-hero { flex-wrap: wrap; } .qc-htxt { flex: 1 0 100%; } }
+
 /* ── CREATE-MODE COMMAND BAR (ref qdb-focus-spotlight.html) — the record actions are replaced
    by this while a draft is open. Same .f12-ctl seat, so the bar neither moves nor changes height
    as it swaps. The two buttons carry qh-lit and stay above the scrim. */

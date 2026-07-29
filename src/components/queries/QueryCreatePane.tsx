@@ -85,9 +85,9 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const other = draft.materials.find((r) => r.key === "other") as Extract<MaterialRow, { key: "other" }> | undefined;
 
   return (
-    <div className="f12-detail" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 16 }}>
+    <div className="f12-detail" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
       {/* ── HERO: the agent picker, resolving to the normal agent header once chosen ── */}
-      <div className="f12-hero" style={{ flex: "none", alignItems: draft.agentId ? "center" : "flex-start" }}>
+      <div className="f12-hero qc-hero" style={{ flex: "none", alignItems: "center" }}>
         {agent ? (
           <>
             <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
@@ -108,24 +108,19 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           </>
         ) : (
           <>
-            <span
-              aria-hidden="true"
-              style={{
-                flex: "none", width: 76, height: 76, borderRadius: "50%", background: "var(--pink-t)",
-                border: "1.5px dashed var(--pink-b)", color: "var(--pink-i)", display: "flex",
-                alignItems: "center", justifyContent: "center", fontSize: 26,
-                /* the heading sits above the field, so the mark centres on the FIELD rather than
-                   the block — otherwise it floats level with the title and reads as a bullet */
-                marginTop: 22,
-              }}
-            >✎</span>
-            <div className="qc-picker" style={{ flex: 1, minWidth: 0, maxWidth: 460 }}>
+            {/* COMPACT (ref qdb-focus-spotlight.html): title and subtitle sit BESIDE the search
+                field rather than stacked above it, and the mark drops 76 → 54px. Roughly 90px of
+                the height the columns need — the other ~95px came from the retired footer. */}
+            <span className="qc-mark" aria-hidden="true">✎</span>
+            <div className="qc-htxt">
               {/* Format B (ref qdb-create-polish §2): the title names the job, the italic serif
                   keeps the human phrasing as a subtitle. There is NO "Agent" field label — the
                   search placeholder ("Search by name or agency…") already does that work, and a
                   label above it would say the same thing twice. */}
               <h2 className="qc-head">New query</h2>
               <p className="qc-sub">Who are you querying?</p>
+            </div>
+            <div className="qc-picker" style={{ flex: 1, minWidth: 0, maxWidth: 460 }}>
               <AgentSearchField
                 agents={agents}
                 value=""
