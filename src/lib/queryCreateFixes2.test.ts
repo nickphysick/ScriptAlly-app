@@ -52,7 +52,7 @@ describe("P1 · the pane names its job", () => {
      wearing the mono LABEL style. Asserting the phrase's absence was too blunt a lock. */
   it("a Playfair heading replaces the mono question", () => {
     expect(pane, "the question is back as a mono eyebrow").not.toContain("<div style={LABEL}>Who are you querying?</div>");
-    expect(pane).toContain('<h2 className="qc-head">Logging new query</h2>');
+    expect(pane).toContain('<h2 className="qc-head">New query</h2>');
     const head = block(".qc-head");
     expect(head, "the .qc-head rule is missing").not.toBe("");
     expect(head, "the heading must be the serif, not the body face").toContain("var(--f12-serif)");

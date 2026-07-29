@@ -127,7 +127,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                   keeps the human phrasing as a subtitle. There is NO "Agent" field label — the
                   search placeholder ("Search by name or agency…") already does that work, and a
                   label above it would say the same thing twice. */}
-              <h2 className="qc-head">Logging new query</h2>
+              <h2 className="qc-head">New query</h2>
               <p className="qc-sub">Who are you querying?</p>
               <AgentSearchField
                 agents={agents}
