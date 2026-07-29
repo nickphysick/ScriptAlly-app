@@ -39,17 +39,33 @@ export interface PageHeaderProps {
   title: string;
   description?: string;
   actions?: PageHeaderActions;
+  /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
+   *  Additive and optional — every existing call site is unchanged. */
+  titleAdornment?: React.ReactNode;
+  /** A custom control occupying the same slot as `actions` — for pages whose right-hand control
+   *  isn't a button (Discover's "Finding for" manuscript selector). Ignored when `actions` is set. */
+  actionsSlot?: React.ReactNode;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({ title, description, actions }) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({
+  title,
+  description,
+  actions,
+  titleAdornment,
+  actionsSlot,
+}) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   return (
     <header className="svh svh--full">
       <div className="svh-top">
         <div className="svh-txt">
-          <h1 className="svh-title">{title}</h1>
+          <h1 className="svh-title">
+            {title}
+            {titleAdornment}
+          </h1>
           {description && <div className="svh-sub">{description}</div>}
         </div>
+        {acts.length === 0 && actionsSlot && <div className="svh-acts">{actionsSlot}</div>}
         {acts.length > 0 && (
           <div className="svh-acts">
             {acts.map((action, i) => (

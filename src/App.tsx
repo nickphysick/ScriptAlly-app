@@ -565,7 +565,6 @@ function AppContent() {
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
-  const showFooter = routeKey !== "queries" && routeKey !== "todo" && !manuscriptsPackages;
 
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
@@ -659,32 +658,11 @@ function AppContent() {
           <StagePage active contentVariant="read"><ImportCsv onNavigate={handleNavigate} /></StagePage>
         )}
 
-        {/* Footer copyright stamp block — in stage flow; hidden on the Queries workspace and the
-            Package Builder shell (same visibility rule as before the router). */}
-        {showFooter && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs animate-fade-in">
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-[#7c3a2a] flex items-center justify-center text-white font-serif font-bold text-xs shadow">
-                  S
-                </div>
-                <span className="font-serif font-bold text-[#F8F5F0]">ScriptAlly</span>
-                <span>&middot; The Literary Querying Companion</span>
-              </div>
-              <div className="h-4 w-[1px] bg-stone-700 hidden md:block" />
-              <button
-                onClick={() => handleNavigate("help")}
-                className="text-[#dbbdb5] hover:text-[#F8F5F0] transition-colors cursor-pointer font-medium underline decoration-[#dbbdb5]/30 hover:decoration-[#F8F5F0] underline-offset-4"
-                id="footer-help-centre-btn"
-              >
-                Help Centre
-              </button>
-            </div>
-            <p className="font-light text-center md:text-right">
-              Crafted for fiction authors querying literary agents. Keep writing, keep pitching. &copy; {new Date().getFullYear()}.
-            </p>
-          </div>
-        </footer>}
+        {/* The legacy site footer ("ScriptAlly · The Literary Querying Companion" + Help Centre)
+            is RETIRED from the workspace tier — a marketing artefact that had no business on a
+            workspace page, and on the taller pages it printed over the content. Help Centre is
+            reached from the shell rail. The MARKETING footer (Landing.tsx `.mk-foot`) is a
+            separate element and is untouched. */}
       </AppShell>
       </EditAgentHost>
       </EditQueryHost>

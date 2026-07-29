@@ -32,6 +32,12 @@
   --ts: #e7ece4;      /* synopsis type tint */
   --tp: #f3e6cf;      /* sample-pages type tint */
   --slate: #6A89A7;   /* Pro pill · slate accents */
+  /* Pro family (ADDITIVE) — the --slate hue's ink, pale fill and border, so a Pro surface (the
+     Discover Pro rule + vetting strip) can be built without hardcoding. Pre-computed literals,
+     no runtime color-mix, per the house rule. */
+  --slate-deep: #4f6b86;
+  --slate-tint: #eef2f7;
+  --slate-line: #c7d6e3;
   --sage: #8a9e88;    /* sage accent */
   --sage-d: #5a6e58;  /* synopsis ink · focus ring */
   --gold: #a8842c;    /* sample-pages ink · star glint */

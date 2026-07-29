@@ -1,444 +1,622 @@
 /**
- * Discover new agents — Phase 1 redesign (ranked cards + lenses + querying batch).
+ * Discover new agents — the agent-list v2 language.
+ * Design authority: design-refs/discover-final-d.html (approved: Matches + Empty · first run),
+ * whose :root IS the agent-list v2 palette — the mockup was drawn from that page.
  *
- * Everything is scoped under .dv2. Shared theme vocabulary comes from the root-class tokens in
- * index.css (--desk/--card/--pane/--bd/--bdw/--chromerad/--hdr/--band-a/--band-b/--band-bd/
- * --band-meta/--band-strong/the --abtn set/--acc); every consumption carries a Cappuccino
- * fallback, so the page renders correctly even on an unthemed surface and auto-upgrades where
- * the theme classes reach (they're on the AppShell root, so this route IS themed). The --dv-*
- * tokens below are this page's additions (ink/muted/line/fills/monogram), Cappuccino defaults
- * with per-theme overrides — page-scoped so the shared index.css blocks stay untouched.
- * All tints are pre-computed hexes: no color-mix(). No data-URIs (Tailwind v4 parser gotcha).
+ * MIRRORING, not re-rolling. The card grammar and token values below are the agent list's
+ * (`--agl-*` / `.agl-acard` in agentList.css). Those are scoped under `.aglist`, a page scope this
+ * page isn't in, so they cannot cascade here; the values are re-declared page-scoped as `--dv-*`,
+ * exactly the pattern this file already used for `--ag-solid`. Reusing the classes outright would
+ * mean mounting Discover inside `.aglist` — a shell-wiring change, deliberately not taken.
+ *
+ * Every colour is a token: the printed card is --dv-paper on a --dv-ink border with the offset
+ * --dv-print shadow; bands are --dv-sage-band (strong) and --dv-fill (tan/possible); section
+ * rules --dv-sage-rule / --dv-line / --slate-line; the avatar is --dv-fill (the agent card's
+ * taupe disc); the Add button is --dv-pink/--dv-pinkline; Pro is the app-wide --slate family
+ * (index.css :root). No hexes are copied from the mockup at the point of use.
+ *
+ * Ground: NONE. Like the agent list ("canvas scheme 1"), the page inherits the ShellV2 content
+ * canvas rather than painting its own desk — the old `background: var(--desk)` is retired here.
  */
 
-/* ── Page-scoped theme tokens (Cappuccino defaults; unthemed surfaces read the same) ── */
+/* ── Page-scoped tokens — values mirrored from agentList.css `--agl-*` ── */
 .dv2 {
-  --dv-ink: #2c2620;
-  --dv-muted: #93897b;
-  --dv-line: rgba(60, 50, 40, 0.12);
-  --dv-good: #6f7f68;
-  --dv-goodfill: #e9ede3;
-  --dv-goodbd: rgba(111, 127, 104, 0.32);
-  --dv-amber: #b98a4e;
-  --dv-amberfill: rgba(185, 138, 78, 0.13);
-  --dv-amberbd: rgba(185, 138, 78, 0.38);
-  --dv-neutralfill: #f3ede4;
-  --dv-bandflat: #e9e1d3;
-  --dv-monoa: #f5e2da;
-  --dv-monob: #efd5ca;
-  --dv-monoink: #7c3a2a;
-  --dv-monobd: #e8cabb;
-  --dv-cardshadow: none;
-  --dv-trayshadow: 0 10px 28px rgba(40, 28, 20, 0.16);
-  --dv-rad: var(--chromerad, 0px);
-  /* Solid/primary CTA pair — MIRRORS the approved --ag-solid values (agentsV2.css "Add agent"
-     solid: mocha/ink/graphite). --ag-* is .agv2-scoped so it can't cascade here; same values,
-     page-scoped, per the --dv-* pattern. Never burgundy. */
-  --dv-solid: #5d4037;
-  --dv-solid-ink: #fdf9f5;
-}
-.t-bold .dv2 {
-  --dv-ink: #1d1712;
-  --dv-muted: #7d7772;
-  --dv-line: rgba(29, 23, 18, 0.14);
-  --dv-bandflat: #f4c7c2;
-  --dv-neutralfill: #f5efe9;
-  --dv-trayshadow: 4px 4px 0 rgba(29, 23, 18, 0.9);
-  --dv-solid: #1d1712;
-  --dv-solid-ink: #fdf9f5;
-}
-.t-edn .dv2 {
-  --dv-ink: #1d1712;
-  --dv-muted: #84878c;
-  --dv-line: rgba(29, 23, 18, 0.09);
-  --dv-good: #555555;
-  --dv-goodfill: #f1f1ef;
-  --dv-goodbd: #e3e2e0;
-  --dv-neutralfill: #f4f4f5;
-  --dv-bandflat: #f4f4f5;
-  --dv-monoa: #f1f1ef;
-  --dv-monob: #f1f1ef;
-  --dv-monoink: #555555;
-  --dv-monobd: #e3e2e0;
-  --dv-cardshadow: 0 1px 2px rgba(20, 20, 20, 0.05), 0 12px 32px rgba(20, 20, 20, 0.07);
-  --dv-trayshadow: 0 12px 36px rgba(20, 20, 25, 0.14);
-  --dv-solid: #44484d;
-  --dv-solid-ink: #ffffff;
+  --dv-ink: #311e19;
+  --dv-ink-head: #2b2017;
+  --dv-ink-body: #48443f;
+  --dv-muted: #9c8878;
+  --dv-label: #8a7d6e;
+  --dv-paper: #ffffff;      /* the printed card */
+  --dv-card: #fdfaf5;       /* softer secondary surfaces */
+  --dv-fill: #efe8df;       /* taupe — avatar disc + the possible-fit (tan) band */
+  --dv-line: #e3d9cf;
+  --dv-linesoft: #ece3da;
+  --dv-pink: #f5e2da;
+  --dv-pinkline: #e8c8bc;
+  --dv-burg: #7c3a2a;
+  --dv-sage-band: #dce0d9;
+  --dv-sage-rule: #8a9e88;
+  --dv-sage-deep: #5a6e58;
+  /* Hard letterpress offset — the ink-bordered card sitting proud of the canvas. */
+  --dv-print: 2px 3px 0 rgba(49, 30, 25, 0.07);
 }
 
-/* ── Page shell — fills the remaining agents-slot height; the STAGE scrolls (never 100vh) ── */
+/* ── Page shell ───────────────────────────────────────────────────────────
+   Geometry is READ OFF the agent list (agentList.css .agl-page / .agl-inner), not re-derived, so
+   the two pages' headers land on the same grid: 28/60/48 page padding, 1240px centred inner
+   column, and the same two breakpoint steps.
+   `flex: 1 0 auto` is load-bearing: the page mounts in a fillColumn slot (height-constrained flex
+   column) with the route footer as its sibling. Without it the page can't grow past the container,
+   so tall content — the first-run example card — overflowed the box and printed over the footer. */
 .dv2 {
   flex: 1 0 auto;
-  background: var(--desk, #e8ddd0);
-  color: var(--dv-ink);
-  padding: 22px 28px 0; /* masthead gutter mirrors the Queries hub (22px top / 28px sides) */
+  color: var(--dv-ink-body);
+  padding: 28px 60px 48px;
 }
 .dv-wrap {
-  /* Left-aligned (ragged right). The horizontal + top gutter now lives on .dv2 (shared with the
-     masthead, mirroring Queries); the masthead's 14px bottom margin sets the gap to the content. */
   max-width: 1240px;
-  margin: 0;
-  padding: 0 0 120px; /* bottom clearance so the sticky batch tray never hides a card */
+  margin: 0 auto;
+}
+@media (max-width: 900px) {
+  .dv2 { padding: 24px 28px 44px; }
+}
+@media (max-width: 640px) {
+  .dv2 { padding: 22px 18px 40px; }
 }
 
-/* ── Trust banner (band grammar: gradient + bottom rule) ── */
+/* ── Header parity ────────────────────────────────────────────────────────
+   The header IS the shared PageHeader (.svh). Discover differs from the agent list by exactly two
+   things: the Pro pill beside the title, and the closing rule rendered 2px in the Pro token
+   instead of the 1px hairline. Both are overrides on the shared markup — no second rule. */
+.dv2 .svh-title { display: inline-flex; align-items: baseline; gap: 11px; flex-wrap: wrap; }
+.dv-propill {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--slate, #6a89a7);
+  color: var(--dv-paper);
+  border-radius: 99px;
+  padding: 4px 10px;
+  flex: none;
+  position: relative;
+  top: -6px;
+}
+/* The one rule — same position + margin as the agent list's, Pro-toned and 2px. */
+.dv2 .svh-rule {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--slate, #6a89a7);
+}
+/* Selector sits in the actions slot at the same height as the agent list's Add button (.svh-btn). */
+.dv-msel {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
+  border: 1px solid var(--dv-line);
+  background: var(--dv-card);
+  color: var(--dv-ink);
+  font-size: 13px;
+  flex: none;
+}
+button.dv-msel { cursor: pointer; transition: border-color 0.12s, background 0.12s; }
+button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pink); }
+.dv-msel .k {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dv-muted);
+}
+.dv-msel svg { width: 13px; height: 13px; color: var(--dv-muted); flex: none; }
+
+/* ── The vetting strip — POPULATED STATE ONLY. In the first-run state the no-match message takes
+      this position instead (the claim only does work beside real matches). ── */
 .dv-trust {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 11px;
+  margin-top: 20px;
   padding: 12px 16px;
-  background: linear-gradient(180deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd));
-  border: var(--bdw, 1px) solid var(--bd, #d8cebf);
-  border-bottom: var(--bdw, 1px) solid var(--band-bd, rgba(112, 94, 70, 0.25));
-  border-radius: var(--dv-rad);
+  background: var(--slate-tint, #eef2f7);
+  border: 1px solid var(--slate-line, #c7d6e3);
+  border-radius: 11px;
+  font-size: 12.5px;
+  color: var(--dv-ink-body);
 }
-.t-edn .dv2 .dv-trust {
-  border-color: transparent;
-  box-shadow: var(--dv-cardshadow);
-}
-
-/* ── Cards ── */
-.dv-card {
-  background: var(--card, #fffefb);
-  border: var(--bdw, 1px) solid var(--bd, #d8cebf);
-  border-radius: var(--dv-rad);
-  padding: 16px 18px 14px;
-}
-.t-edn .dv2 .dv-card {
-  border-color: transparent;
-  box-shadow: var(--dv-cardshadow);
-}
-.dv-card.held {
-  opacity: 0.82;
+.dv-trust > svg { width: 19px; height: 19px; color: var(--slate-deep, #4f6b86); flex: none; }
+.dv-trust b { color: var(--dv-ink); font-weight: 600; }
+.dv-trust .dv-verify {
+  color: var(--slate-deep, #4f6b86);
+  font: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
-/* Monogram disc — pink band + burgundy initials (Editorial goes neutral, like .qmono). */
-.dv-mono {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  flex: none;
+/* ── Control line (below the strip, per the Pro ordering) ── */
+.dv-line {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--dv-monoa), var(--dv-monob));
-  border: 1px solid var(--dv-monobd);
-  color: var(--dv-monoink);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.02em;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
 }
-
-/* ── Why chips — sage by default; the chip matching the active lens leads in accent ── */
-.dv-chip {
+.dv-ctl {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10.5px;
-  font-weight: 500;
-  color: var(--dv-good);
-  background: var(--dv-goodfill);
-  border: 1px solid var(--dv-goodbd);
-  border-radius: 999px;
-  padding: 2.5px 9px;
-  white-space: nowrap;
-}
-.dv-chip.lead {
-  color: #ffffff;
-  background: var(--acc, #7c3a2a);
-  border-color: var(--acc, #7c3a2a);
-  font-weight: 600;
-}
-
-/* Fit-band pill tiers */
-.dv-band {
-  display: inline-flex;
-  align-items: center;
-  font-size: 9.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: 999px;
-  padding: 3px 9px;
-  white-space: nowrap;
-}
-.dv-band.strong { color: var(--dv-good); background: var(--dv-goodfill); border: 1px solid var(--dv-goodbd); }
-.dv-band.good { color: var(--dv-muted); background: var(--dv-neutralfill); border: 1px solid var(--dv-line); }
-.dv-band.possible { color: var(--dv-amber); background: var(--dv-amberfill); border: 1px solid var(--dv-amberbd); }
-
-/* ── Wish-list personalisation hook block ── */
-.dv-wish {
-  margin-top: 12px;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  background: var(--dv-card);
   border: 1px solid var(--dv-line);
   border-radius: 10px;
-  padding: 10px 13px 11px;
-  background: transparent;
-}
-.dv-wish-quote {
-  font-family: "Playfair Display", Georgia, serif;
-  font-style: italic;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 12.5px;
   color: var(--dv-ink);
-  margin: 6px 0 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
 }
-.dv-wish-hit {
-  color: var(--acc, #7c3a2a);
-  font-weight: 700;
+.dv-ctl:hover { border-color: var(--dv-pinkline); }
+.dv-ctl svg { width: 13px; height: 13px; color: var(--dv-muted); flex: none; }
+.dv-ctl.act {
+  border-color: var(--dv-pinkline);
+  background: var(--dv-pink);
+  color: var(--dv-burg);
 }
-.dv-wish-prompt {
-  margin: 9px 0 0;
-  padding-top: 8px;
-  border-top: 1px dashed var(--dv-line);
-  font-size: 12px;
-  color: var(--dv-ink);
+.dv-ctl.act svg { color: var(--dv-burg); }
+.dv-push { margin-left: auto; }
+.dv-cnt {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--dv-muted);
 }
 
-/* ── Lens + filter controls (chip grammar shared with the Agents page) ── */
-.dv-lens,
-.dv-filter {
-  appearance: none;
+/* ── Group sections — the agent list's .agl-gsec / .agl-grule pattern ── */
+.dv-gsec {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  margin: 34px 0 5px;
+}
+.dv-gsec h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 23px;
+  font-weight: 500;
+  color: var(--dv-ink-head);
+  margin: 0;
+}
+.dv-gsec .cn {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  color: var(--dv-muted);
+}
+.dv-grule {
+  height: 2px;
+  border-radius: 2px;
+  margin-bottom: 18px;
+  background: var(--dv-linesoft);
+}
+.dv-grule.strong { background: linear-gradient(90deg, var(--dv-sage-rule) 0 88px, var(--dv-linesoft) 88px); }
+.dv-grule.possible { background: linear-gradient(90deg, var(--dv-line) 0 88px, var(--dv-linesoft) 88px); }
+.dv-grule.pro { background: linear-gradient(90deg, var(--slate-line, #c7d6e3) 0 88px, var(--dv-linesoft) 88px); }
+
+/* ── The match card — the .agl-acard material ── */
+.dv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.dv-ac {
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-ink);
+  border-radius: 11px;
+  overflow: hidden;
+  box-shadow: var(--dv-print);
+  display: flex;
+  flex-direction: column;
+}
+.dv-ac .band {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--dv-ink);
+}
+.dv-ac .band.strong { background: var(--dv-sage-band); }
+.dv-ac .band.possible { background: var(--dv-fill); }
+.dv-ac .band .st {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dv-ink);
+  background: var(--dv-paper);
+  border: 1px solid var(--dv-ink-body);
+  border-radius: 99px;
+  padding: 3px 9px;
+}
+.dv-ac .band .ver {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--dv-ink-body);
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--dv-muted);
-  background: transparent;
+}
+.dv-ac .band .ver svg { width: 11px; height: 11px; color: var(--dv-sage-deep); flex: none; }
+.dv-ac .bd { padding: 14px; display: flex; flex-direction: column; flex: 1; }
+.dv-ac .who { display: flex; align-items: flex-start; gap: 11px; }
+/* Taupe mono-initial disc — the agent card's .agl-av */
+.dv-ac .av2 {
+  width: 42px;
+  height: 42px;
+  border-radius: 99px;
+  flex: none;
+  background: var(--dv-fill);
   border: 1px solid var(--dv-line);
-  border-radius: 999px;
-  padding: 5px 12px;
+  color: var(--dv-ink-body);
+  display: grid;
+  place-items: center;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+}
+.dv-ac .nm {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  line-height: 1.1;
+  color: var(--dv-ink-head);
+  display: block;
+}
+.dv-ac .ag {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--dv-ink-body);
+  margin-top: 3px;
+  display: block;
+}
+.dv-ac .loc {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  font-size: 11.5px;
+  color: var(--dv-ink-body);
+}
+/* Flat flag chip — flag-icons paints the fill; this only sizes/clips it. */
+.dv-ac .loc .fi {
+  width: 14px;
+  height: 10px;
+  border-radius: 1.5px;
+  flex: none;
+  line-height: 1;
+}
+.dv-ac .meta {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--dv-muted);
+  margin-top: 7px;
+  display: block;
+}
+.dv-ac .site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--dv-burg);
+  text-decoration: none;
+  border-bottom: 1px solid var(--dv-pinkline);
+  padding-bottom: 1px;
+  max-width: 100%;
+}
+.dv-ac .site span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-ac .site svg { width: 11px; height: 11px; flex: none; }
+.dv-ac .site:hover { border-bottom-color: var(--dv-burg); }
+.dv-ac .sect {
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid var(--dv-linesoft);
+}
+.dv-ac .sl {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dv-muted);
+  margin-bottom: 7px;
+}
+.dv-ac .why { font-size: 12.5px; color: var(--dv-ink-body); line-height: 1.6; }
+.dv-ac .why .g { color: var(--dv-ink); }
+.dv-ac .why b { color: var(--dv-burg); font-weight: 500; }
+.dv-ac .acts { display: flex; align-items: center; gap: 9px; margin-top: 14px; }
+.dv-ac .acts .spacer { flex: 1; }
+
+/* ── Card actions ── */
+.dv-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 10px;
+  border: 1px solid var(--dv-pinkline);
+  background: var(--dv-pink);
+  color: var(--dv-burg);
+  font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition: filter 0.12s;
 }
-.dv-lens:hover,
-.dv-filter:hover {
-  background: var(--abtn-hov, #f4f2ef);
+.dv-add:hover { filter: brightness(0.97); }
+.dv-add:disabled { opacity: 0.62; cursor: default; }
+.dv-add svg { width: 14px; height: 14px; flex: none; }
+.dv-draft {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 10px;
+  border: 1px solid var(--dv-line);
+  background: var(--dv-card);
   color: var(--dv-ink);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s;
 }
-.dv-lens.on,
-.dv-filter.on {
-  background: var(--dv-bandflat);
-  color: var(--dv-ink);
-  border-color: var(--dv-line);
-  font-weight: 600;
+.dv-draft:hover { border-color: var(--dv-pinkline); }
+.dv-draft:disabled { opacity: 0.62; cursor: default; }
+.dv-dismiss {
+  font-size: 11.5px;
+  color: var(--dv-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.12s;
 }
-.dv-lens:focus-visible,
-.dv-filter:focus-visible,
-.dv-btn:focus-visible,
-.dv-quiet:focus-visible {
-  outline: 2px solid var(--acc, #7c3a2a);
-  outline-offset: 2px;
-}
-
-/* ── Buttons — shape only; colours come from the shared .sa-btn tokens (the ONE treatment) ── */
-.dv-btn {
+.dv-dismiss:hover { color: var(--dv-ink); }
+.dv-done {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 600;
-  border-style: solid;
-  border-radius: 9px;
-  padding: 7px 14px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.dv-btn:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-/* Quiet text actions (Not a fit / Undo / Clear) */
-.dv-quiet {
-  appearance: none;
-  background: transparent;
-  border: none;
-  font-size: 11.5px;
   font-weight: 500;
-  color: var(--dv-muted);
-  cursor: pointer;
-  padding: 4px 2px;
-  transition: color 0.15s;
+  color: var(--dv-sage-deep);
 }
-.dv-quiet:hover {
-  color: var(--dv-ink);
-}
+.dv-done svg { width: 14px; height: 14px; flex: none; }
 
-/* ── Meta strip ── */
-.dv-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-  margin-top: 12px;
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--dv-muted);
-}
-.dv-meta .item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* ── Manuscript selector pills ── */
-.dv-mspill {
-  appearance: none;
-  text-align: left;
-  padding: 7px 13px;
-  border-radius: 10px;
-  border: 1px solid var(--dv-line);
-  background: var(--card, #fffefb);
-  color: var(--dv-ink);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.dv-mspill:hover {
-  background: var(--abtn-hov, #f4f2ef);
-}
-.dv-mspill.on {
-  background: var(--acc, #7c3a2a);
-  border-color: var(--acc, #7c3a2a);
-  color: #ffffff;
-}
-
-/* ── Querying batch tray (sticky against the stage scrollport) ── */
-.dv-batch {
-  position: sticky;
-  bottom: 14px;
-  z-index: 30;
-  margin-top: 18px;
+/* ── Undo / filter-hint strip ── */
+.dv-undo {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 10px;
-  padding: 12px 16px;
-  background: var(--card, #fffefb);
-  border: var(--bdw, 1px) solid var(--bd, #d8cebf);
-  border-radius: var(--dv-rad);
-  box-shadow: var(--dv-trayshadow);
-}
-.t-edn .dv2 .dv-batch {
-  border-color: transparent;
-}
-.dv-batch-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--dv-ink);
-  background: var(--dv-neutralfill);
+  margin-top: 16px;
+  padding: 9px 14px;
+  background: var(--dv-card);
   border: 1px solid var(--dv-line);
-  border-radius: 999px;
-  padding: 3px 6px 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--dv-ink-body);
 }
-.dv-batch-chip button {
-  appearance: none;
-  background: transparent;
+.dv-undo button {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dv-burg);
+  background: none;
   border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── EMPTY / FIRST-RUN ─────────────────────────────────────────────────────
+   A centred feature reel sitting ON the page — no card wrapper. */
+.dv-reel { margin-top: 34px; text-align: center; }
+.dv-eyebrow {
+  display: inline-block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate-deep, #4f6b86);
+  background: var(--slate-tint, #eef2f7);
+  border: 1px solid var(--slate-line, #c7d6e3);
+  border-radius: 99px;
+  padding: 5px 12px;
+  margin-bottom: 18px;
+}
+.dv-reel h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--dv-ink-head);
+  max-width: 760px;
+  margin: 0 auto;
+}
+.dv-reel .lead {
+  font-size: 15px;
+  color: var(--dv-ink-body);
+  line-height: 1.65;
+  max-width: 640px;
+  margin: 16px auto 0;
+}
+.dv-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+  margin-top: 44px;
+}
+.dv-col { text-align: center; }
+.dv-col h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--dv-ink-head);
+  margin: 22px auto 0;
+  max-width: 270px;
+}
+.dv-col p {
+  font-size: 13.5px;
+  color: var(--dv-ink-body);
+  line-height: 1.65;
+  margin: 11px auto 0;
+  max-width: 300px;
+}
+@media (max-width: 960px) {
+  .dv-cols { grid-template-columns: 1fr; gap: 34px; }
+}
+
+/* Animation slot — a deliberate placeholder for a Lottie to be dropped in later. */
+.dv-anim {
+  height: 190px;
+  border-radius: 14px;
+  background: var(--dv-card);
+  border: 1px dashed var(--slate-line, #c7d6e3);
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.dv-anim::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, var(--slate-tint, #eef2f7) 0%, transparent 68%);
+}
+.dv-anim .ph { position: relative; text-align: center; }
+.dv-anim .ph svg { width: 40px; height: 40px; color: var(--slate, #6a89a7); opacity: 0.55; }
+.dv-anim .ph span {
+  display: block;
+  margin-top: 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dv-muted);
+}
+
+/* No-match strip */
+.dv-nomatch {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--dv-card);
+  border: 1px solid var(--dv-line);
+  border-radius: 11px;
+  padding: 15px 18px;
+}
+.dv-nomatch .nm1 { font-size: 13px; color: var(--dv-ink); }
+.dv-nomatch .nm1 b {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px;
+  font-weight: 500;
+}
+.dv-nomatch .nm2 { font-size: 12px; color: var(--dv-ink-body); margin-top: 3px; }
+.dv-nomatch .sp { flex: 1; }
+.dv-nomatch .go {
   display: inline-flex;
   align-items: center;
-  color: var(--dv-muted);
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--dv-pink);
+  border: 1px solid var(--dv-pinkline);
+  color: var(--dv-burg);
+  font-size: 12.5px;
   cursor: pointer;
-  padding: 1px;
-  border-radius: 999px;
+  white-space: nowrap;
+  transition: filter 0.12s;
 }
-.dv-batch-chip button:hover {
-  color: var(--dv-ink);
+.dv-nomatch .go:hover { filter: brightness(0.97); }
+
+/* ── "What a match looks like" — centred, copy left / example card right ── */
+/* Centre-weighted rule: the Pro segment sits in the middle rather than at the left edge. */
+.dv-exrule {
+  height: 2px;
+  border-radius: 2px;
+  margin: 44px auto 0;
+  background: linear-gradient(
+    90deg,
+    var(--dv-linesoft) 0 calc(50% - 44px),
+    var(--slate-line, #c7d6e3) calc(50% - 44px) calc(50% + 44px),
+    var(--dv-linesoft) calc(50% + 44px)
+  );
+}
+.dv-matchsec {
+  margin: 34px auto 0;
+  max-width: 940px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 52px;
+  align-items: center;
+}
+.dv-matchsec h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.14;
+  color: var(--dv-ink-head);
+  margin: 0;
+}
+.dv-matchsec p {
+  font-size: 13.5px;
+  color: var(--dv-ink-body);
+  line-height: 1.7;
+  margin-top: 14px;
+}
+.dv-exhold { position: relative; }
+/* The example is a picture of the feature — never interactive. */
+.dv-exhold .dv-ac { pointer-events: none; }
+.dv-exflag {
+  position: absolute;
+  top: -11px;
+  left: 14px;
+  z-index: 2;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--shell-canvas, #fdfbf8);
+  border: 1px solid var(--dv-line);
+  border-radius: 99px;
+  padding: 3px 10px;
+  color: var(--dv-muted);
+}
+@media (max-width: 1000px) {
+  .dv-matchsec { grid-template-columns: 1fr; gap: 28px; max-width: 420px; }
 }
 
-@media (max-width: 640px) {
-  .dv-wrap {
-    padding: 20px 14px 130px;
-  }
-  .dv-card {
-    padding: 14px 14px 12px;
-  }
+.dv-ctl:focus-visible,
+.dv-add:focus-visible,
+.dv-draft:focus-visible,
+.dv-dismiss:focus-visible,
+.dv-msel:focus-visible,
+.dv-verify:focus-visible,
+.dv-nomatch .go:focus-visible {
+  outline: 2px solid var(--dv-burg);
+  outline-offset: 2px;
 }
 
-/* ── First-run / zero-matches feature sell — renders ONLY when the candidate set is empty.
-      Tokens reused, none invented: --dv-solid (the Agents "Add agent" solid, mirrored above),
-      --hub-row-on (root hub sheet — warm Capp / blush Bold / the REAL Editorial selector pale
-      blue, replacing the mockup's #dce8f5 stand-in) for icon tiles + the marker highlight,
-      --hub-monogram/--hub-monogram-tx for the example avatar, --dv-good* sage for verified/fit.
-      No burgundy italics, no burgundy buttons. ── */
-.dv-fr { display: flex; flex-direction: column; gap: 20px; }
-.dv-fr-eyebrow {
-  display: flex; align-items: center; gap: 9px;
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--dv-muted);
+@media (prefers-reduced-motion: reduce) {
+  .dv-ctl, .dv-add, .dv-draft, .dv-dismiss, .dv-msel, .dv-nomatch .go { transition: none; }
 }
-/* The locked Builder/Packages PRO chip, verbatim (slate on ice — same across themes). */
-.dv-pro {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700;
-  letter-spacing: 0.1em; color: #6A89A7; background: #e7eef3; border: 1px solid #cfdde6;
-  border-radius: 5px; padding: 2px 6px;
-}
-.dv-fr-title {
-  font-family: 'Playfair Display', serif; font-size: 31px; font-weight: 600;
-  color: var(--dv-ink); line-height: 1.14; margin: 9px 0 0; max-width: 620px;
-}
-.dv-fr-title em { font-style: normal; color: var(--dv-solid, #5d4037); } /* emphasis = solid, never burgundy italic */
-.dv-fr-lead { font-size: 13.5px; color: var(--dv-muted); line-height: 1.55; margin: 9px 0 0; max-width: 560px; }
-.dv-fr-benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-@media (max-width: 860px) { .dv-fr-benefits { grid-template-columns: 1fr; } }
-.dv-fr-bcard { padding: 16px 16px 14px; }
-.dv-fr-icon {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: var(--hub-row-on, #f6efe3);
-  display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
-}
-.dv-fr-icon svg { width: 16px; height: 16px; stroke: var(--dv-solid, #5d4037); }
-.dv-fr-btitle { font-family: 'Playfair Display', serif; font-size: 15.5px; font-weight: 600; color: var(--dv-ink); margin: 0 0 5px; }
-.dv-fr-bline { font-size: 12px; color: var(--dv-muted); line-height: 1.5; margin: 0; }
-.dv-fr-strip {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 14px;
-  padding: 14px 16px; border: 1px dashed var(--dv-line); border-radius: 12px;
-  background: var(--card, #fffefb);
-}
-.dv-fr-msg { font-size: 13px; color: var(--dv-ink); line-height: 1.5; flex: 1 1 280px; margin: 0; }
-.dv-fr-msg strong { font-family: 'Playfair Display', serif; font-weight: 600; }
-.dv-fr-cta {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer;
-  background: var(--dv-solid, #5d4037); color: var(--dv-solid-ink, #fdf9f5);
-  border: 1px solid var(--dv-solid, #5d4037); border-radius: 11px; padding: 9px 16px;
-}
-.dv-fr-cta:hover { opacity: 0.92; }
-.dv-fr-cta svg { width: 14px; height: 14px; stroke: currentColor; flex: none; }
-/* Example match card — illustrative, inert (the flag says so; pseudo-actions are aria-hidden). */
-.dv-fr-exwrap { position: relative; margin-top: 2px; }
-.dv-fr-exflag {
-  position: absolute; top: -9px; left: 14px; z-index: 1;
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--dv-muted);
-  background: var(--dv-neutralfill, #f3ede4); border: 1px solid var(--dv-line);
-  border-radius: 5px; padding: 2px 8px;
-}
-.dv-fr-example { pointer-events: none; }
-.dv-fr-av {
-  width: 38px; height: 38px; border-radius: 50%; flex: none;
-  background: var(--hub-monogram, #422701); color: var(--hub-monogram-tx, #fdfaf5);
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700;
-}
-.dv-fr-vbadge {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--dv-good, #6f7f68); background: var(--dv-goodfill, #e9ede3);
-  border: 1px solid var(--dv-goodbd, rgba(111, 127, 104, 0.32));
-  border-radius: 5px; padding: 2px 7px;
-}
-.dv-fr-mark { background: var(--hub-row-on, #f6efe3); border-radius: 3px; padding: 0 3px; }
