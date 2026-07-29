@@ -25,6 +25,7 @@ import {
   draftFromAgent,
   isDiffEmpty,
   validateDraft,
+  draftDirty,
 } from "../../lib/agentDraft";
 import { collection, deleteDoc, deleteField, doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../../lib/firebase";
@@ -404,6 +405,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                       tab={tab}
                       onTab={setTab}
                       onDone={() => void onDone()}
+                      onDiscard={discard}
+                      dirty={draftDirty(draft)}
                       error={error}
                       onImageError={(msg) => setError({ tab: "contact", msg })}
                       isNew={!!newAgent && newAgent.id === agent.id}

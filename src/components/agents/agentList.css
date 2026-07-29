@@ -481,6 +481,23 @@
   font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--agl-ink-label);
 }
+/* DISCARD (agent-list-fixes P4) — same shape as the tick, ink outline, no fill; a dirty card
+   confirms in a small popover rather than a modal. */
+.aglist .agl-discwrap { position: relative; display: inline-flex; }
+.aglist .agl-disc { background: none; }
+.aglist .agl-disc:hover { background: rgba(49, 30, 25, .06); }
+.aglist .agl-discpop {
+  position: absolute; top: calc(100% + 7px); right: 0; z-index: 40; width: 208px;
+  display: flex; flex-direction: column; gap: 9px;
+  background: var(--agl-card, #fdfaf5); border: 1px solid var(--agl-ink, #311e19);
+  border-radius: 11px; box-shadow: 0 10px 26px rgba(49, 30, 25, .18); padding: 11px 12px;
+}
+.aglist .agl-discpop .q { font-size: 12.5px; color: var(--agl-ink, #311e19); }
+.aglist .agl-discpop .acts { display: flex; gap: 7px; justify-content: flex-end; }
+.aglist .agl-btn-warn { background: var(--agl-pink-band); border-color: #e8c8bc; color: #7c3a2a; }
+/* the nrn row: label left, toggle right, helper beneath (agent-list-fixes P4) */
+.aglist .agl-nrn .nrnhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.aglist .agl-nrn .subl { margin-top: 5px; }
 .aglist .agl-done {
   width: 30px; height: 30px; border-radius: 50%; flex: none;
   background: var(--agl-ink); border: 1.5px solid var(--agl-ink); color: var(--agl-cream);

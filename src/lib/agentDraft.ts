@@ -282,3 +282,16 @@ export function diffDraft(original: Agent, d: AgentDraft): DraftDiff {
 /** True when the draft holds nothing to write — Done can close without touching Firestore. */
 export const isDiffEmpty = (diff: DraftDiff): boolean =>
   Object.keys(diff.changed).length === 0 && diff.deletes.length === 0;
+
+/** Has the writer put anything in this draft? Drives the discard confirmation (agent-list-fixes
+ *  P4): a clean card is abandoned immediately, a dirty one asks first. Deliberately generous —
+ *  any typed text, any picked value, any material row counts as content worth confirming. */
+export function draftDirty(d: AgentDraft | null): boolean {
+  if (!d) return false;
+  const text = [d.name, d.agency, d.email, d.website, d.city, d.country, d.mswlNotes, d.responseWeeks, d.methodOther];
+  if (text.some((v) => (v ?? "").trim() !== "")) return true;
+  if (d.genres.length || d.socials.length) return true;
+  if (d.notes.added.length || d.notes.deletedIds.length) return true; // a jotted or removed note counts
+  if (d.starRating || d.noResponseMeansNo !== undefined) return true;
+  return d.materials.some((m) => m.on);
+}

@@ -13,7 +13,7 @@
  * and calls `onDone`, which validates, diffs and commits ONE update. Escape discards.
  */
 import React, { useRef, useState } from "react";
-import { AlertCircle, Camera, Check } from "lucide-react";
+import { AlertCircle, Camera, Check, X } from "lucide-react";
 import { AgentDraft, AgentEditorTab, DraftError, nrnState, nrnSubtitle } from "../../lib/agentDraft";
 import { agentInitials } from "../../lib/agentDisplay";
 import { compressAgentImage, AgentImageError } from "../../lib/agentImage";
@@ -47,6 +47,10 @@ interface AgentEditorProps {
   onTab: (tab: AgentEditorTab) => void;
   /** Validate + diff + commit the single write. */
   onDone: () => void;
+  /** Abandon the card (agent-list-fixes P4). A NEW card had no way out but Escape. */
+  onDiscard?: () => void;
+  /** True when any field carries content — a dirty discard confirms first. */
+  dirty?: boolean;
   /** The blocking validation result, if Done has been refused. */
   error: DraftError | null;
   /** Surfaces an image-rejection message through the same strip. */
@@ -64,13 +68,15 @@ interface AgentEditorProps {
 }
 
 export const AgentEditor: React.FC<AgentEditorProps> = ({
-  draft, onChange, tab, onTab, onDone, error, onImageError, isNew, hasActiveQueries,
+  draft, onChange, tab, onTab, onDone, onDiscard, dirty = false, error, onImageError, isNew, hasActiveQueries,
   notes, notesLoaded, onPostNote, onDeleteNote, onPinNote,
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [genreInput, setGenreInput] = useState("");
   const [socPlatform, setSocPlatform] = useState(PLATFORMS[0]);
   const [socHandle, setSocHandle] = useState("");
+  const [socAdding, setSocAdding] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [noteInput, setNoteInput] = useState("");
   const [otherEditing, setOtherEditing] = useState(false);
 
@@ -158,6 +164,31 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
           </div>
         </div>
 
+        {/* DISCARD (agent-list-fixes P4) — a new card could be created but not abandoned. Same
+            style as the tick, ink outline, no fill. Clean drafts go immediately; a dirty one
+            asks first, in a small popover rather than a modal. Escape takes the same path. */}
+        {onDiscard && (
+          <span className="agl-discwrap">
+            <button
+              type="button"
+              className="agl-done agl-disc"
+              onClick={() => (dirty ? setConfirmDiscard(true) : onDiscard())}
+              title="Discard"
+              aria-label="Discard"
+            >
+              <X width={14} height={14} aria-hidden="true" />
+            </button>
+            {confirmDiscard && (
+              <span className="agl-discpop" role="dialog" aria-label="Discard this record?">
+                <span className="q">Discard this record?</span>
+                <span className="acts">
+                  <button type="button" className="agl-btn agl-btn-ghost agl-btn-sm" onClick={() => setConfirmDiscard(false)}>Keep editing</button>
+                  <button type="button" className="agl-btn agl-btn-sm agl-btn-warn" onClick={onDiscard}>Discard</button>
+                </span>
+              </span>
+            )}
+          </span>
+        )}
         <button type="button" className="agl-done" onClick={onDone} title="Done" aria-label="Done">
           <Check width={14} height={14} aria-hidden="true" />
         </button>
@@ -232,8 +263,9 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                 <input id="agl-site" type="text" className="agl-in" value={draft.website} placeholder="https://…" onChange={(e) => onChange({ website: e.target.value })} />
               </div>
 
-              <div className="agl-row2">
-                <div className="agl-field">
+              {/* (agent-list-fixes P4) Each its OWN full-width row — side by side these squashed
+                  and their labels would not align. */}
+              <div className="agl-field">
                   <label className="agl-label" htmlFor="agl-weeks">Typical response (weeks)</label>
                   <input
                     id="agl-weeks"
@@ -252,8 +284,8 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                   )}
                 </div>
                 <div className={`agl-field agl-nrn ${nrnState(draft.noResponseMeansNo)}`}>
-                  <label className="agl-label">No response means no</label>
-                  <div className="ctlrow">
+                  <div className="nrnhead">
+                    <label className="agl-label">No response means no</label>
                     <button
                       type="button"
                       className={`agl-sw${draft.noResponseMeansNo ? " on" : ""}`}
@@ -262,10 +294,9 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                       aria-label="No response means no"
                       onClick={() => onChange({ noResponseMeansNo: !draft.noResponseMeansNo })}
                     />
-                    <p className="subl">{nrnSubtitle(draft.noResponseMeansNo)}</p>
                   </div>
+                  <p className="subl">{nrnSubtitle(draft.noResponseMeansNo)}</p>
                 </div>
-              </div>
 
               <div className="agl-field">
                 <label className="agl-label" htmlFor="agl-method">Submission method</label>
@@ -309,11 +340,17 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                       </button>
                     </div>
                   ))
-                ) : (
-                  <span className="agl-none">None added yet.</span>
-                )}
+                ) : null}
               </div>
-              <div className="agl-soc-add">
+              {/* (agent-list-fixes P4) AT REST: the add control alone — no empty input, no
+                  placeholder row. Clicking Add reveals the fields, focused; removing the last
+                  handle returns to rest. */}
+              {!socAdding && (
+                <button type="button" className="agl-btn agl-btn-ghost agl-btn-sm" onClick={() => setSocAdding(true)}>
+                  {draft.socials.length ? "Add another" : "Add a handle"}
+                </button>
+              )}
+              {socAdding && <div className="agl-soc-add">
                 <select className="agl-in" value={socPlatform} onChange={(e) => setSocPlatform(e.target.value)} aria-label="Platform">
                   {PLATFORMS.map((pl) => <option key={pl} value={pl}>{pl}</option>)}
                 </select>
@@ -323,11 +360,13 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                   value={socHandle}
                   placeholder="@handle or URL"
                   aria-label="Handle or URL"
+                  autoFocus
                   onChange={(e) => setSocHandle(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSocial(); } }}
                 />
                 <button type="button" className="agl-btn agl-btn-ghost agl-btn-sm" onClick={addSocial}>Add</button>
-              </div>
+                <button type="button" className="agl-btn agl-btn-ghost agl-btn-sm" onClick={() => { setSocAdding(false); setSocHandle(""); }}>Cancel</button>
+              </div>}
             </>
           )}
 

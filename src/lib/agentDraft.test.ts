@@ -13,6 +13,7 @@ import {
   blankDraft,
   legacySocials,
   validateDraft,
+  draftDirty,
   diffDraft,
   isDiffEmpty,
   nrnState,
@@ -185,5 +186,25 @@ describe("agentDraft · no-response-means-no tri-state (amendment A)", () => {
   it("true reads as the pass", () => {
     expect(nrnState(true)).toBe("on");
     expect(nrnSubtitle(true)).toBe("Past the window, treat silence as a pass.");
+  });
+});
+
+describe("draftDirty — the discard confirmation's gate (agent-list-fixes P4)", () => {
+  const base = draftFromAgent(mkAgent({}));
+  const clean = { ...base, name: "", agency: "", email: "", website: "", city: "", country: "", mswlNotes: "", responseWeeks: "", methodOther: "", genres: [], socials: [], starRating: undefined, noResponseMeansNo: undefined, materials: base.materials.map((m) => ({ ...m, on: false })) };
+  it("an untouched card is clean — discard goes straight through", () => {
+    expect(draftDirty(clean)).toBe(false);
+    expect(draftDirty(null)).toBe(false);
+  });
+  it("ANY typed text makes it dirty", () => {
+    for (const k of ["name", "agency", "email", "website", "mswlNotes", "responseWeeks"] as const) {
+      expect(draftDirty({ ...clean, [k]: "x" }), k).toBe(true);
+    }
+  });
+  it("a picked value counts too — genres, a star, the no-reply switch, a material", () => {
+    expect(draftDirty({ ...clean, genres: ["Crime"] })).toBe(true);
+    expect(draftDirty({ ...clean, starRating: 3 })).toBe(true);
+    expect(draftDirty({ ...clean, noResponseMeansNo: false })).toBe(true); // stated false IS a statement
+    expect(draftDirty({ ...clean, materials: [{ ...clean.materials[0], on: true }, ...clean.materials.slice(1)] })).toBe(true);
   });
 });
