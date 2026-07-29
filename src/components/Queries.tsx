@@ -229,7 +229,10 @@ export const Queries: React.FC<{
    *  A new object each time, so a repeat "Log query" with no seeds still fires the effect. */
   createSeed?: { agentId?: string | null; manuscriptId?: string | null } | null;
   onCreateSeedConsumed?: () => void;
-}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed }) => {
+  /** v4 P4 — true while /queries is the visible route. Drives the ROUTE-ENTRY load animation:
+   *  pages stay mounted here, so a plain CSS mount animation would only ever run once. */
+  routeActive?: boolean;
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false }) => {
   const {
     currentUser,
     manuscripts,
@@ -1972,12 +1975,30 @@ export const Queries: React.FC<{
     if (selectedQueryId) writeLastViewedQueryId(selectedQueryId);
   }, [selectedQueryId]);
 
+  /* v4 P4 — the ROUTE-ENTRY load animation. The page stays mounted across navigation, so the entry
+     is a class toggled on becoming visible, not a mount. The ANIMATION is entirely CSS (no JS
+     timers drive it); this timeout only takes the class back off so the next entry can re-run it —
+     the same housekeeping StagePage does for its own entry class. The keyframes use
+     `animation-fill-mode: backwards`, so once they finish the elements hold NO transform and can
+     never become a containing block for the page's position:fixed furniture. */
+  const [entering, setEntering] = useState(false);
+  const prevRouteActive = useRef(false);
+  useEffect(() => {
+    if (routeActive && !prevRouteActive.current) setEntering(true);
+    prevRouteActive.current = routeActive;
+  }, [routeActive]);
+  useEffect(() => {
+    if (!entering) return;
+    const id = window.setTimeout(() => setEntering(false), 700); // past the last column's 0.23s + 0.24s
+    return () => window.clearTimeout(id);
+  }, [entering]);
+
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className="t-f12 f12-root">
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}

@@ -93,7 +93,9 @@ describe("hub token completeness — every theme defines the full set", () => {
 describe("Queries left the hub layer for the F12 master theme (overnight run)", () => {
   const q = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
   it("the page renders the headerless .t-f12 root + f12 control bar (shell rollout Phase 6); the --hub-* sheet stays for other pages", () => {
-    expect(q).toContain('className="t-f12 f12-root"');
+    // v4 P4 appends the route-entry class, so the root is a template literal now — match the
+    // SCOPE itself (both classes, in order), which is what this lock is actually about.
+    expect(q).toMatch(/className=\{`t-f12 f12-root\$\{/);
     expect(q).not.toContain("<F12Page");
     expect(q).toContain("f12-ctl");
     // The sheet itself remains locked above — To-do (and others) still consume it.

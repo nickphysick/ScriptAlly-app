@@ -598,7 +598,8 @@ function AppContent() {
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
             <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
-              createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)} />
+              createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
+              routeActive={routeKey === "queries"} />
           )}
         </StagePage>
 

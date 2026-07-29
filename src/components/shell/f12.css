@@ -101,6 +101,48 @@
 .f12-iconctl .f12-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: var(--panel); padding: 4px 7px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
 .f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
 
+/* ══ ROUTE-ENTRY LOAD ANIMATION (v4 P4; ref queries-hub-v4.html, the ↻ Replay chip) ════════
+   The page settles in reading order: masthead → action bar → list card (rows staggered behind
+   it) → hero → columns left to right. Each element rises 7px over ~220–240ms, ease-out.
+
+   Three rules this obeys:
+   · CSS ONLY. No JS timer drives any of this — `.qh-enter` is toggled on route ENTRY (the page
+     stays mounted, so a mount animation would run exactly once, ever).
+   · fill-mode BACKWARDS, not both: the element takes the from-state during its delay, then on
+     finishing reverts to its own computed style — holding NO transform. A lingering transform
+     would make the page a containing block for its position:fixed furniture (the footgun the
+     shell's own entry class documents).
+   · The APP SHELL never animates — the rail, breadcrumb and search live outside this page. */
+@keyframes qhRise { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+
+.qh-enter .f12-hd2 { animation: qhRise 0.22s ease-out backwards; }
+.qh-enter .f12-ctl,
+.qh-enter .f12-chips { animation: qhRise 0.22s ease-out 0.05s backwards; }
+.qh-enter .f12-list { animation: qhRise 0.24s ease-out 0.08s backwards; }
+.qh-enter .f12-detail .f12-hero { animation: qhRise 0.24s ease-out 0.13s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(1) { animation: qhRise 0.24s ease-out 0.17s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(2) { animation: qhRise 0.24s ease-out 0.2s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(3) { animation: qhRise 0.24s ease-out 0.23s backwards; }
+/* rows stagger 25ms behind the list card, capped at the first ten — past that the eye reads it as
+   a wave, not a settle, and a long list would still be arriving seconds later. */
+.qh-enter .f12-rows .f12-row:nth-child(-n + 10) { animation: qhRise 0.2s ease-out backwards; }
+.qh-enter .f12-rows .f12-row:nth-child(1) { animation-delay: 0.12s; }
+.qh-enter .f12-rows .f12-row:nth-child(2) { animation-delay: 0.145s; }
+.qh-enter .f12-rows .f12-row:nth-child(3) { animation-delay: 0.17s; }
+.qh-enter .f12-rows .f12-row:nth-child(4) { animation-delay: 0.195s; }
+.qh-enter .f12-rows .f12-row:nth-child(5) { animation-delay: 0.22s; }
+.qh-enter .f12-rows .f12-row:nth-child(6) { animation-delay: 0.245s; }
+.qh-enter .f12-rows .f12-row:nth-child(7) { animation-delay: 0.27s; }
+.qh-enter .f12-rows .f12-row:nth-child(8) { animation-delay: 0.295s; }
+.qh-enter .f12-rows .f12-row:nth-child(9) { animation-delay: 0.32s; }
+.qh-enter .f12-rows .f12-row:nth-child(10) { animation-delay: 0.345s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qh-enter .f12-hd2, .qh-enter .f12-ctl, .qh-enter .f12-chips, .qh-enter .f12-list,
+  .qh-enter .f12-detail .f12-hero, .qh-enter .f12-detail .f12-card,
+  .qh-enter .f12-rows .f12-row { animation: none !important; }
+}
+
 /* ══ INLINE QUERY CREATION (v4 P2; ref create-mode-ref.html) ═══════════════════════════════
    The draft row in the list, plus the create pane's chips / checklist / footer. Colours come
    from the existing token set — note the checkbox tick uses the BAND sage (--sage-edge), never

@@ -17,8 +17,10 @@ import { readFileSync } from "fs";
 const f12 = readFileSync(new URL("../components/shell/f12.css", import.meta.url), "utf8");
 const queries = readFileSync(new URL("../components/Queries.tsx", import.meta.url), "utf8");
 const shellComp = readFileSync(new URL("../components/shell/F12Shell.tsx", import.meta.url), "utf8");
+/** The rule for `selector` itself — anchored to a line start, so a DESCENDANT rule
+ *  (".qh-enter .f12-chips {") can never be mistaken for the base rule. */
 const block = (selector: string): string => {
-  const i = f12.indexOf(selector + " {");
+  const i = f12.indexOf("\n" + selector + " {");
   if (i === -1) return "";
   return f12.slice(i, f12.indexOf("}", i));
 };

@@ -94,7 +94,9 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
     const queries = readFileSync(resolve(__dirname, "../Queries.tsx"), "utf8");
     expect(queries.includes("<ChromeSlab")).toBe(false);
     expect(queries.includes("<F12Page")).toBe(false);
-    expect(queries).toContain('className="t-f12 f12-root"');
+    // v4 P4 appends the route-entry class, so the root is a template literal now — match the
+    // SCOPE itself (both classes, in order), which is what this lock is actually about.
+    expect(queries).toMatch(/className=\{`t-f12 f12-root\$\{/);
     expect(queries).toContain('title="Queries Hub"'); // the PageHeader carries the name
     expect(queries).toContain('variant="full"'); // flyouts P3: the compact variant is retired
     expect(queries.includes('className="qhbar"')).toBe(false);
