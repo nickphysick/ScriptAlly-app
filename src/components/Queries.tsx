@@ -2126,6 +2126,9 @@ export const Queries: React.FC<{
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
     <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-focus" : ""}`}>
+      {/* The focus scrim. Always mounted, opacity-toggled by `qh-focus`, so it fades BOTH ways
+          from one CSS transition rather than needing a mount frame. */}
+      <div className="qh-scrim" aria-hidden="true" />
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -2606,7 +2609,7 @@ export const Queries: React.FC<{
             query, rule beneath. Export runs the existing filtered-CSV handler (the list foot
             keeps its copy for now — same handler, flagged in the report); Log query is the
             existing interception, relocated here from the control bar's left zone. ── */}
-        <div className="f12-hd2 qh-dim">
+        <div className="f12-hd2">
           <PageHeader
             variant="full"
             title="Queries Hub"
@@ -2663,7 +2666,7 @@ export const Queries: React.FC<{
                 <span style={{ fontFamily: "var(--f12-serif)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>No queries yet</span>
                 <span style={{ fontSize: 12, lineHeight: 1.5, color: "var(--muted)", maxWidth: 200 }}>Your queries will appear here once you log or import them.</span>
               </div>
-              <div className="f12-lfoot qh-dim">
+              <div className="f12-lfoot">
                 <span><b>SHOWING 0 OF 0</b></span>
                 <span style={{ opacity: 0.5 }}>EXPORT CSV</span>
               </div>
@@ -2721,7 +2724,7 @@ export const Queries: React.FC<{
           const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
 
           return (
-            <div className="f12-ctl qh-dim">
+            <div className="f12-ctl">
               {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
                   column: it existed to lock the bar to the list pane, which now sits in the wider
                   workspace column below. The verbs simply right-align in the header column (ref). */}
@@ -2791,7 +2794,7 @@ export const Queries: React.FC<{
 
         {/* Active filters — removable pink chips on the oat beneath the bar (panes never resize). */}
         {activeFilterChips.length > 0 && (
-          <div className="f12-chips qh-dim">
+          <div className="f12-chips">
             {activeFilterChips.map((c) => (
               <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
             ))}
@@ -2883,7 +2886,7 @@ export const Queries: React.FC<{
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
           <div className="f12-pane f12-list">
-            <div className="f12-lhead qh-dim">
+            <div className="f12-lhead">
               <div className="f12-lsearch">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
                 <input
@@ -2930,7 +2933,11 @@ export const Queries: React.FC<{
                 return (
                   <div
                     ref={draftRowRef}
-                    className={`f12-row f12-draft${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
+                    /* qh-lit goes on the ROW, never on anything inside it: the row animates its
+                       own opacity 0→1 on open, and opacity < 1 makes it a stacking context — so a
+                       z-index on a child would be trapped inside the row and never clear the
+                       scrim. Raise the whole row or nothing. */
+                    className={`f12-row f12-draft qh-lit${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
                     aria-label="New query draft"
                     // The collapse finishing is what clears the draft — so its contents are reset
                     // only once the row has gone, never visibly blanked in place.
@@ -2975,9 +2982,7 @@ export const Queries: React.FC<{
                     // v4 P2 — clicking another row while drafting is a click-away: resolve the
                     // draft first (silently when untouched, with a confirm when dirty), then select.
                     onClick={() => (creating ? closeCreate(() => setSelectedQueryId(q.id)) : setSelectedQueryId(q.id))}
-                    // qh-dim — sibling rows recede while you draft. The DRAFT row never carries it:
-                    // it and the pane are the two things you're actually looking at.
-                    className={`f12-row qh-dim${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
                       // The collapse's own end fires the toast — no timer schedules either.
@@ -3018,7 +3023,7 @@ export const Queries: React.FC<{
                 </div>
               )}
             </div>
-            <div className="f12-lfoot qh-dim">
+            <div className="f12-lfoot">
               <span>SHOWING <b>{sortedList.length}</b> OF {queries.length}</span>
               <button type="button" onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}>EXPORT CSV</button>
             </div>
@@ -3029,7 +3034,7 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className={`qp-pane f12-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className={`qp-pane f12-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>

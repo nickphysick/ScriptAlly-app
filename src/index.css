@@ -606,12 +606,10 @@
   --blue-t: #e7eef6; --blue-b: #d3e0ee; --blue-i: #2b4a6b;   /* you-are-here */
   --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030; --pink-deep: #6e3325;   /* needs-you; pink-deep = urgency-tag text (polish v3 two-depth tag law) */
   --pink-av: #f6d7cf;
-  /* FOCUS GROUND — the clay the workspace drops to while a draft is open, so the lit pane and
-     draft row read as spotlit (ref design-refs/qdb-create-polish2.html §3). Painted on .f12-root
-     ONLY, never on the shell plane: the rail and top bar stay lit and no shared shell file is
-     touched. ⚠️ The value is the ref's, chosen against ITS #f7f3ec ground; ours is the brighter
-     #fdfbf8 canvas, so judge the depth on screen — it is a token so it can be tuned in one place. */
-  --qh-focus-ground: #ded5c7;
+  /* FOCUS SCRIM — warm near-black over everything except the pane, the draft row and the two
+     create actions (ref design-refs/qdb-focus-spotlight.html). SUPERSEDES the previous approach,
+     which dimmed each surface and darkened the ground; one scrim is both simpler and deeper. */
+  --qh-scrim: rgba(42, 31, 21, 0.42);
   /* primary-button pink (chrome revision; v14/v3 omitted these — an undefined var() renders
      as NOTHING, which silently made the mockups' primary button transparent) */
   --pink-btn: #f6cfc9; --pink-btn-h: #f0bfb8;

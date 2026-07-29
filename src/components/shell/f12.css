@@ -24,12 +24,6 @@
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  /* No ground of its own — the shell's canvas shows through. The transition is declared HERE,
-     in the ONE .f12-root rule, so focus mode's clay eases in AND out; the focus value itself
-     lives on .f12-root.qh-focus further down. A second rule for this same selector would be
-     decided by file order, which is the trap the draft row taught. */
-  background: transparent;
-  transition: background 0.24s ease;
   font-family: var(--f12-body);
   font-size: 13px;
   line-height: 1.45;
@@ -221,27 +215,30 @@
    not additive), so the settle would be cancelled the moment the row started leaving. */
 .f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
 
-/* ── FOCUS MODE (ref qdb-create-polish §3) — while a draft is open, everything except the pane
-   and the draft row recedes. Deliberately NOT a scrim: an overlay would have to sit above the
-   list, which owns its own scroll and stacking context, and that is the same class of problem as
-   the clipped draft tag. Instead each receding surface carries `qh-dim` and the page root carries
-   `qh-focus`, so the dim is a state on the elements themselves.
+/* ── FOCUS MODE — THE SCRIM (ref design-refs/qdb-focus-spotlight.html) ──────────────────
+   SUPERSEDES the per-surface dim (.qh-dim opacity/brightness) and the darkened ground
+   (--qh-focus-ground). Both are deleted, not layered under this.
 
-   The transition lives on `.qh-dim` and NOT inside the `.qh-focus` rule, or only the dim-IN would
-   animate: removing the class removes the transition in the same recalculation, and the way back
-   would snap. Nothing gets pointer-events:none — clicking a dimmed row must still run the
-   click-away/discard-confirm path, so the dimmed list stays live, just quiet.
+   ⚠️ The scrim is a child of .f12-root, NOT portalled to <body>. On route entry the stage slot
+   runs `pageIn`, which animates transform+opacity for 180ms — and for that window the slot is a
+   stacking context AND the containing block for position:fixed. Arriving from the rail's
+   "+ Query" opens create mode inside exactly that window, so a body-level scrim would paint OVER
+   the lit pane (which would be trapped in the slot's context) at the one moment it's most
+   visible. Keeping both in the same context makes the z-order true at all times; the cost is
+   that for ≤180ms the scrim covers the stage but not the rail, then reaches full viewport.
 
-   THE GROUND DARKENS TOO (polish2 §3). The hub paints no background of its own — the shell's
-   canvas shows through — so the darkening goes on `.f12-root` itself: it covers the whole
-   workspace and touches no shared shell file, which keeps the rail and top bar lit. */
-.f12-root.qh-focus { background: var(--qh-focus-ground); }
+   pointer-events:none is load-bearing: the darkened list stays fully clickable, so clicking
+   another row still runs the click-away/discard-confirm path. */
+.qh-scrim { position: fixed; inset: 0; background: var(--qh-scrim); opacity: 0; pointer-events: none; transition: opacity 0.24s ease; z-index: 50; }
+.qh-focus .qh-scrim { opacity: 1; }
 
-/* Dimmed surfaces lose BRIGHTNESS as well as opacity — fading alone against a darker ground
-   reads as washed-out rather than unlit. */
-.qh-dim { transition: opacity 0.24s ease, filter 0.24s ease; }
-.qh-focus .qh-dim { opacity: 0.42; filter: brightness(0.93) saturate(0.7); }
-@media (prefers-reduced-motion: reduce) { .qh-dim, .f12-root { transition: none; } }
+/* The three lit things. No ancestor between the page root and any of them creates a stacking
+   context (audited: the stage is position:relative with z-index:auto, which does not), so a
+   plain raise is enough — no ancestor was adjusted and no shared shell file was touched. */
+.qh-focus .qh-lit { position: relative; z-index: 60; }
+
+@media (prefers-reduced-motion: reduce) { .qh-scrim { transition: none; } }
+
 
 /* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
    whose three columns own their scrolling, and absolutely positioning it would break that (the

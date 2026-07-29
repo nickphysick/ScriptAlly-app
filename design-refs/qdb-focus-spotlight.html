@@ -1,0 +1,207 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create mode - spotlight + command bar takeover</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--frame:#ece5da;--canvas:#fdfbf8;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--sel:#eef1f4;--sh:0 6px 20px rgba(60,45,30,.06);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--frame);font-family:var(--in);color:var(--ink);height:100vh;overflow:hidden;display:flex;padding:12px 12px 12px 0;-webkit-font-smoothing:antialiased}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+/* switcher */
+.pick{position:fixed;bottom:14px;right:14px;z-index:400;display:flex;gap:6px;background:#241c15;padding:6px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.pick button{background:transparent;color:#d8ccbc;border:1px solid #483c2e;border-radius:8px;padding:7px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--in)}
+.pick button.on{background:#f4ebdd;color:#241c15;border-color:#f4ebdd}
+/* rail */
+.rail{width:88px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:20px 0}
+.rail .lg{color:var(--rose);font-size:22px;transform:rotate(-8deg);margin-bottom:30px}
+.rail .ri{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#8a7c6b;margin-bottom:8px}
+.rail .ri svg{width:17px;height:17px}
+.rail .ri.on{background:#fff;color:var(--rose);box-shadow:var(--sh)}
+.rail .sp{flex:1}
+.rail .acct{width:38px;height:38px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:var(--pl);font-size:12px;color:var(--rose);box-shadow:var(--sh)}
+/* sheet */
+.sheet{flex:1;background:var(--canvas);border-radius:18px;box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
+.inner{flex:1;display:flex;flex-direction:column;padding:0 34px;min-height:0}
+.topstrip{display:flex;align-items:center;padding:14px 0 0}
+.crumb{font-family:var(--mo);font-size:9px;letter-spacing:.14em;color:#a99c88;text-transform:uppercase}
+.crumb b{color:var(--ink);font-weight:600}
+.tsearch{margin-left:auto;display:flex;align-items:center;gap:8px;background:#f2ece2;border-radius:10px;padding:8px 14px;width:280px;color:#a99c88;font-size:12.5px}
+.mast{display:flex;align-items:flex-end;gap:20px;padding:20px 0 14px;border-bottom:1px solid var(--bd)}
+.mast h1{font-family:var(--pl);font-weight:700;font-size:34px;line-height:1}
+.mast .subt{font-family:var(--pl);font-style:italic;font-size:14px;color:var(--ink2);margin-top:7px}
+.mast .btns{margin-left:auto;display:flex;gap:9px}
+.btn{display:flex;align-items:center;gap:7px;border-radius:10px;padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--ink)}
+.btn.pink{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.btn.off{background:#f6f2ea;color:#bcb1a2;border-color:#eae2d6}
+/* command bar */
+.cmd{display:flex;align-items:center;gap:3px;padding:10px 0}
+.cb{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--ink2);background:none;border:none;border-radius:8px;padding:7px 11px;cursor:pointer}
+.cb svg{width:14px;height:14px;color:#8a7c6b}
+.cb.dim{color:var(--muted)}
+.cb.del{color:#9a3b2a}.cb.del svg{color:#9a3b2a}
+.csep{width:1px;height:18px;background:var(--bd);margin:0 9px}
+.cspring{flex:1}
+/* create-mode command bar */
+.cmdcreate{display:none;align-items:center;gap:12px;padding:8px 0}
+.cmdcreate .ctx{display:flex;align-items:center;gap:9px}
+.cmdcreate .dot{width:7px;height:7px;border-radius:50%;background:var(--rose)}
+.cmdcreate .ctxt{font-family:var(--pl);font-weight:700;font-size:15px}
+.cmdcreate .req{font-size:12px;color:var(--muted)}
+.create .cmd{display:none}
+.create .cmdcreate{display:flex}
+/* workspace */
+.work{flex:1;display:flex;gap:16px;min-height:0;padding-bottom:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:15px;box-shadow:var(--sh)}
+.list{width:300px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;padding:9px}
+.ltop{display:flex;gap:7px;padding-bottom:8px}
+.lsearch{flex:1;display:flex;align-items:center;gap:7px;background:#f4efe6;border-radius:999px;padding:8px 12px;color:#b0a494;font-size:12.5px}
+.ib{width:32px;height:32px;border-radius:999px;border:1px solid var(--bd);display:grid;place-items:center;color:#7a6c5a;background:#fff;font-size:12px;flex-shrink:0}
+.rows{flex:1;overflow-y:auto;min-height:0}
+.rows::-webkit-scrollbar{width:0}
+.qr{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;min-height:50px}
+.qr .mg{width:30px;height:30px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:9.5px;flex-shrink:0}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:13.5px}
+.qr .ag{font-family:var(--mo);font-size:7.5px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:1px}
+.qr .end{margin-left:auto;text-align:right}
+.qr .dt{font-family:var(--mo);font-size:8px;color:var(--muted)}
+.qr.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef;margin-bottom:7px;padding:calc(9px - 1.5px) calc(10px - 1.5px)}
+.dchip{background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:6.5px;letter-spacing:.1em;padding:3px 7px;border-radius:5px;text-transform:uppercase}
+.lfoot{display:flex;justify-content:space-between;padding-top:9px;border-top:1px solid var(--bd);margin-top:4px}
+/* pane */
+.pane{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0}
+.hero{display:flex;align-items:center;gap:16px;padding:16px 20px;flex-shrink:0}
+.hav{width:54px;height:54px;border-radius:50%;background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.htxt{flex:1}
+.htitle{font-family:var(--pl);font-weight:700;font-size:20px;line-height:1.1}
+.hsub{font-family:var(--pl);font-style:italic;font-size:13px;color:var(--ink2)}
+.hfield{flex:1.4;max-width:420px}
+.pin{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:10px 13px;background:#fff;color:var(--muted);font-size:13px}
+.hint{font-size:11.5px;color:var(--muted);margin-top:6px}
+.hint a{color:var(--rose);font-weight:600;text-decoration:underline}
+.cols{flex:1;display:flex;gap:14px;min-height:0}
+.col{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:13.5px;flex-shrink:0}
+.ch svg{width:14px;height:14px}
+.cbody{padding:14px;flex:1;overflow-y:auto;min-height:0}
+.cbody::-webkit-scrollbar{width:0}
+.flab{font-family:var(--mo);font-size:8px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.f{margin-bottom:13px}
+.fin{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:0 12px;background:#fff;font-size:13px;height:40px}
+.fin.locked{background:#f7f3eb;color:var(--ink2)}
+.fin .bk{width:20px;height:20px;border-radius:5px;background:#f5ead9;display:grid;place-items:center;font-size:10px;flex-shrink:0}
+.fin .cal{margin-left:auto;color:#a2937f;font-size:11px}
+.two{display:flex;gap:10px}
+.two .f{flex:1}
+.seg{display:flex;background:#f3ede4;border-radius:10px;padding:3px;gap:2px;height:40px}
+.seg span{flex:1;border-radius:8px;font-size:12px;font-weight:500;color:var(--muted);display:grid;place-items:center}
+.seg span.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(60,45,30,.12)}
+.nchip{border:1px solid var(--bd);border-radius:999px;padding:7px 12px;font-size:11.5px;background:#fff;color:var(--muted);display:inline-block;margin-right:5px}
+.nchip.on{background:#fdf1ea;border-color:#e3b8a2;color:#8d4b32;font-weight:600}
+.divider{height:1px;background:var(--bd);margin:13px 0}
+.mat{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f2ece2;font-size:13px}
+.mat:last-child{border-bottom:none}
+.ck{width:18px;height:18px;border-radius:5px;border:1.5px solid #cfc3b1;flex-shrink:0}
+.notearea{border:1px solid var(--bd);border-radius:10px;padding:12px;color:#b0a494;font-size:12.5px;height:100%;background:#fff}
+/* ============ FOCUS: darken everything except the three lit things ============ */
+.scrim{position:fixed;inset:0;background:rgba(42,31,21,.42);opacity:0;pointer-events:none;transition:opacity .24s ease;z-index:50}
+.create .scrim{opacity:1}
+/* lit: raised above the scrim. No ancestor may create a stacking context. */
+.create .pane{position:relative;z-index:60}
+.create .qr.draft{position:relative;z-index:60}
+.create .cmdcreate .lit-btn{position:relative;z-index:60}
+@media (prefers-reduced-motion: reduce){.scrim{transition:none}}
+</style></head>
+<body>
+<div class="pick">
+  <button onclick="document.getElementById('sheet').classList.remove('create')">Normal</button>
+  <button class="on" onclick="document.getElementById('sheet').classList.add('create')">Create mode</button>
+</div>
+<aside class="rail">
+  <span class="lg">✈</span>
+  <span class="ri"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+  <span class="ri on"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 3-5.5 6-5.5s6 2 6 5.5"/></svg></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/></svg></span>
+  <span class="sp"></span>
+  <span class="acct">ML</span>
+</aside>
+<main class="sheet create" id="sheet">
+  <div class="scrim"></div>
+  <div class="inner">
+    <div class="topstrip"><span class="crumb">Querying / <b>Queries Hub</b></span><div class="tsearch">⌕ Search…</div></div>
+    <div class="mast">
+      <div><h1>Queries Hub</h1><div class="subt">Every query you've sent, and exactly where each one stands.</div></div>
+      <div class="btns"><span class="btn">⤓ Export</span><span class="btn pink off">＋ Log query</span></div>
+    </div>
+
+    <!-- normal command bar -->
+    <div class="cmd">
+      <span class="cspring"></span>
+      <button class="cb"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2"/></svg>View tasks</button>
+      <button class="cb"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
+      <button class="cb dim"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg>Nudge</button>
+      <button class="cb"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11h14V8M9 12h6"/></svg>Mark closed</button>
+      <span class="csep"></span>
+      <button class="cb dim"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Agent</button>
+      <button class="cb dim"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/></svg>Manuscript</button>
+      <span class="csep"></span>
+      <button class="cb del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Delete</button>
+    </div>
+
+    <!-- create-mode command bar -->
+    <div class="cmdcreate">
+      <span class="ctx"><span class="dot"></span><span class="ctxt">New query</span></span>
+      <span class="req">Needs an agent, a manuscript and a date — everything else can wait.</span>
+      <span class="cspring"></span>
+      <span class="mono">Esc to cancel</span>
+      <span class="btn lit-btn" style="margin-left:8px">Cancel</span>
+      <span class="btn pink lit-btn">✈ Save query</span>
+    </div>
+
+    <div class="work">
+      <div class="card list">
+        <div class="ltop"><div class="lsearch">⌕ Search</div><span class="ib">▽</span><span class="ib">⇅</span></div>
+        <div class="rows">
+          <div class="qr draft"><span class="mg">—</span><div><div class="nm" style="font-style:italic;color:#b98a74;font-weight:500">Choose an agent…</div><div class="ag">New query</div></div><div class="end"><span class="dchip">Draft</span><div class="dt" style="margin-top:4px">Today</div></div></div>
+          <div class="qr"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><div class="end"><div class="dt">29 Jul</div></div></div>
+          <div class="qr"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><div class="end"><div class="dt">14 Mar</div></div></div>
+          <div class="qr"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div><div class="end"><div class="dt">15 Jan</div></div></div>
+          <div class="qr"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div><div class="end"><div class="dt">3 Mar</div></div></div>
+          <div class="qr"><span class="mg">DO</span><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div></div><div class="end"><div class="dt">—</div></div></div>
+          <div class="qr"><span class="mg">PR</span><div><div class="nm">Priya Raman</div><div class="ag">No agency</div></div><div class="end"><div class="dt">—</div></div></div>
+        </div>
+        <div class="lfoot"><span class="mono">Showing 22 of 22</span><span class="mono" style="color:var(--ink)">Export CSV</span></div>
+      </div>
+
+      <div class="pane">
+        <div class="card hero">
+          <span class="hav">✎</span>
+          <div class="htxt"><div class="htitle">New query</div><div class="hsub">Who are you querying?</div></div>
+          <div class="hfield"><div class="pin">⌕ &nbsp;Search by name or agency…</div><div class="hint">Agent not listed? <a>Add a new agent now</a></div></div>
+        </div>
+        <div class="cols">
+          <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>When you sent it</div><div class="cbody">
+            <div class="two">
+              <div class="f"><div class="flab">Date sent</div><div class="fin">29 July 2026<span class="cal">▦</span></div></div>
+              <div class="f"><div class="flab">Sent by</div><div class="seg"><span class="on">Email</span><span>Form</span><span>Post</span></div></div>
+            </div>
+            <div class="f"><div class="flab">Nudge reminder</div><div><span class="nchip on">8 Sep · 6 wks</span><span class="nchip">Pick a date</span><span class="nchip">None</span></div></div>
+          </div></div>
+          <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>What you sent</div><div class="cbody">
+            <div class="f"><div class="flab">Manuscript</div><div class="fin locked"><span class="bk">▤</span>Murphy's Day Out<span class="mono" style="margin-left:auto">Only</span></div></div>
+            <div class="divider"></div>
+            <div class="mat"><span class="ck"></span>Query letter</div>
+            <div class="mat"><span class="ck"></span>Synopsis</div>
+            <div class="mat"><span class="ck"></span>Sample materials</div>
+            <div class="mat"><span class="ck"></span>Other…</div>
+          </div></div>
+          <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/></svg>Notes</div><div class="cbody"><div class="notearea">First impressions, personalisation notes, anything worth remembering… (optional)</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+document.querySelectorAll('.pick button').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.pick button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');});});
+</script>
+</body></html>
