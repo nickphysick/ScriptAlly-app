@@ -23,6 +23,7 @@ import "flag-icons/css/flag-icons.min.css";
 import {
   agentRelationship,
   agentStateClass,
+  agentCardDims,
   cardHistory,
   closedStampDate,
   isDoorOpen,
@@ -75,8 +76,11 @@ interface AgentCardProps {
 }
 
 export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor }) => {
+  // Colour = your history; the door rides as ink (hatch + pill) and, when nothing of yours is
+  // live, as the dim class. Three independent facts, three independent classes.
   const stateClass = agentStateClass(agent, queries);
   const open = isDoorOpen(agent);
+  const cardClasses = `${stateClass}${open ? "" : " s-closed"}${agentCardDims(agent, queries) ? " s-dim" : ""}`;
   const history = cardHistory(agent, queries, manuscripts);
   const { shown, more } = wishlistChips(agent);
   const materials = materialsSummary(agent);
@@ -89,12 +93,22 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
   const locationText = (agent.city || "").trim() || countryName(agent.country) || "";
 
   return (
-    <div className={`agl-scene ${stateClass}`}>
+    <div className={`agl-scene ${cardClasses}`}>
       <div className={`agl-rotor${flipped ? " flipped" : ""}`}>
         <div className="agl-facef">
           <div className="agl-acard">
             <div className="agl-band">
               <span className="agl-tag">{relationshipLabel(agentRelationship(agent.id, queries))}</span>
+              {/* THE DOOR, IN INK — beside the standing pill, never instead of it. */}
+              {!open && (
+                <span className="agl-closedpill">
+                  <svg width="8" height="9" viewBox="0 0 8 9" aria-hidden="true">
+                    <path d="M2 4V2.6a2 2 0 0 1 4 0V4" fill="none" stroke="currentColor" strokeWidth="1.1" />
+                    <rect x="1" y="4" width="6" height="4.4" rx="1" fill="currentColor" />
+                  </svg>
+                  Closed
+                </span>
+              )}
               <Stars rating={agent.starRating} />
               <button
                 type="button"

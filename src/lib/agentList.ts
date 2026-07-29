@@ -71,10 +71,27 @@ export const awaitingYourPages = (agentId: string, queries: Query[]): boolean =>
 export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean =>
   agent.submissionStatus !== SubmissionStatus.CLOSED;
 
-/** Card state class: closed overrides everything, else active → sage, no-active/never → pink. */
-export function agentStateClass(agent: Agent, queries: Query[]): "s-sage" | "s-pink" | "s-grey" {
-  if (!isDoorOpen(agent)) return "s-grey";
+/** THE CARD'S COLOUR — YOUR HISTORY, never their door (agent-card-visual pack).
+ *
+ *  Sage means something of yours is live; soft pink means nothing is. The band's pill names
+ *  WHICH pink case applies (no active queries vs never queried) — the colour deliberately does
+ *  not distinguish them.
+ *
+ *  The closed-door override that used to return "s-grey" is GONE: the door is expressed in ink
+ *  (a hatched band and a `Closed` pill), never in colour. See the two-systems EXCEPTION recorded
+ *  in CLAUDE.md — this page inverts the app-wide rule on purpose. */
+export function agentStateClass(agent: Agent, queries: Query[]): "s-sage" | "s-pink" {
   return agentRelationship(agent.id, queries) === "active" ? "s-sage" : "s-pink";
+}
+
+/** THE DIM RULE: a card fades ONLY when the door is closed AND nothing of yours is live.
+ *
+ *  A card with an active query NEVER dims, whatever the door is doing — an outstanding full or
+ *  a live offer does not matter less because the agency shut its doors. That is exactly the case
+ *  the old door-precedence bug hid, and dimming it would reintroduce the same error in a softer
+ *  form. Hover restores full strength (CSS): the record stays entirely valid. */
+export function agentCardDims(agent: Agent, queries: Query[]): boolean {
+  return !isDoorOpen(agent) && agentRelationship(agent.id, queries) !== "active";
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════

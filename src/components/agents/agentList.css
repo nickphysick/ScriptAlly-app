@@ -277,7 +277,9 @@
 /* the three states drive band, cast and rule through one variable set */
 .aglist .s-sage { --agl-band: var(--agl-sage-band); --agl-cast: var(--agl-sage-cast); --agl-rule: var(--agl-sage-rule); }
 .aglist .s-pink { --agl-band: var(--agl-pink-band); --agl-cast: var(--agl-pink-cast); --agl-rule: var(--agl-pink-rule); }
-.aglist .s-grey { --agl-band: var(--agl-grey-band); --agl-cast: var(--agl-grey-cast); --agl-rule: var(--agl-grey-rule); }
+/* (The closed-door colour is RETIRED — agent-card-visual pack: colour carries YOUR HISTORY
+   only, and the door is ink. The grey tokens survive for the non-card surfaces that still use
+   them.) */
 
 .aglist .agl-acard {
   background: var(--agl-paper); border: 1.5px solid var(--agl-ink); border-radius: 10px;
@@ -287,8 +289,26 @@
 }
 .aglist .agl-facef .agl-acard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--agl-cast); }
 /* closed for submissions: the whole face rests faded, and hover restores it to full */
-.aglist .s-grey .agl-facef .agl-acard { opacity: .62; }
-.aglist .s-grey .agl-facef .agl-acard:hover { opacity: 1; }
+/* THE DOOR, IN INK — a hatch over the band's colour, beneath the band's contents. The overlay
+   is pointer-events:none and the children take a stacking context, so it never washes over the
+   pill, the stars or the edit control. */
+.aglist .s-closed .agl-band { position: relative; }
+.aglist .s-closed .agl-band::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px);
+}
+.aglist .s-closed .agl-band > * { position: relative; z-index: 1; }
+/* the ink Closed pill — solid, white label, beside the standing pill */
+.aglist .agl-closedpill {
+  display: inline-flex; align-items: center; gap: 4px; flex: none;
+  background: #2e2723; color: #fff; border-radius: 99px; padding: 2px 8px;
+  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 7px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+/* THE DIM RULE — closed AND nothing of yours live. A card with an active query never dims,
+   whatever the door is doing; hover restores the record to full strength. */
+.aglist .s-dim .agl-facef .agl-acard { opacity: .6; transition: opacity .15s ease; }
+.aglist .s-dim .agl-facef .agl-acard:hover { opacity: 1; }
 
 /* ── band: pill · stars · pencil (no bottom border) ─────────────────────── */
 .aglist .agl-band {
