@@ -6,19 +6,20 @@
  * One height-capped, internally-scrolling MountCard with a pink header band and a THREE-TAB body:
  *   · Urgent        — urgent-family task rows (burgundy).
  *   · Housekeeping  — recommended-family task rows, FLATTENED (sage).
- *   · Notes to self — active (not-done) notes from the standalone notes store (rose).
+ *   · Notes to self — active (not-done) items from the WRITER'S to-do store (UserTask, users/{uid}/tasks)
+ *     — the same store the /todo composer writes. Dateless = a note (rose), dated = a task (sage).
  * Each tab shows a count; the strip defaults to Urgent unless its count is 0, then the first
  * non-empty tab in [Urgent, Housekeeping, Notes]. The pulsing header dot shows only while Urgent > 0.
  *
  * SURFACE ONLY: every action keeps its CURRENT behaviour — navigate via onAction
  * (Dashboard wires this to onNavigate(actionPath)); query-related items open via onOpenQuery;
- * nudge_overdue opens the Nudge modal via onNudge. The Notes tab SHARES the hero's notes store
- * (onAddNote / onCompleteNote = addNote / completeNoteWithUndo) — it never forks it.
+ * nudge_overdue opens the Nudge modal via onNudge. The Notes tab reads/writes the USER-TASK store
+ * (onAddNote → addUserTask · onCompleteNote → updateUserTask done) — the same one /todo uses.
  * snooze/dismiss + onAllTasks are kept on the props for call-site compatibility, not rendered.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { CheckCircle2, ListChecks, PlusCircle, Plus, Check, Calendar, X } from "lucide-react";
-import { Task, Query, Agent, Note, NoteColour } from "../../types";
+import { Task, Query, Agent, UserTask } from "../../types";
 import { MountCard } from "../MountCard";
 import { agentPrimary } from "../../lib/agentDisplay";
 import {
@@ -29,8 +30,8 @@ import {
   FONT_SERIF,
   FONT_MONO,
 } from "../../lib/designTokens";
-import { FONT_CAVEAT, NOTE_THEMES, NOTE_COLOURS } from "../notes/notesTheme";
-import { activeNotes, byMostRecent, formatCreatedStamp } from "../notes/notesUtils";
+import { FONT_CAVEAT } from "../notes/notesTheme";
+import { formatCreatedStamp } from "../notes/notesUtils";
 import { NoteComposeCalendar } from "../notes/NoteComposeCalendar";
 import "../notes/notes.css";
 
@@ -387,16 +388,19 @@ export interface OverToYouProps {
   tasks: Task[];
   queries: Query[];
   agents: Agent[];
-  notes: Note[];
+  /** notes-store convergence: the Notes-to-self tab reads the WRITER'S OWN to-do store (UserTask,
+   *  users/{uid}/tasks) — the same one the /todo composer writes. The post-it `Note` store is a
+   *  DIFFERENT feature (the dashboard hero's post-its) and no longer shares this name. */
+  userNotes: UserTask[];
   onAction: (task: Task) => void;
   onNudge: (task: Task) => void; // nudge_overdue rows open the Nudge modal instead of navigating
   onSnooze: (task: Task) => void; // kept for call-site compatibility; not rendered
   onDismiss: (task: Task) => void; // kept for call-site compatibility; not rendered
   onAllTasks: () => void; // kept for call-site compatibility; not rendered
   onOpenQuery: (queryId: string) => void;
-  onAddNote: (fields: { text: string; colour?: NoteColour; dueDate?: string | null }) => void; // Notes tab create
+  onAddNote: (fields: { text: string; dueDate?: string | null }) => void; // Notes tab create → addUserTask
   onCompleteNote: (id: string) => void; // tick a note done from the Notes tab
-  onDeleteNote: (note: Note) => void; // kept for call-site compatibility; not rendered
+  onDeleteNote: (note: UserTask) => void; // kept for call-site compatibility; not rendered
   /** When set, an × renders in the pink band — used by the dashboard focus slot. */
   onClose?: () => void;
 }
@@ -405,7 +409,7 @@ export const OverToYou: React.FC<OverToYouProps> = ({
   tasks,
   queries,
   agents,
-  notes,
+  userNotes,
   onAction,
   onNudge,
   onOpenQuery,
@@ -415,7 +419,8 @@ export const OverToYou: React.FC<OverToYouProps> = ({
 }) => {
   const urgentRows = buildOverToYouRows(tasks, queries, agents);
   const houseRows = buildHousekeepingRows(tasks, queries, agents);
-  const noteRows = byMostRecent(activeNotes(notes)); // active (not-done), newest first
+  // active (not-done) user notes/tasks, newest first — the SAME store /todo writes
+  const noteRows = [...userNotes].filter((t) => !t.done).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 
   const urgentCount = urgentRows.length;
   const houseCount = houseRows.length;
@@ -462,14 +467,12 @@ export const OverToYou: React.FC<OverToYouProps> = ({
   // ── Inline note composer (minimal — shares the hero's addNote store, not its post-it UI) ──
   const [composing, setComposing] = useState(false);
   const [draftText, setDraftText] = useState("");
-  const [draftColour, setDraftColour] = useState<NoteColour>("pink");
   const [draftDue, setDraftDue] = useState<string | null>(null);
   const [dateOpen, setDateOpen] = useState(false);
 
   const resetCompose = () => {
     setComposing(false);
     setDraftText("");
-    setDraftColour("pink");
     setDraftDue(null);
     setDateOpen(false);
   };
@@ -481,7 +484,7 @@ export const OverToYou: React.FC<OverToYouProps> = ({
   const saveCompose = () => {
     const text = draftText.trim();
     if (!text) return;
-    onAddNote({ text, colour: draftColour, dueDate: draftDue });
+    onAddNote({ text, dueDate: draftDue });
     resetCompose();
   };
 
@@ -689,7 +692,8 @@ export const OverToYou: React.FC<OverToYouProps> = ({
             ) : (
               <>
                 {noteRows.map((note, i) => {
-                  const theme = NOTE_THEMES[note.colour];
+                  // the two natures: a dated item is a TASK (sage), a dateless one a NOTE (rose)
+                  const theme = note.dueDate ? { fill: "#d5dbd3", ink: "#5a6e58" } : { fill: "#f2cec1", ink: "#bd7461" };
                   const leaving = leavingIds.has(note.id);
                   return (
                     <div
@@ -787,24 +791,8 @@ export const OverToYou: React.FC<OverToYouProps> = ({
                     />
                     <div className="flex items-center justify-between" style={{ marginTop: 8, gap: 8 }}>
                       <div className="flex items-center" style={{ gap: 8 }}>
-                        {NOTE_COLOURS.map((c) => (
-                          <button
-                            key={c}
-                            type="button"
-                            aria-label={c}
-                            className="oty-swatch"
-                            onClick={() => setDraftColour(c)}
-                            style={{
-                              width: 16,
-                              height: 16,
-                              borderRadius: "50%",
-                              background: NOTE_THEMES[c].fill,
-                              border: draftColour === c ? `2px solid ${NOTE_THEMES[c].ink}` : "1px solid rgba(0,0,0,0.12)",
-                              cursor: "pointer",
-                              padding: 0,
-                            }}
-                          />
-                        ))}
+                        {/* no colour picker: a user note's tint is DERIVED from its nature
+                            (dateless = note, dated = task) — UserTask carries no colour field. */}
                         <span style={{ position: "relative" }}>
                           <button
                             type="button"

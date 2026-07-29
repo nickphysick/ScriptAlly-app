@@ -500,7 +500,12 @@ export const Dashboard: React.FC<{
     undoQueryStatus,
     addNote,
     updateNote,
-    deleteNote
+    deleteNote,
+    // the Notes-to-self tab reads the writer's OWN to-do store (the /todo composer's store)
+    userTasks,
+    addUserTask,
+    updateUserTask,
+    deleteUserTask
   } = useScriptAllyDb();
 
   // v37 focus slot + stat definitions (hooks — must precede every conditional return).
@@ -524,12 +529,12 @@ export const Dashboard: React.FC<{
   };
   const completeNoteWithUndo = (id: string) => {
     updateNote(id, { done: true, doneAt: new Date().toISOString() });
-    showNoteToast("Note completed", () => updateNote(id, { done: false, doneAt: null }));
+    showNoteToast("Post-it completed", () => updateNote(id, { done: false, doneAt: null }));
   };
   const deleteNoteWithUndo = (id: string) => {
     const snap = notes.find((n) => n.id === id);
     deleteNote(id);
-    showNoteToast("Note deleted", () => {
+    showNoteToast("Post-it deleted", () => {
       if (snap) addNote({ text: snap.text, colour: snap.colour, dueDate: snap.dueDate });
     });
   };
@@ -1487,16 +1492,16 @@ export const Dashboard: React.FC<{
       tasks={tasks}
       queries={queries}
       agents={agents}
-      notes={notes}
+      userNotes={userTasks}
       onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId, { fromTask: true }) : onNavigate(task.actionPath, task.title)}
       onNudge={(task) => setNudgeTask(task)}
       onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
       onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
       onAllTasks={() => setIsTasksPanelOpen(true)}
       onOpenQuery={(qid) => openEditQuery(qid)}
-      onAddNote={addNote}
-      onCompleteNote={completeNoteWithUndo}
-      onDeleteNote={(note) => deleteNoteWithUndo(note.id)}
+      onAddNote={(f) => addUserTask({ text: f.text, dueDate: f.dueDate ?? undefined })}
+      onCompleteNote={(id) => updateUserTask(id, { done: true, completedAt: new Date().toISOString() })}
+      onDeleteNote={(t) => deleteUserTask(t.id)}
       onClose={() => slot.request(null)}
     />
   );

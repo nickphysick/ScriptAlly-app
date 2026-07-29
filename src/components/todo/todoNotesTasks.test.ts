@@ -322,3 +322,34 @@ describe("notes gaps — adding another, and removing one (found in live use)", 
     expect(page).toContain("addUserTask, updateUserTask, deleteUserTask,"); // destructured from the db context
   });
 });
+
+describe("notes-store convergence — one store owns \"Notes to self\"", () => {
+  const oty = readFileSync(join(here, "..", "dashboard", "OverToYou.tsx"), "utf8");
+  const dash = readFileSync(join(here, "..", "Dashboard.tsx"), "utf8");
+
+  it("the dashboard's Notes-to-self tab reads the USER-TASK store (what /todo writes), not the post-its", () => {
+    expect(oty).toContain("userNotes: UserTask[];");
+    expect(oty).not.toContain("notes: Note[];"); // the post-it store no longer feeds this tab
+    expect(oty).toContain("const noteRows = [...userNotes].filter((t) => !t.done)");
+    expect(dash).toContain("userNotes={userTasks}");
+    // tick + create go through the user-task writes (the same store /todo uses)
+    expect(dash).toContain("onCompleteNote={(id) => updateUserTask(id, { done: true");
+    expect(dash).toContain("onAddNote={(f) => addUserTask({ text: f.text");
+  });
+
+  it("NO SURFACE calls both stores \"notes\": the post-its say post-it in every visible string", () => {
+    for (const [file, s] of [
+      ["NotesDesk", readFileSync(join(here, "..", "notes", "NotesDesk.tsx"), "utf8")],
+      ["NoteQuickAdd", readFileSync(join(here, "..", "notes", "NoteQuickAdd.tsx"), "utf8")],
+      ["NoteEditor", readFileSync(join(here, "..", "notes", "NoteEditor.tsx"), "utf8")],
+      ["DeskNote", readFileSync(join(here, "..", "notes", "DeskNote.tsx"), "utf8")],
+    ] as const) {
+      const visible = [...s.matchAll(/(?:placeholder|aria-label|title)="([^"]*)"/g)].map((m) => m[1]);
+      for (const v of visible) expect(`${file}: ${v}`).not.toMatch(/\bnotes?\b/i);
+    }
+    expect(dash).toContain('showNoteToast("Post-it completed"');
+    expect(dash).toContain('showNoteToast("Post-it deleted"');
+    // "Notes to self" now names exactly ONE store — the user-task one
+    expect(oty).toContain('label: "Notes to self"');
+  });
+});

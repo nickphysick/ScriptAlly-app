@@ -90,7 +90,7 @@ export const NotesLab: React.FC = () => {
             tasks={[]}
             queries={[]}
             agents={[]}
-            notes={notes}
+            userNotes={[]}
             onAction={() => {}}
             onNudge={() => {}}
             onSnooze={() => {}}
