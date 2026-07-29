@@ -152,16 +152,31 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
       expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard:hover \{ opacity: 1; \}/);
       expect(css).not.toContain(".s-grey {"); // the door's colour is gone
     });
-    it("the DOOR is ink: a hatch overlay beneath the band's contents, and the Closed pill", () => {
+    it("the DOOR is ink: a hatch overlay beneath the band's contents — and the pill is RETIRED", () => {
       const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
       expect(css).toContain("repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px)");
       expect(css).toMatch(/\.s-closed \.agl-band::after \{[^}]*pointer-events: none/s);
       expect(css).toMatch(/\.s-closed \.agl-band > \* \{ position: relative; z-index: 1; \}/);
-      expect(css).toMatch(/\.agl-closedpill \{[^}]*background: #2e2723/s);
       const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
-      expect(card).toContain('className="agl-closedpill"');
       expect(card).toContain("{!open && (");
-      expect(card).toContain('s-closed');
+      expect(card).toContain("s-closed");
+      // agent-list-fixes P2: hatch + stamp say it; a third device is two too many
+      expect(card).not.toContain("agl-closedpill");
+      expect(css).not.toContain(".agl-closedpill");
+    });
+
+    it("THE HUSHED BODY: closed + nothing live hides the body; an ACTIVE query renders in full", () => {
+      const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
+      // the hush and the dim share ONE derivation, so they can never disagree
+      expect(card).toContain("const hushed = agentCardDims(agent, queries);");
+      expect(card).toContain('{!hushed && <div className="agl-body">');
+      // what survives the hush: identity + the meta line, which sit ABOVE the body
+      expect(card.indexOf('className="agl-meta"')).toBeLessThan(card.indexOf('{!hushed && <div className="agl-body">'));
+      // …and what does not: history, wishlist, materials all live inside the body
+      const body = card.slice(card.indexOf('{!hushed && <div className="agl-body">'), card.indexOf('className="agl-stamp"'));
+      for (const gone of ["Your history", "Wishlist", "Materials wanted"]) expect(body).toContain(gone);
+      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
+      expect(css).toMatch(/\.s-hush \.agl-facef \.agl-acard \{ min-height: 210px; \}/); // never a stub
     });
   });
 });

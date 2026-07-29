@@ -80,7 +80,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
   // live, as the dim class. Three independent facts, three independent classes.
   const stateClass = agentStateClass(agent, queries);
   const open = isDoorOpen(agent);
-  const cardClasses = `${stateClass}${open ? "" : " s-closed"}${agentCardDims(agent, queries) ? " s-dim" : ""}`;
+  // The hush and the dim answer the SAME question — closed door, nothing of yours live — so
+  // they share one derivation rather than drifting apart.
+  const hushed = agentCardDims(agent, queries);
+  const cardClasses = `${stateClass}${open ? "" : " s-closed"}${hushed ? " s-dim s-hush" : ""}`;
   const history = cardHistory(agent, queries, manuscripts);
   const { shown, more } = wishlistChips(agent);
   const materials = materialsSummary(agent);
@@ -99,16 +102,6 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
           <div className="agl-acard">
             <div className="agl-band">
               <span className="agl-tag">{relationshipLabel(agentRelationship(agent.id, queries))}</span>
-              {/* THE DOOR, IN INK — beside the standing pill, never instead of it. */}
-              {!open && (
-                <span className="agl-closedpill">
-                  <svg width="8" height="9" viewBox="0 0 8 9" aria-hidden="true">
-                    <path d="M2 4V2.6a2 2 0 0 1 4 0V4" fill="none" stroke="currentColor" strokeWidth="1.1" />
-                    <rect x="1" y="4" width="6" height="4.4" rx="1" fill="currentColor" />
-                  </svg>
-                  Closed
-                </span>
-              )}
               <Stars rating={agent.starRating} />
               <button
                 type="button"
@@ -152,7 +145,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
               </div>
             </div>
 
-            <div className="agl-body">
+            {/* THE HUSHED BODY (agent-list-fixes P2): with the door closed and nothing of yours
+                live there is nothing to act on and nothing to read, so the body goes and the
+                stamp takes the vacated space. An ACTIVE query always renders in full — the same
+                exception the dim rule makes. */}
+            {!hushed && <div className="agl-body">
               <div>
                 <div className="agl-sect">Your history</div>
                 <div className="agl-hist">
@@ -204,7 +201,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
                   {preview.text}
                 </div>
               )}
-            </div>
+            </div>}
 
             {!open && (
               <div className="agl-stamp" aria-hidden="true">

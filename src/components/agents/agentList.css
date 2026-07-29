@@ -298,13 +298,15 @@
   background: repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px);
 }
 .aglist .s-closed .agl-band > * { position: relative; z-index: 1; }
-/* the ink Closed pill — solid, white label, beside the standing pill */
-.aglist .agl-closedpill {
-  display: inline-flex; align-items: center; gap: 4px; flex: none;
-  background: #2e2723; color: #fff; border-radius: 99px; padding: 2px 8px;
-  font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 7px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-}
+/* (The ink Closed PILL is RETIRED — agent-list-fixes P2: the hatch and the stamp already say
+   it, and three devices for one fact is two too many.)
+   THE HUSHED CARD: with the door closed and nothing of yours live, the body is not rendered —
+   only the name, agency and the response-time meta remain — and the stamp centres in the
+   vacated space so the card reads as complete rather than truncated.
+   The stamp needs NO repositioning: it is already `inset: 0` and flex-centred over the whole
+   face, so as the card shortens it stays centred in what remains. A floor keeps a hushed card
+   from becoming a stub. */
+.aglist .s-hush .agl-facef .agl-acard { min-height: 210px; }
 /* THE DIM RULE — closed AND nothing of yours live. A card with an active query never dims,
    whatever the door is doing; hover restores the record to full strength. */
 .aglist .s-dim .agl-facef .agl-acard { opacity: .6; transition: opacity .15s ease; }
