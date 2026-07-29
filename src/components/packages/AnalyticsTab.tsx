@@ -25,6 +25,7 @@ import {
 } from "../../lib/packageMetrics";
 import { overdueSends, rankMaterialsByReplies, sentToRows, recommendations, Recommendation } from "../../lib/packageAnalytics";
 import { COMMUNITY_STATS_ENABLED, displayablePercentile, percentileLabel, percentileSentence } from "../../lib/communityStats";
+import { AnalyticsEmpty } from "./AnalyticsEmpty";
 
 export type AnalyticsScope = "all" | string;
 
@@ -43,6 +44,10 @@ export interface AnalyticsTabProps {
   onOpenQueries: () => void;
   /** Real action: open a package on the Workshop tab. */
   onOpenPackage: (packageId: string) => void;
+  /** First-run: start a new package (the header's action). */
+  onNewPackage?: () => void;
+  /** First-run: the EXISTING guided tour over example data. */
+  onTryExample?: () => void;
 }
 
 /** A package's sends. */
@@ -92,7 +97,7 @@ const emphasise = (text: string, bold: string[]): React.ReactNode => {
 
 export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
   versions, packages, queries, agents, activePackageId, scope, onScope, now = Date.now(),
-  onOpenQueries, onOpenPackage,
+  onOpenQueries, onOpenPackage, onNewPackage, onTryExample,
 }) => {
   const packaged = queries.filter((q) => !!q.packageId && packages.some((p) => p.id === q.packageId));
 
@@ -128,16 +133,9 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({
     const recs: Recommendation[] = recommendations({ versions, packages, queries, agents, now });
     const bar = (n: number, d: number) => `${d > 0 ? Math.round((n / d) * 100) : 0}%`;
 
+    // First run — nothing has gone out yet. The full empty screen replaces the thin line it used to be.
     if (f.sent === 0) {
-      return (
-        <div className="pkgw-nodata">
-          <h3>Nothing to measure yet</h3>
-          <p>
-            None of your packages has been attached to a query yet. Send one from the Queries Hub and this tab starts
-            tracking what actually happens: how many agents reply, how quickly, and which version is carrying the requests.
-          </p>
-        </div>
-      );
+      return <AnalyticsEmpty onNewPackage={() => onNewPackage?.()} onTryExample={() => onTryExample?.()} />;
     }
 
     return (

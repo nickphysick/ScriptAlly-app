@@ -274,6 +274,8 @@ export const SubmissionPackages: React.FC = () => {
                 onScope={setScope}
                 onOpenQueries={() => navigate("/queries")}
                 onOpenPackage={(pid) => { setTab("workshop"); setOpenPkg(pid); }}
+                onNewPackage={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}
+                onTryExample={startTour}
               />
             </div>
           )}

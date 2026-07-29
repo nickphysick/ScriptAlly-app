@@ -177,6 +177,8 @@ export const PkgLab: React.FC = () => {
               now={Date.parse("2026-07-28T00:00:00.000Z")}
               onOpenQueries={() => window.alert("→ Queries Hub (the real route navigates)")}
               onOpenPackage={(pid) => { setTab("workshop"); setOpenPkg(pid); }}
+              onNewPackage={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}
+              onTryExample={startTour}
             />
           </div>
         ) : view === "empty" ? (
