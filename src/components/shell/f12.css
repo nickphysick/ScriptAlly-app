@@ -263,8 +263,27 @@
 .qc-mat.on { color: var(--ink); }
 .qc-ck { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid var(--line); background: var(--panel); color: transparent; font-size: 10px; padding: 0; cursor: pointer; }
 .qc-mat.on .qc-ck { background: var(--sage-edge); border-color: var(--sage-edge); color: var(--ink); }
-.qc-step { flex: none; width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); font-size: 13px; line-height: 1; cursor: pointer; }
-.qc-step:hover { border-color: var(--muted); }
+/* the sample quantity (ref qdb-create-fixes2 §3) — ONE bordered 32px stepper with hairline
+   dividers, beside a matching unit trigger that opens the app's own menu. The bare +/− buttons
+   and the native <select> it replaces read as three loose controls and one macOS popup.
+   The middle cell is an INPUT: the physics steps by 500 for words, so 5,000 is typed. */
+.qc-qty { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 7px; }
+.qc-stp { display: inline-flex; align-items: center; height: 32px; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.qc-stp button {
+  width: 28px; align-self: stretch; display: grid; place-items: center; padding: 0; border: none;
+  background: transparent; color: var(--ink-2); font-size: 14px; line-height: 1; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.qc-stp button:hover { background: var(--paper); color: var(--ink); }
+.qc-stp input {
+  width: 46px; align-self: stretch; text-align: center; padding: 0 2px; border: none;
+  border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0;
+  background: transparent; font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink); outline: none;
+}
+.qc-unit { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); font-family: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; white-space: nowrap; transition: background 0.12s, border-color 0.12s; }
+.qc-unit:hover { background: var(--paper); border-color: var(--muted); }
+.qc-unit .qc-cv { font-size: 9px; color: var(--faint); }
 
 /* ── GHOST PREVIEW zero-state (v4 P3; ref empty-states-ref.html option 1) — the page's real
    anatomy, faded and inert, behind the welcome card. Skeleton, not decoration: it shows what the

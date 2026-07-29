@@ -23,12 +23,9 @@ import { useFixedMenu } from "../forms/useFixedMenu";
 import { agentInitials, agentPrimary, agentAgencyLine } from "../../lib/agentDisplay";
 import {
   SAMPLE_UNITS,
-  UNIT_CFG,
   snapToUnit,
   stepAmount,
-  parseAmount,
   type MaterialRow,
-  type SampleUnit,
 } from "../../lib/agentMaterials";
 import {
   CREATE_SEND_METHODS,
@@ -77,6 +74,9 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      and was the bug being fixed. */
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const { triggerRef: msTrigRef, menuStyle: msMenuStyle } = useFixedMenu<HTMLButtonElement>(msMenuOpen);
+  /* Same reasoning for the sample UNIT — it was the second native <select> on this pane. */
+  const [unitMenuOpen, setUnitMenuOpen] = useState(false);
+  const { triggerRef: unitTrigRef, menuStyle: unitMenuStyle } = useFixedMenu<HTMLButtonElement>(unitMenuOpen);
   const onlyManuscript = manuscripts.length === 1 ? manuscripts[0] : null;
   const chosenManuscript = manuscripts.find((m) => m.id === draft.manuscriptId) ?? null;
 
@@ -299,24 +299,50 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 </button>
                 <span style={{ cursor: "pointer" }} onClick={() => setRow("sample", { on: !sample.on, amount: sample.amount || snapToUnit(sample.unit) })}>Sample materials</span>
                 {sample.on && (
-                  <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5 }}>
-                    <button type="button" className="qc-step" aria-label="Fewer" onClick={() => setRow("sample", { amount: stepAmount(sample.amount, sample.unit, -1) })}>−</button>
-                    <input
-                      value={sample.amount}
-                      onChange={(e) => setRow("sample", { amount: e.target.value })}
-                      aria-label="Sample quantity"
-                      inputMode="numeric"
-                      style={{ width: 46, textAlign: "center", border: "1px solid var(--line)", borderRadius: 8, padding: "5px 0", fontFamily: "inherit", fontSize: 12.5, background: "var(--panel)", color: "var(--ink)" }}
-                    />
-                    <button type="button" className="qc-step" aria-label="More" onClick={() => setRow("sample", { amount: stepAmount(sample.amount, sample.unit, 1) })}>+</button>
-                    <select
-                      value={sample.unit}
-                      onChange={(e) => setRow("sample", { unit: e.target.value as SampleUnit, amount: snapToUnit(e.target.value as SampleUnit) })}
-                      aria-label="Sample unit"
-                      style={{ border: "1px solid var(--line)", borderRadius: 8, padding: "5px 7px", fontFamily: "inherit", fontSize: 11.5, background: "var(--panel)", color: "var(--ink)", cursor: "pointer" }}
-                    >
-                      {SAMPLE_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
-                    </select>
+                  /* The quantity control (ref qdb-create-fixes2 §3). The PHYSICS is not
+                     re-implemented here: stepAmount / snapToUnit / UNIT_CFG come from
+                     lib/agentMaterials, the same module the agent form's Materials tab runs on, so
+                     the two can never disagree about what a sensible quantity is. Only the skin
+                     differs — an editor row and a create field are allowed to look different.
+
+                     The value is an INPUT, not a read-out: 5,000 words is typed, never stepped. */
+                  <span className="qc-qty">
+                    <span className="qc-stp">
+                      <button type="button" aria-label="Fewer" onClick={() => setRow("sample", { amount: stepAmount(sample.amount, sample.unit, -1) })}>−</button>
+                      <input
+                        value={sample.amount}
+                        onChange={(e) => setRow("sample", { amount: e.target.value })}
+                        aria-label={`Sample quantity in ${sample.unit.toLowerCase()}`}
+                        inputMode="numeric"
+                      />
+                      <button type="button" aria-label="More" onClick={() => setRow("sample", { amount: stepAmount(sample.amount, sample.unit, 1) })}>+</button>
+                    </span>
+                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                      <button
+                        ref={unitTrigRef}
+                        type="button"
+                        className="qc-unit"
+                        aria-haspopup="menu"
+                        aria-expanded={unitMenuOpen}
+                        aria-label={`Sample unit: ${sample.unit}`}
+                        onClick={() => setUnitMenuOpen((o) => !o)}
+                      >
+                        {sample.unit}
+                        <span className="qc-cv" aria-hidden="true">▾</span>
+                      </button>
+                      <F12Menu
+                        open={unitMenuOpen}
+                        onClose={() => setUnitMenuOpen(false)}
+                        style={unitMenuStyle}
+                        ariaLabel="Sample unit"
+                        items={SAMPLE_UNITS.map((u) => ({
+                          label: u,
+                          icon: u === sample.unit ? <span aria-hidden="true">✓</span> : undefined,
+                          /* SNAP, never convert — 3 chapters must not become 3 words. */
+                          onClick: () => { setRow("sample", { unit: u, amount: snapToUnit(u) }); setUnitMenuOpen(false); },
+                        }))}
+                      />
+                    </span>
                   </span>
                 )}
               </div>

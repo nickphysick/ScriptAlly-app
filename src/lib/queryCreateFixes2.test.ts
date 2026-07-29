@@ -18,10 +18,21 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { SAMPLE_UNITS, UNIT_CFG, snapToUnit, stepAmount } from "./agentMaterials";
+import { draftMaterialsToQuery } from "./queryDraft";
+import { materialLabel, sampleMaterialText } from "./materials";
+import type { QueryMaterial } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const pane = read("../components/queries/QueryCreatePane.tsx");
 const css = read("../components/shell/f12.css");
+
+/**
+ * The pane with comments removed. Assertions about what the CODE does must not be able to match
+ * prose ABOUT the code — the comment explaining why the native <select> went would otherwise fail
+ * the test asserting it went.
+ */
+const paneCode = pane.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
 /** One CSS rule body, anchored at a line start so a compound selector can't match instead. */
 const block = (selector: string): string => {
@@ -47,5 +58,106 @@ describe("P1 · the pane names its job", () => {
     expect(pane).toContain("<div style={LABEL}>Agent</div>");
     expect(pane, "the picker itself must not be rebuilt").toContain("AgentSearchField");
     expect(pane).toContain("onCreateAgent");
+  });
+});
+
+describe("P2 · the sample quantity is ONE control over the SHARED physics", () => {
+  it("no native <select> survives anywhere on the pane", () => {
+    expect(paneCode, "a native select renders the macOS system popup — off-brand everywhere").not.toContain("<select");
+    expect(pane, "the unit uses the app's own menu").toContain("ariaLabel=\"Sample unit\"");
+    expect(pane).toContain("useFixedMenu");
+  });
+
+  it("the physics is IMPORTED, never re-implemented", () => {
+    expect(pane).toContain('from "../../lib/agentMaterials"');
+    expect(pane).toContain("stepAmount");
+    expect(pane).toContain("snapToUnit");
+    // The numbers themselves appear in exactly one place. A literal step/default here would be a
+    // second implementation that could silently drift from the agent form's.
+    for (const n of ["500", "5000", "step:", "def:"]) {
+      expect(paneCode, `the unit physics leaked into the pane (${n})`).not.toContain(n);
+    }
+  });
+
+  it("the value is typeable, because 5,000 words is not a number you step to", () => {
+    const qty = block(".qc-stp input");
+    expect(qty, "the .qc-stp input rule is missing — is the value a read-out again?").not.toBe("");
+    expect(pane).toContain("inputMode=\"numeric\"");
+    expect(pane).toContain("onChange={(e) => setRow(\"sample\", { amount: e.target.value })}");
+  });
+
+  it("the stepper is one bordered 32px control, not three loose buttons", () => {
+    const stp = block(".qc-stp");
+    expect(stp, "the .qc-stp rule is missing").not.toBe("");
+    expect(stp).toContain("height: 32px");
+    expect(stp).toContain("border: 1px solid var(--line)");
+    expect(block(".qc-unit"), "the unit trigger must match the stepper's height").toContain("height: 32px");
+    expect(css, "the bare +/− button rule should be gone").not.toContain(".qc-step {");
+  });
+
+  it("changing unit SNAPS to that unit's sensible default — 3 chapters is not 3 words", () => {
+    expect(snapToUnit("Words")).toBe("5000");
+    expect(snapToUnit("Chapters")).toBe("3");
+    expect(snapToUnit("Pages")).toBe("10");
+    // and the step is unit-aware, so stepping words moves in 500s
+    expect(stepAmount("5000", "Words", 1)).toBe("5500");
+    expect(stepAmount("3", "Chapters", 1)).toBe("4");
+    expect(stepAmount("10", "Pages", 1)).toBe("15");
+    // the floor holds
+    expect(stepAmount("500", "Words", -1)).toBe(String(UNIT_CFG.Words.min));
+  });
+});
+
+/**
+ * The cheap round-trip check: create mode speaks SampleUnit ("Chapters"), the stored query speaks
+ * QueryMaterial.type ("chapters"). Casing between two vocabularies is a recurring regression here,
+ * so it is asserted rather than assumed.
+ */
+describe("unit round-trip · create mode → stored query → post-save editor", () => {
+  const POST_SAVE_UNITS = ["pages", "chapters", "words"] as const; // the editor's own state type
+
+  it("every SampleUnit lands on a type the post-save editor can read back", () => {
+    for (const unit of SAMPLE_UNITS) {
+      const out = draftMaterialsToQuery([
+        { key: "sample", kind: "qty", name: "Opening sample", on: true, unit, amount: snapToUnit(unit) },
+      ]);
+      const item = out[0] as QueryMaterial;
+      expect(typeof item, `${unit} degraded to a bare string`).toBe("object");
+      expect(item.type, `${unit} did not lower-case cleanly`).toBe(unit.toLowerCase());
+      expect(POST_SAVE_UNITS, `${unit} is not a unit the post-save editor can show`).toContain(item.type);
+      expect(item.quantity, `${unit} lost its amount`).toBe(Number(snapToUnit(unit)));
+    }
+  });
+
+  it("3 chapters survives the trip intact, amount and unit", () => {
+    const [item] = draftMaterialsToQuery([
+      { key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "3" },
+    ]) as QueryMaterial[];
+    expect(item).toEqual({ material: "Sample Pages", type: "chapters", quantity: 3 });
+    expect(sampleMaterialText(item)).toBe("3 chapters");
+  });
+
+  /**
+   * ⚠️ FLAGGED, NOT FIXED (out of scope — the post-save editor is its own task).
+   * That editor finds the sample with "anything that isn't the query letter or the synopsis"
+   * (`isSampleMat` in Queries.tsx). An "Other" material answers to that description too. The READ
+   * is safe — draftMaterialsToQuery emits sample before other, so `.find` still lands on the
+   * sample — but the editor's save/remove FILTER drops every matching item, so editing the sample
+   * would take the Other line with it. This test documents the trap so the fix has a starting point.
+   */
+  it("documents the isSampleMat breadth trap in the post-save editor", () => {
+    const out = draftMaterialsToQuery([
+      { key: "queryLetter", kind: "binary", name: "Query letter", on: true },
+      { key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "3" },
+      { key: "other", kind: "text", name: "Other", on: true, text: "Author bio" },
+    ]);
+    const isSampleMat = (it: string | QueryMaterial) => {
+      const l = materialLabel(it).toLowerCase();
+      return !l.includes("query") && !l.includes("synopsis");
+    };
+    // the read is fine — order saves it
+    expect((out.find(isSampleMat) as QueryMaterial).type).toBe("chapters");
+    // ...but the predicate matches the Other item too, which is the bug
+    expect(out.filter(isSampleMat)).toHaveLength(2);
   });
 });

@@ -83,9 +83,9 @@ describe("the send column", () => {
 
 describe("the manuscript field has two states, and neither is a native select", () => {
   it("a native <select> is gone — it rendered the off-brand macOS system menu", () => {
-    // Scoped to the manuscript field: the sample-unit control in "What you sent" is still a
-    // native select — same off-brand system menu, but a different field and out of scope here
-    // (flagged in the report).
+    // Scoped to the manuscript field. (The sample-unit control was the other native select on
+    // this pane; it went in corrections round 2 — see queryCreateFixes2.test.ts, which asserts
+    // the WHOLE pane is free of them.)
     const msField = pane.slice(pane.indexOf("<div style={LABEL}>Manuscript</div>"), pane.indexOf("Date sent"));
     expect(msField, "the manuscript field is back on a native select").not.toContain("<select");
     expect(msField).toContain("F12Menu");
