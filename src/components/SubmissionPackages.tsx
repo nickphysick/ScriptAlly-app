@@ -30,7 +30,7 @@ import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
@@ -203,15 +203,33 @@ export const SubmissionPackages: React.FC = () => {
           Pro pill and package-count pulse are dropped with it (no title-adornment/meta slots
           under the header law); the manuscript selector keeps its function in the row below
           the rule until the sidebar switcher is live-wired — see the rollout report. */}
+      {/* The Pro header format, shared by all three states of this page (landing, empty, populated).
+          The SHARED PageHeader is reused unmodified: the Pro pill rides `titleAdornment`, the
+          manuscript selector + primary action ride `actionsSlot` on the title's line (the floating
+          chip on its own row is gone), and its own rule is restyled to the 2px Pro rule under the
+          `.pkgw` scope — Discover's pattern, so there is no second rule and no fork of a component
+          eleven pages share. */}
       <PageHeader
         variant="full"
         title="Package Workshop"
         description="Bundle your materials once, then send them without rebuilding each time."
-        actions={activeMs ? [{ label: "＋ New package", primary: true, onClick: () => { setTab("workshop"); setNewPkgSignal((n) => n + 1); } }] : []}
+        titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
+        actionsSlot={activeMs ? (
+          <div className="pkgw-hact">
+            {msSelector}
+            <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
+              <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
+            </button>
+          </div>
+        ) : undefined}
       />
-      {activeMs && msSelector && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12 }}>{msSelector}</div>
-      )}
+      <div className="pkgw-strip">
+        <ShieldCheck className="sh" aria-hidden="true" />
+        <span className="stx">
+          <b>Every package keeps its own scorecard.</b> ScriptAlly records which letter, synopsis and pages
+          went to each agent — so you can see which combination gets replies, rather than guessing.
+        </span>
+      </div>
 
       {!activeMs ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>

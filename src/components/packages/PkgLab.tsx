@@ -18,6 +18,7 @@ import { PackageTabs, PackageTab } from "./PackageTabs";
 import { WorkshopTab } from "./WorkshopTab";
 import { AnalyticsTab, AnalyticsScope } from "./AnalyticsTab";
 import { PageHeader } from "../shell/PageHeader";
+import { ShieldCheck, Plus } from "lucide-react";
 import "./packageWorkshop.css";
 import { Tour } from "../Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./tourExample";
@@ -77,8 +78,8 @@ const proPill = (
   <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "4px 10px" }}>Pro</span>
 );
 const msChip = (
-  <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600, color: "var(--ink)", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 10, padding: "9px 16px" }}>
-    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="var(--burg)" strokeWidth={1.8} strokeLinejoin="round"><path d="M4 4h13a2 2 0 012 2v14H6a2 2 0 01-2-2z" /><path d="M4 18a2 2 0 012-2h13" /></svg>Murphy&apos;s Day Out
+  <span className="pkgw-ctl">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round"><path d="M5 4h11l3 3v13H5z" /><path d="M8 4v6l2-1.5L12 10V4" /></svg>Murphy&apos;s Day Out
   </span>
 );
 
@@ -111,8 +112,23 @@ export const PkgLab: React.FC = () => {
         variant="full"
         title="Package Workshop"
         description="Bundle your materials once, then send them without rebuilding each time."
-        actions={[{ label: "＋ New package", primary: true, onClick: () => { setTab("workshop"); setNewPkgSignal((n) => n + 1); } }]}
+        titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
+        actionsSlot={
+          <div className="pkgw-hact">
+            {msChip}
+            <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
+              <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
+            </button>
+          </div>
+        }
       />
+      <div className="pkgw-strip">
+        <ShieldCheck className="sh" aria-hidden="true" />
+        <span className="stx">
+          <b>Every package keeps its own scorecard.</b> ScriptAlly records which letter, synopsis and pages
+          went to each agent — so you can see which combination gets replies, rather than guessing.
+        </span>
+      </div>
       <PackageTabs tab={tab} onTab={setTab} />
     </>
   );

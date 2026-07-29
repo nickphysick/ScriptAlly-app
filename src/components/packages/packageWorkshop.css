@@ -482,3 +482,49 @@
 .pkgw-pctpill.top { background: var(--pkg-gold-tint); color: var(--pkg-gold-ink); }
 /* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded. */
 .pkgw-unlock { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
+
+/* ══ Pro header format ═════════════════════════════════════════════════════
+   Ref scriptally-packages-empty.html .phtop/.prorule/.strip, and the pattern Discover
+   established: the SHARED PageHeader is reused unchanged and restyled under this page's
+   scope — the Pro pill rides `titleAdornment`, the right cluster rides `actionsSlot`, and
+   PageHeader's own `.svh-rule` becomes the 2px Pro rule rather than a second rule being
+   drawn beneath it. No modification to a component 11 pages share. */
+.pkgw .svh { margin-bottom: 0; }                 /* the strip butts against the rule */
+.pkgw .svh-title { display: inline-flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+.pkgw .svh-sub { font-style: italic; max-width: 640px; }
+.pkgw .svh-rule { height: 2px; border-radius: 2px; background: var(--slate); opacity: .5; }
+.pkgw .svh-acts { align-items: center; }
+
+.pkgw-propill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--slate); background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
+  border-radius: 99px; padding: 4px 10px; position: relative; top: 2px; flex: none;
+}
+.pkgw-propill svg { width: 10px; height: 10px; }
+
+/* The right cluster — manuscript selector + primary action, on the title's line. Both go
+   through actionsSlot because PageHeader treats `actions` and `actionsSlot` as exclusive. */
+.pkgw-hact { display: flex; align-items: center; gap: 9px; flex: none; }
+.pkgw-ctl {
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 13px;
+  background: var(--pkg-card); border: 1px solid var(--pkg-line); border-radius: 11px;
+  font-size: 12.5px; color: var(--pkg-ink); cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.pkgw-ctl:hover { border-color: var(--pkg-dash); }
+.pkgw-ctl svg { width: 14px; height: 14px; color: var(--pkg-muted); }
+
+/* The Pro claim strip — hangs off the rule, so the two read as one block. */
+.pkgw-strip {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3); border-top: 0;
+  border-radius: 0 0 12px 12px; padding: 11px 16px;
+}
+.pkgw-strip .sh { width: 20px; height: 20px; color: var(--slate); flex: none; }
+.pkgw-strip .stx { font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5; }
+.pkgw-strip .stx b { color: var(--pkg-ink); font-weight: 600; }
+.pkgw-strip .lnk {
+  margin-left: auto; font-size: 11.5px; color: var(--slate); white-space: nowrap; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px solid var(--slate-line, #c7d6e3); padding: 0; font-family: inherit;
+}
+.pkgw .pkgw-tabs { margin-top: 22px; }
