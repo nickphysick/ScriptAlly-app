@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; --nt-comp-bd: #3a1c14; --nt-block-note: #eedfae; --nt-block-task: #d5dbd3; --nt-seg-bg: #faf7f1; --nt-seg-bd: #ddd2c4; --nt-seg-on-bg: #3a2c20; --nt-seg-on-bd: #2a1a13; --nt-seg-on-tx: #f3e7da; --nt-ttl: #2b2118; --nt-dtl: #5d5245; --nt-dtl-note: #6b5a4e; --nt-fld-bg: #faf7f1; --nt-fld-bd: #ddd2c4; --nt-fld-blank: #a5988c; --nt-hint: #a5988c; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
 /* ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
    the dashed butter card that stands in for the Notes grid when nothing is pinned. ── */
 .tdb-nte { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 20px; background: var(--nt-empty-bg); border: 1px dashed var(--nt-empty-bd); border-radius: 13px; padding: 18px 22px; }
@@ -397,13 +397,29 @@
 .tdb-lsub .tdb-lbt.sm { font-size: 12.5px; }
 .tdb-lshow { flex: 0 0 auto; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--lat-ink); white-space: nowrap; }
 .tdb-lpage { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); box-sizing: border-box; margin: 0 0 7px 40px; padding: 10px; background: none; border: 1.5px dashed var(--lat-bd); border-radius: 9px; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
-/* hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): white, notes-family border,
-   Caveat growing to content; the affordance transforms in place. */
-.tdb-composer { background: var(--white, #fff); border: 1px solid #ece2c6; border-radius: 11px; padding: 12px 14px; box-shadow: 0 4px 14px rgba(120, 100, 40, 0.1); margin-bottom: 8px; }
-.tdb-composer textarea { width: 100%; border: none; outline: none; resize: none; font-family: Caveat, cursive; font-size: 19px; color: #4d4238; background: transparent; min-height: 52px; box-sizing: border-box; display: block; }
-.tdb-compfoot { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--hairline); padding-top: 10px; margin-top: 4px; }
-.tdb-comphint { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.1em; color: #b8a97a; }
-.tdb-compsave { margin-left: auto; }
+/* ── notes-and-tasks P2 — THE COMPOSER (design-refs/notes-and-tasks.html · frame 2): one card,
+   two natures. The offset block (--nt-comp-block) swaps butter↔sage by mode; the title/detail
+   swap Caveat↔typeset via the .note modifier; the date + surfacing fields are task-only. ── */
+.tdb-nc { width: 100%; max-width: 560px; box-sizing: border-box; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 13px; box-shadow: 5px 5px 0 var(--nt-comp-block); overflow: hidden; margin-bottom: 8px; }
+.tdb-nc--note { --nt-comp-block: var(--nt-block-note); }
+.tdb-nc--task { --nt-comp-block: var(--nt-block-task); }
+.tdb-nc-seg { display: flex; gap: 4px; padding: 11px 13px 0; }
+.tdb-nc-sgb { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--nt-seg-bd); background: var(--nt-seg-bg); font-size: 11px; font-weight: 600; color: #5d4d38; cursor: pointer; }
+.tdb-nc-sgb.on { background: var(--nt-seg-on-bg); border-color: var(--nt-seg-on-bd); color: var(--nt-seg-on-tx); }
+.tdb-nc-body { padding: 12px 15px 14px; }
+.tdb-nc-ttl { width: 100%; border: none; outline: none; background: transparent; padding: 0; font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--nt-ttl); }
+.tdb-nc-ttl.note { font-family: Caveat, cursive; font-size: 24px; font-weight: 600; }
+.tdb-nc-dtl { width: 100%; border: none; outline: none; resize: none; background: transparent; margin-top: 7px; font-family: var(--f12-body); font-size: 11.5px; color: var(--nt-dtl); }
+.tdb-nc-dtl.note { font-family: Caveat, cursive; font-size: 16px; color: var(--nt-dtl-note); }
+.tdb-nc-meta { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding-top: 11px; border-top: 1px solid #f0ebe1; }
+.tdb-nc-nomark { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; color: var(--nt-fld-blank); }
+.tdb-nc-date { display: inline-flex; }
+.tdb-nc-surface { display: inline-flex; align-items: center; gap: 6px; }
+.tdb-nc-surflbl { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase; color: #8a7a66; }
+.tdb-nc-surface select { height: 28px; border: 1px solid var(--nt-fld-bd); border-radius: 8px; background: var(--nt-fld-bg); font-size: 11px; color: #4d4238; padding: 0 8px; cursor: pointer; }
+.tdb-nc-save { margin-left: auto; display: inline-flex; align-items: center; height: 32px; padding: 0 15px; border-radius: 99px; background: var(--nt-ink-bg); border: 1px solid var(--nt-ink-bd); color: var(--nt-ink-tx); font-size: 12px; font-weight: 600; cursor: pointer; }
+.tdb-nc-save:disabled { opacity: 0.45; cursor: not-allowed; }
+.tdb-nc-hint { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--nt-hint); padding: 0 15px 12px; }
 /* hero-pair P4 — the styled blocking-choice dialog (window.confirm's replacement) */
 .tdb-askwrap { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; }
 .tdb-askscrim { position: absolute; inset: 0; background: rgba(30, 26, 22, 0.4); }

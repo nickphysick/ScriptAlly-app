@@ -16,6 +16,9 @@ import { join } from "node:path";
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const css = readFileSync(join(here, "todo.css"), "utf8");
+const types = readFileSync(join(here, "..", "..", "types.ts"), "utf8");
+const db = readFileSync(join(here, "..", "..", "lib", "db.tsx"), "utf8");
+const rules = readFileSync(join(here, "..", "..", "..", "firestore.rules"), "utf8");
 
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
@@ -45,8 +48,8 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
     expect(open).toContain("setComposerMode(mode)");
     expect(open).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards")');
     expect(page).toContain('const [composerMode, setComposerMode] = useState<"note" | "task">("note")'); // default note
-    // the composer reads the mode (P1 seam; P2 expands the transformation)
-    expect(page).toContain("`tdb-composer tdb-composer--${composerMode}`");
+    // the composer reads the mode (drives the P2 live transformation)
+    expect(page).toContain("`tdb-nc tdb-nc--${composerMode}`");
   });
 
   it("the card is the nt lane's empty node ONLY (gone the moment a note exists) with an honest count", () => {
@@ -76,5 +79,102 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
     expect(btn).toContain("background: var(--nt-ink-bg)");
     expect(btn).toContain("color: var(--nt-ink-tx)");
     expect(btn).toContain("border-radius: 99px");
+  });
+});
+
+describe("notes-and-tasks P2 — the composer + the schema", () => {
+  const comp = page.slice(page.indexOf("function renderComposer"), page.indexOf("function renderNotesEmpty"));
+
+  it("the SCHEMA: UserTask gains detail + surfaceOffset; surfaceOffset is an in-app lead, NOT a notification", () => {
+    expect(types).toContain('export type SurfaceOffset = "on-day" | "day-before" | "week-before"');
+    expect(types).toContain("detail?: string;");
+    expect(types).toContain("surfaceOffset?: SurfaceOffset;");
+    // the type's own words disclaim any delivery mechanism
+    expect(types).toContain("NEVER a notification");
+    expect(types).toMatch(/no push, no email/i);
+  });
+
+  it("addUserTask persists the new fields (detail trimmed; surfaceOffset only on a dated task, default omitted)", () => {
+    expect(db).toContain("detail?: string");
+    expect(db).toContain("surfaceOffset?: SurfaceOffset");
+    expect(db).toContain("...(fields.detail && fields.detail.trim() ? { detail: fields.detail.trim() } : {})");
+    expect(db).toContain('...(fields.dueDate && fields.surfaceOffset && fields.surfaceOffset !== "on-day" ? { surfaceOffset: fields.surfaceOffset } : {})');
+  });
+
+  it("the rules ALLOWLIST detail + surfaceOffset (create + update); surfaceOffset is one of three fixed strings", () => {
+    expect(rules).toContain("'text', 'detail', 'done'"); // detail in the isValidUserTask hasOnly
+    expect(rules).toContain("'dueDate', 'surfaceOffset', 'committedDate'"); // surfaceOffset in hasOnly
+    expect(rules).toContain("data.surfaceOffset in ['on-day', 'day-before', 'week-before']");
+    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset'])"); // update affectedKeys
+  });
+
+  it("two entry points, two default natures: the section opens NOTE, the hero opens TASK", () => {
+    expect(page).toContain('onClick={() => openComposer("note")}'); // the Notes-section 'Write a note'
+    expect(page).toContain('onClick: () => openComposer("task")'); // the hero 'Add task or note'
+    // openComposer resets EVERY field so a seat never inherits a stale draft
+    const open = page.slice(page.indexOf("const openComposer ="), page.indexOf("const closeComposer ="));
+    for (const reset of ['setComposerDraft("")', 'setComposerDetail("")', 'setComposerDate("")', 'setComposerSurface("on-day")']) {
+      expect(open).toContain(reset);
+    }
+  });
+
+  it("the type segment: ✎ Note / ✓ Task, the selected one deep-ink filled", () => {
+    expect(comp).toContain("✎ Note");
+    expect(comp).toContain("✓ Task");
+    expect(comp).toContain('className={`tdb-nc-sgb${isTask ? "" : " on"}`}');
+    expect(comp).toContain('className={`tdb-nc-sgb${isTask ? " on" : ""}`}');
+    expect(rule(".tdb-nc-sgb.on")).toContain("background: var(--nt-seg-on-bg)"); // deep-ink fill
+  });
+
+  it("switching TRANSFORMS every property live — typeface, offset block, fields, nomark, save verb", () => {
+    // title + detail swap Caveat (note) ↔ typeset (task) via the .note modifier
+    expect(comp).toContain('className={`tdb-nc-ttl${isTask ? "" : " note"}`}');
+    expect(comp).toContain('className={`tdb-nc-dtl${isTask ? "" : " note"}`}');
+    expect(rule(".tdb-nc-ttl")).toContain("font-family: var(--f12-serif)"); // task = Playfair
+    expect(rule(".tdb-nc-ttl.note")).toContain("font-family: Caveat"); // note = handwriting
+    // the offset block swaps butter ↔ sage by mode
+    expect(rule(".tdb-nc--note")).toContain("--nt-comp-block: var(--nt-block-note)");
+    expect(rule(".tdb-nc--task")).toContain("--nt-comp-block: var(--nt-block-task)");
+    expect(rule(".tdb-wrap")).toContain("--nt-block-note: #eedfae"); // butter
+    expect(rule(".tdb-wrap")).toContain("--nt-block-task: #d5dbd3"); // sage
+    // the date + surfacing fields are task-only; the note shows the NO-DATE line; the verb changes
+    expect(comp).toContain("isTask ? (");
+    expect(comp).toContain("NO DATE · NOTHING WILL CHASE YOU");
+    expect(comp).toContain('{isTask ? "Add the task" : "Pin the note"}');
+  });
+
+  it("the surfacing field is IN-APP Today's-list timing, never a reminder — and it needs a date first", () => {
+    expect(comp).toContain("Show it in Today’s list"); // NOT "Remind me"
+    for (const opt of ["On the day", "A day early", "A week early"]) expect(comp).toContain(opt);
+    // surfacing renders only once a date is set (dependency)
+    expect(comp).toContain("{composerDate && (");
+    expect(comp).toContain("<BrandDatePicker value={composerDate} onChange={setComposerDate}");
+    // NO notification vocabulary anywhere in the composer
+    for (const banned of ["Remind me", "remind", "notification", "notify", "push", "email"]) {
+      expect(comp.toLowerCase()).not.toContain(banned.toLowerCase());
+    }
+  });
+
+  it("validation + keyboard + NO native dialogs", () => {
+    // title always required; a TASK additionally requires a date
+    expect(page).toContain('const composerCanSave = !!composerDraft.trim() && (composerMode === "note" || !!composerDate)');
+    expect(comp).toContain("disabled={!composerCanSave}");
+    // ⌘⏎ saves · Esc runs the styled discard-confirm (only when dirty)
+    expect(comp).toContain('(e.metaKey || e.ctrlKey) && e.key === "Enter"');
+    expect(comp).toContain('e.key === "Escape"');
+    expect(comp).toContain("tryCloseComposer()");
+    expect(page).toContain('await confirmAsk("Discard this?"');
+    // no native prompt/alert/confirm in the To-do page
+    for (const nativeDlg of ["window.confirm", "window.alert", "window.prompt", "window.confirm("]) {
+      expect(page).not.toContain(nativeDlg);
+    }
+  });
+
+  it("save writes the nature: a note = title (+detail); a task = + dueDate + surfaceOffset", () => {
+    const save = page.slice(page.indexOf("async function saveComposer"), page.indexOf("function renderComposer"));
+    expect(save).toContain("text: composerDraft.trim()");
+    expect(save).toContain("detail: composerDetail.trim() || undefined");
+    expect(save).toContain("dueDate: isTask ? composerDate : undefined");
+    expect(save).toContain("surfaceOffset: isTask ? composerSurface : undefined");
   });
 });

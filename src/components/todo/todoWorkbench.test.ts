@@ -323,28 +323,25 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     expect(css).not.toMatch(/\.tdb-bartext\s*\{/);
     expect(rule(".tdb-sec .tdb-cn")).toContain("font-family: var(--f12-mono)"); // the count beside each heading
   });
-  it("the composer: white notes-family card, Caveat autofocus growing, the mono hint, quiet Cancel + emphasised Save", () => {
-    const c = rule(".tdb-composer");
-    expect(c).toContain("border: 1px solid #ece2c6");
-    expect(c).toContain("box-shadow: 0 4px 14px rgba(120, 100, 40, 0.1)");
-    const ta = rule(".tdb-composer textarea");
-    expect(ta).toContain("font-family: Caveat, cursive");
-    expect(ta).toContain("font-size: 19px");
-    expect(ta).toContain("min-height: 52px");
-    expect(page).toContain("ref={(el) => { if (el) { el.focus();"); // autofocus + initial autosize
-    expect(page).toContain(">⌘⏎ SAVE · ESC CANCEL</span>");
-    expect(page).toContain('className="tdb-btnh tdb-compsave" onClick={() => setComposerAt(null)}>Cancel</button>');
-    expect(page).toContain('className="tdb-btnh em" onClick={saveComposer}>Save note</button>');
+  it("the composer: the two-nature card, autofocus title, the mono hint (notes-and-tasks P2 supersedes the old textarea)", () => {
+    const c = rule(".tdb-nc");
+    expect(c).toContain("border: 1.5px solid var(--nt-comp-bd)");
+    expect(c).toContain("box-shadow: 5px 5px 0 var(--nt-comp-block)"); // the mode-swapping offset block
+    expect(rule(".tdb-nc-ttl.note")).toContain("font-family: Caveat"); // the note title is handwriting
+    expect(page).toContain("autoFocus"); // the title autofocuses on open
+    expect(page).toContain("ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING"); // the mono hint
+    expect(page).toContain('{isTask ? "Add the task" : "Pin the note"}'); // the save verb changes by nature
   });
-  it("keyboard + outside-click law: ⌘⏎/Ctrl⏎ saves · Esc cancels · outside cancels ONLY when empty", () => {
+  it("keyboard + outside-click law: ⌘⏎/Ctrl⏎ saves · Esc cancels (styled confirm) · outside cancels ONLY when empty", () => {
     expect(page).toContain('if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }');
-    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setComposerAt(null); }');
-    expect(page).toContain("if (!composerDraftRef.current.trim()) setComposerAt(null);");
+    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); e.preventDefault(); tryCloseComposer(); }');
+    expect(page).toContain("if (!composerDirtyRef.current) setComposerAt(null);"); // outside cancels only when empty
   });
-  it("save wires to the EXISTING note action (no new write path); both views' affordances transform in place", () => {
-    expect(page).toContain("await addUserTask({ text });");
-    expect(page).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards");'); // addTask opens the seat
-    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() :'); // the cards ghost swaps
+  it("save wires to the EXISTING addUserTask action (extended fields, no new write path); both views' seats transform in place", () => {
+    expect(page).toContain("await addUserTask({"); // the same action — extended, not forked
+    expect(page).toContain("text: composerDraft.trim()");
+    expect(page).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards");'); // openComposer opens the seat
+    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() :'); // the cards seat swaps
     expect(page).toContain(') : composerAt === "ledger" ? renderComposer() : ('); // the ledger add-row swaps
   });
   it("THE DIALOG SWEEP: zero native dialogs in the To-do scope; the styled ask carries the true blocking choices", () => {
@@ -356,7 +353,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
       expect(f).not.toContain("window.confirm(");
     }
     expect(ask).toContain("new Promise<boolean>((resolve) => {");
-    expect((page.match(/await confirmAsk\(/g) ?? []).length).toBe(1); // the quick-✓ duplicate guard
+    expect((page.match(/await confirmAsk\(/g) ?? []).length).toBe(2); // the quick-✓ duplicate guard + the composer discard guard
     expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
     expect(rule(".tdb-askwrap")).toContain("z-index: 90"); // above the flow (50) + toast (60) + modal (70)
     expect(page).toContain("{confirmAskNode}");
@@ -1122,9 +1119,10 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
       expect(src).not.toContain("oday’s list"); // catches Today's/today's alike
       // (Deck v2 legalised the uppercase form: the lens pill + sage chip are named TODAY'S LIST)
     }
-    // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms only);
-    // panel-final P2 retired the filter lens row, so its sentence-case copy is gone — exactly two
-    expect((page.match(/oday’s list/g) ?? []).length).toBe(2);
+    // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms); notes-and-
+    // tasks P2 adds the composer's surfacing field "Show it in Today's list" (its label + aria-label)
+    // — the phrase names the surface it feeds, deliberately. Exactly four now.
+    expect((page.match(/oday’s list/g) ?? []).length).toBe(4);
     expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // via the shared constant — the two literals live in VERB_LABELS alone
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)

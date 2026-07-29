@@ -48,7 +48,8 @@ import { shouldAutoRunTour } from "../../lib/todoTour";
 import { AssistantBand, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
-import { ActivityType, QueryStatus } from "../../types";
+import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
+import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import "./todo.css";
@@ -205,16 +206,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // The seat's view ("cards"/"ledger") and the nature are orthogonal; the nature drives the
   // Phase-2 live transformation. The section's "Write a note" opens note mode.
   const [composerMode, setComposerMode] = useState<"note" | "task">("note");
-  const [composerDraft, setComposerDraft] = useState("");
-  const composerDraftRef = useRef(composerDraft);
-  composerDraftRef.current = composerDraft;
+  const [composerDraft, setComposerDraft] = useState("");       // the title (required)
+  const [composerDetail, setComposerDetail] = useState("");     // the optional detail line
+  const [composerDate, setComposerDate] = useState("");         // task only — ISO "YYYY-MM-DD"
+  const [composerSurface, setComposerSurface] = useState<SurfaceOffset>("on-day"); // task only
+  // dirty = any field carries content; an outside click / Esc only prompts to discard when dirty.
+  const composerDirty = !!(composerDraft.trim() || composerDetail.trim() || composerDate);
+  const composerDirtyRef = useRef(composerDirty);
+  composerDirtyRef.current = composerDirty;
   useEffect(() => {
     if (!composerAt) return;
     const onDown = (e: PointerEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && t.closest(".tdb-composer")) return;
-      // outside: cancel only when empty — a live draft stays open
-      if (!composerDraftRef.current.trim()) setComposerAt(null);
+      if (t && t.closest(".tdb-nc")) return;
+      // outside: cancel only when empty — a live draft stays open (never silently discarded)
+      if (!composerDirtyRef.current) setComposerAt(null);
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
@@ -773,21 +779,49 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): the browser prompt was a
   // placeholder, not a design. addTask now opens the composer in the current view's Notes
   // seat; save wires to the SAME addUserTask action (no new write path).
-  // notes-and-tasks P1 — open the composer in a chosen NATURE, at the current view's seat.
+  // notes-and-tasks P1/P2 — open the composer in a chosen NATURE, at the current view's seat,
+  // on a clean draft.
   const openComposer = (mode: "note" | "task") => {
     setComposerMode(mode);
     setComposerDraft("");
+    setComposerDetail("");
+    setComposerDate("");
+    setComposerSurface("on-day");
     setComposerAt(view === "ledger" ? "ledger" : "cards");
   };
-  // The generic "add a note" affordances (the Notes section, the ledger add-row) open note mode;
-  // the hero's "Add task or note" opens task mode (wired in P2).
-  function addTask() { openComposer("note"); }
-  async function saveComposer() {
-    const text = composerDraft.trim();
-    if (!text) return;
-    await addUserTask({ text });
+  const closeComposer = () => {
     setComposerAt(null);
     setComposerDraft("");
+    setComposerDetail("");
+    setComposerDate("");
+    setComposerSurface("on-day");
+  };
+  // Esc / Cancel: confirm the discard ONLY when the draft carries content (no native dialog —
+  // the styled useConfirmAsk). An empty composer closes silently.
+  async function tryCloseComposer() {
+    if (composerDirty) {
+      const ok = await confirmAsk("Discard this?", { confirmLabel: "Discard", cancelLabel: "Keep editing" });
+      if (!ok) return;
+    }
+    closeComposer();
+  }
+  // The generic "add a note" affordances (the Notes section, the ledger add-row) open note mode;
+  // the hero's "Add task or note" opens task mode.
+  function addTask() { openComposer("note"); }
+  // notes-and-tasks P2 — save the draft as its nature. A NOTE stores title (+ detail); a TASK
+  // additionally stores the dueDate + the in-app surfacing lead. Title is always required; a task
+  // additionally requires a date (a dateless task would be indistinguishable from a note).
+  const composerCanSave = !!composerDraft.trim() && (composerMode === "note" || !!composerDate);
+  async function saveComposer() {
+    if (!composerCanSave) return;
+    const isTask = composerMode === "task";
+    await addUserTask({
+      text: composerDraft.trim(),
+      detail: composerDetail.trim() || undefined,
+      dueDate: isTask ? composerDate : undefined,
+      surfaceOffset: isTask ? composerSurface : undefined,
+    });
+    closeComposer();
   }
 
   // Shell follow-up P3: the hardback-spine TodoShell is RETIRED — the v2 shell (rail, sidebar,
@@ -1059,7 +1093,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           },
           {
             label: "Add task or note",
-            onClick: addTask,
+            onClick: () => openComposer("task"), // the hero opens TASK mode by default
             primary: true,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>,
           },
@@ -1146,26 +1180,65 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── hero-pair P4: THE INLINE COMPOSER (todo-composer.html §4) — white, notes-family
   // border, Caveat autofocused and growing, ⌘⏎ saves · Esc cancels · an outside click
   // cancels only when empty. Save rides the existing addUserTask action. ──
+  // ── notes-and-tasks P2 — THE COMPOSER (design-refs/notes-and-tasks.html · frame 2): ONE
+  // composer, two natures. The type segment leads; switching TRANSFORMS it live — the title +
+  // detail swap Caveat (note) ↔ typeset (task), the offset block swaps butter ↔ sage, the date +
+  // surfacing fields appear only for a task, the note shows the "NO DATE" line, and the save verb
+  // changes. Content survives every switch (the fields are component state, never reset on toggle).
+  // ⌘⏎ saves · Esc cancels (a styled confirm only when dirty). No native prompt/alert/confirm. ──
   function renderComposer() {
+    const isTask = composerMode === "task";
+    const onKey = (e: React.KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }
+      if (e.key === "Escape") { e.stopPropagation(); e.preventDefault(); tryCloseComposer(); }
+    };
     return (
-      <div className={`tdb-composer tdb-composer--${composerMode}`}>
-        <textarea
-          ref={(el) => { if (el) { el.focus(); el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; } }}
-          value={composerDraft}
-          rows={1}
-          placeholder="Jot it down…"
-          aria-label="New note"
-          onChange={(e) => { setComposerDraft(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
-          onKeyDown={(e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }
-            if (e.key === "Escape") { e.stopPropagation(); setComposerAt(null); }
-          }}
-        />
-        <div className="tdb-compfoot">
-          <span className="tdb-comphint" aria-hidden>⌘⏎ SAVE · ESC CANCEL</span>
-          <button type="button" className="tdb-btnh tdb-compsave" onClick={() => setComposerAt(null)}>Cancel</button>
-          <button type="button" className="tdb-btnh em" onClick={saveComposer}>Save note</button>
+      <div className={`tdb-nc tdb-nc--${composerMode}`}>
+        <div className="tdb-nc-seg" role="tablist" aria-label="Note or task">
+          <button type="button" role="tab" aria-selected={!isTask} className={`tdb-nc-sgb${isTask ? "" : " on"}`} onClick={() => setComposerMode("note")}>✎ Note</button>
+          <button type="button" role="tab" aria-selected={isTask} className={`tdb-nc-sgb${isTask ? " on" : ""}`} onClick={() => setComposerMode("task")}>✓ Task</button>
         </div>
+        <div className="tdb-nc-body">
+          <input
+            className={`tdb-nc-ttl${isTask ? "" : " note"}`}
+            value={composerDraft}
+            placeholder={isTask ? "What needs doing?" : "Jot it down…"}
+            aria-label="Title"
+            autoFocus
+            onChange={(e) => setComposerDraft(e.target.value)}
+            onKeyDown={onKey}
+          />
+          <textarea
+            className={`tdb-nc-dtl${isTask ? "" : " note"}`}
+            value={composerDetail}
+            rows={1}
+            placeholder="Add a little more (optional)…"
+            aria-label="Detail"
+            onChange={(e) => { setComposerDetail(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
+            onKeyDown={onKey}
+          />
+          <div className="tdb-nc-meta">
+            {isTask ? (
+              <>
+                <span className="tdb-nc-date"><BrandDatePicker value={composerDate} onChange={setComposerDate} placeholder="Add a date" /></span>
+                {composerDate && (
+                  <label className="tdb-nc-surface">
+                    <span className="tdb-nc-surflbl">Show it in Today’s list</span>
+                    <select value={composerSurface} onChange={(e) => setComposerSurface(e.target.value as SurfaceOffset)} aria-label="Show it in Today’s list">
+                      <option value="on-day">On the day</option>
+                      <option value="day-before">A day early</option>
+                      <option value="week-before">A week early</option>
+                    </select>
+                  </label>
+                )}
+              </>
+            ) : (
+              <span className="tdb-nc-nomark">NO DATE · NOTHING WILL CHASE YOU</span>
+            )}
+            <button type="button" className="tdb-nc-save" disabled={!composerCanSave} onClick={saveComposer}>{isTask ? "Add the task" : "Pin the note"}</button>
+          </div>
+        </div>
+        <div className="tdb-nc-hint" aria-hidden>ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING</div>
       </div>
     );
   }

@@ -508,10 +508,21 @@ export interface TaskFlag {
  * "View tasks" popover (Queries Hub / Contact List) read ONE store. Owner is nullable — an
  * unattached task floats — so at most one of queryId/agentId/manuscriptId is set (all optional).
  */
+/**
+ * The two NATURES of a user-created item are DERIVED from `dueDate`: absent = a NOTE (pinned,
+ * dateless, nothing chases you), present = a TASK (dated, joins the work). `surfaceOffset` is an
+ * IN-APP surfacing lead — how early a dated task joins Today's list, derived at render from
+ * dueDate. It is NOT a notification: there is no reminder delivery (no push, no email); nothing
+ * fires, it only decides when the card appears on Today's list.
+ */
+export type SurfaceOffset = "on-day" | "day-before" | "week-before";
+
 export interface UserTask {
   id: string;
   userId: string;
   text: string;
+  // notes-and-tasks: the optional detail line beneath the title (task detail / a note's second line).
+  detail?: string;
   done: boolean;
   completedAt?: string; // ISO — stamped when done
   createdAt: string; // ISO
@@ -519,6 +530,9 @@ export interface UserTask {
   queryId?: string;
   agentId?: string;
   manuscriptId?: string;
+  // notes-and-tasks: the in-app surfacing lead for a dated task — how early it joins Today's list
+  // (on the day / a day early / a week early). Derived-over-stored at render; NEVER a notification.
+  surfaceOffset?: SurfaceOffset;
   // The day a reminder resurfaces — ISO date, NO time ("YYYY-MM-DD"). Every Stage-6 reminder (door
   // check-back, nudge remind-me, response-window) is a date-triggered task, so this is load-bearing,
   // not decoration: unset = a plain to-do; set = surfaces (and renders overdue) on that day. Dates
