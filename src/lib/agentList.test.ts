@@ -431,13 +431,15 @@ describe("agentList · axis vocabulary is worded once", () => {
 describe("agentList · meta line (absence is a first-class state)", () => {
   it("no stated response time reads 'response unknown' — never an invented number", () => {
     expect(metaTokens(mkAgent({}))[0]).toBe("response unknown");
-    expect(metaTokens(mkAgent({ responseTimeWeeks: 8 }))[0]).toBe("~8 wks");
+    expect(metaTokens(mkAgent({ responseTimeWeeks: 8 }))[0]).toBe("~8 weeks"); // "weeks", not "wks"
   });
 
   it("the no-reply token appears only when explicitly set true", () => {
+    // agent-list-fixes P3: NO-REPLY-MEANS-NO is off the card front entirely — it is detail for
+    // writing to them, not for scanning. It stays in the editor and stays STORED.
     expect(metaTokens(mkAgent({}))).not.toContain("No reply = no");
     expect(metaTokens(mkAgent({ noResponseMeansNo: false }))).not.toContain("No reply = no");
-    expect(metaTokens(mkAgent({ noResponseMeansNo: true }))).toContain("No reply = no");
+    expect(metaTokens(mkAgent({ noResponseMeansNo: true }))).not.toContain("No reply = no");
   });
 
   it("method shortens to Form / the Other text / Email", () => {

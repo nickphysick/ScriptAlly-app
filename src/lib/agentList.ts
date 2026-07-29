@@ -469,9 +469,10 @@ export function methodShort(agent: Pick<Agent, "submissionMethod" | "agentNotes"
  */
 export function metaTokens(agent: Agent): string[] {
   const weeks = agent.responseTimeWeeks;
-  const tokens = [weeks && weeks > 0 ? `~${weeks} wks` : "response unknown", methodShort(agent)];
-  if (agent.noResponseMeansNo === true) tokens.push("No reply = no");
-  return tokens;
+  // "weeks", never "wks" (agent-list-fixes P3) — the card front has room for the word.
+  // NO-REPLY-MEANS-NO is REMOVED from the card front: it is detail for when you are writing to
+  // them, not for scanning. It stays in the editor and stays stored — nothing is lost.
+  return [weeks && weeks > 0 ? `~${weeks} weeks` : "response unknown", methodShort(agent)];
 }
 
 /** "3 Apr 2026" — the mockup's stamp/bubble date format. */

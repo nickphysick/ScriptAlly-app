@@ -6,7 +6,7 @@
  *
  * Band (relationship pill · stars · pencil) → identity (avatar, Playfair name, italic agency, mono
  * meta) → your history → wishlist → materials wanted → note preview → footer (Log query ·
- * Submissions page), with the closed-for-submissions stamp over the whole face when their door is
+ * View website), with the closed-for-submissions stamp over the whole face when their door is
  * shut. Every value is derived in src/lib/agentList.ts; nothing here is stored.
  *
  * Two locked-component rules hold: status visuals are the real `StatusDot` (never a local SVG
@@ -235,7 +235,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
                   }
                 }}
               >
-                Submissions page
+                View website
               </button>
             </div>
           </div>

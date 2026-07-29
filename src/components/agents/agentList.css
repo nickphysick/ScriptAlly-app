@@ -220,9 +220,13 @@
 /* the first section sits closer — the toolbar above it already set the distance */
 .aglist .agl-groups > section:first-child .agl-gsec { margin-top: 24px; }
 .aglist .agl-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
-  gap: 14px; align-items: start;
+  /* THREE to a row (agent-list-fixes P3) — fixed columns, not auto-fill, so the card width is
+     a consequence of the content cap rather than of a minmax floor. ~400px at the 1240 cap. */
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start;
 }
+/* the reflow: two up at ~1100, one below ~700 */
+@media (max-width: 1100px) { .aglist .agl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .aglist .agl-grid { grid-template-columns: 1fr; } }
 
 /* ── buttons (shared with the card faces from Phase 2) ──────────────────── */
 .aglist .agl-btn {

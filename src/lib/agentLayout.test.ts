@@ -48,15 +48,14 @@ describe("agent list · the page column", () => {
     ).not.toMatch(/padding-right/);
   });
 
-  it("the grid is auto-fill with a 268px floor and a 14px gap", () => {
-    expect(
-      block(".aglist .agl-grid"),
-      "the grid track floor moved off 268px — the card's identity row (54px avatar + name) needs that width, and a wider floor drops a column at common laptop widths",
-    ).toContain("minmax(268px, 1fr)");
-    expect(
-      block(".aglist .agl-grid"),
-      "the grid gap moved off 14px — the cards carry a 6px offset shadow, and a tighter gap lets one card's shadow touch its neighbour",
-    ).toContain("gap: 14px");
+  it("THREE columns to a row, 18px gap — fixed, not auto-fill (agent-list-fixes P3)", () => {
+    const grid = css.match(/\.aglist \.agl-grid \{([^}]*)\}/)?.[1] ?? "";
+    expect(grid).toContain("grid-template-columns: repeat(3, 1fr)");
+    expect(grid).toContain("gap: 18px");
+    expect(grid).not.toContain("repeat(auto-fill"); // the card width follows the content cap now
+    // the reflow: two up, then one
+    expect(css).toMatch(/@media \(max-width: 1100px\) \{ \.aglist \.agl-grid \{ grid-template-columns: repeat\(2, 1fr\); \} \}/);
+    expect(css).toMatch(/@media \(max-width: 700px\) \{ \.aglist \.agl-grid \{ grid-template-columns: 1fr; \} \}/);
   });
 });
 
