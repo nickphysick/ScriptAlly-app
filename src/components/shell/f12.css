@@ -204,14 +204,16 @@
    is doing something" pink active treatment. Geometry mirrors .agl-ctl (36px / 12px / radius 10);
    the colours read the f12 token set, not the agent list's. Replaces the icon-only .f12-iconctl
    in the list head — a control that states what it does beats a tooltip. */
-.f12-pill { position: relative; flex: none; display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; height: 36px; padding: 0 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-family: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-.f12-pill:hover { border-color: var(--muted); }
-.f12-pill svg { flex: none; width: 14px; height: 14px; color: var(--faint); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.f12-pill .f12-cv { opacity: 0.8; font-size: 9px; line-height: 1; }
-.f12-pill.f12-active { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
-.f12-pill.f12-active svg { color: var(--pink-i); }
-/* the count badge rides inline (agent-list grammar), not as a corner sticker */
-.f12-pill .f12-pcount { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; background: var(--burg); color: var(--panel); border-radius: 999px; padding: 2px 6px; }
+/* v5 P1 — COMPACT: 36px icon-only circles, so the search takes the rest of the row. The label
+   moved to the tooltip/aria-label and to each popover's own header, so nothing is lost. Filter
+   carries a count badge; Sort deliberately carries no marker — its state reads in its popover. */
+.f12-pill { position: relative; flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font-family: inherit; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.f12-pill:hover, .f12-pill.f12-active { background: var(--paper); border-color: var(--muted); }
+.f12-pill svg { flex: none; width: 15px; height: 15px; color: var(--ink-2); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* the count sits as a corner dot, ringed in the card colour so it reads as ON the button.
+   --burg is the app's established badge fill (the agent list's .agl-badge uses its twin), which
+   the live palette prefers over the ref's lighter rose. */
+.f12-pill .f12-pcount { position: absolute; top: -3px; right: -3px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--burg); border: 1.5px solid var(--panel); color: var(--panel); font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; display: grid; place-items: center; }
 
 /* TasksPopover (5c/6) — record-scoped View-tasks (portalled inside .t-f12) */
 .f12-tasks { width: 288px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden; font-family: var(--f12-body); }

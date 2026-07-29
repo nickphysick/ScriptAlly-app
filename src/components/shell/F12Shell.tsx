@@ -61,21 +61,26 @@ export const IconTrig = React.forwardRef<HTMLButtonElement, {
 IconTrig.displayName = "IconTrig";
 
 /**
- * PillTrig (v4 P1) — the LABELLED sibling of IconTrig, in the agent list's pill grammar: icon ·
- * one-word label · chevron, identical at rest, pink while it's doing something. Used by the
- * Queries list card's Filter / Sort controls, where an icon-only trigger made the user hover to
- * learn what it was. `value` lets a single-choice control state its choice in the label (Sort);
- * `count` is for a control holding several values at once (Filter), as a burgundy badge.
+ * PillTrig — the Queries list card's Filter / Sort trigger.
+ *
+ * v5 P1 (ref qdb-create-motion.html) made it COMPACT: a 36px icon-only circle, so the search field
+ * takes the rest of the header row. The v4 label and chevron are gone from the face — the word now
+ * lives in the `title` tooltip, in the aria-label, AND in the popover's own header, so nothing is
+ * lost to a user who can't hover.
+ *
+ * `count` renders a corner badge — for a control holding several values at once (Filter). A
+ * single-choice control (Sort) passes `value` instead: it enriches the accessible name
+ * ("Sort: Name A–Z") but shows no marker, because its state reads in the popover it opens.
  */
 export const PillTrig = React.forwardRef<HTMLButtonElement, {
   label: string;
   icon: React.ReactNode;
   open: boolean;
-  /** Set away from its default → the shared pink active treatment. */
+  /** Set away from its default — a subtle resting tint, never a second state marker. */
   active?: boolean;
-  /** Single-choice controls swap their label for the chosen value. */
+  /** Single-choice controls name their choice in the accessible label. */
   value?: string;
-  /** Multi-value controls show a count badge instead. */
+  /** Multi-value controls show a count badge. */
   count?: number;
   onClick: () => void;
 }>(({ label, icon, open, active, value, count, onClick }, ref) => (
@@ -86,12 +91,11 @@ export const PillTrig = React.forwardRef<HTMLButtonElement, {
     aria-expanded={open}
     aria-haspopup="dialog"
     aria-label={value ? `${label}: ${value}` : label}
+    title={label}
     onClick={onClick}
   >
     {icon}
-    {value || label}
     {count != null && count > 0 && <span className="f12-pcount">{count}</span>}
-    <span className="f12-cv" aria-hidden="true">▾</span>
   </button>
 ));
 PillTrig.displayName = "PillTrig";

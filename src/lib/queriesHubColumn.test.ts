@@ -66,13 +66,33 @@ describe("Queries hub · the list card's Filter / Sort are LABELLED pills", () =
     expect(queries).toContain('label="Sort"');
   });
 
-  it("PillTrig carries the agent-list pill grammar: label, chevron, shared pink active state", () => {
+  // v5 P1 re-dressed these as COMPACT icon-only circles (the v4 label + chevron are retired), so
+  // the search takes the rest of the row. The guarantees move with the dress: the trigger must
+  // still SAY what it is to a non-hovering user, and the count must still be visible.
+  it("PillTrig is a 36px icon-only circle", () => {
     expect(shellComp).toContain("f12-pill");
-    expect(shellComp, "the chevron left the pill — it no longer reads as a dropdown").toContain("f12-cv");
     const pill = block(".f12-pill");
-    expect(pill, "the pill lost the agent-list geometry (36px tall, 10px radius)").toContain("height: 36px");
-    expect(pill).toContain("border-radius: 10px");
-    // The shared "this control is doing something" treatment — pink, as on the agent list.
-    expect(f12).toContain(".f12-pill.f12-active { background: var(--pink-t)");
+    expect(pill, "the compact trigger lost its square geometry").toContain("width: 36px");
+    expect(pill).toContain("height: 36px");
+    expect(pill, "an icon-only control must be circular, not a rounded rectangle").toContain("border-radius: 999px");
+    expect(shellComp, "the v4 chevron is retired with the label").not.toContain("f12-cv");
+  });
+
+  it("dropping the label does NOT drop the naming — tooltip, aria-label and popover header all say it", () => {
+    expect(shellComp, "no tooltip: an icon-only control the user must hover to identify").toContain("title={label}");
+    expect(shellComp).toContain("aria-label={value ? `${label}: ${value}` : label}");
+    // Each popover names itself in its own header, so the word survives for keyboard/touch users.
+    expect(queries).toContain('title="Filter"');
+    expect(queries).toContain('title="Sort"');
+  });
+
+  it("Filter carries a ringed count badge; Sort carries no marker at all", () => {
+    const badge = block(".f12-pill .f12-pcount");
+    expect(badge, "the count stopped being a corner dot").toContain("position: absolute");
+    expect(badge, "the badge lost the card-coloured ring that seats it on the button").toContain("border: 1.5px solid var(--panel)");
+    expect(badge, "the badge fill left the app's established burgundy").toContain("background: var(--burg)");
+    // Sort passes no count — its state reads in the popover, by design.
+    const sortTrig = queries.slice(queries.indexOf('label="Sort"') - 300, queries.indexOf('label="Sort"') + 300);
+    expect(sortTrig, "Sort grew a count badge — its state belongs in the popover").not.toContain("count=");
   });
 });
