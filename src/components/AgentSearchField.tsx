@@ -4,8 +4,9 @@
  *
  * AgentSearchField — the Log a Query agent picker. Search-as-you-type by name or agency, with
  * smart ordering: not-yet-queried agents float to the top (rating desc), already-queried agents
- * sit below in a dimmed "Already queried" group. A "group by rating" toggle re-buckets results
- * into 5★…1★ groups instead.
+ * sit below in a dimmed "Already queried" group. (A "group by rating" toggle used to re-bucket
+ * the results into 5★…1★ groups; it was removed in the create-mode fixes — it has no meaning
+ * when you are picking one agent to query.)
  *
  * "Already queried" is scoped per-manuscript by the caller (queriedAgentIds). When more than one
  * manuscript exists, a quiet readout names which manuscript the tags reflect.
@@ -51,7 +52,6 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [queryText, setQueryText] = useState("");
-  const [groupByRating, setGroupByRating] = useState(false);
   const [hl, setHl] = useState(0); // highlighted result index (keyboard nav)
   // ── Inline quick-add ──
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -91,19 +91,6 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   const groups: AgentGroup[] = useMemo(() => {
     const byRatingDesc = (a: Agent, b: Agent) => (b.starRating || 0) - (a.starRating || 0);
 
-    if (groupByRating) {
-      const out: AgentGroup[] = [];
-      for (let r = 5; r >= 1; r--) {
-        // Within a bucket, surface not-yet-queried first.
-        const rows = filtered
-          .filter((a) => (a.starRating || 0) === r)
-          .sort((a, b) => Number(isQueried(a)) - Number(isQueried(b)));
-        if (rows.length) out.push({ header: `${r} ★`, rows });
-      }
-      const unrated = filtered.filter((a) => !a.starRating);
-      if (unrated.length) out.push({ header: "Unrated", rows: unrated });
-      return out;
-    }
 
     const notQueried = filtered.filter((a) => !isQueried(a)).sort(byRatingDesc);
     const queried = filtered.filter((a) => isQueried(a)).sort(byRatingDesc);
@@ -112,7 +99,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
     if (queried.length) out.push({ header: "Already queried", dim: true, rows: queried });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, groupByRating, queriedAgentIds]);
+  }, [filtered, queriedAgentIds]);
 
   // Flat list of selectable rows in display order, for keyboard navigation.
   const flatRows = useMemo(() => groups.flatMap((g) => g.rows), [groups]);
@@ -120,7 +107,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   // Reset the highlight when the result set changes; keep the highlighted row in view.
   useEffect(() => {
     setHl(0);
-  }, [queryText, groupByRating, open]);
+  }, [queryText, open]);
   useEffect(() => {
     if (!open) return;
     menuRef.current?.querySelector(".sa-ag-row.hl")?.scrollIntoView({ block: "nearest" });
@@ -203,17 +190,6 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
     <div className="sa-ag" ref={ref}>
       <div className="sa-ag-labelrow">
         <span className="sa-label sa-ag-label">Agent</span>
-        {!showQuickAdd && (
-          <button
-            type="button"
-            className={`sa-ag-toggle${groupByRating ? " on" : ""}`}
-            aria-pressed={groupByRating}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setGroupByRating((v) => !v)}
-          >
-            <span className="sa-ag-tick">✓</span> group by rating
-          </button>
-        )}
       </div>
 
       {showQuickAdd ? (

@@ -175,7 +175,7 @@
     border-color 0.3s ease,
     background 0.4s ease;
 }
-.f12-draft.f12-draft-in { height: 56px; margin: 8px 8px 10px; border-width: 1.5px; opacity: 1; }
+.f12-draft.f12-draft-in { height: 78px; margin: 8px 8px 10px; border-width: 1.5px; opacity: 1; }
 
 /* live fill — the monogram and name resolve as the picker lands, rather than snapping */
 .f12-draft .f12-av { transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
@@ -211,12 +211,28 @@
   .f12-pane-enter-create, .f12-pane-enter-read { animation: none !important; }
 }
 
-/* the pinned draft row — dashed, tagged, shown regardless of the active filters (see above) */
+/* the pinned draft row — dashed, tagged, shown regardless of the active filters (see above).
+   The row lays its two parts out in a column and owns the padding, so the tag can never overhang
+   the row or the card. */
+.f12-draft { display: block; padding: 11px 13px; }
+.f12-draftbody { display: flex; flex-direction: column; }
+.f12-draftmain { display: flex; align-items: center; gap: 11px; }
+.f12-drafttag { position: static; align-self: flex-start; margin: 0 0 6px; }
 .f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
 .f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
 .f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }
 .f12-draft.f12-filled .f12-nm { color: var(--ink); font-style: normal; font-weight: 600; }
 .f12-drafttag { position: absolute; top: -8px; left: 12px; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
+
+/* the hero's "Change" affordance — an outlined pill beside the agent's name, so swapping agent
+   is one click rather than a discard-and-start-again. */
+.qc-change { display: inline-flex; align-items: center; gap: 6px; flex: none; margin-left: 10px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-family: inherit; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.qc-change:hover { background: var(--paper); border-color: var(--muted); }
+.qc-change svg { width: 13px; height: 13px; flex: none; color: var(--faint); }
+
+/* the book chip inside the manuscript field (both states) */
+.qc-bk { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--oat); color: var(--ink-2); }
+.qc-bk svg { width: 12px; height: 12px; }
 
 /* reminder chips */
 .qc-chip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; font-family: inherit; font-size: 12px; background: var(--panel); color: var(--muted); cursor: pointer; transition: background 0.12s, border-color 0.12s; }

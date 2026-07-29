@@ -42,7 +42,9 @@ describe("the draft row grows and collapses (and the growth is what moves the li
     expect(base).toContain("height: 0");
     expect(base).toContain("overflow: hidden");
     expect(base).toContain("transition:");
-    expect(css).toContain(".f12-draft.f12-draft-in { height: 56px;");
+    // the open height is whatever the row's own content needs — it grew when the Draft tag moved
+    // in-flow above the content (create-fixes); what matters is that it animates to a real value.
+    expect(css).toMatch(/\.f12-draft\.f12-draft-in \{ height: \d+px;/);
   });
 
   it("the open state is applied on the frame AFTER mount, or there is nothing to animate from", () => {

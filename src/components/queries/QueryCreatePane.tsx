@@ -15,9 +15,11 @@
  * .f12-card / .f12-chh column chrome, and .f12-btn-pri for the soft-pink Save (the ref draws an
  * espresso dark pill; the app has no dark-pill CTA, so the live idiom wins).
  */
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Agent, Manuscript } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
+import { F12Menu } from "../shell/F12Shell";
+import { useFixedMenu } from "../forms/useFixedMenu";
 import { agentInitials, agentPrimary, agentAgencyLine } from "../../lib/agentDisplay";
 import {
   SAMPLE_UNITS,
@@ -56,7 +58,7 @@ const LABEL: React.CSSProperties = {
 };
 const FIELD: React.CSSProperties = {
   display: "flex", alignItems: "center", gap: 8, width: "100%",
-  border: "1px solid var(--line)", borderRadius: 11, padding: "10px 13px",
+  border: "1px solid var(--line)", borderRadius: 11, padding: "10px 13px", minHeight: 42,
   background: "var(--panel)", fontSize: 13.5, color: "var(--ink)", fontFamily: "inherit",
 };
 
@@ -67,6 +69,16 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const set = (patch: Partial<QueryDraft>) => onChange({ ...draft, ...patch });
   const setRow = (key: MaterialRow["key"], patch: Record<string, unknown>) =>
     set({ materials: draft.materials.map((r) => (r.key === key ? ({ ...r, ...patch } as MaterialRow) : r)) });
+
+  /* The manuscript field has TWO states. With one book there is nothing to choose, so it is a
+     locked read-out rather than a one-option dropdown. With several it is the app's own custom
+     menu (F12Menu + useFixedMenu — the same pair the Filter/Sort popovers and the reading pane's
+     click-to-pick use); a native <select> renders the macOS system popup, which is badly off-brand
+     and was the bug being fixed. */
+  const [msMenuOpen, setMsMenuOpen] = useState(false);
+  const { triggerRef: msTrigRef, menuStyle: msMenuStyle } = useFixedMenu<HTMLButtonElement>(msMenuOpen);
+  const onlyManuscript = manuscripts.length === 1 ? manuscripts[0] : null;
+  const chosenManuscript = manuscripts.find((m) => m.id === draft.manuscriptId) ?? null;
 
   const suggested = suggestedReminderDate(draft.dateSent, agent?.responseTimeWeeks);
   const ready = draftReady(draft);
@@ -81,7 +93,16 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           <>
             <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
             <div style={{ minWidth: 0 }}>
-              <div className="f12-hn">{agentPrimary(agent)}</div>
+              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                <span className="f12-hn">{agentPrimary(agent)}</span>
+                {/* Changing your mind is one click, and it re-derives everything seeded from the
+                    agent — the materials checklist and the nudge suggestion both follow the new
+                    pick rather than silently keeping the old one's. */}
+                <button type="button" className="qc-change" onClick={() => set({ agentId: null, materials: materialRowsForDraft(null) })}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                  Change
+                </button>
+              </div>
               <div className="f12-ha">{agentAgencyLine(agent)}</div>
               <span className="f12-hs">New query</span>
             </div>
@@ -131,20 +152,53 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <span>The send</span>
           </div>
           <div style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 15 }}>
               <div style={LABEL}>Manuscript</div>
-              <select
-                value={draft.manuscriptId}
-                onChange={(e) => set({ manuscriptId: e.target.value })}
-                aria-label="Manuscript"
-                style={{ ...FIELD, cursor: "pointer" }}
-              >
-                <option value="">Choose a manuscript…</option>
-                {manuscripts.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
-              </select>
+              {onlyManuscript ? (
+                <div style={{ ...FIELD, background: "var(--paper)", color: "var(--ink-2)" }} aria-label={`Manuscript: ${onlyManuscript.title}`}>
+                  <span className="qc-bk" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
+                  </span>
+                  <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{onlyManuscript.title}</span>
+                  <span style={{ marginLeft: "auto", flex: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)" }}>Only manuscript</span>
+                </div>
+              ) : (
+                <span className="f12-popwrap" style={{ display: "block" }}>
+                  <button
+                    ref={msTrigRef}
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={msMenuOpen}
+                    aria-label={`Manuscript: ${chosenManuscript?.title ?? "none chosen"}`}
+                    onClick={() => setMsMenuOpen((o) => !o)}
+                    style={{ ...FIELD, cursor: "pointer", textAlign: "left" }}
+                  >
+                    <span className="qc-bk" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
+                    </span>
+                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{chosenManuscript?.title ?? manuscripts[0]?.title ?? ""}</span>
+                    <span aria-hidden="true" style={{ marginLeft: "auto", flex: "none", fontSize: 10, color: "var(--faint)" }}>▾</span>
+                  </button>
+                  <F12Menu
+                    open={msMenuOpen}
+                    onClose={() => setMsMenuOpen(false)}
+                    style={msMenuStyle}
+                    ariaLabel="Choose a manuscript"
+                    items={manuscripts.map((m) => ({
+                      label: m.title,
+                      icon: m.id === draft.manuscriptId ? <span aria-hidden="true">✓</span> : undefined,
+                      onClick: () => { set({ manuscriptId: m.id }); setMsMenuOpen(false); },
+                    }))}
+                  />
+                </span>
+              )}
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
+                at ordinary laptop heights, so the one field that needs a decision was the one you
+                had to scroll to find. */}
+            <div style={{ display: "flex", gap: 12, marginBottom: 15 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={LABEL}>Date sent</div>
               <input
                 type="date"
@@ -152,15 +206,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 max={new Date().toISOString().slice(0, 10)}
                 onChange={(e) => set({ dateSent: e.target.value })}
                 aria-label="Date sent"
-                style={FIELD}
+                style={{ ...FIELD, minHeight: 42 }}
               />
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={LABEL}>Sent by</div>
               {/* Segmented: ONE container frame, equal segments, NO per-segment borders (they add
                   width and misalign the row); selection is an inset ink ring — the live idiom. */}
-              <div role="group" aria-label="Sent by" style={{ display: "flex", border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
+              <div role="group" aria-label="Sent by" style={{ display: "flex", minHeight: 42, border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden" }}>
                 {CREATE_SEND_METHODS.map((m) => {
                   const on = draft.sendMethod === m.value;
                   return (
@@ -180,6 +234,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 })}
               </div>
             </div>
+            </div>
 
             <div>
               <div style={LABEL}>Nudge reminder</div>
@@ -193,7 +248,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                   Pick a date
                 </button>
                 <button type="button" className={`qc-chip${draft.reminder.kind === "none" ? " on" : ""}`} onClick={() => set({ reminder: { kind: "none" } })}>
-                  No reminder
+                  None
                 </button>
               </div>
               {draft.reminder.kind === "custom" && (
