@@ -29,7 +29,7 @@ import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, 
 import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { PageHeader } from "./shell/PageHeader";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
@@ -2548,13 +2548,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           return (
             <div className="f12-ctl">
-              {/* Left zone retired (shell rollout Phase 6): Log a query moved into the page
-                  header; Import data dropped — the sidebar's Shelf › Import covers the entry
-                  (rollout report). The bar keeps only the record verbs, right-aligned. */}
-              <div className="f12-zone-list" />
+              {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
+                  column: it existed to lock the bar to the list pane, which now sits in the wider
+                  workspace column below. The verbs simply right-align in the header column (ref). */}
 
-              {/* Right zone — inset 20px from both pane edges; verbs, then the link group, then danger.
-                  The contextual primary now lives on the reading pane's record header. */}
+              {/* Verbs, then the link group, then danger. The contextual primary lives on the
+                  reading pane's record header. */}
               <div className="f12-zone-read">
                 <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                   <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
@@ -2721,11 +2720,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   aria-label="Search queries"
                 />
               </div>
+              {/* v4 P1 — labelled pills in the agent list's grammar (icon · label · chevron), so the
+                  controls state what they do without a hover. Wiring unchanged. */}
               <div className="f12-popwrap">
-                <IconTrig
+                <PillTrig
                   ref={filterTrigRef}
-                  tip="FILTER"
+                  label="Filter"
                   open={filterPopOpen}
+                  active={activeFilterCount > 0}
                   count={activeFilterCount}
                   onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
@@ -2733,10 +2735,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 {filterPopOpen && renderFilterPopover()}
               </div>
               <div className="f12-popwrap">
-                <IconTrig
+                <PillTrig
                   ref={sortTrigRef}
-                  tip={`SORT · ${(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}`}
+                  label="Sort"
                   open={sortPopOpen}
+                  active={sortKey !== "last_activity"}
+                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
                   onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
                 />

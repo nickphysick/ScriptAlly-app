@@ -62,16 +62,19 @@
 /* ── control bar — two zones locked to the panes by --listw (chrome revision: 56px; the left
    zone sits flush with the list pane's left edge, the right zone is inset 20px from both of
    the reading pane's edges) ── */
-/* The compact page-header seat (shell rollout Phase 6) — the same centred column as the
-   control bar / body, holding the app-standard PageHeader above the F12 work area. */
-.f12-hd2 { flex: none; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 16px var(--gut) 0; }
+/* v4 P1 — THE HEADER BLOCK (page-header seat + action row + chips) sits in the SHARED CONTENT
+   COLUMN (--sa-col-*, pageHeader.css) — the same column the agent list uses, so the two pages'
+   headers line up when you move between them. The WORKSPACE below keeps its own wider --maxw cap
+   (.f12-body); that differential is exactly the ref's Guides view, not an accident. */
+.f12-hd2 { flex: none; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 16px var(--sa-col-gut) 0; }
 .f12-hd2 .svh { margin-bottom: 0; }
 
 /* asymmetric vertical padding (more on top) drops the buttons toward the content below rather
-   than centring them mid-bar — they were reading closer to the breadcrumb than the panes. */
-.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 15px var(--gut) 3px; }
-.f12-zone-list { flex: none; width: var(--listw); display: flex; align-items: center; gap: 8px; padding-left: 0; padding-right: var(--gut); }
-.f12-zone-read { flex: 1; display: flex; align-items: center; gap: 2px; min-width: 0; padding-left: 20px; padding-right: 20px; }
+   than centring them mid-bar — they were reading closer to the breadcrumb than the panes.
+   v4 P1: the --listw left zone is retired (it locked the bar to the list pane, which now lives
+   in a different, wider column) — the verbs simply right-align in the header column, per the ref. */
+.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 15px var(--sa-col-gut) 3px; }
+.f12-zone-read { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
 .f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
 .f12-ctl .f12-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
 /* the link group is pushed right; the danger pair sits past a second divider */
@@ -97,6 +100,20 @@
 .f12-iconctl .f12-fcorner { position: absolute; top: -5px; right: -5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; padding: 1px 5px; }
 .f12-iconctl .f12-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: var(--panel); padding: 4px 7px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
 .f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
+
+/* ── labelled pill trigger (v4 P1) — the list card's Filter / Sort controls, in the AGENT LIST
+   pill grammar: icon · one-word label · chevron, identical at rest, and the shared "this control
+   is doing something" pink active treatment. Geometry mirrors .agl-ctl (36px / 12px / radius 10);
+   the colours read the f12 token set, not the agent list's. Replaces the icon-only .f12-iconctl
+   in the list head — a control that states what it does beats a tooltip. */
+.f12-pill { position: relative; flex: none; display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; height: 36px; padding: 0 12px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-family: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.f12-pill:hover { border-color: var(--muted); }
+.f12-pill svg { flex: none; width: 14px; height: 14px; color: var(--faint); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.f12-pill .f12-cv { opacity: 0.8; font-size: 9px; line-height: 1; }
+.f12-pill.f12-active { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
+.f12-pill.f12-active svg { color: var(--pink-i); }
+/* the count badge rides inline (agent-list grammar), not as a corner sticker */
+.f12-pill .f12-pcount { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; background: var(--burg); color: var(--panel); border-radius: 999px; padding: 2px 6px; }
 
 /* TasksPopover (5c/6) — record-scoped View-tasks (portalled inside .t-f12) */
 .f12-tasks { width: 288px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden; font-family: var(--f12-body); }
@@ -182,7 +199,7 @@
 .f12-quick button:hover { color: var(--ink); border-color: var(--muted); background: var(--paper); }
 
 /* active-filter chips — beneath the control bar, on the oat (the panes never resize) */
-.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut) 9px; }
+.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 0 var(--sa-col-gut) 9px; }
 .f12-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.07em; padding: 4px 5px 4px 10px; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; }
 .f12-chip button { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; color: inherit; opacity: 0.6; }
 .f12-chip button:hover { opacity: 1; background: rgba(138, 64, 48, 0.12); }

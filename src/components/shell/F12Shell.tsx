@@ -61,6 +61,42 @@ export const IconTrig = React.forwardRef<HTMLButtonElement, {
 IconTrig.displayName = "IconTrig";
 
 /**
+ * PillTrig (v4 P1) — the LABELLED sibling of IconTrig, in the agent list's pill grammar: icon ·
+ * one-word label · chevron, identical at rest, pink while it's doing something. Used by the
+ * Queries list card's Filter / Sort controls, where an icon-only trigger made the user hover to
+ * learn what it was. `value` lets a single-choice control state its choice in the label (Sort);
+ * `count` is for a control holding several values at once (Filter), as a burgundy badge.
+ */
+export const PillTrig = React.forwardRef<HTMLButtonElement, {
+  label: string;
+  icon: React.ReactNode;
+  open: boolean;
+  /** Set away from its default → the shared pink active treatment. */
+  active?: boolean;
+  /** Single-choice controls swap their label for the chosen value. */
+  value?: string;
+  /** Multi-value controls show a count badge instead. */
+  count?: number;
+  onClick: () => void;
+}>(({ label, icon, open, active, value, count, onClick }, ref) => (
+  <button
+    ref={ref}
+    type="button"
+    className={`f12-pill${open || active ? " f12-active" : ""}`}
+    aria-expanded={open}
+    aria-haspopup="dialog"
+    aria-label={value ? `${label}: ${value}` : label}
+    onClick={onClick}
+  >
+    {icon}
+    {value || label}
+    {count != null && count > 0 && <span className="f12-pcount">{count}</span>}
+    <span className="f12-cv" aria-hidden="true">▾</span>
+  </button>
+));
+PillTrig.displayName = "PillTrig";
+
+/**
  * Popover shell — PORTALLED to document.body (chrome revision) so the list pane's
  * overflow:hidden can never clip it; positioned against its trigger via the caller's
  * useFixedMenu `menuStyle` (the codebase's anchored-fixed utility). The portal wrapper

@@ -76,11 +76,12 @@ describe("commandBarStatus — the bar's centre text", () => {
 describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the F12 control bar sits at the TOP — two zones locked by --listw; the foot cards are retired", () => {
-    // One bar above the panes (ref queries-hub-v14.html .ctl): FILTER + SORT in the list-width
-    // left zone, the quiet query actions in the right zone. No foot control-row cards remain.
+  it("the F12 control bar sits at the TOP, right-aligned in the header column; the foot cards are retired", () => {
+    // One bar above the panes. v4 P1 (ref queries-hub-v4.html .abar): the bar moved into the
+    // SHARED HEADER COLUMN, so the --listw left zone that locked it to the list pane is retired —
+    // the verbs simply right-align. No foot control-row cards remain.
     expect(src).toContain('className="f12-ctl"');
-    expect(src).toContain('className="f12-zone-list"');
+    expect(src).not.toContain('className="f12-zone-list"'); // the spacer that locked it to the list
     expect(src).toContain('className="f12-zone-read"');
     expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(false); // foot list card gone
     expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(false); // foot ribbon card gone
