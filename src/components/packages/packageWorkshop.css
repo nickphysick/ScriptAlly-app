@@ -480,8 +480,9 @@
   border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none;
 }
 .pkgw-pctpill.top { background: var(--pkg-gold-tint); color: var(--pkg-gold-ink); border-color: #e4d5b2; }
-/* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded. */
-.pkgw-unlock { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
+/* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded.
+   Named `commsoon`, not `unlock` — this surface has nothing to buy. */
+.pkgw-commsoon { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
 
 /* ══ Pro header format ═════════════════════════════════════════════════════
    Ref scriptally-packages-empty.html .phtop/.prorule/.strip, and the pattern Discover
