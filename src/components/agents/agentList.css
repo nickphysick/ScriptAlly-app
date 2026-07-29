@@ -67,10 +67,19 @@
 /* the delay comes from the inline style; the duration and curve come from here */
 .aglist.agl-anim .agl-scene { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
 
+/* ARRIVAL + EXIT (motion pack, Baked 2 + 3). Same shared keyframes, different durations: an
+   arrival is SLOWER than the load so it reads as its own event, an exit is faster than either.
+   `.agl-leaving` holds the card in place while `fall` plays — the gap closes afterwards, on the
+   bump, because a card removed from the list first would have nothing left to animate. */
+.aglist .agl-scene.agl-arriving { animation: rise .34s cubic-bezier(.4, 0, .2, 1) both; }
+.aglist .agl-scene.agl-leaving { animation: fall .16s cubic-bezier(.4, 0, .2, 1) both; pointer-events: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .aglist.agl-anim .agl-head-slot,
   .aglist.agl-anim .agl-toolbar,
-  .aglist.agl-anim .agl-scene { animation: none; }
+  .aglist.agl-anim .agl-scene,
+  .aglist .agl-scene.agl-arriving,
+  .aglist .agl-scene.agl-leaving { animation: none; }
 }
 
 /* THE PAGE COLUMN (rebuild v2). Padding belongs to the scroll region so the scrollbar rides the

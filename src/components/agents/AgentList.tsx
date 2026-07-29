@@ -66,6 +66,8 @@ import {
   prefersReducedMotion,
   rowDelayMs,
 } from "../../lib/agentMotion";
+import { BUMP_MS, EXIT_MS } from "../../lib/agentMotion";
+import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
 import { countryName } from "../../lib/territory";
 import { blankDraft } from "../../lib/agentDraft";
@@ -99,6 +101,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   // FLIP transforms that arrive in Phase 2. Clearing the class returns them to a movable state.
   const gridRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(1);
+  // The positions captured just BEFORE a change that reflows the grid. Consumed once, by the
+  // layout effect below, on the very next render.
+  const flipBefore = useRef<FlipRects | null>(null);
+  // A card on its way out: it holds its place, plays `fall`, and only then is really removed —
+  // otherwise the gap closes underneath it and the exit animates nothing.
+  const [leavingId, setLeavingId] = useState<string | null>(null);
   const [loadAnim, setLoadAnim] = useState(!prefersReducedMotion());
 
   // Measured before paint, so the very first frame already carries the right delay.
@@ -113,6 +121,30 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     return () => window.clearTimeout(done);
     // armed once, on mount — deliberately not reactive to anything
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // LAST + INVERT + PLAY. Runs after the DOM has the new arrangement but before paint, so the
+  // displaced cards are jumped back to their old positions and released on the next frame. Only
+  // cards that actually MOVED are touched; a card that stayed put gets no transform and no layer.
+  useLayoutEffect(() => {
+    const before = flipBefore.current;
+    if (!before) return;
+    flipBefore.current = null;
+    if (prefersReducedMotion()) return clearFlip(gridRef.current);
+    playFlip(gridRef.current, before, { durationMs: BUMP_MS });
+    const done = window.setTimeout(() => clearFlip(gridRef.current), BUMP_MS + 60);
+    return () => window.clearTimeout(done);
+  });
+
+  /** Bring the place the new card will appear into view — the top of the grid, since an unsaved
+   *  card is pinned to the front. A card inserted below the fold is a card the reader never sees
+   *  arrive, which is the one failure this motion exists to prevent. */
+  const scrollInsertionPointIntoView = useCallback(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const top = grid.getBoundingClientRect().top;
+    if (top >= 0) return; // already in view — don't yank a page that was fine
+    grid.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
   }, []);
 
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
@@ -165,15 +197,42 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   const [storedNotes, setStoredNotes] = useState<AgentNote[]>([]);
   const [notesLoaded, setNotesLoaded] = useState(false);
 
-  const discard = useCallback(() => {
+  /** Clear the editor state. Separated from the exit MOTION below so a save (which has its own
+   *  three-beat choreography) and a discard (which reverses) can share the teardown. */
+  const clearEditor = useCallback(() => {
     setFlippedId(null);
     setDraft(null);
     setError(null);
     setStoredNotes([]);
     setNotesLoaded(false);
-    // Escape on a never-valid new card discards it entirely (decision 2).
-    setNewAgent(null);
   }, []);
+
+  /**
+   * Discard (Baked 3) — the reverse of the arrival, and faster.
+   *
+   * An unsaved card LEAVES first and the grid closes the gap afterwards: `fall` needs the card to
+   * still occupy its slot while it plays, so removing it from the list immediately would collapse
+   * the gap underneath and animate nothing. Two beats, not one — the exit, then the bump.
+   *
+   * An existing card just flips back; nothing leaves, so there is nothing to animate.
+   */
+  const discard = useCallback(() => {
+    const departing = newAgent?.id && flippedId === newAgent.id ? newAgent.id : null;
+    clearEditor();
+    if (!departing) return setNewAgent(null);
+
+    if (prefersReducedMotion()) {
+      setNewAgent(null);
+      return;
+    }
+    setLeavingId(departing);
+    window.setTimeout(() => {
+      // measure with the leaving card STILL in place, so the survivors' "before" is honest
+      flipBefore.current = measureFlip(gridRef.current);
+      setLeavingId(null);
+      setNewAgent(null);
+    }, EXIT_MS);
+  }, [clearEditor, newAgent, flippedId]);
 
   // Subscribe to the open agent's notes subcollection. `notesLoaded` only turns true once the
   // listener actually resolves — the notePreview recompute is gated on it, because an unresolved
@@ -413,6 +472,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     // Clear every narrowing control so the new card can't be born hidden behind a filter.
     setFilters(emptyFilterSet());
     setSearch("");
+    // FIRST + settle: where is everything now? Measured BEFORE the insert, so the cards about to
+    // be displaced can be sent back to their old places and released into the bump.
+    flipBefore.current = measureFlip(gridRef.current);
+    // Inserting a card the reader cannot see is the failure case — bring the insertion point into
+    // view before the arrival begins, not after.
+    scrollInsertionPointIntoView();
     setNewAgent(stub);
     setFlippedId(id);
     setDraft(blankDraft(id));
@@ -432,6 +497,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
               <AgentCard
                 key={agent.id}
                 style={loadAnim ? { animationDelay: `${rowDelayMs(index, columns)}ms` } : undefined}
+                motionClass={leavingId === agent.id ? "agl-leaving" : newAgent?.id === agent.id ? "agl-arriving" : undefined}
                 agent={agent}
                 queries={queries}
                 manuscripts={manuscripts}
