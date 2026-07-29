@@ -162,11 +162,20 @@
 
    ⚠️ FLIP TRAP (documented in motion.css): a filled animation outranks an inline transform. The
    save FLIP therefore clears `style.animation` before measuring — see runSaveFlip in Queries.tsx. */
-.f12-draft {
+/* ⚠️ EVERY draft rule is written as a MODIFIER OF THE ROW (`.f12-row.f12-draft`), never as a bare
+   `.f12-draft`. `.f12-row` is declared ~270 lines below this block, so at equal specificity it won
+   the cascade on every property the two shared — display, padding, height, the bottom border, even
+   the monogram's dashed ring. The draft row was silently rendering as a normal row wearing a few
+   leftovers. Compound selectors make the outcome independent of file order; keep them. */
+.f12-row.f12-draft {
   /* appearance + collapsed state in ONE rule: a separate base rule below would re-assert the
      `border` and `margin` shorthands at equal specificity and silently undo the collapse. */
-  position: relative; border: 0 dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md);
-  height: 0; margin: 0 8px; opacity: 0; overflow: hidden;
+  border: 0 dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md);
+  height: 0; margin: 0; opacity: 0; overflow: hidden;
+  /* the 1.5px border is ABSORBED, not added: vertically by border-box against the fixed 56px, and
+     horizontally by taking the row's 14px padding down by the same 1.5px — so the monogram column
+     lines up with every row beneath it and the outer box is the same size. */
+  padding: 0 12.5px;
   transition:
     height 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
     margin 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
@@ -175,16 +184,19 @@
     border-color 0.3s ease,
     background 0.4s ease;
 }
-.f12-draft.f12-draft-in { height: 78px; margin: 8px 8px 10px; border-width: 1.5px; opacity: 1; }
+/* open = EXACTLY a row's height (ref qdb-draft-row.html). The 8px is margin BELOW — spacing
+   between rows so the dashed edge never touches its neighbour — never height inside the row. */
+.f12-row.f12-draft.f12-draft-in { height: 56px; margin: 0 0 8px; border-width: 1.5px; opacity: 1; }
 
 /* live fill — the monogram and name resolve as the picker lands, rather than snapping */
-.f12-draft .f12-av { transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-.f12-draft .f12-nm { transition: color 0.3s ease; }
-.f12-drafttag { transition: opacity 0.3s ease; }
+.f12-row.f12-draft .f12-av { transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+.f12-row.f12-draft .f12-nm { transition: color 0.3s ease; }
 
-/* SAVE beat 1 — the row sheds its draft skin IN PLACE: dashed → none, tag out, ground → selected */
-.f12-draft.f12-draft-saved { border-color: transparent; border-style: solid; background: var(--blue-t); margin: 0 0 0 0; border-radius: 0; }
-.f12-draft.f12-draft-saved .f12-drafttag { opacity: 0; }
+/* SAVE beat 1 — the row sheds its draft skin IN PLACE: dashed → none, tag out, ground → selected.
+   The border-WIDTH stays 1.5px while the colour goes transparent, so the absorbed padding still
+   adds up and nothing shifts sideways as it becomes an ordinary row. */
+.f12-row.f12-draft.f12-draft-saved { border-color: transparent; border-style: solid; background: var(--blue-t); margin: 0; border-radius: 0; }
+.f12-row.f12-draft.f12-draft-saved .f12-drafttag { opacity: 0; }
 
 /* SAVE beat 4 — the settle: a soft pink flash easing down to the selected tint */
 @keyframes f12-settle { from { background: var(--pink-t); } to { background: var(--blue-t); } }
@@ -206,23 +218,26 @@
 .f12-pane-enter-read { animation: rise 0.18s ease-out backwards; }
 
 @media (prefers-reduced-motion: reduce) {
-  .f12-draft, .f12-draft .f12-av, .f12-draft .f12-nm, .f12-drafttag { transition: none !important; }
+  .f12-row.f12-draft, .f12-row.f12-draft .f12-av, .f12-row.f12-draft .f12-nm, .f12-drafttag { transition: none !important; }
   .f12-row.f12-settle, .f12-row.f12-row-leaving,
   .f12-pane-enter-create, .f12-pane-enter-read { animation: none !important; }
 }
 
-/* the pinned draft row — dashed, tagged, shown regardless of the active filters (see above).
-   The row lays its two parts out in a column and owns the padding, so the tag can never overhang
-   the row or the card. */
-.f12-draft { display: block; padding: 11px 13px; }
-.f12-draftbody { display: flex; flex-direction: column; }
-.f12-draftmain { display: flex; align-items: center; gap: 11px; }
-.f12-drafttag { position: static; align-self: flex-start; margin: 0 0 6px; }
-.f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
-.f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
-.f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }
-.f12-draft.f12-filled .f12-nm { color: var(--ink); font-style: normal; font-weight: 600; }
-.f12-drafttag { position: absolute; top: -8px; left: 12px; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; }
+/* the pinned draft row — dashed and tagged, shown regardless of the active filters (see above),
+   but otherwise the SAME BOX as every other row: monogram · name/agency · right-hand column. */
+.f12-row.f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
+.f12-row.f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
+.f12-row.f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }
+.f12-row.f12-draft.f12-filled .f12-nm { color: var(--ink); font-style: normal; font-weight: 600; }
+/* ONE rule for the chip — it previously had three, two of which disagreed about `position`, and
+   the last one in the file won. It sits IN FLOW in the row's right-hand column, in the slot a
+   normal row gives its status dot, with the date beneath it. Nothing is positioned outside the
+   row box: the row's own overflow:hidden (which the height animation needs) would clip it. */
+.f12-drafttag {
+  flex: none; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-mono);
+  font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px; white-space: nowrap; transition: opacity 0.3s ease;
+}
 
 /* the hero's "Change" affordance — an outlined pill beside the agent's name, so swapping agent
    is one click rather than a discard-and-start-again. */

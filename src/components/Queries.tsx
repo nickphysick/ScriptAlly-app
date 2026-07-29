@@ -2923,22 +2923,19 @@ export const Queries: React.FC<{
                       run?.();
                     }}
                   >
-                    {/* The tag STACKS above the row content, both inside the row's own padding.
-                        It used to be absolutely positioned at top:-8px, which the row's
-                        overflow:hidden (needed for the height animation) and the card's edge both
-                        clipped. Restructured, not restyled — see the report. */}
-                    <span className="f12-draftbody">
+                    {/* EXACTLY a normal row's parts, in the same order (ref qdb-draft-row.html):
+                        monogram · name/agency · right-hand column. The "Draft" chip takes the slot
+                        a normal row gives its status dot, with the date beneath it — so nothing
+                        stacks above the content and nothing sits outside the box, which is what
+                        the row's overflow:hidden was clipping. */}
+                    <span className="f12-av f12-av--sm" aria-hidden="true">{draftAgent ? agentInitials(draftAgent) : "—"}</span>
+                    <span className="f12-mid">
+                      <span className="f12-nm">{draftAgent ? agentPrimary(draftAgent) : "Choose an agent…"}</span>
+                      <span className="f12-ag">{draftAgent ? agentAgencyLine(draftAgent) : "New query"}</span>
+                    </span>
+                    <span className="f12-end">
                       <span className="f12-drafttag">Draft</span>
-                      <span className="f12-draftmain">
-                        <span className="f12-av f12-av--sm" aria-hidden="true">{draftAgent ? agentInitials(draftAgent) : "—"}</span>
-                        <span className="f12-mid">
-                          <span className="f12-nm">{draftAgent ? agentPrimary(draftAgent) : "Choose an agent…"}</span>
-                          <span className="f12-ag">{draftAgent ? agentAgencyLine(draftAgent) : "New query"}</span>
-                        </span>
-                        <span className="f12-end">
-                          <span className="f12-d2">TODAY</span>
-                        </span>
-                      </span>
+                      <span className="f12-d2">Today</span>
                     </span>
                   </div>
                 );

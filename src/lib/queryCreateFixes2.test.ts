@@ -25,6 +25,7 @@ import type { QueryMaterial } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const pane = read("../components/queries/QueryCreatePane.tsx");
+const queries = read("../components/Queries.tsx");
 const css = read("../components/shell/f12.css");
 
 /**
@@ -105,6 +106,76 @@ describe("P2 · the sample quantity is ONE control over the SHARED physics", () 
     expect(stepAmount("10", "Pages", 1)).toBe("15");
     // the floor holds
     expect(stepAmount("500", "Words", -1)).toBe(String(UNIT_CFG.Words.min));
+  });
+});
+
+describe("P3 · the draft row is the same box as every other row", () => {
+  /** The row height both must share. Read from the sheet so the test can't drift from it. */
+  const rowHeight = (block(".f12-row").match(/height: (\d+)px/) ?? [])[1];
+
+  it("the list row still declares a fixed height (the number both rows are pinned to)", () => {
+    expect(rowHeight, "the .f12-row height is gone — the whole comparison rests on it").toBeTruthy();
+    expect(rowHeight).toBe("56");
+  });
+
+  it("the open draft row is EXACTLY that height — no growth to fit a tag", () => {
+    const open = block(".f12-row.f12-draft.f12-draft-in");
+    expect(open, "the open-state rule is missing or not compound").not.toBe("");
+    expect(open).toContain(`height: ${rowHeight}px`);
+    // the breathing room is BELOW the row, not inside it
+    expect(open, "the gap must be margin-bottom only — top margin would offset the row").toContain("margin: 0 0 8px");
+  });
+
+  it("the 1.5px border is absorbed by the padding, not added to the box", () => {
+    const base = block(".f12-row.f12-draft");
+    expect(base, "the draft base rule is missing").not.toBe("");
+    const rowPad = (block(".f12-row").match(/padding: 0 (\d+)px/) ?? [])[1];
+    expect(rowPad, "the .f12-row padding is gone").toBe("14");
+    // 14 − 1.5 = 12.5, so the monogram column lines up with the rows beneath
+    expect(base).toContain("padding: 0 12.5px");
+    expect(base).toContain("border: 0 dashed");
+  });
+
+  it("the chip sits in the right-hand column, where a normal row shows its status dot", () => {
+    const row = queries.slice(queries.indexOf("New query draft"), queries.indexOf("renderList.map"));
+    expect(row, "the draft row markup moved — this slice is anchored on its aria-label").not.toBe("");
+    expect(row).toContain('<span className="f12-end">');
+    // chip first, date beneath — the same two slots, the same order as a real row
+    expect(row).toMatch(/f12-drafttag">Draft<\/span>\s*<span className="f12-d2">Today<\/span>/);
+    expect(row, "the parts must be the row's own, not a nested block").toContain('<span className="f12-mid">');
+  });
+
+  it("name and agency truncate rather than wrap — they are the row's own elements", () => {
+    for (const sel of [".f12-row .f12-nm", ".f12-row .f12-ag"]) {
+      expect(block(sel), `${sel} lost its ellipsis`).toContain("text-overflow: ellipsis");
+    }
+    expect(block(".f12-row .f12-mid"), "min-width:0 is what lets the middle actually shrink").toContain("min-width: 0");
+  });
+
+  /**
+   * THE METHOD FIX. Round 1 asserted `.f12-drafttag { position: static; ...}` was present. It was
+   * — and a second rule four lines later set it back to absolute. Presence is not effect; a
+   * duplicated rule is decided by file order, which no string search can see. So: exactly one.
+   */
+  it("every draft selector is declared EXACTLY ONCE", () => {
+    for (const sel of [".f12-drafttag", ".f12-row.f12-draft", ".f12-row.f12-draft.f12-draft-in"]) {
+      expect(ruleCount(sel), `${sel} is declared more than once — the later one silently wins`).toBe(1);
+    }
+  });
+
+  /**
+   * ...and the other half of the same lesson: `.f12-row` is declared ~270 lines BELOW the draft
+   * block, so a bare `.f12-draft` loses every property they share regardless of what it says.
+   * Every draft rule must therefore be a compound modifier of the row.
+   */
+  /* Scope: TOP-LEVEL rules. The reduced-motion block still names `.f12-row.f12-draft` for
+     consistency, but it wins on `!important` regardless of specificity, so ordering can't bite
+     there — this regex is anchored at column 0 and deliberately doesn't reach inside @media. */
+  it("no top-level draft rule is a bare .f12-draft, which the row would outrank by order", () => {
+    const bare = css.match(/\n\.f12-draft[ .{]/g) ?? [];
+    expect(bare, `bare .f12-draft rules found: ${bare.join(", ")}`).toHaveLength(0);
+    expect(css.indexOf("\n.f12-row {"), "the ordering this guards against is still real")
+      .toBeGreaterThan(css.indexOf("\n.f12-row.f12-draft {"));
   });
 });
 

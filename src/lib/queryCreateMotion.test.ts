@@ -38,13 +38,16 @@ describe("one motion language", () => {
 
 describe("the draft row grows and collapses (and the growth is what moves the list)", () => {
   it("it animates from a real zero — height, margin and border-width, not opacity alone", () => {
-    const base = css.slice(css.indexOf("\n.f12-draft {"), css.indexOf("}", css.indexOf("\n.f12-draft {")));
+    // The selectors are compound (`.f12-row.f12-draft`) since corrections round 2: `.f12-row` is
+    // declared further down the sheet, so a bare `.f12-draft` lost the cascade on every shared
+    // property — including this height. See queryCreateFixes2.test.ts.
+    const at = css.indexOf("\n.f12-row.f12-draft {");
+    expect(at, "the draft base rule is missing or no longer compound").toBeGreaterThan(-1);
+    const base = css.slice(at, css.indexOf("}", at));
     expect(base).toContain("height: 0");
     expect(base).toContain("overflow: hidden");
     expect(base).toContain("transition:");
-    // the open height is whatever the row's own content needs — it grew when the Draft tag moved
-    // in-flow above the content (create-fixes); what matters is that it animates to a real value.
-    expect(css).toMatch(/\.f12-draft\.f12-draft-in \{ height: \d+px;/);
+    expect(css).toMatch(/\.f12-row\.f12-draft\.f12-draft-in \{ height: \d+px;/);
   });
 
   it("the open state is applied on the frame AFTER mount, or there is nothing to animate from", () => {
@@ -122,7 +125,7 @@ describe("create mode remembers where you were", () => {
 describe("reduced motion collapses all of it to instant state changes", () => {
   // the WHOLE media block — its inner rules span several lines, so stopping at the first brace
   // would silently only check the first of them.
-  const start = css.indexOf("@media (prefers-reduced-motion: reduce) {\n  .f12-draft");
+  const start = css.indexOf("@media (prefers-reduced-motion: reduce) {\n  .f12-row.f12-draft");
   const rm = css.slice(start, css.indexOf("\n}", start) + 2);
   it("the row's transitions and every create-flow animation are switched off", () => {
     expect(start, "the create flow's reduced-motion block has gone").toBeGreaterThan(-1);

@@ -103,15 +103,17 @@ describe("the manuscript field has two states, and neither is a native select", 
   });
 });
 
+/* SUPERSEDED by corrections round 2 (queryCreateFixes2.test.ts, ref qdb-draft-row.html). The
+   stacked-tag layout asserted here never actually ran: `.f12-row` is declared further down the
+   sheet at equal specificity, so it won `display` and `padding` back, and a second `.f12-drafttag`
+   rule won `position` back. The row is now the SAME BOX as every other row, with the chip in the
+   right-hand column — so the wrappers this block asserted are gone by design. */
 describe("the draft row's tag is not clipped", () => {
-  it("it sits in flow above the row content, inside the row's padding", () => {
-    expect(queries).toContain('className="f12-draftbody"');
-    expect(queries).toContain('className="f12-draftmain"');
-    expect(css).toContain(".f12-drafttag { position: static;");
-  });
-
-  it("the row owns padding and lays its parts out in a column", () => {
-    expect(css).toContain(".f12-draft { display: block; padding: 11px 13px; }");
-    expect(css).toContain(".f12-draftbody { display: flex; flex-direction: column; }");
+  it("nothing in the draft row is positioned outside the row box", () => {
+    expect(queries, "the stacking wrappers are retired").not.toContain('className="f12-draftbody"');
+    expect(queries).not.toContain('className="f12-draftmain"');
+    const tag = css.slice(css.indexOf("\n.f12-drafttag {"));
+    expect(tag.slice(0, tag.indexOf("}")), "an offset tag is clipped by the row's overflow:hidden")
+      .not.toContain("position: absolute");
   });
 });
