@@ -1,14 +1,14 @@
 <!--
-  ScriptAlly — Package Workshop, two-tab (Workshop · Analytics) design reference.
+  ScriptAlly — Packages: the two-tab surface (Workshop · Analytics), swept to composition bars.
 
-  PROVENANCE: this is a SPEC-DERIVED MOCK, not a build artefact. It was authored to specify the
-  design; it is not generated from, and does not run against, the app's data or components.
+  PROVENANCE: SPEC-DERIVED MOCK, not a build artefact. Authored to specify the design; it is not
+  generated from, and does not run against, the app's data or components.
 
-  DATA HONESTY: every figure in it is illustrative. In particular the Analytics tab's COMMUNITY
-  PERCENTILE claims ("higher than 78% of ScriptAlly writers", "TOP 10%", "BEATS 71%", the percentile
-  track and its median tick) are PLACEHOLDERS — no community aggregation pipeline exists, and
-  pre-launch there is no cohort to aggregate. The build renders that surface behind a default-off
-  flag and never invents numbers at runtime. See reports/ for the pipeline note.
+  DATA HONESTY: every figure in it is illustrative. In particular all COMMUNITY PERCENTILE claims
+  ("higher than N% of ScriptAlly writers", "TOP 10%", "BEATS 71%") are PLACEHOLDERS — no community
+  aggregation pipeline exists, and pre-launch there is no cohort to aggregate. The build renders that
+  surface behind a default-off flag and never invents numbers at runtime. See
+  reports/community-percentiles.md.
 
   Source of truth for: layout, tokens, copy and component grammar. Port faithfully.
 -->
@@ -20,8 +20,8 @@
 <title>ScriptAlly — Packages: Workshop + Analytics</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#2e2723;--ink-soft:#6a615a;--muted:#9c8878;--burgundy:#7c3a2a;--sage-deep:#5a6e58;
-  --pink:#f5e2da;--pink-line:#e8c8bc;--sage-band:#dce0d9;--slate:#6a89a7;--tan:#efe7db;
+:root{--ink:#2e2723;--ink-soft:#6a615a;--muted:#9c8878;--burgundy:#7c3a2a;
+  --pink:#f5e2da;--pink-line:#e8c8bc;--sage-band:#dce0d9;--slate:#6a89a7;--gold:#8a6a1f;--gold-fill:#f4ead2;--tan:#efe7db;
   --ground:#e7e0d5;--plane-s:#fdfbf8;--fill:#efe8df;--card:#fdfaf5;--line:#e3d9cf;--linesoft:#ece3da;}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;padding:24px 16px 80px;
@@ -43,7 +43,7 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 .tv{display:none;padding-top:24px}
 .tv.show{display:block}
 .sl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.note{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);border-left:2px solid var(--sage-deep);padding-left:11px;line-height:1.55}
+.note{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);border-left:2px solid var(--pink-line);padding-left:11px;line-height:1.55}
 
 /* ===== Workshop tab ===== */
 .wrap2{display:flex;gap:26px;align-items:flex-start}
@@ -57,7 +57,7 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 .mchip:hover{border-color:#cfc2b4;box-shadow:2px 3px 0 rgba(46,39,35,.06)}
 .mchip .nm2{font-family:"Playfair Display",serif;font-size:13.5px;line-height:1.1}
 .mchip .use{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.05em;color:var(--muted);margin-top:3px}
-.mchip .use.hot{color:var(--sage-deep)}
+.mchip .use.hot{color:var(--gold)}
 .mchip .grip{margin-left:auto;color:#cfc2b4;font-size:11px;letter-spacing:-2px}
 .mnew{display:flex;align-items:center;gap:7px;border:1.5px dashed #cfc2b4;border-radius:10px;padding:8px 11px;color:var(--muted);font-size:11.5px;font-style:italic;cursor:pointer}
 .mnew:hover{border-color:var(--burgundy);color:var(--burgundy)}
@@ -74,7 +74,7 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 .band{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid var(--ink)}
 .pill{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:2.5px 8px}
 .pill.solid{background:var(--burgundy);border-color:var(--burgundy);color:#fff}
-.req{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--sage-deep)}
+.req{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--gold);background:var(--gold-fill);border-radius:99px;padding:2.5px 8px}
 .spin{width:22px;height:22px;border-radius:99px;border:1px solid rgba(46,39,35,.45);display:grid;place-items:center;background:#fff;cursor:pointer;flex:none}
 .spin svg{width:11px;height:11px}
 .req+.spin{margin-left:8px}
@@ -91,13 +91,13 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 /* back face */
 .back .fbd{padding:12px 14px}
 .hero3{display:flex;align-items:center;gap:12px;margin-top:8px}
-.hero3 .big{font-family:"Playfair Display",serif;font-size:36px;font-weight:600;color:var(--sage-deep);line-height:.85}
+.hero3 .big{font-family:"Playfair Display",serif;font-size:36px;font-weight:600;color:var(--ink);line-height:.85}
 .hero3 .lb b{display:block;font-size:12.5px}
 .hero3 .lb span{font-family:"JetBrains Mono",monospace;font-size:7px;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px}
 .srow{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dashed var(--linesoft);font-size:11.5px;color:var(--ink-soft)}
 .srow:last-child{border-bottom:0}
 .srow b{margin-left:auto;font-family:"Playfair Display",serif;font-size:13px;color:var(--ink)}
-.srow b.g{color:var(--sage-deep)}
+.srow b.g{color:var(--ink)}
 .mkact{width:100%;margin-top:10px;display:inline-flex;align-items:center;justify-content:center;height:31px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:11.5px;cursor:pointer}
 .newp{border:1.5px dashed #cfc2b4;border-radius:11px;display:grid;place-items:center;min-height:264px;color:var(--muted);cursor:pointer;font-family:"Playfair Display",serif;font-size:15px}
 .newp:hover{border-color:var(--burgundy);color:var(--burgundy)}
@@ -109,13 +109,13 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 .scp.on{background:var(--pink);border-color:var(--pink-line);color:var(--burgundy)}
 .scp .tag2{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .scp.on .tag2{color:var(--burgundy)}
-.ptrack{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--fill),var(--sage-band));margin:13px 0 4px}
+.ptrack{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--fill),var(--sage-band));border:1px solid rgba(46,39,35,.14);margin:13px 0 4px}
 .ptrack .med{position:absolute;top:-3px;bottom:-3px;width:1.5px;background:#cfc2b4}
 .ptrack .you{position:absolute;top:50%;width:13px;height:13px;border-radius:99px;background:var(--burgundy);border:2.5px solid #fff;box-shadow:0 1px 3px rgba(46,39,35,.3);transform:translate(-50%,-50%)}
 .ptlab{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.pctpill{font-family:"JetBrains Mono",monospace;font-size:6.8px;letter-spacing:.07em;text-transform:uppercase;background:var(--sage-band);color:var(--sage-deep);border-radius:99px;padding:2.5px 8px;white-space:nowrap}
-.pctpill.top{background:#f4ead2;color:#8a6a1f}
-.evchip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--sage-deep);border-radius:99px;padding:5px 12px;font-size:11.5px;color:var(--sage-deep)}
+.pctpill{font-family:"JetBrains Mono",monospace;font-size:6.8px;letter-spacing:.07em;text-transform:uppercase;background:var(--fill);color:var(--ink-soft);border:1px solid var(--line);border-radius:99px;padding:2.5px 8px;white-space:nowrap}
+.pctpill.top{background:#f4ead2;color:#8a6a1f;border-color:#e4d5b2}
+.evchip{display:inline-flex;align-items:center;gap:7px;background:var(--gold-fill);border:1px solid #e4d5b2;border-radius:99px;padding:5px 12px;font-size:11.5px;color:var(--gold)}
 .evchip b{font-family:"Playfair Display",serif;font-size:13px}
 .fochead{display:flex;align-items:center;gap:12px}
 .fochead .fnm{font-family:"Playfair Display",serif;font-size:23px;font-weight:500}
@@ -123,16 +123,16 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 .agrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--linesoft);font-size:12.5px}
 .agrow:last-child{border-bottom:0}
 .agrow .st3{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase}
-.agrow .st3.rep{color:var(--sage-deep)} .agrow .st3.wait{color:var(--muted)} .agrow .st3.req{color:#8a6a1f}
+.agrow .st3.rep{color:var(--ink)} .agrow .st3.wait{color:var(--muted)} .agrow .st3.req{color:#8a6a1f}
 .bigline{font-size:13px;line-height:1.6;color:var(--ink-soft);margin-top:6px}
 .bigline b{color:var(--ink);font-weight:600}
 .kpis{display:flex;gap:16px}
 .kpi{flex:1;background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:14px 16px}
 .kpi .v{font-family:"Playfair Display",serif;font-size:31px;font-weight:600;line-height:.9}
-.kpi .v.g{color:var(--sage-deep)} .kpi .v.b{color:var(--burgundy)}
+.kpi .v.g{color:var(--ink)} .kpi .v.b{color:var(--burgundy)}
 .kpi .k{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:7px}
 .kpi .d{font-size:10.5px;color:var(--ink-soft);margin-top:4px}
-.kpi .d b{color:var(--sage-deep);font-weight:600}
+.kpi .d b{color:var(--ink);font-weight:600}
 .gsec{display:flex;align-items:baseline;gap:11px;margin:30px 0 5px}
 .gsec h2{font-family:"Playfair Display",serif;font-size:20px;font-weight:500}
 .gsec .cn{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
@@ -154,23 +154,32 @@ h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-
 .lbr .ln2{flex:1;min-width:0}
 .lbr .lnm{font-family:"Playfair Display",serif;font-size:13.5px}
 .lbr.best .lnm::after{content:' ★';color:#c8853f}
-.lbr .bar{height:5px;border-radius:3px;background:var(--fill);margin-top:5px;overflow:hidden}
-.lbr .bar i{display:block;height:100%;background:var(--sage-deep)}
+.lbr .bar{display:flex;height:11px;border-radius:4px;margin-top:6px;overflow:hidden;border:1px solid rgba(46,39,35,.2)}
+.lbr .bar i{height:100%}
+.lbr .bar .rep{background:var(--ink)}
+.lbr .bar .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.lbr .bar .non{background:var(--fill)}
+.complegend{display:flex;gap:15px;margin-bottom:10px;font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.complegend span{display:flex;align-items:center;gap:5px}
+.complegend b{width:11px;height:8px;border-radius:2px;border:1px solid rgba(46,39,35,.2);display:inline-block}
 .lbr .lv{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:var(--muted)}
-.lbr .lv b{font-family:"Playfair Display",serif;font-size:13px;color:var(--sage-deep)}
+.lbr .lv b{font-family:"Playfair Display",serif;font-size:13px;color:var(--ink)}
 .matr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--linesoft)}
 .matr:last-child{border-bottom:0}
 .matr .g3{width:26px;height:26px;border-radius:8px;background:var(--fill);color:var(--burgundy);display:grid;place-items:center;font-size:10px;flex:none}
 .matr .mn2{font-family:"Playfair Display",serif;font-size:14px}
 .matr .mm2{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.05em;color:var(--muted);margin-top:2px}
-.matr .bar2{flex:1;height:6px;border-radius:3px;background:var(--fill);overflow:hidden;max-width:220px}
-.matr .bar2 i{display:block;height:100%;background:var(--sage-deep);border-radius:3px}
-.matr .rr{font-family:"Playfair Display",serif;font-size:15px;color:var(--sage-deep);width:44px;text-align:right}
+.matr .bar2{flex:1;display:flex;height:11px;border-radius:4px;overflow:hidden;border:1px solid rgba(46,39,35,.2);max-width:220px}
+.matr .bar2 i{height:100%}
+.matr .bar2 .rep{background:var(--ink)}
+.matr .bar2 .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.matr .bar2 .non{background:var(--fill)}
+.matr .rr{font-family:"Playfair Display",serif;font-size:15px;color:var(--ink);width:44px;text-align:right}
 .matr .rr span{font-family:"JetBrains Mono",monospace;font-size:7px;color:var(--muted);display:block;font-weight:400}
 .matr.best .mn2::after{content:' ★';color:#c8853f}
 .recs{display:flex;gap:16px}
-.rec3{flex:1;background:#fff;border:1px solid var(--sage-deep);border-radius:11px;box-shadow:2px 3px 0 rgba(90,110,88,.13);padding:14px 16px;display:flex;flex-direction:column}
-.rec3 .rk2{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-deep)}
+.rec3{flex:1;background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:14px 16px;display:flex;flex-direction:column}
+.rec3 .rk2{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--burgundy)}
 .rec3 .rt2{font-size:12.5px;line-height:1.55;margin-top:8px;flex:1}
 .rec3 .rt2 b{font-weight:600}
 .rec3 .ra{margin-top:11px;display:inline-flex;align-items:center;align-self:flex-start;height:29px;padding:0 12px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:11px;cursor:pointer}
@@ -319,10 +328,10 @@ const ALL=`
 <div class="grule"></div>
 <div class="panel">
   <div class="fun">
-    <div class="fr"><span class="fl2">Sent</span><span class="tr2"><i style="width:100%;background:#cfc2b4"></i></span><span class="fv">13</span></div>
-    <div class="fr"><span class="fl2">Replied</span><span class="tr2"><i style="width:69%;background:var(--sage-deep)"></i></span><span class="fv">9 <span>69%</span></span></div>
-    <div class="fr"><span class="fl2">Requests</span><span class="tr2"><i style="width:23%;background:#c8a95a"></i></span><span class="fv">3 <span>★</span></span></div>
-    <div class="fr"><span class="fl2">Offers</span><span class="tr2"><i style="width:0"></i></span><span class="fv">0</span></div>
+    <div class="fr"><span class="fl2">Sent</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i class="rep" style="width:69%;background:var(--ink)"></i><i style="width:31%;background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></i></span><span class="fv">13</span></div>
+    <div class="fr"><span class="fl2">Replied</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i style="width:69%;background:var(--ink)"></i><i style="width:31%;background:var(--fill)"></i></span><span class="fv">9 <span>69%</span></span></div>
+    <div class="fr"><span class="fl2">Requests ★</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i style="width:23%;background:#c8a95a"></i><i style="width:77%;background:var(--fill)"></i></span><span class="fv">3 <span>★</span></span></div>
+    <div class="fr"><span class="fl2">Offers</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i style="width:100%;background:var(--fill)"></i></span><span class="fv">0</span></div>
   </div>
   <div class="note" style="margin-top:13px">Four queries are still out. Two have passed twelve weeks — beyond these agents\u2019 usual reply time.</div>
 </div>
@@ -331,18 +340,19 @@ const ALL=`
   <div class="panel">
     <div class="gsec" style="margin:0 0 5px"><h2 style="font-size:17px">Package leaderboard</h2><span class="cn">BY REPLY RATE</span></div>
     <div class="grule" style="margin-bottom:8px"></div>
-    <div class="lbr best"><span class="rk">1</span><span class="ln2"><span class="lnm">Character-led · v2</span><div class="bar"><i style="width:75%"></i></div></span><span class="lv"><b>75%</b> · 1★</span></div>
-    <div class="lbr"><span class="rk">2</span><span class="ln2"><span class="lnm">Comp-led · v1</span><div class="bar"><i style="width:67%"></i></div></span><span class="lv"><b>67%</b> · 1★</span></div>
-    <div class="lbr"><span class="rk">3</span><span class="ln2"><span class="lnm">Hartley bespoke</span><div class="bar"><i style="width:0"></i></div></span><span class="lv"><b>—</b></span></div>
+    <div class="complegend"><span><b style="background:#2e2723"></b>Replied</span><span><b style="background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></b>Still waiting</span><span><b style="background:#efe8df"></b>No reply</span></div>
+    <div class="lbr best"><span class="rk">1</span><span class="ln2"><span class="lnm">Character-led · v2</span><div class="bar"><i class="rep" style="width:75%"></i><i class="wait" style="width:25%"></i></div></span><span class="lv"><b>3</b>/4 · 1★</span></div>
+    <div class="lbr"><span class="rk">2</span><span class="ln2"><span class="lnm">Comp-led · v1</span><div class="bar"><i class="rep" style="width:67%"></i><i class="wait" style="width:33%"></i></div></span><span class="lv"><b>2</b>/3 · 1★</span></div>
+    <div class="lbr"><span class="rk">3</span><span class="ln2"><span class="lnm">Hartley bespoke</span><div class="bar"><i class="non" style="width:100%"></i></div></span><span class="lv"><b>—</b></span></div>
     <div class="note" style="margin-top:11px">Both senders are under five sends — rankings are provisional until each has a fair sample.</div>
   </div>
   <div class="panel">
     <div class="gsec" style="margin:0 0 5px"><h2 style="font-size:17px">Materials winning replies</h2><span class="cn">VS THE SCRIPTALLY COMMUNITY</span></div>
     <div class="grule p" style="margin-bottom:8px"></div>
-    <div class="matr best"><span class="g3">≡</span><span><span class="mn2">Character-led synopsis</span><div class="mm2">IN 2 PACKAGES · 7 SENDS</div></span><span class="bar2"><i style="width:86%"></i></span><span class="pctpill top">TOP 10%</span></div>
-    <div class="matr"><span class="g3">?</span><span><span class="mn2">Character-led letter</span><div class="mm2">IN 2 PACKAGES · 7 SENDS</div></span><span class="bar2"><i style="width:71%"></i></span><span class="pctpill">BEATS 71%</span></div>
-    <div class="matr"><span class="g3">?</span><span><span class="mn2">Comp-led letter</span><div class="mm2">IN 2 PACKAGES · 6 SENDS</div></span><span class="bar2"><i style="width:48%"></i></span><span class="pctpill">BEATS 48%</span></div>
-    <div class="matr"><span class="g3">≡</span><span><span class="mn2">One-page synopsis</span><div class="mm2">IN 2 PACKAGES · 6 SENDS</div></span><span class="bar2"><i style="width:31%"></i></span><span class="pctpill" style="background:var(--fill);color:var(--muted)">BEATS 31%</span></div>
+    <div class="matr best"><span class="g3">≡</span><span><span class="mn2">Character-led synopsis</span><div class="mm2">IN 2 PACKAGES · 7 SENDS</div></span><span class="bar2"><i class="rep" style="width:71%"></i><i class="wait" style="width:29%"></i></span><span class="pctpill top">TOP 10%</span></div>
+    <div class="matr"><span class="g3">?</span><span><span class="mn2">Character-led letter</span><div class="mm2">IN 2 PACKAGES · 7 SENDS</div></span><span class="bar2"><i class="rep" style="width:71%"></i><i class="wait" style="width:29%"></i></span><span class="pctpill">BEATS 71%</span></div>
+    <div class="matr"><span class="g3">?</span><span><span class="mn2">Comp-led letter</span><div class="mm2">IN 2 PACKAGES · 6 SENDS</div></span><span class="bar2"><i class="rep" style="width:50%"></i><i class="wait" style="width:17%"></i><i class="non" style="width:33%"></i></span><span class="pctpill">BEATS 48%</span></div>
+    <div class="matr"><span class="g3">≡</span><span><span class="mn2">One-page synopsis</span><div class="mm2">IN 2 PACKAGES · 6 SENDS</div></span><span class="bar2"><i class="rep" style="width:33%"></i><i class="wait" style="width:17%"></i><i class="non" style="width:50%"></i></span><span class="pctpill" style="background:var(--fill);color:var(--muted)">BEATS 31%</span></div>
   </div>
 </div>
 
