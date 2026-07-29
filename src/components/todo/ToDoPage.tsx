@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel } from "lucide-react";
+import { Funnel, Pin } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -201,6 +201,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
   // hero-pair P4 — the inline note composer's seat + draft (one composer, two view seats)
   const [composerAt, setComposerAt] = useState<null | "cards" | "ledger">(null);
+  // notes-and-tasks P1 — the composer's NATURE: a note (dateless, pinned) or a task (dated).
+  // The seat's view ("cards"/"ledger") and the nature are orthogonal; the nature drives the
+  // Phase-2 live transformation. The section's "Write a note" opens note mode.
+  const [composerMode, setComposerMode] = useState<"note" | "task">("note");
   const [composerDraft, setComposerDraft] = useState("");
   const composerDraftRef = useRef(composerDraft);
   composerDraftRef.current = composerDraft;
@@ -769,10 +773,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): the browser prompt was a
   // placeholder, not a design. addTask now opens the composer in the current view's Notes
   // seat; save wires to the SAME addUserTask action (no new write path).
-  function addTask() {
+  // notes-and-tasks P1 — open the composer in a chosen NATURE, at the current view's seat.
+  const openComposer = (mode: "note" | "task") => {
+    setComposerMode(mode);
     setComposerDraft("");
     setComposerAt(view === "ledger" ? "ledger" : "cards");
-  }
+  };
+  // The generic "add a note" affordances (the Notes section, the ledger add-row) open note mode;
+  // the hero's "Add task or note" opens task mode (wired in P2).
+  function addTask() { openComposer("note"); }
   async function saveComposer() {
     const text = composerDraft.trim();
     if (!text) return;
@@ -921,7 +930,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
           <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0 && composerAt !== "cards"}
             filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
-            emptyNode={composerAt === "cards" ? renderComposer() : <button type="button" className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"><span className="tdb-gg" aria-hidden>＋</span></button>}>
+            emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}>
             {composerAt === "cards" && vNt.length > 0 && renderComposer()}
             {overlayCards("nt")}
             {vNt.map((c) => renderCard(c))}
@@ -1139,7 +1148,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // cancels only when empty. Save rides the existing addUserTask action. ──
   function renderComposer() {
     return (
-      <div className="tdb-composer">
+      <div className={`tdb-composer tdb-composer--${composerMode}`}>
         <textarea
           ref={(el) => { if (el) { el.focus(); el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; } }}
           value={composerDraft}
@@ -1157,6 +1166,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-btnh tdb-compsave" onClick={() => setComposerAt(null)}>Cancel</button>
           <button type="button" className="tdb-btnh em" onClick={saveComposer}>Save note</button>
         </div>
+      </div>
+    );
+  }
+  // ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
+  // when the Notes section holds nothing, one dashed butter card explains what a note is for and
+  // offers the ink "Write a note" (opening the composer in note mode). It vanishes the moment a
+  // note exists; the section head + its honest count still render above it. ──
+  function renderNotesEmpty() {
+    return (
+      <div className="tdb-nte">
+        <span className="tdb-nte-ic" aria-hidden><Pin size={16} /></span>
+        <div className="tdb-nte-tx">
+          <h4>Nothing pinned here yet</h4>
+          <p>Notes are for the things you want to remember but don’t need chasing — a thought about an agent, a line for the query letter, a reminder of where you left off.</p>
+        </div>
+        <button type="button" className="tdb-nte-btn" onClick={() => openComposer("note")}>＋ Write a note</button>
       </div>
     );
   }

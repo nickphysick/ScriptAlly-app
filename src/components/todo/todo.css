@@ -21,7 +21,15 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+/* ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
+   the dashed butter card that stands in for the Notes grid when nothing is pinned. ── */
+.tdb-nte { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 20px; background: var(--nt-empty-bg); border: 1px dashed var(--nt-empty-bd); border-radius: 13px; padding: 18px 22px; }
+.tdb-nte-ic { width: 44px; height: 44px; flex: 0 0 auto; border-radius: 12px; background: var(--nt-tile-bg); border: 1px solid var(--nt-tile-bd); display: flex; align-items: center; justify-content: center; color: #7a6a48; }
+.tdb-nte-tx { flex: 1; min-width: 0; }
+.tdb-nte-tx h4 { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: var(--nt-empty-h); }
+.tdb-nte-tx p { font-size: 11.5px; color: var(--nt-empty-p); margin-top: 3px; line-height: 1.55; }
+.tdb-nte-btn { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 16px; border-radius: 99px; background: var(--nt-ink-bg); border: 1px solid var(--nt-ink-bd); color: var(--nt-ink-tx); font-size: 12px; font-weight: 600; cursor: pointer; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -436,11 +444,8 @@ button.tdb-ldot { cursor: pointer; }
 
 .tdb-emptylane { display: flex; align-items: center; }
 .tdb-emptylane .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
-.tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
-.tdb-ghostcard.quiet { justify-content: center; } /* v4 P6: the empty Notes lane = the quiet ＋ only, no sentence */
-.tdb-ghostcard.quiet .tdb-gg { font-size: 18px; }
-.tdb-ghostcard:hover { background: rgba(255, 255, 255, 0.45); }
-.tdb-gg { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--note-i); }
+/* notes-and-tasks P1: the ghost quiet-＋ empty node is retired for the dashed frame-1 card
+   (.tdb-nte, above) — the Notes section now explains what a note is for. */
 
 /* ── OPTION-A CARD (retoken Phase C; tag colours re-lawed by polish v3 Phase 2): serif titles,
    lane spines, min-height 190 with the middle block flex-clipping — the pills-can-never-spill

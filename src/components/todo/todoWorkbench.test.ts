@@ -119,10 +119,14 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
 });
 
 describe("v4 P6 — empty-state copy + sweep", () => {
-  it("the empty Notes lane shows ONLY the quiet ＋ (no placeholder sentence, repo-wide)", () => {
+  it("the empty Notes lane shows the dashed frame-1 card (notes-and-tasks P1 supersedes the quiet ＋)", () => {
+    // notes-and-tasks P1: the empty Notes section now EXPLAINS what a note is for (frame 1). The
+    // placeholder-free quiet ＋ + its .tdb-ghostcard CSS are retired.
     expect(page).not.toContain("Nothing jotted yet");
-    expect(page).toContain('className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"');
-    expect(css).toContain(".tdb-ghostcard.quiet");
+    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}');
+    expect(page).toContain("Nothing pinned here yet");
+    expect(page).not.toContain('className="tdb-ghostcard quiet"');
+    expect(css).not.toContain(".tdb-ghostcard");
   });
   it("no orphan Pro-square / RESET / header-Begin selectors; the tour targets the rail's button", () => {
     for (const stale of ["tdb-prosq", "tdb-frst", "tdb-herorow", "tdb-fsb\""]) {
