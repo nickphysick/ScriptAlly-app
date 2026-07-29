@@ -49,6 +49,75 @@
   color: var(--agl-ink-body);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   PAGE-LOAD MOTION (motion pack, Baked 1)
+
+   The vocabulary is the app's shared `rise` — defined ONCE in src/styles/motion.css and consumed
+   here; never a second keyframe. The sequence is header → toolbar → cards, and the CARDS STAGGER
+   BY ROW, not by card: the per-card delay is set inline by the grid, because the row depends on
+   the live column count that `repeat(auto-fill, …)` resolves at runtime, and no stylesheet can
+   know it. See src/lib/agentMotion.ts for why the rows cap at four.
+
+   `.agl-anim` is armed on mount and REMOVED once the sequence has run. That's not tidiness: these
+   animations carry fill-mode `both`, and a filled animation outranks an inline transform, so a
+   card still holding one would silently ignore a FLIP transform.
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist.agl-anim .agl-head-slot { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+.aglist.agl-anim .agl-toolbar { animation: rise .28s cubic-bezier(.4, 0, .2, 1) .06s both; }
+/* the delay comes from the inline style; the duration and curve come from here */
+.aglist.agl-anim .agl-scene { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+
+/* ARRIVAL + EXIT (motion pack, Baked 2 + 3). Same shared keyframes, different durations: an
+   arrival is SLOWER than the load so it reads as its own event, an exit is faster than either.
+   `.agl-leaving` holds the card in place while `fall` plays — the gap closes afterwards, on the
+   bump, because a card removed from the list first would have nothing left to animate. */
+.aglist .agl-scene.agl-arriving { animation: rise .34s cubic-bezier(.4, 0, .2, 1) both; }
+.aglist .agl-scene.agl-leaving { animation: fall .16s cubic-bezier(.4, 0, .2, 1) both; pointer-events: none; }
+
+/* SAVE — beat 1, the crossfade IN PLACE (motion pack, Baked 4). The rotor's rotation is
+   suppressed for both halves: a save is a transformation, not a flip back, and rotating here
+   would say "you're editing again" at the exact moment the writer has finished. The editor face
+   fades out, then the finished card fades in — the card never leaves its slot. */
+.aglist .agl-scene.sv-fadeout .agl-rotor,
+.aglist .agl-scene.sv-fadein .agl-rotor,
+.aglist .agl-scene.sv-breath .agl-rotor { transition: none; }
+.aglist .agl-scene.sv-fadeout .agl-faceb { opacity: 0; transition: opacity .17s ease; }
+.aglist .agl-scene.sv-fadein .agl-facef { animation: agl-savein .2s ease both; }
+@keyframes agl-savein { from { opacity: 0; } to { opacity: 1; } }
+
+/* THE NOTICE — beneath the grid, in the shared vocabulary, persisting until dismissed or
+   superseded. It exists because a card that travels off-screen, or leaves because it no longer
+   matches the filters, would otherwise simply have vanished. */
+.aglist .agl-notice {
+  display: flex; align-items: center; gap: 12px; margin-top: 22px;
+  background: var(--agl-card); border: 1px solid var(--agl-line); border-radius: 11px;
+  padding: 11px 14px; font-size: 12.5px; color: var(--agl-ink-body);
+}
+.aglist .agl-notice .txt { flex: 1; min-width: 0; }
+.aglist .agl-notice .act {
+  flex: none; font-family: inherit; font-size: 12px; cursor: pointer;
+  background: var(--agl-pink); border: 1px solid var(--agl-pinkline); color: var(--agl-burg);
+  border-radius: 9px; padding: 5px 11px;
+}
+.aglist .agl-notice .act:hover { border-color: var(--agl-burg); }
+.aglist .agl-notice .dismiss {
+  flex: none; background: none; border: none; cursor: pointer;
+  color: var(--agl-muted); font-size: 12px; padding: 2px 4px;
+}
+.aglist .agl-notice .dismiss:hover { color: var(--agl-ink-head); }
+.aglist .agl-notice-in { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aglist.agl-anim .agl-head-slot,
+  .aglist.agl-anim .agl-toolbar,
+  .aglist.agl-anim .agl-scene,
+  .aglist .agl-scene.agl-arriving,
+  .aglist .agl-scene.agl-leaving,
+  .aglist .agl-scene.sv-fadein .agl-facef,
+  .aglist .agl-notice-in { animation: none; }
+  .aglist .agl-scene.sv-fadeout .agl-faceb { transition: none; }
+}
+
 /* THE PAGE COLUMN (rebuild v2). Padding belongs to the scroll region so the scrollbar rides the
    page edge, not the content; the CONTENT then caps at 1240px and centres, so a wide monitor
    pools its surplus as symmetric margin instead of stretching the grid to absurdity. Two
@@ -125,6 +194,10 @@
   box-shadow: 0 16px 40px rgba(58, 28, 20, .18); padding: 8px;
   animation: aglPopIn .14s ease;
 }
+/* Left-anchored by default; `.right` hangs it from the anchor's RIGHT edge instead, applied by
+   the shared component when a left-anchored box would overflow the content column. Generic, so
+   any popover added later inherits it — nothing here knows which control it is. */
+.aglist .agl-pop.right { left: auto; right: 0; }
 @keyframes aglPopIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .aglist .agl-pop { animation: none; } }
 .aglist .agl-pk {
@@ -218,9 +291,13 @@
 /* the first section sits closer — the toolbar above it already set the distance */
 .aglist .agl-groups > section:first-child .agl-gsec { margin-top: 24px; }
 .aglist .agl-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
-  gap: 14px; align-items: start;
+  /* THREE to a row (agent-list-fixes P3) — fixed columns, not auto-fill, so the card width is
+     a consequence of the content cap rather than of a minmax floor. ~400px at the 1240 cap. */
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start;
 }
+/* the reflow: two up at ~1100, one below ~700 */
+@media (max-width: 1100px) { .aglist .agl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .aglist .agl-grid { grid-template-columns: 1fr; } }
 
 /* ── buttons (shared with the card faces from Phase 2) ──────────────────── */
 .aglist .agl-btn {
@@ -261,7 +338,9 @@
    rotor is the ONE rotating element, it carries preserve-3d, and it must never
    gain an `overflow` property (any value flattens 3D and mirrors the back).
    ══════════════════════════════════════════════════════════════════════════ */
-.aglist .agl-scene { perspective: 1600px; }
+/* The gap beneath the top bar when a card is scrolled to. Expressed as scroll-margin rather than
+   arithmetic at the call site, so it stays correct if the bar's height ever changes. */
+.aglist .agl-scene { perspective: 1600px; scroll-margin-top: 16px; }
 .aglist .agl-rotor {
   position: relative; height: 400px;
   transform-style: preserve-3d;
@@ -275,7 +354,9 @@
 /* the three states drive band, cast and rule through one variable set */
 .aglist .s-sage { --agl-band: var(--agl-sage-band); --agl-cast: var(--agl-sage-cast); --agl-rule: var(--agl-sage-rule); }
 .aglist .s-pink { --agl-band: var(--agl-pink-band); --agl-cast: var(--agl-pink-cast); --agl-rule: var(--agl-pink-rule); }
-.aglist .s-grey { --agl-band: var(--agl-grey-band); --agl-cast: var(--agl-grey-cast); --agl-rule: var(--agl-grey-rule); }
+/* (The closed-door colour is RETIRED — agent-card-visual pack: colour carries YOUR HISTORY
+   only, and the door is ink. The grey tokens survive for the non-card surfaces that still use
+   them.) */
 
 .aglist .agl-acard {
   background: var(--agl-paper); border: 1.5px solid var(--agl-ink); border-radius: 10px;
@@ -285,8 +366,28 @@
 }
 .aglist .agl-facef .agl-acard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--agl-cast); }
 /* closed for submissions: the whole face rests faded, and hover restores it to full */
-.aglist .s-grey .agl-facef .agl-acard { opacity: .62; }
-.aglist .s-grey .agl-facef .agl-acard:hover { opacity: 1; }
+/* THE DOOR, IN INK — a hatch over the band's colour, beneath the band's contents. The overlay
+   is pointer-events:none and the children take a stacking context, so it never washes over the
+   pill, the stars or the edit control. */
+.aglist .s-closed .agl-band { position: relative; }
+.aglist .s-closed .agl-band::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px);
+}
+.aglist .s-closed .agl-band > * { position: relative; z-index: 1; }
+/* (The ink Closed PILL is RETIRED — agent-list-fixes P2: the hatch and the stamp already say
+   it, and three devices for one fact is two too many.)
+   THE HUSHED CARD: with the door closed and nothing of yours live, the body is not rendered —
+   only the name, agency and the response-time meta remain — and the stamp centres in the
+   vacated space so the card reads as complete rather than truncated.
+   The stamp needs NO repositioning: it is already `inset: 0` and flex-centred over the whole
+   face, so as the card shortens it stays centred in what remains. A floor keeps a hushed card
+   from becoming a stub. */
+.aglist .s-hush .agl-facef .agl-acard { min-height: 210px; }
+/* THE DIM RULE — closed AND nothing of yours live. A card with an active query never dims,
+   whatever the door is doing; hover restores the record to full strength. */
+.aglist .s-dim .agl-facef .agl-acard { opacity: .6; transition: opacity .15s ease; }
+.aglist .s-dim .agl-facef .agl-acard:hover { opacity: 1; }
 
 /* ── band: pill · stars · pencil (no bottom border) ─────────────────────── */
 .aglist .agl-band {
@@ -453,6 +554,23 @@
   font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--agl-ink-label);
 }
+/* DISCARD (agent-list-fixes P4) — same shape as the tick, ink outline, no fill; a dirty card
+   confirms in a small popover rather than a modal. */
+.aglist .agl-discwrap { position: relative; display: inline-flex; }
+.aglist .agl-disc { background: none; }
+.aglist .agl-disc:hover { background: rgba(49, 30, 25, .06); }
+.aglist .agl-discpop {
+  position: absolute; top: calc(100% + 7px); right: 0; z-index: 40; width: 208px;
+  display: flex; flex-direction: column; gap: 9px;
+  background: var(--agl-card, #fdfaf5); border: 1px solid var(--agl-ink, #311e19);
+  border-radius: 11px; box-shadow: 0 10px 26px rgba(49, 30, 25, .18); padding: 11px 12px;
+}
+.aglist .agl-discpop .q { font-size: 12.5px; color: var(--agl-ink, #311e19); }
+.aglist .agl-discpop .acts { display: flex; gap: 7px; justify-content: flex-end; }
+.aglist .agl-btn-warn { background: var(--agl-pink-band); border-color: #e8c8bc; color: #7c3a2a; }
+/* the nrn row: label left, toggle right, helper beneath (agent-list-fixes P4) */
+.aglist .agl-nrn .nrnhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.aglist .agl-nrn .subl { margin-top: 5px; }
 .aglist .agl-done {
   width: 30px; height: 30px; border-radius: 50%; flex: none;
   background: var(--agl-ink); border: 1.5px solid var(--agl-ink); color: var(--agl-cream);

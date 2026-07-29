@@ -164,8 +164,14 @@ export interface DraftError {
  * Materials rules land with the materials editor in Phase 5.
  */
 export function validateDraft(d: AgentDraft): DraftError | null {
-  if (!d.name.trim()) return { tab: "contact", msg: "Agent name is required." };
-  if (!d.agency.trim()) return { tab: "contact", msg: "Agency is required." };
+  // NAME **OR** AGENCY — never both, and never the name alone. The app already treats
+  // agency-only records as legitimate (the card renders "Agent not specified" beneath the
+  // agency, and the Firestore isValidAgent rule accepts either), so requiring both trapped a
+  // valid, previously-saved record: the writer could not save it and could not revert it.
+  // Create and edit share this one validator, so the fix reaches both paths at once.
+  if (!d.name.trim() && !d.agency.trim()) {
+    return { tab: "contact", msg: "Give this record an agent name or an agency." };
+  }
   const rw = d.responseWeeks.trim();
   if (rw && (!/^\d+$/.test(rw) || Number(rw) < 1)) {
     return { tab: "contact", msg: "Typical response time must be a whole number of weeks, or left blank if you don't know." };
@@ -276,3 +282,16 @@ export function diffDraft(original: Agent, d: AgentDraft): DraftDiff {
 /** True when the draft holds nothing to write — Done can close without touching Firestore. */
 export const isDiffEmpty = (diff: DraftDiff): boolean =>
   Object.keys(diff.changed).length === 0 && diff.deletes.length === 0;
+
+/** Has the writer put anything in this draft? Drives the discard confirmation (agent-list-fixes
+ *  P4): a clean card is abandoned immediately, a dirty one asks first. Deliberately generous —
+ *  any typed text, any picked value, any material row counts as content worth confirming. */
+export function draftDirty(d: AgentDraft | null): boolean {
+  if (!d) return false;
+  const text = [d.name, d.agency, d.email, d.website, d.city, d.country, d.mswlNotes, d.responseWeeks, d.methodOther];
+  if (text.some((v) => (v ?? "").trim() !== "")) return true;
+  if (d.genres.length || d.socials.length) return true;
+  if (d.notes.added.length || d.notes.deletedIds.length) return true; // a jotted or removed note counts
+  if (d.starRating || d.noResponseMeansNo !== undefined) return true;
+  return d.materials.some((m) => m.on);
+}

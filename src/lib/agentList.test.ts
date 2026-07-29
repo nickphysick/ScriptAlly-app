@@ -7,6 +7,8 @@
  * chip counts over the whole list, search reach, and the absence-aware meta line.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   TERMINAL_STATUSES,
   AWAITING_PAGES_STATUSES,
@@ -15,6 +17,7 @@ import {
   awaitingYourPages,
   isDoorOpen,
   agentStateClass,
+  agentCardDims,
   matchesAgentSearch,
   methodShort,
   metaTokens,
@@ -36,6 +39,8 @@ import {
   agentAxisCounts,
   STANDING_LABEL,
   TURN_LABEL,
+  agentDoor,
+  DOOR_LABEL,
   emptyFilterSet,
   matchesFilterSet,
   filterCount,
@@ -112,15 +117,67 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
 
   it("an Unknown agent is NOT closed, gets no grey state, and stays queryable", () => {
     const unknown = mkAgent({ id: "u", submissionStatus: SubmissionStatus.UNKNOWN });
-    expect(matchesFilterSet(unknown, [], { ...emptyFilterSet(), standing: ["closed"] })).toBe(false);
+    expect(matchesFilterSet(unknown, [], { ...emptyFilterSet(), door: ["closed"] })).toBe(false);
     expect(agentStateClass(unknown, [])).toBe("s-pink");
-    expect(agentAxisCounts([unknown], []).standing.closed).toBe(0);
+    expect(agentAxisCounts([unknown], []).door.closed).toBe(0);
   });
 
-  it("closed overrides sage/pink", () => {
+  /* THE COLOUR/DOOR SPLIT (agent-card-visual pack). Colour carries YOUR HISTORY only; the door
+     is ink. The old "closed overrides sage/pink" precedence is retired — it was the same class
+     of error the axis split fixed, one level down in the presentation. */
+  it("COLOUR IS HISTORY: the door never changes it, and s-grey is extinct", () => {
     const closed = mkAgent({ submissionStatus: SubmissionStatus.CLOSED });
-    expect(agentStateClass(closed, [mkQuery({})])).toBe("s-grey");
+    expect(agentStateClass(closed, [mkQuery({})])).toBe("s-sage"); // a live query, closed door
+    expect(agentStateClass(closed, [])).toBe("s-pink"); // nothing live, closed door
     expect(agentStateClass(mkAgent({}), [mkQuery({})])).toBe("s-sage");
+    expect(agentStateClass(mkAgent({}), [])).toBe("s-pink");
+  });
+
+  describe("THE DIM RULE — all four states", () => {
+    const closed = mkAgent({ id: "c", submissionStatus: SubmissionStatus.CLOSED });
+    const open = mkAgent({ id: "o" });
+    it("closed + NOT active dims", () => {
+      expect(agentCardDims(closed, [])).toBe(true);
+    });
+    it("closed + ACTIVE does NOT dim — an outstanding query does not matter less", () => {
+      expect(agentCardDims(closed, [mkQuery({ agentId: "c" })])).toBe(false);
+    });
+    it("open never dims, active or not", () => {
+      expect(agentCardDims(open, [])).toBe(false);
+      expect(agentCardDims(open, [mkQuery({ agentId: "o" })])).toBe(false);
+    });
+    it("hover restores full strength (CSS — the class is the contract)", () => {
+      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
+      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard \{ opacity: \.6; transition: opacity \.15s ease; \}/);
+      expect(css).toMatch(/\.s-dim \.agl-facef \.agl-acard:hover \{ opacity: 1; \}/);
+      expect(css).not.toContain(".s-grey {"); // the door's colour is gone
+    });
+    it("the DOOR is ink: a hatch overlay beneath the band's contents — and the pill is RETIRED", () => {
+      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
+      expect(css).toContain("repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 9px)");
+      expect(css).toMatch(/\.s-closed \.agl-band::after \{[^}]*pointer-events: none/s);
+      expect(css).toMatch(/\.s-closed \.agl-band > \* \{ position: relative; z-index: 1; \}/);
+      const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
+      expect(card).toContain("{!open && (");
+      expect(card).toContain("s-closed");
+      // agent-list-fixes P2: hatch + stamp say it; a third device is two too many
+      expect(card).not.toContain("agl-closedpill");
+      expect(css).not.toContain(".agl-closedpill");
+    });
+
+    it("THE HUSHED BODY: closed + nothing live hides the body; an ACTIVE query renders in full", () => {
+      const card = readFileSync(join(__dirname, "..", "components", "agents", "AgentCard.tsx"), "utf8");
+      // the hush and the dim share ONE derivation, so they can never disagree
+      expect(card).toContain("const hushed = agentCardDims(agent, queries);");
+      expect(card).toContain('{!hushed && <div className="agl-body">');
+      // what survives the hush: identity + the meta line, which sit ABOVE the body
+      expect(card.indexOf('className="agl-meta"')).toBeLessThan(card.indexOf('{!hushed && <div className="agl-body">'));
+      // …and what does not: history, wishlist, materials all live inside the body
+      const body = card.slice(card.indexOf('{!hushed && <div className="agl-body">'), card.indexOf('className="agl-stamp"'));
+      for (const gone of ["Your history", "Wishlist", "Materials wanted"]) expect(body).toContain(gone);
+      const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
+      expect(css).toMatch(/\.s-hush \.agl-facef \.agl-acard \{ min-height: 210px; \}/); // never a stub
+    });
   });
 });
 
@@ -159,8 +216,8 @@ describe("agentList · axis A (where things stand) partitions the list", () => {
 
   it("AXIS A COUNTS SUM TO THE AGENT TOTAL — the invariant the old chip row broke", () => {
     const c = agentAxisCounts(agents, queries);
-    const sum = c.standing.active + c.standing.noactive + c.standing.never + c.standing.closed;
-    expect(sum).toBe(c.total);
+    const sum = c.standing.active + c.standing.noactive + c.standing.never;
+    expect(sum, "standing stopped partitioning the list — a value was added that isn't a fact about your history, or an agent fell through every branch").toBe(c.total);
     expect(c.total).toBe(agents.length);
   });
 
@@ -169,17 +226,89 @@ describe("agentList · axis A (where things stand) partitions the list", () => {
     expect(agentStanding(agents[1], queries)).toBe("active"); // awaiting pages is INSIDE active
     expect(agentStanding(agents[2], queries)).toBe("noactive");
     expect(agentStanding(agents[3], queries)).toBe("never");
-    expect(agentStanding(agents[4], queries)).toBe("closed");
   });
 
-  it("the door outranks history — a closed agent with a live query still reads Closed", () => {
-    expect(agentStanding(agents[5], queries)).toBe("closed");
-    expect(agentAxisCounts(agents, queries).standing.closed).toBe(2);
+  it("STANDING IS HISTORY ONLY — the door does not outrank it (the precedence is REMOVED)", () => {
+    // agents[4] is closed with a rejected query; agents[5] is closed with a LIVE one
+    expect(
+      agentStanding(agents[4], queries),
+      "a closed agent's history was overwritten by its door — the precedence is back, and every closed agent has just lost its query history",
+    ).toBe("never");
+    expect(
+      agentStanding(agents[5], queries),
+      "THE BUG IS BACK: an agency that shut its doors while holding a live query reads as 'closed' instead of 'active', so the query you are waiting on vanishes from the standing axis AND (because whose-turn is gated on active) from the turn axis too",
+    ).toBe("active");
+    expect(agentAxisCounts(agents, queries).standing.active).toBe(3);
   });
 
   it("Unknown is not Closed, so it never leaves the open standings", () => {
     const unknown = mkAgent({ id: "u", submissionStatus: SubmissionStatus.UNKNOWN });
     expect(agentStanding(unknown, [])).toBe("never");
+    expect(agentDoor(unknown)).toBe("open");
+  });
+});
+
+/**
+ * AXIS C — THEIR DOOR. Independent of your history, which is the whole point: the two are facts
+ * about different systems (theirs and yours) and neither outranks the other.
+ */
+describe("agentList · axis C (their door) is independent of your history", () => {
+  const openActive = mkAgent({ id: "oa" });
+  const openNever = mkAgent({ id: "on" });
+  const shutActive = mkAgent({ id: "sa", submissionStatus: SubmissionStatus.CLOSED });
+  const shutPrev = mkAgent({ id: "sp", submissionStatus: SubmissionStatus.CLOSED });
+  const agents = [openActive, openNever, shutActive, shutPrev];
+  const queries = [
+    mkQuery({ id: "q1", agentId: "oa", status: QueryStatus.QUERIED }),
+    mkQuery({ id: "q2", agentId: "sa", status: QueryStatus.FULL_REQUESTED }),
+    mkQuery({ id: "q3", agentId: "sp", status: QueryStatus.REJECTED }),
+  ];
+
+  it("AXIS C COUNTS SUM TO THE AGENT TOTAL", () => {
+    const c = agentAxisCounts(agents, queries);
+    expect(c.door.open + c.door.closed, "the door axis stopped partitioning the list").toBe(c.total);
+    expect(c).toMatchObject({ door: { open: 2, closed: 2 } });
+  });
+
+  it("THE FIXTURE: an active query at a closed agency appears under BOTH, and keeps its turn", () => {
+    // This is the case the removed precedence made invisible. It must hold on every axis at once.
+    expect(
+      agentStanding(shutActive, queries),
+      "the live full at a shut agency stopped counting as active history",
+    ).toBe("active");
+    expect(
+      agentDoor(shutActive),
+      "the shut agency stopped reading as closed",
+    ).toBe("closed");
+    expect(
+      agentTurn(shutActive, queries),
+      "the agent holds a FULL REQUESTED — the writer owes pages — but the turn axis reports nothing, which is exactly how the old precedence hid a live query from both axes",
+    ).toBe("you");
+
+    // and through the filter set, from every direction
+    const seen = (f: Parameters<typeof matchesFilterSet>[2]) =>
+      agents.filter((a) => matchesFilterSet(a, queries, f)).map((a) => a.id);
+    expect(seen({ ...emptyFilterSet(), standing: ["active"] })).toContain("sa");
+    expect(seen({ ...emptyFilterSet(), door: ["closed"] })).toContain("sa");
+    expect(seen({ ...emptyFilterSet(), turn: ["you"] })).toContain("sa");
+    // and the intersection that a writer would actually reach for
+    expect(seen({ ...emptyFilterSet(), standing: ["active"], door: ["closed"] })).toEqual(["sa"]);
+  });
+
+  it("the axes OVERLAP — an agent counted as active can also be counted as closed", () => {
+    const c = agentAxisCounts(agents, queries);
+    expect(c.standing.active).toBe(2);
+    expect(c.door.closed).toBe(2);
+    const inBoth = agents.filter((a) => agentStanding(a, queries) === "active" && agentDoor(a) === "closed");
+    expect(
+      inBoth.map((a) => a.id),
+      "no agent is in both sets — either the fixture drifted or a precedence has crept back in to keep the axes artificially disjoint",
+    ).toEqual(["sa"]);
+  });
+
+  it("door wording is always '…to queries' / '…for submissions', never a bare 'Closed'", () => {
+    expect(DOOR_LABEL.open).toBe("Open to queries");
+    expect(DOOR_LABEL.closed).toBe("Closed for submissions");
   });
 });
 
@@ -208,10 +337,13 @@ describe("agentList · axis B (whose turn) lives INSIDE active queries", () => {
     expect(c.turn.you + c.turn.them).toBeLessThan(c.total);
   });
 
-  it("the axis simply does not apply outside active queries", () => {
+  it("the axis does not apply outside active queries — but a CLOSED DOOR no longer suppresses it", () => {
     expect(agentTurn(agents[4], queries)).toBeNull(); // only terminal queries
     expect(agentTurn(agents[5], queries)).toBeNull(); // never queried
-    expect(agentTurn(agents[6], queries)).toBeNull(); // closed door outranks the live query
+    expect(
+      agentTurn(agents[6], queries),
+      "a closed agency holding a FULL REQUESTED reports no turn — the door precedence is back and it is hiding a query the writer owes pages on",
+    ).toBe("you"); // closed door, live request: still the writer's move
   });
 
   it("'you' is the CTA engine's writer's-turn, not a second status list", () => {
@@ -283,7 +415,9 @@ describe("agentList · axis vocabulary is worded once", () => {
   it("standing labels reuse the existing page words — no third term for never-queried", () => {
     expect(STANDING_LABEL.active).toBe("Active queries");
     expect(STANDING_LABEL.noactive).toBe("No active queries");
-    expect(STANDING_LABEL.closed).toBe("Closed for submissions");
+    // "Closed for submissions" is NOT a standing — it belongs to the door axis
+    expect(DOOR_LABEL.closed).toBe("Closed for submissions");
+    expect(Object.keys(STANDING_LABEL)).toEqual(["active", "noactive", "never"]);
     // the codebase says "Never queried"; the mockup's word is the same, and relationshipLabel agrees
     expect(STANDING_LABEL.never).toBe("Never queried");
     expect(STANDING_LABEL.never).toBe(relationshipLabel("never"));
@@ -297,13 +431,15 @@ describe("agentList · axis vocabulary is worded once", () => {
 describe("agentList · meta line (absence is a first-class state)", () => {
   it("no stated response time reads 'response unknown' — never an invented number", () => {
     expect(metaTokens(mkAgent({}))[0]).toBe("response unknown");
-    expect(metaTokens(mkAgent({ responseTimeWeeks: 8 }))[0]).toBe("~8 wks");
+    expect(metaTokens(mkAgent({ responseTimeWeeks: 8 }))[0]).toBe("~8 weeks"); // "weeks", not "wks"
   });
 
   it("the no-reply token appears only when explicitly set true", () => {
+    // agent-list-fixes P3: NO-REPLY-MEANS-NO is off the card front entirely — it is detail for
+    // writing to them, not for scanning. It stays in the editor and stays STORED.
     expect(metaTokens(mkAgent({}))).not.toContain("No reply = no");
     expect(metaTokens(mkAgent({ noResponseMeansNo: false }))).not.toContain("No reply = no");
-    expect(metaTokens(mkAgent({ noResponseMeansNo: true }))).toContain("No reply = no");
+    expect(metaTokens(mkAgent({ noResponseMeansNo: true }))).not.toContain("No reply = no");
   });
 
   it("method shortens to Form / the Other text / Email", () => {
@@ -441,6 +577,26 @@ describe("agentList · sort (the four working orders)", () => {
     expect(sortAgentList([never, old, fresh], "recent", queries).map((a) => a.id)).toEqual(["fresh", "old", "never"]);
   });
 
+  it("MULTI-QUERY AGENT: the key is max(dateSent), never the first query the fetch returns", () => {
+    // the fetch order deliberately puts the OLDER query first — the naive "first match wins"
+    // implementation would date this agent to January and bury them at the bottom of the sort
+    const multi = mkAgent({ id: "multi", name: "Multi Mary" });
+    const single = mkAgent({ id: "single", name: "Single Sid" });
+    const queries = [
+      mkQuery({ id: "old", agentId: "multi", manuscriptId: "m1", dateSent: "2026-01-10T00:00:00.000Z" }),
+      mkQuery({ id: "new", agentId: "multi", manuscriptId: "m2", dateSent: "2026-07-20T00:00:00.000Z" }),
+      mkQuery({ id: "mid", agentId: "single", manuscriptId: "m1", dateSent: "2026-04-01T00:00:00.000Z" }),
+    ];
+    expect(
+      lastQueriedAt("multi", queries),
+      "the last-queried key took the first query found rather than the newest — an agent's ordering then depends on fetch order, not on when you last contacted them",
+    ).toBe(Date.parse("2026-07-20T00:00:00.000Z"));
+    expect(
+      sortAgentList([single, multi], "recent", queries).map((a) => a.id),
+      "the two-query agent sorted below the single-query one — their July query was ignored in favour of their January one",
+    ).toEqual(["multi", "single"]);
+  });
+
   it("last-queried is DERIVED from the newest query send, not stored on the agent", () => {
     const queries = [
       mkQuery({ id: "q1", agentId: "a1", dateSent: "2026-01-05T00:00:00.000Z" }),
@@ -467,8 +623,8 @@ describe("agentList · grouping partitions, it never reorders", () => {
     mkQuery({ id: "q3", agentId: "prev", status: QueryStatus.REJECTED }),
   ];
 
-  it("the option list is None + the two axes + rating", () => {
-    expect(AGENT_GROUP_OPTIONS.map((o) => o.key)).toEqual(["none", "standing", "turn", "stars"]);
+  it("the option list is None + the three axes + rating", () => {
+    expect(AGENT_GROUP_OPTIONS.map((o) => o.key)).toEqual(["none", "standing", "turn", "door", "stars"]);
   });
 
   it("None returns no sections at all — the grid renders flat", () => {
@@ -486,10 +642,21 @@ describe("agentList · grouping partitions, it never reorders", () => {
   it("every agent lands in exactly one section, and empty sections are dropped", () => {
     const g = groupAgents(agents, "standing", queries);
     expect(g.flatMap((s) => s.agents).length).toBe(agents.length);
-    expect(g.map((s) => s.key)).toEqual(["active", "noactive", "never", "closed"]);
+    expect(
+      g.map((s) => s.key),
+      "a 'closed' section appeared among the standings — the door is its own grouping now, and mixing it back in re-creates the precedence",
+    ).toEqual(["active", "noactive", "never"]);
     // nobody is "never queried" once we remove that agent — the section disappears rather than showing empty
     const g2 = groupAgents([five, four], "standing", queries);
     expect(g2.map((s) => s.key)).toEqual(["active"]);
+  });
+
+  it("grouping by DOOR splits open from closed, independently of history", () => {
+    const g = groupAgents(agents, "door", queries);
+    expect(g.map((s) => s.key)).toEqual(["open", "closed"]);
+    expect(g.flatMap((s) => s.agents).length).toBe(agents.length);
+    expect(g.find((s) => s.key === "closed")!.agents.map((a) => a.id)).toEqual(["shut"]);
+    expect(g.map((s) => s.title)).toEqual([DOOR_LABEL.open, DOOR_LABEL.closed]);
   });
 
   it("grouping by turn keeps the agents the axis DOESN'T apply to — a dropped remainder would be a lie", () => {
@@ -511,7 +678,7 @@ describe("agentList · grouping partitions, it never reorders", () => {
   it("section titles come from the axis label maps, and stubs from the named palette", () => {
     const g = groupAgents(agents, "standing", queries);
     expect(g.map((s) => s.title)).toEqual([
-      STANDING_LABEL.active, STANDING_LABEL.noactive, STANDING_LABEL.never, STANDING_LABEL.closed,
+      STANDING_LABEL.active, STANDING_LABEL.noactive, STANDING_LABEL.never,
     ]);
     expect(g.find((s) => s.key === "active")!.stub).toBe(GROUP_STUB.sage);
     const t = groupAgents(agents, "turn", queries);

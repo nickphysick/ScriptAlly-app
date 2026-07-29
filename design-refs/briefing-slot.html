@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The briefing slot - four candidates</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2; --hair2:#efe6da;
+  --pink-band:#f6d8cc; --pink-band2:#f2cec1; --pink-b:#e8c8bc; --pink-t:#f5e2da;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-2:#e2d2b9; --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --yel:#f2e9c8; --yel-l:#f5eed4; --yel-bd:#dccf9d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#d8cdbc;font-family:Inter,sans-serif;color:var(--ink)}
+.opt-head{max-width:1560px;margin:56px auto 14px;padding:0 32px}
+.opt-head:first-child{margin-top:32px}
+.opt-head .n{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#6b5a4e}
+.opt-head h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+.opt-head p{font-size:13.5px;color:#4d4238;max-width:760px;line-height:1.5}
+.page{max-width:1560px;margin:0 auto;background:var(--oat);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(58,28,20,.22)}
+
+/* shared atoms */
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;border-radius:99px;padding:3px 9px;background:var(--white);border:1px solid rgba(58,28,20,.25);color:var(--ink)}
+.tag.hot{font-weight:700;border-width:1.5px}
+.tag.offer{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dotf{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dotf.p{background:var(--pink-band);border:1px solid var(--pink-b)}
+.dotf.c{background:var(--cof-1);border:1px solid var(--cof-bd)}
+.dotf.y{background:var(--yel);border:1px solid var(--yel-bd)}
+.srch{display:flex;align-items:center;gap:8px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:7px 14px;color:#8a7a6d;font-size:12.5px;min-width:230px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:#a5988c}
+.btn-add{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:var(--paper);border:none;border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer}
+.iconb{width:32px;height:32px;border-radius:50%;background:var(--white);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:#8a7a6d;cursor:pointer;font-size:12px}
+.avac{width:22px;height:22px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);font-family:'JetBrains Mono',monospace;font-size:8px;display:inline-flex;align-items:center;justify-content:center;color:#7c3a2a}
+.pilbtn{border-radius:99px;font-family:'JetBrains Mono',monospace;letter-spacing:.09em;cursor:pointer;text-align:center}
+
+body{background:#efe6da;padding:34px 0 90px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#5d4d40;margin:34px 0 10px;width:1180px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#4d4238;margin-left:10px;line-height:1.55}
+.stage{width:1180px;background:#fdfcfa;border:1px solid #e2dbd0;border-radius:14px;padding:26px 30px 28px;box-sizing:border-box;box-shadow:0 6px 16px rgba(58,28,20,.1)}
+h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#2b2118}
+.sub{font-family:'Playfair Display',serif;font-size:15px;color:#7a6a5e;margin-top:5px}
+.rule{height:1px;background:#eee7db;margin:18px 0 0}
+.slot{margin-top:18px}
+/* 1 review strip */
+.rev{display:flex;align-items:center;gap:16px;background:linear-gradient(180deg,#f7f2ea,#f3ece1);border:1px solid #e2d8c6;border-radius:13px;padding:14px 18px}
+.rev .k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.2em;color:#8a7a66}
+.rev .t{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#2b2118;margin-top:3px}
+.rev .d{font-size:11px;color:#7a6a5e;margin-top:3px}
+.rev .stats{display:flex;gap:22px;margin-left:auto;text-align:center}
+.rev .stats div b{display:block;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#2b2118}
+.rev .stats div span{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:#a5988c}
+.btn{display:inline-flex;align-items:center;gap:7px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;border-radius:99px;height:34px;padding:0 16px;font-size:11px;font-weight:600;flex:0 0 auto}
+.gh{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #ddd2c4;color:#4d4238;border-radius:99px;height:34px;padding:0 16px;font-size:11px;font-weight:600;flex:0 0 auto}
+/* 2 stat ribbon */
+.ribbon{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.st{background:#fff;border:1px solid #e8e0d2;border-radius:12px;padding:13px 15px}
+.st .k{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.16em;color:#a5988c}
+.st b{display:block;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#2b2118;margin-top:4px}
+.st span{font-size:10px;color:#8a7d6e}
+/* 3 today strip */
+.today{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #e2dbd0;border-radius:13px;padding:12px 16px}
+.today .cc{width:15px;height:15px;border-radius:50%;border:1.5px solid #b9c9b4;background:#e9ede6;flex:0 0 auto}
+.today .lst{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:#3a2c22}
+.today .pill{display:inline-flex;align-items:center;gap:7px;background:#faf7f1;border:1px solid #ece4d4;border-radius:99px;padding:5px 12px}
+/* 4 assistant */
+.asst{display:flex;align-items:center;gap:14px;background:#fdf6f2;border:1.5px solid #3a1c14;border-radius:13px;box-shadow:4px 4px 0 #c2cfda;padding:14px 17px}
+.asst .pill2{display:inline-flex;align-items:center;gap:5px;background:#6A89A7;border:1px solid #587991;color:#f4f8fb;border-radius:99px;height:20px;padding:0 10px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.18em}
+.asst .t{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:700;color:#4a241a;margin-top:6px}
+.asst .d{font-size:11px;color:#7a5a4c;margin-top:3px}
+.bluebtn{display:inline-flex;align-items:center;justify-content:center;background:#6A89A7;border:1px solid #587991;color:#f4f8fb;border-radius:99px;height:32px;padding:0 15px;font-size:10.5px;font-weight:700;margin-left:auto;flex:0 0 auto}
+/* 5 nothing */
+.none{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#b3a housekeeping}
+</style></head><body><div class="lbl">1 &middot; THE REVIEW BRIEFING &nbsp;&#9733; <em>&mdash; your instinct, built: the weekly review surfaces IN the slot when it&rsquo;s fresh (Monday through, say, Wednesday) &mdash; headline, one sentence of narrative, three figures, and the read-through. Then it disappears for the rest of the week and the slot closes.</em></div><div class="stage">
+<h1>What&rsquo;s on your desk?</h1>
+<div class="sub">Urgent tasks, housekeeping, notes. Here&rsquo;s everything on your to-do list.</div>
+<div class="rule"></div>
+<div class="slot"><div class="rev">
+<div><div class="k">&#8634; LAST WEEK IN REVIEW</div>
+<div class="t">A good week: nine tasks cleared, two agents replied</div>
+<div class="d">Your first offer arrived on Thursday. Three queries passed their nudge window.</div></div>
+<div class="stats"><div><b>9</b><span>CLEARED</span></div><div><b>2</b><span>REPLIES</span></div><div><b>38m</b><span>FOCUSED</span></div></div>
+<span class="btn">Read the review</span></div></div>
+</div><div class="lbl">2 &middot; THE STAT RIBBON <em>&mdash; four derived numbers, always present: what needs you, what&rsquo;s out, what you cleared, what&rsquo;s next. Never empty, never surprising &mdash; but it earns its space every day rather than once a week.</em></div><div class="stage">
+<h1>What&rsquo;s on your desk?</h1>
+<div class="sub">Urgent tasks, housekeeping, notes. Here&rsquo;s everything on your to-do list.</div>
+<div class="rule"></div>
+<div class="slot"><div class="ribbon">
+<div class="st"><div class="k">NEEDS YOU</div><b>3</b><span>two are overdue</span></div>
+<div class="st"><div class="k">AWAITING AGENTS</div><b>18</b><span>longest: 862 days</span></div>
+<div class="st"><div class="k">CLEARED THIS WEEK</div><b>9</b><span>up from 4</span></div>
+<div class="st"><div class="k">NEXT NUDGE DUE</div><b>Fri</b><span>Jonathan Marsh</span></div>
+</div></div>
+</div><div class="lbl">3 &middot; TODAY&rsquo;S LIST, PROMOTED <em>&mdash; the corner pop-up&rsquo;s contents shown inline as pills when the list is non-empty, with &ldquo;Work the list&rdquo;. Puts your committed work above your whole pile &mdash; but duplicates the pop-up.</em></div><div class="stage">
+<h1>What&rsquo;s on your desk?</h1>
+<div class="sub">Urgent tasks, housekeeping, notes. Here&rsquo;s everything on your to-do list.</div>
+<div class="rule"></div>
+<div class="slot"><div class="today">
+<div class="k" style="font-family:JetBrains Mono,monospace;font-size:7px;letter-spacing:.2em;color:#8a7a66">TODAY&rsquo;S LIST</div>
+<div class="lst">
+<span class="pill"><span class="cc"></span>Resubmit your R&amp;R to Sophie Dunn</span>
+<span class="pill"><span class="cc"></span>Send your full to Jonathan Marsh</span>
+<span class="pill" style="opacity:.55"><span class="cc" style="background:linear-gradient(180deg,#d7ddd5,#d5dbd3)"></span>Reply to Curtis Vane</span>
+</div>
+<span class="gh" style="margin-left:auto">Work the list &rarr;</span></div></div>
+</div><div class="lbl">4 &middot; THE ASSISTANT BAND <em>&mdash; the Pro sticker widened into the slot. Strong placement for conversion; spends your most valuable real estate on an upsell, so best as the LAST fallback in the rotation, not the default.</em></div><div class="stage">
+<h1>What&rsquo;s on your desk?</h1>
+<div class="sub">Urgent tasks, housekeeping, notes. Here&rsquo;s everything on your to-do list.</div>
+<div class="rule"></div>
+<div class="slot"><div class="asst">
+<div><span class="pill2">&#10022; SCRIPTALLY PRO</span>
+<div class="t">Hand over the housekeeping</div>
+<div class="d">31 of your 44 tasks could run in the background whilst you write.</div></div>
+<span class="bluebtn">Meet the assistant</span></div></div>
+</div></body></html>

@@ -71,42 +71,69 @@ export const awaitingYourPages = (agentId: string, queries: Query[]): boolean =>
 export const isDoorOpen = (agent: Pick<Agent, "submissionStatus">): boolean =>
   agent.submissionStatus !== SubmissionStatus.CLOSED;
 
-/** Card state class: closed overrides everything, else active → sage, no-active/never → pink. */
-export function agentStateClass(agent: Agent, queries: Query[]): "s-sage" | "s-pink" | "s-grey" {
-  if (!isDoorOpen(agent)) return "s-grey";
+/** THE CARD'S COLOUR — YOUR HISTORY, never their door (agent-card-visual pack).
+ *
+ *  Sage means something of yours is live; soft pink means nothing is. The band's pill names
+ *  WHICH pink case applies (no active queries vs never queried) — the colour deliberately does
+ *  not distinguish them.
+ *
+ *  The closed-door override that used to return "s-grey" is GONE: the door is expressed in ink
+ *  (a hatched band and a `Closed` pill), never in colour. See the two-systems EXCEPTION recorded
+ *  in CLAUDE.md — this page inverts the app-wide rule on purpose. */
+export function agentStateClass(agent: Agent, queries: Query[]): "s-sage" | "s-pink" {
   return agentRelationship(agent.id, queries) === "active" ? "s-sage" : "s-pink";
 }
 
+/** THE DIM RULE: a card fades ONLY when the door is closed AND nothing of yours is live.
+ *
+ *  A card with an active query NEVER dims, whatever the door is doing — an outstanding full or
+ *  a live offer does not matter less because the agency shut its doors. That is exactly the case
+ *  the old door-precedence bug hid, and dimming it would reintroduce the same error in a softer
+ *  form. Hover restores full strength (CSS): the record stays entirely valid. */
+export function agentCardDims(agent: Agent, queries: Query[]): boolean {
+  return !isDoorOpen(agent) && agentRelationship(agent.id, queries) !== "active";
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
-   THE TWO AXES (rebuild v2, decision 1)
+   THE THREE AXES (rebuild v2 established two; the door became the third, 28 Jul)
 
-   The old model treated "Awaiting your pages" as a peer of "Active queries" and it is not — it
-   is a SUBSET of active. The counts gave it away (12 active + 3 awaiting + 4 no-active = 19
-   against 16 agents) and filtering on both returned the union where a reader expects the
-   intersection. So: two independent axes.
+   Round one: "Awaiting your pages" was treated as a peer of "Active queries" when it is a
+   SUBSET. The counts gave it away (12 active + 3 awaiting + 4 no-active = 19 against 16 agents)
+   and filtering on both returned the union where a reader expects the intersection.
 
-     · AXIS A — WHERE THINGS STAND. Exactly one value per agent, so the counts partition the
-       list and must sum to the total. The door OUTRANKS the relationship: an agent closed for
-       submissions reads "Closed", whatever their query history, because that is the fact that
-       governs what you can do next.
-     · AXIS B — WHOSE TURN. Only meaningful INSIDE active queries, so its counts sum to the
-       active count, not the total. Never stored: it reads the CTA engine's ball-holder
-       (`getPrimaryAction`), the same derivation the Queries command bar and the To-do flows
-       use, so this page can never disagree with them about whose move it is.
+   Round two, the SAME class of defect one level up: "Closed for submissions" was folded into
+   the standing list and the overlap resolved with a "door outranks history" precedence. But
+   the door and your history are facts about DIFFERENT SYSTEMS — theirs and yours — and neither
+   outranks the other. The precedence made an agency that shut its doors while holding your
+   full disappear from "Active queries", and (because whose-turn is gated on active) from the
+   turn axis as well: a query you were actively waiting on became invisible to both. THE
+   PRECEDENCE IS REMOVED. Do not reintroduce it — the door is its own axis.
+
+     · AXIS A — WHERE THINGS STAND (your history). active / noactive / never. Exclusive, so the
+       counts partition the list and sum to the total.
+     · AXIS B — WHOSE TURN (within active only). Counts sum to the ACTIVE count, not the total.
+       Never stored: it reads the CTA engine's ball-holder (`getPrimaryAction`), the same
+       derivation the Queries command bar and the To-do flows use.
+     · AXIS C — THEIR DOOR (their submission status). open / closed. INDEPENDENT of A and B, so
+       its counts also sum to the total, and an agent can be both "Active queries" and "Closed
+       for submissions" at once — which is precisely the situation worth seeing.
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/** Axis A. Exclusive and exhaustive — every agent is exactly one of these. */
-export type AgentStanding = "active" | "noactive" | "never" | "closed";
+/** Axis A — YOUR HISTORY. Exclusive and exhaustive; says nothing about their door. */
+export type AgentStanding = "active" | "noactive" | "never";
 
 /** Axis B. `null` = the axis doesn't apply (the agent has no active query). */
 export type AgentTurn = "you" | "them" | null;
 
+/** Axis C — THEIR DOOR. Independent of everything above. */
+export type AgentDoor = "open" | "closed";
+
 /**
- * Axis A for one agent. Closed first — the door outranks history; otherwise the relationship
- * ("active" → live query, "noactive" → only terminal ones, "never" → none on record).
+ * Axis A for one agent: purely the relationship — "active" (a live query), "noactive" (only
+ * terminal ones), "never" (none on record). It does NOT consult the door: a closed agency you
+ * have a live full with is still an agent you have an active query with.
  */
 export function agentStanding(agent: Agent, queries: Query[]): AgentStanding {
-  if (!isDoorOpen(agent)) return "closed";
   const rel = agentRelationship(agent.id, queries);
   return rel === "prev" ? "noactive" : rel === "never" ? "never" : "active";
 }
@@ -118,6 +145,9 @@ export function agentStanding(agent: Agent, queries: Query[]): AgentStanding {
  *
  * Reusing `getPrimaryAction` rather than re-listing statuses is the point: the writer's-turn
  * set is defined once, and a taxonomy change lands here for free.
+ *
+ * The gate is the HISTORY axis, which no longer consults the door — so an agent whose agency
+ * has closed still reports whose turn it is on the query you have open with them.
  */
 export function agentTurn(agent: Agent, queries: Query[]): AgentTurn {
   if (agentStanding(agent, queries) !== "active") return null;
@@ -126,12 +156,14 @@ export function agentTurn(agent: Agent, queries: Query[]): AgentTurn {
   return live.some((q) => getPrimaryAction(q.status as QueryStatus).ballHolder === "writer") ? "you" : "them";
 }
 
+/** Axis C for one agent — just `isDoorOpen` in axis clothing; nothing new is derived. */
+export const agentDoor = (agent: Agent): AgentDoor => (isDoorOpen(agent) ? "open" : "closed");
+
 /** The wording for each axis value — one place, so filters, groups and tags all agree. */
 export const STANDING_LABEL: Record<AgentStanding, string> = {
   active: "Active queries",
   noactive: "No active queries",
   never: "Never queried",
-  closed: "Closed for submissions",
 };
 
 export const TURN_LABEL: Record<Exclude<AgentTurn, null>, string> = {
@@ -139,31 +171,42 @@ export const TURN_LABEL: Record<Exclude<AgentTurn, null>, string> = {
   them: "Waiting on the agent",
 };
 
-export const STANDING_ORDER: readonly AgentStanding[] = ["active", "noactive", "never", "closed"];
+/** Door wording is always "…to queries" — never a bare "Closed" (the two-systems vocabulary). */
+export const DOOR_LABEL: Record<AgentDoor, string> = {
+  open: "Open to queries",
+  closed: "Closed for submissions",
+};
+
+export const STANDING_ORDER: readonly AgentStanding[] = ["active", "noactive", "never"];
 export const TURN_ORDER: readonly Exclude<AgentTurn, null>[] = ["you", "them"];
+export const DOOR_ORDER: readonly AgentDoor[] = ["open", "closed"];
 
 export interface AgentAxisCounts {
   total: number;
   standing: Record<AgentStanding, number>;
   /** Keyed within the active set only — `you + them === standing.active`. */
   turn: Record<Exclude<AgentTurn, null>, number>;
+  /** Independent of standing — `open + closed === total`, and the sets OVERLAP with standing. */
+  door: Record<AgentDoor, number>;
 }
 
 /**
- * Both axes counted in one pass over the WHOLE list (never the filtered view — a filter row must
- * show what it would reveal). The two reconciliation invariants are locked in agentList.test.ts:
- * axis A sums to the total, axis B sums to the active count.
+ * All three axes counted in one pass over the WHOLE list (never the filtered view — a filter row
+ * must show what it would reveal). The reconciliation invariants are locked in agentList.test.ts:
+ * standing sums to the total, turn sums to the active count, door sums to the total.
  */
 export function agentAxisCounts(agents: Agent[], queries: Query[]): AgentAxisCounts {
   const out: AgentAxisCounts = {
     total: agents.length,
-    standing: { active: 0, noactive: 0, never: 0, closed: 0 },
+    standing: { active: 0, noactive: 0, never: 0 },
     turn: { you: 0, them: 0 },
+    door: { open: 0, closed: 0 },
   };
   for (const a of agents) {
     out.standing[agentStanding(a, queries)] += 1;
     const t = agentTurn(a, queries);
     if (t) out.turn[t] += 1;
+    out.door[agentDoor(a)] += 1;
   }
   return out;
 }
@@ -200,14 +243,25 @@ export const AGENT_SORT_OPTIONS: readonly { key: AgentListSort; label: string }[
 ];
 
 /**
- * When this agent was last queried — DERIVED, never stored: the newest `dateSent` across their
- * queries, or null if they've never been queried.
+ * When this agent was last queried — DERIVED, never stored.
+ *
+ * THE KEY IS `max(dateSent)` ACROSS ALL THEIR QUERIES — their most recent contact, explicitly,
+ * not whichever query the fetch happens to return first. An agent can hold queries on several
+ * manuscripts, so "the first one found" would order the grid by an arbitrary fact.
+ *
+ * SCOPE: the agent list is GLOBAL, not manuscript-scoped — it reads the whole `queries`
+ * collection from the DB context and has no manuscript selector — so the max is global too. If
+ * this page ever gains a manuscript scope, this call must be given the scoped query set, and the
+ * pulse/counts alongside it; that is a deliberate coupling, not an oversight.
  *
  * WHY dateSent and not a second scan of the activity feed: `dateSent` is `recomputeQuery`'s own
  * output FROM that feed, so it already is the log's derivation, computed once and shared. A
  * parallel scan here could disagree with it — and `Activity` carries no agentId (the closed-stamp
  * helper has to string-match descriptions to get one), so the parallel path would also be the
  * more fragile of the two.
+ *
+ * Returns null for a never-queried agent, and `sortAgentList` sinks those to the BOTTOM — an
+ * agent you have never approached is not one you contacted at the beginning of time.
  */
 export function lastQueriedAt(agentId: string, queries: Query[]): number | null {
   let newest: number | null = null;
@@ -250,12 +304,13 @@ export function sortAgentList(agents: Agent[], sort: AgentListSort, queries: Que
 
 /* ── Grouping ──────────────────────────────────────────────────────────────── */
 
-export type AgentGrouping = "none" | "standing" | "turn" | "stars";
+export type AgentGrouping = "none" | "standing" | "turn" | "door" | "stars";
 
 export const AGENT_GROUP_OPTIONS: readonly { key: AgentGrouping; label: string }[] = [
   { key: "none", label: "None" },
   { key: "standing", label: "Where things stand" },
   { key: "turn", label: "Whose turn" },
+  { key: "door", label: "Their door" },
   { key: "stars", label: "Star rating" },
 ];
 
@@ -282,12 +337,16 @@ const STANDING_STUB: Record<AgentStanding, string> = {
   active: GROUP_STUB.sage,
   noactive: GROUP_STUB.tan,
   never: GROUP_STUB.tan,
-  closed: GROUP_STUB.grey,
 };
 
 const TURN_STUB: Record<Exclude<AgentTurn, null>, string> = {
   you: GROUP_STUB.pink,
   them: GROUP_STUB.sage,
+};
+
+const DOOR_STUB: Record<AgentDoor, string> = {
+  open: GROUP_STUB.sage,
+  closed: GROUP_STUB.grey,
 };
 
 const TIER_WORD = ["One star", "Two stars", "Three stars", "Four stars", "Five stars"];
@@ -325,6 +384,13 @@ export function groupAgents(
     return out;
   }
 
+  if (grouping === "door") {
+    for (const k of DOOR_ORDER) {
+      push(k, DOOR_LABEL[k], DOOR_STUB[k], agents.filter((a) => agentDoor(a) === k));
+    }
+    return out;
+  }
+
   for (const tier of [5, 4, 3, 2, 1]) {
     push(`s${tier}`, TIER_WORD[tier - 1], GROUP_STUB.gold, agents.filter((a) => (a.starRating || 0) === tier), tier);
   }
@@ -345,16 +411,18 @@ export function groupAgents(
 export interface AgentFilterSet {
   standing: AgentStanding[];
   turn: Exclude<AgentTurn, null>[];
+  /** Their door — its own facet, because it is its own axis. */
+  door: AgentDoor[];
   /** Minimum star rating(s) ticked; the LOWEST tick wins, so 4+ and 3+ together read as 3+. */
   stars: number[];
   /** ISO country codes. */
   loc: string[];
 }
 
-export const emptyFilterSet = (): AgentFilterSet => ({ standing: [], turn: [], stars: [], loc: [] });
+export const emptyFilterSet = (): AgentFilterSet => ({ standing: [], turn: [], door: [], stars: [], loc: [] });
 
 export const filterCount = (f: AgentFilterSet): number =>
-  f.standing.length + f.turn.length + f.stars.length + f.loc.length;
+  f.standing.length + f.turn.length + f.door.length + f.stars.length + f.loc.length;
 
 export const isFilterSetEmpty = (f: AgentFilterSet): boolean => filterCount(f) === 0;
 
@@ -364,6 +432,7 @@ export function matchesFilterSet(agent: Agent, queries: Query[], f: AgentFilterS
     const t = agentTurn(agent, queries);
     if (!t || !f.turn.includes(t)) return false;
   }
+  if (f.door.length && !f.door.includes(agentDoor(agent))) return false;
   if (f.stars.length && (agent.starRating || 0) < Math.min(...f.stars)) return false;
   if (f.loc.length && !f.loc.includes(agent.country || "")) return false;
   return true;
@@ -400,9 +469,10 @@ export function methodShort(agent: Pick<Agent, "submissionMethod" | "agentNotes"
  */
 export function metaTokens(agent: Agent): string[] {
   const weeks = agent.responseTimeWeeks;
-  const tokens = [weeks && weeks > 0 ? `~${weeks} wks` : "response unknown", methodShort(agent)];
-  if (agent.noResponseMeansNo === true) tokens.push("No reply = no");
-  return tokens;
+  // "weeks", never "wks" (agent-list-fixes P3) — the card front has room for the word.
+  // NO-REPLY-MEANS-NO is REMOVED from the card front: it is detail for when you are writing to
+  // them, not for scanning. It stays in the editor and stays stored — nothing is lost.
+  return [weeks && weeks > 0 ? `~${weeks} weeks` : "response unknown", methodShort(agent)];
 }
 
 /** "3 Apr 2026" — the mockup's stamp/bubble date format. */

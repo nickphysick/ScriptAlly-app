@@ -18,19 +18,24 @@
  * The colour legend is DELETED: it taught the same vocabulary the filter list already carries, in
  * a second grammar.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Filter, Rows3, Search, SlidersHorizontal } from "lucide-react";
 import {
+  AgentDoor,
   AgentFilterSet,
   AgentStanding,
   AgentTurn,
+  DOOR_LABEL,
+  DOOR_ORDER,
   STANDING_LABEL,
   STANDING_ORDER,
   TURN_LABEL,
   TURN_ORDER,
   AgentAxisCounts,
+  emptyFilterSet,
   filterCount,
 } from "../../lib/agentList";
+import { PopoverAlign, popoverAlign } from "../../lib/popoverAlign";
 import { countryName } from "../../lib/territory";
 
 /* ── the popover shell: click-away, Escape, one open at a time ─────────────── */
@@ -51,6 +56,30 @@ interface PopProps {
 
 const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, open, onOpen, children }) => {
   const wrapRef = useRef<HTMLSpanElement>(null);
+  const [align, setAlign] = useState<PopoverAlign>("left");
+
+  // COLLISION: left-anchored is the default because it reads as belonging to its control, but the
+  // rightmost control's panel is wider than the space beside it and would run off the container.
+  // Measured against the CONTENT COLUMN rather than the window, because the column is what the
+  // reader perceives as the page's edge. Measured in a layout effect so the flip happens before
+  // paint — deciding after would show one frame in the wrong place.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const btn = wrapRef.current?.firstElementChild as HTMLElement | undefined;
+    const container = wrapRef.current?.closest(".agl-inner") as HTMLElement | null;
+    if (!btn || !container) return;
+    const b = btn.getBoundingClientRect();
+    const c = container.getBoundingClientRect();
+    setAlign(
+      popoverAlign({
+        anchorLeft: b.left,
+        anchorRight: b.right,
+        popWidth: width,
+        containerLeft: c.left,
+        containerRight: c.right,
+      }),
+    );
+  }, [open, width]);
 
   useEffect(() => {
     if (!open) return;
@@ -88,7 +117,7 @@ const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, 
         <ChevronDown className="cv" width={12} height={12} aria-hidden="true" />
       </button>
       {open && (
-        <div className="agl-pop" style={{ width }} role="dialog" aria-label={label}>
+        <div className={`agl-pop${align === "right" ? " right" : ""}`} style={{ width }} role="dialog" aria-label={label}>
           {children}
         </div>
       )}
@@ -220,6 +249,24 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
         ))}
 
         <div className="agl-pdiv" />
+        {/* THEIR DOOR — its own axis, not a value of "where things stand". Their submission
+            status and your query history are facts about different systems: an agency can shut
+            its doors while still holding your full, and both facts stay true. */}
+        <div className="agl-pk">
+          Their door
+          <span className="hint">Independent of your history with them</span>
+        </div>
+        {DOOR_ORDER.map((k: AgentDoor) => (
+          <Row
+            key={k}
+            label={DOOR_LABEL[k]}
+            count={counts.door[k]}
+            on={filters.door.includes(k)}
+            onToggle={() => toggle("door", k)}
+          />
+        ))}
+
+        <div className="agl-pdiv" />
         <div className="agl-pk">Star rating</div>
         {starCounts.map(({ min, n }) => (
           <Row
@@ -248,7 +295,9 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
         )}
 
         <div className="agl-pfoot">
-          <button type="button" className="lnk" onClick={() => onFilters({ standing: [], turn: [], stars: [], loc: [] })}>
+          {/* emptyFilterSet(), never a literal — a hand-written list silently misses a new facet
+              the day one is added (which is exactly what happened when the door axis arrived). */}
+          <button type="button" className="lnk" onClick={() => onFilters(emptyFilterSet())}>
             Clear all
           </button>
           {/* The primary states the live result, so ticking a box answers "how many?" before

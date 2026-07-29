@@ -102,23 +102,21 @@ describe("the filter chips — bare on the control line (todo rebuild P1)", () =
   });
 });
 
-describe("the Pro STRIP — the page foot (todo rebuild P5)", () => {
+describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", () => {
   it("gated to non-Pro only; the count is live-derived; it opens the assistant preview", () => {
     expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain("<ProStrip hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
-    const strip = promo.slice(promo.indexOf("export const ProStrip"), promo.indexOf("export const AssistantModal"));
-    expect(strip).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
-    expect(strip).toContain("onClick={onPreview}>Meet the assistant →");
+    expect(page).toContain("<AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
+    const band = promo.slice(promo.indexOf("export const AssistantBand"), promo.indexOf("export const AssistantModal"));
+    expect(band).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
+    expect(band).toContain("onClick={onPreview}>Meet the assistant");
   });
 
-  it("the BLUE STICKER is retired with the two-column band: no blue fill, no offset block, no heavy shadow", () => {
-    expect(page).not.toContain("ProSticker");
-    expect(promo).not.toContain("spine-pro");
-    const r = ruleIn(pageCss)(".tdb-prostrip");
-    expect(r).not.toContain("box-shadow");
-    expect(r).toContain("background: var(--card, #fdfaf5)");
-    // slate stays Pro's colour on the pill + link only
-    expect(ruleIn(pageCss)(".tdb-prostrip-pill")).toContain("background: #6A89A7");
+  it("the BLUE STICKER returns, wide, at the foot — and it is the app's only one", () => {
+    const r = ruleIn(pageCss)(".tdb-asst");
+    expect(r).toContain("box-shadow: 4px 4px 0 #c2cfda");
+    expect(r).toContain("border: 1.5px solid #3a1c14");
+    expect((pageCss.match(/#c2cfda/g) ?? []).length).toBe(1);
+    expect(page).not.toContain("ProStrip");
   });
 });
 

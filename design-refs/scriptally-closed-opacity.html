@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Closed door opacity</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9;
+  --ground:#e7e0d5; --plane:#fdfbf8; --fill:#efe8df; --card:#fdfaf5; --line:#e3d9cf; --linesoft:#ece3da;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;padding:0 0 60px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.head{padding:40px 40px 0;max-width:940px}
+.kick{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#7f7568}
+h1{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-spacing:-.015em;margin-top:8px}
+.rec{margin-top:20px;background:#fdfaf5;border:1px solid #cfc3b5;border-radius:14px;padding:19px 22px}
+.rec h2{font-family:"Playfair Display",serif;font-size:18px;font-weight:500;margin-bottom:9px}
+.rec ol{margin:0 0 0 18px;font-size:13.5px;line-height:1.75;color:#4a423b}
+.rec ol b{color:var(--ink);font-weight:500}
+.sect2{padding:0 40px}
+.rowlab{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#8d8175;margin:34px 0 6px}
+.rowsub{font-size:12.5px;color:#5f574f;line-height:1.6;margin-bottom:16px;max-width:900px}
+.six{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,320px));gap:24px}
+.cell .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+.cell .cap .n{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:#fff;background:var(--ink);border-radius:5px;padding:2px 6px}
+.cell .cap .t{font-family:"Playfair Display",serif;font-size:14.5px}
+.cell .say{font-size:12px;color:#544c44;line-height:1.6;margin-top:11px}
+.cell .say b{color:var(--ink);font-weight:500}
+
+.ac{background:#fff;border:1px solid var(--ink);border-radius:11px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07);position:relative;transition:opacity .15s}
+.ac:hover{opacity:1 !important}
+.band{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid var(--ink);position:relative}
+.band.hatch::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(-45deg,rgba(46,39,35,.14) 0 3px,transparent 3px 9px)}
+.pill{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:3px 9px;white-space:nowrap;position:relative;z-index:1}
+.pill.shut{background:var(--ink);color:#fff;border-color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.pill.shut svg{width:9px;height:9px}
+.stars{margin-left:auto;color:#c8853f;font-size:11px;letter-spacing:1px;position:relative;z-index:1}
+.ed{width:22px;height:22px;border-radius:99px;border:1px solid rgba(46,39,35,.45);display:grid;place-items:center;background:#fff;flex:none;position:relative;z-index:1}
+.ed svg{width:11px;height:11px}
+.bd{padding:14px}
+.who{display:flex;align-items:flex-start;gap:11px}
+.av2{width:42px;height:42px;border-radius:99px;flex:none;background:var(--fill);border:1px solid var(--line);display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--ink-soft)}
+.nm2{font-family:"Playfair Display",serif;font-size:19px;line-height:1.1;display:block}
+.ag{font-family:"Playfair Display",serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:3px;display:block}
+.loc{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11.5px;color:var(--ink-soft)}
+.loc .fl{width:14px;height:10px;border-radius:1.5px;overflow:hidden;display:block;flex:none}
+.loc .fl svg{display:block;width:100%;height:100%}
+.meta{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:7px;display:block}
+.sectn{margin-top:13px;padding-top:11px;border-top:1px solid var(--linesoft)}
+.sl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.hrow{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.hrow .d{width:15px;height:15px;flex:none}
+.hrow .mn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow .wh{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.none{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kick">ScriptAlly · Agent card · Sheet 16</div>
+  <h1>Dim the shut doors</h1>
+  <div class="rec">
+    <h2>The rule</h2>
+    <ol>
+      <li><b>Sage band = something live. Soft pink = nothing live.</b> The pill says which.</li>
+      <li><b>Closed door = hatched band, ink pill, and the card dims.</b> You cannot submit, so it recedes.</li>
+      <li><b>Unless something of yours is already live with them.</b> A shut door does not make your outstanding full less important — that card keeps full strength and shows the hatch only.</li>
+      <li><b>Hover restores full opacity</b> on any dimmed card, so nothing is ever unreadable when you go looking.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="sect2">
+  <div class="rowlab">How far to dim — same card, three levels</div>
+  <div class="rowsub">A prospect at an agency that is shut. Watch the flag, the star rating and the agency name as it drops.</div>
+  <div class="six" id="levels"></div>
+
+  <div class="rowlab">All six permutations with the rule applied</div>
+  <div class="rowsub">Hover any dimmed card to bring it back.</div>
+  <div class="six" id="perms"></div>
+</div>
+
+<script>
+const GB=`<svg viewBox="0 0 32 22" preserveAspectRatio="none"><rect width="32" height="22" fill="#0b2f6b"/><path d="M0 0l32 22M32 0L0 22" stroke="#fff" stroke-width="4.4"/><path d="M0 0l32 22M32 0L0 22" stroke="#c8102e" stroke-width="2.2"/><path d="M16 0v22M0 11h32" stroke="#fff" stroke-width="7"/><path d="M16 0v22M0 11h32" stroke="#c8102e" stroke-width="4"/></svg>`;
+const LOCK=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/></svg>`;
+const DOT={
+ out:`<svg class="d" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="2"/><path d="M7 10h6m-2.2-2.2L13 10l-2.2 2.2" fill="none" stroke="#7c3a2a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ inb:`<svg class="d" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e9ede6" stroke="#8a9e88" stroke-width="2"/><path d="M13 10H7m2.2-2.2L7 10l2.2 2.2" fill="none" stroke="#5a6e58" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ shut:`<svg class="d" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#b4aca4" stroke-width="2"/><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8" stroke="#b4aca4" stroke-width="1.6" stroke-linecap="round"/></svg>`
+};
+function card(o){
+ const bandbg = o.standing==='Active queries' ? 'var(--sage-band)' : 'var(--pink)';
+ const hist = o.hist ? `<div class="hrow">${DOT[o.hist[0]]}<span class="mn">${o.hist[1]}</span><span class="wh">${o.hist[2]}</span></div>`
+                     : `<div class="none">Never queried.</div>`;
+ const op = o.op!==undefined ? `opacity:${o.op}` : '';
+ return `<div class="cell">
+  <div class="cap"><span class="n">${o.n}</span><span class="t">${o.title}</span></div>
+  <div class="ac" style="${op}">
+    <div class="band${o.shut?' hatch':''}" style="background:${bandbg}">
+      <span class="pill">${o.standing}</span>
+      ${o.shut?`<span class="pill shut">${LOCK}Closed</span>`:''}
+      <span class="stars">${o.stars}</span>
+      <span class="ed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m14.5 5.5 4 4L9 19H5v-4l9.5-9.5Z"/></svg></span>
+    </div>
+    <div class="bd">
+      <div class="who"><span class="av2">${o.i}</span><span style="min-width:0">
+        <span class="nm2">${o.name}</span><span class="ag">${o.agency}</span>
+        <span class="loc"><span class="fl">${GB}</span>${o.city}</span>
+        <span class="meta">${o.meta}</span></span></div>
+      <div class="sectn"><div class="sl">Your history</div>${hist}</div>
+    </div>
+  </div>
+  <div class="say">${o.say}</div>
+ </div>`;
+}
+const C={i:'CB',name:'Cara Bell',agency:'Bell & Rowan',city:'Glasgow',meta:'~7 wks · Email',stars:'★★★★☆',standing:'Never queried',hist:null,shut:true};
+document.getElementById('levels').innerHTML=[
+ {...C,n:'1',title:'0.75 — light',op:.75,
+  say:'<b>Recedes, everything still crisp.</b> The star rating and the flag survive intact. Reads as "quieter", which may be too subtle at a glance across sixteen cards.'},
+ {...C,n:'2',title:'0.6 — my pick',op:.6,
+  say:'<b>Clearly stepped back without losing the record.</b> You can still read the agency, count the stars and see the flag. Unmistakable in a grid.'},
+ {...C,n:'3',title:'0.45 — heavy',op:.45,
+  say:'<b>Too far.</b> The star rating and flag start to go, and the ink border loses its bite — the card stops looking like the others and starts looking broken.'}
+].map(card).join('');
+
+const base={city:'London',meta:'~6 wks · Email',stars:'★★★☆☆'};
+document.getElementById('perms').innerHTML=[
+ {...base,n:'1',title:'Active · open',i:'JM',name:'Jonathan Marsh',agency:'Marsh & Co',standing:'Active queries',hist:['out',"Murphy's Day Out",'Full sent'],
+  say:'Sage, full strength.'},
+ {...base,n:'2',title:'No active · open',i:'EH',name:'Elise Hartnoll',agency:'Cardew Blake',standing:'No active queries',stars:'★★☆☆☆',hist:['shut',"Murphy's Day Out",'Closed'],
+  say:'Pink, full strength — their door is open, so you could query again tomorrow.'},
+ {...base,n:'3',title:'Never queried · open',i:'HM',name:'Hugh Mercer',agency:'Mercer Agency',standing:'Never queried',stars:'★★★★☆',hist:null,
+  say:'Pink, full strength. A live prospect.'},
+ {...base,n:'4',title:'Active · closed',i:'TE',name:'Tom Ellery',agency:'Ellery Literary',standing:'Active queries',stars:'★★★★☆',shut:true,hist:['inb',"Murphy's Day Out",'Offer'],
+  say:'<b>The exception.</b> Hatch and pill say the door is shut, but the card stays at full strength — your offer is live and must not fade.'},
+ {...base,n:'5',title:'No active · closed',i:'FS',name:'Fenella Str',agency:'Brightwater Books',standing:'No active queries',stars:'★★☆☆☆',shut:true,op:.6,hist:['shut',"Murphy's Day Out",'Closed'],
+  say:'Nothing live, nothing possible. Dimmed.'},
+ {...base,n:'6',title:'Never queried · closed',i:'CB',name:'Cara Bell',agency:'Bell & Rowan',standing:'Never queried',shut:true,op:.6,hist:null,
+  say:'A prospect you cannot approach yet. Dimmed, but it returns to full when their door reopens.'}
+].map(card).join('');
+</script>
+</body>
+</html>

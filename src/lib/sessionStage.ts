@@ -119,7 +119,12 @@ export const GATHER = {
 // slide. The panel-header search fades via EXIT_FADE. Everything else is IN-WRAP and exits here.
 export const EXIT_LEFT = ".spine-panel"; // the panel slides off left (the rail stays)
 export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"; // the Today corner leaves
-export const EXIT_FADE = ".tdb-rvbox, .tdb-heroright, .tdb-herosub, .tdb-hsearch, .tdb-lh2, .tdb-lsech"; // the review banner, the hero pair + subtitle, the section headings fade
+// The furniture that fades as a focused session opens. SWEEP (briefing-slot P3): .tdb-rvbox
+// became the briefing slot; .tdb-hsearch, .tdb-lh2 and .tdb-lsech are EXTINCT (the To-do
+// rebuild retired the centred search pill and both views' lane header bars), so they are
+// dropped rather than left as selectors that can never match. .tdb-heroright/.tdb-herosub
+// belong to the dormant hero — kept, since they return with the session's own entry point.
+export const EXIT_FADE = ".tdb-brief, .tdb-heroright, .tdb-herosub"; // the briefing, the hero pair + subtitle
 export const EXIT_BAR = ".tdb-dochead"; // the panel's items row slides up and out
 export const DISSOLVE = ".tdb-mainc, .tdb-lsec"; // the panel's border + contents dissolve; the items float
 /** The gatherable items — cards, group bars, or ledger rows, whichever view is up. */

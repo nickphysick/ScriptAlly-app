@@ -34,7 +34,13 @@
    with a max-width, auto margins or horizontal padding. Everything (hero, panel) rides inside
    it; no ancestor or descendant in the chain adds a competing horizontal box. */
 .tdb-col { max-width: var(--tdb-col-max); margin-inline: auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: var(--tdb-hero-gap) 0 0; } /* the hero→panel gap */
+/* ONE OWNER PER GAP (briefing-slot fix). The space under the header rule was THREE stacked
+   values — .svh's 26px, this element's 26px, and .tdb-ctrl's 44px — compounding to 96px of void
+   whenever the briefing was absent. The legacy hero→panel padding goes (there is no panel), and
+   the page neutralises the shared header margin so the gap belongs to whatever comes FIRST:
+   the briefing's own 26px, or the control row's 44px. */
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0; }
+.spine-root .svh { margin-bottom: 0; } /* the To-do page owns its own first gap (see above) */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
 /* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),
@@ -62,27 +68,25 @@
 .tdb-secrule.hk { background: linear-gradient(90deg, #c3cfc0 0 96px, #ece3da 96px); }
 .tdb-secrule.nt { background: linear-gradient(90deg, #ece3da 0 96px, #ece3da 96px); }
 
-/* THE FEATURED REVIEW CARD (todo rebuild P3 — ref .feat): a full-width block directly beneath
-   the header rule, warm diagonal gradient, hairline, radius 16. Left = title + pink badge +
-   body + two actions; right = the 288px illustration panel, bottom-aligned and bleeding to the
-   card's edge. A close control rides top-right in addition to Dismiss. */
-.tdb-feat { display: flex; align-items: stretch; margin-top: 26px; background: linear-gradient(103deg, #fdf9f4 0%, #faf1e8 58%, #f6e8dd 100%); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; position: relative; }
-.tdb-feattxt { flex: 1; min-width: 0; padding: 26px 10px 26px 30px; }
-.tdb-feath { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
-.tdb-feath h3 { font-family: var(--f12-serif); font-size: 26px; font-weight: 500; letter-spacing: -0.012em; line-height: 1.1; color: var(--ink); margin: 0; }
-.tdb-featbadge { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; background: var(--pink-btn, #f5e2da); color: var(--burgundy, #7c3a2a); border: 1px solid #e8c8bc; border-radius: 99px; padding: 4px 10px; }
-.tdb-featd { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-top: 11px; max-width: 50ch; }
-.tdb-featb { display: flex; gap: 10px; margin-top: 19px; }
-/* the two actions — View is the Form 11 soft-pink primary, Dismiss the parchment ghost */
-.tdb-featbtn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 15px; border-radius: 12px; border: 1px solid var(--line); background: var(--card, #fdfaf5); color: var(--ink); font-size: 12.5px; white-space: nowrap; cursor: pointer; }
-.tdb-featbtn svg { width: 15px; height: 15px; }
-.tdb-featbtn.pri { background: var(--pink-btn, #f5e2da); border-color: #e8c8bc; color: var(--burgundy, #7c3a2a); }
-.tdb-featart { width: 288px; flex: none; align-self: flex-end; display: block; }
-.tdb-featart svg { display: block; width: 100%; height: auto; }
-.tdb-featx { position: absolute; top: 13px; right: 13px; width: 27px; height: 27px; border: 0; border-radius: 8px; display: grid; place-items: center; color: var(--muted, #9c8878); cursor: pointer; background: rgba(253, 250, 245, 0.7); }
-.tdb-featx:hover { background: var(--card, #fdfaf5); color: var(--ink); }
-.tdb-featx svg { width: 13px; height: 13px; }
-@media (max-width: 780px) { .tdb-featart { display: none; } }
+/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
+   SUPERSEDES the todo-rebuild featured card and its 288px illustration). A warm panel between
+   the hero rule and the filter row. THE COLLAPSE LAW is structural, not CSS: when there is no
+   fresh, undismissed review the block is not rendered at all, so it contributes no height and
+   no margin — the margin lives on THIS element, never on a wrapper that would survive it. */
+.tdb-brief { display: flex; align-items: center; gap: 16px; position: relative; background: linear-gradient(180deg, #f7f2ea, #f3ece1); border: 1px solid #e2d8c6; border-radius: 13px; padding: 14px 18px; margin-top: 26px; }
+.tdb-brieftxt { min-width: 0; }
+.tdb-briefk { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.2em; color: #8a7a66; }
+.tdb-brieft { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: #2b2118; margin-top: 3px; }
+.tdb-briefd { font-size: 11px; color: #7a6a5e; margin-top: 3px; }
+.tdb-briefstats { display: flex; gap: 22px; margin-left: auto; text-align: center; flex: none; }
+.tdb-briefstats div b { display: block; font-family: var(--f12-serif); font-size: 22px; font-weight: 700; color: #2b2118; }
+.tdb-briefstats div span { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #a5988c; }
+/* the ink CTA is the briefing's own — the page's no-dark-pill law covers its CHROME, and this
+   button is the ref's normative treatment for the slot (flagged in the run report) */
+.tdb-briefbtn { display: inline-flex; align-items: center; gap: 7px; background: #2a1a13; border: 1px solid #1d100c; color: #f3e7da; border-radius: 99px; height: 34px; padding: 0 16px; font-size: 11px; font-weight: 600; flex: 0 0 auto; cursor: pointer; margin-left: 4px; }
+.tdb-briefbtn:hover { background: var(--ink); }
+.tdb-briefx { position: absolute; top: 8px; right: 10px; width: 20px; height: 20px; border: 0; background: none; border-radius: 6px; color: #b5a794; font-size: 11px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.tdb-briefx:hover { background: rgba(255, 255, 255, 0.6); color: var(--ink); }
 
 /* THE CONTROL LINE: chips left, spacer, list search, view toggle — ONE row, no container. */
 .tdb-ctrl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 44px; }
@@ -95,15 +99,17 @@
 .tdb-vtog button { width: 30px; height: 28px; border: 0; background: none; border-radius: 8px; display: grid; place-items: center; color: var(--muted, #9c8878); cursor: pointer; }
 .tdb-vtog button svg { width: 14px; height: 14px; }
 .tdb-vtog button.on { background: var(--shell-canvas, #fdfbf8); color: var(--ink); }
-/* THE PRO STRIP (todo rebuild P5 — ref .prostrip): full width at the page foot, 50px below the
-   last section. Card surface + hairline, a slate PRO pill, Playfair title, one line of body and
-   a slate text link. No blue fill, no heavy shadow. */
-.tdb-prostrip { display: flex; align-items: center; gap: 14px; margin-top: 50px; background: var(--card, #fdfaf5); border: 1px solid var(--line); border-radius: 14px; padding: 15px 17px; }
-.tdb-prostrip-pill { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; background: #6A89A7; color: #fff; border-radius: 6px; padding: 3px 7px; flex: none; }
-.tdb-prostrip-mid { flex: 1; min-width: 0; }
-.tdb-prostrip-t { font-family: var(--f12-serif); font-size: 16px; color: var(--ink); }
-.tdb-prostrip-d { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
-.tdb-prostrip-lk { font-size: 12.5px; color: #6A89A7; background: none; border: 0; border-bottom: 1px solid #c3d2df; padding: 0 0 1px; cursor: pointer; flex: none; }
+/* THE ASSISTANT BAND (briefing-slot P2 — ref option 4): the closing note at the content's foot,
+   full column width, with generous space above. Warm-white ground, 1.5px ink border and the 4px
+   pastille-blue offset block — the app's ONLY blue sticker. */
+.tdb-asst { display: flex; align-items: center; gap: 14px; margin-top: 56px; background: #fdf6f2; border: 1.5px solid #3a1c14; border-radius: 13px; box-shadow: 4px 4px 0 #c2cfda; padding: 14px 17px; }
+.tdb-asstmid { flex: 1; min-width: 0; }
+.tdb-asstpill { display: inline-flex; align-items: center; gap: 5px; background: #6A89A7; border: 1px solid #587991; color: #f4f8fb; border-radius: 99px; height: 20px; padding: 0 10px; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.18em; }
+.tdb-asstt { font-family: var(--f12-serif); font-size: 15.5px; font-weight: 700; color: #4a241a; margin-top: 6px; }
+.tdb-asstd { font-size: 11px; color: #7a5a4c; margin-top: 3px; }
+.tdb-asstbtn { display: inline-flex; align-items: center; justify-content: center; background: #6A89A7; border: 1px solid #587991; color: #f4f8fb; border-radius: 99px; height: 32px; padding: 0 15px; font-size: 10.5px; font-weight: 700; margin-left: auto; flex: 0 0 auto; cursor: pointer; }
+.tdb-asstbtn:hover { background: #5c7b96; }
+
 /* doc pass P3 — the DOCUMENT HEADER band (todo-doc-pass-b.html .dochead). Full-bleed across the
    sheet's top; its own top radius (16 − 1px border = 15) keeps the corner continuity — NEVER
    overflow:hidden on the sheet (it would re-scope the lane headings' sticky to the sheet). */
@@ -211,8 +217,8 @@
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
 .tdb-setrow:hover { background: var(--paper); }
 .tdb-cog { flex: 0 0 auto; color: #4d4238; } /* frame P3: the bare 20px cog — the roundel is gone */
-/* panel-final P4 — the content-panel COLOPHON (.tdb-colo* / .tdb-cololink*) is RETIRED; its
-   successor is the blue Pro sticker at the panel foot (.spine-pro* in todoShell.css). */
+/* (The content-panel colophon and every Pro surface that succeeded it are RETIRED. The one Pro
+   surface on this page is now the assistant band at the content's foot — .tdb-asst above.) */
 .tdb-demok { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #8fa4b8; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .tdb-drow { display: flex; align-items: center; gap: 9px; padding: 7px 2px; border-bottom: 1px solid #edf2f7; font-size: 10.5px; color: var(--ink-2); }
 .tdb-drow:last-child { border-bottom: none; }
@@ -665,7 +671,6 @@ button.tdb-tdot { cursor: pointer; }
 /* polish P3 — the review left the sheet: its own lifted white card at the stack's head
    (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
    none is introduced (the fence records the resolution). */
-.tdb-rvbox { display: flex; align-items: center; gap: 16px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 5px 18px rgba(58, 28, 20, 0.11); padding: 15px 20px; }
 .tdb-rvcupb { width: 46px; flex: 0 0 auto; color: var(--ink); filter: drop-shadow(0 2px 3px rgba(58, 28, 20, 0.14)); }
 .tdb-rvcupb svg { width: 100%; height: auto; display: block; }
 .tdb-rvhx { min-width: 0; }

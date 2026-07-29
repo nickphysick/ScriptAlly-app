@@ -23,7 +23,11 @@ import { Funnel } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, reviewWeek, reviewCompletionSnooze, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import {
+  assembleBoard, todaySplit, ribbonTiles, reviewWeek, reviewCompletionSnooze, weekReviewStats,
+  briefingCleared, briefingFigures, briefingHeadline, briefingNarrative,
+  BoardCard, USER_TASK_FLAG_TYPE,
+} from "../../lib/todoBoard";
 import { flagKeyForTask, flagMatchesTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayGhosts, MAX_TODAY,
@@ -41,7 +45,7 @@ import { FocusedSession, HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
-import { ProStrip, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
+import { AssistantBand, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
@@ -535,6 +539,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     try { localStorage.setItem("sa.todoReviewDismissed", reviewWin.key); } catch { /* private mode */ }
   };
   const openReview = () => { markReviewSeen(); openSundayReview(); };
+  // THE BRIEFING'S FIGURES — derived from the existing review data, never hardcoded. FOCUSED
+  // has no source anywhere in the app (no time is recorded), so that column always drops; a
+  // zero cleared/replies drops its column too rather than showing a nought.
+  const briefStats = useMemo(
+    () => (reviewWin ? weekReviewStats({ activities, queries, agents }, reviewWin) : null),
+    [activities, queries, agents, reviewWin?.key], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const briefCleared = reviewWin ? briefingCleared(userTasks, reviewWin) : 0;
+  const briefReplies = briefStats ? briefStats.back.length : 0;
+  const briefFigures = briefingFigures(briefCleared, briefReplies);
+  const briefNarrative = briefStats ? briefingNarrative(briefStats) : null;
 
   // v4 P3 — CONDITIONAL TODAY: the column exists only with content (≥1 committed OR ≥1 done
   // today — the existing derivation); empty → the board runs 4-up. Exit lags 220ms for the
@@ -783,54 +798,34 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* THE WORKSPACE SHELL (todo-fix48) — the filters live in the sidebar now; the body
               is the centre stack (the panel arrives in Phase 2) beside the Today corner. */}
           <div className="tdb-centre">
-          {/* THE FEATURED REVIEW CARD (todo rebuild P3 — ref .feat): a full-width block directly
-              beneath the header rule, with NO section heading of its own. Renders only while a
-              review is waiting; Dismiss hides it for that review WITHOUT marking it read (the
-              header's own "Last week in review" action still opens it). */}
+          {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
+              SUPERSEDES the todo-rebuild featured card). ONE region between the hero rule and the
+              filter row, rendering the review briefing and nothing else.
+
+              THE COLLAPSE LAW: dismissed, or no fresh review, and the slot renders NOTHING — no
+              node, no margin, no reserved height, so the filter row moves straight up under the
+              hero. That is why the whole block sits inside this one condition and why the slot
+              owns no wrapper of its own. Dismissal is already per-review-period
+              (sa.todoReviewDismissed keyed on reviewWin.key), so a new review brings it back. */}
           {reviewWin && !reviewSeen && !reviewDismissed && (
-            <div className="tdb-feat">
-              <div className="tdb-feattxt">
-                <div className="tdb-feath">
-                  <h3>Last week in review</h3>
-                  <span className="tdb-featbadge">Ready</span>
-                </div>
-                <div className="tdb-featd">
-                  Week {reviewWin.weekNumber} is ready to look back on. Every box ticked turns the dial in your favour.
-                </div>
-                <div className="tdb-featb">
-                  <button type="button" className="tdb-featbtn pri" onClick={openReview}>
-                    View
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m9 6 6 6-6 6" /></svg>
-                  </button>
-                  <button type="button" className="tdb-featbtn" onClick={dismissReviewWeek}>Dismiss</button>
-                </div>
+            <div className="tdb-brief">
+              <div className="tdb-brieftxt">
+                <div className="tdb-briefk">↺ LAST WEEK IN REVIEW</div>
+                <div className="tdb-brieft">{briefingHeadline(briefCleared, briefReplies)}</div>
+                {briefNarrative && <div className="tdb-briefd">{briefNarrative}</div>}
               </div>
-              {/* PLACEHOLDER ARTWORK (the mockup's teacup-and-envelopes) — flagged in the run
-                  report: this slot would suit a commissioned illustration. */}
-              <div className="tdb-featart" aria-hidden>
-                <svg viewBox="0 0 288 186" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="150" cy="86" r="72" fill="#f5e2da" opacity=".5" />
-                  <g fill="none" stroke="#7c3a2a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                    <g transform="rotate(-9 60 140)"><rect x="24" y="116" width="74" height="48" rx="5" fill="#fdfaf5" /></g>
-                    <g transform="rotate(-3 68 132)">
-                      <rect x="34" y="108" width="74" height="48" rx="5" fill="#ffffff" />
-                      <path d="M34 113l37 26 37-26" />
-                    </g>
-                    <ellipse cx="176" cy="163" rx="52" ry="9" fill="#f3e0d6" />
-                    <path d="M140 108h72l-6 34a12 12 0 0 1-11.9 10h-36.2A12 12 0 0 1 146 142Z" fill="#fdfaf5" />
-                    <ellipse cx="176" cy="108" rx="36" ry="7.5" fill="#e8c8bc" />
-                    <path d="M212 116a15 15 0 0 1 0 22" />
-                  </g>
-                  <g fill="none" stroke="#8a9e88" strokeWidth="1.5" strokeLinecap="round" opacity=".85">
-                    <path d="M160 92c7-11-7-17 0-28" />
-                    <path d="M176 87c7-13-7-19 0-32" />
-                    <path d="M192 92c7-11-7-17 0-28" />
-                  </g>
-                </svg>
-              </div>
-              <button type="button" className="tdb-featx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg>
-              </button>
+              {briefFigures.length > 0 && (
+                <div className="tdb-briefstats">
+                  {briefFigures.map((f) => (
+                    <div key={f.key}>
+                      <b>{f.value}</b>
+                      <span>{f.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button type="button" className="tdb-briefbtn" onClick={openReview}>Read the review</button>
+              <button type="button" className="tdb-briefx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
             </div>
           )}
           {/* THE CONTROL LINE (todo rebuild P1) — the filter chips and the list controls are ONE
@@ -935,9 +930,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         )}
           </div>
-          {/* THE PRO STRIP (todo rebuild P5) — the page FOOT, 50px below the last section. */}
+          {/* THE ASSISTANT BAND (briefing-slot P2) — the page's closing note at the foot of the
+              content, full column width. The ONE Pro surface on this page. */}
           {!isProUser(currentUser) && (
-            <ProStrip hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
+            <AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
           )}
           </div>
         </div>

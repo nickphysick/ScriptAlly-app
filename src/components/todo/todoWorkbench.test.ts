@@ -573,7 +573,7 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
 describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
-    const box = page.indexOf('className="tdb-feat"'); // todo rebuild P3: the featured card
+    const box = page.indexOf('className="tdb-brief"'); // briefing-slot P1
     const board = page.indexOf('className="tdb-board"');
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
@@ -599,12 +599,13 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).toContain('onClick={() => pickView("ledger")}');
     expect(rule(".tdb-vtog")).toContain("border-radius: 10px"); // the mockup's fill segment
   });
-  it("ONE review surface repo-wide: the featured card; the banner + strip classes are extinct", () => {
+  it("ONE review surface repo-wide: the briefing slot; the banner, card + strip classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
     expect(css).not.toContain("tdb-rvhead");
     expect(page).not.toContain("tdb-rvbox");
-    expect((page.match(/className="tdb-feat"/g) ?? []).length).toBe(1);
-    expect(page).not.toContain(">Open it ›</button>"); // superseded by View
+    expect(page).not.toContain("tdb-feat"); // the featured card is superseded
+    expect((page.match(/className="tdb-brief"/g) ?? []).length).toBe(1);
+    expect(page).not.toContain(">Open it ›</button>");
   });
 });
 
@@ -917,7 +918,10 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-ws")).toContain("padding: var(--tdb-hero-gap) 0 0"); // the hero→panel gap (the column owns the outer gutters)
+    // (briefing-slot fix) the hero→panel padding is GONE — there is no panel, and it was one of
+    // three stacked owners of the gap under the header rule. The first element below the rule
+    // now supplies the whole gap; .tdb-ws contributes nothing.
+    expect(rule(".tdb-ws")).toContain("padding: 0");
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-sec")).toContain("margin: 46px 0 5px"); // todo rebuild P1: the typographic rhythm
     expect(rule(".tdb-grid")).toContain("gap: 14px"); // P3: the grid gap still clears the sticker block

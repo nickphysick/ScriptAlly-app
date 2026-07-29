@@ -6,7 +6,7 @@
  *
  * Band (relationship pill · stars · pencil) → identity (avatar, Playfair name, italic agency, mono
  * meta) → your history → wishlist → materials wanted → note preview → footer (Log query ·
- * Submissions page), with the closed-for-submissions stamp over the whole face when their door is
+ * View website), with the closed-for-submissions stamp over the whole face when their door is
  * shut. Every value is derived in src/lib/agentList.ts; nothing here is stored.
  *
  * Two locked-component rules hold: status visuals are the real `StatusDot` (never a local SVG
@@ -23,6 +23,7 @@ import "flag-icons/css/flag-icons.min.css";
 import {
   agentRelationship,
   agentStateClass,
+  agentCardDims,
   cardHistory,
   closedStampDate,
   isDoorOpen,
@@ -72,11 +73,21 @@ interface AgentCardProps {
   onEdit: (agentId: string) => void;
   /** Log a query against this agent — preselects them in the focus form. */
   onLogQuery: (agent: Agent) => void;
+  /** Load-stagger delay, set by the grid (the row depends on the live column count). */
+  style?: React.CSSProperties;
+  /** Motion state driven by the grid: arriving, leaving, or settled for a FLIP measurement. */
+  motionClass?: string;
 }
 
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor }) => {
+export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscripts, activities, onEdit, onLogQuery, flipped = false, editor, style, motionClass }) => {
+  // Colour = your history; the door rides as ink (hatch + pill) and, when nothing of yours is
+  // live, as the dim class. Three independent facts, three independent classes.
   const stateClass = agentStateClass(agent, queries);
   const open = isDoorOpen(agent);
+  // The hush and the dim answer the SAME question — closed door, nothing of yours live — so
+  // they share one derivation rather than drifting apart.
+  const hushed = agentCardDims(agent, queries);
+  const cardClasses = `${stateClass}${open ? "" : " s-closed"}${hushed ? " s-dim s-hush" : ""}`;
   const history = cardHistory(agent, queries, manuscripts);
   const { shown, more } = wishlistChips(agent);
   const materials = materialsSummary(agent);
@@ -89,7 +100,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
   const locationText = (agent.city || "").trim() || countryName(agent.country) || "";
 
   return (
-    <div className={`agl-scene ${stateClass}`}>
+    <div className={`agl-scene ${cardClasses}${motionClass ? ` ${motionClass}` : ""}`} style={style} data-agent-card={agent.id}>
       <div className={`agl-rotor${flipped ? " flipped" : ""}`}>
         <div className="agl-facef">
           <div className="agl-acard">
@@ -138,7 +149,11 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
               </div>
             </div>
 
-            <div className="agl-body">
+            {/* THE HUSHED BODY (agent-list-fixes P2): with the door closed and nothing of yours
+                live there is nothing to act on and nothing to read, so the body goes and the
+                stamp takes the vacated space. An ACTIVE query always renders in full — the same
+                exception the dim rule makes. */}
+            {!hushed && <div className="agl-body">
               <div>
                 <div className="agl-sect">Your history</div>
                 <div className="agl-hist">
@@ -190,7 +205,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
                   {preview.text}
                 </div>
               )}
-            </div>
+            </div>}
 
             {!open && (
               <div className="agl-stamp" aria-hidden="true">
@@ -224,7 +239,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, queries, manuscript
                   }
                 }}
               >
-                Submissions page
+                View website
               </button>
             </div>
           </div>

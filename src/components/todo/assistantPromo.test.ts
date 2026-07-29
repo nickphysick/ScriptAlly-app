@@ -21,53 +21,61 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("todo rebuild P5 — THE PRO STRIP (supersedes the blue sticker)", () => {
-  const strip = promo.slice(promo.indexOf("export const ProStrip"), promo.indexOf("export const AssistantModal"));
-  it("the component IS the foot strip: a slate PRO pill, a Playfair title, one line of body, a slate link", () => {
-    expect(strip).toContain('<div className="tdb-prostrip">');
-    expect(strip).toContain('<span className="tdb-prostrip-pill">PRO</span>');
-    expect(strip).toContain('<div className="tdb-prostrip-t">Hand over the housekeeping</div>');
-    expect(strip).toContain('<button type="button" className="tdb-prostrip-lk" onClick={onPreview}>Meet the assistant →</button>');
-    // the blue sticker and the colophon before it are both extinct (markup + name)
+describe("briefing-slot P2 — THE ASSISTANT BAND (supersedes the Pro strip)", () => {
+  const band = promo.slice(promo.indexOf("export const AssistantBand"), promo.indexOf("export const AssistantModal"));
+  it("the component IS the band: slate PRO pill, Playfair title, one derived line, slate button", () => {
+    expect(band).toContain('<div className="tdb-asst">');
+    expect(band).toContain('<span className="tdb-asstpill">');
+    expect(band).toContain("SCRIPTALLY PRO");
+    expect(band).toContain('<div className="tdb-asstt">Hand over the housekeeping</div>');
+    expect(band).toContain('className="tdb-asstbtn" onClick={onPreview}>Meet the assistant</button>');
+    // every earlier Pro surface on this page is extinct
+    expect(promo).not.toContain("ProStrip");
     expect(promo).not.toContain("ProSticker");
     expect(promo).not.toContain("spine-pro");
-    expect(promo).not.toContain("tdb-colo");
+    expect(promo).not.toContain("tdb-colo"); // the colophon
     expect(promo).not.toContain("ProBanner");
   });
-  it("NO BLUE FILL and no heavy shadow — card surface, hairline, radius 14, at the page foot", () => {
-    const r = rule(".tdb-prostrip");
-    expect(r).toContain("background: var(--card, #fdfaf5)");
-    expect(r).toContain("border: 1px solid var(--line)");
-    expect(r).toContain("border-radius: 14px");
-    expect(r).toContain("margin-top: 50px"); // 50px below the last section
-    expect(r).not.toContain("box-shadow");
-    expect(r).not.toContain("#c2cfda"); // the pastille-blue offset block does not follow it here
-    // slate survives only as the pill fill and the link ink (Pro's colour, not a card fill)
-    expect(rule(".tdb-prostrip-pill")).toContain("background: #6A89A7");
-    expect(rule(".tdb-prostrip-lk")).toContain("color: #6A89A7");
+  it("the sticker tokens: warm-white ground, 1.5px ink border, the 4px pastille-blue block", () => {
+    const r = rule(".tdb-asst");
+    expect(r).toContain("background: #fdf6f2");
+    expect(r).toContain("border: 1.5px solid #3a1c14");
+    expect(r).toContain("box-shadow: 4px 4px 0 #c2cfda");
+    expect(r).toContain("border-radius: 13px");
+    expect(r).toContain("margin-top: 56px"); // generous space above, at the content's foot
+    expect(rule(".tdb-asstpill")).toContain("background: #6A89A7");
+    expect(rule(".tdb-asstpill")).toContain("border: 1px solid #587991");
+    expect(rule(".tdb-asstbtn")).toContain("background: #6A89A7");
+    expect(rule(".tdb-asstbtn")).toContain("margin-left: auto"); // pinned to the band's end
+  });
+  it("THE BLUE SHADOW IS UNIQUE — one blue sticker in the app", () => {
+    expect((css.match(/4px 4px 0 #c2cfda/g) ?? []).length).toBe(1);
+    const shellCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
+    expect(shellCss).not.toContain("#c2cfda");
   });
   it("the count is live-derived from props, never hardcoded; the copy is option 5's", () => {
-    expect(strip).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
-    expect(strip).not.toMatch(/\d+ of your \d+/); // no literal numbers baked in
-    expect(strip).not.toMatch(/hours?/i); // the hours clause stays omitted (never fabricated)
+    expect(band).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
+    expect(band).not.toMatch(/\d+ of your \d+/);
+    expect(band).not.toMatch(/hours?/i);
   });
-  it("gating + wiring: mounted only for non-Pro, at the page FOOT, opening the preview modal", () => {
+  it("gating + wiring: non-Pro only, at the page FOOT, opening the preview modal", () => {
     expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain("<ProStrip hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
-    // it sits AFTER the board, not in a top-right band
-    expect(page.indexOf("<ProStrip")).toBeGreaterThan(page.indexOf('<div className="tdb-board">'));
+    expect(page).toContain("<AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
+    expect(page.indexOf("<AssistantBand")).toBeGreaterThan(page.indexOf('<div className="tdb-board">'));
     expect(page).not.toContain("tdb-stickerseat");
-    expect(page).not.toContain("<ProBanner");
-    expect(page).not.toContain('onWhatsInPro={() => onNavigate("plans")}');
   });
-  it("NO dismiss control — the strip cannot be closed (the sticker and colophon had none either)", () => {
-    expect(strip).not.toMatch(/dismiss|onClose|onDismiss/i);
-    expect(strip).not.toContain("✕");
-    expect(strip).not.toMatch(/aria-label="Close"/i);
+  it("EXACTLY ONE Pro surface on the page — and NO dismiss control (it is the closing note)", () => {
+    expect((page.match(/<AssistantBand/g) ?? []).length).toBe(1);
+    for (const gone of ["ProStrip", "ProSticker", "ProBanner", "tdb-prostrip", "spine-pro", "tdb-colo"]) {
+      expect(page).not.toContain(gone);
+      expect(css).not.toContain(gone);
+    }
+    expect(band).not.toMatch(/dismiss|onClose|onDismiss/i);
+    expect(band).not.toContain("✕");
   });
-  it("the colleague banner stays EXTINCT (bounded: FocusFlow's .tdb-propill and the new .tdb-prostrip are live namesakes)", () => {
+  it("the colleague banner stays EXTINCT (bounded: FocusFlow's .tdb-propill is a live namesake)", () => {
     for (const f of [promo, page, css]) {
-      expect(f).not.toMatch(/tdb-pro(?!pill|strip)/);
+      expect(f).not.toMatch(/tdb-pro(?!pill)/);
     }
     expect(promo).not.toContain("Leave the admin to me");
     expect(page).toContain('// TODO(pro-assistant): replace canned theatre with real single-task free run ("Try one free")');

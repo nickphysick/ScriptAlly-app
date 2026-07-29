@@ -13,6 +13,7 @@ import {
   blankDraft,
   legacySocials,
   validateDraft,
+  draftDirty,
   diffDraft,
   isDiffEmpty,
   nrnState,
@@ -82,8 +83,14 @@ describe("agentDraft · validation on Done", () => {
   const ok = draftFromAgent(mkAgent({}));
 
   it("name and agency are required, and route to the Contact tab", () => {
-    expect(validateDraft({ ...ok, name: "  " })).toEqual({ tab: "contact", msg: "Agent name is required." });
-    expect(validateDraft({ ...ok, agency: "" })).toEqual({ tab: "contact", msg: "Agency is required." });
+    // NAME **OR** AGENCY (the validation-trap fix): either alone is a complete record; only both
+    // empty is blocked. Requiring both trapped an existing agency-only record — unsaveable and
+    // unrevertable — even though the app renders exactly that state as valid.
+    expect(validateDraft({ ...ok, name: "  " })).toBeNull(); // agency-only saves
+    expect(validateDraft({ ...ok, agency: "" })).toBeNull(); // agent-name-only saves
+    expect(validateDraft({ ...ok, name: " ", agency: "  " })).toEqual({ tab: "contact", msg: "Give this record an agent name or an agency." });
+    // an EXISTING agency-only record opens and re-saves without touching a field
+    expect(validateDraft({ ...ok, name: "", agency: "Penhallow Literary" })).toBeNull();
   });
 
   it("response weeks is validated ONLY when non-empty (amendment A)", () => {
@@ -179,5 +186,25 @@ describe("agentDraft · no-response-means-no tri-state (amendment A)", () => {
   it("true reads as the pass", () => {
     expect(nrnState(true)).toBe("on");
     expect(nrnSubtitle(true)).toBe("Past the window, treat silence as a pass.");
+  });
+});
+
+describe("draftDirty — the discard confirmation's gate (agent-list-fixes P4)", () => {
+  const base = draftFromAgent(mkAgent({}));
+  const clean = { ...base, name: "", agency: "", email: "", website: "", city: "", country: "", mswlNotes: "", responseWeeks: "", methodOther: "", genres: [], socials: [], starRating: undefined, noResponseMeansNo: undefined, materials: base.materials.map((m) => ({ ...m, on: false })) };
+  it("an untouched card is clean — discard goes straight through", () => {
+    expect(draftDirty(clean)).toBe(false);
+    expect(draftDirty(null)).toBe(false);
+  });
+  it("ANY typed text makes it dirty", () => {
+    for (const k of ["name", "agency", "email", "website", "mswlNotes", "responseWeeks"] as const) {
+      expect(draftDirty({ ...clean, [k]: "x" }), k).toBe(true);
+    }
+  });
+  it("a picked value counts too — genres, a star, the no-reply switch, a material", () => {
+    expect(draftDirty({ ...clean, genres: ["Crime"] })).toBe(true);
+    expect(draftDirty({ ...clean, starRating: 3 })).toBe(true);
+    expect(draftDirty({ ...clean, noResponseMeansNo: false })).toBe(true); // stated false IS a statement
+    expect(draftDirty({ ...clean, materials: [{ ...clean.materials[0], on: true }, ...clean.materials.slice(1)] })).toBe(true);
   });
 });

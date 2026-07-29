@@ -1,0 +1,44 @@
+/**
+ * SHARED MOTION VOCABULARY — the app's entrance and exit.
+ *
+ * ⚠️ THESE ARE APP-WIDE, CONSUMED BY MORE THAN ONE PAGE. Do not scope them back into a component
+ * stylesheet, and never define a second keyframe that does the same job under another name. One
+ * `rise`, one `fall`, everywhere — the whole point is that a card arriving on the agent list and a
+ * row arriving in the Queries Hub read as the same gesture.
+ *
+ * `rise`  — 7px lift + fade. The considered entrance. 0.28s on load, 0.34s on an arrival (slower,
+ *           so a thing appearing because YOU asked for it is legible as its own event).
+ * `fall`  — 5px UP + fade, 0.16s. The quick exit. It lifts away rather than settling down: an exit
+ *           that sinks reads as something dropping out of the world, and the house convention (the
+ *           edit drawer does the same) is a quick exit against a considered entrance.
+ *
+ * TRAP — never put `var()` inside a keyframe percentage selector; it fails silently.
+ * TRAP — these animations use `fill-mode: both`, and a FILLED animation outranks an inline
+ *        `transform` in the cascade. Any element that has run one must be given `animation: none`
+ *        before its position is measured for a FLIP, or the transform is silently ignored. The
+ *        `.sa-settled` class below exists for exactly that, and carries `!important` because it has
+ *        to beat the animation shorthand that set it running.
+ *
+ * Consumed by: the agent list (page load, add, discard, save). The parked `queries-hub-v4` prompt
+ * asserts this keyframe already exists on the Hub — it never did; when that prompt is run it must
+ * ADOPT these rather than define its own.
+ */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fall {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-5px); }
+}
+
+/* The settled state: mandatory before any FLIP measurement. See the trap note above. */
+.sa-settled { animation: none !important; }
+
+/* Motion is an enhancement, never the mechanism — every one of these states must still READ
+   correctly with animation off, which is what reduced motion gets. */
+@media (prefers-reduced-motion: reduce) {
+  .sa-rise, .sa-fall { animation: none !important; }
+}
