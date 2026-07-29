@@ -28,7 +28,7 @@ import {
   materialUsage, materialUsageLine, funnelStages, medianReplyDays, daysToWeeks, formatRate,
 } from "../../lib/packageMetrics";
 import { PackageSaveFields } from "./PackageWorkshop";
-import { WorkshopEmpty } from "./WorkshopEmpty";
+import { WorkshopEmpty, firstRunState } from "./WorkshopEmpty";
 
 /** An in-memory draft (not persisted until Save). Keyed by package id, or a temp id when new. */
 interface Draft { name: string; sel: SlotSelection; isNew: boolean; dirty: boolean }
@@ -501,8 +501,9 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
   // band) INSTEAD of the sidebar+grid, because an empty sidebar beside an empty grid teaches nothing.
   // Materials but no packages → the sidebar+grid render normally and the PACKAGES section degrades to
   // its empty form, with the steps strip advanced to 2. Both derived, nothing stored.
-  const nothingYet = versions.length === 0 && packages.length === 0 && newDraftIds.length === 0;
-  const noPackagesYet = versions.length > 0 && packages.length === 0 && newDraftIds.length === 0;
+  const firstRun = firstRunState(versions.length, packages.length, newDraftIds.length);
+  const nothingYet = firstRun === "empty";
+  const noPackagesYet = firstRun === "packages-only";
 
   if (nothingYet && !matMode) {
     return (

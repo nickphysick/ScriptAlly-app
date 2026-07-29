@@ -59,6 +59,20 @@ export function activeStep(materialCount: number, packageCount: number): 1 | 2 |
   return 3;
 }
 
+/**
+ * Which first-run screen the Workshop tab owes, derived from what exists. Named and exported so the
+ * rule is testable and stated once, rather than living as two inline expressions.
+ *
+ * ⚠️ THE DRAFT CLAUSE. An unsaved draft counts as a package for this decision: you have one in
+ * progress, so you get the grid, not the first-run screen. Without it, starting a package from the
+ * empty state would bounce you straight back to the empty state.
+ */
+export type FirstRunState = "empty" | "packages-only" | "populated";
+export function firstRunState(materialCount: number, packageCount: number, draftCount: number): FirstRunState {
+  if (packageCount > 0 || draftCount > 0) return "populated";
+  return materialCount === 0 ? "empty" : "packages-only";
+}
+
 export interface WorkshopEmptyProps {
   versions: ManuscriptVersion[];
   /** Open the materials editor on a given type (the same editor the sidebar's "Edit materials" opens). */
