@@ -287,3 +287,38 @@ describe("notes-and-tasks P4 — the record + the tour", () => {
     expect(ph).toContain("svh-btn-primary");
   });
 });
+
+describe("notes gaps — adding another, and removing one (found in live use)", () => {
+  it("REGRESSION: the add affordance PERSISTS once notes exist (the empty card is gone by then)", () => {
+    // the bug: Lane's `onAdd` is a dead prop (declared, never destructured/rendered), so the only
+    // add affordance was the empty-state card — once a note existed there was NO way to write another
+    // (the hero's button opens TASK mode). A dashed tile now closes the notes grid.
+    expect(page).toContain('<button type="button" className="tdb-ntadd" onClick={() => openComposer("note")}>＋ Write a note</button>');
+    // it renders as a CHILD of the nt Lane (the grid path, i.e. when notes exist), not the empty node
+    const ntLane = page.slice(page.indexOf('<Lane cls="nt"'), page.indexOf("</Lane>", page.indexOf('<Lane cls="nt"')));
+    expect(ntLane).toContain("tdb-ntadd");
+    expect(ntLane).toContain("{vNt.map((c) => renderCard(c))}");
+    // and it steps aside while the composer occupies the grid (no double composer entry point)
+    expect(ntLane).toContain('{composerAt !== "cards" && (');
+  });
+
+  it("a note can be DELETED — removal is its completion (it is never ticked)", () => {
+    const rc = page.slice(page.indexOf("function renderUserCard"), page.indexOf("function renderCard"));
+    expect(rc).toContain('className="tdb-ntc-del"');
+    expect(rc).toContain("onClick={() => deleteUserNote(c)}");
+    expect(rc).toContain("aria-label={`Delete “${c.title}”`}");
+    // it sits on BOTH natures (the band, above the nature branch) — a task can be ticked OR removed
+    expect(rc.indexOf("tdb-ntc-del")).toBeLessThan(rc.indexOf("isTask ? ("));
+  });
+
+  it("delete goes through the existing store, undoes by re-creating the SAME id, and fails visibly", () => {
+    const del = page.slice(page.indexOf("async function deleteUserNote"), page.indexOf("const composerCanSave"));
+    expect(del).toContain("await deleteUserTask(c.userTaskId)"); // the existing write path, no fork
+    // P1's no-silent-no-op rule covers delete too
+    expect(del).toContain('flash("Couldn’t delete that — try again?", { label: "Try again"');
+    // undo restores the SAME document id through addUserTask (which accepts a caller id since P1)
+    expect(del).toContain('label: "Undo"');
+    expect(del).toContain("addUserTask({ id: c.userTaskId, text: c.title, detail: c.detail, dueDate: c.dueYmd, surfaceOffset: c.surfaceOffset })");
+    expect(page).toContain("addUserTask, updateUserTask, deleteUserTask,"); // destructured from the db context
+  });
+});

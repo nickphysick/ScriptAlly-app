@@ -452,6 +452,15 @@
 .tdb-ntc-pin { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; color: #a89a86; }
 .tdb-ntc-tick { margin-left: auto; width: 19px; height: 19px; flex: 0 0 auto; border-radius: 50%; border: 1.5px solid var(--nt-task-line); background: #fff; cursor: pointer; }
 .tdb-ntc-tick:hover { border-color: #8aa084; background: #f0f4ee; }
+/* notes-gaps — the card's delete (quiet until the card is hovered/focused) + the persistent
+   "write another" tile that closes the notes grid. */
+.tdb-ntc-del { margin-left: auto; width: 18px; height: 18px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 5px; border: none; background: none; color: #8a7d6e; font-size: 11px; line-height: 1; cursor: pointer; opacity: 0; transition: opacity 0.12s, background 0.12s; }
+.tdb-ntc:hover .tdb-ntc-del, .tdb-ntc-del:focus-visible { opacity: 1; }
+.tdb-ntc-del:hover { background: rgba(58, 28, 20, 0.08); color: #3a1c14; }
+@media (prefers-reduced-motion: reduce) { .tdb-ntc-del { transition: none; } }
+.tdb-ntadd { min-height: 84px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 12px; border: 1.5px dashed var(--nt-empty-bd); background: var(--nt-empty-bg); color: #8a7d6e; font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color 0.12s, color 0.12s; }
+.tdb-ntadd:hover { border-color: #c3b28a; color: #4d4238; }
+@media (prefers-reduced-motion: reduce) { .tdb-ntadd { transition: none; } }
 /* hero-pair P4 — the styled blocking-choice dialog (window.confirm's replacement) */
 .tdb-askwrap { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; }
 .tdb-askscrim { position: absolute; inset: 0; background: rgba(30, 26, 22, 0.4); }

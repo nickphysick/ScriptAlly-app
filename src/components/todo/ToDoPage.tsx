@@ -196,7 +196,7 @@ type ToastAction = { label: string; fn: () => void };
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
-    addUserTask, updateUserTask, upsertTaskFlag, updateUserProfile,
+    addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
   const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
@@ -830,6 +830,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // The generic "add a note" affordances (the Notes section, the ledger add-row) open note mode;
   // the hero's "Add task or note" opens task mode.
   function addTask() { openComposer("note"); }
+  // notes-gaps — DELETE a note/task. A note is deleted or edited, never ticked (the two-natures
+  // law), so removal is the note's completion. Undo re-creates the SAME document id through the
+  // existing addUserTask (no new write path); a failed delete surfaces Try again — the P1
+  // no-silent-no-op rule applies to every write, not just the composer's.
+  async function deleteUserNote(c: BoardCard) {
+    if (!c.userTaskId) return;
+    try {
+      await deleteUserTask(c.userTaskId);
+    } catch {
+      flash("Couldn’t delete that — try again?", { label: "Try again", fn: () => deleteUserNote(c) });
+      return;
+    }
+    flash(`Deleted — “${c.title}”`, {
+      label: "Undo",
+      fn: async () => {
+        try {
+          await addUserTask({ id: c.userTaskId, text: c.title, detail: c.detail, dueDate: c.dueYmd, surfaceOffset: c.surfaceOffset });
+        } catch {
+          flash("Couldn’t restore that — try again?", { label: "Try again", fn: () => undefined });
+        }
+      },
+    });
+  }
   const composerCanSave = !!composerDraft.trim() && (composerMode === "note" || !!composerDate);
   // save-and-today P1 — THE MACHINE. On save → PENDING (button disabled, fields read-only, Esc off,
   // the in-flight id hidden from the board so the optimistic insert never flickers). The write
@@ -1007,6 +1030,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {composerAt === "cards" && vNt.length > 0 && renderComposer()}
             {overlayCards("nt")}
             {vNt.map((c) => renderCard(c))}
+            {/* notes-gaps: the add affordance must persist once notes EXIST (the empty-state card is
+                gone by then, and the hero's button opens task mode) — a dashed tile closes the grid. */}
+            {composerAt !== "cards" && (
+              <button type="button" className="tdb-ntadd" onClick={() => openComposer("note")}>＋ Write a note</button>
+            )}
           </Lane>
           )}
         </div>
@@ -1751,6 +1779,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-ntc-b">
           <i className="tdb-ntc-tag">{isTask ? "✓ YOUR TASK" : "✎ NOTE"}</i>
           {promoted && <i className="tdb-ntc-tag hot">{c.dueState === "overdue" ? "OVERDUE" : "DUE TODAY"}</i>}
+          {/* removal is a note's completion (it is never ticked); the task can be ticked OR removed */}
+          <button type="button" className="tdb-ntc-del" onClick={() => deleteUserNote(c)} aria-label={`Delete “${c.title}”`} title="Delete">✕</button>
         </div>
         <div className="tdb-ntc-in">
           <h4 className="tdb-ntc-ttl">{c.title}</h4>
