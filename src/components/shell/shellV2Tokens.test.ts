@@ -28,9 +28,11 @@ const BAKED: Record<string, string> = {
   "--shell-kid-h": "37px",
   "--shell-pad-t": "14px",
   "--shell-quiet": "#b3a598",
-  "--shell-cap-radius": "20px",
-  "--shell-cap-gap": "14px",
-  "--shell-cap-shadow": "0 10px 30px rgba(58,28,20,.09)",
+  "--shell-cap-radius": "18px",
+  "--shell-cap-gap": "10px",
+  "--shell-cap-border": "1px solid #d8ccbc",
+  "--shell-rail-icon": "#a89a8a",
+  "--shell-bar-bg": "#f1ebe3",
   "--shell-gutter": "16px",
   "--shell-group": "24px",
   "--shell-within": "8px",
@@ -50,11 +52,34 @@ describe("capsule tokens — index.css", () => {
     expect(css).not.toContain("#2e2622"); // the dark umber rail
     expect(css).not.toContain("--shell-side-edge");
   });
-  it("the aliased --shell-topbar is RETIRED — the bar reads the content capsule directly", () => {
-    expect(css).not.toMatch(/--shell-topbar\s*:/); // no declaration (the retirement note may name it)
+  it("the aliased --shell-topbar stays RETIRED; the bar now joins the RAIL's chrome family", () => {
+    expect(css).not.toMatch(/--shell-topbar\s*:/);
     const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
     expect(shellCss).not.toContain("var(--shell-topbar)");
-    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*background: var\(--shell-canvas\)/s);
+    // chrome tokens: a PERMANENT fill sharing the rail's tone — no scroll state (superseded)
+    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*background: var\(--shell-bar-bg\)/s);
+    expect(css).toContain("--shell-bar-bg: #f1ebe3");
+    expect(css).toContain("--shell-rail: #f1ebe3"); // one chrome family, deliberately
+  });
+
+  it("THE LAYERED SHADOW is one token of four stops, worn by every capsule", () => {
+    const shadow = css.match(/--shell-cap-shadow:([^;]*);/s)?.[1] ?? "";
+    for (const stop of ["0 1px 2px rgba(58,28,20,.04)", "0 2px 6px rgba(58,28,20,.045)", "0 8px 18px rgba(58,28,20,.05)", "0 20px 44px rgba(58,28,20,.055)"]) {
+      expect(shadow).toContain(stop);
+    }
+    expect(shadow).not.toContain("0 10px 30px"); // the single shadow is retired
+    const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+    expect(shellCss).toMatch(/\.sv2-cap \{[^}]*box-shadow: var\(--shell-cap-shadow\)/);
+    expect(shellCss).toMatch(/\.sv2-cap \{[^}]*border: var\(--shell-cap-border\)/); // the warm edge
+  });
+
+  it("THE CAPSULE EDGE is warm — the export's cold #9e9e9e reached nothing", () => {
+    expect(css).toContain("--shell-cap-border: 1px solid #d8ccbc");
+    // never as a VALUE anywhere — comments stripped, since the correction note names it
+    const noComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(noComments).not.toContain("#9e9e9e");
+    const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+    expect(shellCss).not.toContain("#9e9e9e");
   });
 });
 
@@ -74,9 +99,11 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
     expect(dt.shellMuted).toBe("#9c8878");
   });
   it("capsule geometry", () => {
-    expect(dt.shellCapRadius).toBe(20);
-    expect(dt.shellCapGap).toBe(14);
-    expect(dt.shellCapShadow).toBe("0 10px 30px rgba(58,28,20,.09)");
+    expect(dt.shellCapRadius).toBe(18);
+    expect(dt.shellCapGap).toBe(10);
+    expect(dt.shellCapShadow).toContain("0 20px 44px rgba(58,28,20,.055)"); // the layered set
+    expect(dt.shellCapBorder).toBe("1px solid #d8ccbc");
+    expect(dt.shellBarBg).toBe("#f1ebe3");
   });
   it("spacing scale", () => {
     expect(dt.shellGutter).toBe(16);

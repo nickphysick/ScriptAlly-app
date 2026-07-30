@@ -139,9 +139,13 @@ export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, no
 export const shellInset = "#efe8df"; // THE interior fill (search, chips, pills, hovers)
 export const shellLine = "#e3d9cf"; // interior hairline
 export const shellLineSoft = "#ece3da"; // soft interior hairline
-export const shellCapRadius = 20; // capsule corner (px)
-export const shellCapGap = 14; // capsule gap AND page padding (px)
-export const shellCapShadow = "0 10px 30px rgba(58,28,20,.09)"; // the float
+export const shellCapRadius = 18; // capsule corner (px) — chrome tokens
+export const shellCapGap = 10; // capsule gap AND page padding (px) — chrome tokens
+// THE LAYERED SHADOW — four stops, one token, every capsule.
+export const shellCapShadow =
+  "0 1px 2px rgba(58,28,20,.04), 0 2px 6px rgba(58,28,20,.045), 0 8px 18px rgba(58,28,20,.05), 0 20px 44px rgba(58,28,20,.055)";
+export const shellCapBorder = "1px solid #d8ccbc"; // the warm capsule edge (was a cold #9e9e9e in the export)
+export const shellBarBg = "#f1ebe3"; // the header bar joins the rail's chrome family
 export const shellGutter = 16; // sidebar side gutter (px)
 export const shellGroup = 24; // between sidebar groups (px)
 export const shellWithin = 8; // within a sidebar group (px)

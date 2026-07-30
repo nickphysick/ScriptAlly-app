@@ -11,7 +11,7 @@
 /* ── the ground + the capsules ── */
 @media (min-width: 768px) {
   .sv2-app { padding: var(--shell-cap-gap); gap: var(--shell-cap-gap); }
-  .sv2-cap { border-radius: var(--shell-cap-radius); box-shadow: var(--shell-cap-shadow); }
+  .sv2-cap { border-radius: var(--shell-cap-radius); box-shadow: var(--shell-cap-shadow); border: var(--shell-cap-border); }
 }
 /* The content plane — the third capsule; the stage scrolls INSIDE it. */
 .sv2-plane { background: var(--shell-canvas); overflow: hidden; }
@@ -46,7 +46,7 @@
   border-radius: 13px;
   display: grid;
   place-items: center;
-  color: #a89a8a; /* resting rib ink (mockup literal) */
+  color: var(--shell-rail-icon); /* resting rib ink — tokenised (chrome tokens) */
   margin-bottom: calc(var(--shell-row-h) - 40px);
   transition: background 0.16s, color 0.16s;
 }
@@ -461,7 +461,9 @@
     height: 58px;
     flex: none;
     padding: 0 26px;
-    background: var(--shell-canvas); /* the bar IS the content capsule (--shell-topbar retired) */
+    /* THE HEADER BAR shares the rail's tone — one chrome family, a PERMANENT fill and border
+       (no scroll state: that idea is superseded). */
+    background: var(--shell-bar-bg);
     border-bottom: 1px solid var(--shell-line-soft);
   }
 }
