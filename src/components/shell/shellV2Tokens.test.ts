@@ -257,3 +257,62 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail glyph grows to match
   });
 });
+
+/**
+ * THE RAIL'S MOTION (chrome refinements P3). jsdom cannot run a transition or compute a
+ * transform, so these lock the CONTRACT: route-driven position, transform-only movement,
+ * silence on mount, the weight signal, and press feedback that cannot fight the indicator.
+ */
+describe("the sliding rail indicator", () => {
+  const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+  const rail = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+
+  it("is ROUTE-driven, not click-driven — so back/forward move it too", () => {
+    expect(rail).toContain("const railIndex = SHELL_RAIL.findIndex((r) => r.key === activeKey);");
+    expect(rail).toContain("const activeKey = shellSectionKeyForPath(pathname);");
+    // the position comes from that index alone — no click handler writes it
+    expect(rail).toContain("translateY(calc(${railIndex} * var(--shell-row-h)))");
+    expect(rail).not.toMatch(/setRailIndex|setIndicator(?!Ready)/);
+  });
+
+  it("moves by TRANSFORM only — never `top`", () => {
+    const pill = shellCss.match(/\.sv2-railpill \{([^}]*)\}/)?.[1] ?? "";
+    expect(pill).toContain("top: 0"); // a static origin; the movement is the transform
+    expect(shellCss).toMatch(/\.sv2-railpill\.ready \{ transition: transform 320ms/);
+    expect(shellCss).not.toMatch(/\.sv2-railpill[^{]*\{[^}]*transition:[^;]*\btop\b/);
+  });
+
+  it("is SILENT ON MOUNT — the transition arrives a frame later, so it cannot slide in", () => {
+    expect(rail).toContain("const [indicatorReady, setIndicatorReady] = useState(false);");
+    expect(rail).toContain("window.requestAnimationFrame(() => setIndicatorReady(true))");
+    expect(rail).toContain('className={`sv2-railpill${indicatorReady ? " ready" : ""}`}');
+    // the bare class carries NO transition — only .ready does
+    const pill = shellCss.match(/\.sv2-railpill \{([^}]*)\}/)?.[1] ?? "";
+    expect(pill).not.toContain("transition");
+  });
+
+  it("the pill IS the active fill — the rib's own background goes transparent", () => {
+    expect(shellCss).toMatch(/\.sv2-railnav \.sv2-rib\.on \{ background: transparent; \}/);
+    expect(shellCss).toMatch(/\.sv2-railpill \{[^}]*background: var\(--shell-ground\)/s);
+  });
+
+  it("WEIGHT ON ACTIVE: 1.8 → 2.4, styled on the rendered SVG from the parent — TypeGlyph untouched", () => {
+    expect(shellCss).toMatch(/\.sv2-rib svg \{[^}]*stroke-width: 1\.8/s);
+    expect(shellCss).toMatch(/\.sv2-rib\.on svg \{ stroke-width: 2\.4; \}/);
+    expect(shellCss).toMatch(/\.sv2-rib svg \{[^}]*transition: stroke-width/s);
+    expect(rail).not.toContain("TypeGlyph"); // the rail draws lucide icons; the locked component is not involved
+  });
+
+  it("PRESS feedback scales the icon, not the pill — they cannot fight", () => {
+    expect(shellCss).toMatch(/\.sv2-rib:active \{ transform: scale\(\.92\)/);
+    expect(shellCss).toMatch(/\.sv2-frow:active[^{]*\{ transform: scale\(\.985\)/);
+    expect(shellCss).toMatch(/\.sv2-rib:active \{[^}]*120ms/s);
+    expect(shellCss).not.toMatch(/\.sv2-railpill[^{]*:active/); // the pill has no press state
+  });
+
+  it("REDUCED MOTION: the indicator jumps and the press does nothing", () => {
+    const rm = shellCss.slice(shellCss.indexOf("@media (prefers-reduced-motion: reduce)"));
+    expect(rm).toContain(".sv2-railpill.ready { transition: none; }");
+    expect(rm).toMatch(/\.sv2-rib:active[^{]*\{ transform: none; \}/);
+  });
+});

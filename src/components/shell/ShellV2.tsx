@@ -142,6 +142,14 @@ export const ShellRail: React.FC<{
   const { currentUser } = useScriptAllyDb();
   const counts = useShellNavCounts();
   const activeKey = shellSectionKeyForPath(pathname);
+  // The indicator's position IS the route's rib — one derivation, so back/forward move it too.
+  const railIndex = SHELL_RAIL.findIndex((r) => r.key === activeKey);
+  // Silent on mount: paint it in place, THEN allow the transition.
+  const [indicatorReady, setIndicatorReady] = useState(false);
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => setIndicatorReady(true));
+    return () => window.cancelAnimationFrame(id);
+  }, []);
   const activePage = shellPageForPath(pathname)?.page.key ?? null;
   const initials = (currentUser?.name ?? "")
     .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -220,6 +228,18 @@ export const ShellRail: React.FC<{
           the flyout footer advertises it, and the panel's tuck control keeps collapse
           discoverable.) */}
       <div className="sv2-railnav">
+        {/* THE SLIDING INDICATOR (chrome refinements). Driven by the ACTIVE ROUTE, not by a
+            click handler — a click-driven pill desyncs the moment you use back/forward. It
+            moves by transform only (never `top`), and it is SILENT ON MOUNT: the transition
+            class is added one frame after the first paint, so it cannot slide down from the
+            top of the rail on every page load. Hidden when no rib is lit. */}
+        {railIndex >= 0 && (
+          <span
+            className={`sv2-railpill${indicatorReady ? " ready" : ""}`}
+            style={{ transform: `translateY(calc(${railIndex} * var(--shell-row-h)))` }}
+            aria-hidden="true"
+          />
+        )}
         {SHELL_RAIL.map((rib) => {
           const Icon = RAIL_ICONS[rib.key];
           const on = activeKey === rib.key;

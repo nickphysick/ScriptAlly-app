@@ -34,7 +34,20 @@
    two brand marks read as one line across both capsules. */
 .sv2-railhead { height: var(--shell-head-h); display: grid; place-items: center; flex: none; }
 .sv2-mark { width: 27px; height: 27px; color: var(--burg); flex: none; }
-.sv2-railnav { display: flex; flex-direction: column; align-items: center; }
+.sv2-railnav { display: flex; flex-direction: column; align-items: center; position: relative; }
+/* THE SLIDING INDICATOR — one absolutely positioned element; the active rib's own background
+   goes transparent so the pill is the only fill. TRANSFORM ONLY, never `top`. It carries no
+   transition until `.ready` lands one frame after mount, so it cannot slide in from the top of
+   the rail on first paint. */
+.sv2-railpill {
+  position: absolute; top: 0; left: 50%; margin-left: -20px;
+  width: 40px; height: 40px; border-radius: 13px;
+  background: var(--shell-ground); pointer-events: none; z-index: 0;
+}
+.sv2-railpill.ready { transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1); }
+.sv2-railnav .sv2-rib { position: relative; z-index: 1; }
+/* the pill IS the active fill now — the rib keeps only its ink */
+.sv2-railnav .sv2-rib.on { background: transparent; }
 /* Ribs — icon-only squares; tooltips carry the names (no captions in this idiom). */
 .sv2-rib {
   /* 40px hit area inside the 44px row pitch — the shared rhythm, in both components. */
@@ -50,12 +63,20 @@
   margin-bottom: calc(var(--shell-row-h) - 40px);
   transition: background 0.16s, color 0.16s;
 }
-.sv2-rib svg { width: 18px; height: 18px; }
+/* WEIGHT ON ACTIVE — a second, colour-independent signal. Styled on the RENDERED SVG from the
+   parent class; no component is touched and no prop added (the rail draws lucide icons, not the
+   locked TypeGlyph, so that component is not involved at all). */
+.sv2-rib svg { width: 18px; height: 18px; stroke-width: 1.8; transition: stroke-width 0.16s; }
+.sv2-rib.on svg { stroke-width: 2.4; }
 .sv2-rib:hover { background: var(--shell-inset); }
 /* THE ACTIVE LAW (fixes pack): active = the GROUND token — a window cut through to the page
    ground. Never pink (retired from nav states; it stays the button/content accent), never
    burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
 .sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
+/* PRESS FEEDBACK — :active only, 120ms, house easing. The press scales the ICON while the
+   indicator moves the PILL: separate elements, so they cannot fight. */
+.sv2-rib:active { transform: scale(.92); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
+.sv2-frow:active, .sv2-ff:active, .sv2-tuck:active, .sv2-railav:active { transform: scale(.985); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
 .sv2-railspacer { flex: 1; }
 /* (The dedicated expand control is retired — rail-section-select P2; section icons, the
    flyout footer and ⌘\ carry expansion now.) */
@@ -496,6 +517,9 @@
 .sv2-gsearch { width: 280px; flex: none; }
 
 @media (prefers-reduced-motion: reduce) {
+  /* the indicator JUMPS; the press does nothing */
+  .sv2-railpill.ready { transition: none; }
+  .sv2-rib:active, .sv2-frow:active, .sv2-ff:active, .sv2-tuck:active, .sv2-railav:active { transform: none; }
   .sv2-fly,
   .sv2-side,
   .sv2-rib,
