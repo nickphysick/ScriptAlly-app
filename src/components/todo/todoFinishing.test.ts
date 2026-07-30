@@ -92,10 +92,14 @@ describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)"
       expect(page).toContain(inv);
     }
   });
-  it("Today's tick: the committed row's leading dot completes via quickDone with the toast; offers keep the plain dot", () => {
-    expect(page).toContain('className="tdb-tdot tick" aria-label={`Mark done — ${c.title}`} onClick={(e) => { e.stopPropagation(); quickDone(c); }}');
-    expect(page).toContain('{c.taskType === "offer_received" ? (');
-    expect(css).toContain(".tdb-trow:hover .tdb-tdot.tick .tdb-ttick, .tdb-trow:focus-within .tdb-tdot.tick .tdb-ttick { display: inline; }");
+  it("Today's tick (save-and-today P2): the sage circle strikes IN PLACE, then completes via quickDone + toast", () => {
+    // the hover-grown dot is superseded by an always-present sage completion circle; the row is
+    // struck where it sits and only moves to the done band on the next open, so undo stays easy.
+    expect(page).toContain('className="tdb-cc"');
+    expect(page).toContain("onClick={(e) => { e.stopPropagation(); strikeThenDone(c); }}");
+    expect(page).toContain("setStrikeIds((s) => new Set(s).add(c.key));");
+    expect(page).toContain("void quickDone(c);"); // the existing completion + undo toast, unchanged
+    expect(css).toContain(".tdb-trow.done .tdb-trtx { text-decoration: line-through; }");
   });
 });
 
