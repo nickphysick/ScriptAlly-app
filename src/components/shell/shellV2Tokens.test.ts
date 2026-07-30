@@ -33,6 +33,7 @@ const BAKED: Record<string, string> = {
   "--shell-cap-border": "1px solid #d8ccbc",
   "--shell-rail-icon": "#a89a8a",
   "--shell-bar-bg": "#f1ebe3",
+  "--shell-divider": "linear-gradient(90deg, transparent, rgba(46,39,35,.16) 22%, rgba(46,39,35,.16) 78%, transparent)",
   "--shell-gutter": "16px",
   "--shell-group": "24px",
   "--shell-within": "8px",
@@ -71,6 +72,14 @@ describe("capsule tokens — index.css", () => {
     const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
     expect(shellCss).toMatch(/\.sv2-cap \{[^}]*box-shadow: var\(--shell-cap-shadow\)/);
     expect(shellCss).toMatch(/\.sv2-cap \{[^}]*border: var\(--shell-cap-border\)/); // the warm edge
+  });
+
+  it("THE FADING DIVIDER is one token, drawn as a gradient (a border cannot fade)", () => {
+    const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+    expect(shellCss).toMatch(/\.sv2-ff::before \{[^}]*background: var\(--shell-divider\)/s);
+    expect(shellCss).toMatch(/\.sv2-ff::before \{[^}]*height: 1px/s);
+    // the hard border it replaces is gone from that element
+    expect(shellCss).not.toMatch(/\.sv2-ff \{[^}]*border-top: 1px solid/s);
   });
 
   it("THE CAPSULE EDGE is warm — the export's cold #9e9e9e reached nothing", () => {

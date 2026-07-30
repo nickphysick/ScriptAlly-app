@@ -112,8 +112,11 @@
 .sv2-fct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 .sv2-ff {
   margin-top: 6px;
-  border-top: 1px solid var(--shell-line-soft);
-  padding: 8px 12px 5px;
+  /* THE FADING DIVIDER — a border cannot fade, so the hairline is a 1px gradient block drawn
+     by ::before. The rail's own chrome only; the panel partition and the top bar's base are
+     reported as candidates, not changed. */
+  position: relative;
+  padding: 9px 12px 5px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -127,6 +130,10 @@
   font-size: 11px;
   color: var(--shell-muted);
   text-align: left;
+}
+.sv2-ff::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: var(--shell-divider);
 }
 .sv2-ff:hover { color: var(--shell-ink); }
 .sv2-fkb {

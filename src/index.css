@@ -87,6 +87,9 @@
      editor mockup, whose own default is the already-warm #dfd4c6.) */
   --shell-cap-border: 1px solid #d8ccbc;
   --shell-rail-icon: #a89a8a;         /* resting rib ink — was a literal in shellV2.css */
+  /* FADING DIVIDER — a chrome hairline that stops softly rather than hard at both ends. Scoped
+     to the rail's own chrome in this pack; other candidates are reported, not changed. */
+  --shell-divider: linear-gradient(90deg, transparent, rgba(46,39,35,.16) 22%, rgba(46,39,35,.16) 78%, transparent);
   /* THE HEADER BAR joins the rail's family: one chrome tone, a permanent fill and border.
      This supersedes the hairline-on-scroll idea — there is no scroll state. */
   --shell-bar-bg: #f1ebe3;
