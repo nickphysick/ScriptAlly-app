@@ -191,3 +191,44 @@ describe("Today panel P3 — collapse, the launcher, and its neighbours", () => 
     expect(page).toContain("const [todayMin, setTodayMin] = useState<boolean>");
   });
 });
+
+describe("Today panel P4 — the sweep + the record", () => {
+  it("every selector the rebuild orphaned is EXTINCT (grep-locked)", () => {
+    for (const dead of ["tdb-tdpill", "tdb-tdmin", "tdb-tddot", "tdb-ttick", "tdb-tdot"]) {
+      expect(css).not.toContain(dead);
+      expect(page).not.toContain(dead);
+    }
+    // the old row internals went with the single-line rows (the DONE rows keep .tdb-tmid)
+    expect(css).not.toContain(".tdb-trow .tdb-tx");
+    expect(css).not.toContain(".tdb-trow .tdb-tm ");
+  });
+
+  it("themes.md records the Today panel + the save state machine as settled law", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## The Today panel (settled");
+    expect(themes).toContain("THE OVERLAY ELEVATION PAIR");
+    expect(themes).toContain("THE NO-OPACITY LAW");
+    expect(themes).toContain("THE HEADER EARNS ITS HEIGHT (46px)");
+    expect(themes).toContain("ONE PRIMARY ACTION");
+    expect(themes).toContain("THE LAUNCHER IS THE HEADER");
+    expect(themes).toContain("THE ADJACENCY RULE");
+    expect(themes).toContain("## Save state machine");
+    expect(themes).toContain("THE NO-SILENT-NO-OP LAW");
+    expect(themes).toContain("FAILURE COPY COMES FROM THE ERROR CODE, NEVER THE MESSAGE");
+    expect(themes).toContain("DESTRUCTION ASKS FIRST");
+  });
+
+  it("the tour needs no retarget: its Today stop still resolves and never named the old footer buttons", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('sel: ".tdb-today2"');
+    expect(css).toContain(".tdb-today2"); // the anchor survives the rebuild
+    for (const goneVerb of ["Add more", "Help me pick"]) expect(tour).not.toContain(goneVerb);
+  });
+
+  it("the report is on file with the rules-blocked writes called out", () => {
+    const rep = readFileSync(join(here, "..", "..", "..", "reports", "todo-save-and-today.md"), "utf8");
+    expect(rep).toContain("Writes still blocked until the rules are deployed");
+    expect(rep).toContain("firebase deploy --only firestore:rules");
+    expect(rep).toContain("completedAt");
+  });
+});
