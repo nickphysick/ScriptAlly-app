@@ -118,7 +118,7 @@ export const GATHER = {
 // (toggled from the session state) — EXIT_LEFT names the panel for intent, the class does the
 // slide. The panel-header search fades via EXIT_FADE. Everything else is IN-WRAP and exits here.
 export const EXIT_LEFT = ".spine-panel"; // the panel slides off left (the rail stays)
-export const EXIT_RIGHT = ".tdb-tdpop, .tdb-tdpill"; // the Today corner leaves
+export const EXIT_RIGHT = ".tdb-tdpop"; // the Today corner leaves (ONE node in both states since P3)
 // The furniture that fades as a focused session opens. SWEEP (briefing-slot P3): .tdb-rvbox
 // became the briefing slot; .tdb-hsearch, .tdb-lh2 and .tdb-lsech are EXTINCT (the To-do
 // rebuild retired the centred search pill and both views' lane header bars), so they are

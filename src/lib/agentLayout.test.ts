@@ -94,10 +94,12 @@ describe("the help FAB measures from the capsule, not the browser edge", () => {
     expect(
       shell,
       "the FAB stopped measuring from the content capsule — at a bare right:20 it overhangs the 14px ground gutter, which is exactly the left-correct/right-short bug this phase fixed",
-    ).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px); }");
+    // save-and-today P3 adds the ADJACENCY shift (0 on every route but /todo with the Today corner up),
+    // so the capsule-gap fix now reads through it — the gutter fix itself is unchanged.
+    ).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
     expect(
       shell,
       "the help MENU drifted off the FAB's inset — the two must move together or the menu hangs off the button it belongs to",
-    ).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px); }");
+    ).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
   });
 });

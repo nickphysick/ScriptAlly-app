@@ -57,14 +57,16 @@ describe("Today panel P2 — the header earns its height", () => {
     expect(h).toContain("background: var(--container-head-bg)");
     expect(h).toContain("border-bottom: 1px solid var(--container-head-rule)");
     // a real button, not a div with a nested control
-    expect(panel).toContain('<button type="button" className="tdb-th" onClick={() => toggleTodayMin(true)}');
-    expect(panel).toContain('aria-label="Collapse Today"');
+    // P3: the same header toggles BOTH ways and names its state
+    expect(panel).toContain("onClick={() => toggleTodayMin(!todayMin)}");
+    expect(panel).toContain("aria-expanded={!todayMin}");
+    expect(panel).toContain('aria-label={todayMin ? "Open Today" : "Collapse Today"}');
   });
   it("title + a 52px progress bar + the {done}/{total} fraction + the chevron", () => {
     expect(panel).toContain('<b className="tdb-t">Today</b>');
     expect(panel).toContain('<span className="tdb-tpbar"><i style={{ width: `${pct}%` }} /></span>');
     expect(panel).toContain("{doneN} / {total}");
-    expect(panel).toContain('<span className="tdb-chev" aria-hidden>▾</span>');
+    expect(panel).toContain('className={`tdb-chev${todayMin ? " up" : ""}`}'); // P3: one glyph, rotated
     expect(rule(".tdb-tpbar")).toContain("width: 52px");
   });
   it("the progress is DERIVED from the day's own numbers, never stored", () => {
@@ -116,5 +118,76 @@ describe("Today panel P2 — the done band + ONE footer action", () => {
     // the second ghost button is gone: exactly one primary and one roundel in the foot
     expect(panel).not.toContain("＋ Add more");
     expect(panel).not.toContain('className="tdb-btnp sm"');
+  });
+});
+
+describe("Today panel P3 — collapse, the launcher, and its neighbours", () => {
+  const corner = page.slice(page.indexOf("function renderTodayCorner"), page.indexOf("// ── save-and-today P2"));
+
+  it("ONE node in both states, so collapsing animates HEIGHT ONLY and the corner never jumps", () => {
+    expect(corner).toContain('className={`tdb-tdpop${todayMin ? " min" : ""}');
+    expect(corner).not.toContain("tdb-tdpill"); // the separate pill element is retired
+    const body = rule(".tdb-tdbody");
+    expect(body).toContain("overflow: hidden");
+    expect(body).toContain("transition: max-height 180ms ease"); // ~180ms, height only
+    expect(body).not.toMatch(/transform|opacity|width/); // nothing else animates
+    expect(rule(".tdb-tdpop.min .tdb-tdbody")).toContain("max-height: 0");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-tdbody { transition: none; } }");
+  });
+
+  it("COLLAPSED = the header alone as the launcher: Today + the outstanding count in a sage pill + chevron up", () => {
+    expect(page).toContain('<span className="tdb-cnt">{committedCards.length}</span>');
+    const cnt = rule(".tdb-cnt");
+    expect(cnt).toContain("background: var(--container-head-bg)"); // the sage family
+    expect(cnt).toContain("border-radius: 99px");
+    expect(rule(".tdb-tdpop.min .tdb-th")).toContain("border-radius: 99px"); // reads as a pill
+    // the chevron ROTATES rather than swapping glyph
+    expect(rule(".tdb-chev.up")).toContain("transform: rotate(180deg)");
+    expect(rule(".tdb-chev")).toContain("transition: transform 0.18s ease");
+  });
+
+  it("it never vanishes while items exist, and vanishes ENTIRELY when the list is empty", () => {
+    expect(corner).toContain("if (!todayShown) return null;");           // empty → no corner at all
+    expect(page).toContain("const todayActive = committedCards.length > 0 || doneN > 0;"); // what "empty" means
+    // the collapsed state is a launcher, never an absence
+    expect(corner).toContain("{renderTodayPanel()}");
+  });
+
+  it("the collapsed/expanded state PERSISTS per user across reloads", () => {
+    expect(page).toContain('localStorage.getItem("sa.todoTodayMin") === "1"');
+    expect(page).toContain('localStorage.setItem("sa.todoTodayMin", v ? "1" : "0")');
+  });
+
+  it("ADJACENCY: the help FAB steps clear of the corner's footprint — the boxes cannot overlap or abut", () => {
+    // the page publishes the clearance; the shell's FAB + menu both read it
+    expect(page).toContain('root.style.setProperty("--sa-fab-shift", shift)');
+    expect(page).toContain('!todayShown ? "0px" : todayMin ? "var(--td-fab-clear-min, 172px)" : "var(--td-fab-clear, 320px)"');
+    expect(page).toContain('root.style.removeProperty("--sa-fab-shift")'); // no other route inherits it
+    const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
+    expect(shell).toContain(".ashell-help-fab { display: flex; right: calc(20px + var(--sa-fab-shift, 0px)); }");
+    expect(shell).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
+    expect(shell).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
+    const w = rule(".tdb-wrap");
+    expect(rule(".tdb-tdpop")).toContain("width: var(--td-w)");
+    expect(rule(".tdb-tdpop.min")).toContain("max-width: var(--td-launch-max)");
+    // THE ARITHMETIC, asserted from the tokens themselves rather than eyeballed. The corner is
+    // inset 26px and the FAB 20px (14px cap gap + 6), both measured from the viewport's right edge:
+    //   corner occupies [26, 26 + width];  FAB starts at [20 + shift]
+    //   clear ⇔ 20 + shift > 26 + width  (strictly greater — abutting is a fail, not a pass)
+    const num = (name: string): number => Number(/(\d+)px/.exec(new RegExp(`${name}:\\s*(\\d+px)`).exec(w)![1])![1]);
+    const CORNER_INSET = 26, FAB_INSET = 20;
+    for (const [width, shift] of [
+      [num("--td-w"), num("--td-fab-clear")],                 // expanded
+      [num("--td-launch-max"), num("--td-fab-clear-min")],    // collapsed
+    ]) {
+      expect(FAB_INSET + shift).toBeGreaterThan(CORNER_INSET + width);
+    }
+  });
+
+  it("SESSION: the corner leaves with the board and returns, state intact", () => {
+    const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");
+    expect(stage).toContain('export const EXIT_RIGHT = ".tdb-tdpop"');
+    // the state lives in React + localStorage, not in the DOM, so leave/return preserves it
+    expect(page).toContain("const [todayMin, setTodayMin] = useState<boolean>");
   });
 });

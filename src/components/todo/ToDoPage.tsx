@@ -591,6 +591,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setAddOpen(false);
     try { localStorage.setItem("sa.todoTodayMin", v ? "1" : "0"); } catch { /* private mode */ }
   };
+  // ADJACENCY (save-and-today P3): publish how far the help "?" FAB must step left so it never
+  // overlaps or abuts the Today corner. Expanded clears the full 290px panel; collapsed clears the
+  // narrower launcher; absent clears nothing. Cleared on unmount — no other route inherits a shift.
+  useEffect(() => {
+    const root = document.documentElement;
+    const shift = !todayShown ? "0px" : todayMin ? "var(--td-fab-clear-min, 172px)" : "var(--td-fab-clear, 320px)";
+    root.style.setProperty("--sa-fab-shift", shift);
+    return () => { root.style.removeProperty("--sa-fab-shift"); };
+  }, [todayShown, todayMin]);
   useEffect(() => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (todayActive) { setTodayShown(true); setTodayLeaving(false); return; }
@@ -1401,18 +1410,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE WORKSPACE SHELL (todo-fix48) — the Today corner: the floating card (or its minimised
   // pill), bottom-right of the workspace, absent when the list is empty. The card reuses the
   // one renderTodayPanel (checklist + Work the list) and adds a minimise control.
+  // ── save-and-today P3 — COLLAPSE + THE LAUNCHER (design-refs/today-panel.html · frame 2).
+  // ONE container in both states, so collapsing animates HEIGHT ONLY and the corner never jumps:
+  // the 46px header is always mounted and IS the launcher when collapsed (carrying the outstanding
+  // count in a sage pill, chevron up); the body below it collapses to nothing. The chevron ROTATES
+  // rather than swapping glyph. State persists per user (localStorage, via toggleTodayMin), so it
+  // survives a reload AND the session leave/return. Empty → the whole corner is absent (todayShown).
   function renderTodayCorner() {
     if (!todayShown) return null;
-    if (todayMin) {
-      return (
-        <button type="button" className="tdb-tdpill" onClick={() => toggleTodayMin(false)} aria-label="Open Today" title="Open Today">
-          <span className="tdb-tddot" aria-hidden />Today · {committedCards.length}
-        </button>
-      );
-    }
     return (
-      <div className={`tdb-tdpop${todayLeaving ? " out" : " in"}`} role="complementary" aria-label="Today">
-        <button type="button" className="tdb-tdmin" aria-label="Minimise Today" title="Minimise" onClick={() => toggleTodayMin(true)}>–</button>
+      <div
+        className={`tdb-tdpop${todayMin ? " min" : ""}${todayLeaving ? " out" : " in"}`}
+        role="complementary"
+        aria-label="Today"
+      >
         {renderTodayPanel()}
       </div>
     );
@@ -1435,14 +1446,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     };
     return (
       <div className="tdb-today2">
-        <button type="button" className="tdb-th" onClick={() => toggleTodayMin(true)} aria-expanded aria-label="Collapse Today">
+        {/* the header is the collapse control in BOTH states — expanded it shows the progress pair,
+            collapsed it becomes the launcher and shows the outstanding count in a sage pill */}
+        <button
+          type="button"
+          className="tdb-th"
+          onClick={() => toggleTodayMin(!todayMin)}
+          aria-expanded={!todayMin}
+          aria-label={todayMin ? "Open Today" : "Collapse Today"}
+        >
           <b className="tdb-t">Today</b>
-          <span className="tdb-tprog" aria-hidden>
-            <span className="tdb-tpbar"><i style={{ width: `${pct}%` }} /></span>
-            <span className="tdb-pnum">{doneN} / {total}</span>
-          </span>
-          <span className="tdb-chev" aria-hidden>▾</span>
+          {todayMin ? (
+            <span className="tdb-cnt">{committedCards.length}</span>
+          ) : (
+            <span className="tdb-tprog" aria-hidden>
+              <span className="tdb-tpbar"><i style={{ width: `${pct}%` }} /></span>
+              <span className="tdb-pnum">{doneN} / {total}</span>
+            </span>
+          )}
+          <span className={`tdb-chev${todayMin ? " up" : ""}`} aria-hidden>▾</span>
         </button>
+        {/* everything below the header collapses — height only, 180ms (see .tdb-tdbody) */}
+        <div className="tdb-tdbody" aria-hidden={todayMin}>
         {rolled.length > 0 && (
           <div className="tdb-rollbar">
             <span className="tdb-rolltx"><b>{rolled.length}</b> {rolled.length === 1 ? "item" : "items"} rolled over from a previous day.</span>
@@ -1527,6 +1552,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               </div>
             )}
           </span>
+        </div>
         </div>
       </div>
     );
