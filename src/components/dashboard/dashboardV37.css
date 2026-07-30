@@ -438,3 +438,84 @@
   .sa-greet.split { grid-template-columns: 1fr; }
   .sa-greet-side { display: none; }
 }
+
+/* ---------- MOBILE (Mobile Pass 1, <md; ref design-refs/mobile-concept-v1.html frame 01) ----
+   The stack: kicker + greeting (left-aligned) → DESK LINE → two-up stats → pipeline →
+   To-do doorway → recent activity. The fortnight carousel, attention chip, CTA row and the
+   focus-slot machinery are desktop furniture below md (the chip's focus-slot target is already
+   display:none under 1100). ≥768px this block changes nothing. ---------- */
+.sa-mdeskline,
+.sa-mtodo { display: none; }
+@media (max-width: 767.98px) {
+  .sa-dash { padding: 12px 16px 30px; }
+  .sa-greet { padding: 6px 0 0; text-align: left; margin-bottom: 0; }
+  .sa-greet-eyebrow { justify-content: flex-start; margin-bottom: 10px; }
+  .sa-greet-hi { font-size: 27px; margin: 0 0 14px; }
+  .sa-chip,
+  .sa-greet-ctas,
+  .sa-greet-div,
+  .sa-greet-side { display: none; }
+  .sa-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 18px !important; }
+  .sa-dash-panels { gap: 24px !important; margin-top: 24px !important; }
+  /* the fortnight carousel stands down (the concept stack carries no strip); WhatsLive's own
+     root is a div.dc, untouched by the section selector */
+  section.dc { display: none; }
+  /* the pipeline panel's inner 2fr/1fr pair stacks (inline grid → !important) */
+  .wl-cf { grid-template-columns: 1fr !important; gap: 20px !important; }
+
+  /* THE DESK LINE — hot: blush card + burgundy count roundel; calm: a quiet hairline row, its
+     own treatment, never the loud one greyed out (the recovered panel-foot grammar). */
+  .sa-mdeskline {
+    display: flex; align-items: center; gap: 11px; width: 100%;
+    border: 0; background: transparent; cursor: pointer; text-align: left;
+    font: inherit; padding: 12px 14px; border-radius: 13px; margin-top: 14px;
+  }
+  .sa-mdeskline.hot {
+    background: #faf0ea; /* the desk line's blush (panel-foot pack, recovered with the surface) */
+    border: 1px solid var(--pink-b);
+  }
+  .sa-mdeskline.calm { border-radius: 0; border-top: 1px solid var(--bd, #ece0d2); padding: 12px 2px; }
+  .sa-mdesk-count {
+    flex: none; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px;
+    display: grid; place-items: center; background: var(--burg); color: #fdfaf5;
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  }
+  .sa-mdesk-dot { flex: none; width: 8px; height: 8px; border-radius: 99px; background: var(--band-meta, #9c8878); }
+  .sa-mdesk-tx { flex: 1; min-width: 0; }
+  .sa-mdesk-tx b { display: block; font-size: 13.5px; font-weight: 700; color: var(--ink, #3a1c14); }
+  .sa-mdesk-sub { display: block; font-size: 11.5px; color: var(--band-meta, #9c8878); margin-top: 1px; }
+  .sa-mdesk-go { flex: none; color: var(--acc, #7c3a2a); font-weight: 700; font-size: 15px; }
+
+  /* THE TO-DO DOORWAY — the dashboard band language over the three lane tallies (the board's
+     own vocabulary, so the doorway agrees with its destination). */
+  .sa-mtodo {
+    display: block;
+    background: var(--card, #fffefb);
+    border: var(--bdw, 1px) solid var(--bd, #e7ddd2);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .sa-mtodo-row {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+    border: 0; background: transparent; cursor: pointer; font: inherit; text-align: left;
+    font-size: 13.5px; color: var(--ink, #3a1c14); padding: 11px 16px;
+    border-top: 1px solid var(--bd, #ece0d2);
+  }
+  .sa-mtodo-row:first-of-type { border-top: none; }
+  .sa-mtodo-count {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+    color: var(--band-strong, #4a4036); background: var(--shell-inset, #efe8df);
+    border-radius: 99px; padding: 3px 8px;
+  }
+
+  /* RECENT ACTIVITY — the drawer re-homed in flow (TimelineDrawer's mobile variant reuses the
+     drawer's own head/body classes; only the shell around them changes). */
+  .sa-tlmobile {
+    background: var(--card, #fdfaf5);
+    border: 1px solid var(--bd, #e7ddd2);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .sa-tlmobile .sa-tlbody { overflow: visible; padding: 6px 14px 16px; }
+}

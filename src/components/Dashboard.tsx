@@ -54,6 +54,9 @@ import {
 import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
+// Mobile Pass 1 — the <md desk line + To-do doorway read the To-do board's OWN tallies (the
+// sidebar's recipe), so the doorway can never disagree with the page it opens.
+import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
 // with focus slot → stat row → Fortnight → What's live; timeline in the right-edge drawer).
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
@@ -492,6 +495,7 @@ export const Dashboard: React.FC<{
     queries,
     activities,
     tasks,
+    taskFlags,
     notes,
     logout,
     dismissTask,
@@ -1482,6 +1486,13 @@ export const Dashboard: React.FC<{
   const isDashRoute = typeof window !== "undefined" && window.location.pathname === "/dashboard";
   // The chip and the To-do card must agree — both read buildOverToYouRows.
   const urgentRowCount = buildOverToYouRows(tasks, queries, agents).length;
+  // Mobile Pass 1 (<md only — the surfaces are CSS-gated): the desk line + To-do doorway read
+  // the To-do BOARD's tallies via the sidebar recipe, so they agree with /todo, their target.
+  const mobileTiles = sidebarBoardTiles({
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
+    now: Date.now(), mutedTaskRules: currentUser?.mutedTaskRules,
+  });
+  const mobileNotice = deskNotice(mobileTiles);
   const fortnightCount = mergedActivities.filter((a: any) => {
     const t = new Date(a.date).getTime();
     return Number.isFinite(t) && t >= Date.now() - 14 * 86400000;
@@ -1633,6 +1644,24 @@ export const Dashboard: React.FC<{
           onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
         />
 
+        {/* THE DESK LINE (Mobile Pass 1, <md only — hidden at md+ by CSS; ref concept frame 01):
+            the panel's retired notification line, recovered WITH this surface. Hot = tinted card
+            + burgundy count roundel; calm = a quiet hairline row. It is the doorway to /todo
+            (baked decision 2 — To-do has no tab). It replaces the attention chip below md, whose
+            focus-slot target is already display:none there. */}
+        <button type="button" className={`sa-mdeskline ${mobileNotice.tone}`} onClick={() => onNavigate("todo")}>
+          {mobileNotice.tone === "hot" ? (
+            <span className="sa-mdesk-count" aria-hidden="true">{mobileNotice.count}</span>
+          ) : (
+            <span className="sa-mdesk-dot" aria-hidden="true" />
+          )}
+          <span className="sa-mdesk-tx">
+            <b>{mobileNotice.headline}</b>
+            {mobileNotice.sub && <span className="sa-mdesk-sub">{mobileNotice.sub}</span>}
+          </span>
+          <span className="sa-mdesk-go" aria-hidden="true">→</span>
+        </button>
+
         {/* Full-width stat row — collapses while a focus is open (.split-open above) */}
         <div className="sa-stats" style={{ marginTop: 48 }}>
           {statDefs.map((d) => (
@@ -1640,8 +1669,10 @@ export const Dashboard: React.FC<{
           ))}
         </div>
 
-        {/* Section spacing: 48px above the diary panel, 56px before "What's live" */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 56, marginTop: 48 }}>
+        {/* Section spacing: 48px above the diary panel, 56px before "What's live". At <md the
+            diary carousel stands down (the concept's stack has no fortnight strip) and the
+            spacing tightens — sa-dash-panels carries the override. */}
+        <div className="sa-dash-panels" style={{ display: "flex", flexDirection: "column", gap: 56, marginTop: 48 }}>
           <DiaryCarousel
             queries={queries}
             agents={agents}
@@ -1654,6 +1685,26 @@ export const Dashboard: React.FC<{
             manuscripts={manuscripts}
             onSendQuery={() => onNavigate("queries", "Send a query")}
           />
+
+          {/* THE TO-DO DOORWAY (Mobile Pass 1, <md only — CSS-gated; concept frame 01): three
+              lane tallies in the live board's own vocabulary, opening /todo. A doorway, not the
+              working panel — OverToYou stays the desktop focus slot's. */}
+          <section className="sa-mtodo" aria-label="To-do">
+            <div className="sa-band">
+              <span className="sa-tick" aria-hidden="true" />
+              <h3>To-do</h3>
+            </div>
+            {([
+              ["Urgent", mobileTiles.urgent],
+              ["Housekeeping", mobileTiles.housekeeping],
+              ["Notes to self", mobileTiles.notes],
+            ] as const).map(([label, count]) => (
+              <button key={label} type="button" className="sa-mtodo-row" onClick={() => onNavigate("todo")}>
+                <span>{label}</span>
+                <span className="sa-mtodo-count">{count}</span>
+              </button>
+            ))}
+          </section>
         </div>
 
         {/* Timeline — "The story so far", relocated into the right-edge floating drawer (v37).

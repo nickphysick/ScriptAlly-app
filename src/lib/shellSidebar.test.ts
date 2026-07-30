@@ -6,6 +6,7 @@
 import { describe, it, expect } from "vitest";
 import {
   SHELL_PRO_COPY,
+  deskNotice,
   localYMD,
   manuscriptInitials,
   manuscriptSubtitle,
@@ -27,6 +28,47 @@ describe("sidebarBoardTiles", () => {
         taskFlags: [], activities: [], now: Date.parse("2026-07-27T12:00:00"),
       })
     ).toEqual({ urgent: 0, housekeeping: 0, notes: 0 });
+  });
+});
+
+describe("deskNotice — recovered at 6d64b75; the surface is the MOBILE dashboard desk line", () => {
+  it("HOT: the roundel carries the urgent count, housekeeping rides behind as context", () => {
+    expect(deskNotice({ urgent: 3, housekeeping: 44, notes: 2 })).toEqual({
+      tone: "hot",
+      count: 3,
+      headline: "3 tasks require your attention",
+      sub: "plus 44 housekeeping items",
+    });
+  });
+
+  it("CALM is its own treatment, not the loud one greyed out — and the figure is a plain 0", () => {
+    expect(deskNotice({ urgent: 0, housekeeping: 44, notes: 9 })).toEqual({
+      tone: "calm",
+      count: 0,
+      headline: "Nothing needs you today",
+      sub: "44 housekeeping items when you have a moment",
+    });
+  });
+
+  it("an EMPTY desk states no housekeeping line at all — never '0 housekeeping items'", () => {
+    const n = deskNotice({ urgent: 0, housekeeping: 0, notes: 0 });
+    expect(n.tone).toBe("calm");
+    expect(n.sub).toBeNull();
+    expect(n.headline).toBe("Nothing needs you today");
+  });
+
+  it("singulars agree with their verbs — one task REQUIRES, one ITEM", () => {
+    expect(deskNotice({ urgent: 1, housekeeping: 1, notes: 0 })).toEqual({
+      tone: "hot",
+      count: 1,
+      headline: "1 task requires your attention",
+      sub: "plus 1 housekeeping item",
+    });
+  });
+
+  it("notes never reach the line — they are neither urgent nor housekeeping", () => {
+    const n = deskNotice({ urgent: 0, housekeeping: 0, notes: 12 });
+    expect(`${n.headline} ${n.sub ?? ""}`).not.toContain("12");
   });
 });
 

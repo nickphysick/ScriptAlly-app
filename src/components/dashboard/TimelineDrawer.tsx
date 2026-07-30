@@ -13,6 +13,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { getStageScrollEl } from "../../lib/stageScroll";
+import { useIsMobile } from "../shell/mobileChrome";
 
 export const TIMELINE_PIN_KEY = "sa.timelinePinned";
 
@@ -69,6 +70,25 @@ export const TimelineDrawer: React.FC<TimelineDrawerProps> = ({ fortnightCount, 
       stage.style.paddingRight = "";
     };
   }, [active, open]);
+
+  // Mobile Pass 1 (<md): the drawer RE-HOMES as an in-flow "recent activity" panel at the foot
+  // of the dashboard stack (concept frame 01) — same children, same head vocabulary, no pull
+  // tab, no pin, no fixed positioning. A floating right drawer has no lane on a phone. The
+  // desktop drawer below is untouched; resizing across md swaps presentations live.
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <section className="sa-tlmobile" aria-label="Timeline">
+        <div className="sa-tlhead">
+          <div>
+            <div className="sa-tleyebrow">This fortnight · {fortnightCount} {fortnightCount === 1 ? "event" : "events"}</div>
+            <h3>Timeline</h3>
+          </div>
+        </div>
+        <div className="sa-tlbody">{children}</div>
+      </section>
+    );
+  }
 
   return (
     <>

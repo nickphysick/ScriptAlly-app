@@ -37,10 +37,46 @@ export function sidebarBoardTiles(input: Omit<BoardInput, "today">): LedgerTiles
   return ribbonTiles(board, hkGapCount(groups) + stale.length);
 }
 
-/* (The NOTIFICATION DESK LINE and its `deskNotice` derivation are REMOVED — canonical shell
-   pack. The panel states urgency as one burgundy dot beside the To-do count instead; a count
-   says how much, the dot says some of it will not wait. Recoverable at 6d64b75 if the block is
-   ever wanted back, but do not re-add the derivation without re-adding the surface.) */
+/* (The PANEL's notification desk line was removed by the canonical shell pack — the panel
+   states urgency as one burgundy dot beside the To-do count. `deskNotice` returned with a NEW
+   surface (Mobile Pass 1): the <md dashboard's desk-line card, the doorway to /todo — exactly
+   the tombstone's condition, "do not re-add the derivation without re-adding the surface". The
+   desktop panel remains desk-line-free.) */
+
+export interface DeskNotice {
+  /** `hot` = something is actually urgent; `calm` = the quiet form. Drives the treatment. */
+  tone: "hot" | "calm";
+  /** The roundel figure — the URGENT count, so a calm desk shows a plain 0. */
+  count: number;
+  headline: string;
+  /** The housekeeping line. NULL when there is no housekeeping — never "0 items". */
+  sub: string | null;
+}
+
+const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`;
+
+/** THE DESK LINE (panel-foot pack wording, recovered at 6d64b75; surface = the mobile
+ *  dashboard, Mobile Pass 1). One line says what needs you; the housekeeping total rides
+ *  behind it as context rather than as a peer. No stored field — both figures come off the
+ *  tiles. The quiet state is a genuinely different treatment, not the loud one greyed out. */
+export function deskNotice(tiles: LedgerTiles): DeskNotice {
+  const hk = tiles.housekeeping;
+  const sub = hk > 0 ? plural(hk, "housekeeping item", "housekeeping items") : null;
+  if (tiles.urgent > 0) {
+    return {
+      tone: "hot",
+      count: tiles.urgent,
+      headline: `${plural(tiles.urgent, "task", "tasks")} ${tiles.urgent === 1 ? "requires" : "require"} your attention`,
+      sub: sub && `plus ${sub}`,
+    };
+  }
+  return {
+    tone: "calm",
+    count: 0,
+    headline: "Nothing needs you today",
+    sub: sub && `${sub} when you have a moment`,
+  };
+}
 
 /** Nav count chips by shellV2Nav page key. Only cheaply-countable pages carry one. */
 export function sideNavCounts(input: {
