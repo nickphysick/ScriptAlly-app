@@ -274,8 +274,39 @@ export function rankItems(corpus: PaletteItem[], term: string): PaletteItem[] {
     .filter((x) => x.score > RANK.noMatch);
   scored.sort((a, b) => (b.score - a.score) || (a.i - b.i));
   const ranked = scored.map((x) => x.item);
+  // JUMP TO rides above everything when an agent matched — computed from the RANKED list, so it
+  // offers the agent the palette itself thinks you meant.
+  const jump = jumpToItem(ranked);
+  const all = jump ? [jump, ...ranked] : ranked;
   // Then lay them out in the canonical group order, keeping each group internally ranked.
-  return GROUP_ORDER.flatMap((g) => ranked.filter((item) => item.group === g));
+  return GROUP_ORDER.flatMap((g) => all.filter((item) => item.group === g));
+}
+
+/**
+ * JUMP TO — the contextual action. When the term matches an agent, offer to start a query with
+ * them, above everything else.
+ *
+ * This is the difference between search as lookup and search as the fastest way to start work:
+ * you were going to look the agent up and then go and log a query anyway, so the palette offers
+ * the destination rather than the waypoint. It dispatches through the EXISTING preselect seam
+ * (`LogQueryFocusForm`'s `initialAgentId`), so it opens the same form the rail's `+ Query` does,
+ * already pointed at the right agent — no new form, no new handler.
+ *
+ * Takes the TOP-RANKED agent, not any agent: it is offering one obvious next step, and offering
+ * five would be a second results list.
+ */
+export function jumpToItem(ranked: PaletteItem[]): PaletteItem | null {
+  const agent = ranked.find((r) => r.group === "Agents" && r.run.kind === "agent");
+  if (!agent || agent.run.kind !== "agent") return null;
+  return {
+    id: `jump:${agent.run.agentId}`,
+    group: "Jump to",
+    kind: "act",
+    title: `Log a query to ${agent.run.name}`,
+    subtitle: "Start a new query with this agent",
+    shortcut: "⌘↵",
+    run: { kind: "logQueryTo", agentId: agent.run.agentId, name: agent.run.name },
+  };
 }
 
 /** One span of a title, flagged if it is the matched run. */

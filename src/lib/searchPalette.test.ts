@@ -218,3 +218,38 @@ describe("buildCorpus — second lines carry context, over already-loaded data",
   });
 });
 
+
+describe("Jump to — the contextual action", () => {
+  const now = Date.parse("2026-07-30T12:00:00");
+  const corpus = buildCorpus({
+    now,
+    agentLabel: (a: { name?: string; agency?: string }) => ({ primary: a.name ?? "", secondary: a.agency ?? "" }),
+    agents: [{ id: "a1", name: "Aisha Kapoor", agency: "The Lantern Agency" }],
+    queries: [], manuscripts: [],
+  });
+
+  it("appears ABOVE everything when an agent matches, and dispatches to the preselect seam", () => {
+    const rows = rankItems(corpus, "aisha");
+    expect(rows[0].group).toBe("Jump to");
+    expect(rows[0].title).toBe("Log a query to Aisha Kapoor");
+    expect(rows[0].shortcut).toBe("⌘↵");
+    // the EXISTING seam — LogQueryFocusForm's initialAgentId, not a new handler
+    expect(rows[0].run).toEqual({ kind: "logQueryTo", agentId: "a1", name: "Aisha Kapoor" });
+  });
+
+  it("does not appear when no agent matched", () => {
+    expect(rankItems(corpus, "packages").some((r) => r.group === "Jump to")).toBe(false);
+  });
+
+  it("offers ONE agent — the top-ranked one, not a second results list", () => {
+    const two = buildCorpus({
+      now,
+      agentLabel: (a: { name?: string; agency?: string }) => ({ primary: a.name ?? "", secondary: a.agency ?? "" }),
+      agents: [{ id: "a1", name: "Marcus Reed" }, { id: "a2", name: "Mark Ellery" }],
+      queries: [], manuscripts: [],
+    });
+    const jumps = rankItems(two, "mar").filter((r) => r.group === "Jump to");
+    expect(jumps).toHaveLength(1);
+    expect(jumps[0].title).toBe("Log a query to Marcus Reed");
+  });
+});
