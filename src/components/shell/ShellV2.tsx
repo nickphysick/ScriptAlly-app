@@ -307,30 +307,42 @@ export const ShellSide: React.FC<{
   onCollapse?: () => void;
   /** The panel contents below the band (ShellSidebarBody). */
   children?: React.ReactNode;
-}> = ({ collapsed = false, onCollapse, children }) => (
-  <aside className="sv2-side sv2-cap" aria-hidden={collapsed || undefined}>
-    <div className="sv2-side-inner">
-      {/* THE NAVIGATE BAND — the panel's head block, at the same --shell-head-h as the rail head
-          and the top bar, and flush to the capsule top like both, so all three close on ONE
-          unbroken horizontal line.
-          ⚠️ The brand WORDMARK that used to sit here is RETIRED (canonical shell pack): it
-          duplicated the bar's, and the panel should open straight into navigation. */}
-      <div className="sv2-ptop">
-        <span className="sv2-plab">Navigate</span>
-        <button
-          type="button"
-          className="sv2-tuck"
-          title="Hide the panel (⌘\)"
-          aria-label="Hide the panel"
-          onClick={onCollapse}
-        >
-          <PanelLeft aria-hidden="true" />
-        </button>
+}> = ({ collapsed = false, onCollapse, children }) => {
+  const { pathname } = useLocation();
+  // THE BRAND APPEARS ONCE — in the LEFTMOST CHROME NOT ALREADY CARRYING IT (palette pack,
+  // amending the consolidated pack's "Navigate label on every page"). On the dashboard the bar
+  // holds the wordmark, so the panel shows the label; everywhere else the bar holds the
+  // breadcrumb, so the wordmark comes here. Two logos never sit side by side.
+  // The two mounts are MUTUALLY EXCLUSIVE, which is why both may carry the inspection id.
+  const brandHere = pathname !== SHELL_DASHBOARD.path;
+  return (
+    <aside className="sv2-side sv2-cap" aria-hidden={collapsed || undefined}>
+      <div className="sv2-side-inner">
+        {/* THE PANEL'S HEAD BLOCK — the same --shell-head-h as the rail head and the top bar, and
+            flush to the capsule top like both, so all three close on ONE unbroken line. */}
+        <div className="sv2-ptop">
+          {brandHere ? (
+            <span className="sv2-pwm">
+              <ScriptAllyLogo heightPx={38} id="scriptally-brand-logo-root" />
+            </span>
+          ) : (
+            <span className="sv2-plab">Navigate</span>
+          )}
+          <button
+            type="button"
+            className="sv2-tuck"
+            title="Hide the panel (⌘\)"
+            aria-label="Hide the panel"
+            onClick={onCollapse}
+          >
+            <PanelLeft aria-hidden="true" />
+          </button>
+        </div>
+        <div className="sv2-pbody">{children}</div>
       </div>
-      <div className="sv2-pbody">{children}</div>
-    </div>
-  </aside>
-);
+    </aside>
+  );
+};
 
 /* ── top bar (inside the content capsule) ─────────────────────────────────── */
 

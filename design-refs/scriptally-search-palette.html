@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Search palette</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58; --sage:#8a9e88;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9; --slate:#6a89a7;
+  --ground:#e7e0d5; --rail:#f1ebe3; --cap:#fdfbf8; --fill:#efe8df; --card:#fdfaf5;
+  --line:#e3d9cf; --linesoft:#ece3da; --capbc:#d8ccbc; --gap:14px; --head:58px;
+  --shadow:0 1px 2px rgba(58,28,20,.04),0 2px 6px rgba(58,28,20,.045),0 8px 18px rgba(58,28,20,.05),0 20px 44px rgba(58,28,20,.055);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{width:100%;font-family:"Inter",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;background:var(--ground);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.app{height:100vh;display:flex;gap:var(--gap);padding:var(--gap)}
+.rail{width:64px;flex:none;background:var(--rail);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;padding:0 0 13px}
+.railhead{height:var(--head);display:grid;place-items:center;flex:none}
+.railhead svg{width:24px;height:24px;color:var(--burgundy)}
+.rib{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#a89a8a;margin-bottom:6px}
+.rib svg{width:18px;height:18px}
+.rib.on{background:var(--ground);color:var(--burgundy)}
+.rail .sp{flex:1}
+
+.pan{width:276px;flex:none;background:var(--rail);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+/* panel head — logo on non-dashboard pages */
+.ptop{height:var(--head);flex:none;display:flex;align-items:center;padding:0 12px 0 16px;border-bottom:1px solid var(--linesoft)}
+.ptop .wmp{font-family:"Playfair Display",serif;font-size:22px;letter-spacing:-.012em;flex:1}
+.ptop .lab{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.17em;text-transform:uppercase;color:#b3a598;flex:1}
+.tuck{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.tuck svg{width:16px;height:16px}
+.pbody{flex:1;display:flex;flex-direction:column;padding:11px 12px 12px;min-height:0}
+.nrow{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:11px;font-size:13.5px;color:var(--ink-soft)}
+.nrow svg.ai{width:17px;height:17px;color:#a89a8a;flex:none}
+.nrow .lb{flex:1}
+.nrow .cv{width:11px;height:11px;color:#c4b8a9}
+.nrow.on{background:var(--ground);color:var(--ink);font-weight:500}
+.nrow.on svg.ai{color:var(--burgundy)}
+.nrow.open{color:var(--ink);font-weight:500}
+.nrow.open svg.ai{color:var(--burgundy)}
+.nrow.open .cv{transform:rotate(90deg)}
+.krow{display:flex;align-items:center;gap:9px;height:34px;padding:0 12px 0 41px;border-radius:10px;font-size:12.5px;color:var(--ink-soft)}
+.krow .lb{flex:1}
+.krow .ct{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.krow.on{background:var(--ground);color:var(--ink)}
+.gap1{flex:1;min-height:12px}
+.slab{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.17em;text-transform:uppercase;color:#b3a598;padding:4px 4px 8px}
+.b1{display:flex;align-items:center;justify-content:center;gap:9px;height:40px;border-radius:12px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:13px;margin-bottom:8px}
+.b1 svg{width:15px;height:15px}
+.b2{display:flex;align-items:center;justify-content:center;gap:9px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:13px}
+.b2 svg{width:15px;height:15px;color:var(--muted)}
+.fdiv{height:1px;background:linear-gradient(90deg,transparent,rgba(46,39,35,.13) 18%,rgba(46,39,35,.13) 82%,transparent);margin:14px 4px 8px}
+.frow{display:flex;align-items:center;gap:11px;height:38px;padding:0 12px;border-radius:11px;font-size:12.5px;color:var(--ink-soft)}
+.frow svg{width:16px;height:16px;color:#a89a8a}
+.usr{display:flex;align-items:center;gap:10px;padding:8px 12px 4px}
+.usr .av{width:30px;height:30px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.26);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:11px;color:var(--burgundy)}
+.usr .n1{font-size:12.5px}
+.usr .n2{font-size:10.5px;color:var(--muted);margin-top:2px}
+.usr .n2 a{color:var(--slate);border-bottom:1px solid #c3d2df}
+
+.plane{flex:1;min-width:0;background:var(--cap);border:1px solid var(--capbc);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.tb{height:var(--head);flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--rail);border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.vr{width:1px;height:24px;background:rgba(46,39,35,.12)}
+.scope{display:inline-flex;align-items:center;gap:9px;height:36px;padding:0 11px 0 7px;border-radius:11px;background:var(--card);border:1px solid var(--line)}
+.scope .tile{width:24px;height:24px;border-radius:7px;background:linear-gradient(160deg,#dce0d9,#d0d6cc);border:1px solid rgba(124,58,42,.2);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:9px;color:var(--sage-deep)}
+.scope .nm{font-family:"Playfair Display",serif;font-size:13.5px}
+.cv2{width:11px;height:11px;color:var(--muted)}
+.right{display:flex;align-items:center;gap:9px;margin-left:auto}
+.srch-r{height:36px;display:flex;align-items:center;gap:10px;padding:0 13px;border-radius:11px;background:var(--cap);border:1px solid var(--line);color:var(--muted);font-size:12.5px;width:264px;cursor:text}
+.srch-r svg{width:15px;height:15px}
+.kb2{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:9px;border:1px solid var(--line);border-radius:5px;padding:2px 6px;background:var(--fill);color:#bcb0a3}
+.ib{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--ink-soft)}
+.ib svg{width:17px;height:17px}
+.user{display:inline-flex;align-items:center;gap:9px;height:36px;padding:0 11px 0 5px;border-radius:99px}
+.user .av2{width:28px;height:28px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.28);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:11px;color:var(--burgundy)}
+.user .nm2{font-size:12.5px}
+.pg{flex:1;padding:30px 32px;overflow:hidden}
+h1.t{font-family:"Playfair Display",serif;font-size:33px;font-weight:500}
+.sub{font-family:"Playfair Display",serif;font-size:15px;color:var(--ink-soft);margin-top:8px}
+
+/* ═══ palette ═══ */
+.scrim{position:fixed;inset:0;background:rgba(46,39,35,.34);backdrop-filter:blur(2px);z-index:80;display:none}
+.scrim.on{display:block}
+.pal{position:fixed;left:50%;top:88px;transform:translateX(-50%);width:640px;max-width:calc(100vw - 48px);
+  background:var(--cap);border:1px solid var(--capbc);border-radius:18px;box-shadow:0 28px 70px rgba(58,28,20,.3);z-index:81;overflow:hidden;display:none}
+.pal.on{display:block}
+.pin{display:flex;align-items:center;gap:12px;padding:0 18px;height:60px;border-bottom:1px solid var(--linesoft)}
+.pin svg{width:18px;height:18px;color:var(--muted);flex:none}
+.pin input{flex:1;border:0;outline:0;background:none;font:inherit;font-size:16px;color:var(--ink)}
+.pin input::placeholder{color:#bcb0a3}
+.pin .esc{font-family:"JetBrains Mono",monospace;font-size:9px;border:1px solid var(--line);border-radius:5px;padding:3px 7px;color:#bcb0a3}
+.plist{max-height:404px;overflow-y:auto;padding:8px}
+.plist::-webkit-scrollbar{width:7px}
+.plist::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.grp{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.17em;text-transform:uppercase;color:#b3a598;padding:11px 12px 6px}
+.res{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:11px;cursor:pointer}
+.res.sel{background:var(--fill)}
+.res .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}
+.res .ic svg{width:15px;height:15px}
+.ic.act{background:var(--pink);color:var(--burgundy)}
+.ic.agent{background:var(--sage-band);color:var(--sage-deep)}
+.ic.query{background:#f8ece6;color:var(--burgundy)}
+.ic.page{background:var(--fill);color:var(--ink-soft)}
+.ic.ms{background:#efe7db;color:#8a7358}
+.res .tx{flex:1;min-width:0}
+.res .t1{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .t1 mark{background:none;color:var(--burgundy);font-weight:500}
+.res .t2{font-size:11.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .meta{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none}
+.res .kb{font-family:"JetBrains Mono",monospace;font-size:8.5px;border:1px solid var(--linesoft);border-radius:5px;padding:2px 6px;color:#bcb0a3;flex:none}
+.res .dot{width:14px;height:14px;flex:none}
+.pfoot{display:flex;align-items:center;gap:16px;padding:10px 18px;border-top:1px solid var(--linesoft);background:var(--rail)}
+.pfoot span{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.pfoot i{font-family:"JetBrains Mono",monospace;font-size:9px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;background:var(--cap);font-style:normal}
+.pempty{padding:26px 18px 30px;text-align:center;color:var(--muted);font-size:13px}
+.hint{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:90;background:#2b2622;color:#fff;border-radius:12px;padding:11px 17px;font-size:12px;line-height:1.6;box-shadow:0 10px 28px rgba(0,0,0,.3);max-width:680px}
+.hint b{font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="rail">
+    <div class="railhead"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></div>
+    <div class="rib on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></div>
+    <div class="sp"></div>
+    <div class="rib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></div>
+  </nav>
+
+  <aside class="pan">
+    <div class="ptop"><span class="wmp">ScriptAlly</span>
+      <span class="tuck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/></svg></span></div>
+    <div class="pbody">
+      <div class="nrow"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lb">Dashboard</span></div>
+      <div class="nrow"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span class="lb">Querying</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+      <div class="nrow open"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg><span class="lb">Agents</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+      <div class="krow on"><span class="lb">Agent list</span><span class="ct">16</span></div>
+      <div class="krow"><span class="lb">Discover</span></div>
+      <div class="nrow"><svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg><span class="lb">Shelf</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+      <div class="gap1"></div>
+      <div class="slab">Quick actions</div>
+      <div class="b1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New</div>
+      <div class="b2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>Record a response</div>
+      <div class="fdiv"></div>
+      <div class="frow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span class="lb">Settings</span></div>
+      <div class="usr"><span class="av">ML</span><span style="flex:1"><span class="n1" style="display:block">Michael Li</span><span class="n2" style="display:block">Free plan · <a>Upgrade</a></span></span></div>
+    </div>
+  </aside>
+
+  <main class="plane">
+    <div class="tb">
+      <span class="crumb">Agents / <b>Agent list</b></span><span class="vr"></span>
+      <span class="scope"><span class="tile">MD</span><span class="nm">Murphy's Day Out</span><svg class="cv2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="right">
+        <span class="srch-r" id="opener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…<span class="kb2">⌘K</span></span>
+        <span class="ib"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.9.7c0 1.6-2.5 2-2.5 3.4"/><path d="M12 16.8h.01"/></svg></span>
+        <span class="user"><span class="av2">ML</span><span class="nm2">Michael Li</span><svg class="cv2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      </span>
+    </div>
+    <div class="pg"><h1 class="t">Your agent list</h1><div class="sub">Everyone you're querying, watching, or saving for later.</div></div>
+  </main>
+</div>
+
+<div class="scrim on" id="scrim"></div>
+<div class="pal on" id="pal">
+  <div class="pin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>
+    <input id="q" placeholder="Search agents, queries, pages — or start something" autocomplete="off">
+    <span class="esc">ESC</span>
+  </div>
+  <div class="plist" id="list"></div>
+  <div class="pfoot">
+    <span><i>↑</i><i>↓</i> Navigate</span><span><i>↵</i> Open</span><span><i>⌘↵</i> Open in new</span><span style="margin-left:auto"><i>esc</i> Close</span>
+  </div>
+</div>
+
+<div class="hint"><b>Type in the palette</b> — try “mar”, “pack”, “resp”, or an agent's name. Arrow keys move, Enter opens. Everything below is live.</div>
+
+<script>
+const IC={
+ act:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+ send:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>`,
+ reply:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>`,
+ agent:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>`,
+ page:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`,
+ ms:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg>`,
+ gear:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg>`
+};
+const DOT={
+ out:`<svg class="dot" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="2"/></svg>`,
+ in:`<svg class="dot" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e9ede6" stroke="#8a9e88" stroke-width="2"/></svg>`,
+ shut:`<svg class="dot" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#b4aca4" stroke-width="2"/></svg>`
+};
+const DATA=[
+ // actions
+ {g:'Actions',k:'act',ic:IC.send,t:'Log a query',s:'Start a new query',kb:'⌘L'},
+ {g:'Actions',k:'act',ic:IC.reply,t:'Record a response',s:'Log what an agent said',kb:'⌘R'},
+ {g:'Actions',k:'act',ic:IC.agent,t:'Add an agent',s:'Create a new agent record'},
+ {g:'Actions',k:'act',ic:IC.ms,t:'Add a manuscript',s:'Start a new project'},
+ {g:'Actions',k:'act',ic:IC.send,t:'Export queries to CSV',s:'Download your full query log'},
+ // agents
+ {g:'Agents',k:'agent',ic:IC.agent,t:'Jonathan Marsh',s:'The Marsh Agency · London',meta:'Active'},
+ {g:'Agents',k:'agent',ic:IC.agent,t:'Aisha Kapoor',s:'The Lantern Agency · Edinburgh',meta:'Active'},
+ {g:'Agents',k:'agent',ic:IC.agent,t:"Daniel O'Rourke",s:'Inkwell & Stone · Dublin',meta:'Active'},
+ {g:'Agents',k:'agent',ic:IC.agent,t:'Marcus Reed',s:'Bloomsbury Quill · London',meta:'Active'},
+ {g:'Agents',k:'agent',ic:IC.agent,t:'Fenella Str',s:'Brightwater Books · New York',meta:'No active'},
+ {g:'Agents',k:'agent',ic:IC.agent,t:'Priya Raghavan',s:'Northbank Agency · Manchester',meta:'Active'},
+ // queries
+ {g:'Queries',k:'query',dot:DOT.out,t:'Jonathan Marsh — full sent',s:"Murphy's Day Out · 9 days ago"},
+ {g:'Queries',k:'query',dot:DOT.in,t:'Tom Ellery — offer received',s:"Murphy's Day Out · 2 days ago"},
+ {g:'Queries',k:'query',dot:DOT.out,t:"Daniel O'Rourke — partial sent",s:"Murphy's Day Out · 11 days ago"},
+ {g:'Queries',k:'query',dot:DOT.shut,t:'Marcus Reed — closed, no reply',s:"Murphy's Day Out · 776 days ago"},
+ // manuscripts
+ {g:'Manuscripts',k:'ms',ic:IC.ms,t:"Murphy's Day Out",s:'Thriller · 50,000 words · 21 queries'},
+ // pages
+ {g:'Pages',k:'page',ic:IC.page,t:'Dashboard',s:'Your desk'},
+ {g:'Pages',k:'page',ic:IC.send,t:'Queries Hub',s:'Every query and where it stands'},
+ {g:'Pages',k:'page',ic:IC.page,t:'To-do',s:'Urgent tasks and housekeeping'},
+ {g:'Pages',k:'page',ic:IC.page,t:'Packages',s:'Submission package workshop'},
+ {g:'Pages',k:'page',ic:IC.agent,t:'Agent list',s:'Everyone you are querying'},
+ {g:'Pages',k:'page',ic:IC.agent,t:'Discover',s:'Find new agents'},
+ {g:'Pages',k:'page',ic:IC.ms,t:'Manuscripts',s:'Your shelf'},
+ {g:'Pages',k:'page',ic:IC.ms,t:'Comparable titles',s:'Find comps for your book'},
+ {g:'Pages',k:'page',ic:IC.gear,t:'Task settings',s:'Choose what appears on your to-do list'},
+ {g:'Pages',k:'page',ic:IC.gear,t:'Help centre',s:'Guides and answers'}
+];
+const RECENT=['Jonathan Marsh — full sent','Queries Hub','Tom Ellery — offer received','Task settings'];
+const ORDER=['Jump to','Actions','Agents','Queries','Manuscripts','Pages','Recent'];
+
+const q=document.getElementById('q'), list=document.getElementById('list');
+let sel=0, rows=[];
+
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+function score(item,term){
+ const t=norm(term), a=norm(item.t), b=norm(item.s||'');
+ if(!t) return 0;
+ if(a.startsWith(t)) return 100;
+ if(a.includes(t)) return 70;
+ if(b.includes(t)) return 40;
+ // loose subsequence
+ let i=0; for(const c of a){ if(c===t[i]) i++; if(i===t.length) return 20; }
+ return -1;
+}
+function mark(text,term){
+ if(!term) return text;
+ const i=text.toLowerCase().indexOf(term.toLowerCase());
+ if(i<0) return text;
+ return text.slice(0,i)+'<mark>'+text.slice(i,i+term.length)+'</mark>'+text.slice(i+term.length);
+}
+function build(){
+ const term=q.value.trim();
+ let items;
+ if(!term){
+   items=[
+     ...RECENT.map(n=>({...DATA.find(d=>d.t===n),g:'Recent'})),
+     ...DATA.filter(d=>d.g==='Actions').slice(0,4)
+   ];
+ } else {
+   items=DATA.map(d=>({d,s:score(d,term)})).filter(x=>x.s>=0).sort((a,b)=>b.s-a.s).map(x=>x.d);
+   // contextual: matched an agent → offer to act on them
+   const ag=items.find(i=>i.g==='Agents');
+   if(ag) items.unshift({g:'Jump to',k:'act',ic:IC.send,t:'Log a query to '+ag.t,s:'Start a new query with this agent',kb:'⌘↵'});
+ }
+ rows=items;
+ if(!items.length){ list.innerHTML='<div class="pempty">Nothing matches “'+term+'”.</div>'; return; }
+ let html='', last='';
+ items.forEach((it,i)=>{
+  if(it.g!==last){ html+='<div class="grp">'+it.g+'</div>'; last=it.g; }
+  html+=`<div class="res${i===sel?' sel':''}" data-i="${i}">
+   ${it.dot?`<span class="ic ${it.k}">${it.dot}</span>`:`<span class="ic ${it.k}">${it.ic}</span>`}
+   <span class="tx"><span class="t1" style="display:block">${mark(it.t,term)}</span>${it.s?`<span class="t2" style="display:block">${it.s}</span>`:''}</span>
+   ${it.meta?`<span class="meta">${it.meta}</span>`:''}
+   ${it.kb?`<span class="kb">${it.kb}</span>`:''}
+  </div>`;
+ });
+ list.innerHTML=html;
+ list.querySelectorAll('.res').forEach(r=>{
+   r.onmouseenter=()=>{sel=+r.dataset.i;paintSel();};
+ });
+}
+function paintSel(){
+ list.querySelectorAll('.res').forEach(r=>r.classList.toggle('sel',+r.dataset.i===sel));
+ const el=list.querySelector('.res.sel'); if(el) el.scrollIntoView({block:'nearest'});
+}
+q.addEventListener('input',()=>{sel=0;build();});
+document.addEventListener('keydown',e=>{
+ if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(sel+1,rows.length-1);paintSel();}
+ if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(sel-1,0);paintSel();}
+ if(e.key==='Escape'){document.getElementById('pal').classList.remove('on');document.getElementById('scrim').classList.remove('on');}
+ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();open_();}
+});
+function open_(){document.getElementById('pal').classList.add('on');document.getElementById('scrim').classList.add('on');q.focus();q.select();}
+document.getElementById('opener').onclick=open_;
+document.getElementById('scrim').onclick=()=>{document.getElementById('pal').classList.remove('on');document.getElementById('scrim').classList.remove('on');};
+build(); q.focus();
+</script>
+</body>
+</html>

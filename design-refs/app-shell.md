@@ -135,11 +135,24 @@ avatar chip at the bottom.
 
 ## Panel capsule (top → bottom)
 
-1. **THE NAVIGATE BAND** (canonical shell pack) — a `--shell-head-h` (58px) band, **flush to the
-   capsule top**, carrying a mono `Navigate` label in `--shell-quiet` and the tuck control right,
-   over a `--shell-line-soft` bottom hairline. Its contents scroll below it in `.sv2-pbody`.
-   **⚠️ THE PANEL'S BRAND WORDMARK IS RETIRED** — it duplicated the bar's, and the panel should
-   open straight into navigation. `ScriptAllyLogo` now mounts **once** in the whole shell.
+1. **THE PANEL HEAD BAND** — a `--shell-head-h` (58px) band, **flush to the capsule top**, with
+   the tuck control right, over a `--shell-line-soft` bottom hairline. Its contents scroll below
+   it in `.sv2-pbody`.
+   **⚠️ WHAT SITS AT ITS LEFT IS ROUTE-DEPENDENT — THE BRAND APPEARS EXACTLY ONCE** (palette pack;
+   this AMENDS the canonical pack, which put a `Navigate` label here on every page):
+
+   | Page | Panel head | Bar left |
+   |---|---|---|
+   | Dashboard | mono `Navigate` label | **the wordmark** |
+   | Every other page | **the wordmark** | the breadcrumb |
+
+   The rule is **the brand goes in the leftmost chrome not already carrying it**, so two logos
+   never sit side by side. The panel's wordmark is the same asset at the same **38px** in the same
+   58px band as the bar's. The two mounts are **mutually exclusive**, which is exactly why both may
+   carry the `scriptally-brand-logo-root` id without colliding — measured, one visible brand in
+   either state.
+   **When the panel is collapsed on a non-dashboard page there is no wordmark anywhere. That is
+   intended** — the rail's plane glyph carries the brand. Do not add a fallback.
    **⚠️ FLUSH IS LOAD-BEARING.** The rail head, this band and the bar share `--shell-head-h`, but
    sharing a height is not sharing a baseline: the rail and the panel used to start
    `--shell-pad-t` (14px) lower, so the three closed at 72/72/58. **`--shell-pad-t` is retired**

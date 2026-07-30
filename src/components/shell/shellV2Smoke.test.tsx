@@ -47,17 +47,36 @@ describe("v2 shell — smoke renders", () => {
     expect(html).not.toContain("sv2-railav");
   });
 
-  it("panel frame: the NAVIGATE BAND, with the tuck beside it — and no wordmark", () => {
+  it("panel frame: the head band, with the tuck beside it", () => {
     const html = at("/todo", <ShellSide onCollapse={() => {}} />);
     expect(html).toContain("sv2-ptop");
-    expect(html).toContain("sv2-plab");
-    expect(html).toContain("Navigate");
     expect(html).toContain('aria-label="Hide the panel"'); // the tuck toggle (fixes pack)
     expect(html).toContain("sv2-pbody"); // the contents scroll below the band
-    // THE PANEL'S WORDMARK IS RETIRED — it duplicated the bar's (canonical shell pack).
-    expect(html).not.toContain("sv2-wm\"");
-    expect(html).not.toContain("scriptally-title-v2.png");
     expect(html).not.toContain("sv2-mhrule"); // the masthead rule is gone
+  });
+
+  it("THE BRAND APPEARS ONCE — panel on working pages, bar on the dashboard, never both", () => {
+    const side = (path: string) => at(path, <ShellSide onCollapse={() => {}} />);
+    // working page: the wordmark is in the PANEL and the bar shows the crumb
+    for (const path of ["/todo", "/agents", "/queries", "/manuscripts"]) {
+      expect(side(path), path).toContain("sv2-pwm");
+      expect(side(path), path).toContain("scriptally-title-v2.png");
+      expect(side(path), path).not.toContain("sv2-plab"); // no label where the brand is
+      expect(bar(path), path).not.toContain("sv2-tbbrand");
+      expect(bar(path), path).toContain("sv2-crumb");
+    }
+    // dashboard: the wordmark is in the BAR and the panel shows the Navigate label
+    expect(side("/dashboard")).toContain("sv2-plab");
+    expect(side("/dashboard")).toContain("Navigate");
+    expect(side("/dashboard")).not.toContain("sv2-pwm");
+    expect(side("/dashboard")).not.toContain("scriptally-title-v2.png");
+    expect(bar("/dashboard")).toContain("sv2-tbbrand");
+    expect(bar("/dashboard")).toContain("scriptally-title-v2.png");
+    // exactly ONE brand in the document either way — so the shared id never collides
+    for (const path of ["/dashboard", "/agents"]) {
+      const both = side(path) + bar(path);
+      expect(both.match(/scriptally-brand-logo-root/g), path).toHaveLength(1);
+    }
   });
 
   it("panel collapse: the dedicated expand control is RETIRED (rail-section-select P2); the tuck + flyout footer carry the affordances", () => {
@@ -247,14 +266,17 @@ describe("v2 shell — smoke renders", () => {
     expect(claude).not.toContain("brand mark when the panel is collapsed");
   });
 
-  it("the brand's DOM id is set at ONE call site — a duplicate id measures the wrong instance", () => {
+  it("the brand's DOM id is a PROP — a hardcoded one measured the wrong instance", () => {
     const logo = readFileSync(resolve(__dirname, "..", "ScriptAllyLogo.tsx"), "utf8");
-    // the id is a prop, never a constant inside the component
+    // The id is a prop, never a constant inside the component: it used to be hardcoded, so the
+    // bar, the panel and the mobile slim bar were duplicates and getElementById returned
+    // whichever came first in the document — the panel's 27px copy, not the bar's.
     expect(logo).toContain("id={id}");
     expect(logo).not.toContain('id="scriptally-brand-logo-root"');
-    // exactly one mount claims it, and it is the bar's
-    const shell = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    expect(shell.match(/id="scriptally-brand-logo-root"/g)).toHaveLength(1);
+    // Two mounts claim it now (bar on the dashboard, panel elsewhere) but they are MUTUALLY
+    // EXCLUSIVE, so exactly one is ever in the document. That is asserted against the rendered
+    // output in "THE BRAND APPEARS ONCE" above — the count that matters is the rendered one.
     expect(bar("/dashboard")).toContain('id="scriptally-brand-logo-root"');
+    expect(bar("/agents")).not.toContain('id="scriptally-brand-logo-root"');
   });
 });

@@ -266,13 +266,17 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
   });
 
-  it("the brand mark is height-constrained, aspect preserved — and it renders ONCE, in the bar", () => {
+  it("THE BRAND APPEARS ONCE — two mounts, mutually exclusive by route, identical treatment", () => {
     const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    // THE PANEL'S WORDMARK IS RETIRED (canonical shell pack): it duplicated the bar's, and the
-    // panel opens straight into navigation now. One mount, height-constrained, id set there.
-    expect(v2.match(/<ScriptAllyLogo/g)).toHaveLength(1);
-    expect(v2).toContain('<ScriptAllyLogo heightPx={38} id="scriptally-brand-logo-root" />');
-    expect(v2).not.toContain("heightPx={27}");
+    // Palette pack: the brand goes in the LEFTMOST CHROME NOT ALREADY CARRYING IT. The bar holds
+    // it on the dashboard; the panel holds it everywhere else. Two mounts, never both at once —
+    // which is precisely why both may carry the inspection id without colliding.
+    const mounts = v2.match(/<ScriptAllyLogo heightPx=\{38\} id="scriptally-brand-logo-root" \/>/g);
+    expect(mounts, "both mounts, same asset, same height").toHaveLength(2);
+    expect(v2).not.toContain("heightPx={27}"); // the old smaller panel treatment is gone
+    // the two branches key off the SAME predicate, in opposite senses
+    expect(v2).toContain("const brandHere = pathname !== SHELL_DASHBOARD.path;");
+    expect(v2).toContain("const isDashboard = pathname === SHELL_DASHBOARD.path;");
     expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail's plane glyph is unchanged
   });
 });

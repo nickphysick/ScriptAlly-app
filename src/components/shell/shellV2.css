@@ -218,6 +218,10 @@
   padding: 0 12px 0 16px;
   border-bottom: 1px solid var(--shell-line-soft);
 }
+/* THE PANEL'S WORDMARK — the same asset at the same height as the bar's, in the same 58px band.
+   It renders here on every page EXCEPT the dashboard, where the bar carries it instead (palette
+   pack: the brand appears in the leftmost chrome not already carrying it). */
+.sv2-pwm { flex: 1; display: flex; align-items: center; min-width: 0; }
 .sv2-plab {
   flex: 1;
   font-family: "JetBrains Mono", monospace;
