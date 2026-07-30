@@ -1526,9 +1526,10 @@ export const Dashboard: React.FC<{
 
   return (
     <div
-      className="min-h-screen pb-16 font-sans"
+      className="sa-dashroot min-h-screen pb-16 font-sans"
       // No bespoke ground (canvas scheme 1) — the taupe desk inverted the depth model; the page
-      // inherits the stage's canvas like every other page.
+      // inherits the stage's canvas like every other page. sa-dashroot swaps the min-height to
+      // dvh below md (viewport law) — unlayered CSS beats the layered Tailwind utility.
       style={{ color: bodyInk }}
     >
 

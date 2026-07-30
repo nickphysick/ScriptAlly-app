@@ -131,6 +131,33 @@ describe("the shell at <md — one bar, one capsule, derived clearance", () => {
   });
 });
 
+describe("the app-feel layer (Phase 6)", () => {
+  it("the manifest is standalone with the token colours, and index.html links it", () => {
+    const manifest = JSON.parse(readFileSync(resolve(__dirname, "../../../public/manifest.webmanifest"), "utf8"));
+    expect(manifest.display).toBe("standalone");
+    expect(manifest.theme_color).toBe("#e7e0d5"); // --shell-ground
+    expect(manifest.background_color).toBe("#fdfbf8"); // --shell-canvas
+    expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual(
+      expect.arrayContaining(["192x192", "512x512"]),
+    );
+    const html = readFileSync(resolve(__dirname, "../../../index.html"), "utf8");
+    expect(html).toContain('rel="manifest" href="/manifest.webmanifest"');
+    expect(html).toContain('name="theme-color" content="#e7e0d5"');
+    expect(html).toContain("viewport-fit=cover");
+  });
+
+  it("the ≥16px input floor and scroll containment are <md-scoped", () => {
+    const mobileBlocks = css.split("@media (max-width: 767.98px)");
+    expect(mobileBlocks.length, "the <md blocks must exist").toBeGreaterThan(2);
+    const appFeel = mobileBlocks[mobileBlocks.length - 1];
+    expect(appFeel).toContain("font-size: 16px !important");
+    expect(appFeel).toContain("overscroll-behavior: contain");
+    expect(appFeel).toContain("#app-stage-scroll");
+    expect(appFeel).toContain(".sa-msheet-body");
+    expect(css).toContain("-webkit-tap-highlight-color: transparent");
+  });
+});
+
 describe("the you-menu — demoted destinations behind the avatar", () => {
   it("carries the six rows and the plain-slate plan line (no Pro card)", () => {
     for (const row of ["To-do", "Submission packages", "Import your queries", "Account settings", "Help", "Sign out"]) {

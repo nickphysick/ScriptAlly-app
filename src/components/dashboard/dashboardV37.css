@@ -447,6 +447,8 @@
 .sa-mdeskline,
 .sa-mtodo { display: none; }
 @media (max-width: 767.98px) {
+  /* the viewport law: dvh with the vh fallback (wins over the layered min-h-screen utility) */
+  .sa-dashroot { min-height: 100vh; min-height: 100dvh; }
   .sa-dash { padding: 12px 16px 30px; }
   .sa-greet { padding: 6px 0 0; text-align: left; margin-bottom: 0; }
   .sa-greet-eyebrow { justify-content: flex-start; margin-bottom: 10px; }

@@ -313,3 +313,26 @@
      never pink. The desktop rail's exact grammar, floated. */
   .sa-mtab.on { background: var(--shell-ground); color: var(--shell-ink); }
 }
+
+/* ── APP-FEEL (Mobile Pass 1, Phase 6) ──────────────────────────────────────
+   Tap highlight off everywhere (a touch-only artefact — it cannot alter desktop rendering);
+   scroll containment, momentum and the ≥16px input floor are <md-scoped. */
+* { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 767.98px) {
+  /* the app never rubber-bands past its own chrome */
+  html,
+  body { overscroll-behavior-y: none; }
+  #app-stage-scroll,
+  .aglist,
+  .f12-root .f12-rows,
+  .f12-root .f12-body .f12-pane,
+  .sa-msheet-body {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* iOS zooms any focused control under 16px — every text control reads at least 16px below
+     md. !important is the point: the floor must beat each surface's own smaller sizes. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea,
+  select { font-size: 16px !important; }
+}
