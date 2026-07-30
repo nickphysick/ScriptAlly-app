@@ -19,19 +19,23 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
+import { HelpCircle, ListChecks, LogOut, Package, Settings, Upload } from "lucide-react";
+import { parchment, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { SearchPalette } from "./SearchPalette";
 import { buildCorpus, rankItems } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { ShellSidebarBody, ShellScope } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
-import { Nav } from "../Nav";
+import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
+import { MobileSheet } from "./MobileSheet";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { useScriptAllyDb } from "../../lib/db";
+import { planLine } from "../../lib/shellSidebar";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
+import "./mobileShell.css";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 
@@ -123,8 +127,8 @@ const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" }
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
-  // palette never fetches.
-  const { agents, queries, manuscripts } = useScriptAllyDb();
+  // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
+  const { agents, queries, manuscripts, currentUser, logout } = useScriptAllyDb();
   const stageRef = useRef<HTMLDivElement>(null);
   // Per-route scroll memory: saved continuously while scrolling, restored on route change
   // (top for a first visit). Lives on the stage element — the window never scrolls now.
@@ -138,8 +142,21 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // VI P3 — the help FAB's /todo two-item menu returns (the workbench-era route hide is
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
-  // (NavDrawer retired — shell follow-up P3: its last trigger left with CrumbStrip; the v2
-  // rail + sidebar are the desktop navigation, the slim bar + BottomTabBar the mobile.)
+  // (NavDrawer retired — shell follow-up P3. The slim mobile Nav is retired too (Mobile Pass 1):
+  // the v2 top bar now carries the <md variant itself — one bar, two breakpoint states — and the
+  // rebuilt BottomTabBar is the floating tab capsule.)
+
+  // ── MOBILE CHROME (Mobile Pass 1) ──
+  // The you-menu sheet (concept frame 07) and the per-route pushed-detail registry. Pages
+  // register a MobileDetailSpec under their OWN route key (mounted-but-inactive StagePage slots
+  // can therefore never hide another route's tab bar); the shell reads only the active route's.
+  const [youOpen, setYouOpen] = useState(false);
+  const [mobileDetailMap, setMobileDetailMap] = useState<Record<string, MobileDetailSpec | null>>({});
+  const setMobileDetail = useCallback((route: string, spec: MobileDetailSpec | null) => {
+    setMobileDetailMap((prev) => (prev[route] === spec ? prev : { ...prev, [route]: spec }));
+  }, []);
+  const mobileChromeValue = useMemo(() => ({ setMobileDetail }), [setMobileDetail]);
+  const activeMobileDetail = mobileDetailMap[routeKey] ?? null;
 
   // Panel collapse (fixes pack) — the rail IS the collapsed state (the deferred rail question,
   // resolved; no flyouts, no mini-panel). Persisted under the sa. UI-pref convention, REUSING
@@ -315,8 +332,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       data-sa-ground=""
       // The capsule GROUND — the warm grained field all three capsules float on (the paper
       // grain reuses the canonical PAGE_GRAIN data-URI inline; the CSS parser rejects it in
-      // .css files). Padding + gap arrive with the .sv2-app class at ≥768px.
-      style={{ display: "flex", height: "100vh", overflow: "hidden", backgroundColor: "var(--shell-ground)", backgroundImage: PAGE_GRAIN }}
+      // .css files). Layout (flex · viewport height · overflow) lives on the .sv2-app class
+      // (shellV2.css) so the mobile pass can swap 100vh → 100dvh below md; padding + gap
+      // arrive with the class at ≥768px.
+      style={{ backgroundColor: "var(--shell-ground)", backgroundImage: PAGE_GRAIN }}
     >
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
           only (class + media query in shellV2.css — never inline display). The interim layers
@@ -326,23 +345,23 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} openSection={openSec} onToggleSection={onToggleSection} />
       </ShellSide>
       <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}
-        <div className="md:hidden" style={{ flexShrink: 0 }}>
-          <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onOpenSearch={openPalette} />
-        </div>
+        {/* (The slim mobile Nav is RETIRED — Mobile Pass 1. The v2 top bar below renders the <md
+            variant itself: wordmark-or-page-title · search icon · avatar, or back/Done on a
+            pushed detail. One bar, two breakpoint states — never a parallel bar.) */}
 
         {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} onOpenSearch={openPalette} searchOpenerRef={searchOpenerRef} />
+        <ShellTopBar onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} onOpenSearch={openPalette} searchOpenerRef={searchOpenerRef} mobileDetail={activeMobileDetail} onOpenYou={() => setYouOpen(true)} />
 
         {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
             foot fade. The wrapper is new; the stage's id, ref, scroll memory and styles are
             untouched, because everything from stageScroll.ts to per-route scroll restoration
-            addresses it directly. */}
+            addresses it directly. (sv2-stagepad = the <md clearance for the floating tab bar,
+            replacing the old pb-[76px] maths; zero at md+.) */}
         <div className="sv2-pgwrap">
           <div
             id={STAGE_SCROLL_ID}
             ref={stageRef}
-            className="pb-[76px] md:pb-0"
+            className="sv2-stagepad"
             onScroll={(e) => {
               const el = e.target as HTMLElement;
               scrollMemo.current[routeKey] = el.scrollTop;
@@ -353,7 +372,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             // depth law, locked in shellV2Tokens.test.ts).
             style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "var(--shell-canvas)" }}
           >
-            {children}
+            <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
           </div>
           {/* THE FOOT FADE — only when there IS more below. A permanent fade over a short page
               reads as a rendering fault, so it is a state, not decoration. */}
@@ -406,7 +425,55 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         </>
       )}
 
-      <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} />
+      {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
+          pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
+      <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} hidden={activeMobileDetail !== null} />
+
+      {/* THE YOU-MENU (Mobile Pass 1, concept frame 07) — the avatar's sheet: user block with
+          the plan as PLAIN SLATE TEXT (no Pro card), then the demoted destinations. Rows route
+          to existing pages; nothing here is a new surface. */}
+      <MobileSheet open={youOpen} onClose={() => setYouOpen(false)} ariaLabel="Your account and shortcuts">
+        {currentUser && (
+          <div className="sa-ymenu-user">
+            <span className="sa-ymenu-av" aria-hidden="true">
+              {currentUser.name.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+            </span>
+            <div>
+              <div className="sa-ymenu-nm">{currentUser.name}</div>
+              <div className="sa-ymenu-em">{currentUser.email}</div>
+              <div className="sa-ymenu-plan">
+                {planLine(currentUser.plan).label}
+                {planLine(currentUser.plan).upgrade && (
+                  <>
+                    {" · "}
+                    <button type="button" className="sa-ymenu-uplink" onClick={() => { setYouOpen(false); goPath("/plans"); }}>
+                      Upgrade
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/todo"); }}>
+          <ListChecks aria-hidden="true" /> To-do
+        </button>
+        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/manuscripts/packages"); }}>
+          <Package aria-hidden="true" /> Submission packages
+        </button>
+        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/import"); }}>
+          <Upload aria-hidden="true" /> Import your queries
+        </button>
+        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/account"); }}>
+          <Settings aria-hidden="true" /> Account settings
+        </button>
+        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/help"); }}>
+          <HelpCircle aria-hidden="true" /> Help
+        </button>
+        <button type="button" className="sa-ymenu-row sa-ymenu-out" onClick={() => { setYouOpen(false); logout(); }}>
+          <LogOut aria-hidden="true" /> Sign out
+        </button>
+      </MobileSheet>
 
       {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
           from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}

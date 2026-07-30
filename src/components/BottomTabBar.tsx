@@ -2,98 +2,60 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Bottom tab bar — the mobile-only primary navigation (rendered `md:hidden`, fixed to the viewport
- * bottom). Below the Tailwind `md` breakpoint the four primary destinations leave the top bar and
- * live here as four equal tabs: Dashboard · Queries · Agents · Scripts (Manuscripts). The active tab
- * gets a soft-pink pill behind the icon with burgundy ink; inactive tabs are muted.
+ * Bottom tab bar — the mobile primary navigation, rebuilt to the capsule language (Mobile Pass 1;
+ * ref design-refs/mobile-concept-v1.html). It floats as ITS OWN CAPSULE (baked decision 1): inset
+ * from the screen edges, capsule border + layered shadow, four equal tabs with mono micro-labels.
+ * Active = ground-fill pill with ink text (baked decision 3 — never burgundy, never pink; the
+ * desktop rail's exact active grammar).
  *
- * Critical fill/border colours are inline (Tailwind has silently overridden inline-critical colours
- * in this codebase before); Tailwind is used only for layout/breakpoint. Z-index sits at z-40 —
- * above page content, below the z-50 top bar and z-60 dropdowns, and well below the z-[70]+ band
- * reserved for the bottom-sheet layer a later mobile prompt will add.
+ * Four tabs (baked decision 2): Home (Dashboard) · Queries · Agents · Scripts. To-do has NO tab —
+ * it is reached from the dashboard desk line and the you-menu. Route-driven active state via
+ * `activeTab` (the shell's routeKey); off-tab routes light nothing.
+ *
+ * Hidden at ≥md and on pushed detail screens (`hidden` — the shell passes the active route's
+ * MobileDetailSpec presence; query detail gets the condensed command bar, the agent editor its
+ * own Done/Cancel — baked decision 5). All geometry/colour lives in mobileShell.css — display is
+ * class + media-query driven, never inline (the shell CSS footgun law).
  */
 import React from "react";
-import { LayoutDashboard, Send, Users, BookOpen, LucideIcon } from "lucide-react";
-import { burgundy, FONT_MONO } from "../lib/designTokens";
+import { Home, Send, Users, BookOpen, LucideIcon } from "lucide-react";
 
 interface BottomTabBarProps {
   activeTab: string;
   onNavigate: (tab: string, subPageName?: string) => void;
+  /** True while the active route shows a pushed detail screen — the bar stands down. */
+  hidden?: boolean;
 }
 
-const PILL = "#f5e2da"; // active-tab pill fill (inline — Tailwind has overridden this before)
-const INACTIVE = "#a08070"; // muted icon + label
-
 const TABS: { tab: string; label: string; Icon: LucideIcon }[] = [
-  { tab: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
+  { tab: "dashboard", label: "Home", Icon: Home },
   { tab: "queries", label: "Queries", Icon: Send },
   { tab: "agents", label: "Agents", Icon: Users },
   { tab: "manuscripts", label: "Scripts", Icon: BookOpen },
 ];
 
-export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onNavigate }) => (
-  <nav
-    className="md:hidden flex items-stretch"
-    aria-label="Primary"
-    style={{
-      position: "fixed",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: 40,
-      background: "#fdfaf5",
-      borderTop: "0.5px solid rgba(124,58,42,0.16)",
-      boxShadow: "0 -2px 14px rgba(58,28,20,0.06)",
-      padding: "7px 6px",
-      paddingBottom: "calc(7px + env(safe-area-inset-bottom))",
-    }}
-  >
-    {TABS.map(({ tab, label, Icon }) => {
-      const active = activeTab === tab;
-      // Queries goes straight to the database on mobile — the nav dropdown (desktop) doesn't belong
-      // in a bottom tab bar; logging/recording are reached via in-page buttons.
-      const sub = tab === "queries" ? "Query database" : undefined;
-      return (
-        <button
-          key={tab}
-          onClick={() => onNavigate(tab, sub)}
-          aria-label={label}
-          aria-current={active ? "page" : undefined}
-          className="flex flex-col items-center justify-center gap-1 cursor-pointer"
-          style={{
-            flex: 1,
-            minHeight: 54,
-            background: "transparent",
-            border: "none",
-            padding: 0,
-          }}
-        >
-          <span
-            className="flex items-center justify-center"
-            style={{
-              width: 46,
-              height: 28,
-              borderRadius: 11,
-              background: active ? PILL : "transparent",
-              transition: "background 0.15s",
-            }}
+export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onNavigate, hidden = false }) => {
+  if (hidden) return null;
+  return (
+    <nav className="sa-mtabbar" aria-label="Primary">
+      {TABS.map(({ tab, label, Icon }) => {
+        const active = activeTab === tab;
+        // Queries goes straight to the hub on mobile — logging/recording are in-page affordances.
+        const sub = tab === "queries" ? "Query database" : undefined;
+        return (
+          <button
+            key={tab}
+            type="button"
+            className={`sa-mtab${active ? " on" : ""}`}
+            onClick={() => onNavigate(tab, sub)}
+            aria-label={label}
+            aria-current={active ? "page" : undefined}
           >
-            <Icon size={22} style={{ color: active ? burgundy : INACTIVE }} strokeWidth={active ? 2.1 : 1.8} />
-          </span>
-          <span
-            style={{
-              fontFamily: FONT_MONO,
-              fontSize: 8.5,
-              textTransform: "uppercase",
-              letterSpacing: "0.07em",
-              color: active ? burgundy : INACTIVE,
-              fontWeight: active ? 600 : 500,
-            }}
-          >
-            {label}
-          </span>
-        </button>
-      );
-    })}
-  </nav>
-);
+            <Icon aria-hidden="true" strokeWidth={active ? 2.2 : 1.8} />
+            <span>{label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+};

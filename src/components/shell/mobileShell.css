@@ -1,0 +1,315 @@
+/* ── MOBILE SHELL CHROME (Mobile Pass 1; ref design-refs/mobile-concept-v1.html) ──────────────
+   Everything here is scoped BELOW `md` (767.98px) except the sheet chassis, whose callers are
+   mobile-gated. At ≥768px this file must change nothing — the desktop capsules are locked.
+
+   The mobile arrangement (concept frames 01–07): the warm grained ground carries the top bar
+   directly; ONE full-bleed content capsule (`.sv2-pgwrap`) floats beneath it, running to the
+   screen foot with its bottom corners squared; the tab bar floats over it as its own capsule.
+   All colour reads the live --shell-* / --burg family — never the mockup's hexes.
+
+   Display is class + media-query driven, never inline (the shell CSS footgun law). ── */
+
+/* ── THE SHEET CHASSIS (baked decision 7) — portalled to document.body; tokens are :root-scoped
+   so they resolve outside the theme classes. Entry is pure CSS; close is an unmount (no JS
+   timers drive motion). z-index 1000 = the app's modal stratum (.sa-overlay), above the z-40
+   tab bar; the hub toast (z-1100) deliberately stays above modals. ── */
+.sa-msheet-layer { position: fixed; inset: 0; z-index: 1000; }
+.sa-msheet-scrim {
+  position: absolute;
+  inset: 0;
+  /* the app's one modal dim (forms.css .sa-overlay) — same ink, same weight */
+  background: rgba(40, 20, 14, 0.45);
+  animation: saMsheetDim 0.2s ease-out;
+}
+.sa-msheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--shell-canvas);
+  border: var(--shell-cap-border);
+  border-bottom: none;
+  /* top radius from the capsule radius token — the sheet is a capsule pinned to the foot */
+  border-radius: var(--shell-cap-radius) var(--shell-cap-radius) 0 0;
+  box-shadow: 0 -12px 40px rgba(58, 28, 20, 0.25);
+  padding: 10px 18px 0;
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  animation: saMsheetUp 0.28s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.sa-msheet-grab {
+  width: 38px;
+  height: 4px;
+  border-radius: 2px;
+  background: #d8ccbc; /* = --shell-cap-border's colour (the shorthand token owns the hex) */
+  margin: 0 auto 14px;
+  flex: none;
+}
+.sa-msheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+@keyframes saMsheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes saMsheetDim {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa-msheet,
+  .sa-msheet-scrim { animation: none; }
+}
+
+/* ── THE YOU-MENU (concept frame 07) — user block + plain rows inside the sheet. The plan line
+   is PLAIN SLATE TEXT (no Pro card, no pill — the panel-foot law's mobile twin). ── */
+.sa-ymenu-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 4px 15px;
+  border-bottom: 1px solid var(--shell-line-soft);
+  margin-bottom: 6px;
+}
+.sa-ymenu-av {
+  width: 42px;
+  height: 42px;
+  border-radius: 99px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--shell-card);
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14px;
+  color: var(--burg);
+}
+.sa-ymenu-nm { font-size: 15px; font-weight: 700; color: var(--shell-ink); line-height: 1.2; }
+.sa-ymenu-em { font-size: 12px; color: var(--shell-muted); margin-top: 1px; }
+.sa-ymenu-plan { font-size: 12px; font-weight: 600; color: var(--slate); margin-top: 2px; }
+.sa-ymenu-uplink {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--slate);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.sa-ymenu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--shell-line-soft);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--shell-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.sa-ymenu-row:last-child { border-bottom: none; }
+.sa-ymenu-row svg { width: 17px; height: 17px; color: var(--shell-ink-soft); flex: none; }
+.sa-ymenu-row.sa-ymenu-out,
+.sa-ymenu-row.sa-ymenu-out svg { color: var(--burg); }
+
+/* ── MOBILE-ONLY BAR CONTROLS — hidden at md+, shown below. ── */
+.sv2m-iconbtn,
+.sv2m-av,
+.sv2m-back,
+.sv2m-cancel,
+.sv2m-done,
+.sv2m-dtitle { display: none; }
+
+/* ── THE TAB BAR — its own floating capsule (baked decision 1). ── */
+.sa-mtabbar { display: none; }
+
+@media (max-width: 767.98px) {
+  /* ── screen arrangement ── */
+  /* dvh with the vh fallback (viewport law) — the shell root is the one hard viewport clamp */
+  .sv2-app { height: 100vh; height: 100dvh; }
+  /* the plane stops being the capsule: the ground shows through, the bar sits on it */
+  .sv2-plane { background: transparent; overflow: visible; }
+  /* the content capsule — full-bleed, squared foot, running under the floating tab bar */
+  .sv2-pgwrap {
+    margin: 4px 10px 0;
+    background: var(--shell-canvas);
+    border: var(--shell-cap-border);
+    border-bottom: none;
+    border-radius: var(--shell-cap-radius) var(--shell-cap-radius) 0 0;
+    box-shadow: var(--shell-cap-shadow);
+    overflow: hidden;
+  }
+  /* squared foot → the fade squares off with it */
+  .sv2-fade { border-radius: 0; }
+  /* content clears the floating tab bar (62px bar + 14px inset + breathing + safe area) */
+  .sv2-stagepad { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+
+  /* ── the top bar, on the ground ── */
+  .sv2-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: calc(6px + env(safe-area-inset-top)) 12px 6px 16px;
+    background: transparent;
+    border-bottom: none;
+  }
+  /* desktop bar furniture stands down */
+  .sv2-topbar .sv2-vr,
+  .sv2-topbar .sv2-scopewrap,
+  .sv2-topbar > .sv2-scope,
+  .sv2-topbar .sv2-gsearch,
+  .sv2-topbar .sv2-tbicon,
+  .sv2-topbar .sv2-tbuser { display: none; }
+  /* the breadcrumb reduces to the page name (concept frames 02/05/06) */
+  .sv2-crumb span { display: none; }
+  .sv2-crumb b {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--shell-ink);
+  }
+  /* mobile cluster: search opener (icon) + avatar (you-menu) */
+  .sv2m-iconbtn {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 99px;
+    border: var(--shell-cap-border);
+    background: var(--shell-side);
+    color: var(--shell-ink-soft);
+    cursor: pointer;
+    padding: 0;
+  }
+  .sv2m-iconbtn svg { width: 15px; height: 15px; }
+  .sv2m-av {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 99px;
+    border: 1px solid rgba(124, 58, 42, 0.28);
+    background: var(--shell-card);
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 11px;
+    color: var(--burg);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* ── pushed detail screens (baked decision 5): back/title, or Cancel · title · Done ── */
+  .sv2-tb-mdetail .sv2-tbbrand,
+  .sv2-tb-mdetail .sv2-crumb,
+  .sv2-tb-mdetail .sv2-grow,
+  .sv2-tb-mdetail .sv2m-iconbtn,
+  .sv2-tb-mdetail .sv2m-av { display: none; }
+  .sv2m-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    background: transparent;
+    padding: 6px 8px 6px 0;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--shell-ink);
+    cursor: pointer;
+  }
+  .sv2m-back svg { width: 17px; height: 17px; color: var(--shell-ink-soft); }
+  .sv2m-cancel {
+    display: inline-flex;
+    border: 0;
+    background: transparent;
+    padding: 6px 4px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--shell-ink-soft);
+    cursor: pointer;
+  }
+  .sv2m-dtitle {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--shell-ink);
+  }
+  /* the editor's Done — the Form 11 soft-pink primary (baked decision 4) */
+  .sv2m-done {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--pink-b);
+    background: var(--pink);
+    color: var(--burg);
+    border-radius: 99px;
+    padding: 7px 15px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ── the floating tab-bar capsule ── */
+  .sa-mtabbar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    height: 62px;
+    background: var(--shell-side);
+    border: var(--shell-cap-border);
+    border-radius: var(--shell-cap-radius);
+    box-shadow: var(--shell-cap-shadow);
+  }
+  .sa-mtab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 48px;
+    border: 0;
+    background: transparent;
+    border-radius: 14px;
+    color: var(--shell-muted);
+    cursor: pointer;
+    padding: 0;
+  }
+  .sa-mtab svg { width: 19px; height: 19px; }
+  .sa-mtab span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  /* THE NAV ACTIVE LAW (baked decision 3): ground-fill pill, ink text — never burgundy,
+     never pink. The desktop rail's exact grammar, floated. */
+  .sa-mtab.on { background: var(--shell-ground); color: var(--shell-ink); }
+}

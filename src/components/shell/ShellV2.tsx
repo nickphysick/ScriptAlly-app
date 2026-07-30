@@ -18,10 +18,11 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, Settings, PanelLeft, List, Package, User, Compass, BookCopy,
-  SlidersHorizontal, HelpCircle, ChevronDown, Search,
+  SlidersHorizontal, HelpCircle, ChevronDown, ChevronLeft, Search,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
+import { MobileDetailSpec } from "./mobileChrome";
 import { useShellNavCounts } from "./ShellSidebar";
 import {
   SHELL_DASHBOARD, SHELL_RAIL, SHELL_SECTIONS, SHELL_SETUP, SHELL_SETUP_PATHS, ShellV2Section, railClickPlan,
@@ -359,7 +360,13 @@ export const ShellTopBar: React.FC<{
   onOpenSearch?: () => void;
   /** Focus returns to this control when the palette closes. */
   searchOpenerRef?: React.RefObject<HTMLButtonElement | null>;
-}> = ({ onNavigate, scope, onHelp, onOpenSearch, searchOpenerRef }) => {
+  /** Mobile Pass 1 — the ACTIVE route's pushed detail (back/title or Cancel·title·Done). All
+   *  detail elements are <md-only by CSS, so a registered spec changes nothing at md+. */
+  mobileDetail?: MobileDetailSpec | null;
+  /** Mobile Pass 1 — the avatar opens the you-menu sheet (<md only; desktop keeps the user
+   *  block navigating to /account). */
+  onOpenYou?: () => void;
+}> = ({ onNavigate, scope, onHelp, onOpenSearch, searchOpenerRef, mobileDetail = null, onOpenYou }) => {
   const { pathname } = useLocation();
   const { currentUser } = useScriptAllyDb();
   // THE BAR HAS TWO STATES, ONE COMPONENT (ref design-refs/scriptally-bar-per-page.html).
@@ -403,7 +410,27 @@ export const ShellTopBar: React.FC<{
   );
 
   return (
-    <header className={`sv2-topbar${isDashboard ? " sv2-tb-dash" : ""}`}>
+    <header className={`sv2-topbar${isDashboard ? " sv2-tb-dash" : ""}${mobileDetail ? " sv2-tb-mdetail" : ""}`}>
+      {/* MOBILE DETAIL (Mobile Pass 1, baked decision 5) — a pushed screen swaps the bar to
+          ‹ back (query detail) or Cancel · title · Done (agent editor). Every element here is
+          display:none at md+ (mobileShell.css), so desktop never sees them. */}
+      {mobileDetail &&
+        (mobileDetail.kind === "back" ? (
+          <button type="button" className="sv2m-back" onClick={mobileDetail.onBack}>
+            <ChevronLeft aria-hidden="true" />
+            {mobileDetail.title}
+          </button>
+        ) : (
+          <>
+            <button type="button" className="sv2m-cancel" onClick={mobileDetail.onCancel}>
+              Cancel
+            </button>
+            <span className="sv2m-dtitle">{mobileDetail.title}</span>
+            <button type="button" className="sv2m-done" onClick={mobileDetail.onDone}>
+              {mobileDetail.doneLabel ?? "Done"}
+            </button>
+          </>
+        ))}
       {/* LEFT (ref design-refs/scriptally-bar-per-page.html) — the front door names the product;
           a working page names your location. THE BREADCRUMB IS BACK on every non-dashboard page:
           with the wordmark gone from those pages the slot stood empty, and orientation is what
@@ -445,6 +472,23 @@ export const ShellTopBar: React.FC<{
           {help}
           {user}
         </div>
+      )}
+      {/* MOBILE CLUSTER (Mobile Pass 1, concept frames 01/02/05) — the search opener as an icon
+          and the avatar as the you-menu trigger. <md only by CSS; desktop keeps the pill + the
+          user block above. */}
+      <button type="button" className="sv2m-iconbtn" onClick={onOpenSearch} aria-label="Search">
+        <Search aria-hidden="true" />
+      </button>
+      {currentUser && (
+        <button
+          type="button"
+          className="sv2m-av"
+          onClick={onOpenYou}
+          aria-label="Your account and shortcuts"
+          aria-haspopup="dialog"
+        >
+          {initials}
+        </button>
       )}
     </header>
   );
