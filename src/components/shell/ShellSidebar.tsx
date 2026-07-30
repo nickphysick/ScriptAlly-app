@@ -58,6 +58,69 @@ const SECTION_ICONS: Record<string, React.ComponentType<{ className?: string; "a
   shelf: Book,
 };
 
+
+/** THE MANUSCRIPT SCOPE CONTROL (top-bar rebuild) — the SAME switcher that used to sit in the
+ *  sidebar, moved whole rather than rebuilt: same shared `scriptally_active_manuscript_id` key,
+ *  same popover, same resolve/pick helpers. It lives in the bar because every figure on screen
+ *  is filtered by it, and in the sidebar it vanished the moment the panel collapsed. */
+export const ShellScope: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
+  const { manuscripts, queries } = useScriptAllyDb();
+  const [storedMsId, setStoredMsId] = useState<string | null>(() => {
+    try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; }
+  });
+  const activeMs = resolveActiveManuscript(manuscripts, storedMsId);
+  const [msOpen, setMsOpen] = useState(false);
+  const deckRef = useRef<HTMLDivElement>(null);
+  const pickManuscript = (id: string) => {
+    try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode */ }
+    setStoredMsId(id);
+    setMsOpen(false);
+  };
+  useEffect(() => {
+    if (!msOpen) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && deckRef.current?.contains(t)) return;
+      setMsOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [msOpen]);
+  const msQueries = (id: string) => queries.filter((q) => q.manuscriptId === id);
+
+  if (!activeMs) {
+    return (
+      <button type="button" className="sv2-scope" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
+        <span className="sv2-scopetile" aria-hidden="true">+</span>
+        <span className="sv2-scopet">Add a manuscript</span>
+      </button>
+    );
+  }
+  return (
+    <span className="sv2-scopewrap" ref={deckRef}>
+      <button type="button" className="sv2-scope" onClick={() => setMsOpen((v) => !v)} aria-expanded={msOpen} aria-haspopup="listbox">
+        <span className="sv2-scopetile" aria-hidden="true">{manuscriptInitials(activeMs.title)}</span>
+        <span className="sv2-scopet">{activeMs.title}</span>
+        <ChevronsUpDown className="sv2-scopechev" aria-hidden="true" />
+      </button>
+      {msOpen && (
+        <div className="sv2-mspop" role="listbox" aria-label="Manuscripts">
+          {manuscripts.map((m) => (
+            <div key={m.id} role="option" aria-selected={m.id === activeMs.id} className="sv2-msrow" onClick={() => pickManuscript(m.id)}>
+              <span className="sv2-msn">{m.title}</span>
+              <span className="sv2-msc">{manuscriptSubtitle(m, msQueries(m.id))}</span>
+            </div>
+          ))}
+          <div className="sv2-msdiv" />
+          <div className="sv2-msadd" onClick={() => { setMsOpen(false); onNavigate("manuscripts", "Add a manuscript"); }}>
+            <Plus aria-hidden="true" /> Add a manuscript
+          </div>
+        </div>
+      )}
+    </span>
+  );
+};
+
 export const ShellSidebarBody: React.FC<{
   /** The legacy navigate bridge — the capture interceptions (Log query etc.) run through it. */
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -173,55 +236,10 @@ export const ShellSidebarBody: React.FC<{
 
       <div className="sv2-half" />
 
-      <div className="sv2-slab">Working on</div>
-      {/* ── Manuscript row — bare (no card) ── */}
-      {activeMs ? (
-        <div className="sv2-mswrap" ref={deckRef}>
-          <button
-            type="button"
-            className="sv2-ms2"
-            onClick={() => setMsOpen((v) => !v)}
-            aria-expanded={msOpen}
-            aria-haspopup="listbox"
-          >
-            <span className="sv2-mstile" aria-hidden="true">{manuscriptInitials(activeMs.title)}</span>
-            <span className="sv2-mstxt">
-              <span className="sv2-mst1">{activeMs.title}</span>
-              <span className="sv2-mst2">{manuscriptSubtitle(activeMs, msQueries(activeMs.id))}</span>
-            </span>
-            <span className="sv2-mschev" aria-hidden="true"><ChevronsUpDown /></span>
-          </button>
-          {msOpen && (
-            <div className="sv2-mspop" role="listbox" aria-label="Manuscripts">
-              {manuscripts.map((m) => (
-                <div
-                  key={m.id}
-                  role="option"
-                  aria-selected={m.id === activeMs.id}
-                  className="sv2-msrow"
-                  onClick={() => pickManuscript(m.id)}
-                >
-                  <span className="sv2-msn">{m.title}</span>
-                  <span className="sv2-msc">{manuscriptSubtitle(m, msQueries(m.id))}</span>
-                </div>
-              ))}
-              <div className="sv2-msdiv" />
-              <div className="sv2-msadd" onClick={() => { setMsOpen(false); onNavigate("manuscripts", "Add a manuscript"); }}>
-                <Plus aria-hidden="true" /> Add a manuscript
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <button type="button" className="sv2-ms2" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
-          <span className="sv2-mstile" aria-hidden="true">+</span>
-          <span className="sv2-mstxt">
-            <span className="sv2-mst1">Add a manuscript</span>
-            <span className="sv2-mst2">Your book goes here</span>
-          </span>
-        </button>
-      )}
-
+      {/* (The manuscript row and its "Working on" heading LEFT for the top bar — top-bar
+          rebuild. No duplication: the scope control exists once, in the chrome, so it survives
+          the panel collapsing. Removing it also relieves the crowding in this half.) */}
+      <div className="sv2-slab">Tasks &amp; reminders</div>
       {/* ── Task pills — Urgent / House ── */}
       <div className="sv2-pills">
         {pills.map((pill) => (

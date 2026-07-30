@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { useLocation, useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
-import { ShellSidebarBody } from "./ShellSidebar";
+import { ShellSidebarBody, ShellScope } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
@@ -267,7 +267,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         </div>
 
         {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} collapsed={panelCollapsed} />
+        <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} />
 
         {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
             the fixed BottomTabBar (was on the legacy shell's <main>). */}
@@ -285,55 +285,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         </div>
       </div>
 
-      {/* Floating help — global again (VI P3 reversed the workbench-era /todo hide); mockup
-          anatomy. Desktop only: below md the account menu carries Help Centre and the bottom tab
-          bar owns that corner. Display comes from the class (not inline) so the media query can
-          hide it. */}
-      {/* THE GUTTER FIX (agent-list rebuild P2): the FAB and its menu are position:fixed, so they
-          measure from the BROWSER edge — which is 14px further out than every capsule. Sitting at
-          a bare right:20 they overhung the ground gutter on the right only, which is exactly the
-          left-correct/right-short signature. Both now measure from the capsule edge
-          (--shell-cap-gap) at ≥768px, the same fix the timeline pull tab took. Below md the
-          capsule stands down and the flush-to-edge idiom is correct, so the base value stays.
-          No compensating padding anywhere — the cause moved, not the symptom. */}
-      <style>{`
-        /* ADJACENCY (save-and-today P3): --sa-fab-shift is published by the To-do page while the
-           Today corner is on screen, so the FAB steps clear of that corner's footprint instead of
-           sitting beside (or under) it. It is 0 everywhere else, so no other route moves. */
-        .ashell-help-fab { display: flex; right: calc(20px + var(--sa-fab-shift, 0px)); }
-        .ashell-help-menu { right: calc(20px + var(--sa-fab-shift, 0px)); }
-        @media (min-width: 768px) {
-          .ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }
-          .ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }
-        }
-        @media (max-width: 767.98px) {
-          .ashell-help-fab { display: none !important; }
-        }
-      `}</style>
-      {routeKey !== "help" && <button
-        type="button"
-        className="ashell-help-fab"
-        onClick={() => {
-          // On the To-do board the ? opens a two-item menu (the tour replay lives here); the
-          // existing direct-navigate behaviour is KEPT as the menu's first item — and stays the
-          // click action itself on every other route.
-          if (routeKey === "todo") setHelpMenuOpen((v) => !v);
-          else onNavigate("help");
-        }}
-        title="Help"
-        aria-label="Help"
-        style={{
-          // `right` comes from the class above so the media query can move it to the capsule edge
-          // (inline would beat it — the shell CSS footgun).
-          position: "fixed", bottom: 20, width: 38, height: 38, borderRadius: "50%",
-          background: parchment, border: "var(--bdw) solid var(--bd)", color: burgundy,
-          fontFamily: FONT_SERIF, fontSize: 17, cursor: "pointer",
-          boxShadow: "0 3px 12px rgba(58,28,20,0.12)", zIndex: 30,
-          alignItems: "center", justifyContent: "center",
-        }}
-      >
-        ?
-      </button>}
+      {/* (The floating help FAB is RETIRED — top-bar rebuild: help is a bar button now, so it
+          is chrome rather than a thing measured from the browser edge. Its /todo two-item menu
+          survives below, re-anchored under the bar's right end.) */}
       {helpMenuOpen && routeKey !== "help" && (
         <>
           <div style={{ position: "fixed", inset: 0, zIndex: 39 }} onClick={() => setHelpMenuOpen(false)} />
@@ -342,7 +296,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             aria-label="Help"
             className="ashell-help-menu"
             style={{
-              position: "fixed", bottom: 66, zIndex: 41, minWidth: 176,
+              // re-anchored under the bar's right end (the FAB it hung off is retired)
+              position: "fixed", top: 62, right: 24, zIndex: 41, minWidth: 176,
               background: parchment, border: "var(--bdw) solid var(--bd)", borderRadius: 12,
               boxShadow: "0 6px 24px rgba(58,28,20,0.16)", padding: 6, fontSize: 13,
             }}

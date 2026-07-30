@@ -488,13 +488,42 @@
     gap: 14px;
     height: 58px;
     flex: none;
-    padding: 0 26px;
+    gap: 12px;
+    padding: 0 18px;
     /* THE HEADER BAR shares the rail's tone — one chrome family, a PERMANENT fill and border
        (no scroll state: that idea is superseded). */
     background: var(--shell-bar-bg);
     border-bottom: 1px solid var(--shell-line-soft);
   }
 }
+/* ── THE BAR'S CONTENTS (top-bar rebuild, arrangement B) ────────────────────────────────────
+   brand · divider · scope · grow · search · divider · tools. The breadcrumb is RETIRED. */
+.sv2-tbbrand { display: flex; align-items: center; flex: none; padding: 10px 0; }
+.sv2-vr { width: 1px; align-self: stretch; margin: 12px 2px; background: var(--shell-line); flex: none; }
+.sv2-scopewrap { position: relative; flex: none; }
+.sv2-scope {
+  display: inline-flex; align-items: center; gap: 9px; height: 36px; padding: 0 11px 0 7px;
+  border-radius: 11px; background: var(--shell-card); border: 1px solid var(--shell-line);
+  cursor: pointer; flex: none; max-width: 260px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sv2-scope:hover { border-color: #cfc2b4; box-shadow: 0 3px 12px rgba(58, 28, 20, 0.07); }
+.sv2-scopetile {
+  width: 24px; height: 24px; border-radius: 7px; flex: none; display: grid; place-items: center;
+  background: linear-gradient(160deg, #dce0d9, #d0d6cc); border: 1px solid rgba(124, 58, 42, 0.2);
+  font-family: var(--font-serif); font-size: 9px; color: #5a6e58;
+}
+.sv2-scopet { font-family: var(--font-serif); font-size: 13.5px; color: var(--shell-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2-scopechev { width: 12px; height: 12px; color: var(--shell-muted); flex: none; }
+/* the bar's tool buttons — help now, the timeline next pass */
+.sv2-tbicon {
+  width: 34px; height: 34px; border: 0; background: transparent; border-radius: 10px;
+  display: grid; place-items: center; color: var(--shell-muted); cursor: pointer; flex: none;
+  transition: background 0.15s, color 0.15s;
+}
+.sv2-tbicon svg { width: 17px; height: 17px; }
+.sv2-tbicon:hover { background: var(--shell-inset); color: var(--shell-ink); }
+/* (the crumb rules below are dead with the breadcrumb — kept only until a cleanup pass) */
 .sv2-crumb {
   display: flex;
   align-items: center;

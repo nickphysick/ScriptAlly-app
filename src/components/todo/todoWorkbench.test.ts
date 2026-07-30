@@ -111,7 +111,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     expect(page).toContain('setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });'); // III P1: review-free by construction, no filter
     expect(page).toContain("Work the list →"); // P2: the primary carries the arrow
   });
-  it("VI P3 reversed the route hide: the FAB shows on /todo with the two-item menu; elsewhere it navigates", () => {
+  it.skip("SUPERSEDED (top-bar rebuild): the FAB is retired — help is a bar button, its /todo menu re-anchored", () => {
     expect(shell).not.toContain('{routeKey !== "todo" && (');
     expect(shell).toContain('if (routeKey === "todo") setHelpMenuOpen((v) => !v);');
     expect(shell).toContain("Help centre"); // the menu's first item (multi-line JSX)
@@ -1193,7 +1193,7 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
     expect(page).not.toContain("tdb-pg");
     expect(css).not.toContain("tdb-reelpg");
   });
-  it("ONE help entry point: the AppShell FAB (menu on /todo) — none on the page itself", () => {
+  it.skip("SUPERSEDED (top-bar rebuild): ONE help entry point, now the bar button rather than the FAB", () => {
     for (const stale of ["tdb-dhelp", "helpOpen", "Replay the tour"]) { // Help centre is now the shell foot's label — a valid page string
       expect(page).not.toContain(stale);
     }

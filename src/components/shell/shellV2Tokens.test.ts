@@ -240,7 +240,7 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
 
   it("the GROUP HEADINGS: two quiet mono labels, and the tile caption SURVIVES", () => {
     const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
-    expect(body).toContain('<div className="sv2-slab">Working on</div>');
+    expect(body).toContain('<div className="sv2-slab">Tasks &amp; reminders</div>'); // Working on left with the scope control
     expect(body).toContain('<div className="sv2-slab">Quick actions</div>');
     expect(body).toContain("Log · Respond · Agent · Manuscript"); // the caption stays (baked)
     const slab = rule(".sv2-slab");

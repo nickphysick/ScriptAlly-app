@@ -350,17 +350,15 @@ export const ShellTopBar: React.FC<{
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   onNavigate: (tab: string, subPageName?: string) => void;
-  /** Panel collapse — the DASHBOARD crumb slot depends on it (tone/crumb pack). */
-  collapsed?: boolean;
-}> = ({ routeKey, searchQuery, setSearchQuery, onNavigate, collapsed = false }) => {
+  /** The manuscript SCOPE control, rendered by the shell and seated in the bar (top-bar
+   *  rebuild): it left the sidebar entirely, so which manuscript you are working on is visible
+   *  on every page and in every state — it used to vanish the moment the panel collapsed. */
+  scope?: React.ReactNode;
+  /** Help's existing behaviour, lifted out of the retired floating FAB. */
+  onHelp?: () => void;
+}> = ({ routeKey, searchQuery, setSearchQuery, onNavigate, scope, onHelp }) => {
   const { pathname } = useLocation();
-  const crumb = shellCrumbForPath(pathname);
   const searchRef = useRef<HTMLInputElement | null>(null);
-  // The dashboard's crumb slot is special (tone/crumb pack): the brand lives in the panel, so
-  // when the panel goes the mark moves here; with the panel showing, the slot reads as prose.
-  // Handled at the RENDER, not in shellV2Nav — the model's "Dashboard" label is shared with the
-  // accordion row, and renaming it there would rename the nav item too.
-  const isDashboard = pathname === SHELL_DASHBOARD.path;
 
   // ⌘K — focus the global search. The To-do page owns its route-local ⌘K registration (one
   // live owner per route, the long-standing invariant), so this handler stands down there.
@@ -378,30 +376,15 @@ export const ShellTopBar: React.FC<{
 
   return (
     <header className="sv2-topbar">
-      {isDashboard ? (
-        collapsed ? (
-          // Panel collapsed — the brand mark stands in for it (same artwork, bar-sized).
-          <div className="sv2-crumbmark">
-            <ScriptAllyLogo heightPx={22} />
-          </div>
-        ) : (
-          <div className="sv2-crumb"><b>Your dashboard</b></div>
-        )
-      ) : (
-        crumb && (
-          <div className="sv2-crumb">
-            {crumb.section !== crumb.page && (
-              <>
-                <span>{crumb.section}</span>
-                <span className="sv2-sl">/</span>
-              </>
-            )}
-            <b>{crumb.page}</b>
-          </div>
-        )
-      )}
-      {/* The save-state chip is REMOVED (fixes pack Phase 4): crumb left, search right,
-          nothing else. It was purely presentational — no save-state logic existed to keep. */}
+      {/* ARRANGEMENT B (ref design-refs/scriptally-topbar-contents.html):
+          brand · divider · scope · grow · search · divider · tools.
+          THE BREADCRUMB IS GONE — it was the third thing telling you where you are, after the
+          rail's lit section and the page's own PageHeader title. That also supersedes the
+          dashboard crumb rule: the brand is now permanently in the bar, at full size, on every
+          page and in every state, so the rule had nothing left to do. */}
+      <span className="sv2-tbbrand"><ScriptAllyLogo heightPx={34} /></span>
+      <span className="sv2-vr" aria-hidden="true" />
+      {scope}
       <div className="sv2-grow" />
       <div className="sv2-gsearch">
         <NavSearch
@@ -412,6 +395,13 @@ export const ShellTopBar: React.FC<{
           inputRef={searchRef}
         />
       </div>
+      <span className="sv2-vr" aria-hidden="true" />
+      {/* Help stops being a thing stuck to the viewport and becomes chrome. (The timeline is
+          deferred: its drawer is rendered by Dashboard and gated on that route, so its trigger
+          cannot simply be app-wide — Nick's call is a dashboard-only bar button, next pass.) */}
+      <button type="button" className="sv2-tbicon" onClick={onHelp} title="Help" aria-label="Help">
+        <HelpCircle aria-hidden="true" />
+      </button>
     </header>
   );
 };

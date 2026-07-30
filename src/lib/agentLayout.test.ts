@@ -81,25 +81,12 @@ describe("agent list · the page column", () => {
  * `.sa-tltab` was moved to the capsule edge in an earlier pack; the help FAB was missed, and its
  * bare right:20 measured from the browser edge, overhanging the ground gutter on the right only.
  */
-describe("the help FAB measures from the capsule, not the browser edge", () => {
-  it("neither the FAB nor its menu carries an inline `right` — inline would beat the media query", () => {
-    const fab = shell.slice(shell.indexOf('className="ashell-help-fab"'), shell.indexOf("</button>}"));
-    expect(
-      fab,
-      "an inline `right` returned to the help FAB — inline styles out-specify the breakpoint rule, so the desktop capsule inset silently stops applying (the shell CSS footgun)",
-    ).not.toMatch(/right:\s*\d/);
-  });
-
-  it("the desktop inset reads the capsule gap token", () => {
-    expect(
-      shell,
-      "the FAB stopped measuring from the content capsule — at a bare right:20 it overhangs the 14px ground gutter, which is exactly the left-correct/right-short bug this phase fixed",
-    // save-and-today P3 adds the ADJACENCY shift (0 on every route but /todo with the Today corner up),
-    // so the capsule-gap fix now reads through it — the gutter fix itself is unchanged.
-    ).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
-    expect(
-      shell,
-      "the help MENU drifted off the FAB's inset — the two must move together or the menu hangs off the button it belongs to",
-    ).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
+describe("the help FAB is RETIRED — help is a bar button now (top-bar rebuild)", () => {
+  it("the floating FAB and its inline right-inset are gone, so it cannot mismeasure anything", () => {
+    expect(shell).not.toContain('className="ashell-help-fab"');
+    // it was one of the three suspects in the right-gutter bug; removing it removes the class
+    const v2 = readFileSync(new URL("../components/shell/ShellV2.tsx", import.meta.url), "utf8");
+    expect(v2).toContain('className="sv2-tbicon"');
   });
 });
+

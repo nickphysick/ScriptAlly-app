@@ -158,30 +158,9 @@ describe("Today panel P3 — collapse, the launcher, and its neighbours", () => 
     expect(page).toContain('localStorage.setItem("sa.todoTodayMin", v ? "1" : "0")');
   });
 
-  it("ADJACENCY: the help FAB steps clear of the corner's footprint — the boxes cannot overlap or abut", () => {
-    // the page publishes the clearance; the shell's FAB + menu both read it
-    expect(page).toContain('root.style.setProperty("--sa-fab-shift", shift)');
-    expect(page).toContain('!todayShown ? "0px" : todayMin ? "var(--td-fab-clear-min, 172px)" : "var(--td-fab-clear, 320px)"');
-    expect(page).toContain('root.style.removeProperty("--sa-fab-shift")'); // no other route inherits it
+  it("ADJACENCY is moot — the help FAB is RETIRED (top-bar rebuild), so nothing can abut the corner", () => {
     const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
-    expect(shell).toContain(".ashell-help-fab { display: flex; right: calc(20px + var(--sa-fab-shift, 0px)); }");
-    expect(shell).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
-    expect(shell).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
-    const w = rule(".tdb-wrap");
-    expect(rule(".tdb-tdpop")).toContain("width: var(--td-w)");
-    expect(rule(".tdb-tdpop.min")).toContain("max-width: var(--td-launch-max)");
-    // THE ARITHMETIC, asserted from the tokens themselves rather than eyeballed. The corner is
-    // inset 26px and the FAB 20px (14px cap gap + 6), both measured from the viewport's right edge:
-    //   corner occupies [26, 26 + width];  FAB starts at [20 + shift]
-    //   clear ⇔ 20 + shift > 26 + width  (strictly greater — abutting is a fail, not a pass)
-    const num = (name: string): number => Number(/(\d+)px/.exec(new RegExp(`${name}:\\s*(\\d+px)`).exec(w)![1])![1]);
-    const CORNER_INSET = 26, FAB_INSET = 20;
-    for (const [width, shift] of [
-      [num("--td-w"), num("--td-fab-clear")],                 // expanded
-      [num("--td-launch-max"), num("--td-fab-clear-min")],    // collapsed
-    ]) {
-      expect(FAB_INSET + shift).toBeGreaterThan(CORNER_INSET + width);
-    }
+    expect(shell).not.toContain('className="ashell-help-fab"');
   });
 
   it("SESSION: the corner leaves with the board and returns, state intact", () => {

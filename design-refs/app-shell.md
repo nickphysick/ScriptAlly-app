@@ -165,10 +165,25 @@ the primary-button colour and content accent. Never pink, never burgundy, in nav
 
 ## Content capsule
 
-58px top bar inside the capsule (`line-soft` bottom hairline): crumb left · save-state chip ·
-`NavSearch` right (cream fill, no border; ⌘K wiring unchanged). `PageHeader` renders inside the
-capsule as-is (all three variants; primary = Form 11 soft-pink). Page scroll happens inside the
-capsule, never on the window.
+58px top bar inside the capsule (`line-soft` bottom hairline), ARRANGEMENT B (ref
+`scriptally-topbar-contents.html`): **brand · divider · manuscript scope · flexible space ·
+search (⌘K) · divider · tools**. It wears the rail's tone — one chrome family.
+
+**The manuscript SCOPE lives here, not in the sidebar.** Every figure on screen is filtered by
+it, and in the panel it vanished the moment the panel collapsed. It exists ONCE: the sidebar's
+manuscript row and its "Working on" heading are gone, and the panel's lower half now reads
+Tasks & reminders → Quick actions.
+
+**THE BREADCRUMB IS RETIRED on every page.** It was the third thing telling you where you are,
+after the rail's lit section and the page's own `PageHeader` title. **This supersedes the
+dashboard crumb rule** (brand mark when collapsed / "Your dashboard" when expanded): the brand
+is now permanently in the bar at full size, on every page and in every state, so that rule has
+nothing left to do — it is deleted, not contradicted.
+
+**Help is a bar button**, so the floating FAB is retired — one of the three suspects in the
+right-gutter bug, removed as a class of problem rather than repositioned again. The timeline is
+NOT yet folded in: its drawer is rendered by `Dashboard` and gated on that route, so its trigger
+cannot be app-wide. Nick's call for the follow-up is a dashboard-only bar button.
 
 ## Panel collapse (fixes pack — the rail question, RESOLVED)
 
