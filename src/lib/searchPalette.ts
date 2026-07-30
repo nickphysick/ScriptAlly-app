@@ -90,10 +90,118 @@ export const PALETTE_ACTIONS: PaletteItem[] = [
   },
 ];
 
+/**
+ * THE PAGES — every routed page plus Task settings and Help centre. **Pages and features are
+ * results**: typing "pack" should find the Packages page and "settings" should find Task
+ * settings, because the thing people are looking for is as often a place as a record.
+ */
+export const PALETTE_PAGES: PaletteItem[] = [
+  { id: "page:dashboard", group: "Pages", kind: "page", title: "Dashboard", subtitle: "Your desk", run: { kind: "path", path: "/dashboard" } },
+  { id: "page:queries", group: "Pages", kind: "page", title: "Queries Hub", subtitle: "Every query and where it stands", run: { kind: "path", path: "/queries" } },
+  { id: "page:todo", group: "Pages", kind: "page", title: "To-do", subtitle: "Urgent tasks and housekeeping", run: { kind: "path", path: "/todo" } },
+  { id: "page:packages", group: "Pages", kind: "page", title: "Packages", subtitle: "Submission package workshop", run: { kind: "path", path: "/manuscripts/packages" } },
+  { id: "page:agents", group: "Pages", kind: "page", title: "Agent list", subtitle: "Everyone you are querying", run: { kind: "path", path: "/agents" } },
+  { id: "page:discover", group: "Pages", kind: "page", title: "Discover", subtitle: "Find new agents", run: { kind: "path", path: "/agents/discover" } },
+  { id: "page:manuscripts", group: "Pages", kind: "page", title: "Manuscripts", subtitle: "Your shelf", run: { kind: "path", path: "/manuscripts" } },
+  { id: "page:comps", group: "Pages", kind: "page", title: "Comparable titles", subtitle: "Find comps for your book", run: { kind: "path", path: "/manuscripts/comps" } },
+  { id: "page:import", group: "Pages", kind: "page", title: "Import", subtitle: "Bring in queries from a spreadsheet", run: { kind: "path", path: "/import" } },
+  { id: "page:account", group: "Pages", kind: "page", title: "Account", subtitle: "Your details and preferences", run: { kind: "path", path: "/account" } },
+  { id: "page:plans", group: "Pages", kind: "page", title: "Plans", subtitle: "What Pro adds", run: { kind: "path", path: "/plans" } },
+  // Task settings is a SHEET inside /todo, not a route — the existing reachability contract is
+  // "navigate there, then dispatch the event", which is what the rail's flyout already does.
+  { id: "page:task-settings", group: "Pages", kind: "page", title: "Task settings", subtitle: "Choose what appears on your to-do list", run: { kind: "path", path: "/todo" } },
+  { id: "page:help", group: "Pages", kind: "page", title: "Help centre", subtitle: "Guides and answers", run: { kind: "path", path: "/help" } },
+];
+
 /** How many actions the empty state shows beneath Recent (mockup: the top four). */
 export const EMPTY_ACTION_COUNT = 4;
 /** How many recents the empty state shows (mockup: the last four things opened). */
 export const RECENT_COUNT = 4;
+
+/** Whole days between an ISO date and now, for a query's "9 days ago" line. */
+function daysAgo(iso: string | undefined, now: number): number | null {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return null;
+  return Math.max(0, Math.floor((now - t) / 86_400_000));
+}
+
+/** "9 days ago" / "today" / "1 day ago" — singular-safe, and honest about an undated query. */
+function ageLine(iso: string | undefined, now: number): string | null {
+  const d = daysAgo(iso, now);
+  if (d === null) return null;
+  if (d === 0) return "today";
+  return `${d} day${d === 1 ? "" : "s"} ago`;
+}
+
+export interface CorpusInput {
+  agents: { id: string; name?: string; agency?: string; city?: string }[];
+  queries: { id: string; agentId: string; manuscriptId: string; status: string; dateSent?: string }[];
+  manuscripts: { id: string; title: string; genre?: string; wordCount?: number }[];
+  /** Injected so the age lines are deterministic in tests. */
+  now: number;
+  /** How an agent's name and agency read — the app's ONE display rule, passed in to keep this
+   *  module free of component imports. */
+  agentLabel: (a: { id: string; name?: string; agency?: string }) => { primary: string; secondary: string };
+}
+
+/**
+ * BUILD THE CORPUS from already-loaded state. Order matters: it is the tie-break inside a group
+ * (rankItems sorts by score, then by corpus position), so agents come before queries before
+ * manuscripts before pages, and the fixed lists sit last.
+ *
+ * ⚠️ SECOND LINES CARRY CONTEXT, because a title alone is often ambiguous — two agents at the
+ * same agency, a query whose agent you know but whose manuscript you don't. Agents show agency
+ * and city; queries show manuscript and age; manuscripts show genre and word count.
+ */
+export function buildCorpus(input: CorpusInput): PaletteItem[] {
+  const { agents, queries, manuscripts, now, agentLabel } = input;
+  const msById = new Map(manuscripts.map((m) => [m.id, m]));
+  const queryCount = new Map<string, number>();
+  for (const q of queries) queryCount.set(q.manuscriptId, (queryCount.get(q.manuscriptId) ?? 0) + 1);
+
+  const agentItems: PaletteItem[] = agents.map((a) => {
+    const { primary, secondary } = agentLabel(a);
+    const sub = [secondary, a.city].filter(Boolean).join(" · ");
+    return {
+      id: `agent:${a.id}`, group: "Agents", kind: "agent",
+      title: primary, subtitle: sub || undefined,
+      run: { kind: "agent", agentId: a.id, name: primary },
+    };
+  });
+
+  const queryItems: PaletteItem[] = queries.map((q) => {
+    const agent = agents.find((a) => a.id === q.agentId);
+    const who = agent ? agentLabel(agent).primary : "Unknown agent";
+    const ms = msById.get(q.manuscriptId);
+    const age = ageLine(q.dateSent, now);
+    const sub = [ms?.title, age].filter(Boolean).join(" · ");
+    return {
+      id: `query:${q.id}`, group: "Queries", kind: "query",
+      // The status rides the TITLE so a search for "offer" finds the offers.
+      title: `${who} — ${q.status}`,
+      subtitle: sub || undefined,
+      status: q.status,
+      run: { kind: "query", queryId: q.id },
+    };
+  });
+
+  const msItems: PaletteItem[] = manuscripts.map((m) => {
+    const n = queryCount.get(m.id) ?? 0;
+    const sub = [
+      m.genre,
+      m.wordCount ? `${m.wordCount.toLocaleString("en-GB")} words` : null,
+      `${n} ${n === 1 ? "query" : "queries"}`,
+    ].filter(Boolean).join(" · ");
+    return {
+      id: `ms:${m.id}`, group: "Manuscripts", kind: "ms",
+      title: m.title, subtitle: sub,
+      run: { kind: "path", path: "/manuscripts" },
+    };
+  });
+
+  return [...agentItems, ...queryItems, ...msItems, ...PALETTE_ACTIONS, ...PALETTE_PAGES];
+}
 
 /**
  * NORMALISATION — case and punctuation are stripped from BOTH sides, so `orourke` finds

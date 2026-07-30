@@ -6,7 +6,7 @@
 import { describe, it, expect } from "vitest";
 import {
   EMPTY_ACTION_COUNT, GROUP_ORDER, PALETTE_ACTIONS, PaletteItem, RANK, RECENT_COUNT,
-  emptyStateItems, highlightParts, normalise, pushRecent, rankItems, scoreItem,
+  buildCorpus, emptyStateItems, highlightParts, normalise, pushRecent, rankItems, scoreItem,
 } from "./searchPalette";
 
 const item = (title: string, subtitle?: string): Pick<PaletteItem, "title" | "subtitle"> =>
@@ -169,3 +169,52 @@ describe("⚠️ every action dispatches to an EXISTING handler", () => {
     expect(byId["act:record"].shortcut).toBe("⌘R");
   });
 });
+
+describe("buildCorpus — second lines carry context, over already-loaded data", () => {
+  const now = Date.parse("2026-07-30T12:00:00");
+  const agentLabel = (a: { name?: string; agency?: string }) =>
+    ({ primary: a.name || a.agency || "", secondary: a.name ? (a.agency ?? "") : "Agent not specified" });
+  const input = {
+    now, agentLabel,
+    agents: [{ id: "a1", name: "Daniel O'Rourke", agency: "Inkwell & Stone", city: "Dublin" }],
+    queries: [{ id: "q1", agentId: "a1", manuscriptId: "m1", status: "Full Sent", dateSent: "2026-07-21T09:00:00" }],
+    manuscripts: [{ id: "m1", title: "Murphy's Day Out", genre: "Thriller", wordCount: 50000 }],
+  };
+
+  it("agents show agency and city", () => {
+    const a = buildCorpus(input).find((i) => i.id === "agent:a1")!;
+    expect(a.title).toBe("Daniel O'Rourke");
+    expect(a.subtitle).toBe("Inkwell & Stone · Dublin");
+  });
+
+  it("queries show manuscript and age, and CARRY THEIR STATUS for the real StatusDot", () => {
+    const q = buildCorpus(input).find((i) => i.id === "query:q1")!;
+    expect(q.title).toBe("Daniel O'Rourke — Full Sent");
+    expect(q.subtitle).toBe("Murphy's Day Out · 9 days ago");
+    // the row renders StatusDot from this — never a locally drawn circle
+    expect(q.status).toBe("Full Sent");
+  });
+
+  it("manuscripts show genre, word count and query count — singular-safe", () => {
+    const m = buildCorpus(input).find((i) => i.id === "ms:m1")!;
+    expect(m.subtitle).toBe("Thriller · 50,000 words · 1 query");
+  });
+
+  it("an undated query says nothing rather than inventing an age", () => {
+    const q = buildCorpus({ ...input, queries: [{ id: "q2", agentId: "a1", manuscriptId: "m1", status: "Queried" }] })
+      .find((i) => i.id === "query:q2")!;
+    expect(q.subtitle).toBe("Murphy's Day Out");
+  });
+
+  it("pages and features are results — including Task settings and Help centre", () => {
+    const corpus = buildCorpus(input);
+    expect(rankItems(corpus, "pack").some((r) => r.title === "Packages")).toBe(true);
+    expect(rankItems(corpus, "settings").some((r) => r.title === "Task settings")).toBe(true);
+    expect(rankItems(corpus, "help").some((r) => r.title === "Help centre")).toBe(true);
+  });
+
+  it("the status is searchable — 'full' finds the full-sent query", () => {
+    expect(rankItems(buildCorpus(input), "full").some((r) => r.id === "query:q1")).toBe(true);
+  });
+});
+

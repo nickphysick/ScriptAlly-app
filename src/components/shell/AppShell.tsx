@@ -22,12 +22,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
 import { SearchPalette } from "./SearchPalette";
-import { PALETTE_ACTIONS, rankItems } from "../../lib/searchPalette";
+import { buildCorpus, rankItems } from "../../lib/searchPalette";
+import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { ShellSidebarBody, ShellScope } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
+import { useScriptAllyDb } from "../../lib/db";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 
@@ -120,6 +122,9 @@ interface AppShellProps {
 const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" } as const;
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
+  // The palette's corpus reads these — already in memory on every route (DbProvider), so the
+  // palette never fetches.
+  const { agents, queries, manuscripts } = useScriptAllyDb();
   const stageRef = useRef<HTMLDivElement>(null);
   // Per-route scroll memory: saved continuously while scrolling, restored on route change
   // (top for a first visit). Lives on the stage element — the window never scrolls now.
@@ -255,9 +260,17 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   const [paletteTerm, setPaletteTerm] = useState("");
   const searchOpenerRef = useRef<HTMLButtonElement>(null);
   const openPalette = useCallback(() => { setPaletteTerm(""); setPaletteOpen(true); }, []);
-  // The ranked corpus for the typed term. Phase 2 ranks the ACTIONS; the agents / queries /
-  // manuscripts / pages corpus joins in Phase 3. All of it is already-loaded state — no fetch.
-  const paletteItems = useMemo(() => rankItems(PALETTE_ACTIONS, paletteTerm), [paletteTerm]);
+  // THE CORPUS — built from already-loaded state (DbProvider subscribes on every route), so the
+  // palette never fetches and has no loading state. Rebuilt when the data changes, not per
+  // keystroke; the ranking is the cheap part.
+  const corpus = useMemo(
+    () => buildCorpus({
+      agents, queries, manuscripts, now: Date.now(),
+      agentLabel: (a) => ({ primary: agentPrimary(a), secondary: agentSecondary(a) }),
+    }),
+    [agents, queries, manuscripts],
+  );
+  const paletteItems = useMemo(() => rankItems(corpus, paletteTerm), [corpus, paletteTerm]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) return;
