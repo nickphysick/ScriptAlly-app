@@ -199,7 +199,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                 if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveCompose(); }
                 if (e.key === "Escape") resetCompose();
               }}
-              placeholder="Leave yourself a note…"
+              placeholder="Leave yourself a post-it…"
               style={{
                 width: "100%",
                 minHeight: 78,
@@ -325,7 +325,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             <PostIt colour="pink" theme={NOTE_THEMES.pink} width={PICK_W} minHeight={PICK_MINH} surfaced={false} onClick={() => grabColour("pink")}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 7, minHeight: 88, textAlign: "center", color: NOTE_THEMES.pink.ink }}>
                 <Plus size={20} strokeWidth={2.25} />
-                <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.55 }}>Add a note</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.55 }}>Add a post-it</div>
               </div>
             </PostIt>
           </div>
@@ -380,7 +380,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               onClick={(e) => { e.stopPropagation(); addAnother(); }}
               onMouseEnter={() => setCornerHover(true)}
               onMouseLeave={() => setCornerHover(false)}
-              aria-label="New note"
+              aria-label="New post-it"
               style={{
                 width: 28,
                 height: 28,

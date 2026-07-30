@@ -1,0 +1,127 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create mode - dialog, columns, focus</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--content:#f7f3ec;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--terra:#9a3b2a;--sel:#e9edf2;--sh:0 8px 26px rgba(60,45,30,.07);--shPop:0 22px 60px rgba(60,45,30,.22);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--content);font-family:var(--in);color:var(--ink);padding:28px 34px 80px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:21px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:8px;max-width:900px}
+.lab{font-family:var(--mo);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin:26px 0 4px}
+.note{font-size:12px;color:var(--muted);margin-bottom:11px;max-width:880px}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh)}
+.row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+/* ---------- dialog ---------- */
+.dlg{width:410px;padding:26px 28px;border-radius:18px;box-shadow:var(--shPop)}
+.dlg h3{font-family:var(--pl);font-weight:700;font-size:22px;margin-bottom:9px}
+.dlg p{font-size:13.5px;color:var(--ink2);line-height:1.5;margin-bottom:22px}
+.dlgbtns{display:flex;gap:10px;justify-content:flex-end}
+.db{border-radius:11px;padding:11px 20px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--ink)}
+.db:hover{background:#f6f0e7}
+.db.keep{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.db.danger{background:transparent;border-color:#e0bdb2;color:var(--terra)}
+.db.danger:hover{background:#fbeee9}
+/* ---------- columns ---------- */
+.col{width:340px;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:14px}
+.ch svg{width:15px;height:15px}
+.cb{padding:16px}
+.f{margin-bottom:15px}
+.f:last-child{margin-bottom:0}
+.flab{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.fin{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:0 13px;background:#fff;font-size:13.5px;height:42px}
+.fin.locked{background:#f6f2ea;color:var(--ink2)}
+.fin .bk{width:22px;height:22px;border-radius:6px;background:#f5ead9;display:grid;place-items:center;font-size:11px;flex-shrink:0}
+.fin .cal{margin-left:auto;color:#a2937f;font-size:12px}
+.seg{display:flex;background:#f3ede4;border-radius:11px;padding:3px;gap:2px;height:42px}
+.seg span{flex:1;border-radius:9px;font-size:12.5px;font-weight:500;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.seg span.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(60,45,30,.12)}
+.nud{display:flex;gap:6px;flex-wrap:wrap}
+.nchip{border:1px solid var(--bd);border-radius:999px;padding:8px 13px;font-size:12px;background:#fff;color:var(--muted);cursor:pointer}
+.nchip.on{background:#fdf1ea;border-color:#e3b8a2;color:#8d4b32;font-weight:600}
+.mat{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #f1ebe1;font-size:13.5px}
+.mat:last-child{border-bottom:none}
+.ck{width:19px;height:19px;border-radius:6px;border:1.5px solid #cfc3b1;flex-shrink:0}
+.mhint{font-family:var(--mo);font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:12px}
+.divider{height:1px;background:var(--bd);margin:15px 0}
+/* ---------- focus ---------- */
+.stage{position:relative;border-radius:18px;padding:16px;border:1px solid var(--bd);background:var(--content);transition:background .26s ease}
+.stage.focus{background:#ded5c7}
+.dimmable{transition:opacity .24s ease, filter .24s ease}
+.stage.focus .dimmable{opacity:.42;filter:brightness(.93) saturate(.7)}
+.mini{display:flex;gap:14px}
+.minilist{width:240px;padding:9px}
+.mrow{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;min-height:48px}
+.mrow .mg{width:28px;height:28px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:9px}
+.mrow .nm{font-family:var(--pl);font-weight:600;font-size:13px}
+.mrow .ag{font-family:var(--mo);font-size:7px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:1px}
+.mrow.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef;margin-bottom:7px;padding:calc(9px - 1.5px) calc(10px - 1.5px)}
+.dchip{margin-left:auto;background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:6.5px;letter-spacing:.1em;padding:3px 7px;border-radius:5px;text-transform:uppercase}
+.minipane{flex:1;padding:14px}
+.mcols{display:flex;gap:10px;margin-top:12px}
+.mcol{flex:1;border:1px solid var(--bd);border-radius:11px;overflow:hidden;min-height:90px}
+.mch{background:var(--sage);border-bottom:1px solid var(--sageBd);padding:8px;text-align:center;font-size:10.5px;font-weight:600}
+.mmast{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 4px}
+.mmast h2{font-family:var(--pl);font-weight:700;font-size:18px}
+.mb{border:1px solid var(--bd);background:#fff;border-radius:9px;padding:7px 12px;font-size:11.5px;font-weight:600;margin-left:auto}
+.tog{display:inline-flex;gap:8px;margin-bottom:12px}
+.tbtn{background:#241c15;color:#f4ebdd;border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer}
+.tbtn.alt{background:transparent;color:var(--ink);border:1px solid var(--bd)}
+</style></head>
+<body>
+<h1>Create mode — dialog, columns, focus depth</h1>
+
+<div class="lab">1 · Discard dialog — on-brand</div>
+<div class="note">Parchment surface, Playfair heading, house buttons. <b>Keep editing</b> is the soft-pink default (the safe action leads); <b>Discard</b> is a terracotta outline — clearly destructive, never a red system slab.</div>
+<div class="card dlg">
+  <h3>Discard this query?</h3>
+  <p>Nothing has been saved yet — this draft will be lost.</p>
+  <div class="dlgbtns"><span class="db danger">Discard</span><span class="db keep">Keep editing</span></div>
+</div>
+
+<div class="lab">2 · Columns renamed — manuscript moves to "What you sent"</div>
+<div class="note">"When you sent it" now holds only the send facts (date · method · nudge). The manuscript joins the materials it was sent with, sitting above them with a divider.</div>
+<div class="row">
+  <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>When you sent it</div><div class="cb">
+    <div class="f"><div class="flab">Date sent</div><div class="fin">29 July 2026<span class="cal">▦</span></div></div>
+    <div class="f"><div class="flab">Sent by</div><div class="seg"><span class="on">Email</span><span>Form</span><span>Post</span></div></div>
+    <div class="f"><div class="flab">Nudge reminder</div><div class="nud"><span class="nchip on">8 Sep · in 6 weeks</span><span class="nchip">Pick a date</span><span class="nchip">None</span></div></div>
+  </div></div>
+
+  <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>What you sent</div><div class="cb">
+    <div class="f"><div class="flab">Manuscript</div><div class="fin locked"><span class="bk">▤</span>Murphy's Day Out<span class="mono" style="margin-left:auto">Only manuscript</span></div></div>
+    <div class="divider"></div>
+    <div class="mat"><span class="ck"></span>Query letter</div>
+    <div class="mat"><span class="ck"></span>Synopsis</div>
+    <div class="mat"><span class="ck"></span>Sample materials</div>
+    <div class="mat"><span class="ck"></span>Other…</div>
+    <div class="mhint">Pick an agent and this fills in from what they ask for</div>
+  </div></div>
+
+  <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/></svg>Notes</div><div class="cb">
+    <div style="border:1px solid var(--bd);border-radius:11px;padding:13px;color:#b0a494;font-size:13px;min-height:120px;background:#fff">First impressions, personalisation notes, anything worth remembering… (optional)</div>
+  </div></div>
+</div>
+
+<div class="lab">3 · Focus mode — the page itself darkens</div>
+<div class="note">The ground goes from cream to a deeper clay and dimmed elements lose brightness as well as opacity, so the lit pane and draft row read as genuinely spotlit. Still no scrim — the background is a token swap on the stage.</div>
+<div class="tog"><button class="tbtn" onclick="document.getElementById('st').classList.add('focus')">Enter create mode</button><button class="tbtn alt" onclick="document.getElementById('st').classList.remove('focus')">Exit</button></div>
+<div class="stage" id="st">
+  <div class="mmast dimmable"><h2>Queries Hub</h2><span class="mb">＋ Log query</span></div>
+  <div class="mini">
+    <div class="card minilist">
+      <div class="mrow draft"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><span class="dchip">Draft</span></div>
+      <div class="mrow dimmable"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div></div>
+      <div class="mrow dimmable"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div></div>
+      <div class="mrow dimmable"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div></div>
+    </div>
+    <div class="card minipane">
+      <div style="font-family:var(--pl);font-weight:700;font-size:17px">Logging new query</div>
+      <div style="font-family:var(--pl);font-style:italic;font-size:13px;color:var(--ink2)">Who are you querying?</div>
+      <div class="mcols"><div class="mcol"><div class="mch">When you sent it</div></div><div class="mcol"><div class="mch">What you sent</div></div><div class="mcol"><div class="mch">Notes</div></div></div>
+    </div>
+  </div>
+</div>
+</body></html>

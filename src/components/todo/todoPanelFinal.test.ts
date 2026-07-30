@@ -137,7 +137,7 @@ describe("the To-do PAGE HEADER — exactly two actions (todo rebuild P4)", () =
     expect(hdr).toContain("disabled: !reviewWin"); // the house disabled treatment when none exists
     expect(hdr).not.toMatch(/label: "Last week in review",[\s\S]{0,120}primary: true/); // it is the ghost
     expect(hdr).toContain('label: "Add task or note"');
-    expect(hdr).toContain("onClick: addTask");
+    expect(hdr).toContain('onClick: () => openComposer("task")'); // notes-and-tasks P2: the hero opens TASK mode
     expect(hdr).toContain("primary: true");
   });
 

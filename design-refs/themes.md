@@ -1104,3 +1104,117 @@ assistant" button pinned to the band's end, opening the existing preview modal. 
 
 **ONE PRO SURFACE.** Exactly one exists on this page, and every predecessor is extinct: the
 content-panel colophon, the panel-foot blue sticker, and the card-surfaced foot strip. Locked.
+
+## Notes and tasks — the two natures (To-do; ref `design-refs/notes-and-tasks.html`, notes-and-tasks pack)
+A user-created To-do item (`UserTask`) has **two natures, DERIVED from `dueDate`** — never a
+stored status flag:
+- **A NOTE** (no `dueDate`) — pinned, dateless, **nothing chases you**. Butter card (`--nt-block-note`
+  `#eedfae` offset), an **✎ NOTE** band, **Caveat** handwriting for title + detail, a mono **PINNED
+  {date}** footer, and **NO completion circle** — a note is edited or deleted, never ticked. Lives
+  only in the Notes lane.
+- **A TASK** (has `dueDate`) — dated, joins the work. **Sage** card (`--nt-block-task` `#d5dbd3` offset,
+  `--nt-task-line` `#b9c9b4` band/tick line), a **✓ YOUR TASK** band, typeset title (Playfair) +
+  detail (Inter), a mono **date chip**, and a **completion tick** (the existing `quickDone` + undo
+  toast).
+
+**THE PROMOTION RULE (derived at render, by the clock).** On its **due day** a task inherits the
+**urgent pink** (`--nt-block-due` `#f2cec1`) offset + band, gains a **DUE TODAY** tag (**OVERDUE**
+once the day passes, with the date chip in its overdue form), sorts into the **Urgent** lane, and
+**joins Today's list**. `surfaceOffset` — an **in-app surfacing lead**, one of `on-day` / `day-before`
+/ `week-before` — joins the task to Today's list **that many days early** (never a notification: no
+push, no email; `taskDueState` / `taskSurfaced` / `SURFACE_LEAD_DAYS` are pure, and `todaySplit`
+reads a derived `surfaced` flag, writing nothing).
+
+**SAGE IS THE USER-CREATED FAMILY; BLUE IS PRO.** The task family is sage (+ pink when due).
+**Blue never appears on a note or task card** — the pastille blue is reserved for the one Pro
+surface (the assistant band). Do not colour a user card blue.
+
+**THE COMPOSER'S TRANSFORMATION (frame 2).** One composer, two natures. The type segment
+(**✎ Note** / **✓ Task**) leads; switching TRANSFORMS it live — title + detail swap **Caveat ↔
+typeset**, the offset block swaps **butter ↔ sage** (`--nt-comp-block` by mode), the **date + "Show
+it in Today's list"** fields appear only for a task (the surfacing selector only once a date is set),
+the note shows the **NO DATE · NOTHING WILL CHASE YOU** line, and the save verb changes (**Pin the
+note** / **Add the task**). Content survives every switch. Two entry points: the Notes section opens
+**note** mode, the hero "Add task or note" opens **task** mode. Title always required; a task also
+requires a date. ⌘⏎ saves; Esc runs the styled `useConfirmAsk` discard (only when dirty) — **no
+native `prompt`/`alert`/`confirm`**.
+
+## The Today panel (settled — To-do; ref `design-refs/today-panel.html`, save-and-today pack P2/P3)
+The bottom-right Today corner, rebuilt to the researched overlay pattern.
+
+**THE OVERLAY ELEVATION PAIR.** The surface is white on a `#ddd2c2` hairline at radius 14, 290px
+wide (`--td-w`), carrying **two** shadows — an ambient spread plus a tight contact shadow —
+deepening together on hover: `--td-elev` `0 18px 44px rgba(58,28,20,.20), 0 2px 6px rgba(58,28,20,.10)`
+→ `--td-elev-hov` `0 22px 54px rgba(58,28,20,.26), 0 2px 8px rgba(58,28,20,.12)`.
+
+**THE NO-OPACITY LAW.** A functional panel is **never** faded. It recedes by **elevation and size
+only** — there is no opacity on the corner's surface rules in any state, and that absence is locked.
+
+**THE HEADER EARNS ITS HEIGHT (46px).** Sage (`--container-head-*`, whose height went 42 → 46px;
+Today is that token's sole consumer). It carries the Playfair title, a **52px progress bar** and the
+**`{done} / {total}`** fraction, so the panel answers "how am I doing" before you read a row. The
+progress is **derived** (`total = committed + done`), never stored. **The whole header is the collapse
+control** — a real button, not a div with a nested chevron.
+
+**ROWS.** 12px, single line, truncated — never wrapped. An always-present sage completion circle
+(reading `--nt-task-line`, the shared task-family token). A mono sub-label **only where it means
+something**: `DUE TODAY` · `OVERDUE` · `YOUR TASK`, and **nothing at all** on derived rows.
+
+**TICK STRIKES IN PLACE.** Completing strikes the row **where it sits**; it joins the done band only
+on the **next open**, so undo stays within reach. It runs the existing completion primitive + undo
+toast — never a second completion path. The done band stays a collapsed `✓ {n} DONE TODAY ▸` strip
+that expands in place.
+
+**ONE PRIMARY ACTION.** The foot is the ink **"Work the list →"** — *disabled* when the list is
+empty, never swapped for a different verb — plus a quiet **＋ roundel** whose menu holds "Help me
+pick" and "Choose from the board". Two competing ghost buttons are extinct.
+
+**HEIGHT.** The panel caps at a **third of the viewport**; the **rows** take the overflow
+(`--td-rows-max`), so the corner never grows into the work.
+
+**COLLAPSE IS HEIGHT ONLY.** One node in both states: the header stays mounted, everything below it
+transitions `max-height` over **180ms** behind `overflow:hidden` — so the bottom-anchored corner never
+jumps. The **chevron rotates**; it is never swapped for a different glyph. Reduced motion drops the
+transition and keeps the behaviour.
+
+**THE LAUNCHER IS THE HEADER.** Collapsed, that same header *is* the launcher — title, the outstanding
+count in a sage pill, chevron up, hugging its content as a pill. It **never vanishes while items
+exist**; when the list is empty the **whole corner is absent**, launcher included — there is no zero
+state in the corner. The collapsed/expanded choice **persists per user** (localStorage), surviving a
+reload and the session leave/return, because the state lives in React + storage and never in the DOM.
+
+**THE ADJACENCY RULE — no two floating controls sit side by side.** The help "?" FAB and the Today
+corner are both `position:fixed` bottom-right. The To-do page publishes `--sa-fab-shift` while the
+corner is on screen and the shell's FAB *and* its menu read it, so the FAB steps clear of the corner's
+footprint; the variable is 0 on every other route and removed on unmount. **Prove it with arithmetic,
+not by eye**: the corner occupies `[26, 26 + width]` from the viewport's right edge and the FAB starts
+at `20 + shift`, so clearance requires `20 + shift > 26 + width` — *strictly* greater, because
+abutting is a failure too. The launcher's width cap (`--td-launch-max`) and the FAB's clearance
+(`--td-fab-clear-min`) are **separate tokens**; conflating them is exactly what left a 6px overlap in
+the collapsed state during the build.
+
+## Save state machine (To-do — the writer's own notes and tasks)
+Every user-originated write goes through an explicit machine: **idle → pending → (saved | failed)**.
+
+- **Pending** — the save button disables and keeps its label (a quiet inline spinner only past
+  ~300ms), the fields go read-only but **keep every character**, and Esc is suppressed.
+- **Saved** — the composer closes **only after the write resolves**.
+- **Failed** — the composer **stays open**, content intact and editable again, with an inline error
+  beneath the actions and a **Try again** that re-runs the write.
+
+**THE NO-SILENT-NO-OP LAW.** No user action may quietly do nothing. This covers saving, **ticking a
+task complete**, and **deleting** — each surfaces a visible failure with a retry rather than throwing
+into the void.
+
+**FAILURE COPY COMES FROM THE ERROR CODE, NEVER THE MESSAGE.** `classifyWriteError` maps a caught
+write to `permission` / `network` / `unknown` (`src/lib/todoWrite.ts`), and `saveErrorCopy` renders
+the wording. A raw Firebase message must never reach the UI, and there are **no native dialogs** —
+blocking choices use the styled `useConfirmAsk`.
+
+**NO FLICKER.** An optimistic insert is permitted only if its rollback is invisible: the in-flight id
+is hidden from the board until the write resolves, so the item's node is **inserted once**, never
+inserted-then-removed.
+
+**DESTRUCTION ASKS FIRST.** Delete is gated on the styled confirm — an undo toast is a safety net
+*after* consent, not a substitute for it. A task warns harder than a note, naming that its date goes
+too and, when it is on Today's list, that it leaves that list.

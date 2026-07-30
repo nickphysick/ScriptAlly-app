@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useLayoutEffect, useState, useEffect, useRef } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -25,11 +25,15 @@ import {
   addDoc
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan, ComponentType } from "../types";
+import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType } from "../types";
 import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { QueryCreatePane } from "./queries/QueryCreatePane";
+import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft } from "../lib/queryDraft";
+import { pickableManuscripts } from "../lib/lifecycle";
+import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
@@ -205,7 +209,30 @@ const RibbonMenuItem: React.FC<{
 );
 RibbonMenuItem.displayName = "RibbonMenuItem";
 
-export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string, subPageName?: string) => void; activeSubPage?: string; inShell?: boolean }> = ({ searchQuery, onNavigate, activeSubPage, inShell = false }) => {
+/* v4 P3 — last-viewed query, remembered across visits so the hub reopens where you left it.
+   localStorage under the house `sa.` UI-prefs prefix; a lightweight preference, never a fact —
+   an id that no longer exists just falls through to the first row of the current sort. */
+const LAST_VIEWED_KEY = "sa.queries.lastViewed";
+const readLastViewedQueryId = (): string | null => {
+  try { return localStorage.getItem(LAST_VIEWED_KEY); } catch { return null; }
+};
+const writeLastViewedQueryId = (id: string | null) => {
+  try { if (id) localStorage.setItem(LAST_VIEWED_KEY, id); else localStorage.removeItem(LAST_VIEWED_KEY); } catch { /* private mode — the preference is optional */ }
+};
+
+export const Queries: React.FC<{
+  searchQuery: string;
+  onNavigate?: (tab: string, subPageName?: string) => void;
+  activeSubPage?: string;
+  inShell?: boolean;
+  /** v4 P2 — App's log-a-query interception hands the hub a SEED instead of opening a popup.
+   *  A new object each time, so a repeat "Log query" with no seeds still fires the effect. */
+  createSeed?: { agentId?: string | null; manuscriptId?: string | null } | null;
+  onCreateSeedConsumed?: () => void;
+  /** v4 P4 — true while /queries is the visible route. Drives the ROUTE-ENTRY load animation:
+   *  pages stay mounted here, so a plain CSS mount animation would only ever run once. */
+  routeActive?: boolean;
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false }) => {
   const {
     currentUser,
     manuscripts,
@@ -217,6 +244,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     tasks,
     addJournalEntry,
     addQuery,
+    addAgent,
     updateQuery,
     deleteQuery,
     recordMaterialsSent,
@@ -234,6 +262,198 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
+
+  /* ── v4 P2 · INLINE QUERY CREATION ────────────────────────────────────────────────────────
+     The draft is LOCAL STATE — nothing reaches Firestore until Save, which goes through the
+     existing addQuery path (one creation path, and it still seeds the QUERY_SENT activity).
+     `createBase` is the untouched baseline: Cancel/Esc/click-away discard silently when the
+     draft still matches it, and confirm when it doesn't. */
+  const [createDraft, setCreateDraft] = useState<QueryDraft | null>(null);
+  const [createBase, setCreateBase] = useState<QueryDraft | null>(null);
+  const [createSaving, setCreateSaving] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const creating = createDraft !== null;
+
+  /* ── v5 P2 · CHOREOGRAPHY STATE (ref qdb-create-motion.html) ──────────────────────────────
+     `draftIn` drives the row's grow/collapse — set on the frame AFTER the row mounts, so the
+     height transition has a real 0 to animate from. `stashedSelection` is whatever was open when
+     create mode started: entry clears the selected state, discard puts it back. `pendingSave`
+     carries the saved id plus the draft row's last top, so the REAL row can FLIP from where the
+     draft sat. `graceRow` force-shows a saved query the filters would hide, long enough to settle
+     before it collapses out behind the toast. */
+  const [draftIn, setDraftIn] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [stashedSelection, setStashedSelection] = useState<string | null>(null);
+  const [pendingSave, setPendingSave] = useState<{ id: string; fromTop: number } | null>(null);
+  const [settleId, setSettleId] = useState<string | null>(null);
+  const [graceRow, setGraceRow] = useState<{ id: string; leaving: boolean } | null>(null);
+  const draftRowRef = useRef<HTMLDivElement>(null);
+  /** Runs when the draft row has finished collapsing (its transitionend), not on a timer. */
+  const pendingDiscardRef = useRef<(() => void) | null>(null);
+
+  /** Grow the draft row in on the frame after it mounts (a transition needs a from-state that has
+   *  actually been painted). rAF, not a timer — it schedules the class flip, it doesn't animate. */
+  useEffect(() => {
+    if (!creating) return;
+    const id = requestAnimationFrame(() => setDraftIn(true));
+    return () => cancelAnimationFrame(id);
+  }, [creating]);
+
+  /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
+   *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
+  const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
+    /* IDEMPOTENT. Every "Log query" in the app funnels here — masthead, rail capture, dashboard,
+       agent cards, manuscript plates — and a second call used to wipe the draft you were typing
+       AND the stashed selection it needs to restore on discard, leaving the pane in create mode
+       with no row. A seeded re-entry is a no-op too: swapping the seeded agent into a live draft
+       would silently overwrite work (flagged as a decision, not implemented). The toast is what
+       stops "nothing happened" reading as a broken button. */
+    if (creating) {
+      showToast({ message: "You're already logging a query" });
+      return;
+    }
+    const seedAgent = seed.agentId ? agents.find((a) => a.id === seed.agentId) ?? null : null;
+    // The popup's manuscript preselect, kept: honour a seeded id when it's actually pickable, else
+    // fall back to the first pickable book — so a one-manuscript library doesn't open with an empty
+    // picker and a disabled Save. (This is why logQuerySeed.ts survives the popup's retirement.)
+    const manuscriptId = resolveInitialManuscriptId(seed.manuscriptId ?? undefined, pickableManuscripts(manuscripts));
+    const base: QueryDraft = { ...emptyDraft({ agentId: seed.agentId, manuscriptId }), materials: materialRowsForDraft(seedAgent) };
+    // v5 P2 — stash what was open, then clear the selected state: while you're drafting, nothing
+    // else is "the query you're looking at". Discard puts it back.
+    setStashedSelection(selectedQueryId);
+    setSelectedQueryId(null);
+    setDraftIn(false);
+    setDraftSaved(false);
+    setCreateBase(base);
+    setCreateDraft(base);
+    setCreateError(null);
+    setCreateSaving(false);
+  };
+
+  /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
+   *  is born with exactly the defaults (and schema-valid shape) it always was. */
+  const handleCreateAgentInline = async (d: { name: string; agency: string; email: string; responseTimeWeeks?: number; starRating?: number }) => {
+    const payload = {
+      name: d.name.trim(),
+      agency: d.agency.trim(),
+      email: d.email.trim(),
+      website: "",
+      genres: [] as string[],
+      mswlNotes: "",
+      starRating: ((d.starRating ?? 3) as 1 | 2 | 3 | 4 | 5),
+      submissionStatus: SubmissionStatus.OPEN,
+      responseTimeWeeks: d.responseTimeWeeks ?? 0,
+      noResponseMeansNo: false,
+      submissionMethod: SubmissionMethod.EMAIL,
+      materialsWanted: ["Query Letter"],
+      notes: "",
+      agentNotes: "",
+    };
+    const result = await addAgent(payload);
+    if (!result.success || !result.id) return { ok: false, error: result.error };
+    const agent: Agent = {
+      ...payload,
+      id: result.id,
+      userId: currentUser?.id || "",
+      dateAdded: new Date().toISOString(),
+      lastCheckedDate: new Date().toISOString(),
+    };
+    return { ok: true, agent };
+  };
+
+  /** Leave create mode. Untouched → silent; dirty → confirm. `then` runs once it's actually shut
+   *  (so clicking another row selects it only after the draft is resolved). */
+  const closeCreate = (then?: () => void) => {
+    /* v5 P2 — collapse FIRST, unmount after. The draft row's height transition ending is what
+       clears the draft (see onTransitionEnd on the row), so the contents are reset only once the
+       row has actually gone — no visible flash of emptied text. The selection is restored here:
+       the stashed query if it still exists, else the first row of the current sort. */
+    const shut = () => {
+      setDraftIn(false);
+      pendingDiscardRef.current = () => {
+        setCreateDraft(null);
+        setCreateBase(null);
+        setCreateError(null);
+        setDraftSaved(false);
+        const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
+          ? stashedSelection
+          : (sortedListRef.current[0]?.id ?? null);
+        setSelectedQueryId(restore);
+        setStashedSelection(null);
+        then?.();
+      };
+    };
+    if (createDraft && createBase && draftDirty(createDraft, createBase)) {
+      showConfirm({
+        title: "Discard this query?",
+        danger: true,
+        confirmLabel: "Discard",
+        cancelLabel: "Keep editing",
+        body: <p style={{ margin: 0 }}>Nothing has been saved yet — this draft will be lost.</p>,
+        onConfirm: shut,
+      });
+      return;
+    }
+    shut();
+  };
+
+  const saveCreate = async () => {
+    if (!createDraft || !draftReady(createDraft) || createSaving) return;
+    setCreateSaving(true);
+    setCreateError(null);
+    try {
+      const agent = agents.find((a) => a.id === createDraft.agentId) ?? null;
+      const res = await addQuery(draftToPayload(createDraft, agent) as any);
+      if (!res.success || !res.id) {
+        // Whatever addQuery reports (a permission or network failure) surfaces in the footer bar.
+        // There is NO query-count limit on the free tier — that gate was never a product rule.
+        setCreateError(res.error || "Couldn't save that query — please try again.");
+        return;
+      }
+      if (createDraft.journal.trim()) await addJournalEntry(res.id, createDraft.journal.trim());
+      const newId = res.id;
+      /* v5 P2 — beat 1: the row sheds its draft skin IN PLACE (dashed → none, tag out, ground →
+         selected tint) before anything moves. We hold the draft row mounted and remember its top;
+         the effect below waits for the real row to arrive, then FLIPs it from exactly here, so
+         the two elements read as one row transforming rather than one vanishing and another
+         appearing. */
+      const fromTop = draftRowRef.current?.getBoundingClientRect().top ?? 0;
+      setDraftSaved(true);
+      setPendingSave({ id: newId, fromTop });
+    } catch {
+      setCreateError("Couldn't save that query — please try again.");
+    } finally {
+      setCreateSaving(false);
+    }
+  };
+
+  /* v5 P2 — beats 2–5. The write is async, so we wait for the saved query to actually arrive in
+     `queries` before handing over: until then the draft row stays put wearing its saved skin, and
+     there is no gap. Once it lands we drop the draft, select the new row, and let the layout
+     effect below FLIP it from the draft's old top. */
+  useEffect(() => {
+    if (!pendingSave) return;
+    const saved = queries.find((q) => q.id === pendingSave.id);
+    if (!saved) return; // the listener hasn't caught up yet
+    setCreateDraft(null);
+    setCreateBase(null);
+    setDraftSaved(false);
+    setStashedSelection(null);
+    setSelectedQueryId(pendingSave.id);
+    // Would the current filters hide it? Ask THE predicate, never a copy of it.
+    if (!matchesFilters(saved)) setGraceRow({ id: pendingSave.id, leaving: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSave, queries]);
+
+
+  // The seed from App's interception — every "Log query" launch point in the app arrives here.
+  useEffect(() => {
+    if (!createSeed) return;
+    openCreate(createSeed);
+    onCreateSeedConsumed?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createSeed]);
+
   
   // Refs for State and Listener Management
   const unsubscribeRef = useRef<any>(null);
@@ -256,7 +476,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
   const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
@@ -304,16 +523,46 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   };
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
+  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
   // global-feed twins; models deleteAgent). No undo — a cascade restore isn't offered; the counted
   // confirm below is the safety. Clear the selection so the pane doesn't dangle on a deleted id.
-  const handleDeleteQuery = () => {
-    if (!activeQuery) return;
-    const id = activeQuery.id;
-    setIsDeleteConfirmOpen(false);
+  const handleDeleteQuery = (id: string) => {
     setSelectedQueryId(null);
     void deleteQuery(id);
+  };
+
+  /* The counted confirm, now through the SHARED dialog (ToastProvider) rather than a bespoke
+     modal — so it wears the house treatment: terracotta outline on the destructive action, the
+     safe action as the soft-pink primary on the right, and the app's focus ring. The counted body
+     is unchanged: what it says is the safety, and this was only ever a styling problem. */
+  const askDeleteQuery = () => {
+    if (!activeQuery || !activeAgent) return;
+    // Bound HERE, not read at confirm time: the shared dialog (unlike the bespoke modal it
+    // replaces) isn't force-closed when the selection changes, so reading activeQuery on confirm
+    // could delete a query the dialog never named.
+    const id = activeQuery.id;
+    const agentName = agentPrimary(activeAgent) || "this agent";
+    const evCount = activities.filter(a => a.queryId === activeQuery.id).length;
+    const responded = activeQuery.hasAgentResponded === true;
+    showConfirm({
+      title: "Delete this query?",
+      danger: true,
+      confirmLabel: "Delete query",
+      cancelLabel: "Keep it",
+      body: (
+        <p style={{ margin: 0 }}>
+          This permanently deletes your query to <b style={{ color: "var(--ink)" }}>{agentName}</b>
+          {activeMs?.title ? <> for <b style={{ color: "var(--ink)" }}>{activeMs.title}</b></> : null}
+          {evCount > 0
+            ? <>, along with its <b style={{ color: "var(--ink)" }}>{evCount} tracking event{evCount > 1 ? "s" : ""}</b></>
+            : <>, along with its tracking history</>}.
+          {responded ? <> Your <b style={{ color: "var(--ink)" }}>response stats</b> will change.</> : null}{" "}
+          <b style={{ color: "var(--terra)" }}>This can’t be undone.</b>
+        </p>
+      ),
+      onConfirm: () => handleDeleteQuery(id),
+    });
   };
 
   // Toast state for Undo
@@ -691,6 +940,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [needsTasks, setNeedsTasks] = useState(false);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
+
+  // v4 P2 — Esc leaves create mode. Declared here (not with the other create handlers) because it
+  // reads the popover state above: an open Filter/Sort popover owns Escape first.
+  useEffect(() => {
+    if (!creating) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || filterPopOpen || sortPopOpen) return;
+      e.preventDefault();
+      closeCreate();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [creating, createDraft, createBase, filterPopOpen, sortPopOpen]);
+
   // Portalled popovers anchor to their icon triggers via the codebase's fixed-position utility
   // (chrome revision — the list pane keeps overflow:hidden; the portal escapes the clip).
   const { triggerRef: filterTrigRef, menuStyle: filterMenuStyle } = useFixedMenu<HTMLButtonElement>(filterPopOpen);
@@ -847,15 +1111,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Query editing now lives entirely in the Edit Query drawer (openEditQuery) — the inline
   // isEditMode editor and its edit-state are retired. The reading pane below is view-only.
 
-  // Create query inputs for inline quick-log portal
-  const [showLogModal, setShowLogModal] = useState(false);
-  const [logMsId, setLogMsId] = useState("");
-  const [logAgId, setLogAgId] = useState("");
-  const [logPkgId, setLogPkgId] = useState("");
-  const [logNotes, setLogNotes] = useState("");
-  const [logMethod, setLogMethod] = useState("Email");
-  const [logError, setLogError] = useState("");
-
   // Select initial query on mount or use activeSubPage preselection
   useEffect(() => {
     if (activeSubPage && activeSubPage !== "All queries" && activeSubPage !== "Queries database") {
@@ -870,18 +1125,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         return;
       }
     }
+    // v4 P3 — auto-select on load: the LAST-VIEWED query when it's still present. The fallback is
+    // the first row of the CURRENT SORT, applied once the sort has resolved (the effect below) —
+    // this used to grab queries[0], which is the raw array's first, not the first visible row.
     if (queries.length > 0 && !selectedQueryId) {
-      setSelectedQueryId(queries[0].id);
+      const remembered = readLastViewedQueryId();
+      if (remembered && queries.some((q) => q.id === remembered)) setSelectedQueryId(remembered);
     }
   }, [queries, selectedQueryId, activeSubPage]);
-
-  // Sync log defaults
-  useEffect(() => {
-    if (manuscripts.length > 0 && !logMsId) setLogMsId(manuscripts[0].id);
-    const activePkgs = packages.filter(p => p.status === "Active");
-    if (activePkgs.length > 0 && !logPkgId) setLogPkgId(activePkgs[0].id);
-    if (agents.length > 0 && !logAgId) setLogAgId(agents[0].id);
-  }, [manuscripts, packages, agents, logMsId, logAgId, logPkgId]);
 
   // The active query + its agent/manuscript, resolved live. The reading pane is view-only EXCEPT the
   // 5d click-to-pick shortcuts (send method + manuscript); everything else edits via the Edit Query
@@ -1075,7 +1326,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     queryBucket(q.status as QueryStatus) === "waiting" &&
     !!q.responseDeadline && new Date(q.responseDeadline).getTime() < nowMs;
 
-  const filteredList = queries.filter(q => {
+  /* v5 P2 — THE filter predicate, extracted so there is exactly one. The list renders through it,
+     and the create flow asks it "would the query I just saved be visible?" — asking a copy would
+     be the classic drift bug (the row silently vanishes because the copy disagreed). */
+  const matchesFilters = (q: Query): boolean => {
     const agent = agents.find(a => a.id === q.agentId);
     const ms = manuscripts.find(m => m.id === q.manuscriptId);
 
@@ -1110,7 +1364,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     }
 
     return true;
-  });
+  };
+  const filteredList = queries.filter(matchesFilters);
 
   // ── F12 sort (ref sort popover: Activity / Dates / Pipeline) — all derived from fields
   // already on the query; no reads. MAXT stands in for "missing" so undated rows sink.
@@ -1134,7 +1389,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     return idx <= 6 ? 6 - idx : 10 + idx;
   };
 
-  const sortedList = [...filteredList].sort((a, b) => {
+  /* v5 P2 — THE sort comparator, extracted for the same reason as the predicate: the create
+     flow's FLIP travel asks it where the saved row belongs, and it must be the comparator the
+     list itself is ordered by, or the row animates to the wrong slot. */
+  const compareQueries = (a: Query, b: Query): number => {
     const agA = agents.find(ag => ag.id === a.agentId)?.name || "";
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
     switch (sortKey) {
@@ -1155,7 +1413,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       case "last_activity":
       default: return lastActivityMs(b) - lastActivityMs(a);
     }
-  });
+  };
+  const sortedList = [...filteredList].sort(compareQueries);
 
   // ── F12 active-filter chips + the FILTER / SORT popovers (ref queries-hub-v14.html) ──
   const resetAllFilters = () => {
@@ -1298,33 +1557,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (!selectedQueryId || !journalInput.trim()) return;
     addJournalEntry(selectedQueryId, journalInput.trim());
     setJournalInput("");
-  };
-
-  // Quick submission logger handler
-  // NOTE: this inline "Log query" modal is DEAD — showLogModal is never set true (the live path is
-  // LogQueryFocusForm). Left in place but made type-correct (async + await) for the migration; flagged
-  // for removal. The await is a no-op on live behaviour because this handler is never reached.
-  const handleLogQuerySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!logMsId || !logAgId) {
-      setLogError("Please select a valid manuscript and target agent.");
-      return;
-    }
-    const res = await addQuery({
-      manuscriptId: logMsId,
-      agentId: logAgId,
-      packageId: logPkgId,
-      personalisationNotes: logNotes,
-      sendMethod: logMethod as any
-    });
-
-    if (res.success) {
-      setShowLogModal(false);
-      setLogNotes("");
-      setLogError("");
-    } else {
-      setLogError(res.error || "Internal error logging query.");
-    }
   };
 
   const getListStatusPill = (status: QueryStatus) => {
@@ -1850,14 +2082,82 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   // Keep stable refs in sync for keydown handler (runs before each render's effects)
   sortedListRef.current = sortedList;
+  /* v5 P2 — the GRACE ROW. A query the filters would hide still gets to appear and settle, so a
+     save is never a silent no-op; it then collapses out behind the toast. It is placed by the real
+     comparator, not pinned to the top, so the brief moment it is on screen is honest about where
+     it lives. */
+  const graceQuery = graceRow ? queries.find((q) => q.id === graceRow.id) ?? null : null;
+  const renderList = graceQuery && !sortedList.some((q) => q.id === graceQuery.id)
+    ? [...sortedList, graceQuery].sort(compareQueries)
+    : sortedList;
+
   selectedQueryIdRef.current = selectedQueryId;
+
+  /* The FLIP. Measured after React has placed the row at its sorted index (the real comparator
+     did that, not us), so the travel always ends where the list actually wants it. */
+  useLayoutEffect(() => {
+    if (!pendingSave) return;
+    const el = document.getElementById(`query-row-${pendingSave.id}`);
+    if (!el) return; // not rendered yet (or hidden by a filter with no grace row)
+    // ⚠️ motion.css's trap: a filled animation outranks an inline transform. Clear any before
+    // measuring, or the invert is silently ignored.
+    el.style.animation = "none";
+    const last = el.getBoundingClientRect();
+    const delta = pendingSave.fromTop - last.top;
+    setPendingSave(null);
+    if (Math.abs(delta) > 1) {
+      el.style.transition = "none";
+      el.style.transform = `translateY(${delta}px)`;
+      void el.offsetWidth; // force reflow so the inverted position is the starting frame
+      el.style.transition = "transform 0.32s cubic-bezier(0.22, 0.9, 0.3, 1)";
+      el.style.transform = "";
+      const clear = () => { el.style.transition = ""; el.removeEventListener("transitionend", clear); };
+      el.addEventListener("transitionend", clear);
+    }
+    el.style.animation = "";
+    setSettleId(pendingSave.id); // beat 4 — the settle pulse rides on top
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSave, sortedList]);
+
+  /* v4 P3 — the auto-select FALLBACK, here because it needs the resolved sort: with queries on file
+     and nothing selected (and no draft open), land on the first row the user can actually see. */
+  useEffect(() => {
+    if (creating || selectedQueryId || sortedList.length === 0) return;
+    setSelectedQueryId(sortedList[0].id);
+  }, [creating, selectedQueryId, sortedList]);
+
+  /* Remember the last-viewed query (a preference, written on change only). */
+  useEffect(() => {
+    if (selectedQueryId) writeLastViewedQueryId(selectedQueryId);
+  }, [selectedQueryId]);
+
+  /* v4 P4 — the ROUTE-ENTRY load animation. The page stays mounted across navigation, so the entry
+     is a class toggled on becoming visible, not a mount. The ANIMATION is entirely CSS (no JS
+     timers drive it); this timeout only takes the class back off so the next entry can re-run it —
+     the same housekeeping StagePage does for its own entry class. The keyframes use
+     `animation-fill-mode: backwards`, so once they finish the elements hold NO transform and can
+     never become a containing block for the page's position:fixed furniture. */
+  const [entering, setEntering] = useState(false);
+  const prevRouteActive = useRef(false);
+  useEffect(() => {
+    if (routeActive && !prevRouteActive.current) setEntering(true);
+    prevRouteActive.current = routeActive;
+  }, [routeActive]);
+  useEffect(() => {
+    if (!entering) return;
+    const id = window.setTimeout(() => setEntering(false), 700); // past the last column's 0.23s + 0.24s
+    return () => window.clearTimeout(id);
+  }, [entering]);
 
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className="t-f12 f12-root">
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-focus" : ""}`}>
+      {/* The focus scrim. Always mounted, opacity-toggled by `qh-focus`, so it fades BOTH ways
+          from one CSS transition rather than needing a mount frame. */}
+      <div className="qh-scrim" aria-hidden="true" />
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -1997,100 +2297,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
            now live in the shared .f12-body column, same as the Contact List page.) */
       `}</style>
 
-      {/* QUICK INLINE LOG DIALOG PORTAL */}
-      {showLogModal && (
-        <div className="fixed inset-0 bg-[#3a1c14]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 border border-[#7c3a2a]/20 shadow-2xl max-w-md w-full relative">
-            <h3 className="font-serif text-xl font-bold text-[#3a1c14] mb-4">Log a Query</h3>
-            
-            {logError && (
-              <p className="p-2 mb-3 bg-[#A32D2D]/10 text-[#A32D2D] text-xs font-semibold rounded">{logError}</p>
-            )}
-
-            <form onSubmit={handleLogQuerySubmit} className="space-y-4">
-              <div>
-                <label className="block text-[10px] uppercase font-bold tracking-wider text-[#3a1c14]/65 mb-1.5">Manuscript</label>
-                <select
-                  value={logMsId}
-                  onChange={(e) => setLogMsId(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white rounded border border-[#7c3a2a]/10 focus:outline-[#7c3a2a]"
-                >
-                  {manuscripts.map(m => (
-                    <option key={m.id} value={m.id}>{m.title}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase font-bold tracking-wider text-[#3a1c14]/65 mb-1.5">Target Agent</label>
-                <select
-                  value={logAgId}
-                  onChange={(e) => setLogAgId(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white rounded border border-[#7c3a2a]/10"
-                >
-                  {agents.map(a => (
-                    <option key={a.id} value={a.id}>{agentLabel(a)}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase font-bold tracking-wider text-[#3a1c14]/65 mb-1.5">Submission Package</label>
-                <select
-                  value={logPkgId}
-                  onChange={(e) => setLogPkgId(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-white rounded border border-[#7c3a2a]/10"
-                >
-                  {packages.map(p => (
-                    <option key={p.id} value={p.id}>{p.packageName}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase font-bold tracking-wider text-[#3a1c14]/65 mb-1.5">Personalised Hook Notes</label>
-                <textarea
-                  value={logNotes}
-                  onChange={(e) => setLogNotes(e.target.value)}
-                  placeholder="Discussed her MSWL tweet..."
-                  className="w-full text-xs p-2.5 bg-white rounded border border-[#7c3a2a]/10 min-h-[60px]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pb-3">
-                <div>
-                  <label className="block text-[10px] uppercase font-bold text-stone-500 mb-1">Send Method</label>
-                  <select
-                    value={logMethod}
-                    onChange={(e) => setLogMethod(e.target.value)}
-                    className="w-full text-xs p-2 border border-[#7c3a2a]/10 bg-white mr-2"
-                  >
-                    <option value="Email">Email</option>
-                    <option value="Online Form">QueryManager</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-[#7c3a2a]/10">
-                <button
-                  type="button"
-                  onClick={() => setShowLogModal(false)}
-                  className="px-3.5 py-1.5 bg-stone-100 font-bold hover:bg-stone-200 text-stone-700 rounded text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 bg-[#7c3a2a] inline-flex items-center gap-1 hover:bg-[#7c3a2a]/95 text-white rounded text-xs font-bold whitespace-nowrap"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Send query</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
 
 
@@ -2449,6 +2655,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
                     onClick: () => onNavigate?.("queries", "Log a query"),
                     primary: true,
+                    // Already drafting? The CTA says so rather than looking live and doing nothing.
+                    disabled: creating,
                   },
                 ]
               : [
@@ -2457,12 +2665,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
                     onClick: () => onNavigate?.("queries", "Log a query"),
                     primary: true,
+                    // Already drafting? The CTA says so rather than looking live and doing nothing.
+                    disabled: creating,
                   },
                 ]}
           />
         </div>
 
-        {queries.length === 0 ? (
+        {/* `&& !creating`: create mode lives in the populated branch, so without this a
+            first-run "Log your first query" set a draft that NOTHING rendered — the CTA read as
+            dead. Found during the re-entry work; see the report. */}
+        {queries.length === 0 && !creating ? (
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>
@@ -2489,43 +2702,36 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>
 
             {/* Welcome pane — centred onboarding */}
-            <div className="f12-pane f12-detail" style={{ overflowY: "auto", alignItems: "center", justifyContent: "center", padding: 24, display: "flex" }}>
-              <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
-                <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: qdbBoldInk, marginBottom: 9 }}>No queries yet</div>
-                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: "#5a5048", lineHeight: 1.55, maxWidth: 360, margin: "0 auto 20px" }}>This is where you'll track every agent you query — what you sent, when it went, and what came back.</div>
-
-                {/* Smart Import */}
-                <div style={{ position: "relative", background: "#fcf9f3", border: "1px solid #e7ddce", borderRadius: 15, padding: "19px 21px", textAlign: "left" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 11 }}>
-                    <span style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 12, background: "#eef2f5", color: "#5e7e9c", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Sparkles style={{ width: 23, height: 23 }} />
-                    </span>
-                    <span style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 20, color: qdbBoldInk }}>Smart Import <span style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span></span>
-                  </div>
-                  <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#4f463c", lineHeight: 1.55, marginBottom: 16 }}>Upload your messy old spreadsheet and watch ScriptAlly build your whole database — every agent matched, sorted and dated, ready to track in seconds.</div>
-                  <button type="button" onClick={() => onNavigate?.("import")} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 21px", borderRadius: 11, cursor: "pointer", background: "#fff", border: "1.5px solid #9db4c6", color: "#42637e" }}>
-                    <Sparkles style={{ width: 18, height: 18 }} />
-                    Try Smart Import
-                  </button>
+            {/* GHOST PREVIEW zero-state (v4 P3; ref empty-states-ref.html, option 1) — a faded,
+                non-interactive skeleton of the real anatomy (hero + three columns) behind a centred
+                welcome card, so the CTA lands with context: you can see what the page becomes.
+                The two secondary routes (Smart Import, the import template) are kept as quiet links
+                rather than dropped with the old welcome pane. */}
+            <div className="f12-pane f12-detail" style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+              <div className="qc-ghost" aria-hidden="true">
+                <div className="qc-ghost-hero"><span className="qc-ghost-av" /><span className="qc-ghost-line" /></div>
+                <div className="qc-ghost-cols">
+                  {[60, 70, 50].map((w, i) => (
+                    <div className="qc-ghost-col" key={i}>
+                      <div className="qc-ghost-band" />
+                      <div className="qc-ghost-ln" />
+                      <div className="qc-ghost-ln" style={{ width: `${w}%` }} />
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                {/* divider */}
-                <div style={{ display: "flex", alignItems: "center", gap: 13, margin: "20px 2px 16px" }}>
-                  <div style={{ flex: 1, height: 1, background: "#e6ddce" }} />
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#a89a8b" }}>or add them yourself</span>
-                  <div style={{ flex: 1, height: 1, background: "#e6ddce" }} />
-                </div>
-
-                {/* manual add — ink-outline buttons */}
-                <div style={{ display: "flex", gap: 11, justifyContent: "center", flexWrap: "wrap" }}>
-                  <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 20px", borderRadius: 11, cursor: "pointer", background: "#fffefb", border: "1.5px solid #1d1712", color: "#1d1712" }}>
-                    <Plus style={{ width: 15, height: 15 }} />
-                    Add a query
-                  </button>
-                  <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 20px", borderRadius: 11, textDecoration: "none", background: "#fffefb", border: "1.5px solid #1d1712", color: "#1d1712" }}>
-                    <Download style={{ width: 15, height: 15 }} />
-                    Download import template
-                  </a>
+              <div className="qc-welcome">
+                <h3>Your first query starts here</h3>
+                <p>Track every submission — who has it, what you sent, and when to follow up.</p>
+                <button type="button" className="f12-btn-pri" onClick={() => openCreate()}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                  Log your first query
+                </button>
+                <div className="qc-welcome-alt">
+                  <button type="button" onClick={() => onNavigate?.("import")}>Import a spreadsheet</button>
+                  <span aria-hidden="true">·</span>
+                  <a href="/ScriptAlly-pipeline-import-template.xlsx" download>Download the template</a>
                 </div>
               </div>
             </div>
@@ -2546,15 +2752,39 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           const waitingOnAgent = ctrlAction?.ballHolder === "agent";
           const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
 
+          /* CREATE MODE TAKES THE BAR (ref qdb-focus-spotlight.html). The record actions are
+             REPLACED, not disabled: none of them applies to a query that doesn't exist yet, and
+             a row of dead buttons reads as breakage. Save and Cancel keep the very handlers the
+             retired pane footer called — this is a relocation, not a rewire. */
+          if (creating) {
+            const ready = createDraft ? draftReady(createDraft) : false;
+            return (
+              <div className="f12-ctl f12-ctl-create">
+                <span className="qcb-ctx"><span className="qcb-dot" aria-hidden="true" />New query</span>
+                {/* The requirement line doubles as the error slot — the same job it did in the
+                    footer, so a failed save still explains itself rather than vanishing. */}
+                <span className={`qcb-req${createError ? " qcb-err" : ""}`}>
+                  {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
+                </span>
+                <span style={{ flex: 1 }} />
+                <span className="qcb-esc">Esc to cancel</span>
+                <button type="button" className="f12-btn-sec qh-lit" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
+                <button type="button" className="f12-btn-pri qh-lit" onClick={saveCreate} disabled={!ready || createSaving}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                  {createSaving ? "Saving…" : "Save query"}
+                </button>
+              </div>
+            );
+          }
+
           return (
             <div className="f12-ctl">
-              {/* Left zone retired (shell rollout Phase 6): Log a query moved into the page
-                  header; Import data dropped — the sidebar's Shelf › Import covers the entry
-                  (rollout report). The bar keeps only the record verbs, right-aligned. */}
-              <div className="f12-zone-list" />
+              {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
+                  column: it existed to lock the bar to the list pane, which now sits in the wider
+                  workspace column below. The verbs simply right-align in the header column (ref). */}
 
-              {/* Right zone — inset 20px from both pane edges; verbs, then the link group, then danger.
-                  The contextual primary now lives on the reading pane's record header. */}
+              {/* Verbs, then the link group, then danger. The contextual primary lives on the
+                  reading pane's record header. */}
               <div className="f12-zone-read">
                 <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                   <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
@@ -2607,7 +2837,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     ]}
                   />
                 </div>
-                <button type="button" className="f12-act f12-del" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query">
+                <button type="button" className="f12-act f12-del" disabled={!sel} onClick={askDeleteQuery} title="Delete this query">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
                   Delete
                 </button>
@@ -2680,26 +2910,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Delete confirmation — destructive, no undo. v3 promoted Delete to the bar (the ⋯ More menu
             was removed). The final deletion is a flagged STUB (no deleteQuery handler yet — see the
             handleDeleteQuery note above); the confirm flow itself is real. */}
-        {isDeleteConfirmOpen && activeQuery && activeAgent && (() => {
-          const agentName = agentPrimary(activeAgent) || "this agent";
-          // 5e — counted confirm: the tracking events this delete erases + the stat consequence.
-          const evCount = activities.filter(a => a.queryId === activeQuery.id).length;
-          const responded = activeQuery.hasAgentResponded === true;
-          return (
-            <div role="dialog" aria-modal="true" aria-label="Delete query" onClick={() => setIsDeleteConfirmOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(29,23,18,.42)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 16, boxShadow: "0 24px 60px rgba(29,23,18,.28)", padding: "22px 24px" }}>
-                <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 700, color: "#1a1512", marginBottom: 9 }}>Delete this query?</div>
-                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, lineHeight: 1.5, color: "#5a5048" }}>
-                  This permanently deletes your query to <b style={{ color: "#1a1512" }}>{agentName}</b>{activeMs?.title ? <> for <b style={{ color: "#1a1512" }}>{activeMs.title}</b></> : null}{evCount > 0 ? <>, along with its <b style={{ color: "#1a1512" }}>{evCount} tracking event{evCount > 1 ? "s" : ""}</b></> : <>, along with its tracking history</>}.{responded ? <> Your <b style={{ color: "#1a1512" }}>response stats</b> will change.</> : null} <b style={{ color: "#9a3b2a" }}>This can’t be undone.</b>
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 20 }}>
-                  <button type="button" onClick={() => setIsDeleteConfirmOpen(false)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: "#5a5048", background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Cancel</button>
-                  <button type="button" onClick={handleDeleteQuery} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: "#fff", background: "#9a3b2a", border: "1px solid #9a3b2a", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Delete query</button>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
         {/* ── Split — list pane beside the reading pane, in the SAME centred column as the
             Contact List page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
@@ -2721,11 +2931,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   aria-label="Search queries"
                 />
               </div>
+              {/* v4 P1 — labelled pills in the agent list's grammar (icon · label · chevron), so the
+                  controls state what they do without a hover. Wiring unchanged. */}
               <div className="f12-popwrap">
-                <IconTrig
+                <PillTrig
                   ref={filterTrigRef}
-                  tip="FILTER"
+                  label="Filter"
                   open={filterPopOpen}
+                  active={activeFilterCount > 0}
                   count={activeFilterCount}
                   onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
@@ -2733,10 +2946,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 {filterPopOpen && renderFilterPopover()}
               </div>
               <div className="f12-popwrap">
-                <IconTrig
+                <PillTrig
                   ref={sortTrigRef}
-                  tip={`SORT · ${(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}`}
+                  label="Sort"
                   open={sortPopOpen}
+                  active={sortKey !== "last_activity"}
+                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
                   onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
                 />
@@ -2744,7 +2959,47 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>
             </div>
             <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
-              {sortedList.map((q) => {
+              {/* v4 P2 — the DRAFT row pins to the top and shows regardless of the active filters
+                  (it isn't a query yet, so no filter could match it). It fills in live as the
+                  agent is chosen: dashed and italic until then, solid once resolved. */}
+              {createDraft && (() => {
+                const draftAgent = createDraft.agentId ? agents.find((a) => a.id === createDraft.agentId) ?? null : null;
+                return (
+                  <div
+                    ref={draftRowRef}
+                    /* qh-lit goes on the ROW, never on anything inside it: the row animates its
+                       own opacity 0→1 on open, and opacity < 1 makes it a stacking context — so a
+                       z-index on a child would be trapped inside the row and never clear the
+                       scrim. Raise the whole row or nothing. */
+                    className={`f12-row f12-draft qh-lit${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
+                    aria-label="New query draft"
+                    // The collapse finishing is what clears the draft — so its contents are reset
+                    // only once the row has gone, never visibly blanked in place.
+                    onTransitionEnd={(e) => {
+                      if (e.propertyName !== "height" || draftIn) return;
+                      const run = pendingDiscardRef.current;
+                      pendingDiscardRef.current = null;
+                      run?.();
+                    }}
+                  >
+                    {/* EXACTLY a normal row's parts, in the same order (ref qdb-draft-row.html):
+                        monogram · name/agency · right-hand column. The "Draft" chip takes the slot
+                        a normal row gives its status dot, with the date beneath it — so nothing
+                        stacks above the content and nothing sits outside the box, which is what
+                        the row's overflow:hidden was clipping. */}
+                    <span className="f12-av f12-av--sm" aria-hidden="true">{draftAgent ? agentInitials(draftAgent) : "—"}</span>
+                    <span className="f12-mid">
+                      <span className="f12-nm">{draftAgent ? agentPrimary(draftAgent) : "Choose an agent…"}</span>
+                      <span className="f12-ag">{draftAgent ? agentAgencyLine(draftAgent) : "New query"}</span>
+                    </span>
+                    <span className="f12-end">
+                      <span className="f12-drafttag">Draft</span>
+                      <span className="f12-d2">Today</span>
+                    </span>
+                  </div>
+                );
+              })()}
+              {renderList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);
                 const ms = manuscripts.find(m => m.id === q.manuscriptId);
                 if (!agent || !ms) return null;
@@ -2758,8 +3013,23 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     id={`query-row-${q.id}`}
                     role="option"
                     aria-selected={isSelected}
-                    onClick={() => setSelectedQueryId(q.id)}
-                    className={`f12-row${isSelected ? " f12-sel" : ""}`}
+                    // v4 P2 — clicking another row while drafting is a click-away: resolve the
+                    // draft first (silently when untouched, with a confirm when dirty), then select.
+                    onClick={() => (creating ? closeCreate(() => setSelectedQueryId(q.id)) : setSelectedQueryId(q.id))}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
+                    onAnimationEnd={(e) => {
+                      if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
+                      // The collapse's own end fires the toast — no timer schedules either.
+                      if (e.animationName === "f12-collapse") {
+                        setGraceRow(null);
+                        showToast({
+                          message: "Query saved — it's hidden by your current filter",
+                          undoLabel: "Show it",
+                          duration: 4000,
+                          undo: () => { resetAllFilters(); setListSearch(""); setSelectedQueryId(q.id); },
+                        });
+                      }
+                    }}
                   >
                     <span className="f12-av f12-av--sm" aria-hidden="true">{agentInitials(agent)}</span>
                     <span className="f12-mid">
@@ -2781,7 +3051,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </button>
                 );
               })}
-              {sortedList.length === 0 && (
+              {sortedList.length === 0 && queries.length > 0 && (
                 <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--faint)", fontSize: 12, fontStyle: "italic" }}>
                   No queries match these filters.
                 </div>
@@ -2798,8 +3068,19 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className="qp-pane f12-pane f12-detail" style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            {activeQuery && activeAgent && activeMs ? (
+          <div className={`qp-pane f12-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            {createDraft ? (
+              /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
+              <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
+                <QueryCreatePane
+                  draft={createDraft}
+                  onChange={setCreateDraft}
+                  agents={agents}
+                  manuscripts={pickableManuscripts(manuscripts)}
+                  onCreateAgent={handleCreateAgentInline}
+                />
+              </div>
+            ) : activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
                   .qp-noteacts{ opacity:0; transition:opacity .14s; }
@@ -3073,7 +3354,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* pink header band */}
                       <div className="f12-chh">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
-                        <span>Journal</span>
+                        <span>Notes</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -3111,7 +3392,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                             <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "#b3a596", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
                                             <div className="qp-noteacts" style={{ display: "flex", gap: 4 }}>
                                               <button type="button" title="Edit" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="qp-noteact"><Pencil style={{ width: 12, height: 12 }} /></button>
-                                              <button type="button" title="Delete" onClick={async () => { if (window.confirm("Delete this note?")) await deleteJournalEntry(entry.id); }} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
+                                              <button type="button" title="Delete" onClick={() => showConfirm({ title: "Delete this note?", danger: true, confirmLabel: "Delete", cancelLabel: "Keep it", body: <p style={{ margin: 0 }}>This note will be removed from the query's record.</p>, onConfirm: () => deleteJournalEntry(entry.id) })} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
                                             </div>
                                           </div>
                                         </>
@@ -3141,6 +3422,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 </div>{/* end sub-cards row */}
 
               </>
+            ) : sortedList.length === 0 ? (
+              /* v4 P3 — FILTERED (or searched) TO ZERO. The page isn't empty, the view is — so no
+                 ghost preview here; a quiet note and a one-tap way back to everything. */
+              <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
+                <div className="qc-nomatch">
+                  <p>No queries match these filters.</p>
+                  {/* clears the SEARCH too — a search term is just as likely to be what emptied the
+                      view, and a button that doesn't restore the list is a dead end. */}
+                  <button type="button" className="f12-btn-sec" onClick={() => { resetAllFilters(); setListSearch(""); }}>Clear filters</button>
+                </div>
+              </div>
             ) : (
               /* No selection — placeholder fills the pane; the command bar does NOT render (Phase 2). */
               <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878" }}>

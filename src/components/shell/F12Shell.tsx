@@ -61,6 +61,46 @@ export const IconTrig = React.forwardRef<HTMLButtonElement, {
 IconTrig.displayName = "IconTrig";
 
 /**
+ * PillTrig — the Queries list card's Filter / Sort trigger.
+ *
+ * v5 P1 (ref qdb-create-motion.html) made it COMPACT: a 36px icon-only circle, so the search field
+ * takes the rest of the header row. The v4 label and chevron are gone from the face — the word now
+ * lives in the `title` tooltip, in the aria-label, AND in the popover's own header, so nothing is
+ * lost to a user who can't hover.
+ *
+ * `count` renders a corner badge — for a control holding several values at once (Filter). A
+ * single-choice control (Sort) passes `value` instead: it enriches the accessible name
+ * ("Sort: Name A–Z") but shows no marker, because its state reads in the popover it opens.
+ */
+export const PillTrig = React.forwardRef<HTMLButtonElement, {
+  label: string;
+  icon: React.ReactNode;
+  open: boolean;
+  /** Set away from its default — a subtle resting tint, never a second state marker. */
+  active?: boolean;
+  /** Single-choice controls name their choice in the accessible label. */
+  value?: string;
+  /** Multi-value controls show a count badge. */
+  count?: number;
+  onClick: () => void;
+}>(({ label, icon, open, active, value, count, onClick }, ref) => (
+  <button
+    ref={ref}
+    type="button"
+    className={`f12-pill${open || active ? " f12-active" : ""}`}
+    aria-expanded={open}
+    aria-haspopup="dialog"
+    aria-label={value ? `${label}: ${value}` : label}
+    title={label}
+    onClick={onClick}
+  >
+    {icon}
+    {count != null && count > 0 && <span className="f12-pcount">{count}</span>}
+  </button>
+));
+PillTrig.displayName = "PillTrig";
+
+/**
  * Popover shell — PORTALLED to document.body (chrome revision) so the list pane's
  * overflow:hidden can never clip it; positioned against its trigger via the caller's
  * useFixedMenu `menuStyle` (the codebase's anchored-fixed utility). The portal wrapper

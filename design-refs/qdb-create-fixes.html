@@ -1,0 +1,113 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create pane - fixes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--content:#f7f3ec;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--sh:0 8px 26px rgba(60,45,30,.07);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--content);font-family:var(--in);color:var(--ink);padding:28px 34px 70px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:22px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:22px;max-width:900px}
+.lab{font-family:var(--mo);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);margin:22px 0 8px}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh)}
+/* hero states */
+.hero{display:flex;align-items:center;gap:18px;padding:20px 24px;margin-bottom:12px}
+.hav{width:64px;height:64px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--pl);font-size:21px;flex-shrink:0}
+.hav.empty{background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f;font-size:19px}
+.hn{font-family:var(--pl);font-weight:700;font-size:26px;line-height:1.1}
+.ha{font-family:var(--pl);font-style:italic;font-size:15px;color:var(--ink2);margin-top:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pinkDeep);color:#8d4b32;border-radius:999px;padding:4px 11px;font-family:var(--mo);font-size:8px;letter-spacing:.09em;text-transform:uppercase;margin-top:8px}
+.chg{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bd);background:#fff;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;margin-left:10px}
+.chg:hover{background:#f6f0e7}
+.chg svg{width:13px;height:13px;color:#8a7c6b}
+.pin{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:11px 14px;background:#fff;max-width:420px;color:var(--muted);font-size:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:9px}
+.hint a{color:var(--rose);font-weight:600;text-decoration:underline;cursor:pointer}
+.esc{margin-left:auto;align-self:flex-start}
+/* send column */
+.col{width:430px;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:14px}
+.ch svg{width:15px;height:15px}
+.cb{padding:16px}
+.f{margin-bottom:15px}
+.f:last-child{margin-bottom:0}
+.flab{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.fin{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:11px;padding:11px 13px;background:#fff;font-size:13.5px;min-height:42px}
+.fin.locked{background:#f6f2ea;color:var(--ink2)}
+.fin .cv{margin-left:auto;color:#a2937f;font-size:10px}
+.fin .bk{width:22px;height:22px;border-radius:6px;background:#f5ead9;display:grid;place-items:center;font-size:11px;flex-shrink:0}
+.two{display:flex;gap:12px}
+.two .f{flex:1;margin-bottom:15px}
+.segs{display:flex;border:1px solid var(--bd);border-radius:11px;overflow:hidden;background:#fff;min-height:42px}
+.sg{flex:1;display:grid;place-items:center;font-size:12.5px;color:var(--muted);cursor:pointer;padding:0 4px}
+.sg.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--ink);border-radius:10px}
+.nud{display:flex;flex-wrap:wrap;gap:6px}
+.nchip{border:1px solid var(--bd);border-radius:999px;padding:8px 13px;font-size:12px;background:#fff;cursor:pointer;color:var(--muted);white-space:nowrap}
+.nchip.on{background:#fdf1ea;border-color:#e3b8a2;color:#8d4b32;font-weight:600}
+.nnote{font-family:var(--mo);font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:8px}
+.row2{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+/* draft row fix */
+.listbox{width:330px;padding:10px;overflow:hidden}
+.qr{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:12px;position:relative}
+.qr.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef}
+.qr .mg{width:34px;height:34px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:10.5px;flex-shrink:0}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:15px}
+.qr .ag{font-family:var(--mo);font-size:8px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.qr .dt{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted)}
+.dtag{display:inline-block;background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:7px;letter-spacing:.1em;padding:2px 7px;border-radius:6px;text-transform:uppercase;margin-bottom:7px}
+</style></head>
+<body>
+<h1>Create pane — corrections</h1>
+<div class="sub">The three that are design calls: the agent hero after selection, the two-up send row, and the manuscript field's two states. Plus the draft-row clipping fix.</div>
+
+<div class="lab">1 · Agent chosen — changing it is one click</div>
+<div class="card hero" style="max-width:900px">
+  <span class="hav">WT</span>
+  <div><div style="display:flex;align-items:center"><span class="hn">William Tan</span><span class="chg"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Change</span></div><div class="ha">Foxglove Literary</div><span class="chip">New query</span></div>
+  <span class="mono esc">Esc to cancel</span>
+</div>
+<div class="card hero" style="max-width:900px">
+  <span class="hav empty">✎</span>
+  <div style="flex:1"><div class="mono" style="margin-bottom:7px">Who are you querying?</div><div class="pin">⌕ &nbsp;Search by name or agency…</div><div class="hint">Agent not listed? <a>Add a new agent now</a></div></div>
+  <span class="mono esc">Esc to cancel</span>
+</div>
+
+<div class="lab">2 · "The send" — date + method share a row, so nudge is visible without scrolling</div>
+<div class="row2">
+  <div class="card col">
+    <div class="ch"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>The send</div>
+    <div class="cb">
+      <div class="f"><div class="flab">Manuscript</div><div class="fin locked"><span class="bk">▤</span>Murphy's Day Out<span class="mono" style="margin-left:auto">Only manuscript</span></div></div>
+      <div class="two">
+        <div class="f"><div class="flab">Date sent</div><div class="fin">29 Jul 2026<span class="cv">▾</span></div></div>
+        <div class="f"><div class="flab">Sent by</div><div class="segs"><span class="sg on">Email</span><span class="sg">Form</span><span class="sg">Post</span></div></div>
+      </div>
+      <div class="f"><div class="flab">Nudge reminder</div>
+        <div class="nud"><span class="nchip on">8 Sep · in 6 weeks</span><span class="nchip">Pick a date</span><span class="nchip">None</span></div>
+        <div class="nnote">Suggested from William's typical reply time</div>
+      </div>
+    </div>
+  </div>
+  <div class="card col">
+    <div class="ch"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>The send <span class="mono" style="font-weight:400">· multiple manuscripts</span></div>
+    <div class="cb">
+      <div class="f"><div class="flab">Manuscript</div><div class="fin"><span class="bk">▤</span>Murphy's Day Out<span class="cv">▾</span></div></div>
+      <div class="two">
+        <div class="f"><div class="flab">Date sent</div><div class="fin">29 Jul 2026<span class="cv">▾</span></div></div>
+        <div class="f"><div class="flab">Sent by</div><div class="segs"><span class="sg on">Email</span><span class="sg">Form</span><span class="sg">Post</span></div></div>
+      </div>
+      <div class="f"><div class="flab">Nudge reminder</div>
+        <div class="nud"><span class="nchip on">8 Sep · in 6 weeks</span><span class="nchip">Pick a date</span><span class="nchip">None</span></div>
+        <div class="nnote">Suggested from William's typical reply time</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="lab">3 · Draft row — nothing clipped</div>
+<div class="card listbox">
+  <div class="qr draft"><div style="flex:1"><span class="dtag">Draft</span><div style="display:flex;align-items:center;gap:11px"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><span class="dt">Today</span></div></div></div>
+  <div class="qr"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><span class="dt">14 Mar</span></div>
+</div>
+</body></html>

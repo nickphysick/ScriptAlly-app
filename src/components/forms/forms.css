@@ -459,6 +459,49 @@
 .sa-dp-day.today { font-weight: 600; color: #5a6e58; box-shadow: inset 0 0 0 1px #b8c8b0; }
 .sa-dp-day.sel { background: #7c3a2a; color: #f5ede8; font-weight: 500; }
 .sa-dp-day.sel:hover { background: #5a2a1e; color: #f5ede8; }
+/* outside min/max — inert, and it must READ inert, or a click that does nothing looks broken */
+.sa-dp-day.off { color: #d5cabc; cursor: default; pointer-events: none; }
+.sa-dp-day.off:hover { background: transparent; }
+.sa-dp-day:focus-visible { outline: 2px solid #7c3a2a; outline-offset: -2px; }
+
+/* The hub trigger IS the hub's field idiom — 42px, 11px radius, hairline, calendar glyph right —
+   so it sits level with "Sent by" and the manuscript field beside it. `margin-bottom` is zeroed:
+   Form 11 stacks fields with their own margin, the hub's columns own their spacing. */
+.sa-dp--hub > .sa-field {
+  height: 42px; padding: 0 13px; margin-bottom: 0; border-radius: 11px;
+  border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb);
+  font-family: inherit; font-size: 13.5px; color: var(--ink, #1e1a16); box-shadow: none;
+}
+.sa-dp--hub > .sa-field:hover { border-color: var(--muted, #7d7469); }
+.sa-dp--hub.open > .sa-field { border-color: var(--ink, #1e1a16); box-shadow: 0 0 0 3px var(--pink-t, #f7e3dd); }
+.sa-dp--hub .sa-field-icon { color: var(--faint, #a89e91); }
+.sa-dp--hub .sa-placeholder { color: var(--faint, #a89e91); }
+
+/* ══ HUB SKIN — opt-in via variant="hub" (ref design-refs/qdb-create-polish.html §1) ══
+   Every rule is scoped to .sa-dp--hub, so the twenty Form 11 call sites keep exactly the popover
+   they have. The palette is the .t-f12 hub set — parchment surface, pink ring on today, soft-pink
+   fill on the selection — because this one opens inside the Queries hub, not a Form 11 drawer. */
+.sa-dp--hub .sa-dp-pop { width: 290px; border-radius: 14px; border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb); box-shadow: 0 18px 44px rgba(60, 45, 30, 0.18); }
+.sa-dp--hub .sa-dp-month { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; color: var(--ink, #1e1a16); }
+.sa-dp--hub .sa-dp-navbtn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb); color: var(--ink-2, #4a443c); }
+.sa-dp--hub .sa-dp-navbtn:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
+.sa-dp--hub .sa-dp-dow { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted, #7d7469); }
+.sa-dp--hub .sa-dp-day { aspect-ratio: auto; height: 33px; border-radius: 9px; font-family: inherit; font-size: 12.5px; color: var(--ink-2, #4a443c); }
+.sa-dp--hub .sa-dp-day:hover { background: var(--paper, #faf6f0); color: var(--ink, #1e1a16); }
+.sa-dp--hub .sa-dp-day.muted { color: #cbc0b0; }
+.sa-dp--hub .sa-dp-day.muted:hover { background: transparent; }
+.sa-dp--hub .sa-dp-day.today { color: var(--ink, #1e1a16); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--pink-b, #eecdc3); }
+.sa-dp--hub .sa-dp-day.sel { background: var(--pink-t, #f7e3dd); color: var(--pink-i, #8a4030); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--pink-b, #eecdc3); }
+.sa-dp--hub .sa-dp-day.sel:hover { background: var(--pink-t, #f7e3dd); color: var(--pink-i, #8a4030); }
+.sa-dp--hub .sa-dp-day.off { color: #d5cabc; }
+.sa-dp--hub .sa-dp-quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+.sa-dp--hub .sa-dp-chip { border: 1px solid var(--line, #e6dccd); border-radius: 999px; padding: 6px 11px; font-family: inherit; font-size: 11.5px; color: var(--ink-2, #4a443c); background: var(--panel, #fffdfb); cursor: pointer; }
+.sa-dp--hub .sa-dp-chip:hover:not(:disabled) { background: var(--paper, #faf6f0); }
+.sa-dp--hub .sa-dp-chip:disabled { opacity: 0.4; cursor: default; }
+.sa-dp--hub .sa-dp-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line, #e6dccd); }
+.sa-dp--hub .sa-dp-link { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--burg, #7c3a2a); background: none; border: none; padding: 0; cursor: pointer; }
+.sa-dp--hub .sa-dp-link.quiet { color: var(--muted, #7d7469); font-weight: 500; }
+.sa-dp--hub .sa-dp-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* ── Centred soft-pink button ──────────────────────────────────────────── */
 .sa-btn-row { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 0; }

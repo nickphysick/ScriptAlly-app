@@ -27,14 +27,20 @@ const HEADS = [".tdb-th"]; // the spine retired the sage FILTER band (.tdb-rsech
 describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere", () => {
   it("the tokens exist once, on the wrap, and carry the settled values", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--container-head-h: 42px");
+    // save-and-today P2 SUPERSEDES the 42px: the Today header earns 46px now that it carries the
+    // progress bar + fraction, and Today is the sole remaining consumer of this token.
+    expect(w).toContain("--container-head-h: 46px");
     expect(w).toContain("--container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3)");
     expect(w).toContain("--container-head-rule: #b9c9b4");
     expect(w).toContain("--container-head-ink: #3d4a3b");
     expect(w).toContain("--container-head-mono: #5a6e58");
-    // ONE sage source: no near-duplicate of the head fill or rule anywhere else in the sheet
+    // ONE sage source for the HEADER: the head fill is not re-hardcoded anywhere else in the sheet.
     expect(css.match(/#d7ddd5/g)!.length).toBe(1);
-    expect(css.match(/#b9c9b4/g)!.length).toBe(1);
+    // the head GRADIENT pair also names #d5dbd3, which the notes-and-tasks sage family tokens
+    // (--nt-block-task, and P2's done-circle fill) legitimately share — each tokened once.
+    // the head RULE hex #b9c9b4 is now also the notes-and-tasks task-family line (--nt-task-line) —
+    // a distinct, deliberately-tokened second source; each is sourced once, never scattered in rules.
+    expect(css.match(/#b9c9b4/g)!.length).toBe(2);
   });
   it("ALL THREE headers read the same fill, the same rule and the same height token", () => {
     for (const sel of HEADS) {
@@ -42,7 +48,8 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
       expect(r).toContain("background: var(--container-head-bg)");
       expect(r).toContain("border-bottom: 1px solid var(--container-head-rule)");
       expect(r).toContain("height: var(--container-head-h)");
-      expect(r).toContain("padding: 0 var(--container-head-pad)");
+      // P2: the header's right edge tightened to 8px to seat the chevron; the LEFT inset stays the token
+      expect(r).toContain("var(--container-head-pad)");
       expect(r).toContain("box-sizing: border-box");
       expect(r).toContain("align-items: center"); // flex-centred, never baseline
     }
@@ -60,19 +67,20 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
     expect(t).not.toContain("hk-sage"); // it reads the head token now, not the band pair
     expect(t).not.toContain("hk-spine");
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)");
-    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)");
+    // P2: the header's right slot is the progress bar + fraction (.tdb-pnum), not the old .tdb-thr count
+    expect(rule(".tdb-pnum")).toContain("font-family: var(--f12-mono)");
     // the glyphs keep their sage — the row dot, the completion ticks, the done-row tick
     expect(rule(".tdb-tick")).toContain("var(--hk-sage)");
     expect(rule(".tdb-dtick")).toContain("var(--hk-sage)");
     expect(css).toContain("--hk-sage");
   });
   it("header typography stays per container: mono FILTER warmed, Playfair lines in the warm ink", () => {
-    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)"); // Today's mono count
+    expect(rule(".tdb-pnum")).toContain("letter-spacing"); // Today's mono fraction (P2's right slot)
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's Playfair title
     expect(rule(".tdb-th .tdb-t")).toContain("var(--f12-serif)");
   });
   it("the header inks join the sage family: mono labels #5a6e58, Playfair lines #3d4a3b", () => {
-    expect(rule(".tdb-th .tdb-thr")).toContain("color: var(--container-head-mono)"); // Today's count
+    expect(rule(".tdb-pnum")).toContain("color: #4a5f48"); // P2: the mono fraction is the header's right slot
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title (a sage head)
     expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)"); // Today's title
     // the values themselves, once, on the wrap
@@ -112,9 +120,9 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
     expect(filterFn).not.toContain("tdb-herobegin");
     expect(page).not.toContain("tdb-sbpair"); // the sidebar-seated pair retired
   });
-  it("the sage 42px header tokens survive for the surfaces that still wear them", () => {
-    // Today's header + the collapsed filter overlay's FILTER band still read the sage source
-    expect(rule(".tdb-wrap")).toContain("--container-head-h: 42px");
+  it("the sage header tokens survive; the height is 46px since P2 gave the header its progress pair", () => {
+    // Today is the sole consumer of these tokens now, and the ref's header is 46px (was 42).
+    expect(rule(".tdb-wrap")).toContain("--container-head-h: 46px");
     expect(rule(".tdb-th")).toContain("background: var(--container-head-bg)");
   });
 });

@@ -1,0 +1,164 @@
+<!--
+  ScriptAlly — Progress-bar forms — the five candidates, and why composition was chosen. REFERENCE ONLY: do not build from this file.
+
+  PROVENANCE: SPEC-DERIVED MOCK, not a build artefact. Authored to specify the design; it is not
+  generated from, and does not run against, the app's data or components.
+
+  DATA HONESTY: every figure in it is illustrative. In particular all COMMUNITY PERCENTILE claims
+  ("higher than N% of ScriptAlly writers", "TOP 10%", "BEATS 71%") are PLACEHOLDERS — no community
+  aggregation pipeline exists, and pre-launch there is no cohort to aggregate. The build renders that
+  surface behind a default-off flag and never invents numbers at runtime. See
+  reports/community-percentiles.md.
+
+  Source of truth for: layout, tokens, copy and component grammar. Port faithfully.
+-->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — bar forms</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2e2723;--ink-soft:#6a615a;--muted:#9c8878;--burgundy:#7c3a2a;
+  --pink:#f5e2da;--pink-line:#e8c8bc;--sage-band:#dce0d9;--slate:#6a89a7;--tan:#efe7db;
+  --ground:#e7e0d5;--plane-s:#fdfbf8;--fill:#efe8df;--card:#fdfaf5;--line:#e3d9cf;--linesoft:#ece3da;
+  --gold:#8a6a1f;--gold-fill:#f4ead2;--star:#c8853f;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;padding:30px 20px 80px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-family:"Playfair Display",serif;font-size:26px;font-weight:500;text-align:center}
+.intro{text-align:center;font-size:12.5px;color:#5a4f45;line-height:1.65;max-width:740px;margin:10px auto 30px}
+.intro b{color:var(--burgundy)}
+.opt{background:var(--plane-s);border-radius:16px;padding:22px 26px;margin-bottom:20px;box-shadow:0 8px 24px rgba(58,28,20,.07)}
+.oh{display:flex;align-items:center;gap:11px;margin-bottom:5px}
+.oh h2{font-family:"Playfair Display",serif;font-size:19px;font-weight:500}
+.oh .tag{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.oh .rec{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);border-radius:99px;padding:3px 10px}
+.od{font-size:12px;color:var(--ink-soft);line-height:1.65;margin-bottom:15px;max-width:750px}
+.od b{color:var(--ink);font-weight:600}
+.cmp{background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:17px 19px}
+.lane{display:flex;align-items:center;gap:15px;padding:11px 0;border-bottom:1px dashed var(--linesoft)}
+.lane:last-of-type{border-bottom:0}
+.ln{font-family:"Playfair Display",serif;font-size:14.5px;width:152px;flex:none}
+.ls{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.06em;color:var(--muted);display:block;margin-top:3px}
+.lane.win .ln::after{content:' ★';color:var(--star)}
+.lv{font-family:"Playfair Display",serif;font-size:15px;width:96px;text-align:right;color:var(--ink);flex:none}
+.lv span{font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--muted);margin-left:4px}
+.lane.win .lv{color:var(--burgundy)}
+.viz{flex:1;min-width:0}
+
+/* 1 · tally segments */
+.tally{display:flex;gap:4px;align-items:center}
+.tally i{width:22px;height:13px;border-radius:3px;background:var(--fill);border:1px solid rgba(46,39,35,.18);flex:none}
+.tally i.on{background:var(--ink);border-color:var(--ink)}
+.tally i.req{background:var(--star);border-color:#a86d2e}
+.tally .plus{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);margin-left:4px}
+
+/* 2 · bullet */
+.bul{position:relative;height:14px}
+.bul .tr{position:absolute;inset:3px 0;background:var(--fill);border-radius:4px;overflow:hidden}
+.bul .tr i{display:block;height:100%;background:var(--ink);border-radius:4px}
+.bul .med{position:absolute;top:0;bottom:0;width:2px;background:var(--burgundy);border-radius:1px}
+.medkey{display:flex;align-items:center;gap:7px;font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.medkey b{width:2px;height:11px;background:var(--burgundy);border-radius:1px;display:inline-block}
+
+/* 3 · dot plot */
+.dot{position:relative;height:16px}
+.dot::before{content:'';position:absolute;left:0;right:0;top:50%;border-top:1px dotted #d5c9bb}
+.dot i{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:99px;background:#fff;border:2.5px solid var(--ink)}
+.lane.win .dot i{border-color:var(--burgundy);background:var(--burgundy)}
+.dot .gh{position:absolute;top:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:99px;background:#ded3c6}
+
+/* 4 · composition */
+.comp{display:flex;height:13px;border-radius:4px;overflow:hidden;border:1px solid rgba(46,39,35,.2)}
+.comp i{height:100%}
+.comp .rep{background:var(--ink)}
+.comp .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.comp .non{background:var(--fill)}
+.legend{display:flex;gap:16px;margin-bottom:11px;font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend b{width:12px;height:9px;border-radius:2px;border:1px solid rgba(46,39,35,.2);display:inline-block}
+
+/* 5 · hybrid */
+.hyb{position:relative}
+.hyb .tally{margin-bottom:6px}
+.hyb .axis{position:relative;height:9px}
+.hyb .axis::before{content:'';position:absolute;left:0;right:0;top:0;border-top:1px solid var(--linesoft)}
+.hyb .axis .med{position:absolute;top:-2px;width:2px;height:7px;background:var(--burgundy);border-radius:1px}
+.hyb .axis .ml{position:absolute;top:2px;transform:translateX(-50%);font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.06em;color:var(--muted);white-space:nowrap}
+
+.close{background:var(--plane-s);border-radius:16px;padding:22px 26px;box-shadow:0 8px 24px rgba(58,28,20,.07)}
+.close h2{font-family:"Playfair Display",serif;font-size:18px;font-weight:500;margin-bottom:10px}
+.close p{font-size:12.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:10px}
+.close p b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Progress bars — five forms</h1>
+<div class="intro">All in ink; each works with whichever fill colour you pick. The thing driving these: your sample sizes are <b>three or four sends</b>. A smooth 75% bar claims a precision that four data points don't have — so the better forms show the denominator, the benchmark, or both.</div>
+
+<div class="opt">
+  <div class="oh"><h2>1 · Tally segments</h2><span class="tag">One block per query sent</span><span class="rec">★ Recommended</span></div>
+  <div class="od">Each block is one agent you sent to; filled means they replied. You read the rate <b>and the sample size in the same glyph</b> — four blocks obviously isn't a verdict, twelve obviously is. The gold block is the send that earned a full request, so you can see exactly which one it was. Above about twelve sends it collapses to a plain proportional bar.</div>
+  <div class="cmp">
+    <div class="lane win"><span class="ln">Character-led · v2<span class="ls">CHAR. LETTER + CHAR. SYNOPSIS</span></span><span class="viz"><span class="tally"><i class="req"></i><i class="on"></i><i class="on"></i><i></i></span></span><span class="lv">3 of 4<span>REPLIED</span></span></div>
+    <div class="lane"><span class="ln">Comp-led · v1<span class="ls">COMP LETTER + 1PP SYNOPSIS</span></span><span class="viz"><span class="tally"><i class="req"></i><i class="on"></i><i></i></span></span><span class="lv">2 of 3<span>REPLIED</span></span></div>
+    <div class="lane"><span class="ln">Short &amp; sharp<span class="ls">COMP LETTER + PROLOGUE</span></span><span class="viz"><span class="tally"><i class="on"></i><i></i><i></i></span></span><span class="lv">1 of 3<span>REPLIED</span></span></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="oh"><h2>2 · Bullet with benchmark</h2><span class="tag">Bar + community median tick</span></div>
+  <div class="od">The bar, plus a burgundy tick marking the community median. A bar alone answers "how much"; this answers <b>"how does mine compare"</b> — which is the actual question, and it's the form the research keeps pointing at for exactly this job. It also puts the community data to work visually rather than only in a pill.</div>
+  <div class="cmp">
+    <div class="medkey"><b></b>Community median · 52% reply rate</div>
+    <div class="lane win"><span class="ln">Character-led · v2<span class="ls">CHAR. LETTER + CHAR. SYNOPSIS</span></span><span class="viz"><span class="bul"><span class="tr"><i style="width:75%"></i></span><span class="med" style="left:52%"></span></span></span><span class="lv">75%<span>3 OF 4</span></span></div>
+    <div class="lane"><span class="ln">Comp-led · v1<span class="ls">COMP LETTER + 1PP SYNOPSIS</span></span><span class="viz"><span class="bul"><span class="tr"><i style="width:67%"></i></span><span class="med" style="left:52%"></span></span></span><span class="lv">67%<span>2 OF 3</span></span></div>
+    <div class="lane"><span class="ln">Short &amp; sharp<span class="ls">COMP LETTER + PROLOGUE</span></span><span class="viz"><span class="bul"><span class="tr"><i style="width:33%"></i></span><span class="med" style="left:52%"></span></span></span><span class="lv">33%<span>1 OF 3</span></span></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="oh"><h2>3 · Dot plot</h2><span class="tag">Position on a hairline axis</span></div>
+  <div class="od">A dot at the value on a dotted axis, with a ghost dot for the community median. The least ink of any option and the most editorial — it belongs to the same family as your two-tone section rules. <b>Best-in-class for small datasets</b> precisely because it doesn't dress four data points up as a solid mass. Trade-off: it reads as a chart, so it needs the axis explained once.</div>
+  <div class="cmp">
+    <div class="medkey"><b style="background:#ded3c6;width:7px;height:7px;border-radius:99px"></b>Grey dot = community median</div>
+    <div class="lane win"><span class="ln">Character-led · v2<span class="ls">CHAR. LETTER + CHAR. SYNOPSIS</span></span><span class="viz"><span class="dot"><span class="gh" style="left:52%"></span><i style="left:75%"></i></span></span><span class="lv">75%<span>3 OF 4</span></span></div>
+    <div class="lane"><span class="ln">Comp-led · v1<span class="ls">COMP LETTER + 1PP SYNOPSIS</span></span><span class="viz"><span class="dot"><span class="gh" style="left:52%"></span><i style="left:67%"></i></span></span><span class="lv">67%<span>2 OF 3</span></span></div>
+    <div class="lane"><span class="ln">Short &amp; sharp<span class="ls">COMP LETTER + PROLOGUE</span></span><span class="viz"><span class="dot"><span class="gh" style="left:52%"></span><i style="left:33%"></i></span></span><span class="lv">33%<span>1 OF 3</span></span></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="oh"><h2>4 · Composition</h2><span class="tag">Replied · still waiting · no reply</span></div>
+  <div class="od">One track split three ways. This is the most <b>honest about outstanding queries</b>: an agent who hasn't answered yet isn't a rejection, and a single percentage quietly buries that. Useful when several queries are still live — which, for most writers, is most of the time. Costs a legend, and comparison across lanes is slightly slower.</div>
+  <div class="cmp">
+    <div class="legend"><span><b style="background:#2e2723"></b>Replied</span><span><b style="background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></b>Still waiting</span><span><b style="background:#efe8df"></b>No reply</span></div>
+    <div class="lane win"><span class="ln">Character-led · v2<span class="ls">CHAR. LETTER + CHAR. SYNOPSIS</span></span><span class="viz"><span class="comp"><i class="rep" style="width:75%"></i><i class="wait" style="width:25%"></i></span></span><span class="lv">3 of 4<span>REPLIED</span></span></div>
+    <div class="lane"><span class="ln">Comp-led · v1<span class="ls">COMP LETTER + 1PP SYNOPSIS</span></span><span class="viz"><span class="comp"><i class="rep" style="width:67%"></i><i class="wait" style="width:33%"></i></span></span><span class="lv">2 of 3<span>REPLIED</span></span></div>
+    <div class="lane"><span class="ln">Short &amp; sharp<span class="ls">COMP LETTER + PROLOGUE</span></span><span class="viz"><span class="comp"><i class="rep" style="width:33%"></i><i class="wait" style="width:33%"></i><i class="non" style="width:34%"></i></span></span><span class="lv">1 of 3<span>REPLIED</span></span></div>
+  </div>
+</div>
+
+<div class="opt">
+  <div class="oh"><h2>5 · Tally + benchmark</h2><span class="tag">Forms 1 and 2 combined</span></div>
+  <div class="od">Segments for the sends, with a hairline axis beneath carrying the community median tick. You get the sample size, the outcome of each individual send, the request, and the benchmark — in one row, with no legend. Denser than the others; earns its keep on the Analytics tab, likely too much for a card back.</div>
+  <div class="cmp">
+    <div class="lane win"><span class="ln">Character-led · v2<span class="ls">CHAR. LETTER + CHAR. SYNOPSIS</span></span><span class="viz"><span class="hyb"><span class="tally"><i class="req"></i><i class="on"></i><i class="on"></i><i></i></span><span class="axis"><span class="med" style="left:52%"></span><span class="ml" style="left:52%">COMMUNITY MEDIAN</span></span></span></span><span class="lv">75%<span>3 OF 4</span></span></div>
+    <div class="lane"><span class="ln">Comp-led · v1<span class="ls">COMP LETTER + 1PP SYNOPSIS</span></span><span class="viz"><span class="hyb"><span class="tally"><i class="req"></i><i class="on"></i><i></i></span><span class="axis"><span class="med" style="left:52%"></span></span></span></span><span class="lv">67%<span>2 OF 3</span></span></div>
+    <div class="lane"><span class="ln">Short &amp; sharp<span class="ls">COMP LETTER + PROLOGUE</span></span><span class="viz"><span class="hyb"><span class="tally"><i class="on"></i><i></i><i></i></span><span class="axis"><span class="med" style="left:52%"></span></span></span></span><span class="lv">33%<span>1 OF 3</span></span></div>
+  </div>
+</div>
+
+<div class="close">
+  <h2>Where I'd land</h2>
+  <p><b>Tally segments (1) as the house form</b>, used on card backs, the leaderboard and the materials table. It's the only one that makes the small sample self-evident rather than something a caption has to apologise for — and the gold block for the send that won a request is a detail nobody else's tracker has.</p>
+  <p><b>Bullet or the hybrid (2 / 5) on the Analytics tab only</b>, once community data is live — that's where the comparison question is actually being asked, and where a benchmark tick has room to be explained. Until the pipeline exists, the tick simply doesn't render, and form 1 stands alone.</p>
+  <p><b>Composition (4) for the funnel</b>, where "still waiting" genuinely is its own state and the legend is already justified. And whichever you choose, ink stays the fill — none of these need colour to work, which is the point.</p>
+</div>
+</div>
+</body>
+</html>

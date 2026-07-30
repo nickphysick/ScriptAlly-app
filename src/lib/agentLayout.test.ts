@@ -22,15 +22,32 @@ const block = (selector: string): string => {
 };
 
 describe("agent list · the page column", () => {
+  // v4 P1: the two numbers now come from the SHARED column tokens (pageHeader.css) so the Queries
+  // header can sit in the same column. The values are unchanged — these locks therefore check the
+  // token wiring AND that the tokens still carry 60px / 1240px, which is a strictly stronger
+  // guarantee than the old literal match (it catches a drift at the definition too).
+  const headerCss = readFileSync(new URL("../components/shell/pageHeader.css", import.meta.url), "utf8");
+
+  it("the shared column tokens still carry the agent list's canonical geometry", () => {
+    expect(
+      headerCss,
+      "--sa-col-gut moved off 60px — that silently re-guttters BOTH the agent list and the Queries header",
+    ).toMatch(/--sa-col-gut:\s*60px/);
+    expect(
+      headerCss,
+      "--sa-col-max moved off 1240px — that silently re-caps BOTH pages' content columns",
+    ).toMatch(/--sa-col-max:\s*1240px/);
+  });
+
   it("padding rides the page, the CAP rides the inner column — two elements, two jobs", () => {
     expect(
       block(".aglist .agl-page"),
-      "the page padding changed — 28px top / 60px sides / 48px bottom is the mockup's breathing room; merging it with the cap would tie the two together",
-    ).toContain("padding: 28px 60px 48px");
+      "the page padding changed — 28px top / the shared gutter / 48px bottom is the mockup's breathing room; merging it with the cap would tie the two together",
+    ).toContain("padding: 28px var(--sa-col-gut) 48px");
     expect(
       block(".aglist .agl-inner"),
       "the content cap left the inner column — without it the grid stretches the full width of an ultrawide monitor instead of pooling the surplus as margin",
-    ).toContain("max-width: 1240px");
+    ).toContain("max-width: var(--sa-col-max)");
     expect(
       block(".aglist .agl-inner"),
       "the inner column stopped centring — a capped column that doesn't centre just pins itself left and leaves all the surplus on one side",
@@ -77,10 +94,12 @@ describe("the help FAB measures from the capsule, not the browser edge", () => {
     expect(
       shell,
       "the FAB stopped measuring from the content capsule — at a bare right:20 it overhangs the 14px ground gutter, which is exactly the left-correct/right-short bug this phase fixed",
-    ).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px); }");
+    // save-and-today P3 adds the ADJACENCY shift (0 on every route but /todo with the Today corner up),
+    // so the capsule-gap fix now reads through it — the gutter fix itself is unchanged.
+    ).toContain(".ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
     expect(
       shell,
       "the help MENU drifted off the FAB's inset — the two must move together or the menu hangs off the button it belongs to",
-    ).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px); }");
+    ).toContain(".ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }");
   });
 });

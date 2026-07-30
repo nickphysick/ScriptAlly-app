@@ -99,7 +99,7 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 210, minHeight
           onClick={() => setConfirm("delete")}
           onMouseEnter={() => setDismissHover(true)}
           onMouseLeave={() => setDismissHover(false)}
-          aria-label="Dismiss note"
+          aria-label="Dismiss post-it"
           style={{ background: "none", border: "none", padding: 0, lineHeight: 0, cursor: "pointer", color: theme.ink, opacity: noteHover ? (dismissHover ? 0.85 : 0.38) : 0, pointerEvents: noteHover ? "auto" : "none", transition: "opacity 0.12s ease", marginRight: -1, marginTop: -1 }}
         >
           <Trash2 size={13} strokeWidth={2} />

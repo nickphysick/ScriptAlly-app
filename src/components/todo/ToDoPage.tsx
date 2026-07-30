@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel } from "lucide-react";
+import { Funnel, Pin } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -35,6 +35,7 @@ import {
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { isProUser } from "../../lib/assistFill";
+import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
@@ -48,7 +49,8 @@ import { shouldAutoRunTour } from "../../lib/todoTour";
 import { AssistantBand, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
-import { ActivityType, QueryStatus } from "../../types";
+import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
+import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import "./todo.css";
@@ -194,23 +196,40 @@ type ToastAction = { label: string; fn: () => void };
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
-    addUserTask, updateUserTask, upsertTaskFlag, updateUserProfile,
+    addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
   const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
   // hero-pair P4 — the inline note composer's seat + draft (one composer, two view seats)
   const [composerAt, setComposerAt] = useState<null | "cards" | "ledger">(null);
-  const [composerDraft, setComposerDraft] = useState("");
-  const composerDraftRef = useRef(composerDraft);
-  composerDraftRef.current = composerDraft;
+  // notes-and-tasks P1 — the composer's NATURE: a note (dateless, pinned) or a task (dated).
+  // The seat's view ("cards"/"ledger") and the nature are orthogonal; the nature drives the
+  // Phase-2 live transformation. The section's "Write a note" opens note mode.
+  const [composerMode, setComposerMode] = useState<"note" | "task">("note");
+  const [composerDraft, setComposerDraft] = useState("");       // the title (required)
+  const [composerDetail, setComposerDetail] = useState("");     // the optional detail line
+  const [composerDate, setComposerDate] = useState("");         // task only — ISO "YYYY-MM-DD"
+  const [composerSurface, setComposerSurface] = useState<SurfaceOffset>("on-day"); // task only
+  // save-and-today P1 — THE SAVE STATE MACHINE: idle → pending → (saved | failed). A denied/dropped
+  // write must fail VISIBLY (never a silent close), and the optimistic insert must not flicker — so
+  // the in-flight id is hidden from the board until the write resolves.
+  const [saveState, setSaveState] = useState<"idle" | "pending" | "failed">("idle");
+  const [saveError, setSaveError] = useState<WriteErrorCode | null>(null);
+  const [pendingSaveId, setPendingSaveId] = useState<string | null>(null); // the in-flight create, hidden until resolved
+  const [saveSlow, setSaveSlow] = useState(false); // the quiet inline spinner, only past ~300ms
+  const savePending = saveState === "pending";
+  // dirty = any field carries content; an outside click / Esc only prompts to discard when dirty.
+  const composerDirty = !!(composerDraft.trim() || composerDetail.trim() || composerDate);
+  const composerDirtyRef = useRef(composerDirty);
+  composerDirtyRef.current = composerDirty;
   useEffect(() => {
     if (!composerAt) return;
     const onDown = (e: PointerEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && t.closest(".tdb-composer")) return;
-      // outside: cancel only when empty — a live draft stays open
-      if (!composerDraftRef.current.trim()) setComposerAt(null);
+      if (t && t.closest(".tdb-nc")) return;
+      // outside: cancel only when empty — a live draft stays open (never silently discarded)
+      if (!composerDirtyRef.current) setComposerAt(null);
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
@@ -315,12 +334,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
   const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
   const board = useMemo(
-    () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
+    // save-and-today P1 — hide the in-flight create (pendingSaveId) so the optimistic insert never
+    // flashes: the item's node is inserted ONCE, when the write resolves, never inserted-then-removed.
+    () => assembleBoard({ tasks, userTasks: pendingSaveId ? userTasks.filter((t) => t.id !== pendingSaveId) : userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
     // mutedTaskRules is a board dep because the Sunday CARD reads it directly (nudge/dq/stale mutes
     // change `tasks` upstream, but sunday_review does not).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tasks, userTasks, queries, agents, manuscripts, taskFlags, today, currentUser?.mutedTaskRules],
+    [tasks, userTasks, pendingSaveId, queries, agents, manuscripts, taskFlags, today, currentUser?.mutedTaskRules],
   );
   // The Housekeeping lane renders the dq rules GROUPED (one card per rule, queried-first members) +
   // STALE queries as INDIVIDUAL cards (real one-off decisions, never batched). The flat board.hk
@@ -560,7 +581,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE WORKSPACE SHELL (todo-fix48) — Today is back in its corner pop-up: a minimise control
   // collapses it to a pill, the state persisted.
   const [todayMin, setTodayMin] = useState<boolean>(() => { try { return localStorage.getItem("sa.todoTodayMin") === "1"; } catch { return false; } });
-  const toggleTodayMin = (v: boolean) => { setTodayMin(v); try { localStorage.setItem("sa.todoTodayMin", v ? "1" : "0"); } catch { /* private mode */ } };
+  // save-and-today P2/P3: ticking strikes IN PLACE — the row keeps its seat, struck, until the panel
+  // is next OPENED, so undo stays within reach. Expanding clears the set (that is the "next open").
+  const [strikeIds, setStrikeIds] = useState<Set<string>>(new Set());
+  const [addOpen, setAddOpen] = useState(false); // the ＋ roundel's add flow (hosts "Help me pick")
+  const toggleTodayMin = (v: boolean) => {
+    setTodayMin(v);
+    if (!v) setStrikeIds(new Set()); // opening = the deferred move: struck rows join the done band
+    setAddOpen(false);
+    try { localStorage.setItem("sa.todoTodayMin", v ? "1" : "0"); } catch { /* private mode */ }
+  };
+  // ADJACENCY (save-and-today P3): publish how far the help "?" FAB must step left so it never
+  // overlaps or abuts the Today corner. Expanded clears the full 290px panel; collapsed clears the
+  // narrower launcher; absent clears nothing. Cleared on unmount — no other route inherits a shift.
+  useEffect(() => {
+    const root = document.documentElement;
+    const shift = !todayShown ? "0px" : todayMin ? "var(--td-fab-clear-min, 172px)" : "var(--td-fab-clear, 320px)";
+    root.style.setProperty("--sa-fab-shift", shift);
+    return () => { root.style.removeProperty("--sa-fab-shift"); };
+  }, [todayShown, todayMin]);
   useEffect(() => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (todayActive) { setTodayShown(true); setTodayLeaving(false); return; }
@@ -671,10 +710,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     flash(`Done — “${c.title}”`, { label: "Undo", fn });
   }
 
+  // save-and-today P2 — Today's tick: strike the row IN PLACE first, then run the existing
+  // completion (which carries the undo toast). The row only leaves for the done band on the next
+  // open, so a mis-tick is undone where it happened rather than hunted for in another band.
+  function strikeThenDone(c: BoardCard) {
+    setStrikeIds((s) => new Set(s).add(c.key));
+    void quickDone(c);
+  }
   async function quickDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
-      await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
+      // save-and-today P1 — ticking is a write like any other: it must not silently no-op. On a
+      // denied/dropped write, surface a Try-again toast rather than the old unhandled throw.
+      try {
+        await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
+      } catch {
+        flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => quickDone(c) });
+        return;
+      }
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
       setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on Today.`, undo });
       doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
@@ -769,16 +822,104 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): the browser prompt was a
   // placeholder, not a design. addTask now opens the composer in the current view's Notes
   // seat; save wires to the SAME addUserTask action (no new write path).
-  function addTask() {
+  // notes-and-tasks P1/P2 — open the composer in a chosen NATURE, at the current view's seat,
+  // on a clean draft.
+  const resetSaveMachine = () => { setSaveState("idle"); setSaveError(null); setPendingSaveId(null); setSaveSlow(false); };
+  const openComposer = (mode: "note" | "task") => {
+    setComposerMode(mode);
     setComposerDraft("");
+    setComposerDetail("");
+    setComposerDate("");
+    setComposerSurface("on-day");
+    resetSaveMachine();
     setComposerAt(view === "ledger" ? "ledger" : "cards");
-  }
-  async function saveComposer() {
-    const text = composerDraft.trim();
-    if (!text) return;
-    await addUserTask({ text });
+  };
+  const closeComposer = () => {
     setComposerAt(null);
     setComposerDraft("");
+    setComposerDetail("");
+    setComposerDate("");
+    setComposerSurface("on-day");
+    resetSaveMachine();
+  };
+  // Esc / Cancel: confirm the discard ONLY when the draft carries content (no native dialog —
+  // the styled useConfirmAsk). SUPPRESSED while a save is pending (fields are locked mid-write).
+  async function tryCloseComposer() {
+    if (savePending) return;
+    if (composerDirty) {
+      const ok = await confirmAsk("Discard this?", { confirmLabel: "Discard", cancelLabel: "Keep editing" });
+      if (!ok) return;
+    }
+    closeComposer();
+  }
+  // The generic "add a note" affordances (the Notes section, the ledger add-row) open note mode;
+  // the hero's "Add task or note" opens task mode.
+  function addTask() { openComposer("note"); }
+  // notes-gaps — DELETE a note/task. A note is deleted or edited, never ticked (the two-natures
+  // law), so removal is the note's completion. Undo re-creates the SAME document id through the
+  // existing addUserTask (no new write path); a failed delete surfaces Try again — the P1
+  // no-silent-no-op rule applies to every write, not just the composer's.
+  async function deleteUserNote(c: BoardCard) {
+    if (!c.userTaskId) return;
+    // Deleting is destructive and the ✕ sits on the card itself, so it ALWAYS asks first — an undo
+    // toast is a safety net, not a substitute for consent. A task warns harder than a note: it
+    // carries a date and may be committed to Today, so more is lost than a jotted line.
+    const isTask = c.nature === "task";
+    const ok = await confirmAsk(
+      isTask
+        ? `Delete “${c.title}”? This task and its date will be removed from your board${c.committed || c.surfaced ? " and from Today’s list" : ""}.`
+        : `Delete “${c.title}”?`,
+      { confirmLabel: isTask ? "Delete the task" : "Delete the note", cancelLabel: "Keep it" },
+    );
+    if (!ok) return;
+    try {
+      await deleteUserTask(c.userTaskId);
+    } catch {
+      flash("Couldn’t delete that — try again?", { label: "Try again", fn: () => deleteUserNote(c) });
+      return;
+    }
+    flash(`Deleted — “${c.title}”`, {
+      label: "Undo",
+      fn: async () => {
+        try {
+          await addUserTask({ id: c.userTaskId, text: c.title, detail: c.detail, dueDate: c.dueYmd, surfaceOffset: c.surfaceOffset });
+        } catch {
+          flash("Couldn’t restore that — try again?", { label: "Try again", fn: () => undefined });
+        }
+      },
+    });
+  }
+  const composerCanSave = !!composerDraft.trim() && (composerMode === "note" || !!composerDate);
+  // save-and-today P1 — THE MACHINE. On save → PENDING (button disabled, fields read-only, Esc off,
+  // the in-flight id hidden from the board so the optimistic insert never flickers). The write
+  // RESOLVES → SAVED (unhide the settled item, close in place). It THROWS → FAILED (the composer
+  // stays open with every character intact, editable again, an inline error + Try again).
+  async function saveComposer() {
+    if (!composerCanSave || savePending) return;
+    const isTask = composerMode === "task";
+    const id = "task-" + Math.random().toString(36).slice(2, 11);
+    setSaveState("pending");
+    setSaveError(null);
+    setPendingSaveId(id);
+    const slow = window.setTimeout(() => setSaveSlow(true), 300);
+    try {
+      await addUserTask({
+        id,
+        text: composerDraft.trim(),
+        detail: composerDetail.trim() || undefined,
+        dueDate: isTask ? composerDate : undefined,
+        surfaceOffset: isTask ? composerSurface : undefined,
+      });
+      window.clearTimeout(slow);
+      setPendingSaveId(null); // the settled item may now render
+      closeComposer();
+    } catch (e) {
+      window.clearTimeout(slow);
+      setSaveSlow(false);
+      setPendingSaveId(null); // the optimistic insert rolled back — nothing left to hide
+      setSaveError(classifyWriteError(e));
+      setSaveState("failed");
+    }
   }
 
   // Shell follow-up P3: the hardback-spine TodoShell is RETIRED — the v2 shell (rail, sidebar,
@@ -918,13 +1059,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {vStale.map((c) => renderCard(c))}
           </Lane>
           )}
-          {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
-          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0 && composerAt !== "cards"}
+          {(!active || vNt.length > 0 || overlayCards("nt").length > 0 || composerAt === "cards") && (
+          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
             filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
-            emptyNode={composerAt === "cards" ? renderComposer() : <button type="button" className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"><span className="tdb-gg" aria-hidden>＋</span></button>}>
+            emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}>
             {composerAt === "cards" && vNt.length > 0 && renderComposer()}
             {overlayCards("nt")}
             {vNt.map((c) => renderCard(c))}
+            {/* notes-gaps: the add affordance must persist once notes EXIST (the empty-state card is
+                gone by then, and the hero's button opens task mode) — a dashed tile closes the grid. */}
+            {composerAt !== "cards" && (
+              <button type="button" className="tdb-ntadd" onClick={() => openComposer("note")}>＋ Write a note</button>
+            )}
           </Lane>
           )}
         </div>
@@ -1050,7 +1196,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           },
           {
             label: "Add task or note",
-            onClick: addTask,
+            onClick: () => openComposer("task"), // the hero opens TASK mode by default
             primary: true,
             icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>,
           },
@@ -1137,26 +1283,92 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── hero-pair P4: THE INLINE COMPOSER (todo-composer.html §4) — white, notes-family
   // border, Caveat autofocused and growing, ⌘⏎ saves · Esc cancels · an outside click
   // cancels only when empty. Save rides the existing addUserTask action. ──
+  // ── notes-and-tasks P2 — THE COMPOSER (design-refs/notes-and-tasks.html · frame 2): ONE
+  // composer, two natures. The type segment leads; switching TRANSFORMS it live — the title +
+  // detail swap Caveat (note) ↔ typeset (task), the offset block swaps butter ↔ sage, the date +
+  // surfacing fields appear only for a task, the note shows the "NO DATE" line, and the save verb
+  // changes. Content survives every switch (the fields are component state, never reset on toggle).
+  // ⌘⏎ saves · Esc cancels (a styled confirm only when dirty). No native prompt/alert/confirm. ──
   function renderComposer() {
+    const isTask = composerMode === "task";
+    const onKey = (e: React.KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }
+      if (e.key === "Escape") { e.stopPropagation(); e.preventDefault(); tryCloseComposer(); }
+    };
     return (
-      <div className="tdb-composer">
-        <textarea
-          ref={(el) => { if (el) { el.focus(); el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; } }}
-          value={composerDraft}
-          rows={1}
-          placeholder="Jot it down…"
-          aria-label="New note"
-          onChange={(e) => { setComposerDraft(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
-          onKeyDown={(e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }
-            if (e.key === "Escape") { e.stopPropagation(); setComposerAt(null); }
-          }}
-        />
-        <div className="tdb-compfoot">
-          <span className="tdb-comphint" aria-hidden>⌘⏎ SAVE · ESC CANCEL</span>
-          <button type="button" className="tdb-btnh tdb-compsave" onClick={() => setComposerAt(null)}>Cancel</button>
-          <button type="button" className="tdb-btnh em" onClick={saveComposer}>Save note</button>
+      <div className={`tdb-nc tdb-nc--${composerMode}${saveState === "failed" ? " failed" : ""}`}>
+        <div className="tdb-nc-seg" role="tablist" aria-label="Note or task">
+          <button type="button" role="tab" aria-selected={!isTask} className={`tdb-nc-sgb${isTask ? "" : " on"}`} disabled={savePending} onClick={() => setComposerMode("note")}>✎ Note</button>
+          <button type="button" role="tab" aria-selected={isTask} className={`tdb-nc-sgb${isTask ? " on" : ""}`} disabled={savePending} onClick={() => setComposerMode("task")}>✓ Task</button>
         </div>
+        <div className="tdb-nc-body">
+          <input
+            className={`tdb-nc-ttl${isTask ? "" : " note"}`}
+            value={composerDraft}
+            placeholder={isTask ? "What needs doing?" : "Jot it down…"}
+            aria-label="Title"
+            autoFocus
+            readOnly={savePending}
+            onChange={(e) => setComposerDraft(e.target.value)}
+            onKeyDown={onKey}
+          />
+          <textarea
+            className={`tdb-nc-dtl${isTask ? "" : " note"}`}
+            value={composerDetail}
+            rows={1}
+            placeholder="Add a little more (optional)…"
+            aria-label="Detail"
+            readOnly={savePending}
+            onChange={(e) => { setComposerDetail(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
+            onKeyDown={onKey}
+          />
+          <div className="tdb-nc-meta">
+            {isTask ? (
+              <>
+                <span className={`tdb-nc-date${savePending ? " lock" : ""}`}><BrandDatePicker value={composerDate} onChange={setComposerDate} placeholder="Add a date" /></span>
+                {composerDate && (
+                  <label className="tdb-nc-surface">
+                    <span className="tdb-nc-surflbl">Show it in Today’s list</span>
+                    <select value={composerSurface} disabled={savePending} onChange={(e) => setComposerSurface(e.target.value as SurfaceOffset)} aria-label="Show it in Today’s list">
+                      <option value="on-day">On the day</option>
+                      <option value="day-before">A day early</option>
+                      <option value="week-before">A week early</option>
+                    </select>
+                  </label>
+                )}
+              </>
+            ) : (
+              <span className="tdb-nc-nomark">NO DATE · NOTHING WILL CHASE YOU</span>
+            )}
+            <button type="button" className="tdb-nc-save" disabled={!composerCanSave || savePending} onClick={saveComposer}>
+              {saveSlow && <span className="tdb-nc-spin" aria-hidden />}
+              {isTask ? "Add the task" : "Pin the note"}
+            </button>
+          </div>
+          {saveState === "failed" && (
+            <div className="tdb-nc-err" role="alert">
+              <span className="tdb-nc-errtx">{saveErrorCopy(saveError ?? "unknown")}</span>
+              <button type="button" className="tdb-nc-retry" onClick={saveComposer}>Try again</button>
+            </div>
+          )}
+        </div>
+        <div className="tdb-nc-hint" aria-hidden>ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING</div>
+      </div>
+    );
+  }
+  // ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
+  // when the Notes section holds nothing, one dashed butter card explains what a note is for and
+  // offers the ink "Write a note" (opening the composer in note mode). It vanishes the moment a
+  // note exists; the section head + its honest count still render above it. ──
+  function renderNotesEmpty() {
+    return (
+      <div className="tdb-nte">
+        <span className="tdb-nte-ic" aria-hidden><Pin size={16} /></span>
+        <div className="tdb-nte-tx">
+          <h4>Nothing pinned here yet</h4>
+          <p>Notes are for the things you want to remember but don’t need chasing — a thought about an agent, a line for the query letter, a reminder of where you left off.</p>
+        </div>
+        <button type="button" className="tdb-nte-btn" onClick={() => openComposer("note")}>＋ Write a note</button>
       </div>
     );
   }
@@ -1198,30 +1410,64 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE WORKSPACE SHELL (todo-fix48) — the Today corner: the floating card (or its minimised
   // pill), bottom-right of the workspace, absent when the list is empty. The card reuses the
   // one renderTodayPanel (checklist + Work the list) and adds a minimise control.
+  // ── save-and-today P3 — COLLAPSE + THE LAUNCHER (design-refs/today-panel.html · frame 2).
+  // ONE container in both states, so collapsing animates HEIGHT ONLY and the corner never jumps:
+  // the 46px header is always mounted and IS the launcher when collapsed (carrying the outstanding
+  // count in a sage pill, chevron up); the body below it collapses to nothing. The chevron ROTATES
+  // rather than swapping glyph. State persists per user (localStorage, via toggleTodayMin), so it
+  // survives a reload AND the session leave/return. Empty → the whole corner is absent (todayShown).
   function renderTodayCorner() {
     if (!todayShown) return null;
-    if (todayMin) {
-      return (
-        <button type="button" className="tdb-tdpill" onClick={() => toggleTodayMin(false)} aria-label="Open Today" title="Open Today">
-          <span className="tdb-tddot" aria-hidden />Today · {committedCards.length}
-        </button>
-      );
-    }
     return (
-      <div className={`tdb-tdpop${todayLeaving ? " out" : " in"}`} role="complementary" aria-label="Today">
-        <button type="button" className="tdb-tdmin" aria-label="Minimise Today" title="Minimise" onClick={() => toggleTodayMin(true)}>–</button>
+      <div
+        className={`tdb-tdpop${todayMin ? " min" : ""}${todayLeaving ? " out" : " in"}`}
+        role="complementary"
+        aria-label="Today"
+      >
         {renderTodayPanel()}
       </div>
     );
   }
+  // ── save-and-today P2 — THE TODAY PANEL, EXPANDED (design-refs/today-panel.html · frame 1).
+  // The 46px sage header carries the Playfair title, a 52px progress bar and the {done}/{total}
+  // fraction, and the WHOLE header is the collapse control. Rows are single-line with truncation, a
+  // sage completion circle, and a mono sub-label only where it means something (DUE TODAY / YOUR
+  // TASK). Ticking strikes IN PLACE — the row moves to the done band only on the next open, so undo
+  // stays easy. Foot: ONE primary (Work the list →) beside a quiet ＋ roundel. ──
   function renderTodayPanel() {
     const ghosts = todayGhosts(committedCards.length, doneN);
+    const total = committedCards.length + doneN;
+    const pct = total > 0 ? Math.round((doneN / total) * 100) : 0;
+    const subLabel = (c: BoardCard): string | null => {
+      if (c.nature !== "task") return null; // only the writer's OWN tasks earn a caption
+      if (c.dueState === "today") return "DUE TODAY";
+      if (c.dueState === "overdue") return "OVERDUE";
+      return "YOUR TASK";
+    };
     return (
       <div className="tdb-today2">
-        <div className="tdb-th">
+        {/* the header is the collapse control in BOTH states — expanded it shows the progress pair,
+            collapsed it becomes the launcher and shows the outstanding count in a sage pill */}
+        <button
+          type="button"
+          className="tdb-th"
+          onClick={() => toggleTodayMin(!todayMin)}
+          aria-expanded={!todayMin}
+          aria-label={todayMin ? "Open Today" : "Collapse Today"}
+        >
           <b className="tdb-t">Today</b>
-          <i className="tdb-thr">{committedCards.length === 0 && doneN === 0 ? shortHeaderDate(now) : `${committedCards.length} OF ${MAX_TODAY}`}</i>
-        </div>
+          {todayMin ? (
+            <span className="tdb-cnt">{committedCards.length}</span>
+          ) : (
+            <span className="tdb-tprog" aria-hidden>
+              <span className="tdb-tpbar"><i style={{ width: `${pct}%` }} /></span>
+              <span className="tdb-pnum">{doneN} / {total}</span>
+            </span>
+          )}
+          <span className={`tdb-chev${todayMin ? " up" : ""}`} aria-hidden>▾</span>
+        </button>
+        {/* everything below the header collapses — height only, 180ms (see .tdb-tdbody) */}
+        <div className="tdb-tdbody" aria-hidden={todayMin}>
         {rolled.length > 0 && (
           <div className="tdb-rollbar">
             <span className="tdb-rolltx"><b>{rolled.length}</b> {rolled.length === 1 ? "item" : "items"} rolled over from a previous day.</span>
@@ -1234,22 +1480,27 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-tmid2">
           {committedCards.length > 0 && (
             <div className="tdb-tcommit">
-              {committedCards.map((c) => (
-                <div key={c.key} className="tdb-trow" onClick={() => openFlowCards([c])}>
-                  {/* doc pass P5 — Today's tick: the leading dot grows the tick on row hover/
-                      focus and completes with the undo toast (offers keep the plain dot) */}
-                  {c.taskType === "offer_received" ? (
-                    <span className="tdb-tdot">{!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}</span>
-                  ) : (
-                    <button type="button" className="tdb-tdot tick" aria-label={`Mark done — ${c.title}`} onClick={(e) => { e.stopPropagation(); quickDone(c); }}>
-                      {!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}
-                      <span className="tdb-ttick" aria-hidden>✓</span>
+              {committedCards.map((c) => {
+                const struck = strikeIds.has(c.key); // ticked THIS open: struck in place, not moved
+                const sub = subLabel(c);
+                return (
+                  <div key={c.key} className={`tdb-trow${struck ? " done" : ""}`} onClick={() => openFlowCards([c])}>
+                    <button
+                      type="button"
+                      className="tdb-cc"
+                      aria-label={`Mark done — ${c.title}`}
+                      onClick={(e) => { e.stopPropagation(); strikeThenDone(c); }}
+                    >
+                      {struck && <span aria-hidden>✓</span>}
                     </button>
-                  )}
-                  <div className="tdb-tmid"><div className="tdb-tx">{c.title}</div><div className="tdb-tm">{c.record}</div></div>
-                  <button type="button" className="tdb-x" title="Take off Today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
-                </div>
-              ))}
+                    <span className="tdb-trtx">
+                      {c.title}
+                      {sub && <span className="tdb-trsub">{sub}</span>}
+                    </span>
+                    <button type="button" className="tdb-x" title="Take off Today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
+                  </div>
+                );
+              })}
             </div>
           )}
           {ghosts > 0 && (
@@ -1278,22 +1529,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
 
+        {/* ONE primary action. The second ghost button is retired — "Help me pick" moved INSIDE the
+            add flow, as an option on the ＋ roundel. */}
         <div className="tdb-tf2">
-          {committedCards.length > 0 ? (
-            <>
-              <button type="button" className="tdb-btnh" onClick={helpMePick}>＋ Add more</button>
-              <button type="button" className="tdb-btnp sm" onClick={() => {
-                // C2 family law — the Today walk is a ritual: sage bands whole-walk
-                setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
-              }}>Work the list</button>
-            </>
-          ) : (
-            <>
-              <button type="button" className="tdb-btnh" onClick={helpMePick}>Help me pick</button>
-              {/* the manual doorway — commitment happens on the board's cards */}
-              <button type="button" className="tdb-btnh" onClick={() => scrollToLane("do")}>＋ Add</button>
-            </>
-          )}
+          <button
+            type="button"
+            className="tdb-pbtn"
+            disabled={committedCards.length === 0}
+            onClick={() => {
+              // C2 family law — the Today walk is a ritual: sage bands whole-walk
+              setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
+            }}
+          >
+            Work the list →
+          </button>
+          <span className="tdb-addwrap">
+            <button type="button" className="tdb-sbtn" aria-label="Add to Today" aria-expanded={addOpen} onClick={() => setAddOpen((v) => !v)}>＋</button>
+            {addOpen && (
+              <div className="tdb-addmenu" role="menu">
+                <button type="button" role="menuitem" onClick={() => { setAddOpen(false); helpMePick(); }}>Help me pick</button>
+                <button type="button" role="menuitem" onClick={() => { setAddOpen(false); scrollToLane("do"); }}>Choose from the board</button>
+              </div>
+            )}
+          </span>
+        </div>
         </div>
       </div>
     );
@@ -1588,8 +1847,45 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
+  // ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (design-refs/notes-and-tasks.html · frame
+  // 3): a NOTE is butter with an ✎ NOTE band, Caveat, a PINNED footer and NO completion circle; a
+  // TASK is sage (the user-created family) with a ✓ YOUR TASK band, typeset, a date chip and a
+  // completion tick (the existing quickDone + undo toast). A task PROMOTES on its due day — pink
+  // offset + band, a DUE TODAY tag — while its lane (Urgent) and Today's-list membership are
+  // derived upstream. Blue is reserved for Pro and NEVER appears here. ──
+  function renderUserCard(c: BoardCard) {
+    const isTask = c.nature === "task";
+    const promoted = c.dueState === "today" || c.dueState === "overdue";
+    const surfLead = c.surfaceOffset && c.surfaceOffset !== "on-day" ? c.surfaceOffset : null;
+    return (
+      <div key={c.key} data-tdbkey={c.key} className={`tdb-ntc ${c.nature}${promoted ? " due" : ""}`}>
+        <div className="tdb-ntc-b">
+          <i className="tdb-ntc-tag">{isTask ? "✓ YOUR TASK" : "✎ NOTE"}</i>
+          {promoted && <i className="tdb-ntc-tag hot">{c.dueState === "overdue" ? "OVERDUE" : "DUE TODAY"}</i>}
+          {/* removal is a note's completion (it is never ticked); the task can be ticked OR removed */}
+          <button type="button" className="tdb-ntc-del" onClick={() => deleteUserNote(c)} aria-label={`Delete “${c.title}”`} title="Delete">✕</button>
+        </div>
+        <div className="tdb-ntc-in">
+          <h4 className="tdb-ntc-ttl">{c.title}</h4>
+          {c.detail && <div className="tdb-ntc-d">{c.detail}</div>}
+          <div className="tdb-ntc-ft">
+            {isTask ? (
+              <>
+                <span className={`tdb-ntc-dchip${promoted ? " due" : ""}`}>{c.due}</span>
+                {surfLead && <span className="tdb-ntc-surf">{surfLead === "week-before" ? "SHOWS A WEEK EARLY" : "SHOWS A DAY EARLY"}</span>}
+                <button type="button" className="tdb-ntc-tick" onClick={() => quickDone(c)} aria-label={`Mark “${c.title}” done`} />
+              </>
+            ) : (
+              <span className="tdb-ntc-pin">{c.due}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
   // ── full-detail lane card (the contract): band tag (+ ✓ TODAY chip) over title + manuscript. ──
   function renderCard(c: BoardCard, gin = false) {
+    if (c.nature) return renderUserCard(c); // notes-and-tasks: user notes/tasks wear their own grammar
     const committed = onList(c);
     const ov = overlays[c.key];
     const isOffer = c.taskType === "offer_received";

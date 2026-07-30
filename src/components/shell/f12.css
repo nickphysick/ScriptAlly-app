@@ -35,7 +35,12 @@
    at rest (they only "worked" on hover, where :hover added a class). :where() lets every
    class-based button surface win at rest, exactly as the mockup intends. */
 :where(.f12-root button) { font: inherit; cursor: pointer; background: none; border: none; color: inherit; text-align: left; }
-.f12-root button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
+/* ⚠️ Scoped to `.t-f12`, NOT `.f12-root`. The page root carries both classes, so on-page coverage
+   is unchanged — but everything PORTALLED to document.body (F12Menu, F12Popover, the toasts, the
+   confirm dialog) is wrapped in a bare `.t-f12` div, and under the old selector those buttons fell
+   through to the browser's default focus ring. That's why the discard dialog focused blue. Any
+   future portalled surface now gets the house ring by construction. */
+.t-f12 button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
 .f12-root svg { display: block; }
 .f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
 
@@ -62,16 +67,19 @@
 /* ── control bar — two zones locked to the panes by --listw (chrome revision: 56px; the left
    zone sits flush with the list pane's left edge, the right zone is inset 20px from both of
    the reading pane's edges) ── */
-/* The compact page-header seat (shell rollout Phase 6) — the same centred column as the
-   control bar / body, holding the app-standard PageHeader above the F12 work area. */
-.f12-hd2 { flex: none; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 16px var(--gut) 0; }
+/* v4 P1 — THE HEADER BLOCK (page-header seat + action row + chips) sits in the SHARED CONTENT
+   COLUMN (--sa-col-*, pageHeader.css) — the same column the agent list uses, so the two pages'
+   headers line up when you move between them. The WORKSPACE below keeps its own wider --maxw cap
+   (.f12-body); that differential is exactly the ref's Guides view, not an accident. */
+.f12-hd2 { flex: none; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 16px var(--sa-col-gut) 0; }
 .f12-hd2 .svh { margin-bottom: 0; }
 
 /* asymmetric vertical padding (more on top) drops the buttons toward the content below rather
-   than centring them mid-bar — they were reading closer to the breadcrumb than the panes. */
-.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 15px var(--gut) 3px; }
-.f12-zone-list { flex: none; width: var(--listw); display: flex; align-items: center; gap: 8px; padding-left: 0; padding-right: var(--gut); }
-.f12-zone-read { flex: 1; display: flex; align-items: center; gap: 2px; min-width: 0; padding-left: 20px; padding-right: 20px; }
+   than centring them mid-bar — they were reading closer to the breadcrumb than the panes.
+   v4 P1: the --listw left zone is retired (it locked the bar to the list pane, which now lives
+   in a different, wider column) — the verbs simply right-align in the header column, per the ref. */
+.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 15px var(--sa-col-gut) 3px; }
+.f12-zone-read { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
 .f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
 .f12-ctl .f12-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
 /* the link group is pushed right; the danger pair sits past a second divider */
@@ -97,6 +105,303 @@
 .f12-iconctl .f12-fcorner { position: absolute; top: -5px; right: -5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; padding: 1px 5px; }
 .f12-iconctl .f12-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: var(--panel); padding: 4px 7px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
 .f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
+
+/* ══ ROUTE-ENTRY LOAD ANIMATION (v4 P4; ref queries-hub-v4.html, the ↻ Replay chip) ════════
+   The page settles in reading order: masthead → action bar → list card (rows staggered behind
+   it) → hero → columns left to right. Each element rises 7px over ~220–240ms, ease-out.
+
+   v5: the keyframe is the SHARED `rise` (src/styles/motion.css), not a local twin. That file is
+   explicit that one `rise` serves the whole app — a row arriving here and a card arriving on the
+   agent list must read as the same gesture — so the v4 `qhRise` duplicate is retired.
+
+   Three rules this obeys:
+   · CSS ONLY. No JS timer drives any of this — `.qh-enter` is toggled on route ENTRY (the page
+     stays mounted, so a mount animation would run exactly once, ever).
+   · fill-mode BACKWARDS, not both: the element takes the from-state during its delay, then on
+     finishing reverts to its own computed style — holding NO transform. A lingering transform
+     would make the page a containing block for its position:fixed furniture (the footgun the
+     shell's own entry class documents).
+   · The APP SHELL never animates — the rail, breadcrumb and search live outside this page. */
+
+.qh-enter .f12-hd2 { animation: rise 0.22s ease-out backwards; }
+.qh-enter .f12-ctl,
+.qh-enter .f12-chips { animation: rise 0.22s ease-out 0.05s backwards; }
+.qh-enter .f12-list { animation: rise 0.24s ease-out 0.08s backwards; }
+.qh-enter .f12-detail .f12-hero { animation: rise 0.24s ease-out 0.13s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(1) { animation: rise 0.24s ease-out 0.17s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(2) { animation: rise 0.24s ease-out 0.2s backwards; }
+.qh-enter .f12-detail .f12-card:nth-child(3) { animation: rise 0.24s ease-out 0.23s backwards; }
+/* rows stagger 25ms behind the list card, capped at the first ten — past that the eye reads it as
+   a wave, not a settle, and a long list would still be arriving seconds later. */
+.qh-enter .f12-rows .f12-row:nth-child(-n + 10) { animation: rise 0.2s ease-out backwards; }
+.qh-enter .f12-rows .f12-row:nth-child(1) { animation-delay: 0.12s; }
+.qh-enter .f12-rows .f12-row:nth-child(2) { animation-delay: 0.145s; }
+.qh-enter .f12-rows .f12-row:nth-child(3) { animation-delay: 0.17s; }
+.qh-enter .f12-rows .f12-row:nth-child(4) { animation-delay: 0.195s; }
+.qh-enter .f12-rows .f12-row:nth-child(5) { animation-delay: 0.22s; }
+.qh-enter .f12-rows .f12-row:nth-child(6) { animation-delay: 0.245s; }
+.qh-enter .f12-rows .f12-row:nth-child(7) { animation-delay: 0.27s; }
+.qh-enter .f12-rows .f12-row:nth-child(8) { animation-delay: 0.295s; }
+.qh-enter .f12-rows .f12-row:nth-child(9) { animation-delay: 0.32s; }
+.qh-enter .f12-rows .f12-row:nth-child(10) { animation-delay: 0.345s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qh-enter .f12-hd2, .qh-enter .f12-ctl, .qh-enter .f12-chips, .qh-enter .f12-list,
+  .qh-enter .f12-detail .f12-hero, .qh-enter .f12-detail .f12-card,
+  .qh-enter .f12-rows .f12-row { animation: none !important; }
+}
+
+/* ══ INLINE QUERY CREATION (v4 P2; ref create-mode-ref.html) ═══════════════════════════════
+   The draft row in the list, plus the create pane's chips / checklist / footer. Colours come
+   from the existing token set — note the checkbox tick uses the BAND sage (--sage-edge), never
+   the StatusDot trio (--sage/--sageC/--sageD), which index.css locks to StatusDots. */
+
+/* ══ CREATE-FLOW CHOREOGRAPHY (v5 P2; ref qdb-create-motion.html) ═══════════════════════════
+   One motion language: the entrances reuse the SHARED `rise` (src/styles/motion.css); the row's
+   own growth and skin-shed are transitions, because they interpolate between two real states
+   rather than playing a canned gesture.
+
+   THE ROW GROWS, THE LIST DOESN'T JUMP. Because `.f12-row` has an explicit height, the draft can
+   animate height + margin + border-width from zero — and that growth is what pushes the rows
+   below down. No per-row transforms, so nothing has to be un-transformed afterwards.
+
+   ⚠️ FLIP TRAP (documented in motion.css): a filled animation outranks an inline transform. The
+   save FLIP therefore clears `style.animation` before measuring — see runSaveFlip in Queries.tsx. */
+/* ⚠️ EVERY draft rule is written as a MODIFIER OF THE ROW (`.f12-row.f12-draft`), never as a bare
+   `.f12-draft`. `.f12-row` is declared ~270 lines below this block, so at equal specificity it won
+   the cascade on every property the two shared — display, padding, height, the bottom border, even
+   the monogram's dashed ring. The draft row was silently rendering as a normal row wearing a few
+   leftovers. Compound selectors make the outcome independent of file order; keep them. */
+.f12-row.f12-draft {
+  /* appearance + collapsed state in ONE rule: a separate base rule below would re-assert the
+     `border` and `margin` shorthands at equal specificity and silently undo the collapse. */
+  border: 0 dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md);
+  height: 0; margin: 0; opacity: 0; overflow: hidden;
+  /* the 1.5px border is ABSORBED, not added: vertically by border-box against the fixed 56px, and
+     horizontally by taking the row's 14px padding down by the same 1.5px — so the monogram column
+     lines up with every row beneath it and the outer box is the same size. */
+  padding: 0 12.5px;
+  transition:
+    height 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
+    margin 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
+    border-width 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
+    opacity 0.22s ease 0.05s,
+    border-color 0.3s ease,
+    background 0.4s ease;
+}
+/* open = EXACTLY a row's height (ref qdb-draft-row.html). The 8px is margin BELOW — spacing
+   between rows so the dashed edge never touches its neighbour — never height inside the row. */
+.f12-row.f12-draft.f12-draft-in { height: 56px; margin: 0 0 8px; border-width: 1.5px; opacity: 1; }
+
+/* live fill — the monogram and name resolve as the picker lands, rather than snapping */
+.f12-row.f12-draft .f12-av { transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+.f12-row.f12-draft .f12-nm { transition: color 0.3s ease; }
+
+/* SAVE beat 1 — the row sheds its draft skin IN PLACE: dashed → none, tag out, ground → selected.
+   The border-WIDTH stays 1.5px while the colour goes transparent, so the absorbed padding still
+   adds up and nothing shifts sideways as it becomes an ordinary row. */
+.f12-row.f12-draft.f12-draft-saved { border-color: transparent; border-style: solid; background: var(--blue-t); margin: 0; border-radius: 0; }
+.f12-row.f12-draft.f12-draft-saved .f12-drafttag { opacity: 0; }
+
+/* SAVE beat 4 — the settle: a soft pink flash easing down to the selected tint */
+@keyframes f12-settle { from { background: var(--pink-t); } to { background: var(--blue-t); } }
+.f12-row.f12-settle { animation: f12-settle 0.9s ease-out both; }
+
+/* SAVE beat 5 — hidden by the current filter: the row collapses out AFTER the settle has read
+   (the 0.7s delay is CSS, not a timer), and the toast fires from its animationend. */
+@keyframes f12-collapse { from { height: 56px; opacity: 1; } to { height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; border-width: 0; } }
+.f12-row.f12-row-leaving { animation: f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; overflow: hidden; pointer-events: none; }
+/* both at once — separate rules would OVERRIDE rather than compose (the `animation` property is
+   not additive), so the settle would be cancelled the moment the row started leaving. */
+.f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
+
+/* ── COMPACT CREATE HERO (ref qdb-focus-spotlight.html) — the height the columns needed came
+   from two places: the retired footer bar (~95px) and this (~90px). Padding tightens, the mark
+   drops to 54px, and the title/subtitle move BESIDE the search field instead of above it. Scoped
+   to .qc-hero so the reading pane's own record hero is untouched. */
+.f12-hero.qc-hero { padding: 16px 20px; gap: 16px; }
+.qc-mark { flex: none; width: 54px; height: 54px; border-radius: 50%; background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); display: flex; align-items: center; justify-content: center; font-size: 19px; }
+.qc-htxt { flex: none; min-width: 0; }
+.qc-hero .qc-head { font-size: 20px; line-height: 1.1; }
+.qc-hero .qc-sub { font-size: 13px; margin: 0; }
+/* Below the two-up width the text block would squeeze the field, so it stacks back. */
+@media (max-width: 980px) { .f12-hero.qc-hero { flex-wrap: wrap; } .qc-htxt { flex: 1 0 100%; } }
+
+/* ── CREATE-MODE COMMAND BAR (ref qdb-focus-spotlight.html) — the record actions are replaced
+   by this while a draft is open. Same .f12-ctl seat, so the bar neither moves nor changes height
+   as it swaps. The two buttons carry qh-lit and stay above the scrim. */
+.f12-ctl-create { align-items: center; gap: 12px; }
+.qcb-ctx { display: inline-flex; align-items: center; gap: 9px; flex: none; font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); }
+.qcb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; }
+/* Advisory copy, so it yields first: it truncates rather than pushing the buttons, and below
+   1100px it goes entirely. Cancel and Save must never wrap or be pushed out of the bar. */
+.qcb-req { flex: 0 1 auto; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcb-err { color: var(--pink-i); }
+.qcb-esc { flex: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); }
+.f12-ctl-create .f12-btn-sec, .f12-ctl-create .f12-btn-pri { flex: none; white-space: nowrap; }
+@media (max-width: 1100px) { .qcb-req { display: none; } }
+
+/* ── FOCUS MODE — THE SCRIM (ref design-refs/qdb-focus-spotlight.html) ──────────────────
+   SUPERSEDES the per-surface dim (.qh-dim opacity/brightness) and the darkened ground
+   (--qh-focus-ground). Both are deleted, not layered under this.
+
+   ⚠️ The scrim is a child of .f12-root, NOT portalled to <body>. On route entry the stage slot
+   runs `pageIn`, which animates transform+opacity for 180ms — and for that window the slot is a
+   stacking context AND the containing block for position:fixed. Arriving from the rail's
+   "+ Query" opens create mode inside exactly that window, so a body-level scrim would paint OVER
+   the lit pane (which would be trapped in the slot's context) at the one moment it's most
+   visible. Keeping both in the same context makes the z-order true at all times; the cost is
+   that for ≤180ms the scrim covers the stage but not the rail, then reaches full viewport.
+
+   pointer-events:none is load-bearing: the darkened list stays fully clickable, so clicking
+   another row still runs the click-away/discard-confirm path. */
+.qh-scrim { position: fixed; inset: 0; background: var(--qh-scrim); opacity: 0; pointer-events: none; transition: opacity 0.24s ease; z-index: 50; }
+.qh-focus .qh-scrim { opacity: 1; }
+
+/* The three lit things. No ancestor between the page root and any of them creates a stacking
+   context (audited: the stage is position:relative with z-index:auto, which does not), so a
+   plain raise is enough — no ancestor was adjusted and no shared shell file was touched. */
+.qh-focus .qh-lit { position: relative; z-index: 60; }
+
+@media (prefers-reduced-motion: reduce) { .qh-scrim { transition: none; } }
+
+
+/* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
+   whose three columns own their scrolling, and absolutely positioning it would break that (the
+   ref simplifies the scroll model away). Entering CREATE mode lags the row by 110ms so the two
+   read as one gesture; returning to reading mode has no lag. */
+.f12-pane-enter-create { animation: rise 0.18s ease-out 0.11s backwards; }
+.f12-pane-enter-read { animation: rise 0.18s ease-out backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .f12-row.f12-draft, .f12-row.f12-draft .f12-av, .f12-row.f12-draft .f12-nm, .f12-drafttag { transition: none !important; }
+  .f12-row.f12-settle, .f12-row.f12-row-leaving,
+  .f12-pane-enter-create, .f12-pane-enter-read { animation: none !important; }
+}
+
+/* the pinned draft row — dashed and tagged, shown regardless of the active filters (see above),
+   but otherwise the SAME BOX as every other row: monogram · name/agency · right-hand column. */
+.f12-row.f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
+.f12-row.f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
+.f12-row.f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }
+.f12-row.f12-draft.f12-filled .f12-nm { color: var(--ink); font-style: normal; font-weight: 600; }
+/* ONE rule for the chip — it previously had three, two of which disagreed about `position`, and
+   the last one in the file won. It sits IN FLOW in the row's right-hand column, in the slot a
+   normal row gives its status dot, with the date beneath it. Nothing is positioned outside the
+   row box: the row's own overflow:hidden (which the height animation needs) would clip it. */
+.f12-drafttag {
+  flex: none; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-mono);
+  font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px; white-space: nowrap; transition: opacity 0.3s ease;
+}
+
+/* the hero's "Change" affordance — an outlined pill beside the agent's name, so swapping agent
+   is one click rather than a discard-and-start-again. */
+.qc-change { display: inline-flex; align-items: center; gap: 6px; flex: none; margin-left: 10px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-family: inherit; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.qc-change:hover { background: var(--paper); border-color: var(--muted); }
+.qc-change svg { width: 13px; height: 13px; flex: none; color: var(--faint); }
+
+/* the create pane's own heading (ref qdb-create-fixes2 §1) — Playfair, replacing the mono
+   "Who are you querying?" eyebrow. The pane is a page in its own right while it is open, so it
+   says what you are doing; "Agent" then reads as an ordinary field label beneath it. */
+.qc-head { font-family: var(--f12-serif); font-weight: 700; font-size: 23px; line-height: 1.15; color: var(--ink); }
+/* the subtitle carries the question the eyebrow used to ask — italic serif, so it reads as the
+   title's second breath rather than another label (format B). */
+.qc-sub { font-family: var(--f12-serif); font-style: italic; font-size: 14.5px; color: var(--ink-2); margin: 3px 0 12px; }
+
+/* "Sent by" — the INSET TRACK (ref qdb-create-fixes2 §2 option A): a recessed tan track with the
+   active choice raised out of it as a white pill. The height is the Date sent field's 42px so the
+   two-up row sits level, and the 3px padding is inside that — the segments are the track's
+   children, so no segment can ever overflow the frame the way a bordered one did. */
+.qc-seg { display: inline-flex; width: 100%; height: 42px; padding: 3px; gap: 2px; background: var(--oat); border-radius: 11px; }
+.qc-seg button {
+  flex: 1; min-width: 0; display: grid; place-items: center; border: none; background: transparent;
+  border-radius: 9px; font-family: inherit; font-size: 12.5px; font-weight: 500; line-height: 1;
+  color: var(--muted); cursor: pointer; transition: background 0.14s, color 0.14s;
+}
+.qc-seg button:hover { color: var(--ink-2); }
+.qc-seg button.on { background: var(--panel); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(60, 45, 30, 0.12); }
+
+/* the book chip inside the manuscript field (both states) */
+.qc-bk { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--oat); color: var(--ink-2); }
+.qc-bk svg { width: 12px; height: 12px; }
+
+/* reminder chips */
+.qc-chip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; font-family: inherit; font-size: 12px; background: var(--panel); color: var(--muted); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+.qc-chip:hover { border-color: var(--muted); }
+.qc-chip.on { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); font-weight: 600; }
+
+/* the materials checklist */
+.qc-mat { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 2px; border: none; border-bottom: 1px solid var(--hairline); background: none; font-family: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; }
+.qc-mat:last-of-type { border-bottom: none; }
+.qc-mat.on { color: var(--ink); }
+.qc-ck { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid var(--line); background: var(--panel); color: transparent; font-size: 10px; padding: 0; cursor: pointer; }
+.qc-mat.on .qc-ck { background: var(--sage-edge); border-color: var(--sage-edge); color: var(--ink); }
+/* the sample quantity (ref qdb-create-fixes2 §3) — ONE bordered 32px stepper with hairline
+   dividers, beside a matching unit trigger that opens the app's own menu. The bare +/− buttons
+   and the native <select> it replaces read as three loose controls and one macOS popup.
+   The middle cell is an INPUT: the physics steps by 500 for words, so 5,000 is typed. */
+.qc-qty { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 7px; }
+.qc-stp { display: inline-flex; align-items: center; height: 32px; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--panel); }
+.qc-stp button {
+  width: 28px; align-self: stretch; display: grid; place-items: center; padding: 0; border: none;
+  background: transparent; color: var(--ink-2); font-size: 14px; line-height: 1; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.qc-stp button:hover { background: var(--paper); color: var(--ink); }
+.qc-stp input {
+  width: 46px; align-self: stretch; text-align: center; padding: 0 2px; border: none;
+  border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0;
+  background: transparent; font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink); outline: none;
+}
+.qc-unit { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); font-family: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; white-space: nowrap; transition: background 0.12s, border-color 0.12s; }
+.qc-unit:hover { background: var(--paper); border-color: var(--muted); }
+.qc-unit .qc-cv { font-size: 9px; color: var(--faint); }
+
+/* ── GHOST PREVIEW zero-state (v4 P3; ref empty-states-ref.html option 1) — the page's real
+   anatomy, faded and inert, behind the welcome card. Skeleton, not decoration: it shows what the
+   pane becomes. pointer-events:none so nothing here is ever clickable. */
+.qc-ghost { position: absolute; inset: 0; padding: 18px; opacity: 0.38; filter: saturate(0.6); pointer-events: none; }
+.qc-ghost-hero { display: flex; align-items: center; gap: 14px; height: 76px; padding: 0 18px; margin-bottom: 14px; border: 1px solid var(--line); border-radius: 13px; }
+.qc-ghost-av { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--oat); }
+.qc-ghost-line { height: 12px; width: 150px; border-radius: 5px; background: var(--oat); }
+.qc-ghost-cols { display: flex; gap: 12px; height: calc(100% - 100px); }
+.qc-ghost-col { flex: 1; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+.qc-ghost-band { height: 36px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); }
+.qc-ghost-ln { height: 9px; margin: 12px 14px; border-radius: 4px; background: var(--oat); }
+
+/* the welcome card that sits over it — one primary, then the quiet alternative routes */
+.qc-welcome { position: relative; z-index: 2; margin: auto; max-width: 380px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-2); padding: 28px 34px; }
+.qc-welcome h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 20px; color: var(--ink); margin-bottom: 8px; }
+.qc-welcome p { font-size: 13px; line-height: 1.5; color: var(--muted); margin-bottom: 16px; }
+.qc-welcome .f12-btn-pri { justify-content: center; }
+.qc-welcome-alt { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; font-size: 12px; color: var(--faint); }
+.qc-welcome-alt button, .qc-welcome-alt a { font: inherit; color: var(--muted); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.qc-welcome-alt button:hover, .qc-welcome-alt a:hover { color: var(--ink); }
+
+/* filtered-to-zero — a quiet note in the pane, never the ghost (the page isn't empty, the view is) */
+.qc-nomatch { margin: auto; text-align: center; max-width: 320px; }
+.qc-nomatch p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+/* the footer bar — requirement line, then Cancel / Save */
+.qc-req { font-family: inherit; font-size: 12px; color: var(--muted); }
+
+/* ── labelled pill trigger (v4 P1) — the list card's Filter / Sort controls, in the AGENT LIST
+   pill grammar: icon · one-word label · chevron, identical at rest, and the shared "this control
+   is doing something" pink active treatment. Geometry mirrors .agl-ctl (36px / 12px / radius 10);
+   the colours read the f12 token set, not the agent list's. Replaces the icon-only .f12-iconctl
+   in the list head — a control that states what it does beats a tooltip. */
+/* v5 P1 — COMPACT: 36px icon-only circles, so the search takes the rest of the row. The label
+   moved to the tooltip/aria-label and to each popover's own header, so nothing is lost. Filter
+   carries a count badge; Sort deliberately carries no marker — its state reads in its popover. */
+.f12-pill { position: relative; flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font-family: inherit; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.f12-pill:hover, .f12-pill.f12-active { background: var(--paper); border-color: var(--muted); }
+.f12-pill svg { flex: none; width: 15px; height: 15px; color: var(--ink-2); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* the count sits as a corner dot, ringed in the card colour so it reads as ON the button.
+   --burg is the app's established badge fill (the agent list's .agl-badge uses its twin), which
+   the live palette prefers over the ref's lighter rose. */
+.f12-pill .f12-pcount { position: absolute; top: -3px; right: -3px; min-width: 15px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--burg); border: 1.5px solid var(--panel); color: var(--panel); font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; display: grid; place-items: center; }
 
 /* TasksPopover (5c/6) — record-scoped View-tasks (portalled inside .t-f12) */
 .f12-tasks { width: 288px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden; font-family: var(--f12-body); }
@@ -182,7 +487,7 @@
 .f12-quick button:hover { color: var(--ink); border-color: var(--muted); background: var(--paper); }
 
 /* active-filter chips — beneath the control bar, on the oat (the panes never resize) */
-.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut) 9px; }
+.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 0 var(--sa-col-gut) 9px; }
 .f12-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.07em; padding: 4px 5px 4px 10px; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; }
 .f12-chip button { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; color: inherit; opacity: 0.6; }
 .f12-chip button:hover { opacity: 1; background: rgba(138, 64, 48, 0.12); }

@@ -13,7 +13,7 @@
  * Unit-tested for column membership, commit state, and the cleared union — not the prose.
  */
 
-import { Task, Query, Agent, Manuscript, UserTask, TaskFlag, QueryStatus, Activity, ActivityType } from "../types";
+import { Task, Query, Agent, Manuscript, UserTask, SurfaceOffset, TaskFlag, QueryStatus, Activity, ActivityType } from "../types";
 import { OFFER_RECEIVED_DESC_RE } from "./activityUtils";
 import { queryAmbientStatus } from "./queryAmbient";
 import { agentDataQualityNeeds } from "./agentDataQuality";
@@ -62,6 +62,13 @@ export interface BoardCard {
   taskType?: string;
   relatedRecordId?: string;
   userTaskId?: string;
+  // notes-and-tasks: the two natures of a user card + the derived task state (user cards only).
+  nature?: "note" | "task";
+  dueState?: "future" | "today" | "overdue"; // set for a task; drives the due-day promotion
+  detail?: string; // the optional detail line
+  dueYmd?: string; // the raw dueDate "YYYY-MM-DD"
+  surfaceOffset?: SurfaceOffset;
+  surfaced?: boolean; // DERIVED — reached its in-app surfacing window (today >= dueDate − lead) → on Today's list
 }
 
 /**
@@ -206,34 +213,68 @@ export function reminderDue(dueYmd: string, nowMs: number): { label: string; war
   return { label: `${days} DAY${days === 1 ? "" : "S"} TO DEADLINE`, warn: days <= 3 };
 }
 
+/** The three in-app surfacing leads → days early a dated task joins Today's list. */
+export const SURFACE_LEAD_DAYS: Record<SurfaceOffset, number> = { "on-day": 0, "day-before": 1, "week-before": 7 };
+
+/** A dated task's state relative to today (date-only string compare — no timezone drift). */
+export function taskDueState(dueYmd: string, todayYmd: string): "future" | "today" | "overdue" {
+  if (dueYmd === todayYmd) return "today";
+  return dueYmd < todayYmd ? "overdue" : "future";
+}
+
+/** Has a dated task reached its surfacing window (today >= dueDate − lead days)? → joins Today's list.
+ *  Derived at render, never stored; parsed at local noon so the shifted day never drifts. */
+export function taskSurfaced(dueYmd: string, offset: SurfaceOffset | undefined, todayYmd: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dueYmd);
+  if (!m) return false;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
+  d.setDate(d.getDate() - SURFACE_LEAD_DAYS[offset ?? "on-day"]);
+  const surfaceFrom = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return todayYmd >= surfaceFrom;
+}
+
+/** The mono date chip for a task card: the due date, in an OVERDUE form once the day has passed
+ *  (the DUE-TODAY promotion is carried by the band tag, not this chip). */
+function taskDueChip(dueYmd: string, state: "future" | "today" | "overdue"): string {
+  const d = shortDate(dueYmd).toUpperCase();
+  return state === "overdue" ? `OVERDUE · ${d}` : d;
+}
+
+// notes-and-tasks P3 — THE TWO NATURES, DERIVED FROM dueDate: absent = a NOTE (butter, pinned,
+// dateless, no tick, Notes lane only); present = a TASK (sage, ticked, a date chip). A task
+// PROMOTES on its due day — pink, DUE TODAY, the Urgent (do) lane — and joins Today's list; a
+// task also SURFACES onto Today's list `surfaceOffset` days early. Every one of these is derived
+// at render from the date; nothing is a stored status flag. Supersedes the linked-reminder split.
 function userCard(t: UserTask, input: BoardInput): BoardCard {
-  const rec = t.agentId
-    ? input.agents.find((a) => a.id === t.agentId)
-    : undefined;
+  const rec = t.agentId ? input.agents.find((a) => a.id === t.agentId) : undefined;
   const ms = t.manuscriptId ? input.manuscripts.find((m) => m.id === t.manuscriptId) : undefined;
-  const record = rec ? `On ${agentPrimary(rec)}` : ms ? `On ${ms.title}` : "Your note";
-  // The mockup's note tag: "Note · 6 Jul" — the due date when set, else when it was jotted.
-  const noteDate = shortDate(t.dueDate ?? t.createdAt);
-  // P2 (approved scope grant, verbatim in the report): a LINKED REMINDER — agentId + queryId +
-  // dueDate ALL present — is urgent work with a deadline, not a jotted note: do lane + the
-  // deadline chip. Anything less stays a Notes-to-self card, byte-identically.
-  const linked = !!(t.agentId && t.queryId && t.dueDate);
-  const linkedDue = linked ? reminderDue(t.dueDate!, input.now) : null;
+  const isTask = !!t.dueDate;
+  const record = rec ? `On ${agentPrimary(rec)}` : ms ? `On ${ms.title}` : isTask ? "Your task" : "Your note";
+  const dueState = isTask ? taskDueState(t.dueDate!, input.today) : undefined;
+  const promoted = dueState === "today" || dueState === "overdue"; // due day + overdue → Urgent
+  const surfaced = isTask && taskSurfaced(t.dueDate!, t.surfaceOffset, input.today);
+  const pinnedDate = shortDate(t.createdAt).toUpperCase();
   return {
     key: t.id,
-    stream: linked ? "do" : "nt",
-    title: t.text || "New task",
+    stream: promoted ? "do" : "nt",
+    title: t.text || (isTask ? "New task" : "New note"),
     who: "",
     subtitle: "",
-    due: linkedDue ? linkedDue.label : noteDate ? `Note · ${noteDate}` : "Note",
-    warn: linkedDue ? linkedDue.warn : false,
+    due: isTask ? taskDueChip(t.dueDate!, dueState!) : pinnedDate ? `PINNED ${pinnedDate}` : "PINNED",
+    warn: promoted,
     snoozes: 0,
     hk: false,
-    initials: "✎",
+    initials: isTask ? "✓" : "✎",
     record,
     committed: t.committedDate === input.today,
     committedDate: t.committedDate,
     done: false,
+    nature: isTask ? "task" : "note",
+    dueState,
+    detail: t.detail,
+    dueYmd: t.dueDate,
+    surfaceOffset: t.surfaceOffset,
+    surfaced,
     userTaskId: t.id,
   };
 }
@@ -291,7 +332,9 @@ const msOf = (iso?: string): number | undefined => {
  */
 export function todaySplit(board: AssembledBoard, today: string): { committed: BoardCard[]; done: BoardCard[] } {
   const laneCards = [...board.do, ...board.hk, ...board.nt];
-  return { committed: laneCards.filter((c) => c.committedDate === today), done: board.cleared };
+  // Today's list = explicitly committed today OR a task that has SURFACED (derived, notes-and-tasks
+  // P3) — the surfacing lead joins a dated task automatically, without writing committedDate.
+  return { committed: laneCards.filter((c) => c.committedDate === today || !!c.surfaced), done: board.cleared };
 }
 
 /**

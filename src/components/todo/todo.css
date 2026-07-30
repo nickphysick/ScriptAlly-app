@@ -21,7 +21,15 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 42px; --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 46px; /* save-and-today P2: the Today header earns 46px (was 42) — it now carries the progress bar + fraction. Today is the sole consumer of this token. */ --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; --nt-comp-bd: #3a1c14; --nt-block-note: #eedfae; --nt-block-task: #d5dbd3; --nt-seg-bg: #faf7f1; --nt-seg-bd: #ddd2c4; --nt-seg-on-bg: #3a2c20; --nt-seg-on-bd: #2a1a13; --nt-seg-on-tx: #f3e7da; --nt-ttl: #2b2118; --nt-dtl: #5d5245; --nt-dtl-note: #6b5a4e; --nt-fld-bg: #faf7f1; --nt-fld-bd: #ddd2c4; --nt-fld-blank: #a5988c; --nt-hint: #a5988c; --nt-block-due: #f2cec1; --nt-task-line: #b9c9b4; --td-w: 290px; --td-elev: 0 18px 44px rgba(58, 28, 20, 0.20), 0 2px 6px rgba(58, 28, 20, 0.10); --td-elev-hov: 0 22px 54px rgba(58, 28, 20, 0.26), 0 2px 8px rgba(58, 28, 20, 0.12); --td-rows-max: 290px; --td-body-cap: 460px; --td-launch-max: 172px; --td-fab-clear: 320px; --td-fab-clear-min: 200px; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+/* ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
+   the dashed butter card that stands in for the Notes grid when nothing is pinned. ── */
+.tdb-nte { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 20px; background: var(--nt-empty-bg); border: 1px dashed var(--nt-empty-bd); border-radius: 13px; padding: 18px 22px; }
+.tdb-nte-ic { width: 44px; height: 44px; flex: 0 0 auto; border-radius: 12px; background: var(--nt-tile-bg); border: 1px solid var(--nt-tile-bd); display: flex; align-items: center; justify-content: center; color: #7a6a48; }
+.tdb-nte-tx { flex: 1; min-width: 0; }
+.tdb-nte-tx h4 { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: var(--nt-empty-h); }
+.tdb-nte-tx p { font-size: 11.5px; color: var(--nt-empty-p); margin-top: 3px; line-height: 1.55; }
+.tdb-nte-btn { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 16px; border-radius: 99px; background: var(--nt-ink-bg); border: 1px solid var(--nt-ink-bd); color: var(--nt-ink-tx); font-size: 12px; font-weight: 600; cursor: pointer; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -194,7 +202,7 @@
    verbs never scroll away); the rail's three squares are short and never scroll. Budget at 900px:
    900 − 49 (appnav) − 48 (gutters) = 803 ≫ ≈370 for a full Today. Scrollbars: thin, hairline,
    hover-visible, gutter stable. ── */
-.tdb-tmid2 { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
+.tdb-tmid2 { overflow-y: auto; min-height: 0; max-height: var(--td-rows-max); scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
 .tdb-tmid2:hover, .tdb-tmid2:focus-within { scrollbar-color: var(--hairline) transparent; }
 /* ── THE FILTER RAIL (Final Shape P2, ref .fside) — 248px sticky white panel: SHOW label,
    vertical quiet pills (34px rows, family dot left, count right), the RESET row when narrowed,
@@ -389,13 +397,70 @@
 .tdb-lsub .tdb-lbt.sm { font-size: 12.5px; }
 .tdb-lshow { flex: 0 0 auto; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--lat-ink); white-space: nowrap; }
 .tdb-lpage { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); box-sizing: border-box; margin: 0 0 7px 40px; padding: 10px; background: none; border: 1.5px dashed var(--lat-bd); border-radius: 9px; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
-/* hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): white, notes-family border,
-   Caveat growing to content; the affordance transforms in place. */
-.tdb-composer { background: var(--white, #fff); border: 1px solid #ece2c6; border-radius: 11px; padding: 12px 14px; box-shadow: 0 4px 14px rgba(120, 100, 40, 0.1); margin-bottom: 8px; }
-.tdb-composer textarea { width: 100%; border: none; outline: none; resize: none; font-family: Caveat, cursive; font-size: 19px; color: #4d4238; background: transparent; min-height: 52px; box-sizing: border-box; display: block; }
-.tdb-compfoot { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--hairline); padding-top: 10px; margin-top: 4px; }
-.tdb-comphint { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.1em; color: #b8a97a; }
-.tdb-compsave { margin-left: auto; }
+/* ── notes-and-tasks P2 — THE COMPOSER (design-refs/notes-and-tasks.html · frame 2): one card,
+   two natures. The offset block (--nt-comp-block) swaps butter↔sage by mode; the title/detail
+   swap Caveat↔typeset via the .note modifier; the date + surfacing fields are task-only. ── */
+.tdb-nc { grid-column: 1 / -1; width: 100%; max-width: 560px; box-sizing: border-box; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 13px; box-shadow: 5px 5px 0 var(--nt-comp-block); overflow: hidden; margin-bottom: 8px; }
+.tdb-nc--note { --nt-comp-block: var(--nt-block-note); }
+.tdb-nc--task { --nt-comp-block: var(--nt-block-task); }
+.tdb-nc-seg { display: flex; gap: 4px; padding: 11px 13px 0; }
+.tdb-nc-sgb { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--nt-seg-bd); background: var(--nt-seg-bg); font-size: 11px; font-weight: 600; color: #5d4d38; cursor: pointer; }
+.tdb-nc-sgb.on { background: var(--nt-seg-on-bg); border-color: var(--nt-seg-on-bd); color: var(--nt-seg-on-tx); }
+.tdb-nc-body { padding: 12px 15px 14px; }
+.tdb-nc-ttl { width: 100%; border: none; outline: none; background: transparent; padding: 0; font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--nt-ttl); }
+.tdb-nc-ttl.note { font-family: Caveat, cursive; font-size: 24px; font-weight: 600; }
+.tdb-nc-dtl { width: 100%; border: none; outline: none; resize: none; background: transparent; margin-top: 7px; font-family: var(--f12-body); font-size: 11.5px; color: var(--nt-dtl); }
+.tdb-nc-dtl.note { font-family: Caveat, cursive; font-size: 16px; color: var(--nt-dtl-note); }
+.tdb-nc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; row-gap: 10px; margin-top: 12px; padding-top: 11px; border-top: 1px solid #f0ebe1; }
+.tdb-nc-nomark { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; color: var(--nt-fld-blank); }
+.tdb-nc-date { display: inline-flex; }
+.tdb-nc-surface { display: inline-flex; align-items: center; gap: 6px; flex: 0 1 auto; min-width: 0; }
+.tdb-nc-surflbl { white-space: nowrap; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase; color: #8a7a66; }
+.tdb-nc-surface select { height: 28px; border: 1px solid var(--nt-fld-bd); border-radius: 8px; background: var(--nt-fld-bg); font-size: 11px; color: #4d4238; padding: 0 8px; cursor: pointer; }
+.tdb-nc-save { margin-left: auto; flex: 0 0 auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 15px; border-radius: 99px; background: var(--nt-ink-bg); border: 1px solid var(--nt-ink-bd); color: var(--nt-ink-tx); font-size: 12px; font-weight: 600; cursor: pointer; }
+.tdb-nc-save:disabled { opacity: 0.45; cursor: not-allowed; }
+.tdb-nc-hint { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--nt-hint); padding: 0 15px 12px; }
+/* save-and-today P1 — the machine's pending + failed chrome. */
+.tdb-nc-date.lock { pointer-events: none; }
+.tdb-nc-spin { width: 11px; height: 11px; margin-right: 7px; flex: 0 0 auto; border-radius: 50%; border: 2px solid rgba(243, 231, 218, 0.4); border-top-color: var(--nt-ink-tx); animation: ntSpin 0.7s linear infinite; }
+@keyframes ntSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tdb-nc-spin { animation: none; } }
+.tdb-nc-err { display: flex; align-items: center; gap: 10px; margin: 8px 15px 0; padding: 8px 11px; border-radius: 9px; background: #f8e2da; border: 1px solid #e8c8bc; }
+.tdb-nc-errtx { font-size: 11px; line-height: 1.4; color: #8a3a28; }
+.tdb-nc-retry { margin-left: auto; flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #8a3a28; background: none; border: none; border-bottom: 1.5px solid #d99e86; padding: 0 0 1px; cursor: pointer; }
+/* ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (frame 3): note (butter) · task (sage) ·
+   promoted task (pink). Sage is the USER-CREATED family; blue is Pro-only and never appears. ── */
+.tdb-ntc { box-sizing: border-box; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 12px; overflow: hidden; box-shadow: 5px 5px 0 var(--nt-ntc-blk); }
+.tdb-ntc.note { --nt-ntc-blk: var(--nt-block-note); }
+.tdb-ntc.task { --nt-ntc-blk: var(--nt-block-task); }
+.tdb-ntc.task.due { --nt-ntc-blk: var(--nt-block-due); }
+.tdb-ntc-b { height: 26px; display: flex; align-items: center; gap: 7px; padding: 0 11px; border-bottom: 1px solid; }
+.tdb-ntc.note .tdb-ntc-b { background: linear-gradient(180deg, #f6eed6, #f1e5c4); border-color: #e0d3a8; }
+.tdb-ntc.task .tdb-ntc-b { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-color: var(--nt-task-line); }
+.tdb-ntc.task.due .tdb-ntc-b { background: linear-gradient(180deg, #f6d8cc, #f2cec1); border-color: #e8c8bc; }
+.tdb-ntc-tag { font-family: var(--f12-mono); font-size: 6px; letter-spacing: 0.13em; font-style: normal; background: #fff; border: 1px solid rgba(58, 28, 20, 0.2); border-radius: 99px; padding: 2px 7px; color: #3a1c14; }
+.tdb-ntc-tag.hot { font-weight: 700; border-width: 1.5px; color: #8a3a28; border-color: #e8c8bc; }
+.tdb-ntc-in { padding: 12px 14px 13px; }
+.tdb-ntc-ttl { margin: 0; font-family: var(--f12-serif); font-size: 14px; font-weight: 700; color: #2b2118; line-height: 1.3; }
+.tdb-ntc.note .tdb-ntc-ttl { font-family: Caveat, cursive; font-size: 20px; font-weight: 600; line-height: 1.15; }
+.tdb-ntc-d { font-family: var(--f12-body); font-size: 10.5px; color: #8a7d6e; margin-top: 5px; line-height: 1.5; }
+.tdb-ntc.note .tdb-ntc-d { font-family: Caveat, cursive; font-size: 14px; color: #7a6a55; }
+.tdb-ntc-ft { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding-top: 9px; border-top: 1px solid #f2ede4; }
+.tdb-ntc-dchip { display: inline-flex; align-items: center; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; background: #e9ede6; border: 1px solid #cfd8ce; border-radius: 99px; padding: 3px 8px; color: #5a6e58; }
+.tdb-ntc-dchip.due { background: #f8e2da; border-color: #e8c8bc; color: #8a3a28; }
+.tdb-ntc-surf { display: inline-flex; align-items: center; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; background: #f4efe7; border: 1px solid #e2d7c3; border-radius: 99px; padding: 3px 8px; color: #8a7a66; }
+.tdb-ntc-pin { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; color: #a89a86; }
+.tdb-ntc-tick { margin-left: auto; width: 19px; height: 19px; flex: 0 0 auto; border-radius: 50%; border: 1.5px solid var(--nt-task-line); background: #fff; cursor: pointer; }
+.tdb-ntc-tick:hover { border-color: #8aa084; background: #f0f4ee; }
+/* notes-gaps — the card's delete (quiet until the card is hovered/focused) + the persistent
+   "write another" tile that closes the notes grid. */
+.tdb-ntc-del { margin-left: auto; width: 18px; height: 18px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 5px; border: none; background: none; color: #8a7d6e; font-size: 11px; line-height: 1; cursor: pointer; opacity: 0; transition: opacity 0.12s, background 0.12s; }
+.tdb-ntc:hover .tdb-ntc-del, .tdb-ntc-del:focus-visible { opacity: 1; }
+.tdb-ntc-del:hover { background: rgba(58, 28, 20, 0.08); color: #3a1c14; }
+@media (prefers-reduced-motion: reduce) { .tdb-ntc-del { transition: none; } }
+.tdb-ntadd { min-height: 84px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 12px; border: 1.5px dashed var(--nt-empty-bd); background: var(--nt-empty-bg); color: #8a7d6e; font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color 0.12s, color 0.12s; }
+.tdb-ntadd:hover { border-color: #c3b28a; color: #4d4238; }
+@media (prefers-reduced-motion: reduce) { .tdb-ntadd { transition: none; } }
 /* hero-pair P4 — the styled blocking-choice dialog (window.confirm's replacement) */
 .tdb-askwrap { position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center; }
 .tdb-askscrim { position: absolute; inset: 0; background: rgba(30, 26, 22, 0.4); }
@@ -436,11 +501,8 @@ button.tdb-ldot { cursor: pointer; }
 
 .tdb-emptylane { display: flex; align-items: center; }
 .tdb-emptylane .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
-.tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
-.tdb-ghostcard.quiet { justify-content: center; } /* v4 P6: the empty Notes lane = the quiet ＋ only, no sentence */
-.tdb-ghostcard.quiet .tdb-gg { font-size: 18px; }
-.tdb-ghostcard:hover { background: rgba(255, 255, 255, 0.45); }
-.tdb-gg { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--note-i); }
+/* notes-and-tasks P1: the ghost quiet-＋ empty node is retired for the dashed frame-1 card
+   (.tdb-nte, above) — the Notes section now explains what a note is for. */
 
 /* ── OPTION-A CARD (retoken Phase C; tag colours re-lawed by polish v3 Phase 2): serif titles,
    lane spines, min-height 190 with the middle block flex-clipping — the pills-can-never-spill
@@ -541,11 +603,6 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tt { font-family: var(--f12-serif); font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-tsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-ms { font-family: var(--f12-serif); font-style: italic; color: var(--ink-2); }
-.tdb-tdot { width: 26px; height: 26px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; padding: 0; }
-button.tdb-tdot { cursor: pointer; }
-.tdb-ttick { display: none; font-size: 11px; font-weight: 700; line-height: 1; color: var(--ink); }
-.tdb-trow:hover .tdb-tdot.tick > :not(.tdb-ttick), .tdb-trow:focus-within .tdb-tdot.tick > :not(.tdb-ttick) { display: none; }
-.tdb-trow:hover .tdb-tdot.tick .tdb-ttick, .tdb-trow:focus-within .tdb-tdot.tick .tdb-ttick { display: inline; }
 
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
@@ -594,16 +651,13 @@ button.tdb-tdot { cursor: pointer; }
 /* ── THE WORKSPACE SHELL (todo-fix48) — TODAY, BACK IN ITS CORNER: the floating card fixed to
    the workspace's bottom-right (ref .tdpop), minimising to a pill. z above the panel, below
    the toasts (60) and modals. ── */
-.tdb-tdpop { position: fixed; right: 26px; bottom: 24px; width: 250px; max-height: min(70vh, 560px); z-index: 45; display: flex; flex-direction: column; }
+/* save-and-today P2 — 290px per the ref; the panel never exceeds a THIRD of the viewport, and the
+   rows (not the panel) take the overflow — both in CSS, so nothing needs measuring. */
+.tdb-tdpop { position: fixed; right: 26px; bottom: 24px; width: var(--td-w); max-height: 33vh; z-index: 45; display: flex; flex-direction: column; }
 .tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }
 .tdb-tdpop.out { animation: tdbTodayOut 220ms ease forwards; }
 /* the minimise control, top-right of the card */
-.tdb-tdmin { position: absolute; top: 9px; right: 11px; z-index: 2; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 15px; line-height: 1; color: #8a7a6d; background: none; border: none; cursor: pointer; }
-.tdb-tdmin:hover { background: #f2ede7; color: var(--ink); }
 /* the minimised pill/FAB */
-.tdb-tdpill { position: fixed; right: 26px; bottom: 24px; z-index: 45; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 99px; background: var(--white, #fff); border: 1px solid #ddd2c2; box-shadow: 0 8px 22px rgba(58, 28, 20, 0.18); font-family: var(--f12-serif); font-size: 13px; font-weight: 700; color: #2b2118; cursor: pointer; }
-.tdb-tdpill:hover { border-color: #c9bba9; }
-.tdb-tddot { width: 8px; height: 8px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); flex: 0 0 auto; }
 @keyframes tdbTodayIn { from { opacity: 0; transform: translateY(14px); } }
 @keyframes tdbTodayOut { to { opacity: 0; transform: translateY(14px); } }
 @media (prefers-reduced-motion: reduce) { .tdb-tdpop.in, .tdb-tdpop.out { animation: none; } }
@@ -614,23 +668,51 @@ button.tdb-tdot { cursor: pointer; }
    ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
 /* the corner card (ref .tdpop): white, #ddd2c2 hairline, radius 14, deep shadow; it fills the
    fixed .tdb-tdpop wrapper and scrolls internally. */
-.tdb-today2 { flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid #ddd2c2; border-radius: 14px; box-shadow: 0 14px 38px rgba(58, 28, 20, 0.22); display: flex; flex-direction: column; overflow: hidden; }
+/* save-and-today P2 — THE OVERLAY ELEVATION PAIR (ambient + contact), deepening on hover. NEVER
+   opacity: a functional panel stays full contrast; it recedes by elevation and size, not by fading. */
+.tdb-today2 { flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid #ddd2c2; border-radius: 14px; box-shadow: var(--td-elev); display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.16s ease; }
+.tdb-today2:hover { box-shadow: var(--td-elev-hov); }
+@media (prefers-reduced-motion: reduce) { .tdb-today2 { transition: none; } }
 /* the settlement (sage, final): Today's diary-sage head is the FAMILY — its two siblings
    joined it. One sage source (--container-head-*), one height; the sage glyphs (row dots,
    completion ticks, the StatusDot incoming states) are untouched beside it. */
-.tdb-th { flex: none; display: flex; align-items: center; gap: 8px; height: var(--container-head-h); padding: 0 var(--container-head-pad); background: var(--container-head-bg); border-bottom: 1px solid var(--container-head-rule); border-radius: 15px 15px 0 0; box-sizing: border-box; }
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 13px; font-weight: 700; color: var(--container-head-ink); }
-.tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--container-head-mono); white-space: nowrap; }
-.tdb-tmid2 { flex: 0 1 auto; padding: 0 13px; display: flex; flex-direction: column; }
+/* the header earns its height: title · a 52px progress bar · the fraction · the chevron. The WHOLE
+   header is the collapse control, so it is a <button> spanning the panel's width. */
+.tdb-th { flex: none; width: 100%; display: flex; align-items: center; gap: 9px; height: var(--container-head-h); padding: 0 8px 0 var(--container-head-pad); background: var(--container-head-bg); border: none; border-bottom: 1px solid var(--container-head-rule); border-radius: 15px 15px 0 0; box-sizing: border-box; cursor: pointer; text-align: left; }
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: var(--container-head-ink); }
+.tdb-tprog { margin-left: auto; display: flex; align-items: center; gap: 7px; }
+.tdb-tpbar { width: 52px; height: 4px; border-radius: 2px; background: rgba(58, 28, 20, 0.14); overflow: hidden; }
+.tdb-tpbar i { display: block; height: 100%; background: #5a6e58; transition: width 0.2s ease; }
+@media (prefers-reduced-motion: reduce) { .tdb-tpbar i { transition: none; } }
+.tdb-pnum { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: #4a5f48; white-space: nowrap; }
+.tdb-chev { width: 26px; height: 26px; flex: 0 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #4a5f48; transition: transform 0.18s ease; }
+.tdb-chev.up { transform: rotate(180deg); }
+/* ── save-and-today P3 — COLLAPSE: height ONLY, ~180ms, so the bottom-anchored corner never jumps.
+   The body is capped and clipped, and the collapsed card is the header alone (the launcher). ── */
+.tdb-tdbody { overflow: hidden; max-height: var(--td-body-cap); transition: max-height 180ms ease; }
+.tdb-tdpop.min .tdb-tdbody { max-height: 0; }
+@media (prefers-reduced-motion: reduce) { .tdb-tdbody { transition: none; } }
+/* the collapsed launcher: header-only, hugging its content, with the count in a sage pill */
+.tdb-tdpop.min { width: auto; max-width: var(--td-launch-max); height: auto; max-height: none; }
+.tdb-tdpop.min .tdb-today2 { border-radius: 99px; }
+.tdb-tdpop.min .tdb-th { border-radius: 99px; border-bottom: none; padding-right: 10px; }
+.tdb-cnt { margin-left: auto; display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px; background: var(--container-head-bg); border: 1px solid var(--container-head-rule); font-family: var(--f12-mono); font-size: 10px; font-weight: 600; color: var(--container-head-ink); }
+@media (prefers-reduced-motion: reduce) { .tdb-chev { transition: none; } }
+.tdb-tmid2 { flex: 0 1 auto; padding: 0 14px; display: flex; flex-direction: column; }
 .tdb-tcommit { display: flex; flex-direction: column; }
-.tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
-.tdb-trow:hover { background: var(--white, #fff); }
+/* save-and-today P2 — the row: 12px, ONE line with truncation, a sage completion circle, and a mono
+   sub-label only where it means something. Ticking strikes in place (.done). */
+.tdb-trow { display: flex; align-items: center; gap: 10px; padding: 11px 2px; border-bottom: 1px solid #f4efe6; font-size: 12px; color: #33302a; line-height: 1.35; cursor: pointer; flex: none; }
+.tdb-trow:hover { background: #fbf8f2; }
+.tdb-cc { width: 17px; height: 17px; flex: 0 0 auto; border-radius: 50%; border: 1.6px solid var(--nt-task-line); background: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #5a6e58; cursor: pointer; padding: 0; }
+.tdb-trow.done { color: #a59a8c; }
+.tdb-trow.done .tdb-cc { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-color: #8a9e88; }
+.tdb-trow.done .tdb-trtx { text-decoration: line-through; }
+.tdb-trtx { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdb-trsub { display: block; margin-top: 2px; font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.08em; color: #a59a8c; }
 .tdb-tmid { flex: 1; min-width: 0; }
-.tdb-trow .tdb-tx { font-size: 11.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 .tdb-trow .tdb-x { margin-left: auto; color: var(--faint); font-size: 11px; padding: 0 3px; background: none; border: none; }
 .tdb-trow .tdb-x:hover { color: var(--hk-ink); }
-.tdb-tdot { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
 /* the dashed invitation — no fill, the card's parchment shows through (ref .ghostbox/.grow) */
 .tdb-ghostbox { border: 1.5px dashed rgba(58, 28, 20, 0.22); border-radius: 11px; padding: 5px 12px; }
 .tdb-tcommit + .tdb-ghostbox { margin-top: 9px; }
@@ -648,8 +730,16 @@ button.tdb-tdot { cursor: pointer; }
 .tdb-drow .tdb-dm2 { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hk-ink); opacity: 0.75; margin-top: 3px; }
 .tdb-tick { width: 20px; height: 20px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
 /* the footer verbs — outline + ink primary, equal widths (ref .tfoot) */
-.tdb-tf2 { flex: none; display: flex; gap: 6px; padding: 12px 13px 13px; }
-.tdb-tf2 .tdb-btnh, .tdb-tf2 .tdb-btnp { flex: 1; padding: 0; white-space: nowrap; } /* the fixed-height pair sits level — the clip fixed structurally */
+/* save-and-today P2 — ONE primary + the quiet ＋ roundel (the retired second ghost is gone). */
+.tdb-tf2 { flex: none; display: flex; align-items: center; gap: 8px; padding: 11px 12px 12px; }
+.tdb-pbtn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; border-radius: 99px; background: #2a1a13; border: 1px solid #1d100c; color: #f3e7da; font-size: 11.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.tdb-pbtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.tdb-addwrap { position: relative; flex: 0 0 auto; display: inline-flex; }
+.tdb-sbtn { width: 36px; height: 36px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff; border: 1px solid #ddd2c4; color: #4d4238; font-size: 14px; cursor: pointer; padding: 0; }
+.tdb-sbtn:hover { border-color: #c9bba9; background: #fbf8f2; }
+.tdb-addmenu { position: absolute; right: 0; bottom: 44px; z-index: 2; min-width: 178px; display: flex; flex-direction: column; padding: 5px; border-radius: 11px; background: var(--white, #fff); border: 1px solid #ddd2c2; box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); }
+.tdb-addmenu button { text-align: left; padding: 8px 10px; border: none; background: none; border-radius: 7px; font-size: 12px; color: #4d4238; cursor: pointer; white-space: nowrap; }
+.tdb-addmenu button:hover { background: #f5f0e8; }
 
 /* ── Polish III P1: the REVIEW BANNER (5ways §1 — white lifted card; live tokens; the shadow
    literal is the ref's) + the thin-bar AFTERLIFE (refine ref) — the Sunday card + the masthead

@@ -128,20 +128,28 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               className="sa-confirm-scrim"
               onMouseDown={(e) => { if (e.target === e.currentTarget) closeConfirm(); }}
             >
-              <div className="sa-confirm" role="dialog" aria-modal="true" aria-label={confirm.title}>
+              <div className={`sa-confirm${confirm.danger ? " sa-confirm--danger" : ""}`} role="dialog" aria-modal="true" aria-label={confirm.title}>
                 <h2>{confirm.title}</h2>
                 {confirm.body && <div className="sa-confirm-body">{confirm.body}</div>}
+                {/* ORDER IS A SAFETY FEATURE. A destructive dialog puts the SAFE action last —
+                    rightmost, where the eye and the cursor land — so a reflexive click keeps your
+                    work. A benign dialog is not reordered: inverting a plain "Yes" would train
+                    people to look for the action in a place it usually isn't. Either way the
+                    cancel keeps autofocus, so Enter is always the safe key. */}
                 <div className="sa-confirm-actions">
+                  {confirm.danger && (
+                    <button type="button" className="sa-confirm-ok" onClick={runConfirm}>
+                      {confirm.confirmLabel ?? "Confirm"}
+                    </button>
+                  )}
                   <button type="button" className="sa-confirm-cancel" autoFocus onClick={closeConfirm}>
                     {confirm.cancelLabel ?? "Cancel"}
                   </button>
-                  <button
-                    type="button"
-                    className={`sa-confirm-ok${confirm.danger ? " sa-danger" : ""}`}
-                    onClick={runConfirm}
-                  >
-                    {confirm.confirmLabel ?? "Confirm"}
-                  </button>
+                  {!confirm.danger && (
+                    <button type="button" className="sa-confirm-ok" onClick={runConfirm}>
+                      {confirm.confirmLabel ?? "Confirm"}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

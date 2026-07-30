@@ -85,7 +85,7 @@ export const NoteQuickAdd: React.FC<NoteQuickAddProps> = ({ onAdd, autoFocus, on
             submit();
           }
         }}
-        placeholder="Leave yourself a note…"
+        placeholder="Leave yourself a post-it…"
         style={{
           width: "100%",
           background: "transparent",

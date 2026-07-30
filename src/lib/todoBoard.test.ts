@@ -258,24 +258,30 @@ describe("terseDoneLabel — done rows use the committed rows' vocabulary, never
   });
 });
 
-describe("linked reminders — the approved P2 derivation clause (agentId + queryId + dueDate → Urgent)", () => {
+describe("the two natures — a task promotes by DUE STATE (notes-and-tasks P3; supersedes the linked-reminder clause)", () => {
   const DAY = 86400000;
   const mkTask = (id: string, over: Partial<UserTask>): UserTask =>
     ({ id, userId: "u", text: "Tell Daniel about the offer", done: false, createdAt: "2026-07-09T09:00:00Z", updatedAt: "2026-07-09T09:00:00Z", ...over } as UserTask);
   const base: BoardInput = { tasks: [], userTasks: [], queries: [], agents: [agent("a1", "Daniel")], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: NOW };
 
-  it("all three links present → the do lane with the deadline chip; anything less stays a note", () => {
-    const due = new Date(NOW + 5 * DAY).toISOString().slice(0, 10);
+  it("a due/overdue task → the Urgent (do) lane; a future task or a dateless note → Notes (nt) — derived by the clock", () => {
+    const future = new Date(NOW + 5 * DAY).toISOString().slice(0, 10);
+    const past = new Date(NOW - 2 * DAY).toISOString().slice(0, 10);
     const b = assembleBoard({ ...base, userTasks: [
-      mkTask("full", { agentId: "a1", queryId: "qo", dueDate: due }),
-      mkTask("no-due", { agentId: "a1", queryId: "qo" }),
-      mkTask("no-agent", { queryId: "qo", dueDate: due }),
-      mkTask("plain", {}),
+      mkTask("today", { dueDate: TODAY }),       // due today → promoted to Urgent
+      mkTask("overdue", { dueDate: past }),      // overdue → stays promoted
+      mkTask("future", { dueDate: future }),     // dated but not yet due → a task in Notes
+      mkTask("note", {}),                        // dateless → a note in Notes
     ] });
-    expect(b.do.map((c) => c.key)).toEqual(["full"]);
-    expect(b.nt.map((c) => c.key).sort()).toEqual(["no-agent", "no-due", "plain"]);
-    expect(b.do[0].due).toBe("5 DAYS TO DEADLINE");
-    expect(b.do[0].userTaskId).toBe("full"); // still ticks off like any user task
+    expect(b.do.map((c) => c.key).sort()).toEqual(["overdue", "today"]);
+    expect(b.nt.map((c) => c.key).sort()).toEqual(["future", "note"]);
+    const byKey = (k: string) => [...b.do, ...b.nt].find((c) => c.key === k)!;
+    expect(byKey("note").nature).toBe("note");
+    expect(byKey("future").nature).toBe("task");
+    expect(byKey("future").dueState).toBe("future");
+    expect(byKey("today").dueState).toBe("today");
+    expect(byKey("overdue").dueState).toBe("overdue");
+    expect(byKey("today").userTaskId).toBe("today"); // still ticks off like any user task
   });
 
   it("reminderDue: countdown, warn inside 3 days, today, passed", () => {

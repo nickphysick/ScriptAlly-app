@@ -121,9 +121,11 @@
 /* THE PAGE COLUMN (rebuild v2). Padding belongs to the scroll region so the scrollbar rides the
    page edge, not the content; the CONTENT then caps at 1240px and centres, so a wide monitor
    pools its surplus as symmetric margin instead of stretching the grid to absurdity. Two
-   elements, two jobs — merging them would tie the cap to the padding. */
-.aglist .agl-page { padding: 28px 60px 48px; }
-.aglist .agl-inner { max-width: 1240px; margin: 0 auto; }
+   elements, two jobs — merging them would tie the cap to the padding.
+   v4 P1: the two numbers now come from the SHARED column tokens (pageHeader.css) so the Queries
+   header can sit in the same column. The token values ARE these values — this is a no-op. */
+.aglist .agl-page { padding: 28px var(--sa-col-gut) 48px; }
+.aglist .agl-inner { max-width: var(--sa-col-max); margin: 0 auto; }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
 .aglist .agl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }

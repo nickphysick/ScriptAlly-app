@@ -107,7 +107,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
           <X size={17} />
         </button>
 
-        <div style={{ ...labelStyle, marginBottom: 12 }}>Edit note</div>
+        <div style={{ ...labelStyle, marginBottom: 12 }}>Edit post-it</div>
 
         {/* text — handwritten, on a faint tint of the chosen colour */}
         <textarea

@@ -36,6 +36,12 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
+    sel: ".svh-btn-primary",  // notes-and-tasks: the hero's "Add task or note" (the Form-11 primary)
+    h: "A note, or a task.",
+    p: "Jot a note — pinned, dateless, nothing chases you. Or set a task — give it a date and it joins the work, showing up as early as you like.",
+    cta: "Next →",
+  },
+  {
     sel: ".tdb-bsearch",  // todo rebuild P1: the search sits on the control line
     h: "Search from the bar.",
     p: "One field for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",

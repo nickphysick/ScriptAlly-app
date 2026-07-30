@@ -7,6 +7,18 @@ export interface BrandDatePickerProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  /** Earliest selectable date, "YYYY-MM-DD", INCLUSIVE. Days before it are inert. */
+  min?: string;
+  /** Latest selectable date, "YYYY-MM-DD", INCLUSIVE. Days after it are inert. */
+  max?: string;
+  /**
+   * "form" (default) is the Form 11 skin every existing call site wears — unchanged.
+   * "hub" is the .t-f12 parchment skin, and ALSO opts into the quick chips and the
+   * Clear/Done footer, so no existing surface grows controls it didn't ask for.
+   */
+  variant?: "form" | "hub";
+  /** Accessible name for the trigger, when the visible label alone isn't enough. */
+  ariaLabel?: string;
 }
 
 const MONTHS = [
@@ -29,17 +41,39 @@ const fromISO = (s: string): Date | null => {
 };
 const sameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+/** Most recent Monday at or before today — "Last Monday" reads as "the Monday just gone". */
+const lastMonday = (from: Date): Date => addDays(from, -(((from.getDay() + 6) % 7) || 7));
+
+/**
+ * Is this day selectable? Comparison is on the ISO string, which sorts lexicographically for
+ * "YYYY-MM-DD" — no Date maths, so no timezone can shift a boundary day in or out of range.
+ */
+const withinRange = (d: Date, min?: string, max?: string): boolean => {
+  const iso = toISO(d);
+  if (min && iso < min) return false;
+  if (max && iso > max) return false;
+  return true;
+};
 
 /**
  * Branded date picker. Never a native <input type=date>. A field-styled trigger opens a
  * parchment calendar popover: Playfair month header, burgundy nav, Monday-first grid,
  * sage "today" ring, burgundy selected day, greyed adjacent-month days. Closes on outside click.
  */
-export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChange, placeholder = "Select a date" }) => {
+export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
+  value, onChange, placeholder = "Select a date", min, max, variant = "form", ariaLabel,
+}) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  // Anchor the calendar popover with position:fixed so FormShell's scroll region can't clip it.
-  const { triggerRef, menuStyle } = useFixedMenu<HTMLDivElement>(open);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  /* Anchor the calendar popover with position:fixed so FormShell's scroll region can't clip it —
+     and place it AUTOmatically: the calendar is ~380px tall with the chips and footer, so a
+     trigger low in the window (the nudge reminder's "Pick a date", which sits under three chips
+     near the pane foot) had its month grid cut off by the viewport. `menuRef` lets the hook
+     measure the real height rather than guess at it. */
+  const { triggerRef, menuStyle } = useFixedMenu<HTMLDivElement>(open, { placement: "auto", menuRef: popRef });
 
   const selected = useMemo(() => fromISO(value), [value]);
   const today = useMemo(() => new Date(), []);
@@ -47,29 +81,81 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
     const base = selected ?? new Date();
     return new Date(base.getFullYear(), base.getMonth(), 1);
   });
+  /** The keyboard cursor — a day is "focused" before it is chosen. Null while closed. */
+  const [focusDate, setFocusDate] = useState<Date | null>(null);
+
+  /** Close WITHOUT changing anything, and hand focus back to the trigger that opened us. */
+  const closeAndReturn = () => {
+    setOpen(false);
+    setFocusDate(null);
+    triggerRef.current?.focus();
+  };
+
+  const commit = (d: Date) => {
+    if (!withinRange(d, min, max)) return;
+    onChange(toISO(d));
+    closeAndReturn();
+  };
 
   // Keep the shown month in step if the selected value changes while closed.
   useEffect(() => {
     if (!open && selected) setView(new Date(selected.getFullYear(), selected.getMonth(), 1));
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Opening seeds the cursor on the selected day, else today, and shows that month.
+  useEffect(() => {
+    if (!open) return;
+    const start = selected ?? today;
+    setFocusDate(start);
+    setView(new Date(start.getFullYear(), start.getMonth(), 1));
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Move real DOM focus onto the cursor cell so arrow keys land somewhere and screen readers
+  // announce the day. Runs after each cursor move, including ones that changed month.
+  useEffect(() => {
+    if (!open || !focusDate) return;
+    const cell = gridRef.current?.querySelector<HTMLElement>('[data-dp-cursor="true"]');
+    cell?.focus();
+  }, [open, focusDate]);
+
   useEffect(() => {
     if (!open) return;
     const onDocClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) { setOpen(false); setFocusDate(null); }
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeAndReturn(); };
     document.addEventListener("mousedown", onDocClick);
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("mousedown", onDocClick);
       document.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** Arrow keys walk the grid a day (←→) or a week (↑↓) at a time, across month boundaries. */
+  const onGridKey = (e: React.KeyboardEvent) => {
+    const cur = focusDate ?? selected ?? today;
+    const step = ({ ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 } as Record<string, number>)[e.key];
+    if (step !== undefined) {
+      e.preventDefault();
+      const next = addDays(cur, step);
+      setFocusDate(next);
+      if (next.getMonth() !== view.getMonth() || next.getFullYear() !== view.getFullYear()) {
+        setView(new Date(next.getFullYear(), next.getMonth(), 1));
+      }
+      return;
+    }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); commit(cur); }
+  };
 
   const triggerLabel = selected
     ? `${selected.getDate()} ${MONTHS[selected.getMonth()]} ${selected.getFullYear()}`
     : placeholder;
+
+  /* The cursor cell, whether or not the popover has been opened yet: falling back to the selected
+     day (else today) means there is ALWAYS one tabbable cell, so a keyboard user who tabs in never
+     lands on a grid with no tab stop. `focusDate` only takes over once the arrows start moving. */
+  const cursor = focusDate ?? selected ?? today;
 
   const navMonth = (delta: number) =>
     setView((v) => new Date(v.getFullYear(), v.getMonth() + delta, 1));
@@ -85,7 +171,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
   }
 
   return (
-    <div className={`sa-dp${open ? " open" : ""}`} ref={ref}>
+    <div className={`sa-dp${open ? " open" : ""}${variant === "hub" ? " sa-dp--hub" : ""}`} ref={ref}>
       <div
         className="sa-field"
         ref={triggerRef}
@@ -93,6 +179,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
         tabIndex={0}
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-label={ariaLabel}
         onClick={() => setOpen((o) => !o)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -120,7 +207,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
         </svg>
       </div>
 
-      <div className="sa-dp-pop" role="dialog" style={{ ...menuStyle, minWidth: undefined }}>
+      <div ref={popRef} className="sa-dp-pop" role="dialog" style={{ ...menuStyle, minWidth: undefined }}>
         <div className="sa-dp-head">
           <div className="sa-dp-month">{MONTHS[view.getMonth()]} {view.getFullYear()}</div>
           <div className="sa-dp-nav">
@@ -139,27 +226,58 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
           ))}
         </div>
 
-        <div className="sa-dp-grid">
+        {/* Roving tabindex over a grid: exactly ONE cell is tabbable, and the arrow keys move
+            which. Cells stay <div>s deliberately — turning them into <button>s would need a
+            style reset on the shared .sa-dp-day rule, which is worn by twenty other call sites. */}
+        <div className="sa-dp-grid" ref={gridRef} role="grid" onKeyDown={onGridKey}>
           {cells.map((c, i) => {
-            if (c.muted) return <div key={i} className="sa-dp-day muted">{c.day}</div>;
+            if (c.muted) return <div key={i} className="sa-dp-day muted" role="gridcell" aria-hidden="true">{c.day}</div>;
             const isToday = c.date && sameDay(c.date, today);
             const isSel = c.date && selected && sameDay(c.date, selected);
+            const allowed = !c.date || withinRange(c.date, min, max);
+            const isCursor = !!(c.date && sameDay(c.date, cursor));
             return (
               <div
                 key={i}
-                className={`sa-dp-day${isToday ? " today" : ""}${isSel ? " sel" : ""}`}
-                onClick={() => {
-                  if (c.date) {
-                    onChange(toISO(c.date));
-                    setOpen(false);
-                  }
-                }}
+                role="gridcell"
+                tabIndex={isCursor ? 0 : -1}
+                data-dp-cursor={isCursor || undefined}
+                aria-selected={!!isSel}
+                aria-disabled={!allowed || undefined}
+                aria-label={c.date ? `${c.day} ${MONTHS[view.getMonth()]} ${view.getFullYear()}` : undefined}
+                className={`sa-dp-day${isToday ? " today" : ""}${isSel ? " sel" : ""}${allowed ? "" : " off"}`}
+                onClick={() => { if (c.date) commit(c.date); }}
               >
                 {c.day}
               </div>
             );
           })}
         </div>
+
+        {/* Chips + footer are HUB-ONLY: the twenty Form 11 call sites keep the popover they have. */}
+        {variant === "hub" && (
+          <>
+            <div className="sa-dp-quick">
+              {([
+                ["Today", today],
+                ["Yesterday", addDays(today, -1)],
+                ["Last Monday", lastMonday(today)],
+              ] as const).map(([label, d]) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="sa-dp-chip"
+                  disabled={!withinRange(d, min, max)}
+                  onClick={() => commit(d)}
+                >{label}</button>
+              ))}
+            </div>
+            <div className="sa-dp-foot">
+              <button type="button" className="sa-dp-link quiet" onClick={() => { onChange(""); closeAndReturn(); }}>Clear</button>
+              <button type="button" className="sa-dp-link" onClick={closeAndReturn}>Done</button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

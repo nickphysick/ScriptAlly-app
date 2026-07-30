@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create flow - motion demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--content:#f7f3ec;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--sel:#e9edf2;--sh:0 8px 26px rgba(60,45,30,.07);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--content);font-family:var(--in);color:var(--ink);padding:26px 34px 70px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:22px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:18px;max-width:920px}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.controls{display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+.demo-btn{background:#241c15;color:#f4ebdd;border:none;border-radius:10px;padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer}
+.demo-btn.alt{background:transparent;color:var(--ink);border:1px solid var(--bd)}
+.demo-btn.alt.on{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.wrap{display:flex;gap:20px;align-items:flex-start}
+/* list */
+.listcard{width:330px;flex-shrink:0;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);overflow:hidden}
+.ltop{display:flex;gap:8px;padding:12px;align-items:center}
+.lsearch{flex:1;display:flex;align-items:center;gap:8px;background:#f2ede4;border-radius:999px;padding:9px 14px;color:#b0a494;font-size:13px}
+.ib{position:relative;width:36px;height:36px;border-radius:999px;border:1px solid var(--bd);display:grid;place-items:center;color:#7a6c5a;cursor:pointer;background:#fff;flex-shrink:0}
+.ib svg{width:15px;height:15px}
+.ib:hover{background:#f6f0e7}
+.ib .adot{position:absolute;top:-3px;right:-3px;min-width:15px;height:15px;border-radius:8px;background:var(--rose);color:#fff;font-family:var(--mo);font-size:8.5px;display:grid;place-items:center;padding:0 4px;border:1.5px solid var(--card)}
+.rows{position:relative}
+.qr{display:flex;align-items:center;gap:11px;padding:12px 14px;cursor:pointer;position:relative;background:var(--card);transition:transform .28s cubic-bezier(.22,.9,.3,1), opacity .2s ease, background .3s ease}
+.qr+.qr{border-top:1px solid #f1ebe1}
+.qr .mg{width:34px;height:34px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:10.5px;flex-shrink:0;transition:border .3s, background .3s}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:15px;transition:color .3s}
+.qr .ag{font-family:var(--mo);font-size:8px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.qr .dt{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted)}
+.qr.sel{background:var(--sel)}
+.qr.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink)}
+/* draft row states */
+.qr.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef;margin:8px;border-radius:12px;overflow:hidden;max-height:0;padding-top:0;padding-bottom:0;opacity:0;transition:max-height .26s cubic-bezier(.22,.9,.3,1), opacity .22s ease .05s, padding .26s cubic-bezier(.22,.9,.3,1), border-color .3s, background .4s}
+.qr.draft.in{max-height:70px;padding:12px 14px;opacity:1}
+.qr.draft .tag{position:absolute;top:4px;right:10px;background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:7px;letter-spacing:.1em;padding:2px 7px;border-radius:6px;text-transform:uppercase;transition:opacity .3s}
+.qr.draft .mg{background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f}
+.qr.draft .nm{color:#b98a74;font-style:italic;font-weight:500}
+.qr.draft.filled .mg{border:1.5px solid transparent;background:var(--pink);color:#8d5a48}
+.qr.draft.filled .nm{color:var(--ink);font-style:normal;font-weight:600}
+.qr.draft.saved{border-color:transparent;border-style:solid;background:var(--sel);margin:0;border-radius:0}
+.qr.draft.saved .tag{opacity:0}
+@keyframes settle{0%{background:#fbe9de}100%{background:var(--sel)}}
+.qr.settle{animation:settle .9s ease-out both}
+/* pane */
+.pane{flex:1;position:relative;min-height:420px}
+.pv{position:absolute;inset:0;transition:opacity .18s ease, transform .18s ease}
+.pv.hide{opacity:0;transform:translateY(5px);pointer-events:none}
+.hero{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);padding:20px 24px;display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.hero .hav{width:56px;height:56px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--pl);font-size:19px}
+.hero .hn{font-family:var(--pl);font-weight:700;font-size:24px}
+.hero .ha{font-family:var(--pl);font-style:italic;font-size:14px;color:var(--ink2);margin-top:2px}
+.cols{display:flex;gap:14px}
+.col{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);overflow:hidden;min-height:250px}
+.ch{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:13.5px}
+.cb{padding:14px;font-size:12.5px;color:var(--muted)}
+/* create pane bits */
+.hero.create .hav{background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f;font-size:20px}
+.pin2{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:11px;padding:10px 13px;background:#fff;max-width:360px;font-family:var(--pl);font-size:15px;color:var(--muted)}
+.foot{display:flex;align-items:center;gap:10px;margin-top:14px}
+.btn2{display:flex;align-items:center;gap:7px;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent}
+.btn2.save{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.btn2.ghost{background:transparent;color:var(--muted);border-color:var(--bd)}
+/* toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,14px);background:#241c15;color:#f4ebdd;border-radius:12px;padding:12px 18px;font-size:13px;display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;box-shadow:0 12px 34px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast b{color:#f0cdbd;cursor:pointer;font-weight:600}
+.note{font-size:12px;color:var(--muted);margin-top:14px;max-width:920px;line-height:1.5}
+</style></head>
+<body>
+<h1>Create-flow choreography + compact filter/sort</h1>
+<div class="sub">Click through the real sequence: <b>Log query</b> → watch the list make room · fill the draft · then <b>Save</b> (travels to its sorted spot) or <b>Discard</b> (collapses, selection restored). Toggle "Sort: Name A–Z" before saving to see the travel; toggle "Filter hides it" to see the hidden-by-filter toast.</div>
+<div class="controls">
+  <button class="demo-btn" id="bOpen" onclick="openCreate()">＋ Log query</button>
+  <button class="demo-btn" id="bFill" onclick="fillAgent()" disabled>1 · Pick agent (Aisha)</button>
+  <button class="demo-btn" id="bSave" onclick="saveQ()" disabled>2a · Save</button>
+  <button class="demo-btn" id="bDisc" onclick="discard()" disabled>2b · Discard</button>
+  <span style="width:16px"></span>
+  <button class="demo-btn alt" id="tSort" onclick="this.classList.toggle('on')">Sort: Name A–Z</button>
+  <button class="demo-btn alt" id="tFilt" onclick="this.classList.toggle('on')">Filter hides it</button>
+</div>
+<div class="wrap">
+  <div class="listcard">
+    <div class="ltop">
+      <div class="lsearch">⌕ Search your queries…</div>
+      <span class="ib" title="Filter"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="adot">2</span></span>
+      <span class="ib" title="Sort"><svg viewBox="0 0 24 24"><path d="M8 7v10M8 7 5 10M8 7l3 3M16 17V7M16 17l-3-3M16 17l3-3"/></svg></span>
+    </div>
+    <div class="rows" id="rows">
+      <div class="qr draft" id="draftRow"><span class="tag">Draft</span><span class="mg" id="dMg">☺</span><div><div class="nm" id="dNm">New query…</div><div class="ag" id="dAg">&nbsp;</div></div><span class="dt">TODAY</span></div>
+      <div class="qr sel" id="prevSel"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><span class="dt">14 Mar</span></div>
+      <div class="qr"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div><span class="dt">15 Jan</span></div>
+      <div class="qr"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div><span class="dt">3 Mar</span></div>
+      <div class="qr"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><span class="dt">30 Jun</span></div>
+    </div>
+  </div>
+  <div class="pane">
+    <div class="pv" id="readPane">
+      <div class="hero"><span class="hav">FS</span><div><div class="hn">Fenella Str</div><div class="ha">Brightwater Books</div></div></div>
+      <div class="cols"><div class="col"><div class="ch">Tracking</div><div class="cb">Query sent · via email…</div></div><div class="col"><div class="ch">What you sent</div><div class="cb">Murphy's Day Out…</div></div><div class="col"><div class="ch">Journal</div><div class="cb">k</div></div></div>
+    </div>
+    <div class="pv hide" id="createPane">
+      <div class="hero create"><span class="hav" id="cAv">☺</span><div style="flex:1"><div class="mono" style="margin-bottom:6px">Who are you querying?</div><div class="pin2" id="cPick">⌕ &nbsp;Search your agents…</div></div><span class="mono">ESC TO CANCEL</span></div>
+      <div class="cols"><div class="col"><div class="ch">The send</div><div class="cb">Manuscript · date · method · nudge reminder…</div></div><div class="col"><div class="ch">What you sent</div><div class="cb">Materials checklist…</div></div><div class="col"><div class="ch">Journal</div><div class="cb">First impressions…</div></div></div>
+      <div class="foot"><span class="mono">Needs an agent, a manuscript and a date</span><span style="flex:1"></span><button class="btn2 ghost" onclick="discard()">Cancel</button><button class="btn2 save" onclick="saveQ()">✈ Save query</button></div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Compact controls</b> (top of list): search now takes the full width minus two 36px icon-only buttons — Filter carries a count badge when any filter is active (the on-brand rose dot), Sort shows its state in the popover. Labels live in the popovers' own headers, so nothing is lost.</div>
+<div class="toast" id="toast">Query saved — it's hidden by your current filter &nbsp;<b onclick="document.getElementById('toast').classList.remove('show')">Show it</b></div>
+<script>
+var draft=document.getElementById('draftRow'),state='idle';
+function btns(o,f,s,d){bOpen.disabled=!o;bFill.disabled=!f;bSave.disabled=!s;bDisc.disabled=!d;}
+function openCreate(){state='draft';draft.classList.add('in');
+ setTimeout(function(){readPane.classList.add('hide');createPane.classList.remove('hide');},110);
+ document.getElementById('prevSel').classList.remove('sel');btns(false,true,false,true);}
+function fillAgent(){draft.classList.add('filled');dMg.textContent='AK';dNm.textContent='Aisha Kapoor';dAg.textContent='The Lantern Agency';
+ cAv.textContent='AK';cAv.style.borderStyle='solid';cAv.style.background='var(--pink)';cAv.style.color='#8d5a48';cPick.innerHTML='Aisha Kapoor &nbsp;·&nbsp; <i style="color:var(--muted)">The Lantern Agency</i>';cPick.style.color='var(--ink)';btns(false,false,true,true);}
+function saveQ(){if(bSave.disabled)return;state='saving';
+ draft.classList.add('saved');draft.classList.add('sel');
+ var hidden=document.getElementById('tFilt').classList.contains('on');
+ var travel=document.getElementById('tSort').classList.contains('on');
+ createPane.classList.add('hide');readPane.classList.remove('hide');
+ setTimeout(function(){
+   if(travel){ // FLIP to alphabetical slot (after Sophie... Aisha first actually -> stays; demo: move below Sophie? Aisha is alphabetically first, so travel demo: move to slot 1 anyway; use William? keep simple: travel to after Tom)
+     var rows=document.getElementById('rows');var target=rows.children[3]; // after Tom
+     var from=draft.getBoundingClientRect();rows.insertBefore(draft,target.nextSibling);var to=draft.getBoundingClientRect();
+     draft.style.transition='none';draft.style.transform='translateY('+(from.top-to.top)+'px)';void draft.offsetWidth;
+     draft.style.transition='transform .32s cubic-bezier(.22,.9,.3,1)';draft.style.transform='';
+   }
+   draft.classList.add('settle');
+   if(hidden){setTimeout(function(){draft.style.opacity='0';draft.style.maxHeight='0';draft.style.paddingTop='0';draft.style.paddingBottom='0';document.getElementById('toast').classList.add('show');setTimeout(function(){document.getElementById('toast').classList.remove('show')},4200);},700);}
+ },220);
+ btns(false,false,false,false);setTimeout(function(){bOpen.disabled=false},900);}
+function discard(){if(state!=='draft'&&state!=='saving')return;state='idle';
+ createPane.classList.add('hide');readPane.classList.remove('hide');
+ draft.classList.remove('in');
+ setTimeout(function(){draft.classList.remove('filled');dMg.textContent='☺';dNm.textContent='New query…';dAg.innerHTML='&nbsp;';},300);
+ document.getElementById('prevSel').classList.add('sel');btns(true,false,false,false);}
+</script>
+</body></html>

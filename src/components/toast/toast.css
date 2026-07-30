@@ -39,25 +39,38 @@
   display: flex; align-items: center; justify-content: center; padding: 20px;
   animation: sa-confirm-fade 0.14s ease;
 }
+/* ref design-refs/qdb-create-polish2.html §1 — parchment, 18px, deep popover shadow. */
 .sa-confirm {
-  width: 100%; max-width: 420px; background: var(--panel, #fffdfb); color: var(--ink, #1e1a16);
-  border-radius: var(--r-lg, 12px); box-shadow: var(--sh-3, 0 22px 54px rgba(20, 15, 10, 0.3));
-  padding: 22px 22px 18px; font-family: var(--f12-body, "Inter", system-ui, sans-serif);
+  width: 100%; max-width: 410px; background: var(--panel, #fffdfb); color: var(--ink, #1e1a16);
+  border-radius: 18px; box-shadow: 0 22px 60px rgba(60, 45, 30, 0.22);
+  padding: 26px 28px; font-family: var(--f12-body, "Inter", system-ui, sans-serif);
   animation: sa-confirm-pop 0.16s ease;
 }
-.sa-confirm h2 { font-family: var(--f12-serif, Georgia, serif); font-size: 19px; font-weight: 600; margin: 0 0 8px; }
-.sa-confirm .sa-confirm-body { font-size: 13.5px; line-height: 1.5; color: var(--ink-2, #4a443c); margin-bottom: 18px; }
+.sa-confirm h2 { font-family: var(--f12-serif, Georgia, serif); font-size: 22px; font-weight: 700; margin: 0 0 9px; }
+.sa-confirm .sa-confirm-body { font-size: 13.5px; line-height: 1.5; color: var(--ink-2, #4a443c); margin-bottom: 22px; }
 .sa-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .sa-confirm-actions button {
-  font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13px; font-weight: 500;
-  padding: 8px 15px; border-radius: var(--r-md, 9px); cursor: pointer; border: 1px solid transparent;
+  font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13.5px; font-weight: 600;
+  padding: 11px 20px; border-radius: 11px; cursor: pointer;
+  border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb); color: var(--ink, #1e1a16);
+  transition: background 0.14s, border-color 0.14s;
 }
-.sa-confirm-cancel { background: var(--panel, #fffdfb); border-color: var(--line, #e6dccd); color: var(--ink-2, #4a443c); }
-.sa-confirm-cancel:hover { border-color: var(--muted, #7d7469); color: var(--ink, #1e1a16); }
-.sa-confirm-ok { background: var(--ink, #1e1a16); color: var(--panel, #fffdfb); }
-.sa-confirm-ok:hover { background: #000000; }
-.sa-confirm-ok.sa-danger { background: #a5342a; }
-.sa-confirm-ok.sa-danger:hover { background: #8f2c23; }
+.sa-confirm-actions button:hover { background: var(--paper, #faf6f0); }
+
+/* The BENIGN dialog: the confirm is what you came for, so it leads as the primary and sits last.
+   Never invert a "Yes" — only a destructive dialog reorders (see below). */
+.sa-confirm-cancel { color: var(--ink-2, #4a443c); }
+.sa-confirm-ok { background: var(--pink-t, #f7e3dd); border-color: var(--pink-b, #eecdc3); color: var(--pink-i, #8a4030); }
+.sa-confirm-ok:hover { background: var(--pink-b, #eecdc3); }
+
+/* The DESTRUCTIVE dialog inverts the emphasis, not just the colour: the SAFE action becomes the
+   soft-pink primary and moves last (rightmost), so a reflexive click on the default position
+   cannot destroy work. The destructive action is a terracotta OUTLINE — legible as dangerous
+   without being the filled slab that invites the very click it should discourage. */
+.sa-confirm--danger .sa-confirm-cancel { background: var(--pink-t, #f7e3dd); border-color: var(--pink-b, #eecdc3); color: var(--pink-i, #8a4030); }
+.sa-confirm--danger .sa-confirm-cancel:hover { background: var(--pink-b, #eecdc3); }
+.sa-confirm--danger .sa-confirm-ok { background: transparent; border-color: #e0bdb2; color: var(--terra, #9a3b2a); }
+.sa-confirm--danger .sa-confirm-ok:hover { background: #fbeee9; }
 
 @keyframes sa-confirm-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes sa-confirm-pop { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }

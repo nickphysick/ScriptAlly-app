@@ -1,0 +1,133 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Log a query - inline create</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--page:#efe9e1;--card:#fdfcf9;--bd:#e4dcd0;--ink:#2b2118;--muted:#97897a;--sage:#dde3d8;--sageBd:#cdd6c6;--pink:#f7dfd5;--pinkDeep:#eec9ba;--burg:#8d3f2d;--esp:#3a2d1f;--sh:0 8px 26px rgba(60,45,30,.08);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);font-family:var(--in);color:var(--ink);padding:34px 40px 80px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:24px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13.5px;margin-bottom:26px;max-width:920px}
+.wrap{display:flex;gap:22px;align-items:flex-start}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+/* list */
+.list{width:320px;flex-shrink:0;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);padding:12px;overflow:hidden}
+.lsearch{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:999px;padding:9px 14px;color:#b9ae9d;font-size:13px;background:#f6f1e9;margin-bottom:10px}
+.qr{display:flex;align-items:center;gap:11px;padding:11px 10px;border-radius:12px}
+.qr .mg{width:34px;height:34px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:10.5px;flex-shrink:0}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:15px}
+.qr .ag{font-family:var(--mo);font-size:8px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.qr .dt{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted)}
+.qr+.qr{border-top:1px solid #f0e9df}
+/* draft row */
+.qr.draft{border:1.5px dashed var(--pinkDeep);background:#fdf4ef;position:relative}
+.qr.draft .mg{border:1.5px dashed #dba留causeState58f}
+.qr.draft .mg{background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f}
+.qr.draft .nm{color:#b98a74;font-style:italic;font-weight:500}
+.qr.draft .tag{position:absolute;top:-8px;left:12px;background:#f3d9cb;color:#8d4b32;font-family:var(--mo);font-size:7.5px;letter-spacing:.1em;padding:2px 8px;border-radius:6px;text-transform:uppercase}
+.qr.draft.filled .mg{border-style:solid;background:var(--pink);color:#8d5a48}
+.qr.draft.filled .nm{color:var(--ink);font-style:normal;font-family:var(--pl);font-weight:600}
+/* pane */
+.pane{flex:1;display:flex;flex-direction:column;gap:16px}
+.hero{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);padding:22px 26px;display:flex;align-items:center;gap:18px}
+.hero .hav{width:64px;height:64px;border-radius:50%;background:#fbeae1;border:1.5px dashed #dfae97;color:#c07a5f;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.picker{flex:1}
+.picker .plab{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.pinput{display:flex;align-items:center;gap:9px;border:1px solid var(--bd);border-radius:12px;padding:12px 15px;font-size:15px;background:#fff;max-width:430px}
+.pinput input{border:none;outline:none;font-family:var(--pl);font-size:17px;flex:1;background:transparent;color:var(--ink)}
+.sugg{margin-top:7px;max-width:430px;border:1px solid var(--bd);border-radius:12px;background:#fff;box-shadow:var(--sh);overflow:hidden}
+.sg{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13.5px;cursor:pointer}
+.sg:hover,.sg.hi{background:#f8f3ec}
+.sg .mg2{width:26px;height:26px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:9px}
+.sg .a2{color:var(--muted);font-size:11.5px;margin-left:auto;font-style:italic}
+.sg.new{color:#8d4b32;font-weight:600;border-top:1px dashed var(--bd)}
+.esc{margin-left:auto;font-family:var(--mo);font-size:9px;color:var(--muted);align-self:flex-start}
+/* columns */
+.cols{display:flex;gap:16px}
+.col{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);overflow:hidden;display:flex;flex-direction:column}
+.ch{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-family:var(--in);font-weight:600;font-size:14.5px}
+.ch svg{width:15px;height:15px}
+.cb{padding:18px;font-size:13px;flex:1}
+.f{margin-bottom:16px}
+.flab{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.fin{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:11px;padding:10px 13px;background:#fff;font-size:13.5px}
+.segs{display:flex;gap:6px}
+.sg2{border:1px solid var(--bd);border-radius:999px;padding:8px 14px;font-size:12.5px;background:#fff;cursor:pointer;color:var(--muted)}
+.sg2.on{background:var(--esp);color:#f5eee2;border-color:var(--esp);font-weight:600}
+.mat{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid #f0e9df;font-size:13.5px;cursor:pointer}
+.mat:last-of-type{border-bottom:none}
+.mat .ck{width:18px;height:18px;border-radius:6px;border:1.5px solid #cfc3b1;display:grid;place-items:center;color:#fff;font-size:10px;flex-shrink:0}
+.mat.on .ck{background:#7e9178;border-color:#7e9178}
+.mat.on{color:var(--ink)}
+.mat .hint{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted);text-transform:uppercase}
+.nud{display:flex;flex-wrap:wrap;gap:6px}
+.nchip{border:1px solid var(--bd);border-radius:999px;padding:8px 13px;font-size:12px;background:#fff;cursor:pointer;color:var(--muted)}
+.nchip.on{background:#fdf1ea;border-color:#e3b8a2;color:#8d4b32;font-weight:600}
+.nnote{font-family:var(--mo);font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:7px}
+.qty{margin-left:auto;display:flex;align-items:center;gap:5px}
+.qty input{width:38px;border:1px solid var(--bd);border-radius:8px;padding:5px 0;text-align:center;font-size:12.5px;font-family:var(--in);outline:none}
+.qty .unit{border:1px solid var(--bd);border-radius:8px;padding:5px 9px;font-size:11.5px;color:var(--ink);background:#fff;cursor:pointer}
+.jarea{border:1px solid var(--bd);border-radius:12px;padding:13px;color:#b9ae9d;font-size:13px;background:#fff;min-height:90px;font-style:italic}
+/* footer bar */
+.foot{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 16px;box-shadow:var(--sh)}
+.foot .req{font-size:12px;color:var(--muted)}
+.foot .spring{flex:1}
+.btn{display:flex;align-items:center;gap:8px;border-radius:11px;padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid transparent}
+.btn.ghost{background:transparent;color:var(--muted);border-color:var(--bd)}
+.btn.save{background:var(--esp);color:#f5eee2}
+.btn.save.dis{opacity:.45;cursor:default}
+</style></head>
+<body>
+<h1>Log a query — inline, in the reading pane</h1>
+<div class="sub">Draft row pins to the top of the list and fills in live as you type. Nothing is saved until "Save query" — the draft is local state only. Esc or Cancel discards (with a confirm if dirty).</div>
+<div class="wrap">
+  <div class="list">
+    <div class="lsearch">⌕ Search</div>
+    <div class="qr draft filled"><span class="tag">Draft</span><span class="mg">AK</span><div><div class="nm">Aisha Kapoor</div><div class="ag">The Lantern Agency</div></div><span class="dt">TODAY</span></div>
+    <div class="qr"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><span class="dt">14 Mar</span></div>
+    <div class="qr"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div><span class="dt">15 Jan 2024</span></div>
+    <div class="qr"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div><span class="dt">3 Mar 2024</span></div>
+    <div class="qr"><span class="mg">DO</span><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div></div><span class="dt">—</span></div>
+  </div>
+  <div class="pane">
+    <div class="hero">
+      <span class="hav">☺</span>
+      <div class="picker">
+        <div class="plab">Who are you querying?</div>
+        <div class="pinput">⌕ <input value="Aisha K" placeholder="Search your agents…"></div>
+        <div class="sugg">
+          <div class="sg hi"><span class="mg2">AK</span>Aisha Kapoor<span class="a2">The Lantern Agency</span></div>
+          <div class="sg new">＋ Add "Aisha K…" as a new agent</div>
+        </div>
+      </div>
+      <span class="esc">ESC TO CANCEL</span>
+    </div>
+    <div class="cols">
+      <div class="col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>The send</div><div class="cb">
+        <div class="f"><div class="flab">Manuscript</div><div class="fin">▾ &nbsp;Murphy's Day Out</div></div>
+        <div class="f"><div class="flab">Date sent</div><div class="fin">📅 &nbsp;Today, 29 Jul</div></div>
+        <div class="f"><div class="flab">Sent by</div><div class="segs"><span class="sg2 on">Email</span><span class="sg2">Form</span><span class="sg2">Post</span></div></div>
+        <div class="f" style="margin-bottom:0"><div class="flab">Nudge reminder</div>
+          <div class="nud"><span class="nchip on">8 Sep &middot; in 6 weeks</span><span class="nchip">Pick a date</span><span class="nchip">No reminder</span></div>
+          <div class="nnote">Suggested from Aisha's typical reply time (~6 weeks)</div>
+        </div>
+      </div></div>
+      <div class="col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>What you sent</div><div class="cb">
+        <div class="mat on"><span class="ck">✓</span>Query letter</div>
+        <div class="mat on"><span class="ck">✓</span>Synopsis</div>
+        <div class="mat on"><span class="ck">✓</span>Sample materials<span class="qty"><input value="5"><span class="unit">Chapters ▾</span></span></div>
+        <div class="mat"><span class="ck"></span>Other…</div>
+      </div></div>
+      <div class="col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/></svg>Journal</div><div class="cb">
+        <div class="jarea">First impressions, personalisation notes, anything worth remembering… (optional)</div>
+      </div></div>
+    </div>
+    <div class="foot">
+      <span class="req">Needs an agent, a manuscript and a date — everything else can wait.</span>
+      <span class="spring"></span>
+      <button class="btn ghost">Cancel</button>
+      <button class="btn save">✈ &nbsp;Save query</button>
+    </div>
+  </div>
+</div>
+</body></html>

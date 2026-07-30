@@ -6,10 +6,11 @@
  * Renders inside the global AppShell stage (no nav of its own), scoped to the active manuscript via
  * localStorage["scriptally_active_manuscript_id"]. This host provides the qhbar chrome (ChromeSlab:
  * crumb + title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
- * and mounts <PackageWorkshop> for everything else. At ZERO packages it renders the PackageShowcase
- * Pro-selling landing instead — full-bleed, with its own bare Queries-Hub-idiom header (the
- * ChromeSlab card deliberately does not render on that branch); "Unlock with Pro" → /plans, "Try it
- * with example data →" enters the workshop + starts the tour.
+ * and mounts the two-tab surface for everything else. At ZERO packages the WORKSHOP'S OWN first-run
+ * empty state renders — for every user on every plan. (A Pro-selling landing used to sit in front of
+ * it; it was retired because this route has no Pro gate, so it was pitching the feature to people who
+ * already had it. If a real gate ever lands, a persuasion surface belongs at /plans or on the public
+ * site, not on an authenticated route.)
  *
  * The old multi-view builder (FirstVisitHome / PackagesHome / Composer / MaterialsManager /
  * MaterialsRail / JourneyStrip / PackageStats view / WorkedExample / the MaterialModal popup) was
@@ -18,18 +19,22 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { resolveActivePackage } from "../lib/packageMetrics";
 import { ComponentType } from "../types";
 import { useNavigate } from "react-router-dom";
-import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
-import { PackageShowcase } from "./packages/PackageShowcase";
+import { PackageSaveFields } from "./packages/PackageWorkshop";
+import { WorkshopTab } from "./packages/WorkshopTab";
+import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
+import { PackageTabs, PackageTab } from "./packages/PackageTabs";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
+import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile, setActivePackage } = useScriptAllyDb();
   const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -37,15 +42,20 @@ export const SubmissionPackages: React.FC = () => {
   );
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const msMenuRef = useRef<HTMLDivElement>(null);
-  // At zero packages the route shows the PackageShowcase landing; "entered" flips it to the (empty)
-  // workshop once the user takes the example-data tour link. Reset on manuscript switch so a fresh
-  // book shows its own landing. Irrelevant once a manuscript has ≥1 package (the workshop renders).
-  const [entered, setEntered] = useState(false);
   // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
   // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
   const [tourActive, setTourActive] = useState(false);
   // Pulse the "＋ Add materials" affordance after the tour ends with no materials yet (FR4).
   const [pulseAdd, setPulseAdd] = useState(false);
+  // Which tab is showing. Component-local UI state by design — deliberately NOT persisted, so the
+  // workshop is always what you land on.
+  const [tab, setTab] = useState<PackageTab>("workshop");
+  // Bumped by the header's "＋ New package" — the workshop opens a fresh draft on each change.
+  const [newPkgSignal, setNewPkgSignal] = useState(0);
+  // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
+  const [scope, setScope] = useState<AnalyticsScope>("all");
+  // A recommendation asked the Workshop tab to open a particular package.
+  const [openPkg, setOpenPkg] = useState<string | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -72,6 +82,9 @@ export const SubmissionPackages: React.FC = () => {
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
+  // The manuscript's chosen active package — read-only here; null when unset, retired, missing or
+  // cross-manuscript. It drives the ACTIVE card treatment and which card is editable.
+  const activePkg = useMemo(() => resolveActivePackage(activeMs, msPackages), [activeMs, msPackages]);
 
   if (!currentUser) return null;
 
@@ -79,7 +92,6 @@ export const SubmissionPackages: React.FC = () => {
     setActiveMsId(id);
     localStorage.setItem("scriptally_active_manuscript_id", id);
     setMsMenuOpen(false);
-    setEntered(false);
   };
   const multiMs = manuscripts.length > 1;
 
@@ -105,11 +117,9 @@ export const SubmissionPackages: React.FC = () => {
     // The tour ends on the empty workshop — nudge the writer to their first real action.
     if (msVersions.length === 0) setPulseAdd(true);
   };
-  // The showcase's "Try it with example data →" enters the workshop + starts the tour (the sole
-  // workshop entry from the landing — the old Build-CTA auto-offer retired with the FR1 landing).
-  // The workshop "?" re-runs the tour any time. hasSeenTour still stamps on end.
+  // The ONE way into the guided tour: the example-data band on the workshop's empty state and the
+  // matching action on the analytics empty state both call this. hasSeenTour still stamps on end.
   const startTour = () => setTourActive(true);
-  const enterViaTour = () => { setEntered(true); setTourActive(true); };
 
   // While the tour runs the workshop shows the PURE example fixture (never persisted); otherwise the
   // real manuscript-scoped data. The example writes are no-ops (host handlers ignore them).
@@ -161,22 +171,8 @@ export const SubmissionPackages: React.FC = () => {
     </div>
   ) : null;
 
-  // Zero packages → the Pro showcase landing, full-bleed (it paints its own Cappuccino ground and
-  // carries its own Queries-Hub-idiom header — the ChromeSlab card deliberately does NOT render on
-  // this branch; the workshop keeps it). "Unlock with Pro" → /plans (the in-app upgrade route).
-  if (activeMs && msPackages.length === 0 && !entered) {
-    return (
-      <PackageShowcase
-        manuscriptTitle={activeMs.title}
-        msSelector={multiMs ? msSelector : undefined}
-        onUnlockPro={() => navigate("/plans")}
-        onTryExample={enterViaTour}
-      />
-    );
-  }
-
   return (
-    <div className="pkg-root" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflow: "hidden" }}>
+    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflowY: "auto" }}>
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
@@ -186,14 +182,33 @@ export const SubmissionPackages: React.FC = () => {
           Pro pill and package-count pulse are dropped with it (no title-adornment/meta slots
           under the header law); the manuscript selector keeps its function in the row below
           the rule until the sidebar switcher is live-wired — see the rollout report. */}
+      {/* The Pro header format, shared by all three states of this page (landing, empty, populated).
+          The SHARED PageHeader is reused unmodified: the Pro pill rides `titleAdornment`, the
+          manuscript selector + primary action ride `actionsSlot` on the title's line (the floating
+          chip on its own row is gone), and its own rule is restyled to the 2px Pro rule under the
+          `.pkgw` scope — Discover's pattern, so there is no second rule and no fork of a component
+          eleven pages share. */}
       <PageHeader
         variant="full"
         title="Package Workshop"
         description="Bundle your materials once, then send them without rebuilding each time."
+        titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
+        actionsSlot={activeMs ? (
+          <div className="pkgw-hact">
+            {msSelector}
+            <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
+              <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
+            </button>
+          </div>
+        ) : undefined}
       />
-      {activeMs && msSelector && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12 }}>{msSelector}</div>
-      )}
+      <div className="pkgw-strip">
+        <ShieldCheck className="sh" aria-hidden="true" />
+        <span className="stx">
+          <b>Every package keeps its own scorecard.</b> ScriptAlly records which letter, synopsis and pages
+          went to each agent — so you can see which combination gets replies, rather than guessing.
+        </span>
+      </div>
 
       {!activeMs ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>
@@ -203,19 +218,47 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         </div>
       ) : (
-        <PackageWorkshop
-          versions={wsVersions}
-          packages={wsPackages}
-          queries={wsQueries}
-          agents={wsAgents}
-          onCreateVersion={tourActive ? noop : createVersion}
-          onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
-          onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
-          onSavePackage={tourActive ? noop : savePackage}
-          onStartTour={startTour}
-          pulseAddMaterials={pulseAdd && !tourActive}
-          onDismissPulse={() => setPulseAdd(false)}
-        />
+        <>
+          <PackageTabs tab={tab} onTab={setTab} />
+
+          {tab === "workshop" ? (
+            <div className="pkgw-tv" role="tabpanel" aria-label="Workshop">
+              <WorkshopTab
+                versions={wsVersions}
+                packages={wsPackages}
+                queries={wsQueries}
+                activePackageId={tourActive ? null : activePkg?.id ?? null}
+                onCreateVersion={tourActive ? noop : createVersion}
+                onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
+                onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
+                onSavePackage={tourActive ? noop : savePackage}
+                onMakeActive={tourActive || !msId ? noop : (pid) => void setActivePackage(msId, pid)}
+                onTryExample={startTour}
+                newPackageSignal={newPkgSignal}
+                openPackageId={openPkg}
+                onOpenedPackage={() => setOpenPkg(null)}
+                pulseAddMaterials={pulseAdd && !tourActive}
+                onDismissPulse={() => setPulseAdd(false)}
+              />
+            </div>
+          ) : (
+            <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
+              <AnalyticsTab
+                versions={wsVersions}
+                packages={wsPackages}
+                queries={wsQueries}
+                agents={wsAgents}
+                activePackageId={tourActive ? null : activePkg?.id ?? null}
+                scope={scope}
+                onScope={setScope}
+                onOpenQueries={() => navigate("/queries")}
+                onOpenPackage={(pid) => { setTab("workshop"); setOpenPkg(pid); }}
+                onNewPackage={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}
+                onTryExample={startTour}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {tourActive && (

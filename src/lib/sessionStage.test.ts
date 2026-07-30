@@ -67,7 +67,7 @@ describe("the gather's spine", () => {
     // the workspace shell (todo-fix48): the sidebar exits via the shell's `.tsh-clearing` class
     // (it names the sidebar for intent); the Today corner + the hero pair/subtitle exit in-wrap
     expect(EXIT_LEFT).toBe(".spine-panel"); // the spine: the panel is the mover; the rail persists
-    expect(EXIT_RIGHT).toBe(".tdb-tdpop, .tdb-tdpill"); // the Today corner leaves
+    expect(EXIT_RIGHT).toBe(".tdb-tdpop"); // P3: the corner is ONE node in both states (the pill is gone)
     expect(EXIT_FADE).not.toContain(".tdb-bigsearch"); // the search moved to the bar
     expect(EXIT_FADE).toContain(".tdb-heroright"); // the CTA pair fades
     expect(EXIT_FADE).toContain(".tdb-herosub"); // the subtitle fades (the progress row takes its slot)

@@ -364,18 +364,26 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'committedDate'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
         && data.text is string && data.text.size() <= 16384
+        // notes-and-tasks: the optional detail line beneath the title.
+        && (!data.keys().hasAny(['detail']) || (data.detail is string && data.detail.size() <= 16384))
         && data.done is bool
-        && (data.completedAt == null || (data.completedAt is string && data.completedAt.size() <= 64))
+        // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
+        // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
+        // for a missing map field), which silently DENIED every create (the composer never writes
+        // completedAt on create). Proven with the Rules :test API; see reports/todo-save-and-today.md.
+        && (!data.keys().hasAny(['completedAt']) || (data.completedAt is string && data.completedAt.size() <= 64))
         && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
         && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
         && (!data.keys().hasAny(['manuscriptId']) || (data.manuscriptId is string && data.manuscriptId.size() <= 128))
-        // Reminder day — ISO date-only "YYYY-MM-DD"; optional, string when present (rejects null).
+        // Due day — ISO date-only "YYYY-MM-DD"; optional, string when present (rejects null).
         && (!data.keys().hasAny(['dueDate']) || (data.dueDate is string && data.dueDate.size() <= 16))
+        // notes-and-tasks: the in-app surfacing lead — one of three fixed strings; optional.
+        && (!data.keys().hasAny(['surfaceOffset']) || (data.surfaceOffset is string && data.surfaceOffset in ['on-day', 'day-before', 'week-before']))
         // Today's-list commitment — ISO date-only "YYYY-MM-DD"; optional, string when present.
         && (!data.keys().hasAny(['committedDate']) || (data.committedDate is string && data.committedDate.size() <= 16))
         && data.createdAt is string && data.createdAt.size() <= 64
@@ -603,7 +611,7 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'done', 'completedAt', 'updatedAt', 'dueDate'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset'])
         );
       }
 

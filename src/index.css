@@ -34,6 +34,12 @@
   --ts: #e7ece4;      /* synopsis type tint */
   --tp: #f3e6cf;      /* sample-pages type tint */
   --slate: #6A89A7;   /* Pro pill · slate accents */
+  /* Pro family (ADDITIVE) — the --slate hue's ink, pale fill and border, so a Pro surface (the
+     Discover Pro rule + vetting strip) can be built without hardcoding. Pre-computed literals,
+     no runtime color-mix, per the house rule. */
+  --slate-deep: #4f6b86;
+  --slate-tint: #eef2f7;
+  --slate-line: #c7d6e3;
   --sage: #8a9e88;    /* sage accent */
   --sage-d: #5a6e58;  /* synopsis ink · focus ring */
   --gold: #a8842c;    /* sample-pages ink · star glint */
@@ -618,6 +624,11 @@
   --blue-t: #e7eef6; --blue-b: #d3e0ee; --blue-i: #2b4a6b;   /* you-are-here */
   --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030; --pink-deep: #6e3325;   /* needs-you; pink-deep = urgency-tag text (polish v3 two-depth tag law) */
   --pink-av: #f6d7cf;
+  /* FOCUS SCRIM — warm near-black over everything except the pane, the draft row and the two
+     create actions (ref design-refs/qdb-focus-spotlight.html). SUPERSEDES the previous approach,
+     which dimmed each surface and darkened the ground; one scrim is both simpler and deeper. */
+  --qh-scrim: rgba(42, 31, 21, 0.42);
+  --terra: #9a3b2a;   /* destructive tone — the confirm dialog's outline action AND its warning text */
   /* primary-button pink (chrome revision; v14/v3 omitted these — an undefined var() renders
      as NOTHING, which silently made the mockups' primary button transparent) */
   --pink-btn: #f6cfc9; --pink-btn-h: #f0bfb8;

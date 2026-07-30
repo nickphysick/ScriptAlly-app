@@ -8,11 +8,12 @@
 import { describe, it, expect } from "vitest";
 import { TOUR_STOPS, shouldAutoRunTour } from "./todoTour";
 
-describe("TOUR_STOPS — seven stops (the spine adds the category rail), Done on the last", () => {
-  it("is exactly the seven stops in order: rail → hero → search → pills → review → a card → Today", () => {
+describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), Done on the last", () => {
+  it("is exactly the eight stops in order: rail → hero → add → search → pills → review → a card → Today", () => {
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
       ".spine-rail",
       ".tdb-herobegin",
+      ".svh-btn-primary", // notes-and-tasks P4: the hero's "Add task or note"
       ".tdb-bsearch",
       ".tdb-ctrl",
       ".tdb-revlink",
@@ -26,6 +27,7 @@ describe("TOUR_STOPS — seven stops (the spine adds the category rail), Done on
     expect(TOUR_STOPS.map((s) => s.h)).toEqual([
       "Your whole workspace, spined.",
       "Say go, any time.",
+      "A note, or a task.",
       "Search from the bar.",
       "Narrow the desk.",
       "Your week, reviewed.",
@@ -34,12 +36,13 @@ describe("TOUR_STOPS — seven stops (the spine adds the category rail), Done on
     ]);
     expect(TOUR_STOPS[0].p).toContain("from the rail"); // the spine's category rail
     expect(TOUR_STOPS[1].p).toContain("focused session");
-    expect(TOUR_STOPS[2].p).toContain("⌘K");
-    expect(TOUR_STOPS[3].p).toContain("All brings everything back"); // todo rebuild P1: the reset chip is "All"
-    expect(TOUR_STOPS[4].p).toContain("turns the dial in your favour");
-    expect(TOUR_STOPS[5].p).toContain("Hover for the actions");
-    expect(TOUR_STOPS[5].p).toContain("Batches expand in place");
-    expect(TOUR_STOPS[6].p).toContain("struck through as you go");
+    expect(TOUR_STOPS[2].p).toContain("nothing chases you"); // notes-and-tasks: the two natures
+    expect(TOUR_STOPS[3].p).toContain("⌘K");
+    expect(TOUR_STOPS[4].p).toContain("All brings everything back"); // todo rebuild P1: the reset chip is "All"
+    expect(TOUR_STOPS[5].p).toContain("turns the dial in your favour");
+    expect(TOUR_STOPS[6].p).toContain("Hover for the actions");
+    expect(TOUR_STOPS[6].p).toContain("Batches expand in place");
+    expect(TOUR_STOPS[7].p).toContain("struck through as you go");
   });
 });
 

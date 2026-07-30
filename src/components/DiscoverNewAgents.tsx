@@ -2,32 +2,34 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * DiscoverNewAgents — the "Discover new agents" page (Agents › Discover), Phase-1 redesign.
+ * DiscoverNewAgents — the "Discover new agents" page (Agents › Discover).
+ * Ref: design-refs/discover-final-d.html (approved — Matches + Empty · first run).
  *
- * Ranked agent suggestions with a transparent "why": fit band + /100 display score, why-chips,
- * a wish-list personalisation hook (matched MSWL terms highlighted via the shared scorer's
- * overlappingWords), a truthful trust story, priority LENSES that re-rank client-side over
- * signals that exist, working filters, and a session-only querying batch. All derivations live
- * in src/lib/discoverAgents.ts (unit-tested); the match maths is the untouched shared engine in
- * communityMatch.ts.
+ * Rendered in the AGENT-LIST v2 language: the page keeps the standard ShellV2 `PageHeader` and
+ * mirrors the agent card's grammar (agentList.css `--agl-*` / `.agl-acard`, re-declared page-scoped
+ * as `--dv-*` because `.agl-*` is scoped to `.aglist`). Each match is a printed card — ink border,
+ * offset shadow, a fit BAND (sage for strong, tan for possible) carrying the fit pill and the
+ * verified date, a taupe mono-initial avatar,
+ * Playfair name + italic agency, flag + city, a mono meta line, the agency website as a real
+ * link, and a "Why it fits" section. Grouped into Strong fits / Possible fits under the
+ * agent-list section-rule pattern.
  *
- * Data honesty (hard rule): every trust signal is bound to a real field — "Verified {date}" from
+ * PRO treatment ("rule + strip"): a Pro pill beside the title, a 2px Pro rule under the header,
+ * and the vetting strip in the Pro tint directly beneath it — controls sit below the strip.
+ *
+ * Data honesty (hard rule): every signal is bound to a real field — "Verified {date}" from
  * lastVerifiedDate, open status from submissionStatus, reply time from responseTimeWeeks,
- * "Queried by N writers" zero-suppressed from communityQueryCount. CommunityAgent has NO
- * location or legitimacy (AAA/no-fee) fields yet, so: no location chip, no "Local first" lens,
- * no UK-only filter, and the trust banner uses the honest hand-verified copy — never the
- * fabricated version. "Add & draft query" is deliberately absent: LogQueryFocusForm has no
- * pre-fill seam (flagged follow-up), and query records are never created blind.
+ * location from country/city (via the territory helpers), the website from `website`. Anything
+ * absent is simply not rendered. CommunityAgent has NO legitimacy field (AAA membership / no-fee
+ * assertion), so the vetting copy is the honest hand-checked version and never claims membership
+ * of a body we can't evidence. The one exception, clearly labelled as such, is the "What a match
+ * looks like" EXAMPLE card in the first-run state — illustrative, inert, and never presented as
+ * a real catalogue record.
  *
- * Theming: consumes the shell theme tokens (on the AppShell root, so this route IS themed) with
- * Cappuccino fallbacks; page-scoped --dv-* tokens live in agents/discover.css. Buttons use the
- * shared .sa-btn treatment (v37: no primary/ghost split). Critical colours stay inline or in the
- * page CSS — never Tailwind colour classes (they've overridden inline-critical colours before).
- *
- * Layout model kept from the previous page: a flex child of the fillColumn agents slot under the
- * 44px sub-nav; the page grows and the STAGE scrolls (no 100vh/bar offsets). The batch tray is
- * position:sticky against the stage scrollport. Manuscript selector behaviour kept: 0 → empty
- * state, 1 → auto-selected + hidden, 2+ → pill selector.
+ * All colour comes from existing tokens (the agent-list palette + the app-wide `--slate` Pro
+ * family in index.css `:root`); page classes live in agents/discover.css. No hexes at the point
+ * of use. The page paints no ground of its own — it inherits the ShellV2 content canvas, as the
+ * agent list does.
  */
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
@@ -36,7 +38,6 @@ import { CommunityAgent, SubmissionStatus } from "../types";
 import { doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { agencyKey, nameCompatible } from "../lib/smartImportReviewModel";
-import { genreWordCountRange } from "../lib/manuscripts";
 import {
   buildDiscoverEntries,
   rankEntries,
@@ -46,53 +47,80 @@ import {
   LENS_META,
   DiscoverLens,
   DiscoverEntry,
-  score100,
-  manuscriptReadiness,
-  highlightSegments,
-  topHookTerm,
+  displayTerms,
   monthYearLabel,
-  catalogueMeta,
 } from "../lib/discoverAgents";
-import { getHomeCountry, flagFor, agentLocation } from "../lib/territory";
-import { FONT_SERIF, FONT_SANS, FONT_MONO } from "../lib/designTokens";
+import { getHomeCountry, flagFor, countryName } from "../lib/territory";
+import { agentInitials, agentPrimary, agentSecondary } from "../lib/agentDisplay";
 import { PageHeader } from "./shell/PageHeader";
-import { BookOpen, ShieldCheck, Check, Plus, Bookmark, BookmarkCheck, X, Send } from "lucide-react";
+import {
+  ShieldCheck,
+  Check,
+  Plus,
+  ChevronDown,
+  ExternalLink,
+  Sparkles,
+} from "lucide-react";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/discover.css";
 
 interface DiscoverNewAgentsProps {
-  onNavigate?: (tab: string, subPageName?: string) => void;
+  /** Third param is the existing preselect seam (App.tsx stows opts.agentId/manuscriptId for the
+   *  Log-a-Query form) — what "Draft a query" rides. */
+  onNavigate?: (
+    tab: string,
+    subPageName?: string,
+    opts?: { agentId?: string; manuscriptId?: string },
+  ) => void;
 }
 
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+/** Two display groups (the approved ref shows Strong / Possible only): the engine's `good` tier
+ *  reads as a possible fit rather than earning its own band. */
+const isStrong = (e: DiscoverEntry) => e.tier === "strong";
 
-const BAND_LABEL: Record<DiscoverEntry["tier"], string> = {
-  strong: "Strong fit",
-  good: "Good fit",
-  possible: "Possible fit",
-};
+/**
+ * A reserved slot for a feature animation in the first-run reel.
+ *
+ * These three panels are deliberate placeholders for Lottie files that don't exist yet. To drop a
+ * real animation in, pass it as `children` at the call site — one line per column, e.g.
+ *   <AnimationSlot label="Matched to your book">
+ *     <Lottie animationData={matchedAnim} loop autoplay style={{ width: "100%", height: "100%" }} />
+ *   </AnimationSlot>
+ * Nothing else changes: the panel keeps its height, radius and place in the grid, and the dashed
+ * placeholder chrome only renders while `children` is absent.
+ */
+const AnimationSlot: React.FC<{ label: string; children?: React.ReactNode }> = ({ label, children }) => (
+  <div className="dv-anim" role="img" aria-label={`${label} — illustration`}>
+    {children ?? (
+      <span className="ph" aria-hidden="true">
+        <Sparkles strokeWidth={1.6} />
+        <span>Animation</span>
+      </span>
+    )}
+  </div>
+);
 
-/** Which why-chip leads (accent fill) under each lens. */
-const LENS_LEAD_CHIP: Record<DiscoverLens, string> = {
-  best: "genre",
-  mswl: "wish",
-  fast: "replies",
-  open: "genre",
-  local: "loc",
-};
+/** Bare domain for display ("langleymoore.co.uk"); null when there's nothing usable. */
+function siteLabel(website?: string): string | null {
+  const raw = (website || "").trim();
+  if (!raw) return null;
+  return raw.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "") || null;
+}
+/** Absolute href for a stored domain (records store bare domains). */
+function siteHref(website: string): string {
+  const raw = website.trim();
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
 
-const mono = (size: number): React.CSSProperties => ({
-  fontFamily: FONT_MONO,
-  fontSize: size,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-});
+/** Mono meta line — open status · reply time · reply policy. Each part omitted when unknown. */
+function metaLine(a: Pick<CommunityAgent, "submissionStatus" | "responseTimeWeeks" | "noResponseMeansNo">): string {
+  const parts: string[] = [];
+  if (a.submissionStatus === SubmissionStatus.OPEN) parts.push("Open to queries");
+  else if (a.submissionStatus === SubmissionStatus.CLOSED) parts.push("Closed to queries");
+  if ((a.responseTimeWeeks || 0) > 0) parts.push(`replies ~${a.responseTimeWeeks} wks`);
+  if (a.noResponseMeansNo) parts.push("may not reply");
+  return parts.join(" · ");
+}
 
 export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate }) => {
   const { communityAgents, agents, manuscripts, addAgent, currentUser } = useScriptAllyDb();
@@ -105,33 +133,31 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
 
   // Lens + filters — all client-side over the scored candidate set.
   const [lens, setLens] = useState<DiscoverLens>("best");
-  const [openOnly, setOpenOnly] = useState(true); // matches the old behaviour (closed never shown)
+  const [openOnly, setOpenOnly] = useState(true); // closed agents hidden by default, as before
   const [hideHeld, setHideHeld] = useState(true); // "Not already in my database"
   const [ukiOnly, setUkiOnly] = useState(false); // "UK & Ireland only" — off by default
 
-  // Session-only card state (same lifetime as the old panel's dismiss/add sets).
+  // Session-only card state.
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [lastDismissed, setLastDismissed] = useState<{ id: string; name: string } | null>(null);
   const [added, setAdded] = useState<Set<string>>(new Set());
   const [adding, setAdding] = useState<string | null>(null);
 
-  // The querying batch — session-only bookmarks, no persistence, no schema.
-  const [batch, setBatch] = useState<Set<string>>(new Set());
-  const [batchBusy, setBatchBusy] = useState(false);
-
   // Already-held: exact name+agency, or fuzzy agency+name (the Smart-Import dedupe, as before).
-  const heldIds = useMemo(() => {
-    const held = new Set<string>();
+  // Mapped community id → the USER's agent id, so "Draft a query" can preselect an agent the
+  // writer already holds instead of adding a duplicate.
+  const heldMap = useMemo(() => {
+    const held = new Map<string, string>();
     for (const ca of communityAgents || []) {
       const caKey = agencyKey(ca.agency);
-      const isHeld = agents.some((a) => {
+      const match = agents.find((a) => {
         const exact =
           a.name.trim().toLowerCase() === ca.name.trim().toLowerCase() &&
           a.agency.trim().toLowerCase() === ca.agency.trim().toLowerCase();
         if (exact) return true;
         return agencyKey(a.agency) === caKey && nameCompatible(a.name, ca.name);
       });
-      if (isHeld) held.add(ca.id);
+      if (match) held.set(ca.id, match.id);
     }
     return held;
   }, [communityAgents, agents]);
@@ -142,8 +168,6 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
   // Location-backed controls render only when the catalogue actually carries location data.
   const hasLocations = useMemo(() => locationCoverage(communityAgents || []) > 0, [communityAgents]);
 
-  const trust = useMemo(() => catalogueMeta(communityAgents || []), [communityAgents]);
-
   // Candidate set (threshold-gated, unsorted) → visible (filters + dismissals) → ranked by lens.
   const entries = useMemo(
     () => (selected ? buildDiscoverEntries(communityAgents || [], selected) : []),
@@ -153,30 +177,27 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
     let v = entries.filter((e) => !dismissed.has(e.agent.id));
     if (openOnly) v = v.filter((e) => e.agent.submissionStatus !== SubmissionStatus.CLOSED);
     if (ukiOnly) v = v.filter((e) => isUkIreland(e.agent.country));
-    // Keep a just-added agent visible so its done-state shows (as the old panel did).
-    if (hideHeld) v = v.filter((e) => added.has(e.agent.id) || !heldIds.has(e.agent.id));
+    // Keep a just-added agent visible so its done-state shows.
+    if (hideHeld) v = v.filter((e) => added.has(e.agent.id) || !heldMap.has(e.agent.id));
     return rankEntries(v, activeLens, homeCountry);
-  }, [entries, dismissed, openOnly, ukiOnly, hideHeld, heldIds, added, activeLens, homeCountry]);
+  }, [entries, dismissed, openOnly, ukiOnly, hideHeld, heldMap, added, activeLens, homeCountry]);
+
+  const strongFits = useMemo(() => visible.filter(isStrong), [visible]);
+  const possibleFits = useMemo(() => visible.filter((e) => !isStrong(e)), [visible]);
 
   // First-run / zero-matches sell: no manuscripts at all, or a ZERO candidate set for the selected
-  // one (entries is threshold-gated and pre-filter — matches merely hidden by filters/dismissals
-  // keep the results view and its existing "hidden by your filters" affordance).
+  // one (entries is threshold-gated and pre-filter — matches merely hidden by filters keep the
+  // results view and its own "hidden by your filters" affordance).
   const firstRun = pickable.length === 0 || entries.length === 0;
+
   const tryNextManuscript = () => {
     if (pickable.length < 2 || !selected) return;
     const i = pickable.findIndex((m) => m.id === selected.id);
     setSelectedId(pickable[(i + 1) % pickable.length].id);
   };
 
-  const readiness = useMemo(
-    () =>
-      selected
-        ? manuscriptReadiness(selected, genreWordCountRange(selected.ageCategory, selected.genre))
-        : null,
-    [selected],
-  );
-
-  const handleAdd = async (ca: CommunityAgent): Promise<boolean> => {
+  /** Add a community agent to the user's database. Returns the new agent id, or null on failure. */
+  const handleAdd = async (ca: CommunityAgent): Promise<string | null> => {
     setAdding(ca.id);
     try {
       const result = await addAgent({
@@ -209,69 +230,30 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
           console.error("Failed to increment contributedByCount:", countErr);
         }
         setAdded((prev) => new Set(prev).add(ca.id));
-        // An agent just added is no longer a bookmark candidate — keep the tray truthful.
-        setBatch((prev) => {
-          if (!prev.has(ca.id)) return prev;
-          const next = new Set(prev);
-          next.delete(ca.id);
-          return next;
-        });
-        return true;
+        return result.id ?? null;
       }
       console.error("Failed to add community agent:", result.error);
-      return false;
+      return null;
     } catch (err) {
       console.error("Error adding community agent:", err);
-      return false;
+      return null;
     } finally {
       setAdding(null);
     }
   };
 
-  const toggleBatch = (id: string) => {
-    setBatch((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const batchAgents = useMemo(
-    () => (communityAgents || []).filter((ca) => batch.has(ca.id)),
-    [communityAgents, batch],
-  );
-
-  const handleAddAll = async () => {
-    setBatchBusy(true);
-    try {
-      for (const ca of batchAgents) {
-        if (added.has(ca.id) || heldIds.has(ca.id)) {
-          setBatch((prev) => {
-            const next = new Set(prev);
-            next.delete(ca.id);
-            return next;
-          });
-          continue;
-        }
-        const ok = await handleAdd(ca);
-        if (ok) {
-          setBatch((prev) => {
-            const next = new Set(prev);
-            next.delete(ca.id);
-            return next;
-          });
-        }
-        // Failures stay in the batch so nothing silently vanishes.
-      }
-    } finally {
-      setBatchBusy(false);
-    }
+  /** Draft a query: make sure the agent exists in the writer's database, then open the Log-a-Query
+   *  form preselected on that agent + the current manuscript. Never creates a query record itself. */
+  const handleDraft = async (ca: CommunityAgent) => {
+    const existing = heldMap.get(ca.id);
+    const agentId = existing ?? (await handleAdd(ca));
+    if (!agentId) return;
+    onNavigate?.("queries", "Log a query", { agentId, manuscriptId: selected?.id });
   };
 
   const dismiss = (ca: CommunityAgent) => {
     setDismissed((prev) => new Set(prev).add(ca.id));
-    setLastDismissed({ id: ca.id, name: ca.name });
+    setLastDismissed({ id: ca.id, name: agentPrimary(ca) });
   };
 
   const undoDismiss = () => {
@@ -284,689 +266,447 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
     setLastDismissed(null);
   };
 
-  /* ── Readiness line copy — computed, truthful, nothing fabricated ── */
-  const readinessParts: string[] = [];
-  if (selected && readiness) {
-    if (readiness.fit && readiness.rangeLabel && selected.wordCount) {
-      const verb =
-        readiness.fit === "in" ? "sits in" : readiness.fit === "long" ? "runs long of" : "runs short of";
-      const genreBit = [selected.ageCategory, selected.genre].filter(Boolean).join(" ");
-      readinessParts.push(
-        `${selected.wordCount.toLocaleString()} words ${verb} the ${readiness.rangeLabel} range${genreBit ? ` for ${genreBit}` : ""}`,
+  const hiddenByFilters = selected
+    ? entries.filter((e) => !dismissed.has(e.agent.id)).length - visible.length
+    : 0;
+
+  /* ── One match card ─────────────────────────────────────────────────────
+     `example` renders the same markup inert (the first-run illustration). */
+  const renderCard = (e: DiscoverEntry) => {
+    const { agent } = e;
+    const strong = isStrong(e);
+    const verified = monthYearLabel(agent.lastVerifiedDate);
+    const flag = flagFor(agent.country);
+    const place = agent.city?.trim() || countryName(agent.country);
+    const site = siteLabel(agent.website);
+    const meta = metaLine(agent);
+    const terms = displayTerms(e.breakdown.overlappingWords);
+    const showGenre = e.breakdown.genreScore > 0 && Boolean((selected?.genre || "").trim());
+    const isAdded = added.has(agent.id);
+    const isBusy = adding === agent.id;
+    const held = heldMap.has(agent.id);
+
+    return (
+      <article className="dv-ac" key={agent.id}>
+        <div className={`band ${strong ? "strong" : "possible"}`}>
+          <span className="st">{strong ? "Strong fit" : "Possible fit"}</span>
+          {verified && (
+            <span className="ver">
+              <ShieldCheck aria-hidden="true" />
+              Verified {verified}
+            </span>
+          )}
+        </div>
+        <div className="bd">
+          <div className="who">
+            <span className="av2" aria-hidden="true">{agentInitials(agent)}</span>
+            <span style={{ minWidth: 0 }}>
+              <span className="nm">{agentPrimary(agent)}</span>
+              <span className="ag">{agentSecondary(agent)}</span>
+              {flag && place && (
+                <span className="loc">
+                  <span className={flag} aria-hidden="true" />
+                  {place}
+                </span>
+              )}
+              {meta && <span className="meta">{meta}</span>}
+              {site && (
+                <a
+                  className="site"
+                  href={siteHref(agent.website)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink aria-hidden="true" />
+                  <span>{site}</span>
+                </a>
+              )}
+            </span>
+          </div>
+
+          {(showGenre || terms.length > 0) && (
+            <div className="sect">
+              <div className="sl">Why it fits</div>
+              <div className="why">
+                {showGenre && <span className="g">{selected?.genre}</span>}
+                {showGenre && terms.length > 0 && " · "}
+                {terms.length > 0 && (
+                  <>
+                    wish list matches{" "}
+                    {terms.map((t, i) => (
+                      <React.Fragment key={t}>
+                        {i > 0 && ", "}
+                        <b>{t}</b>
+                      </React.Fragment>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="acts">
+            {isAdded ? (
+              <span className="dv-done">
+                <Check aria-hidden="true" strokeWidth={2.5} />
+                {held ? "In your agents" : "Added to your agents"}
+              </span>
+            ) : (
+              <button type="button" className="dv-add" disabled={isBusy} onClick={() => handleAdd(agent)}>
+                <Plus aria-hidden="true" strokeWidth={2.2} />
+                {isBusy ? "Adding…" : "Add to my agents"}
+              </button>
+            )}
+            <button type="button" className="dv-draft" disabled={isBusy} onClick={() => handleDraft(agent)}>
+              Draft a query
+            </button>
+            <span className="spacer" />
+            {!isAdded && (
+              <button type="button" className="dv-dismiss" onClick={() => dismiss(agent)}>
+                Not a fit
+              </button>
+            )}
+          </div>
+        </div>
+      </article>
+    );
+  };
+
+  const section = (label: string, tier: "strong" | "possible", list: DiscoverEntry[]) =>
+    list.length > 0 && (
+      <>
+        <div className="dv-gsec">
+          <h2>{label}</h2>
+          <span className="cn">{list.length}</span>
+        </div>
+        <div className={`dv-grule ${tier}`} />
+        <div className="dv-grid">{list.map(renderCard)}</div>
+      </>
+    );
+
+  /* ── First-run no-match strip — three manuscript cases ── */
+  const renderNoMatch = () => {
+    if (pickable.length === 0) {
+      return (
+        <div className="dv-nomatch">
+          <div>
+            <div className="nm1">
+              Add a manuscript to see <b>your matches</b>
+            </div>
+            <div className="nm2">
+              Discover scores the catalogue against a specific book — genre, age category and
+              wish-list overlap — so it needs one to work from.
+            </div>
+          </div>
+          <span className="sp" />
+          <button
+            type="button"
+            className="go"
+            onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
+          >
+            Add a manuscript
+          </button>
+        </div>
       );
     }
-    if (readiness.hasLogline && readiness.hasComps) {
-      readinessParts.push("logline ✓ · comps ✓");
-    } else if (!readiness.hasLogline && !readiness.hasComps) {
-      readinessParts.push("add a logline and comp titles — the wish-list match reads both");
-    } else if (!readiness.hasLogline) {
-      readinessParts.push("comps ✓ · add a logline to sharpen wish-list matching");
-    } else {
-      readinessParts.push("logline ✓ · add comp titles to sharpen wish-list matching");
-    }
-  }
-
-  const hiddenByFilters = selected ? entries.filter((e) => !dismissed.has(e.agent.id)).length - visible.length : 0;
+    const genreBit = [selected?.ageCategory, selected?.genre].filter(Boolean).join(" ");
+    const many = pickable.length >= 2;
+    return (
+      <div className="dv-nomatch">
+        <div>
+          <div className="nm1">
+            No matches for <b>{selected?.title}</b> yet
+          </div>
+          <div className="nm2">
+            {genreBit
+              ? `The catalogue is still growing in ${genreBit}. `
+              : "The catalogue is still growing. "}
+            {many
+              ? "Try another manuscript, or check back as we add agents in your genre."
+              : "Check back as we add agents in your genre."}
+          </div>
+        </div>
+        <span className="sp" />
+        {many && (
+          <button type="button" className="go" onClick={tryNextManuscript}>
+            Try another manuscript
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="dv2">
-      {/* The standard page header (shell follow-up P3) — ChromeSlab retired; the ranked-matches
-          pulse line is dropped with it (no meta slot under the header law — rollout report).
-          No CTA: add actions live on the cards + the batch tray. */}
-      <PageHeader
-        variant="full"
-        title="Discover new agents"
-        description="Agents worth a look, matched to what you write." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-      />
+      {/* THE shared page header — identical to the agent list's but for two things: the Pro pill
+          beside the title, and the closing rule rendered 2px in the Pro token (discover.css). The
+          manuscript selector occupies the same slot as the agent list's "Add new agent" button. */}
       <div className="dv-wrap">
-        {firstRun ? (
-          /* ── First-run / zero-matches feature sell — hero + benefits + adaptive action strip +
-                inert example card. Results chrome (trust banner, readiness, lenses, filters) is
-                hidden here; the hero carries the vetting message. ── */
-          <div className="dv-fr" style={{ fontFamily: FONT_SANS }}>
-            <div>
-              <div className="dv-fr-eyebrow">
-                <span className="dv-pro">Pro</span>
-                Discover new agents
-              </div>
-              <h2 className="dv-fr-title">
-                Find the agents your book was <em>written for</em>.
-              </h2>
-              <p className="dv-fr-lead">
-                ScriptAlly scores every agent in its hand-checked catalogue against your manuscript
-                — genre, age category and wish-list overlap — and shows you why each one fits
-                before you query.
-              </p>
-            </div>
-
-            <div className="dv-fr-benefits">
-              <div className="dv-card dv-fr-bcard">
-                <span className="dv-fr-icon"><BookOpen aria-hidden="true" strokeWidth={1.8} /></span>
-                <h3 className="dv-fr-btitle">Matched to your book</h3>
-                <p className="dv-fr-bline">
-                  Suggestions are ranked by real overlap with your genre, age category and themes —
-                  not an alphabetical directory.
-                </p>
-              </div>
-              <div className="dv-card dv-fr-bcard">
-                <span className="dv-fr-icon"><ShieldCheck aria-hidden="true" strokeWidth={1.8} /></span>
-                <h3 className="dv-fr-btitle">Every agent vetted</h3>
-                <p className="dv-fr-bline">
-                  Real agencies, hand-checked and kept current by ScriptAlly — and never one that
-                  charges a reading fee.
-                </p>
-              </div>
-              <div className="dv-card dv-fr-bcard">
-                <span className="dv-fr-icon"><Send aria-hidden="true" strokeWidth={1.8} /></span>
-                <h3 className="dv-fr-btitle">A head start on your query</h3>
-                <p className="dv-fr-bline">
-                  Each match pulls out the wish-list line to lead your letter with — the
-                  personalisation already found for you.
-                </p>
-              </div>
-            </div>
-
-            <div className="dv-fr-strip">
-              {pickable.length === 0 ? (
-                <>
-                  <p className="dv-fr-msg">Add a manuscript to discover agents who fit it.</p>
-                  <button type="button" className="dv-fr-cta" onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}>
-                    <Plus aria-hidden="true" strokeWidth={2.2} /> Add a manuscript
-                  </button>
-                </>
-              ) : pickable.length === 1 ? (
-                <p className="dv-fr-msg">
-                  No matches for <strong>{selected?.title}</strong> yet — we'll surface fits here
-                  as we add agents in {selected?.genre || "your genre"}. Check back soon.
-                </p>
+        <PageHeader
+          variant="full"
+          title="Discover new agents"
+          description="Verified agents matched to your manuscript — with the reasons they fit."
+          titleAdornment={<span className="dv-propill">Pro</span>}
+          actionsSlot={
+            selected ? (
+              pickable.length >= 2 ? (
+                <button
+                  type="button"
+                  className="dv-msel"
+                  onClick={tryNextManuscript}
+                  title="Switch manuscript"
+                >
+                  <span className="k">Finding for</span>
+                  {selected.title}
+                  <ChevronDown aria-hidden="true" />
+                </button>
               ) : (
-                <>
-                  <p className="dv-fr-msg">
-                    No matches for <strong>{selected?.title}</strong> yet — the catalogue's still
-                    growing in {selected?.genre || "your genre"}.
+                <span className="dv-msel">
+                  <span className="k">Finding for</span>
+                  {selected.title}
+                </span>
+              )
+            ) : undefined
+          }
+        />
+        <div>
+          {/* The vetting strip earns its place beside real matches; in the first-run state the
+              no-match message takes this position instead. */}
+          {!firstRun && (
+            <div className="dv-trust">
+              <ShieldCheck aria-hidden="true" />
+              <span>
+                <b>Every agent here is vetted.</b> A real agency, hand-checked and kept current —
+                and never one that charges a fee.{" "}
+                <button type="button" className="dv-verify" onClick={() => onNavigate?.("help")}>
+                  How we verify →
+                </button>
+              </span>
+            </div>
+          )}
+
+          {firstRun ? (
+            <>
+              {/* The no-match message takes the vetting strip's position, directly under the rule. */}
+              {renderNoMatch()}
+
+              {/* ── The centred feature reel — sits ON the page, no card wrapper ── */}
+              <section className="dv-reel">
+                <span className="dv-eyebrow">Pro · Discover new agents</span>
+                <h2>The right agents are already looking for a book like yours.</h2>
+                <p className="lead">
+                  ScriptAlly scores every agent in its hand-checked catalogue against your
+                  manuscript — genre, age category and wish-list overlap — and shows you why each
+                  one fits before you query.
+                </p>
+                <div className="dv-cols">
+                  <div className="dv-col">
+                    <AnimationSlot label="Matched to your book" />
+                    <h3>Matched to your book</h3>
+                    <p>
+                      Ranked by real overlap with your genre and themes — not an alphabetical
+                      directory to trawl.
+                    </p>
+                  </div>
+                  <div className="dv-col">
+                    <AnimationSlot label="Every agent vetted" />
+                    <h3>Every agent vetted</h3>
+                    <p>
+                      Real agencies, hand-checked and kept current — and never one that charges a
+                      reading fee.
+                    </p>
+                  </div>
+                  <div className="dv-col">
+                    <AnimationSlot label="A head start on your query" />
+                    <h3>A head start on your query</h3>
+                    <p>
+                      Each match pulls out the wish-list line to lead your letter with — the
+                      personalisation, found for you.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* ── What a match looks like — copy left, an inert ILLUSTRATION right ── */}
+              <div className="dv-exrule" />
+              <section className="dv-matchsec">
+                <div>
+                  <h2>What a match looks like</h2>
+                  <p>
+                    Every match tells you how strongly it fits and why — the genre overlap, and the
+                    exact wish-list lines your book speaks to, ready to lead your query letter with.
+                    You'll see where they're based, how long they take to reply, and a link straight
+                    to their submission page. When one looks right, add them in a click — or start
+                    the query there and then.
                   </p>
-                  <div className="flex flex-wrap" style={{ gap: 8 }}>
-                    {pickable.map((m) => {
-                      const isSel = selected?.id === m.id;
-                      return (
-                        <button key={m.id} type="button" className={`dv-mspill${isSel ? " on" : ""}`} onClick={() => setSelectedId(m.id)} aria-pressed={isSel}>
-                          <div style={{ fontFamily: FONT_SERIF, fontSize: 13.5, fontWeight: 600, lineHeight: 1.1 }}>{m.title}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button type="button" className="dv-fr-cta" onClick={tryNextManuscript}>
-                    Try another manuscript
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Example match — what a real suggestion looks like. Illustrative and inert; only
-                real card capabilities shown (fit band, chips, wish-list hook, verified date, the
-                real add/dismiss actions) — nothing fabricated. */}
-            <div className="dv-fr-exwrap">
-              <span className="dv-fr-exflag">Example</span>
-              <div className="dv-card dv-fr-example" aria-label="Example of a match card">
-                <div className="flex items-start justify-between" style={{ gap: 12 }}>
-                  <div className="flex items-center" style={{ gap: 12, minWidth: 0 }}>
-                    <span className="dv-fr-av" aria-hidden="true">EW</span>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "var(--dv-ink)", lineHeight: 1.2 }}>
-                        Eleanor Whitcombe
-                      </div>
-                      <div style={{ ...mono(10), color: "var(--dv-muted)", marginTop: 2 }}>Marsh &amp; Tide Literary</div>
+                </div>
+                <div className="dv-exhold">
+                  <span className="dv-exflag">Example</span>
+                  <article className="dv-ac" aria-hidden="true">
+                    <div className="band strong">
+                      <span className="st">Strong fit</span>
+                      <span className="ver">
+                        <ShieldCheck aria-hidden="true" />
+                        Verified Jun 2026
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end" style={{ gap: 5, flexShrink: 0 }}>
-                    <span className="dv-band strong" style={{ fontFamily: FONT_MONO }}>{BAND_LABEL.strong}</span>
-                    <span className="dv-fr-vbadge">Verified Jun 2026</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap" style={{ gap: 6, marginTop: 11 }}>
-                  <span className="dv-chip">Literary Fiction</span>
-                  <span className="dv-chip">Matches your wish list</span>
-                </div>
-                <p style={{ fontFamily: FONT_SERIF, fontSize: 13, color: "var(--dv-ink)", lineHeight: 1.6, margin: "11px 0 0" }}>
-                  "Quiet, voice-led stories about <span className="dv-fr-mark">family</span>,{" "}
-                  <span className="dv-fr-mark">memory</span> and{" "}
-                  <span className="dv-fr-mark">coastal communities</span> — I want prose with real
-                  rhythm."
-                </p>
-                <p style={{ ...mono(9.5), color: "var(--dv-muted)", margin: "10px 0 0" }}>
-                  Open to queries · Replies in ~8 wk
-                </p>
-                <div className="flex" style={{ gap: 9, marginTop: 13 }} aria-hidden="true">
-                  <span className="sa-btn dv-btn" style={{ fontFamily: FONT_SANS }}>
-                    <Plus style={{ width: 14, height: 14 }} strokeWidth={2.4} aria-hidden="true" /> Add to my agents
-                  </span>
-                  <span className="dv-quiet" style={{ fontFamily: FONT_SANS }}>Dismiss</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-        <p
-          style={{
-            fontFamily: FONT_SANS,
-            fontSize: 13.5,
-            fontWeight: 300,
-            color: "var(--dv-muted)",
-            margin: "0 0 16px",
-            lineHeight: 1.5,
-          }}
-        >
-          Ranked matches for your manuscript from the verified community catalogue — with the why
-          behind every suggestion.
-        </p>
-
-        {/* ── Trust banner — the HONEST version: no legitimacy fields exist on the record yet,
-              so no AAA/no-fee claims. Count + date are derived from real catalogue fields. ── */}
-        <div className="dv-trust" style={{ marginBottom: 18 }}>
-          <span className="flex items-center" style={{ gap: 10, minWidth: 0 }}>
-            <ShieldCheck
-              aria-hidden="true"
-              style={{ width: 18, height: 18, color: "var(--acc, #7c3a2a)", flexShrink: 0 }}
-              strokeWidth={1.8}
-            />
-            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "var(--band-strong, #4a4036)", lineHeight: 1.45 }}>
-              <strong style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600 }}>
-                Every agent here is hand-verified.
-              </strong>{" "}
-              A real agency, checked and kept current by ScriptAlly.
-            </span>
-          </span>
-          <span style={{ ...mono(9.5), color: "var(--band-meta, #705e46)", whiteSpace: "nowrap", flexShrink: 0 }}>
-            {trust.count} agent{trust.count === 1 ? "" : "s"}
-            {trust.lastCheckedLabel ? ` · last checked ${trust.lastCheckedLabel}` : ""}
-          </span>
-        </div>
-
-        {/* ── Results view — first-run (zero matches / no manuscripts) never reaches here ── */}
-            {/* ── Manuscript selector — only when there's a real choice ── */}
-            {pickable.length >= 2 && (
-              <div style={{ marginBottom: 14 }}>
-                <span style={{ ...mono(9.5), color: "var(--dv-muted)" }}>Finding agents for</span>
-                <div className="flex flex-wrap" style={{ gap: 8, marginTop: 8 }}>
-                  {pickable.map((m) => {
-                    const isSel = selected?.id === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        className={`dv-mspill${isSel ? " on" : ""}`}
-                        onClick={() => setSelectedId(m.id)}
-                        aria-pressed={isSel}
-                      >
-                        <div style={{ fontFamily: FONT_SERIF, fontSize: 13.5, fontWeight: 600, lineHeight: 1.1 }}>
-                          {m.title}
+                    <div className="bd">
+                      <div className="who">
+                        <span className="av2">EW</span>
+                        <span style={{ minWidth: 0 }}>
+                          <span className="nm">Eleanor Whitcombe</span>
+                          <span className="ag">Marsh &amp; Tide Literary</span>
+                          <span className="loc">
+                            <span className="fi fi-gb" />
+                            London
+                          </span>
+                          <span className="meta">Open to queries · replies ~8 wks</span>
+                          <span className="site">
+                            <ExternalLink aria-hidden="true" />
+                            <span>marshandtide.co.uk</span>
+                          </span>
+                        </span>
+                      </div>
+                      <div className="sect">
+                        <div className="sl">Why it fits</div>
+                        <div className="why">
+                          <span className="g">Literary Fiction</span> · wish list matches{" "}
+                          <b>family</b>, <b>memory</b>, <b>coastal communities</b>
                         </div>
-                        <div
-                          style={{
-                            fontFamily: FONT_MONO,
-                            fontSize: 9.5,
-                            marginTop: 3,
-                            color: isSel ? "rgba(255,255,255,0.82)" : "var(--dv-muted)",
-                          }}
-                        >
-                          {[m.genre, m.wordCount ? `${Math.round(m.wordCount / 1000)}k words` : ""]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </div>
-                      </button>
-                    );
-                  })}
+                      </div>
+                      <div className="acts">
+                        <span className="dv-add">
+                          <Plus aria-hidden="true" strokeWidth={2.2} />
+                          Add to my agents
+                        </span>
+                        <span className="dv-draft">Draft a query</span>
+                        <span className="spacer" />
+                        <span className="dv-dismiss">Not a fit</span>
+                      </div>
+                    </div>
+                  </article>
                 </div>
-              </div>
-            )}
-
-            {/* ── Readiness line — word count vs the genre range + materials presence ── */}
-            {selected && readinessParts.length > 0 && (
-              <p
-                style={{
-                  fontFamily: FONT_SANS,
-                  fontSize: 12,
-                  color: "var(--dv-muted)",
-                  margin: "0 0 16px",
-                  lineHeight: 1.5,
-                }}
-              >
-                <span style={{ ...mono(9.5), color: "var(--dv-muted)", marginRight: 8 }}>Readiness</span>
-                {readinessParts.join(" · ")}
-              </p>
-            )}
-
-            {/* ── Lenses + filters ── */}
-            <div
-              className="flex flex-wrap items-center justify-between"
-              style={{ gap: 10, marginBottom: 8 }}
-            >
-              <div className="flex flex-wrap items-center" style={{ gap: 6 }} role="group" aria-label="Ranking lens">
+              </section>
+            </>
+          ) : (
+            <>
+              {/* ── Controls (below the Pro strip) ── */}
+              <div className="dv-line">
+                <span className="dv-cnt">Ranked by</span>
                 {lenses.map((l) => (
                   <button
                     key={l}
                     type="button"
+                    className={`dv-ctl${activeLens === l ? " act" : ""}`}
                     aria-pressed={activeLens === l}
-                    className={`dv-lens${activeLens === l ? " on" : ""}`}
-                    style={{ fontFamily: FONT_SANS }}
                     onClick={() => setLens(l)}
                   >
                     {LENS_META[l].label}
                   </button>
                 ))}
+                <span className="dv-push" />
+                <span className="dv-cnt">
+                  {visible.length} {visible.length === 1 ? "match" : "matches"}
+                </span>
               </div>
-              <div className="flex flex-wrap items-center" style={{ gap: 6 }}>
+              <div className="dv-line">
+                <span className="dv-cnt">Filters</span>
                 <button
                   type="button"
+                  className={`dv-ctl${openOnly ? " act" : ""}`}
                   aria-pressed={openOnly}
-                  className={`dv-filter${openOnly ? " on" : ""}`}
-                  style={{ fontFamily: FONT_SANS }}
                   onClick={() => setOpenOnly((v) => !v)}
                 >
-                  {openOnly && <Check style={{ width: 11, height: 11 }} strokeWidth={2.5} aria-hidden="true" />}
+                  {openOnly && <Check aria-hidden="true" strokeWidth={2.6} />}
                   Open to submissions
                 </button>
                 <button
                   type="button"
+                  className={`dv-ctl${hideHeld ? " act" : ""}`}
                   aria-pressed={hideHeld}
-                  className={`dv-filter${hideHeld ? " on" : ""}`}
-                  style={{ fontFamily: FONT_SANS }}
                   onClick={() => setHideHeld((v) => !v)}
                 >
-                  {hideHeld && <Check style={{ width: 11, height: 11 }} strokeWidth={2.5} aria-hidden="true" />}
+                  {hideHeld && <Check aria-hidden="true" strokeWidth={2.6} />}
                   Not already in my database
                 </button>
                 {hasLocations && (
                   <button
                     type="button"
+                    className={`dv-ctl${ukiOnly ? " act" : ""}`}
                     aria-pressed={ukiOnly}
-                    className={`dv-filter${ukiOnly ? " on" : ""}`}
-                    style={{ fontFamily: FONT_SANS }}
                     onClick={() => setUkiOnly((v) => !v)}
                   >
-                    {ukiOnly && <Check style={{ width: 11, height: 11 }} strokeWidth={2.5} aria-hidden="true" />}
+                    {ukiOnly && <Check aria-hidden="true" strokeWidth={2.6} />}
                     UK &amp; Ireland only
                   </button>
                 )}
               </div>
-            </div>
 
-            {/* ── Ranked-by caption — the order IS the rank (no numbering on cards) ── */}
-            {selected && (
-              <p style={{ ...mono(9.5), color: "var(--dv-muted)", margin: "0 0 12px" }}>
-                {visible.length} match{visible.length === 1 ? "" : "es"} for {selected.title} ·{" "}
-                {LENS_META[activeLens].caption}
-              </p>
-            )}
-
-            {/* ── Cards ── */}
-            {visible.length === 0 ? (
-              <div
-                style={{
-                  fontFamily: FONT_SERIF,
-                  fontStyle: "italic",
-                  fontSize: 13,
-                  color: "var(--dv-muted)",
-                  lineHeight: 1.5,
-                  textAlign: "center",
-                  padding: "26px 18px",
-                  background: "var(--card, #fffefb)",
-                  border: "1px dashed var(--dv-line)",
-                  borderRadius: 10,
-                }}
-              >
-                {hiddenByFilters > 0 ? (
-                  <>
-                    {hiddenByFilters} match{hiddenByFilters === 1 ? " is" : "es are"} hidden by your
-                    filters.{" "}
-                    <button
-                      type="button"
-                      className="dv-quiet"
-                      style={{ fontFamily: FONT_SANS, fontWeight: 600, color: "var(--acc, #7c3a2a)" }}
-                      onClick={() => {
-                        setOpenOnly(false);
-                        setHideHeld(false);
-                        setUkiOnly(false);
-                      }}
-                    >
-                      Show everything
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    Nothing to suggest just yet — the community catalogue is still growing. Once there
-                    are verified agents who fit {selected?.genre || "this manuscript"}, they'll rank
-                    here.
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="flex flex-col" style={{ gap: 12 }}>
-                {visible.map((entry) => {
-                  const { agent, breakdown, score, tier } = entry;
-                  const isAdded = added.has(agent.id);
-                  const isHeld = heldIds.has(agent.id) && !isAdded;
-                  const isAdding = adding === agent.id;
-                  const inBatch = batch.has(agent.id);
-                  const isOpen = agent.submissionStatus === SubmissionStatus.OPEN;
-                  const isClosed = agent.submissionStatus === SubmissionStatus.CLOSED;
-                  const verified = monthYearLabel(agent.lastVerifiedDate);
-                  const checked = monthYearLabel(agent.lastCheckedDate);
-                  const hook = topHookTerm(breakdown.overlappingWords);
-                  const segments = agent.mswlNotes
-                    ? highlightSegments(agent.mswlNotes, breakdown.overlappingWords)
-                    : [];
-
-                  // Why chips — each bound to a real contributing signal; the active lens's chip leads.
-                  const chips: { key: string; label: React.ReactNode }[] = [];
-                  if (breakdown.genreScore > 0 && (selected?.genre || "").trim()) {
-                    chips.push({
-                      key: "genre",
-                      label: (
-                        <>
-                          <Check style={{ width: 11, height: 11 }} strokeWidth={2.5} aria-hidden="true" />
-                          {selected?.genre}
-                        </>
-                      ),
-                    });
-                  }
-                  if (breakdown.mswlScore > 0) {
-                    chips.push({ key: "wish", label: "Matches your wish list" });
-                  }
-                  if (breakdown.ageScore > 0 && (selected?.ageCategory || "").trim()) {
-                    chips.push({
-                      key: "age",
-                      label: (
-                        <>
-                          <Check style={{ width: 11, height: 11 }} strokeWidth={2.5} aria-hidden="true" />
-                          {selected?.ageCategory}
-                        </>
-                      ),
-                    });
-                  }
-                  if ((agent.responseTimeWeeks || 0) > 0) {
-                    chips.push({ key: "replies", label: `Replies in ~${agent.responseTimeWeeks}wk` });
-                  }
-                  // Location chip — only when the record's country resolves (flag ⇒ known country).
-                  const flag = flagFor(agent.country);
-                  const location = agentLocation(agent);
-                  if (flag && location) {
-                    chips.push({
-                      key: "loc",
-                      label: (
-                        <>
-                          <span className={flag} aria-hidden="true" style={{ borderRadius: 2 }} />
-                          {location}
-                        </>
-                      ),
-                    });
-                  }
-                  const leadKey = LENS_LEAD_CHIP[activeLens];
-                  chips.sort((a, b) => Number(b.key === leadKey) - Number(a.key === leadKey));
-
-                  return (
-                    <div key={agent.id} className={`dv-card${isHeld ? " held" : ""}`}>
-                      {/* Identity row + fit band & score */}
-                      <div className="flex items-start justify-between" style={{ gap: 12 }}>
-                        <div className="flex items-center" style={{ gap: 12, minWidth: 0 }}>
-                          <span className="dv-mono" style={{ fontFamily: FONT_SANS }} aria-hidden="true">
-                            {getInitials(agent.name)}
-                          </span>
-                          <div style={{ minWidth: 0 }}>
-                            <div
-                              style={{
-                                fontFamily: FONT_SERIF,
-                                fontSize: 17,
-                                fontWeight: 600,
-                                color: "var(--dv-ink)",
-                                lineHeight: 1.2,
-                              }}
-                            >
-                              {agent.name}
-                            </div>
-                            <div style={{ ...mono(10), color: "var(--dv-muted)", marginTop: 2 }}>
-                              {agent.agency || "Independent"}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end" style={{ gap: 5, flexShrink: 0 }}>
-                          <span className={`dv-band ${tier}`} style={{ fontFamily: FONT_MONO }}>
-                            {BAND_LABEL[tier]}
-                          </span>
-                          <span
-                            title="Match score from genre, wish-list and age-category fit"
-                            style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 700, color: "var(--dv-ink)", lineHeight: 1 }}
-                          >
-                            {score100(score)}
-                            <span style={{ ...mono(9), color: "var(--dv-muted)", marginLeft: 3 }}>/100</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Why chips */}
-                      {chips.length > 0 && (
-                        <div className="flex flex-wrap items-center" style={{ gap: 6, marginTop: 11 }}>
-                          {chips.map((c) => (
-                            <span
-                              key={c.key}
-                              className={`dv-chip${c.key === leadKey ? " lead" : ""}`}
-                              style={{ fontFamily: FONT_SANS }}
-                            >
-                              {c.label}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Wish-list personalisation hook — only when mswlNotes exists */}
-                      {agent.mswlNotes && (
-                        <div className="dv-wish">
-                          <span style={{ ...mono(9), color: "var(--dv-muted)" }}>
-                            Their wish list — your personalisation hook
-                          </span>
-                          <p className="dv-wish-quote">
-                            {"“"}
-                            {segments.map((seg, i) =>
-                              seg.hit ? (
-                                <span key={i} className="dv-wish-hit">
-                                  {seg.text}
-                                </span>
-                              ) : (
-                                <React.Fragment key={i}>{seg.text}</React.Fragment>
-                              ),
-                            )}
-                            {"”"}
-                          </p>
-                          {hook && (
-                            <p className="dv-wish-prompt" style={{ fontFamily: FONT_SANS }}>
-                              They want <strong>{hook}</strong> — lead your query with it.
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Meta strip — every item conditional on a real field, never fabricated */}
-                      <div className="dv-meta" style={{ fontFamily: FONT_MONO }}>
-                        {isOpen && (
-                          <span className="item" style={{ color: "var(--dv-good)" }}>
-                            <span
-                              aria-hidden="true"
-                              style={{ width: 6, height: 6, borderRadius: 999, background: "var(--dv-good)", display: "inline-block" }}
-                            />
-                            Open to queries
-                          </span>
-                        )}
-                        {isClosed && <span className="item">Closed to queries</span>}
-                        {(agent.responseTimeWeeks || 0) > 0 && (
-                          <span className="item">
-                            Replies ~{agent.responseTimeWeeks}wk
-                            {agent.noResponseMeansNo ? " · may not reply" : ""}
-                          </span>
-                        )}
-                        {verified ? (
-                          <span className="item">
-                            <ShieldCheck style={{ width: 12, height: 12, color: "var(--dv-good)" }} strokeWidth={2} aria-hidden="true" />
-                            Verified {verified}
-                          </span>
-                        ) : checked ? (
-                          /* Honest fallback when no verified date parses — real check date only. */
-                          <span className="item">
-                            <ShieldCheck style={{ width: 12, height: 12, color: "var(--dv-good)" }} strokeWidth={2} aria-hidden="true" />
-                            Hand-verified · last checked {checked}
-                          </span>
-                        ) : null}
-                        {(agent.communityQueryCount || 0) > 0 && (
-                          <span className="item">
-                            Queried by {agent.communityQueryCount} writer
-                            {agent.communityQueryCount === 1 ? "" : "s"} here
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Actions — "Add & draft query" deliberately absent (no pre-fill seam; see header) */}
-                      <div className="flex items-center justify-between" style={{ gap: 10, marginTop: 13 }}>
-                        <div className="flex items-center" style={{ gap: 8 }}>
-                          {isHeld ? (
-                            <span
-                              className="inline-flex items-center"
-                              style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, color: "var(--dv-good)" }}
-                            >
-                              <Check style={{ width: 14, height: 14 }} strokeWidth={2.5} aria-hidden="true" />
-                              In your agents
-                            </span>
-                          ) : isAdded ? (
-                            <span
-                              className="inline-flex items-center"
-                              style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12, fontWeight: 600, color: "var(--dv-good)" }}
-                            >
-                              <Check style={{ width: 14, height: 14 }} strokeWidth={2.5} aria-hidden="true" />
-                              Added to your agents
-                            </span>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                className="sa-btn dv-btn"
-                                style={{ fontFamily: FONT_SANS }}
-                                disabled={isAdding || batchBusy}
-                                onClick={() => handleAdd(agent)}
-                              >
-                                <Plus style={{ width: 14, height: 14 }} strokeWidth={2.4} aria-hidden="true" />
-                                {isAdding ? "Adding…" : "Add to my agents"}
-                              </button>
-                              <button
-                                type="button"
-                                className="sa-btn dv-btn"
-                                style={{ fontFamily: FONT_SANS }}
-                                aria-pressed={inBatch}
-                                onClick={() => toggleBatch(agent.id)}
-                              >
-                                {inBatch ? (
-                                  <BookmarkCheck style={{ width: 14, height: 14 }} strokeWidth={2.2} aria-hidden="true" />
-                                ) : (
-                                  <Bookmark style={{ width: 14, height: 14 }} strokeWidth={2.2} aria-hidden="true" />
-                                )}
-                                {inBatch ? "In your batch" : "Add to batch"}
-                              </button>
-                            </>
-                          )}
-                        </div>
-                        {!isAdded && !isHeld && (
-                          <button
-                            type="button"
-                            className="dv-quiet"
-                            style={{ fontFamily: FONT_SANS }}
-                            onClick={() => dismiss(agent)}
-                          >
-                            Not a fit
-                          </button>
-                        )}
-                      </div>
+              {visible.length === 0 ? (
+                <div className="dv-nomatch" style={{ marginTop: 26 }}>
+                  <div>
+                    <div className="nm1">
+                      Nothing showing for <b>{selected?.title}</b>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Session-only Undo for the last dismissal */}
-            {lastDismissed && (
-              <div
-                className="flex items-center justify-between"
-                style={{
-                  marginTop: 12,
-                  padding: "8px 12px",
-                  borderRadius: 8,
-                  background: "var(--card, #fffefb)",
-                  border: "1px solid var(--dv-line)",
-                }}
-              >
-                <span style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "var(--dv-muted)" }}>
-                  Removed{" "}
-                  <strong style={{ color: "var(--dv-ink)", fontWeight: 600 }}>{lastDismissed.name}</strong>{" "}
-                  from suggestions
-                </span>
-                <button
-                  type="button"
-                  className="dv-quiet"
-                  style={{ fontFamily: FONT_SANS, fontWeight: 600, color: "var(--acc, #7c3a2a)" }}
-                  onClick={undoDismiss}
-                >
-                  Undo
-                </button>
-              </div>
-            )}
-
-            {/* ── Querying batch tray — session-only, sticky against the stage scrollport ── */}
-            {batch.size > 0 && (
-              <div className="dv-batch" role="region" aria-label="Your querying batch" aria-live="polite">
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: FONT_SERIF, fontSize: 14.5, fontWeight: 600, color: "var(--dv-ink)" }}>
-                    Your querying batch · {batch.size}
+                    <div className="nm2">
+                      {hiddenByFilters > 0
+                        ? `${hiddenByFilters} ${hiddenByFilters === 1 ? "match is" : "matches are"} hidden by your filters.`
+                        : "Every match has been set aside this session."}
+                    </div>
                   </div>
-                  <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "var(--dv-muted)", marginTop: 2 }}>
-                    Query in small batches of 5–10 — a focused round beats a blast.
-                  </div>
-                  <div className="flex flex-wrap" style={{ gap: 6, marginTop: 8 }}>
-                    {batchAgents.map((ca) => (
-                      <span key={ca.id} className="dv-batch-chip" style={{ fontFamily: FONT_SANS }}>
-                        {ca.name}
-                        <button
-                          type="button"
-                          aria-label={`Remove ${ca.name} from batch`}
-                          onClick={() => toggleBatch(ca.id)}
-                        >
-                          <X style={{ width: 12, height: 12 }} strokeWidth={2.2} aria-hidden="true" />
-                        </button>
+                  <span className="sp" />
+                  <button
+                    type="button"
+                    className="go"
+                    onClick={() => {
+                      setOpenOnly(false);
+                      setHideHeld(false);
+                      setUkiOnly(false);
+                      setDismissed(new Set());
+                      setLastDismissed(null);
+                    }}
+                  >
+                    Show everything
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {section("Strong fits", "strong", strongFits)}
+                  {section("Possible fits", "possible", possibleFits)}
+                  {hiddenByFilters > 0 && (
+                    <div className="dv-undo" style={{ marginTop: 22 }}>
+                      <span>
+                        {hiddenByFilters} more {hiddenByFilters === 1 ? "agent is" : "agents are"}{" "}
+                        hidden by your filters.
                       </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
-                  <button
-                    type="button"
-                    className="sa-btn dv-btn"
-                    style={{ fontFamily: FONT_SANS }}
-                    disabled={batchBusy}
-                    onClick={handleAddAll}
-                  >
-                    <Plus style={{ width: 14, height: 14 }} strokeWidth={2.4} aria-hidden="true" />
-                    {batchBusy ? "Adding…" : "Add all to my agents"}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpenOnly(false);
+                          setHideHeld(false);
+                          setUkiOnly(false);
+                        }}
+                      >
+                        Show them
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {lastDismissed && (
+                <div className="dv-undo">
+                  <span>
+                    Removed <strong>{lastDismissed.name}</strong> from your matches
+                  </span>
+                  <button type="button" onClick={undoDismiss}>
+                    Undo
                   </button>
-                  <button
-                    type="button"
-                    className="dv-quiet"
-                    style={{ fontFamily: FONT_SANS }}
-                    disabled={batchBusy}
-                    onClick={() => setBatch(new Set())}
-                  >
-                    Clear
-                  </button>
                 </div>
-              </div>
-            )}
-          </>
-        )}
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

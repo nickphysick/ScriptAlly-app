@@ -1,0 +1,419 @@
+<!--
+  ScriptAlly — Packages: the two-tab surface (Workshop · Analytics), swept to composition bars.
+
+  PROVENANCE: SPEC-DERIVED MOCK, not a build artefact. Authored to specify the design; it is not
+  generated from, and does not run against, the app's data or components.
+
+  DATA HONESTY: every figure in it is illustrative. In particular all COMMUNITY PERCENTILE claims
+  ("higher than N% of ScriptAlly writers", "TOP 10%", "BEATS 71%") are PLACEHOLDERS — no community
+  aggregation pipeline exists, and pre-launch there is no cohort to aggregate. The build renders that
+  surface behind a default-off flag and never invents numbers at runtime. See
+  reports/community-percentiles.md.
+
+  Source of truth for: layout, tokens, copy and component grammar. Port faithfully.
+-->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Packages: Workshop + Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2e2723;--ink-soft:#6a615a;--muted:#9c8878;--burgundy:#7c3a2a;
+  --pink:#f5e2da;--pink-line:#e8c8bc;--sage-band:#dce0d9;--slate:#6a89a7;--gold:#8a6a1f;--gold-fill:#f4ead2;--tan:#efe7db;
+  --ground:#e7e0d5;--plane-s:#fdfbf8;--fill:#efe8df;--card:#fdfaf5;--line:#e3d9cf;--linesoft:#ece3da;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;padding:24px 16px 80px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.frame{max-width:1300px;margin:0 auto;background:var(--plane-s);border-radius:18px;box-shadow:0 10px 30px rgba(58,28,20,.09);overflow:hidden}
+.tb{height:52px;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:1px solid var(--linesoft)}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.pg{padding:26px 56px 54px}
+.inner{max-width:1180px;margin:0 auto}
+.phtop{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+h1.t{font-family:"Playfair Display",serif;font-size:34px;font-weight:500;letter-spacing:-.015em}
+.sub{font-family:"Playfair Display",serif;font-size:15.5px;color:var(--ink-soft);margin-top:8px}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:11px;border:1px solid var(--pink-line);background:var(--pink);color:var(--burgundy);font-size:12.5px;cursor:pointer;white-space:nowrap}
+.tabs{display:flex;gap:22px;margin-top:18px;border-bottom:1px solid var(--linesoft)}
+.tab{font-family:"Playfair Display",serif;font-size:16px;color:var(--ink-soft);padding:9px 2px;cursor:pointer;border-bottom:2px solid transparent}
+.tab.on{color:var(--burgundy);border-bottom-color:var(--burgundy)}
+.tab .n{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);margin-left:4px}
+.tv{display:none;padding-top:24px}
+.tv.show{display:block}
+.sl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.note{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);border-left:2px solid var(--pink-line);padding-left:11px;line-height:1.55}
+
+/* ===== Workshop tab ===== */
+.wrap2{display:flex;gap:26px;align-items:flex-start}
+.side{width:258px;flex:none}
+.shead{display:flex;align-items:center;margin-bottom:11px}
+.shead .edit{margin-left:auto;font-size:11.5px;color:var(--burgundy);cursor:pointer}
+.mgrp{margin-bottom:15px}
+.mgrp .sl{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.mgrp .sl i{color:var(--burgundy);font-style:normal;font-size:10px}
+.mchip{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:grab;transition:border-color .15s,box-shadow .15s}
+.mchip:hover{border-color:#cfc2b4;box-shadow:2px 3px 0 rgba(46,39,35,.06)}
+.mchip .nm2{font-family:"Playfair Display",serif;font-size:13.5px;line-height:1.1}
+.mchip .use{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.05em;color:var(--muted);margin-top:3px}
+.mchip .use.hot{color:var(--gold)}
+.mchip .grip{margin-left:auto;color:#cfc2b4;font-size:11px;letter-spacing:-2px}
+.mnew{display:flex;align-items:center;gap:7px;border:1.5px dashed #cfc2b4;border-radius:10px;padding:8px 11px;color:var(--muted);font-size:11.5px;font-style:italic;cursor:pointer}
+.mnew:hover{border-color:var(--burgundy);color:var(--burgundy)}
+.main2{flex:1;min-width:0}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px}
+
+/* flip cards, agent-card formatting */
+.fc{perspective:1200px;min-height:264px}
+.fci{position:relative;width:100%;height:100%;min-height:264px;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,.1,.2,1)}
+.fc.flip .fci{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;background:#fff;border:1px solid var(--ink);border-radius:11px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07);display:flex;flex-direction:column}
+.face.back{transform:rotateY(180deg)}
+.fc.active .face{box-shadow:3px 5px 0 rgba(46,39,35,.13);outline:2px solid var(--ink);outline-offset:2px}
+.band{display:flex;align-items:center;gap:7px;padding:8px 12px;border-bottom:1px solid var(--ink)}
+.pill{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:2.5px 8px}
+.pill.solid{background:var(--burgundy);border-color:var(--burgundy);color:#fff}
+.req{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--gold);background:var(--gold-fill);border-radius:99px;padding:2.5px 8px}
+.spin{width:22px;height:22px;border-radius:99px;border:1px solid rgba(46,39,35,.45);display:grid;place-items:center;background:#fff;cursor:pointer;flex:none}
+.spin svg{width:11px;height:11px}
+.req+.spin{margin-left:8px}
+.band .spin:only-of-type{margin-left:auto}
+.fbd{padding:13px 14px;flex:1}
+.fbd .nm{font-family:"Playfair Display",serif;font-size:17.5px;line-height:1.15}
+.mrow2{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);padding:6px 0;border-bottom:1px dashed var(--linesoft)}
+.mrow2:last-child{border-bottom:0}
+.mrow2 .g3{width:20px;height:20px;border-radius:6px;background:var(--fill);color:var(--burgundy);display:grid;place-items:center;font-size:9px;flex:none}
+.mrow2.dim{color:#b8a996;font-style:italic}
+.mrow2.dim .g3{color:#cfc2b4}
+.ffoot{display:flex;align-items:center;border-top:1px solid var(--linesoft);padding:9px 13px;font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.06em;color:var(--muted)}
+.ffoot .fa2{margin-left:auto;font-family:"Inter";font-size:11px;color:var(--burgundy);cursor:pointer;letter-spacing:0}
+/* back face */
+.back .fbd{padding:12px 14px}
+.hero3{display:flex;align-items:center;gap:12px;margin-top:8px}
+.hero3 .big{font-family:"Playfair Display",serif;font-size:36px;font-weight:600;color:var(--ink);line-height:.85}
+.hero3 .lb b{display:block;font-size:12.5px}
+.hero3 .lb span{font-family:"JetBrains Mono",monospace;font-size:7px;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px}
+.srow{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dashed var(--linesoft);font-size:11.5px;color:var(--ink-soft)}
+.srow:last-child{border-bottom:0}
+.srow b{margin-left:auto;font-family:"Playfair Display",serif;font-size:13px;color:var(--ink)}
+.srow b.g{color:var(--ink)}
+.mkact{width:100%;margin-top:10px;display:inline-flex;align-items:center;justify-content:center;height:31px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:11.5px;cursor:pointer}
+.newp{border:1.5px dashed #cfc2b4;border-radius:11px;display:grid;place-items:center;min-height:264px;color:var(--muted);cursor:pointer;font-family:"Playfair Display",serif;font-size:15px}
+.newp:hover{border-color:var(--burgundy);color:var(--burgundy)}
+
+/* ===== Analytics tab ===== */
+.scoper{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.scp{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--ink);cursor:pointer;font-family:"Playfair Display",serif}
+.scp:hover{border-color:#cfc2b4}
+.scp.on{background:var(--pink);border-color:var(--pink-line);color:var(--burgundy)}
+.scp .tag2{font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.scp.on .tag2{color:var(--burgundy)}
+.ptrack{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--fill),var(--sage-band));border:1px solid rgba(46,39,35,.14);margin:13px 0 4px}
+.ptrack .med{position:absolute;top:-3px;bottom:-3px;width:1.5px;background:#cfc2b4}
+.ptrack .you{position:absolute;top:50%;width:13px;height:13px;border-radius:99px;background:var(--burgundy);border:2.5px solid #fff;box-shadow:0 1px 3px rgba(46,39,35,.3);transform:translate(-50%,-50%)}
+.ptlab{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pctpill{font-family:"JetBrains Mono",monospace;font-size:6.8px;letter-spacing:.07em;text-transform:uppercase;background:var(--fill);color:var(--ink-soft);border:1px solid var(--line);border-radius:99px;padding:2.5px 8px;white-space:nowrap}
+.pctpill.top{background:#f4ead2;color:#8a6a1f;border-color:#e4d5b2}
+.evchip{display:inline-flex;align-items:center;gap:7px;background:var(--gold-fill);border:1px solid #e4d5b2;border-radius:99px;padding:5px 12px;font-size:11.5px;color:var(--gold)}
+.evchip b{font-family:"Playfair Display",serif;font-size:13px}
+.fochead{display:flex;align-items:center;gap:12px}
+.fochead .fnm{font-family:"Playfair Display",serif;font-size:23px;font-weight:500}
+.fochead .mk2{margin-left:auto;display:inline-flex;align-items:center;height:31px;padding:0 13px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:11.5px;cursor:pointer}
+.agrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed var(--linesoft);font-size:12.5px}
+.agrow:last-child{border-bottom:0}
+.agrow .st3{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase}
+.agrow .st3.rep{color:var(--ink)} .agrow .st3.wait{color:var(--muted)} .agrow .st3.req{color:#8a6a1f}
+.bigline{font-size:13px;line-height:1.6;color:var(--ink-soft);margin-top:6px}
+.bigline b{color:var(--ink);font-weight:600}
+.kpis{display:flex;gap:16px}
+.kpi{flex:1;background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:14px 16px}
+.kpi .v{font-family:"Playfair Display",serif;font-size:31px;font-weight:600;line-height:.9}
+.kpi .v.g{color:var(--ink)} .kpi .v.b{color:var(--burgundy)}
+.kpi .k{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:7px}
+.kpi .d{font-size:10.5px;color:var(--ink-soft);margin-top:4px}
+.kpi .d b{color:var(--ink);font-weight:600}
+.gsec{display:flex;align-items:baseline;gap:11px;margin:30px 0 5px}
+.gsec h2{font-family:"Playfair Display",serif;font-size:20px;font-weight:500}
+.gsec .cn{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.grule{height:2px;border-radius:2px;margin-bottom:15px;background:linear-gradient(90deg,#c3cfc0 0 88px,var(--linesoft) 88px)}
+.grule.p{background:linear-gradient(90deg,var(--pink-line) 0 88px,var(--linesoft) 88px)}
+.duo{display:flex;gap:18px;align-items:stretch}
+.panel{background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:15px 17px}
+.duo .panel{flex:1}
+.fun{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.fr{display:flex;align-items:center;gap:11px}
+.fr .fl2{width:104px;font-size:11.5px;color:var(--ink-soft);flex:none}
+.fr .tr2{flex:1;height:16px;border-radius:5px;background:var(--fill);overflow:hidden}
+.fr .tr2 i{display:block;height:100%;border-radius:5px}
+.fr .fv{width:56px;text-align:right;font-family:"Playfair Display",serif;font-size:14px;flex:none}
+.fr .fv span{font-family:"JetBrains Mono",monospace;font-size:7.5px;color:var(--muted);margin-left:3px}
+.lbr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--linesoft)}
+.lbr:last-child{border-bottom:0}
+.lbr .rk{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:var(--muted);width:11px}
+.lbr .ln2{flex:1;min-width:0}
+.lbr .lnm{font-family:"Playfair Display",serif;font-size:13.5px}
+.lbr.best .lnm::after{content:' ★';color:#c8853f}
+.lbr .bar{display:flex;height:11px;border-radius:4px;margin-top:6px;overflow:hidden;border:1px solid rgba(46,39,35,.2)}
+.lbr .bar i{height:100%}
+.lbr .bar .rep{background:var(--ink)}
+.lbr .bar .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.lbr .bar .non{background:var(--fill)}
+.complegend{display:flex;gap:15px;margin-bottom:10px;font-family:"JetBrains Mono",monospace;font-size:6.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.complegend span{display:flex;align-items:center;gap:5px}
+.complegend b{width:11px;height:8px;border-radius:2px;border:1px solid rgba(46,39,35,.2);display:inline-block}
+.lbr .lv{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:var(--muted)}
+.lbr .lv b{font-family:"Playfair Display",serif;font-size:13px;color:var(--ink)}
+.matr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--linesoft)}
+.matr:last-child{border-bottom:0}
+.matr .g3{width:26px;height:26px;border-radius:8px;background:var(--fill);color:var(--burgundy);display:grid;place-items:center;font-size:10px;flex:none}
+.matr .mn2{font-family:"Playfair Display",serif;font-size:14px}
+.matr .mm2{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.05em;color:var(--muted);margin-top:2px}
+.matr .bar2{flex:1;display:flex;height:11px;border-radius:4px;overflow:hidden;border:1px solid rgba(46,39,35,.2);max-width:220px}
+.matr .bar2 i{height:100%}
+.matr .bar2 .rep{background:var(--ink)}
+.matr .bar2 .wait{background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)}
+.matr .bar2 .non{background:var(--fill)}
+.matr .rr{font-family:"Playfair Display",serif;font-size:15px;color:var(--ink);width:44px;text-align:right}
+.matr .rr span{font-family:"JetBrains Mono",monospace;font-size:7px;color:var(--muted);display:block;font-weight:400}
+.matr.best .mn2::after{content:' ★';color:#c8853f}
+.recs{display:flex;gap:16px}
+.rec3{flex:1;background:#fff;border:1px solid var(--ink);border-radius:11px;box-shadow:2px 3px 0 rgba(46,39,35,.07);padding:14px 16px;display:flex;flex-direction:column}
+.rec3 .rk2{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--burgundy)}
+.rec3 .rt2{font-size:12.5px;line-height:1.55;margin-top:8px;flex:1}
+.rec3 .rt2 b{font-weight:600}
+.rec3 .ra{margin-top:11px;display:inline-flex;align-items:center;align-self:flex-start;height:29px;padding:0 12px;border-radius:9px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:11px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="tb"><span class="crumb">Manuscripts / <b>Submission packages</b></span></div>
+  <div class="pg"><div class="inner">
+    <div class="phtop"><div><h1 class="t">Package Workshop</h1><div class="sub">Build versions of your submission, and learn which one wins requests.</div></div><span class="btn">＋ New package</span></div>
+    <div class="tabs">
+      <span class="tab on" onclick="setTab(0,this)">Workshop</span>
+      <span class="tab" onclick="setTab(1,this)">Analytics</span>
+    </div>
+
+    <!-- ============ WORKSHOP ============ -->
+    <div class="tv show">
+      <div class="wrap2">
+        <div class="side">
+          <div class="shead"><span class="sl">Your materials</span><span class="edit">Edit materials →</span></div>
+          <div class="mgrp"><div class="sl"><i>?</i>Query letters</div>
+            <div class="mchip"><span><span class="nm2">Character-led letter</span><div class="use hot">IN 2 PACKAGES · 3 REQUESTS</div></span><span class="grip">⋮⋮</span></div>
+            <div class="mchip"><span><span class="nm2">Comp-led letter</span><div class="use">IN 2 PACKAGES · 1 REQUEST</div></span><span class="grip">⋮⋮</span></div>
+          </div>
+          <div class="mgrp"><div class="sl"><i>≡</i>Synopses</div>
+            <div class="mchip"><span><span class="nm2">Character-led synopsis</span><div class="use hot">IN 2 · 3 REQUESTS ★</div></span><span class="grip">⋮⋮</span></div>
+            <div class="mchip"><span><span class="nm2">One-page synopsis</span><div class="use">IN 2 · 1 REQUEST</div></span><span class="grip">⋮⋮</span></div>
+          </div>
+          <div class="mgrp"><div class="sl"><i>▤</i>Sample pages</div>
+            <div class="mchip"><span><span class="nm2">Chapters 1–3</span><div class="use">IN 2 PACKAGES</div></span><span class="grip">⋮⋮</span></div>
+            <div class="mchip"><span><span class="nm2">Prologue + Ch 1</span><div class="use">UNUSED</div></span><span class="grip">⋮⋮</span></div>
+            <div class="mnew">＋ New material</div>
+          </div>
+        </div>
+
+        <div class="main2">
+          <div class="pgrid">
+            <!-- active -->
+            <div class="fc active" id="f1"><div class="fci">
+              <div class="face">
+                <div class="band" style="background:var(--sage-band)"><span class="pill solid">Active</span><span class="req">1 FULL REQ ✓</span><span class="spin" onclick="flip('f1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9c2.5 0 4.8 1 6.4 2.6L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-9 9c-2.5 0-4.8-1-6.4-2.6L3 16"/><path d="M3 21v-5h5"/></svg></span></div>
+                <div class="fbd">
+                  <div class="nm" contenteditable>Character-led · v2</div>
+                  <div style="margin-top:8px">
+                    <div class="mrow2"><span class="g3">?</span>Character-led letter</div>
+                    <div class="mrow2"><span class="g3">≡</span>Character-led synopsis</div>
+                    <div class="mrow2 dim"><span class="g3">▤</span>Add sample pages…</div>
+                  </div>
+                </div>
+                <div class="ffoot">SENT ×4<span class="fa2">Edit</span></div>
+              </div>
+              <div class="face back">
+                <div class="band" style="background:var(--tan)"><span class="pill">Results</span><span class="spin" style="margin-left:auto" onclick="flip('f1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg></span></div>
+                <div class="fbd">
+                  <div class="nm" style="font-size:15px">Character-led · v2</div>
+                  <div class="hero3"><span class="big">1</span><span class="lb"><b>Full request ✓</b><span>from 4 sent</span></span></div>
+                  <div style="margin-top:9px">
+                    <div class="srow">Request rate<b class="g">25%</b></div>
+                    <div class="srow">Replies<b>3 of 4</b></div>
+                    <div class="srow">Median reply<b>3.1 wks</b></div>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+            <!-- others -->
+            <div class="fc" id="f2"><div class="fci">
+              <div class="face" onclick="flip('f2')">
+                <div class="band" style="background:var(--sage-band)"><span class="pill">Sent ×3</span><span class="req">1 FULL REQ ✓</span></div>
+                <div class="fbd">
+                  <div class="nm">Comp-led · v1</div>
+                  <div style="margin-top:8px">
+                    <div class="mrow2"><span class="g3">?</span>Comp-led letter</div>
+                    <div class="mrow2"><span class="g3">≡</span>One-page synopsis</div>
+                    <div class="mrow2 dim"><span class="g3">▤</span>No sample pages</div>
+                  </div>
+                </div>
+                <div class="ffoot">TAP TO SEE RESULTS ↻</div>
+              </div>
+              <div class="face back" onclick="flip('f2')">
+                <div class="band" style="background:var(--tan)"><span class="pill">Results</span></div>
+                <div class="fbd">
+                  <div class="nm" style="font-size:15px">Comp-led · v1</div>
+                  <div class="hero3"><span class="big">1</span><span class="lb"><b>Full request ✓</b><span>from 3 sent</span></span></div>
+                  <div style="margin-top:7px">
+                    <div class="srow">Request rate<b class="g">33%</b></div>
+                    <div class="srow">Replies<b>2 of 3</b></div>
+                  </div>
+                  <span class="mkact" onclick="event.stopPropagation()">Make active</span>
+                </div>
+              </div>
+            </div></div>
+            <div class="fc" id="f3"><div class="fci">
+              <div class="face" onclick="flip('f3')">
+                <div class="band" style="background:var(--tan)"><span class="pill">Draft</span></div>
+                <div class="fbd">
+                  <div class="nm">Hartley bespoke</div>
+                  <div style="margin-top:8px">
+                    <div class="mrow2"><span class="g3">≡</span>Character-led synopsis</div>
+                    <div class="mrow2"><span class="g3">▤</span>Chapters 1–3</div>
+                    <div class="mrow2 dim"><span class="g3">?</span>No letter yet — required</div>
+                  </div>
+                </div>
+                <div class="ffoot">NOT SENT YET</div>
+              </div>
+              <div class="face back" onclick="flip('f3')">
+                <div class="band" style="background:var(--tan)"><span class="pill">Results</span></div>
+                <div class="fbd">
+                  <div class="nm" style="font-size:15px">Hartley bespoke</div>
+                  <div class="note" style="margin-top:14px">Nothing to measure yet — add a letter and send it with a query.</div>
+                  <span class="mkact" onclick="event.stopPropagation()">Make active</span>
+                </div>
+              </div>
+            </div></div>
+            <div class="newp">＋ New package</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ANALYTICS ============ -->
+    <div class="tv">
+      <div class="scoper" id="scoper">
+        <span class="scp on" data-p="all">All packages</span>
+        <span class="scp" data-p="f1">Character-led · v2 <span class="tag2">ACTIVE</span></span>
+        <span class="scp" data-p="f2">Comp-led · v1</span>
+        <span class="scp" data-p="f3">Hartley bespoke <span class="tag2">DRAFT</span></span>
+      </div>
+      <div id="anbody"></div>
+    </div>
+  </div></div>
+</div>
+
+<script>
+function setTab(n,el){document.querySelectorAll('.tv').forEach((t,i)=>t.classList.toggle('show',i===n));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');}
+function flip(id){document.getElementById(id).classList.toggle('flip');}
+
+const ALL=`
+<div class="kpis">
+  <div class="kpi"><div class="v">13</div><div class="k">Queries sent</div><div class="d">across 3 packages</div></div>
+  <div class="kpi"><div class="v g">69<span style="font-size:18px">%</span></div><div class="k">Reply rate</div><div class="d">higher than <b>78%</b> of ScriptAlly writers</div></div>
+  <div class="kpi"><div class="v b">4.2<span style="font-size:16px"> wks</span></div><div class="k">Median reply time</div><div class="d">2 still out past 12 wks</div></div>
+  <div class="kpi"><div class="v" style="color:#8a6a1f">3<span style="font-size:16px"> ★</span></div><div class="k">Requests</div><div class="d">rare — typically only 6–8% of sends earn one</div></div>
+</div>
+
+<div class="gsec"><h2>Where your queries stand</h2><span class="cn">ALL TIME</span></div>
+<div class="grule"></div>
+<div class="panel">
+  <div class="fun">
+    <div class="fr"><span class="fl2">Sent</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i class="rep" style="width:69%;background:var(--ink)"></i><i style="width:31%;background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></i></span><span class="fv">13</span></div>
+    <div class="fr"><span class="fl2">Replied</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i style="width:69%;background:var(--ink)"></i><i style="width:31%;background:var(--fill)"></i></span><span class="fv">9 <span>69%</span></span></div>
+    <div class="fr"><span class="fl2">Requests ★</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i style="width:23%;background:#c8a95a"></i><i style="width:77%;background:var(--fill)"></i></span><span class="fv">3 <span>★</span></span></div>
+    <div class="fr"><span class="fl2">Offers</span><span class="tr2" style="display:flex;border:1px solid rgba(46,39,35,.2)"><i style="width:100%;background:var(--fill)"></i></span><span class="fv">0</span></div>
+  </div>
+  <div class="note" style="margin-top:13px">Four queries are still out. Two have passed twelve weeks — beyond these agents\u2019 usual reply time.</div>
+</div>
+
+<div class="duo" style="margin-top:26px">
+  <div class="panel">
+    <div class="gsec" style="margin:0 0 5px"><h2 style="font-size:17px">Package leaderboard</h2><span class="cn">BY REPLY RATE</span></div>
+    <div class="grule" style="margin-bottom:8px"></div>
+    <div class="complegend"><span><b style="background:#2e2723"></b>Replied</span><span><b style="background:repeating-linear-gradient(45deg,#e2d8cc,#e2d8cc 3px,#efe8df 3px,#efe8df 6px)"></b>Still waiting</span><span><b style="background:#efe8df"></b>No reply</span></div>
+    <div class="lbr best"><span class="rk">1</span><span class="ln2"><span class="lnm">Character-led · v2</span><div class="bar"><i class="rep" style="width:75%"></i><i class="wait" style="width:25%"></i></div></span><span class="lv"><b>3</b>/4 · 1★</span></div>
+    <div class="lbr"><span class="rk">2</span><span class="ln2"><span class="lnm">Comp-led · v1</span><div class="bar"><i class="rep" style="width:67%"></i><i class="wait" style="width:33%"></i></div></span><span class="lv"><b>2</b>/3 · 1★</span></div>
+    <div class="lbr"><span class="rk">3</span><span class="ln2"><span class="lnm">Hartley bespoke</span><div class="bar"><i class="non" style="width:100%"></i></div></span><span class="lv"><b>—</b></span></div>
+    <div class="note" style="margin-top:11px">Both senders are under five sends — rankings are provisional until each has a fair sample.</div>
+  </div>
+  <div class="panel">
+    <div class="gsec" style="margin:0 0 5px"><h2 style="font-size:17px">Materials winning replies</h2><span class="cn">VS THE SCRIPTALLY COMMUNITY</span></div>
+    <div class="grule p" style="margin-bottom:8px"></div>
+    <div class="matr best"><span class="g3">≡</span><span><span class="mn2">Character-led synopsis</span><div class="mm2">IN 2 PACKAGES · 7 SENDS</div></span><span class="bar2"><i class="rep" style="width:71%"></i><i class="wait" style="width:29%"></i></span><span class="pctpill top">TOP 10%</span></div>
+    <div class="matr"><span class="g3">?</span><span><span class="mn2">Character-led letter</span><div class="mm2">IN 2 PACKAGES · 7 SENDS</div></span><span class="bar2"><i class="rep" style="width:71%"></i><i class="wait" style="width:29%"></i></span><span class="pctpill">BEATS 71%</span></div>
+    <div class="matr"><span class="g3">?</span><span><span class="mn2">Comp-led letter</span><div class="mm2">IN 2 PACKAGES · 6 SENDS</div></span><span class="bar2"><i class="rep" style="width:50%"></i><i class="wait" style="width:17%"></i><i class="non" style="width:33%"></i></span><span class="pctpill">BEATS 48%</span></div>
+    <div class="matr"><span class="g3">≡</span><span><span class="mn2">One-page synopsis</span><div class="mm2">IN 2 PACKAGES · 6 SENDS</div></span><span class="bar2"><i class="rep" style="width:33%"></i><i class="wait" style="width:17%"></i><i class="non" style="width:50%"></i></span><span class="pctpill" style="background:var(--fill);color:var(--muted)">BEATS 31%</span></div>
+  </div>
+</div>
+
+<div class="gsec"><h2>What to do next</h2><span class="cn">DERIVED FROM YOUR RESULTS</span></div>
+<div class="grule p"></div>
+<div class="recs">
+  <div class="rec3"><span class="rk2">★ Lean into your strength</span><div class="rt2">Your <b>character-led synopsis</b> is in the top 10% of community synopses for replies — and both of your requests travelled with it. <b>Hartley bespoke</b> already includes it; finish that package\u2019s letter and it\u2019s ready to send.</div><span class="ra">Open Hartley bespoke</span></div>
+  <div class="rec3"><span class="rk2">Underperformer</span><div class="rt2">The <b>one-page synopsis</b> trails most of the community on replies. Before your next batch, consider swapping in the character-led synopsis in <b>Comp-led · v1</b>.</div><span class="ra">Swap it in</span></div>
+  <div class="rec3"><span class="rk2">Waiting game</span><div class="rt2"><b>Two queries</b> are past twelve weeks with no reply — beyond these agents\u2019 usual response time. A polite nudge is fair game.</div><span class="ra">Open in Queries Hub</span></div>
+</div>`;
+
+const FOCUS={
+f1:{name:'Character-led · v2',pill:'<span class="pill solid">Active</span>',act:'',
+ rate:'75%',pct:82,sent:4,rep:'3 of 4',med:'3.1 wks',
+ ev:'<span class="evchip">★ <b>1 full request</b>&nbsp;— rare: typically 6–8% of sends earn one</span>',
+ mats:[['≡','Character-led synopsis','Top 10% of community synopses for replies','top','TOP 10%'],
+       ['?','Character-led letter','Beats 71% of community query letters','','BEATS 71%']],
+ agents:[['Hartley Books','req','FULL REQUEST ★'],['Vane & Co','rep','REPLIED'],['Marsh Literary','rep','REPLIED'],['Ash & Quill','wait','WAITING · 3 WKS']],
+ note:'Four sends is an early read — the percentile will firm up as this package travels more.'},
+f2:{name:'Comp-led · v1',pill:'<span class="pill">Sent ×3</span>',act:'<span class="mk2">Make active</span>',
+ rate:'67%',pct:61,sent:3,rep:'2 of 3',med:'4.8 wks',
+ ev:'<span class="evchip">★ <b>1 full request</b></span>',
+ mats:[['?','Comp-led letter','Beats 48% of community query letters','','BEATS 48%'],
+       ['≡','One-page synopsis','Beats 31% of community synopses','low','BEATS 31%']],
+ agents:[['Fell Press','req','FULL REQUEST ★'],['Bowen Assoc.','rep','REPLIED'],['Ashcombe','wait','WAITING · 13 WKS ⚠']],
+ note:'One reply outstanding past twelve weeks — worth a nudge from the Queries Hub.'},
+f3:{name:'Hartley bespoke',pill:'<span class="pill">Draft</span>',act:'<span class="mk2">Make active</span>',
+ draft:true}
+};
+
+function focusHTML(p){
+ if(p.draft) return `<div class="fochead"><span class="fnm">${p.name}</span>${p.pill}${p.act}</div>
+   <div class="panel" style="margin-top:16px"><div class="note">Nothing to measure yet — this package hasn\u2019t been sent. Add a query letter and send it with a query, and its numbers will appear here.</div></div>`;
+ return `<div class="fochead"><span class="fnm">${p.name}</span>${p.pill}${p.act}</div>
+ <div class="duo" style="margin-top:16px">
+   <div class="panel" style="flex:1.35">
+     <div class="sl">Reply rate — vs the ScriptAlly community</div>
+     <div class="hero3" style="margin-top:10px"><span class="big">${p.rate}</span><span class="lb"><b>of agents replied</b><span>${p.rep} · median ${p.med}</span></span></div>
+     <div class="ptrack"><span class="med" style="left:50%"></span><span class="you" style="left:${p.pct}%"></span></div>
+     <div class="ptlab"><span>COMMUNITY LOW</span><span>MEDIAN</span><span>HIGH</span></div>
+     <div class="bigline">This package\u2019s reply rate is higher than <b>${p.pct}% of packages</b> in the ScriptAlly community.</div>
+     <div style="margin-top:12px">${p.ev}</div>
+   </div>
+   <div class="panel">
+     <div class="sl" style="margin-bottom:6px">Sent to</div>
+     ${p.agents.map(a=>`<div class="agrow">${a[0]}<span class="st3 ${a[1]}">${a[2]}</span></div>`).join('')}
+   </div>
+ </div>
+ <div class="gsec"><h2 style="font-size:17px">This package\u2019s materials</h2><span class="cn">VS THE COMMUNITY</span></div>
+ <div class="grule p"></div>
+ <div class="panel">
+   ${p.mats.map(m=>`<div class="matr${m[3]==='top'?' best':''}"><span class="g3">${m[0]}</span><span><span class="mn2">${m[1]}</span><div class="mm2">${m[2].toUpperCase()}</div></span><span class="pctpill${m[3]==='top'?' top':''}"${m[3]==='low'?' style="background:var(--fill);color:var(--muted)"':''}>${m[4]}</span></div>`).join('')}
+   <div class="note" style="margin-top:11px">${p.note}</div>
+ </div>`;
+}
+const anbody=document.getElementById('anbody');
+anbody.innerHTML=ALL;
+document.querySelectorAll('.scp').forEach(el=>el.onclick=()=>{
+ document.querySelectorAll('.scp').forEach(x=>x.classList.remove('on'));el.classList.add('on');
+ const k=el.dataset.p; anbody.innerHTML = k==='all'?ALL:focusHTML(FOCUS[k]);
+});
+</script>
+</body>
+</html>

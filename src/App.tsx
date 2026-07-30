@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { ToastProvider } from "./components/toast/ToastProvider";
+import { NotesStoreScan } from "./components/NotesStoreScan"; // ⚠️ TEMP — notes-store scan; delete with the route
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell, StagePage } from "./components/shell/AppShell";
@@ -29,7 +30,6 @@ import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesP
 import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
 import { BrandStudio } from "./components/BrandStudio";
-import { LogQueryFocusForm } from "./components/LogQueryFocusForm";
 import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
@@ -356,13 +356,11 @@ function AppContent() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isBrandStudioOpen, setIsBrandStudioOpen] = useState<boolean>(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
-  const [isLogQueryOpen, setIsLogQueryOpen] = useState<boolean>(false);
-  // Agent to preselect when the Log-a-Query overlay opens (the Agents page Send-query/Up-next
-  // seam — handleNavigate's opts.agentId). Cleared on close so the next plain open is unseeded.
-  const [logQueryAgentId, setLogQueryAgentId] = useState<string | null>(null);
-  // Manuscript to preselect on the same overlay (the manuscripts-page Send-a-query seam —
-  // opts.manuscriptId, the mirror of the agent seam). Same stow/clear lifecycle.
-  const [logQueryManuscriptId, setLogQueryManuscriptId] = useState<string | null>(null);
+  /* v4 P2 — the Log-a-Query POPUP is retired. Every "Log query" launch point in the app still
+     calls handleNavigate("queries", "Log a query"[, {agentId|manuscriptId}]); the interception now
+     routes to the Queries hub and hands it this SEED, which opens inline create mode there. A new
+     object per invocation, so a repeat press with no seeds still fires the hub's effect. */
+  const [createQuerySeed, setCreateQuerySeed] = useState<{ agentId: string | null; manuscriptId: string | null } | null>(null);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
   // Rail "+ Record a response": app-level host for the existing RecordResponseScreen (the
@@ -386,9 +384,9 @@ function AppContent() {
   // manuscript (the bookplate hero / Send-first) — every existing two-arg call is untouched.
   const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
-      setLogQueryAgentId(opts?.agentId ?? null);
-      setLogQueryManuscriptId(opts?.manuscriptId ?? null);
-      setIsLogQueryOpen(true);
+      // Inline creation lives on the hub, so this one NAVIGATES (the popup did not) and seeds it.
+      setCreateQuerySeed({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null });
+      navigate(pathFor("queries"));
       return;
     }
     if (subPageName === "Add an agent") {
@@ -414,6 +412,13 @@ function AppContent() {
   // false there). In prod the #/status-dots hash simply falls through to the normal app/landing.
   if (isStatusDotDemo && import.meta.env.DEV) {
     return <StatusDotDemo />;
+  }
+  // ⚠️ TEMPORARY (notes-store convergence) — DELETE this branch with the component. Deliberately NOT
+  // DEV-gated: the numbers that matter come from a PRODUCTION build run locally (npm run build →
+  // npm run preview), where import.meta.env.DEV is false. Read-only; reads only the signed-in user's
+  // own documents, rules-enforced. Sign in first, then visit #/notes-scan.
+  if (hash === "#/notes-scan") {
+    return <NotesStoreScan />;
   }
   // Dev-only review surface for the presentational plans page (same pattern as #/status-dots).
   // It's also registered in the activeTab switch below; this hash hatch lets it be reviewed
@@ -565,7 +570,6 @@ function AppContent() {
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
-  const showFooter = routeKey !== "queries" && routeKey !== "todo" && !manuscriptsPackages;
 
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
@@ -601,7 +605,9 @@ function AppContent() {
           {queriesSub === "Landing" ? (
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
-            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell />
+            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
+              createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
+              routeActive={routeKey === "queries"} />
           )}
         </StagePage>
 
@@ -659,46 +665,16 @@ function AppContent() {
           <StagePage active contentVariant="read"><ImportCsv onNavigate={handleNavigate} /></StagePage>
         )}
 
-        {/* Footer copyright stamp block — in stage flow; hidden on the Queries workspace and the
-            Package Builder shell (same visibility rule as before the router). */}
-        {showFooter && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs animate-fade-in">
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-[#7c3a2a] flex items-center justify-center text-white font-serif font-bold text-xs shadow">
-                  S
-                </div>
-                <span className="font-serif font-bold text-[#F8F5F0]">ScriptAlly</span>
-                <span>&middot; The Literary Querying Companion</span>
-              </div>
-              <div className="h-4 w-[1px] bg-stone-700 hidden md:block" />
-              <button
-                onClick={() => handleNavigate("help")}
-                className="text-[#dbbdb5] hover:text-[#F8F5F0] transition-colors cursor-pointer font-medium underline decoration-[#dbbdb5]/30 hover:decoration-[#F8F5F0] underline-offset-4"
-                id="footer-help-centre-btn"
-              >
-                Help Centre
-              </button>
-            </div>
-            <p className="font-light text-center md:text-right">
-              Crafted for fiction authors querying literary agents. Keep writing, keep pitching. &copy; {new Date().getFullYear()}.
-            </p>
-          </div>
-        </footer>}
+        {/* The legacy site footer ("ScriptAlly · The Literary Querying Companion" + Help Centre)
+            is RETIRED from the workspace tier — a marketing artefact that had no business on a
+            workspace page, and on the taller pages it printed over the content. Help Centre is
+            reached from the shell rail. The MARKETING footer (Landing.tsx `.mk-foot`) is a
+            separate element and is untouched. */}
       </AppShell>
       </EditAgentHost>
       </EditQueryHost>
 
       {/* Focus Mode Overlay Dialog Form */}
-      <LogQueryFocusForm
-        isOpen={isLogQueryOpen}
-        onClose={() => { setIsLogQueryOpen(false); setLogQueryAgentId(null); setLogQueryManuscriptId(null); }}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-        onNavigate={handleNavigate}
-        initialAgentId={logQueryAgentId ?? undefined}
-        initialManuscriptId={logQueryManuscriptId ?? undefined}
-      />
-
       <AddAgentFocusForm
         isOpen={isAddAgentOpen}
         onClose={() => setIsAddAgentOpen(false)}

@@ -76,11 +76,14 @@ describe("commandBarStatus — the bar's centre text", () => {
 describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the F12 control bar sits at the TOP — two zones locked by --listw; the foot cards are retired", () => {
-    // One bar above the panes (ref queries-hub-v14.html .ctl): FILTER + SORT in the list-width
-    // left zone, the quiet query actions in the right zone. No foot control-row cards remain.
-    expect(src).toContain('className="f12-ctl"');
-    expect(src).toContain('className="f12-zone-list"');
+  it("the F12 control bar sits at the TOP, right-aligned in the header column; the foot cards are retired", () => {
+    // One bar above the panes. v4 P1 (ref queries-hub-v4.html .abar): the bar moved into the
+    // SHARED HEADER COLUMN, so the --listw left zone that locked it to the list pane is retired —
+    // the verbs simply right-align. No foot control-row cards remain.
+    // The bar also carries `qh-dim` since focus mode landed, so match the CLASS, not the whole
+    // attribute — an exact-attribute assertion breaks every time a state class is added.
+    expect(src).toMatch(/className="f12-ctl[ "]/);
+    expect(src).not.toContain('className="f12-zone-list"'); // the spacer that locked it to the list
     expect(src).toContain('className="f12-zone-read"');
     expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(false); // foot list card gone
     expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(false); // foot ribbon card gone
@@ -147,7 +150,9 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
   it("the panes are the f12 pair (list --listw / detail flex:1), never grid-cell-anchored", () => {
     // No stale gridColumn/gridRow cell styles remain on the panes — the flex column owns layout.
     expect(src.includes('className="f12-pane f12-list"')).toBe(true);
-    expect(src.includes('className="qp-pane f12-pane f12-detail"')).toBe(true);
+    // v5 P2 appended the crossfade class, so the pane's className is a template literal now —
+    // match the CLASS LIST (in order), which is what this guard is actually about.
+    expect(src).toMatch(/className=\{`qp-pane f12-pane f12-detail /);
     expect(src.includes("gridColumn: 2, gridRow:")).toBe(false);
     expect(src.includes("gridColumn: 1, gridRow:")).toBe(false);
   });

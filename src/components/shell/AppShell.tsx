@@ -297,11 +297,14 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           capsule stands down and the flush-to-edge idiom is correct, so the base value stays.
           No compensating padding anywhere — the cause moved, not the symptom. */}
       <style>{`
-        .ashell-help-fab { display: flex; right: 20px; }
-        .ashell-help-menu { right: 20px; }
+        /* ADJACENCY (save-and-today P3): --sa-fab-shift is published by the To-do page while the
+           Today corner is on screen, so the FAB steps clear of that corner's footprint instead of
+           sitting beside (or under) it. It is 0 everywhere else, so no other route moves. */
+        .ashell-help-fab { display: flex; right: calc(20px + var(--sa-fab-shift, 0px)); }
+        .ashell-help-menu { right: calc(20px + var(--sa-fab-shift, 0px)); }
         @media (min-width: 768px) {
-          .ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px); }
-          .ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px); }
+          .ashell-help-fab { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }
+          .ashell-help-menu { right: calc(var(--shell-cap-gap) + 6px + var(--sa-fab-shift, 0px)); }
         }
         @media (max-width: 767.98px) {
           .ashell-help-fab { display: none !important; }

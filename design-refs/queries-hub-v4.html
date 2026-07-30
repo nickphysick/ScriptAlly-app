@@ -1,0 +1,183 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Queries Hub — load animation (current shell)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--frame:#e9e3d9;--content:#f7f3ec;--card:#fdfcfa;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--burg:#8d3f2d;--sel:#e9edf2;--sh:0 8px 26px rgba(60,45,30,.07);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--frame);font-family:var(--in);color:var(--ink);height:100vh;overflow:hidden;padding:14px 14px 14px 0;display:flex;-webkit-font-smoothing:antialiased}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* replay chip */
+.replay{position:fixed;bottom:16px;right:16px;z-index:300;background:#241c15;color:#f4ebdd;border:none;border-radius:10px;padding:9px 14px;font-family:var(--in);font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+/* rail */
+.rail{width:104px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:26px 0}
+.rail .logo{color:var(--rose);font-size:26px;transform:rotate(-8deg);margin-bottom:38px}
+.rail .ri{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#8a7c6b;margin-bottom:10px;cursor:pointer}
+.rail .ri svg{width:19px;height:19px}
+.rail .ri.on{background:#fff;color:var(--rose);box-shadow:var(--sh)}
+.rail .sp{flex:1}
+.rail .acct{width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:var(--pl);font-size:13px;color:var(--rose);box-shadow:var(--sh)}
+/* content sheet */
+.sheet{flex:1;background:var(--content);border-radius:20px;box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden;padding:0 30px}
+.hwrap{padding:0 34px}
+.guides .hwrap{box-shadow:inset 1px 0 0 rgba(180,90,64,.35), inset -1px 0 0 rgba(180,90,64,.35)}
+.topstrip{display:flex;align-items:center;padding:20px 0 0}
+.crumb{font-family:var(--mo);font-size:9.5px;letter-spacing:.14em;color:#a99c88;text-transform:uppercase}
+.crumb b{color:var(--ink);font-weight:600}
+.tsearch{margin-left:auto;display:flex;align-items:center;gap:9px;background:#efe9df;border-radius:11px;padding:10px 16px;width:340px;color:#a99c88;font-size:13.5px}
+/* masthead */
+.mast{display:flex;align-items:flex-end;gap:22px;padding:34px 0 24px;border-bottom:1px solid var(--bd)}
+.mast h1{font-family:var(--pl);font-weight:700;font-size:46px;line-height:1;letter-spacing:-.01em}
+.mast .subt{font-family:var(--pl);font-style:italic;font-weight:500;font-size:18px;color:var(--ink2);margin-top:12px}
+.mast .btns{margin-left:auto;display:flex;gap:10px}
+.btn{display:flex;align-items:center;gap:8px;border-radius:11px;padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--ink)}
+.btn.pink{background:var(--pink);border-color:var(--pinkDeep);color:#6b3categorie321}
+.btn.pink{color:#6b3321}
+/* action bar */
+.abar{display:flex;align-items:center;gap:4px;padding:16px 0 14px}
+.ab{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink2);background:none;border:none;border-radius:9px;padding:8px 12px;cursor:pointer}
+.ab svg{width:15px;height:15px;color:#8a7c6b}
+.ab:hover{background:#efe8dd}
+.ab.dim{color:var(--muted)}
+.ab.del{color:#9a3b2a}.ab.del svg{color:#9a3b2a}
+.asep{width:1px;height:20px;background:var(--bd);margin:0 10px}
+.aspring{flex:1}
+/* workspace */
+.work{flex:1;display:flex;gap:20px;overflow:hidden;padding-bottom:22px}
+.listcard{width:330px;flex-shrink:0;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
+.ltop{display:flex;gap:8px;padding:12px}
+.lsearch{flex:1;display:flex;align-items:center;gap:8px;background:#f2ede4;border-radius:999px;padding:9px 14px;color:#b0a494;font-size:13px}
+.lpill{display:flex;align-items:center;gap:7px;border:1px solid var(--bd);border-radius:999px;padding:0 13px;height:36px;font-size:12.5px;color:var(--ink2);background:#fff;cursor:pointer;white-space:nowrap}
+.lpill svg{width:14px;height:14px;color:#8a7c6b}
+.lpill .cv{opacity:.5;font-size:9px}
+.rows{flex:1;overflow-y:auto}
+.rows::-webkit-scrollbar{width:0}
+.qr{display:flex;align-items:center;gap:11px;padding:12px 14px;cursor:pointer;position:relative}
+.qr+.qr{border-top:1px solid #f1ebe1}
+.qr.sel{background:var(--sel)}
+.qr.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink)}
+.qr .mg{width:34px;height:34px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:10.5px;flex-shrink:0}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:15px}
+.qr .ag{font-family:var(--mo);font-size:8px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.qr .end{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.qr .dt{font-family:var(--mo);font-size:8.5px;color:var(--muted)}
+.sdot{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:9px}
+.sdot.o{border:1.5px solid var(--burg);background:#f8e7dc;color:var(--burg)}
+.sdot.i{border:1.5px solid #8a9e88;background:#e9ede6;color:#5a6e58}
+.lfoot{display:flex;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--bd)}
+.lfoot .mono b{color:var(--ink)}
+/* pane */
+.pane{flex:1;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.hero{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);padding:24px 28px;display:flex;align-items:center;gap:20px}
+.hero .hav{width:74px;height:74px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--pl);font-size:24px;flex-shrink:0}
+.hero .hn{font-family:var(--pl);font-weight:700;font-size:30px;line-height:1.05}
+.hero .ha{font-family:var(--pl);font-style:italic;font-size:16px;color:var(--ink2);margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--pinkDeep);background:#fdf1ea;color:#8d4b32;border-radius:999px;padding:5px 12px;font-family:var(--mo);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;margin-top:9px}
+.cols{flex:1;display:flex;gap:16px;overflow:hidden}
+.col{flex:1;background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:14.5px}
+.ch svg{width:15px;height:15px}
+.cb{padding:16px;font-size:13px;flex:1;overflow-y:auto}
+.ev{display:flex;gap:11px;align-items:flex-start}
+.ev .ei{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--burg);background:#f8e7dc;color:var(--burg);display:grid;place-items:center;flex-shrink:0;font-size:10px}
+.ev b{font-size:14px}
+.ev .es{color:var(--muted);font-size:12px;margin-top:2px}
+.ev .ed{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted)}
+.tagrow{display:flex;gap:6px;margin:10px 0 0 39px;flex-wrap:wrap}
+.tg{border:1px solid var(--bd);border-radius:999px;padding:4px 11px;font-size:11.5px;color:var(--ink2);background:#fff}
+.ms{display:flex;align-items:center;gap:9px;font-family:var(--pl);font-weight:700;font-size:17px}
+.ms .bic{width:34px;height:34px;border-radius:9px;background:#f5ead9;display:grid;place-items:center;font-size:15px}
+.msm{font-family:var(--mo);font-size:8.5px;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;margin:6px 0 0 43px}
+.sentline{font-family:var(--mo);font-size:8.5px;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;margin-top:16px}
+.sentline b{color:var(--ink)}
+.jn{border:1px solid var(--bd);border-radius:12px;padding:12px;background:#fff}
+.jn .jt{font-family:var(--mo);font-size:7.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.writen{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:11px;padding:10px 13px;color:#b0a494;font-size:13px;margin-top:12px;background:#fff}
+.writen .snd{margin-left:auto;color:var(--rose)}
+/* ===== load animation ===== */
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.anim .mast{animation:rise .22s ease-out both}
+.anim .abar{animation:rise .22s ease-out .05s both}
+.anim .listcard{animation:rise .24s ease-out .08s both}
+.anim .pane .hero{animation:rise .24s ease-out .13s both}
+.anim .pane .col:nth-child(1){animation:rise .24s ease-out .17s both}
+.anim .pane .col:nth-child(2){animation:rise .24s ease-out .2s both}
+.anim .pane .col:nth-child(3){animation:rise .24s ease-out .23s both}
+.anim .qr{animation:rise .2s ease-out both}
+.anim .qr:nth-child(1){animation-delay:.12s}.anim .qr:nth-child(2){animation-delay:.145s}.anim .qr:nth-child(3){animation-delay:.17s}.anim .qr:nth-child(4){animation-delay:.195s}.anim .qr:nth-child(5){animation-delay:.22s}.anim .qr:nth-child(6){animation-delay:.245s}.anim .qr:nth-child(7){animation-delay:.27s}.anim .qr:nth-child(8){animation-delay:.295s}
+@media (prefers-reduced-motion: reduce){.anim .mast,.anim .abar,.anim .listcard,.anim .pane .hero,.anim .pane .col,.anim .qr{animation:none!important}}
+</style></head>
+<body>
+<button class="replay" onclick="replay()">↻ Replay load</button>
+<button class="replay" style="right:150px;background:#5a4a38" onclick="document.getElementById('mainEl').classList.toggle('guides')">▦ Guides</button>
+<aside class="rail">
+  <span class="logo">✈</span>
+  <span class="ri"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+  <span class="ri on"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 3-5.5 6-5.5s6 2 6 5.5M16 8.5a3.5 3.5 0 0 1 0 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15 14.8c2.6.3 5 2 5 5.2"/></svg></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/></svg></span>
+  <span class="sp"></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg></span>
+  <span class="acct">ML</span>
+</aside>
+<main class="sheet anim" id="mainEl">
+  <div class="hwrap">
+  <div class="topstrip"><span class="crumb">Querying &nbsp;/&nbsp; <b>Queries Hub</b></span><div class="tsearch">⌕ Search...</div></div>
+  <div class="mast">
+    <div><h1>Queries Hub</h1><div class="subt">Every query you've sent, and exactly where each one stands.</div></div>
+    <div class="btns"><button class="btn"><svg viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg> Export</button><button class="btn pink">＋ Log query</button></div>
+  </div>
+  <div class="abar">
+    <span class="aspring"></span>
+    <button class="ab"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2"/></svg>View tasks</button>
+    <button class="ab"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
+    <button class="ab dim"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Nudge</button>
+    <button class="ab"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M9 12h6"/></svg>Mark closed</button>
+    <span class="asep"></span>
+    <button class="ab"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Agent</button>
+    <button class="ab"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3"/></svg>Manuscript</button>
+    <span class="asep"></span>
+    <button class="ab dim"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></button>
+    <button class="ab del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Delete</button>
+  </div>
+  </div>
+  <div class="work">
+    <div class="listcard">
+      <div class="ltop"><div class="lsearch">⌕ Search</div><span class="lpill"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filter <span class="cv">▾</span></span><span class="lpill"><svg viewBox="0 0 24 24"><path d="M8 7v10M8 7 5 10M8 7l3 3M16 17V7M16 17l-3-3M16 17l3-3"/></svg>Sort <span class="cv">▾</span></span></div>
+      <div class="rows">
+        <div class="qr sel"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><div class="end"><span class="sdot o">➤</span><span class="dt">14 Mar</span></div></div>
+        <div class="qr"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div><div class="end"><span class="sdot i">»</span><span class="dt">15 Jan 2024</span></div></div>
+        <div class="qr"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div><div class="end"><span class="sdot i">★</span><span class="dt">3 Mar 2024</span></div></div>
+        <div class="qr"><span class="mg">DO</span><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div></div><div class="end"><span class="sdot i">»</span><span class="dt">—</span></div></div>
+        <div class="qr"><span class="mg">PR</span><div><div class="nm">Priya Raman</div><div class="ag">No agency</div></div><div class="end"><span class="sdot i">›</span><span class="dt">—</span></div></div>
+        <div class="qr"><span class="mg">MR</span><div><div class="nm">Marcus Reed</div><div class="ag">Hartley &amp; Co</div></div><div class="end"><span class="sdot o">✕</span><span class="dt">20 Feb 2024</span></div></div>
+        <div class="qr"><span class="mg">GP</span><div><div class="nm">Greg Panetta</div><div class="ag">No agency</div></div><div class="end"><span class="sdot o">‹</span><span class="dt">—</span></div></div>
+        <div class="qr"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><div class="end"><span class="sdot o">➤</span><span class="dt">30 Jun 2024</span></div></div>
+      </div>
+      <div class="lfoot"><span class="mono">Showing <b>20</b> of <b>20</b></span><span class="mono" style="color:var(--ink);cursor:pointer">Export CSV</span></div>
+    </div>
+    <div class="pane">
+      <div class="hero">
+        <span class="hav">FS</span>
+        <div><div class="hn">Fenella Str</div><div class="ha">Brightwater Books</div><div><span class="chip">◌ &nbsp;Queried</span></div></div>
+      </div>
+      <div class="cols">
+        <div class="col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Tracking</div><div class="cb">
+          <div class="ev"><span class="ei">➤</span><div><b>Query sent</b><div class="es">via Email</div></div><span class="ed">14 MAR</span></div>
+          <div class="tagrow"><span class="tg">Synopsis</span><span class="tg">First 5 chapters</span><span class="tg">Query letter</span></div>
+        </div></div>
+        <div class="col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>What you sent</div><div class="cb">
+          <div class="ms"><span class="bic">▤</span>Murphy's Day Out</div>
+          <div class="msm">Thriller &nbsp;·&nbsp; 50,000 words</div>
+          <div class="sentline">Sent by <b>email</b> &nbsp;·&nbsp; 14 Mar</div>
+        </div></div>
+        <div class="col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/></svg>Journal</div><div class="cb">
+          <div class="jn"><div class="jt">15 Jul, 23:31</div>k</div>
+          <div class="writen">Write a note… <span class="snd">➤</span></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>function replay(){var m=document.getElementById('mainEl');m.classList.remove('anim');void m.offsetWidth;m.classList.add('anim');}</script>
+</body></html>

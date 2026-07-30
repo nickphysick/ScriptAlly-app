@@ -2,6 +2,17 @@
    Full / compact / greeting variants; surfaces + inks from the --shell-* tokens, the primary
    button from the canonical Form 11 pink trio (--pink/--pink-b/--pink-h). ── */
 
+/* ── THE SHARED CONTENT COLUMN (Queries Hub v4 P1; ref queries-hub-v4.html, Guides view) ────
+   ONE definition of the column a page's header block sits in — masthead, its closing rule and
+   the action row — so the header lines up when you move between pages. The AGENT LIST is the
+   canonical geometry (a 1240px cap inside 60px page gutters); these tokens carry exactly those
+   numbers, so retro-fitting Agents to them is a no-op by construction.
+
+   A page whose WORKSPACE is deliberately wider keeps its own wider cap BELOW the header — the
+   Queries hub's list + reading pane stay on --maxw (.f12-body). That differential is the point
+   of the ref's Guides view, not an accident. */
+:root { --sa-col-max: 1240px; --sa-col-gut: 60px; }
+
 .svh { margin-bottom: 26px; }
 .svh-top {
   display: flex;

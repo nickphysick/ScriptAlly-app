@@ -1,0 +1,692 @@
+/**
+ * Package Workshop — the two-tab surface (Workshop · Analytics).
+ * Design authority: design-refs/scriptally-packages-twotab.html.
+ *
+ * MIRRORING, not re-rolling — the same house move the agent list and Discover made before this page.
+ * The card grammar below (ink border + letterpress offset + band + mono pill) is the agent list's and
+ * Discover's, but `--agl-*` is scoped under `.aglist` and `--dv-*` under `.dv2`, neither of which this
+ * page is inside, so neither can cascade here. The values are re-declared page-scoped as `--pkg-*`.
+ * `--agl-*` and `--dv-*` are deliberately NOT touched (both live in surfaces other streams hold).
+ * A shared card token set is the right end state — recorded as consolidation debt in the run report.
+ *
+ * Everything resolves to `--shell-*` (src/index.css :root) or the `:root` brand constants; the only
+ * literals are the handful of accent values that have no token yet, declared once at the top. This
+ * page is SINGLE-LOOK (Nick's call): no `.t-capp`/`.t-bold`/`.t-edn` variants — it renders identically
+ * in all three themes, exactly like the agent list, Discover and the whole v2 shell.
+ *
+ * The page paints NO background (canvas scheme 1 — the stage owns the canvas).
+ */
+
+.pkgw {
+  /* — surfaces + ink: straight from the shell system — */
+  --pkg-ink: var(--shell-ink);
+  --pkg-ink-soft: var(--shell-ink-soft);
+  --pkg-muted: var(--shell-muted);
+  --pkg-paper: #ffffff;            /* the card face — brighter than --shell-card, per the ref */
+  --pkg-card: var(--shell-card);
+  --pkg-fill: var(--shell-inset);
+  --pkg-line: var(--shell-line);
+  --pkg-linesoft: var(--shell-line-soft);
+  /* — brand accents: the :root constants — */
+  --pkg-burg: var(--burg);
+  --pkg-pink: var(--pink);
+  --pkg-pinkline: var(--pink-b);
+  /* NO dark sage. `--sage-d` is RETIRED from this surface (it survives elsewhere in the app):
+     a reply rate is a neutral measure, not a success state, so positive figures are INK; the things
+     that are genuinely rare-and-good — requests, ★ marks, the top decile — are GOLD. The pale
+     `--pkg-sage-band` below is untouched: it is the band tint for an active/sent package. */
+  /* — the few values with no token yet (mirroring the agl / dv literals) — */
+  --pkg-sage-band: #dce0d9;        /* the sage band — identical to --agl-sage-band */
+  --pkg-tan: #efe7db;              /* the draft/results band */
+  --pkg-dash: #cfc2b4;             /* dashed ghost borders, grips */
+  --pkg-dim: #b8a996;              /* empty-slot italic ink */
+  --pkg-gold-ink: #8a6a1f;         /* request events — text */
+  --pkg-gold-bar: #c8a95a;         /* request events — the funnel bar */
+  --pkg-gold-tint: #f4ead2;        /* request events — pill fill */
+  --pkg-star: #c8853f;             /* the ★ that marks a leader */
+  --pkg-rule-sage: #c3cfc0;        /* section-rule stub, sage sections */
+  /* — the letterpress: card sitting proud of the canvas (ref .face) — */
+  --pkg-print: 2px 3px 0 rgba(46, 39, 35, 0.07);
+  --pkg-print-active: 3px 5px 0 rgba(46, 39, 35, 0.13);
+
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: var(--pkg-ink);
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────────
+   A sibling block beneath PageHeader, never inside it: PageHeader draws title +
+   description + its own closing rule, and has no tabs slot (nor a meta slot — the
+   header law). Playfair, burgundy underline on the active tab. */
+.pkgw-tabs {
+  display: flex;
+  gap: 22px;
+  margin-top: -8px;               /* tuck under PageHeader's own rule */
+  border-bottom: 1px solid var(--pkg-linesoft);
+  flex: none;
+}
+.pkgw-tab {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 16px;
+  color: var(--pkg-ink-soft);
+  padding: 9px 2px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;            /* sit the underline on the strip's base line */
+  transition: color .15s;
+}
+.pkgw-tab:hover { color: var(--pkg-ink); }
+.pkgw-tab.on { color: var(--pkg-burg); border-bottom-color: var(--pkg-burg); }
+.pkgw-tab .n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--pkg-muted);
+  margin-left: 4px;
+}
+.pkgw-tab.on .n { color: var(--pkg-burg); }
+.pkgw-tab:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 3px; border-radius: 3px; }
+
+/* Tab body: flow content. The PAGE scrolls (the agents-page model — the scroll region owns the
+   padding so the scrollbar rides the page edge), not individual panes; the viewport-fit pane model
+   the old two-window workshop used retires with it. */
+.pkgw-tv { padding-top: 24px; padding-bottom: 40px; }
+
+/* ── Shared grammar (ref .sl / .note / .panel / .gsec / .grule) ───────────────
+   The section rule is the app-wide grouping pattern: Playfair heading + mono count
+   + a 2px rule whose leading 88px stub carries the section's identity colour —
+   the same grammar as .agl-gsec / .tdb-sec / .dv-gsec. */
+.pkgw .sl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--pkg-muted);
+}
+.pkgw .note {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--pkg-ink-soft);
+  border-left: 2px solid var(--pkg-pinkline);
+  padding-left: 11px;
+  line-height: 1.55;
+}
+.pkgw .panel {
+  background: var(--pkg-paper);
+  border: 1px solid var(--pkg-ink);
+  border-radius: 11px;
+  box-shadow: var(--pkg-print);
+  padding: 15px 17px;
+}
+.pkgw .gsec { display: flex; align-items: baseline; gap: 11px; margin: 30px 0 5px; }
+.pkgw .gsec h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 500; }
+.pkgw .gsec .cn { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--pkg-muted); }
+.pkgw .grule {
+  height: 2px;
+  border-radius: 2px;
+  margin-bottom: 15px;
+  background: linear-gradient(90deg, var(--pkg-rule-sage) 0 88px, var(--pkg-linesoft) 88px);
+}
+.pkgw .grule.p { background: linear-gradient(90deg, var(--pkg-pinkline) 0 88px, var(--pkg-linesoft) 88px); }
+
+/* The honest pre-data state — a real state, not a placeholder: a manuscript can hold
+   packages that have never been attached to a query. */
+.pkgw-nodata { max-width: 560px; }
+.pkgw-nodata h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.pkgw-nodata p { font-size: 13px; line-height: 1.6; color: var(--pkg-ink-soft); }
+
+/* ══ Workshop tab ══════════════════════════════════════════════════════════ */
+.pkgw-wrap2 { display: flex; gap: 26px; align-items: flex-start; }
+
+/* ── Materials sidebar ────────────────────────────────────────────────────
+   Deliberately LIGHT: a 1px hairline and no offset shadow. In this system the
+   ink-border-and-letterpress treatment is reserved for packages — materials are
+   the parts, packages are the objects. */
+.pkgw-side { width: 258px; flex: none; }
+.pkgw-side .shead { display: flex; align-items: center; margin-bottom: 11px; }
+.pkgw-side .edit {
+  margin-left: auto; font-size: 11.5px; color: var(--pkg-burg);
+  background: none; border: 0; padding: 0; cursor: pointer;
+}
+.pkgw-side .edit:hover { text-decoration: underline; text-underline-offset: 3px; }
+.pkgw-mgrp { margin-bottom: 15px; }
+.pkgw-mgrp .sl { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.pkgw-mgrp .sl i { color: var(--pkg-burg); font-style: normal; display: inline-flex; }
+.pkgw-mchip {
+  display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+  background: var(--pkg-paper); border: 1px solid var(--pkg-line); border-radius: 10px;
+  padding: 9px 11px; margin-bottom: 7px; cursor: grab;
+  transition: border-color .15s, box-shadow .15s;
+}
+.pkgw-mchip:hover { border-color: var(--pkg-dash); box-shadow: 2px 3px 0 rgba(46, 39, 35, .06); }
+.pkgw-mchip:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.pkgw-mchip.sel { border-color: var(--pkg-burg); box-shadow: 0 0 0 2px rgba(124, 58, 42, .12); }
+.pkgw-mchip .nm2 { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; line-height: 1.1; display: block; }
+.pkgw-mchip .use {
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .05em;
+  color: var(--pkg-muted); margin-top: 3px;
+}
+.pkgw-mchip .use.hot { color: var(--pkg-gold-ink); }
+.pkgw-mchip .grip { margin-left: auto; color: var(--pkg-dash); font-size: 11px; letter-spacing: -2px; flex: none; }
+.pkgw-mchip.dragging { opacity: .45; }
+.pkgw-mnew {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  border: 1.5px dashed var(--pkg-dash); border-radius: 10px; padding: 8px 11px;
+  color: var(--pkg-muted); font-size: 11.5px; font-style: italic; cursor: pointer; background: none;
+}
+.pkgw-mnew:hover { border-color: var(--pkg-burg); color: var(--pkg-burg); }
+.pkgw-teach { font-size: 11.5px; line-height: 1.5; color: var(--pkg-ink-soft); margin-bottom: 12px; }
+/* The FR4 pulse: after the tour ends with no materials yet. */
+@keyframes pkgwMatPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 42, .35); } 50% { box-shadow: 0 0 0 9px rgba(124, 58, 42, 0); } }
+.pkgw-side .edit.pulse { animation: pkgwMatPulse 1.8s ease-out infinite; color: var(--pkg-burg); font-weight: 600; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .pkgw-side .edit.pulse { animation: none; box-shadow: 0 0 0 3px rgba(124, 58, 42, .25); }
+}
+
+/* ── Package grid ─────────────────────────────────────────────────────────── */
+.pkgw-main { flex: 1; min-width: 0; }
+.pkgw-pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 18px; }
+
+/* The card: ink border + letterpress offset, and a 3D rotor.
+   `.pkgw-fci` is the ONE element that rotates; both faces are absolutely positioned at inset:0 inside
+   it, so front and back are the same height by construction and the card cannot jump on flip. */
+.pkgw-fc { perspective: 1200px; min-height: 264px; }
+.pkgw-fci {
+  position: relative; width: 100%; height: 100%; min-height: 264px;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4, .1, .2, 1);
+}
+.pkgw-fc.flip .pkgw-fci { transform: rotateY(180deg); }
+.pkgw-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  background: var(--pkg-paper); border: 1px solid var(--pkg-ink); border-radius: 11px;
+  overflow: hidden; box-shadow: var(--pkg-print);
+  display: flex; flex-direction: column;
+}
+.pkgw-face.back { transform: rotateY(180deg); }
+/* A read-only card flips on click; the editable one must not (its rows are an editing surface), so
+   only its band button flips it. */
+.pkgw-face.tap { cursor: pointer; }
+
+/* Reduced motion: no rotation at all — the faces cross-fade in place. backface-visibility has to go
+   with the rotation, or both faces would show at once. */
+@media (prefers-reduced-motion: reduce) {
+  .pkgw-fci { transition: none; }
+  .pkgw-fc.flip .pkgw-fci { transform: none; }
+  .pkgw-face { backface-visibility: visible; transition: opacity .18s ease; }
+  .pkgw-face.back { transform: none; opacity: 0; }
+  .pkgw-fc.flip .pkgw-face.front { opacity: 0; }
+  .pkgw-fc.flip .pkgw-face.back { opacity: 1; }
+}
+/* The ACTIVE package — and nothing else in the system — earns the double outline + deeper cast. */
+.pkgw-fc.active .pkgw-face { box-shadow: var(--pkg-print-active); outline: 2px solid var(--pkg-ink); outline-offset: 2px; }
+
+.pkgw-band { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-bottom: 1px solid var(--pkg-ink); flex: none; }
+.pkgw-band.sage { background: var(--pkg-sage-band); }
+.pkgw-band.tan { background: var(--pkg-tan); }
+.pkgw-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .1em; text-transform: uppercase;
+  background: var(--pkg-paper); border: 1px solid rgba(46, 39, 35, .5); border-radius: 99px; padding: 2.5px 8px;
+  white-space: nowrap;
+}
+.pkgw-pill.solid { background: var(--pkg-burg); border-color: var(--pkg-burg); color: #fff; }
+.pkgw-req { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--pkg-gold-ink); white-space: nowrap; }
+.pkgw-spin {
+  width: 22px; height: 22px; border-radius: 99px; border: 1px solid rgba(46, 39, 35, .45);
+  display: grid; place-items: center; background: var(--pkg-paper); cursor: pointer; flex: none; padding: 0;
+  margin-left: auto;
+}
+.pkgw-req + .pkgw-spin { margin-left: 8px; }
+.pkgw-spin:hover { border-color: var(--pkg-ink); }
+.pkgw-spin:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+
+.pkgw-fbd { padding: 13px 14px; flex: 1; min-height: 0; }
+.pkgw-fbd .nm { font-family: 'Playfair Display', Georgia, serif; font-size: 17.5px; line-height: 1.15; }
+.pkgw-fbd input.nm {
+  width: 100%; border: 0; background: none; padding: 0; color: var(--pkg-ink);
+  border-bottom: 1px dashed transparent;
+}
+.pkgw-fbd input.nm:hover { border-bottom-color: var(--pkg-line); }
+.pkgw-fbd input.nm:focus { outline: none; border-bottom-color: var(--pkg-burg); }
+.pkgw-rows { margin-top: 8px; }
+.pkgw-mrow {
+  display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--pkg-ink-soft);
+  padding: 6px 0; border-bottom: 1px dashed var(--pkg-linesoft);
+}
+.pkgw-mrow:last-child { border-bottom: 0; }
+.pkgw-mrow .g3 {
+  width: 20px; height: 20px; border-radius: 6px; background: var(--pkg-fill); color: var(--pkg-burg);
+  display: grid; place-items: center; flex: none;
+}
+.pkgw-mrow.dim { color: var(--pkg-dim); font-style: italic; }
+.pkgw-mrow.dim .g3 { color: var(--pkg-dash); }
+.pkgw-mrow .rm { margin-left: auto; background: none; border: 0; color: var(--pkg-muted); cursor: pointer; padding: 0 2px; font-size: 12px; }
+.pkgw-mrow .rm:hover { color: var(--pkg-burg); }
+/* Drop affordances — a type-matched slot only. */
+.pkgw-mrow.over { background: rgba(124, 58, 42, .06); border-radius: 6px; box-shadow: inset 0 0 0 1px var(--pkg-burg); }
+@keyframes pkgwFlash { 0% { background: rgba(138, 158, 136, .35); } 100% { background: transparent; } }
+.pkgw-mrow.flash { animation: pkgwFlash .5s ease-out; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { .pkgw-mrow.flash { animation: none; } }
+
+.pkgw-ffoot {
+  display: flex; align-items: center; border-top: 1px solid var(--pkg-linesoft); padding: 9px 13px;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .06em; color: var(--pkg-muted);
+  flex: none;
+}
+.pkgw-ffoot .fa2 {
+  margin-left: auto; font-family: inherit; font-size: 11px; color: var(--pkg-burg); cursor: pointer;
+  letter-spacing: 0; background: none; border: 0; padding: 0;
+}
+.pkgw-ffoot .fa2 + .fa2 { margin-left: 10px; }
+.pkgw-ffoot .fa2:disabled { color: var(--pkg-dash); cursor: not-allowed; }
+.pkgw-ffoot .fa2:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
+
+.pkgw-newp {
+  border: 1.5px dashed var(--pkg-dash); border-radius: 11px; display: grid; place-items: center;
+  min-height: 264px; color: var(--pkg-muted); cursor: pointer;
+  font-family: 'Playfair Display', Georgia, serif; font-size: 15px; background: none; width: 100%;
+}
+.pkgw-newp:hover { border-color: var(--pkg-burg); color: var(--pkg-burg); }
+
+/* ── Materials editor (behind "Edit materials →") ─────────────────────────── */
+.pkgw-med { max-width: 620px; }
+.pkgw-med .medh { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.pkgw-med .medsub { font-size: 12.5px; color: var(--pkg-ink-soft); margin-bottom: 16px; }
+.pkgw-med label { display: block; margin-bottom: 14px; }
+.pkgw-med .lb { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: var(--pkg-muted); display: block; margin-bottom: 6px; }
+.pkgw-med input[type="text"], .pkgw-med textarea {
+  width: 100%; background: var(--pkg-paper); border: 1px solid var(--pkg-line); border-radius: 9px;
+  padding: 10px 12px; font-family: inherit; font-size: 13px; color: var(--pkg-ink);
+}
+.pkgw-med textarea { min-height: 190px; resize: vertical; line-height: 1.6; }
+.pkgw-med input[type="text"]:focus, .pkgw-med textarea:focus { outline: none; border-color: var(--pkg-burg); box-shadow: 0 0 0 3px rgba(124, 58, 42, .1); }
+.pkgw-med .types { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.pkgw-med .ty {
+  display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px;
+  background: var(--pkg-card); border: 1px solid var(--pkg-line); border-radius: 10px;
+  font-size: 12px; color: var(--pkg-ink); cursor: pointer;
+}
+.pkgw-med .ty.on { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgw-med .medacts { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.pkgw-med .warn { margin-top: 14px; font-size: 12px; line-height: 1.55; color: var(--pkg-ink-soft); border-left: 2px solid var(--pkg-burg); padding-left: 11px; }
+
+/* The house button pair (matches PageHeader's .svh-btn grammar). */
+.pkgw-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px;
+  border-radius: 9px; border: 1px solid var(--pkg-line); background: var(--pkg-card);
+  color: var(--pkg-ink); font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.pkgw-btn:hover:not(:disabled) { background: var(--pkg-paper); border-color: var(--pkg-pinkline); }
+.pkgw-btn--primary { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgw-btn--primary:hover:not(:disabled) { background: var(--pink-h); }
+.pkgw-btn:disabled { background: var(--pkg-card); border-color: var(--pkg-linesoft); color: #bcb0a3; cursor: not-allowed; box-shadow: none; }
+
+@media (max-width: 900px) {
+  .pkgw-wrap2 { flex-direction: column; }
+  .pkgw-side { width: 100%; }
+}
+
+/* ── Results face ─────────────────────────────────────────────────────────── */
+.pkgw-face.back .pkgw-fbd { padding: 12px 14px; }
+.pkgw-face.back .nm { font-size: 15px; }
+.pkgw-hero3 { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.pkgw-hero3 .big { font-family: 'Playfair Display', Georgia, serif; font-size: 36px; font-weight: 600; color: var(--pkg-ink); line-height: .85; }
+.pkgw-hero3 .lb b { display: block; font-size: 12.5px; }
+.pkgw-hero3 .lb span { font-family: 'JetBrains Mono', monospace; font-size: 7px; text-transform: uppercase; color: var(--pkg-muted); display: block; margin-top: 2px; }
+.pkgw-srow {
+  display: flex; align-items: baseline; gap: 8px; padding: 5px 0;
+  border-bottom: 1px dashed var(--pkg-linesoft); font-size: 11.5px; color: var(--pkg-ink-soft);
+}
+.pkgw-srow:last-child { border-bottom: 0; }
+.pkgw-srow b { margin-left: auto; font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--pkg-ink); }
+.pkgw-srow b.g { color: var(--pkg-ink); }
+.pkgw-srow b.gold { color: var(--pkg-gold-ink); }
+.pkgw-mkact {
+  width: 100%; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center;
+  height: 31px; border-radius: 9px; background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
+  color: var(--pkg-burg); font-size: 11.5px; cursor: pointer; font-family: inherit;
+}
+.pkgw-mkact:hover { background: var(--pink-h); }
+.pkgw-mkact:disabled { background: var(--pkg-card); border-color: var(--pkg-linesoft); color: #bcb0a3; cursor: default; }
+
+/* ══ Analytics tab ═════════════════════════════════════════════════════════ */
+.pkgw-scoper { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+.pkgw-scp {
+  display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px;
+  background: var(--pkg-card); border: 1px solid var(--pkg-line); border-radius: 10px;
+  font-size: 12px; color: var(--pkg-ink); cursor: pointer; font-family: 'Playfair Display', Georgia, serif;
+}
+.pkgw-scp:hover { border-color: var(--pkg-dash); }
+.pkgw-scp.on { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgw-scp .tag2 {
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--pkg-muted);
+}
+.pkgw-scp.on .tag2 { color: var(--pkg-burg); }
+
+.pkgw-kpis { display: flex; gap: 16px; flex-wrap: wrap; }
+.pkgw-kpi {
+  flex: 1; min-width: 190px; background: var(--pkg-paper); border: 1px solid var(--pkg-ink);
+  border-radius: 11px; box-shadow: var(--pkg-print); padding: 14px 16px;
+}
+.pkgw-kpi .v { font-family: 'Playfair Display', Georgia, serif; font-size: 31px; font-weight: 600; line-height: .9; }
+.pkgw-kpi .v .u { font-size: 17px; }
+.pkgw-kpi .v.g { color: var(--pkg-ink); }
+.pkgw-kpi .v.b { color: var(--pkg-burg); }
+.pkgw-kpi .v.gold { color: var(--pkg-gold-ink); }
+.pkgw-kpi .k {
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--pkg-muted); margin-top: 7px;
+}
+.pkgw-kpi .d { font-size: 10.5px; color: var(--pkg-ink-soft); margin-top: 4px; line-height: 1.45; }
+.pkgw-kpi .d b { color: var(--pkg-ink); font-weight: 600; }
+
+.pkgw-duo { display: flex; gap: 18px; align-items: stretch; flex-wrap: wrap; }
+.pkgw-duo > .panel { flex: 1; min-width: 300px; }
+
+/* Funnel */
+.pkgw-fun { display: flex; flex-direction: column; gap: 9px; margin-top: 6px; }
+.pkgw-fr { display: flex; align-items: center; gap: 11px; }
+.pkgw-fr .fl2 { width: 104px; font-size: 11.5px; color: var(--pkg-ink-soft); flex: none; }
+.pkgw-fr .tr2 { flex: 1; height: 16px; border-radius: 5px; background: var(--pkg-fill); overflow: hidden; }
+.pkgw-fr .tr2 i { display: block; height: 100%; border-radius: 5px; }
+.pkgw-fr .fv { width: 62px; text-align: right; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; flex: none; }
+.pkgw-fr .fv span { font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--pkg-muted); margin-left: 3px; }
+
+/* Leaderboard */
+.pkgw-lbr { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--pkg-linesoft); }
+.pkgw-lbr:last-of-type { border-bottom: 0; }
+.pkgw-lbr .rk { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--pkg-muted); width: 11px; flex: none; }
+.pkgw-lbr .ln2 { flex: 1; min-width: 0; }
+.pkgw-lbr .lnm { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; }
+.pkgw-lbr.best .lnm::after { content: ' ★'; color: var(--pkg-star); }
+.pkgw-lbr .lv { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: var(--pkg-muted); flex: none; }
+.pkgw-lbr .lv b { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; color: var(--pkg-ink); }
+.pkgw-lbr .prov { font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--pkg-muted); margin-left: 6px; }
+
+/* Materials */
+.pkgw-matr { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--pkg-linesoft); }
+.pkgw-matr:last-of-type { border-bottom: 0; }
+.pkgw-matr .g3 {
+  width: 26px; height: 26px; border-radius: 8px; background: var(--pkg-fill); color: var(--pkg-burg);
+  display: grid; place-items: center; flex: none;
+}
+.pkgw-matr .mn2 { font-family: 'Playfair Display', Georgia, serif; font-size: 14px; }
+.pkgw-matr .mm2 { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .05em; color: var(--pkg-muted); margin-top: 2px; }
+.pkgw-matr .rr { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: var(--pkg-ink); width: 52px; text-align: right; flex: none; }
+.pkgw-matr .rr span { font-family: 'JetBrains Mono', monospace; font-size: 7px; color: var(--pkg-muted); display: block; font-weight: 400; }
+.pkgw-matr.best .mn2::after { content: ' ★'; color: var(--pkg-star); }
+
+/* The request-event chip — an event, never a rate. */
+.pkgw-evchip {
+  display: inline-flex; align-items: center; gap: 7px; background: var(--pkg-gold-tint);
+  border: 1px solid #e4d5b2; border-radius: 99px; padding: 5px 12px;
+  font-size: 11.5px; color: var(--pkg-gold-ink);
+}
+.pkgw-evchip b { font-family: 'Playfair Display', Georgia, serif; font-size: 13px; }
+
+/* The in-focus "Sent to" list. */
+.pkgw-agrow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--pkg-linesoft); font-size: 12.5px; }
+.pkgw-agrow:last-child { border-bottom: 0; }
+.pkgw-agrow .st3 { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.pkgw-agrow .st3.rep { color: var(--pkg-ink); }
+.pkgw-agrow .st3.wait { color: var(--pkg-muted); }
+.pkgw-agrow .st3.req { color: var(--pkg-gold-ink); }
+
+/* "What to do next" — sage-bordered recommendation cards. */
+.pkgw-recs { display: flex; gap: 16px; flex-wrap: wrap; }
+.pkgw-rec3 {
+  flex: 1; min-width: 260px; background: var(--pkg-paper); border: 1px solid var(--pkg-ink);
+  border-radius: 11px; box-shadow: var(--pkg-print); padding: 14px 16px;
+  display: flex; flex-direction: column;
+}
+.pkgw-rec3 .rk2 { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .12em; text-transform: uppercase; color: var(--pkg-burg); }
+.pkgw-rec3 .rt2 { font-size: 12.5px; line-height: 1.55; margin-top: 8px; flex: 1; }
+.pkgw-rec3 .rt2 b { font-weight: 600; }
+.pkgw-rec3 .ra {
+  margin-top: 11px; display: inline-flex; align-items: center; align-self: flex-start; height: 29px;
+  padding: 0 12px; border-radius: 9px; background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
+  color: var(--pkg-burg); font-size: 11px; cursor: pointer; font-family: inherit;
+}
+.pkgw-rec3 .ra:hover { background: var(--pink-h); }
+/* Not built yet, and saying so — never a live-looking button that does nothing. */
+.pkgw-rec3 .ra--soon {
+  background: var(--pkg-card); border-color: var(--pkg-linesoft); color: #bcb0a3; cursor: default;
+}
+
+/* ── Community comparison (renders only when the flag is on AND a source answers) ── */
+.pkgw-ptrack { position: relative; height: 8px; border-radius: 5px; background: linear-gradient(90deg, var(--pkg-fill), var(--pkg-sage-band)); margin: 13px 0 4px; }
+.pkgw-ptrack .med { position: absolute; top: -3px; bottom: -3px; width: 1.5px; background: var(--pkg-dash); }
+.pkgw-ptrack .you {
+  position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 99px; background: var(--pkg-burg);
+  border: 2.5px solid var(--pkg-paper); box-shadow: 0 1px 3px rgba(46, 39, 35, .3); transform: translate(-50%, -50%);
+}
+.pkgw-ptlab { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--pkg-muted); }
+.pkgw-bigline { font-size: 13px; line-height: 1.6; color: var(--pkg-ink-soft); margin-top: 6px; }
+.pkgw-bigline b { color: var(--pkg-ink); font-weight: 600; }
+.pkgw-pctpill {
+  font-family: 'JetBrains Mono', monospace; font-size: 6.8px; letter-spacing: .07em; text-transform: uppercase;
+  background: var(--pkg-fill); color: var(--pkg-ink-soft); border: 1px solid var(--pkg-line);
+  border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none;
+}
+.pkgw-pctpill.top { background: var(--pkg-gold-tint); color: var(--pkg-gold-ink); border-color: #e4d5b2; }
+/* The flag-off stand-in: a quiet line, so the panel reads finished rather than half-loaded.
+   Named `commsoon`, not `unlock` — this surface has nothing to buy. */
+.pkgw-commsoon { margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .07em; text-transform: uppercase; color: var(--pkg-muted); }
+
+/* ══ Pro header format ═════════════════════════════════════════════════════
+   Ref scriptally-packages-empty.html .phtop/.prorule/.strip, and the pattern Discover
+   established: the SHARED PageHeader is reused unchanged and restyled under this page's
+   scope — the Pro pill rides `titleAdornment`, the right cluster rides `actionsSlot`, and
+   PageHeader's own `.svh-rule` becomes the 2px Pro rule rather than a second rule being
+   drawn beneath it. No modification to a component 11 pages share. */
+.pkgw .svh { margin-bottom: 0; }                 /* the strip butts against the rule */
+.pkgw .svh-title { display: inline-flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+.pkgw .svh-sub { font-style: italic; max-width: 640px; }
+.pkgw .svh-rule { height: 2px; border-radius: 2px; background: var(--slate); opacity: .5; }
+.pkgw .svh-acts { align-items: center; }
+
+.pkgw-propill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--slate); background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
+  border-radius: 99px; padding: 4px 10px; position: relative; top: 2px; flex: none;
+}
+.pkgw-propill svg { width: 10px; height: 10px; }
+
+/* The right cluster — manuscript selector + primary action, on the title's line. Both go
+   through actionsSlot because PageHeader treats `actions` and `actionsSlot` as exclusive. */
+.pkgw-hact { display: flex; align-items: center; gap: 9px; flex: none; }
+.pkgw-ctl {
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 13px;
+  background: var(--pkg-card); border: 1px solid var(--pkg-line); border-radius: 11px;
+  font-size: 12.5px; color: var(--pkg-ink); cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.pkgw-ctl:hover { border-color: var(--pkg-dash); }
+.pkgw-ctl svg { width: 14px; height: 14px; color: var(--pkg-muted); }
+
+/* The Pro claim strip — hangs off the rule, so the two read as one block. */
+.pkgw-strip {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3); border-top: 0;
+  border-radius: 0 0 12px 12px; padding: 11px 16px;
+}
+.pkgw-strip .sh { width: 20px; height: 20px; color: var(--slate); flex: none; }
+.pkgw-strip .stx { font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5; }
+.pkgw-strip .stx b { color: var(--pkg-ink); font-weight: 600; }
+.pkgw-strip .lnk {
+  margin-left: auto; font-size: 11.5px; color: var(--slate); white-space: nowrap; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px solid var(--slate-line, #c7d6e3); padding: 0; font-family: inherit;
+}
+.pkgw .pkgw-tabs { margin-top: 22px; }
+
+/* ══ Workshop first-run empty state ═══════════════════════════════════════
+   Ref scriptally-packages-empty.html. Everything here is PRESENTATIONAL — the active step is
+   derived from what exists (materials / packages), never stored. */
+.pkgw-steps {
+  display: flex; align-items: stretch; margin-bottom: 34px;
+  border: 1px solid var(--pkg-line); border-radius: 13px; background: var(--pkg-card); overflow: hidden;
+}
+.pkgw-stp { flex: 1; display: flex; align-items: flex-start; gap: 12px; padding: 15px 18px; position: relative; }
+.pkgw-stp + .pkgw-stp { border-left: 1px solid var(--pkg-linesoft); }
+.pkgw-stp .no {
+  width: 24px; height: 24px; border-radius: 99px; flex: none; display: grid; place-items: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  border: 1px solid var(--pkg-line); background: var(--pkg-paper); color: var(--pkg-muted);
+}
+.pkgw-stp.now { background: var(--pkg-paper); }
+.pkgw-stp.now .no { background: var(--pkg-burg); border-color: var(--pkg-burg); color: #fff; }
+.pkgw-stp.now .sh2 { color: var(--pkg-burg); }
+.pkgw-stp .sh2 { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; line-height: 1.2; }
+.pkgw-stp .sd { font-size: 11.5px; color: var(--pkg-ink-soft); margin-top: 4px; line-height: 1.5; }
+.pkgw-stp.dim .sh2, .pkgw-stp.dim .sd { color: #b3a494; }
+
+.pkgw-lead { font-size: 13px; color: var(--pkg-ink-soft); line-height: 1.6; max-width: 720px; margin: -4px 0 20px; }
+.pkgw .gsec .rt { margin-left: auto; font-size: 11.5px; color: var(--pkg-burg); cursor: pointer; background: none; border: 0; font-family: inherit; }
+
+/* The three type cards — the real card material, one per material type. */
+.pkgw-mgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 900px) { .pkgw-mgrid { grid-template-columns: 1fr; } }
+.pkgw-mcard {
+  background: var(--pkg-paper); border: 1px solid var(--pkg-ink); border-radius: 11px; overflow: hidden;
+  box-shadow: var(--pkg-print); display: flex; flex-direction: column;
+}
+.pkgw-mcard .band { background: var(--pkg-tan); }
+.pkgw-mcard .zero { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 7.5px; color: var(--pkg-muted); }
+.pkgw-mcard .bd { padding: 20px 18px 18px; flex: 1; display: flex; flex-direction: column; }
+.pkgw-mcard .tile {
+  width: 42px; height: 42px; border-radius: 12px; background: var(--pkg-fill); color: var(--pkg-burg);
+  display: grid; place-items: center; margin-bottom: 13px;
+}
+.pkgw-mcard .mt { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; line-height: 1.15; }
+.pkgw-mcard .md { font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.6; margin-top: 7px; flex: 1; }
+.pkgw-mcard .eg { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 12px; color: var(--pkg-muted); margin-top: 10px; }
+.pkgw-mcard .add {
+  margin-top: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 34px;
+  border-radius: 10px; background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
+  color: var(--pkg-burg); font-size: 12px; cursor: pointer; font-family: inherit; width: 100%;
+}
+.pkgw-mcard .add:hover { background: var(--pink-h); }
+/* The letter is the one material a package cannot exist without — so its action, and only its
+   action, pulses. */
+@keyframes pkgwAddPulse { 0% { box-shadow: 0 0 0 0 rgba(124,58,42,.30); } 70% { box-shadow: 0 0 0 9px rgba(124,58,42,0); } 100% { box-shadow: 0 0 0 0 rgba(124,58,42,0); } }
+.pkgw-mcard.first .add { animation: pkgwAddPulse 2.4s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pkgw-mcard.first .add { animation: none; box-shadow: 0 0 0 3px rgba(124,58,42,.22); } }
+
+/* Skeleton package shells — decorative, aria-hidden, never focusable. */
+.pkgw-ghost {
+  background: var(--pkg-paper); border: 1.5px dashed var(--pkg-line); border-radius: 11px; overflow: hidden;
+  min-height: 236px; display: flex; flex-direction: column;
+}
+.pkgw-ghost .gband { height: 34px; background: var(--pkg-linesoft); border-bottom: 1.5px dashed var(--pkg-line); display: flex; align-items: center; padding: 0 13px; }
+.pkgw-ghost .gpill { width: 52px; height: 10px; border-radius: 99px; background: #e6ddd3; }
+.pkgw-ghost .gbd { padding: 15px 14px; flex: 1; }
+.pkgw-ghost .gline { height: 13px; border-radius: 4px; background: #efe8e0; width: 62%; }
+.pkgw-ghost .grow2 { display: flex; align-items: center; gap: 9px; margin-top: 14px; }
+.pkgw-ghost .gt2 { width: 20px; height: 20px; border-radius: 6px; background: var(--pkg-fill); flex: none; }
+.pkgw-ghost .gbar { height: 9px; border-radius: 4px; background: #f1eae2; flex: 1; max-width: 150px; }
+.pkgw-ghost .gfoot { height: 30px; border-top: 1.5px dashed var(--pkg-line); background: #fdfcfa; }
+.pkgw-ghost.mk { border-color: var(--pkg-pinkline); display: grid; place-items: center; cursor: pointer; width: 100%; font-family: inherit; }
+.pkgw-ghost.mk:hover { border-color: var(--pkg-burg); }
+.pkgw-ghost.mk .mkin { text-align: center; padding: 20px; }
+.pkgw-ghost.mk .plus {
+  width: 38px; height: 38px; border-radius: 99px; background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
+  color: var(--pkg-burg); display: grid; place-items: center; margin: 0 auto 11px; font-size: 17px;
+}
+.pkgw-ghost.mk .mkt { font-family: 'Playfair Display', Georgia, serif; font-size: 16px; }
+.pkgw-ghost.mk .mks { font-size: 11.5px; color: var(--pkg-ink-soft); margin-top: 5px; line-height: 1.5; max-width: 180px; }
+.pkgw-gcap {
+  display: flex; align-items: center; gap: 9px; margin-top: 14px;
+  font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 12.5px; color: var(--pkg-ink-soft);
+}
+.pkgw-gcap .dsh { width: 26px; border-top: 1.5px dashed var(--pkg-line); }
+
+/* The example-data band — the SAME tour entry point as everywhere else, never a second path. */
+.pkgw-exband {
+  display: flex; align-items: center; gap: 16px; margin-top: 38px;
+  background: var(--pkg-card); border: 1px solid var(--pkg-line); border-radius: 13px; padding: 16px 20px;
+}
+.pkgw-exband .ic { width: 38px; height: 38px; border-radius: 11px; background: var(--pkg-sage-band); color: var(--pkg-ink); display: grid; place-items: center; flex: none; }
+.pkgw-exband .ext { font-size: 12.5px; color: var(--pkg-ink-soft); line-height: 1.55; }
+.pkgw-exband .ext b { font-family: 'Playfair Display', Georgia, serif; font-weight: 500; font-size: 14.5px; color: var(--pkg-ink); display: block; margin-bottom: 3px; }
+.pkgw-exband .go {
+  margin-left: auto; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 10px;
+  border: 1px solid var(--pkg-line); background: var(--pkg-paper); color: var(--pkg-ink); font-size: 12px;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.pkgw-exband .go:hover { border-color: var(--pkg-burg); color: var(--pkg-burg); }
+
+/* ══ Analytics first-run empty state ══════════════════════════════════════
+   Ref scriptally-packages-empty.html. Dashed KPI shells, the nothing-to-measure card, the greyed
+   preview that teaches the COMPOSITION shape before any data exists, and the community teaser. */
+.pkgw-kpi.empty { border: 1.5px dashed var(--pkg-line); box-shadow: none; }
+.pkgw-kpi.empty .v { font-weight: 500; color: #d8cec3; }
+
+.pkgw-anempty {
+  background: var(--pkg-paper); border: 1px solid var(--pkg-ink); border-radius: 11px;
+  box-shadow: var(--pkg-print); padding: 34px 32px; margin-top: 22px;
+  display: flex; gap: 28px; align-items: center; flex-wrap: wrap;
+}
+.pkgw-anempty .il { width: 132px; flex: none; }
+.pkgw-anempty .eh { font-family: 'Playfair Display', Georgia, serif; font-size: 21px; font-weight: 500; }
+.pkgw-anempty .ep { font-size: 12.5px; color: var(--pkg-ink-soft); line-height: 1.65; margin-top: 9px; max-width: 560px; }
+.pkgw-anempty .ep b { color: var(--pkg-ink); font-weight: 600; }
+.pkgw-anempty .acts { display: flex; gap: 9px; margin-top: 15px; flex-wrap: wrap; }
+
+/* The composition preview — a single track with a hairline, three segments inside it: solid
+   (replied), diagonal hatch (still waiting), empty (no reply). Greyed here because there is no data
+   yet; the point is to teach the FORM, so the shape is legible the moment real numbers arrive. */
+.pkgw-prev { margin-top: 26px; }
+.pkgw-pvrow { display: flex; align-items: center; gap: 12px; padding: 9px 0; }
+.pkgw-pvrow .pl2 { width: 96px; font-size: 11.5px; color: #b3a494; flex: none; }
+.pkgw-pvrow .tr3 { flex: 1; display: flex; height: 14px; border-radius: 5px; overflow: hidden; border: 1px solid rgba(46, 39, 35, .14); }
+.pkgw-pvrow .tr3 i { height: 100%; background: #e7ded4; }
+.pkgw-pvrow .tr3 i.w { background: repeating-linear-gradient(45deg, #eee5da, #eee5da 3px, #f6f0e9 3px, #f6f0e9 6px); }
+.pkgw-pvrow .tr3 i.n { background: #f6f0e9; }
+.pkgw-pvrow .pv2 { width: 40px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #c4b7a8; }
+
+
+/* ══ Composition bars ══════════════════════════════════════════════════════
+   Ref design-refs/scriptally-packages-twotab.html (.bar/.bar2/.complegend), chosen over the four
+   alternatives in scriptally-bar-forms.html.
+
+   WHY THIS FORM. Sample sizes here are three or four sends. A smooth proportional fill claims a
+   precision the data hasn't got, and it silently counts a query that simply hasn't come back yet as
+   a failure. So the track IS the sends, divided into what actually happened: replied (solid ink),
+   still waiting (hatch), no reply (empty). The denominator rides the label — "3/4", not "75%" —
+   because the denominator is the whole point. Legend once per panel, never per row. */
+.pkgw-cbar {
+  display: flex; height: 11px; border-radius: 4px; overflow: hidden;
+  border: 1px solid rgba(46, 39, 35, .2);
+}
+.pkgw-cbar i { height: 100%; }
+.pkgw-cbar .rep { background: var(--pkg-ink); }
+.pkgw-cbar .wait { background: repeating-linear-gradient(45deg, #e2d8cc, #e2d8cc 3px, #efe8df 3px, #efe8df 6px); }
+.pkgw-cbar .non { background: var(--pkg-fill); }
+/* The leaderboard's sits under the name; the materials one is an inline column. */
+.pkgw-lbr .pkgw-cbar { margin-top: 6px; }
+.pkgw-matr .pkgw-cbar { flex: 1; max-width: 220px; }
+.pkgw-fr .pkgw-cbar { flex: 1; height: 16px; border-radius: 5px; }
+
+.pkgw-complegend {
+  display: flex; gap: 15px; margin-bottom: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 6.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--pkg-muted);
+}
+.pkgw-complegend span { display: flex; align-items: center; gap: 5px; }
+.pkgw-complegend b {
+  width: 11px; height: 8px; border-radius: 2px; border: 1px solid rgba(46, 39, 35, .2); display: inline-block;
+}
+.pkgw-complegend .k-rep { background: var(--pkg-ink); }
+.pkgw-complegend .k-wait { background: repeating-linear-gradient(45deg, #e2d8cc, #e2d8cc 3px, #efe8df 3px, #efe8df 6px); }
+.pkgw-complegend .k-non { background: var(--pkg-fill); }
