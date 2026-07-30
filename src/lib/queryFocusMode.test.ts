@@ -55,8 +55,10 @@ describe("the scrim", () => {
   it("CANNOT swallow clicks — the darkened list stays live", () => {
     expect(rule(".qh-scrim"), "pointer-events:none is the whole reason the click-away still works")
       .toContain("pointer-events: none");
-    // and the row's click-away/discard path is untouched
-    expect(queries).toContain("onClick={() => (creating ? closeCreate(() => setSelectedQueryId(q.id)) : setSelectedQueryId(q.id))}");
+    // and the row's click-away/discard path is untouched (pickRow = select + the mobile push —
+    // Mobile Pass 1 — with the draft still resolved first)
+    expect(queries).toContain("onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}");
+    expect(queries).toContain("setSelectedQueryId(id);"); // pickRow still selects
   });
 
   it("fades both ways from one transition, and not at all under reduced motion", () => {

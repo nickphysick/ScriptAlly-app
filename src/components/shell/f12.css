@@ -598,3 +598,96 @@
 .f12-panefoot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 16px; border-top: 1px solid var(--hairline); background: var(--panel); font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
 .f12-panefoot .f12-open { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
 .f12-panefoot .f12-open i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE (Mobile Pass 1, <md; ref design-refs/mobile-concept-v1.html frames 02–04)
+   The hub's two-pane desk presents as LIST → pushed DETAIL below md. Both
+   panes stay MOUNTED and translate — never display:none — so the list's
+   scroll survives the push. The top control bar stands down (its actions
+   re-home to the floating command bar + the ⋯ sheet); the create variant
+   survives in flow. ≥768px this block changes nothing.
+   ══════════════════════════════════════════════════════════════════════════ */
+.qh-mcmd { display: none; }
+
+/* the ⋯ overflow sheet's rows (sheet-hosted, so they live outside the media block; the content
+   is wrapped in .t-f12 so the tokens resolve in the portal) */
+.qh-msheet { padding: 2px 2px 6px; }
+.qh-msrow {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 13px 6px; border: 0; border-bottom: 1px solid var(--hairline);
+  background: transparent; font: inherit; font-size: 14px; font-weight: 600;
+  color: var(--ink); text-align: left; cursor: pointer;
+}
+.qh-msrow:last-child { border-bottom: none; }
+.qh-msrow[disabled] { opacity: 0.5; cursor: default; }
+.qh-msdanger { color: var(--terra); }
+.qh-msk {
+  font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--faint); padding: 10px 6px 4px;
+}
+.qh-msdiv { height: 1px; background: var(--hairline); margin: 4px 0; }
+
+@media (max-width: 767.98px) {
+  /* the top control bar's read actions re-home; the CREATE bar survives in flow (Save/Cancel +
+     the requirement/error line must stay reachable) */
+  .f12-root .f12-ctl { display: none; }
+  .f12-root .f12-ctl.f12-ctl-create { display: flex; height: auto; min-height: 0; flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  .f12-root .f12-ctl-create .qcb-req { display: block; flex-basis: 100%; } /* wins over the 1100px hide */
+  .f12-root .f12-ctl-create .qcb-esc { display: none; } /* no Esc key on a phone */
+
+  /* THE PUSHER — the body is the viewport; the panes are its two screens */
+  .f12-root .f12-body { position: relative; overflow: hidden; padding: 0 !important; }
+  .f12-root .f12-body .f12-pane {
+    position: absolute; inset: 0; width: 100%;
+    border-left: none; border-right: none; border-radius: 0; box-shadow: none;
+    transition: transform 0.26s cubic-bezier(0.22, 0.8, 0.3, 1);
+  }
+  .f12-root .f12-detail { z-index: 2; }
+  .qh-mv-list .f12-body .f12-detail { transform: translateX(102%); }
+  .qh-mv-detail .f12-body .f12-list { transform: translateX(-24%); }
+
+  /* the EMPTY state opts out of the pusher and stacks its two panes */
+  .f12-root .f12-body.f12-body-empty { position: static; overflow: visible; flex-direction: column; height: auto; padding: var(--gut) !important; }
+  .f12-root .f12-body-empty .f12-pane {
+    position: static; width: auto; transform: none;
+    border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2);
+  }
+  .f12-root .f12-body-empty .f12-detail { min-height: 420px; }
+
+  /* the DETAIL scrolls as one document (concept frame 03): hero → stacked cards; the fixed
+     command bar gets its clearance from the columns' own foot padding (the hub is a fill slot —
+     the stage's clearance never reaches an internally-scrolling pane) */
+  .f12-root .f12-body .f12-detail { overflow-y: auto !important; display: block !important; -webkit-overflow-scrolling: touch; }
+  .f12-root .qp-cols,
+  .f12-root .qc-cols { display: block !important; padding: 14px 14px calc(96px + env(safe-area-inset-bottom)) !important; }
+  .f12-root .qp-cols > .f12-card,
+  .f12-root .qc-cols > .f12-card { margin-bottom: 12px; min-height: 0; }
+  .f12-root .f12-hero { margin: 14px 14px 0 !important; }
+  /* the command bar takes the hero's primary (the create hero keeps its own controls) */
+  .f12-root .f12-hero:not(.qc-hero) > .f12-btn-pri { display: none; }
+
+  /* touch rule: the note actions are hover-revealed on desktop and unreachable by tap — always
+     visible below md (out-specifies the pane's inline <style> rule) */
+  .f12-root .qp-note .qp-noteacts { opacity: 1; }
+
+  /* the create-mode focus scrim is desktop spotlight furniture */
+  .f12-root .qh-scrim { display: none; }
+
+  /* THE COMMAND BAR — the hub's settled espresso container, condensed (concept frame 03).
+     Espresso = the F12 sheet's own --ink; the primary inside stays the soft-pink .f12-btn-pri
+     (baked decision 4 — the container is not a CTA). */
+  .qh-mcmd {
+    position: fixed; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 40; display: flex; align-items: center; gap: 9px; padding: 11px 12px;
+    background: var(--ink); border-radius: 20px; box-shadow: var(--sh-3);
+  }
+  .qh-mcmd .f12-btn-pri { flex: 1; justify-content: center; }
+  .qh-mq {
+    border: 0; background: transparent; color: var(--paper); opacity: 0.78;
+    font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 700; padding: 8px 10px; cursor: pointer;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .f12-root .f12-body .f12-pane { transition: none; }
+}

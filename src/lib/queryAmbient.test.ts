@@ -91,10 +91,14 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     expect(src.includes("Actions toolbar")).toBe(false);
   });
 
-  it("the mark-sent popover is anchored to the record header's contextual primary (single home)", () => {
+  it("the mark-sent popover is anchored to the contextual primary (single home per breakpoint)", () => {
     // Shell rollout Phase 6: the contextual primary moved from the control bar to the reading
-    // pane's record header; it routes markSentTriggerRef only on the writer's turn.
-    expect(src).toContain("ref={heroIsMark ? markSentTriggerRef : undefined}");
+    // pane's record header; it routes markSentTriggerRef only on the writer's turn. Mobile
+    // Pass 1: below md the floating command bar's primary carries the anchor instead (the hero
+    // button is display:none there, and a hidden anchor positions a popover at 0,0) — still
+    // exactly ONE live anchor at any breakpoint.
+    expect(src).toContain("ref={heroIsMark && !isMobile ? markSentTriggerRef : undefined}");
+    expect(src).toContain("ref={isMark ? markSentTriggerRef : undefined}"); // the mobile bar's
     expect(src).toContain("triggerRef={markSentTriggerRef}"); // the popover consumes the same ref
   });
 
@@ -143,7 +147,8 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
     // The panes live in the SAME centred column as the Contact List page — .f12-body caps at
     // --maxw with auto margins and the --gut bottom gap; the old page-specific grid is gone.
     expect(src.includes('className="queries-content-grid"')).toBe(false);
-    const bodies = src.match(/className="f12-body"/g) ?? [];
+    // the empty branch's body carries the pusher opt-out modifier (Mobile Pass 1)
+    const bodies = src.match(/className="f12-body[" ]/g) ?? [];
     expect(bodies.length).toBeGreaterThanOrEqual(2); // empty + populated branches
   });
 

@@ -28,6 +28,8 @@ import { BrandDatePicker } from "./forms";
 import { EmailBandHeader } from "./emailImport/parts";
 import { EmailOverlay } from "./emailImport/PasteEmailFlow";
 import { PasteEmailButton } from "./emailImport/PasteEmailButton";
+import { MobileSheet } from "./shell/MobileSheet";
+import { useIsMobile } from "./shell/mobileChrome";
 import {
   burgundy,
   headingInk,
@@ -81,6 +83,9 @@ interface RecordResponseScreenProps {
 
 export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOpen, onClose, onNavigate, onSuccessToast }) => {
   const { queries, agents, manuscripts, currentUser } = useScriptAllyDb();
+  // Mobile Pass 1 (concept frame 04): below md the guided flow presents in the MobileSheet
+  // chassis instead of the centred overlay — chassis only, the flow inside is untouched.
+  const isMobile = useIsMobile();
 
   const [selectedQueryId, setSelectedQueryId] = useState("");
   const [outcome, setOutcome] = useState<QueryStatus | null>(null);
@@ -217,8 +222,8 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
     onNavigate?.("queries", "Send a query");
   };
 
-  return (
-    <EmailOverlay onClose={onClose} maxWidth={560}>
+  const body = (
+    <>
       <style>{`
         @keyframes rrPulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(232,200,188,0); border-color: ${buttonPinkBorder}; }
@@ -433,6 +438,16 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
           </div>
         </div>
       </MountPanel>
+    </>
+  );
+
+  return isMobile ? (
+    <MobileSheet open onClose={onClose} ariaLabel="Record a response">
+      {body}
+    </MobileSheet>
+  ) : (
+    <EmailOverlay onClose={onClose} maxWidth={560}>
+      {body}
     </EmailOverlay>
   );
 };

@@ -50,6 +50,8 @@ import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
+import { MobileSheet } from "./shell/MobileSheet";
+import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
 import { TimelineComposer, type TimelineComposerHandle } from "./reading-pane/TimelineComposer";
 import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
@@ -263,6 +265,26 @@ export const Queries: React.FC<{
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
 
+  /* ── Mobile Pass 1 · LIST → DETAIL (ref design-refs/mobile-concept-v1.html frames 02/03) ──
+     Below md the two-pane desk presents as a pushed pair: the list full-screen, the reading
+     pane a pushed detail. `mobileView` is PRESENTATION state only — the selection still exists
+     on desktop's terms (the hub auto-selects), so the switch, not the selection, decides which
+     pane shows. Both panes stay mounted (translated, never display:none'd), so the list's
+     scroll survives the push for free. */
+  const isMobile = useIsMobile();
+  const { setMobileDetail } = useMobileChrome();
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  /** Select a row: on mobile this is also the push. */
+  const pickRow = (id: string) => {
+    setSelectedQueryId(id);
+    setMobileView("detail");
+  };
+  /** The freshest closeCreate + creating flag for the shell bar's back handler (the registered
+   *  spec is stable across renders, so it reads through refs — never a stale closure). */
+  const closeCreateRef = useRef<(then?: () => void) => void>(() => {});
+  const creatingRef = useRef(false);
+
   /* ── v4 P2 · INLINE QUERY CREATION ────────────────────────────────────────────────────────
      The draft is LOCAL STATE — nothing reaches Firestore until Save, which goes through the
      existing addQuery path (one creation path, and it still seeds the QUERY_SENT activity).
@@ -396,6 +418,31 @@ export const Queries: React.FC<{
     }
     shut();
   };
+  closeCreateRef.current = closeCreate;
+  creatingRef.current = creating;
+
+  /* Mobile Pass 1 — create mode IS a detail screen below md: entering it pushes to the pane
+     (the draft owns it), and the shell bar's ‹ back runs the same dirty-guarded closeCreate a
+     click-away does. Desktop never reads mobileView. */
+  useEffect(() => {
+    if (creating) setMobileView("detail");
+  }, [creating]);
+  const mobileDetailOn = mobileView === "detail" && (creating || selectedQueryId !== null);
+  useEffect(() => {
+    if (!(isMobile && mobileDetailOn)) {
+      setMobileDetail("queries", null);
+      return;
+    }
+    setMobileDetail("queries", {
+      kind: "back",
+      title: "Queries",
+      onBack: () => {
+        if (creatingRef.current) closeCreateRef.current(() => setMobileView("list"));
+        else setMobileView("list");
+      },
+    });
+    return () => setMobileDetail("queries", null);
+  }, [isMobile, mobileDetailOn, setMobileDetail]);
 
   const saveCreate = async () => {
     if (!createDraft || !draftReady(createDraft) || createSaving) return;
@@ -471,7 +518,10 @@ export const Queries: React.FC<{
   const [isMarkSentOpen, setIsMarkSentOpen] = useState(false);
   // The Mark-sent trigger now lives in the pane's command bar (pinned low), so the popover opens
   // UPWARD from it (additive placement — every other useFixedMenu caller keeps the default).
-  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen); // F12: the bar sits at the TOP — menus open downward
+  // Desktop: anchored to the reading-pane hero button, opening downward. Mobile Pass 1: the
+  // anchor moves to the floating command bar's primary (the hero button hides <md), and the
+  // popover opens UPWARD from it — the trigger is pinned to the viewport foot.
+  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen, isMobile ? { placement: "up" } : undefined);
   // Control-ribbon secondary surfaces — Nudge (modal), Close-reasons menu (anchored upward off its
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
@@ -2154,7 +2204,7 @@ export const Queries: React.FC<{
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-focus" : ""}`}>
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-focus" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
       {/* The focus scrim. Always mounted, opacity-toggled by `qh-focus`, so it fades BOTH ways
           from one CSS transition rather than needing a mount frame. */}
       <div className="qh-scrim" aria-hidden="true" />
@@ -2679,8 +2729,10 @@ export const Queries: React.FC<{
           /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
              (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>
-          {/* Empty split — list placeholder + welcome pane in the centred column */}
-          <div className="f12-body" style={{ paddingTop: "var(--gut)" }}>
+          {/* Empty split — list placeholder + welcome pane in the centred column. f12-body-empty
+              opts OUT of the mobile pusher: at <md the two panes stack instead (the welcome pane
+              must never hide behind a push that has nothing to push to). */}
+          <div className="f12-body f12-body-empty" style={{ paddingTop: "var(--gut)" }}>
 
             {/* List pane — search + centred placeholder + disabled CSV foot */}
             <div className="f12-pane f12-list">
@@ -3013,9 +3065,10 @@ export const Queries: React.FC<{
                     id={`query-row-${q.id}`}
                     role="option"
                     aria-selected={isSelected}
-                    // v4 P2 — clicking another row while drafting is a click-away: resolve the
-                    // draft first (silently when untouched, with a confirm when dirty), then select.
-                    onClick={() => (creating ? closeCreate(() => setSelectedQueryId(q.id)) : setSelectedQueryId(q.id))}
+    // v4 P2 — clicking another row while drafting is a click-away: resolve the
+                    // draft first (silently when untouched, with a confirm when dirty), then
+                    // select. pickRow also pushes to detail below md (Mobile Pass 1).
+                    onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
                     className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
@@ -3118,7 +3171,10 @@ export const Queries: React.FC<{
                         </span>
                       </div>
                       <button
-                        ref={heroIsMark ? markSentTriggerRef : undefined}
+                        // Mobile Pass 1: below md the floating command bar's primary carries
+                        // the Mark-sent anchor instead (this button is display:none there, and
+                        // a hidden anchor positions a popover at 0,0).
+                        ref={heroIsMark && !isMobile ? markSentTriggerRef : undefined}
                         type="button"
                         className="f12-btn-pri"
                         style={{ marginLeft: "auto", flexShrink: 0 }}
@@ -3134,7 +3190,7 @@ export const Queries: React.FC<{
                 {/* Columns — three FULL-HEIGHT equal columns (workspace fill): the row takes all the
                     space below the agent band, each column scrolls independently behind its own edge
                     fade, the Journal composer pins to its column foot. */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 20px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
+                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 20px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
                   <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
@@ -3455,6 +3511,65 @@ export const Queries: React.FC<{
               page carries every action; the list pane's own footer carries count + Export CSV.) */}
 
         </div>{/* closes f12-body */}
+
+        {/* ── THE MOBILE COMMAND BAR (Mobile Pass 1, concept frame 03) — the hub's settled
+            espresso container, condensed to one floating bar on the pushed detail. It takes
+            the tab bar's place (the detail registration hides that). The PRIMARY is the hero's
+            own contextual CTA — same derivation, same composer-focus behaviour, soft-pink per
+            the button law — and carries the Mark-sent anchor below md; Edit is the drawer; ⋯
+            opens the overflow sheet. JS-gated on the mobile detail view so the desktop DOM is
+            untouched. ── */}
+        {isMobile && mobileDetailOn && !creating && activeQuery && activeAgent && activeMs && (() => {
+          const a = getPrimaryAction(activeQuery.status as QueryStatus);
+          const closed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
+          const isMark = a.kind === "mark-sent" && !closed;
+          const label = closed ? "Reopen"
+            : a.kind === "mark-sent" ? (a.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
+            : "Record response";
+          const waiting = a.ballHolder === "agent";
+          return (
+            <>
+              <div className="qh-mcmd">
+                <button
+                  ref={isMark ? markSentTriggerRef : undefined}
+                  type="button"
+                  className="f12-btn-pri"
+                  onClick={() => composerRef.current?.focus()}
+                >
+                  {label}
+                </button>
+                <button type="button" className="qh-mq" onClick={() => openEditQuery(activeQuery.id)}>Edit</button>
+                <button type="button" className="qh-mq" aria-label="More actions" aria-haspopup="dialog" onClick={() => setMobileMoreOpen(true)}>⋯</button>
+              </div>
+              <MobileSheet open={mobileMoreOpen} onClose={() => setMobileMoreOpen(false)} ariaLabel="More query actions">
+                <div className="t-f12 qh-msheet">
+                  {waiting && (
+                    <button type="button" className="qh-msrow" onClick={() => { setMobileMoreOpen(false); setIsNudgeOpen(true); }}>
+                      Nudge the agent
+                    </button>
+                  )}
+                  {!closed && (
+                    <>
+                      <div className="qh-msk">Close this query as…</div>
+                      {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].map((reason) => (
+                        <button key={reason} type="button" className="qh-msrow" onClick={() => { setMobileMoreOpen(false); updateQueryStatus(activeQuery.id, reason); }}>
+                          <StatusDot status={reason} overrideSize={15} decorative /> {reason}
+                        </button>
+                      ))}
+                      <div className="qh-msdiv" aria-hidden="true" />
+                    </>
+                  )}
+                  <button type="button" className="qh-msrow" disabled={isGeneratingPDF} onClick={() => { setMobileMoreOpen(false); handleDownloadPDF(); }}>
+                    {isGeneratingPDF ? "Generating…" : "Download as PDF"}
+                  </button>
+                  <button type="button" className="qh-msrow qh-msdanger" onClick={() => { setMobileMoreOpen(false); askDeleteQuery(); }}>
+                    Delete this query
+                  </button>
+                </div>
+              </MobileSheet>
+            </>
+          );
+        })()}
         </>
         )}
 

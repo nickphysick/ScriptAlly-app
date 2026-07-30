@@ -144,8 +144,9 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
         >Esc to cancel</span>
       </div>
 
-      {/* ── The three columns, in the reading pane's own chrome ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+      {/* ── The three columns, in the reading pane's own chrome (qc-cols stacks them <md —
+          Mobile Pass 1) ── */}
+      <div className="qc-cols" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
         {/* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
             to "What you sent", where it sits with the materials it went out with. */}

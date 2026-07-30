@@ -72,3 +72,14 @@
 @media (prefers-reduced-motion: reduce) {
   .svh-btn { transition: none; }
 }
+
+/* ── MOBILE (Mobile Pass 1, <md) — the shared column gutter tightens (60px desk gutters eat a
+   phone; the :root token line above stays the locked desktop value), and the header compacts.
+   ≥768px this block changes nothing. ── */
+@media (max-width: 767.98px) {
+  :root { --sa-col-gut: 16px; }
+  .svh { margin-bottom: 16px; }
+  .svh-title { font-size: 26px; }
+  .svh-sub { font-size: 14px; margin-top: 6px; }
+  .svh-rule { margin-top: 14px; }
+}
