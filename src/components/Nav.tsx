@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
-import { NavSearch } from "./NavSearch";
 import { TasksDropdown, useTaskAlerts } from "./TasksDropdown";
 import {
   burgundy,
@@ -47,6 +46,8 @@ interface NavProps {
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  /** Opens the command palette — the slim bar's search button (palette pack). */
+  onOpenSearch?: () => void;
 }
 
 const PINK = "#f8e7dc"; // soft-pink pill fill (inline — Tailwind has overridden this before)
@@ -226,14 +227,13 @@ const QueriesNavMenu: React.FC<{
   );
 };
 
-export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, searchQuery, setSearchQuery }) => {
+export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, searchQuery, setSearchQuery, onOpenSearch }) => {
   const { currentUser, logout } = useScriptAllyDb();
   const { activeTasksCount, badgeText } = useTaskAlerts();
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
   const [showQueriesMenu, setShowQueriesMenu] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   // Divider fades in once the page leaves the very top; clean at rest.
@@ -308,21 +308,21 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             ))}
           </nav>
 
-          {/* Search — live typeahead, immediately after the links (desktop only; below md the
-              inline field is hidden and the slim bar uses the search icon-toggle on the right). */}
-          <div className="ml-1 max-md:hidden">
-            <NavSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
-          </div>
+          {/* (The desktop inline field is RETIRED with NavSearch. It was already unreachable:
+              this whole bar renders inside AppShell's `md:hidden` wrapper, and the field itself
+              carried `max-md:hidden` — so it could never be visible at any width.) */}
 
           {/* Right cluster — (mobile search) · bell · settings · user */}
           <div className="ml-auto flex items-center gap-3 shrink-0">
-            {/* Mobile search toggle — below md, reveals the full-width search row beneath the bar. */}
+            {/* Mobile search — OPENS THE COMMAND PALETTE (palette pack). It used to reveal an
+                inline NavSearch row beneath the bar; the palette is the app's one search now, and
+                it is built for narrow widths (max-width: calc(100vw - 48px)), so a second mobile
+                implementation would be exactly the fork the pack forbids. */}
             <button
-              onClick={() => { setMobileSearchOpen((v) => !v); closeAll(); }}
+              onClick={() => { onOpenSearch?.(); closeAll(); }}
               className="md:hidden flex items-center justify-center cursor-pointer"
               style={{ minWidth: 44, minHeight: 44, background: "transparent", border: "none", padding: 4, color: burgundy }}
               aria-label="Search"
-              aria-expanded={mobileSearchOpen}
             >
               <Search className="w-[18px] h-[18px]" />
             </button>
@@ -455,13 +455,8 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
           </div>
         </div>
 
-        {/* Mobile search row — full-width field revealed below the slim bar by the search toggle.
-            Reuses the existing NavSearch (one search system), just presented full-width on mobile. */}
-        {mobileSearchOpen && (
-          <div className="md:hidden px-4 pb-3 pt-0.5">
-            <NavSearch variant="mobile" searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
-          </div>
-        )}
+        {/* (The inline mobile search row is RETIRED with NavSearch — the toggle opens the
+            palette instead.) */}
       </header>
     </>
   );

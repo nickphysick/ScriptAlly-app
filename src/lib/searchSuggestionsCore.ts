@@ -1,4 +1,12 @@
 /**
+ * ⚠️ MOSTLY DEAD SINCE THE COMMAND PALETTE (palette pack). `NavSearch` and the
+ * `searchSuggestions` React layer are DELETED — the palette is the app's one search, over its
+ * own pure core in `lib/searchPalette.ts`. What survives here is `initialsOf`, still used by
+ * DashboardStatsRow; `buildSearchSuggestions` / `stepHighlight` / `SEARCH_CAP` are dead-but-
+ * tested, kept deliberately (the house pattern) rather than deleted in a pack that did not
+ * scope them. A cleanup should either move `initialsOf` out and delete this file, or delete the
+ * dead exports with their tests — but not leave it half-done.
+ *
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *

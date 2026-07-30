@@ -194,14 +194,18 @@ describe("v2 shell — smoke renders", () => {
     expect(panel()).toContain("sv2-usr");
   });
 
-  it("the SEARCH takes the capsule's paper and a hairline — not a bare fill", () => {
+  it("THE SEARCH IS AN OPENER — one search implementation, and the palette is it", () => {
     const html = bar("/dashboard");
-    expect(html).toContain("sv2-searchpill");
-    expect(html).toContain("var(--shell-canvas)");
-    expect(html).toContain("1px solid var(--shell-line)");
-    // the old bare-fill treatment is gone from the capsule variant
-    const ns = readFileSync(resolve(__dirname, "..", "NavSearch.tsx"), "utf8");
-    expect(ns).not.toContain('background: "var(--shell-inset)", borderRadius: 11');
+    expect(html).toContain("sv2-searchopen");
+    expect(html).toContain("⌘K");
+    // it is a BUTTON, not a field: the palette takes the typing
+    expect(html).not.toContain("nav-search-field");
+    expect(html).not.toContain("<input");
+    // and nothing in the shell or the slim bar mounts a second search
+    const shell = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+    const nav = readFileSync(resolve(__dirname, "..", "Nav.tsx"), "utf8");
+    expect(shell).not.toContain("<NavSearch");
+    expect(nav).not.toContain("<NavSearch");
   });
 
   it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — no row, no pill, no fill", () => {
@@ -218,7 +222,7 @@ describe("v2 shell — smoke renders", () => {
   });
 
   const bar = (path: string) =>
-    at(path, <ShellTopBar routeKey="x" searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} scope={<span className="sv2-scope" />} onHelp={() => {}} />);
+    at(path, <ShellTopBar onNavigate={() => {}} scope={<span className="sv2-scope" />} onHelp={() => {}} onOpenSearch={() => {}} />);
 
   it("WORKING PAGES: breadcrumb · divider · scope · grow · tools(search · help)", () => {
     const html = bar("/manuscripts");
@@ -227,14 +231,14 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("Shelf"); // the section
     expect(html).toContain("<b>Manuscripts</b>"); // the current page, bold and inert
     expect(html).toContain("sv2-scope");
-    expect(html).toContain("nav-search-field"); // the real NavSearch, not a fork
+    expect(html).toContain("sv2-searchopen"); // the palette OPENER, not an inline field
     expect(html).toContain("sv2-gsearch-r"); // the right-hand placement
     expect(html).toContain("sv2-tbicon"); // help, chrome rather than a floating FAB
     // the wordmark belongs to the dashboard alone
     expect(html).not.toContain("sv2-tbbrand");
     expect(html.indexOf("sv2-crumb")).toBeLessThan(html.indexOf("sv2-scope"));
-    expect(html.indexOf("sv2-scope")).toBeLessThan(html.indexOf("nav-search-field"));
-    expect(html.indexOf("nav-search-field")).toBeLessThan(html.indexOf("sv2-tbicon"));
+    expect(html.indexOf("sv2-scope")).toBeLessThan(html.indexOf("sv2-searchopen"));
+    expect(html.indexOf("sv2-searchopen")).toBeLessThan(html.indexOf("sv2-tbicon"));
   });
 
   it("THE DASHBOARD: wordmark · divider · scope · centred search · help — and NO crumb", () => {
@@ -257,7 +261,7 @@ describe("v2 shell — smoke renders", () => {
       expect(html, path).toContain(`<b>${page}</b>`);
       expect(html, path).not.toContain("sv2-tbbrand");
       // constant across both states: the scope, the search, the divider, help
-      for (const constant of ["sv2-scope", "nav-search-field", "sv2-vr", "sv2-tbicon"]) {
+      for (const constant of ["sv2-scope", "sv2-searchopen", "sv2-vr", "sv2-tbicon"]) {
         expect(html, `${path} ${constant}`).toContain(constant);
       }
     }

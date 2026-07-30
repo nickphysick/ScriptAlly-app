@@ -4,9 +4,11 @@
  *
  * ShellV2 — the CAPSULE shell chrome (ref design-refs/scriptally-shell-canonical.html): the 70px
  * icon rail capsule (burgundy plane glyph, icon-only ribs with tooltips, Setup at the foot — the
- * avatar chip is RETIRED), the 288px panel capsule (a 58px "Navigate" band at its head; contents
+ * avatar chip is RETIRED), the 288px panel capsule (a 58px head band carrying the wordmark, or
+ * the "Navigate" label on the dashboard where the bar has the wordmark instead; contents
  * in ShellSidebar), and the content capsule's 58px top bar — wordmark-or-breadcrumb · divider ·
- * scope · search (⌘K) · help · the user block.
+ * scope · the search OPENER (⌘K) · help · the user block. The bar no longer holds a search
+ * field: it opens the command palette, which is the app's one search.
  *
  * The flat shell's tab tongue, captions, masthead rule/kicker and tuck control are RETIRED
  * (collapse behaviour is an open question — deliberately not built). Display of every sv2
@@ -16,10 +18,9 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, Settings, PanelLeft, List, Package, User, Compass, BookCopy,
-  SlidersHorizontal, HelpCircle, ChevronDown,
+  SlidersHorizontal, HelpCircle, ChevronDown, Search,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { NavSearch } from "../NavSearch";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { useShellNavCounts } from "./ShellSidebar";
 import {
@@ -347,9 +348,6 @@ export const ShellSide: React.FC<{
 /* ── top bar (inside the content capsule) ─────────────────────────────────── */
 
 export const ShellTopBar: React.FC<{
-  routeKey: string;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
   onNavigate: (tab: string, subPageName?: string) => void;
   /** The manuscript SCOPE control, rendered by the shell and seated in the bar (top-bar
    *  rebuild): it left the sidebar entirely, so which manuscript you are working on is visible
@@ -357,38 +355,30 @@ export const ShellTopBar: React.FC<{
   scope?: React.ReactNode;
   /** Help's existing behaviour, lifted out of the retired floating FAB. */
   onHelp?: () => void;
-}> = ({ routeKey, searchQuery, setSearchQuery, onNavigate, scope, onHelp }) => {
+  /** THE SEARCH IS AN OPENER now — the palette takes the typing (palette pack). */
+  onOpenSearch?: () => void;
+  /** Focus returns to this control when the palette closes. */
+  searchOpenerRef?: React.RefObject<HTMLButtonElement | null>;
+}> = ({ onNavigate, scope, onHelp, onOpenSearch, searchOpenerRef }) => {
   const { pathname } = useLocation();
   const { currentUser } = useScriptAllyDb();
-  const searchRef = useRef<HTMLInputElement | null>(null);
   // THE BAR HAS TWO STATES, ONE COMPONENT (ref design-refs/scriptally-bar-per-page.html).
   // Exactly two things differ — wordmark vs crumb, and where the search sits — so the bar never
   // reads as a different component between pages. Everything else is constant.
   const isDashboard = pathname === SHELL_DASHBOARD.path;
   const crumb = shellCrumbForPath(pathname);
 
-  // ⌘K — focus the global search. The To-do page owns its route-local ⌘K registration (one
-  // live owner per route, the long-standing invariant), so this handler stands down there.
-  useEffect(() => {
-    if (routeKey === "todo") return;
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [routeKey]);
+  // (⌘K is registered ONCE, globally, by the palette host in AppShell — it must work from
+  // anywhere including inside a text field, which a bar-local listener could not promise.)
 
+  // THE OPENER — it still looks like the field it replaced, because it is still the thing you
+  // click to search; it simply hands the typing to the palette.
   const search = (
-    <NavSearch
-      variant="capsule"
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-      onNavigate={onNavigate}
-      inputRef={searchRef}
-    />
+    <button type="button" className="sv2-searchopen" onClick={onOpenSearch} ref={searchOpenerRef}>
+      <Search aria-hidden="true" />
+      <span className="sv2-sotext">Search agents, queries, notes…</span>
+      <span className="sv2-sokb" aria-hidden="true">⌘K</span>
+    </button>
   );
   // Help stops being a thing stuck to the viewport and becomes chrome. (The TIMELINE is out of
   // scope entirely — it stays exactly as it is.)

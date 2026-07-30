@@ -17,10 +17,12 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { burgundy, parchment, FONT_SERIF, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
+import { SearchPalette } from "./SearchPalette";
+import { PALETTE_ACTIONS, rankItems } from "../../lib/searchPalette";
 import { ShellSidebarBody, ShellScope } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { Nav } from "../Nav";
@@ -247,6 +249,29 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     return () => { ro.disconnect(); window.removeEventListener("resize", updateFade); };
   }, [pathname, updateFade]);
 
+  // ── THE COMMAND PALETTE (palette pack). Hosted HERE, above the page tree, so one instance
+  // serves every route and ⌘K can be registered exactly once.
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [paletteTerm, setPaletteTerm] = useState("");
+  const searchOpenerRef = useRef<HTMLButtonElement>(null);
+  const openPalette = useCallback(() => { setPaletteTerm(""); setPaletteOpen(true); }, []);
+  // The ranked corpus for the typed term. Phase 2 ranks the ACTIONS; the agents / queries /
+  // manuscripts / pages corpus joins in Phase 3. All of it is already-loaded state — no fetch.
+  const paletteItems = useMemo(() => rankItems(PALETTE_ACTIONS, paletteTerm), [paletteTerm]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) return;
+      // ⌘K WORKS FROM ANYWHERE, INCLUDING INSIDE A TEXT FIELD — deliberately no editable-target
+      // guard. It is the one shortcut that should never be swallowed by whatever has focus.
+      e.preventDefault();
+      openPalette();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openPalette]);
+  // The palette is a doorway, not a place: any navigation closes it.
+  useEffect(() => { setPaletteOpen(false); }, [pathname]);
+
   // Chrome navigation — router-direct (new-code rule), clearing the global search the way the
   // handleNavigate bridge does on real navigation.
   const navigate = useNavigate();
@@ -290,11 +315,11 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* Mobile slim bar — the existing top Nav, below md only (the rail is desktop-only). */}
         <div className="md:hidden" style={{ flexShrink: 0 }}>
-          <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onOpenSearch={openPalette} />
         </div>
 
         {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} />
+        <ShellTopBar onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} onOpenSearch={openPalette} searchOpenerRef={searchOpenerRef} />
 
         {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
             foot fade. The wrapper is new; the stage's id, ref, scroll memory and styles are
@@ -322,6 +347,18 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
         </div>
       </div>
+
+      <SearchPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onNavigate={onNavigate}
+        onNavigatePath={goPath}
+        items={paletteItems}
+        setSearchQuery={setSearchQuery}
+        openerRef={searchOpenerRef}
+        term={paletteTerm}
+        setTerm={setPaletteTerm}
+      />
 
       {/* (The floating help FAB is RETIRED — top-bar rebuild: help is a bar button now, so it
           is chrome rather than a thing measured from the browser edge. Its /todo two-item menu
