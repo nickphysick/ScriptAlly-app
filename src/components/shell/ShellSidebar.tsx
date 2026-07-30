@@ -26,8 +26,8 @@ import { UserPlan } from "../../types";
 import { invokeCapture } from "./railNav";
 import { SHELL_DASHBOARD, SHELL_SECTIONS, shellPageForPath } from "./shellV2Nav";
 import {
-  SHELL_PRO_COPY, manuscriptInitials, manuscriptSubtitle, resolveActiveManuscript,
-  sideNavCounts, sidebarBoardTiles, taskPills,
+  deskNotice, manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
+  sideNavCounts, sidebarBoardTiles,
 } from "../../lib/shellSidebar";
 
 /** The shared active-manuscript key (the Package Workshop / Comps / Manuscripts convention). */
@@ -147,7 +147,8 @@ export const ShellSidebarBody: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
   );
-  const pills = taskPills(tiles);
+  const notice = deskNotice(tiles);
+  const plan = planLine(currentUser?.plan);
   const total = tiles.urgent + tiles.housekeeping + tiles.notes;
   const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: total });
   const hit = shellPageForPath(pathname);
@@ -178,7 +179,30 @@ export const ShellSidebarBody: React.FC<{
   }, [msOpen]);
   const msQueries = (id: string) => queries.filter((q) => q.manuscriptId === id);
 
-  const showUpgrade = !!currentUser && currentUser.plan !== UserPlan.PRO;
+  // ── the New popover (panel-foot pack) — dismissal follows the scope chip's own pattern:
+  // pointerdown outside closes, and Escape closes. Escape is NOT captured/stopped here: this is
+  // permanent chrome sitting beside pages that own their own Escape (an open agent card's draft
+  // discard), so swallowing the key at the shell would reach past this popover's business.
+  const [newOpen, setNewOpen] = useState(false);
+  const newRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!newOpen) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && newRef.current?.contains(t)) return;
+      setNewOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setNewOpen(false); };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [newOpen]);
+  // A navigation must not leave a popover hanging over the new page's panel.
+  useEffect(() => { setNewOpen(false); }, [pathname]);
+
   const initials = (currentUser?.name ?? "")
     .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
@@ -239,56 +263,97 @@ export const ShellSidebarBody: React.FC<{
       {/* (The manuscript row and its "Working on" heading LEFT for the top bar — top-bar
           rebuild. No duplication: the scope control exists once, in the chrome, so it survives
           the panel collapsing. Removing it also relieves the crowding in this half.) */}
-      <div className="sv2-slab">Tasks &amp; reminders</div>
-      {/* ── Task pills — Urgent / House ── */}
-      <div className="sv2-pills">
-        {pills.map((pill) => (
-          <button key={pill.key} type="button" className="sv2-tpill" onClick={() => onNavigatePath("/todo")}>
-            <i className={`sv2-pip sv2-pip-${pill.key}`} aria-hidden="true" />
-            <span className="sv2-tn">{pill.count}</span>
-            <span className="sv2-tl">{pill.label}</span>
-          </button>
-        ))}
-      </div>
+      {/* ── THE NOTIFICATION DESK LINE (panel-foot pack) — supersedes the two Urgent/House
+          pills, which stated two numbers side by side and left you to work out which mattered.
+          One line says what needs you; housekeeping rides behind it as context, not as a peer.
+          The calm state is a genuinely different treatment (transparent, hairline-topped, muted
+          roundel) rather than the loud one greyed out — a quiet desk should not look like an
+          alert that happens to say zero. ── */}
+      <button
+        type="button"
+        className={`sv2-notif${notice.tone === "calm" ? " calm" : ""}`}
+        onClick={() => onNavigatePath("/todo")}
+      >
+        <span className="sv2-ncnt">{notice.count}</span>
+        <span className="sv2-ntx">
+          <span className="sv2-nt1">{notice.headline}</span>
+          {notice.sub && <span className="sv2-nt2">{notice.sub}</span>}
+        </span>
+        <ChevronRight className="sv2-ncv" aria-hidden="true" />
+      </button>
 
-      {/* "Quick actions" names the GROUP; the caption below still names each tile — without
-          it the four icons are unlabelled again (baked: the caption stays). */}
+      {/* ── QUICK ACTIONS — two controls, not four unlabelled tiles (panel-foot pack). The four
+          tiles' four contracts all survive: three creates moved into New's popover, and Record
+          a response was PROMOTED to its own button because it is the one you reach for while
+          holding a reply, not while thinking about making something. ── */}
       <div className="sv2-slab">Quick actions</div>
-      {/* ── Action strip — the existing capture contracts; blue is reserved for Pro ── */}
-      <div className="sv2-strip4">
-        <button type="button" className="sv2-gt sv2-gt1" title="Log query" aria-label="Log query" onClick={() => invokeCapture("query", onNavigate)}>
-          <Send aria-hidden="true" />
-        </button>
-        <button type="button" className="sv2-gt sv2-gt2" title="Record response" aria-label="Record response" onClick={() => invokeCapture("record", onNavigate)}>
+      <div className="sv2-qa">
+        <div className={`sv2-newwrap${newOpen ? " open" : ""}`} ref={newRef}>
+          {newOpen && (
+            <div className="sv2-pop" role="menu" aria-label="Create">
+              <div className="sv2-pk">Create</div>
+              <button type="button" className="sv2-prow" role="menuitem" onClick={() => { setNewOpen(false); invokeCapture("query", onNavigate); }}>
+                <Send aria-hidden="true" />
+                <span className="sv2-plb">Log a query</span>
+              </button>
+              <button type="button" className="sv2-prow" role="menuitem" onClick={() => { setNewOpen(false); invokeCapture("agent", onNavigate); }}>
+                <UserPlus aria-hidden="true" />
+                <span className="sv2-plb">Add an agent</span>
+              </button>
+              <button type="button" className="sv2-prow" role="menuitem" onClick={() => { setNewOpen(false); onNavigate("manuscripts", "Add a manuscript"); }}>
+                <BookPlus aria-hidden="true" />
+                <span className="sv2-plb">Add a manuscript</span>
+              </button>
+            </div>
+          )}
+          {/* The mockup shows ⌘L / ⌘N hints. They are NOT rendered: no shortcut registry exists,
+              so a hint would advertise a key that does nothing (standing report flag). */}
+          <button type="button" className="sv2-b1" aria-expanded={newOpen} aria-haspopup="menu" onClick={() => setNewOpen((v) => !v)}>
+            <Plus aria-hidden="true" />
+            New
+          </button>
+        </div>
+        <button type="button" className="sv2-b2" onClick={() => invokeCapture("record", onNavigate)}>
           <Reply aria-hidden="true" />
-        </button>
-        <button type="button" className="sv2-gt sv2-gt3" title="Add agent" aria-label="Add agent" onClick={() => invokeCapture("agent", onNavigate)}>
-          <UserPlus aria-hidden="true" />
-        </button>
-        <button type="button" className="sv2-gt sv2-gt3" title="Add manuscript" aria-label="Add manuscript" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
-          <BookPlus aria-hidden="true" />
+          Record a response
         </button>
       </div>
-      <div className="sv2-gcap" aria-hidden="true">Log · Respond · Agent · Manuscript</div>
 
-      {/* ── Upgrade row — slate is Pro's colour; hover never goes burgundy ── */}
-      {showUpgrade && (
-        <button type="button" className="sv2-upg" onClick={() => onNavigatePath("/plans")}>
-          <span className="sv2-propill">PRO</span>
-          <span className="sv2-upgt">{SHELL_PRO_COPY}</span>
-          <ChevronRight className="sv2-upgchev" aria-hidden="true" />
-        </button>
-      )}
-
-      {/* ── User block ── */}
+      {/* ── THE FOOT — the upsell is FOLDED INTO THE PLAN LINE (panel-foot pack, treatment 1).
+          The standalone upgrade row is gone: a persistent sold-looking row in permanent chrome
+          is a thing you learn to stop seeing, and the panel foot is already where someone goes
+          when they think about their account. The plan is stated as fact; "Upgrade" is a plain
+          slate link in that same line. Pro users get the plan and no link. ── */}
       {currentUser && (
-        <div className="sv2-usr">
-          <span className="sv2-av" aria-hidden="true">{initials}</span>
-          <span className="sv2-ub">
-            <span className="sv2-un">{currentUser.name}</span>
-            <span className="sv2-ur">{currentUser.plan === UserPlan.PRO ? "Pro plan" : "Free plan"}</span>
-          </span>
-        </div>
+        <>
+          <div className="sv2-fdiv" aria-hidden="true" />
+          <button type="button" className="sv2-usr" onClick={() => onNavigatePath("/account")}>
+            <span className="sv2-av" aria-hidden="true">{initials}</span>
+            <span className="sv2-ub">
+              <span className="sv2-un">{currentUser.name}</span>
+              <span className="sv2-ur">
+                {plan.label}
+                {plan.upgrade && (
+                  <>
+                    {" · "}
+                    <span
+                      className="sv2-uplink"
+                      role="link"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); onNavigatePath("/plans"); }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onNavigatePath("/plans"); }
+                      }}
+                    >
+                      Upgrade
+                    </span>
+                  </>
+                )}
+              </span>
+            </span>
+            <ChevronRight className="sv2-ucv" aria-hidden="true" />
+          </button>
+        </>
       )}
     </>
   );

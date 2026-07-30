@@ -6,15 +6,16 @@
 import { describe, it, expect } from "vitest";
 import {
   SHELL_PRO_COPY,
+  deskNotice,
   localYMD,
   manuscriptInitials,
   manuscriptSubtitle,
+  planLine,
   resolveActiveManuscript,
   sideNavCounts,
   sidebarBoardTiles,
-  taskPills,
 } from "./shellSidebar";
-import { Manuscript, Query, QueryStatus } from "../types";
+import { Manuscript, Query, QueryStatus, UserPlan } from "../types";
 
 const ms = (over: Partial<Manuscript>): Manuscript => ({ id: "m1", title: "Murphy's Day Out", ...over } as Manuscript);
 const q = (over: Partial<Query>): Query => ({ id: "q1", status: QueryStatus.QUERIED, ...over } as Query);
@@ -30,17 +31,53 @@ describe("sidebarBoardTiles", () => {
   });
 });
 
-describe("taskPills — the capsule panel's two pills (the ledger is superseded)", () => {
-  it("always both pills, live counts, mockup labels (House, not Housekeeping)", () => {
-    expect(taskPills({ urgent: 3, housekeeping: 41, notes: 2 })).toEqual([
-      { key: "urgent", label: "Urgent", count: 3 },
-      { key: "housekeeping", label: "House", count: 41 },
-    ]);
+describe("deskNotice — the notification desk line (SUPERSEDES the Urgent/House pills)", () => {
+  it("HOT: the roundel carries the urgent count, housekeeping rides behind as context", () => {
+    expect(deskNotice({ urgent: 3, housekeeping: 44, notes: 2 })).toEqual({
+      tone: "hot",
+      count: 3,
+      headline: "3 tasks require your attention",
+      sub: "plus 44 housekeeping items",
+    });
   });
-  it("zeros render as zeros — the pills never hide (notes left the sidebar summary)", () => {
-    const pills = taskPills({ urgent: 0, housekeeping: 0, notes: 5 });
-    expect(pills.map((p) => p.count)).toEqual([0, 0]);
-    expect(pills.some((p) => (p.key as string) === "notes")).toBe(false);
+
+  it("CALM is its own treatment, not the loud one greyed out — and the figure is a plain 0", () => {
+    expect(deskNotice({ urgent: 0, housekeeping: 44, notes: 9 })).toEqual({
+      tone: "calm",
+      count: 0,
+      headline: "Nothing needs you today",
+      sub: "44 housekeeping items when you have a moment",
+    });
+  });
+
+  it("an EMPTY desk states no housekeeping line at all — never '0 housekeeping items'", () => {
+    const n = deskNotice({ urgent: 0, housekeeping: 0, notes: 0 });
+    expect(n.tone).toBe("calm");
+    expect(n.sub).toBeNull();
+    expect(n.headline).toBe("Nothing needs you today");
+  });
+
+  it("singulars agree with their verbs — one task REQUIRES, one ITEM", () => {
+    expect(deskNotice({ urgent: 1, housekeeping: 1, notes: 0 })).toEqual({
+      tone: "hot",
+      count: 1,
+      headline: "1 task requires your attention",
+      sub: "plus 1 housekeeping item",
+    });
+  });
+
+  it("notes never reach the line — they are neither urgent nor housekeeping", () => {
+    const n = deskNotice({ urgent: 0, housekeeping: 0, notes: 12 });
+    expect(`${n.headline} ${n.sub ?? ""}`).not.toContain("12");
+  });
+});
+
+describe("planLine — the folded upsell (panel-foot treatment 1)", () => {
+  it("free: the plan is stated as fact and the upsell is a link in that same line", () => {
+    expect(planLine(undefined)).toEqual({ label: "Free plan", upgrade: true });
+  });
+  it("PRO: the plan, and NO link — a paying user is never sold to", () => {
+    expect(planLine(UserPlan.PRO)).toEqual({ label: "Pro plan", upgrade: false });
   });
 });
 

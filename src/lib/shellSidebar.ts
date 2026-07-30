@@ -7,7 +7,7 @@
  * stored — and the task ledger reuses the To-do board's own selectors, so the sidebar can
  * never disagree with the page.
  */
-import { Agent, Manuscript, Query, SubmissionPackage } from "../types";
+import { Agent, Manuscript, Query, SubmissionPackage, UserPlan } from "../types";
 import { assembleBoard, ribbonTiles, BoardInput } from "./todoBoard";
 import { groupHousekeeping, hkGapCount } from "./todoHousekeeping";
 import { activeQueryCount, isShelvedPresentation } from "./manuscriptPage";
@@ -37,19 +37,43 @@ export function sidebarBoardTiles(input: Omit<BoardInput, "today">): LedgerTiles
   return ribbonTiles(board, hkGapCount(groups) + stale.length);
 }
 
-export interface TaskPill {
-  key: "urgent" | "housekeeping";
-  label: string;
+export interface DeskNotice {
+  /** `hot` = something is actually urgent; `calm` = the quiet form. Drives the treatment. */
+  tone: "hot" | "calm";
+  /** The roundel figure — the URGENT count, so a calm desk shows a plain 0. */
   count: number;
+  headline: string;
+  /** The housekeeping line. NULL when there is no housekeeping — never "0 items". */
+  sub: string | null;
 }
 
-/** The capsule panel's two task pills (Urgent / House) — always both, live counts. Notes left
- *  the sidebar summary with the ledger (capsule Phase 3); the board itself still shows them. */
-export function taskPills(tiles: LedgerTiles): TaskPill[] {
-  return [
-    { key: "urgent", label: "Urgent", count: tiles.urgent },
-    { key: "housekeeping", label: "House", count: tiles.housekeeping },
-  ];
+const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`;
+
+/** THE NOTIFICATION DESK LINE (panel-foot pack; ref design-refs/scriptally-panel-foot.html) —
+ *  supersedes the two Urgent/House pills, which stated two numbers and asked you to work out
+ *  which mattered. One line says what needs you, and the housekeeping total rides behind it as
+ *  context rather than as a peer.
+ *
+ *  It needs NO stored field: both figures come off the tiles the panel already derives. The
+ *  quiet state is a genuinely different treatment, not a greyed-out copy of the loud one — a
+ *  calm desk should not look like an alert that happens to say zero. */
+export function deskNotice(tiles: LedgerTiles): DeskNotice {
+  const hk = tiles.housekeeping;
+  const sub = hk > 0 ? plural(hk, "housekeeping item", "housekeeping items") : null;
+  if (tiles.urgent > 0) {
+    return {
+      tone: "hot",
+      count: tiles.urgent,
+      headline: `${plural(tiles.urgent, "task", "tasks")} ${tiles.urgent === 1 ? "requires" : "require"} your attention`,
+      sub: sub && `plus ${sub}`,
+    };
+  }
+  return {
+    tone: "calm",
+    count: 0,
+    headline: "Nothing needs you today",
+    sub: sub && `${sub} when you have a moment`,
+  };
 }
 
 /** Nav count chips by shellV2Nav page key. Only cheaply-countable pages carry one. */
@@ -93,5 +117,20 @@ export function resolveActiveManuscript(
 }
 
 /** The upgrade row's copy — the capsule pack's baked wording (supersedes the flat shell's
- *  "Unlock your full query log" option A). */
+ *  "Unlock your full query log" option A).
+ *  ⚠️ RETAINED FOR THE ROW THAT NO LONGER EXISTS: the standalone upgrade row is gone (panel-foot
+ *  pack, treatment 1 — the upsell folded into the plan line), so this constant is unused by the
+ *  panel. Left in place because it is the baked wording, and the Pro link still reads "Upgrade". */
 export const SHELL_PRO_COPY = "Upgrade to Pro";
+
+/** THE PLAN LINE (panel-foot pack, treatment 1 — "folded into the plan line"; ref
+ *  design-refs/scriptally-panel-foot.html column 1). The quietest of the four treatments and the
+ *  one Notion/Figma/Raycast use: the plan you are on is stated as FACT beside your name, and the
+ *  upsell is a plain slate link in that same line. No block of its own, no badge, no fill.
+ *
+ *  Why it wins here: the panel foot is exactly where someone goes when they think about their
+ *  account, so the prompt is already in the right place — and a persistent sold-looking row in
+ *  permanent chrome is a thing you learn to stop seeing. Pro users get the plan, no link. */
+export function planLine(plan: UserPlan | undefined): { label: string; upgrade: boolean } {
+  return plan === UserPlan.PRO ? { label: "Pro plan", upgrade: false } : { label: "Free plan", upgrade: true };
+}

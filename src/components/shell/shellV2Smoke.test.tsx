@@ -98,28 +98,63 @@ describe("v2 shell — smoke renders", () => {
     expect(css).toMatch(/\.sv2-frow\.on \{ background: var\(--shell-ground\)/);
   });
 
-  it("panel contents: accordion (Dashboard flat, the CONTROLLED open section renders open), pills, action strip, upgrade row, user block", () => {
+  const panel = () =>
+    at("/queries", <ShellSidebarBody onNavigate={() => {}} onNavigatePath={() => {}} openSection="querying" onToggleSection={() => {}} />);
+
+  it("panel contents: accordion (Dashboard flat, the CONTROLLED open section renders open)", () => {
     // The accordion's open section is OWNED BY AppShell (rail-icon-toggle pack) — the sidebar
     // is controlled; here we pass the section AppShell would derive for /queries.
-    const html = at("/queries", <ShellSidebarBody onNavigate={() => {}} onNavigatePath={() => {}} openSection="querying" onToggleSection={() => {}} />);
-    // the accordion — Dashboard flat + the three sections; the controlled section renders open
+    const html = panel();
     expect(html).toContain("sv2-asec sv2-flat");
     for (const lb of ["Dashboard", "Querying", "Agents", "Shelf"]) expect(html).toContain(lb);
     expect(html).toContain("sv2-akids open");
     expect(html).toContain("Queries Hub");
     expect(html).toContain("sv2-akid on"); // /queries is the active child (pink fill only)
-    // the two task pills (empty desk → zeros, still rendered)
-    expect(html).toContain("sv2-tpill");
-    expect(html).toContain("Urgent");
-    expect(html).toContain("House");
-    // the four capture tiles carry their tooltips
-    for (const lb of ["Log query", "Record response", "Add agent", "Add manuscript"]) expect(html).toContain(`title="${lb}"`);
-    // Free plan → the upgrade row with the capsule copy; the user block beneath (no utility buttons)
-    expect(html).toContain("Upgrade to Pro");
-    expect(html).toContain("sv2-propill");
+  });
+
+  it("THE DESK LINE replaces the two pills — an empty desk gets the CALM treatment, not a zeroed alert", () => {
+    const html = panel();
+    expect(html).toContain("sv2-notif");
+    expect(html).toContain("calm"); // the empty fixture desk has nothing urgent
+    expect(html).toContain("Nothing needs you today");
+    // the retired pills, gone at the source
+    expect(html).not.toContain("sv2-tpill");
+    expect(html).not.toContain("sv2-pip");
+  });
+
+  it("QUICK ACTIONS: two controls, and all FOUR old tile contracts survive", () => {
+    const html = panel();
+    // the two buttons, with real labels rather than unlabelled icons
+    expect(html).toContain("sv2-b1");
+    expect(html).toContain("New");
+    expect(html).toContain("sv2-b2");
+    expect(html).toContain("Record a response"); // PROMOTED to its own button
+    // the four-tile strip is gone
+    expect(html).not.toContain("sv2-strip4");
+    expect(html).not.toContain("sv2-gcap");
+    // ...and the three creates live in the popover, which the source dispatches to the SAME
+    // capture contracts (the popover itself is closed at rest, so assert the source).
+    const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
+    for (const c of ['invokeCapture("query"', 'invokeCapture("agent"', 'invokeCapture("record"']) {
+      expect(body, c).toContain(c);
+    }
+    expect(body).toContain('onNavigate("manuscripts", "Add a manuscript")');
+    // no shortcut registry exists, so no key hint may be advertised
+    expect(html).not.toContain("⌘L");
+    expect(html).not.toContain("⌘N");
+  });
+
+  it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — no row, no pill, no fill", () => {
+    const html = panel();
     expect(html).toContain("Nick Physick");
     expect(html).toContain("Free plan");
-    expect(html).not.toContain("sv2-iconbtn"); // the user block carries no utility buttons now
+    expect(html).toContain("sv2-uplink"); // a plain slate link, in the plan line
+    expect(html).toContain("Upgrade");
+    // the standalone row and its badge are retired (treatment 1, not treatment 2)
+    expect(html).not.toContain("sv2-upg\"");
+    expect(html).not.toContain("sv2-propill");
+    expect(html).not.toContain("Upgrade to Pro");
+    expect(html).not.toContain("sv2-iconbtn"); // the account row carries no utility buttons
   });
 
   const bar = (path: string) =>

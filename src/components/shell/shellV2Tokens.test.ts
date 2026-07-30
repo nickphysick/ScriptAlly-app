@@ -245,11 +245,15 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(railFn).not.toContain("sv2-railspacer-");
   });
 
-  it("the GROUP HEADINGS: two quiet mono labels, and the tile caption SURVIVES", () => {
+  it("ONE group heading now — the desk line is a SENTENCE and needs no label above it", () => {
     const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
-    expect(body).toContain('<div className="sv2-slab">Tasks &amp; reminders</div>'); // Working on left with the scope control
     expect(body).toContain('<div className="sv2-slab">Quick actions</div>');
-    expect(body).toContain("Log · Respond · Agent · Manuscript"); // the caption stays (baked)
+    // "Tasks & reminders" went with the two pills (panel-foot pack): the desk line states its
+    // own subject in words, so a mono label above it only repeats the sentence more quietly.
+    expect(body).not.toContain("Tasks &amp; reminders");
+    // The tile caption went with the four tiles it was naming — the two buttons carry real
+    // labels now, so there is nothing left for it to disambiguate.
+    expect(body).not.toContain("Log · Respond · Agent · Manuscript");
     const slab = rule(".sv2-slab");
     expect(slab).toContain("font-size: 7.5px");
     expect(slab).toContain("letter-spacing: 0.17em");

@@ -118,11 +118,13 @@ spacers, no sympathetic animation. Lock-tested.
 brand image at ~27px, height-constrained with its aspect preserved. The rail's plane glyph grows
 to match and sits in the same 56px block, so the two read as one line across both capsules.
 
-**Group headings** in the panel's lower half: **"Working on"** above the manuscript row and the
-task pills, **"Quick actions"** above the four action tiles — mono 7.5px `.17em` uppercase in
-`--shell-quiet`, a step lighter than `--shell-muted` so they group without competing. The
-"Log · Respond · Agent · Manuscript" caption beneath the tiles **stays**: the heading names the
-group, the caption still names each tile.
+**Group headings** in the panel's lower half: **ONE now — "Quick actions"** — mono 7.5px `.17em`
+uppercase in `--shell-quiet`, a step lighter than `--shell-muted` so it groups without competing.
+"Working on" left with the manuscript row (top-bar rebuild); **"Tasks & reminders" left with the
+task pills** (panel-foot pack): the desk line that replaced them states its own subject in
+words, so a mono label above it only repeats the sentence more quietly. The
+"Log · Respond · Agent · Manuscript" caption went with the four tiles it was naming — the two
+buttons carry real labels, so there is nothing left to disambiguate.
 
 ## Rail capsule
 
@@ -147,15 +149,45 @@ avatar chip at the bottom.
 3. Flexible spacer.
 4. **Manuscript row** — bare: sage-gradient initials tile, Playfair title, mono
    `20 queries · 16 active`, up/down chevron.
-5. **Task pills** — two cream pills: pip + Playfair count + mono label (`Urgent` / `House`),
-   derived from the To-do board's own selectors.
-6. **Action strip** — four equal fill tiles, 44px, radius 12: Log query (pink/burgundy), Record
-   response (sage band/deep), Add agent + Add manuscript (both tan `#efe7db`/`#8a7358` — **blue
-   is reserved for Pro**). Mono caption below: `Log · Respond · Agent · Manuscript`.
-7. **Upgrade row** — card surface, `line` hairline, radius 12: solid slate `PRO` pill (mono,
-   white) · `Upgrade to Pro` 12.5px medium · chevron. Hover goes slate, never burgundy. No
-   meter, no benefit copy. Hidden for Pro users.
-8. **User block** — hairline above: avatar chip, name, plan. (No utility buttons in this idiom.)
+5. **THE NOTIFICATION DESK LINE** (panel-foot pack; ref `scriptally-panel-foot.html`) —
+   **supersedes the two Urgent/House task pills**, which stated two numbers side by side and left
+   you to work out which mattered. One line says what needs you; the housekeeping total rides
+   behind it as context rather than as a peer. Derivation: the pure `deskNotice(tiles)`, off the
+   tiles the panel already computes — **no stored field**.
+   **TWO STATES, and the quiet one is a DIFFERENT TREATMENT, not the loud one greyed out** — a
+   calm desk must not look like an alert that happens to say zero:
+   - **hot** (something urgent): blush `#faf0ea` fill, `#e8c8bc` line, radius 12, burgundy count
+     roundel, `{n} tasks require your attention` over `plus {m} housekeeping items`, burgundy
+     chevron; hover lifts a soft burgundy shadow.
+   - **calm** (nothing urgent): **no fill and no frame** — a hairline above it only, square, the
+     roundel muted on `--shell-inset`, `Nothing needs you today` over
+     `{m} housekeeping items when you have a moment`.
+   Singulars agree with their verbs (`1 task requires`), and **an empty desk states no
+   housekeeping line at all** — never "0 housekeeping items". Notes reach neither line.
+6. **Quick actions — TWO controls** (panel-foot pack), replacing the four unlabelled tiles.
+   **All four of the strip's contracts survive**: `New` (pink primary, 40px, radius 12; its plus
+   rotates 45° when open) opens a popover **upward** — it sits at the panel's foot, so downward
+   would leave the capsule — carrying `Log a query`, `Add an agent`, `Add a manuscript`; and
+   **`Record a response` is PROMOTED to its own button** (card surface, `line` hairline), because
+   it is what you reach for holding a reply, not while thinking about making something.
+   Dismissal follows the scope chip's pattern (pointerdown outside, Escape, and any navigation).
+   **The mockup's ⌘L/⌘N hints are deliberately NOT rendered** — no shortcut registry exists, so a
+   hint would advertise a key that does nothing (standing flag).
+7. **The foot: a fading divider, then the account row — and the upsell is FOLDED INTO THE PLAN
+   LINE** (panel-foot treatment 1, "folded into the plan line"; the ref's other three columns are
+   the rejected alternatives). **The standalone upgrade row and its slate `PRO` pill are GONE.**
+   The row is: avatar · name · `Free plan · Upgrade` · chevron, where **`Upgrade` is a plain slate
+   link** (underlined, `#c3d2df`), never a pill and never a fill. Pro users read `Pro plan` with
+   **no link** — a paying user is never sold to. Derivation: the pure `planLine(plan)`.
+   Why this treatment: a persistent sold-looking row in permanent chrome is a thing you learn to
+   stop seeing, and the panel foot is already where someone goes when they think about their
+   account, so the prompt is in the right place at its quietest weight. The plan line stopped
+   being 8px mono uppercase when it started carrying a link — `FREE PLAN · UPGRADE` reads as a
+   system tag, and the point of this treatment is that it is a sentence about your account.
+   **Deviation from the ref, deliberate:** the mockup's foot also draws a `Settings` row and its
+   bar draws a user chip. Neither is built — **Settings is already a rail rib and the account is
+   already the rail's foot chip**, so both would be second mounts of a control that exists. One
+   home each; the ref rendered them as context for the upsell, which is what it was comparing.
 
 **The nav active-state law (fixes pack): active = GROUND fill `#e7e0d5` — the row reads as a
 window cut through to the page ground — ink text, burgundy icon, same radii; one law for the
