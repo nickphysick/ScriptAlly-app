@@ -116,13 +116,9 @@
   --shell-muted: #9c8878;             /* muted chrome ink */
 }
 
-/* Top-nav search placeholder — Playfair Display 500 16px (typed text stays Source Sans Pro 12px,
-   set inline on the input). Colour stays the muted #c8b8a8 from the placeholder-[#c8b8a8] utility. */
-.nav-search-field::placeholder {
-  font-family: "Playfair Display", Georgia, serif;
-  font-weight: 500;
-  font-size: 16px;
-}
+/* (`.nav-search-field::placeholder` is DELETED with NavSearch — palette pack. Nothing carries
+   that class any more: the bar's search is an opener button, and the palette's input styles its
+   own placeholder in `searchPalette.css`.) */
 
 /* ── App themes. The class (.t-capp / .t-bold / .t-edn) is set on the AppShell root, so these
    custom properties cascade to the shell chrome (rail, help FAB) and the Queries page; the
