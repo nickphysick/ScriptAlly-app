@@ -42,7 +42,9 @@ describe("v2 shell — smoke renders", () => {
     for (const tip of ["Dashboard", "Querying", "Agents", "Shelf", "Setup"]) expect(html).toContain(`title="${tip}"`);
     expect(html).toContain("sv2-rib on");
     expect(html).not.toContain("sv2-railbtn"); // captioned buttons + the tab tongue are retired
-    expect(html).toContain("sv2-railav"); // the rail-foot account chip
+    // THE RAIL'S AVATAR IS RETIRED (canonical shell pack) — the account is in the bar on every
+    // page and in the panel foot; the rail's was a third home.
+    expect(html).not.toContain("sv2-railav");
   });
 
   it("panel frame: the real wordmark artwork, large and centred, with the tuck toggle beside it", () => {
@@ -142,6 +144,30 @@ describe("v2 shell — smoke renders", () => {
     // no shortcut registry exists, so no key hint may be advertised
     expect(html).not.toContain("⌘L");
     expect(html).not.toContain("⌘N");
+  });
+
+  it("THE USER BLOCK is in the bar on EVERY page — and the duplication with the panel foot is deliberate", () => {
+    for (const path of ["/dashboard", "/agents", "/queries", "/manuscripts"]) {
+      const html = bar(path);
+      expect(html, path).toContain("sv2-tbuser");
+      expect(html, path).toContain("sv2-tbav");
+      expect(html, path).toContain("Nick Physick");
+      // identical size and position in both bar states — it always rides the tools cluster
+      expect(html.indexOf("sv2-tbicon"), path).toBeLessThan(html.indexOf("sv2-tbuser"));
+    }
+    // ...and it ALSO renders at the panel's foot. Approved duplication, asserted so it is not
+    // "tidied away" by someone who spots it later.
+    expect(panel()).toContain("sv2-usr");
+  });
+
+  it("the SEARCH takes the capsule's paper and a hairline — not a bare fill", () => {
+    const html = bar("/dashboard");
+    expect(html).toContain("sv2-searchpill");
+    expect(html).toContain("var(--shell-canvas)");
+    expect(html).toContain("1px solid var(--shell-line)");
+    // the old bare-fill treatment is gone from the capsule variant
+    const ns = readFileSync(resolve(__dirname, "..", "NavSearch.tsx"), "utf8");
+    expect(ns).not.toContain('background: "var(--shell-inset)", borderRadius: 11');
   });
 
   it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — no row, no pill, no fill", () => {

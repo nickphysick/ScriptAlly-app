@@ -102,7 +102,7 @@ carried its own numbers they would drift the first time one was touched.
 
 | Token | Value | Read by |
 |---|---|---|
-| `--shell-head-h` | `56px` | the panel masthead AND the rail head block |
+| `--shell-head-h` | **`58px`** | the panel's **Navigate band**, the rail head block **AND the top bar** — one unbroken line across all three capsules |
 | `--shell-row-h` | `44px` | the panel nav row's height AND the rail rib's `40px + calc(row − 40)` gap |
 | `--shell-pad-t` | `14px` | both capsules' top padding |
 | `--shell-kid-h` | `37px` | the accordion child pitch — **the panel alone** |
@@ -114,7 +114,7 @@ Within a 44px row the icon sits in a **40px hit area**, vertically centred, in b
 When a section expands the panel rows shift down and **the rail stays fixed**: no tracking, no
 spacers, no sympathetic animation. Lock-tested.
 
-**Brand mark:** the masthead block is 56px starting 14px from the top, and the mark is the real
+**Brand mark:** the masthead block is 58px, and the mark is the real
 brand image at ~27px, height-constrained with its aspect preserved. The rail's plane glyph grows
 to match and sits in the same 56px block, so the two read as one line across both capsules.
 
@@ -303,3 +303,20 @@ narrowed count.
 
 The To-do page header; Agents' eight actions; the dashboard's four CTAs vs the header pair;
 the manuscript switcher's live wiring.
+
+## The user block, and an approved duplication (canonical shell pack)
+
+The account appears in **two** places, on purpose: **the bar's right end on every page**
+(avatar · name · chevron, identical size and position in both bar states) **and the panel's
+foot** (avatar · name · plan line · chevron). **This duplication is intentional and approved —
+do not tidy it away.** They do different jobs: the bar's copy is the one that survives the panel
+collapsing, and the panel's is the one that carries `Free plan · Upgrade`.
+
+**The RAIL's avatar chip is retired.** Three homes was one too many, and the rail's was the one
+with no job the other two were not already doing.
+
+**The search field takes the content capsule's own paper (`--shell-canvas`) with a
+`--shell-line` hairline**, 36px, radius 11 — not the bare `--shell-inset` fill it had, which on
+the bar's `--shell-bar-bg` left it with barely any edge and read as a gap in the bar rather than a
+control. The fill and the border are inline in `NavSearch`'s capsule variant, since that component
+owns its own presentation; the hover lives in `shellV2.css` beside the scope chip's.

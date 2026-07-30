@@ -76,7 +76,7 @@
 /* PRESS FEEDBACK — :active only, 120ms, house easing. The press scales the ICON while the
    indicator moves the PILL: separate elements, so they cannot fight. */
 .sv2-rib:active { transform: scale(.92); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
-.sv2-frow:active, .sv2-ff:active, .sv2-tuck:active, .sv2-railav:active { transform: scale(.985); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
+.sv2-frow:active, .sv2-ff:active, .sv2-tuck:active, .sv2-tbuser:active { transform: scale(.985); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
 .sv2-railspacer { flex: 1; }
 /* (The dedicated expand control is retired — rail-section-select P2; section icons, the
    flyout footer and ⌘\ carry expansion now.) */
@@ -167,21 +167,8 @@
   background: var(--shell-card);
 }
 
-/* The rail-foot avatar chip — the account link under Setup. */
-.sv2-railav {
-  width: 36px;
-  height: 36px;
-  border-radius: 99px;
-  border: 1px solid rgba(124, 58, 42, 0.25);
-  background: var(--shell-card);
-  display: grid;
-  place-items: center;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 13px;
-  color: var(--burg);
-  cursor: pointer;
-  margin-top: 6px;
-}
+/* (The rail-foot avatar chip is RETIRED — canonical shell pack. The account is in the bar on
+   every page and in the panel foot; the rail's was a third home.) */
 
 /* ── panel capsule ── */
 .sv2-side { display: none; }
@@ -595,6 +582,27 @@
 .sv2-tbbrand { display: flex; align-items: center; flex: none; padding: 8px 0; }
 /* the tools cluster — pushed right by .sv2-grow; on working pages the search joins it */
 .sv2-tbright { display: flex; align-items: center; gap: 9px; flex: none; margin-left: auto; }
+/* THE USER BLOCK — avatar · name · chevron, at the right end, on EVERY page, identical in both
+   bar states. ⚠️ It ALSO sits at the panel's foot; that duplication is INTENTIONAL AND APPROVED
+   (canonical shell pack). The bar's copy is the one that survives the panel collapsing; the
+   panel's carries the plan line. The RAIL's third copy is the one that went. */
+.sv2-tbuser {
+  display: inline-flex; align-items: center; gap: 9px; height: 36px; padding: 0 11px 0 5px;
+  border: 0; background: transparent; border-radius: 99px; cursor: pointer; font: inherit;
+  color: var(--shell-ink); flex: none; transition: background 0.15s;
+}
+.sv2-tbuser:hover { background: var(--shell-inset); }
+.sv2-tbav {
+  width: 28px; height: 28px; border-radius: 99px; flex: none; display: grid; place-items: center;
+  background: var(--shell-card); border: 1px solid rgba(124, 58, 42, 0.28);
+  font-family: "Playfair Display", Georgia, serif; font-size: 11px; color: var(--burg);
+}
+.sv2-tbname { font-size: 12.5px; white-space: nowrap; }
+.sv2-tbuchev { width: 12px; height: 12px; color: var(--shell-muted); flex: none; }
+/* the search pill's hover, matching the scope chip beside it (the fill + hairline are inline in
+   NavSearch's capsule variant, since that component owns its own presentation) */
+.sv2-gsearch .sv2-searchpill { transition: border-color 0.15s, box-shadow 0.15s; }
+.sv2-gsearch .sv2-searchpill:hover { border-color: #cfc2b4; box-shadow: 0 2px 10px rgba(58, 28, 20, 0.05); }
 .sv2-vr { width: 1px; align-self: stretch; margin: 12px 2px; background: var(--shell-line); flex: none; }
 .sv2-scopewrap { position: relative; flex: none; }
 .sv2-scope {
@@ -666,7 +674,7 @@
 @media (prefers-reduced-motion: reduce) {
   /* the indicator JUMPS; the press does nothing */
   .sv2-railpill.ready { transition: none; }
-  .sv2-rib:active, .sv2-frow:active, .sv2-ff:active, .sv2-tuck:active, .sv2-railav:active { transform: none; }
+  .sv2-rib:active, .sv2-frow:active, .sv2-ff:active, .sv2-tuck:active, .sv2-tbuser:active { transform: none; }
   .sv2-fly,
   .sv2-side,
   .sv2-rib,

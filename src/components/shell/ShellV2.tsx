@@ -2,11 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ShellV2 — the CAPSULE shell chrome (ref design-refs/scriptally-capsule-shell.html): the 70px
- * icon rail capsule (burgundy plane glyph, icon-only ribs with tooltips, Setup + the avatar at
- * the foot), the 288px panel capsule (the real brand artwork centred at its head; contents in
- * ShellSidebar), and the content capsule's 58px top bar (breadcrumb · save-state chip · the
- * shared NavSearch in its cream capsule variant, focused by ⌘K).
+ * ShellV2 — the CAPSULE shell chrome (ref design-refs/scriptally-shell-canonical.html): the 70px
+ * icon rail capsule (burgundy plane glyph, icon-only ribs with tooltips, Setup at the foot — the
+ * avatar chip is RETIRED), the 288px panel capsule (a 58px "Navigate" band at its head; contents
+ * in ShellSidebar), and the content capsule's 58px top bar — wordmark-or-breadcrumb · divider ·
+ * scope · search (⌘K) · help · the user block.
  *
  * The flat shell's tab tongue, captions, masthead rule/kicker and tuck control are RETIRED
  * (collapse behaviour is an open question — deliberately not built). Display of every sv2
@@ -16,7 +16,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, Settings, PanelLeft, List, Package, User, Compass, BookCopy,
-  SlidersHorizontal, HelpCircle,
+  SlidersHorizontal, HelpCircle, ChevronDown,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { NavSearch } from "../NavSearch";
@@ -139,7 +139,6 @@ export const ShellRail: React.FC<{
   onCollapse?: () => void;
 }> = ({ onNavigatePath, collapsed = false, onExpand, onBrowse, openSection = null, onCollapse }) => {
   const { pathname } = useLocation();
-  const { currentUser } = useScriptAllyDb();
   const counts = useShellNavCounts();
   const activeKey = shellSectionKeyForPath(pathname);
   // The indicator's position IS the route's rib — one derivation, so back/forward move it too.
@@ -151,8 +150,6 @@ export const ShellRail: React.FC<{
     return () => window.cancelAnimationFrame(id);
   }, []);
   const activePage = shellPageForPath(pathname)?.page.key ?? null;
-  const initials = (currentUser?.name ?? "")
-    .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   // ── flyout state: which section, anchored where; the ~140ms grace timer lets the pointer
   // travel rib → flyout (interaction logic — the appearance itself is the CSS .show class).
@@ -284,17 +281,9 @@ export const ShellRail: React.FC<{
       >
         <Settings aria-hidden="true" />
       </button>
-      {currentUser && (
-        <button
-          type="button"
-          className="sv2-railav"
-          title="Account"
-          aria-label="Account"
-          onClick={() => onNavigatePath("/account")}
-        >
-          {initials}
-        </button>
-      )}
+      {/* (The rail's avatar chip is RETIRED — canonical shell pack: the account lives in the bar
+          on every page, and in the panel foot. Three homes was one too many, and the bar's is the
+          one that survives every panel state.) */}
       {collapsed && fly && (
         <ShellFlyout
           kicker={flyKicker(fly.key)}
@@ -358,6 +347,7 @@ export const ShellTopBar: React.FC<{
   onHelp?: () => void;
 }> = ({ routeKey, searchQuery, setSearchQuery, onNavigate, scope, onHelp }) => {
   const { pathname } = useLocation();
+  const { currentUser } = useScriptAllyDb();
   const searchRef = useRef<HTMLInputElement | null>(null);
   // THE BAR HAS TWO STATES, ONE COMPONENT (ref design-refs/scriptally-bar-per-page.html).
   // Exactly two things differ — wordmark vs crumb, and where the search sits — so the bar never
@@ -396,6 +386,20 @@ export const ShellTopBar: React.FC<{
     </button>
   );
 
+  // THE USER BLOCK — avatar · name · chevron, at the right end, on EVERY page.
+  // It ALSO sits at the panel's foot. ⚠️ That duplication is INTENTIONAL AND APPROVED (canonical
+  // shell pack): the bar's copy is the one that survives the panel collapsing, and the panel's
+  // carries the plan line. Do not "tidy" either away. The rail's third copy is what went.
+  const initials = (currentUser?.name ?? "")
+    .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  const user = currentUser && (
+    <button type="button" className="sv2-tbuser" onClick={() => onNavigate("account")} title="Account">
+      <span className="sv2-tbav" aria-hidden="true">{initials}</span>
+      <span className="sv2-tbname">{currentUser.name}</span>
+      <ChevronDown className="sv2-tbuchev" aria-hidden="true" />
+    </button>
+  );
+
   return (
     <header className={`sv2-topbar${isDashboard ? " sv2-tb-dash" : ""}`}>
       {/* LEFT (ref design-refs/scriptally-bar-per-page.html) — the front door names the product;
@@ -431,12 +435,13 @@ export const ShellTopBar: React.FC<{
       {isDashboard ? (
         <>
           <div className="sv2-gsearch sv2-gsearch-c">{search}</div>
-          <div className="sv2-tbright">{help}</div>
+          <div className="sv2-tbright">{help}{user}</div>
         </>
       ) : (
         <div className="sv2-tbright">
           <div className="sv2-gsearch sv2-gsearch-r">{search}</div>
           {help}
+          {user}
         </div>
       )}
     </header>

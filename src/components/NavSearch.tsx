@@ -26,8 +26,11 @@ interface NavSearchProps {
    * "rail" is the AppShell sidebar presentation: full-width pill (the rail is ~216px), never
    * autofocused, no breakpoint hiding (the rail itself is desktop-only). Behaviour is otherwise
    * identical to desktop — same typeahead, same result navigation.
-   * "capsule" is the capsule-shell top bar: full-width CREAM FILL pill, no border (the capsule
-   * idiom's fill-based chrome), radius 11. Behaviour identical to rail.
+   * "capsule" is the capsule-shell top bar: full-width pill in the CONTENT-CAPSULE tone with a
+   * hairline, radius 11, 36px. Behaviour identical to rail.
+   * ⚠️ It was a bare `--shell-inset` fill with NO border, which on the bar's own `--shell-bar-bg`
+   * left the field with barely any edge — it read as a gap in the bar rather than a control.
+   * The canonical shell mockup gives it the capsule's own paper and a `--shell-line` hairline.
    */
   variant?: "desktop" | "mobile" | "rail" | "capsule";
   /** Optional ref to the input — lets the rail focus it from the ⌘K shortcut. */
@@ -46,12 +49,13 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
 
   return (
     <div ref={wrapRef} className={fullWidth ? "relative w-full" : "relative max-sm:hidden"} style={{ flexShrink: 0 }}>
-      {/* Search pill — parchment card everywhere except the capsule top bar, whose chrome is
-          fill-based: cream fill, no border (capsule shell). */}
+      {/* Search pill — parchment card everywhere except the capsule top bar, which takes the
+          content capsule's own paper plus a hairline so it reads as a control on the bar's
+          darker tone (canonical shell mockup `.srch`). */}
       <div
-        className="flex items-center gap-2"
+        className={`flex items-center gap-2${isCapsule ? " sv2-searchpill" : ""}`}
         style={isCapsule
-          ? { background: "var(--shell-inset)", borderRadius: 11, padding: "0 12px", height: 34, boxSizing: "border-box", width: "100%" }
+          ? { background: "var(--shell-canvas)", border: "1px solid var(--shell-line)", borderRadius: 11, padding: "0 13px", height: 36, boxSizing: "border-box", width: "100%" }
           : { background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: fullWidth ? "100%" : 240 }}
       >
         <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
