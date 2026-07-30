@@ -1,0 +1,569 @@
+<!--
+  ScriptAlly — Mobile concept v1 (committed 30 Jul 2026, Mobile Pass 1, Phase 0)
+
+  NORMATIVE for structure and arrangement: screen anatomy, capsule model (one full-bleed
+  content capsule on the ground, floating tab-bar capsule), tab set, list→detail push,
+  bottom-sheet chassis, command-bar placement, you-menu contents.
+
+  ILLUSTRATIVE for colour: every colour in the build comes from live codebase tokens
+  (--shell-*, --burg/--pink family, .t-f12 sheet) — never from this file's hexes, even
+  where they happen to restate the same values.
+
+  The StatusDots drawn here (.sd-*) are hand-drawn stand-ins; the build renders the real
+  locked StatusDot component everywhere.
+-->
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Mobile concept v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Capsule shell chrome — locked 30 Jul */
+    --ground:#e7e0d5;
+    --panel:#f8f4ee;
+    --content:#fdfbf8;
+    --interior:#efe8df;
+    --cap-border:#d8ccbc;
+    --ink:#311e19;
+    --ink-soft:#5d5047;
+    --muted:#8a7a6c;
+    --label:#9c8878;
+    /* Form 11 accents */
+    --burg:#7c3a2a;
+    --pink-bg:#f5e2da;
+    --pink-bd:#e8c8bc;
+    --pink-hover:#efd5ca;
+    --sage-band:#dce0d9;
+    --sage-acc:#8a9e88;
+    --sage-ink:#5a6e58;
+    --sage-centre:#e9ede6;
+    --pink-centre:#f8e7dc;
+    --amber:#BA7517;
+    --latte:#ebe1d0;
+    --butter:#f4ecd6;
+    --urgent-pink:#f3e0d6;
+    --hairline:#ece0d2;
+    --shadow-cap: 0 1px 2px rgba(49,30,25,.05), 0 4px 10px rgba(49,30,25,.06), 0 12px 28px rgba(49,30,25,.07);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  body{background:#332d28;font-family:'Source Sans 3',sans-serif;color:var(--ink);padding:40px 48px 64px}
+
+  /* ============ DESK / REVIEW CHROME ============ */
+  .desk-head{max-width:1100px;margin:0 auto 34px}
+  .desk-head .kick{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;color:#a89a88;text-transform:uppercase;font-weight:500}
+  .desk-head h1{font-family:'Playfair Display',serif;color:#f1ebe3;font-size:30px;font-weight:600;margin-top:8px}
+  .desk-head p{color:#b8ab9b;font-size:13.5px;max-width:760px;margin-top:10px;line-height:1.55}
+  .frames{display:flex;gap:56px;align-items:flex-start;overflow-x:auto;padding:8px 4px 24px}
+  .frame{flex:0 0 auto;width:392px}
+  .frame .fkick{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;color:#a89a88;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+  .frame .ftitle{font-family:'Playfair Display',serif;color:#f1ebe3;font-size:19px;font-weight:600;margin-bottom:14px}
+  .frame .fnote{color:#b0a494;font-size:12.5px;line-height:1.55;margin-top:16px}
+  .frame .fnote b{color:#ddd2c2;font-weight:600}
+
+  /* ============ PHONE ============ */
+  .phone{width:392px;height:820px;background:#0d0b0a;border-radius:44px;padding:10px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .screen{position:relative;width:100%;height:100%;border-radius:35px;overflow:hidden;background:var(--ground);display:flex;flex-direction:column}
+  .screen::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.32 0 0 0 0 0.26 0 0 0 0 0.2 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .screen>*{position:relative;z-index:1}
+
+  /* Top bar — sits directly on the ground */
+  .topbar{height:78px;padding:28px 18px 0;display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .wordmark{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .topbar .spacer{flex:1}
+  .iconbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--cap-border);background:var(--panel);display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
+  .iconbtn svg{width:15px;height:15px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:#d9c4b6;border:1px solid var(--cap-border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#6a4636}
+  .crumb{display:flex;align-items:center;gap:8px;color:var(--ink-soft);font-size:13px}
+  .crumb svg{width:16px;height:16px}
+  .crumb .pg{font-family:'Playfair Display',serif;font-weight:600;font-size:17px;color:var(--ink)}
+
+  /* Content capsule — one full-bleed floating surface */
+  .cap{flex:1;margin:6px 10px 0;background:var(--content);border:1px solid var(--cap-border);border-radius:18px 18px 0 0;border-bottom:none;box-shadow:var(--shadow-cap);overflow-y:auto;padding:20px 16px 120px;scrollbar-width:none}
+  .cap::-webkit-scrollbar{display:none}
+
+  /* Tab bar — floating capsule */
+  .tabbar{position:absolute;left:12px;right:12px;bottom:14px;height:62px;background:var(--panel);border:1px solid var(--cap-border);border-radius:22px;box-shadow:var(--shadow-cap);display:flex;align-items:center;padding:0 8px;z-index:5}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0;border-radius:15px;color:var(--muted)}
+  .tab svg{width:19px;height:19px}
+  .tab span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+  .tab.active{background:var(--ground);color:var(--ink)}
+
+  /* ============ SHARED PIECES ============ */
+  .mlabel{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.17em;text-transform:uppercase;font-weight:500;color:var(--label)}
+  .serif{font-family:'Playfair Display',serif}
+  .btn-pink{display:inline-flex;align-items:center;gap:6px;background:var(--pink-bg);border:1px solid var(--pink-bd);color:var(--ink);font-weight:700;font-size:13px;padding:9px 15px;border-radius:999px}
+  .btn-ghost{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e0d5c8;color:#6a5a50;font-weight:600;font-size:13px;padding:9px 15px;border-radius:999px}
+
+  /* StatusDot — approximation; build uses the real locked component */
+  .sd{width:13px;height:13px;border-radius:50%;flex-shrink:0;position:relative}
+  .sd-out-0{border:1.5px solid var(--burg);background:var(--pink-centre)}
+  .sd-out-1{border:1.5px solid var(--burg);background:linear-gradient(to bottom,var(--burg) 50%,var(--pink-centre) 50%)}
+  .sd-out-2{border:3.5px solid var(--burg);background:var(--pink-centre)}
+  .sd-in-1{border:1.5px solid var(--sage-acc);background:linear-gradient(to bottom,var(--sage-acc) 50%,var(--sage-centre) 50%)}
+  .sd-in-2{border:3.5px solid var(--sage-acc);background:var(--sage-centre)}
+  .sd-offer{background:var(--burg)}
+  .sd-offer::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fdfaf5;font-size:8px;font-weight:700}
+  .sd-closed{border:1.5px solid #b8b0a6;background:#efece7}
+  .sd-closed::after{content:"×";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9a9186;font-size:9px;line-height:1}
+
+  /* ============ DASHBOARD ============ */
+  .greet-kick{margin-bottom:6px}
+  .greet{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;line-height:1.2;margin-bottom:16px}
+  .deskline{background:var(--urgent-pink);border:1px solid var(--pink-bd);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .deskline b{font-size:13.5px;font-weight:700}
+  .deskline .go{margin-left:auto;color:var(--burg);font-weight:700;font-size:15px}
+  .statrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat{background:#fff;border:1px solid var(--hairline);border-radius:13px;padding:13px 14px}
+  .stat .n{font-family:'Playfair Display',serif;font-size:27px;font-weight:700;line-height:1}
+  .stat .l{margin-top:6px}
+  .mpanel{background:#fff;border:1px solid var(--hairline);border-radius:14px;overflow:hidden;margin-bottom:14px}
+  .mpanel .band{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:linear-gradient(135deg,#dce0d9,#d0d6cc)}
+  .mpanel .band.pink{background:linear-gradient(135deg,#f5e2da,#efd5ca)}
+  .mpanel .band .mlabel{color:#4c5a4a}
+  .mpanel .band.pink .mlabel{color:#8a5847}
+  .mpanel .bd{padding:12px 14px}
+  .pipe-ms{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+  .pipe-ms .t{font-family:'Playfair Display',serif;font-weight:600;font-size:14.5px;font-style:italic}
+  .pipe-ms .c{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+  .buckets{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .bucket{background:var(--content);border:1px solid var(--hairline);border-radius:9px;padding:8px 4px;text-align:center}
+  .bucket .n{font-family:'Playfair Display',serif;font-weight:700;font-size:16px}
+  .bucket .l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--label);margin-top:3px}
+  .todo-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--hairline);font-size:13.5px}
+  .todo-row:last-child{border-bottom:none}
+  .todo-row .cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;background:var(--interior);border-radius:999px;padding:3px 8px;color:var(--ink-soft)}
+  .act-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--hairline)}
+  .act-row:last-child{border-bottom:none}
+  .act-row .w{font-size:13px;line-height:1.35}
+  .act-row .d{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-left:auto;flex-shrink:0}
+
+  /* ============ QUERIES LIST ============ */
+  .pagehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .pagehead h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600}
+  .pagehead .sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:.08em}
+  .chips{display:flex;gap:7px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;scrollbar-width:none}
+  .chip{flex-shrink:0;font-size:12px;font-weight:600;color:var(--ink-soft);background:#fff;border:1px solid var(--hairline);border-radius:999px;padding:6px 12px}
+  .chip.on{background:var(--ground);border-color:var(--cap-border);color:var(--ink)}
+  .qcard{background:#fff;border:1px solid var(--hairline);border-radius:13px;padding:13px 14px;margin-bottom:9px}
+  .qcard .r1{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .qcard .an{font-family:'Playfair Display',serif;font-weight:600;font-size:15.5px}
+  .qcard .agy{font-size:11.5px;font-style:italic;color:var(--muted)}
+  .qcard .wait{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);flex-shrink:0}
+  .qcard .wait.hot{color:var(--burg);font-weight:700}
+  .qcard .r2{display:flex;align-items:center;gap:7px;margin-top:9px}
+  .qcard .st{font-size:12px;font-weight:600;color:var(--ink-soft)}
+  .qcard .ms{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label);margin-left:auto;letter-spacing:.05em}
+
+  /* ============ QUERY DETAIL ============ */
+  .dhero{padding-bottom:14px;border-bottom:.5px solid var(--hairline);margin-bottom:16px}
+  .dhero .an{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;line-height:1.15}
+  .dhero .agy{font-style:italic;color:var(--muted);font-size:13.5px;margin-top:3px}
+  .dhero .strow{display:flex;align-items:center;gap:8px;margin-top:11px}
+  .dhero .stl{font-weight:700;font-size:13.5px;color:var(--sage-ink)}
+  .sugg{background:var(--sage-centre);border:1px solid #d3dccf;border-radius:13px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:18px;color:#3e4a3c}
+  .sugg b{font-weight:700}
+  .dsec{margin-bottom:18px}
+  .dsec .mlabel{display:block;margin-bottom:9px}
+  .tl-row{display:flex;gap:11px;padding:7px 0}
+  .tl-row .sdw{padding-top:2px}
+  .tl-row .ev{font-size:13.5px;font-weight:600}
+  .tl-row .dt{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px}
+  .doc-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--hairline);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-size:13px}
+  .doc-row .q{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted)}
+  .doc-row svg{width:14px;height:14px;color:var(--ink-soft)}
+  .note-bub{background:#fff;border:1px solid var(--hairline);border-radius:13px;border-bottom-left-radius:4px;padding:11px 13px;font-size:13px;line-height:1.5;max-width:88%}
+  .note-bub .dt{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);margin-top:6px}
+  /* command bar */
+  .cmdbar{position:absolute;left:12px;right:12px;bottom:14px;background:#311e19;border-radius:20px;box-shadow:var(--shadow-cap);display:flex;align-items:center;gap:9px;padding:11px 12px;z-index:5}
+  .cmdbar .btn-pink{flex:1;justify-content:center;padding:11px 0}
+  .cmdbar .quiet{color:#cbb9ad;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:0 10px}
+
+  /* ============ SHEETS ============ */
+  .dim{position:absolute;inset:0;background:rgba(49,30,25,.42);z-index:8}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--content);border-radius:22px 22px 0 0;border:1px solid var(--cap-border);border-bottom:none;z-index:9;padding:10px 18px 34px;box-shadow:0 -12px 40px rgba(49,30,25,.25)}
+  .grab{width:38px;height:4px;border-radius:2px;background:var(--cap-border);margin:0 auto 16px}
+  .sheet h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;line-height:1.25}
+  .sheet .sub{color:var(--ink-soft);font-size:13.5px;margin-top:5px}
+  .optrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--hairline);border-radius:13px;padding:14px;margin-top:10px}
+  .optrow .t{font-weight:700;font-size:14px}
+  .optrow .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .optrow .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .steps{display:flex;gap:5px;justify-content:center;margin-top:20px}
+  .steps i{width:6px;height:6px;border-radius:50%;background:var(--cap-border)}
+  .steps i.on{background:var(--burg)}
+  .menurow{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:.5px solid var(--hairline);font-size:14.5px;font-weight:600}
+  .menurow:last-child{border-bottom:none}
+  .menurow svg{width:17px;height:17px;color:var(--ink-soft)}
+  .userblock{display:flex;align-items:center;gap:12px;padding:4px 4px 15px;border-bottom:.5px solid var(--hairline);margin-bottom:6px}
+  .userblock .nm{font-weight:700;font-size:15px}
+  .userblock .em{font-size:12px;color:var(--muted)}
+  .userblock .plan{font-size:12px;color:#6A89A7;font-weight:600;margin-top:2px}
+
+  /* ============ AGENTS ============ */
+  .acard{background:#fff;border:1.5px solid var(--ink);border-radius:10px;box-shadow:4px 4px 0 rgba(49,30,25,.14);margin-bottom:14px;overflow:hidden}
+  .acard .top{padding:13px 14px;display:flex;gap:11px}
+  .acard .av{width:40px;height:40px;border-radius:50%;background:#cfc0b0;color:#5a4636;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;flex-shrink:0}
+  .acard .an{font-family:'Playfair Display',serif;font-weight:600;font-size:16.5px;line-height:1.15}
+  .acard .agy{font-style:italic;font-size:12px;color:var(--muted)}
+  .acard .stars{color:var(--amber);font-size:11px;letter-spacing:2px;margin-top:4px}
+  .acard .pin{font-family:'Caveat',cursive;font-size:15px;color:#6a5a50;padding:0 14px 11px;line-height:1.3}
+  .acard .band{padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+  .acard .band .pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+  .acard .band .dots{display:flex;gap:5px}
+  .band-sage{background:var(--sage-band);color:#43503f}
+  .band-pink{background:var(--pink-bg);color:#7d5040}
+  .acard.closed{opacity:.6}
+  .band-closed{background:repeating-linear-gradient(45deg,#e8e5e0,#e8e5e0 5px,#dedad4 5px,#dedad4 10px);color:#6a6258;position:relative}
+  .stamp{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;font-weight:700;border:1.5px solid #8a8177;color:#8a8177;border-radius:3px;padding:2px 6px;transform:rotate(-3deg)}
+  .searchfield{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--hairline);border-radius:999px;padding:9px 14px;color:var(--muted);font-size:13px;margin-bottom:14px}
+  .searchfield svg{width:14px;height:14px}
+
+  /* ============ TO-DO DECK ============ */
+  .idstrip{background:var(--panel);border:1px solid var(--hairline);border-radius:14px;padding:14px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .idstrip h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-top:4px}
+  .todaychip{display:flex;align-items:center;gap:8px;background:#ddd3c2;border:1px solid var(--cap-border);border-radius:999px;padding:8px 13px;font-weight:700;font-size:12.5px}
+  .todaychip .n{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--content);border-radius:999px;padding:2px 7px}
+  .reelhead{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:linear-gradient(135deg,#dce0d9,#d5dbd3);border-radius:9px;margin:16px 0 9px}
+  .reelhead .mlabel{color:#4c5a4a}
+  .reelhead .pg{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a7a68}
+  .tcard{background:#fff;border:1px solid var(--hairline);border-radius:12px;overflow:hidden;margin-bottom:8px;display:flex}
+  .tcard .cband{width:6px;flex-shrink:0}
+  .cband.pink{background:var(--urgent-pink)}
+  .cband.latte{background:var(--latte)}
+  .cband.butter{background:var(--butter)}
+  .tcard .in{padding:11px 12px;flex:1;display:flex;align-items:center;gap:10px}
+  .tcard .tt{font-family:'Playfair Display',serif;font-weight:600;font-size:14.5px;line-height:1.2}
+  .tcard .ts{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .tag{font-size:9.5px;font-weight:600;background:var(--pink-bg);border:1px solid var(--pink-bd);color:#7d5040;border-radius:999px;padding:2px 8px;display:inline-block;margin-top:6px}
+  .tag.deep{background:#eec9ba;border-color:#dfab97;font-weight:800}
+  .play{margin-left:auto;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .play svg{width:11px;height:11px;margin-left:1px}
+  .focusbtn{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;font-weight:700;font-size:13.5px;padding:11px 0;width:100%;margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<div class="desk-head">
+  <div class="kick">ScriptAlly · Mobile concept v1 · 30 Jul 2026</div>
+  <h1>The app at 390px — seven screens</h1>
+  <p>Built from this week's locked capsule tokens and each page's settled language, not sampled from live dev. The proposal in one line: <b style="color:#e6dccc">capsules survive on mobile</b> — one full-bleed content capsule on the warm ground, the tab bar floating as its own capsule, the panel's contents redistributed into the desk line and the you-menu. React to structure and instinct; ignore pixel-level detail. Scroll inside each phone.</p>
+</div>
+
+<div class="frames">
+
+  <!-- ============ 1. DASHBOARD ============ -->
+  <div class="frame">
+    <div class="fkick">01 · Home tab</div>
+    <div class="ftitle">Dashboard</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="wordmark">ScriptAlly</span>
+        <span class="spacer"></span>
+        <span class="iconbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>
+        <span class="avatar">ML</span>
+      </div>
+      <div class="cap">
+        <div class="mlabel greet-kick">Thursday 30 July</div>
+        <div class="greet">Good afternoon,<br>Michael.</div>
+        <div class="deskline">
+          <span style="font-size:15px">✳</span>
+          <b>2 things need you today</b>
+          <span class="go">→</span>
+        </div>
+        <div class="statrow">
+          <div class="stat"><div class="n">14</div><div class="l mlabel">Active queries</div></div>
+          <div class="stat"><div class="n">6</div><div class="l mlabel">Responses received</div></div>
+        </div>
+        <div class="mpanel">
+          <div class="band"><span class="mlabel">Your querying pipeline</span></div>
+          <div class="bd">
+            <div class="pipe-ms"><span class="t">Murphy's Day Out</span><span class="c">14 queries</span></div>
+            <div class="buckets">
+              <div class="bucket"><div class="n">8</div><div class="l">Queried</div></div>
+              <div class="bucket"><div class="n">3</div><div class="l">Partial</div></div>
+              <div class="bucket"><div class="n">2</div><div class="l">Full</div></div>
+              <div class="bucket"><div class="n">1</div><div class="l">R&amp;R</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mpanel">
+          <div class="band pink"><span class="mlabel">To-do</span></div>
+          <div class="bd">
+            <div class="todo-row">Needs a send <span class="cnt">2</span></div>
+            <div class="todo-row">Housekeeping <span class="cnt">3</span></div>
+            <div class="todo-row">Notes to self <span class="cnt">1</span></div>
+          </div>
+        </div>
+        <div class="mpanel">
+          <div class="band"><span class="mlabel">Recent activity</span></div>
+          <div class="bd">
+            <div class="act-row"><span class="sd sd-in-2"></span><span class="w"><b>Harriet Bell</b> requested the full</span><span class="d">3W AGO</span></div>
+            <div class="act-row"><span class="sd sd-out-0"></span><span class="w">Queried <b>Tom Okafor</b></span><span class="d">5W AGO</span></div>
+            <div class="act-row"><span class="sd sd-closed"></span><span class="w"><b>Priya Shah</b> passed</span><span class="d">6W AGO</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Home</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg><span>Queries</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.8a3.5 3.5 0 010 6.4M18.5 14.3c2 .9 3 2.8 3 5.7"/></svg><span>Agents</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/></svg><span>Scripts</span></div>
+      </div>
+    </div></div>
+    <div class="fnote">Capsule shell translated: content is one floating capsule on the ground; tab bar floats as a second. The sidebar panel's <b>desk line</b> becomes the pink card up top. Nav active state is <b>ground fill</b>, per the law. Four tabs from the June P1 decision.</div>
+  </div>
+
+  <!-- ============ 2. QUERIES LIST ============ -->
+  <div class="frame">
+    <div class="fkick">02 · Queries tab</div>
+    <div class="ftitle">Queries — the list half</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="crumb"><span class="pg">Queries</span></span>
+        <span class="spacer"></span>
+        <span class="iconbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>
+        <span class="avatar">ML</span>
+      </div>
+      <div class="cap">
+        <div class="pagehead">
+          <div><div class="sub">14 ACTIVE · 3 CLOSED</div></div>
+          <button class="btn-pink">+ New query</button>
+        </div>
+        <div class="chips">
+          <span class="chip on">All</span><span class="chip">Needs you</span><span class="chip">Awaiting agents</span><span class="chip">Closed</span>
+        </div>
+        <div class="qcard">
+          <div class="r1"><div><span class="an">Harriet Bell</span><div class="agy">Bell &amp; Marsh Literary</div></div><span class="wait">3W WAITING</span></div>
+          <div class="r2"><span class="sd sd-in-2"></span><span class="st" style="color:var(--sage-ink)">Full requested</span><span class="ms">MURPHY'S DAY OUT</span></div>
+        </div>
+        <div class="qcard">
+          <div class="r1"><div><span class="an">Tom Okafor</span><div class="agy">Greenhouse Literary</div></div><span class="wait hot">14W WAITING</span></div>
+          <div class="r2"><span class="sd sd-out-0"></span><span class="st">Queried</span><span class="ms">MURPHY'S DAY OUT</span></div>
+        </div>
+        <div class="qcard">
+          <div class="r1"><div><span class="an">Rosa Lindqvist</span><div class="agy">Lindqvist &amp; Co</div></div><span class="wait">1W WAITING</span></div>
+          <div class="r2"><span class="sd sd-out-1"></span><span class="st">Partial sent</span><span class="ms">MURPHY'S DAY OUT</span></div>
+        </div>
+        <div class="qcard">
+          <div class="r1"><div><span class="an">Daniel Ferreira</span><div class="agy">Ferreira Talent</div></div><span class="wait">YOUR TURN</span></div>
+          <div class="r2"><span class="sd sd-in-1"></span><span class="st" style="color:var(--sage-ink)">Revise &amp; resubmit</span><span class="ms">MURPHY'S DAY OUT</span></div>
+        </div>
+        <div class="qcard">
+          <div class="r1"><div><span class="an">Priya Shah</span><div class="agy">Shah Literary Agency</div></div><span class="wait">CLOSED</span></div>
+          <div class="r2"><span class="sd sd-closed"></span><span class="st" style="color:#9a9186">No response — closed</span><span class="ms">MURPHY'S DAY OUT</span></div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Home</span></div>
+        <div class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg><span>Queries</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.8a3.5 3.5 0 010 6.4M18.5 14.3c2 .9 3 2.8 3 5.7"/></svg><span>Agents</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/></svg><span>Scripts</span></div>
+      </div>
+    </div></div>
+    <div class="fnote">The hub's two-pane desk becomes <b>list → detail</b> (the June decision). List rows carry the StatusDot, wait clock, and manuscript in mono. Overdue reads burgundy. Tapping a card pushes to frame 03. Desktop's espresso command bar does not appear at list level.</div>
+  </div>
+
+  <!-- ============ 3. QUERY DETAIL ============ -->
+  <div class="frame">
+    <div class="fkick">03 · Pushed screen</div>
+    <div class="ftitle">Query detail (reading pane)</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="crumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg><span>Queries</span></span>
+      </div>
+      <div class="cap" style="padding-bottom:130px">
+        <div class="dhero">
+          <div class="an">Harriet Bell</div>
+          <div class="agy">Bell &amp; Marsh Literary</div>
+          <div class="strow"><span class="sd sd-in-2"></span><span class="stl">Full requested</span></div>
+        </div>
+        <div class="sugg"><b>Their turn.</b> You sent the full 3 weeks ago. Harriet typically responds within 8 weeks — nothing to do yet.</div>
+        <div class="dsec">
+          <span class="mlabel">Tracking</span>
+          <div class="tl-row"><span class="sdw"><span class="sd sd-in-2"></span></span><div><div class="ev">Full manuscript sent</div><div class="dt">9 JUL 2026</div></div></div>
+          <div class="tl-row"><span class="sdw"><span class="sd sd-in-1"></span></span><div><div class="ev">Full requested</div><div class="dt">2 JUL 2026</div></div></div>
+          <div class="tl-row"><span class="sdw"><span class="sd sd-out-0"></span></span><div><div class="ev">Queried</div><div class="dt">14 MAY 2026</div></div></div>
+        </div>
+        <div class="dsec">
+          <span class="mlabel">What you sent</span>
+          <div class="doc-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Query letter<span class="q">✓</span></div>
+          <div class="doc-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Synopsis<span class="q">2 PAGES</span></div>
+          <div class="doc-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5v14z"/></svg>Full manuscript<span class="q">82,000 WORDS</span></div>
+        </div>
+        <div class="dsec">
+          <span class="mlabel">Notes</span>
+          <div class="note-bub">She mentioned Murphy's voice reminded her of a debut she sold last spring — good sign.<div class="dt">2 JUL · 14:22</div></div>
+        </div>
+      </div>
+      <div class="cmdbar">
+        <button class="btn-pink">✓&nbsp; Record response</button>
+        <span class="quiet">Edit</span>
+        <span class="quiet">···</span>
+      </div>
+    </div></div>
+    <div class="fnote">Tab bar yields to a condensed <b>espresso command bar</b> — the hub's two-card bar, folded to one. Primary stays soft-pink per the button law. Suggested action rides high as the sage card. Correction UI ("Edit last entry") will live behind the tracking rows when built.</div>
+  </div>
+
+  <!-- ============ 4. RECORD RESPONSE SHEET ============ -->
+  <div class="frame">
+    <div class="fkick">04 · Bottom sheet</div>
+    <div class="ftitle">Record a response</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="crumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg><span>Queries</span></span>
+      </div>
+      <div class="cap" style="padding-bottom:130px">
+        <div class="dhero">
+          <div class="an">Harriet Bell</div>
+          <div class="agy">Bell &amp; Marsh Literary</div>
+          <div class="strow"><span class="sd sd-in-2"></span><span class="stl">Full requested</span></div>
+        </div>
+        <div class="sugg"><b>Their turn.</b> You sent the full 3 weeks ago.</div>
+      </div>
+      <div class="dim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <h3>Word from Harriet Bell</h3>
+        <div class="sub">Every reply moves your journey forward. What kind of news is it?</div>
+        <div class="optrow"><span class="dot" style="background:var(--sage-acc)"></span><div><div class="t">A request</div><div class="s">She wants to see more</div></div></div>
+        <div class="optrow"><span class="dot" style="background:#b8b0a6"></span><div><div class="t">A pass</div><div class="s">A no, or a no-for-now</div></div></div>
+        <div class="optrow"><span class="dot" style="background:var(--pink-bd)"></span><div><div class="t">Something else</div><div class="s">R&amp;R, a nudge reply, other news</div></div></div>
+        <div class="steps"><i class="on"></i><i></i><i></i></div>
+      </div>
+    </div></div>
+    <div class="fnote">The guided-steps response flow (your chosen Option A) as a <b>bottom sheet</b> — the app-wide mobile pattern replacing centred modals. Same sheet chassis serves mark-sent, the ⏸ fork, filters, and edit forms.</div>
+  </div>
+
+  <!-- ============ 5. AGENTS ============ -->
+  <div class="frame">
+    <div class="fkick">05 · Agents tab</div>
+    <div class="ftitle">Agent list</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="crumb"><span class="pg">Agents</span></span>
+        <span class="spacer"></span>
+        <span class="iconbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg></span>
+        <span class="avatar">ML</span>
+      </div>
+      <div class="cap">
+        <div class="pagehead">
+          <div><div class="sub">23 AGENTS · 9 IDLE</div></div>
+          <button class="btn-pink">+ Add agent</button>
+        </div>
+        <div class="searchfield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Search your list…</div>
+        <div class="acard">
+          <div class="top">
+            <span class="av">HB</span>
+            <div><div class="an">Harriet Bell</div><div class="agy">Bell &amp; Marsh Literary · London</div><div class="stars">★★★★★</div></div>
+          </div>
+          <div class="pin">Loves character-led comic fiction — mentioned Murphy by name!</div>
+          <div class="band band-sage"><span class="pill">Active queries</span><span class="dots"><span class="sd sd-in-2"></span></span></div>
+        </div>
+        <div class="acard">
+          <div class="top">
+            <span class="av">TO</span>
+            <div><div class="an">Tom Okafor</div><div class="agy">Greenhouse Literary · Bristol</div><div class="stars">★★★★☆</div></div>
+          </div>
+          <div class="band band-sage"><span class="pill">Active queries</span><span class="dots"><span class="sd sd-out-0"></span></span></div>
+        </div>
+        <div class="acard">
+          <div class="top">
+            <span class="av">RL</span>
+            <div><div class="an">Rosa Lindqvist</div><div class="agy">Lindqvist &amp; Co · Edinburgh</div><div class="stars">★★★☆☆</div></div>
+          </div>
+          <div class="band band-pink"><span class="pill">Never queried</span></div>
+        </div>
+        <div class="acard closed">
+          <div class="top">
+            <span class="av">JW</span>
+            <div><div class="an">James Whitfield</div><div class="agy">Whitfield Associates · London</div><div class="stars">★★★★☆</div></div>
+          </div>
+          <div class="band band-closed"><span class="pill">No active queries</span><span class="stamp">CLOSED TO QUERIES</span></div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Home</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg><span>Queries</span></div>
+        <div class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.8a3.5 3.5 0 010 6.4M18.5 14.3c2 .9 3 2.8 3 5.7"/></svg><span>Agents</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/></svg><span>Scripts</span></div>
+      </div>
+    </div></div>
+    <div class="fnote">The flip-card grid goes <b>single column</b>, card language intact: ink border, hard offset cast, sage band for active, pink for never-queried, hatched + stamp at 0.6 for closed doors, Caveat pinned note. On mobile the flip becomes a <b>push to a full-screen editor</b> — 3D flips at full width feel gimmicky on a phone. Flag if you want the flip kept.</div>
+  </div>
+
+  <!-- ============ 6. TO-DO DECK ============ -->
+  <div class="frame">
+    <div class="fkick">06 · Via Home or you-menu</div>
+    <div class="ftitle">To-do — the desk</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="crumb"><span class="pg">To-do</span></span>
+        <span class="spacer"></span>
+        <span class="avatar">ML</span>
+      </div>
+      <div class="cap">
+        <div class="idstrip">
+          <div><div class="mlabel">Thursday 30 July</div><h2>What's on your desk?</h2></div>
+          <div class="todaychip">Today <span class="n">3</span></div>
+        </div>
+        <button class="focusbtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="6 3 20 12 6 21 6 3"/></svg> Focused session</button>
+        <div class="reelhead"><span class="mlabel">Needs a send</span><span class="pg">2</span></div>
+        <div class="tcard"><span class="cband pink"></span><div class="in"><div><div class="tt">Nudge Tom Okafor</div><div class="ts">Queried 14 weeks ago — past his window</div><span class="tag deep">Overdue</span></div><span class="play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="6 3 20 12 6 21 6 3"/></svg></span></div></div>
+        <div class="tcard"><span class="cband pink"></span><div class="in"><div><div class="tt">Send the full to Harriet Bell</div><div class="ts">Requested Tuesday · Murphy's Day Out</div><span class="tag">Requested</span></div><span class="play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="6 3 20 12 6 21 6 3"/></svg></span></div></div>
+        <div class="reelhead"><span class="mlabel">Housekeeping</span><span class="pg">3</span></div>
+        <div class="tcard"><span class="cband latte"></span><div class="in"><div><div class="tt">3 agents missing response times</div><div class="ts">Fill in one go</div></div><span class="play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="6 3 20 12 6 21 6 3"/></svg></span></div></div>
+        <div class="reelhead"><span class="mlabel">Notes to self</span><span class="pg">1</span></div>
+        <div class="tcard"><span class="cband butter"></span><div class="in"><div><div class="tt" style="font-family:'Caveat',cursive;font-size:17px;font-weight:500">Check Lindqvist's autumn open window</div><div class="ts">Pinned 26 July</div></div></div></div>
+      </div>
+      <div class="tabbar">
+        <div class="tab active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Home</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg><span>Queries</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16.5 4.8a3.5 3.5 0 010 6.4M18.5 14.3c2 .9 3 2.8 3 5.7"/></svg><span>Agents</span></div>
+        <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/></svg><span>Scripts</span></div>
+      </div>
+    </div></div>
+    <div class="fnote">Deck-v1 stacked: identity strip up top, reels become <b>vertical sections</b> under soft-sage heads, pastille bands as edge strips (pink urgency, latte housekeeping, butter notes), two-depth pink tags. Today column collapses to the <b>chip → sheet</b>. Focused session keeps its ink-outline prominence. Note: To-do has no tab — reached from the dashboard's desk line. Flag if it should displace a tab.</div>
+  </div>
+
+  <!-- ============ 7. YOU-MENU ============ -->
+  <div class="frame">
+    <div class="fkick">07 · From the avatar</div>
+    <div class="ftitle">You-menu</div>
+    <div class="phone"><div class="screen">
+      <div class="topbar">
+        <span class="wordmark">ScriptAlly</span>
+        <span class="spacer"></span>
+        <span class="iconbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>
+        <span class="avatar">ML</span>
+      </div>
+      <div class="cap">
+        <div class="mlabel greet-kick">Thursday 30 July</div>
+        <div class="greet">Good afternoon,<br>Michael.</div>
+        <div class="deskline"><span style="font-size:15px">✳</span><b>2 things need you today</b><span class="go">→</span></div>
+      </div>
+      <div class="dim"></div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="userblock">
+          <span class="avatar" style="width:42px;height:42px;font-size:12px">ML</span>
+          <div><div class="nm">Michael Li</div><div class="em">michael@murphysday.co.uk</div><div class="plan">Free plan · Upgrade</div></div>
+        </div>
+        <div class="menurow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M21 12v6a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h11"/></svg>To-do</div>
+        <div class="menurow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Submission packages</div>
+        <div class="menurow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Import your queries</div>
+        <div class="menurow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Account settings</div>
+        <div class="menurow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>Help</div>
+        <div class="menurow" style="color:#9a5f4e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>Sign out</div>
+      </div>
+    </div></div>
+    <div class="fnote">Secondary destinations demoted here (the June you-menu decision), now also carrying the sidebar panel's foot: user block with <b>"Free plan · Upgrade" as plain slate text</b> — no Pro card. To-do and Packages live here plus via dashboard doorways. Flag anything that deserves promotion to a tab.</div>
+  </div>
+
+</div>
+</body>
+</html>
