@@ -322,3 +322,30 @@ with no job the other two were not already doing.
 the bar's `--shell-bar-bg` left it with barely any edge and read as a gap in the bar rather than a
 control. The fill and the border are inline in `NavSearch`'s capsule variant, since that component
 owns its own presentation; the hover lives in `shellV2.css` beside the scope chip's.
+
+## The foot fade (canonical shell pack)
+
+The content capsule's scroll region **fades out at its foot when there is more content below**, so
+a hard cut line never reads as the end of the page.
+
+**It is a STATE, not decoration.** It appears only while
+`scrollHeight - scrollTop - clientHeight > 8` and fades at 200ms; **a permanent fade over a short
+page reads as a rendering fault.** The 8px slack keeps sub-pixel rounding from flickering it at
+the very bottom of a scroll.
+
+56px tall, `pointer-events: none`, a gradient from transparent to `--shell-canvas`. **Inset 1px
+left and right** so it sits inside the capsule's border rather than darkening it along the foot,
+and its bottom corners are `calc(var(--shell-cap-radius) - 1px)` — the capsule's radius minus that
+inset, or the fade squares off the curve.
+
+**It is driven by CONTENT height, not only by scrolling.** A `ResizeObserver` watches the stage
+and its first child as well as the scroll event, because a freshly-navigated long page would
+otherwise have no fade until you first scrolled it, and a page that grows in place (an accordion,
+a lazily-filled list) would never gain one.
+
+**The stage itself is untouched** — the wrapper (`.sv2-pgwrap`) is new; the stage keeps its id,
+its ref, its scroll-memory handler and its styles, because `stageScroll.ts`, the overlay locks and
+per-route scroll restoration all address it directly.
+
+**The panel is NOT faded in this pack** — its body scrolls too, and the same treatment would
+probably suit it, but it was out of scope here. Worth a look when the panel next gets attention.

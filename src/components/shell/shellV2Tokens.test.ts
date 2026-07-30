@@ -335,3 +335,47 @@ describe("the sliding rail indicator", () => {
     expect(rm).toMatch(/\.sv2-rib:active[^{]*\{ transform: none; \}/);
   });
 });
+
+/**
+ * THE FOOT FADE (canonical shell pack). jsdom cannot measure a gradient or a scroll position, so
+ * this locks the two things that make it correct rather than decorative: it is a STATE (opacity,
+ * toggled by a class) and it is INSET so it cannot sit on the capsule's border.
+ */
+describe("the foot fade", () => {
+  const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
+  const shell = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
+  const fade = shellCss.match(/\.sv2-fade \{([^}]*)\}/s)?.[1] ?? "";
+
+  it("is a STATE, not decoration — hidden by default, shown by a class, 200ms", () => {
+    expect(fade, "the .sv2-fade rule must exist").not.toBe("");
+    expect(fade).toContain("opacity: 0");
+    expect(shellCss).toContain(".sv2-fade.on { opacity: 1; }");
+    expect(fade).toMatch(/transition: opacity 0\.2s/);
+  });
+
+  it("never eats a click, and never covers the capsule's border", () => {
+    expect(fade).toContain("pointer-events: none");
+    // inset 1px each side: over the border it would darken the capsule edge along its foot
+    expect(fade).toContain("left: 1px");
+    expect(fade).toContain("right: 1px");
+    // and the corners follow the capsule, minus that inset, or the fade squares off the curve
+    expect(fade).toContain("calc(var(--shell-cap-radius) - 1px)");
+    expect(fade).toContain("height: 56px");
+  });
+
+  it("the STAGE is untouched — the wrapper is new, its id/ref/memory are not", () => {
+    expect(shellCss).toMatch(/\.sv2-pgwrap \{[^}]*position: relative/s);
+    expect(shell).toContain('className="sv2-pgwrap"');
+    expect(shell).toContain("id={STAGE_SCROLL_ID}");
+    expect(shell).toContain("ref={stageRef}");
+    expect(shell).toContain("scrollMemo.current[routeKey] = el.scrollTop");
+  });
+
+  it("it is driven by CONTENT height, not only by scrolling", () => {
+    // a freshly-navigated long page must fade before the first scroll, and a page that grows in
+    // place (an accordion, a lazily-filled list) must gain one without a scroll or a resize
+    expect(shell).toContain("scrollHeight - el.scrollTop - el.clientHeight > 8");
+    expect(shell).toContain("new ResizeObserver(updateFade)");
+    expect(shell).toMatch(/useEffect\(\(\) => \{\s*updateFade\(\);/);
+  });
+});

@@ -220,6 +220,33 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     return () => window.removeEventListener("keydown", onKey);
   }, [togglePanel]);
 
+  // ── THE FOOT FADE (canonical shell pack). It appears ONLY when content continues below the
+  // fold: a permanent fade over a short page reads as a rendering fault rather than an
+  // affordance. The 8px slack keeps sub-pixel rounding from flickering it at the very bottom.
+  const [fadeOn, setFadeOn] = useState(false);
+  const updateFade = useCallback(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    setFadeOn(el.scrollHeight - el.scrollTop - el.clientHeight > 8);
+  }, []);
+  // Re-check when the page changes and when the viewport does — the scroll event alone would
+  // leave a freshly-navigated long page with no fade until the first scroll.
+  useEffect(() => {
+    updateFade();
+    const el = stageRef.current;
+    if (!el || typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateFade);
+      return () => window.removeEventListener("resize", updateFade);
+    }
+    // The CONTENT's height is what matters, not just the viewport's: pages that expand in place
+    // (an accordion, a lazily-filled list) change the answer without a scroll or a resize.
+    const ro = new ResizeObserver(updateFade);
+    ro.observe(el);
+    if (el.firstElementChild) ro.observe(el.firstElementChild);
+    window.addEventListener("resize", updateFade);
+    return () => { ro.disconnect(); window.removeEventListener("resize", updateFade); };
+  }, [pathname, updateFade]);
+
   // Chrome navigation — router-direct (new-code rule), clearing the global search the way the
   // handleNavigate bridge does on real navigation.
   const navigate = useNavigate();
@@ -269,19 +296,30 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
         <ShellTopBar routeKey={routeKey} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} />
 
-        {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
-            the fixed BottomTabBar (was on the legacy shell's <main>). */}
-        <div
-          id={STAGE_SCROLL_ID}
-          ref={stageRef}
-          className="pb-[76px] md:pb-0"
-          onScroll={(e) => { scrollMemo.current[routeKey] = (e.target as HTMLElement).scrollTop; }}
-          // The ONE canvas (scheme 1, "Raised light"): painted here, inherited by every page —
-          // no page sets a bespoke ground, and the canvas stays lighter than the sidebar (the
-          // depth law, locked in shellV2Tokens.test.ts).
-          style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "var(--shell-canvas)" }}
-        >
-          {children}
+        {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
+            foot fade. The wrapper is new; the stage's id, ref, scroll memory and styles are
+            untouched, because everything from stageScroll.ts to per-route scroll restoration
+            addresses it directly. */}
+        <div className="sv2-pgwrap">
+          <div
+            id={STAGE_SCROLL_ID}
+            ref={stageRef}
+            className="pb-[76px] md:pb-0"
+            onScroll={(e) => {
+              const el = e.target as HTMLElement;
+              scrollMemo.current[routeKey] = el.scrollTop;
+              updateFade();
+            }}
+            // The ONE canvas (scheme 1, "Raised light"): painted here, inherited by every page —
+            // no page sets a bespoke ground, and the canvas stays lighter than the sidebar (the
+            // depth law, locked in shellV2Tokens.test.ts).
+            style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "var(--shell-canvas)" }}
+          >
+            {children}
+          </div>
+          {/* THE FOOT FADE — only when there IS more below. A permanent fade over a short page
+              reads as a rendering fault, so it is a state, not decoration. */}
+          <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
         </div>
       </div>
 

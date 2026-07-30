@@ -699,3 +699,35 @@
   /* the plus does not pivot */
   .sv2-b1 svg, .sv2-newwrap.open .sv2-b1 svg { transition: none; transform: none; }
 }
+
+/* ── THE FOOT FADE (canonical shell pack; ref scriptally-shell-canonical.html `.fade`) ────────
+   The content capsule's scroll region fades out at its foot when there is MORE BELOW, so a cut
+   line never reads as the end of the page.
+
+   It appears only when content continues (`scrollHeight - scrollTop - clientHeight > 8`) — a
+   permanent fade over a short page reads as a rendering fault rather than an affordance.
+
+   Inset 1px left and right so it sits INSIDE the capsule's border rather than over it, and the
+   bottom corners are the capsule radius minus that inset, or the fade squares off the curve. */
+.sv2-pgwrap { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+.sv2-fade {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 0;
+  height: 56px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(253, 251, 248, 0) 0%,
+    rgba(253, 251, 248, 0.72) 45%,
+    var(--shell-canvas) 100%
+  );
+  border-radius: 0 0 calc(var(--shell-cap-radius) - 1px) calc(var(--shell-cap-radius) - 1px);
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sv2-fade.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .sv2-fade { transition: none; }
+}
