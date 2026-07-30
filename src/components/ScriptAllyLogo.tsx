@@ -11,9 +11,14 @@ export const ScriptAllyLogo: React.FC<{
   size?: "sm" | "md" | "lg";
   /** Exact pixel height — overrides `size` (additive escape; the rail lockup uses it). */
   heightPx?: number;
+  /** Optional DOM id. It is a PROP, never a constant: this component mounts at several call
+   *  sites at once (the bar, the panel, the mobile slim bar), and a hardcoded id made them
+   *  duplicates — `getElementById` then returned whichever came first in the document, so
+   *  inspecting the brand measured the wrong instance. Set it on the one you mean to inspect. */
+  id?: string;
   iconColor?: string;
   textColor?: string;
-}> = ({ className = "", size = "md", heightPx }) => {
+}> = ({ className = "", size = "md", heightPx, id }) => {
   // Heights match the previous SVG wordmark so every call site keeps its on-page size.
   const heights = {
     sm: "h-6",
@@ -25,7 +30,7 @@ export const ScriptAllyLogo: React.FC<{
     <div
       className={`flex items-center select-none ${heightPx == null ? heights[size] : ""} ${className}`}
       style={heightPx != null ? { height: heightPx } : undefined}
-      id="scriptally-brand-logo-root"
+      id={id}
     >
       <img
         src="/scriptally-title-v2.png"

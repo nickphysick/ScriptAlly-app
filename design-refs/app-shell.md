@@ -165,20 +165,50 @@ the primary-button colour and content accent. Never pink, never burgundy, in nav
 
 ## Content capsule
 
-58px top bar inside the capsule (`line-soft` bottom hairline), ARRANGEMENT B (ref
-`scriptally-topbar-contents.html`): **brand · divider · manuscript scope · flexible space ·
-search (⌘K) · divider · tools**. It wears the rail's tone — one chrome family.
+Top bar inside the capsule (`line-soft` bottom hairline), wearing the rail's tone — one chrome
+family. Its height is **`--shell-head-h` (58px)**, the SAME token as the rail head and the panel
+masthead, so all three capsules close on one continuous line. The bar used to restate `58px`
+while the token said `56` — which is exactly how the two drifted. Never restate the number.
+
+**THE BAR HAS TWO STATES, ONE COMPONENT** (ref `scriptally-bar-per-page.html`):
+
+| | Dashboard | Every working page |
+|---|---|---|
+| left | the **wordmark**, 38px | the **breadcrumb** |
+| search | **absolutely centred** on the bar, 440px | **right**, 264px, in the tools cluster |
+| constant | scope · divider · help | scope · divider · help |
+
+**Exactly two things differ — wordmark versus crumb, and where search sits.** Everything else is
+constant, so the bar never reads as a different component from one page to the next. The search is
+centred on the BAR's midline (`position:absolute; left:50%`), not on the space left over between
+the flanks, so a long manuscript title in the scope chip cannot pull it off the line: the flanks
+carry `z-index:2` and the search `1`, so the title passes under it.
 
 **The manuscript SCOPE lives here, not in the sidebar.** Every figure on screen is filtered by
 it, and in the panel it vanished the moment the panel collapsed. It exists ONCE: the sidebar's
 manuscript row and its "Working on" heading are gone, and the panel's lower half now reads
 Tasks & reminders → Quick actions.
 
-**THE BREADCRUMB IS RETIRED on every page.** It was the third thing telling you where you are,
-after the rail's lit section and the page's own `PageHeader` title. **This supersedes the
-dashboard crumb rule** (brand mark when collapsed / "Your dashboard" when expanded): the brand
-is now permanently in the bar at full size, on every page and in every state, so that rule has
-nothing left to do — it is deleted, not contradicted.
+**THE BREADCRUMB IS BACK on every non-dashboard page** (bar-per-page pack — a REINSTATEMENT: a
+previous pass removed it everywhere, which was an overreach). Source is the pure
+`shellCrumbForPath` in `shellV2Nav.ts` — `Section / **Page**`, mono 9.5px uppercase, section in
+muted ink, current page bold and inert (it does not navigate). Off-nav routes keep their entry
+through `CRUMB_EXTRAS`.
+
+**The DASHBOARD crumb rule stays DELETED, and that deletion is right.** It said: brand mark when
+the panel is collapsed / "Your dashboard" when expanded. The dashboard now reads the **wordmark**
+in that slot in every state, so the rule has nothing to come back to. Deleted, not contradicted —
+do not resurrect it.
+
+**The brand's DOM id is a PROP, set at exactly ONE call site** (the bar's). `ScriptAllyLogo` used
+to hardcode `id="scriptally-brand-logo-root"`, so the bar, the panel and the mobile slim bar all
+carried the same id and `getElementById` returned whichever came first in the document — which
+made inspecting the brand measure the *panel's* 27px copy rather than the bar's. **Measured
+30 Jul at 1440×900: the bar's mark renders at exactly 38px** (it was 34, and the constraint was
+applying all along), and the artwork is only **68.4% ink** — 513px of the asset's 750px height —
+so 38px of element reads as ~26px of letterform. Raising the number is not the same as raising the
+apparent size; the dead margin is baked into the PNG, and cropping the asset is the only thing
+that would change it.
 
 **Help is a bar button**, so the floating FAB is retired — one of the three suspects in the
 right-gutter bug, removed as a class of problem rather than repositioned again.

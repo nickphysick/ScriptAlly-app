@@ -359,6 +359,11 @@ export const ShellTopBar: React.FC<{
 }> = ({ routeKey, searchQuery, setSearchQuery, onNavigate, scope, onHelp }) => {
   const { pathname } = useLocation();
   const searchRef = useRef<HTMLInputElement | null>(null);
+  // THE BAR HAS TWO STATES, ONE COMPONENT (ref design-refs/scriptally-bar-per-page.html).
+  // Exactly two things differ — wordmark vs crumb, and where the search sits — so the bar never
+  // reads as a different component between pages. Everything else is constant.
+  const isDashboard = pathname === SHELL_DASHBOARD.path;
+  const crumb = shellCrumbForPath(pathname);
 
   // ⌘K — focus the global search. The To-do page owns its route-local ⌘K registration (one
   // live owner per route, the long-standing invariant), so this handler stands down there.
@@ -374,34 +379,66 @@ export const ShellTopBar: React.FC<{
     return () => window.removeEventListener("keydown", onKey);
   }, [routeKey]);
 
+  const search = (
+    <NavSearch
+      variant="capsule"
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      onNavigate={onNavigate}
+      inputRef={searchRef}
+    />
+  );
+  // Help stops being a thing stuck to the viewport and becomes chrome. (The TIMELINE is out of
+  // scope entirely — it stays exactly as it is.)
+  const help = (
+    <button type="button" className="sv2-tbicon" onClick={onHelp} title="Help" aria-label="Help">
+      <HelpCircle aria-hidden="true" />
+    </button>
+  );
+
   return (
-    <header className="sv2-topbar">
-      {/* ARRANGEMENT B (ref design-refs/scriptally-topbar-contents.html):
-          brand · divider · scope · grow · search · divider · tools.
-          THE BREADCRUMB IS GONE — it was the third thing telling you where you are, after the
-          rail's lit section and the page's own PageHeader title. That also supersedes the
-          dashboard crumb rule: the brand is now permanently in the bar, at full size, on every
-          page and in every state, so the rule had nothing left to do. */}
-      <span className="sv2-tbbrand"><ScriptAllyLogo heightPx={34} /></span>
+    <header className={`sv2-topbar${isDashboard ? " sv2-tb-dash" : ""}`}>
+      {/* LEFT (ref design-refs/scriptally-bar-per-page.html) — the front door names the product;
+          a working page names your location. THE BREADCRUMB IS BACK on every non-dashboard page:
+          with the wordmark gone from those pages the slot stood empty, and orientation is what
+          belongs in it. The DASHBOARD crumb rule stays deleted — the dashboard reads the
+          wordmark, never a crumb, so that rule has nothing to come back to. */}
+      {isDashboard ? (
+        <span className="sv2-tbbrand">
+          {/* The id is set HERE and nowhere else, so inspecting the brand measures THIS
+              instance — the panel's and the mobile bar's copies no longer collide with it. */}
+          <ScriptAllyLogo heightPx={38} id="scriptally-brand-logo-root" />
+        </span>
+      ) : (
+        crumb && (
+          <div className="sv2-crumb">
+            {crumb.section !== crumb.page && (
+              <>
+                <span>{crumb.section}</span>
+                <span className="sv2-sl">/</span>
+              </>
+            )}
+            <b>{crumb.page}</b>
+          </div>
+        )
+      )}
       <span className="sv2-vr" aria-hidden="true" />
       {scope}
       <div className="sv2-grow" />
-      <div className="sv2-gsearch">
-        <NavSearch
-          variant="capsule"
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onNavigate={onNavigate}
-          inputRef={searchRef}
-        />
-      </div>
-      <span className="sv2-vr" aria-hidden="true" />
-      {/* Help stops being a thing stuck to the viewport and becomes chrome. (The timeline is
-          deferred: its drawer is rendered by Dashboard and gated on that route, so its trigger
-          cannot simply be app-wide — Nick's call is a dashboard-only bar button, next pass.) */}
-      <button type="button" className="sv2-tbicon" onClick={onHelp} title="Help" aria-label="Help">
-        <HelpCircle aria-hidden="true" />
-      </button>
+      {/* SEARCH — on the dashboard it sits on the TRUE MIDLINE, absolutely centred so the flank
+          widths can never pull it off the line; on working pages it returns to the right, and
+          narrower, inside the tools cluster. */}
+      {isDashboard ? (
+        <>
+          <div className="sv2-gsearch sv2-gsearch-c">{search}</div>
+          <div className="sv2-tbright">{help}</div>
+        </>
+      ) : (
+        <div className="sv2-tbright">
+          <div className="sv2-gsearch sv2-gsearch-r">{search}</div>
+          {help}
+        </div>
+      )}
     </header>
   );
 };

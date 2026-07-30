@@ -485,8 +485,9 @@
   .sv2-topbar {
     display: flex;
     align-items: center;
-    gap: 14px;
-    height: 58px;
+    /* ONE CONTINUOUS LINE: the bar reads the SAME token as the rail head and the panel masthead
+       (bar-per-page pack). Never restate the number here — that is how 56 and 58 drifted apart. */
+    height: var(--shell-head-h);
     flex: none;
     gap: 12px;
     padding: 0 18px;
@@ -494,11 +495,30 @@
        (no scroll state: that idea is superseded). */
     background: var(--shell-bar-bg);
     border-bottom: 1px solid var(--shell-line-soft);
+    /* the containing block for the dashboard's absolutely centred search */
+    position: relative;
   }
 }
-/* ── THE BAR'S CONTENTS (top-bar rebuild, arrangement B) ────────────────────────────────────
-   brand · divider · scope · grow · search · divider · tools. The breadcrumb is RETIRED. */
-.sv2-tbbrand { display: flex; align-items: center; flex: none; padding: 10px 0; }
+/* ── THE BAR'S CONTENTS — TWO STATES, ONE COMPONENT (bar-per-page pack; ref
+   design-refs/scriptally-bar-per-page.html) ─────────────────────────────────────────────────
+   DASHBOARD:      wordmark · divider · scope · [search on the TRUE MIDLINE] · tools
+   WORKING PAGES:  breadcrumb · divider · scope · grow · tools(search · help)
+   Exactly two things differ — wordmark vs crumb, and where the search sits — so the bar never
+   reads as a different component from one page to the next.
+
+   The FLANKS take z-index 2 and the centred search takes 1, so a long manuscript title in the
+   scope chip passes UNDER the search rather than shoving it off the midline. */
+.sv2-tbbrand,
+.sv2-crumb,
+.sv2-scopewrap,
+.sv2-vr,
+.sv2-tbright { position: relative; z-index: 2; }
+/* 38px of artwork in a 58px bar. NOTE (measured, 30 Jul): the asset is only 68.4% ink — 513px
+   of the 750px height — so 38px of element reads as ~26px of letterform. Raising this number
+   is not the same as raising the apparent size; the dead margin is baked into the PNG. */
+.sv2-tbbrand { display: flex; align-items: center; flex: none; padding: 8px 0; }
+/* the tools cluster — pushed right by .sv2-grow; on working pages the search joins it */
+.sv2-tbright { display: flex; align-items: center; gap: 9px; flex: none; margin-left: auto; }
 .sv2-vr { width: 1px; align-self: stretch; margin: 12px 2px; background: var(--shell-line); flex: none; }
 .sv2-scopewrap { position: relative; flex: none; }
 .sv2-scope {
@@ -523,27 +543,39 @@
 }
 .sv2-tbicon svg { width: 17px; height: 17px; }
 .sv2-tbicon:hover { background: var(--shell-inset); color: var(--shell-ink); }
-/* (the crumb rules below are dead with the breadcrumb — kept only until a cleanup pass) */
+/* THE BREADCRUMB — live again, on every page but the dashboard. (The dashboard's own crumb slot
+   and its `.sv2-crumbmark` brand stand-in are DELETED, not disabled: that page reads the
+   wordmark in this slot, so there is nothing for the rule to do.) */
 .sv2-crumb {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: none;
   font-family: "JetBrains Mono", monospace;
   font-size: 9.5px;
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--shell-muted);
+  white-space: nowrap;
 }
 .sv2-crumb b { color: var(--shell-ink); font-weight: 500; }
-/* The dashboard's collapsed-panel crumb slot: the brand mark stands in for the hidden panel
-   (tone/crumb pack). Height-constrained to the 58px bar; the artwork keeps its own aspect. */
-.sv2-crumbmark { display: flex; align-items: center; flex: none; }
 .sv2-crumb .sv2-sl { opacity: 0.5; }
 .sv2-grow { flex: 1; }
 /* The re-homed focus-family reading column (fixes P5) — FocusShell's 860px measure, kept so
    Account / Plans / Help layouts move across unchanged. */
 .sv2-focuscol { width: 100%; max-width: 860px; margin: 0 auto; padding: 16px 32px 90px; }
-.sv2-gsearch { width: 280px; flex: none; }
+/* SEARCH, two placements. Dashboard: absolutely centred on the bar — the midline is the bar's,
+   not the leftover space between the flanks, so it holds still as the scope title changes
+   length. Working pages: narrower, right, in the tools cluster. */
+.sv2-gsearch { flex: none; }
+.sv2-gsearch-c {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 440px;
+  z-index: 1;
+}
+.sv2-gsearch-r { width: 264px; }
 
 @media (prefers-reduced-motion: reduce) {
   /* the indicator JUMPS; the press does nothing */

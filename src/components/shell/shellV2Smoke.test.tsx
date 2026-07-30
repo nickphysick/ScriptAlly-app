@@ -122,28 +122,63 @@ describe("v2 shell — smoke renders", () => {
     expect(html).not.toContain("sv2-iconbtn"); // the user block carries no utility buttons now
   });
 
-  it("the bar is ARRANGEMENT B: brand · divider · scope · grow · search · divider · help", () => {
-    const html = at("/manuscripts", <ShellTopBar routeKey="manuscripts" searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} scope={<span className="sv2-scope" />} onHelp={() => {}} />);
+  const bar = (path: string) =>
+    at(path, <ShellTopBar routeKey="x" searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} scope={<span className="sv2-scope" />} onHelp={() => {}} />);
+
+  it("WORKING PAGES: breadcrumb · divider · scope · grow · tools(search · help)", () => {
+    const html = bar("/manuscripts");
     expect(html).toContain("sv2-topbar");
-    expect(html).toContain("sv2-tbbrand");
-    expect(html).toContain("scriptally-title-v2.png"); // the real brand asset, height-constrained
+    expect(html).toContain("sv2-crumb");
+    expect(html).toContain("Shelf"); // the section
+    expect(html).toContain("<b>Manuscripts</b>"); // the current page, bold and inert
     expect(html).toContain("sv2-scope");
     expect(html).toContain("nav-search-field"); // the real NavSearch, not a fork
-    expect(html).toContain("sv2-tbicon"); // help, now chrome rather than a floating FAB
-    expect(html.indexOf("sv2-tbbrand")).toBeLessThan(html.indexOf("sv2-scope"));
+    expect(html).toContain("sv2-gsearch-r"); // the right-hand placement
+    expect(html).toContain("sv2-tbicon"); // help, chrome rather than a floating FAB
+    // the wordmark belongs to the dashboard alone
+    expect(html).not.toContain("sv2-tbbrand");
+    expect(html.indexOf("sv2-crumb")).toBeLessThan(html.indexOf("sv2-scope"));
     expect(html.indexOf("sv2-scope")).toBeLessThan(html.indexOf("nav-search-field"));
     expect(html.indexOf("nav-search-field")).toBeLessThan(html.indexOf("sv2-tbicon"));
   });
 
-  it("THE BREADCRUMB IS GONE from every page — and the dashboard crumb rule with it", () => {
-    for (const path of ["/manuscripts", "/dashboard", "/queries"]) {
-      const html = at(path, <ShellTopBar routeKey="x" searchQuery="" setSearchQuery={() => {}} onNavigate={() => {}} />);
-      expect(html).not.toContain("sv2-crumb");
-      expect(html).not.toContain("Your dashboard");
-      expect(html).not.toContain("sv2-crumbmark");
+  it("THE DASHBOARD: wordmark · divider · scope · centred search · help — and NO crumb", () => {
+    const html = bar("/dashboard");
+    expect(html).toContain("sv2-tb-dash");
+    expect(html).toContain("sv2-tbbrand");
+    expect(html).toContain("scriptally-title-v2.png"); // the real brand asset, height-constrained
+    expect(html).toContain("sv2-gsearch-c"); // the true-midline placement
+    expect(html).toContain("sv2-tbicon");
+    // The dashboard crumb rule stays DELETED — no crumb, no "Your dashboard", no brand stand-in.
+    expect(html).not.toContain("sv2-crumb");
+    expect(html).not.toContain("Your dashboard");
+    expect(html).not.toContain("sv2-crumbmark");
+  });
+
+  it("the crumb is on EVERY non-dashboard page, and the two states differ ONLY in two things", () => {
+    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do"], ["/import", "Import"], ["/account", "Account"]] as const) {
+      const html = bar(path);
+      expect(html, path).toContain("sv2-crumb");
+      expect(html, path).toContain(`<b>${page}</b>`);
+      expect(html, path).not.toContain("sv2-tbbrand");
+      // constant across both states: the scope, the search, the divider, help
+      for (const constant of ["sv2-scope", "nav-search-field", "sv2-vr", "sv2-tbicon"]) {
+        expect(html, `${path} ${constant}`).toContain(constant);
+      }
     }
-    // the superseded rule is deleted, not left contradicted
+    // The dashboard-specific rule stays superseded — deleted, not contradicted.
     const claude = readFileSync(resolve(__dirname, "..", "..", "..", "CLAUDE.md"), "utf8");
     expect(claude).not.toContain("brand mark when the panel is collapsed");
+  });
+
+  it("the brand's DOM id is set at ONE call site — a duplicate id measures the wrong instance", () => {
+    const logo = readFileSync(resolve(__dirname, "..", "ScriptAllyLogo.tsx"), "utf8");
+    // the id is a prop, never a constant inside the component
+    expect(logo).toContain("id={id}");
+    expect(logo).not.toContain('id="scriptally-brand-logo-root"');
+    // exactly one mount claims it, and it is the bar's
+    const shell = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+    expect(shell.match(/id="scriptally-brand-logo-root"/g)).toHaveLength(1);
+    expect(bar("/dashboard")).toContain('id="scriptally-brand-logo-root"');
   });
 });

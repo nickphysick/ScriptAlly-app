@@ -73,7 +73,11 @@
      numbers or they drift apart the first time either is touched. Alignment is required only
      with the accordion CLOSED; when a section expands the panel rows shift and the rail stays
      fixed, deliberately. --shell-kid-h belongs to the panel alone. */
-  --shell-head-h: 56px;               /* masthead / rail head block */
+  /* 58px, matching the top bar's own height, so the rail head, the panel masthead and the bar
+     close on ONE CONTINUOUS LINE across all three capsules (bar-per-page pack). It was 56 while
+     the bar was 58 — two values a pixel-and-a-half apart, which read as a mistake rather than a
+     rhythm. One number now; move the bar and this together or not at all. */
+  --shell-head-h: 58px;               /* masthead / rail head block — AND the top bar */
   --shell-row-h: 44px;                /* nav row pitch — BOTH components */
   --shell-kid-h: 37px;                /* accordion child pitch — the panel alone */
   --shell-pad-t: 14px;                /* top padding — BOTH components */

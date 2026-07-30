@@ -23,7 +23,8 @@ const BAKED: Record<string, string> = {
   "--shell-inset": "#efe8df",
   "--shell-line": "#e3d9cf",
   "--shell-line-soft": "#ece3da",
-  "--shell-head-h": "56px",
+  // 58px: the bar's own height, so all three capsules close on one line (bar-per-page pack).
+  "--shell-head-h": "58px",
   "--shell-row-h": "44px",
   "--shell-kid-h": "37px",
   "--shell-pad-t": "14px",
@@ -201,9 +202,15 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(rule(".sv2-side-inner")).toContain("padding: var(--shell-pad-t) 18px 18px");
   });
 
-  it("the HEAD BLOCK is one token, referenced by BOTH capsules — the two brand marks share a line", () => {
+  it("the HEAD BLOCK is one token, referenced by ALL THREE capsules — rail, panel and BAR share a line", () => {
     expect(rule(".sv2-railhead")).toContain("height: var(--shell-head-h)");
     expect(rule(".sv2-wmrow")).toContain("height: var(--shell-head-h)");
+    // The bar joined the rhythm (bar-per-page pack): it used to restate 58px while the token
+    // said 56, which is exactly how the two drifted apart in the first place.
+    // (.sv2-topbar has two rules — the mobile display:none and the desktop block — so this
+    // asserts the FILE, the same way the rail's two-rule case does above.)
+    expect(shellCss).toContain("height: var(--shell-head-h)");
+    expect(shellCss, "no literal twin of the bar height survives").not.toMatch(/height: ?58px/);
   });
 
   it("the NAV ROW PITCH is one token: the panel row IS 44px, and the rail's 40px rib + its gap make 44", () => {
@@ -219,7 +226,7 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toMatch(/\.sv2-rail[^{]*\{[^}]*--shell-kid-h/s);
   });
 
-  it("NEITHER component keeps a hard-coded twin of a shared value", () => {
+  it("NO component keeps a hard-coded twin of a shared value", () => {
     for (const sel of [".sv2-rail", ".sv2-side-inner", ".sv2-asec", ".sv2-railhead", ".sv2-wmrow"]) {
       const r = rule(sel);
       expect(r, `${sel} literal 56`).not.toMatch(/height: 56px/);
