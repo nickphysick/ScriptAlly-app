@@ -27,7 +27,6 @@ const BAKED: Record<string, string> = {
   "--shell-head-h": "58px",
   "--shell-row-h": "44px",
   "--shell-kid-h": "37px",
-  "--shell-pad-t": "14px",
   "--shell-quiet": "#b3a598",
   "--shell-cap-radius": "18px",
   "--shell-cap-gap": "14px",
@@ -196,15 +195,21 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     return m[1];
   };
 
-  it("TOP PADDING is one token, referenced by BOTH capsules", () => {
-    // (.sv2-rail has two rules — the mobile display:none and the desktop block; assert the file)
-    expect(shellCss).toContain("padding: var(--shell-pad-t) 0 20px");
-    expect(rule(".sv2-side-inner")).toContain("padding: var(--shell-pad-t) 18px 18px");
+  it("THE HEAD BLOCKS ARE FLUSH — no top padding survives to break the one line", () => {
+    // --shell-pad-t is RETIRED. It put the rail head and the panel masthead 14px lower than the
+    // bar, so the three capsules shared a HEIGHT token but not a BASELINE — which is the whole
+    // point of the token. All three now start at their capsule's top edge.
+    expect(css, "the retired padding token is gone from :root").not.toMatch(/^\s*--shell-pad-t:/m);
+    expect(shellCss, "the rail no longer offsets its head").not.toContain("var(--shell-pad-t)");
+    expect(shellCss).toContain("padding: 0 0 20px");
+    expect(rule(".sv2-side-inner")).toContain("padding: 0");
   });
 
   it("the HEAD BLOCK is one token, referenced by ALL THREE capsules — rail, panel and BAR share a line", () => {
     expect(rule(".sv2-railhead")).toContain("height: var(--shell-head-h)");
-    expect(rule(".sv2-wmrow")).toContain("height: var(--shell-head-h)");
+    // the panel's head block is the NAVIGATE BAND now; the brand wordmark row it replaced is gone
+    expect(rule(".sv2-ptop")).toContain("height: var(--shell-head-h)");
+    expect(shellCss).not.toContain(".sv2-wmrow");
     // The bar joined the rhythm (bar-per-page pack): it used to restate 58px while the token
     // said 56, which is exactly how the two drifted apart in the first place.
     // (.sv2-topbar has two rules — the mobile display:none and the desktop block — so this
@@ -227,11 +232,10 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
   });
 
   it("NO component keeps a hard-coded twin of a shared value", () => {
-    for (const sel of [".sv2-rail", ".sv2-side-inner", ".sv2-asec", ".sv2-railhead", ".sv2-wmrow"]) {
+    for (const sel of [".sv2-rail", ".sv2-side-inner", ".sv2-asec", ".sv2-railhead", ".sv2-ptop"]) {
       const r = rule(sel);
       expect(r, `${sel} literal 56`).not.toMatch(/height: 56px/);
       expect(r, `${sel} literal 44`).not.toMatch(/height: 44px/);
-      expect(r, `${sel} literal 14 pad`).not.toMatch(/padding: 14px/);
       expect(r, `${sel} literal 20 pad-top`).not.toMatch(/padding: 20px 0;/);
     }
   });
@@ -262,10 +266,14 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
   });
 
-  it("the brand mark is height-constrained at the larger size, aspect preserved", () => {
+  it("the brand mark is height-constrained, aspect preserved — and it renders ONCE, in the bar", () => {
     const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    expect(v2).toContain("<ScriptAllyLogo heightPx={27} />"); // ~27px, up from 30px box/~20px cap
-    expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail glyph grows to match
+    // THE PANEL'S WORDMARK IS RETIRED (canonical shell pack): it duplicated the bar's, and the
+    // panel opens straight into navigation now. One mount, height-constrained, id set there.
+    expect(v2.match(/<ScriptAllyLogo/g)).toHaveLength(1);
+    expect(v2).toContain('<ScriptAllyLogo heightPx={38} id="scriptally-brand-logo-root" />');
+    expect(v2).not.toContain("heightPx={27}");
+    expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail's plane glyph is unchanged
   });
 });
 

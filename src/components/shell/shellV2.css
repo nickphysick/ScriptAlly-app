@@ -26,12 +26,13 @@
     width: 70px;
     flex: none;
     background: var(--shell-rail);
-    padding: var(--shell-pad-t) 0 20px;
+    padding: 0 0 20px;
     overflow: hidden;
   }
 }
-/* The rail's head BLOCK — the same 56px at the same 14px top as the panel's masthead, so the
-   two brand marks read as one line across both capsules. */
+/* The rail's head BLOCK — the same --shell-head-h as the panel's Navigate band and the top bar,
+   and FLUSH to the capsule top like both of them. It used to start --shell-pad-t lower, which
+   put its baseline 14px below the bar's: the token was shared but the offset was not. */
 .sv2-railhead { height: var(--shell-head-h); display: grid; place-items: center; flex: none; }
 .sv2-mark { width: 27px; height: 27px; color: var(--burg); flex: none; }
 .sv2-railnav { display: flex; flex-direction: column; align-items: center; position: relative; }
@@ -199,24 +200,51 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: var(--shell-pad-t) 18px 18px;
-  overflow-y: auto;
+  /* NO TOP PADDING: the Navigate band IS the head block and must start at the capsule's very top,
+     or the line across rail / panel / bar breaks by exactly this padding (canonical shell pack). */
+  padding: 0;
+  overflow: hidden;
 }
 
-/* The brand row — the artwork centred, the tuck toggle vertically centred on it, top-right. */
-/* The masthead BLOCK — 56px, matching the rail's head block exactly (shared token). */
-.sv2-wmrow { position: relative; flex: none; height: var(--shell-head-h); display: flex; align-items: center; margin: 0; }
-.sv2-wm { display: flex; justify-content: center; flex: none; }
+/* ── THE NAVIGATE BAND — the panel's head block (canonical shell pack). Same --shell-head-h as
+   the rail head and the top bar, so all three capsules close on ONE unbroken horizontal line.
+   The brand WORDMARK that used to live here is RETIRED: it duplicated the bar's, and the panel
+   should open straight into navigation. ── */
+.sv2-ptop {
+  height: var(--shell-head-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--shell-line-soft);
+}
+.sv2-plab {
+  flex: 1;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--shell-quiet);
+}
+/* the panel's scrolling body, below the band */
+.sv2-pbody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 11px 12px 12px;
+  overflow-y: auto;
+}
 .sv2-tuck {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 26px;
+  /* A FLEX CHILD OF THE BAND, not an absolute overlay. It was absolutely positioned against the
+     old brand row; left that way inside the band it sits ON TOP of the "Navigate" label and
+     reads as a glyph dropped into the middle of the word. (Browser-caught, 30 Jul.) */
+  width: 32px;
+  height: 32px;
+  flex: none;
   border: 0;
   background: transparent;
-  border-radius: 7px;
+  border-radius: 9px;
   cursor: pointer;
   color: var(--shell-muted);
   display: grid;
@@ -224,7 +252,7 @@
   transition: background 0.16s, color 0.16s;
 }
 .sv2-tuck:hover { background: var(--shell-inset); color: var(--burg); }
-.sv2-tuck svg { width: 15px; height: 15px; }
+.sv2-tuck svg { width: 16px; height: 16px; }
 
 /* ── accordion nav — generous rows, no hairlines anywhere ── */
 .sv2-acc { display: flex; flex-direction: column; gap: 4px; flex: none; }
@@ -350,59 +378,9 @@
 /* ── task pills — two cream pills, fill-based. 26px module rhythm (fixes pack): the desk
    group opens out upward into the spacer's slack; the spacer still gives way first at short
    viewports. ── */
-/* ── THE NOTIFICATION DESK LINE (panel-foot pack; ref design-refs/scriptally-panel-foot.html)
-   Supersedes the two Urgent/House pills. TWO STATES, and the calm one is a DIFFERENT TREATMENT
-   rather than the loud one greyed out: transparent, hairline-topped, muted roundel. A quiet desk
-   should not look like an alert that happens to say zero. ── */
-.sv2-notif {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  width: 100%;
-  margin-top: 26px;
-  padding: 11px 12px;
-  border-radius: 12px;
-  /* baked (panel-foot pack): the blush tint + its line. Literals, as this file's other panel
-     accents are — they are one treatment's pair, not a shell-wide surface role. */
-  background: #faf0ea;
-  border: 1px solid #e8c8bc;
-  cursor: pointer;
-  font: inherit;
-  color: var(--shell-ink);
-  text-align: left;
-  flex: none;
-  transition: box-shadow 0.15s;
-}
-.sv2-notif:hover { box-shadow: 0 3px 12px rgba(124, 58, 42, 0.1); }
-.sv2-ncnt {
-  min-width: 22px;
-  height: 22px;
-  padding: 0 5px;
-  border-radius: 99px;
-  background: var(--burg);
-  color: #fff;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10.5px;
-  display: grid;
-  place-items: center;
-  flex: none;
-  margin-top: 1px;
-}
-.sv2-ntx { flex: 1; min-width: 0; }
-.sv2-nt1 { display: block; font-size: 12.5px; line-height: 1.35; color: var(--shell-ink); }
-.sv2-nt2 { display: block; font-size: 11.5px; color: var(--shell-ink-soft, #6a615a); margin-top: 3px; }
-.sv2-ncv { width: 12px; height: 12px; color: var(--burg); flex: none; margin-top: 5px; }
-/* the zero state — no fill, no frame, just a hairline above it */
-.sv2-notif.calm {
-  background: transparent;
-  border-color: transparent;
-  border-top: 1px solid var(--shell-line-soft);
-  border-radius: 0;
-  padding: 12px 12px 11px;
-}
-.sv2-notif.calm:hover { box-shadow: none; }
-.sv2-notif.calm .sv2-ncnt { background: var(--shell-inset); color: var(--shell-muted); }
-.sv2-notif.calm .sv2-ncv { color: var(--shell-muted); }
+/* (The notification desk line is REMOVED ENTIRELY — canonical shell pack. Urgency is now one
+   6px burgundy dot beside the To-do count in the nav: a count says how much, the dot says some
+   of it will not wait. It was not restyled or relocated; it is gone.) */
 
 /* ── QUICK ACTIONS — two controls (panel-foot pack). The four unlabelled tiles are RETIRED; all
    four of their contracts survive, three inside New's popover and Record on its own button. ── */
@@ -482,7 +460,35 @@
 .sv2-prow svg { width: 15px; height: 15px; color: var(--shell-rail-icon); flex: none; }
 .sv2-plb { flex: 1; min-width: 0; }
 
-/* ── the foot — a fading divider, then the account row carrying the plan line ── */
+/* THE URGENT DOT — 6px burgundy, beside the To-do count. The whole notification block reduced
+   to this: the nav already states the number, so urgency only needs a mark. */
+.sv2-akdot { width: 6px; height: 6px; border-radius: 99px; background: var(--burg); flex: none; }
+
+/* ── the foot — a fading divider, Settings, then the account row carrying the plan line ── */
+/* Settings is HERE and also a rail rib: it has to survive the panel collapsing, and the rail is
+   the collapsed state. (Unlike the account, which had three homes and gave one up.) */
+.sv2-frow2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 11px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--shell-ink-soft);
+  text-align: left;
+  flex: none;
+  transition: background 0.15s;
+}
+.sv2-frow2:hover { background: var(--shell-inset); }
+.sv2-fi { width: 16px; height: 16px; color: var(--shell-rail-icon); flex: none; }
+.sv2-flb { flex: 1; min-width: 0; }
+
 .sv2-fdiv {
   height: 1px;
   background: var(--shell-divider);
@@ -683,10 +689,10 @@
   .sv2-asec .sv2-acv,
   .sv2-akids,
   .sv2-akid,
-  .sv2-notif,
   .sv2-b1,
   .sv2-b2,
   .sv2-prow,
+  .sv2-frow2,
   .sv2-usr {
     transition: none;
   }

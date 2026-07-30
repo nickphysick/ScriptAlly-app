@@ -80,7 +80,9 @@
   --shell-head-h: 58px;               /* masthead / rail head block — AND the top bar */
   --shell-row-h: 44px;                /* nav row pitch — BOTH components */
   --shell-kid-h: 37px;                /* accordion child pitch — the panel alone */
-  --shell-pad-t: 14px;                /* top padding — BOTH components */
+  /* (--shell-pad-t is RETIRED: the rail head, the panel's Navigate band and the top bar are all
+     FLUSH to their capsule tops now, so there is no shared top padding left to name. A 14px
+     offset on two of the three was exactly what broke the one-line alignment.) */
   --shell-quiet: #b3a598;             /* quiet/tertiary label ink — the group headings */
   --shell-cap-radius: 18px;           /* capsule corner (chrome tokens: 20 → 18) */
   --shell-cap-gap: 14px;              /* capsule gap AND page padding — the OUTER GAP (10 → 14) */

@@ -20,13 +20,14 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, ChevronRight, ChevronsUpDown, Plus, Reply, UserPlus, BookPlus,
+  Settings,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
 import { invokeCapture } from "./railNav";
 import { SHELL_DASHBOARD, SHELL_SECTIONS, shellPageForPath } from "./shellV2Nav";
 import {
-  deskNotice, manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
+  manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
   sideNavCounts, sidebarBoardTiles,
 } from "../../lib/shellSidebar";
 
@@ -147,7 +148,6 @@ export const ShellSidebarBody: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
   );
-  const notice = deskNotice(tiles);
   const plan = planLine(currentUser?.plan);
   const total = tiles.urgent + tiles.housekeeping + tiles.notes;
   const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: total });
@@ -248,6 +248,12 @@ export const ShellSidebarBody: React.FC<{
                       onClick={() => onNavigatePath(page.path)}
                     >
                       <span className="sv2-aklbl">{page.label}</span>
+                      {/* URGENCY LIVES HERE NOW — one 6px burgundy dot beside the To-do count,
+                          replacing the whole notification block (canonical shell pack). A count
+                          says how much; the dot says some of it will not wait. */}
+                      {page.key === "todo" && tiles.urgent > 0 && (
+                        <span className="sv2-akdot" aria-label={`${tiles.urgent} urgent`} />
+                      )}
                       {count !== undefined && <span className="sv2-akct">{count}</span>}
                     </button>
                   );
@@ -263,25 +269,6 @@ export const ShellSidebarBody: React.FC<{
       {/* (The manuscript row and its "Working on" heading LEFT for the top bar — top-bar
           rebuild. No duplication: the scope control exists once, in the chrome, so it survives
           the panel collapsing. Removing it also relieves the crowding in this half.) */}
-      {/* ── THE NOTIFICATION DESK LINE (panel-foot pack) — supersedes the two Urgent/House
-          pills, which stated two numbers side by side and left you to work out which mattered.
-          One line says what needs you; housekeeping rides behind it as context, not as a peer.
-          The calm state is a genuinely different treatment (transparent, hairline-topped, muted
-          roundel) rather than the loud one greyed out — a quiet desk should not look like an
-          alert that happens to say zero. ── */}
-      <button
-        type="button"
-        className={`sv2-notif${notice.tone === "calm" ? " calm" : ""}`}
-        onClick={() => onNavigatePath("/todo")}
-      >
-        <span className="sv2-ncnt">{notice.count}</span>
-        <span className="sv2-ntx">
-          <span className="sv2-nt1">{notice.headline}</span>
-          {notice.sub && <span className="sv2-nt2">{notice.sub}</span>}
-        </span>
-        <ChevronRight className="sv2-ncv" aria-hidden="true" />
-      </button>
-
       {/* ── QUICK ACTIONS — two controls, not four unlabelled tiles (panel-foot pack). The four
           tiles' four contracts all survive: three creates moved into New's popover, and Record
           a response was PROMOTED to its own button because it is the one you reach for while
@@ -327,6 +314,12 @@ export const ShellSidebarBody: React.FC<{
       {currentUser && (
         <>
           <div className="sv2-fdiv" aria-hidden="true" />
+          {/* Settings is in the panel foot AND stays a rail rib — it has to survive the panel
+              collapsing, and the rail is the collapsed state. */}
+          <button type="button" className="sv2-frow2" onClick={() => onNavigatePath("/account")}>
+            <Settings className="sv2-fi" aria-hidden="true" />
+            <span className="sv2-flb">Settings</span>
+          </button>
           <button type="button" className="sv2-usr" onClick={() => onNavigatePath("/account")}>
             <span className="sv2-av" aria-hidden="true">{initials}</span>
             <span className="sv2-ub">

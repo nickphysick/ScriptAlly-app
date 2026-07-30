@@ -37,44 +37,10 @@ export function sidebarBoardTiles(input: Omit<BoardInput, "today">): LedgerTiles
   return ribbonTiles(board, hkGapCount(groups) + stale.length);
 }
 
-export interface DeskNotice {
-  /** `hot` = something is actually urgent; `calm` = the quiet form. Drives the treatment. */
-  tone: "hot" | "calm";
-  /** The roundel figure — the URGENT count, so a calm desk shows a plain 0. */
-  count: number;
-  headline: string;
-  /** The housekeeping line. NULL when there is no housekeeping — never "0 items". */
-  sub: string | null;
-}
-
-const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`;
-
-/** THE NOTIFICATION DESK LINE (panel-foot pack; ref design-refs/scriptally-panel-foot.html) —
- *  supersedes the two Urgent/House pills, which stated two numbers and asked you to work out
- *  which mattered. One line says what needs you, and the housekeeping total rides behind it as
- *  context rather than as a peer.
- *
- *  It needs NO stored field: both figures come off the tiles the panel already derives. The
- *  quiet state is a genuinely different treatment, not a greyed-out copy of the loud one — a
- *  calm desk should not look like an alert that happens to say zero. */
-export function deskNotice(tiles: LedgerTiles): DeskNotice {
-  const hk = tiles.housekeeping;
-  const sub = hk > 0 ? plural(hk, "housekeeping item", "housekeeping items") : null;
-  if (tiles.urgent > 0) {
-    return {
-      tone: "hot",
-      count: tiles.urgent,
-      headline: `${plural(tiles.urgent, "task", "tasks")} ${tiles.urgent === 1 ? "requires" : "require"} your attention`,
-      sub: sub && `plus ${sub}`,
-    };
-  }
-  return {
-    tone: "calm",
-    count: 0,
-    headline: "Nothing needs you today",
-    sub: sub && `${sub} when you have a moment`,
-  };
-}
+/* (The NOTIFICATION DESK LINE and its `deskNotice` derivation are REMOVED — canonical shell
+   pack. The panel states urgency as one burgundy dot beside the To-do count instead; a count
+   says how much, the dot says some of it will not wait. Recoverable at 6d64b75 if the block is
+   ever wanted back, but do not re-add the derivation without re-adding the surface.) */
 
 /** Nav count chips by shellV2Nav page key. Only cheaply-countable pages carry one. */
 export function sideNavCounts(input: {

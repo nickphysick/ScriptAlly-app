@@ -47,14 +47,17 @@ describe("v2 shell — smoke renders", () => {
     expect(html).not.toContain("sv2-railav");
   });
 
-  it("panel frame: the real wordmark artwork, large and centred, with the tuck toggle beside it", () => {
+  it("panel frame: the NAVIGATE BAND, with the tuck beside it — and no wordmark", () => {
     const html = at("/todo", <ShellSide onCollapse={() => {}} />);
-    expect(html).toContain("sv2-wm");
-    expect(html).toContain("scriptally-title-v2.png"); // the brand asset, not Playfair text
-    expect(html).toContain('alt="ScriptAlly"');
+    expect(html).toContain("sv2-ptop");
+    expect(html).toContain("sv2-plab");
+    expect(html).toContain("Navigate");
     expect(html).toContain('aria-label="Hide the panel"'); // the tuck toggle (fixes pack)
+    expect(html).toContain("sv2-pbody"); // the contents scroll below the band
+    // THE PANEL'S WORDMARK IS RETIRED — it duplicated the bar's (canonical shell pack).
+    expect(html).not.toContain("sv2-wm\"");
+    expect(html).not.toContain("scriptally-title-v2.png");
     expect(html).not.toContain("sv2-mhrule"); // the masthead rule is gone
-    expect(html).not.toContain("week one"); // the kicker (weekOfQuerying) left the panel
   });
 
   it("panel collapse: the dedicated expand control is RETIRED (rail-section-select P2); the tuck + flyout footer carry the affordances", () => {
@@ -114,14 +117,26 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("sv2-akid on"); // /queries is the active child (pink fill only)
   });
 
-  it("THE DESK LINE replaces the two pills — an empty desk gets the CALM treatment, not a zeroed alert", () => {
+  it("THE NOTIFICATION IS GONE ENTIRELY — urgency is one dot beside the To-do count", () => {
     const html = panel();
-    expect(html).toContain("sv2-notif");
-    expect(html).toContain("calm"); // the empty fixture desk has nothing urgent
-    expect(html).toContain("Nothing needs you today");
-    // the retired pills, gone at the source
+    // Not restyled, not relocated: removed. (It replaced the Urgent/House pills earlier the same
+    // day; the canonical pack removes the whole block, and both are asserted gone here.)
+    expect(html).not.toContain("sv2-notif");
+    expect(html).not.toContain("Nothing needs you today");
+    expect(html).not.toContain("require your attention");
     expect(html).not.toContain("sv2-tpill");
     expect(html).not.toContain("sv2-pip");
+    // the dot's home is the nav row; the empty fixture desk has nothing urgent, so none renders
+    expect(html).not.toContain("sv2-akdot");
+    const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
+    expect(body).toContain('page.key === "todo" && tiles.urgent > 0');
+  });
+
+  it("SETTINGS is in the panel foot AND stays a rail rib — it must survive the collapse", () => {
+    expect(panel()).toContain("sv2-frow2");
+    expect(panel()).toContain("Settings");
+    // the rail keeps its own, because the rail IS the collapsed state
+    expect(at("/queries", <ShellRail onNavigatePath={() => {}} />)).toContain('title="Setup"');
   });
 
   it("QUICK ACTIONS: two controls, and all FOUR old tile contracts survive", () => {

@@ -135,10 +135,18 @@ avatar chip at the bottom.
 
 ## Panel capsule (top → bottom)
 
-1. **Brand mark** — the real ScriptAlly artwork (`ScriptAllyLogo` → `/scriptally-title-v2.png`),
-   large and centred, ~28–34px tall (40px allowance if it reads small — judge in browser),
-   aspect preserved, never restyled; ~26px clear below. The Playfair wordmark, ink rule and mono
-   kicker are retired (`weekOfQuerying` still lives in dashboardStats for the dashboard).
+1. **THE NAVIGATE BAND** (canonical shell pack) — a `--shell-head-h` (58px) band, **flush to the
+   capsule top**, carrying a mono `Navigate` label in `--shell-quiet` and the tuck control right,
+   over a `--shell-line-soft` bottom hairline. Its contents scroll below it in `.sv2-pbody`.
+   **⚠️ THE PANEL'S BRAND WORDMARK IS RETIRED** — it duplicated the bar's, and the panel should
+   open straight into navigation. `ScriptAllyLogo` now mounts **once** in the whole shell.
+   **⚠️ FLUSH IS LOAD-BEARING.** The rail head, this band and the bar share `--shell-head-h`, but
+   sharing a height is not sharing a baseline: the rail and the panel used to start
+   `--shell-pad-t` (14px) lower, so the three closed at 72/72/58. **`--shell-pad-t` is retired**
+   and all three start at their capsule's top edge — measured 30 Jul, all three bottoms at 73px.
+   The tuck is a **flex child** of the band, never absolutely positioned: left absolute (as it was
+   against the old brand row) it lands on top of the label and reads as a glyph dropped into the
+   middle of the word.
 2. **Accordion nav** — generous rows (13–14px type, 13px vertical pad, 14px radius).
    **Dashboard is a flat link** (active = pink fill on the row). Sections: Querying (Queries
    Hub · To-do · Packages), Agents (Agent list · Discover), Shelf (Manuscripts · Comparable
@@ -149,21 +157,13 @@ avatar chip at the bottom.
 3. Flexible spacer.
 4. **Manuscript row** — bare: sage-gradient initials tile, Playfair title, mono
    `20 queries · 16 active`, up/down chevron.
-5. **THE NOTIFICATION DESK LINE** (panel-foot pack; ref `scriptally-panel-foot.html`) —
-   **supersedes the two Urgent/House task pills**, which stated two numbers side by side and left
-   you to work out which mattered. One line says what needs you; the housekeeping total rides
-   behind it as context rather than as a peer. Derivation: the pure `deskNotice(tiles)`, off the
-   tiles the panel already computes — **no stored field**.
-   **TWO STATES, and the quiet one is a DIFFERENT TREATMENT, not the loud one greyed out** — a
-   calm desk must not look like an alert that happens to say zero:
-   - **hot** (something urgent): blush `#faf0ea` fill, `#e8c8bc` line, radius 12, burgundy count
-     roundel, `{n} tasks require your attention` over `plus {m} housekeeping items`, burgundy
-     chevron; hover lifts a soft burgundy shadow.
-   - **calm** (nothing urgent): **no fill and no frame** — a hairline above it only, square, the
-     roundel muted on `--shell-inset`, `Nothing needs you today` over
-     `{m} housekeeping items when you have a moment`.
-   Singulars agree with their verbs (`1 task requires`), and **an empty desk states no
-   housekeeping line at all** — never "0 housekeeping items". Notes reach neither line.
+5. **⚠️ THERE IS NO NOTIFICATION BLOCK — it is REMOVED ENTIRELY** (canonical shell pack). Not
+   restyled, not relocated. It had two lives in one day: the Urgent/House task pills, then a
+   two-state notification desk line that replaced them; **both are gone.** Urgency is now **one
+   6px burgundy dot beside the To-do count** in the nav (`.sv2-akdot`, rendered when
+   `tiles.urgent > 0`). The count already says how much; the dot says some of it will not wait.
+   The `deskNotice` derivation was deleted with the surface — recoverable at `6d64b75`, but do
+   not re-add the derivation without re-adding the surface.
 6. **Quick actions — TWO controls** (panel-foot pack), replacing the four unlabelled tiles.
    **All four of the strip's contracts survive**: `New` (pink primary, 40px, radius 12; its plus
    rotates 45° when open) opens a popover **upward** — it sits at the panel's foot, so downward
@@ -173,21 +173,23 @@ avatar chip at the bottom.
    Dismissal follows the scope chip's pattern (pointerdown outside, Escape, and any navigation).
    **The mockup's ⌘L/⌘N hints are deliberately NOT rendered** — no shortcut registry exists, so a
    hint would advertise a key that does nothing (standing flag).
-7. **The foot: a fading divider, then the account row — and the upsell is FOLDED INTO THE PLAN
-   LINE** (panel-foot treatment 1, "folded into the plan line"; the ref's other three columns are
+7. **The foot: a fading divider, a SETTINGS row, then the account row — and the upsell is FOLDED
+   INTO THE PLAN LINE** (panel-foot treatment 1, "folded into the plan line"; the ref's other three columns are
    the rejected alternatives). **The standalone upgrade row and its slate `PRO` pill are GONE.**
    The row is: avatar · name · `Free plan · Upgrade` · chevron, where **`Upgrade` is a plain slate
    link** (underlined, `#c3d2df`), never a pill and never a fill. Pro users read `Pro plan` with
    **no link** — a paying user is never sold to. Derivation: the pure `planLine(plan)`.
+   **Settings sits above the account row AND stays a rail rib** — it has to survive the panel
+   collapsing, and the rail is the collapsed state. (Unlike the account, which had three homes and
+   gave the rail's up.)
    Why this treatment: a persistent sold-looking row in permanent chrome is a thing you learn to
    stop seeing, and the panel foot is already where someone goes when they think about their
    account, so the prompt is in the right place at its quietest weight. The plan line stopped
    being 8px mono uppercase when it started carrying a link — `FREE PLAN · UPGRADE` reads as a
    system tag, and the point of this treatment is that it is a sentence about your account.
-   **Deviation from the ref, deliberate:** the mockup's foot also draws a `Settings` row and its
-   bar draws a user chip. Neither is built — **Settings is already a rail rib and the account is
-   already the rail's foot chip**, so both would be second mounts of a control that exists. One
-   home each; the ref rendered them as context for the upsell, which is what it was comparing.
+   *(An earlier pass declined to build the Settings row and the bar's user chip, reading them as
+   second mounts. The canonical pack overrules that: both are built, the duplication is approved,
+   and it is the RAIL's avatar that gave way instead.)*
 
 **The nav active-state law (fixes pack): active = GROUND fill `#e7e0d5` — the row reads as a
 window cut through to the page ground — ink text, burgundy icon, same radii; one law for the

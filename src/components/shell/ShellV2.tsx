@@ -305,18 +305,18 @@ export const ShellSide: React.FC<{
   /** Panel collapse (fixes pack): hidden via the container's state class (CSS transition). */
   collapsed?: boolean;
   onCollapse?: () => void;
-  /** The panel contents below the brand (ShellSidebarBody). */
+  /** The panel contents below the band (ShellSidebarBody). */
   children?: React.ReactNode;
 }> = ({ collapsed = false, onCollapse, children }) => (
   <aside className="sv2-side sv2-cap" aria-hidden={collapsed || undefined}>
     <div className="sv2-side-inner">
-      {/* The real brand artwork, large and centred (capsule spec item 1) — the canonical
-          height-locked wordmark component; alt="ScriptAlly" rides inside it. Never restyled.
-          The tuck toggle sits top-right, vertically centred on the mark (fixes pack). */}
-      <div className="sv2-wmrow">
-        <div className="sv2-wm">
-          <ScriptAllyLogo heightPx={27} />
-        </div>
+      {/* THE NAVIGATE BAND — the panel's head block, at the same --shell-head-h as the rail head
+          and the top bar, and flush to the capsule top like both, so all three close on ONE
+          unbroken horizontal line.
+          ⚠️ The brand WORDMARK that used to sit here is RETIRED (canonical shell pack): it
+          duplicated the bar's, and the panel should open straight into navigation. */}
+      <div className="sv2-ptop">
+        <span className="sv2-plab">Navigate</span>
         <button
           type="button"
           className="sv2-tuck"
@@ -327,7 +327,7 @@ export const ShellSide: React.FC<{
           <PanelLeft aria-hidden="true" />
         </button>
       </div>
-      {children}
+      <div className="sv2-pbody">{children}</div>
     </div>
   </aside>
 );
