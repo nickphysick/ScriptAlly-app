@@ -295,9 +295,10 @@
      a consequence of the content cap rather than of a minmax floor. ~400px at the 1240 cap. */
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: start;
 }
-/* the reflow: two up at ~1100, one below ~700 */
+/* the reflow: two up at ~1100 (desktop-side, untouched); ONE below md — the 700px hand-rolled
+   breakpoint migrated to the single mobile/desktop divider (Mobile Pass 1 breakpoint law) */
 @media (max-width: 1100px) { .aglist .agl-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px) { .aglist .agl-grid { grid-template-columns: 1fr; } }
+@media (max-width: 767.98px) { .aglist .agl-grid { grid-template-columns: 1fr; } }
 
 /* ── buttons (shared with the card faces from Phase 2) ──────────────────── */
 .aglist .agl-btn {
@@ -325,8 +326,9 @@
 @media (max-width: 900px) {
   .aglist .agl-page { padding: 24px 28px 44px; }
 }
-@media (max-width: 640px) {
-  .aglist .agl-page { padding: 22px 18px 40px; }
+/* the 640px hand-rolled breakpoint migrated to md (Mobile Pass 1 breakpoint law) */
+@media (max-width: 767.98px) {
+  .aglist .agl-page { padding: 18px 16px 40px; }
   .aglist .agl-h1 { font-size: 38px; }
   .aglist .agl-search { min-width: 0; width: 100%; }
 }
@@ -884,3 +886,42 @@
 .aglist .agl-bubble.struck .btext { text-decoration: line-through; color: var(--agl-ink-label); }
 .aglist .agl-bubble.struck { opacity: .72; }
 .aglist .agl-bubble .bdate.unsaved { color: #a9724f; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE (Mobile Pass 1, <md; ref design-refs/mobile-concept-v1.html frame 05)
+   The flip stands down below md (baked decision 6): opening a card renders the
+   SAME editor element as a full-screen in-flow view that replaces the list —
+   .aglist stays the scroll container, the shell bar carries Done/Cancel, the
+   tab bar stands down. The rotor is untouched (its no-overflow law included).
+   ══════════════════════════════════════════════════════════════════════════ */
+.aglist .agl-mpush { display: none; }
+/* the sheet-hosted popover panels: the .aglist wrapper carries the tokens/scoping but must not
+   bring the page root's own scroll geometry with it */
+.aglist.agl-inpop { height: auto; overflow: visible; }
+@media (max-width: 767.98px) {
+  /* the pushed editor replaces the list (scroll saved/restored around it in AgentList) */
+  .aglist .agl-mpushed { display: none; }
+  .aglist .agl-mpush {
+    display: block;
+    padding: 14px 14px calc(30px + env(safe-area-inset-bottom));
+    animation: aglMPushIn 0.22s ease-out;
+  }
+  /* the editor card sizes to its content in flow; give short tabs a workable minimum */
+  .aglist .agl-mpush .agl-acard { min-height: 60vh; min-height: 60dvh; }
+  /* the notes pane keeps its own column geometry inside the push */
+  .aglist .agl-mpush .agl-pane.chat { height: auto; min-height: 50vh; min-height: 50dvh; }
+
+  /* the toolbar wraps: search full-width above the three controls + count */
+  .aglist .agl-toolbar { flex-wrap: wrap; }
+
+  /* hover-only affordances become always-visible (the pass's touch rule): the avatar's
+     change-photo veil is the one control on this surface revealed only by :hover */
+  .aglist .agl-ehead .agl-av .cam { opacity: 1; background: rgba(43, 32, 23, 0.28); }
+}
+@keyframes aglMPushIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aglist .agl-mpush { animation: none; }
+}

@@ -37,6 +37,8 @@ import {
 } from "../../lib/agentList";
 import { PopoverAlign, popoverAlign } from "../../lib/popoverAlign";
 import { countryName } from "../../lib/territory";
+import { MobileSheet } from "../shell/MobileSheet";
+import { useIsMobile } from "../shell/mobileChrome";
 
 /* ── the popover shell: click-away, Escape, one open at a time ─────────────── */
 
@@ -57,6 +59,10 @@ interface PopProps {
 const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, open, onOpen, children }) => {
   const wrapRef = useRef<HTMLSpanElement>(null);
   const [align, setAlign] = useState<PopoverAlign>("left");
+  // Mobile Pass 1: below md the SAME panel children present in the MobileSheet chassis instead
+  // of the anchored popover — the sheet owns dismissal there (scrim + Escape), so the anchored
+  // popover's outside-click/align machinery stands down.
+  const isMobile = useIsMobile();
 
   // COLLISION: left-anchored is the default because it reads as belonging to its control, but the
   // rightmost control's panel is wider than the space beside it and would run off the container.
@@ -64,7 +70,7 @@ const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, 
   // reader perceives as the page's edge. Measured in a layout effect so the flip happens before
   // paint — deciding after would show one frame in the wrong place.
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
     const btn = wrapRef.current?.firstElementChild as HTMLElement | undefined;
     const container = wrapRef.current?.closest(".agl-inner") as HTMLElement | null;
     if (!btn || !container) return;
@@ -79,15 +85,16 @@ const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, 
         containerRight: c.right,
       }),
     );
-  }, [open, width]);
+  }, [open, width, isMobile]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
     const onDocDown = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) onOpen(null);
     };
     // Escape closes the popover and goes no further — a dropdown dismissal must never reach the
-    // page handler that discards an open card's draft.
+    // page handler that discards an open card's draft. (The sheet's own capture-phase Escape
+    // gives the mobile presentation the same guarantee.)
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.stopImmediatePropagation();
@@ -100,7 +107,7 @@ const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, 
       document.removeEventListener("mousedown", onDocDown);
       window.removeEventListener("keydown", onKey, true);
     };
-  }, [open, onOpen]);
+  }, [open, onOpen, isMobile]);
 
   return (
     <span className="agl-pw" ref={wrapRef}>
@@ -116,10 +123,17 @@ const Pop: React.FC<PopProps> = ({ id, label, icon, active, badge, width = 288, 
         {badge ? <span className="agl-badge">{badge}</span> : null}
         <ChevronDown className="cv" width={12} height={12} aria-hidden="true" />
       </button>
-      {open && (
+      {open && !isMobile && (
         <div className={`agl-pop${align === "right" ? " right" : ""}`} style={{ width }} role="dialog" aria-label={label}>
           {children}
         </div>
+      )}
+      {isMobile && (
+        <MobileSheet open={open} onClose={() => onOpen(null)} ariaLabel={label}>
+          {/* The sheet portals to body; the .aglist wrapper re-establishes the page's token
+              scope + descendant selectors (every option row is `.aglist .agl-*`-scoped). */}
+          <div className="aglist agl-inpop">{children}</div>
+        </MobileSheet>
       )}
     </span>
   );

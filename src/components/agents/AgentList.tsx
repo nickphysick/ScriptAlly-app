@@ -72,6 +72,7 @@ import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { AgentToolbar, AppliedTag, AgentAppliedTags } from "./AgentToolbar";
 import { countryName } from "../../lib/territory";
 import { blankDraft } from "../../lib/agentDraft";
+import { useIsMobile, useMobileChrome } from "../shell/mobileChrome";
 import "./agentList.css";
 
 interface AgentListProps {
@@ -408,6 +409,32 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     ? effectiveNotes(storedNotes, draft.notes, { flatNote: openAgent?.notes, dateAdded: openAgent?.dateAdded })
     : [];
 
+  // ── Mobile editor push (Mobile Pass 1, baked decision 6) ──────────────────
+  // Below md the 3D flip stands down: opening a card renders the SAME editor element (same
+  // draft buffer, same handlers, one updateAgent on Done) as a full-screen in-flow view that
+  // REPLACES the list — the .aglist root stays the scroll container, the shell bar above
+  // carries Done/Cancel via the MobileDetailSpec seam, and the tab bar stands down with it.
+  const isMobile = useIsMobile();
+  const { setMobileDetail } = useMobileChrome();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const pushAgent = openAgent ?? (newAgent && flippedId === newAgent.id ? newAgent : null);
+  const mobilePushOpen = isMobile && !!draft && !!flippedId && !!pushAgent;
+  // The list's scroll survives the push: .aglist is the scroller, and hiding the list clamps
+  // its scrollTop — saved on push, restored on return (back-preserves-scroll).
+  const listScrollMemo = useRef(0);
+  const prevPush = useRef(false);
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    if (mobilePushOpen && !prevPush.current) {
+      listScrollMemo.current = el.scrollTop;
+      el.scrollTop = 0;
+    } else if (!mobilePushOpen && prevPush.current) {
+      el.scrollTop = listScrollMemo.current;
+    }
+    prevPush.current = mobilePushOpen;
+  }, [mobilePushOpen]);
+
   const onDone = useCallback(async () => {
     if (!draft) return;
     const invalid = validateDraft(draft);
@@ -606,6 +633,24 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     if (flippedId && !shown.some((a) => a.id === flippedId)) discard();
   }, [shown, flippedId, discard]);
 
+  // The shell's Done/Cancel (baked decision 5): the pushed editor registers itself so the top
+  // bar swaps to Cancel · title · Done and the tab bar stands down. Done is the editor's own
+  // commit; Cancel is the silent discard — the page's Escape grammar (the editor's in-card ✕
+  // keeps the ask-if-dirty path for careful discards).
+  useEffect(() => {
+    if (!mobilePushOpen) {
+      setMobileDetail("agents", null);
+      return;
+    }
+    setMobileDetail("agents", {
+      kind: "editor",
+      title: newAgent && flippedId === newAgent.id ? "New agent" : "Edit agent",
+      onCancel: discard,
+      onDone: () => void onDone(),
+    });
+    return () => setMobileDetail("agents", null);
+  }, [mobilePushOpen, flippedId, newAgent, discard, onDone, setMobileDetail]);
+
   /**
    * Add a new agent (decision 16, as amended): a DRAFT-ONLY record — nothing is persisted until
    * Done passes validation. Filter and search are cleared so it can't be born hidden, and it flips
@@ -645,31 +690,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
   };
   const onLogQuery = (agent: { id: string }) => onNavigate?.("queries", "Log a query", { agentId: agent.id });
 
-  /** ONE card renderer, shared by the flat grid and every group section — a second copy would
-   *  drift the moment the editor gains a prop.
-   *
-   *  `index` is the card's position in its own grid, which is what the row stagger reads. The
-   *  delay is set inline because the row depends on the LIVE column count (auto-fill), which no
-   *  stylesheet can know — CSS has no way to derive a row from nth-child without the column count
-   *  baked in at authoring time. The state class stays on the container; only the number is here. */
-  const renderCard = (agent: Agent, index: number) => (
-              <AgentCard
-                key={agent.id}
-                style={loadAnim ? { animationDelay: `${rowDelayMs(index, columns)}ms` } : undefined}
-                motionClass={[
-                  leavingId === agent.id ? "agl-leaving" : "",
-                  newAgent?.id === agent.id && !saveState ? "agl-arriving" : "",
-                  saveState?.id === agent.id ? `sv-${saveState.phase}` : "",
-                ].filter(Boolean).join(" ") || undefined}
-                agent={agent}
-                queries={queries}
-                manuscripts={manuscripts}
-                activities={activities}
-                onEdit={onEdit}
-                onLogQuery={onLogQuery}
-                flipped={flippedId === agent.id && saveState?.id !== agent.id}
-                editor={
-                  draft && flippedId === agent.id ? (
+  /** ONE editor element builder, shared by the card back face (desktop flip) and the mobile
+   *  push host — a second copy would drift the moment the editor gains a prop. */
+  const editorFor = (agent: Agent) =>
+    draft && flippedId === agent.id ? (
                     <AgentEditor
                       draft={draft}
                       onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))}
@@ -720,14 +744,46 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
                       }
                       onPinNote={(id) => setDraft((d) => (d ? { ...d, pinnedNoteId: id } : d))}
                     />
-                  ) : null
-                }
+    ) : null;
+
+  /** ONE card renderer, shared by the flat grid and every group section.
+   *
+   *  `index` is the card's position in its own grid, which is what the row stagger reads. The
+   *  delay is set inline because the row depends on the LIVE column count (auto-fill), which no
+   *  stylesheet can know — CSS has no way to derive a row from nth-child without the column count
+   *  baked in at authoring time. The state class stays on the container; only the number is here.
+   *
+   *  Below md the FLIP IS SUPPRESSED (baked decision 6): the card never rotates and carries no
+   *  editor face — the mobile push host renders the same editor element full-screen instead. */
+  const renderCard = (agent: Agent, index: number) => (
+              <AgentCard
+                key={agent.id}
+                style={loadAnim ? { animationDelay: `${rowDelayMs(index, columns)}ms` } : undefined}
+                motionClass={[
+                  leavingId === agent.id ? "agl-leaving" : "",
+                  newAgent?.id === agent.id && !saveState ? "agl-arriving" : "",
+                  saveState?.id === agent.id ? `sv-${saveState.phase}` : "",
+                ].filter(Boolean).join(" ") || undefined}
+                agent={agent}
+                queries={queries}
+                manuscripts={manuscripts}
+                activities={activities}
+                onEdit={onEdit}
+                onLogQuery={onLogQuery}
+                flipped={!isMobile && flippedId === agent.id && saveState?.id !== agent.id}
+                editor={!isMobile ? editorFor(agent) : null}
               />
   );
 
   return (
-    <div className={`aglist${loadAnim ? " agl-anim" : ""}`}>
-      <div className="agl-page">
+    <div className={`aglist${loadAnim ? " agl-anim" : ""}`} ref={rootRef}>
+      {/* THE MOBILE EDITOR PUSH (baked decisions 5 + 6) — in flow, replacing the list; the
+          .aglist root keeps scrolling, the shell bar carries Done/Cancel, the tab bar stands
+          down. The SAME editor element the card back would host — one draft, one commit. */}
+      {mobilePushOpen && pushAgent && (
+        <div className="agl-mpush">{editorFor(pushAgent)}</div>
+      )}
+      <div className={`agl-page${mobilePushOpen ? " agl-mpushed" : ""}`}>
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
        <div className="agl-inner">

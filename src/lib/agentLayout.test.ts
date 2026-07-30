@@ -70,9 +70,10 @@ describe("agent list · the page column", () => {
     expect(grid).toContain("grid-template-columns: repeat(3, 1fr)");
     expect(grid).toContain("gap: 18px");
     expect(grid).not.toContain("repeat(auto-fill"); // the card width follows the content cap now
-    // the reflow: two up, then one
+    // the reflow: two up (desktop-side), then one below md — the 700px hand-rolled breakpoint
+    // migrated to the single mobile/desktop divider (Mobile Pass 1 breakpoint law)
     expect(css).toMatch(/@media \(max-width: 1100px\) \{ \.aglist \.agl-grid \{ grid-template-columns: repeat\(2, 1fr\); \} \}/);
-    expect(css).toMatch(/@media \(max-width: 700px\) \{ \.aglist \.agl-grid \{ grid-template-columns: 1fr; \} \}/);
+    expect(css).toMatch(/@media \(max-width: 767\.98px\) \{ \.aglist \.agl-grid \{ grid-template-columns: 1fr; \} \}/);
   });
 });
 
