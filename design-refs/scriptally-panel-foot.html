@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Panel foot</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --pink-tint:#faf0ea; --sage-band:#dce0d9; --slate:#6a89a7;
+  --ground:#e7e0d5; --rail:#f1ebe3; --cap:#fdfbf8; --fill:#efe8df; --card:#fdfaf5;
+  --line:#e3d9cf; --linesoft:#ece3da; --ease:cubic-bezier(.4,0,.2,1);
+  --shadow:0 1px 2px rgba(58,28,20,.04),0 2px 6px rgba(58,28,20,.045),0 8px 18px rgba(58,28,20,.05),0 20px 44px rgba(58,28,20,.055);
+  --urg:#eabfab; --hse:#b7c5b4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;padding:0 0 70px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E")}
+.head{padding:36px 40px 0}
+.kickr{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#7f7568}
+h1{font-family:"Playfair Display",serif;font-size:32px;font-weight:500;letter-spacing:-.015em;margin-top:8px}
+.lede{font-family:"Playfair Display",serif;font-size:15px;color:#5f574f;margin-top:8px;max-width:840px}
+.cols{display:flex;gap:24px;padding:28px 40px 0;align-items:flex-start;overflow-x:auto}
+.cols::-webkit-scrollbar{height:9px}
+.cols::-webkit-scrollbar-thumb{background:#cfc3b5;border-radius:9px}
+.col{width:276px;flex:none}
+.clab{display:flex;align-items:baseline;gap:9px;margin-bottom:11px}
+.clab .n{font-family:"JetBrains Mono",monospace;font-size:9px;color:#fff;background:var(--ink);border-radius:6px;padding:3px 7px}
+.clab .t{font-family:"Playfair Display",serif;font-size:15.5px}
+.note{margin-top:13px;font-size:11.5px;line-height:1.6;color:#544c44}
+.note b{color:var(--ink);font-weight:500}
+.note .src{display:block;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--burgundy);margin-top:8px}
+
+.pan{height:620px;background:var(--rail);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.ptop{height:58px;flex:none;display:flex;align-items:center;padding:0 12px 0 16px;border-bottom:1px solid var(--linesoft)}
+.ptop .lab{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.17em;text-transform:uppercase;color:#b3a598;flex:1}
+.tuck{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}
+.tuck svg{width:16px;height:16px}
+.pbody{flex:1;display:flex;flex-direction:column;padding:11px 12px 12px}
+.nrow{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:11px;font-size:13.5px;color:var(--ink-soft)}
+.nrow svg.ai{width:17px;height:17px;color:#a89a8a;flex:none}
+.nrow .lb{flex:1}
+.nrow .cv{width:11px;height:11px;color:#c4b8a9}
+.nrow.open{color:var(--ink);font-weight:500}
+.nrow.open svg.ai{color:var(--burgundy)}
+.nrow.open .cv{transform:rotate(90deg)}
+.krow{display:flex;align-items:center;gap:9px;height:34px;padding:0 12px 0 41px;border-radius:10px;font-size:12.5px;color:var(--ink-soft)}
+.krow .lb{flex:1}
+.krow .ct{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.krow.on{background:var(--ground);color:var(--ink)}
+.gap1{flex:1;min-height:12px}
+
+/* ── notification desk line ── */
+.notif{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-radius:12px;background:var(--pink-tint);border:1px solid var(--pink-line);cursor:pointer;flex:none;transition:box-shadow .15s var(--ease)}
+.notif:hover{box-shadow:0 3px 12px rgba(124,58,42,.1)}
+.notif .cnt{min-width:22px;height:22px;border-radius:99px;background:var(--burgundy);color:#fff;font-family:"JetBrains Mono",monospace;font-size:10.5px;display:grid;place-items:center;flex:none;margin-top:1px;padding:0 5px}
+.notif .tx{flex:1;min-width:0}
+.notif .t1{font-size:12.5px;line-height:1.35;color:var(--ink)}
+.notif .t2{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+.notif .cv{width:11px;height:11px;color:var(--burgundy);flex:none;margin-top:5px}
+/* zero state */
+.notif.calm{background:transparent;border-color:transparent;border-top:1px solid var(--linesoft);border-radius:0;padding:12px 12px 11px}
+.notif.calm .cnt{background:var(--fill);color:var(--muted)}
+.notif.calm .cv{color:var(--muted)}
+
+/* ── quick actions ── */
+.slab{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.17em;text-transform:uppercase;color:#b3a598;padding:16px 4px 8px;flex:none}
+.qa{display:flex;flex-direction:column;gap:8px;flex:none}
+.newwrap{position:relative}
+.b1{display:flex;align-items:center;justify-content:center;gap:9px;height:40px;border-radius:12px;background:var(--pink);border:1px solid var(--pink-line);color:var(--burgundy);font-size:13px;cursor:pointer;transition:box-shadow .15s var(--ease)}
+.b1:hover{box-shadow:0 3px 12px rgba(124,58,42,.14)}
+.b1 svg{width:15px;height:15px;transition:transform .2s var(--ease)}
+.newwrap.open .b1 svg{transform:rotate(45deg)}
+.b2{display:flex;align-items:center;justify-content:center;gap:9px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:13px;cursor:pointer;transition:border-color .15s var(--ease)}
+.b2:hover{border-color:#cfc2b4}
+.b2 svg{width:15px;height:15px;color:var(--muted)}
+.pop{position:absolute;left:0;right:0;bottom:calc(100% + 8px);background:var(--cap);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(58,28,20,.18);padding:7px;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .15s,transform .15s;z-index:40}
+.newwrap.open .pop{opacity:1;transform:translateY(0);pointer-events:auto}
+.pk{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:8px 11px 6px}
+.prow{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:10px;font-size:12.5px;color:var(--ink-soft);cursor:pointer}
+.prow:hover{background:var(--fill);color:var(--ink)}
+.prow svg{width:15px;height:15px;color:#a89a8a;flex:none}
+.prow .lb{flex:1}
+.prow .kb{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:#bcb0a3;border:1px solid var(--linesoft);border-radius:5px;padding:1px 5px}
+
+/* ── foot ── */
+.fdiv{height:1px;background:linear-gradient(90deg,transparent,rgba(46,39,35,.13) 18%,rgba(46,39,35,.13) 82%,transparent);margin:14px 4px 8px;flex:none}
+.frow{display:flex;align-items:center;gap:11px;height:38px;padding:0 12px;border-radius:11px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;flex:none}
+.frow:hover{background:var(--fill)}
+.frow svg.fi{width:16px;height:16px;color:#a89a8a;flex:none}
+.frow .lb{flex:1}
+.frow .cv{width:11px;height:11px;color:var(--muted)}
+.usr{display:flex;align-items:center;gap:10px;padding:8px 12px 4px;flex:none;cursor:pointer;border-radius:11px}
+.usr:hover{background:var(--fill)}
+.usr .av{width:30px;height:30px;border-radius:99px;background:var(--card);border:1px solid rgba(124,58,42,.26);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:11px;color:var(--burgundy);flex:none}
+.usr .tx{flex:1;min-width:0}
+.usr .n1{font-size:12.5px}
+.usr .n2{font-size:10.5px;color:var(--muted);margin-top:2px}
+.usr .n2 a{color:var(--slate);border-bottom:1px solid #c3d2df;padding-bottom:1px;cursor:pointer}
+.usr .cv{width:11px;height:11px;color:var(--muted)}
+
+/* pro variants */
+.proRow{display:flex;align-items:center;gap:11px;height:38px;padding:0 12px;border-radius:11px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;flex:none}
+.proRow:hover{background:var(--fill)}
+.proRow svg.fi{width:16px;height:16px;color:var(--slate);flex:none}
+.proRow .lb{flex:1}
+.proRow .cv{width:11px;height:11px;color:var(--muted)}
+.foot-note{font-size:10.5px;color:#b3a598;padding:8px 12px 2px;flex:none}
+.foot-note a{color:var(--slate);border-bottom:1px solid #cfdae4;cursor:pointer}
+.chip{font-family:"JetBrains Mono",monospace;font-size:7px;letter-spacing:.1em;background:var(--fill);border:1px solid var(--line);color:var(--muted);border-radius:5px;padding:2px 5px}
+
+.bar{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:60;display:flex;gap:5px;background:#fdfbf8;border-radius:99px;padding:7px;box-shadow:0 12px 30px rgba(58,28,20,.24)}
+.bar button{border:0;background:transparent;font:inherit;font-size:11.5px;padding:8px 14px;border-radius:99px;cursor:pointer;color:var(--ink-soft)}
+.bar button.on{background:var(--ink);color:#fff}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kickr">ScriptAlly · Side panel · Sheet 21</div>
+  <h1>Notification, two actions, and four ways to be quiet about Pro</h1>
+  <div class="lede">Everything but the upsell is identical across the four. Toggle the desk state at the bottom to see it with nothing urgent.</div>
+</div>
+
+<div class="cols" id="cols"></div>
+
+<div class="bar">
+  <button class="on" data-s="hot">3 urgent</button>
+  <button data-s="calm">Nothing urgent</button>
+</div>
+
+<script>
+const CV=`<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>`;
+const I={
+ dash:`<svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`,
+ q:`<svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>`,
+ a:`<svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>`,
+ s:`<svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg>`,
+ gear:`<svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>`,
+ spark:`<svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9L12 3.5Z"/></svg>`
+};
+const TOP=`<div class="ptop"><span class="lab">Navigate</span><span class="tuck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/></svg></span></div>`;
+const NAV=`
+ <div class="nrow">${I.dash}<span class="lb">Dashboard</span></div>
+ <div class="nrow open">${I.q}<span class="lb">Querying</span>${CV}</div>
+ <div class="krow"><span class="lb">Queries Hub</span><span class="ct">21</span></div>
+ <div class="krow on"><span class="lb">To-do</span><span class="ct">44</span></div>
+ <div class="krow"><span class="lb">Packages</span><span class="ct">0</span></div>
+ <div class="nrow">${I.a}<span class="lb">Agents</span>${CV}</div>
+ <div class="nrow">${I.s}<span class="lb">Shelf</span>${CV}</div>`;
+
+const NOTIF={
+ hot:`<div class="notif">
+   <span class="cnt">3</span>
+   <span class="tx"><span class="t1" style="display:block">3 tasks require your attention</span><span class="t2" style="display:block">plus 44 housekeeping items</span></span>
+   ${CV}
+ </div>`,
+ calm:`<div class="notif calm">
+   <span class="cnt">0</span>
+   <span class="tx"><span class="t1" style="display:block">Nothing needs you today</span><span class="t2" style="display:block">44 housekeeping items when you have a moment</span></span>
+   ${CV}
+ </div>`
+};
+const QA=`<div class="slab">Quick actions</div>
+ <div class="qa">
+  <div class="newwrap" id="nw">
+    <div class="pop">
+      <div class="pk">Create</div>
+      <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span class="lb">Log a query</span><span class="kb">⌘L</span></div>
+      <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.2"/><path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"/><path d="M18 8.5v5M15.5 11h5"/></svg><span class="lb">Add an agent</span></div>
+      <div class="prow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H16v9"/><path d="M5 4.5v15A1.5 1.5 0 0 0 6.5 21H12"/><path d="M18 15v6M15 18h6"/></svg><span class="lb">Add a manuscript</span></div>
+    </div>
+    <div class="b1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New</div>
+  </div>
+  <div class="b2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>Record a response</div>
+ </div>`;
+const SETTINGS=`<div class="frow">${I.gear}<span class="lb">Settings</span></div>`;
+const USER=extra=>`<div class="usr"><span class="av">ML</span><span class="tx"><span class="n1" style="display:block">Michael Li</span><span class="n2" style="display:block">${extra}</span></span>${CV}</div>`;
+
+const PRO={
+1:{t:'Folded into the plan line',
+  html:`<div class="fdiv"></div>${SETTINGS}${USER('Free plan · <a>Upgrade</a>')}`,
+  note:`<b>The quietest, and what Notion does.</b> No block of its own — the plan you are on is stated as fact beside your name, and the word <i>Upgrade</i> is a plain slate link. Zero footprint, and it appears exactly where a user goes when they think about their account.<span class="src">Notion · Figma · Raycast</span>`},
+2:{t:'A plain row',
+  html:`<div class="fdiv"></div><div class="proRow">${I.spark}<span class="lb">Upgrade to Pro</span>${CV}</div>${SETTINGS}${USER('Free plan')}`,
+  note:`<b>Same weight as Settings.</b> A row among rows — small slate spark glyph, no fill, no border, no badge. Visible without being sold. This is Todoist's approach and it is the safe middle.<span class="src">Todoist · Slack</span>`},
+3:{t:'A footnote',
+  html:`<div class="fdiv"></div>${SETTINGS}${USER('Free plan')}<div class="foot-note">You are on the free plan. <a>See what Pro adds</a></div>`,
+  note:`<b>Below everything, in 10.5px.</b> Almost an aside. Warmer than a button because it is phrased as information rather than an offer — but it is also the easiest thing on the panel to never read.`},
+4:{t:'Nothing here',
+  html:`<div class="fdiv"></div>${SETTINGS}${USER('Free plan <span class="chip">FREE</span>')}`,
+  note:`<b>No persistent upsell at all.</b> Linear, Arc and Superhuman do this — the prompt appears only when you actually meet a limit, where it is relevant and converts far better. <b>The most confident option and the best for trust</b>; the cost is that a user who would happily pay may never be asked.<span class="src">Linear · Arc · Superhuman</span>`}
+};
+
+let state='hot';
+function build(){
+ document.getElementById('cols').innerHTML=Object.entries(PRO).map(([k,v])=>`
+  <div class="col">
+   <div class="clab"><span class="n">${k}</span><span class="t">${v.t}</span></div>
+   <div class="pan">${TOP}<div class="pbody">${NAV}<div class="gap1"></div>${NOTIF[state]}${QA}${v.html}</div></div>
+   <div class="note">${v.note}</div>
+  </div>`).join('');
+ document.querySelectorAll('.newwrap').forEach(nw=>{
+  nw.querySelector('.b1').onclick=e=>{e.stopPropagation();document.querySelectorAll('.newwrap').forEach(x=>{if(x!==nw)x.classList.remove('open')});nw.classList.toggle('open');};
+  nw.querySelector('.pop').onclick=e=>e.stopPropagation();
+ });
+}
+document.addEventListener('click',()=>document.querySelectorAll('.newwrap').forEach(x=>x.classList.remove('open')));
+document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>{
+ state=b.dataset.s;
+ document.querySelectorAll('.bar button').forEach(x=>x.classList.toggle('on',x.dataset.s===state));
+ build();
+});
+build();
+</script>
+</body>
+</html>

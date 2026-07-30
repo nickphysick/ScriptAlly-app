@@ -79,7 +79,7 @@
   --shell-pad-t: 14px;                /* top padding — BOTH components */
   --shell-quiet: #b3a598;             /* quiet/tertiary label ink — the group headings */
   --shell-cap-radius: 18px;           /* capsule corner (chrome tokens: 20 → 18) */
-  --shell-cap-gap: 10px;              /* capsule gap AND page padding (chrome tokens: 14 → 10) */
+  --shell-cap-gap: 14px;              /* capsule gap AND page padding — the OUTER GAP (10 → 14) */
   /* THE LAYERED SHADOW — one token, every capsule. Four stops rather than one: the near pair
      seats the edge, the far pair carries the float. */
   --shell-cap-shadow:

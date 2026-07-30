@@ -181,9 +181,12 @@ is now permanently in the bar at full size, on every page and in every state, so
 nothing left to do — it is deleted, not contradicted.
 
 **Help is a bar button**, so the floating FAB is retired — one of the three suspects in the
-right-gutter bug, removed as a class of problem rather than repositioned again. The timeline is
-NOT yet folded in: its drawer is rendered by `Dashboard` and gated on that route, so its trigger
-cannot be app-wide. Nick's call for the follow-up is a dashboard-only bar button.
+right-gutter bug, removed as a class of problem rather than repositioned again.
+
+**The TIMELINE is out of scope entirely.** An earlier note here told a future run to fold it into
+the bar and delete the floating version; **that instruction was withdrawn — it was never a
+decision.** Leave the timeline exactly as it is: do not move it, delete it, or give it a bar
+button.
 
 ## Panel collapse (fixes pack — the rail question, RESOLVED)
 

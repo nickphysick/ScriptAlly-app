@@ -29,7 +29,7 @@ const BAKED: Record<string, string> = {
   "--shell-pad-t": "14px",
   "--shell-quiet": "#b3a598",
   "--shell-cap-radius": "18px",
-  "--shell-cap-gap": "10px",
+  "--shell-cap-gap": "14px",
   "--shell-cap-border": "1px solid #d8ccbc",
   "--shell-rail-icon": "#a89a8a",
   "--shell-bar-bg": "#f1ebe3",
@@ -109,7 +109,7 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
   });
   it("capsule geometry", () => {
     expect(dt.shellCapRadius).toBe(18);
-    expect(dt.shellCapGap).toBe(10);
+    expect(dt.shellCapGap).toBe(14);
     expect(dt.shellCapShadow).toContain("0 20px 44px rgba(58,28,20,.055)"); // the layered set
     expect(dt.shellCapBorder).toBe("1px solid #d8ccbc");
     expect(dt.shellBarBg).toBe("#f1ebe3");

@@ -140,7 +140,7 @@ export const shellInset = "#efe8df"; // THE interior fill (search, chips, pills,
 export const shellLine = "#e3d9cf"; // interior hairline
 export const shellLineSoft = "#ece3da"; // soft interior hairline
 export const shellCapRadius = 18; // capsule corner (px) — chrome tokens
-export const shellCapGap = 10; // capsule gap AND page padding (px) — chrome tokens
+export const shellCapGap = 14; // capsule gap AND page padding (px) — the outer gap
 // THE LAYERED SHADOW — four stops, one token, every capsule.
 export const shellCapShadow =
   "0 1px 2px rgba(58,28,20,.04), 0 2px 6px rgba(58,28,20,.045), 0 8px 18px rgba(58,28,20,.05), 0 20px 44px rgba(58,28,20,.055)";
