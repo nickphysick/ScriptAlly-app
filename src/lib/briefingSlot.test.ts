@@ -85,7 +85,8 @@ describe("THE COLLAPSE LAW — the empty case contributes NO height", () => {
     expect(css).toContain(".spine-root .svh { margin-bottom: 0; }"); // the page owns its first gap
     // so the first thing below the rule supplies the whole gap, whichever it is
     expect(css.match(/\.tdb-brief \{([^}]*)\}/)?.[1]).toContain("margin-top: 26px");
-    expect(css.match(/\.tdb-ctrl \{([^}]*)\}/)?.[1]).toContain("margin-top: 44px");
+    // the tightening P1: the strip sits directly beneath the hero — 14px, still the gap's ONE owner
+    expect(css.match(/\.tdb-ctrl \{([^}]*)\}/)?.[1]).toContain("margin-top: 14px");
   });
 
   it("the spacing lives on the SLOT itself — no min-height, no fixed height, no wrapper margin", () => {

@@ -1,0 +1,102 @@
+<!--
+FENCE NOTE — the tightening pack, Phases 1 + 3 (the tightened hero, the control strip,
+the card grammar). NORMATIVE for: the single-line hero (no subtitle; title left, the ghost
+review + soft-pink add buttons right), the recessed one-bar control strip (chips + search +
+toggle), and the card as the row stood upright — band (kind + tabular date), body (title +
+ms line + fixed progress slot), and the pinned action-lane foot inside a shared min-height.
+-->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The card view, aligned to the same system</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+body{background:#f2ede7;padding:30px 0 80px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#5d4d40;margin:36px 0 10px;width:1240px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#4d4238;margin-left:10px;line-height:1.55}
+.wrap{width:1240px;background:#fdfcfa;border:1px solid #e2dbd0;border-radius:13px;padding:20px 22px 24px;box-sizing:border-box}
+.hero{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.hero h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#2b2118}
+.hcta{margin-left:auto;display:flex;gap:9px}
+.gh{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #e0d6c6;color:#4d4238;border-radius:9px;height:33px;padding:0 13px;font-size:11px;font-weight:600}
+.pk{display:inline-flex;align-items:center;gap:7px;background:#f6d8cc;border:1px solid #e8c8bc;color:#5c2f22;border-radius:9px;height:33px;padding:0 14px;font-size:11px;font-weight:700}
+.wb{display:flex;align-items:center;gap:3px;background:#f5f0e8;border:1px solid #e4dbcd;border-radius:10px;padding:6px 8px;margin-bottom:20px}
+.fc{display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 10px;border-radius:7px;font-size:10.5px;font-weight:600;color:#6b5a4e}
+.fc.on{background:#2a1a13;color:#f3e7da}
+.fc .n{font-family:'JetBrains Mono',monospace;font-size:8px;opacity:.6}
+.fc.zero{opacity:.4}
+.wbsrch{margin-left:auto;display:flex;align-items:center;gap:7px;height:29px;background:#fff;border:1px solid #e0d6c6;border-radius:7px;padding:0 11px;width:200px;color:#a59a8c;font-size:10.5px}
+.vtg{display:inline-flex;align-items:center;height:29px;border:1px solid #e0d6c6;border-radius:7px;background:#fff;padding:2px;gap:2px;margin-left:8px}
+.vc{width:27px;height:23px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;font-size:11px;color:#8a8074}
+.vc.on{background:#2a1a13;color:#f3e7da}
+.sect{display:flex;align-items:baseline;gap:9px;margin:0 0 11px}
+.sect h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#2b2118}
+.sect .c{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c}
+.sect .rule{flex:1;height:1px;background:#ece5d9;margin-left:6px}
+.gr{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+/* THE CARD — same lanes as the ledger row, stacked */
+.c{background:#fff;border:1.5px solid #3a1c14;border-radius:11px;box-shadow:4px 4px 0 var(--blk);display:flex;flex-direction:column;min-height:150px;overflow:hidden}
+.c.u{--blk:#f2cec1}.c.h{--blk:#eee5d4}
+.c .top{display:flex;align-items:center;gap:7px;padding:9px 12px;border-bottom:1px solid var(--bd)}
+.c.u .top{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.c.h .top{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.c .tag{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.13em;background:#fff;border:1px solid rgba(58,28,20,.2);border-radius:99px;padding:2px 8px;color:#3a1c14}
+.c .when{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em;color:#8a6a58;font-variant-numeric:tabular-nums}
+.c .mid{padding:12px 13px 0;flex:1}
+.c h4{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:700;color:#2b2118;line-height:1.25}
+.c .ms{font-family:'Playfair Display',serif;font-style:italic;font-size:10.5px;color:#a5988c;margin-top:3px}
+.c .prog{margin-top:10px}
+.c .pbar{height:3px;border-radius:2px;background:#efe7d9;overflow:hidden}
+.c .pbar i{display:block;height:100%;background:#b9a98e}
+.c .pn{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em;color:#a5988c;margin-top:5px}
+.c .foot{display:flex;align-items:center;gap:6px;padding:10px 12px 11px;margin-top:auto}
+.prime{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:7px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;font-size:10px;font-weight:600}
+.ib{width:28px;height:28px;border-radius:7px;border:1px solid #e4dbcd;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#6b5a4e}
+.ib.last{margin-left:auto;border:none;background:transparent;color:#c9bcae}
+</style></head><body><div class="lbl">THE CARD VIEW, ON THE SAME COLUMN SYSTEM <em>&mdash; each card is the ledger row stood upright: BAND (kind + the date, tabular-mono, right) &middot; BODY (title, manuscript, and the batch progress in its fixed slot) &middot; FOOT (the same action lane &mdash; primary, icons, chevron). Because the foot is pinned with margin-top:auto and every card shares one min-height, the buttons line up ACROSS the row and nothing floats. Four to a row now, so the cards fill the width without becoming billboards.</em></div><div class="wrap">
+<div class="hero"><h1>What&rsquo;s on your desk?</h1>
+<div class="hcta"><span class="gh">&#8634; Last week in review</span><span class="pk">&#65291; Add task or note</span></div></div>
+<div class="wb">
+<span class="fc on">All <span class="n">44</span></span><span class="fc">Offers <span class="n">1</span></span>
+<span class="fc">Agent waiting <span class="n">2</span></span><span class="fc">Materials <span class="n">16</span></span>
+<span class="fc">Wish lists <span class="n">15</span></span><span class="fc">Stale <span class="n">10</span></span>
+<span class="fc">Snoozed <span class="n">1</span></span><span class="fc zero">Notes <span class="n">0</span></span>
+<span class="wbsrch">&#9906; Search your list&hellip;</span>
+<span class="vtg"><span class="vc on">&#9638;</span><span class="vc">&#9776;</span></span></div>
+
+<div class="sect"><h2>Urgent</h2><span class="c">3</span><span class="rule"></span></div>
+<div class="gr">
+<div class="c u">
+<div class="top"><span class="tag">&#9733; OFFER</span><span class="when">19 JUL</span></div>
+<div class="mid"><h4>Tom Ellery has made an offer</h4><div class="ms">Murphy&rsquo;s Day Out</div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+<div class="c u">
+<div class="top"><span class="tag">AGENT WAITING</span><span class="when">12 JUL</span></div>
+<div class="mid"><h4>Send your full to Jonathan Marsh</h4><div class="ms">The Marsh Agency</div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+<div class="c u">
+<div class="top"><span class="tag">AGENT WAITING</span><span class="when">15 JUL</span></div>
+<div class="mid"><h4>Send your partial to Daniel O&rsquo;Rourke</h4><div class="ms">Penhallow Literary</div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+</div>
+<div class="sect"><h2>Housekeeping</h2><span class="c">41</span><span class="rule"></span></div>
+<div class="gr">
+<div class="c h">
+<div class="top"><span class="tag">MATERIALS WANTED</span><span class="when"></span></div>
+<div class="mid"><h4>16 agents missing a materials list</h4><div class="ms">Add what they ask to receive</div><div class="prog"><div class="pbar"><i style="width:0%"></i></div><div class="pn">0 OF 16 AGENTS &middot; 0%</div></div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+<div class="c h">
+<div class="top"><span class="tag">WISH LISTS</span><span class="when"></span></div>
+<div class="mid"><h4>15 agents missing a wish list</h4><div class="ms">Add their wish lists</div><div class="prog"><div class="pbar"><i style="width:0%"></i></div><div class="pn">0 OF 16 AGENTS &middot; 0%</div></div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+<div class="c h">
+<div class="top"><span class="tag">STALE QUERY</span><span class="when">862 DAYS</span></div>
+<div class="mid"><h4>Jonathan Marsh silent</h4><div class="ms">No reply &mdash; consider closing</div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+<div class="c h">
+<div class="top"><span class="tag">STALE QUERY</span><span class="when">782 DAYS</span></div>
+<div class="mid"><h4>Marcus Reed silent</h4><div class="ms">No reply &mdash; consider closing</div></div>
+<div class="foot"><span class="prime">Action now</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span><span class="ib last">&#9656;</span></div></div>
+</div>
+</div></body></html>

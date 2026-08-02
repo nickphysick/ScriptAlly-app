@@ -141,24 +141,24 @@ type Overlay =
  *  Deliberately absent (and reported): the lane play button ("Focus on {label}") and the Notes
  *  ＋ went with the header bar — a heading is a heading. No "Clear this section": not built. */
 export const SectionHead: React.FC<{
-  cls: string; // "do" | "hk" | "nt" — the identity colour of the rule's 96px stub
+  cls: string; // "do" | "hk" | "nt" — kept for the Lane ids; the heading itself is family-neutral now
   label: string;
   count: number;
   /** Deck v2: when the deck narrows this section, the heading appends "x OF y · FILTERED". */
   filtered?: { x: number; y: number; showAll: () => void } | null;
-}> = ({ cls, label, count, filtered }) => (
-  <>
-    <div className="tdb-sec">
-      <h2>{label}</h2>
-      <span className="tdb-cn">{count}</span>
-      {filtered && (
-        <span className="tdb-secfilt">
-          {filtered.x} OF {filtered.y} · FILTERED · <button type="button" onClick={filtered.showAll}>SHOW ALL</button>
-        </span>
-      )}
-    </div>
-    <div className={`tdb-secrule ${cls}`} aria-hidden />
-  </>
+}> = ({ label, count, filtered }) => (
+  // the tightening P1 — ONE line: Playfair label · mono count · a hairline filling the remaining
+  // width. The separate family-stub rule beneath is retired; the filtered note sits past the rule.
+  <div className="tdb-sec">
+    <h2>{label}</h2>
+    <span className="tdb-cn">{count}</span>
+    <span className="tdb-secrule" aria-hidden />
+    {filtered && (
+      <span className="tdb-secfilt">
+        {filtered.x} OF {filtered.y} · FILTERED · <button type="button" onClick={filtered.showAll}>SHOW ALL</button>
+      </span>
+    )}
+  </div>
 );
 
 /** One board SECTION — the heading above a wrapping auto-fill card grid. No scroll machinery:
@@ -1184,9 +1184,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    *  new entry point. */
   function renderPageHeader() {
     return (
+      // the tightening P1 — the subtitle is REMOVED: with no description the shared PageHeader
+      // lays the title and the two actions on one line (svh-top is a flex row); the buttons take
+      // the page-scoped 34px step in todo.css. Copy lives nowhere else.
       <PageHeader
         title="What’s on your desk?"
-        description="Urgent tasks, housekeeping, notes. Here’s everything on your to-do list."
         actions={[
           {
             label: "Last week in review",

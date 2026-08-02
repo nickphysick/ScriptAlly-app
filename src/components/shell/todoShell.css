@@ -6,14 +6,13 @@
  * WRAPPER, kept as the token carrier so the cascade (and the surviving artefact locks) hold.
  */
 .spine-root {
-  /* THE FILTER CHIPS (todo rebuild P1) — the bench SLAB is gone; the chips ride bare on the
-     control line. Idle = the interior fill; selected = the Form 11 soft-pink with a burgundy
-     label (the deep-ink fill retired with every other dark pill on this page). */
-  --spine-chip-bg: #efe8df;    /* an idle chip — the interior fill */
-  --spine-chip-tx: #6a615a;
-  --spine-chip-hov: #e7dfd3;
-  --spine-chip-on-bg: #f5e2da; /* a selected chip — soft pink, burgundy label */
-  --spine-chip-on-tx: #7c3a2a;
+  /* THE FILTER CHIPS — the tightening P1: the chips live INSIDE the recessed strip now: transparent at rest
+     (the strip's ground shows through), a warm step on hover, INK when active. */
+  --spine-chip-bg: transparent;
+  --spine-chip-tx: #6b5a4e;
+  --spine-chip-hov: #ece5d9;
+  --spine-chip-on-bg: #2a1a13; /* a selected chip — ink fill, cream label */
+  --spine-chip-on-tx: #f3e7da;
   /* (todo rebuild P5: the BLUE PRO STICKER is retired — its successor is the foot
      .tdb-asst in todo.css — the assistant band at the content's foot.) */
   /* the search pill's own hairline */
@@ -29,13 +28,13 @@
 
 /* ── THE FILTER CHIPS — bare on the control line (the .spine-bench slab and its funnel/FILTER
    head are DELETED: no group containers on this page). ── */
-.spine-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 99px; border: 0; background: var(--spine-chip-bg); font-size: 12px; color: var(--spine-chip-tx); cursor: pointer; }
+.spine-chip { display: inline-flex; align-items: center; gap: 5px; height: 27px; padding: 0 10px; border-radius: 7px; border: 0; background: var(--spine-chip-bg); font-size: 10.5px; font-weight: 600; color: var(--spine-chip-tx); cursor: pointer; }
 .spine-chip:hover { background: var(--spine-chip-hov); }
 .spine-chip.on { background: var(--spine-chip-on-bg); color: var(--spine-chip-on-tx); }
 .spine-chip.on .spine-chipn { color: var(--spine-chip-on-tx); }
 /* a zero-count chip fades but stays rendered — and stops being interactive */
-.spine-chip.zero { opacity: 0.45; cursor: default; pointer-events: none; }
-.spine-chipn { font-family: var(--f12-mono); font-size: 9.5px; color: #9c8878; }
+.spine-chip.zero { opacity: 0.4; cursor: default; pointer-events: none; }
+.spine-chipn { font-family: var(--f12-mono); font-size: 8px; color: inherit; opacity: 0.6; }
 /* the struck prior total during search (fnFace renders <s class="tdb-was"> inside the count) */
 .spine-chipn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
 

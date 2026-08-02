@@ -1,0 +1,100 @@
+<!--
+FENCE NOTE — the tightening pack, Phase 2 (the ledger column grid).
+NORMATIVE: SYSTEM A only — the fixed column grid (14px dot · flexible task · fixed kind ·
+fixed status · fixed action lane), every row a CSS grid on the same tracks so tags, dates and
+buttons form straight vertical lines down the page. SYSTEM B (per-row content-driven layout)
+is the REJECTED alternative — it is the fault being fixed.
+-->
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The ledger row - two column systems</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+body{background:#f2ede7;padding:30px 0 80px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#5d4d40;margin:36px 0 10px;width:1240px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#4d4238;margin-left:10px;line-height:1.55}
+.wrap{width:1240px;background:#fdfcfa;border:1px solid #e2dbd0;border-radius:13px;padding:20px 22px 22px;box-sizing:border-box}
+.colhead{display:grid;align-items:center;padding:0 14px 7px;border-bottom:1px solid #e8e1d4;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.16em;color:#a5988c}
+.rows{border:1px solid #e8e1d4;border-top:none;border-radius:0 0 10px 10px;overflow:hidden;background:#fff}
+.r{display:grid;align-items:center;padding:0 14px;height:56px;border-bottom:1px solid #f4efe6;cursor:pointer}
+.r:last-child{border-bottom:none}
+.r:hover{background:#fdfaf5}
+/* GRID A: dot | title | tag | status | actions */
+.gA{grid-template-columns:14px minmax(0,1fr) 132px 150px 132px}
+.gA .colhead{grid-template-columns:14px minmax(0,1fr) 132px 150px 132px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.u{background:#d98b74}.dot.h{background:#cbb995}
+.tt{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#2b2118;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms{font-family:'Playfair Display',serif;font-style:italic;font-size:10px;color:#a5988c;margin-top:1px}
+.tag{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;color:#7a6a5e;background:#f7f2e9;border:1px solid #e8e1d0;border-radius:5px;padding:3px 7px;display:inline-block}
+.stat{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:#8a7d6e;font-variant-numeric:tabular-nums}
+.bar{width:96px;height:3px;border-radius:2px;background:#efe7d9;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+.bar i{display:block;height:100%;background:#b9a98e}
+.acts{display:flex;justify-content:flex-end;gap:5px;opacity:0;transition:opacity .12s}
+.r:hover .acts,.r:focus-within .acts{opacity:1}
+.prime{display:inline-flex;align-items:center;height:27px;padding:0 12px;border-radius:7px;background:#2a1a13;border:1px solid #1d100c;color:#f3e7da;font-size:10px;font-weight:600}
+.ib{width:27px;height:27px;border-radius:7px;border:1px solid #e4dbcd;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#6b5a4e}
+.restA{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:#c0b4a4;text-align:right}
+.r:hover .restA{display:none}
+/* GRID B: two-line, meta rail right */
+.gB{grid-template-columns:14px minmax(0,1fr) 180px 120px}
+.gB.colhead{grid-template-columns:14px minmax(0,1fr) 180px 120px}
+.metaB{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.metaB .k{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:#b3a698}
+.actsB{display:flex;justify-content:flex-end;gap:5px}
+.ghostb{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:7px;border:1px solid #e4dbcd;background:#fff;font-size:10px;font-weight:600;color:#4d4238}
+</style></head><body><div class="lbl">A &middot; FIXED COLUMN GRID &nbsp;&#9733; (HOVER A ROW) <em>&mdash; a real table: fixed tracks with a mono column header, so KIND, STATUS and ACTION each own a lane and line up down the page. Text left, the status column mono and tabular so dates and counts stack, actions right-aligned in a reserved lane &mdash; at rest that lane shows only a chevron, on hover it becomes Action + icons. Nothing can float because every cell has a column.</em></div><div class="wrap">
+<div class="colhead gA"><span></span><span>TASK</span><span>KIND</span><span>STATUS</span><span style="text-align:right">ACTION</span></div>
+<div class="rows">
+<div class="r gA"><span class="dot u"></span>
+<div><div class="tt">Tom Ellery has made an offer</div><div class="ms">Murphy&rsquo;s Day Out</div></div>
+<div><span class="tag">&#9733; OFFER</span></div>
+<div><span class="stat">RECEIVED 19 JUL</span></div>
+<div style="position:relative"><div class="restA">&#9656;</div>
+<div class="acts" style="position:absolute;right:0;top:50%;transform:translateY(-50%)"><span class="prime">Action</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span></div></div></div>
+<div class="r gA"><span class="dot u"></span>
+<div><div class="tt">Send your full to Jonathan Marsh</div><div class="ms">The Marsh Agency</div></div>
+<div><span class="tag">AGENT WAITING</span></div>
+<div><span class="stat">REQUESTED 12 JUL</span></div>
+<div style="position:relative"><div class="restA">&#9656;</div>
+<div class="acts" style="position:absolute;right:0;top:50%;transform:translateY(-50%)"><span class="prime">Action</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span></div></div></div>
+<div class="r gA"><span class="dot h"></span>
+<div><div class="tt">16 agents missing a materials list</div><div class="ms">Add what they ask to receive</div></div>
+<div><span class="tag">MATERIALS</span></div>
+<div><span class="bar"><i style="width:0%"></i></span><span class="stat">0/16</span></div>
+<div style="position:relative"><div class="restA">&#9656;</div>
+<div class="acts" style="position:absolute;right:0;top:50%;transform:translateY(-50%)"><span class="prime">Action</span><span class="ib">&#128340;</span></div></div></div>
+<div class="r gA"><span class="dot h"></span>
+<div><div class="tt">Jonathan Marsh silent</div><div class="ms">No reply &mdash; consider closing</div></div>
+<div><span class="tag">STALE</span></div>
+<div><span class="stat">SILENT 862 DAYS</span></div>
+<div style="position:relative"><div class="restA">&#9656;</div>
+<div class="acts" style="position:absolute;right:0;top:50%;transform:translateY(-50%)"><span class="prime">Action</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span></div></div></div>
+<div class="r gA"><span class="dot h"></span>
+<div><div class="tt">Marcus Reed silent for 782 days</div><div class="ms">No reply &mdash; consider closing</div></div>
+<div><span class="tag">STALE</span></div>
+<div><span class="stat">SILENT 782 DAYS</span></div>
+<div style="position:relative"><div class="restA">&#9656;</div>
+<div class="acts" style="position:absolute;right:0;top:50%;transform:translateY(-50%)"><span class="prime">Action</span><span class="ib">&#65291;</span><span class="ib">&#128340;</span></div></div></div>
+</div></div><div class="lbl">B &middot; TWO-LINE, META RAIL <em>&mdash; denser and quieter: the tag drops into the subtitle line as text, and a right rail carries one labelled figure per row (RECEIVED 19 JUL / SILENT 862 DAYS / COMPLETE 0 OF 16). Actions are always visible but demoted to one ghost button + an overflow menu. Fewer lanes, less to align, but the actions stop being the point.</em></div><div class="wrap">
+<div class="colhead gB"><span></span><span>TASK</span><span style="text-align:right">WHERE IT STANDS</span><span></span></div>
+<div class="rows">
+<div class="r gB" style="height:62px"><span class="dot u"></span>
+<div><div class="tt">Tom Ellery has made an offer</div><div class="ms">Murphy&rsquo;s Day Out &middot; <span style="font-family:JetBrains Mono,monospace;font-size:7.5px;letter-spacing:.12em;color:#a5988c;font-style:normal">&#9733; OFFER</span></div></div>
+<div class="metaB"><span class="k">RECEIVED</span><span class="stat">19 JUL</span></div>
+<div class="actsB"><span class="ghostb">Action</span><span class="ib">&#8942;</span></div></div>
+<div class="r gB" style="height:62px"><span class="dot u"></span>
+<div><div class="tt">Send your full to Jonathan Marsh</div><div class="ms">The Marsh Agency &middot; <span style="font-family:JetBrains Mono,monospace;font-size:7.5px;letter-spacing:.12em;color:#a5988c;font-style:normal">AGENT WAITING</span></div></div>
+<div class="metaB"><span class="k">REQUESTED</span><span class="stat">12 JUL</span></div>
+<div class="actsB"><span class="ghostb">Action</span><span class="ib">&#8942;</span></div></div>
+<div class="r gB" style="height:62px"><span class="dot h"></span>
+<div><div class="tt">16 agents missing a materials list</div><div class="ms">Housekeeping &middot; <span style="font-family:JetBrains Mono,monospace;font-size:7.5px;letter-spacing:.12em;color:#a5988c;font-style:normal">MATERIALS</span></div></div>
+<div class="metaB"><span class="k">COMPLETE</span><span class="stat">0 OF 16</span></div>
+<div class="actsB"><span class="ghostb">Action</span><span class="ib">&#8942;</span></div></div>
+<div class="r gB" style="height:62px"><span class="dot h"></span>
+<div><div class="tt">Jonathan Marsh silent</div><div class="ms">No reply &mdash; consider closing &middot; <span style="font-family:JetBrains Mono,monospace;font-size:7.5px;letter-spacing:.12em;color:#a5988c;font-style:normal">STALE</span></div></div>
+<div class="metaB"><span class="k">SILENT</span><span class="stat">862 DAYS</span></div>
+<div class="actsB"><span class="ghostb">Action</span><span class="ib">&#8942;</span></div></div>
+</div></div></body></html>

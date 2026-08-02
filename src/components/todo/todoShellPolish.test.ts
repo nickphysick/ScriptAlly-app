@@ -121,7 +121,7 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
   it("the chips carry the reactive behaviour: selected = the SOFT PINK, zero fades, the search chip", () => {
     expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)"); // todo rebuild P1: pink, not ink
     expect(tRule(".spine-chip.on")).not.toContain("box-shadow");
-    expect(tRule(".spine-chip.zero")).toContain("opacity: 0.45"); // zero-count fades, still rendered
+    expect(tRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1: zero at 40%, still rendered
     expect(tRule(".spine-chipn .tdb-was")).toContain("line-through"); // the struck prior total
     expect(page).toContain('className="spine-chip q"'); // the active-search chip, chip grammar
     expect(tshCss).not.toContain("spine-benchhead"); // the bench's funnel + FILTER header is deleted
@@ -301,10 +301,10 @@ describe("centring fix P2 — the big search in the panel header", () => {
   });
   it("the search is the control line's fill field: 228px, fill background, no border", () => {
     const p = rule(".tdb-bsearch");
-    expect(p).toContain("width: 228px");
-    expect(p).toContain("height: 34px");
-    expect(p).toContain("background: var(--shell-inset, #efe8df)");
-    expect(p).not.toMatch(/border:|box-shadow:/);
+    expect(p).toContain("width: 200px"); // the tightening P1: ~200px inside the strip
+    expect(p).toContain("height: 29px"); // the tightening P1: the strip's 29px field
+    expect(p).toContain("background: #fff"); // the tightening P1: white + hairline inside the strip
+    expect(p).not.toContain("box-shadow:"); // the tightening P1: bordered (white + hairline), still flat
     expect(page).toContain('placeholder="Search your list…"');
   });
   it("the field derives from the container, never from vw", () => {

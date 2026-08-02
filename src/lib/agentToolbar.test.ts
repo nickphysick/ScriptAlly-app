@@ -157,8 +157,11 @@ describe("agent list · group sections reuse the To-do board's pattern", () => {
     expect(sec, "the section heading weight drifted off the board's 500").toContain("font-weight: 500");
     expect(block(".aglist .agl-gsec .cn"), "the section count left the mono face it shares with the board").toContain("'JetBrains Mono'");
     expect(block(".aglist .agl-grule"), "the section rule left 2px — the board's rule is a 2px hairline, not a border").toContain("height: 2px");
-    // the board still draws its own version of the same thing (this is the pattern being reused)
-    expect(todo, "the To-do board's own section rule changed shape — the two are meant to stay the same idea").toContain(".tdb-secrule { height: 2px");
+    // The board's OWN sections moved on (the tightening: one line, label · count · an inline
+    // hairline filling the width) — the agent list KEEPS the stub grammar it borrowed, so the
+    // shared-idea assertion is now historical. What still holds: the board draws a rule INSIDE
+    // its section line rather than a second grouping style.
+    expect(todo).toContain(".tdb-secrule { flex: 1; height: 1px;");
   });
 
   it("the 88px stub carries the section's identity colour, and the palette is NAMED", () => {

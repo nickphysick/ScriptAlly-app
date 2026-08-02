@@ -95,9 +95,9 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   });
   it("the view toggle is the control line's fill segment (the sage bar it sat in is gone)", () => {
     const t = rule(".tdb-vtog");
-    expect(t).toContain("background: var(--shell-inset, #efe8df)"); // fill container
-    expect(t).toContain("border-radius: 10px");
-    expect(rule(".tdb-vtog button.on")).toContain("background: var(--shell-canvas, #fdfbf8)"); // active takes the capsule
+    expect(t).toContain("background: #fff"); // the tightening P1: a white capsule inside the strip
+    expect(t).toContain("border-radius: 7px"); // the tightening P1: the ref's 7px capsule
+    expect(rule(".tdb-vtog button.on")).toContain("background: #2a1a13"); // the tightening P1: active = ink
     expect(css).not.toContain(".tdb-vseg {"); // the bordered sage segment is retired
   });
 });

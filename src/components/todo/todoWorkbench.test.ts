@@ -51,7 +51,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain("fnFace(shownY, searchTotal ?? shownY)");
     // selected = the ink fill; a zero chip fades but renders (never hidden, never reordered)
     expect(tshRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
-    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.45");
+    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1
     // the ruled 'TO-DO · FILTERS' label + the old REVIEW & FILTER band are retired
     expect(page).not.toContain('contextLabel="TO-DO · FILTERS"');
     expect(page).not.toContain("REVIEW &amp; FILTER");
@@ -183,7 +183,7 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect(rule(".tdb-sbtn")).toContain("flex: 0 0 auto");
     // todo rebuild P1: the bordered segment is retired — the active chip takes the capsule surface.
     const on = rule(".tdb-vtog button.on");
-    expect(on).toContain("background: var(--shell-canvas, #fdfbf8)");
+    expect(on).toContain("background: #2a1a13"); // the tightening P1: the strip's active segment is ink
     expect(on).not.toContain("box-shadow");
   });
   it("the press is EXTINCT: no offset shadows, no translate steps, no press reduced-motion branch, no cta classes", () => {
@@ -215,10 +215,10 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
   });
   it("the view toggle is the control line's fill segment (todo rebuild P1)", () => {
     const t = rule(".tdb-vtog");
-    expect(t).toContain("background: var(--shell-inset, #efe8df)"); // fill container
-    expect(t).toContain("padding: 3px");
-    expect(rule(".tdb-vtog button")).toContain("width: 30px");
-    expect(rule(".tdb-vtog button.on")).toContain("background: var(--shell-canvas, #fdfbf8)"); // active takes the capsule
+    expect(t).toContain("background: #fff"); // the tightening P1: a white capsule inside the strip
+    expect(t).toContain("padding: 2px"); // the tightening P1: the ref's 2px inset
+    expect(rule(".tdb-vtog button")).toContain("width: 27px"); // the tightening P1: the ref's 27×23 chips
+    expect(rule(".tdb-vtog button.on")).toContain("background: #2a1a13"); // the tightening P1: active = ink
     expect(css).not.toContain(".tdb-vseg {"); // the bordered sage segment is extinct
   });
   it("NO CONTAINER is left to keep radius continuity with: the board is a bare div", () => {
@@ -481,7 +481,7 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
   it("zero-match chips DIM in place (the live count keys the fade) — never hidden, never reordered", () => {
     expect(page).toContain("const live = searchFc ? searchFc[key] : count;");
     expect(page).toContain('live === 0 ? " zero" : ""');
-    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.45");
+    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1
   });
   it("the bench grows the removable query chip: quoted uppercased term, ✕ clears the search", () => {
     expect(page).toContain("“{search.trim().toUpperCase()}” <span aria-hidden>✕</span>");
@@ -558,19 +558,18 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("tdb-reelpg");
   });
-  it("the heading is TYPOGRAPHIC and static: Playfair 27 + a mono count over a 2px identity rule", () => {
+  it("the heading is TYPOGRAPHIC and static (the tightening P1): label · count · an inline hairline", () => {
     const h = rule(".tdb-sec");
-    expect(h).toContain("margin: 46px 0 5px"); // 46px above each heading
-    expect(rule(".tdb-sec h2")).toContain("font-size: 27px");
-    expect(rule(".tdb-sec h2")).toContain("letter-spacing: -0.01em");
+    expect(h).toContain("margin: 34px 0 11px"); // the tightened rhythm
+    expect(rule(".tdb-sec h2")).toContain("font-size: 17px");
     expect(rule(".tdb-sec .tdb-cn")).toContain("font-family: var(--f12-mono)");
+    // the rule now lives INSIDE the line and fills the remaining width; the family stub is retired
     const r = rule(".tdb-secrule");
-    expect(r).toContain("height: 2px");
-    expect(r).toContain("margin-bottom: 22px"); // 22px below the rule
-    // the 96px identity stub, one colour per section
-    expect(rule(".tdb-secrule.do")).toContain("#e8c8bc 0 96px");
-    expect(rule(".tdb-secrule.hk")).toContain("#c3cfc0 0 96px");
-    expect(rule(".tdb-secrule.nt")).toContain("#ece3da 0 96px");
+    expect(r).toContain("flex: 1");
+    expect(r).toContain("height: 1px");
+    expect(css).not.toContain(".tdb-secrule.do");
+    expect(css).not.toContain(".tdb-secrule.hk");
+    expect(css).not.toContain(".tdb-secrule.nt");
     // nothing sticky, no play button, no bar
     expect(h).not.toContain("position: sticky");
     expect(css).not.toContain(".tdb-lh2 {");
@@ -609,7 +608,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).toContain('className="tdb-vtog" role="group" aria-label="View"');
     expect(page).toContain('onClick={() => pickView("cards")}');
     expect(page).toContain('onClick={() => pickView("ledger")}');
-    expect(rule(".tdb-vtog")).toContain("border-radius: 10px"); // the mockup's fill segment
+    expect(rule(".tdb-vtog")).toContain("border-radius: 7px"); // the tightening P1: the ref's 7px capsule
   });
   it("ONE review surface repo-wide: the briefing slot; the banner, card + strip classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
@@ -638,7 +637,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
     expect(page).toContain("ref={searchRef}"); // the ⌘K target moved with it
     expect(css).not.toMatch(/\.tdb-hsearch\s*\{/); // the big centred pill is extinct
-    expect(rule(".tdb-bsearch")).toContain("background: var(--shell-inset, #efe8df)");
+    expect(rule(".tdb-bsearch")).toContain("background: #fff"); // the tightening P1
     expect(page).toContain("matchesSearch(c, search, sctx)");
     // the old hero pill stays gone
     expect(page).not.toContain("tdb-bigsearch");
@@ -935,7 +934,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     // now supplies the whole gap; .tdb-ws contributes nothing.
     expect(rule(".tdb-ws")).toContain("padding: 0");
     expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
-    expect(rule(".tdb-sec")).toContain("margin: 46px 0 5px"); // todo rebuild P1: the typographic rhythm
+    expect(rule(".tdb-sec")).toContain("margin: 34px 0 11px"); // the tightening P1: the tightened rhythm
     expect(rule(".tdb-grid")).toContain("gap: 14px"); // P3: the grid gap still clears the sticker block
   });
 });
@@ -1048,7 +1047,7 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
   it("THE LATTE LAW: bands/underline/post-it/dot latte; coffee survives only in journey-sheet headers", () => {
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
     expect(rule(".tdb-band.hk")).toContain("var(--lat-1)");
-    expect(rule(".tdb-secrule.hk")).toContain("#c3cfc0"); // todo rebuild P1: the section rule carries the family colour
+    expect(css).not.toContain(".tdb-secrule.hk"); // the tightening P1: the family stub is retired (the dot column carries family)
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
     expect(flow).toContain("cof"); // the journey-sheet family keeps coffee
   });

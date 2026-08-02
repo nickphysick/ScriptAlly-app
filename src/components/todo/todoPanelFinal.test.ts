@@ -48,16 +48,26 @@ describe("the filter chips — bare on the control line (todo rebuild P1)", () =
     expect(ctrl.indexOf("{renderFilterChips()}")).toBeLessThan(ctrl.indexOf("tdb-ctrlsp"));
     expect(ctrl.indexOf("tdb-ctrlsp")).toBeLessThan(ctrl.indexOf("tdb-bsearch"));
     expect(ctrl.indexOf("tdb-bsearch")).toBeLessThan(ctrl.indexOf("tdb-vtog"));
+    // the tightening P1: the row became the RECESSED STRIP — one bar directly beneath the hero
     const row = ruleIn(pageCss)(".tdb-ctrl");
     expect(row).toContain("display: flex");
-    expect(row).toContain("margin-top: 44px"); // 44px above the row
+    expect(row).toContain("margin-top: 14px"); // directly beneath the hero
+    expect(row).toContain("background: var(--strip-bg)");
+    expect(row).toContain("border: 1px solid var(--strip-bd)");
+    expect(row).toContain("border-radius: var(--strip-r)");
+    expect(row).toContain("padding: 6px 8px");
+    expect(ruleIn(pageCss)(".tdb-wrap")).toContain("--strip-bg: #f5f0e8");
+    expect(ruleIn(pageCss)(".tdb-wrap")).toContain("--strip-bd: #e4dbcd");
     expect(ruleIn(pageCss)(".tdb-ctrlsp")).toContain("flex: 1");
-    expect(ruleIn(pageCss)(".tdb-bsearch")).toContain("width: 228px");
-    expect(ruleIn(pageCss)(".tdb-bsearch")).toContain("background: var(--shell-inset, #efe8df)"); // fill, no border
-    expect(ruleIn(pageCss)(".tdb-bsearch")).not.toContain("border:");
-    // the toggle: fill container, the active segment takes the capsule surface
-    expect(ruleIn(pageCss)(".tdb-vtog")).toContain("background: var(--shell-inset, #efe8df)");
-    expect(ruleIn(pageCss)(".tdb-vtog button.on")).toContain("background: var(--shell-canvas, #fdfbf8)");
+    // the search: white, bordered, 7px radius, ~200px, right-aligned within the bar
+    const srch = ruleIn(pageCss)(".tdb-bsearch");
+    expect(srch).toContain("width: 200px");
+    expect(srch).toContain("background: #fff");
+    expect(srch).toContain("border: 1px solid #e0d6c6");
+    expect(srch).toContain("border-radius: 7px");
+    // the toggle: a white capsule; the active segment takes the ink
+    expect(ruleIn(pageCss)(".tdb-vtog")).toContain("background: #fff");
+    expect(ruleIn(pageCss)(".tdb-vtog button.on")).toContain("background: #2a1a13");
   });
 
   it("the facets are wrapping toggle chips; All leads as the Show-all reset", () => {
@@ -77,18 +87,21 @@ describe("the filter chips — bare on the control line (todo rebuild P1)", () =
     expect(chipFn).toContain('live === 0 ? " zero" : ""'); // zero-count = faded, still rendered
   });
 
-  it("NO DARK PILL: a selected chip is the Form 11 soft-pink with a burgundy label, on a fill-idle chip", () => {
+  it("the strip's chips (the tightening P1): transparent at rest, warm on hover, INK when active", () => {
+    // supersedes the soft-pink selected chip — inside the recessed strip the active chip is the
+    // ink fill (ref .fc.on), counts mono at 60%, zero-count chips at 40% and inert.
     const chip = shell(".spine-chip");
     expect(chip).toContain("background: var(--spine-chip-bg)");
     expect(chip).toContain("border: 0"); // fill-based, never a hairline-bordered pill
-    expect(chip).toContain("border-radius: 99px");
+    expect(chip).toContain("border-radius: 7px");
     expect(shell(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
-    expect(shell(".spine-root")).toContain("--spine-chip-bg: #efe8df"); // the interior fill
-    expect(shell(".spine-root")).toContain("--spine-chip-on-bg: #f5e2da"); // soft pink, NOT #3a2c20
-    expect(shell(".spine-root")).toContain("--spine-chip-on-tx: #7c3a2a"); // burgundy label
-    expect(shellCss).not.toContain("#3a2c20"); // the deep-ink chip fill is extinct
+    expect(shell(".spine-root")).toContain("--spine-chip-bg: transparent");
+    expect(shell(".spine-root")).toContain("--spine-chip-hov: #ece5d9");
+    expect(shell(".spine-root")).toContain("--spine-chip-on-bg: #2a1a13"); // ink fill
+    expect(shell(".spine-root")).toContain("--spine-chip-on-tx: #f3e7da"); // cream label
+    expect(shell(".spine-chipn")).toContain("opacity: 0.6"); // counts at 60%
     // a zero-count chip fades AND stops being interactive
-    expect(shell(".spine-chip.zero")).toContain("opacity: 0.45");
+    expect(shell(".spine-chip.zero")).toContain("opacity: 0.4");
     expect(shell(".spine-chip.zero")).toContain("pointer-events: none");
   });
 
@@ -123,12 +136,17 @@ describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", ()
 describe("the To-do PAGE HEADER — exactly two actions (todo rebuild P4)", () => {
   const hdr = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
 
-  it("adopts the app-wide PageHeader (full) with the page's title + description", () => {
+  it("adopts the app-wide PageHeader — TITLE ONLY (the tightening P1 removed the subtitle)", () => {
     expect(page).toContain('import { PageHeader } from "../shell/PageHeader"');
     expect(page).toContain("{renderPageHeader()}");
     expect(hdr).toContain("<PageHeader");
     expect(hdr).toContain("title=\"What\u2019s on your desk?\"");
-    expect(hdr).toContain("Urgent tasks, housekeeping, notes.");
+    expect(hdr).not.toContain("description="); // no subtitle node — title + actions on one line
+    // the copy is gone from the LIVE header (it survives only inside the DORMANT renderHero,
+    // kept whole for the session red gate — see the "DORMANT (todo rebuild P4)" note)
+    expect(hdr).not.toContain("Urgent tasks, housekeeping, notes.");
+    // the hero buttons take the ref's 34px step ON THIS PAGE ONLY (the global .svh-btn stays 38)
+    expect(ruleIn(pageCss)(".tdb-wrap .svh-btn")).toContain("height: var(--hero-btn-h, 34px)");
   });
 
   it("exactly two: 'Last week in review' (ghost, disabled with no review) and 'Add task or note' (pink primary)", () => {
