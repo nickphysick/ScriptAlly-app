@@ -1,0 +1,179 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Queries Hub - header collapse modes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--frame:#ece5da;--canvas:#faf7f1;--white:#fff;--bd:#e5ddd1;--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--sage:#dde3d8;--sageBd:#ccd5c5;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--rose:#b45a40;--sel:#eef1f4;--sh:0 6px 20px rgba(60,45,30,.06);--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--frame);font-family:var(--in);color:var(--ink);height:100vh;overflow:hidden;display:flex;padding:12px 12px 12px 0;-webkit-font-smoothing:antialiased}
+svg{fill:none;stroke:currentColor;stroke-width:1.9}
+.mono{font-family:var(--mo);font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.pick{position:fixed;bottom:14px;right:14px;z-index:400;display:flex;gap:6px;background:#241c15;padding:6px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.pick button{background:transparent;color:#d8ccbc;border:1px solid #483c2e;border-radius:8px;padding:7px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--in)}
+.pick button.on{background:#f4ebdd;color:#241c15;border-color:#f4ebdd}
+.rail{width:82px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:18px 0}
+.rail .lg{color:var(--rose);font-size:21px;transform:rotate(-8deg);margin-bottom:26px}
+.rail .ri{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#8a7c6b;margin-bottom:7px}
+.rail .ri svg{width:17px;height:17px}
+.rail .ri.on{background:#fff;color:var(--rose);box-shadow:var(--sh)}
+.rail .sp{flex:1}
+.sheet{flex:1;background:var(--canvas);border-radius:18px;box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden}
+/* shell top strip - ALWAYS present */
+.top{display:flex;align-items:center;gap:14px;padding:12px 26px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.crumb{font-family:var(--mo);font-size:9px;letter-spacing:.14em;color:#a99c88;text-transform:uppercase}
+.crumb b{color:var(--ink);font-weight:600}
+.mspick{display:flex;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:6px 11px;background:#fff;font-size:12.5px}
+.mspick .mg{width:22px;height:22px;border-radius:6px;background:var(--sage);display:grid;place-items:center;font-family:var(--mo);font-size:8px}
+.tsearch{margin-left:auto;display:flex;align-items:center;gap:8px;background:#f2ece2;border-radius:10px;padding:8px 13px;width:270px;color:#a99c88;font-size:12.5px}
+.acct{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600}
+.acct .av{width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid var(--bd);display:grid;place-items:center;font-family:var(--pl);font-size:10px;color:var(--rose)}
+/* masthead (the collapsible part) */
+.mast{overflow:hidden;transition:max-height .26s cubic-bezier(.22,.9,.3,1), opacity .18s ease;max-height:150px;opacity:1;flex-shrink:0}
+.mastin{display:flex;align-items:flex-end;gap:20px;padding:20px 26px 14px}
+.mastin h1{font-family:var(--pl);font-weight:700;font-size:34px;line-height:1}
+.mastin .subt{font-family:var(--pl);font-style:italic;font-size:14px;color:var(--ink2);margin-top:7px}
+.btns{margin-left:auto;display:flex;gap:9px}
+.btn{display:flex;align-items:center;gap:7px;border-radius:10px;padding:9px 15px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:#fff;color:var(--ink);white-space:nowrap}
+.btn.pink{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.btn.sm{padding:7px 12px;font-size:12px}
+.collapsed .mast{max-height:0;opacity:0}
+/* command bar */
+.cmd{display:flex;align-items:center;gap:3px;padding:8px 26px;flex-shrink:0;border-bottom:1px solid transparent}
+.cmdtitle{display:none;align-items:center;gap:10px;margin-right:6px}
+.collapsed .cmdtitle{display:flex}
+.cmdtitle h2{font-family:var(--pl);font-weight:700;font-size:19px}
+.cb{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--ink2);background:none;border:none;border-radius:8px;padding:7px 10px;cursor:pointer}
+.cb svg{width:14px;height:14px;color:#8a7c6b}
+.cb.dim{color:var(--muted)}
+.cb.del{color:#9a3b2a}.cb.del svg{color:#9a3b2a}
+.csep{width:1px;height:18px;background:var(--bd);margin:0 8px}
+.cspring{flex:1}
+.expand{width:32px;height:32px;border-radius:9px;border:1px solid var(--bd);background:#fff;display:grid;place-items:center;color:#7a6c5a;cursor:pointer;flex-shrink:0;margin-left:8px}
+.expand svg{width:14px;height:14px}
+.cmdbtns{display:none;gap:8px;margin-left:8px}
+.collapsed .cmdbtns{display:flex}
+/* workspace */
+.work{flex:1;display:flex;gap:16px;min-height:0;padding:6px 26px 20px}
+.card{background:var(--white);border:1px solid var(--bd);border-radius:15px;box-shadow:var(--sh)}
+.list{width:290px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;padding:9px}
+.ltop{display:flex;gap:7px;padding-bottom:8px}
+.lsearch{flex:1;display:flex;align-items:center;gap:7px;background:#f5f0e8;border-radius:999px;padding:8px 12px;color:#b0a494;font-size:12.5px}
+.ib{width:32px;height:32px;border-radius:999px;border:1px solid var(--bd);display:grid;place-items:center;color:#7a6c5a;background:#fff;font-size:12px;flex-shrink:0}
+.rows{flex:1;overflow-y:auto;min-height:0}
+.rows::-webkit-scrollbar{width:0}
+.qr{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;min-height:50px}
+.qr.sel{background:var(--sel)}
+.qr .mg{width:30px;height:30px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--mo);font-size:9.5px;flex-shrink:0}
+.qr .nm{font-family:var(--pl);font-weight:600;font-size:13.5px}
+.qr .ag{font-family:var(--mo);font-size:7.5px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:1px}
+.qr .dt{margin-left:auto;font-family:var(--mo);font-size:8px;color:var(--muted)}
+.lfoot{display:flex;justify-content:space-between;padding-top:9px;border-top:1px solid var(--bd)}
+.pane{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0}
+.hero{display:flex;align-items:center;gap:16px;padding:18px 22px;flex-shrink:0}
+.hav{width:58px;height:58px;border-radius:50%;background:var(--pink);color:#8d5a48;display:grid;place-items:center;font-family:var(--pl);font-size:20px;flex-shrink:0}
+.hn{font-family:var(--pl);font-weight:700;font-size:23px;line-height:1.1}
+.ha{font-family:var(--pl);font-style:italic;font-size:14px;color:var(--ink2)}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pinkDeep);color:#8d4b32;border-radius:999px;padding:4px 10px;font-family:var(--mo);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;margin-top:7px}
+.cols{flex:1;display:flex;gap:14px;min-height:0}
+.col{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:var(--sage);border-bottom:1px solid var(--sageBd);font-weight:600;font-size:13.5px;flex-shrink:0}
+.ch svg{width:14px;height:14px}
+.cbody{padding:14px;flex:1;overflow-y:auto;min-height:0;font-size:12.5px}
+.cbody::-webkit-scrollbar{width:0}
+.ev{display:flex;gap:10px}
+.ei{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--rose);background:#fbeae1;color:var(--rose);display:grid;place-items:center;font-size:10px;flex-shrink:0}
+.ms{font-family:var(--pl);font-weight:700;font-size:15px}
+.hintline{font-family:var(--mo);font-size:8px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:10px}
+.notearea{border:1px solid var(--bd);border-radius:10px;padding:11px;color:#b0a494;font-size:12.5px;background:#fff;min-height:70px}
+/* mode notes */
+.hintbar{position:fixed;bottom:14px;left:100px;z-index:400;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:9px 14px;font-size:12px;color:var(--ink2);box-shadow:var(--sh);max-width:640px}
+</style></head>
+<body>
+<div class="pick">
+  <button onclick="mode(this,'grand')">Grand</button>
+  <button class="on" onclick="mode(this,'toggle')">A · Toggle</button>
+  <button onclick="mode(this,'auto')">B · Auto-collapse</button>
+  <button onclick="mode(this,'slim')">C · Slim always</button>
+</div>
+<div class="hintbar" id="hint"></div>
+<aside class="rail">
+  <span class="lg">✈</span>
+  <span class="ri"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+  <span class="ri on"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 3-5.5 6-5.5s6 2 6 5.5"/></svg></span>
+  <span class="ri"><svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/></svg></span>
+  <span class="sp"></span>
+</aside>
+<main class="sheet collapsed" id="sheet">
+  <div class="top">
+    <span class="crumb">Querying / <b>Queries Hub</b></span>
+    <span class="mspick"><span class="mg">MD</span>Murphy's Day Out ⌄</span>
+    <div class="tsearch">⌕ Search agents, queries, notes… <span style="margin-left:auto" class="mono">⌘K</span></div>
+    <span class="acct"><span class="av">ML</span>Michael Li ⌄</span>
+  </div>
+  <div class="mast"><div class="mastin">
+    <div><h1>Queries Hub</h1><div class="subt">Every query you've sent, and exactly where each one stands.</div></div>
+    <div class="btns"><span class="btn">⤓ Export</span><span class="btn pink">＋ Log query</span></div>
+  </div></div>
+  <div class="cmd">
+    <span class="cmdtitle"><h2>Queries Hub</h2></span>
+    <span class="cspring"></span>
+    <button class="cb"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2"/></svg>View tasks</button>
+    <button class="cb"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
+    <button class="cb"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg>Nudge</button>
+    <button class="cb"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11h14V8M9 12h6"/></svg>Mark closed</button>
+    <span class="csep"></span>
+    <button class="cb dim"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Agent</button>
+    <button class="cb del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Delete</button>
+    <span class="cmdbtns"><span class="btn sm">⤓ Export</span><span class="btn sm pink">＋ Log query</span></span>
+    <span class="expand" id="exp" onclick="toggleC()"><svg viewBox="0 0 24 24" id="expi"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/></svg></span>
+  </div>
+  <div class="work">
+    <div class="card list">
+      <div class="ltop"><div class="lsearch">⌕ Search</div><span class="ib">▽</span><span class="ib">⇅</span></div>
+      <div class="rows">
+        <div class="qr sel"><span class="mg">WT</span><div><div class="nm">William Tan</div><div class="ag">Foxglove Literary</div></div><span class="dt">29 Jul</span></div>
+        <div class="qr"><span class="mg">FS</span><div><div class="nm">Fenella Str</div><div class="ag">Brightwater Books</div></div><span class="dt">14 Mar</span></div>
+        <div class="qr"><span class="mg">SD</span><div><div class="nm">Sophie Dunn</div><div class="ag">Curtis Vane</div></div><span class="dt">15 Jan</span></div>
+        <div class="qr"><span class="mg">TE</span><div><div class="nm">Tom Ellery</div><div class="ag">Curtis Vane</div></div><span class="dt">3 Mar</span></div>
+        <div class="qr"><span class="mg">DO</span><div><div class="nm">Daniel O'Rourke</div><div class="ag">Inkwell &amp; Stone</div></div><span class="dt">—</span></div>
+        <div class="qr"><span class="mg">PR</span><div><div class="nm">Priya Raman</div><div class="ag">No agency</div></div><span class="dt">—</span></div>
+        <div class="qr"><span class="mg">MR</span><div><div class="nm">Marcus Reed</div><div class="ag">Hartley &amp; Co</div></div><span class="dt">20 Feb</span></div>
+        <div class="qr"><span class="mg">GP</span><div><div class="nm">Greg Panetta</div><div class="ag">No agency</div></div><span class="dt">—</span></div>
+      </div>
+      <div class="lfoot"><span class="mono">Showing 21 of 21</span><span class="mono" style="color:var(--ink)">Export CSV</span></div>
+    </div>
+    <div class="pane">
+      <div class="card hero"><span class="hav">WT</span><div style="flex:1"><div class="hn">William Tan</div><div class="ha">Foxglove Literary</div><span class="chip">◌ Queried</span></div><span class="btn pink">✈ Record response</span></div>
+      <div class="cols">
+        <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Tracking</div><div class="cbody">
+          <div class="ev"><span class="ei">➤</span><div><b style="font-size:13px">Query sent</b><div style="color:var(--muted);font-size:11.5px">via Email</div></div><span class="mono" style="margin-left:auto">30 Jun</span></div>
+          <div style="background:#fbeae1;border-radius:10px;padding:11px;margin-top:12px;font-size:12.5px;font-weight:600;color:#8d4b32">⧗ Response overdue by 101 weeks</div>
+        </div></div>
+        <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>What you sent</div><div class="cbody">
+          <div class="ms">Murphy's Day Out</div><div class="hintline">Thriller · 50,000 words</div>
+          <div class="hintline">Sent by email · 30 Jun</div>
+        </div></div>
+        <div class="card col"><div class="ch"><svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4z"/></svg>Notes</div><div class="cbody"><div class="notearea">hiya</div></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+var notes={
+ grand:"Grand — the current state. Masthead always visible. ~150px of the window spent on a title you already know.",
+ toggle:"A · Toggle — an expand button in the command bar collapses the masthead; the title shrinks into the command row and Export/Log query move beside it. The choice is remembered. Click ⤢ to try it. (Gmail/Figma pattern.)",
+ auto:"B · Auto-collapse — the masthead is shown on arrival, then collapses automatically the moment you select a query or start creating one. Clicking the small title (or Esc) brings it back. Nothing to learn, no button.",
+ slim:"C · Slim always — Queries Hub simply never has a big masthead: title + actions live permanently in one compact row. Most space, least consistency with your other pages."};
+function mode(el,m){var s=document.getElementById('sheet');
+ document.querySelectorAll('.pick button').forEach(function(b){b.classList.remove('on')});el.classList.add('on');
+ document.getElementById('hint').textContent=notes[m];
+ document.getElementById('exp').style.display=(m==='toggle')?'grid':'none';
+ if(m==='grand'){s.classList.remove('collapsed');}
+ if(m==='toggle'){s.classList.add('collapsed');}
+ if(m==='auto'){s.classList.remove('collapsed');setTimeout(function(){s.classList.add('collapsed')},900);}
+ if(m==='slim'){s.classList.add('collapsed');}
+}
+function toggleC(){document.getElementById('sheet').classList.toggle('collapsed');}
+document.getElementById('hint').textContent=notes.toggle;
+</script>
+</body></html>

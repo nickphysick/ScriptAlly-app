@@ -2691,6 +2691,11 @@ export const Queries: React.FC<{
         <div className="f12-hd2">
           <PageHeader
             variant="full"
+            /* The workspace masthead: this page is a fixed-height master–detail surface, so
+               header height is working area taken from the panes. The description is KEPT as a
+               prop though compact doesn't render it — the copy stays where it lives, so bringing
+               it back is a flag flip rather than a hunt. */
+            compact
             title="Queries Hub"
             description="Every query you've sent, and exactly where each one stands."
             actions={queries.length > 0

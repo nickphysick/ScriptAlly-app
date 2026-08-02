@@ -71,7 +71,9 @@
    COLUMN (--sa-col-*, pageHeader.css) — the same column the agent list uses, so the two pages'
    headers line up when you move between them. The WORKSPACE below keeps its own wider --maxw cap
    (.f12-body); that differential is exactly the ref's Guides view, not an accident. */
-.f12-hd2 { flex: none; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 16px var(--sa-col-gut) 0; }
+/* padding-top is 0 under the compact masthead: the header block now owns its own 12px, and
+   stacking 16 on top of it gave back a quarter of what compact saves. */
+.f12-hd2 { flex: none; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 0 var(--sa-col-gut); }
 .f12-hd2 .svh { margin-bottom: 0; }
 
 /* asymmetric vertical padding (more on top) drops the buttons toward the content below rather

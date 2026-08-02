@@ -45,6 +45,17 @@ export interface PageHeaderProps {
   /** A custom control occupying the same slot as `actions` — for pages whose right-hand control
    *  isn't a button (Discover's "Finding for" manuscript selector). Ignored when `actions` is set. */
   actionsSlot?: React.ReactNode;
+  /**
+   * The lean masthead for WORKSPACE pages — a fixed-height master–detail surface where every
+   * pixel of header is working area taken from the panes below (the Queries Hub). Drops the
+   * subtitle, takes the title to 26px, tightens the vertical padding and centres the title row
+   * against the actions. Default false: every other page is byte-identical without it.
+   *
+   * NOT a return of the retired `variant: "compact"` — that was a second full layout, and one
+   * header layout for every page is the win worth keeping. This is a density flag on the one
+   * layout. See pageHeader.test.tsx, which locks both halves of that distinction.
+   */
+  compact?: boolean;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -53,17 +64,18 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actions,
   titleAdornment,
   actionsSlot,
+  compact = false,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   return (
-    <header className="svh svh--full">
+    <header className={`svh svh--full${compact ? " svh--compact" : ""}`}>
       <div className="svh-top">
         <div className="svh-txt">
           <h1 className="svh-title">
             {title}
             {titleAdornment}
           </h1>
-          {description && <div className="svh-sub">{description}</div>}
+          {description && !compact && <div className="svh-sub">{description}</div>}
         </div>
         {acts.length === 0 && actionsSlot && <div className="svh-acts">{actionsSlot}</div>}
         {acts.length > 0 && (

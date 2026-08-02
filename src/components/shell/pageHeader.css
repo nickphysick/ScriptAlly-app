@@ -67,6 +67,16 @@
 /* The rule that closes every header — everything below it is page content. */
 .svh-rule { height: 1px; background: var(--shell-line-soft); margin-top: 22px; }
 
+/* ── COMPACT — the workspace masthead (ref design-refs/qdb-mast-trim.html option 3). A density
+   flag on the one layout, not a second layout: same markup, same rule, same Playfair/weight/ink.
+   The title row CENTRES against the actions instead of baseline-aligning, because at 26px the
+   baseline sat oddly high beside a 36px button. The rule's 22px margin is folded into the block's
+   own 12px padding — the divider itself is untouched. ── */
+.svh--compact .svh-top { align-items: center; padding: 12px 0; }
+.svh--compact .svh-title { font-size: 26px; }
+.svh--compact .svh-acts { padding-bottom: 0; }
+.svh--compact .svh-rule { margin-top: 0; }
+
 /* (The compact variant is RETIRED — flyouts pack P3: one header grammar app-wide.) */
 
 @media (prefers-reduced-motion: reduce) {

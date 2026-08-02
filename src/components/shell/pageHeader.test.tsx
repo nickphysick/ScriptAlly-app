@@ -31,11 +31,52 @@ describe("PageHeader — full", () => {
   });
 });
 
-describe("PageHeader — the compact variant is retired (flyouts pack P3)", () => {
-  it("the type union carries no compact member and no compact CSS survives", () => {
-    // @ts-expect-error — "compact" must not typecheck
+/**
+ * THE COMPACT STORY, in two halves — both still true, and they are not in conflict.
+ *
+ * RETIRED: `variant: "compact"` (flyouts pack P3, ca72a22). That was a SECOND full layout, and
+ * one header layout for every page is the win worth keeping. It stays retired.
+ *
+ * SANCTIONED: a `compact` BOOLEAN — a density flag on the one layout. The Queries Hub is a
+ * fixed-height master–detail workspace: the panes fill what's left after the masthead, so every
+ * pixel of header is working area taken from the list and the reading pane. At 40px + subtitle
+ * the masthead cost 117px; compact takes it to 63px. Same markup, same rule, same Playfair,
+ * weight and ink — it drops the subtitle, sets the title to 26px and tightens the padding.
+ *
+ * The distinction is the point: a variant forks the layout, a flag tunes it. Anyone adding the
+ * next one should ask which they are doing.
+ */
+describe("PageHeader — the compact VARIANT stays retired; the compact FLAG is sanctioned", () => {
+  it("the type union still carries no compact member", () => {
+    // @ts-expect-error — "compact" must not typecheck as a variant
     const rejected: React.ComponentProps<typeof PageHeader>["variant"] = "compact";
     expect(rejected).toBe("compact"); // runtime string; the line above is the real assertion
+  });
+
+  it("the boolean exists, drops the subtitle, and keeps the rule", () => {
+    const html = renderToStaticMarkup(
+      <PageHeader compact title="Queries Hub" description="Every query you've sent." />,
+    );
+    expect(html).toContain("svh--compact");
+    expect(html, "compact must not render the subtitle").not.toContain("svh-sub");
+    expect(html, "the description is still ACCEPTED — the copy stays where it lives").toContain("Queries Hub");
+    expect(html, "the hairline divider is untouched").toContain("svh-rule");
+  });
+
+  it("default is off — every other page renders exactly as before", () => {
+    const html = renderToStaticMarkup(<PageHeader title="T" description="D" />);
+    expect(html).not.toContain("svh--compact");
+    expect(html, "the subtitle still renders where compact isn't set").toContain("svh-sub");
+  });
+
+  it("only the density changes: same face, same weight, same ink", () => {
+    const css = readFileSync(new URL("./pageHeader.css", import.meta.url), "utf8");
+    const compact = css.slice(css.indexOf(".svh--compact .svh-top"));
+    const block = compact.slice(0, compact.indexOf("\n\n") + 1 || compact.length);
+    expect(block).toContain("font-size: 26px");
+    for (const forbidden of ["font-family", "font-weight", "color:"]) {
+      expect(block, `compact changed ${forbidden} — it is a density flag, not a restyle`).not.toContain(forbidden);
+    }
   });
 });
 
