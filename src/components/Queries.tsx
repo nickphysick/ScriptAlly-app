@@ -3126,7 +3126,10 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className={`qp-pane f12-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className={`qp-pane f12-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* No background: the pane inherits .f12-pane's --panel like every other card on the page.
+               It used to override to --paper (#faf6f0), a cream that made this one surface warmer
+               than the rest of the app — REMOVED rather than painted over. */
+            style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
