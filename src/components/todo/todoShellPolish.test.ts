@@ -176,20 +176,20 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).not.toMatch(/padding-left|padding-right/);
   });
-  it("the grid is FLUID (todo rebuild P1: auto-fill on a 272px floor) — the width sets the count", () => {
-    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(auto-fill, minmax(272px, 1fr))");
+  it("the grid is FOUR columns at the standard tier (the tightening P3 supersedes the fluid auto-fill)", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(4, 1fr)");
     expect(rule(".tdb-grid")).not.toContain("var(--tdb-cardw)"); // no fixed card width in the grid
   });
-  it("the ≥1700 4-up TIER is retired — auto-fill derives the count, so no breakpoint governs it", () => {
-    expect(css).not.toContain("@media (min-width: 1700px)");
-    expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4-everywhere rule is gone
+  it("the wider tier takes five — one breakpoint, per the pack's 'the existing wider tier may still take more'", () => {
+    expect(css).toContain("@media (min-width: 1700px) { .tdb-grid { grid-template-columns: repeat(5, 1fr); } }");
+    expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4-everywhere rule stays gone
   });
-  it("the sticker clearance still holds at the grown sizes (the gap ≥ the offset)", () => {
+  it("the sticker clearance still holds (the gap ≥ the offset); every cell stretches with its track", () => {
     const gap = parseInt(/--tdb-grid-gap:\s*(\d+)px/.exec(rule(".tdb-wrap"))![1], 10);
     const off = parseInt(/--tdb-sticker-off:\s*(\d+)px/.exec(rule(".tdb-wrap"))![1], 10);
     expect(gap).toBeGreaterThanOrEqual(off);
-    // the batch + Expand-n cells are grid items → they stretch with their 1fr tracks
-    expect(rule(".tdb-cell.b")).toContain("height: var(--tdb-cardh-g)");
+    // the batch cell's own height token died with the hover machinery — one shared min-height
+    expect(css).not.toContain(".tdb-cell.b {");
   });
 });
 

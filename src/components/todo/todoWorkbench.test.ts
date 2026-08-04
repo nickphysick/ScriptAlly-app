@@ -175,7 +175,7 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
     // toolbelt P2/P3: the compact verb family is gone — the card stack rides the law's own
     // hairline primitives at 30px (no ink-solid anywhere in the expansion)
-    expect(css).toContain(".tdb-vstack .tdb-btnh { height: 30px; width: 100%; font-size: 10px; }");
+    expect(rule(".tdb-lprime")).toContain("height: 28px"); // the tightening P3: the lane's one geometry (the vstack died with the hover reveal)
     expect(css).not.toContain(".tdb-verb");
   });
   it("fixed heights + centring hold: the Today foot is ONE primary + the ＋ roundel; the toggle's active chip = white + ink ring, shadowless", () => {
@@ -289,8 +289,8 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
     expect(page).toContain('stroke="currentColor"');
     // the tightening P2: the ledger's clock triggers are ICON-ONLY in the reserved lane (the
     // label survives as aria-label/title from the SAME constant); the labelled form remains on cards.
-    expect((page.match(/<ClockGlyph \/>\{VERB_LABELS\.later\}/g) ?? []).length).toBe(2); // laterMenu's labelled branch + the batch CARD (cards keep labels until P3)
-    expect((page.match(/aria-label=\{VERB_LABELS\.later\}/g) ?? []).length).toBe(2); // laterMenu icon mode + batch
+    expect((page.match(/<ClockGlyph \/>\{VERB_LABELS\.later\}/g) ?? []).length).toBe(1); // laterMenu's labelled branch (the journey sheets)
+    expect((page.match(/aria-label=\{VERB_LABELS\.later\}/g) ?? []).length).toBe(3); // laterMenu icon mode + the batch row + the batch card
     expect(page).toContain('later: "Snooze or dismiss",');
     expect(page).not.toContain("☾");
     expect(page).not.toContain("Snooze or dismiss ▾");
@@ -431,11 +431,11 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
 
 describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
   it("the WIDTH TIER is retired (todo rebuild P1) — auto-fill derives the count from the width", () => {
-    expect(css).not.toContain("@media (min-width: 1700px)");
+    expect(css).toContain("@media (min-width: 1700px) { .tdb-grid { grid-template-columns: repeat(5, 1fr); } }"); // the tightening P3: the wider tier takes five
     expect(css).not.toContain("--tdb-asm"); // CENTRING FIX: the second geometry owner stays retired
   });
   it("the matrix: one fluid rule, a 272px floor, no breakpoint and no asm-width machinery", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(272px, 1fr))");
+    expect(rule(".tdb-grid")).toContain("repeat(4, 1fr)"); // the tightening P3: four at the standard tier
     expect(css).not.toContain(".tdb-wrap.today-off .tdb-grid"); // the always-4 grid rule is gone
   });
   it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
@@ -507,8 +507,8 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(page).toContain('className="tdb-wrap today-off"'); // the board is always full-width; Today floats
   });
   it("the grid FLOWS to fill: auto-fill tracks on a 272px floor, no tier (todo rebuild P1)", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(272px, 1fr))");
-    expect(css).not.toContain("@media (min-width: 1700px)");
+    expect(rule(".tdb-grid")).toContain("repeat(4, 1fr)"); // the tightening P3: four at the standard tier
+    expect(css).toContain("@media (min-width: 1700px) { .tdb-grid { grid-template-columns: repeat(5, 1fr); } }"); // the tightening P3: the wider tier takes five
     expect(rule(".tdb-asm")).toContain("width: 100%"); // CENTRING FIX: the row fills the column
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
@@ -559,7 +559,7 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
 
 describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebuild P1)", () => {
   it("the grid: auto-fill on a 272px floor, ALL cards rendered (no truncation, no pagers)", () => {
-    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 14px");
+    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px"); // the tightening P3
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("tdb-reelpg");
   });
@@ -581,8 +581,8 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
     expect(page).not.toContain("tdb-playb");
   });
   it("the hover invariants hold (the hotfix suite re-asserts the cell/surface law)", () => {
-    expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)");
-    expect(rule(".tdb-vwrap")).toContain("grid-template-rows: 0fr");
+    expect(rule(".tdb-cell")).not.toContain("height:"); // the tightening P3: a plain grid item (the shared min-height lives on the CARD)
+    expect(css).not.toContain(".tdb-vwrap"); // the hover-reveal machinery is extinct (the foot is always present)
   });
 });
 
@@ -669,7 +669,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
 });
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
   it("Final Shape P4 — THE WRAPPED GRID: auto-fill columns, all cards, one scroll; reels/snap stay retired", () => {
-    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(auto-fill, minmax(272px, 1fr))");
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(4, 1fr)"); // the tightening P3
     expect(rule(".tdb-grid")).toContain("gap: 14px");
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("reelFit");
@@ -680,12 +680,12 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
   it("v2 anatomy: 27px band, 12.5px titles, content-sized cards, tighter body", () => {
     expect(rule(".tdb-band")).toContain("min-height: 27px");
     expect(rule(".tdb-tt")).toContain("font-size: 12.5px");
-    expect(rule(".tdb-tile")).not.toContain("min-height");
+    expect(rule(".tdb-tile")).toContain("min-height: var(--card-minh)"); // the tightening P3: the shared height, feet pinned
     expect(rule(".tdb-body")).toContain("padding: 10px 12px 12px");
   });
   it("VI P3 → todo rebuild P1: the lane PLAY BUTTON is retired with the header bar; the batch lead stands", () => {
     expect(page).not.toContain("tdb-playb"); // a heading is a heading — no actions on it
-    expect(page).toContain('onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>'); // the batch card's lead (toolbelt P2 parity)
+    expect(page).toContain('className="tdb-lprime" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>'); // the batch card's lead, in the lane
     expect(page).not.toContain("Fix together");
     expect(page).not.toContain(">▶ Focus on"); // the pill text is extinct in both views
   });
@@ -854,10 +854,13 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(br).toContain('<span className="tdb-lchev" aria-hidden>▶</span>'); // the batch head keeps its expand chevron
   });
   it("toolbelt P2 — the divergence is RETIRED: cards + ledger read ONE shared VERB_LABELS constant", () => {
-    const cv = page.slice(page.indexOf("function cardVerbs"), page.indexOf("function renderCard"));
-    expect(cv).toContain("{VERB_LABELS.action}");
-    expect(cv).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
-    expect(cv).toContain("laterMenu(c)");
+    // the tightening P3: cardVerbs died with the hover stack — the card FOOT is the ledger's
+    // own lane (rowActionLane's classes + the same constant), so the two views cannot diverge.
+    expect(page).not.toContain("function cardVerbs");
+    const foot = page.slice(page.indexOf('<div className="tdb-cfoot"'), page.indexOf("function renderGroupCard"));
+    expect(foot).toContain("{VERB_LABELS.action}");
+    expect(foot).toContain("aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
+    expect(foot).toContain("laterMenu(c, true)");
     // the literals live ONCE, in the constant — nowhere inline
     expect((page.match(/: "Action now"/g) ?? []).length).toBe(1); // the constant's assignment alone
     expect((page.match(/: "Snooze or dismiss"/g) ?? []).length).toBe(1);
@@ -996,7 +999,7 @@ describe("shell P3 — Today, in its corner (the companion rail retired)", () =>
 
 describe("II·B P4 — one tag grammar + card polish", () => {
   it("the grouped card wears the standard typed tag pill; the kicker grammar is retired page-wide", () => {
-    expect(page).toContain('<span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>');
+    expect(page).toContain('<span className="tdb-ktag">{g.meta.label.toUpperCase()}</span>'); // the tightening P3: the squared kind chip
     expect(page).not.toContain("tdb-kick");
     expect(page).not.toContain("tdb-kd");
     expect(css).not.toContain("tdb-kick");
@@ -1019,7 +1022,7 @@ describe("Width v4 — SUPERSEDED: the .tdb-col is the single geometry owner (ce
     const w = rule(".tdb-wrap");
     expect(w).not.toContain("--tdb-asm");
     expect(w).not.toContain("--tdb-sheet");
-    expect(w).toContain("--tdb-cardw: 250px;"); // the card token stays (the fork-face flex-basis)
+    expect(w).not.toContain("--tdb-cardw"); // the tightening P3: the last flex-basis died with the absolute surface
   });
   it("the work row no longer owns geometry — .tdb-col does, alone", () => {
     expect(rule(".tdb-asm")).toContain("width: 100%");
@@ -1039,8 +1042,8 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
   });
   it("the grid: fluid columns that fill the capsule; the cards flow larger; no pagers, no partials", () => {
-    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(272px, 1fr))"); // fills the capsule
-    expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)"); // the in-flow overlay faces keep their slot
+    expect(rule(".tdb-grid")).toContain("repeat(4, 1fr)"); // the tightening P3: four at the standard tier // fills the capsule
+    expect(rule(".tdb-tile")).toContain("min-height: var(--card-minh)"); // the overlay faces share the card height
     expect(page).not.toContain("tdb-reelpg");
     expect(page).not.toContain("tdb-reeltrack");
     expect(css).not.toContain("tdb-pg ");

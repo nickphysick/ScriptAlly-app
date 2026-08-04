@@ -148,3 +148,58 @@ describe("tightening P2 — the ledger as a REAL column grid (system A)", () => 
     expect(rule(".tdb-lstat .tdb-minibar")).toContain("max-width: 76px");
   });
 });
+
+describe("tightening P3 — the card, on the same system (the row stood upright)", () => {
+  it("BAND: kind tag left, the date/age right in TABULAR mono — the ledger's own figures, upright", () => {
+    const card = page.slice(page.indexOf('<div className={`tdb-band ${c.stream}`}>'), page.indexOf('<div className="tdb-body">'));
+    expect(card).toContain('<span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>');
+    expect(card).toContain('<span className="tdb-when">{c.due}</span>'); // the SAME c.due the ledger status lane renders
+    const band = rule(".tdb-band");
+    expect(band).toContain("grid-template-columns: minmax(0, 1fr) auto"); // two tracks, never an auto margin
+    expect(rule(".tdb-when")).toContain("font-variant-numeric: tabular-nums");
+  });
+
+  it("BODY + THE FIXED PROGRESS SLOT: present on batch cards, absent on units — the foot never moves either way", () => {
+    expect(page).toContain('<div className="tdb-cprog">');
+    expect(rule(".tdb-cprog")).toContain("margin-top: 10px");
+    // the slot cannot reposition the foot because the foot is PINNED (margin-top:auto), not stacked
+    expect(rule(".tdb-cfoot")).toContain("margin-top: auto");
+  });
+
+  it("FOOT: the identical action lane, pinned inside the SHARED min-height so feet align across a row", () => {
+    expect(rule(".tdb-wrap")).toContain("--card-minh: 150px");
+    for (const sel of [".tdb-tile", ".tdb-gcard", ".tdb-ntc"]) {
+      expect(rule(sel)).toContain("min-height: var(--card-minh)"); // EVERY card family shares it
+    }
+    // EQUAL FOOT OFFSETS, by construction: each card is a flex column at the shared min-height and
+    // its foot carries margin-top:auto — so in any row, every foot sits at the card's base
+    // regardless of title length (a two-line title beside a one-line title changes nothing).
+    expect(rule(".tdb-tile")).toContain("flex-direction: column");
+    expect(rule(".tdb-gcard")).toContain("flex-direction: column");
+    expect(rule(".tdb-ntc")).toContain("flex-direction: column");
+    expect(rule(".tdb-ntc-ft")).toContain("margin-top: auto"); // the user cards' foot pins too
+    // the lane's contents mirror the ledger: ink primary + icon buttons + the chevron on the 1fr track
+    const foot = rule(".tdb-cfoot");
+    expect(foot).toContain("grid-template-columns: auto auto auto 1fr");
+    expect(rule(".tdb-cfoot .tdb-crest")).toContain("justify-self: end");
+    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+  });
+
+  it("FOUR columns at the standard tier; the wider tier takes five; the sticker treatment is UNTOUCHED", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(4, 1fr)");
+    expect(css).toContain("@media (min-width: 1700px) { .tdb-grid { grid-template-columns: repeat(5, 1fr); } }");
+    // the sticker tokens stand exactly as the polish pack locked them
+    const w = rule(".tdb-wrap");
+    expect(w).toContain("--tdb-sticker-bd: #3a1c14");
+    expect(w).toContain("--tdb-sticker-bw: 1.5px");
+    expect(w).toContain("--tdb-sticker-off: 5px");
+    expect(rule(".tdb-tile.do")).toContain("box-shadow: var(--tdb-sticker-off) var(--tdb-sticker-off) 0 var(--tdb-sticker-pink)");
+  });
+
+  it("the hover-verb machinery is EXTINCT — no reveal can change a card's size or hide its actions", () => {
+    for (const dead of ["tdb-vwrap", "tdb-vinner", "tdb-vstack", "tdb-gdetail", "cardVerbs"]) {
+      expect(page).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+  });
+});

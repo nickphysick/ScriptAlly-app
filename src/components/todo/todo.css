@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-g: 150px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 46px; /* save-and-today P2: the Today header earns 46px (was 42) — it now carries the progress bar + fraction. Today is the sole consumer of this token. */ --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; --nt-comp-bd: #3a1c14; --nt-block-note: #eedfae; --nt-block-task: #d5dbd3; --nt-seg-bg: #faf7f1; --nt-seg-bd: #ddd2c4; --nt-seg-on-bg: #3a2c20; --nt-seg-on-bd: #2a1a13; --nt-seg-on-tx: #f3e7da; --nt-ttl: #2b2118; --nt-dtl: #5d5245; --nt-dtl-note: #6b5a4e; --nt-fld-bg: #faf7f1; --nt-fld-bd: #ddd2c4; --nt-fld-blank: #a5988c; --nt-hint: #a5988c; --nt-block-due: #f2cec1; --nt-task-line: #b9c9b4; --td-w: 290px; --td-elev: 0 18px 44px rgba(58, 28, 20, 0.20), 0 2px 6px rgba(58, 28, 20, 0.10); --td-elev-hov: 0 22px 54px rgba(58, 28, 20, 0.26), 0 2px 8px rgba(58, 28, 20, 0.12); --td-rows-max: 290px; --td-body-cap: 460px; --td-launch-max: 172px; --strip-bg: #f5f0e8; --strip-bd: #e4dbcd; --strip-r: 10px; --lg-dot: 14px; --lg-kind: 132px; --lg-status: 150px; --lg-act: 132px; --lg-row-h: 56px; --lg-tracks: var(--lg-dot) minmax(0, 1fr) var(--lg-kind) var(--lg-status) var(--lg-act); --td-fab-clear: 320px; --td-fab-clear-min: 200px; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 40px; --tdb-appnav: 49px; --tdb-rail: 248px; --tdb-vp: 774px; --tdb-sidebar: 270px; --tdb-today: 256px; --tdb-grid-gap: 14px; --tdb-sticker-bd: #3a1c14; --tdb-sticker-bw: 1.5px; --tdb-sticker-off: 5px; --tdb-sticker-off-hov: 6px; --tdb-sticker-pink: #f2cec1; --tdb-sticker-latte: #eee5d4; --tdb-sticker-butter: #eedfae; --tdb-col-max: 1360px; --tdb-col-gutter: 40px; --tdb-chrome-gap: 44px; --tdb-panel-bd: #e2dbd0; --tdb-panel-hair: #ece5d8; --tdb-hsearch-h: 46px; --tdb-hsearch-w: 460px; --tdb-hsearch-reserve: 320px; --tdb-hsearch-floor: 1160px; --tdb-panel-r: 14px; --tdb-panel-pad: 22px; --tdb-hero-gap: 26px; --tdb-search-h: 46px; --container-head-h: 46px; /* save-and-today P2: the Today header earns 46px (was 42) — it now carries the progress bar + fraction. Today is the sole consumer of this token. */ --container-head-bg: linear-gradient(180deg, #d7ddd5, #d5dbd3); --container-head-rule: #b9c9b4; --container-head-pad: 15px; --container-head-ink: #3d4a3b; --container-head-mono: #5a6e58; --nt-empty-bg: #fbf7ee; --nt-empty-bd: #d9cca8; --nt-tile-bg: #f4ecd4; --nt-tile-bd: #e0d3a8; --nt-empty-h: #2b2118; --nt-empty-p: #8a7d6e; --nt-ink-bg: #2a1a13; --nt-ink-bd: #1d100c; --nt-ink-tx: #f3e7da; --nt-comp-bd: #3a1c14; --nt-block-note: #eedfae; --nt-block-task: #d5dbd3; --nt-seg-bg: #faf7f1; --nt-seg-bd: #ddd2c4; --nt-seg-on-bg: #3a2c20; --nt-seg-on-bd: #2a1a13; --nt-seg-on-tx: #f3e7da; --nt-ttl: #2b2118; --nt-dtl: #5d5245; --nt-dtl-note: #6b5a4e; --nt-fld-bg: #faf7f1; --nt-fld-bd: #ddd2c4; --nt-fld-blank: #a5988c; --nt-hint: #a5988c; --nt-block-due: #f2cec1; --nt-task-line: #b9c9b4; --td-w: 290px; --td-elev: 0 18px 44px rgba(58, 28, 20, 0.20), 0 2px 6px rgba(58, 28, 20, 0.10); --td-elev-hov: 0 22px 54px rgba(58, 28, 20, 0.26), 0 2px 8px rgba(58, 28, 20, 0.12); --td-rows-max: 290px; --td-body-cap: 460px; --td-launch-max: 172px; --strip-bg: #f5f0e8; --strip-bd: #e4dbcd; --strip-r: 10px; --lg-dot: 14px; --lg-kind: 132px; --lg-status: 150px; --lg-act: 132px; --lg-row-h: 56px; --lg-tracks: var(--lg-dot) minmax(0, 1fr) var(--lg-kind) var(--lg-status) var(--lg-act); --card-minh: 150px; --td-fab-clear: 320px; --td-fab-clear-min: 200px; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; width: 100%; }
 /* ── notes-and-tasks P1 — THE EMPTY NOTES SECTION (design-refs/notes-and-tasks.html · frame 1):
    the dashed butter card that stands in for the Notes grid when nothing is pinned. ── */
 .tdb-nte { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 20px; background: var(--nt-empty-bg); border: 1px dashed var(--nt-empty-bd); border-radius: 13px; padding: 18px 22px; }
@@ -357,9 +357,11 @@
    hover overlay + Later menu overflow freely; the wrap is the only scroller). */
 /* THE CARD GRID (todo rebuild P1): auto-fill tracks with a 272px floor — with the board panel
    gone the grid answers to the content capsule, so the column COUNT follows the width. */
-.tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 14px; padding: 0; }
+/* the tightening P3 — FOUR columns at the standard tier (ref .gr); the wider tier takes five. */
+.tdb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 0; }
+@media (min-width: 1700px) { .tdb-grid { grid-template-columns: repeat(5, 1fr); } }
 @media (prefers-reduced-motion: reduce) {
-  .tdb-vwrap, .tdb-vinner, .tdb-tile, .tdb-gcard { transition: none; }
+  .tdb-tile, .tdb-gcard { transition: none; }
   .tdb-tile.hov, .tdb-gcard.hov { transform: none; }
 }
 /* ── doc pass P4: LEDGER v2 — family-washed sections (the wash is territory, not decoration)
@@ -435,7 +437,9 @@
 .tdb-nc-retry { margin-left: auto; flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #8a3a28; background: none; border: none; border-bottom: 1.5px solid #d99e86; padding: 0 0 1px; cursor: pointer; }
 /* ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (frame 3): note (butter) · task (sage) ·
    promoted task (pink). Sage is the USER-CREATED family; blue is Pro-only and never appears. ── */
-.tdb-ntc { box-sizing: border-box; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 12px; overflow: hidden; box-shadow: 5px 5px 0 var(--nt-ntc-blk); }
+/* the tightening P3: the user cards join the SHARED min-height + pinned foot, so feet stay level
+   beside the derived cards in a mixed row (their settled band/typography untouched). */
+.tdb-ntc { box-sizing: border-box; min-height: var(--card-minh); display: flex; flex-direction: column; background: var(--white, #fff); border: 1.5px solid var(--nt-comp-bd); border-radius: 12px; overflow: hidden; box-shadow: 5px 5px 0 var(--nt-ntc-blk); }
 .tdb-ntc.note { --nt-ntc-blk: var(--nt-block-note); }
 .tdb-ntc.task { --nt-ntc-blk: var(--nt-block-task); }
 .tdb-ntc.task.due { --nt-ntc-blk: var(--nt-block-due); }
@@ -445,12 +449,12 @@
 .tdb-ntc.task.due .tdb-ntc-b { background: linear-gradient(180deg, #f6d8cc, #f2cec1); border-color: #e8c8bc; }
 .tdb-ntc-tag { font-family: var(--f12-mono); font-size: 6px; letter-spacing: 0.13em; font-style: normal; background: #fff; border: 1px solid rgba(58, 28, 20, 0.2); border-radius: 99px; padding: 2px 7px; color: #3a1c14; }
 .tdb-ntc-tag.hot { font-weight: 700; border-width: 1.5px; color: #8a3a28; border-color: #e8c8bc; }
-.tdb-ntc-in { padding: 12px 14px 13px; }
+.tdb-ntc-in { padding: 12px 14px 13px; flex: 1; display: flex; flex-direction: column; }
 .tdb-ntc-ttl { margin: 0; font-family: var(--f12-serif); font-size: 14px; font-weight: 700; color: #2b2118; line-height: 1.3; }
 .tdb-ntc.note .tdb-ntc-ttl { font-family: Caveat, cursive; font-size: 20px; font-weight: 600; line-height: 1.15; }
 .tdb-ntc-d { font-family: var(--f12-body); font-size: 10.5px; color: #8a7d6e; margin-top: 5px; line-height: 1.5; }
 .tdb-ntc.note .tdb-ntc-d { font-family: Caveat, cursive; font-size: 14px; color: #7a6a55; }
-.tdb-ntc-ft { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding-top: 9px; border-top: 1px solid #f2ede4; }
+.tdb-ntc-ft { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 9px; border-top: 1px solid #f2ede4; }
 .tdb-ntc-dchip { display: inline-flex; align-items: center; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; background: #e9ede6; border: 1px solid #cfd8ce; border-radius: 99px; padding: 3px 8px; color: #5a6e58; }
 .tdb-ntc-dchip.due { background: #f8e2da; border-color: #e8c8bc; color: #8a3a28; }
 .tdb-ntc-surf { display: inline-flex; align-items: center; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; background: #f4efe7; border: 1px solid #e2d7c3; border-radius: 99px; padding: 3px 8px; color: #8a7a66; }
@@ -534,7 +538,7 @@ button.tdb-ldot { cursor: pointer; }
    survives only in StatusDots (locked) and micro-accents — never a tag fill. ── */
 /* THE CARD CONTRACT (Deck v2 P4 → hover hotfix: CELL + SURFACE) — band = identity + status
    ONLY; body = content only. THE ONE-SURFACE LAW: the CELL (.tdb-cell) holds the reel slot at a
-   FIXED resting height (--tdb-cardh — v4: one height, batch and unit alike) and NEVER changes size — the reel
+   shared min-height (the tightening P3: --card-minh, batch and unit alike) — the reel
    never reflows; the SURFACE (.tdb-tile/.tdb-gcard, absolute inside it) carries the ONLY border,
    background, radius and shadow, equals the cell at rest (min-height 100%), and on hover grows
    DOWNWARD past the cell's bottom edge (z raised) to include its verbs — one uninterrupted
@@ -547,11 +551,12 @@ button.tdb-ldot { cursor: pointer; }
    cell, growing downward freely; the CELL (not the surface) raises z on hover/focus-within
    above the sticky section headings (z 10) so the expansion covers the next section. The
    ancestor chain (grid → lane → sheetbody → mainc) is audited clip-free and context-free. */
-.tdb-cell { position: relative; height: var(--tdb-cardh); z-index: 1; } /* a grid item — the column tracks size it */
-.tdb-cell.b { height: var(--tdb-cardh-g); } /* grouping P1: the batch cell re-heights for the rest affordance */
+/* the tightening P3 — the fixed-height cell + absolute hover-surface machinery is superseded:
+   the foot is ALWAYS present, so a card is a plain grid item on the shared min-height. */
+.tdb-cell { position: relative; z-index: 1; }
 .tdb-cell:hover, .tdb-cell:focus-within { z-index: 30; }
-.tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; min-height: 100%; }
-.tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
+.tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { height: 100%; }
+.tdb-tile { position: relative; box-sizing: border-box; min-height: var(--card-minh); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
 /* ── SHELL POLISH P3 — STICKER CARDS: a 1.5px ink border + a hard offset block behind (no
    blur) in the card's family colour. The pastille bands + white tag pills inside are
    untouched; the ledger rows, the Today pop-up and the session page are NOT stickers. ── */
@@ -568,20 +573,23 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tile:focus, .tdb-gcard:focus { outline: none; }
 .tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border-radius: 11px; overflow: hidden; }
-.tdb-band { flex: none; display: flex; align-items: center; gap: 5px; min-height: 27px; padding: 0 12px; border-bottom: 1px solid var(--line); border-radius: 11px 11px 0 0; }
+.tdb-band { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px; min-height: 27px; padding: 0 12px; border-bottom: 1px solid var(--line); border-radius: 11px 11px 0 0; }
+.tdb-bandl { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.tdb-when { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #8a7d6e; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tdb-band.do { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-bottom-color: var(--pink-b); }
 .tdb-band.hk { background: linear-gradient(180deg, var(--lat-1), var(--lat-2)); border-bottom-color: var(--lat-bd); } /* LATTE */
 .tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }
-.tdb-chipon { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.08em; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); border-radius: 99px; padding: 2px 8px; white-space: nowrap; }
 .tdb-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 10px 12px 12px; }
-/* the hover VERB ROW — INSIDE the surface's border (no own background/border/radius: it
-   inherits the surface's). The wrapper animates via the grid trick; visibility keeps the
-   collapsed buttons out of the tab order (delayed on collapse so the fold-up stays visible). */
-.tdb-vwrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 180ms ease; }
-.tdb-tile.hov .tdb-vwrap, .tdb-gcard.hov .tdb-vwrap { grid-template-rows: 1fr; }
-.tdb-vinner { overflow: hidden; min-height: 0; visibility: hidden; transition: visibility 0s linear 180ms; }
-.tdb-tile.hov .tdb-vinner, .tdb-gcard.hov .tdb-vinner { visibility: visible; transition-delay: 0s; }
-.tdb-gdetail { padding: 0 12px 6px; }
+/* the tightening P3 — THE FIXED PROGRESS SLOT (batch cards): present or absent, the pinned foot
+   never moves; and THE PINNED FOOT itself — the identical action lane, margin-top:auto (the ONE
+   sanctioned auto margin: it pins vertically inside the shared min-height; nothing positions
+   horizontally with it). The chevron rides the last 1fr track, never an auto margin. */
+.tdb-cprog { margin-top: 10px; }
+.tdb-cprog .tdb-minibar { max-width: none; }
+.tdb-cfoot { margin-top: auto; display: grid; grid-template-columns: auto auto auto 1fr; align-items: center; gap: 6px; padding: 10px 12px 11px; }
+.tdb-cfoot .tdb-crest { justify-self: end; color: #c9bcae; font-size: 11px; }
+.tdb-cfoot .tdb-latwrap { position: relative; }
+.tdb-cfoot .tdb-latmenu { left: 0; }
 /* ── grouping P1 (todo-grouping.html §1): the rest affordance · the full-span GROUP BAR
    (family band colours; it owns Collapse) · the dashed page-in cell · the in-animation. ── */
 .tdb-gxp { margin-top: 11px; width: 100%; border: none; border-top: 1px solid var(--hairline); background: none; padding: 9px 0 0; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 10.5px; font-weight: 700; color: var(--ink); cursor: pointer; }
@@ -589,17 +597,12 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-gbart { font-family: var(--f12-serif); font-size: 13.5px; font-weight: 700; color: var(--ink); }
 .tdb-gbarn { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--lat-ink); }
 .tdb-gcol { margin-left: auto; height: 28px; padding: 0 13px; font-size: 10px; }
-.tdb-gpage { height: var(--tdb-cardh); border: 1.5px dashed var(--lat-bd); border-radius: 12px; background: none; display: flex; align-items: center; justify-content: center; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
+.tdb-gpage { min-height: var(--card-minh); border: 1.5px dashed var(--lat-bd); border-radius: 12px; background: none; display: flex; align-items: center; justify-content: center; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
 .tdb-cell.gin { animation: tdbGroupIn 200ms ease; }
 @keyframes tdbGroupIn { from { opacity: 0; transform: translateY(4px); } }
 @media (prefers-reduced-motion: reduce) { .tdb-gbar, .tdb-gpage, .tdb-cell.gin, .tdb-lsub, .tdb-lpage { animation: none; } .tdb-lchev { transition: none; } } /* v4 P4: the batch detail revealed above the verbs */
-/* toolbelt P2 (todo-toolbelt.html §2 .vstack): the expansion stacks the ledger's three
-   phrases full-width above a hairline; the reveal mechanics (vwrap/vinner) untouched. */
-.tdb-vstack { display: flex; flex-direction: column; gap: 6px; margin: 9px 12px 12px; border-top: 1px solid var(--hairline); padding-top: 11px; }
-.tdb-vstack .tdb-btnh { height: 30px; width: 100%; font-size: 10px; }
-.tdb-vstack .tdb-latwrap { width: 100%; display: flex; }
-.tdb-vstack .tdb-latwrap .tdb-btnh { flex: 1; }
-.tdb-latwrap { position: static; flex: 1; display: flex; } /* static: the menu's containing block is the SURFACE, escaping .tdb-vinner's clip */
+
+.tdb-latwrap { position: relative; display: flex; } /* the menu anchors here (the vinner clip died with the hover stack) */
 /* the Later menu — identical on every card (ref .menu2) */
 .tdb-latmenu { position: absolute; top: calc(100% + 4px); right: 12px; z-index: 7; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); padding: 6px; width: 172px; }
 .tdb-latmenu button { display: block; width: 100%; text-align: left; padding: 8px 11px; border-radius: 8px; font-size: 10.5px; font-weight: 600; color: var(--ink-2); background: none; border: none; cursor: pointer; }
@@ -624,7 +627,7 @@ button.tdb-ldot { cursor: pointer; }
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
    + ink-outline "Fix together →" (fills ink on hover) + the quiet Never (behaviour kept). ── */
-.tdb-gcard { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; } /* in-flow only for the cell-less fork face */
+.tdb-gcard { position: relative; box-sizing: border-box; min-height: var(--card-minh); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; } /* in-flow only for the cell-less fork face */
 .tdb-gtt { font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gn { font-size: 18px; font-weight: 700; }
 .tdb-gsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }

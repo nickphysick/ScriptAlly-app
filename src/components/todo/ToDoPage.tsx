@@ -1853,26 +1853,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </span>
     );
   }
-  // The verb wrapper is ALWAYS mounted (the 0fr→1fr grid trick needs a live element to
-  // animate); visibility keeps the collapsed buttons out of the tab order.
-  // toolbelt P2 — the cards adopt the ledger's phrases: the expansion stacks the three
-  // full-width rows (single-surface mechanics untouched; rest state untouched). The tick verb left
-  // the card verbs with the parity — the quickDone pathway stands at its other surfaces
-  // (the ledger's head checkbox, Today's tick).
-  function cardVerbs(c: BoardCard, hov: boolean) {
-    const committed = onList(c);
-    return (
-      <div className="tdb-vwrap" aria-hidden={!hov}>
-        <div className="tdb-vinner">
-          <div className="tdb-vstack" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
-            <button type="button" className="tdb-btnh" onClick={() => toggleToday(c)}>{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}</button>
-            {laterMenu(c)}
-          </div>
-        </div>
-      </div>
-    );
-  }
   // ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (design-refs/notes-and-tasks.html · frame
   // 3): a NOTE is butter with an ✎ NOTE band, Caveat, a PINNED footer and NO completion circle; a
   // TASK is sage (the user-created family) with a ✓ YOUR TASK band, typeset, a date chip and a
@@ -1924,27 +1904,37 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       );
     }
     const hov = verbKey === c.key;
-    // cell + surface (hover hotfix): the CELL holds the reel slot at a fixed resting height and
-    // never changes size; the SURFACE (absolute inside it) carries the only border/background/
-    // radius/shadow and grows downward over whatever lies beneath — one continuous outline.
+    // the tightening P3 — THE ROW STOOD UPRIGHT (design-refs/card-grid.html): the same three
+    // lanes as the ledger. Band = kind tag left + the SAME tabular figures right; body = title +
+    // manuscript line; foot = the identical action lane, PINNED with margin-top:auto inside the
+    // shared min-height, so feet align across a row whatever the title length. The hover-verb
+    // expansion machinery is superseded — the foot is always present.
     return (
       <div key={c.key} data-tdbkey={c.key} className={`tdb-cell${gin ? " gin" : ""}`}>
         <div className={`tdb-tile ${c.stream}${hov ? " hov" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`}
           onClick={() => openFlowCards([c])}
           onMouseEnter={() => armVerbs(c.key)} onMouseLeave={disarmVerbs}
           onFocus={() => armVerbs(c.key)} onBlur={disarmVerbs}
-          role="button" aria-expanded={hov} tabIndex={0}
+          role="button" tabIndex={0}
           onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
           <div className={`tdb-band ${c.stream}`}>
-            <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
-            {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
-            {committed && <span className="tdb-chipon">✓ TODAY</span>}
+            <span className="tdb-bandl">
+              <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>
+              {c.snoozes > 0 && <span className="tdb-ktag snz">×{c.snoozes}</span>}
+              {committed && <span className="tdb-ktag on">✓ TODAY</span>}
+            </span>
+            <span className="tdb-when">{c.due}</span>
           </div>
           <div className="tdb-body">
             <div className="tdb-tt">{c.title}</div>
             {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
           </div>
-          {cardVerbs(c, hov)}
+          <div className="tdb-cfoot" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
+            <button type="button" className="tdb-lib" aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} title={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>
+            {laterMenu(c, true)}
+            <span className="tdb-crest" aria-hidden>▸</span>
+          </div>
         </div>
       </div>
     );
@@ -2003,43 +1993,38 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           role="button" aria-expanded={hov} tabIndex={0}
           onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); setFlow({ items: [{ kind: "group", group: g }] }); } }}>
           <div className="tdb-band hk">
-            <span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>
+            <span className="tdb-bandl"><span className="tdb-ktag">{g.meta.label.toUpperCase()}</span></span>
+            <span className="tdb-when">{g.members.length}</span>
           </div>
-          {/* v4 P4 — the RESTING batch body is trimmed to the unit card's height: band + count
-              headline + roundels. The description + progress move into the hover expansion. */}
+          {/* the tightening P3 — the batch body carries its PROGRESS in the fixed slot (present on
+              batch cards, absent on unit cards — the pinned foot never moves either way); the
+              hover expansion that used to hold it is superseded. */}
           <div className="tdb-body">
             <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
             <div className="tdb-avs">
               {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
               {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
             </div>
-            {/* grouping P1 — the one rest affordance (below the roundels, above the hover
-                verb area; it replaces neither the hover expansion nor Action now) */}
+            <div className="tdb-cprog">
+              <div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>
+              <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
+            </div>
+            {/* grouping P1 — the one rest affordance (it replaces neither the foot nor Action now) */}
             <button type="button" className="tdb-gxp" onClick={(e) => { e.stopPropagation(); toggleGroup(g.rule); }}>Expand {g.members.length} ▾</button>
           </div>
-          <div className="tdb-vwrap" aria-hidden={!hov}>
-            <div className="tdb-vinner">
-              <div className="tdb-gdetail">
-                <div className="tdb-gsub">{copy.sub}</div>
-                <div className="tdb-gprog">
-                  <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
-                  <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
+          <div className="tdb-cfoot" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="tdb-lprime" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>
+            <span className="tdb-latwrap">
+              <button type="button" className="tdb-lib" aria-label={VERB_LABELS.later} title={VERB_LABELS.later} aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}><ClockGlyph /></button>
+              {laterKey === key && (
+                <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
+                  <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
+                  <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
+                  <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
                 </div>
-              </div>
-              <div className="tdb-vstack" onClick={(e) => e.stopPropagation()}>
-                <button type="button" className="tdb-btnh em" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>
-                <span className="tdb-latwrap">
-                  <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}><ClockGlyph />{VERB_LABELS.later}</button>
-                  {laterKey === key && (
-                    <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
-                      <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
-                      <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
-                      <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
-                    </div>
-                  )}
-                </span>
-              </div>
-            </div>
+              )}
+            </span>
+            <span className="tdb-crest" aria-hidden>▸</span>
           </div>
         </div>
       </div>
