@@ -4,6 +4,7 @@ import {
   getActivityTime,
   deriveStatus,
   deriveResponseFlags,
+  deriveResponseReceivedAt,
   deriveRevisionRound,
   derivePipelineDates,
   deriveQueryFields,
@@ -114,6 +115,46 @@ describe('deriveResponseFlags — "one response per query"', () => {
   });
 });
 
+describe('deriveResponseReceivedAt — first agent action, never fabricated', () => {
+  it('no incoming activity → null (empty log, writer-only rungs, closes)', () => {
+    expect(deriveResponseReceivedAt([])).toBeNull();
+    expect(deriveResponseReceivedAt([at(QueryStatus.QUERIED, 0)])).toBeNull();
+    expect(deriveResponseReceivedAt([at(QueryStatus.QUERIED, 0), at(QueryStatus.PARTIAL_SENT, 1), at(QueryStatus.FULL_SENT, 2)])).toBeNull();
+    expect(deriveResponseReceivedAt([at(QueryStatus.QUERIED, 0), at(QueryStatus.NO_RESPONSE, 60)])).toBeNull();
+    expect(deriveResponseReceivedAt([at(QueryStatus.QUERIED, 0), at(QueryStatus.WITHDRAWN, 3)])).toBeNull();
+  });
+
+  it('a single response → its own timestamp', () => {
+    const log = [at(QueryStatus.QUERIED, 0), at(QueryStatus.PARTIAL_REQUESTED, 2)];
+    expect(deriveResponseReceivedAt(log)).toBe(new Date(t0 + 2 * 86400000).toISOString());
+  });
+
+  it('multiple responses → the EARLIEST, not the latest, regardless of input order', () => {
+    const log = [at(QueryStatus.QUERIED, 0), at(QueryStatus.PARTIAL_REQUESTED, 2), at(QueryStatus.FULL_REQUESTED, 10), at(QueryStatus.REJECTED, 30)];
+    expect(deriveResponseReceivedAt(log)).toBe(new Date(t0 + 2 * 86400000).toISOString());
+    expect(deriveResponseReceivedAt([...log].reverse())).toBe(new Date(t0 + 2 * 86400000).toISOString());
+  });
+
+  it('response then undo (the response rung deleted) → null again', () => {
+    const before = [at(QueryStatus.QUERIED, 0), at(QueryStatus.OFFER, 5)];
+    expect(deriveResponseReceivedAt(before)).toBe(new Date(t0 + 5 * 86400000).toISOString());
+    const afterUndo = before.filter((a) => a.resultingStatus !== QueryStatus.OFFER);
+    expect(deriveResponseReceivedAt(afterUndo)).toBeNull();
+  });
+
+  it('a date-PROVISIONAL earliest incoming rung yields null — never a fabricated date', () => {
+    const log = [at(QueryStatus.QUERIED, 0), { ...at(QueryStatus.PARTIAL_REQUESTED, 2), dateProvisional: true }];
+    expect(deriveResponseReceivedAt(log)).toBeNull();
+    // …while hasAgentResponded still derives true from the rung's existence.
+    expect(deriveResponseFlags(log).hasAgentResponded).toBe(true);
+  });
+
+  it('a provisional LATER rung does not disturb a real earliest one', () => {
+    const log = [at(QueryStatus.PARTIAL_REQUESTED, 2), { ...at(QueryStatus.FULL_REQUESTED, 9), dateProvisional: true }];
+    expect(deriveResponseReceivedAt(log)).toBe(new Date(t0 + 2 * 86400000).toISOString());
+  });
+});
+
 describe('deriveRevisionRound', () => {
   it('no activities → round 1', () => {
     expect(deriveRevisionRound([])).toBe(1);
@@ -159,5 +200,7 @@ describe('deriveQueryFields — bundle + idempotence', () => {
     expect(a.status).toBe(QueryStatus.FULL_REQUESTED);
     expect(a.hasAgentResponded).toBe(true);
     expect(a.revisionRound).toBe(1);
+    // The earliest incoming rung (the partial request, day 1) — not the later full request.
+    expect(a.responseReceivedAt).toBe(new Date(t0 + 1 * 86400000).toISOString());
   });
 });

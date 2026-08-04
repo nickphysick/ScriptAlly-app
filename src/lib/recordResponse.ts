@@ -43,7 +43,8 @@ export interface RecordResponseData {
   fullVersionSent?: string;
   expectedBy: string;
   sendReminderDate: string;
-  /** #4 — when the response actually arrived (defaults today, user-editable). Drives responseReceivedAt. */
+  /** #4 — when the response actually arrived (defaults today, user-editable). Becomes the
+   *  activity's createdAt, from which recomputeQuery derives responseReceivedAt. */
   dateReceived: string;
   /** #2 — Revise & Resubmit: the agent's revision guidance. */
   rrNotes: string;
@@ -233,12 +234,12 @@ export async function recordQueryResponse(
   //    stage dates are no longer written here: they are derived from the activity log by
   //    recomputeQuery (the single writer) after the log is updated below.
   const updates: Record<string, any> = {
-    // lastStatusChange = when you recorded it (audit). responseReceivedAt = when the response
-    // actually arrived — user-editable via dateReceived (partial/full/rejected), defaulting today;
-    // falls back to now for branches that don't capture it (offer uses offerDate; close has none).
-    // Either way responseReceivedAt is ALWAYS stamped — only its value source changes.
+    // lastStatusChange = when you recorded it (audit stamp). responseReceivedAt is NOT stamped
+    // here — it is derived by recomputeQuery from the activity log (the earliest incoming-
+    // direction rung), so every close path agrees by construction. The user-editable
+    // dateReceived still reaches it: it drives the activity's createdAt below (step 4), which
+    // is exactly what the derivation reads.
     lastStatusChange: serverTimestamp(),
-    responseReceivedAt: getTimestamp(data.dateReceived) || serverTimestamp(),
   };
 
   updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();
@@ -366,7 +367,8 @@ export async function recordQueryResponse(
   const undo = async () => {
     const revertData = {
       lastStatusChange: convertToTimestampOrDate(preSnapshot.lastStatusChange) ?? deleteField(),
-      responseReceivedAt: convertToTimestampOrDate(preSnapshot.responseReceivedAt) ?? deleteField(),
+      // responseReceivedAt is deliberately not restored here — it is derived, and the recompute
+      // below self-corrects it once the activity this call created has been deleted.
       materialsRequestedType: preSnapshot.materialsRequestedType ?? deleteField(),
       materialsRequestedQuantity: preSnapshot.materialsRequestedQuantity ?? deleteField(),
       fullVersionSent: preSnapshot.fullVersionSent ?? deleteField(),

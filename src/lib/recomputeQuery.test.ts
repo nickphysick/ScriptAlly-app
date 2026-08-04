@@ -15,6 +15,9 @@ vi.mock('./firebase', () => ({
   OperationType: { UPDATE: 'update' },
 }));
 
+import { readdirSync, readFileSync } from 'fs';
+import { join, relative, resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { getDocs, updateDoc } from 'firebase/firestore';
 import { subcollectionDocToDerivable, monotonicEventTime, recomputeQuery } from './recomputeQuery';
 import { QueryStatus } from '../types';
@@ -77,6 +80,8 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     expect(written.partialSentDate).toEqual(DELETED);
     expect(written.fullRequestedDate).toEqual(DELETED);
     expect(written.fullSentDate).toEqual(DELETED);
+    // The partial request is the earliest (and only) incoming rung.
+    expect(written.responseReceivedAt).toBe(iso('2026-01-03T10:00:00Z'));
   });
 
   it('an empty log derives back to Queried (no response), all stage dates cleared', async () => {
@@ -86,6 +91,28 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     expect(written.status).toBe(QueryStatus.QUERIED);
     expect(written.hasAgentResponded).toBe(false);
     expect(written.partialRequestedDate).toEqual(DELETED);
+    expect(written.responseReceivedAt).toEqual(DELETED);
+  });
+
+  it('responseReceivedAt = the EARLIEST incoming rung, not the latest', async () => {
+    mockGetDocs.mockResolvedValue(snap([
+      { id: 'a1', data: () => ({ resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-01T10:00:00Z') }) },
+      { id: 'a2', data: () => ({ resultingStatus: QueryStatus.REJECTED, createdAt: iso('2026-03-01T10:00:00Z') }) },
+    ]));
+    await recomputeQuery('u1', 'q1');
+    const written: any = mockUpdateDoc.mock.calls[0][1];
+    expect(written.status).toBe(QueryStatus.REJECTED);
+    expect(written.responseReceivedAt).toBe(iso('2026-02-01T10:00:00Z'));
+  });
+
+  it('a date-provisional earliest incoming rung → deleteField (responded, date unknown)', async () => {
+    mockGetDocs.mockResolvedValue(snap([
+      { id: 'a1', data: () => ({ resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-01T10:00:00Z'), dateProvisional: true }) },
+    ]));
+    await recomputeQuery('u1', 'q1');
+    const written: any = mockUpdateDoc.mock.calls[0][1];
+    expect(written.hasAgentResponded).toBe(true);
+    expect(written.responseReceivedAt).toEqual(DELETED);
   });
 
   it('derives revisionRound 2 from an R&R → Full Sent resubmission', async () => {
@@ -97,5 +124,29 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     const written: any = mockUpdateDoc.mock.calls[0][1];
     expect(written.status).toBe(QueryStatus.FULL_SENT);
     expect(written.revisionRound).toBe(2);
+  });
+});
+
+describe('single-writer lock — responseReceivedAt', () => {
+  it('no non-test file outside the derivation pair carries the write key', () => {
+    // A write is the object-key form `responseReceivedAt:` (assignment in a payload or the
+    // derived-fields interface). Reads are `q.responseReceivedAt` and the Query type declares
+    // `responseReceivedAt?:` — neither matches the pattern, so the sweep flags writers only.
+    const SRC_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+    const ALLOWED = new Set(['lib/queryDerivation.ts', 'lib/recomputeQuery.ts']);
+    const offenders: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, entry.name);
+        if (entry.isDirectory()) { walk(p); continue; }
+        if (!/\.(ts|tsx)$/.test(entry.name) || /\.test\.(ts|tsx)$/.test(entry.name)) continue;
+        if (/responseReceivedAt\s*:/.test(readFileSync(p, 'utf8'))) offenders.push(relative(SRC_ROOT, p));
+      }
+    };
+    walk(SRC_ROOT);
+    // Anchors first: the two allowed homes DO carry the key, proving the sweep sees real writes.
+    expect(offenders).toContain('lib/queryDerivation.ts');
+    expect(offenders).toContain('lib/recomputeQuery.ts');
+    expect(offenders.filter((f) => !ALLOWED.has(f))).toEqual([]);
   });
 });

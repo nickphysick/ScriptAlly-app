@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Query derivation — the SINGLE source of truth for turning a query's activity log into its
- * status, response flag, revision round, and cached pipeline dates.
+ * status, response flag, response-received date, revision round, and cached pipeline dates.
  *
  * Everything here is PURE and deterministic: same activities in → same fields out. No Firestore,
  * no timers, no side effects — which is what lets the same functions run over the online
@@ -28,6 +28,8 @@ export interface DerivableActivity {
   id?: string;
   resultingStatus?: QueryStatus | string | null;
   date: unknown;
+  /** Import flag: the date is only an ordering key, not a real date (smart/email-import rungs). */
+  dateProvisional?: boolean;
 }
 
 /** Statuses that mean the agent acted — receiving any of these is "a response" (max one per query). */
@@ -72,12 +74,13 @@ export function getActivityTime(date: unknown): number {
 export function orderedStatusBearing(activities: DerivableActivity[]): {
   status: QueryStatus;
   time: number;
+  provisional: boolean;
 }[] {
   return activities
-    .map((a, i) => ({ status: normalizeResultingStatus(a.resultingStatus), time: getActivityTime(a.date), id: a.id ?? "", i }))
-    .filter((a): a is { status: QueryStatus; time: number; id: string; i: number } => a.status !== null)
+    .map((a, i) => ({ status: normalizeResultingStatus(a.resultingStatus), time: getActivityTime(a.date), provisional: a.dateProvisional === true, id: a.id ?? "", i }))
+    .filter((a): a is { status: QueryStatus; time: number; provisional: boolean; id: string; i: number } => a.status !== null)
     .sort((a, b) => a.time - b.time || a.id.localeCompare(b.id) || a.i - b.i)
-    .map(({ status, time }) => ({ status, time }));
+    .map(({ status, time, provisional }) => ({ status, time, provisional }));
 }
 
 /** The status the log produces: the most recent status-bearing activity's resultingStatus, else QUERIED. */
@@ -91,6 +94,19 @@ export function deriveResponseFlags(activities: DerivableActivity[]): { hasAgent
   return {
     hasAgentResponded: orderedStatusBearing(activities).some((a) => AGENT_RESPONSE_STATUSES.has(a.status)),
   };
+}
+
+/**
+ * When the agent FIRST acted — the earliest incoming-direction rung (AGENT_RESPONSE_STATUSES),
+ * as an ISO string. `null` (recomputeQuery writes deleteField()) when the agent has never acted,
+ * and when that earliest rung is date-PROVISIONAL: an imported rung's createdAt is only an
+ * ordering key, so writing it out would mint a fabricated response date. hasAgentResponded still
+ * derives true from the rung's existence — "responded, date unknown" is the honest pair.
+ */
+export function deriveResponseReceivedAt(activities: DerivableActivity[]): string | null {
+  const first = orderedStatusBearing(activities).find((a) => AGENT_RESPONSE_STATUSES.has(a.status));
+  if (!first) return null;
+  return first.provisional ? null : new Date(first.time).toISOString();
 }
 
 /**
@@ -137,6 +153,7 @@ export interface DerivedQueryFields extends DerivedPipelineDates {
   status: QueryStatus;
   hasAgentResponded: boolean;
   revisionRound: number;
+  responseReceivedAt: string | null;
 }
 
 /** One call for everything recomputeQuery writes. */
@@ -145,6 +162,7 @@ export function deriveQueryFields(activities: DerivableActivity[]): DerivedQuery
     status: deriveStatus(activities),
     ...deriveResponseFlags(activities),
     revisionRound: deriveRevisionRound(activities),
+    responseReceivedAt: deriveResponseReceivedAt(activities),
     ...derivePipelineDates(activities),
   };
 }

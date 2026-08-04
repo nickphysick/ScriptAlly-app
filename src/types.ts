@@ -364,7 +364,9 @@ export interface Query {
   // Written by recordResponse (the single response path) and validated by the Firestore rules, but
   // previously undeclared here. The date-like fields hold Firestore Timestamps at runtime and are
   // read through date-coercion helpers, so they're typed loosely; the rest are strings.
-  responseReceivedAt?: any; // Timestamp | string — when the response actually arrived
+  responseReceivedAt?: any; // Timestamp | string — DERIVED by recomputeQuery (sole writer): when
+  // the agent FIRST acted, from the earliest incoming rung of the activity log. Absent when no
+  // dated response exists. Legacy stamped values heal on the query's next recompute.
   lastStatusChange?: any; // Timestamp — audit: when the status change was recorded
   expectedSendDate?: any; // Timestamp | string — partial/full: when the materials are due out
   sendReminderDate?: any; // Timestamp | string — self-reminder to send materials / resubmit

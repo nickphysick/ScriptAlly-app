@@ -1927,14 +1927,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Auto-close: when the writer chose "Mark as no response automatically" at log time, close the
   // query once its response deadline has passed with no reply. Reuses updateQueryStatus for the
-  // status change + "No response received…" timeline activity, then stamps the response date so it
-  // surfaces in Fortnight in Focus as the response event it conceptually is. Idempotent — once a
-  // query leaves QUERIED it no longer matches, so this never re-fires or loops.
+  // status change + "No response received…" timeline activity, then stamps lastStatusChange so
+  // the close is dated for the feed surfaces. Idempotent — once a query leaves QUERIED it no
+  // longer matches, so this never re-fires or loops.
   //
-  // TODO (future unification pass): the three close paths — this auto-close, manual
-  // updateQueryStatus, and RecordResponseModal/recordQueryResponse — now stamp responseReceivedAt
-  // inconsistently (updateQueryStatus alone never sets it). Consolidate them onto one path so a
-  // "close" always records the response date the same way, regardless of how it was triggered.
+  // responseReceivedAt is no longer stamped by ANY close path: it is derived by recomputeQuery
+  // from the activity log (the earliest incoming rung), so the paths cannot disagree about it —
+  // and a no-response close is not an agent response, so it carries none (Fortnight's close
+  // event falls back to lastStatusChange).
+  //
+  // TODO (close-path residue): lastStatusChange is still stamped inconsistently — this
+  // auto-close and recordQueryResponse stamp it; manual updateQueryStatus never does.
+  // Consolidate that one stamp onto a single path when next in these flows.
   useEffect(() => {
     if (!currentUser || queries.length === 0) return;
     const cu = currentUser;
@@ -1953,10 +1957,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             QueryStatus.NO_RESPONSE,
             "Automatically closed — no response by the deadline you set."
           );
-          // updateQueryStatus doesn't stamp the response date — do it here so the auto-close shows
-          // up in Fortnight in Focus (which derives its response event from responseReceivedAt).
+          // updateQueryStatus stamps no audit fields — stamp lastStatusChange here so the
+          // auto-close is dated for the feed surfaces (Fortnight falls back to it).
           await updateDoc(doc(db, "users", cu.id, "queries", q.id), {
-            responseReceivedAt: serverTimestamp(),
             lastStatusChange: serverTimestamp(),
           });
         } catch (err) {

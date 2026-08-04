@@ -9,7 +9,7 @@
  * and writes the result to the query document:
  *
  *   status · partialRequestedDate · partialSentDate · fullRequestedDate · fullSentDate
- *   revisionRound · hasAgentResponded
+ *   revisionRound · hasAgentResponded · responseReceivedAt
  *
  * No other code writes these fields. Every mutation is "change the activity log, then
  * recomputeQuery(queryId)" — so the status can never drift from the log, duplicate/contradictory
@@ -33,6 +33,8 @@ export function subcollectionDocToDerivable(id: string, data: Record<string, unk
     id,
     resultingStatus: normalizeResultingStatus(data.resultingStatus) ?? normalizeResultingStatus(data.type),
     date: data.createdAt,
+    // Carried only when set: an import rung whose createdAt is an ordering key, not a real date.
+    ...(data.dateProvisional === true ? { dateProvisional: true } : {}),
   };
 }
 
@@ -86,6 +88,9 @@ export async function recomputeQuery(userId: string, queryId: string): Promise<v
       fullSentDate: stageDate(QueryStatus.FULL_SENT, fields.fullSentDate),
       revisionRound: fields.revisionRound,
       hasAgentResponded: fields.hasAgentResponded,
+      // Derived "when the agent first acted" (earliest incoming rung, as ISO). Absent — never
+      // fabricated — when no incoming rung exists or the earliest one is date-provisional.
+      responseReceivedAt: fields.responseReceivedAt ?? deleteField(),
     });
   } catch (e) {
     handleFirestoreError(e, OperationType.UPDATE, `users/${userId}/queries/${queryId}`);
