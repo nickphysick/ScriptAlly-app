@@ -166,9 +166,11 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect((page.match(/className="tdb-pbtn"/g) ?? []).length).toBe(1); // Work the list (Today)
     // todo rebuild P3: the review banner's ink pill became the featured card's soft-pink View.
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(1); // the shrinking ink census (Begin only)
-    expect(page).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
-    expect(page).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
-    expect(page).toContain('className="tdb-btnh" onClick={() => toggleToday(c)}');
+    // the tightening P2: the ledger's action lane carries an INK primary (ref .prime) — revealed
+    // on hover/focus-within inside the reserved lane, so the census admits the lane primaries.
+    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(page).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
+    expect(page).toContain('onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>');
     expect(page).toContain('onClick={() => { setAddOpen(false); helpMePick(); }}>Help me pick</button>'); // relocated into the ＋ flow
     // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
     // toolbelt P2/P3: the compact verb family is gone — the card stack rides the law's own
@@ -285,7 +287,10 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
     expect(page).toContain('<circle cx="12" cy="12" r="9" />');
     expect(page).toContain('<path d="M12 7v5l3.5 2" />');
     expect(page).toContain('stroke="currentColor"');
-    expect((page.match(/<ClockGlyph \/>\{VERB_LABELS\.later\}/g) ?? []).length).toBe(3); // the card menu + ledger batch + batch card — one constant, one glyph
+    // the tightening P2: the ledger's clock triggers are ICON-ONLY in the reserved lane (the
+    // label survives as aria-label/title from the SAME constant); the labelled form remains on cards.
+    expect((page.match(/<ClockGlyph \/>\{VERB_LABELS\.later\}/g) ?? []).length).toBe(2); // laterMenu's labelled branch + the batch CARD (cards keep labels until P3)
+    expect((page.match(/aria-label=\{VERB_LABELS\.later\}/g) ?? []).length).toBe(2); // laterMenu icon mode + batch
     expect(page).toContain('later: "Snooze or dismiss",');
     expect(page).not.toContain("☾");
     expect(page).not.toContain("Snooze or dismiss ▾");
@@ -731,8 +736,9 @@ describe("grouping P3 — persistence + interplay", () => {
     expect(page).toContain("const groupMembers = (g: HkGroup) => (searchActive ? g.members.filter((m) => matchesSearch(m.card, search, sctx)) : g.members);");
     expect(page).toContain("const groupShowing = (g: HkGroup, matched: number) => (matched === g.members.length ? `SHOWING ALL ${g.members.length}` : `SHOWING ${matched} OF ${g.members.length}`);");
     expect((page.match(/const members = groupMembers\(g\);/g) ?? []).length).toBe(2); // gx + the ledger row
-    expect(page).toContain('<span className="tdb-lshow">{groupShowing(g, members.length)}</span>');
-    expect(rule(".tdb-lshow")).toContain("color: var(--lat-ink)");
+    // the tightening P2: the SHOWING note rides the batch row's subtitle line (the grid has no
+    // floating span between lanes)
+    expect(page).toContain('groupShowing(g, members.length)');
   });
   it("member actions re-derive the counts (the bar reads g.members.length live — no cached tally); zero members prune the flag", () => {
     expect(page).toContain("{g.members.length}{copy.rest(g.members.length)}"); // the gbar title reads the LIVE derivation
@@ -754,26 +760,24 @@ describe("grouping P2 — the ledger nest", () => {
     expect(br).toContain("onClick={() => toggleGroup(g.rule)}");
     expect(br).toContain("aria-expanded={expanded}");
     expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });'); // Action now's opener survives
-    expect(br).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
+    expect(br).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
   });
-  it("member rows: inset 40, family-tinted 3px spine, smaller title, the STANDARD trio; pagination matches the cards", () => {
-    const sub2 = rule(".tdb-lsub");
-    expect(sub2).toContain("margin: 0 0 7px 40px");
-    expect(sub2).toContain("border-left: 3px solid var(--lat-bd)");
-    expect(css).toContain(".tdb-lsub .tdb-lbt.sm { font-size: 12.5px; }");
+  it("member rows join the SAME grid (the tightening P2): inset title, tinted row, the standard lane", () => {
+    // the standalone inset card (margin 40 + 3px spine) is superseded — a member IS a grid row
+    expect(rule(".tdb-lrow.lsub")).toContain("background: #fbf8f2");
+    expect(css).toContain(".tdb-lrow.lsub .tdb-ltask { padding-left: 14px; }");
+    expect(css).toContain(".tdb-lrow.lsub .tdb-lbt.sm { font-size: 12.5px; }");
     const mr = page.slice(page.indexOf("function runMemberRow"), page.indexOf("function runBatchRow"));
     expect(mr).toContain("onClick={() => openFlowCards([c])}");
-    expect(mr).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
-    expect(mr).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
-    expect(mr).toContain("laterMenu(c)");
+    expect(mr).toContain("rowActionLane(c, committed)"); // the identical reserved lane
     expect(page).toContain("{paged.map((m) => runMemberRow(m.card))}");
     expect(page).toContain('className="tdb-lpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>');
     expect(rule(".tdb-lpage")).toContain("border: 1.5px dashed var(--lat-bd)");
   });
   it("the parent row persists while open (progress + meta intact) as the collapse control", () => {
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain("tdb-minibar");
-    expect(br).toContain("tdb-mmeta");
+    expect(br).toContain("tdb-minibar"); // the progress bar now lives in the STATUS lane
+    expect(br).toContain("tdb-lstatn"); // pct · count beneath it (the old floating mmeta is gone)
     expect(br).toContain("{expanded && (");
     expect(br).toContain("<React.Fragment key={key}>");
   });
@@ -789,19 +793,20 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     const sec = rule(".tdb-lsec");
     expect(sec).toContain("background: none");
     expect(sec).toContain("border: 0");
-    // todo rebuild P2 — the ROW is the mockup's hairline card: card surface, radius 13, a
-    // hover that lifts the border and adds a soft shadow.
+    // the tightening P2 (system A) — the floating hairline CARD is superseded: every row is a
+    // GRID on the shared tracks, 56px, hairline-separated, tinting whole on hover.
     const row = rule(".tdb-lrow");
-    expect(row).toContain("background: var(--card, #fdfaf5)");
-    expect(row).toContain("border-radius: 13px");
-    expect(row).toContain("border: 1px solid var(--line)");
-    expect(row).toContain("margin-bottom: 10px");
-    expect(rule(".tdb-lrow:hover")).toContain("box-shadow: 0 3px 12px rgba(58, 28, 20, 0.07)");
-    // the 42px tinted family tile, one colour per family
-    expect(rule(".tdb-ltile")).toContain("width: 42px; height: 42px; border-radius: 12px");
-    expect(rule(".tdb-ltile.do")).toContain("var(--pink-b"); // pink band for urgent
-    expect(rule(".tdb-ltile.hk")).toContain("var(--lat-1"); // sage/latte band for housekeeping
-    expect(rule(".tdb-lbt")).toContain("font-size: 16px"); // Playfair 16 title
+    expect(row).toContain("display: grid");
+    expect(row).toContain("grid-template-columns: var(--lg-tracks)");
+    expect(row).toContain("height: var(--lg-row-h)");
+    expect(row).toContain("border-bottom: 1px solid #f4efe6");
+    expect(rule(".tdb-lrow:hover")).toContain("background: #fdfaf5");
+    // the 42px family tile is superseded by the 9px family DOT in its own 14px lane
+    expect(css).not.toContain(".tdb-ltile");
+    expect(rule(".tdb-ldot.do")).toContain("#d98b74");
+    expect(rule(".tdb-ldot.hk")).toContain("#cbb995");
+    expect(rule(".tdb-lbt")).toContain("font-size: 14px"); // Playfair title, ellipsis in the task lane
+    expect(rule(".tdb-lbt")).toContain("text-overflow: ellipsis");
     expect(rule(".tdb-lbms")).toContain("font-style: italic"); // italic Playfair subtitle
   });
   it("BOTH views share ONE typographic heading (todo rebuild P1) — the washed sticky bar is extinct", () => {
@@ -819,16 +824,16 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).not.toContain("{!ledgerFold.do &&");
     expect(page).toContain('{doSorted.map((c) => runRow(c, "do"))}'); // rows render unconditionally now
   });
-  it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
-    expect(rule(".tdb-lacts")).toContain("align-self: center");
-    expect(rule(".tdb-btnh")).toContain("height: 34px"); // frame P2: the row actions ride the law's small height
+  it("the actions live in the RESERVED lane (the tightening P2); Action now OPENS (both kinds), never completes", () => {
     const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
-    expect(rr).toContain('className="tdb-btnh em" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(rr).toContain("rowActionLane(c, committed)");
     expect(rr).not.toContain("quickDone(c)}>Action now");
-    expect(rr).toContain('{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}');
+    const lane = page.slice(page.indexOf("function rowActionLane"), page.indexOf("function runRow"));
+    expect(lane).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(lane).toContain("aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
     expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });');
-    expect(br).toContain('className="tdb-btnh em" onClick={open}>{VERB_LABELS.action}</button>');
+    expect(br).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
     expect(br).not.toContain("Today’s list"); // groups stay uncommittable — the carried resolution
   });
   it("the dropdown keeps the Later items under the renamed trigger", () => {
@@ -837,15 +842,16 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect((page.match(/>Give it a week<\/button>/g) ?? []).length).toBe(3);
     expect((page.match(/>Don’t show these again<\/button>/g) ?? []).length).toBe(3);
   });
-  it("quick-complete = the LEADING checkbox: the roundel ticks on row hover/focus and completes; offers + batches exempt", () => {
-    expect(page).toContain('className="tdb-ldot tick" aria-label={`Mark done — ${c.title}`}');
-    expect(page).toContain("onClick={(e) => { e.stopPropagation(); quickDone(c); }}");
-    expect(rule(".tdb-ldot")).toContain("width: 24px");
-    expect(css).toContain(".tdb-lrow:hover .tdb-ldot.tick .tdb-ldtick, .tdb-lrow:focus-within .tdb-ldot.tick .tdb-ldtick { display: inline; }");
-    const ld = page.slice(page.indexOf("function ledgerDot"), page.indexOf("function runRow"));
-    expect(ld).toContain('if (c.taskType === "offer_received")'); // the plain-dot branch
+  it("the leading-checkbox quick-complete is SUPERSEDED (the tightening P2, system A): the dot is a family marker", () => {
+    // The ref's row anatomy has no tick — the dot lane carries the FAMILY COLOUR only, and
+    // completion stays with the flow + Today's own tick (the completion primitive is untouched).
+    // ledgerDot and its hover-tick machinery are deleted with it (reported).
+    expect(page).not.toContain("function ledgerDot");
+    expect(page).not.toContain('className="tdb-ldot tick"');
+    expect(css).not.toContain(".tdb-ldtick");
+    expect(rule(".tdb-ldot")).toContain("width: 9px");
     const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain('<span className="tdb-lchev" aria-hidden>▶</span>'); // grouping P2: the chevron took the batch head (units keep ledgerDot)
+    expect(br).toContain('<span className="tdb-lchev" aria-hidden>▶</span>'); // the batch head keeps its expand chevron
   });
   it("toolbelt P2 — the divergence is RETIRED: cards + ledger read ONE shared VERB_LABELS constant", () => {
     const cv = page.slice(page.indexOf("function cardVerbs"), page.indexOf("function renderCard"));
@@ -1057,7 +1063,7 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     const out = execSync(`grep -ril '${needle}' ` + join(here, "..", "..") + " || true", { encoding: "utf8" }).trim();
     expect(out).toBe("");
     const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
-    expect(board).toContain('due: "AGENT WAITING"');
+    expect(board).toContain('kind: "AGENT WAITING"'); // the tightening P2: the phrase is the KIND lane's tag now
   });
 });
 

@@ -46,7 +46,8 @@ export interface BoardCard {
   title: string;
   who: string; // the emphasised name (agent / subject) inside the title
   subtitle: string;
-  due: string; // mono chip label
+  due: string; // mono chip label — the STATUS lane's tabular figures (the tightening P2)
+  kind?: string; // the KIND lane's facet tag (OFFER · AGENT WAITING · STALE · …) — pure presentation
   warn: boolean;
   snoozes: number;
   status?: QueryStatus; // → StatusDot; absent for housekeeping + user tasks
@@ -96,6 +97,22 @@ export interface BoardInput {
   mutedTaskRules?: string[]; // Task Settings — the Sunday CARD reads "sunday_review" here (engine tasks are already mute-filtered upstream)
 }
 
+/** Defensive ms from a Timestamp | ISO string | Date (the audit fields are `any`). */
+const auditMs = (v: unknown): number | null => {
+  if (!v) return null;
+  if (typeof v === "string") { const n = Date.parse(v); return Number.isNaN(n) ? null : n; }
+  if (v instanceof Date) return v.getTime();
+  const d = (v as { toDate?: () => Date }).toDate?.();
+  return d instanceof Date ? d.getTime() : null;
+};
+
+/** "REQUESTED 12 JUL" from the query's lastStatusChange audit stamp; absent → "" (honest). */
+const requestedFigures = (q: Query | undefined): string => {
+  const ms = auditMs(q?.lastStatusChange);
+  if (ms == null) return "";
+  return `REQUESTED ${new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+};
+
 const dqLabel = (gap?: string) =>
   gap === "mswl" ? "no wish list" : gap === "materials" ? "no materials listed" : gap === "responseTime" ? "no reply window" : "details to add";
 const dqSub = (gap?: string) =>
@@ -132,30 +149,35 @@ function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms
   const msTitle = ms?.title ?? "";
   const agentWait = () => (q ? queryAmbientStatus(q, "agent", undefined, now) : null);
   switch (task.taskType) {
+    // the tightening P2 — KIND and STATUS are separate lanes now: `kind` is the facet tag
+    // (the same classification the filter chips draw), `due` carries ONLY tabular figures.
+    // "REQUESTED {date}" reads the query's own lastStatusChange audit stamp; absent → an
+    // empty status cell (honest — never an invented date).
     case "offer_received":
-      return { title: `${name} has made an offer`, who: name, subtitle: msTitle || "Respond when you’re ready", due: offerDue(q?.responseDeadline ? Date.parse(q.responseDeadline) : null, now), warn: true, status: q?.status, hk: false };
+      return { kind: "OFFER", title: `${name} has made an offer`, who: name, subtitle: msTitle || "Respond when you’re ready", due: offerDue(q?.responseDeadline ? Date.parse(q.responseDeadline) : null, now), warn: true, status: q?.status, hk: false };
     case "partial_requested":
-      return { title: `Send your partial to ${name}`, who: name, subtitle: msTitle, due: "AGENT WAITING", warn: false, status: q?.status, hk: false };
+      return { kind: "AGENT WAITING", title: `Send your partial to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
     case "full_requested":
-      return { title: `Send your full to ${name}`, who: name, subtitle: msTitle, due: "AGENT WAITING", warn: true, status: q?.status, hk: false };
+      return { kind: "AGENT WAITING", title: `Send your full to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: true, status: q?.status, hk: false };
     case "revise_resubmit":
-      return { title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: "AGENT WAITING", warn: false, status: q?.status, hk: false };
+      return { kind: "AGENT WAITING", title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
     case "nudge_overdue": {
       const a = agentWait();
       const days = a && a.sentMs != null ? a.nDays : null;
-      return { title: `Nudge ${name}`, who: name, subtitle: msTitle, due: days != null ? `${days} DAYS · NO REPLY` : "NO REPLY YET", warn: days != null && days > 84, status: q?.status, hk: false };
+      return { kind: "AGENT WAITING", title: `Nudge ${name}`, who: name, subtitle: msTitle, due: days != null ? `${days} DAYS · NO REPLY` : "NO REPLY YET", warn: days != null && days > 84, status: q?.status, hk: false };
     }
     case "no_response_close": {
       const a = agentWait();
       const days = a && a.sentMs != null ? a.nDays : null;
-      return { title: `${name} silent${days != null ? ` for ${days} days` : ""}`, who: name, subtitle: "No reply — consider closing", due: "STALE QUERY", warn: true, status: q?.status, hk: false };
+      return { kind: "STALE", title: `${name} silent${days != null ? ` for ${days} days` : ""}`, who: name, subtitle: "No reply — consider closing", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
     }
     case "data_quality_poor": {
       const gap = ag ? agentDataQualityNeeds(ag)[0] : undefined;
-      return { title: `${name} has ${dqLabel(gap)}`, who: name, subtitle: dqSub(gap), due: "HOUSEKEEPING", warn: false, status: undefined as QueryStatus | undefined, hk: true };
+      const kind = gap === "mswl" ? "WISH LIST" : gap === "materials" ? "MATERIALS" : gap === "responseTime" ? "REPLY WINDOW" : "DETAILS";
+      return { kind, title: `${name} has ${dqLabel(gap)}`, who: name, subtitle: dqSub(gap), due: "", warn: false, status: undefined as QueryStatus | undefined, hk: true };
     }
     default:
-      return { title: task.title, who: "", subtitle: task.context, due: "", warn: false, status: q?.status, hk: false };
+      return { kind: "", title: task.title, who: "", subtitle: task.context, due: "", warn: false, status: q?.status, hk: false };
   }
 }
 
@@ -269,6 +291,7 @@ function userCard(t: UserTask, input: BoardInput): BoardCard {
     committed: t.committedDate === input.today,
     committedDate: t.committedDate,
     done: false,
+    kind: isTask ? "YOUR TASK" : "NOTE", // the tightening P2 — the KIND lane's facet tag
     nature: isTask ? "task" : "note",
     dueState,
     detail: t.detail,
