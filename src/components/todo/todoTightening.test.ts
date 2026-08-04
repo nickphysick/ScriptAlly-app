@@ -203,3 +203,34 @@ describe("tightening P3 — the card, on the same system (the row stood upright)
     }
   });
 });
+
+describe("tightening P4 — the sweep + the record", () => {
+  it("the flex-era remnants are EXTINCT (grep-locked)", () => {
+    for (const dead of ["tdb-ltags", "tdb-lgo", "tdb-ltile", "tdb-lbody", "tdb-tagline", "tdb-lbsub", "tdb-mmeta", "tdb-lshow", "tdb-chipon", "tdb-lddot", "tdb-ldtick", "tdb-vwrap", "tdb-vstack", "tdb-gdetail"]) {
+      expect(page).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+    // the retired width tokens went with the absolute surface
+    for (const tok of ["--tdb-cardw", "--tdb-cardh"]) expect(css).not.toContain(tok);
+  });
+
+  it("themes.md records THE COLUMN SYSTEM: the tracks, the reserved lane, the pinned foot, the law", () => {
+    const themes = readFileSync(join(here, "..", "..", "..", "design-refs", "themes.md"), "utf8");
+    expect(themes).toContain("## The column system");
+    expect(themes).toContain("no list or card element positions itself with auto margins");
+    expect(themes).toContain("THE LEDGER TRACKS");
+    expect(themes).toContain("THE RESERVED ACTION LANE");
+    expect(themes).toContain("THE CARD IS THE ROW STOOD UPRIGHT");
+    expect(themes).toContain("KIND ≠ STATUS");
+  });
+
+  it("every tour anchor still resolves after the rebuild", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    for (const sel of [".spine-rail", ".tdb-herobegin", ".svh-btn-primary", ".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink", ".tdb-today2"]) {
+      expect(tour).toContain(sel);
+    }
+    // the card/row stop's selectors all survive as live classes
+    expect(tour).toContain(".tdb-tile, .tdb-gcard, .tdb-lrow");
+    for (const cls of [".tdb-tile", ".tdb-gcard", ".tdb-lrow"]) expect(css).toContain(cls);
+  });
+});

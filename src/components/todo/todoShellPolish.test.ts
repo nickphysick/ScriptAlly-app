@@ -100,7 +100,7 @@ describe("shell polish P3 — sticker cards", () => {
   });
   it("the pastille bands + white tag pills inside are UNCHANGED (the sticker is on the card only)", () => {
     expect(rule(".tdb-band.hk")).toContain("linear-gradient(180deg, var(--lat-1), var(--lat-2))"); // the latte band, untouched
-    expect(rule(".tdb-tag")).toContain("background: var(--white)"); // white tag pills, untouched
+    expect(rule(".tdb-ktag")).toContain("background: #f7f2e9"); // the tightening: the kind chip replaced the white pills
   });
   it("the ledger rows, the Today pop-up and the session page are NOT stickers", () => {
     // the sticker selectors are the card tiles only — never the ledger row, the Today card or the session page

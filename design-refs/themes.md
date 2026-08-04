@@ -1218,3 +1218,39 @@ inserted-then-removed.
 **DESTRUCTION ASKS FIRST.** Delete is gated on the styled confirm — an undo toast is a safety net
 *after* consent, not a substitute for it. A task warns harder than a note, naming that its date goes
 too and, when it is on Today's list, that it leaves that list.
+
+## The column system (To-do — the tightening; refs `design-refs/ledger-grid.html` system A + `design-refs/card-grid.html`)
+The board's two views share ONE positioning system, and the root law it exists to enforce:
+**no list or card element positions itself with auto margins** — the old flex +
+`margin-left:auto` layout let every item compute its own positions, so nothing aligned down
+the page. The one sanctioned auto margin is the card foot's `margin-top:auto`: a **vertical
+pin** inside the shared min-height, never a horizontal position.
+
+**THE LEDGER TRACKS.** Every row — unit, member, batch — is a CSS grid on one token:
+`--lg-tracks: 14px | minmax(0,1fr) | 132px | 150px | 132px` (dot · task · kind · status ·
+action), rows 56px (`--lg-row-h`), hairline-separated, whole-row hover tint, clickable to
+open. The mono column header (TASK · KIND · STATUS · ACTION, action right) renders **on the
+same tracks**, so its alignment cannot drift from the columns' contents.
+
+**KIND ≠ STATUS.** `kind` is the facet tag — the same classification the filter chips draw
+(OFFER · AGENT WAITING · STALE · MATERIALS / WISH LIST · YOUR TASK · NOTE) — in a small
+squared chip (`.tdb-ktag`, radius 5; ★ OFFER keeps its star in markup; ✓ TODAY is the sage
+`.on` state). `due` carries ONLY tabular mono figures ("REQUESTED 12 JUL" from the query's own
+`lastStatusChange` audit stamp — absent → an empty cell, never an invented date; "SILENT {n}
+DAYS"; the reply-by countdown). Batch rows put the progress bar + count in that same status
+lane. The white-pill `.tdb-tag` family is extinct; what its law protected survives translated
+(no pink fill on a tag, burgundy never fills one).
+
+**THE RESERVED ACTION LANE.** Always its full track width: a quiet chevron at rest; the ink
+primary + the ＋/− and clock icon buttons revealed on `:hover`/`:focus-within` **absolutely
+within the lane** — revealing them can never add width or shift a sibling. Keyboard reach
+mirrors hover exactly.
+
+**THE CARD IS THE ROW STOOD UPRIGHT.** Band = kind tag left + the SAME `due` figures right in
+tabular mono, on a two-track grid. Body = title + manuscript line + the batch progress in a
+**fixed slot** (present or absent, the foot never repositions). Foot = the identical action
+lane, **pinned with `margin-top:auto` inside the shared `--card-minh` (150px)** — every card
+family shares it (unit, batch, AND the user note/task cards), so feet sit level across a row
+whatever the title lengths. The hover-verb reveal machinery is extinct: feet cannot align if
+actions only exist on hover. Four columns at the standard tier; ≥1700px takes five. The
+sticker treatment (ink border + family offset block) is untouched.

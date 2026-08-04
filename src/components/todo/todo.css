@@ -402,7 +402,6 @@
 .tdb-lrow.lsub { background: #fbf8f2; animation: tdbGroupIn 200ms ease; }
 .tdb-lrow.lsub .tdb-ltask { padding-left: 14px; }
 .tdb-lrow.lsub .tdb-lbt.sm { font-size: 12.5px; }
-.tdb-lshow { flex: 0 0 auto; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--lat-ink); white-space: nowrap; }
 .tdb-lpage { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); box-sizing: border-box; margin: 0 0 7px 40px; padding: 10px; background: none; border: 1.5px dashed var(--lat-bd); border-radius: 9px; color: var(--lat-ink); font-size: 11px; font-weight: 600; cursor: pointer; animation: tdbGroupIn 200ms ease; }
 /* ── notes-and-tasks P2 — THE COMPOSER (design-refs/notes-and-tasks.html · frame 2): one card,
    two natures. The offset block (--nt-comp-block) swaps butter↔sage by mode; the title/detail
@@ -617,9 +616,6 @@ button.tdb-ldot { cursor: pointer; }
    ★ OFFER and urgency — white fill, 1px faint-ink border (rgba = the live --ink #1e1a16 @ 25%;
    the ref's #3a1c14 realised as the live token), ink text. OFFER keeps its ★ + 700; urgency
    keeps 700. The ink-filled tag and the 1.5px ink frame are retired. */
-.tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid rgba(30, 26, 22, 0.25); background: var(--white); color: var(--ink); white-space: nowrap; }
-.tdb-tag.due.warn { font-weight: 700; }
-.tdb-tag.offer { font-weight: 700; }
 .tdb-tt { font-family: var(--f12-serif); font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-tsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-ms { font-family: var(--f12-serif); font-style: italic; color: var(--ink-2); }

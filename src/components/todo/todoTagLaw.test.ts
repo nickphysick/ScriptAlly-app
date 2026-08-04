@@ -21,43 +21,21 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("THE SOFT TAG LAW (Polish III — third and final revision) — rule-text locks", () => {
-  it("EVERY tag is white fill / faint-ink border / ink text — the base rule", () => {
-    const base = rule(".tdb-tag");
-    expect(base).toContain("background: var(--white)");
-    expect(base).toContain("color: var(--ink)");
-    expect(base).toContain("border: 1px solid rgba(30, 26, 22, 0.25)"); // the live --ink @ 25%
-    expect(css).not.toMatch(/\.tdb-tag\.snz\s*\{/);
+describe("THE SOFT TAG LAW — SUPERSEDED by the tightening (the kind chip)", () => {
+  // The white-pill .tdb-tag family is EXTINCT: the tightening's KIND lane replaced the status
+  // tags with a single squared chip (.tdb-ktag — mono 6.5, #f7f2e9 fill, #e8e1d0 hairline,
+  // radius 5), identical in the ledger's kind column and the card band. What the law protected
+  // survives translated: no pink fill on any tag, burgundy never fills one, ★ OFFER keeps its
+  // star in MARKUP (`★ ${c.kind}`), and the ✓ TODAY state is the sage .tdb-ktag.on.
+  it("the white-pill family is extinct; the kind chip is the one tag", () => {
+    expect(css).not.toMatch(/\.tdb-tag[\s.{]/);
+    const k = rule(".tdb-ktag");
+    expect(k).toContain("background: #f7f2e9");
+    expect(k).toContain("border: 1px solid #e8e1d0");
+    expect(k).toContain("border-radius: 5px");
   });
-
-  it("urgency keeps 700 ONLY — the 1.5px ink frame is retired", () => {
-    const warn = rule(".tdb-tag.due.warn");
-    expect(warn).toContain("font-weight: 700");
-    expect(warn).not.toContain("1.5px");
-    expect(warn).not.toContain("border");
-  });
-
-  it("★ OFFER is soft too — white like every other tag, keeping ★ (markup) + 700; the ink fill is retired", () => {
-    const offer = rule(".tdb-tag.offer");
-    expect(offer).toContain("font-weight: 700");
-    expect(offer).not.toContain("background: var(--ink)");
-    expect(offer).not.toContain("color: #fff");
-  });
-
-  it("no tag variant re-inks anything — one look, both views (the cof tint is retired)", () => {
-    expect(css).not.toMatch(/\.tdb-tag\.cof\s*\{/);
-    const tagRules = css.match(/\.tdb-tag[^{]*\{[^}]*\}/g) ?? [];
-    for (const r of tagRules) {
-      expect(r).not.toContain("--burg");
-      const bg = r.match(/background:\s*([^;]+);/);
-      if (bg) expect(bg[1].trim()).toBe("var(--white)");
-      for (const tint of ["--pink-t", "--pink-i", "--pink-btn", "--pink-deep", "--note-t", "--note-i", "--hk-cof"]) {
-        expect(r).not.toContain(tint);
-      }
-    }
-  });
-
-  it("gold stays retired from the board stylesheet", () => {
-    expect(css).not.toMatch(/--gold/);
+  it("no tag carries a pink fill; burgundy never fills one; TODAY is the sage state", () => {
+    expect(rule(".tdb-ktag")).not.toMatch(/#f5c7c2|#f2cec1|#7c3a2a/);
+    expect(rule(".tdb-ktag.on")).toContain("var(--hk-sage)");
   });
 });

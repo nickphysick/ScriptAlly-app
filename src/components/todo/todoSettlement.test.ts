@@ -151,7 +151,7 @@ describe("settlement P4 — the sweep", () => {
     // the three families' band tokens and the white tag pills stand exactly as deployed
     for (const t of ["--pink-t", "--pink-b", "--lat-1", "--lat-2"]) expect(css).toContain(t);
     expect(css).toContain(".tdb-band"); // the card band grammar
-    expect(rule(".tdb-tag")).toContain("background: var(--white)"); // white tag pills
+    expect(rule(".tdb-ktag")).toContain("background: #f7f2e9"); // the tightening: the kind chip is the one tag
   });
   it("the tour still lands: Begin's anchor rode to the hero (the workspace shell)", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
