@@ -11,6 +11,11 @@
  *   - Field validation: valid fixtures pass; invalid values and disallowed fields are rejected
  *   - affectedKeys: update attempts with fields outside the allowlist are rejected
  *   - communityAgents: intended model + open-create finding surfaced
+ *   - notes / tasks / taskFlags / genreSuggestions: owner scoping, closed shapes, enum values and
+ *     update allowlists — including the tasks committedDate update denial, locked as a KNOWN BUG
+ *     (Tier 1 · Phase 3, 4 Aug 2026: the fix is blocked behind a todo-stream-owned artefact lock;
+ *     flip that test to assertSucceeds in the same commit that appends 'committedDate' to the
+ *     tasks update allowlist and amends todoNotesTasks.test.ts)
  *   - /test/connection: public read allowed, write blocked
  *   - /waitlist, /counters: hard deny
  *
@@ -195,6 +200,47 @@ const validDismissedTask = (uid = ALICE) => ({
   relatedRecordId: 'q-1',
   dismissedDate: '2026-01-01T00:00:00.000Z',
   dismissType: 'permanent',
+});
+
+// isValidUserNote uses the `== null` pattern for dueDate/doneAt, which ERRORS on an absent key —
+// so the valid shape carries both keys explicitly (null when dateless), exactly as the app writes.
+const validUserNote = (uid = ALICE) => ({
+  id: 'note-1',
+  userId: uid,
+  text: 'Ring the bookshop about the launch table.',
+  colour: 'sage',
+  dueDate: null,
+  done: false,
+  doneAt: null,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+});
+
+// Minimal valid UserTask — every optional field (detail, completedAt, record scope, dueDate,
+// surfaceOffset, committedDate) is guarded by hasAny in the rules, so absence is fine.
+const validUserTask = (uid = ALICE) => ({
+  id: 'task-1',
+  userId: uid,
+  text: 'Follow up with the printers',
+  done: false,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+});
+
+const validTaskFlag = (uid = ALICE) => ({
+  id: 'full_requested__q-1',
+  userId: uid,
+  taskType: 'full_requested',
+  queryId: 'q-1',
+  snoozeCount: 0,
+});
+
+const validGenreSuggestion = (uid = ALICE) => ({
+  id: `${uid}__cosy-horror`,
+  normalisedLabel: 'cosy-horror',
+  label: 'Cosy Horror',
+  userId: uid,
+  createdAt: '2026-01-01T00:00:00.000Z',
 });
 
 const validCommunityAgent = () => ({
@@ -868,6 +914,257 @@ describe('/users/{userId}/dismissedTasks', () => {
   });
 });
 
+// ─── /users/{userId}/notes (desk notes / dated tasks) ───────────────────────
+
+describe('/users/{userId}/notes', () => {
+  it('owner can create a valid note (dueDate/doneAt present as null — the app always writes them)', async () => {
+    const db = aliceCtx().firestore();
+    await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'notes', 'note-1'), validUserNote(ALICE)));
+  });
+
+  it('rejects a note with an invalid colour (enum is pink | sage | yellow)', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'notes', 'note-1'), { ...validUserNote(ALICE), colour: 'butter' })
+    );
+  });
+
+  it('rejects a note with a field outside the closed shape', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'notes', 'note-1'), { ...validUserNote(ALICE), pinned: true })
+    );
+  });
+
+  it('a create MISSING the dueDate key is denied — the `== null` pattern needs the key present', async () => {
+    // Documents the sharp edge (see isValidUserTask's completedAt comment in firestore.rules):
+    // rules error on absent-key access, so the app writes dueDate: null for dateless notes.
+    const db = aliceCtx().firestore();
+    const { dueDate, ...missingDueDate } = validUserNote(ALICE);
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'notes', 'note-1'), missingDueDate));
+  });
+
+  it('owner can update allowlisted fields (text · done · doneAt · updatedAt)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'notes', 'note-1'), validUserNote(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'notes', 'note-1'), {
+        text: 'Ring the bookshop — table confirmed.',
+        done: true,
+        doneAt: '2026-01-02T09:00:00.000Z',
+        updatedAt: '2026-01-02T09:00:00.000Z',
+      })
+    );
+  });
+
+  it('rejects an update touching createdAt (outside the update allowlist)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'notes', 'note-1'), validUserNote(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'notes', 'note-1'), { createdAt: '2020-01-01T00:00:00.000Z' })
+    );
+  });
+
+  it('owner can list their notes', async () => {
+    await assertSucceeds(getDocs(collection(aliceCtx().firestore(), 'users', ALICE, 'notes')));
+  });
+
+  it('blocks cross-user read', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'notes', 'note-1'), validUserNote(ALICE));
+    });
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'users', ALICE, 'notes', 'note-1')));
+  });
+
+  it('blocks unauthenticated write', async () => {
+    await assertFails(
+      setDoc(doc(unauthed().firestore(), 'users', ALICE, 'notes', 'note-1'), validUserNote(ALICE))
+    );
+  });
+});
+
+// ─── /users/{userId}/tasks (UserTask — the canonical stored to-do object) ───
+
+describe('/users/{userId}/tasks', () => {
+  it('owner can create a valid minimal task', async () => {
+    const db = aliceCtx().firestore();
+    await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE)));
+  });
+
+  it('owner can create a task WITH dueDate, surfaceOffset and committedDate (all in the create shape)', async () => {
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      setDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), {
+        ...validUserTask(ALICE),
+        dueDate: '2026-02-14',
+        surfaceOffset: 'day-before',
+        committedDate: '2026-02-13',
+      })
+    );
+  });
+
+  it('rejects a create with an invalid surfaceOffset (enum is on-day | day-before | week-before)', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { ...validUserTask(ALICE), surfaceOffset: 'fortnight-before' })
+    );
+  });
+
+  it('rejects a create with a non-string committedDate', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { ...validUserTask(ALICE), committedDate: 42 })
+    );
+  });
+
+  it('rejects a create with a field outside the closed shape', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { ...validUserTask(ALICE), priority: 'high' })
+    );
+  });
+
+  it('owner can update allowlisted fields (text · done · completedAt · updatedAt)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), {
+        text: 'Printers chased.',
+        done: true,
+        completedAt: '2026-01-03T12:00:00.000Z',
+        updatedAt: '2026-01-03T12:00:00.000Z',
+      })
+    );
+  });
+
+  it('rejects an update touching queryId (record scope is create-only input)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9' })
+    );
+  });
+
+  /**
+   * ⚠️ KNOWN BUG, locked deliberately (Tier 1 · Phase 3, 4 Aug 2026).
+   *
+   * committedDate IS client-updated post-create — Today's-list commit/uncommit (ToDoPage
+   * toggleToday) and FocusFlow's Monday seeding both route through db.tsx updateUserTask — but
+   * the tasks update allowlist omits it, so every such write is silently denied (updateUserTask
+   * swallows the error; the optimistic patch rolls back on the next snapshot).
+   *
+   * The one-line fix (append 'committedDate' to the hasOnly list) is blocked for this stream:
+   * todoNotesTasks.test.ts pins the exact list string and src/components/todo/** is out of
+   * scope. FLIP THIS TEST to assertSucceeds in the same commit that lands both halves.
+   */
+  it('[KNOWN BUG] a Today\'s-list commit — update {committedDate, updatedAt} — is DENIED by the allowlist', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), {
+        committedDate: '2026-08-04',
+        updatedAt: '2026-08-04T10:00:00.000Z',
+      })
+    );
+  });
+
+  it('blocks cross-user read', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'users', ALICE, 'tasks', 'task-1')));
+  });
+
+  it('blocks unauthenticated write', async () => {
+    await assertFails(
+      setDoc(doc(unauthed().firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE))
+    );
+  });
+});
+
+// ─── /users/{userId}/taskFlags (stances on derived tasks) ───────────────────
+
+describe('/users/{userId}/taskFlags', () => {
+  it('owner can create a valid flag', async () => {
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      setDoc(doc(db, 'users', ALICE, 'taskFlags', 'full_requested__q-1'), validTaskFlag(ALICE))
+    );
+  });
+
+  it('rejects a flag with a field outside the closed shape', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'taskFlags', 'full_requested__q-1'), { ...validTaskFlag(ALICE), sneaky: true })
+    );
+  });
+
+  it('rejects a negative snoozeCount', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'taskFlags', 'full_requested__q-1'), { ...validTaskFlag(ALICE), snoozeCount: -1 })
+    );
+  });
+
+  it('rejects a committedDate over 16 chars (date-only strings, never datetimes)', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'taskFlags', 'full_requested__q-1'), {
+        ...validTaskFlag(ALICE),
+        committedDate: '2026-08-04T10:00:00.000Z', // 24 chars — the field is "YYYY-MM-DD"
+      })
+    );
+  });
+
+  it('owner can full-overwrite with committedDate — the upsert path derived tasks commit through', async () => {
+    // Contrast with the tasks suite's KNOWN BUG: derived-task Today commits go through
+    // upsertTaskFlag's whole-doc setDoc, whose closed shape includes committedDate — so THIS
+    // path works today while the stored-task update path is denied.
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'taskFlags', 'full_requested__q-1'), validTaskFlag(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      setDoc(doc(db, 'users', ALICE, 'taskFlags', 'full_requested__q-1'), {
+        ...validTaskFlag(ALICE),
+        committedDate: '2026-08-04',
+      })
+    );
+  });
+
+  it('owner can list and delete their flags', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'taskFlags', 'full_requested__q-1'), validTaskFlag(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(getDocs(collection(db, 'users', ALICE, 'taskFlags')));
+    await assertSucceeds(deleteDoc(doc(db, 'users', ALICE, 'taskFlags', 'full_requested__q-1')));
+  });
+
+  it('blocks cross-user write', async () => {
+    await assertFails(
+      setDoc(doc(bobCtx().firestore(), 'users', ALICE, 'taskFlags', 'full_requested__q-1'), validTaskFlag(ALICE))
+    );
+  });
+
+  it('blocks unauthenticated read', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'taskFlags', 'full_requested__q-1'), validTaskFlag(ALICE));
+    });
+    await assertFails(getDoc(doc(unauthed().firestore(), 'users', ALICE, 'taskFlags', 'full_requested__q-1')));
+  });
+});
+
 // ─── /communityAgents ────────────────────────────────────────────────────────
 
 describe('/communityAgents', () => {
@@ -1008,6 +1305,74 @@ describe('/communityAgents', () => {
       await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
     });
     await assertFails(getDoc(doc(unauthed().firestore(), 'communityAgents', 'ca-1')));
+  });
+});
+
+// ─── /genreSuggestions (taxonomy promotion queue) ────────────────────────────
+
+describe('/genreSuggestions', () => {
+  it('signed-in user can create their OWN suggestion', async () => {
+    await assertSucceeds(
+      setDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), validGenreSuggestion(ALICE))
+    );
+  });
+
+  it("rejects a suggestion carrying someone else's userId", async () => {
+    await assertFails(
+      setDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), {
+        ...validGenreSuggestion(ALICE),
+        userId: BOB,
+      })
+    );
+  });
+
+  it('rejects a suggestion with a field outside the closed shape', async () => {
+    await assertFails(
+      setDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), {
+        ...validGenreSuggestion(ALICE),
+        source: 'app',
+      })
+    );
+  });
+
+  it('rejects a label over 64 chars', async () => {
+    await assertFails(
+      setDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), {
+        ...validGenreSuggestion(ALICE),
+        label: 'x'.repeat(65),
+      })
+    );
+  });
+
+  it('the creator CANNOT read their own suggestion back (reads are admin-only — privacy)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), validGenreSuggestion(ALICE));
+    });
+    await assertFails(getDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`)));
+  });
+
+  it('admin CAN read the queue', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), validGenreSuggestion(ALICE));
+    });
+    await assertSucceeds(getDoc(doc(adminCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`)));
+  });
+
+  it('non-admin cannot update or delete; admin can delete (promote/dismiss)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), validGenreSuggestion(ALICE));
+    });
+    await assertFails(
+      updateDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), { label: 'Cosier Horror' })
+    );
+    await assertFails(deleteDoc(doc(aliceCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`)));
+    await assertSucceeds(deleteDoc(doc(adminCtx().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`)));
+  });
+
+  it('blocks unauthenticated create', async () => {
+    await assertFails(
+      setDoc(doc(unauthed().firestore(), 'genreSuggestions', `${ALICE}__cosy-horror`), validGenreSuggestion(ALICE))
+    );
   });
 });
 
