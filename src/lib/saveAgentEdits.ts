@@ -172,10 +172,11 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
 /**
  * Sanitise the patch and commit it (plus any `extraWrites`) as a single atomic `writeBatch`.
  *
- * Deliberately does NOT touch `lastCheckedDate`: a field edit is not a re-verification, so it must
- * not reset the freshness clock (unlike `updateAgent`, which stamps it). The rule requires
- * `lastCheckedDate` to be present, but `batch.update` merges, so the existing value is preserved on
- * the resulting doc and the rule still passes. Returns a typed result; never throws.
+ * Does NOT touch `lastCheckedDate` — the app-wide rule, not a local exception: the field means
+ * "last VERIFIED", so it moves only at creation and by a deliberate act of verification, never as
+ * a side effect of editing (updateAgent abstains identically). The Firestore rule requires
+ * `lastCheckedDate` to be present, but `batch.update` merges, so the existing value is preserved
+ * on the resulting doc and the rule still passes. Returns a typed result; never throws.
  *
  * `extraWrites` is THE fan-out seam (Prompt 3): the agent doc rides in the FIRST batch alongside as
  * many query-deadline updates as fit, so the common case (≤ 499 extras) is a single atomic commit.

@@ -1367,6 +1367,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return { success: false, error: "Operation failed." };
   };
 
+  // Deliberately NO lastCheckedDate stamp anywhere in this function: the field means "last
+  // VERIFIED", and an edit is not a verification (see the Agent type + saveAgentEdits, which
+  // states the same rule). Creation stamps it (addAgent); a future explicit "mark as checked"
+  // action is the only other legitimate writer. Comment kept ABOVE the function so the artefact
+  // lock (agentLastChecked.test.ts) can assert the body never mentions the field.
   const updateAgent = async (id: string, fields: Partial<Agent>) => {
     if (!currentUser) return;
     const existingAgent = agents.find(a => a.id === id);
@@ -1377,10 +1382,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     let writeSuccess = false;
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "agents", id), {
-        ...fields,
-        lastCheckedDate: new Date().toISOString()
-      });
+      await updateDoc(doc(db, "users", currentUser.id, "agents", id), { ...fields });
       writeSuccess = true;
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);

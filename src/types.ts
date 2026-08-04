@@ -234,7 +234,10 @@ export interface Agent {
   submissionMethod: SubmissionMethod;
   materialsWanted: string[]; // e.g. ["Query Letter", "Synopsis", "First 10 pages"]
   dateAdded: string; // ISO String
-  lastCheckedDate: string; // ISO String
+  lastCheckedDate: string; // ISO string — when the writer last VERIFIED these details are still
+  // accurate ("last checked", never "last edited"). Stamped at creation, because creating the
+  // record is verifying it; edits must not move it. A deliberate "mark as checked" act is the
+  // only other legitimate writer (UI not yet built — Tier 2).
   notes: string;
   agentNotes?: string;
   // Standing disposition set when logging a rejection: would you query this agent again (different MS)?
