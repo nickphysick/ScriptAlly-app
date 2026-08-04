@@ -610,6 +610,16 @@ service cloud.firestore {
         allow get, delete: if isOwner(userId) && isValidId(taskId);
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId);
+        // ⚠️ KNOWN SILENT DENIAL (Tier 1 recon, 4 Aug 2026): committedDate IS client-updated
+        // post-create — Today's-list commit/uncommit (ToDoPage toggleToday, db.tsx
+        // updateUserTask) and the Sunday review's Monday seeding (FocusFlow) — and every such
+        // update is denied by the allowlist below (silently: updateUserTask swallows the error
+        // and the optimistic patch rolls back on the next snapshot). The fix is to append
+        // 'committedDate' to the list — BLOCKED this run: the exact list string is pinned by
+        // the todo-stream-owned lock (todoNotesTasks.test.ts, "update affectedKeys"), and
+        // src/components/todo/** is out of this stream's scope. Unblock = append it in BOTH
+        // places in one commit; the value shape is already enforced by isValidUserTask above.
+        // The rules suite covers the denial as a KNOWN BUG (tests/rules, tasks describe).
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset'])
         );
