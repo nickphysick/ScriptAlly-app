@@ -7,22 +7,17 @@ import React, { useLayoutEffect, useState, useEffect, useRef } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
-import { 
-  doc, 
-  updateDoc, 
-  setDoc, 
-  deleteDoc, 
-  collection, 
-  serverTimestamp, 
-  Timestamp, 
+import {
+  doc,
+  updateDoc,
+  setDoc,
+  collection,
+  Timestamp,
   deleteField,
   onSnapshot,
   query,
   orderBy,
-  limit,
-  getDocs,
-  where,
-  addDoc
+  limit
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType } from "../types";
@@ -694,97 +689,6 @@ export const Queries: React.FC<{
 
     return () => unsubscribe();
   }, [selectedQueryId, currentUser?.id]);
-
-  // Run Part 1 & Part 6 cleanup/retrospective logic once on app load
-  useEffect(() => {
-    if (!currentUser?.id) return;
-
-    const runTimelineCleanup = async () => {
-      try {
-        if (localStorage.getItem('timelineCleanupV3')) return;
-        const userId = currentUser.id;
-
-        const validStatuses = Object.values(QueryStatus);
-
-        const queriesSnap = await getDocs(
-          collection(db, 'users', userId, 'queries')
-        );
-
-        for (const queryDoc of queriesSnap.docs) {
-          const activitySnap = await getDocs(
-            collection(db, 'users', userId, 'queries', queryDoc.id, 'activity')
-          );
-
-          for (const activityDoc of activitySnap.docs) {
-            const type = activityDoc.data().type;
-            // Delete any document whose type is not a valid QueryStatus enum value
-            if (!validStatuses.includes(type)) {
-              await deleteDoc(activityDoc.ref);
-            }
-          }
-
-          // Also delete duplicates — if two documents have the same type, keep only the latest
-          const validDocs = activitySnap.docs.filter(d =>
-            validStatuses.includes(d.data().type)
-          );
-          const seenTypes = new Set<string>();
-          const sortedByDate = [...validDocs].sort((a, b) => {
-            const aTime = a.data().createdAt?.seconds ?? 0;
-            const bTime = b.data().createdAt?.seconds ?? 0;
-            return bTime - aTime; // newest first
-          });
-          for (const d of sortedByDate) {
-            const type = d.data().type;
-            if (seenTypes.has(type)) {
-              await deleteDoc(d.ref); // delete older duplicate
-            } else {
-              seenTypes.add(type);
-            }
-          }
-        }
-
-        // Run Part 6: Retrospective activity document for Murphy Wurph query
-        const murphyQuery = queriesSnap.docs.find(d =>
-          d.data().agentName === 'Murphy Wurph' &&
-          d.data().status === QueryStatus.PARTIAL_REQUESTED
-        );
-
-        if (murphyQuery) {
-          const existingActivity = await getDocs(
-            query(
-              collection(db, 'users', userId, 'queries', murphyQuery.id, 'activity'),
-              where('type', '==', QueryStatus.PARTIAL_REQUESTED)
-            )
-          );
-
-          if (existingActivity.empty) {
-            const data = murphyQuery.data();
-            await addDoc(
-              collection(db, 'users', userId, 'queries', murphyQuery.id, 'activity'),
-              {
-                type: QueryStatus.PARTIAL_REQUESTED,
-                createdAt: data.lastStatusChange ?? serverTimestamp(),
-                note: data.materialsRequestedQuantity
-                  ? `Partial manuscript requested — ${data.materialsRequestedQuantity} ${data.materialsRequestedType}`
-                  : 'Partial manuscript requested',
-                queryId: murphyQuery.id,
-                agentName: data.agentName ?? 'Murphy Wurph',
-                manuscriptTitle: data.manuscriptTitle ?? "Bethus' Beautiful Peonies",
-                materialsType: data.materialsRequestedType ?? null,
-                materialsQuantity: data.materialsRequestedQuantity ?? null,
-              }
-            );
-          }
-        }
-
-        localStorage.setItem('timelineCleanupV3', 'true');
-      } catch (err) {
-        console.error("Cleanup/Retrospective error:", err);
-      }
-    };
-
-    runTimelineCleanup();
-  }, [currentUser?.id]);
 
   const triggerToast = (config: {
     queryId: string;
