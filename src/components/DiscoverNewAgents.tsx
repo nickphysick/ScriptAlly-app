@@ -384,8 +384,29 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       </>
     );
 
-  /* ── First-run no-match strip — three manuscript cases ── */
+  /* ── First-run no-match strip — the pool first, then the three manuscript cases ── */
   const renderNoMatch = () => {
+    // An EMPTY POOL is its own state (Tier 2 · Phase 7): communityAgents seeding is admin-gated,
+    // so an unseeded catalogue is reachable in the wild — and it used to fall into the
+    // "no matches for {title} yet" message below, which blames genre fit and offers
+    // try-another-manuscript: a dead route when no manuscript could match an empty catalogue.
+    // Said plainly instead, with no route offered — none exists from here. (Filters hiding
+    // everything is the separate results-view state, which keeps its clear-filters way back.)
+    if ((communityAgents || []).length === 0) {
+      return (
+        <div className="dv-nomatch">
+          <div>
+            <div className="nm1">
+              The community catalogue is <b>empty</b> right now
+            </div>
+            <div className="nm2">
+              There are no agents in the shared pool yet, so there is nothing to match against —
+              for any manuscript. Check back once the catalogue has been stocked.
+            </div>
+          </div>
+        </div>
+      );
+    }
     if (pickable.length === 0) {
       return (
         <div className="dv-nomatch">
