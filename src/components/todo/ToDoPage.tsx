@@ -1919,7 +1919,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
           <div className={`tdb-band ${c.stream}`}>
             <span className="tdb-bandl">
-              <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>
+              {/* ⚠️ GUARDED, like the list row at the top of this file. `kind` is "" for a user
+                  task (todoBoard's default branch), so an unguarded render drew an EMPTY PILL —
+                  chrome with nothing in it, which reads as a load failure rather than an absence. */}
+              {c.kind && <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>}
               {c.snoozes > 0 && <span className="tdb-ktag snz">×{c.snoozes}</span>}
               {committed && <span className="tdb-ktag on">✓ TODAY</span>}
             </span>

@@ -34,6 +34,39 @@ export type BoardStream = "do" | "hk" | "nt" | "done";
 const DO_NEXT_TYPES: ReadonlySet<string> = new Set(["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue"]);
 const HK_TYPES: ReadonlySet<string> = new Set(["data_quality_poor", "no_response_close"]);
 
+/**
+ * ⚠️ THE SILENCE ANCHOR — how long an agent has been quiet, in whole days.
+ *
+ * THE BUG THIS FIXES: the card read the figure off `queryAmbientStatus(q, "agent")`, which picks
+ * its send date from the query's STATUS — QUERIED → dateSent, PARTIAL_SENT → partialSentDate,
+ * anything else → fullSentDate. A nudge/close task on a query in any other status therefore
+ * looked for a `fullSentDate` that was never set, got NaN, fell through to the override branch
+ * with `sentMs: null`, and the template printed a bare "SILENT" — dropping a figure `dateSent`
+ * could have supplied all along.
+ *
+ * ⚠️ FIXED HERE RATHER THAN IN queryAmbientStatus, deliberately: that function drives the Queries
+ * tracking readout, where "days at THIS stage" is the correct reading. Silence since the writer
+ * last sent ANYTHING is a different question, and this is the only place that asks it.
+ *
+ * Falls back down the chain and returns null only when the query genuinely carries no send date —
+ * in which case "SILENT" with no figure is the honest render, not a dropped one.
+ */
+export function silentDays(
+  q: Pick<Query, "status" | "dateSent" | "partialSentDate" | "fullSentDate"> | undefined,
+  now: number,
+): number | null {
+  if (!q) return null;
+  const st = q.status as QueryStatus;
+  const stageIso = st === QueryStatus.PARTIAL_SENT ? q.partialSentDate
+    : st === QueryStatus.FULL_SENT ? q.fullSentDate
+    : q.dateSent;
+  const iso = stageIso ?? q.dateSent;
+  if (!iso) return null;
+  const ms = new Date(iso).getTime();
+  if (Number.isNaN(ms)) return null;
+  return Math.max(0, Math.floor((now - ms) / 86400000));
+}
+
 export function boardStreamForTaskType(taskType: string): "do" | "hk" | null {
   if (DO_NEXT_TYPES.has(taskType)) return "do";
   if (HK_TYPES.has(taskType)) return "hk";
@@ -62,6 +95,11 @@ export interface BoardCard {
   // action wiring
   taskType?: string;
   relatedRecordId?: string;
+  /* ⚠️ IDENTITY, not presentation. The card carried the agent's NAME and the query id, so two
+     queries to one agent were indistinguishable to any dedupe and identical to the eye. These two
+     are what "the same piece of work" actually means here. */
+  agentId?: string;
+  msTitle?: string;
   userTaskId?: string;
   // notes-and-tasks: the two natures of a user card + the derived task state (user cards only).
   nature?: "note" | "task";
@@ -162,13 +200,11 @@ function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms
     case "revise_resubmit":
       return { kind: "AGENT WAITING", title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
     case "nudge_overdue": {
-      const a = agentWait();
-      const days = a && a.sentMs != null ? a.nDays : null;
+      const days = silentDays(q, now);
       return { kind: "AGENT WAITING", title: `Nudge ${name}`, who: name, subtitle: msTitle, due: days != null ? `${days} DAYS · NO REPLY` : "NO REPLY YET", warn: days != null && days > 84, status: q?.status, hk: false };
     }
     case "no_response_close": {
-      const a = agentWait();
-      const days = a && a.sentMs != null ? a.nDays : null;
+      const days = silentDays(q, now);
       return { kind: "STALE", title: `${name} silent${days != null ? ` for ${days} days` : ""}`, who: name, subtitle: "No reply — consider closing", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
     }
     case "data_quality_poor": {
@@ -210,6 +246,8 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
       : {}),
     taskType: task.taskType,
     relatedRecordId: task.relatedRecordId,
+    agentId: ag?.id,
+    msTitle: ms?.title || task.manuscriptTitle || undefined,
   };
 }
 
@@ -308,8 +346,60 @@ function orderDoNext(cards: BoardCard[]): BoardCard[] {
   return [...cards].sort((a, b) => rank(a) - rank(b));
 }
 
+/**
+ * ⚠️ THE "MARCUS REED TWICE" FIX, and the cause is NOT duplicate activities.
+ *
+ * Derived tasks are generated PER QUERY (`task-nudge-${q.id}`, `task-no-res-close-${q.id}`…), and
+ * one agent can hold several queries. Two rows for one agent are therefore usually two real pieces
+ * of work — but the row's title carries the AGENT ALONE ("Nudge Marcus Reed"), so two legitimate
+ * rows render identically and read as a bug. And where two queries share both agent and
+ * manuscript, they genuinely ARE one piece of work rendered twice.
+ *
+ * So this does two things, in that order:
+ *   1. COLLAPSE true duplicates — same task type, same agent, same manuscript. The first survives
+ *      (the lanes are already ordered by urgency, so the first is the one worth keeping).
+ *   2. DISAMBIGUATE the legitimate remainder — where a type+agent pair still has more than one row,
+ *      each surviving row must carry its manuscript in the meta line, so two rows for one agent
+ *      can never look like the same row twice.
+ *
+ * ⚠️ IT DEDUPES ON THE DERIVATION, NOT THE RENDER. Hiding the second row would lose real work;
+ * what was wrong was a key that ignored the manuscript and a title that dropped it.
+ */
+export function dedupeAgentCards(cards: BoardCard[]): BoardCard[] {
+  const seen = new Set<string>();
+  const kept: BoardCard[] = [];
+  for (const c of cards) {
+    // Cards with no agent (user tasks, manuscript prompts) are never collapsed — they have no
+    // agent identity to collide on.
+    const id = c.agentId ? `${c.taskType ?? ""}|${c.agentId}|${c.msTitle ?? ""}` : null;
+    if (id) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+    }
+    kept.push(c);
+  }
+  // Pass 2: any type+agent pair still holding more than one row must name its manuscript.
+  const pairCount = new Map<string, number>();
+  for (const c of kept) {
+    if (!c.agentId) continue;
+    const k = `${c.taskType ?? ""}|${c.agentId}`;
+    pairCount.set(k, (pairCount.get(k) ?? 0) + 1);
+  }
+  return kept.map((c) => {
+    if (!c.agentId) return c;
+    const k = `${c.taskType ?? ""}|${c.agentId}`;
+    if ((pairCount.get(k) ?? 0) < 2) return c;
+    const ms = c.msTitle?.trim();
+    // Only ever ADDS the distinguishing fact; never replaces a record line that already carries it.
+    if (!ms || c.record.includes(ms)) return c;
+    return { ...c, record: c.record ? `${c.record} · ${ms}` : `On ${ms}` };
+  });
+}
+
 export function assembleBoard(input: BoardInput): AssembledBoard {
-  const derived = input.tasks.map((t) => derivedCard(t, input)).filter((c): c is BoardCard => c != null);
+  const derived = dedupeAgentCards(
+    input.tasks.map((t) => derivedCard(t, input)).filter((c): c is BoardCard => c != null),
+  );
 
   // User tasks — open (not done), most-recent first, minus snoozed/muted ones (the quick rail's ⏸
   // writes a `user_task` TaskFlag stance; nothing is deleted). P2: routed by the card's OWN stream
