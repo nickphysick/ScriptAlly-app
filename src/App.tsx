@@ -19,7 +19,6 @@ import { EditAgentHost } from "./components/EditAgentHost";
 import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
-import { QueriesLanding } from "./components/QueriesLanding";
 import { ToDoPage } from "./components/todo/ToDoPage";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
@@ -311,10 +310,10 @@ function pathFor(tab: string, subPageName?: string): string {
     case "landing": return "/"; // marketing front door (wordmarks navigate here from any tier)
     case "dashboard": return "/dashboard";
     case "queries": {
-      // The orphaned Landing keeps its guarded niche behind a param; named database aliases land
-      // on the desk; any OTHER subpage value is a query id (NavSearch deep-selection) — carried
-      // through ?q= exactly as Queries' "unrecognised subpage = id" contract expects.
-      if (subPageName === "Landing") return "/queries?view=landing";
+      // Named database aliases land on the desk; any OTHER subpage value is a query id
+      // (NavSearch deep-selection) — carried through ?q= exactly as Queries'
+      // "unrecognised subpage = id" contract expects. (The orphaned QueriesLanding and its
+      // ?view=landing niche are deleted — Tier 2 · Phase 5.)
       const dbAliases = ["Query database", "Queries database", "All queries", "Hub"];
       if (subPageName && !dbAliases.includes(subPageName)) return `/queries?q=${encodeURIComponent(subPageName)}`;
       return "/queries";
@@ -563,10 +562,9 @@ function AppContent() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Queries subpage-equivalent, read from the URL: ?view=landing keeps the orphaned Landing
-  // guard; ?q=<id> is deep-selection (Queries treats an unrecognised subpage value as a query id,
-  // exactly as it did with the old activeSubPage).
-  const queriesSub = params.get("view") === "landing" ? "Landing" : (params.get("q") ?? "Query database");
+  // Queries subpage-equivalent, read from the URL: ?q=<id> is deep-selection (Queries treats an
+  // unrecognised subpage value as a query id, exactly as it did with the old activeSubPage).
+  const queriesSub = params.get("q") ?? "Query database";
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
@@ -602,13 +600,9 @@ function AppContent() {
             its OWN chrome (F12Page — CrumbStrip header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
         <StagePage active={routeKey === "queries"} layout="fill" clip>
-          {queriesSub === "Landing" ? (
-            <QueriesLanding onNavigate={handleNavigate} />
-          ) : (
-            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
-              createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
-              routeActive={routeKey === "queries"} />
-          )}
+          <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
+            createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
+            routeActive={routeKey === "queries"} />
         </StagePage>
 
         {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page
