@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Double-decker shell · sub-nav</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a;
+  --parch:#f2ede7; --chrome:#fbf9f5; --work:#ffffff; --line:#ece7de; --edge:#e6e0d5;
+  --rail-tx:#a89a8a; --rail-hi:#f4efe7;
+  --railw:52px; --panelw:216px; --shellw:calc(var(--railw) + var(--panelw));
+  --pitch:42px; --head:66px; --gap:14px; --r:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:Inter,sans-serif;background:#efece6;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
+body.closed{--shellw:var(--railw)}
+
+/* ---------- control strip ---------- */
+.ctl{flex:none;background:#fff;border-bottom:1px solid #e4dfd6;padding:10px 18px 12px;z-index:30}
+.ctl h1{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:6px}
+.tip{font-size:12px;line-height:1.6;color:var(--ink-soft);max-width:1120px}
+.tip b{color:var(--ink);font-weight:600}
+.tip code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f4f0e9;border-radius:4px;padding:1px 4px}
+
+/* ---------- desk + capsule ---------- */
+.desk{flex:1;min-height:0;background:linear-gradient(160deg,#b4c2b6,#a8b8aa);padding:var(--gap)}
+.cap{height:100%;background:var(--work);border-radius:var(--r);overflow:hidden;display:flex;
+  box-shadow:0 1px 2px rgba(56,66,58,.1),0 6px 16px rgba(56,66,58,.12),0 22px 48px rgba(56,66,58,.14)}
+
+/* ---------- shell ---------- */
+.shell{flex:none;width:var(--shellw);display:flex;flex-direction:column;position:relative;
+  background:linear-gradient(90deg,#2e2723 0 var(--railw),var(--chrome) var(--railw));
+  border-right:1px solid var(--line);
+  transition:width .22s cubic-bezier(.4,0,.2,1)}
+
+.row{display:flex;align-items:center;height:var(--pitch);position:relative;cursor:pointer;flex:none;outline:none}
+.ci{width:var(--railw);flex:none;display:flex;align-items:center;justify-content:center}
+.ib{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--rail-tx);transition:all .15s}
+.ci svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cl{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:34px;margin:0 10px 0 6px;padding:0 10px;border-radius:8px;
+  font-size:13.5px;font-weight:500;color:var(--ink-soft);white-space:nowrap;overflow:hidden;transition:background .15s,color .15s}
+.row:hover .ib{color:var(--rail-hi)}
+.row:hover .cl{background:rgba(242,237,231,.55);color:var(--ink)}
+.row.rail-on .ib{background:rgba(255,255,255,.12);color:var(--rail-hi)}
+.row.lbl-on .cl{background:var(--parch);color:var(--ink);font-weight:600}
+.row.sec-quiet .cl{color:var(--ink);font-weight:600}
+
+.ct{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.ct .dot{width:5px;height:5px;border-radius:50%;background:var(--burgundy)}
+.pch{color:var(--muted);display:flex;opacity:.5;transition:transform .2s,opacity .15s;flex:none}
+.pch svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.row:hover .pch{opacity:1}
+.row.open .pch{transform:rotate(180deg)}
+.ct + .pch{margin-left:6px}
+.ct:last-child{margin-left:auto}
+.cl > .pch:last-child{margin-left:auto}
+.cl > .ct + .pch{margin-left:6px}
+
+/* fading panel-side content */
+.fade{transition:opacity .16s .06s,visibility .16s}
+body.closed .fade{opacity:0;visibility:hidden;transition:opacity .1s,visibility .1s}
+
+/* collapsed tooltips */
+.row::after{content:attr(data-tip);position:absolute;left:calc(var(--railw) + 10px);top:50%;transform:translateY(-50%);
+  background:#2e2723;color:#f4efe7;font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;white-space:nowrap;
+  opacity:0;visibility:hidden;pointer-events:none;transition:opacity .12s;z-index:10;
+  box-shadow:0 2px 8px rgba(46,39,35,.25)}
+body.closed .row:hover::after{opacity:1;visibility:visible;transition-delay:.25s}
+body.flyopen .row::after{display:none}
+
+/* ---------- sub-nav ---------- */
+.sub{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s cubic-bezier(.4,0,.2,1)}
+.sub.open{grid-template-rows:1fr}
+.subin{overflow:hidden;min-width:0;position:relative;padding:1px 0 3px}
+.subin::before{content:'';position:absolute;left:calc(var(--railw) + 16px);top:4px;bottom:8px;width:1px;background:var(--edge)}
+.srow{height:32px;display:flex;align-items:center;margin:1px 10px 1px calc(var(--railw) + 6px);padding:0 10px 0 24px;border-radius:7px;
+  font-size:12.5px;font-weight:500;color:var(--ink-soft);cursor:pointer;position:relative;white-space:nowrap;overflow:hidden;outline:none;
+  transition:background .13s,color .13s}
+.srow:hover{background:rgba(242,237,231,.55);color:var(--ink)}
+.srow.on{background:var(--parch);color:var(--ink);font-weight:600}
+body.closed .sub{grid-template-rows:0fr !important}
+
+/* ---------- head ---------- */
+.hrowA{height:var(--head);cursor:default}
+.hrowA .glyph{font-family:'Playfair Display',serif;font-size:19px;color:var(--rail-hi)}
+.hrowA .cl{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink);background:none !important;padding-left:8px}
+.hrowB{height:46px}
+.hrowB .cl{background:#fff;border:1px solid var(--edge);font-size:12.5px;font-weight:600;color:var(--ink);transition:border-color .15s}
+.hrowB:hover .cl{background:#fff;border-color:#d6cdbf}
+.hrowB .cl .chev{margin-left:auto;color:var(--muted);display:flex}
+.hrowB .cl .chev svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8}
+.hdiv{height:1px;background:var(--line);margin:8px 0 0 var(--railw);flex:none}
+
+.navwrap{padding-top:8px}
+.spacer{flex:1}
+
+/* ---------- foot ---------- */
+.fdiv{height:1px;background:var(--line);margin-left:var(--railw);flex:none}
+.urow{height:54px;cursor:default}
+.urow .ava{width:28px;height:28px;border-radius:50%;background:#4a423c;color:#e8e0d4;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.urow .cl{background:none !important;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;line-height:1.25}
+.urow .n{font-size:12.5px;font-weight:600;color:var(--ink)}
+.urow .p{font-size:10.5px;color:var(--muted)}
+.urow .p a{color:var(--burgundy);text-decoration:none;font-weight:500}
+.crow{height:40px;margin-bottom:8px}
+.crow .ib svg{transition:transform .22s}
+body.closed .crow .ib svg{transform:rotate(180deg)}
+.crow .cl{font-size:12.5px;color:var(--muted)}
+
+/* ---------- collapsed flyout ---------- */
+.fly{position:absolute;left:calc(var(--railw) + 10px);min-width:192px;background:#fff;border:1px solid var(--edge);border-radius:12px;
+  box-shadow:0 4px 14px rgba(46,39,35,.14),0 16px 38px rgba(46,39,35,.12);padding:6px;z-index:20;display:none}
+.fly.show{display:block}
+.fly .fh{font-size:11px;font-weight:600;color:var(--muted);padding:6px 10px 5px;letter-spacing:.02em}
+.fly .fi{height:32px;display:flex;align-items:center;border-radius:7px;padding:0 10px;font-size:12.5px;font-weight:500;color:var(--ink-soft);cursor:pointer;outline:none}
+.fly .fi:hover{background:rgba(242,237,231,.6);color:var(--ink)}
+.fly .fi.on{background:var(--parch);color:var(--ink);font-weight:600}
+.fly .fi .ct{margin-left:auto}
+
+/* ---------- main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:var(--head);flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;border-bottom:1px solid var(--line);background:var(--chrome)}
+.crumb{font-size:13px;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:600}
+.bright{margin-left:auto;display:flex;align-items:center;gap:10px}
+.bsearch{height:34px;width:210px;border-radius:9px;background:#fff;border:1px solid var(--edge);display:flex;align-items:center;gap:8px;padding:0 11px;color:var(--muted);font-size:12px;cursor:pointer;transition:border-color .15s;outline:none}
+.bsearch:hover,.bsearch:focus-visible{border-color:#d6cdbf}
+.bsearch svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+.bsearch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;background:#f4f0e9;border-radius:4px;padding:1px 5px}
+.help{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .15s;outline:none}
+.help:hover,.help:focus-visible{color:var(--ink);background:rgba(242,237,231,.7)}
+.help svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.work{flex:1;min-height:0;background:var(--work);padding:26px 28px;overflow:auto}
+.work h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;margin-bottom:4px}
+.work .sub2{font-size:12.5px;color:var(--muted);margin-bottom:20px}
+.skrow{display:flex;gap:14px}
+.sk{border:1px solid #eeeae2;border-radius:14px;background:#fdfcfa;height:300px;flex:1;padding:16px}
+.sk .l{height:10px;border-radius:5px;background:#f1ece3;margin-bottom:12px}
+.sk .l.w60{width:60%}.sk .l.w40{width:40%}.sk .l.w80{width:80%}
+
+.row:focus-visible .cl,.srow:focus-visible,.fly .fi:focus-visible{box-shadow:inset 0 0 0 2px rgba(124,58,42,.45)}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="ctl">
+  <h1>Sub-nav grammar — accordion when expanded, flyout when collapsed</h1>
+  <div class="tip"><b>Click Queries, Agents or Materials.</b> Parents with children open an accordion and land on their default child; the parchment fill moves to the child while the parent goes quiet (bold ink, no fill) — one fill on screen at a time. The thread line and child text align to the parent's <b>label x-position</b>, not the icon, so indentation reads as hierarchy. One section open at a time; closing a section with an active child rolls its state up — parent regains the fill and the attention count. <b>Collapse (« at foot), then click a rail icon:</b> the same children appear as a flyout with identical states; tooltips compose <code>Section · Child</code>. Dashboard, To-do and Learn have no children and simply navigate. Focus rings and reduced-motion are handled.</div>
+</header>
+
+<div class="desk">
+  <div class="cap">
+
+    <div class="shell" id="shell">
+
+      <div class="row hrowA" data-tip="ScriptAlly">
+        <div class="ci"><span class="glyph">S</span></div>
+        <div class="cl fade">ScriptAlly</div>
+      </div>
+
+      <div class="row hrowB" data-tip="The Hollow Sea" tabindex="0">
+        <div class="ci"><span class="ib"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span></div>
+        <div class="cl fade">The Hollow Sea
+          <span class="chev"><svg viewBox="0 0 24 24"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg></span>
+        </div>
+      </div>
+
+      <div class="hdiv fade"></div>
+
+      <nav class="navwrap" id="nav"></nav>
+
+      <div class="spacer"></div>
+
+      <div class="fdiv fade"></div>
+      <div class="row urow" data-tip="Nick Physick · Free plan">
+        <div class="ci"><span class="ava">NP</span></div>
+        <div class="cl fade"><span class="n">Nick Physick</span><span class="p">Free plan · <a href="#">Upgrade</a></span></div>
+      </div>
+      <div class="row" data-tip="Settings" style="height:40px" tabindex="0" id="settingsRow">
+        <div class="ci"><span class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span></div>
+        <div class="cl fade" style="font-size:13px">Settings</div>
+      </div>
+      <div class="row crow" data-tip="Expand" id="collapseBtn" tabindex="0">
+        <div class="ci"><span class="ib"><svg viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5"/><path d="M18 17l-5-5 5-5"/></svg></span></div>
+        <div class="cl fade">Collapse</div>
+      </div>
+
+      <div class="fly" id="fly"></div>
+
+    </div>
+
+    <div class="main">
+      <div class="bar">
+        <span class="crumb" id="crumb"></span>
+        <div class="bright">
+          <div class="bsearch" tabindex="0"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Search<span class="k">⌘K</span></div>
+          <div class="help" tabindex="0" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 0 1 5.5.7c0 1.8-2.7 2.3-2.7 3.8"/><circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="none"/></svg></div>
+        </div>
+      </div>
+      <div class="work">
+        <h2 id="wtitle">Needs attention</h2>
+        <div class="sub2">3 queries have passed their nudge threshold</div>
+        <div class="skrow">
+          <div class="sk" style="max-width:320px"><div class="l w60"></div><div class="l w80"></div><div class="l w40"></div><div class="l w80"></div><div class="l w60"></div></div>
+          <div class="sk"><div class="l w40"></div><div class="l w80"></div><div class="l w60"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ICONS={
+ dash:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+ queries:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 8h7M9 12h5"/>',
+ agents:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+ materials:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+ todo:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+ learn:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/>'
+};
+const SECTIONS=[
+ {id:'dash',label:'Dashboard'},
+ {id:'queries',label:'Queries',def:'q-att',children:[
+   {id:'q-all',label:'All queries'},
+   {id:'q-att',label:'Needs attention',count:3},
+   {id:'q-await',label:'Awaiting response'},
+   {id:'q-closed',label:'Closed'}]},
+ {id:'agents',label:'Agents',def:'a-list',children:[
+   {id:'a-list',label:'Contact list'},
+   {id:'a-disc',label:'Discover'}]},
+ {id:'materials',label:'Materials',def:'m-docs',children:[
+   {id:'m-docs',label:'Documents'},
+   {id:'m-pkg',label:'Submission packages'}]},
+ {id:'todo',label:'To-do',count:4},
+ {id:'learn',label:'Learn'}
+];
+
+const state={active:'queries',child:'q-att',open:'queries'};
+const nav=document.getElementById('nav'),fly=document.getElementById('fly'),shell=document.getElementById('shell');
+const crumb=document.getElementById('crumb'),wtitle=document.getElementById('wtitle');
+const el={rows:{},subs:{},srows:{},cts:{}};
+
+function countChip(n,urgent){return `<span class="ct">${urgent?'<span class="dot"></span>':''}${n}</span>`}
+
+SECTIONS.forEach(sec=>{
+  const row=document.createElement('div');
+  row.className='row';row.tabIndex=0;
+  row.innerHTML=`<div class="ci"><span class="ib"><svg viewBox="0 0 24 24">${ICONS[sec.id]}</svg></span></div>
+    <div class="cl fade">${sec.label}<span class="slot"></span>${sec.children?'<span class="pch"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>':''}</div>`;
+  row.onclick=()=>parentClick(sec);
+  row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();parentClick(sec)}};
+  nav.appendChild(row);
+  el.rows[sec.id]=row;
+  el.cts[sec.id]=row.querySelector('.slot');
+  if(sec.children){
+    const sub=document.createElement('div');sub.className='sub';
+    const subin=document.createElement('div');subin.className='subin fade';sub.appendChild(subin);
+    sec.children.forEach(ch=>{
+      const s=document.createElement('div');s.className='srow';s.tabIndex=0;
+      s.innerHTML=ch.label+(ch.count?countChip(ch.count,true):'');
+      s.onclick=e=>{e.stopPropagation();childClick(sec,ch)};
+      s.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();childClick(sec,ch)}};
+      subin.appendChild(s);el.srows[ch.id]=s;
+    });
+    nav.appendChild(sub);el.subs[sec.id]=sub;
+  }
+});
+
+function childOf(sec,cid){return sec.children&&sec.children.find(c=>c.id===cid)}
+
+function parentClick(sec){
+  if(document.body.classList.contains('closed')&&sec.children){toggleFly(sec);return}
+  closeFly();
+  if(sec.children){
+    if(state.open===sec.id&&state.active===sec.id){state.open=null}
+    else{state.open=sec.id;state.active=sec.id;if(!childOf(sec,state.child))state.child=sec.def}
+    state.active=sec.id;if(!childOf(sec,state.child))state.child=sec.def;
+  }else{state.active=sec.id;state.child=null}
+  update();
+}
+function childClick(sec,ch){state.active=sec.id;state.child=ch.id;update()}
+
+function toggleFly(sec){
+  if(fly.classList.contains('show')&&fly.dataset.sec===sec.id){closeFly();return}
+  fly.dataset.sec=sec.id;
+  fly.innerHTML=`<div class="fh">${sec.label}</div>`+sec.children.map(ch=>
+    `<div class="fi${state.active===sec.id&&state.child===ch.id?' on':''}" data-c="${ch.id}" tabindex="0">${ch.label}${ch.count?countChip(ch.count,true):''}</div>`).join('');
+  fly.querySelectorAll('.fi').forEach(fi=>{
+    fi.onclick=e=>{e.stopPropagation();childClick(sec,sec.children.find(c=>c.id===fi.dataset.c));closeFly()};
+  });
+  const r=el.rows[sec.id].getBoundingClientRect(),s=shell.getBoundingClientRect();
+  fly.style.top=(r.top-s.top)+'px';
+  fly.classList.add('show');document.body.classList.add('flyopen');
+}
+function closeFly(){fly.classList.remove('show');document.body.classList.remove('flyopen')}
+document.addEventListener('click',e=>{if(!shell.contains(e.target))closeFly()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFly()});
+
+function update(){
+  SECTIONS.forEach(sec=>{
+    const row=el.rows[sec.id];
+    const open=state.open===sec.id&&!document.body.classList.contains('closed');
+    const secActive=state.active===sec.id;
+    row.classList.toggle('open',open);
+    row.classList.toggle('rail-on',secActive);
+    row.classList.toggle('lbl-on',secActive&&(!sec.children||!open));
+    row.classList.toggle('sec-quiet',secActive&&sec.children&&open);
+    if(el.subs[sec.id])el.subs[sec.id].classList.toggle('open',open);
+    // counts: To-do always; parents with attention children show roll-up when closed
+    let chip='';
+    if(sec.count)chip=countChip(sec.count,true);
+    if(sec.children&&!open){const c=sec.children.find(x=>x.count);if(c)chip=countChip(c.count,true)}
+    el.cts[sec.id].outerHTML=`<span class="slot">${chip}</span>`;
+    el.cts[sec.id]=row.querySelector('.slot');
+    // tooltip composes Section · Child
+    const ch=secActive&&childOf(sec,state.child);
+    row.dataset.tip=sec.label+(ch?' · '+ch.label:'')+(sec.count?' · '+sec.count:'');
+    if(sec.children)sec.children.forEach(c=>el.srows[c.id].classList.toggle('on',secActive&&state.child===c.id));
+  });
+  const sec=SECTIONS.find(s=>s.id===state.active),ch=childOf(sec,state.child);
+  crumb.innerHTML=`<b>${sec.label}</b>${ch?' · '+ch.label:''}`;
+  wtitle.textContent=ch?ch.label:sec.label;
+}
+
+document.getElementById('collapseBtn').onclick=()=>{
+  closeFly();document.body.classList.toggle('closed');update();
+};
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Aligned top-nav shell (dashboard)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a;
+  --parch:#f2ede7; --line:#ece7de; --edge:#e6e0d5;
+  --page:#f7eee7; --card:#fffdfb;
+  --head:66px;
+  --spring:cubic-bezier(.33,1,.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:Inter,sans-serif;background:#efece6;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
+
+/* ---------- control strip ---------- */
+.ctl{flex:none;background:#fff;border-bottom:1px solid #e4dfd6;padding:10px 18px 12px;z-index:200}
+.ctl h1{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:6px}
+.tip{font-size:12px;line-height:1.6;color:var(--ink-soft);max-width:1120px}
+.tip b{color:var(--ink);font-weight:600}
+.tip code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f4f0e9;border-radius:4px;padding:1px 4px}
+
+/* ---------- page ---------- */
+.page{flex:1;min-height:0;background:var(--page);overflow:auto;position:relative}
+
+/* ---------- top nav ---------- */
+.topnav{position:sticky;top:0;height:var(--head);background:var(--page);display:flex;align-items:center;gap:22px;
+  padding:0 max(28px,4vw);z-index:40;border-bottom:1px solid transparent;transition:border-color .22s}
+.topnav.scrolled{border-bottom-color:var(--line)}
+.topnav.megaopen{border-bottom-color:transparent}
+
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.brand .tile{width:34px;height:34px;border-radius:9px;background:#2e2723;color:#f4efe7;display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:16px}
+.brand .wm{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink)}
+
+.links{display:flex;align-items:center;gap:2px;margin-left:8px}
+.nl > button{all:unset;display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;
+  font-family:Inter;font-size:13.5px;font-weight:500;color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s}
+.nl > button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.55;transition:transform .24s var(--spring)}
+.nl > button:hover{background:rgba(242,237,231,.75);color:var(--ink)}
+.nl.open > button{background:var(--parch);color:var(--ink);font-weight:600}
+.nl.open > button svg{transform:rotate(180deg)}
+.nl > button:focus-visible{box-shadow:inset 0 0 0 2px rgba(124,58,42,.45)}
+.nl .ct{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.nl .ct .dot{width:5px;height:5px;border-radius:50%;background:var(--burgundy)}
+
+/* ---------- mega: one wrap, morphing height, crossfading panes ---------- */
+.megawrap{position:absolute;top:100%;left:0;right:0;background:var(--page);
+  border-top:1px solid #ddd2c2;border-bottom:1px solid var(--line);
+  box-shadow:0 22px 34px -20px rgba(46,39,35,.22);overflow:hidden;height:0;visibility:hidden;z-index:39;
+  transition:height .32s var(--spring),visibility 0s .32s}
+.megawrap.show{visibility:visible;transition:height .32s var(--spring)}
+.mega{position:absolute;top:0;left:0;right:0;opacity:0;pointer-events:none;
+  transition:opacity .16s,transform .3s var(--spring)}
+.mega.active{opacity:1;pointer-events:auto;transform:none !important;
+  transition:opacity .22s .05s,transform .3s var(--spring)}
+.mgin{max-width:1560px;margin:0 auto;padding:34px max(28px,4vw) 44px;display:grid;grid-template-columns:1fr 1fr minmax(300px,380px);gap:56px}
+.mcol .mlb{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+.mi{display:block;margin-bottom:26px;cursor:pointer}
+.mi .t{font-size:15.5px;font-weight:500;color:var(--ink);transition:color .13s}
+.mi .s{font-size:13px;color:var(--muted);margin-top:3px}
+.mi:hover .t{color:var(--burgundy)}
+.mpan{border-left:1px solid var(--line);padding-left:44px}
+.mpan .mlb2{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.mpan h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--ink);line-height:1.25;margin-bottom:12px}
+.mpan p{font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:16px}
+.mpan a{font-size:13.5px;font-weight:500;color:var(--burgundy);text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.mpan a svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.mpan a:hover svg{transform:translateX(3px)}
+
+.megascrim{position:fixed;inset:0;background:rgba(46,39,35,.28);z-index:35;opacity:0;pointer-events:none;transition:opacity .28s}
+.megascrim.show{opacity:1;pointer-events:auto}
+
+/* ---------- nav right ---------- */
+.rgt{margin-left:auto;display:flex;align-items:center;gap:10px}
+.bsearch{height:34px;width:210px;border-radius:9px;background:#fff;border:1px solid var(--edge);display:flex;align-items:center;gap:8px;padding:0 11px;color:var(--muted);font-size:12px;cursor:pointer;transition:border-color .15s;outline:none}
+.bsearch:hover,.bsearch:focus-visible{border-color:#d6cdbf}
+.bsearch svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+.bsearch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;background:#f4f0e9;border-radius:4px;padding:1px 5px}
+.help{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .15s;outline:none}
+.help:hover,.help:focus-visible{color:var(--ink);background:rgba(242,237,231,.75)}
+.help svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.uwrap{position:relative}
+.uchip{all:unset;display:flex;align-items:center;gap:9px;height:40px;padding:3px 10px 3px 3px;border-radius:999px;cursor:pointer;transition:background .15s}
+.uchip:hover{background:rgba(242,237,231,.75)}
+.uchip:focus-visible{box-shadow:0 0 0 2px rgba(124,58,42,.45)}
+.uchip .ava{width:34px;height:34px;border-radius:50%;background:#f5e3da;border:1px solid rgba(124,58,42,.25);
+  color:var(--burgundy);font-family:'Playfair Display',serif;font-size:13px;display:flex;align-items:center;justify-content:center}
+.uchip .nm{font-size:13.5px;font-weight:500;color:var(--ink)}
+.uchip > svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.uwrap.open .uchip{background:var(--parch)}
+.uwrap.open .uchip > svg{transform:rotate(180deg)}
+.umenu{position:absolute;top:calc(100% + 6px);right:0;min-width:200px;background:#fff;border:1px solid var(--edge);border-radius:12px;
+  box-shadow:0 4px 14px rgba(46,39,35,.14),0 16px 38px rgba(46,39,35,.12);padding:6px;z-index:50;display:none}
+.uwrap.open .umenu{display:block}
+.umenu .uh{padding:8px 10px 6px;line-height:1.3}
+.umenu .uh .p{font-size:10.5px;color:var(--muted)}
+.umenu .uh .p a{color:var(--burgundy);text-decoration:none;font-weight:500}
+.umenu .fdv{height:1px;background:var(--line);margin:5px 8px}
+.umenu .fi{height:32px;display:flex;align-items:center;border-radius:7px;padding:0 10px;font-size:12.5px;font-weight:500;color:var(--ink-soft);cursor:pointer}
+.umenu .fi:hover{background:rgba(242,237,231,.6);color:var(--ink)}
+
+/* ---------- command palette ---------- */
+.scrim{position:fixed;inset:0;background:rgba(46,39,35,.34);z-index:100;display:none}
+.scrim.show{display:block}
+.pal{position:fixed;left:50%;top:13%;transform:translateX(-50%);width:min(600px,92vw);background:#fff;border:1px solid var(--edge);border-radius:14px;
+  box-shadow:0 10px 30px rgba(46,39,35,.2),0 40px 90px rgba(46,39,35,.24);z-index:101;display:none;overflow:hidden}
+.pal.show{display:block}
+.prow{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.prow svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:1.7;flex:none}
+.prow input{all:unset;flex:1;font-family:Inter;font-size:14.5px;color:var(--ink)}
+.prow input::placeholder{color:var(--muted)}
+.prow .esc{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:#f4f0e9;border-radius:4px;padding:2px 6px}
+.plist{max-height:390px;overflow:auto;padding:6px 6px 8px}
+.pg{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:10px 10px 5px}
+.pi{display:flex;align-items:center;gap:11px;height:40px;padding:0 10px;border-radius:8px;cursor:pointer}
+.pi .pic{width:28px;height:28px;border-radius:7px;background:var(--parch);display:flex;align-items:center;justify-content:center;color:var(--burgundy);flex:none}
+.pi .pic svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pi .t{font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .s{font-size:11.5px;color:var(--muted);margin-left:2px;white-space:nowrap}
+.pi .kind{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);padding-left:12px}
+.pi.sel{background:var(--parch)}
+.pempty{padding:26px 16px;text-align:center;font-size:13px;color:var(--muted)}
+
+/* ---------- dashboard content ---------- */
+.hero{text-align:center;padding:64px 24px 8px}
+.mline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+.hero h2{font-family:'Playfair Display',serif;font-size:min(64px,7vw);font-weight:600;color:var(--ink);margin:18px 0 20px;line-height:1.05}
+.att{display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer}
+.att .dot{width:8px;height:8px;border-radius:50%;background:var(--burgundy)}
+.att svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8}
+.acts{display:flex;justify-content:center;gap:12px;margin:34px 0 44px;flex-wrap:wrap}
+.ab{display:flex;align-items:center;gap:8px;height:40px;padding:0 18px;border-radius:10px;background:#fff;border:1px solid var(--edge);
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);cursor:pointer;transition:all .15s}
+.ab:hover{border-color:#d6cdbf;background:#fffdfb}
+.ab svg{width:15px;height:15px;stroke:var(--burgundy);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.hr{height:1px;background:var(--line);max-width:1080px;margin:0 auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;max-width:1560px;margin:52px auto;padding:0 max(28px,4vw)}
+.card{background:var(--card);border:1px solid #f0e7dd;border-radius:16px;padding:22px 22px 26px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 10px 28px rgba(58,28,20,.06)}
+.card .lb{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+.card .lb svg{width:15px;height:15px;stroke:var(--burgundy);fill:none;stroke-width:1.6}
+.card .num{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;margin-top:14px;display:flex;align-items:center;gap:12px}
+.card .chip{font-family:Inter;font-size:11.5px;font-weight:500;color:var(--ink-soft);background:var(--parch);border-radius:999px;padding:4px 11px}
+.card .fill{height:70px;margin-top:18px;border-radius:8px;background:linear-gradient(180deg,rgba(124,58,42,.06),transparent)}
+.pad{height:120px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="ctl">
+  <h1>Top-nav shell v3 — hover-open, morphing mega, graded rules</h1>
+  <div class="tip"><b>Hover a nav item</b> (~100ms intent delay) and the section rolls out: height unfurls on a spring curve while the content rises and fades in, the bar's hairline strengthens to <code>#ddd2c2</code>, and the page dims behind. <b>Now slide the cursor along the nav without leaving:</b> the surface never closes — its height morphs between sections while the outgoing pane slides out and the incoming pane slides in <b>from the direction of travel</b> (left-to-right when moving right, mirrored coming back), and the parchment pill tracks the cursor. Move into the panel: stays open. Leave the whole region: a 160ms grace closes it — no flicker at the boundary. Click still toggles for touch; Escape and the scrim close as before.</div>
+</header>
+
+<div class="page" id="page">
+
+  <nav class="topnav" id="tn">
+    <div class="brand"><span class="tile">S</span><span class="wm">ScriptAlly</span></div>
+
+    <div class="links" id="links">
+      <div class="nl" data-mega="mg-queries">
+        <button>Queries <span class="ct"><span class="dot"></span>3</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+      <div class="nl" data-mega="mg-agents">
+        <button>Agents <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+      <div class="nl" data-mega="mg-materials">
+        <button>Materials <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+      <div class="nl" data-mega="mg-learn">
+        <button>Learn <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      </div>
+    </div>
+
+    <div class="rgt">
+      <div class="bsearch" id="searchBtn" tabindex="0"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Search<span class="k">⌘K</span></div>
+      <div class="help" tabindex="0" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 0 1 5.5.7c0 1.8-2.7 2.3-2.7 3.8"/><circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="none"/></svg></div>
+      <div class="uwrap" id="uwrap">
+        <button class="uchip"><span class="ava">NP</span><span class="nm">Nick Physick</span>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="umenu">
+          <div class="uh"><div class="p">Free plan · <a href="#">Upgrade</a></div></div>
+          <div class="fdv"></div>
+          <div class="fi">Settings</div>
+          <div class="fi">Sign out</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- single morphing surface; panes stack inside -->
+    <div class="megawrap" id="megawrap">
+
+      <div class="mega" id="mg-queries">
+        <div class="mgin">
+          <div class="mcol">
+            <div class="mlb">Track</div>
+            <div class="mi"><div class="t">Queries Hub</div><div class="s">Every query and exactly where it stands</div></div>
+            <div class="mi"><div class="t">To-do</div><div class="s">What needs you, and what can wait</div></div>
+            <div class="mi"><div class="t">Submission packages</div><div class="s">What you send, assembled once</div></div>
+          </div>
+          <div class="mcol">
+            <div class="mlb">Act</div>
+            <div class="mi"><div class="t">Log a query</div><div class="s">Start a new query</div></div>
+            <div class="mi"><div class="t">Record a response</div><div class="s">Log what an agent said back</div></div>
+            <div class="mi"><div class="t">Smart import</div><div class="s">Bring in queries from a spreadsheet</div></div>
+            <div class="mi"><div class="t">Export CSV</div><div class="s">Download your full query log</div></div>
+          </div>
+          <div class="mpan">
+            <div class="mlb2">This week</div>
+            <h3>Three queries are past their reply window</h3>
+            <p>A nudge is usually enough, and it resets the clock.</p>
+            <a href="#">Open the to-do list <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mega" id="mg-agents">
+        <div class="mgin">
+          <div class="mcol">
+            <div class="mlb">Track</div>
+            <div class="mi"><div class="t">Contact list</div><div class="s">Every agent, door open or closed</div></div>
+            <div class="mi"><div class="t">Discover</div><div class="s">Find agents who want your genre</div></div>
+          </div>
+          <div class="mcol">
+            <div class="mlb">Act</div>
+            <div class="mi"><div class="t">Add an agent</div><div class="s">Log someone new to query</div></div>
+            <div class="mi"><div class="t">Import agents</div><div class="s">Bring in a list from a spreadsheet</div></div>
+          </div>
+          <div class="mpan">
+            <div class="mlb2">This week</div>
+            <h3>An agent on your list has reopened to submissions</h3>
+            <p>Doors rarely stay open for long — worth a look while it lasts.</p>
+            <a href="#">View contact list <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mega" id="mg-materials">
+        <div class="mgin">
+          <div class="mcol">
+            <div class="mlb">Track</div>
+            <div class="mi"><div class="t">Documents</div><div class="s">Query letters, synopses and samples</div></div>
+            <div class="mi"><div class="t">Submission packages</div><div class="s">What you send, assembled once</div></div>
+          </div>
+          <div class="mcol">
+            <div class="mlb">Act</div>
+            <div class="mi"><div class="t">Upload a document</div><div class="s">Add a new version to your library</div></div>
+            <div class="mi"><div class="t">Build a package</div><div class="s">Pair materials to an agent's requirements</div></div>
+          </div>
+          <div class="mpan">
+            <div class="mlb2">Worth a look</div>
+            <h3>Your synopsis hasn't changed in six weeks</h3>
+            <p>A quick pass before your next batch keeps it sharp.</p>
+            <a href="#">Open documents <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mega" id="mg-learn">
+        <div class="mgin">
+          <div class="mcol">
+            <div class="mlb">Guides</div>
+            <div class="mi"><div class="t">Querying basics</div><div class="s">How the process works, start to finish</div></div>
+            <div class="mi"><div class="t">Nudging etiquette</div><div class="s">When to follow up, and how</div></div>
+          </div>
+          <div class="mcol">
+            <div class="mlb">Reference</div>
+            <div class="mi"><div class="t">Glossary</div><div class="s">R&amp;R, MSWL and the rest, decoded</div></div>
+          </div>
+          <div class="mpan">
+            <div class="mlb2">Featured</div>
+            <h3>What a full request actually means</h3>
+            <p>And what to do in the weeks after you hit send.</p>
+            <a href="#">Read the guide <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="mline">Wednesday 5 August &nbsp;·&nbsp; Week 140 of querying</div>
+    <h2>Good afternoon, Nick</h2>
+    <div class="att"><span class="dot"></span>3 things need your attention <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+    <div class="acts">
+      <button class="ab"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Send query</button>
+      <button class="ab"><svg viewBox="0 0 24 24"><path d="M9 14l-5-5 5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v5"/></svg>Record a response</button>
+      <button class="ab"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>Add agent</button>
+      <button class="ab"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Add manuscript</button>
+    </div>
+    <div class="hr"></div>
+  </section>
+
+  <section class="cards">
+    <div class="card"><div class="lb"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Queries sent</div><div class="num">21 <span class="chip">0 this week</span></div><div class="fill"></div></div>
+    <div class="card"><div class="lb"><svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12"/><path d="M6 2v6l6 4 6-4V2"/><path d="M6 22v-6l6-4 6 4v6"/></svg>Active queries</div><div class="num">16 <span class="chip">13 awaiting a reply</span></div><div class="fill"></div></div>
+    <div class="card"><div class="lb"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Agents</div><div class="num">16 <span class="chip">0 idle</span></div><div class="fill"></div></div>
+    <div class="card"><div class="lb"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>Responses received</div><div class="num">11 <span class="chip">52% rate</span></div><div class="fill"></div></div>
+  </section>
+
+  <div class="pad"></div>
+</div>
+
+<div class="megascrim" id="megascrim"></div>
+
+<!-- command palette -->
+<div class="scrim" id="scrim"></div>
+<div class="pal" id="pal">
+  <div class="prow">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input id="pq" placeholder="Search pages, actions, agents, queries…" autocomplete="off">
+    <span class="esc">esc</span>
+  </div>
+  <div class="plist" id="plist"></div>
+</div>
+
+<script>
+/* ---------- morphing mega menu ---------- */
+const ORDER=['mg-queries','mg-agents','mg-materials','mg-learn'];
+const nls=[...document.querySelectorAll('.nl[data-mega]')];
+const tn=document.getElementById('tn');
+const wrap=document.getElementById('megawrap');
+const megascrim=document.getElementById('megascrim');
+let openId=null,hoverTimer=null,leaveTimer=null;
+
+function pane(id){return document.getElementById(id)}
+
+function showMega(id){
+  clearTimeout(leaveTimer);
+  if(openId===id)return;
+  const prev=openId;
+  const dir=prev?Math.sign(ORDER.indexOf(id)-ORDER.indexOf(prev)):0;
+  const p=pane(id);
+
+  /* stage incoming pane from direction of travel (or from below when opening fresh) */
+  p.style.transition='none';
+  p.style.transform=dir===0?'translateY(10px)':(dir>0?'translateX(28px)':'translateX(-28px)');
+  void p.offsetWidth;                       /* flush */
+  p.style.transition='';
+
+  /* outgoing pane exits toward the opposite side */
+  if(prev){
+    const pp=pane(prev);
+    pp.classList.remove('active');
+    pp.style.transform=dir>0?'translateX(-28px)':'translateX(28px)';
+  }
+
+  p.classList.add('active');
+  p.style.transform='';
+
+  wrap.classList.add('show');
+  wrap.style.height=(p.offsetHeight+2)+'px';  /* +2: wrap's own top+bottom borders (border-box) */
+  tn.classList.add('megaopen');
+  megascrim.classList.add('show');
+
+  nls.forEach(n=>n.classList.toggle('open',n.dataset.mega===id));
+  openId=id;
+}
+
+function hideMega(){
+  clearTimeout(hoverTimer);clearTimeout(leaveTimer);
+  if(!openId)return;
+  pane(openId).classList.remove('active');
+  wrap.style.height='0px';
+  wrap.classList.remove('show');
+  tn.classList.remove('megaopen');
+  megascrim.classList.remove('show');
+  nls.forEach(n=>n.classList.remove('open'));
+  openId=null;
+}
+
+nls.forEach(n=>{
+  const id=n.dataset.mega,btn=n.querySelector('button');
+  /* hover: intent delay when closed, instant morph when already open */
+  btn.addEventListener('mouseenter',()=>{
+    clearTimeout(leaveTimer);clearTimeout(hoverTimer);
+    if(openId){showMega(id)}
+    else{hoverTimer=setTimeout(()=>showMega(id),100)}
+  });
+  btn.addEventListener('mouseleave',()=>clearTimeout(hoverTimer));
+  /* click toggles (touch parity) */
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    openId===id?hideMega():showMega(id);
+  });
+});
+
+/* grace period: closes 160ms after leaving nav + panel region */
+function scheduleClose(){clearTimeout(leaveTimer);leaveTimer=setTimeout(hideMega,160)}
+function cancelClose(){clearTimeout(leaveTimer)}
+tn.addEventListener('mouseleave',scheduleClose);
+tn.addEventListener('mouseenter',cancelClose);
+wrap.addEventListener('mouseleave',scheduleClose);
+wrap.addEventListener('mouseenter',cancelClose);
+megascrim.addEventListener('click',hideMega);
+
+/* ---------- user menu ---------- */
+const uw=document.getElementById('uwrap');
+uw.querySelector('.uchip').onclick=e=>{e.stopPropagation();hideMega();uw.classList.toggle('open')};
+document.addEventListener('click',()=>{hideMega();uw.classList.remove('open')});
+
+/* ---------- scroll hairline ---------- */
+const page=document.getElementById('page');
+page.addEventListener('scroll',()=>tn.classList.toggle('scrolled',page.scrollTop>8));
+
+/* ---------- command palette ---------- */
+const IC={
+ act:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>',
+ page:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+ agent:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+ query:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>',
+ ms:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'
+};
+const AGENTS=[
+ {t:'Kate Evans',s:'Curtis Brown'},
+ {t:'Juliet Mushens',s:'Mushens Entertainment'},
+ {t:'Madeleine Milburn',s:'Madeleine Milburn Agency'},
+ {t:'Nelle Andrew',s:'Rachel Mills Literary'},
+ {t:'Hattie Grunewald',s:'The Blair Partnership'}
+];
+const DATA=[
+ ...[
+  {t:'Send query',s:'Start a new query'},
+  {t:'Record a response',s:'Log what an agent said back'},
+  {t:'Add agent',s:'Log someone new to query'},
+  {t:'Add manuscript',s:''},
+  {t:'Smart import',s:'Bring in queries from a spreadsheet'},
+  {t:'Export CSV',s:'Download your full query log'},
+  {t:'Upgrade to Pro',s:''}
+ ].map(x=>({...x,g:'Actions',ic:'act'})),
+ ...[
+  {t:'Dashboard'},{t:'Queries Hub'},{t:'To-do'},{t:'Submission packages'},
+  {t:'Contact list'},{t:'Discover'},{t:'Documents'},{t:'Learn'},{t:'Settings'}
+ ].map(x=>({...x,g:'Pages',ic:'page'})),
+ ...AGENTS.map(x=>({...x,g:'Agents',ic:'agent'})),
+ ...[
+  {t:'Query · Kate Evans',s:'Full requested'},
+  {t:'Query · Juliet Mushens',s:'Awaiting response'},
+  {t:'Query · Nelle Andrew',s:'Queried'},
+  {t:'Query · Hattie Grunewald',s:'Closed'}
+ ].map(x=>({...x,g:'Queries',ic:'query'})),
+ ...[
+  {t:'The Hollow Sea',s:'Literary fiction'},
+  {t:'Winter Ledger',s:'Historical fiction'}
+ ].map(x=>({...x,g:'Manuscripts',ic:'ms'}))
+];
+const GROUP_ORDER=['Actions','Pages','Agents','Queries','Manuscripts'];
+const scrim=document.getElementById('scrim'),pal=document.getElementById('pal'),
+      pq=document.getElementById('pq'),plist=document.getElementById('plist');
+let items=[],sel=0;
+
+function score(txt,q){
+  const t=txt.toLowerCase();
+  if(t.startsWith(q))return 3;
+  if(t.split(/\s+/).some(w=>w.startsWith(q)))return 2;
+  if(t.includes(q))return 1;
+  return 0;
+}
+function build(q){
+  q=q.trim().toLowerCase();
+  let res;
+  if(!q){
+    res=[...DATA.filter(d=>d.g==='Actions').slice(0,3),
+         ...DATA.filter(d=>d.g==='Pages').slice(0,4)];
+  }else{
+    res=DATA.map(d=>({...d,sc:Math.max(score(d.t,q),d.s?score(d.s,q)-0.5:0)}))
+            .filter(d=>d.sc>0);
+    AGENTS.filter(a=>score(a.t,q)>0).forEach(a=>{
+      res.push({t:'Log a query to '+a.t,s:a.s,g:'Actions',ic:'act',sc:3.5});
+    });
+    res.sort((a,b)=>b.sc-a.sc||GROUP_ORDER.indexOf(a.g)-GROUP_ORDER.indexOf(b.g));
+  }
+  items=[];
+  let html='',last=null;
+  const grouped=GROUP_ORDER.flatMap(g=>res.filter(r=>r.g===g));
+  grouped.forEach(r=>{
+    if(r.g!==last){html+=`<div class="pg">${r.g}</div>`;last=r.g}
+    const i=items.length;
+    html+=`<div class="pi" data-i="${i}">
+      <span class="pic"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${IC[r.ic]}</svg></span>
+      <span class="t">${r.t}</span>${r.s?`<span class="s">${r.s}</span>`:''}
+      <span class="kind">${r.g==='Actions'?'↵':r.g.slice(0,-1).toLowerCase()}</span></div>`;
+    items.push(r);
+  });
+  plist.innerHTML=grouped.length?html:'<div class="pempty">Nothing matches — try an agent, a page or an action</div>';
+  sel=0;paint();
+  plist.querySelectorAll('.pi').forEach(el=>{
+    el.onmouseenter=()=>{sel=+el.dataset.i;paint()};
+    el.onclick=()=>closePal();
+  });
+}
+function paint(){plist.querySelectorAll('.pi').forEach(el=>el.classList.toggle('sel',+el.dataset.i===sel));
+  const s=plist.querySelector('.pi.sel');if(s)s.scrollIntoView({block:'nearest'})}
+function openPal(){hideMega();uw.classList.remove('open');
+  scrim.classList.add('show');pal.classList.add('show');pq.value='';build('');pq.focus()}
+function closePal(){scrim.classList.remove('show');pal.classList.remove('show')}
+document.getElementById('searchBtn').onclick=e=>{e.stopPropagation();openPal()};
+scrim.onclick=closePal;
+pq.oninput=()=>build(pq.value);
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();
+    pal.classList.contains('show')?closePal():openPal();return}
+  if(!pal.classList.contains('show')){if(e.key==='Escape')hideMega();return}
+  if(e.key==='Escape'){closePal()}
+  else if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(sel+1,items.length-1);paint()}
+  else if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(sel-1,0);paint()}
+  else if(e.key==='Enter'){closePal()}
+});
+</script>
+</body>
+</html>
