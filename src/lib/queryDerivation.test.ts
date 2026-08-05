@@ -6,6 +6,7 @@ import {
   deriveResponseFlags,
   deriveResponseReceivedAt,
   deriveRejectedDate,
+  deriveLastStatusChange,
   deriveRevisionRound,
   derivePipelineDates,
   deriveQueryFields,
@@ -183,6 +184,25 @@ describe('deriveRejectedDate — closed-by-rejection only, never fabricated', ()
   it('a date-PROVISIONAL closing rejection → null (import guard — never an invented date)', () => {
     const log = [at(QueryStatus.QUERIED, 0), { ...at(QueryStatus.REJECTED, 20), dateProvisional: true }];
     expect(deriveRejectedDate(log)).toBeNull();
+  });
+});
+
+describe('deriveLastStatusChange — the latest rung’s own time, not a recording stamp', () => {
+  it('empty log → null', () => {
+    expect(deriveLastStatusChange([])).toBeNull();
+  });
+
+  it('the most recent status-bearing rung wins, whatever its direction, order-independent', () => {
+    const log = [at(QueryStatus.QUERIED, 0), at(QueryStatus.PARTIAL_REQUESTED, 2), at(QueryStatus.PARTIAL_SENT, 4)];
+    expect(deriveLastStatusChange(log)).toBe(new Date(t0 + 4 * 86400000).toISOString());
+    expect(deriveLastStatusChange([...log].reverse())).toBe(new Date(t0 + 4 * 86400000).toISOString());
+  });
+
+  it('a date-PROVISIONAL latest rung → null (a provisional earlier rung does not matter)', () => {
+    const provisionalLatest = [at(QueryStatus.QUERIED, 0), { ...at(QueryStatus.REJECTED, 9), dateProvisional: true }];
+    expect(deriveLastStatusChange(provisionalLatest)).toBeNull();
+    const provisionalEarlier = [{ ...at(QueryStatus.QUERIED, 0), dateProvisional: true }, at(QueryStatus.REJECTED, 9)];
+    expect(deriveLastStatusChange(provisionalEarlier)).toBe(new Date(t0 + 9 * 86400000).toISOString());
   });
 });
 

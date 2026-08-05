@@ -9,7 +9,7 @@
  * and writes the result to the query document:
  *
  *   status · partialRequestedDate · partialSentDate · fullRequestedDate · fullSentDate
- *   revisionRound · hasAgentResponded · responseReceivedAt · rejectedDate
+ *   revisionRound · hasAgentResponded · responseReceivedAt · rejectedDate · lastStatusChange
  *
  * No other code writes these fields. Every mutation is "change the activity log, then
  * recomputeQuery(queryId)" — so the status can never drift from the log, duplicate/contradictory
@@ -94,6 +94,9 @@ export async function recomputeQuery(userId: string, queryId: string): Promise<v
       // Derived "when the query closed by rejection" (the final rung, only when REJECTED; same
       // provisional guard). Feeds the package reply-time maths' first-move candidates.
       rejectedDate: fields.rejectedDate ?? deleteField(),
+      // Derived "when the status last changed" — the latest rung's own time, not a recording
+      // stamp; same provisional guard. The last stamped audit field to join the derived set.
+      lastStatusChange: fields.lastStatusChange ?? deleteField(),
     });
   } catch (e) {
     handleFirestoreError(e, OperationType.UPDATE, `users/${userId}/queries/${queryId}`);

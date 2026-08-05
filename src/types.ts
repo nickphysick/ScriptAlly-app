@@ -371,7 +371,9 @@ export interface Query {
   responseReceivedAt?: any; // Timestamp | string — DERIVED by recomputeQuery (sole writer): when
   // the agent FIRST acted, from the earliest incoming rung of the activity log. Absent when no
   // dated response exists. Legacy stamped values heal on the query's next recompute.
-  lastStatusChange?: any; // Timestamp — audit: when the status change was recorded
+  lastStatusChange?: any; // Timestamp | string — DERIVED by recomputeQuery (sole writer): the
+  // most recent status-bearing rung's own time; absent for provisional-dated imports. Legacy
+  // stamped values heal on the query's next recompute (Tier 3 · Phase 4).
   expectedSendDate?: any; // Timestamp | string — partial/full: when the materials are due out
   sendReminderDate?: any; // Timestamp | string — self-reminder to send materials / resubmit
   offerDate?: any; // Timestamp | string

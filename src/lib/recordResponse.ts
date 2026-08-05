@@ -25,7 +25,6 @@ import {
   setDoc,
   deleteDoc,
   deleteField,
-  serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "./firebase";
@@ -235,14 +234,12 @@ export async function recordQueryResponse(
   // 2. Build the query document update — the response DETAILS only. `status` and the pipeline
   //    stage dates are no longer written here: they are derived from the activity log by
   //    recomputeQuery (the single writer) after the log is updated below.
-  const updates: Record<string, any> = {
-    // lastStatusChange = when you recorded it (audit stamp). responseReceivedAt is NOT stamped
-    // here — it is derived by recomputeQuery from the activity log (the earliest incoming-
-    // direction rung), so every close path agrees by construction. The user-editable
-    // dateReceived still reaches it: it drives the activity's createdAt below (step 4), which
-    // is exactly what the derivation reads.
-    lastStatusChange: serverTimestamp(),
-  };
+  // Response DETAILS only. Every audit/date field is DERIVED by recomputeQuery from the
+  // activity log — lastStatusChange (the latest rung), responseReceivedAt (the earliest
+  // incoming rung), rejectedDate (the closing rejection) — so no stamp is written here and
+  // the record/close paths cannot disagree (Tier 1 · Phase 2 + Tier 3 · Phase 4). The
+  // user-editable dateReceived reaches the derivation via the activity's createdAt (step 4).
+  const updates: Record<string, any> = {};
 
   updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();
   updates.materialsRequestedQuantity = materialsRequestedQuantity !== undefined ? materialsRequestedQuantity : deleteField();
@@ -368,9 +365,9 @@ export async function recordQueryResponse(
   //    recomputes, so the derived fields follow the restored log.
   const undo = async () => {
     const revertData = {
-      lastStatusChange: convertToTimestampOrDate(preSnapshot.lastStatusChange) ?? deleteField(),
-      // responseReceivedAt is deliberately not restored here — it is derived, and the recompute
-      // below self-corrects it once the activity this call created has been deleted.
+      // lastStatusChange and responseReceivedAt are deliberately not restored here — they are
+      // derived, and the recompute below self-corrects them once the activity this call
+      // created has been deleted.
       materialsRequestedType: preSnapshot.materialsRequestedType ?? deleteField(),
       materialsRequestedQuantity: preSnapshot.materialsRequestedQuantity ?? deleteField(),
       fullVersionSent: preSnapshot.fullVersionSent ?? deleteField(),

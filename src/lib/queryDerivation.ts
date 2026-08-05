@@ -124,6 +124,20 @@ export function deriveRejectedDate(activities: DerivableActivity[]): string | nu
 }
 
 /**
+ * "When the status last changed" — the most recent status-bearing rung's time as ISO: the
+ * event's OWN time, not the old wall-clock recording stamp (contrast deriveResponseReceivedAt,
+ * the EARLIEST incoming rung). `null` when the log is empty or the latest rung is
+ * date-provisional (Tier 3 · Phase 4 — the last inconsistently-stamped field joins the
+ * derived set, so no close path can disagree about it).
+ */
+export function deriveLastStatusChange(activities: DerivableActivity[]): string | null {
+  const ordered = orderedStatusBearing(activities);
+  const last = ordered[ordered.length - 1];
+  if (!last) return null;
+  return last.provisional ? null : new Date(last.time).toISOString();
+}
+
+/**
  * Revision round = 1 + the number of resubmission sends. A resubmission is a FULL_SENT whose
  * nearest preceding status-bearing activity is REVISE_RESUBMIT — derived from log shape, never
  * a stored counter, so editing/deleting an R&R recomputes the round correctly.
@@ -169,6 +183,7 @@ export interface DerivedQueryFields extends DerivedPipelineDates {
   revisionRound: number;
   responseReceivedAt: string | null;
   rejectedDate: string | null;
+  lastStatusChange: string | null;
 }
 
 /** One call for everything recomputeQuery writes. */
@@ -179,6 +194,7 @@ export function deriveQueryFields(activities: DerivableActivity[]): DerivedQuery
     revisionRound: deriveRevisionRound(activities),
     responseReceivedAt: deriveResponseReceivedAt(activities),
     rejectedDate: deriveRejectedDate(activities),
+    lastStatusChange: deriveLastStatusChange(activities),
     ...derivePipelineDates(activities),
   };
 }

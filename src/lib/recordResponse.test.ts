@@ -94,9 +94,10 @@ describe('recordQueryResponse — single-writer invariant + the activity write',
     await recordQueryResponse(mkDeps() as any, mkData({ responseType: 'partial' }));
     const queryUpdate: any = mockUpdateDoc.mock.calls[0][1];
     expect(queryUpdate.status).toBeUndefined();
-    // responseReceivedAt joined the derived set — recomputeQuery is its only writer now.
+    // The whole audit set is derived now — recomputeQuery is the only writer of all three.
     expect('responseReceivedAt' in queryUpdate).toBe(false);
-    expect('lastStatusChange' in queryUpdate).toBe(true); // the direct audit stamp that remains
+    expect('lastStatusChange' in queryUpdate).toBe(false);
+    expect('rejectedDate' in queryUpdate).toBe(false);
   });
 
   it('a reversion to Queried writes no timeline activity but still recomputes', async () => {
@@ -114,10 +115,10 @@ describe('recordQueryResponse — undo', () => {
     await res.undo();
     expect(mockDeleteDoc).toHaveBeenCalled();
     expect(mockRecompute).toHaveBeenCalledWith('u1', 'q1');
-    // The revert payload no longer restores responseReceivedAt — the recompute above
-    // self-corrects it from the trimmed log.
+    // The revert payload restores neither derived audit field — the recompute above
+    // self-corrects both from the trimmed log.
     const revert: any = mockUpdateDoc.mock.calls[1][1];
     expect('responseReceivedAt' in revert).toBe(false);
-    expect('lastStatusChange' in revert).toBe(true);
+    expect('lastStatusChange' in revert).toBe(false);
   });
 });

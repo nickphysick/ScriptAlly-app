@@ -80,8 +80,10 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     expect(written.partialSentDate).toEqual(DELETED);
     expect(written.fullRequestedDate).toEqual(DELETED);
     expect(written.fullSentDate).toEqual(DELETED);
-    // The partial request is the earliest (and only) incoming rung.
+    // The partial request is the earliest (and only) incoming rung — and the latest rung, so
+    // lastStatusChange lands on the same time here.
     expect(written.responseReceivedAt).toBe(iso('2026-01-03T10:00:00Z'));
+    expect(written.lastStatusChange).toBe(iso('2026-01-03T10:00:00Z'));
   });
 
   it('an empty log derives back to Queried (no response), all stage dates cleared', async () => {
@@ -92,6 +94,7 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     expect(written.hasAgentResponded).toBe(false);
     expect(written.partialRequestedDate).toEqual(DELETED);
     expect(written.responseReceivedAt).toEqual(DELETED);
+    expect(written.lastStatusChange).toEqual(DELETED);
   });
 
   it('responseReceivedAt = the EARLIEST incoming rung; rejectedDate = the closing rejection', async () => {
@@ -104,6 +107,7 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     expect(written.status).toBe(QueryStatus.REJECTED);
     expect(written.responseReceivedAt).toBe(iso('2026-02-01T10:00:00Z'));
     expect(written.rejectedDate).toBe(iso('2026-03-01T10:00:00Z'));
+    expect(written.lastStatusChange).toBe(iso('2026-03-01T10:00:00Z'));
   });
 
   it('rejectedDate is deleteField when the query is not closed by rejection', async () => {
@@ -167,7 +171,7 @@ describe('single-writer lock — the derived date fields', () => {
     return offenders;
   };
 
-  it.each(['responseReceivedAt', 'rejectedDate'])(
+  it.each(['responseReceivedAt', 'rejectedDate', 'lastStatusChange'])(
     '%s: no non-test file outside the derivation pair carries the write key',
     (field) => {
       const offenders = offendersFor(field);
