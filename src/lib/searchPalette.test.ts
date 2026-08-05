@@ -4,9 +4,11 @@
  * are browser checks (jsdom cannot judge them) and are verified in the run report instead.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import {
-  EMPTY_ACTION_COUNT, GROUP_ORDER, PALETTE_ACTIONS, PaletteItem, RANK, RECENT_COUNT,
-  buildCorpus, emptyStateItems, highlightParts, normalise, pushRecent, rankItems, scoreItem,
+  EMPTY_ACTION_COUNT, EMPTY_PAGE_COUNT, GROUP_ORDER, PALETTE_ACTIONS, PaletteItem, RANK,
+  buildCorpus, emptyStateItems, highlightParts, normalise, rankItems, scoreItem,
 } from "./searchPalette";
 
 const item = (title: string, subtitle?: string): Pick<PaletteItem, "title" | "subtitle"> =>
@@ -27,10 +29,20 @@ describe("normalise — case and punctuation are stripped from both sides", () =
 });
 
 describe("scoreItem — ranked, not filtered", () => {
-  it("title prefix beats title substring beats subtitle substring beats subsequence", () => {
+  /* ⚠️ BAKED 20's SCALE: prefix 3 > word-boundary 2 > substring 1, with a subtitle match half a
+     point back. The WORD-BOUNDARY tier is new in the shell rebuild and is the one that was
+     missing — without it a surname match scored level with an incidental one. */
+  it("prefix beats word-boundary beats substring, and a subtitle is half a point back", () => {
     expect(scoreItem(item("Marsh Agency"), "mar")).toBe(RANK.titlePrefix);
-    expect(scoreItem(item("The Marsh Agency"), "mar")).toBe(RANK.titleSubstring);
-    expect(scoreItem(item("Nothing", "The Marsh Agency"), "mar")).toBe(RANK.subtitleSubstring);
+    expect(scoreItem(item("The Marsh Agency"), "mar")).toBe(RANK.titleWordBoundary);
+    expect(scoreItem(item("Postmarsh"), "mar")).toBe(RANK.titleSubstring);
+    expect(scoreItem(item("Nothing", "Marsh Agency"), "mar"))
+      .toBe(RANK.titlePrefix - RANK.subtitlePenalty);
+    expect(scoreItem(item("Nothing", "The Marsh Agency"), "mar"))
+      .toBe(RANK.titleWordBoundary - RANK.subtitlePenalty);
+    // a title match always wins over the same match on a subtitle
+    expect(scoreItem(item("Marsh Agency"), "mar"))
+      .toBeGreaterThan(scoreItem(item("Nothing", "Marsh Agency"), "mar"));
     // ⚠️ aisah → Aisha is a TRANSPOSITION, not a subsequence: walking "aishakapoor" for
     // a-i-s-a-h, the h never comes back round. The subsequence tier cannot see it, which is why
     // there is a typo tier at all.
@@ -123,35 +135,25 @@ describe("highlightParts — the mark lands on what the reader can see", () => {
   });
 });
 
-describe("the empty state is never empty", () => {
-  it("cold start: no recents, so the top actions stand alone", () => {
-    const rows = emptyStateItems([]);
-    expect(rows).toHaveLength(EMPTY_ACTION_COUNT);
-    expect(rows.every((r) => r.group === "Actions")).toBe(true);
+/* ⚠️ SESSION RECENTS ARE RETIRED (shell-rebuild Phase 5). Baked 20 specifies the empty state
+   exactly — three actions and four pages — and the Recent group was the only place recents ever
+   rendered. Their blocks were deleted with them rather than left asserting an export nothing
+   calls. A real feature was lost; it is recorded in the run report. */
+describe("the empty state is never empty — Baked 20: three actions, four pages", () => {
+  it("shows three actions and four pages, in that order", () => {
+    const rows = emptyStateItems();
+    expect(rows).toHaveLength(EMPTY_ACTION_COUNT + EMPTY_PAGE_COUNT);
+    expect(rows.slice(0, EMPTY_ACTION_COUNT).every((r) => r.group === "Actions")).toBe(true);
+    expect(rows.slice(EMPTY_ACTION_COUNT).every((r) => r.group === "Pages")).toBe(true);
   });
 
-  it("with recents: Recent first, then the top actions", () => {
-    const rows = emptyStateItems([row({ id: "r1", title: "Jonathan Marsh" })]);
-    expect(rows[0].group).toBe("Recent");
-    expect(rows[0].title).toBe("Jonathan Marsh");
-    expect(rows).toHaveLength(1 + EMPTY_ACTION_COUNT);
-  });
-
-  it("caps recents so the actions are always reachable without scrolling past a history", () => {
-    const many = Array.from({ length: 12 }, (_, i) => row({ id: `r${i}`, title: `R${i}` }));
-    const rows = emptyStateItems(many);
-    expect(rows.filter((r) => r.group === "Recent")).toHaveLength(RECENT_COUNT);
+  it("takes no argument — there is no history to pass it", () => {
+    expect(emptyStateItems.length).toBe(0);
   });
 });
 
-describe("pushRecent — newest first, no duplicates", () => {
-  it("moves a re-opened item to the front rather than repeating it", () => {
-    const a = row({ id: "a", title: "A" });
-    const b = row({ id: "b", title: "B" });
-    const after = pushRecent(pushRecent([a], b), a);
-    expect(after.map((r) => r.id)).toEqual(["a", "b"]);
-  });
-});
+/* (The `pushRecent` block was deleted with the function it tested — see the note above the
+   empty-state describe. Retired by Baked 20, deliberately, not lost by accident.) */
 
 describe("⚠️ every action dispatches to an EXISTING handler", () => {
   it("captures use the rail's contracts; the rest use the navigate bridge", () => {
@@ -228,9 +230,12 @@ describe("Jump to — the contextual action", () => {
     queries: [], manuscripts: [],
   });
 
-  it("appears ABOVE everything when an agent matches, and dispatches to the preselect seam", () => {
+  /* ⚠️ IT IS THE TOP OF ACTIONS NOW, not a group of its own (Baked 20, shell-rebuild Phase 5).
+     Actions is the first group, so it is still the first row on screen — but the heading it used
+     to bring with it is gone, because a one-row group is a label wearing a heading's clothes. */
+  it("leads the Actions group when an agent matches, and dispatches to the preselect seam", () => {
     const rows = rankItems(corpus, "aisha");
-    expect(rows[0].group).toBe("Jump to");
+    expect(rows[0].group).toBe("Actions");
     expect(rows[0].title).toBe("Log a query to Aisha Kapoor");
     expect(rows[0].shortcut).toBe("⌘↵");
     // the EXISTING seam — LogQueryFocusForm's initialAgentId, not a new handler
@@ -238,7 +243,8 @@ describe("Jump to — the contextual action", () => {
   });
 
   it("does not appear when no agent matched", () => {
-    expect(rankItems(corpus, "packages").some((r) => r.group === "Jump to")).toBe(false);
+    expect(rankItems(corpus, "packages").some((r) => r.title.startsWith("Log a query to")))
+      .toBe(false);
   });
 
   it("offers ONE agent — the top-ranked one, not a second results list", () => {
@@ -248,8 +254,42 @@ describe("Jump to — the contextual action", () => {
       agents: [{ id: "a1", name: "Marcus Reed" }, { id: "a2", name: "Mark Ellery" }],
       queries: [], manuscripts: [],
     });
-    const jumps = rankItems(two, "mar").filter((r) => r.group === "Jump to");
+    const jumps = rankItems(two, "mar").filter((r) => r.title.startsWith("Log a query to"));
     expect(jumps).toHaveLength(1);
     expect(jumps[0].title).toBe("Log a query to Marcus Reed");
+  });
+});
+
+/**
+ * ⚠️ THE PALETTE NOW HAS TWO HOSTS, AND MUST STILL BE ONE PALETTE (shell-rebuild pack, Phase 5).
+ * It was mounted inside AppShell — the workspace shell — so on /dashboard the search pill opened
+ * nothing and ⌘K did nothing at all. The fix is a shared `usePalette` hook rather than a second
+ * copy of the block, because two copies would register ⌘K twice: two listeners, both calling
+ * preventDefault, on the app's one universal shortcut.
+ */
+describe("both shells mount ONE palette", () => {
+  const read = (p: string) =>
+    readFileSync(resolve(__dirname, "..", "components", "shell", p), "utf8");
+
+  it("the hook is the only place the corpus and ⌘K are wired", () => {
+    const hook = read("usePalette.tsx");
+    expect(hook).toContain("buildCorpus");
+    expect(hook).toContain('e.key.toLowerCase() === "k"');
+    for (const host of ["AppShell.tsx", "TopNavHost.tsx"]) {
+      expect(read(host), host).toContain("usePalette");
+      expect(read(host), `${host} must not build its own corpus`).not.toContain("buildCorpus");
+      expect(read(host), `${host} must not register its own ⌘K`).not.toContain('=== "k"');
+    }
+  });
+
+  it("the top-nav shell really is given an opener — the gap this phase closed", () => {
+    expect(read("TopNavHost.tsx")).toContain("onOpenSearch={openPalette}");
+  });
+
+  /* Baked 20 — ⌘K TOGGLES. Pressing it with the palette open closes it, which is what the hand
+     expects of a shortcut that is a switch. */
+  it("⌘K toggles rather than only opening", () => {
+    const hook = read("usePalette.tsx");
+    expect(hook).toMatch(/setOpen\(\(v\) => \{[\s\S]*?if \(v\) return false;/);
   });
 });

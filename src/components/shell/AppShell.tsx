@@ -28,9 +28,7 @@ import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { attentionCount } from "../../lib/queriesFilterParam";
 import { AccountMenu } from "./AccountMenu";
-import { SearchPalette } from "./SearchPalette";
-import { buildCorpus, rankItems } from "../../lib/searchPalette";
-import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
+import { usePalette } from "./usePalette";
 import { ShellSidebarBody, ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
@@ -304,36 +302,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     return () => { ro.disconnect(); window.removeEventListener("resize", updateFade); };
   }, [pathname, updateFade]);
 
-  // ── THE COMMAND PALETTE (palette pack). Hosted HERE, above the page tree, so one instance
-  // serves every route and ⌘K can be registered exactly once.
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [paletteTerm, setPaletteTerm] = useState("");
-  const searchOpenerRef = useRef<HTMLButtonElement>(null);
-  const openPalette = useCallback(() => { setPaletteTerm(""); setPaletteOpen(true); }, []);
-  // THE CORPUS — built from already-loaded state (DbProvider subscribes on every route), so the
-  // palette never fetches and has no loading state. Rebuilt when the data changes, not per
-  // keystroke; the ranking is the cheap part.
-  const corpus = useMemo(
-    () => buildCorpus({
-      agents, queries, manuscripts, now: Date.now(),
-      agentLabel: (a) => ({ primary: agentPrimary(a), secondary: agentSecondary(a) }),
-    }),
-    [agents, queries, manuscripts],
-  );
-  const paletteItems = useMemo(() => rankItems(corpus, paletteTerm), [corpus, paletteTerm]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) return;
-      // ⌘K WORKS FROM ANYWHERE, INCLUDING INSIDE A TEXT FIELD — deliberately no editable-target
-      // guard. It is the one shortcut that should never be swallowed by whatever has focus.
-      e.preventDefault();
-      openPalette();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [openPalette]);
-  // The palette is a doorway, not a place: any navigation closes it.
-  useEffect(() => { setPaletteOpen(false); }, [pathname]);
+  /* ── THE COMMAND PALETTE. ⚠️ THE HOSTING MOVED TO `usePalette` (shell-rebuild pack, Phase 5)
+     because it lived HERE, inside the workspace shell — which meant the top-nav shell had no
+     palette at all: on /dashboard the search pill opened nothing and ⌘K did nothing. Copying the
+     block into the second shell would have registered ⌘K twice. */
+  const { openPalette, searchOpenerRef, palette } = usePalette({
+    onNavigate, onNavigatePath: (to) => goPath(to), setSearchQuery,
+  });
 
   // Chrome navigation — router-direct (new-code rule), clearing the global search the way the
   // handleNavigate bridge does on real navigation.
@@ -435,17 +410,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         </div>
       </WorkspaceShell>
 
-      <SearchPalette
-        open={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
-        onNavigate={onNavigate}
-        onNavigatePath={goPath}
-        items={paletteItems}
-        setSearchQuery={setSearchQuery}
-        openerRef={searchOpenerRef}
-        term={paletteTerm}
-        setTerm={setPaletteTerm}
-      />
+      {palette}
 
       {/* (The floating help FAB is RETIRED — top-bar rebuild: help is a bar button now, so it
           is chrome rather than a thing measured from the browser edge. Its /todo two-item menu

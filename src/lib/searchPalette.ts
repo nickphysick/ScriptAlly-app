@@ -31,12 +31,23 @@ export type PaletteRun =
   /** Jump to: open Log-a-query PRESELECTED to this agent, via the existing initialAgentId seam. */
   | { kind: "logQueryTo"; agentId: string; name: string };
 
-export type PaletteGroup =
-  | "Jump to" | "Recent" | "Actions" | "Agents" | "Queries" | "Manuscripts" | "Pages";
+export type PaletteGroup = "Actions" | "Pages" | "Agents" | "Queries" | "Manuscripts";
 
-/** Group render order (mockup ORDER, with Recent used only by the empty state). */
+/**
+ * Group render order — Baked 20, exactly.
+ *
+ * ⚠️ `Jump to` AND `Recent` ARE RETIRED AS GROUPS (shell-rebuild pack, Phase 5). Baked 20 names
+ * five groups in this order and says the contextual `Log a query to {agent}` goes "at the top of
+ * Actions" rather than into a group of its own — so the item survives, its heading does not.
+ * `Recent` went with the same clause: the empty state is specified as three actions and four
+ * pages, which leaves recents nowhere to render. That is a real loss of a working feature,
+ * recorded rather than quietly absorbed; `pushRecent` is retired with it.
+ *
+ * ⚠️ PAGES MOVED FROM LAST TO SECOND. Under the old order a page match sat beneath every agent,
+ * query and manuscript, so typing "packages" scrolled past records to reach the page you named.
+ */
 export const GROUP_ORDER: PaletteGroup[] = [
-  "Jump to", "Recent", "Actions", "Agents", "Queries", "Manuscripts", "Pages",
+  "Actions", "Pages", "Agents", "Queries", "Manuscripts",
 ];
 
 /** The icon family a row wears — maps to the mockup's `.ic` tints. */
@@ -113,10 +124,9 @@ export const PALETTE_PAGES: PaletteItem[] = [
   { id: "page:help", group: "Pages", kind: "page", title: "Help centre", subtitle: "Guides and answers", run: { kind: "path", path: "/help" } },
 ];
 
-/** How many actions the empty state shows beneath Recent (mockup: the top four). */
-export const EMPTY_ACTION_COUNT = 4;
-/** How many recents the empty state shows (mockup: the last four things opened). */
-export const RECENT_COUNT = 4;
+/** Baked 20 — the empty state is three actions and four pages. */
+export const EMPTY_ACTION_COUNT = 3;
+export const EMPTY_PAGE_COUNT = 4;
 
 /** Whole days between an ISO date and now, for a query's "9 days ago" line. */
 function daysAgo(iso: string | undefined, now: number): number | null {
@@ -211,16 +221,29 @@ export function buildCorpus(input: CorpusInput): PaletteItem[] {
  */
 export const normalise = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-/** Ranking tiers — named, so a change is a decision rather than a nudged constant. */
+/**
+ * Ranking tiers — Baked 20's scale, named so a change is a decision rather than a nudged constant.
+ *
+ * ⚠️ THE WORD-BOUNDARY TIER IS NEW, and it is the one that was missing: without it "mushens"
+ * scored the same against "Juliet Mushens" as against any title merely containing the letters,
+ * so a surname match ranked level with an incidental one.
+ *
+ * ⚠️ THE TWO FUZZY TIERS SIT BELOW EVERY REAL MATCH, deliberately kept rather than dropped.
+ * Baked 20 does not mention them, and it does not forbid them; `typo` is what catches
+ * `aisah` → `Aisha`, a transposition no subsequence can see and the single commonest typo there
+ * is. Scoring them below 1 means they can never outrank a genuine substring hit.
+ */
 export const RANK = {
-  titlePrefix: 100,
-  titleSubstring: 70,
-  subtitleSubstring: 40,
+  titlePrefix: 3,
+  titleWordBoundary: 2,
+  titleSubstring: 1,
+  /** Baked 20: a subtitle match is the same tier, half a point back. */
+  subtitlePenalty: 0.5,
   /** One adjacent transposition — the ordinary typo (`aisah` → `Aisha`). */
-  typo: 30,
+  typo: 0.5,
   /** The loosest tier. Report-flagged: this is the one to drop first if it gets noisy at scale. */
-  looseSubsequence: 20,
-  noMatch: -1,
+  looseSubsequence: 0.25,
+  noMatch: 0,
 } as const;
 
 /**
@@ -242,17 +265,45 @@ function withinOneTransposition(title: string, term: string): boolean {
  * Score one item against a term. RANKED, NOT FILTERED: everything that matches at all is kept
  * and ordered, so a weak match is at the bottom rather than absent.
  */
+/**
+ * Baked 20's three tiers over one string: prefix 3 > word-boundary 2 > substring 1.
+ *
+ * ⚠️ WORD BOUNDARIES ARE TAKEN FROM THE RAW TEXT, not the normalised form. Normalising strips
+ * the spaces, so `normalise("Juliet Mushens")` is one word and every surname would silently drop
+ * to the substring tier — the tier would exist and never fire.
+ */
+function tierFor(raw: string, term: string): number {
+  const t = normalise(term);
+  if (!t) return RANK.noMatch;
+  const whole = normalise(raw);
+  if (whole.startsWith(t)) return RANK.titlePrefix;
+  if (raw.toLowerCase().split(/\s+/).some((w) => normalise(w).startsWith(t))) {
+    return RANK.titleWordBoundary;
+  }
+  if (whole.includes(t)) return RANK.titleSubstring;
+  return RANK.noMatch;
+}
+
+/**
+ * Score one item against a term. RANKED, NOT FILTERED: everything that matches at all is kept and
+ * ordered, so a weak match is at the bottom rather than absent.
+ *
+ * Baked 20's shape: score the title, score the subtitle half a point back, take the best.
+ */
 export function scoreItem(item: Pick<PaletteItem, "title" | "subtitle">, term: string): number {
   const t = normalise(term);
-  if (!t) return 0;
+  if (!t) return RANK.noMatch;
+
+  const titleScore = tierFor(item.title, term);
+  const subRaw = item.subtitle ? tierFor(item.subtitle, term) : RANK.noMatch;
+  const subScore = subRaw > RANK.noMatch ? subRaw - RANK.subtitlePenalty : RANK.noMatch;
+  const best = Math.max(titleScore, subScore);
+  if (best > RANK.noMatch) return best;
+
+  // Below every real match: the two fuzzy tiers, over the TITLE only. At that looseness a
+  // subtitle match is noise rather than a near-miss.
   const title = normalise(item.title);
-  const sub = normalise(item.subtitle ?? "");
-  if (title.startsWith(t)) return RANK.titlePrefix;
-  if (title.includes(t)) return RANK.titleSubstring;
-  if (sub.includes(t)) return RANK.subtitleSubstring;
   if (withinOneTransposition(title, t)) return RANK.typo;
-  // Loose subsequence over the TITLE only. Deliberately not run over subtitles: at that
-  // looseness a subtitle match is noise, not a near-miss.
   let i = 0;
   for (const c of title) {
     if (c === t[i]) i += 1;
@@ -274,8 +325,9 @@ export function rankItems(corpus: PaletteItem[], term: string): PaletteItem[] {
     .filter((x) => x.score > RANK.noMatch);
   scored.sort((a, b) => (b.score - a.score) || (a.i - b.i));
   const ranked = scored.map((x) => x.item);
-  // JUMP TO rides above everything when an agent matched — computed from the RANKED list, so it
-  // offers the agent the palette itself thinks you meant.
+  // Baked 20 — the contextual action is INJECTED AT THE TOP OF ACTIONS, not given a group of its
+  // own. Computed from the RANKED list, so it offers the agent the palette itself thinks you
+  // meant, and unshifted so it leads the group whatever else matched.
   const jump = jumpToItem(ranked);
   const all = jump ? [jump, ...ranked] : ranked;
   // Then lay them out in the canonical group order, keeping each group internally ranked.
@@ -300,7 +352,8 @@ export function jumpToItem(ranked: PaletteItem[]): PaletteItem | null {
   if (!agent || agent.run.kind !== "agent") return null;
   return {
     id: `jump:${agent.run.agentId}`,
-    group: "Jump to",
+    // Baked 20: it belongs to Actions, at the top — not to a heading of its own.
+    group: "Actions",
     kind: "act",
     title: `Log a query to ${agent.run.name}`,
     subtitle: "Start a new query with this agent",
@@ -331,19 +384,19 @@ export function highlightParts(title: string, term: string): HighlightPart[] {
 }
 
 /**
- * THE EMPTY STATE — recents, then the top actions. A search box that opens blank is a search
- * box; one that opens with your recents and your common actions is a launcher, which is the
- * point. Recents are session-scoped and derived from what you actually opened (no stored field),
- * so on a cold start there are none and the actions stand alone.
+ * THE EMPTY STATE — Baked 20: three actions and four pages. A search box that opens blank is a
+ * search box; one that opens with your common actions and destinations is a launcher, which is
+ * the point.
+ *
+ * ⚠️ SESSION RECENTS ARE RETIRED WITH THIS (shell-rebuild pack, Phase 5). Baked 20 specifies the
+ * empty state exactly, and there is no room in it for a Recent group — which is where recents
+ * were the only thing that ever rendered. `pushRecent` and RECENT_COUNT are deleted rather than
+ * left as dead-but-tested exports. A real feature was lost here; it is in the report, not
+ * quietly absorbed.
  */
-export function emptyStateItems(recent: PaletteItem[]): PaletteItem[] {
+export function emptyStateItems(): PaletteItem[] {
   return [
-    ...recent.slice(0, RECENT_COUNT).map((r) => ({ ...r, group: "Recent" as const })),
     ...PALETTE_ACTIONS.slice(0, EMPTY_ACTION_COUNT),
+    ...PALETTE_PAGES.slice(0, EMPTY_PAGE_COUNT),
   ];
-}
-
-/** Push an opened item onto the session's recents, newest first, de-duplicated by id. */
-export function pushRecent(recent: PaletteItem[], item: PaletteItem): PaletteItem[] {
-  return [item, ...recent.filter((r) => r.id !== item.id)].slice(0, RECENT_COUNT * 2);
 }

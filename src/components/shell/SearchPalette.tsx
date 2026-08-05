@@ -18,7 +18,7 @@ import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { invokeCapture } from "./railNav";
 import {
-  GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, emptyStateItems, highlightParts, pushRecent,
+  GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, emptyStateItems, highlightParts,
 } from "../../lib/searchPalette";
 import "./searchPalette.css";
 
@@ -67,11 +67,10 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [sel, setSel] = useState(0);
-  const [recent, setRecent] = useState<PaletteItem[]>([]);
 
   const rows = useMemo(
-    () => (term.trim() ? items : emptyStateItems(recent)),
-    [term, items, recent]
+    () => (term.trim() ? items : emptyStateItems()),
+    [term, items]
   );
 
   // The selection can never point past the list — the term changes under it on every keystroke.
@@ -121,7 +120,6 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
   }, [onNavigate, onNavigatePath, setSearchQuery]);
 
   const activate = useCallback((item: PaletteItem) => {
-    setRecent((r) => pushRecent(r, item));
     closeAndReturn();
     perform(item.run);
   }, [closeAndReturn, perform]);

@@ -43,7 +43,7 @@ import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
-import { TopNavShell } from "./components/shell/TopNavShell";
+import { TopNavHost } from "./components/shell/TopNavHost";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -580,9 +580,10 @@ function AppContent() {
       <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
         <TopNavPanelData>
           {(panelInput) => (
-            <TopNavShell
+            <TopNavHost
               onNavigate={handleNavigate}
               onNavigatePath={(to) => { setSearchQuery(""); navigate(to); }}
+              setSearchQuery={setSearchQuery}
               panelInput={panelInput}
             >
               {path === "/dashboard" && (
@@ -591,7 +592,7 @@ function AppContent() {
               {path === "/account" && <div className="sv2-focuscol"><AccountSettings onNavigate={handleNavigate} /></div>}
               {path === "/plans" && <div className="sv2-focuscol"><PlansPage /></div>}
               {path === "/help" && <div className="sv2-focuscol"><HelpCentre /></div>}
-            </TopNavShell>
+            </TopNavHost>
           )}
         </TopNavPanelData>
       </div>
