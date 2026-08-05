@@ -295,79 +295,24 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
   });
 
-  it("THE BRAND APPEARS ONCE — two mounts, mutually exclusive by route, identical treatment", () => {
+  it("THE BRAND APPEARS ONCE — the column's masthead carries it, and it is the route home", () => {
+    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
+    expect(col.match(/<ScriptAllyLogo/g), "one mount in the column").toHaveLength(1);
+    expect(col).toContain('onNavigatePath("/dashboard")'); // there is no Dashboard nav item
     const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    // Palette pack: the brand goes in the LEFTMOST CHROME NOT ALREADY CARRYING IT. The bar holds
-    // it on the dashboard; the panel holds it everywhere else. Two mounts, never both at once —
-    // which is precisely why both may carry the inspection id without colliding.
-    const mounts = v2.match(/<ScriptAllyLogo heightPx=\{38\} id="scriptally-brand-logo-root" \/>/g);
-    expect(mounts, "both mounts, same asset, same height").toHaveLength(2);
-    expect(v2).not.toContain("heightPx={27}"); // the old smaller panel treatment is gone
-    // the two branches key off the SAME predicate, in opposite senses
-    expect(v2).toContain("const brandHere = pathname !== SHELL_DASHBOARD.path;");
-    expect(v2).toContain("const isDashboard = pathname === SHELL_DASHBOARD.path;");
+    // The panel that used to hold the brand on working pages is GONE; the column's masthead is
+    // the one mount, and it doubles as the route home (hence no Dashboard nav item).
+    expect(v2).not.toContain("sv2-pwm"); // the retired panel's brand slot
     expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail's plane glyph is unchanged
   });
 });
 
 /**
- * THE RAIL'S MOTION (chrome refinements P3). jsdom cannot run a transition or compute a
- * transform, so these lock the CONTRACT: route-driven position, transform-only movement,
- * silence on mount, the weight signal, and press feedback that cannot fight the indicator.
+ * ⚠️ THE SLIDING RAIL INDICATOR IS RETIRED with the rail (app-shell pack, Phase 2). Its job —
+ * one floating marker, route-driven, silent on mount — passed to the COLUMN'S SELECTOR, whose
+ * geometry is locked in lib/shellColumn.test.ts and whose structure (including the first-paint
+ * mute, which jsdom cannot see) is locked in shellColumn.test.tsx.
  */
-describe("the sliding rail indicator", () => {
-  const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
-  const rail = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-
-  it("is ROUTE-driven, not click-driven — so back/forward move it too", () => {
-    expect(rail).toContain("const railIndex = SHELL_RAIL.findIndex((r) => r.key === activeKey);");
-    expect(rail).toContain("const activeKey = shellSectionKeyForPath(pathname);");
-    // the position comes from that index alone — no click handler writes it
-    expect(rail).toContain("translateY(calc(${railIndex} * var(--shell-row-h)))");
-    expect(rail).not.toMatch(/setRailIndex|setIndicator(?!Ready)/);
-  });
-
-  it("moves by TRANSFORM only — never `top`", () => {
-    const pill = shellCss.match(/\.sv2-railpill \{([^}]*)\}/)?.[1] ?? "";
-    expect(pill).toContain("top: 0"); // a static origin; the movement is the transform
-    expect(shellCss).toMatch(/\.sv2-railpill\.ready \{ transition: transform 320ms/);
-    expect(shellCss).not.toMatch(/\.sv2-railpill[^{]*\{[^}]*transition:[^;]*\btop\b/);
-  });
-
-  it("is SILENT ON MOUNT — the transition arrives a frame later, so it cannot slide in", () => {
-    expect(rail).toContain("const [indicatorReady, setIndicatorReady] = useState(false);");
-    expect(rail).toContain("window.requestAnimationFrame(() => setIndicatorReady(true))");
-    expect(rail).toContain('className={`sv2-railpill${indicatorReady ? " ready" : ""}`}');
-    // the bare class carries NO transition — only .ready does
-    const pill = shellCss.match(/\.sv2-railpill \{([^}]*)\}/)?.[1] ?? "";
-    expect(pill).not.toContain("transition");
-  });
-
-  it("the pill IS the active fill — the rib's own background goes transparent", () => {
-    expect(shellCss).toMatch(/\.sv2-railnav \.sv2-rib\.on \{ background: transparent; \}/);
-    expect(shellCss).toMatch(/\.sv2-railpill \{[^}]*background: var\(--shell-active-fill\)/s);
-  });
-
-  it("WEIGHT ON ACTIVE: 1.8 → 2.4, styled on the rendered SVG from the parent — TypeGlyph untouched", () => {
-    expect(shellCss).toMatch(/\.sv2-rib svg \{[^}]*stroke-width: 1\.8/s);
-    expect(shellCss).toMatch(/\.sv2-rib\.on svg \{ stroke-width: 2\.4; \}/);
-    expect(shellCss).toMatch(/\.sv2-rib svg \{[^}]*transition: stroke-width/s);
-    expect(rail).not.toContain("TypeGlyph"); // the rail draws lucide icons; the locked component is not involved
-  });
-
-  it("PRESS feedback scales the icon, not the pill — they cannot fight", () => {
-    expect(shellCss).toMatch(/\.sv2-rib:active \{ transform: scale\(\.92\)/);
-    expect(shellCss).toMatch(/\.sv2-frow:active[^{]*\{ transform: scale\(\.985\)/);
-    expect(shellCss).toMatch(/\.sv2-rib:active \{[^}]*120ms/s);
-    expect(shellCss).not.toMatch(/\.sv2-railpill[^{]*:active/); // the pill has no press state
-  });
-
-  it("REDUCED MOTION: the indicator jumps and the press does nothing", () => {
-    const rm = shellCss.slice(shellCss.indexOf("@media (prefers-reduced-motion: reduce)"));
-    expect(rm).toContain(".sv2-railpill.ready { transition: none; }");
-    expect(rm).toMatch(/\.sv2-rib:active[^{]*\{ transform: none; \}/);
-  });
-});
 
 /**
  * THE FOOT FADE (canonical shell pack). jsdom cannot measure a gradient or a scroll position, so

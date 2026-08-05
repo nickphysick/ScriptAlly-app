@@ -1,4 +1,9 @@
 /**
+ * ⚠️ THE RAIL, THE SIDE PANEL AND THEIR SIDEBAR BODY ARE GONE (app-shell pack, Phase 2) — one
+ * expanding column replaced all three, and their blocks were deleted from this file with them
+ * rather than left asserting components nothing mounts. The column's own locks live in
+ * lib/shellColumn.test.ts (geometry) and shellColumn.test.tsx (structure).
+ *
  * jsdom/static smoke render for the v2 shell chrome — structure and classes only (layout is a
  * browser check, per the pack's jsdom limits). The point: the chrome is auth-gated in the app,
  * so a runtime crash in these components would otherwise hide until Nick signs in. The db hook
@@ -29,155 +34,23 @@ vi.mock("../../lib/db", () => ({
   }),
 }));
 
-import { FLYOUT_SECTIONS, ShellFlyout, ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
-import { ShellSidebarBody } from "./ShellSidebar";
+import { ShellTopBar } from "./ShellV2";
 
 const at = (path: string, node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
 
 describe("v2 shell — smoke renders", () => {
-  it("rail capsule: Dashboard + three section ribs + Setup + the avatar; pink active, no captions, no tongue", () => {
-    const html = at("/queries", <ShellRail onNavigatePath={() => {}} />);
-    expect(html).toContain("sv2-rail sv2-cap");
-    for (const tip of ["Dashboard", "Querying", "Agents", "Shelf", "Setup"]) expect(html).toContain(`title="${tip}"`);
-    expect(html).toContain("sv2-rib on");
-    expect(html).not.toContain("sv2-railbtn"); // captioned buttons + the tab tongue are retired
-    // THE RAIL'S AVATAR IS RETIRED (canonical shell pack) — the account is in the bar on every
-    // page and in the panel foot; the rail's was a third home.
-    expect(html).not.toContain("sv2-railav");
-  });
-
-  it("panel frame: the head band, with the tuck beside it", () => {
-    const html = at("/todo", <ShellSide onCollapse={() => {}} />);
-    expect(html).toContain("sv2-ptop");
-    expect(html).toContain('aria-label="Hide the panel"'); // the tuck toggle (fixes pack)
-    expect(html).toContain("sv2-pbody"); // the contents scroll below the band
-    expect(html).not.toContain("sv2-mhrule"); // the masthead rule is gone
-  });
-
-  it("THE BRAND APPEARS ONCE — panel on working pages, bar on the dashboard, never both", () => {
-    const side = (path: string) => at(path, <ShellSide onCollapse={() => {}} />);
-    // working page: the wordmark is in the PANEL and the bar shows the crumb
-    for (const path of ["/todo", "/agents", "/queries", "/manuscripts"]) {
-      expect(side(path), path).toContain("sv2-pwm");
-      expect(side(path), path).toContain("scriptally-title-v2.png");
-      expect(side(path), path).not.toContain("sv2-plab"); // no label where the brand is
-      expect(bar(path), path).not.toContain("sv2-tbbrand");
-      expect(bar(path), path).toContain("sv2-crumb");
-    }
-    // dashboard: the wordmark is in the BAR and the panel shows the Navigate label
-    expect(side("/dashboard")).toContain("sv2-plab");
-    expect(side("/dashboard")).toContain("Navigate");
-    expect(side("/dashboard")).not.toContain("sv2-pwm");
-    expect(side("/dashboard")).not.toContain("scriptally-title-v2.png");
-    expect(bar("/dashboard")).toContain("sv2-tbbrand");
-    expect(bar("/dashboard")).toContain("scriptally-title-v2.png");
-    // exactly ONE brand in the document either way — so the shared id never collides
-    for (const path of ["/dashboard", "/agents"]) {
-      const both = side(path) + bar(path);
-      expect(both.match(/scriptally-brand-logo-root/g), path).toHaveLength(1);
-    }
-  });
-
-  it("panel collapse: the dedicated expand control is RETIRED (rail-section-select P2); the tuck + flyout footer carry the affordances", () => {
-    const collapsed = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed onExpand={() => {}} />);
-    expect(collapsed).not.toContain("sv2-railtuck"); // the expand button is gone
-    expect(collapsed).not.toContain('aria-label="Show the panel"');
-    // the panel's tuck control stays (asserted in the panel-frame test: "Hide the panel"), and
-    // the flyout footer's "Expand sidebar · ⌘\" stays (asserted in the flyout test) — both are
-    // now load-bearing. The hide itself is still the container-class CSS transition:
-    const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
-    expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*width: 0/s);
-    expect(css).toMatch(/\.sv2-collapsed \.sv2-side \{[^}]*margin-left: calc\(-1 \* var\(--shell-cap-gap\)\)/s);
-    expect(css).not.toContain(".sv2-railtuck {"); // its styles went with it
-  });
-
-  it("rail flyouts (flyouts pack): hover targets on the four sections while collapsed — never Dashboard, none expanded", () => {
-    expect([...FLYOUT_SECTIONS]).toEqual(["querying", "agents", "shelf", "setup"]); // Dashboard absent (baked)
-    const collapsed = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed onExpand={() => {}} />);
-    for (const key of FLYOUT_SECTIONS) expect(collapsed).toContain(`data-fly="${key}"`);
-    expect(collapsed).not.toContain('data-fly="dashboard"');
-    const expanded = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed={false} />);
-    expect(expanded).not.toContain("data-fly");
-    expect(expanded).not.toContain("sv2-fly"); // flyouts render only while collapsed (and on hover)
-  });
-
-  it("the flyout capsule: kicker, page rows with counts, active row on the ACTIVE FILL, the Expand footer", () => {
-    const rows = [
-      { key: "queries-hub", label: "Queries Hub", icon: <span />, count: 20, active: true, onClick: () => {} },
-      { key: "todo", label: "To-do", icon: <span />, count: 44, active: false, onClick: () => {} },
-    ];
-    const html = renderToStaticMarkup(
-      <ShellFlyout kicker="Querying" rows={rows} onExpand={() => {}} top={80} show onMouseEnter={() => {}} onMouseLeave={() => {}} />
-    );
-    expect(html).toContain("sv2-fly show");
-    expect(html).toContain("Querying"); // the mono kicker
-    expect(html).toContain("Queries Hub");
-    expect(html).toContain(">20<"); // the mono count
-    expect(html).toContain("sv2-frow on"); // the active row class…
-    expect(html).toContain("Expand sidebar");
-    expect(html).toContain("⌘\\");
-    // …whose fill is the GROUND (the nav law), locked at the rule text:
-    const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
-    expect(css).toMatch(/\.sv2-frow\.on \{ background: var\(--shell-active-fill\)/);
-  });
-
-  const panel = () =>
-    at("/queries", <ShellSidebarBody onNavigate={() => {}} onNavigatePath={() => {}} openSection="querying" onToggleSection={() => {}} />);
-
-  it("panel contents: accordion (Dashboard flat, the CONTROLLED open section renders open)", () => {
-    // The accordion's open section is OWNED BY AppShell (rail-icon-toggle pack) — the sidebar
-    // is controlled; here we pass the section AppShell would derive for /queries.
-    const html = panel();
-    expect(html).toContain("sv2-asec sv2-flat");
-    for (const lb of ["Dashboard", "Querying", "Agents", "Shelf"]) expect(html).toContain(lb);
-    expect(html).toContain("sv2-akids open");
-    expect(html).toContain("Queries Hub");
-    expect(html).toContain("sv2-akid on"); // /queries is the active child (pink fill only)
-  });
-
-  it("THE NOTIFICATION IS GONE ENTIRELY — urgency is one dot beside the To-do count", () => {
-    const html = panel();
-    // Not restyled, not relocated: removed. (It replaced the Urgent/House pills earlier the same
-    // day; the canonical pack removes the whole block, and both are asserted gone here.)
-    expect(html).not.toContain("sv2-notif");
-    expect(html).not.toContain("Nothing needs you today");
-    expect(html).not.toContain("require your attention");
-    expect(html).not.toContain("sv2-tpill");
-    expect(html).not.toContain("sv2-pip");
-    // the dot's home is the nav row; the empty fixture desk has nothing urgent, so none renders
-    expect(html).not.toContain("sv2-akdot");
-    const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
-    expect(body).toContain('page.key === "todo" && tiles.urgent > 0');
-  });
-
-  it("SETTINGS is in the panel foot AND stays a rail rib — it must survive the collapse", () => {
-    expect(panel()).toContain("sv2-frow2");
-    expect(panel()).toContain("Settings");
-    // the rail keeps its own, because the rail IS the collapsed state
-    expect(at("/queries", <ShellRail onNavigatePath={() => {}} />)).toContain('title="Setup"');
-  });
-
-  it("QUICK ACTIONS: two controls, and all FOUR old tile contracts survive", () => {
-    const html = panel();
-    // the two buttons, with real labels rather than unlabelled icons
-    expect(html).toContain("sv2-b1");
-    expect(html).toContain("New");
-    expect(html).toContain("sv2-b2");
-    expect(html).toContain("Record a response"); // PROMOTED to its own button
-    // the four-tile strip is gone
-    expect(html).not.toContain("sv2-strip4");
-    expect(html).not.toContain("sv2-gcap");
-    // ...and the three creates live in the popover, which the source dispatches to the SAME
-    // capture contracts (the popover itself is closed at rest, so assert the source).
-    const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
-    for (const c of ['invokeCapture("query"', 'invokeCapture("agent"', 'invokeCapture("record"']) {
-      expect(body, c).toContain(c);
-    }
-    expect(body).toContain('onNavigate("manuscripts", "Add a manuscript")');
-    // no shortcut registry exists, so no key hint may be advertised
-    expect(html).not.toContain("⌘L");
-    expect(html).not.toContain("⌘N");
+  it("THE BRAND lives in the COLUMN's masthead now — the panel that used to hold it is gone", () => {
+    // Phase 2 folded the rail and the panel into one column, and the column's masthead carries
+    // the wordmark AND is the route home to the dashboard — which is why there is no Dashboard
+    // nav item. The bar's own brand/crumb split is settled in Phase 3.
+    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
+    expect(col).toContain("<ScriptAllyLogo heightPx={26} />");
+    expect(col).toContain('onNavigatePath("/dashboard")');
+    // the retired panel's brand slot and its Navigate label are gone from the source entirely
+    const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+    expect(v2).not.toContain("sv2-pwm");
+    expect(v2).not.toContain("sv2-plab");
   });
 
   it("THE USER BLOCK is in the bar on EVERY page — and the duplication with the panel foot is deliberate", () => {
@@ -189,9 +62,11 @@ describe("v2 shell — smoke renders", () => {
       // identical size and position in both bar states — it always rides the tools cluster
       expect(html.indexOf("sv2-tbicon"), path).toBeLessThan(html.indexOf("sv2-tbuser"));
     }
-    // ...and it ALSO renders at the panel's foot. Approved duplication, asserted so it is not
-    // "tidied away" by someone who spots it later.
-    expect(panel()).toContain("sv2-usr");
+    // ...and it ALSO renders at the COLUMN's foot. Approved duplication, asserted so it is not
+    // "tidied away" by someone who spots it later: the bar's copy survives the column
+    // collapsing, the column's carries the plan line.
+    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
+    expect(col).toContain("sc-fu");
   });
 
   it("THE SEARCH IS AN OPENER — one search implementation, and the palette is it", () => {
@@ -209,17 +84,15 @@ describe("v2 shell — smoke renders", () => {
     expect(existsSync(resolve(__dirname, "..", "Nav.tsx"))).toBe(false);
   });
 
-  it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — no row, no pill, no fill", () => {
-    const html = panel();
-    expect(html).toContain("Nick Physick");
-    expect(html).toContain("Free plan");
-    expect(html).toContain("sv2-uplink"); // a plain slate link, in the plan line
-    expect(html).toContain("Upgrade");
-    // the standalone row and its badge are retired (treatment 1, not treatment 2)
-    expect(html).not.toContain("sv2-upg\"");
-    expect(html).not.toContain("sv2-propill");
-    expect(html).not.toContain("Upgrade to Pro");
-    expect(html).not.toContain("sv2-iconbtn"); // the account row carries no utility buttons
+  it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — a text link, no row, no pill, no card", () => {
+    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
+    // the plan is stated as fact beside the name, and Upgrade is a plain slate link in that line
+    expect(col).toContain("planLine(currentUser?.plan)");
+    expect(col).toContain("sc-up");
+    expect(col).toContain("Upgrade");
+    // Pro is a text link HERE and a card in the account menu. Nowhere else.
+    expect(col).not.toContain("propill");
+    expect(col).not.toContain("Upgrade to Pro");
   });
 
   const bar = (path: string) =>

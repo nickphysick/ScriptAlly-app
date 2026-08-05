@@ -21,7 +21,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useLocation, useNavigate } from "react-router-dom";
 import { HelpCircle, ListChecks, LogOut, Package, Settings, Upload } from "lucide-react";
 import { parchment, PAGE_GRAIN } from "../../lib/designTokens";
-import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
+import { ShellTopBar } from "./ShellV2";
+import { ShellColumn } from "./ShellColumn";
 import { SearchPalette } from "./SearchPalette";
 import { buildCorpus, rankItems } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
@@ -341,10 +342,17 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
           only (class + media query in shellV2.css — never inline display). The interim layers
           (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
-      <ShellRail onNavigatePath={goPath} collapsed={panelCollapsed} onExpand={togglePanel} onBrowse={onBrowse} openSection={openSec} onCollapse={collapsePanel} />
-      <ShellSide collapsed={panelCollapsed} onCollapse={togglePanel}>
-        <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} openSection={openSec} onToggleSection={onToggleSection} />
-      </ShellSide>
+      {/* THE ONE COLUMN (app-shell pack, Phase 2) — it replaced the rail AND the side panel,
+          which were two components with their own paddings; that is why alignment kept
+          drifting. Clicking a section while collapsed expands and opens in one move, which is
+          why there are no hover flyouts. */}
+      <ShellColumn
+        collapsed={panelCollapsed}
+        onSetCollapsed={setPanel}
+        onNavigatePath={goPath}
+        onNavigate={onNavigate}
+        onOpenAccount={() => setYouOpen(true)}
+      />
       <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {/* (The slim mobile Nav is RETIRED — Mobile Pass 1. The v2 top bar below renders the <md
             variant itself: wordmark-or-page-title · search icon · avatar, or back/Done on a
