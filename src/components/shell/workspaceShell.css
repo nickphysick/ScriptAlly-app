@@ -1,34 +1,27 @@
-/* ── THE DOUBLE-DECKER WORKSPACE SHELL (shell-rebuild pack, Phase 2) ───────────────────────────
+/* ── THE FULL-SCREEN WORKSPACE SHELL (shell-rebuild pack + Amendment 1) ────────────────────────
    Ref design-refs/shell-workspace-doubledecker.html.
 
    ⚠️⚠️ THE RAIL IS PAINT, NOT A CONTAINER (Baked 3 / T3). `.ws-shell` is ONE column whose
    background is a hard-stopped gradient: ink to 52px, chrome after it. Every row — brand,
-   selector, nav, settings, user, collapse — is a SINGLE element spanning both surfaces, with a
-   fixed 52px icon cell at its head.
+   selector, nav, Settings, user — is a SINGLE element spanning both surfaces, with a fixed 52px
+   icon cell at its head.
 
    THIS IS WHAT GUARANTEES ZERO ICON DRIFT ON COLLAPSE. The icons do not move because there is
    nothing to move them: their cell is the same 52px box in both states, and collapsing only
    changes the width of what follows it. Rebuild this as a rail element beside a panel element
-   and the drift comes straight back — two boxes with two paddings, realigned by hand every time
-   either is touched. If you are reaching for `.ws-rail { width: 52px }`, stop. ── */
+   and the drift comes straight back. If you are reaching for `.ws-rail { width: 52px }`, stop.
 
-.ws-desk {
-  height: 100%;
+   ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE. The shell is full-screen: `--shell-chrome`
+   IS the page ground, edge to edge, and the content is a white card floating on it. The sage
+   desk gradient is REJECTED for the workspace (see the lock) — it belongs to the retired capsule
+   idiom, and reinstating it would put a green field back behind a shell that no longer floats. ── */
+
+/* THE APP GROUND. The panel colour is the page colour — there is nothing behind it. */
+.ws-app {
+  flex: 1;
   min-height: 0;
-  background: var(--shell-desk-grad);
-  padding: var(--shell-cap-gap);
-}
-
-.ws-cap {
-  height: 100%;
-  background: #ffffff;
-  border-radius: var(--shell-cap-radius);
-  overflow: hidden;
   display: flex;
-  box-shadow:
-    0 1px 2px rgba(56, 66, 58, 0.1),
-    0 6px 16px rgba(56, 66, 58, 0.12),
-    0 22px 48px rgba(56, 66, 58, 0.14);
+  background: var(--shell-chrome);
 }
 
 /* THE ONE COLUMN. The gradient is the rail. */
@@ -43,10 +36,25 @@
     var(--shell-ink) 0 var(--shell-railw),
     var(--shell-chrome) var(--shell-railw)
   );
-  border-right: 1px solid var(--shell-hair);
   transition: width 0.22s var(--shell-ease);
 }
 .ws-shell.shut { width: var(--shell-railw); }
+
+/* ⚠️ THE RAIL'S SHADOW IS A PAINTED OVERLAY, NOT A box-shadow — and that is a T3 rule, not a
+   stylistic one. A box-shadow needs an element to cast it, which would mean giving the rail its
+   own container, which is exactly the refactor that reintroduces icon drift. This falls ONTO the
+   panel ground from the 52px seam instead, and belongs to the column that is already there. */
+.ws-shell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--shell-railw);
+  width: 18px;
+  background: linear-gradient(90deg, rgba(46, 39, 35, 0.1), rgba(46, 39, 35, 0));
+  pointer-events: none;
+  z-index: 5;
+}
 
 /* ══ ROWS — every one of them spans both surfaces ══ */
 .ws-row {
@@ -96,7 +104,7 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   height: 34px;
   margin: 0 10px 0 6px;
   padding: 0 10px;
@@ -109,8 +117,29 @@
   transition: background 0.15s, color 0.15s;
 }
 
+/* ══ AMENDMENT 1 (C) — THE INLINE LABEL ICON ══
+   It inherits the label's colour rather than carrying its own, so it moves with every state the
+   label has instead of needing a parallel set of rules. */
+.ws-li { display: flex; flex: none; color: inherit; opacity: 0.8; }
+.ws-li svg { width: 16px; height: 16px; stroke-width: 1.6; }
+.ws-row.fill-pill .ws-li,
+.ws-row.fill-quiet .ws-li,
+.ws-row:hover .ws-li { opacity: 1; }
+
 .ws-row:hover .ws-ib { color: var(--shell-rail-hi); }
 .ws-row:hover .ws-cl { background: rgba(242, 237, 231, 0.55); color: var(--shell-ink); }
+
+/* ⚠️ AMENDMENT 1 (C) — THE ANTI-ECHO RULE. With the icon now beside the label, the rail's copy
+   of it sits 60px away saying the same thing twice. Expanded, the rail copies RECEDE so the icon
+   reads as living where the nav currently is; collapsed, they return to full strength because
+   they are all there is. The ACTIVE section keeps its square and its icon at full strength in
+   both states — that one is a position marker, not an echo.
+
+   This is a state-driven colour change on ONE icon set, never a second set of icons. */
+.ws-shell:not(.shut) .ws-navwrap .ws-row:not(.rail-on) .ws-ib,
+.ws-shell:not(.shut) .ws-setrow:not(.rail-on) .ws-ib { color: rgba(168, 154, 138, 0.4); }
+.ws-shell:not(.shut) .ws-navwrap .ws-row:not(.rail-on):hover .ws-ib,
+.ws-shell:not(.shut) .ws-setrow:not(.rail-on):hover .ws-ib { color: rgba(168, 154, 138, 0.65); }
 
 /* ══ BAKED 4 + 5 — the active grammar. NEVER a burgundy fill. ══
    rail cell = a translucent white square on the ink; panel label = a parchment pill.
@@ -205,8 +234,9 @@
   background: var(--shell-edge);
 }
 
-/* `display:flex` makes the button block-level, so it fills the row minus its margins. An explicit
-   width calc here would restate the margins and drift from them the first time either moves. */
+/* ⚠️ CHILDREN STAY TEXT-ONLY (Amendment 1, C). The indent and the thread line already carry the
+   hierarchy; an icon on every child would compete with them and flatten the level it is meant
+   to express. */
 .ws-srow {
   height: var(--kid);
   display: flex;
@@ -251,6 +281,32 @@
   padding-left: 8px;
 }
 
+/* ══ AMENDMENT 1 (D) — THE COLLAPSE CONTROL MOVED TO THE HEAD ══
+   The foot row is GONE. Expanded, the chevrons sit beside the wordmark; collapsed, an expand row
+   appears on the rail directly beneath the brand — the path that restores the shell WITHOUT
+   navigating, which is the one thing the click-commits grammar cannot otherwise offer. */
+.ws-ctog {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex: none;
+}
+.ws-ctog:hover { background: rgba(242, 237, 231, 0.85); color: var(--shell-ink); }
+.ws-ctog svg { width: 15px; height: 15px; stroke-width: 1.7; }
+.ws-ctog:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+
+.ws-xtog { display: none; height: 40px; }
+.ws-shell.shut .ws-xtog { display: flex; }
+
 /* Head row B — the manuscript selector (Baked 9). The wrapper is UNPOSITIONED on purpose: the
    popover is absolute against `.ws-shell`, so it shares the flyouts' left edge exactly. */
 .ws-msrow { flex: none; }
@@ -264,7 +320,7 @@
   color: var(--shell-ink);
   transition: border-color 0.15s;
 }
-.ws-hrowB:hover .ws-cl { border-color: #d6cdbf; }
+.ws-hrowB:hover .ws-cl { background: #ffffff; border-color: #d6cdbf; }
 .ws-hrowB.static { cursor: default; }
 .ws-hrowB.static:hover .ws-cl { border-color: var(--shell-edge); }
 .ws-hrowB .ws-chev { margin-left: auto; color: var(--shell-muted); display: flex; flex: none; }
@@ -280,7 +336,7 @@
 .ws-navwrap { padding-top: 8px; }
 .ws-spacer { flex: 1; min-height: 0; }
 
-/* ══ FOOT (Baked 10) — hairline → user → Settings → collapse. No email, no plan row. ══ */
+/* ══ FOOT (Baked 10, as amended) — hairline → user → Settings. NO collapse row. ══ */
 .ws-fdiv {
   height: 1px;
   background: var(--shell-hair);
@@ -311,24 +367,41 @@
 }
 .ws-urow .ws-up:hover { text-decoration: underline; }
 
-.ws-setrow { height: 40px; }
+.ws-setrow { height: 40px; margin-bottom: 8px; }
 .ws-setrow .ws-cl { font-size: 13px; }
 
-.ws-crow { height: 40px; margin-bottom: 8px; }
-.ws-crow .ws-ib svg { transition: transform 0.22s; }
-.ws-shell.shut .ws-crow .ws-ib svg { transform: rotate(180deg); }
-.ws-crow .ws-cl { font-size: 12.5px; color: var(--shell-muted); }
-
-/* ══ FLYOUT (Baked 7) — the SAME MenuCard the top-nav user menu uses ══ */
+/* ══ FLYOUT (Baked 7, as amended) — the SAME MenuCard the top-nav user menu uses ══
+   ⚠️ NO FOOT ACTION. The earlier "Expand sidebar" item is superseded: under Amendment 1 every
+   click expands, so an item promising it was describing what the next click did anyway. */
 .ws-fly {
   position: absolute;
   left: calc(var(--shell-railw) + 10px);
   z-index: 20;
 }
 
-/* ══ MAIN ══ */
-.ws-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+/* ══ MAIN — the chrome ground frames a white content card (Amendment 1, B) ══ */
+.ws-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  background: var(--shell-chrome);
+  /* Asymmetric on purpose: the left inset is tighter because the rail's painted shadow already
+     reads as separation on that edge. */
+  padding: var(--shell-frame) var(--shell-frame) var(--shell-frame) 12px;
+}
+.ws-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: var(--shell-card-radius);
+  border: 1px solid rgba(46, 39, 35, 0.06);
+  box-shadow: 0 1px 2px rgba(46, 39, 35, 0.05), 0 8px 24px rgba(46, 39, 35, 0.08);
+  overflow: hidden;
+}
 
+/* THE BAR IS THE CARD'S HEADER — there is no bar outside the card. */
 .ws-bar {
   height: var(--head);
   flex: none;
@@ -337,7 +410,7 @@
   gap: 14px;
   padding: 0 22px;
   border-bottom: 1px solid var(--shell-hair);
-  background: var(--shell-chrome);
+  background: #ffffff;
 }
 .ws-crumb { font-size: 13px; color: var(--shell-muted); }
 .ws-crumb b { color: var(--shell-ink); font-weight: 600; }
@@ -354,12 +427,11 @@
 /* ══ BELOW md — MOBILE PASS 1 IS LEFT EXACTLY AS IT IS ══
    ⚠️ BOTH REBUILD MOCKUPS ARE DESKTOP-ONLY, and the phone already has a shipped, locked chrome
    (the sheet chassis, the floating tab capsule and the one bar's <md variant). This shell is
-   therefore a ≥768px replacement: below it, the column and the new bar are hidden, the desk goes
-   flush and square, and the existing mobile bar renders in their place. Building a phone
-   treatment from mockups that do not contain one would be designing, not implementing. */
+   therefore a ≥768px replacement: below it, the column and the new bar are hidden, the card
+   loses its frame and becomes the page, and the existing mobile bar renders in their place. */
 @media (max-width: 767px) {
-  .ws-desk { padding: 0; }
-  .ws-cap { border-radius: 0; box-shadow: none; }
+  .ws-main { padding: 0; }
+  .ws-card { border-radius: 0; border: 0; box-shadow: none; }
   .ws-shell,
   .ws-bar { display: none; }
 }
@@ -368,8 +440,8 @@
   .ws-mobilebar { display: none; }
 }
 
-/* The workspace root owns no outer gap: `.ws-desk` is the desk, and it pads itself. Two paddings
-   would double the inset the moment either moved. */
+/* The workspace root owns no outer gap: the shell is the leftmost column of the VIEWPORT, and
+   `.ws-main` pads the card itself. */
 .sv2-app.ws-host { padding: 0; gap: 0; }
 
 /* ══ FOCUS + REDUCED MOTION (Baked 21) ══ */
@@ -391,7 +463,7 @@
   .ws-cl,
   .ws-srow,
   .ws-pch,
-  .ws-crow .ws-ib svg {
+  .ws-ctog {
     transition: none;
   }
 }

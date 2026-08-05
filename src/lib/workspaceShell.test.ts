@@ -9,8 +9,9 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  SHELL_COLLAPSED_KEY, ShellSection, openForHit, readCollapsed, sectionClick, sectionRowState,
-  shellCrumb, shellHitFor, writeCollapsed,
+  PEEK_GRACE_MS, PEEK_INTENT_MS, SHELL_COLLAPSED_KEY, ShellSection, collapseKeyAllowed, openForHit,
+  peeksOnHover, readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor,
+  writeCollapsed,
 } from "./workspaceShell";
 
 const SECTIONS: ShellSection[] = [
@@ -140,7 +141,7 @@ describe("Baked 7 — collapsed forces the accordion shut", () => {
 
 describe("sectionClick — a parent is a destination as well as a toggle", () => {
   it("a childless section navigates and opens nothing", () => {
-    expect(sectionClick(sec("todo"), null, null, false)).toEqual({ open: null, go: "/todo", flyout: false });
+    expect(sectionClick(sec("todo"), null, null, false)).toEqual({ open: null, go: "/todo", expand: false });
   });
 
   it("a parent opens the accordion AND lands on its default child", () => {
@@ -158,17 +159,88 @@ describe("sectionClick — a parent is a destination as well as a toggle", () =>
 
   it("clicking the section you are in, while it is open, shuts it", () => {
     const p = sectionClick(sec("queries"), { section: "queries", child: "q-att" }, "queries", false);
-    expect(p).toEqual({ open: null, go: null, flyout: false });
+    expect(p).toEqual({ open: null, go: null, expand: false });
+  });
+});
+
+/**
+ * ⚠️⚠️ AMENDMENT 1 (E2) — HOVER PEEKS, CLICK COMMITS. This SUPERSEDES the original Baked 7, under
+ * which a collapsed parent's click opened a flyout. The two grammars are different products:
+ * Slack/Jira click-navigates and STAYS collapsed (collapse as a setting); Notion/Linear commits
+ * and RESTORES (collapse as a temporary focus mode). This is the second, and these fixtures are
+ * what stop a later pass drifting back to the first.
+ */
+describe("Amendment 1 — every click expands, and none opens a flyout", () => {
+  it("collapsed, a CHILDLESS section expands AND navigates", () => {
+    expect(sectionClick(sec("todo"), null, null, true))
+      .toEqual({ open: null, go: "/todo", expand: true });
   });
 
-  it("collapsed, a parent opens a flyout instead of navigating", () => {
-    const p = sectionClick(sec("queries"), null, null, true);
-    expect(p.flyout).toBe(true);
+  it("collapsed, a SECTIONED row expands, opens its accordion and lands on the default child", () => {
+    expect(sectionClick(sec("queries"), null, null, true))
+      .toEqual({ open: "queries", go: "/queries", expand: true });
+  });
+
+  /* Moving you off the child you are standing on would be the surprise, not the service. */
+  it("collapsed, it keeps the current child when that child belongs to the section", () => {
+    const p = sectionClick(sec("queries"), { section: "queries", child: "q-att" }, null, true);
+    expect(p.expand).toBe(true);
+    expect(p.open).toBe("queries");
     expect(p.go).toBeNull();
   });
 
-  it("collapsed, a CHILDLESS section still just navigates — nothing to fly out", () => {
-    expect(sectionClick(sec("todo"), null, null, true)).toEqual({ open: null, go: "/todo", flyout: false });
+  it("collapsed, a child of ANOTHER section does not count as current", () => {
+    const p = sectionClick(sec("queries"), { section: "agents", child: "a-disc" }, null, true);
+    expect(p.go).toBe("/queries");
+  });
+
+  it("expanded clicks never set expand", () => {
+    expect(sectionClick(sec("todo"), null, null, false).expand).toBe(false);
+    expect(sectionClick(sec("queries"), null, null, false).expand).toBe(false);
+  });
+
+  it("no click path returns a flyout — the property is gone entirely", () => {
+    const p = sectionClick(sec("queries"), null, null, true);
+    expect(Object.keys(p)).toEqual(["open", "go", "expand"]);
+  });
+});
+
+describe("Amendment 1 (E1) — hover peeks, pointer only", () => {
+  it("peeks only when collapsed AND the section has children", () => {
+    expect(peeksOnHover(sec("queries"), true)).toBe(true);
+    expect(peeksOnHover(sec("queries"), false)).toBe(false);
+    expect(peeksOnHover(sec("todo"), true)).toBe(false);
+  });
+
+  it("carries the specced timings", () => {
+    expect(PEEK_INTENT_MS).toBe(120);
+    expect(PEEK_GRACE_MS).toBe(160);
+  });
+});
+
+/* ⚠️ `[` IS A CHARACTER. A bare-key shortcut that fires inside a field eats the keystroke and
+   reads as the app dropping input — so it is suppressed while typing, and the palette counts as
+   typing because it is a text field wearing a dialog. */
+describe("Amendment 1 (E5) — `[` toggles, except while typing", () => {
+  it("acts on ordinary focus", () => {
+    expect(collapseKeyAllowed("BUTTON", false, false)).toBe(true);
+    expect(collapseKeyAllowed("DIV", false, false)).toBe(true);
+    expect(collapseKeyAllowed(null, false, false)).toBe(true);
+  });
+
+  it("is suppressed in every editable target", () => {
+    expect(collapseKeyAllowed("INPUT", false, false)).toBe(false);
+    expect(collapseKeyAllowed("TEXTAREA", false, false)).toBe(false);
+    expect(collapseKeyAllowed("SELECT", false, false)).toBe(false);
+    expect(collapseKeyAllowed("DIV", true, false)).toBe(false);
+  });
+
+  it("is suppressed while the palette is open", () => {
+    expect(collapseKeyAllowed("BUTTON", false, true)).toBe(false);
+  });
+
+  it("is case-insensitive about the tag name", () => {
+    expect(collapseKeyAllowed("input", false, false)).toBe(false);
   });
 });
 

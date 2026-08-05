@@ -268,3 +268,118 @@ allowed a third block.
   `TypeGlyph`, `packageMetrics`. No `#/pkg-lab`, no `firestore.rules`.
 - `QueryStatus` used only via the enum — `CLOSED_QUERY_STATUSES` is built from
   `QueryStatus.REJECTED / WITHDRAWN / NO_RESPONSE`.
+
+---
+
+# Amendment 1 — full-screen workspace geometry + collapse grammar
+
+Applied in one pass, one commit, on top of the six above. The design ref
+`design-refs/shell-workspace-doubledecker.html` was **replaced in place** first (`8858254`): the
+amendment states it had been recommitted, and it had not been — the updated mockup existed only
+in `~/Downloads` as `scriptally-workspace-fullscreen.html`, the same sequencing miss as Phase 0.
+
+## Supersession list
+
+| # | Superseded | Deleted / replaced |
+|---|---|---|
+| A1 | **The sage desk and the capsule** | `.ws-desk` (sage gradient + 14px pad) and `.ws-cap` (radius + layered shadow) deleted from `workspaceShell.css`; `<div className="ws-desk"><div className="ws-cap">` replaced by a single `.ws-app` in `WorkspaceShell.tsx`. The AppShell root's inline `backgroundColor: var(--shell-desk)` **and its `PAGE_GRAIN` image** are gone — grain was texture for a field that no longer exists. `PAGE_GRAIN` is no longer imported there. |
+| A2 | **The foot collapse row** | `.ws-crow` rule and the `ws-crow` button deleted. The foot now ends: hairline → user → Settings. |
+| A3 | Shell inside a container | `.sv2-app.ws-host` keeps `padding: 0`; the shell is the leftmost column of the viewport. 52 + 216 arithmetic unchanged. |
+| E (Baked 7) | **Collapsed click opened a flyout** | `SectionClick.flyout` removed from the type entirely and replaced by `expand`. No click path opens a flyout now. |
+| E4 | The flyout's "Expand sidebar" foot action | Never built in this repo; locked against by name so it cannot arrive. |
+
+**The sage desk is locked as rejected-for-workspace**, in the same pattern as the rejected ink
+avatar hex: `workspaceShell.test.tsx` fails if `--shell-desk-grad` or `#b4c2b6` reappears in that
+stylesheet, or if `ws-desk`/`ws-cap` reappear in the component. The token itself survives at
+`:root` for anything else that wants a desk — it is rejected *here*, not deleted globally.
+
+## New tokens, with locks
+
+| Token | Value | Measured |
+|---|---|---|
+| `--shell-frame` | `14px` | **`14px`** ✓ |
+| `--shell-card-radius` | `16px` | **`16px`** ✓ |
+
+Both `--shell-*` prefixed per the Phase 1 convention, and both read back from `getComputedStyle`
+on the running dev server. Locked in `workspaceShell.test.tsx` against `index.css`.
+
+## The three expansion paths, as implemented
+
+Amendment 1 (E) trades **Slack/Jira-style persistent collapse** (click navigates, sidebar stays
+shut — collapse as a *setting*) for **Notion/Linear-style peek-and-restore** (collapse as a
+temporary *focus mode*, which committed navigation ends). That is the product decision the
+grammar below expresses, and it is why the flyout needs no foot action: "Expand sidebar" became
+redundant the moment every click did it.
+
+1. **Click anything in the sidebar → expands.** A childless row expands *and* navigates. A
+   sectioned row expands, opens its accordion and lands on its default child — *unless* the child
+   you are already on belongs to that section, in which case you stay put, because moving you
+   would be the surprise rather than the service. The manuscript pill and Settings expand only.
+2. **Flyout selection → commits fully.** Navigate to the child, close the flyout, expand the
+   shell, and open that section's accordion, so the accordion appears where the flyout was. A
+   peek that resolved into a still-collapsed rail would leave you where you started.
+3. **Expand without navigating** — the `»` rail row beneath the brand when collapsed, and `[`.
+   This is the only path that does not move you, which is precisely why it exists: under
+   click-commits, nothing else can restore the shell without also taking you somewhere.
+
+**Hover peeks, pointer only.** Collapsed, hovering a *sectioned* icon opens its flyout after
+120ms of intent, with 160ms of grace to travel into it; sliding along the rail while one is open
+switches instantly (mega-menu grammar). Childless icons show tooltips only. Touch devices have no
+hover, so taps follow path 1 — **nothing is unreachable by touch**.
+
+**`[` is suppressed while typing.** It is a character: a bare-key shortcut firing inside a field
+eats the keystroke and reads as the app dropping input. Suppressed for `INPUT`/`TEXTAREA`/`SELECT`,
+`contenteditable`, and while the palette is open — the palette being a text field wearing a dialog.
+
+## Inline label icons and the anti-echo rule
+
+Every top-level label now carries its icon inline (16px, `stroke-width:1.6`), inheriting the
+label's colour at `.8` opacity and reaching `1` on hover and when active. Settings takes its gear;
+the manuscript pill takes a book. **Children stay text-only** — the indent and thread line already
+carry the hierarchy, and an icon on every child would compete with them.
+
+That put the same glyph twice on one row, 60px apart. **The anti-echo rule** dims the rail's
+copies to `rgba(168,154,138,.4)` (`.65` on hover) while expanded, so the icon reads as living
+wherever the nav currently is, and restores them to full strength on collapse where they are all
+there is. **The active section is excluded in both states** — that one is a position marker, not
+an echo. It is a state-driven colour change on *one* icon set, never a second set.
+
+## Traps
+
+T1, T2, T4, T5, T6 are unchanged from the table above. **T3 gained a clause**: the rail's new
+shadow is a **painted `::after` overlay** on the column at `left:52px`, `width:18px`,
+`pointer-events:none` — *not* a `box-shadow`. A box-shadow needs an element to cast it, which
+would mean giving the rail its own container, which is the exact refactor that reintroduces icon
+drift. Locked, including that `.ws-shell` itself carries no `box-shadow`.
+
+## Two more locks that were wrong before they were right
+
+The same two failure modes as the first pass, and worth recording because they keep recurring:
+
+1. **The "no Expand sidebar" guard caught its own tombstone** — the comment recording that the
+   item was superseded. Absence in the component is now asserted against a comment-stripped copy
+   of the source, as it already was for the stylesheet.
+2. **The "children are text-only" guard swept in every later section row**, which legitimately
+   carries an inline icon — it would have failed on the rule it was meant to protect. It now
+   extracts the `ws-srow` buttons themselves and asserts the count first.
+
+## Gates
+
+`tsc` clean · `vite build` clean · **Vitest 2441 passed | 2 skipped (147 files)**, up from 2408.
+Browser: the two new tokens measured live, and **no console errors** on `/` or `/queries`.
+
+## Browser-verify pending — refreshed
+
+Still auth-gated, so nothing below is claimed. **The two items the amendment names as
+layout-engine work are top of the list:**
+
+1. **The rail shadow overlay** — that the 18px gradient reads as the rail casting onto the panel
+   ground, and does not band or clip at the seam.
+2. **The card frame** — 14px of ground on top/right/bottom, 12px on the left, and that the
+   asymmetry reads as even given the rail shadow occupying that edge.
+3. The card's left edge following the shell's width transition on collapse, without a reflow jump.
+4. The anti-echo dimming at both states, and that the active section really does stay full
+   strength while its neighbours recede.
+5. The three expansion paths end to end, and the 120/160ms peek at the rail-to-flyout boundary.
+6. `[` from inside a field and with the palette open — the suppression is the interesting half.
+7. Below 768px: the card should lose its frame and become the page, with mobile chrome untouched.

@@ -22,7 +22,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   Book, HelpCircle, LayoutGrid, ListChecks, LogOut, Package, Send, Settings, Upload, Users,
 } from "lucide-react";
-import { parchment, PAGE_GRAIN } from "../../lib/designTokens";
+import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
@@ -338,13 +338,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     <div
       className={`${THEME_CLASS[theme]} sv2-app ws-host${panelCollapsed ? " sv2-collapsed" : ""}`}
       data-sa-ground=""
-      // THE DESK — the sage-grey field the capsules float on (app-shell pack, Baked 2). The
-      // grain and the light pool are two pointer-events:none layers drawn by .sv2-app::before
-      // and ::after in shellV2.css; only the flat colour is set here, because the grain's
-      // data-URI is the one thing the CSS parser rejects in a .css file. Layout (flex ·
-      // viewport height · overflow) lives on the .sv2-app class so the mobile pass can swap
-      // 100vh → 100dvh below md; padding + gap arrive with the class at ≥768px.
-      style={{ backgroundColor: "var(--shell-desk)", backgroundImage: PAGE_GRAIN }}
+      // ⚠️ THE DESK IS GONE (Amendment 1, A1). This was the sage-grey field the capsules floated
+      // on; the workspace is full-screen now, so --shell-chrome IS the page ground and the
+      // content is a white card laid on it. The grain went with the desk: it was texture for a
+      // field that no longer exists, and grain under a full-bleed chrome ground is invisible work.
+      // Layout (flex · viewport height · overflow) still lives on the .sv2-app class so the
+      // mobile pass can swap 100vh → 100dvh below md.
+      style={{ backgroundColor: "var(--shell-chrome)" }}
     >
       {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so

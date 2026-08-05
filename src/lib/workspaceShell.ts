@@ -183,16 +183,27 @@ export function shellCrumb(
  *
  * ⚠️ A PARENT IS A DESTINATION AS WELL AS A TOGGLE. Clicking `Queries` opens the accordion AND
  * lands on its default child — an accordion that only expands leaves you looking at a menu when
- * you asked for a page. Re-clicking the section you are already in collapses it (the mockup's
- * behaviour), because at that point the toggle is the only thing left to want.
+ * you asked for a page. Re-clicking the section you are already in collapses it, because at that
+ * point the toggle is the only thing left to want.
+ *
+ * ⚠️⚠️ AMENDMENT 1 (E2) — ANY CLICK IN THE SIDEBAR EXPANDS IT, and there is NO click path that
+ * opens a flyout. This SUPERSEDES the original Baked 7, where a collapsed parent's click opened
+ * one. The two grammars are genuinely different products:
+ *
+ *   · Slack/Jira: click navigates and the sidebar STAYS collapsed — collapse is a setting.
+ *   · Notion/Linear: click commits and the sidebar RESTORES — collapse is a temporary focus mode.
+ *
+ * This is the second. Hovering peeks (the flyout, pointer-only); clicking commits, and committed
+ * navigation restores your wayfinding. It is the whole reason the flyout needs no foot action:
+ * "Expand sidebar" was redundant the moment every click did it.
  */
 export interface SectionClick {
   /** The section to expand, or null to shut the accordion. */
   open: string | null;
-  /** Where to navigate. Null when the click only toggles. */
+  /** Where to navigate. Null when the click only toggles, or you are already there. */
   go: string | null;
-  /** Collapsed parents with children open a flyout instead of navigating (Baked 7). */
-  flyout: boolean;
+  /** Collapsed clicks always expand the shell (Amendment 1, E2). */
+  expand: boolean;
 }
 
 export function sectionClick(
@@ -203,16 +214,58 @@ export function sectionClick(
 ): SectionClick {
   const hasKids = !!sec.children?.length;
 
-  if (collapsed && hasKids) return { open: openId, go: null, flyout: true };
-  if (!hasKids) return { open: null, go: sec.path ?? null, flyout: false };
+  if (collapsed) {
+    // Childless: expand AND navigate. Sectioned: expand, open the accordion, and land on the
+    // default child — unless the child you are already on belongs to this section, in which case
+    // moving you would be the surprise.
+    if (!hasKids) return { open: null, go: sec.path ?? null, expand: true };
+    const keeps = hit?.section === sec.id && !!hit?.child
+      && sec.children!.some((c) => c.id === hit.child);
+    const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
+    return { open: sec.id, go: keeps ? null : def.path, expand: true };
+  }
+
+  if (!hasKids) return { open: null, go: sec.path ?? null, expand: false };
 
   const alreadyHere = hit?.section === sec.id;
-  if (alreadyHere && openId === sec.id) return { open: null, go: null, flyout: false };
+  if (alreadyHere && openId === sec.id) return { open: null, go: null, expand: false };
 
   const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
   // Already in the section but shut: reopen without moving off the child you are actually on.
   const go = alreadyHere && hit?.child ? null : def.path;
-  return { open: sec.id, go, flyout: false };
+  return { open: sec.id, go, expand: false };
+}
+
+/**
+ * Should hovering this rail row peek its children? (Amendment 1, E1.)
+ *
+ * ⚠️ ONLY WHEN COLLAPSED, AND ONLY WITH CHILDREN. Expanded, the children are already on screen;
+ * childless rows have nothing to show and get a tooltip instead. Peeking is a POINTER-ONLY
+ * accelerator — E6: taps follow the click rule, so nothing is unreachable by touch.
+ */
+export function peeksOnHover(sec: ShellSection, collapsed: boolean): boolean {
+  return collapsed && !!sec.children?.length;
+}
+
+/** Amendment 1 (E1) — hover-peek timings, named once so the shell and its locks agree. */
+export const PEEK_INTENT_MS = 120;
+export const PEEK_GRACE_MS = 160;
+
+/**
+ * Should `[` act? (Amendment 1, E5.)
+ *
+ * ⚠️ SUPPRESSED WHILE TYPING, because `[` is a character. A bare letter-key shortcut that fires
+ * inside a field eats the keystroke and reads as the app dropping input. The palette is excluded
+ * for the same reason — it is a text field wearing a dialog.
+ */
+export function collapseKeyAllowed(
+  tag: string | null | undefined,
+  isContentEditable: boolean,
+  paletteOpen: boolean,
+): boolean {
+  if (paletteOpen || isContentEditable) return false;
+  const t = (tag ?? "").toUpperCase();
+  return t !== "INPUT" && t !== "TEXTAREA" && t !== "SELECT";
 }
 
 /** The section that should be open when the route decides for you (arriving, or navigating in). */

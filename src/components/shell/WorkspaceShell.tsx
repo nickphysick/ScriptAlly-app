@@ -20,12 +20,14 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Book, ChevronDown, ChevronsUpDown, ChevronsLeft, Settings } from "lucide-react";
+import {
+  Book, ChevronDown, ChevronsUpDown, ChevronsLeft, ChevronsRight, Settings,
+} from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveActiveManuscript } from "../../lib/shellSidebar";
 import {
-  ShellSection, openForHit, readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor,
-  writeCollapsed,
+  PEEK_GRACE_MS, PEEK_INTENT_MS, ShellSection, collapseKeyAllowed, openForHit, peeksOnHover,
+  readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor, writeCollapsed,
 } from "../../lib/workspaceShell";
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
 import "./primitives.css";
@@ -69,9 +71,18 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const shellRef = useRef<HTMLElement>(null);
   const rowRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  /* Amendment 1 (E1) — hover peek. Two timers: intent before opening, grace to travel into it. */
+  const peekIn = useRef<number | null>(null);
+  const peekOut = useRef<number | null>(null);
 
   // Following the route means a link from anywhere lands with the right section already open.
   useEffect(() => { setOpenId(openForHit(hit)); }, [hit?.section, hit?.child]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const setShut = useCallback((next: boolean) => {
+    setCollapsed(next);
+    writeCollapsed(typeof window === "undefined" ? null : window.localStorage, next);
+    setFlyoutFor(null);
+  }, []);
 
   const toggleCollapsed = useCallback(() => {
     setCollapsed((c) => {
@@ -81,6 +92,22 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     });
     setFlyoutFor(null);
   }, []);
+
+  /* ⚠️ AMENDMENT 1 (E5) — `[` TOGGLES BOTH WAYS, and is suppressed while typing, because `[` is
+     a character: a bare key that fires inside a field eats the keystroke and reads as the app
+     dropping input. The palette counts as typing — it is a text field wearing a dialog. */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = document.activeElement as HTMLElement | null;
+      const paletteOpen = !!document.querySelector(".sp-pal");
+      if (!collapseKeyAllowed(el?.tagName, !!el?.isContentEditable, paletteOpen)) return;
+      e.preventDefault();
+      toggleCollapsed();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggleCollapsed]);
 
   /* Dismissal: outside pointer, Escape, and any navigation. The same three the scope chip uses,
      so every transient surface in the shell behaves identically. */
@@ -110,16 +137,38 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     onNavigatePath(path);
   }, [onNavigatePath]);
 
+  /* ⚠️ AMENDMENT 1 (E2) — EVERY CLICK IN THE SIDEBAR EXPANDS IT, and no click opens a flyout.
+     Hovering peeks; clicking commits. Collapse is a temporary focus mode here, not a setting, so
+     committed navigation restores your wayfinding. */
   const onSectionClick = useCallback((sec: ShellSection) => {
     const plan = sectionClick(sec, hit, openId, collapsed);
-    if (plan.flyout) {
-      setFlyoutFor((f) => (f === sec.id ? null : sec.id));
-      return;
-    }
     setFlyoutFor(null);
+    if (plan.expand) setShut(false);
     setOpenId(plan.open);
     if (plan.go) go(plan.go);
-  }, [hit, openId, collapsed, go]);
+  }, [hit, openId, collapsed, go, setShut]);
+
+  /* Amendment 1 (E1) — hover peeks, pointer only. Sliding along the rail while a flyout is open
+     switches instantly (mega-menu grammar); opening cold waits out the intent delay so a cursor
+     merely crossing the rail does not fire one. */
+  const clearPeek = useCallback(() => {
+    if (peekIn.current) { window.clearTimeout(peekIn.current); peekIn.current = null; }
+    if (peekOut.current) { window.clearTimeout(peekOut.current); peekOut.current = null; }
+  }, []);
+
+  const onRowEnter = useCallback((sec: ShellSection) => {
+    if (!peeksOnHover(sec, collapsed)) return;
+    clearPeek();
+    if (flyoutFor) { setFlyoutFor(sec.id); return; }
+    peekIn.current = window.setTimeout(() => setFlyoutFor(sec.id), PEEK_INTENT_MS);
+  }, [collapsed, flyoutFor, clearPeek]);
+
+  const schedulePeekClose = useCallback(() => {
+    clearPeek();
+    peekOut.current = window.setTimeout(() => setFlyoutFor(null), PEEK_GRACE_MS);
+  }, [clearPeek]);
+
+  useEffect(() => () => clearPeek(), [clearPeek]);
 
   /* ── the manuscript selector (Baked 9) ── */
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
@@ -141,19 +190,42 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const flyTop = flyoutFor ? rowRefs.current[flyoutFor]?.offsetTop ?? 0 : 0;
 
   return (
-    <div className="ws-desk">
-      <div className="ws-cap">
+    <div className="ws-app">
 
         <aside
           ref={shellRef}
           className={`ws-shell${collapsed ? " shut" : ""}${flyoutFor ? " flyopen" : ""}`}
           aria-label="Main navigation"
         >
-          {/* ── head A: brand ── */}
+          {/* ── head A: brand + the collapse control (Amendment 1, D) ── */}
           <div className="ws-row ws-hrowA" data-tip="ScriptAlly">
             <span className="ws-ci"><span className="ws-glyph">S</span></span>
-            <span className="ws-cl ws-fade">ScriptAlly</span>
+            <span className="ws-cl ws-fade">
+              ScriptAlly
+              <button
+                type="button"
+                className="ws-ctog"
+                title="Collapse"
+                aria-label="Collapse the navigation"
+                onClick={() => setShut(true)}
+              >
+                <ChevronsLeft aria-hidden="true" />
+              </button>
+            </span>
           </div>
+
+          {/* ⚠️ THE EXPAND-WITHOUT-NAVIGATING PATH (Amendment 1, D). Under the click-commits
+              grammar every other control both expands AND moves you; this one only expands. */}
+          <button
+            type="button"
+            className="ws-row ws-xtog"
+            data-tip="Expand"
+            aria-label="Expand the navigation"
+            onClick={() => setShut(false)}
+          >
+            <span className="ws-ci"><span className="ws-ib"><ChevronsRight aria-hidden="true" /></span></span>
+            <span className="ws-cl ws-fade" />
+          </button>
 
           {/* ── head B: the manuscript selector. Single manuscript = the same row, static. ── */}
           {activeMs && (
@@ -167,11 +239,17 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 /* ⚠️ NOT `disabled` when there is one manuscript. A disabled button stops firing
                    hover in several browsers, and the collapsed rail's only way to name this book
                    is its tooltip — disabling it would silently cost the single-manuscript user
-                   the one label they have. It is inert by handler and by class instead. */
-                onClick={() => { if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); } }}
+                   the one label they have. It is inert by handler and by class instead.
+
+                   Amendment 1 (E2): collapsed, clicking it EXPANDS — like everything else here. */
+                onClick={() => {
+                  if (collapsed) { setShut(false); return; }
+                  if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); }
+                }}
               >
                 <span className="ws-ci"><span className="ws-ib"><Book aria-hidden="true" /></span></span>
                 <span className="ws-cl ws-fade">
+                  <span className="ws-li"><Book aria-hidden="true" /></span>
                   <span className="ws-mstitle">{activeMs.title}</span>
                   {manyMs && <span className="ws-chev"><ChevronsUpDown aria-hidden="true" /></span>}
                 </span>
@@ -208,9 +286,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     aria-current={st.railOn ? "true" : undefined}
                     aria-expanded={kids.length ? st.open : undefined}
                     onClick={() => onSectionClick(sec)}
+                    onMouseEnter={() => onRowEnter(sec)}
+                    onMouseLeave={schedulePeekClose}
                   >
                     <span className="ws-ci"><span className="ws-ib">{icons[sec.id]}</span></span>
                     <span className="ws-cl ws-fade">
+                      {/* Amendment 1 (C) — the same icon, inline. One set, two mounts. */}
+                      <span className="ws-li">{icons[sec.id]}</span>
                       {sec.label}
                       {st.count && <CountChip count={st.count.n} urgent={st.count.urgent} />}
                       {kids.length > 0 && (
@@ -247,7 +329,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
           <div className="ws-spacer" />
 
-          {/* ── foot (Baked 10): hairline → user → Settings → collapse ── */}
+          {/* ── foot (Baked 10, as amended): hairline → user → Settings. The collapse row is
+              GONE — Amendment 1 (A2) moved that control to the head. ── */}
           <div className="ws-fdiv ws-fade" />
 
           <button
@@ -280,30 +363,30 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           </button>
           {accountMenu}
 
+          {/* Amendment 1 (E2): collapsed, Settings EXPANDS rather than navigating away from a
+              shell you cannot read. */}
           <button
             type="button"
             className="ws-row ws-setrow"
             data-tip="Settings"
-            onClick={() => go("/account")}
+            onClick={() => { if (collapsed) { setShut(false); return; } go("/account"); }}
           >
             <span className="ws-ci"><span className="ws-ib"><Settings aria-hidden="true" /></span></span>
-            <span className="ws-cl ws-fade">Settings</span>
-          </button>
-
-          <button
-            type="button"
-            className="ws-row ws-crow"
-            data-tip={collapsed ? "Expand" : "Collapse"}
-            aria-label={collapsed ? "Expand the navigation" : "Collapse the navigation"}
-            aria-pressed={collapsed}
-            onClick={toggleCollapsed}
-          >
-            <span className="ws-ci"><span className="ws-ib"><ChevronsLeft aria-hidden="true" /></span></span>
-            <span className="ws-cl ws-fade">Collapse</span>
+            <span className="ws-cl ws-fade">
+              <span className="ws-li"><Settings aria-hidden="true" /></span>
+              Settings
+            </span>
           </button>
 
           {/* THE FLYOUT — the same MenuCard the top-nav user menu draws, with identical children,
-              counts and states. Two components here would be two things to keep in agreement. */}
+              counts and states. Two components here would be two things to keep in agreement.
+
+              ⚠️ NO FOOT ACTION (Amendment 1, E4). "Expand sidebar" was superseded the moment every
+              click expanded: an item promising what the next click does anyway is furniture.
+
+              ⚠️ SELECTING FROM IT COMMITS FULLY (E3) — navigate, close, expand, and open that
+              section's accordion, so the accordion appears where the flyout was. A peek that
+              resolved into a still-collapsed rail would leave you where you started. */}
           {flySection && (
             <MenuCard
               heading={flySection.label}
@@ -311,21 +394,30 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               style={{ top: flyTop }}
               role="menu"
             >
-              {(flySection.children ?? []).map((ch) => (
-                <MenuCardItem
-                  key={ch.id}
-                  label={ch.label}
-                  on={hit?.section === flySection.id && hit?.child === ch.id}
-                  count={ch.count}
-                  urgent={ch.urgent}
-                  onSelect={() => go(ch.path)}
-                />
-              ))}
+              <div onMouseEnter={clearPeek} onMouseLeave={schedulePeekClose}>
+                {(flySection.children ?? []).map((ch) => (
+                  <MenuCardItem
+                    key={ch.id}
+                    label={ch.label}
+                    on={hit?.section === flySection.id && hit?.child === ch.id}
+                    count={ch.count}
+                    urgent={ch.urgent}
+                    onSelect={() => {
+                      setOpenId(flySection.id);
+                      setShut(false);
+                      go(ch.path);
+                    }}
+                  />
+                ))}
+              </div>
             </MenuCard>
           )}
         </aside>
 
+        {/* THE CONTENT CARD (Amendment 1, B) — white, floating on the chrome ground. The bar is
+            its HEADER: there is no bar outside the card. */}
         <div className="ws-main">
+          <div className="ws-card">
           <header className="ws-bar">
             {crumb && (
               <span className="ws-crumb">
@@ -340,9 +432,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             </div>
           </header>
           <div className="ws-work">{children}</div>
+          </div>
         </div>
 
-      </div>
     </div>
   );
 };

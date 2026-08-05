@@ -41,6 +41,10 @@ const src = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
    A `not.toContain` over a file that includes its own commentary passes and fails for reasons
    that have nothing to do with the stylesheet. */
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+/* ⚠️ AND THE SAME TRAP EXISTS IN THE SOURCE. The "no Expand sidebar" guard first failed on the
+   COMMENT recording that the item was superseded — the guard caught its own tombstone. Absence in
+   the component is asserted against code with block comments stripped. */
+const srcCode = src.replace(/\/\*[\s\S]*?\*\//g, "");
 
 const SECTIONS: ShellSection[] = [
   { id: "dashboard", label: "Dashboard", path: "/dashboard" },
@@ -97,6 +101,18 @@ describe("⚠️ T3 — the rail is PAINT, not a container", () => {
     expect(rule(".ws-ci")).toContain("width: var(--shell-railw)");
     expect(css, "no collapsed-only override of the icon cell's width")
       .not.toMatch(/\.ws-shell\.shut[^{]*\.ws-ci\s*\{[^}]*width:/);
+  });
+
+  /* ⚠️ AMENDMENT 1 (B) — THE RAIL'S SHADOW IS A PAINTED OVERLAY, and that is a T3 rule rather
+     than a stylistic one. A box-shadow needs an element to cast it, which would mean giving the
+     rail its own container — exactly the refactor that reintroduces icon drift. */
+  it("the rail shadow is an ::after overlay on the column, never a box-shadow", () => {
+    const r = rule(".ws-shell::after");
+    expect(r).toContain("left: var(--shell-railw)");
+    expect(r).toContain("width: 18px");
+    expect(r).toContain("linear-gradient(90deg, rgba(46, 39, 35, 0.1), rgba(46, 39, 35, 0))");
+    expect(r).toContain("pointer-events: none");
+    expect(rule(".ws-shell"), "the column casts no shadow of its own").not.toContain("box-shadow");
   });
 
   it("no sibling rail element exists to drift against", () => {
@@ -235,23 +251,28 @@ describe("Baked 10 — the foot, in order, with nothing extra", () => {
     expect(at("/queries")).not.toContain("n@example.com");
   });
 
-  it("carries Settings and the collapse row", () => {
-    const html = at("/queries");
-    expect(html).toContain("Settings");
-    expect(html).toContain("Collapse");
+  it("carries Settings", () => {
+    expect(at("/queries")).toContain("Settings");
+  });
+
+  /* ⚠️ AMENDMENT 1 (A2) — THE FOOT COLLAPSE ROW IS GONE. The control moved to head row A, and
+     the foot now ends at Settings. */
+  it("has NO collapse row in the foot", () => {
+    expect(cssRules).not.toContain(".ws-crow");
+    expect(src).not.toContain("ws-crow");
   });
 
   it("the Upgrade link is burgundy — the only other burgundy in the shell", () => {
     expect(rule(".ws-urow .ws-up")).toContain("color: var(--shell-burgundy)");
   });
 
-  it("orders user → Settings → collapse in the source", () => {
+  it("orders hairline → user → Settings, and stops there", () => {
+    const d = src.indexOf("ws-fdiv");
     const u = src.indexOf("ws-urow");
-    const s = src.indexOf("ws-setrow");
-    const c = src.indexOf("ws-crow");
-    expect(u).toBeGreaterThan(-1);
-    expect(s).toBeGreaterThan(u);
-    expect(c).toBeGreaterThan(s);
+    const st = src.indexOf("ws-setrow");
+    expect(d).toBeGreaterThan(-1);
+    expect(u).toBeGreaterThan(d);
+    expect(st).toBeGreaterThan(u);
   });
 });
 
@@ -294,6 +315,14 @@ describe("Baked 12 + 13 — the bar", () => {
     expect(rule(".ws-bar")).toContain("height: var(--head)");
     expect(rule(".ws-hrowA")).toContain("height: var(--head)");
   });
+
+  /* ⚠️ AMENDMENT 1 (B) — THE BAR IS THE CARD'S HEADER. There is no bar outside the card, so the
+     crumb and the search sit on the same white surface as the page rather than on the ground. */
+  it("the bar renders INSIDE the content card", () => {
+    const html = at("/queries");
+    expect(html).toContain("ws-card");
+    expect(html.indexOf("ws-card")).toBeLessThan(html.indexOf("ws-bar"));
+  });
 });
 
 describe("Baked 21 — focus rings and reduced motion", () => {
@@ -322,5 +351,151 @@ describe("The IA is a PROP — the shell owns grammar, never a section list", ()
 
   it("children of a shut section are unreachable by keyboard", () => {
     expect(src).toContain("tabIndex={st.open ? 0 : -1}");
+  });
+});
+
+/**
+ * ⚠️⚠️ AMENDMENT 1 — FULL-SCREEN GEOMETRY. The desk and the capsule are GONE: the shell is the
+ * leftmost column of the viewport, `--shell-chrome` is the page ground, and the content is a
+ * white card floating on it.
+ */
+describe("Amendment 1 (A + B) — full-screen, card-on-ground", () => {
+  /* ⚠️ THE SAGE DESK IS REJECTED FOR THE WORKSPACE, and is named here so a later "faithful to the
+     mockup" pass fails loudly rather than putting a green field back behind a shell that no
+     longer floats. Same pattern as the rejected ink-avatar hex. */
+  it("the sage desk gradient is REJECTED here", () => {
+    expect(cssRules).not.toContain("--shell-desk-grad");
+    expect(cssRules).not.toContain("#b4c2b6");
+    expect(src).not.toContain("ws-desk");
+    expect(src).not.toContain("ws-cap");
+  });
+
+  it("the app ground is the chrome token, edge to edge", () => {
+    expect(rule(".ws-app")).toContain("background: var(--shell-chrome)");
+  });
+
+  it("the capsule's radius and shadow are gone from the shell column", () => {
+    expect(rule(".ws-shell")).not.toContain("border-radius");
+    expect(rule(".ws-shell")).not.toContain("box-shadow");
+  });
+
+  it("the main area frames the card: 14px on three sides, 12px against the rail's shadow", () => {
+    expect(rule(".ws-main"))
+      .toContain("padding: var(--shell-frame) var(--shell-frame) var(--shell-frame) 12px");
+  });
+
+  it("the card is white on the radius token, hairline-bordered and softly raised", () => {
+    const r = rule(".ws-card");
+    expect(r).toContain("background: #ffffff");
+    expect(r).toContain("border-radius: var(--shell-card-radius)");
+    expect(r).toContain("border: 1px solid rgba(46, 39, 35, 0.06)");
+    expect(r).toContain("box-shadow: 0 1px 2px rgba(46, 39, 35, 0.05), 0 8px 24px rgba(46, 39, 35, 0.08)");
+    expect(r).toContain("overflow: hidden");
+  });
+
+  it("the two new tokens carry the specced values", () => {
+    const indexCss = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    expect(indexCss).toMatch(/--shell-frame:\s*14px\s*;/);
+    expect(indexCss).toMatch(/--shell-card-radius:\s*16px\s*;/);
+  });
+});
+
+/**
+ * ⚠️ AMENDMENT 1 (C) — the icon moved beside the label, so the rail's copy of it now says the
+ * same thing twice, 60px away. The anti-echo rule dims the rail copies while expanded and
+ * restores them on collapse. It is a state-driven colour change on ONE icon set.
+ */
+describe("Amendment 1 (C) — inline label icons and the anti-echo rule", () => {
+  it("every top-level label carries its icon inline", () => {
+    const html = at("/queries");
+    expect(html).toContain("ws-li");
+    // three sections + the manuscript pill + Settings
+    expect(html.match(/class="ws-li"/g)?.length).toBe(5);
+  });
+
+  it("the inline icon inherits the label's colour rather than carrying its own", () => {
+    const r = rule(".ws-li");
+    expect(r).toContain("color: inherit");
+    expect(r).toContain("opacity: 0.8");
+  });
+
+  it("it reaches full strength on hover and when active", () => {
+    expect(css).toMatch(/\.ws-row\.fill-pill \.ws-li[\s\S]{0,120}?opacity: 1/);
+  });
+
+  it("expanded, the inactive rail icons recede; the ACTIVE one is excluded", () => {
+    expect(css).toContain(".ws-shell:not(.shut) .ws-navwrap .ws-row:not(.rail-on) .ws-ib");
+    expect(css).toMatch(/\.ws-row:not\(\.rail-on\) \.ws-ib[\s\S]{0,140}?rgba\(168, 154, 138, 0\.4\)/);
+    expect(css).toMatch(/:not\(\.rail-on\):hover \.ws-ib[\s\S]{0,140}?rgba\(168, 154, 138, 0\.65\)/);
+  });
+
+  /* Collapsed the rail icons are all there is, so they must come back to full strength — the
+     dimming is scoped to `:not(.shut)` for exactly that reason. */
+  it("the receding is scoped to the EXPANDED state only", () => {
+    expect(css).not.toMatch(/\.ws-shell\.shut[^{]*\.ws-ib\s*\{[^}]*rgba\(168, 154, 138/);
+  });
+
+  /* ⚠️ SCOPED TO THE CHILD BUTTONS THEMSELVES. Slicing "from the sub-nav to the spacer" swept in
+     every later section row, which legitimately carries an inline icon — the guard would have
+     failed on the rule it was meant to protect. */
+  it("children stay text-only — the indent and thread line carry the hierarchy", () => {
+    const html = at("/queries");
+    const kids = html.match(/<button[^>]*class="ws-srow[^"]*"[\s\S]*?<\/button>/g) ?? [];
+    expect(kids.length, "child rows must render for this claim to mean anything")
+      .toBe(SECTIONS[1].children!.length);
+    for (const k of kids) expect(k).not.toContain("ws-li");
+  });
+});
+
+/**
+ * ⚠️ AMENDMENT 1 (D + E) — the collapse control moved to the head, and the grammar became
+ * hover-peeks/click-commits.
+ */
+describe("Amendment 1 (D) — the collapse control lives in the head", () => {
+  it("expanded, the chevrons sit beside the wordmark", () => {
+    const html = at("/queries");
+    expect(html).toContain("ws-ctog");
+    expect(html).toContain('aria-label="Collapse the navigation"');
+    expect(html.indexOf("ws-hrowA")).toBeLessThan(html.indexOf("ws-ctog"));
+  });
+
+  it("an expand row sits on the rail, shown only when collapsed", () => {
+    expect(at("/queries")).toContain("ws-xtog");
+    expect(rule(".ws-xtog")).toContain("display: none");
+    expect(css).toContain(".ws-shell.shut .ws-xtog { display: flex; }");
+  });
+
+  it("both controls use the one persistence key", () => {
+    expect(src).toContain("setShut(true)");
+    expect(src).toContain("setShut(false)");
+    expect(src).toContain("writeCollapsed");
+  });
+});
+
+describe("Amendment 1 (E) — hover peeks, click commits", () => {
+  it("rail rows peek on hover and schedule a graceful close", () => {
+    expect(src).toContain("onMouseEnter={() => onRowEnter(sec)}");
+    expect(src).toContain("onMouseLeave={schedulePeekClose}");
+  });
+
+  /* E3 — a peek that resolved into a still-collapsed rail would leave you where you started. */
+  it("flyout selection navigates, expands AND opens that section's accordion", () => {
+    expect(src).toMatch(/onSelect=\{\(\) => \{[\s\S]*?setOpenId\(flySection\.id\)[\s\S]*?setShut\(false\)[\s\S]*?go\(ch\.path\)/);
+  });
+
+  /* E4 — "Expand sidebar" was superseded the moment every click expanded. */
+  it("the flyout has NO foot action", () => {
+    expect(srcCode).not.toContain("Expand sidebar");
+  });
+
+  it("Settings and the manuscript pill expand when collapsed rather than navigating", () => {
+    expect(src).toMatch(/onClick=\{\(\) => \{ if \(collapsed\) \{ setShut\(false\); return; \} go\("\/account"\); \}\}/);
+    expect(src).toMatch(/if \(collapsed\) \{ setShut\(false\); return; \}\s*\n\s*if \(manyMs\)/);
+  });
+
+  it("`[` is bound, and routed through the suppression rule", () => {
+    expect(src).toContain('e.key !== "["');
+    expect(src).toContain("collapseKeyAllowed");
+    expect(src).toContain('document.querySelector(".sp-pal")');
   });
 });

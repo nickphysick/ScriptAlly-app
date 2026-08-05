@@ -164,6 +164,13 @@
      elements. Any refactor that gives the rail its own box reintroduces icon drift on collapse. */
   --shell-railw: 52px;                /* the ink band — a background stop, not an element */
   --shell-panelw: 216px;              /* the light band beside it (268px expanded, 52 collapsed) */
+  /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
+     full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
+     it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever
+     still wants a desk; it is REJECTED for the workspace, and workspaceShell.test.tsx fails if it
+     reappears there. */
+  --shell-frame: 14px;                /* the ground visible around the content card */
+  --shell-card-radius: 16px;          /* the content card's corner */
   /* The rebuild's motion, named once. --shell-spring above is the OLD selector spring and stays
      with the shell it belongs to; this is the rollout curve both mockups use. */
   --shell-spring-out: cubic-bezier(0.33, 1, 0.5, 1);
