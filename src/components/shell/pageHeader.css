@@ -93,3 +93,45 @@
   .svh-sub { font-size: 14px; margin-top: 6px; }
   .svh-rule { margin-top: 14px; }
 }
+
+/* ── THE TOOL ROW (app-shell pack, Baked 10) ──────────────────────────────────────────────────
+   The page's actions on their own row, above the hairline, primary pink at the RIGHT. This is
+   the DEFAULT; `compact` keeps them inline on the title row instead, because on a fixed-height
+   master–detail surface header height is taken directly from the panes below. ── */
+.svh-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-bottom: 13px;
+}
+/* the primary sits at the right end of the row */
+.svh-tools .svh-btn-primary { margin-left: auto; }
+/* ...and when there is no primary, the overflow closes the row instead */
+.svh-tools .svh-morewrap:last-child { margin-left: auto; }
+
+.svh-morewrap { position: relative; display: inline-flex; }
+.svh-more {
+  width: 34px; height: 34px; border-radius: 9px;
+  border: 0; background: transparent; cursor: pointer;
+  display: grid; place-items: center; color: var(--shell-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.svh-more:hover { background: #fff; color: var(--shell-ink); }
+.svh-more svg { width: 16px; height: 16px; }
+.svh-moremenu {
+  position: absolute; top: calc(100% + 6px); right: 0; min-width: 184px;
+  background: var(--shell-canvas); border: 1px solid var(--shell-line);
+  border-radius: 12px; box-shadow: 0 14px 34px rgba(56, 66, 58, 0.18);
+  padding: 6px; z-index: 40;
+}
+.svh-morerow {
+  display: block; width: 100%; text-align: left;
+  border: 0; background: transparent; border-radius: 9px;
+  padding: 8px 11px; cursor: pointer;
+  font: inherit; font-size: 12.5px; color: var(--shell-ink-soft);
+}
+.svh-morerow:hover:not(:disabled) { background: var(--shell-inset); color: var(--shell-ink); }
+.svh-morerow:disabled { color: var(--shell-quiet); cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) { .svh-more { transition: none; } }

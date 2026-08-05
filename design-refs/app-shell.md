@@ -1,5 +1,20 @@
 # App shell — CAPSULE system (design reference)
 
+> **⚠️ PAGE HEADERS — AT MOST TWO ACTIONS IN THE ROW, PLUS OVERFLOW; THE PRIMARY IS PINK AND SITS
+> AT THE RIGHT.** *(This restates Baked 10, which said "that page's actions" with no cap.)* The cap
+> exists because **a page header is where actions go to be noticed, and a row of five is a row of
+> none** — and that reasoning survived the move to a tool row unchanged: the row is a new
+> ARRANGEMENT of the same constraint, not a licence to relax it. Anything beyond two goes behind a
+> `⋯` at the end of the row. If a page has six things it can do, five of them are not primary.
+> **A page that seems to need three co-equal primaries is usually a header doing a job that belongs
+> in the content — raise the page, do not widen the tuple.**
+>
+> **⚠️ `compact` KEEPS ITS ACTIONS INLINE on the title row.** The tool row is the default, but on a
+> fixed-height master–detail surface **header height is taken directly from the panes below** —
+> which is the whole reason `compact` exists, and giving the actions their own row would add back
+> exactly the height it was built to remove. One layout, one density flag; the flag already
+> governed alignment, so governing row-versus-inline is an extension rather than a new concept.
+>
 > **⚠️ THE SELECTOR NEVER MARKS A ROW THAT IS NOT RENDERED — a collapsed child resolves to its
 > parent.** The floating selector is the ONLY active marker, so what it points at is the entire
 > answer to "where am I". Children are hidden while the column is collapsed, so honouring a child

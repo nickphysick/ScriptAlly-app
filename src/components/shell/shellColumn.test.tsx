@@ -64,6 +64,17 @@ describe("the selector is the ONLY active marker", () => {
     expect(css).toMatch(/\.sc-row\.on \.sc-ic svg[^{]*\{ stroke-width: 2\.4/);
   });
 
+  it("⚠️ NO INSET FILL ON THE COLUMN — it needs a surface it can sit on, and this is not one", () => {
+    // --shell-inset is within a hair of the column (#efe8df on #efe7db), so a fill painted with
+    // it there does nothing while looking deliberate in source. A control that must read as a
+    // surface takes white + a hairline instead — what the ghost button already does. The one
+    // legitimate use inside the column's subtree is the popover, whose own surface is
+    // --shell-canvas, where the inset genuinely steps.
+    const outsidePopover = css.replace(/\.sc-prow[^}]*\}/g, "");
+    expect(outsidePopover).not.toContain("var(--shell-inset)");
+    expect(css).toMatch(/\.sc-qb\.g \{[^}]*background: #fff; border: 1px solid var\(--shell-line\)/);
+  });
+
   it("it reads the ACTIVE FILL, never the desk", () => {
     expect(css).toMatch(/\.sc-sel \{[^}]*background: var\(--shell-active-fill\)/s);
     expect(css).not.toContain("var(--shell-desk)");
