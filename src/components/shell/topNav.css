@@ -1,0 +1,146 @@
+/* ── THE TOP-NAV SHELL (ref design-refs/scriptally-topnav-v2.html) ────────────────────────────
+   For pages you READ rather than work in. ⚠️ NO DESK, NO CAPSULES — a flat warm page. The
+   workspace's sage desk and floating capsules are the other shell's idiom; mixing them would
+   make two shells look like one shell behaving inconsistently. ── */
+
+.tn-app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--shell-canvas);
+}
+
+.tn-mast {
+  height: var(--head);
+  flex: none;
+  background: var(--shell-canvas);
+  position: relative;
+  z-index: 40;
+}
+/* ⚠️ THE HAIRLINE APPEARS ON SCROLL ONLY — the workspace bar's is permanent because it completes
+   the corner with its capsule edge. There is no capsule here, so there is no corner to complete.
+   The asymmetry between the two shells is deliberate. */
+.tn-mast::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--shell-line);
+  opacity: 0; transition: opacity 0.22s var(--shell-ease);
+}
+.tn-mast.scrolled::after { opacity: 1; }
+
+.tn-row {
+  max-width: 1240px; margin: 0 auto; height: 100%;
+  display: flex; align-items: center; gap: 4px; padding: 0 30px;
+}
+.tn-brand {
+  display: flex; align-items: center; margin-right: 26px;
+  border: 0; background: transparent; cursor: pointer;
+  border-radius: 9px; padding: 5px 8px 5px 4px;
+}
+.tn-brand:hover { background: rgba(255, 255, 255, 0.6); }
+
+.tn-nl {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 38px; padding: 0 13px; border-radius: 10px;
+  border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 14px; color: var(--shell-ink-soft);
+  transition: background 0.15s var(--shell-ease), color 0.15s var(--shell-ease);
+  position: relative;
+}
+.tn-nl:hover { color: var(--shell-ink); background: rgba(255, 255, 255, 0.66); }
+.tn-nl svg { width: 11px; height: 11px; color: #c4b8a9; transition: transform 0.2s var(--shell-ease); }
+.tn-nl.open { background: rgba(255, 255, 255, 0.66); color: var(--shell-ink); }
+.tn-nl.open svg { transform: rotate(180deg); }
+
+.tn-right { margin-left: auto; display: flex; align-items: center; gap: 6px; position: relative; }
+.tn-srch {
+  display: flex; align-items: center; gap: 9px;
+  width: 214px; height: 36px; padding: 0 12px; border-radius: 99px;
+  border: 1px solid var(--shell-line); background: rgba(255, 255, 255, 0.5);
+  color: var(--shell-muted); font: inherit; font-size: 12.5px; cursor: text;
+  transition: border-color 0.15s var(--shell-ease);
+}
+.tn-srch:hover { border-color: #cfc2b4; }
+.tn-srch svg { width: 14px; height: 14px; flex: none; }
+.tn-srch > span:not(.tn-k) { flex: 1; text-align: left; }
+.tn-k {
+  font-family: "JetBrains Mono", monospace; font-size: 8.5px;
+  border: 1px solid var(--shell-line); border-radius: 5px; padding: 1px 5px;
+}
+.tn-acctwrap { position: relative; display: inline-flex; }
+.tn-acct {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 9px 0 4px; border-radius: 99px;
+  border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 13.5px; color: var(--shell-ink);
+}
+.tn-acct:hover, .tn-acct.open { background: rgba(255, 255, 255, 0.66); }
+.tn-av {
+  width: 30px; height: 30px; border-radius: 99px;
+  background: var(--pink); border: 1px solid var(--pink-b);
+  display: grid; place-items: center;
+  font-family: "Playfair Display", Georgia, serif; font-size: 11.5px; color: var(--burg);
+}
+.tn-acct svg { width: 11px; height: 11px; color: var(--shell-muted); transition: transform 0.2s var(--shell-ease); }
+.tn-acct.open svg { transform: rotate(180deg); }
+
+/* ── the mega-menus — SAME COLOUR as the page, separated by SHADOW ALONE ── */
+.tn-mega {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: var(--shell-canvas);
+  opacity: 0; pointer-events: none; transform: translateY(-5px);
+  transition: opacity 0.17s var(--shell-ease), transform 0.2s var(--shell-ease);
+  z-index: 39;
+  box-shadow: 0 1px 0 var(--shell-line), 0 20px 44px rgba(56, 66, 58, 0.13);
+}
+.tn-mega.on { opacity: 1; pointer-events: auto; transform: translateY(0); }
+/* ⚠️ COLUMNS COME FROM CONTENT, never three reserved slots — the menus are thinner than the
+   mockup drew them, and three fixed columns with two items in them looks broken. */
+.tn-minner {
+  max-width: 1240px; margin: 0 auto; padding: 26px 30px 30px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)) 290px;
+  gap: 32px;
+}
+.tn-cap {
+  font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.17em;
+  text-transform: uppercase; color: var(--shell-quiet); display: block; margin-bottom: 11px;
+}
+.tn-mi {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 8px 9px; margin-left: -9px; border-radius: 9px;
+  border: 0; background: transparent; cursor: pointer;
+  width: calc(100% + 9px); text-align: left; font: inherit;
+  transition: background 0.13s var(--shell-ease);
+}
+.tn-mi:hover { background: rgba(255, 255, 255, 0.72); }
+.tn-mt { min-width: 0; }
+.tn-t { font-size: 13.5px; display: block; color: var(--shell-ink); }
+.tn-s { font-size: 11.5px; color: var(--shell-muted); margin-top: 3px; display: block; line-height: 1.45; }
+
+/* THE PANEL — live data, never marketing copy, and it carries more weight here than in the
+   mockup because the menus are shorter: it is what stops a short menu looking empty. */
+.tn-promo { border-left: 1px solid var(--shell-line); padding-left: 28px; }
+.tn-cap2 {
+  font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.17em;
+  text-transform: uppercase; color: var(--shell-muted);
+}
+.tn-promo h5 {
+  font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 500;
+  line-height: 1.25; margin-top: 9px; color: var(--shell-ink);
+}
+.tn-promo p { font-size: 12.5px; color: var(--shell-ink-soft); line-height: 1.6; margin-top: 9px; }
+.tn-lk {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 0; background: transparent; cursor: pointer;
+  font: inherit; font-size: 12.5px; color: var(--burg); margin-top: 12px; padding: 0;
+}
+.tn-lk svg { width: 11px; height: 11px; }
+
+.tn-scrim { position: fixed; inset: 0; z-index: 38; background: transparent; }
+
+.tn-page { flex: 1; min-height: 0; overflow-y: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tn-mast::after, .tn-mega, .tn-nl, .tn-nl svg, .tn-acct svg, .tn-mi, .tn-srch { transition: none; }
+}

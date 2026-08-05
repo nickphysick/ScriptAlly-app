@@ -67,15 +67,17 @@ const BAKED: Record<string, string> = {
  * green suite and a clean typecheck. A missing definition is silent in CSS; this makes it loud.
  */
 describe("no shell rule reads a token that does not exist", () => {
-  const shellFiles = ["./shellV2.css", "./shellColumn.css", "./accountMenu.css", "./searchPalette.css"];
+  const shellFiles = ["./shellV2.css", "./shellColumn.css", "./accountMenu.css", "./searchPalette.css", "./topNav.css", "./pageHeader.css"];
   it("every var(--x) in the shell stylesheets resolves to a definition", () => {
     const defined = new Set<string>();
     for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
     // a shell stylesheet may define its own scoped token, so collect those too
     const texts = shellFiles.map((f) => readFileSync(resolve(__dirname, f), "utf8"));
     for (const t of texts) for (const m of t.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
-    // `--i` is set inline per row (the stagger index), not in a stylesheet
-    const allowed = new Set([...defined, "--i"]);
+    // Set INLINE per element rather than in a stylesheet: `--i` is the column's stagger index,
+    // `--cols` is a mega-menu's column count. Both carry a fallback in the CSS, so an element
+    // that somehow renders without them still lays out.
+    const allowed = new Set([...defined, "--i", "--cols"]);
     for (const [i, f] of shellFiles.entries()) {
       const text = texts[i];
       for (const m of text.matchAll(/var\((--[a-z0-9-]+)/gi)) {

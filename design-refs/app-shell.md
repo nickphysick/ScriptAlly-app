@@ -1,5 +1,13 @@
 # App shell — CAPSULE system (design reference)
 
+> **⚠️ THE TOP-NAV SHELL HAS THREE HEADINGS — Queries · Agents · Materials** *(this restates
+> Baked 9, which listed four)*. `Learn` is gone: its one real destination is Help centre, which the
+> shared account menu carries, so nothing became unreachable. **A heading that opens onto a single
+> link advertises a section that does not exist.** It returns when there are guides to put in it.
+> Mega-menu **columns are rendered from content, one to three — never three reserved** — and the
+> live-data panel stays in every menu, because with the menus this thin it is what stops a short
+> one looking empty.
+>
 > **⚠️ PAGE HEADERS — AT MOST TWO ACTIONS IN THE ROW, PLUS OVERFLOW; THE PRIMARY IS PINK AND SITS
 > AT THE RIGHT.** *(This restates Baked 10, which said "that page's actions" with no cap.)* The cap
 > exists because **a page header is where actions go to be noticed, and a row of five is a row of
