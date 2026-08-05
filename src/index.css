@@ -24,7 +24,8 @@
    burgundy) — a consolidation follow-up is flagged so the two sources can't drift. ── */
 :root {
   --burg: #7c3a2a;    /* query-letter ink · primary brand (=== --color-burgundy) */
-  --burg-d: #632e22;  /* deep burgundy */
+  /* (--burg-d is GONE — Tier 3+4 · Phase 10: defined here as #632e22, referenced nowhere, while
+     designTokens.ts held the live deepBurgundy #6b3023. One deep burgundy now: the JS token.) */
   --ink: #241c15;     /* near-black — glyph strokes on tinted bands, headings */
   --muted: #9a8c80;   /* muted mono captions */
   --pink: #f5e2da;    /* soft-pink CTA fill */

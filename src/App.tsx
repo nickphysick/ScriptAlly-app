@@ -35,8 +35,8 @@ import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { RecordResponseScreen } from "./components/RecordResponseScreen";
-// Route tiers (landing build): marketing chrome for "/" + /pricing, focus chrome for
-// /account · /plans · /help; the workspace keeps the AppShell below, untouched.
+// Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
+// one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
@@ -336,7 +336,8 @@ function pathFor(tab: string, subPageName?: string): string {
 }
 
 // The workspace route set lives in marketing/routeTiers.ts (one source for the tier model);
-// marketing + focus paths return from their tier branches before the unknown-path redirect.
+// marketing paths return from their tier branch before the unknown-path redirect (the focus
+// tier is retired — capsule fixes P5).
 
 function AppContent() {
   const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
@@ -594,7 +595,7 @@ function AppContent() {
         </StagePage>
 
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
-            its OWN chrome (F12Page — CrumbStrip header + centred --maxw column), so the slot has
+            its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
         <StagePage active={routeKey === "queries"} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
@@ -608,7 +609,7 @@ function AppContent() {
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
-        {/* The agents slot is SPLIT (F12): Discover keeps the capped work column + CrumbStrip;
+        {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;
             the Contact List page renders the F12 shell (its own chrome), so its slot is bare. */}
         <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn" contentVariant="work">
           <DiscoverNewAgents onNavigate={handleNavigate} />

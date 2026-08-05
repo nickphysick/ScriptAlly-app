@@ -60,7 +60,7 @@ import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
-  burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
+  burgundy, deepBurgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
   qdbCardLine,
   qdbBoldInk, qdbBoldInk2, qdbBoldMuted,
 } from "../lib/designTokens";
@@ -932,7 +932,7 @@ export const Queries: React.FC<{
     burgundy: {
       name: "Burgundy Heritage",
       primary: "#7c3a2a",
-      primaryHover: "#632e22",
+      primaryHover: deepBurgundy, // consolidated on designTokens' #6b3023 (Tier 3+4 · Phase 10) — the drifted #632e22 twin is gone
       primaryLight: "#FAF1EF",
       primaryDark: "#3a1c14",
       bgMain: "#FDF8F6",
@@ -2152,9 +2152,6 @@ export const Queries: React.FC<{
         }
         .queries-container-theme .bg-\[\#7c3a2a\] {
           background-color: ${curTheme.primary} !important;
-        }
-        .queries-container-theme .hover\:bg-\[\#632e22\]:hover {
-          background-color: ${curTheme.primaryHover} !important;
         }
         .queries-container-theme .bg-\[\#3a1c14\] {
           background-color: ${curTheme.primaryDark} !important;

@@ -3,8 +3,9 @@
  * List; refs design-refs/queries-hub-v14.html + agents-contact-list-v3.html, whose :roots are
  * identical). Built once (overnight run, Stage 2) and consumed by both pages:
  *
- *   F12Page      — the `.t-f12` root: oat ground, full-bleed header (the app-wide CrumbStrip,
- *                  repainted by the .t-f12 --crumb-* tokens, with the page's tools OVERLAID
+ *   F12Page      — the `.t-f12` root: oat ground, full-bleed header (the page's OWN crumb strip
+ *                  — the app-wide CrumbStrip component is long deleted — painted by the .t-f12
+ *                  --crumb-* tokens, with the page's tools OVERLAID
  *                  right — composition on top of the strip, never an edit to it; Stage 1 owns
  *                  that component), then the page's own bands/panes below (children).
  *   Icirc        — circular hover icon button (header export/help etc.).

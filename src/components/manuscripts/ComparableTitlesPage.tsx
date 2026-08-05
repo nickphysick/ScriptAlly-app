@@ -8,8 +8,9 @@
  * Single visual source of truth: design-refs/comparable-titles-flat.html.
  *
  * Workspace-fills layout (masthead flex-none over a two-panel split that fills the stage and scrolls
- * internally). The masthead is ChromeSlab grand with the manuscript selector in its tools slot
- * (HubHeaderBar is deleted — shell rollout Phase 6).
+ * internally). The masthead is the standard PageHeader with the manuscript selector in its
+ * tools slot (ChromeSlab and HubHeaderBar are both long deleted — shell rollout Phase 6 /
+ * follow-up P3).
  * Store only facts + one intent (`inQuery`); role / query line / health / recency are derived
  * at render (src/lib/compsPage.ts). Comp writes go through the shared updateManuscript path (a first
  * write on a legacy-string doc converts it to the structured array); every write runs through

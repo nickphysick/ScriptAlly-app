@@ -4,8 +4,8 @@
  *
  * Submission Package Builder → the single-page Package Workshop (route /manuscripts/packages, Pro).
  * Renders inside the global AppShell stage (no nav of its own), scoped to the active manuscript via
- * localStorage["scriptally_active_manuscript_id"]. This host provides the qhbar chrome (ChromeSlab:
- * crumb + title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
+ * localStorage["scriptally_active_manuscript_id"]. This host provides the page header (the
+ * standard PageHeader: title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
  * and mounts the two-tab surface for everything else. At ZERO packages the WORKSHOP'S OWN first-run
  * empty state renders — for every user on every plan. (A Pro-selling landing used to sit in front of
  * it; it was retired because this route has no Pro gate, so it was pitching the feature to people who

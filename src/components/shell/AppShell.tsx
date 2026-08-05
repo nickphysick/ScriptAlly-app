@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * AppShell — the global chrome that wraps every routed page. The persistent left rail is
- * RETIRED (overnight nav run): navigation lives in the app-wide NavDrawer, opened from the
- * header menu buttons (CrumbStrip on workspace pages, DashTopBar on the dashboard), and the
- * content column is full-bleed to the left edge.
+ * Navigation today: the v2 shell — the rail plus the top bar's breadcrumb (ShellV2). The
+ * overnight-nav era's NavDrawer/CrumbStrip/DashTopBar chrome is long gone (shell follow-up P3;
+ * the tombstones further down mark the slots they vacated).
  *
  * The content column holds the mobile slim bar (the old <Nav>, kept below md only) above the
  * STAGE — the app's scroll container (#app-stage-scroll). Pages render inside as persistent

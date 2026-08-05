@@ -356,9 +356,9 @@ export const PlansPage: React.FC = () => (
     `}</style>
 
     <div className="relative" style={{ zIndex: 1, maxWidth: 880, margin: "0 auto", padding: "12px 16px 0" }}>
-      {/* The standard page header (capsule fixes P5 — re-homed from FocusShell): full variant
-          replaces the centred italic hero; the mono "ScriptAlly · two tiers" strapline is
-          dropped, not restyled (rollout report). */}
+      {/* The standard page header (capsule fixes P5 — re-homed from the DELETED FocusShell):
+          full variant replaces the centred italic hero; the mono "ScriptAlly · two tiers"
+          strapline is dropped, not restyled (rollout report). */}
       <PageHeader
         variant="full"
         title="Choose your plan"

@@ -17,7 +17,8 @@
  *   WIRED ........ display name (updateUserProfile), home country (updateUserProfile — drives
  *                  the agent territory split; changeable but never cleared back to unset, per
  *                  the origin-state law), password reset (resetPassword),
- *                  plan + trial display, View plans (onNavigate "plans" — focus chrome),
+ *                  plan + trial display, View plans (onNavigate "plans" — a workspace route;
+ *                  the focus tier is retired),
  *                  data export (client-side JSON of the already-loaded data),
  *                  data import (onNavigate "import" → ImportCsv).
  *   COMING-SOON .. pen name, email change, two-factor, active sessions, manage billing,
@@ -774,8 +775,8 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
               : ""}
           </p>
         </div>
-        {/* In-app upgrade CTAs target /plans (focus chrome) — the public /pricing keeps the
-            marketing tier (route-tier journeys table, landing build). */}
+        {/* In-app upgrade CTAs target /plans (a workspace route in the capsule shell — the
+            focus tier is retired); the public /pricing keeps the marketing tier. */}
         <button onClick={() => onNavigate("plans")} style={primaryBtn}>
           View plans &amp; upgrade <ChevronRight style={{ width: 15, height: 15 }} aria-hidden="true" />
         </button>
@@ -931,8 +932,8 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
       `}</style>
 
       <div className="relative" style={{ zIndex: 1, maxWidth: 1040, margin: "0 auto", padding: "12px 16px 0" }}>
-        {/* The standard page header (capsule fixes P5 — re-homed from FocusShell into the
-            capsule shell): full variant replaces the bespoke h1 + sub. */}
+        {/* The standard page header (capsule fixes P5 — re-homed from the DELETED FocusShell
+            into the capsule shell): full variant replaces the bespoke h1 + sub. */}
         <PageHeader
           variant="full"
           title="Account settings"

@@ -34,22 +34,22 @@ export interface User {
   queriesTheme?: "cappuccino" | "bold" | "editorial";
   // The Package Workshop guided tour has been offered once. Set true when the tour ends (finish OR
   // skip) so it never auto-runs again; the help "?" re-runs it regardless. Absent === never seen.
-  // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful)
-  // until that deploy lands, exactly like the agent `pinned` flag.
+  // NOTE: in the committed user-update allowlist (firestore.rules) — live behaviour tracks
+  // whichever rules revision Nick last deployed, as with every rules-gated field.
   hasSeenTour?: boolean;
   // The user's own invented genres (the taxonomy's Personal tier — see src/lib/genres.ts). Each is
   // { id: "u:{uid}:{slug}", label }. Created only when a typed genre matches nothing canonical or
   // personal; capped at MAX_PERSONAL_GENRES. Stored here (not a subcollection) so it rides the
-  // already-loaded user doc — no new page-load read. NOTE: rides the parked user-update allowlist
-  // edit — silently denied (graceful) until that deploy lands.
+  // already-loaded user doc — no new page-load read. NOTE: in the committed user-update
+  // allowlist (firestore.rules); live behaviour tracks the deployed rules revision.
   personalGenres?: { id: string; label: string }[];
   // Housekeeping rules the writer has muted app-wide ("Don't ask again → All of them"). Per-item
   // mutes live on a TaskFlag instead. Muting stops the reminder; it never deletes the underlying gap.
   mutedTaskRules?: string[];
   // The To-do board's first-visit spotlight tour has run (ISO timestamp; set on Done OR skip — the
   // hasSeenTour pattern). Absent === never seen; the ? popover's "Replay the tour" ignores it.
-  // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful,
-  // the tour just re-offers) until that deploy lands.
+  // NOTE: in the committed user-update allowlist (firestore.rules); live behaviour tracks the
+  // deployed rules revision (a denial is graceful — the tour just re-offers).
   tourSeenAt?: string;
 }
 
