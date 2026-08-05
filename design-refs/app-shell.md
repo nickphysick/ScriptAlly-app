@@ -1,5 +1,13 @@
 # App shell — CAPSULE system (design reference)
 
+> **⚠️ THE SELECTOR NEVER MARKS A ROW THAT IS NOT RENDERED — a collapsed child resolves to its
+> parent.** The floating selector is the ONLY active marker, so what it points at is the entire
+> answer to "where am I". Children are hidden while the column is collapsed, so honouring a child
+> target there would put the one marker over a row that is not on screen — it would be marking
+> something invisible. **This is a decision, not a missing case: do not "fix" it by making the
+> collapsed state honour child targets.** (`selectorBox` in `lib/shellColumn.ts`; locked as state
+> four of four in `lib/shellColumn.test.ts`.)
+>
 > **⚠️ TOKEN NAMING — the mockups and the code differ on purpose.** The sage-desk and top-nav
 > mockups call the ground **`--desk`**; the code calls it **`--shell-desk`**, because `--desk` was
 > already the PER-THEME working-area background (`.t-capp` `#e8ddd0` · `.t-bold` `#c2cfda` ·
