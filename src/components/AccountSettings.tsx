@@ -14,7 +14,9 @@
  * Wiring rule: a control is wired only when its end-to-end behaviour already exists (or is
  * trivially self-contained this pass). Everything else is rendered on-brand but clearly inert
  * and persists NOTHING (a dead stored pref is a desync trap).
- *   WIRED ........ display name (updateUserProfile), password reset (resetPassword),
+ *   WIRED ........ display name (updateUserProfile), home country (updateUserProfile — drives
+ *                  the agent territory split; changeable but never cleared back to unset, per
+ *                  the origin-state law), password reset (resetPassword),
  *                  plan + trial display, View plans (onNavigate "plans" — focus chrome),
  *                  data export (client-side JSON of the already-loaded data),
  *                  data import (onNavigate "import" → ImportCsv).
@@ -29,6 +31,7 @@ import { useScriptAllyDb } from "../lib/db";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountCard } from "./MountCard";
 import { PageHeader } from "./shell/PageHeader";
+import { CountryCombobox } from "./forms";
 import {
   pageGround,
   PAGE_GRAIN,
@@ -513,6 +516,7 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
   const [active, setActive] = useState<SectionId>("profile");
   const [name, setName] = useState(currentUser?.name ?? "");
   const [nameStatus, setNameStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });
+  const [countryStatus, setCountryStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });
   const [resetMsg, setResetMsg] = useState<string | null>(null);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [showDelete, setShowDelete] = useState(false);
@@ -535,6 +539,22 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
       setTimeout(() => setNameStatus({ type: "idle" }), 2500);
     } catch {
       setNameStatus({ type: "error", msg: "Couldn't save. Please try again." });
+    }
+  };
+
+  /** Save-on-select (the Preferences theme-radio convention). An empty pick — the combobox's
+   *  "Clear selection" row — is deliberately a no-op: unstated is an ORIGIN state, not a
+   *  destination (the agent-editor law), and the territory model never stores "" (unset means
+   *  the key is omitted, seeded once at signup). The helper text below states the rule. */
+  const saveHomeCountry = async (code: string) => {
+    if (!code || code === currentUser?.homeCountry) return;
+    setCountryStatus({ type: "saving" });
+    try {
+      await updateUserProfile({ homeCountry: code });
+      setCountryStatus({ type: "saved", msg: "Saved" });
+      setTimeout(() => setCountryStatus({ type: "idle" }), 2500);
+    } catch {
+      setCountryStatus({ type: "error", msg: "Couldn't save. Please try again." });
     }
   };
 
@@ -642,6 +662,41 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
         {nameStatus.type === "error" && (
           <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED }}>{nameStatus.msg}</span>
         )}
+      </div>
+
+      {/* Home country — seeded silently at signup from the browser locale (key omitted when
+          unresolvable) and previously never writable again: a wrong guess was a permanent trap
+          for the agent territory split (Tier 2 · Phase 4). Absent shows as "Not set" and is
+          settable; once set it can be changed but not cleared (the origin-state law). */}
+      <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
+        <label htmlFor="account-homecountry" style={labelStyle}>
+          Home country
+        </label>
+        <div style={{ maxWidth: 360 }}>
+          <CountryCombobox
+            id="account-homecountry"
+            value={currentUser.homeCountry ?? ""}
+            onChange={saveHomeCountry}
+            placeholder="Not set"
+          />
+        </div>
+        <div className="flex items-center" style={{ gap: 12, marginTop: 8, flexWrap: "wrap" }}>
+          <p style={{ ...helpText, margin: 0 }}>
+            Sets your home market — the agent list uses it to tell domestic agents from
+            international ones. It can be changed any time, but not cleared once set.
+          </p>
+          {countryStatus.type === "saving" && (
+            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: mutedInk }}>Saving…</span>
+          )}
+          {countryStatus.type === "saved" && (
+            <span className="flex items-center" style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>
+              <Check style={{ width: 14, height: 14 }} aria-hidden="true" /> {countryStatus.msg}
+            </span>
+          )}
+          {countryStatus.type === "error" && (
+            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED }}>{countryStatus.msg}</span>
+          )}
+        </div>
       </div>
 
       {/* Pen name — coming soon. Not a User field and not in the Firestore allowlist, so it
