@@ -24,16 +24,21 @@ Stored `lastStatusChange` may be a Firestore `Timestamp` while the derived value
 
 ## How to run it
 
-The tool is `import.meta.env.DEV`-gated, so it **cannot appear in a production build** — verified empirically: the production bundle contains neither `Recompute sweep` nor `recompute-sweep`, while the deliberately un-gated `Notes-store scan` string *is* present (the control proving the check works). The DEV gate keys off the dev **server**, not the env file, so the two combinations are:
+**On dev, on a local dev server. That is the whole answer.**
 
-| Target | Command | Reaches |
-|---|---|---|
-| Dev data | `npm run dev` → `http://localhost:3000/#/recompute-sweep` | `scriptally-dev` |
-| **Prod data** | the existing `scriptally-prod-env` launch config (`npm run dev -- --mode production --port 3002`) → `http://localhost:3002/#/recompute-sweep` | `gen-lang-client-0801391782` |
+```bash
+npm run dev
+```
 
-**The second row is the one that matters** — your real querying history lives in prod, and a dev-server build pointed at `.env.production` keeps `import.meta.env.DEV` true (so the route renders) while loading the prod Firebase config. Both were checked: the route renders and reports the expected project ID in each case. The page prints the live Firebase project at the top — **read it before pressing anything.**
+→ `http://localhost:3000/#/recompute-sweep` → sign in with your dev account → **Dry run** → read the table → **Run sweep** → dry-run once more to confirm zero changes.
 
-Then: sign in as normal → **Dry run** → read the table → **Run sweep** → dry-run once more to confirm zero changes.
+The page prints the live Firebase project at the top; it should read **scriptally-dev**. Read it before pressing anything.
+
+**The tool exists only on a local dev server** — `import.meta.env.DEV` is false in *any* `vite build`, whatever `--mode` says. Verified empirically: neither `Recompute sweep` nor `recompute-sweep` appears in the `npm run build` (prod) bundle **or** the `npm run build:dev` bundle, while the deliberately un-gated `Notes-store scan` string does — the control proving the grep works. So it is not on `scriptally-dev.web.app` either, and it cannot reach a production build.
+
+**Dev rules are ready.** The 5 Aug dev rules deploy carries `rejectedDate` in the queries update allowlist, so the sweep's writes pass today.
+
+> **Correction (5 Aug).** The first version of this report steered towards running against prod via a production-mode dev server, on my assumption that the history worth healing lived there. That assumption was never verified and does not match how this project is worked: **dev only**. The prod paragraph has been removed rather than softened.
 
 ## The owner-scoped limitation — a rules guarantee, not a gap
 
@@ -45,9 +50,11 @@ After the sweep, **package reply-time figures will read longer than before**, po
 
 Also expect: `Fortnight in Focus` and the dashboard event chains dating some historical events by the rung's own time rather than an old recording stamp, and `hasAgentResponded` / `revisionRound` correcting on any record whose stored value had drifted from its log. The dry run tells you exactly which, before anything is written.
 
-## Rules dependency
+## Scope: this heals dev, and that is the intent
 
-`rejectedDate` sits in the queries update allowlist as of the Tier 3+4 rules change, **deployed to dev on 5 Aug**. Prod rules have **not** been deployed. Running the sweep against **prod before those rules are deployed will fail every query** with a permission error (the whole recompute update fails `hasOnly`) — the tool will report each failure and continue, harmlessly, but it will heal nothing. **Deploy prod rules first.**
+The sweep runs against `scriptally-dev`, under the signed-in dev account — the database this project is worked on.
+
+**Prod is untouched, and does not need this tool to become correct.** The fix is forward-correct by construction: once prod receives the Tier 3+4 rules and hosting deploy, every response recorded from that moment derives `rejectedDate`, `responseReceivedAt` and `lastStatusChange` properly. Only queries already *closed* before that deploy would keep stale fields — and with no live users, whether any such record matters is a separate question, parked here rather than answered. (If it ever needs answering: the dry run writes nothing, so it can report the shape of the problem without changing anything. That would be a deliberate decision, not part of this run.)
 
 ## After the sweep
 
