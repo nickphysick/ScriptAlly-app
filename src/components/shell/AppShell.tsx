@@ -330,12 +330,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     <div
       className={`${THEME_CLASS[theme]} sv2-app${panelCollapsed ? " sv2-collapsed" : ""}`}
       data-sa-ground=""
-      // The capsule GROUND — the warm grained field all three capsules float on (the paper
-      // grain reuses the canonical PAGE_GRAIN data-URI inline; the CSS parser rejects it in
-      // .css files). Layout (flex · viewport height · overflow) lives on the .sv2-app class
-      // (shellV2.css) so the mobile pass can swap 100vh → 100dvh below md; padding + gap
-      // arrive with the class at ≥768px.
-      style={{ backgroundColor: "var(--shell-ground)", backgroundImage: PAGE_GRAIN }}
+      // THE DESK — the sage-grey field the capsules float on (app-shell pack, Baked 2). The
+      // grain and the light pool are two pointer-events:none layers drawn by .sv2-app::before
+      // and ::after in shellV2.css; only the flat colour is set here, because the grain's
+      // data-URI is the one thing the CSS parser rejects in a .css file. Layout (flex ·
+      // viewport height · overflow) lives on the .sv2-app class so the mobile pass can swap
+      // 100vh → 100dvh below md; padding + gap arrive with the class at ≥768px.
+      style={{ backgroundColor: "var(--shell-desk)", backgroundImage: PAGE_GRAIN }}
     >
       {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
           only (class + media query in shellV2.css — never inline display). The interim layers

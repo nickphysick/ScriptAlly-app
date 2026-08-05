@@ -141,9 +141,15 @@ export const shellLine = "#e3d9cf"; // interior hairline
 export const shellLineSoft = "#ece3da"; // soft interior hairline
 export const shellCapRadius = 18; // capsule corner (px) — chrome tokens
 export const shellCapGap = 14; // capsule gap AND page padding (px) — the outer gap
-// THE LAYERED SHADOW — four stops, one token, every capsule.
+// THE LAYERED SHADOW — four stops, one token, every capsule. GREEN-GREY: the tint belongs to
+// the desk's colour family and moves with it (the desk is sage). A cool-blue or warm-brown
+// shadow on a sage desk reads as dirt rather than depth.
 export const shellCapShadow =
-  "0 1px 2px rgba(58,28,20,.04), 0 2px 6px rgba(58,28,20,.045), 0 8px 18px rgba(58,28,20,.05), 0 20px 44px rgba(58,28,20,.055)";
+  "0 1px 2px rgba(56,66,58,.08), 0 4px 10px rgba(56,66,58,.09), 0 14px 30px rgba(56,66,58,.11), 0 34px 66px rgba(56,66,58,.13)";
+/** THE DESK — the sage-grey ground the capsules float on. Nothing else reads it. */
+export const shellDesk = "#aebdb0";
+/** The nav's active fill — a bright surface LAID ON the capsule, never a hole cut to the desk. */
+export const shellActiveFill = "#ffffff";
 export const shellCapBorder = "1px solid #d8ccbc"; // the warm capsule edge (was a cold #9e9e9e in the export)
 export const shellBarBg = "#f1ebe3"; // the header bar joins the rail's chrome family
 export const shellGutter = 16; // sidebar side gutter (px)

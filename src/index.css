@@ -57,7 +57,20 @@
    JS twins (shellGround …) — the flagged duplication; the pair is kept in step by
    shellV2Tokens.test.ts. ── */
 :root {
-  --shell-ground: #e7e0d5;            /* the page ground behind all three capsules (+ paper grain) */
+  /* ⚠️ THE DESK AND THE ACTIVE FILL ARE TWO TOKENS, and they used to be one. `--shell-ground`
+     was both the ground behind the capsules AND the nav's active-row fill, under the old law
+     "active = a window cut through to the page ground". That law only held while the ground was
+     a neutral cream: cut a window through to SAGE and the metaphor produces a green pill.
+     THE LAW IS NOW: active is a BRIGHT SURFACE LAID ON the capsule, not a hole cut through it.
+
+     ⚠️ IT IS `--shell-desk`, NOT `--desk`. `--desk` was already taken: it is the PER-THEME
+     working-area background (.t-capp #e8ddd0 · .t-bold #c2cfda · .t-edn #f4f4f3) that the hub
+     pages and the ultrawide margin rule read, and it is content, not chrome. A `:root --desk`
+     would have been overridden by every theme class anyway — silently, so the desk would simply
+     have come out the wrong colour with nothing to point at. */
+  --shell-desk: #aebdb0;              /* THE DESK — the sage-grey ground. NOTHING else reads this. */
+  --shell-active-fill: #ffffff;       /* the selector + every .on state (app-shell pack) */
+  --shell-ground: #e7e0d5;            /* ⚠️ LEGACY cream ground — being retired with the old shell */
   --shell-rail: #f1ebe3;              /* RAIL capsule — the deepest surface (stepped trio) */
   --shell-side: #f8f4ee;              /* PANEL capsule — one step above the rail */
   --shell-canvas: #fdfbf8;            /* CONTENT capsule — the brightest surface; its top bar too */
@@ -74,11 +87,23 @@
      numbers or they drift apart the first time either is touched. Alignment is required only
      with the accordion CLOSED; when a section expands the panel rows shift and the rail stays
      fixed, deliberately. --shell-kid-h belongs to the panel alone. */
-  /* 58px, matching the top bar's own height, so the rail head, the panel masthead and the bar
-     close on ONE CONTINUOUS LINE across all three capsules (bar-per-page pack). It was 56 while
-     the bar was 58 — two values a pixel-and-a-half apart, which read as a mistake rather than a
-     rhythm. One number now; move the bar and this together or not at all. */
-  --shell-head-h: 58px;               /* masthead / rail head block — AND the top bar */
+  /* ══ THE ALIGNMENT CONTRACT (app-shell pack, Baked 1) ══════════════════════════════════════
+     FOUR TOKENS EXPANSION NEVER TOUCHES. The column goes 78px ↔ 246px, and on expand ONLY
+     labels, chevrons and children change — ICONS DO NOT MOVE.
+
+     ⚠️ THIS IS A RULE, NOT A SET OF VALUES. Alignment here is STRUCTURAL, not maintained: the
+     icon box sits at --gutter in BOTH states because both states read the same token, not
+     because two numbers were matched up by hand. If a future change moves an icon between
+     collapsed and expanded, the token is being bypassed — that is the bug, and the fix is to
+     put the row back on the token rather than to nudge the other state to match. */
+  --gutter: 20px;                     /* left inset — the icon box's x in EVERY state */
+  --icon: 38px;                       /* icon box */
+  --pitch: 42px;                      /* parent row height */
+  --kid: 34px;                        /* child row height */
+  --head: 72px;                       /* masthead / top bar — drives BOTH capsules' headers */
+  --col-min: 78px;                    /* column, collapsed */
+  --col-max: 246px;                   /* column, expanded */
+  --shell-head-h: 58px;               /* ⚠️ LEGACY — retiring in favour of --head; see Baked 1 */
   --shell-row-h: 44px;                /* nav row pitch — BOTH components */
   --shell-kid-h: 37px;                /* accordion child pitch — the panel alone */
   /* (--shell-pad-t is RETIRED: the rail head, the panel's Navigate band and the top bar are all
@@ -88,12 +113,19 @@
   --shell-cap-radius: 18px;           /* capsule corner (chrome tokens: 20 → 18) */
   --shell-cap-gap: 14px;              /* capsule gap AND page padding — the OUTER GAP (10 → 14) */
   /* THE LAYERED SHADOW — one token, every capsule. Four stops rather than one: the near pair
-     seats the edge, the far pair carries the float. */
+     seats the edge, the far pair carries the float.
+     ⚠️ THE TINT BELONGS TO THE DESK'S COLOUR FAMILY, and moves with it. It is green-grey
+     rgba(56,66,58,…) because the desk is sage. A cool-blue or warm-brown shadow on a sage desk
+     reads as DIRT rather than as depth. If the desk ever changes family, this moves with it —
+     that is the rule; the four stops themselves are just the shape. */
   --shell-cap-shadow:
-    0 1px 2px rgba(58,28,20,.04),
-    0 2px 6px rgba(58,28,20,.045),
-    0 8px 18px rgba(58,28,20,.05),
-    0 20px 44px rgba(58,28,20,.055);
+    0 1px 2px rgba(56,66,58,.08),
+    0 4px 10px rgba(56,66,58,.09),
+    0 14px 30px rgba(56,66,58,.11),
+    0 34px 66px rgba(56,66,58,.13);
+  /* THE WHITE TOP RIM. Without it the capsules read as holes cut in the desk rather than as
+     objects resting on it — the shadow alone gives depth but not surface. */
+  --shell-cap-rim: inset 0 1px 0 rgba(255,255,255,.55);
   /* THE CAPSULE EDGE. The export carried #9e9e9e — a cold neutral in an entirely warm palette,
      and the only value in the set outside the family. #d8ccbc is the same lightness at the
      right temperature. (It reached nothing else: #9e9e9e appears nowhere in src/ or in the

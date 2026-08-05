@@ -47,7 +47,7 @@
 .sv2-railpill {
   position: absolute; top: 0; left: 50%; margin-left: -20px;
   width: 40px; height: 40px; border-radius: 13px;
-  background: var(--shell-ground); pointer-events: none; z-index: 0;
+  background: var(--shell-active-fill); pointer-events: none; z-index: 0;
 }
 .sv2-railpill.ready { transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1); }
 .sv2-railnav .sv2-rib { position: relative; z-index: 1; }
@@ -74,10 +74,12 @@
 .sv2-rib svg { width: 18px; height: 18px; stroke-width: 1.8; transition: stroke-width 0.16s; }
 .sv2-rib.on svg { stroke-width: 2.4; }
 .sv2-rib:hover { background: var(--shell-inset); }
-/* THE ACTIVE LAW (fixes pack): active = the GROUND token — a window cut through to the page
-   ground. Never pink (retired from nav states; it stays the button/content accent), never
-   burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
-.sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
+/* ⚠️ THE ACTIVE LAW (RESTATED, app-shell pack): active is a BRIGHT SURFACE LAID ON the capsule
+   — `--shell-active-fill` (#fff) — NOT a hole cut through to the ground. The old wording said
+   "a window cut through to the page ground", which held only while the ground was neutral
+   cream; on the sage desk that metaphor produces a GREEN PILL. Never pink (retired from nav
+   states; it stays the button/content accent), never burgundy. */
+.sv2-rib.on { background: var(--shell-active-fill); color: var(--burg); }
 /* PRESS FEEDBACK — :active only, 120ms, house easing. The press scales the ICON while the
    indicator moves the PILL: separate elements, so they cannot fight. */
 .sv2-rib:active { transform: scale(.92); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
@@ -87,7 +89,7 @@
    flyout footer and ⌘\ carry expansion now.) */
 /* The rib whose flyout is open holds its hover look while the pointer travels across. */
 .sv2-rib.hovering { background: var(--shell-inset); color: var(--shell-ink); }
-.sv2-rib.on.hovering { background: var(--shell-ground); color: var(--burg); }
+.sv2-rib.on.hovering { background: var(--shell-active-fill); color: var(--burg); }
 
 /* ── rail flyouts (collapsed only; ref scriptally-rail-flyouts.html) ── */
 .sv2-fly {
@@ -133,7 +135,7 @@
 .sv2-frow.on svg { color: var(--burg); }
 .sv2-frow:hover { background: var(--shell-inset); color: var(--shell-ink); }
 /* The nav active law — ground fill, in the flyout too. */
-.sv2-frow.on { background: var(--shell-ground); color: var(--shell-ink); }
+.sv2-frow.on { background: var(--shell-active-fill); color: var(--shell-ink); }
 .sv2-flbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sv2-fct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 .sv2-ff {
@@ -290,7 +292,7 @@
 .sv2-asec.open .sv2-acv { transform: rotate(90deg); }
 /* THE ACTIVE LAW (fixes pack): active = GROUND fill, ink text, burgundy icon — never pink,
    never burgundy fills. One law, both columns (rail ribs + panel rows). */
-.sv2-asec.sv2-flat.on { background: var(--shell-ground); color: var(--shell-ink); font-weight: 500; }
+.sv2-asec.sv2-flat.on { background: var(--shell-active-fill); color: var(--shell-ink); font-weight: 500; }
 .sv2-asec.sv2-flat.on .sv2-ai { color: var(--burg); }
 .sv2-akids { overflow: hidden; max-height: 0; transition: max-height 0.26s ease; }
 .sv2-akids.open { max-height: 160px; }
@@ -312,7 +314,7 @@
   transition: background 0.16s;
 }
 .sv2-akid:hover { background: var(--shell-inset); }
-.sv2-akid.on { background: var(--shell-ground); color: var(--shell-ink); }
+.sv2-akid.on { background: var(--shell-active-fill); color: var(--shell-ink); }
 .sv2-aklbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sv2-akct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 

@@ -50,11 +50,11 @@ describe("the tab bar — a floating capsule with the nav active law", () => {
     expect(bar).toContain("background: var(--shell-side)");
   });
 
-  it("THE NAV ACTIVE LAW — ground-fill pill, ink text; never burgundy, never pink", () => {
+  it("THE NAV ACTIVE LAW — a bright surface LAID ON, ink text; never burgundy, never pink", () => {
     expect(css).toContain(".sa-mtab.on");
     const on = css.match(/\.sa-mtab\.on \{([^}]*)\}/s)?.[1] ?? "";
     expect(on, "the active rule must exist").not.toBe("");
-    expect(on).toContain("background: var(--shell-ground)");
+    expect(on).toContain("background: var(--shell-active-fill)");
     expect(on).toContain("color: var(--shell-ink)");
     // and the component carries no colour of its own (the old inline pink/burgundy bar is gone)
     expect(barSrc).not.toContain("#f5e2da");

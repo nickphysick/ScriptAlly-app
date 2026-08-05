@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Pastille desks</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58; --sage:#8a9e88;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9; --slate:#6a89a7;
+  --paper:#f7f2e9; --rail:#efe7db; --edge:#e2d8c8; --line:#ded2bf; --card:#fdfaf5;
+  --ease:cubic-bezier(.4,0,.2,1); --spring:cubic-bezier(.34,1.28,.64,1);
+  --gutter:20px; --icon:38px; --pitch:42px; --kid:34px; --head:72px; --pad-r:18px;
+  --col-min:78px; --col-max:246px; --col:var(--col-max);
+  --gap:14px; --r:18px;
+  --desk:#aebdb0;
+  /* ⚠️ STALE — DO NOT COPY THIS VALUE. The rgba(60,66,80,…) tint is left over from the pastille
+     sheet, where the desk was BLUE. On the sage desk the shipped tint is green-grey
+     rgba(56,66,58,…) — see the app-shell pack, Baked 3, which names the value AND gives the
+     reason. House rule: the mockup wins on what it SHOWS, but not where the pack names a value
+     and gives its reason; a reasoned value in prose beats an unreasoned one in an artefact. */
+  --lift:0 1px 2px rgba(60,66,80,.08),0 4px 10px rgba(60,66,80,.09),0 14px 30px rgba(60,66,80,.11),0 34px 66px rgba(60,66,80,.13);
+  --rim:inset 0 1px 0 rgba(255,255,255,.55);
+}
+body.shut{--col:var(--col-min)}
+body.s1{--desk:#aebdb0}
+body.s2{--desk:#b0bcb2}
+body.s3{--desk:#a6b6ab}
+body.s4{--desk:#9fb0a4}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;background:var(--desk)}
+
+/* ═══ DESK ═══ */
+.desk{position:fixed;inset:0;z-index:0;pointer-events:none}
+.tex{position:absolute;inset:0;opacity:.5;mix-blend-mode:multiply;background-size:cover;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='500'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='700' height='500' filter='url(%23f)' opacity='.16'/%3E%3C/svg%3E")}
+.pool{position:absolute;inset:0;background-image:radial-gradient(120% 90% at 50% -16%,rgba(255,255,255,.5) 0%,rgba(255,255,255,.1) 44%,rgba(0,0,0,0) 68%),radial-gradient(100% 80% at 50% 120%,rgba(40,40,60,.1) 0%,rgba(0,0,0,0) 60%)}
+
+.app{height:100vh;display:flex;gap:var(--gap);padding:var(--gap);position:relative;z-index:1}
+.colm{width:var(--col);flex:none;position:relative;display:flex;flex-direction:column;padding:0 0 14px;background:var(--rail);
+  border-radius:var(--r);box-shadow:var(--lift),var(--rim);overflow:hidden;transition:width .3s var(--ease)}
+.mast{height:var(--head);flex:none;display:flex;align-items:center;padding-left:var(--gutter);cursor:pointer}
+.mast .mk{width:var(--icon);height:var(--icon);display:grid;place-items:center;flex:none;color:var(--burgundy)}
+.mast .mk svg{width:23px;height:23px}
+.mast .wm{font-family:"Playfair Display",serif;font-size:21px;letter-spacing:-.015em;white-space:nowrap;margin-left:10px;
+  opacity:0;transform:translateX(-6px);transition:opacity .18s var(--ease),transform .26s var(--ease)}
+body:not(.shut) .mast .wm{opacity:1;transform:translateX(0)}
+.navwrap{flex:1;min-height:0;position:relative;display:flex;flex-direction:column}
+.nav{overflow-y:auto;overflow-x:hidden;position:relative;padding-top:8px;scrollbar-width:none}
+.nav::-webkit-scrollbar{width:0}
+.sfade{position:absolute;left:0;right:0;height:24px;pointer-events:none;opacity:0;transition:opacity .2s var(--ease);z-index:4}
+.sfade.t{top:0;background:linear-gradient(180deg,var(--rail),rgba(239,231,219,0))}
+.sfade.b{bottom:0;background:linear-gradient(0deg,var(--rail),rgba(239,231,219,0))}
+.sfade.on{opacity:1}
+.slider{position:absolute;top:0;left:0;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(58,28,20,.1);pointer-events:none;z-index:1;
+  transition:transform .34s var(--spring),width .3s var(--ease),height .22s var(--ease),border-radius .22s var(--ease)}
+.slider.mute{transition:none}
+.row{height:var(--pitch);display:flex;align-items:center;padding-left:var(--gutter);cursor:pointer;position:relative;white-space:nowrap;z-index:2;outline:none}
+.row .ic{width:var(--icon);height:var(--icon);display:grid;place-items:center;flex:none;color:#a89a8a;border-radius:11px;transition:color .18s var(--ease),transform .12s var(--ease)}
+.row .ic svg{width:18px;height:18px;transition:stroke-width .18s var(--ease)}
+.row .lb{margin-left:10px;font-size:13.5px;color:var(--ink-soft);flex:1;overflow:hidden;opacity:0;transform:translateX(-6px);
+  transition:opacity .18s var(--ease),transform .26s var(--ease),color .18s var(--ease);transition-delay:calc(var(--i,0)*26ms)}
+body:not(.shut) .row .lb{opacity:1;transform:translateX(0)}
+body.shut .row .lb{transition-delay:0ms}
+.row .cv{width:10px;height:10px;color:#c4b8a9;margin-right:var(--pad-r);opacity:0;transition:opacity .18s var(--ease),transform .2s var(--ease)}
+body:not(.shut) .row .cv{opacity:1}
+.row:hover .ic,.row:hover .lb{color:var(--ink)}
+.row.sel .ic{color:var(--burgundy)}
+.row.sel .ic svg{stroke-width:2.4}
+.row.sel .lb{color:var(--ink);font-weight:500}
+.row.exp .cv{transform:rotate(90deg)}
+.row.exp .lb{color:var(--ink);font-weight:500}
+.row.exp .ic{color:var(--burgundy)}
+.row:active .ic{transform:scale(.92)}
+.kids{overflow:hidden;max-height:0;transition:max-height .26s var(--ease)}
+body:not(.shut) .kids.on{max-height:200px}
+.kid{height:var(--kid);display:flex;align-items:center;padding-left:calc(var(--gutter) + var(--icon) + 10px);font-size:12.5px;color:var(--ink-soft);
+  cursor:pointer;position:relative;white-space:nowrap;z-index:2;transition:color .18s var(--ease)}
+.kid:hover{color:var(--ink)}
+.kid.sel{color:var(--ink);font-weight:500}
+.qa{padding-left:var(--gutter);display:flex;flex-direction:column;gap:8px;padding-right:var(--pad-r);flex:none;margin-top:10px}
+body.shut .qa{padding-right:0;width:calc(var(--gutter) + var(--icon))}
+.qb{height:var(--icon);border-radius:11px;display:flex;align-items:center;cursor:pointer;white-space:nowrap;overflow:hidden}
+.qb .qi{width:var(--icon);height:var(--icon);display:grid;place-items:center;flex:none}
+.qb .qi svg{width:15px;height:15px}
+.qb .ql{font-size:12.5px;margin-left:2px;opacity:0;transform:translateX(-6px);transition:opacity .18s var(--ease),transform .26s var(--ease)}
+body:not(.shut) .qb .ql{opacity:1;transform:translateX(0)}
+.qb.p{background:var(--pink);border:1px solid var(--pink-line);color:#5c2d21}
+.qb.g{background:#fff;border:1px solid var(--edge);color:var(--ink)}
+.qb.g .qi{color:var(--muted)}
+.foot{margin-top:12px;padding:11px var(--gutter) 0;position:relative;flex:none}
+.foot::before{content:"";position:absolute;left:var(--gutter);right:var(--pad-r);top:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--edge) 14%,var(--edge) 86%,transparent);opacity:0;transition:opacity .2s var(--ease)}
+body:not(.shut) .foot::before{opacity:1}
+.fu{display:flex;align-items:center;cursor:pointer;white-space:nowrap}
+.fu .av{width:var(--icon);height:var(--icon);border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);display:grid;place-items:center;
+  font-family:"Playfair Display",serif;font-size:11px;color:var(--burgundy);flex:none}
+.fu .ft{margin-left:10px;opacity:0;transform:translateX(-6px);transition:opacity .18s var(--ease),transform .26s var(--ease);flex:1;overflow:hidden}
+body:not(.shut) .fu .ft{opacity:1;transform:translateX(0)}
+.fu .n1{font-size:12.5px;display:block}
+.fu .n2{font-size:10.5px;color:var(--muted);margin-top:2px;display:block}
+.fu .n2 a{color:var(--slate)}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;background:var(--paper);
+  border-radius:var(--r);box-shadow:var(--lift),var(--rim);overflow:hidden}
+.top{height:var(--head);flex:none;display:flex;align-items:center;gap:13px;padding:0 24px;position:relative;background:var(--paper);z-index:20}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--edge)}
+.tuck{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--muted);cursor:pointer;flex:none;margin-left:-6px}
+.tuck:hover{background:#fff;color:var(--ink)}
+.tuck svg{width:16px;height:16px}
+.crumb{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.crumb b{color:var(--ink);font-weight:500}
+.vsep{width:1px;height:20px;background:var(--line)}
+.scope{display:inline-flex;align-items:center;gap:9px;height:36px;padding:0 11px 0 6px;border-radius:10px;cursor:pointer}
+.scope:hover{background:#fff}
+.scope .t{width:25px;height:25px;border-radius:7px;background:linear-gradient(160deg,#dce0d9,#d0d6cc);border:1px solid rgba(124,58,42,.18);display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:8.5px;color:var(--sage-deep)}
+.scope .nm{font-family:"Playfair Display",serif;font-size:14px}
+.scope svg{width:11px;height:11px;color:var(--muted)}
+.right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.srch{display:flex;align-items:center;gap:9px;width:214px;height:36px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12.5px;cursor:text}
+.srch svg{width:14px;height:14px}
+.srch .k{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:8.5px;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.acct{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 9px 0 4px;border-radius:99px;cursor:pointer;font-size:13.5px}
+.acct:hover{background:#fff}
+.acct .av2{width:30px;height:30px;border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:11.5px;color:var(--burgundy)}
+.acct svg{width:11px;height:11px;color:var(--muted)}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.phead{padding:20px 24px 0;flex:none}
+.phead h1{font-family:"Playfair Display",serif;font-size:30px;font-weight:500;letter-spacing:-.02em}
+.phead .sub{font-family:"Playfair Display",serif;font-size:14px;color:var(--ink-soft);margin-top:5px}
+.ptools{display:flex;align-items:center;gap:8px;margin-top:14px;padding-bottom:13px;border-bottom:1px solid var(--edge)}
+.tl{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:9px;font-size:12.5px;color:var(--ink-soft);cursor:pointer}
+.tl:hover{background:#fff;color:var(--ink)}
+.tl svg{width:15px;height:15px;color:#a89a8a}
+.tl.pk{background:var(--pink);border:1px solid var(--pink-line);color:#5c2d21}
+.tl.pk svg{color:var(--burgundy)}
+.tl.rt{margin-left:auto}
+.split{display:flex;flex:1;min-height:0}
+.list{width:290px;flex:none;border-right:1px solid var(--edge);display:flex;flex-direction:column;min-height:0}
+.lsearch{padding:13px 16px 11px;flex:none;display:flex;gap:8px}
+.lsearch .f{flex:1;height:32px;border-radius:99px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;gap:8px;padding:0 11px;font-size:12px;color:var(--muted)}
+.lsearch .f svg{width:13px;height:13px}
+.lsearch .ib2{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.lsearch .ib2 svg{width:14px;height:14px}
+.lscroll{flex:1;overflow-y:auto;min-height:0;padding-bottom:8px}
+.lscroll::-webkit-scrollbar{width:7px}
+.lscroll::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.qr{display:flex;align-items:center;gap:11px;padding:11px 16px;cursor:pointer;border-left:2px solid transparent}
+.qr:hover{background:rgba(255,255,255,.7)}
+.qr.on{background:#fff;border-left-color:var(--burgundy)}
+.qr .ini{width:32px;height:32px;border-radius:99px;background:var(--card);border:1px solid var(--edge);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:11px;color:var(--ink-soft);flex:none}
+.qr .tx{flex:1;min-width:0}
+.qr .n{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qr .a{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qr .rt{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
+.qr .rt .d{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
+.sd{width:17px;height:17px}
+.lfoot{flex:none;padding:10px 16px;border-top:1px solid var(--edge);display:flex;align-items:center;font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lfoot .ex{margin-left:auto;color:var(--burgundy);cursor:pointer}
+.read{flex:1;min-width:0;overflow-y:auto;padding:18px 24px 26px}
+.read::-webkit-scrollbar{width:8px}
+.read::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.rhead{display:flex;align-items:flex-start;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.rhead .big{width:62px;height:62px;border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);display:grid;place-items:center;font-family:"Playfair Display",serif;font-size:20px;color:var(--burgundy);flex:none}
+.rhead .who{flex:1}
+.rhead h2{font-family:"Playfair Display",serif;font-size:26px;font-weight:500}
+.rhead .ag{font-family:"Playfair Display",serif;font-style:italic;font-size:14px;color:var(--ink-soft);margin-top:3px}
+.chip{display:inline-flex;align-items:center;gap:7px;background:var(--pink);border:1px solid var(--pink-line);border-radius:99px;padding:5px 11px;font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#5c2d21;margin-top:11px}
+.rcta{display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 17px;border-radius:11px;background:var(--pink);border:1px solid var(--pink-line);color:#5c2d21;font-size:13.5px;cursor:pointer;flex:none}
+.rcta svg{width:15px;height:15px}
+.panes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
+.pane{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pane .ph{display:flex;align-items:center;gap:9px;padding:10px 14px;background:var(--sage-band);border-bottom:1px solid var(--line)}
+.pane .ph svg{width:15px;height:15px;color:var(--sage-deep)}
+.pane .ph span{font-family:"Playfair Display",serif;font-size:15px}
+.pane .pb{padding:14px}
+.ev{display:flex;gap:11px}
+.ev .evi{width:30px;height:30px;border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);display:grid;place-items:center;flex:none}
+.ev .evi svg{width:14px;height:14px;color:var(--burgundy)}
+.ev .t{font-size:13.5px;font-weight:500}
+.ev .s{font-size:11.5px;color:var(--muted);margin-top:3px}
+.ev .d{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)}
+.wait{background:#f4f0e6;border:1px solid var(--edge);border-radius:11px;padding:12px;margin-top:13px}
+.wait .wt{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.wait .wt svg{width:14px;height:14px;color:var(--muted)}
+.wait .wt b{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:400}
+.wbar{height:5px;border-radius:99px;background:#e6ded0;margin-top:10px;overflow:hidden}
+.wbar i{display:block;height:100%;width:14%;background:var(--sage);border-radius:99px}
+.wmeta{display:flex;justify-content:space-between;margin-top:8px;font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.docrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0e9df;font-size:13px}
+.docrow:last-child{border-bottom:0}
+.docrow svg{width:15px;height:15px;color:#a89a8a}
+.docrow .st{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.docrow .tick{width:15px;height:15px;color:var(--sage-deep)}
+.note{border:1px dashed var(--edge);border-radius:11px;padding:13px;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.note .nd{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+
+
+.cardsview{display:none;flex:1;min-height:0;overflow-y:auto;padding:18px 24px 26px}
+.cardsview.on{display:block}
+.cardsview::-webkit-scrollbar{width:8px}
+.cardsview::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ac{background:#fff;border:1px solid var(--ink);border-radius:11px;overflow:hidden;box-shadow:2px 3px 0 rgba(46,39,35,.07)}
+.ac .bnd{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid var(--ink);background:var(--sage-band)}
+.ac .bnd.pk{background:var(--pink)}
+.ac .bnd .pl{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid rgba(46,39,35,.5);border-radius:99px;padding:3px 9px}
+.ac .bnd .stars{margin-left:auto;color:#c8853f;font-size:10px;letter-spacing:1px}
+.ac .bd{padding:14px}
+.ac .nm3{font-family:"Playfair Display",serif;font-size:19px;display:block}
+.ac .ag3{font-family:"Playfair Display",serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);margin-top:4px;display:block}
+.ac .meta{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid #f0e9df}
+.ac .meta .rt2{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.ac .meta .dots{margin-left:auto;display:flex;gap:6px}
+body.cards .split{display:none}
+body.cards .cardsview{display:block}
+.panel{position:fixed;right:14px;top:14px;bottom:14px;width:262px;z-index:80;background:#fdfbf8;border-radius:16px;box-shadow:0 18px 44px rgba(20,12,6,.4);
+  display:flex;flex-direction:column;overflow:hidden}
+.ph2{padding:15px 16px 12px;border-bottom:1px solid #ece3da}
+.ph2 .k{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.ph2 h2{font-family:"Playfair Display",serif;font-size:17px;font-weight:500;margin-top:5px}
+.plist{flex:1;overflow-y:auto;padding:4px 16px 14px}
+.plist::-webkit-scrollbar{width:7px}
+.plist::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.fx{border-bottom:1px solid #f0e9df;padding:11px 0}
+.fx:last-child{border-bottom:0}
+.fxh{display:flex;align-items:center;gap:9px;cursor:pointer}
+.fxh .t2{flex:1;font-size:12.5px}
+.sw{width:34px;height:20px;border-radius:99px;background:#efe8df;border:1px solid var(--line);position:relative;flex:none;transition:background .18s}
+.sw i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:99px;background:#fff;border:1px solid var(--line);transition:left .18s}
+.sw.on{background:var(--pink);border-color:var(--pink-line)}
+.sw.on i{left:16px;border-color:var(--pink-line)}
+.fx p{font-size:11px;color:#574f47;line-height:1.5;margin-top:6px}
+.fx p b{color:var(--ink);font-weight:500}
+.fxh{padding:3px 6px;border-radius:8px;margin:-3px -6px}
+.fxh.on{background:#f4ede2}
+.chp{width:20px;height:20px;border-radius:6px;border:1px solid rgba(46,39,35,.22);flex:none}
+.rat{font-family:"JetBrains Mono",monospace;font-size:8.5px;color:var(--muted);flex:none}
+.pfoot{padding:12px 16px;border-top:1px solid #ece3da}
+.pfoot .lab{font-family:"JetBrains Mono",monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex}
+.pfoot .lab b{margin-left:auto;font-weight:400;color:var(--ink)}
+input[type=range]{width:100%;margin-top:9px;accent-color:var(--burgundy)}
+.pfoot button{width:100%;height:32px;margin-top:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:11.5px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="desk"><div class="tex"></div><div class="pool"></div></div>
+
+<div class="app" style="padding-right:290px">
+  <nav class="colm">
+    <div class="mast"><span class="mk"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg></span><span class="wm">ScriptAlly</span></div>
+    <div class="navwrap">
+      <div class="sfade t" id="ft"></div>
+      <div class="nav" id="nav">
+        <div class="slider mute" id="slider"></div>
+        <div class="row" data-s="q" style="--i:0"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></span><span class="lb">Queries</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+        <div class="kids on" data-k="q"><div class="kid sel">Queries Hub</div><div class="kid">To-do</div><div class="kid">Archive</div></div>
+        <div class="row" data-s="a" style="--i:1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg></span><span class="lb">Agents</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+        <div class="kids" data-k="a"><div class="kid">Agent list</div><div class="kid">Discover</div></div>
+        <div class="row" data-s="m" style="--i:2"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg></span><span class="lb">Materials</span><svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></div>
+        <div class="kids" data-k="m"><div class="kid">Manuscripts</div><div class="kid">Query letters</div><div class="kid">Synopses</div><div class="kid">Packages</div></div>
+      </div>
+      <div class="sfade b" id="fb"></div>
+    </div>
+    <div class="qa">
+      <div class="qb p"><span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><span class="ql">New</span></div>
+      <div class="qb g"><span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg></span><span class="ql">Record a response</span></div>
+    </div>
+    <div class="foot"><div class="fu"><span class="av">ML</span><span class="ft"><span class="n1">Michael Li</span><span class="n2">Free plan · <a>Upgrade</a></span></span></div></div>
+  </nav>
+
+  <main class="main">
+    <div class="top">
+      <span class="tuck" id="tuck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/></svg></span>
+      <span class="crumb">Queries / <b>Queries Hub</b></span>
+      <span class="vsep"></span>
+      <span class="scope"><span class="t">MD</span><span class="nm">Murphy's Day Out</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="right">
+        <span class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…<span class="k">⌘K</span></span>
+        <span class="acct"><span class="av2">ML</span>Michael Li<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      </span>
+    </div>
+    <div class="body">
+      <div class="phead">
+        <h1>Queries Hub</h1>
+        <div class="sub">Every query you've sent, and exactly where each one stands.</div>
+        <div class="ptools">
+          <span class="tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>View tasks</span>
+          <span class="tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5 9 18l10-10a2.1 2.1 0 0 0-3-3L6 15l-2 4.5Z"/></svg>Edit</span>
+          <span class="tl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Nudge</span>
+          <span class="tl rt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M8 11l4 4 4-4M4 20h16"/></svg>Export</span>
+          <span class="tl pk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log query</span>
+        </div>
+      </div>
+      <div class="split">
+        <div class="list">
+          <div class="lsearch">
+            <span class="f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search queries</span>
+            <span class="ib2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg></span>
+          </div>
+          <div class="lscroll" id="lscroll"></div>
+          <div class="lfoot">Showing 21 of 21<span class="ex">Export CSV</span></div>
+        </div>
+        <div class="read">
+          <div class="rhead">
+            <span class="big">WT</span>
+            <span class="who"><h2>William Tan</h2><div class="ag">Foxglove Literary</div>
+              <span class="chip"><svg style="width:13px;height:13px" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="2"/><path d="M7 10h6m-2.2-2.2L13 10l-2.2 2.2" fill="none" stroke="#7c3a2a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Queried</span></span>
+            <span class="rcta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>Record response</span>
+          </div>
+          <div class="panes">
+            <div class="pane">
+              <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-6 5 4"/></svg><span>Tracking</span></div>
+              <div class="pb">
+                <div class="ev"><span class="evi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg></span><span><span class="t">Query sent</span><span class="s">via post</span></span><span class="d">29 JUL</span></div>
+                <div class="wait">
+                  <div class="wt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 3h10M8 3v4l4 4 4-4V3M8 21v-4l4-4 4 4v4M7 21h10"/></svg>Waiting to hear back<b>7 days</b></div>
+                  <div class="wbar"><i></i></div>
+                  <div class="wmeta"><span>Sent 29 Jul</span><span>Expected ~23 Sept</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="pane">
+              <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span>What you sent</span></div>
+              <div class="pb">
+                <div class="docrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5 9 18l10-10a2.1 2.1 0 0 0-3-3L6 15l-2 4.5Z"/></svg>Query letter<span class="st">Mark sent</span></div>
+                <div class="docrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4h14M5 9h14M5 14h9"/></svg>Synopsis<span class="st">Sent</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg></div>
+                <div class="docrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4"/></svg>Opening sample<span class="st">3 chapters</span><svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg></div>
+              </div>
+            </div>
+            <div class="pane">
+              <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Notes</span></div>
+              <div class="pb"><div class="note"><div class="nd">Today</div>Your notes on this query appear here — first impressions, things they said, anything worth remembering.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cardsview" id="cardsview"><div class="cgrid" id="cgrid"></div></div>
+    </div>
+  </main>
+</div>
+
+<aside class="panel">
+  <div class="ph2"><div class="k">Capsules on a pastille desk</div><h2>Desk tone</h2></div>
+  <div class="plist" id="plist"></div>
+  <div class="pfoot">
+    <div class="lab" style="margin-bottom:8px">Test against sage bands</div>
+    <button id="view">Show agent cards</button>
+    <button id="tog" style="margin-top:6px">Collapse rail</button>
+  </div>
+</aside>
+
+<script>
+const DOT={
+ out:`<svg class="sd" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="2"/><path d="M7 10h6m-2.2-2.2L13 10l-2.2 2.2" fill="none" stroke="#7c3a2a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ inb:`<svg class="sd" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e9ede6" stroke="#8a9e88" stroke-width="2"/><path d="M13 10H7m2.2-2.2L7 10l2.2 2.2" fill="none" stroke="#5a6e58" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ offer:`<svg class="sd" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#7c3a2a" stroke="#7c3a2a" stroke-width="2"/><path d="m6.4 10.2 2.4 2.4 4.8-4.8" fill="none" stroke="#fdfaf5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ shut:`<svg class="sd" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#b4aca4" stroke-width="2"/><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8" stroke="#b4aca4" stroke-width="1.6" stroke-linecap="round"/></svg>`};
+const Q=[['WT','William Tan','Foxglove Literary','29 Jul','out',1],['FS','Fenella Str','Brightwater Books','14 Mar','shut',0],
+['TE','Tom Ellery','Curtis Vane','3 Mar','offer',0],['DO',"Daniel O'Rourke",'Inkwell & Stone','11d','out',0],
+['AK','Aisha Kapoor','The Lantern Agency','3w','inb',0],['JM','Jonathan Marsh','The Marsh Agency','4d','inb',0],
+['MR','Marcus Reed','Hartley & Co','20 Feb','shut',0],['HM','Hugh Mercer','Mercer Agency','2 Jan','out',0]];
+document.getElementById('lscroll').innerHTML=Q.map(([i,n,a,d,k,on])=>`
+ <div class="qr${on?' on':''}"><span class="ini">${i}</span><span class="tx"><span class="n">${n}</span><span class="a">${a}</span></span>
+ <span class="rt">${DOT[k]}<span class="d">${d}</span></span></div>`).join('');
+
+const FX=[
+ ['s1','Sage grey','#aebdb0','1.60','<b>As chosen.</b> H128 S10 L71. Sits <b>1.47:1</b> from the card sage band and 1.46 from the StatusDot ring — close enough that the two greens are in conversation, far enough apart in lightness to stay distinct. The desk is the dark green, the meaning-bearing sages are the light ones.'],
+ ['s2','Greyer','#b0bcb2','1.56','<b>Two points less saturation, pushed toward neutral.</b> Reads as warm grey with a green cast rather than as sage. <b>If the family clash worries you, this is the fix</b> — it keeps the tone and gives sage back its exclusivity.'],
+ ['s3','Cooler','#a6b6ab','1.66','Slightly bluer and deeper. Separates from the rail a touch more, and moves away from the yellow-green of the card bands.'],
+ ['s4','Deeper','#9fb0a4','1.77','<b>The strongest float of the four.</b> Worth testing on a sparse page — this is where the desk starts to be a presence rather than a ground.']
+];
+let cur='s1';
+const plist=document.getElementById('plist');
+plist.innerHTML=FX.map(([k,t,hex,c,d])=>`<div class="fx"><div class="fxh" data-k="${k}">
+ <span class="chp" style="background:${hex}"></span><span class="t2">${t}</span><span class="rat">${c}:1</span></div><p>${d}</p></div>`).join('');
+function sync(){
+ const shut=document.body.classList.contains('shut');
+ const cards=document.body.classList.contains('cards');
+ document.body.className=cur+(shut?' shut':'')+(cards?' cards':'');
+ plist.querySelectorAll('.fxh').forEach(el=>el.classList.toggle('on',el.dataset.k===cur));
+}
+plist.querySelectorAll('.fxh').forEach(el=>el.onclick=()=>{cur=el.dataset.k;sync();});
+
+const nav=document.getElementById('nav'),slider=document.getElementById('slider');
+const V=n=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));
+function place(){
+ const shut=document.body.classList.contains('shut');
+ const g=V('--gutter'),ic=V('--icon'),kd=V('--kid'),pr=V('--pad-r'),cmax=V('--col-max');
+ const kid=nav.querySelector('.kid.sel');let x,y,w,h,r;
+ if(kid&&!shut&&kid.closest('.kids').classList.contains('on')){x=g+ic+1;y=kid.offsetTop+2;w=cmax-x-pr;h=kd-4;r=9;}
+ else{const row=nav.querySelector('.row.sel')||nav.querySelector('.row');x=g;y=row.offsetTop+2;h=ic;r=11;w=shut?ic:cmax-g-pr;}
+ slider.style.transform=`translate(${x}px,${y}px)`;slider.style.width=w+'px';slider.style.height=h+'px';slider.style.borderRadius=r+'px';
+}
+nav.querySelectorAll('.row[data-s]').forEach(r=>r.onclick=()=>{
+ if(document.body.classList.contains('shut'))document.body.classList.remove('shut');
+ const kids=nav.querySelector('.kids[data-k="'+r.dataset.s+'"]'),was=r.classList.contains('exp');
+ nav.querySelectorAll('.row').forEach(x=>x.classList.remove('exp','sel'));
+ nav.querySelectorAll('.kids').forEach(x=>x.classList.remove('on'));
+ nav.querySelectorAll('.kid').forEach(x=>x.classList.remove('sel'));
+ if(!was){r.classList.add('exp');kids.classList.add('on');}
+ r.classList.add('sel');requestAnimationFrame(place);});
+nav.querySelectorAll('.kid').forEach(k=>k.onclick=e=>{e.stopPropagation();
+ nav.querySelectorAll('.kid').forEach(x=>x.classList.remove('sel'));
+ nav.querySelectorAll('.row').forEach(x=>x.classList.remove('sel'));
+ k.classList.add('sel');requestAnimationFrame(place);});
+function tog(){document.body.classList.toggle('shut');
+ document.getElementById('tog').textContent=document.body.classList.contains('shut')?'Expand rail':'Collapse rail';setTimeout(place,10);}
+document.getElementById('tog').onclick=tog;document.getElementById('tuck').onclick=tog;
+function fades(){document.getElementById('ft').classList.toggle('on',nav.scrollTop>4);
+ document.getElementById('fb').classList.toggle('on',nav.scrollHeight-nav.scrollTop-nav.clientHeight>4);}
+nav.addEventListener('scroll',fades);window.addEventListener('resize',()=>{fades();place();});
+
+const AG=[['Jonathan Marsh','The Marsh Agency','Active queries','sg','★★★☆☆','4–6 weeks',[DOT.out,DOT.inb]],
+['Fenella Str','Brightwater Books','No active queries','pk','★★☆☆☆','8 weeks',[DOT.shut]],
+['Aisha Kapoor','The Lantern Agency','Active queries','sg','★★★★☆','6 weeks',[DOT.inb]],
+["Daniel O'Rourke",'Inkwell & Stone','Active queries','sg','★★★☆☆','10 weeks',[DOT.out]],
+['Hugh Mercer','Mercer Agency','Never queried','pk','★★★★☆','4 weeks',[]],
+['Tom Ellery','Curtis Vane','Active queries','sg','★★★★★','3 weeks',[DOT.offer]],
+['Priya Raghavan','Northbank Agency','Active queries','sg','★★★☆☆','5 weeks',[DOT.inb]],
+['Sophie Dunn','Curtis Vane','No active queries','pk','★★☆☆☆','12 weeks',[DOT.shut]],
+['Marcus Reed','Hartley & Co','Active queries','sg','★★★★☆','6 weeks',[DOT.out]]];
+document.getElementById('cgrid').innerHTML=AG.map(([n,a,p,c,st,r,dots])=>`
+ <div class="ac"><div class="bnd ${c==='pk'?'pk':''}"><span class="pl">${p}</span><span class="stars">${st}</span></div>
+ <div class="bd"><span class="nm3">${n}</span><span class="ag3">${a}</span>
+ <div class="meta"><span class="rt2">Replies in ${r}</span><span class="dots">${dots.join('')}</span></div></div></div>`).join('');
+document.getElementById('view').onclick=()=>{
+ document.body.classList.toggle('cards');
+ const on=document.body.classList.contains('cards');
+ document.getElementById('view').textContent=on?'Show Queries Hub':'Show agent cards';
+ document.querySelector('.phead h1').textContent=on?'Your agent list':'Queries Hub';
+ document.querySelector('.phead .sub').textContent=on?"Everyone you're querying, watching, or saving for later.":"Every query you've sent, and exactly where each one stands.";
+};
+sync();place();setTimeout(()=>{slider.classList.remove('mute');fades();},60);
+</script>
+</body>
+</html>

@@ -204,11 +204,16 @@ avatar chip at the bottom.
    second mounts. The canonical pack overrules that: both are built, the duplication is approved,
    and it is the RAIL's avatar that gave way instead.)*
 
-**The nav active-state law (fixes pack): active = GROUND fill `#e7e0d5` — the row reads as a
-window cut through to the page ground — ink text, burgundy icon, same radii; one law for the
-rail ribs and both panel row kinds. Hover stays the interior fill `#f2ede7` (adjacent tones —
-browser-check the distinction). Soft pink is RETIRED from nav states everywhere; it survives as
-the primary-button colour and content accent. Never pink, never burgundy, in nav states.**
+**⚠️ THE NAV ACTIVE-STATE LAW, RESTATED (app-shell pack — this REPLACES the old wording, which is
+deleted rather than left standing):** active = **`--shell-active-fill` (#fff)** — **a bright surface
+LAID ON the capsule, not a hole cut through to the ground** — ink text, burgundy icon, same radii;
+one law for the rail ribs and both panel row kinds. Hover stays the interior fill.
+
+The old sentence read *"active = GROUND fill `#e7e0d5`, the row reads as a window cut through to the
+page ground"*. That held only while the ground was a neutral cream. **The ground is now sage
+`#aebdb0`, and cutting a window through to sage produces a green pill** — so the metaphor had to go
+with the colour. Soft pink stays RETIRED from nav states everywhere; it survives as the
+primary-button colour and content accent. **Never pink, never burgundy, in nav states.**
 
 ## Content capsule
 

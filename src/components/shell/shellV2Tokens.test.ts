@@ -14,6 +14,20 @@ import * as dt from "../../lib/designTokens";
 const css = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
 
 const BAKED: Record<string, string> = {
+  // ⚠️ These two are in the BAKED map because a malformed comment once SWALLOWED --shell-desk:
+  // the declaration sat outside its /* */ and the build emitted no token and no error, so the
+  // desk simply came out the wrong colour with nothing to point at. A value asserted here fails
+  // loudly the moment it stops being emitted.
+  "--shell-desk": "#aebdb0",
+  "--shell-active-fill": "#ffffff",
+  "--gutter": "20px",
+  "--icon": "38px",
+  "--pitch": "42px",
+  "--kid": "34px",
+  "--head": "72px",
+  "--col-min": "78px",
+  "--col-max": "246px",
+  "--shell-cap-rim": "inset 0 1px 0 rgba(255,255,255,.55)",
   "--shell-ground": "#e7e0d5",
   "--shell-rail": "#f1ebe3",
   "--shell-side": "#f8f4ee",
@@ -65,10 +79,16 @@ describe("capsule tokens — index.css", () => {
 
   it("THE LAYERED SHADOW is one token of four stops, worn by every capsule", () => {
     const shadow = css.match(/--shell-cap-shadow:([^;]*);/s)?.[1] ?? "";
-    for (const stop of ["0 1px 2px rgba(58,28,20,.04)", "0 2px 6px rgba(58,28,20,.045)", "0 8px 18px rgba(58,28,20,.05)", "0 20px 44px rgba(58,28,20,.055)"]) {
+    // ⚠️ GREEN-GREY, because the desk is sage. The tint belongs to the desk's colour family and
+    // moves with it — a cool-blue or warm-brown shadow on a sage desk reads as dirt, not depth.
+    // (The sage-desk mockup still ships a blue-grey rgba(60,66,80,…); that line is FENCED as
+    // stale in design-refs — a reasoned value in the pack beats an unreasoned one in an artefact.)
+    for (const stop of ["0 1px 2px rgba(56,66,58,.08)", "0 4px 10px rgba(56,66,58,.09)", "0 14px 30px rgba(56,66,58,.11)", "0 34px 66px rgba(56,66,58,.13)"]) {
       expect(shadow).toContain(stop);
     }
     expect(shadow).not.toContain("0 10px 30px"); // the single shadow is retired
+    expect(shadow, "the warm-brown tint went with the cream ground").not.toContain("rgba(58,28,20");
+    expect(shadow, "the pastille sheet's blue-grey belonged to a blue desk").not.toContain("rgba(60,66,80");
     const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
     expect(shellCss).toMatch(/\.sv2-cap \{[^}]*box-shadow: var\(--shell-cap-shadow\)/);
     expect(shellCss).toMatch(/\.sv2-cap \{[^}]*border: var\(--shell-cap-border\)/); // the warm edge
@@ -110,7 +130,7 @@ describe("capsule tokens — designTokens.ts twins agree", () => {
   it("capsule geometry", () => {
     expect(dt.shellCapRadius).toBe(18);
     expect(dt.shellCapGap).toBe(14);
-    expect(dt.shellCapShadow).toContain("0 20px 44px rgba(58,28,20,.055)"); // the layered set
+    expect(dt.shellCapShadow).toContain("0 34px 66px rgba(56,66,58,.13)"); // the layered set, green-grey
     expect(dt.shellCapBorder).toBe("1px solid #d8ccbc");
     expect(dt.shellBarBg).toBe("#f1ebe3");
   });
@@ -143,7 +163,16 @@ describe("the STEPPED TRIO depth law (scheme D) — depth recedes leftward", () 
     expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellSide));
     expect(lum(dt.shellInset)).toBeGreaterThan(lum(dt.shellGround));
   });
-  it("the nav active state (GROUND) stays darker than the hover fill on every capsule", () => {
+  it("⚠️ THE ACTIVE FILL IS THE BRIGHTEST SURFACE — laid ON the capsule, not cut through it", () => {
+    // The old law made active the GROUND token, so active was the DARKEST step. That only worked
+    // while the ground was neutral cream; against the sage desk it produced a green pill. Active
+    // is now #fff — brighter than every capsule, which is what "laid on" has to mean.
+    expect(lum(dt.shellActiveFill)).toBeGreaterThan(lum(dt.shellCanvas));
+    expect(lum(dt.shellActiveFill)).toBeGreaterThan(lum(dt.shellRail));
+    expect(dt.shellActiveFill).not.toBe(dt.shellDesk); // one token each, never shared again
+  });
+
+  it("the legacy cream ground stays darker than the hover fill (the old shell, until it goes)", () => {
     // The active law is unchanged (active = ground); this keeps active > hover in depth so the
     // hierarchy survives the step. The rail's MARGINS are narrow — reported for a browser check.
     expect(lum(dt.shellGround)).toBeLessThan(lum(dt.shellInset));
@@ -316,7 +345,7 @@ describe("the sliding rail indicator", () => {
 
   it("the pill IS the active fill — the rib's own background goes transparent", () => {
     expect(shellCss).toMatch(/\.sv2-railnav \.sv2-rib\.on \{ background: transparent; \}/);
-    expect(shellCss).toMatch(/\.sv2-railpill \{[^}]*background: var\(--shell-ground\)/s);
+    expect(shellCss).toMatch(/\.sv2-railpill \{[^}]*background: var\(--shell-active-fill\)/s);
   });
 
   it("WEIGHT ON ACTIVE: 1.8 → 2.4, styled on the rendered SVG from the parent — TypeGlyph untouched", () => {

@@ -102,7 +102,7 @@ describe("v2 shell — smoke renders", () => {
     expect(expanded).not.toContain("sv2-fly"); // flyouts render only while collapsed (and on hover)
   });
 
-  it("the flyout capsule: kicker, page rows with counts, active row on the GROUND fill, the Expand footer", () => {
+  it("the flyout capsule: kicker, page rows with counts, active row on the ACTIVE FILL, the Expand footer", () => {
     const rows = [
       { key: "queries-hub", label: "Queries Hub", icon: <span />, count: 20, active: true, onClick: () => {} },
       { key: "todo", label: "To-do", icon: <span />, count: 44, active: false, onClick: () => {} },
@@ -119,7 +119,7 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("⌘\\");
     // …whose fill is the GROUND (the nav law), locked at the rule text:
     const css = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
-    expect(css).toMatch(/\.sv2-frow\.on \{ background: var\(--shell-ground\)/);
+    expect(css).toMatch(/\.sv2-frow\.on \{ background: var\(--shell-active-fill\)/);
   });
 
   const panel = () =>

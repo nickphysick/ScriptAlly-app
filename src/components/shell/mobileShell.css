@@ -311,7 +311,7 @@
   }
   /* THE NAV ACTIVE LAW (baked decision 3): ground-fill pill, ink text — never burgundy,
      never pink. The desktop rail's exact grammar, floated. */
-  .sa-mtab.on { background: var(--shell-ground); color: var(--shell-ink); }
+  .sa-mtab.on { background: var(--shell-active-fill); color: var(--shell-ink); }
 }
 
 /* ── APP-FEEL (Mobile Pass 1, Phase 6) ──────────────────────────────────────
