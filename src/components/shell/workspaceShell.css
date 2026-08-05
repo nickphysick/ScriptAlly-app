@@ -1,0 +1,371 @@
+/* ── THE DOUBLE-DECKER WORKSPACE SHELL (shell-rebuild pack, Phase 2) ───────────────────────────
+   Ref design-refs/shell-workspace-doubledecker.html.
+
+   ⚠️⚠️ THE RAIL IS PAINT, NOT A CONTAINER (Baked 3 / T3). `.ws-shell` is ONE column whose
+   background is a hard-stopped gradient: ink to 52px, chrome after it. Every row — brand,
+   selector, nav, settings, user, collapse — is a SINGLE element spanning both surfaces, with a
+   fixed 52px icon cell at its head.
+
+   THIS IS WHAT GUARANTEES ZERO ICON DRIFT ON COLLAPSE. The icons do not move because there is
+   nothing to move them: their cell is the same 52px box in both states, and collapsing only
+   changes the width of what follows it. Rebuild this as a rail element beside a panel element
+   and the drift comes straight back — two boxes with two paddings, realigned by hand every time
+   either is touched. If you are reaching for `.ws-rail { width: 52px }`, stop. ── */
+
+.ws-desk {
+  height: 100%;
+  min-height: 0;
+  background: var(--shell-desk-grad);
+  padding: var(--shell-cap-gap);
+}
+
+.ws-cap {
+  height: 100%;
+  background: #ffffff;
+  border-radius: var(--shell-cap-radius);
+  overflow: hidden;
+  display: flex;
+  box-shadow:
+    0 1px 2px rgba(56, 66, 58, 0.1),
+    0 6px 16px rgba(56, 66, 58, 0.12),
+    0 22px 48px rgba(56, 66, 58, 0.14);
+}
+
+/* THE ONE COLUMN. The gradient is the rail. */
+.ws-shell {
+  flex: none;
+  width: calc(var(--shell-railw) + var(--shell-panelw));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    var(--shell-ink) 0 var(--shell-railw),
+    var(--shell-chrome) var(--shell-railw)
+  );
+  border-right: 1px solid var(--shell-hair);
+  transition: width 0.22s var(--shell-ease);
+}
+.ws-shell.shut { width: var(--shell-railw); }
+
+/* ══ ROWS — every one of them spans both surfaces ══ */
+.ws-row {
+  display: flex;
+  align-items: center;
+  height: var(--pitch);
+  position: relative;
+  flex: none;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+/* THE ICON CELL — 52px, fixed, in every state. This is the anti-drift contract. */
+.ws-ci {
+  width: var(--shell-railw);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ws-ib {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--shell-rail-tx);
+  transition: background 0.15s, color 0.15s;
+}
+.ws-ci svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.6;
+}
+
+/* The panel side of a row. */
+.ws-cl {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  margin: 0 10px 0 6px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--shell-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ws-row:hover .ws-ib { color: var(--shell-rail-hi); }
+.ws-row:hover .ws-cl { background: rgba(242, 237, 231, 0.55); color: var(--shell-ink); }
+
+/* ══ BAKED 4 + 5 — the active grammar. NEVER a burgundy fill. ══
+   rail cell = a translucent white square on the ink; panel label = a parchment pill.
+   `quiet` is the open-accordion parent: bold ink, NO fill, because its child holds the fill. */
+.ws-row.rail-on .ws-ib { background: rgba(255, 255, 255, 0.12); color: var(--shell-rail-hi); }
+.ws-row.fill-pill .ws-cl {
+  background: var(--shell-parch);
+  color: var(--shell-ink);
+  font-weight: 600;
+}
+.ws-row.fill-quiet .ws-cl { color: var(--shell-ink); font-weight: 600; }
+
+.ws-pch {
+  margin-left: auto;
+  color: var(--shell-muted);
+  display: flex;
+  opacity: 0.5;
+  transition: transform 0.2s, opacity 0.15s;
+  flex: none;
+}
+.ws-pch svg { width: 12px; height: 12px; stroke-width: 1.8; }
+.ws-row:hover .ws-pch { opacity: 1; }
+.ws-row.open .ws-pch { transform: rotate(180deg); }
+/* A count sits before the chevron, so the chevron keeps the right edge. */
+.ws-cl .sp-ct + .ws-pch { margin-left: 6px; }
+
+/* ══ T6 — THE PANEL SIDE FADES, IT IS NEVER `display:none` ══
+   Removing the element mid-transition kills the animation and the labels vanish in one frame.
+   opacity + visibility keeps the fade and still takes it out of the accessibility tree. */
+.ws-fade { transition: opacity 0.16s 0.06s, visibility 0.16s; }
+.ws-shell.shut .ws-fade {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.1s, visibility 0.1s;
+}
+
+/* ══ COLLAPSED TOOLTIPS (Baked 7) — composed `Section · Child`, 250ms intent ══ */
+.ws-row::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(var(--shell-railw) + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--shell-ink);
+  color: var(--shell-rail-hi);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(46, 39, 35, 0.25);
+}
+.ws-shell.shut .ws-row:hover::after,
+.ws-shell.shut .ws-row:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.25s;
+}
+/* A tooltip behind an open flyout is noise pointing at the thing you already opened. */
+.ws-shell.flyopen .ws-row::after { display: none; }
+
+/* ══ SUB-NAV (Baked 6) — one section open at a time ══ */
+.ws-sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s var(--shell-ease);
+}
+.ws-sub.open { grid-template-rows: 1fr; }
+.ws-shell.shut .ws-sub { grid-template-rows: 0fr !important; }
+
+.ws-subin {
+  overflow: hidden;
+  min-width: 0;
+  position: relative;
+  padding: 1px 0 3px;
+}
+/* ⚠️ THE THREAD LINE ALIGNS TO THE PARENT LABEL'S X, NOT THE ICON COLUMN (Baked 6). Indenting
+   from the icon reads as a second icon column with nothing in it; indenting from the label reads
+   as hierarchy. That is why this is railw + 16 and not railw alone. */
+.ws-subin::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--shell-railw) + 16px);
+  top: 4px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--shell-edge);
+}
+
+/* `display:flex` makes the button block-level, so it fills the row minus its margins. An explicit
+   width calc here would restate the margins and drift from them the first time either moves. */
+.ws-srow {
+  height: var(--kid);
+  display: flex;
+  align-items: center;
+  margin: 1px 10px 1px calc(var(--shell-railw) + 6px);
+  padding: 0 10px 0 24px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--shell-ink-soft);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  outline: none;
+  transition: background 0.13s, color 0.13s;
+}
+.ws-srow:hover { background: rgba(242, 237, 231, 0.55); color: var(--shell-ink); }
+.ws-srow.on {
+  background: var(--shell-parch);
+  color: var(--shell-ink);
+  font-weight: 600;
+}
+
+/* ══ HEAD ══ */
+.ws-hrowA { height: var(--head); cursor: default; }
+.ws-hrowA .ws-glyph {
+  font-family: "Playfair Display", serif;
+  font-size: 19px;
+  color: var(--shell-rail-hi);
+}
+.ws-hrowA .ws-cl {
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--shell-ink);
+  background: none;
+  padding-left: 8px;
+}
+
+/* Head row B — the manuscript selector (Baked 9). The wrapper is UNPOSITIONED on purpose: the
+   popover is absolute against `.ws-shell`, so it shares the flyouts' left edge exactly. */
+.ws-msrow { flex: none; }
+.ws-mstitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-hrowB { height: 46px; }
+.ws-hrowB .ws-cl {
+  background: #ffffff;
+  border: 1px solid var(--shell-edge);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--shell-ink);
+  transition: border-color 0.15s;
+}
+.ws-hrowB:hover .ws-cl { border-color: #d6cdbf; }
+.ws-hrowB.static { cursor: default; }
+.ws-hrowB.static:hover .ws-cl { border-color: var(--shell-edge); }
+.ws-hrowB .ws-chev { margin-left: auto; color: var(--shell-muted); display: flex; flex: none; }
+.ws-hrowB .ws-chev svg { width: 12px; height: 12px; stroke-width: 1.8; }
+
+.ws-hdiv {
+  height: 1px;
+  background: var(--shell-hair);
+  margin: 8px 0 0 var(--shell-railw);
+  flex: none;
+}
+
+.ws-navwrap { padding-top: 8px; }
+.ws-spacer { flex: 1; min-height: 0; }
+
+/* ══ FOOT (Baked 10) — hairline → user → Settings → collapse. No email, no plan row. ══ */
+.ws-fdiv {
+  height: 1px;
+  background: var(--shell-hair);
+  margin-left: var(--shell-railw);
+  flex: none;
+}
+.ws-urow { height: 54px; }
+.ws-urow .ws-cl {
+  background: none;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  line-height: 1.25;
+}
+.ws-urow .ws-n { font-size: 12.5px; font-weight: 600; color: var(--shell-ink); }
+.ws-urow .ws-p { font-size: 10.5px; color: var(--shell-muted); }
+.ws-urow .ws-up {
+  color: var(--shell-burgundy);
+  font-weight: 500;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ws-urow .ws-up:hover { text-decoration: underline; }
+
+.ws-setrow { height: 40px; }
+.ws-setrow .ws-cl { font-size: 13px; }
+
+.ws-crow { height: 40px; margin-bottom: 8px; }
+.ws-crow .ws-ib svg { transition: transform 0.22s; }
+.ws-shell.shut .ws-crow .ws-ib svg { transform: rotate(180deg); }
+.ws-crow .ws-cl { font-size: 12.5px; color: var(--shell-muted); }
+
+/* ══ FLYOUT (Baked 7) — the SAME MenuCard the top-nav user menu uses ══ */
+.ws-fly {
+  position: absolute;
+  left: calc(var(--shell-railw) + 10px);
+  z-index: 20;
+}
+
+/* ══ MAIN ══ */
+.ws-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.ws-bar {
+  height: var(--head);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--shell-hair);
+  background: var(--shell-chrome);
+}
+.ws-crumb { font-size: 13px; color: var(--shell-muted); }
+.ws-crumb b { color: var(--shell-ink); font-weight: 600; }
+/* Baked 12 — search lives HERE, next to help. Never in the panel. */
+.ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.ws-work { flex: 1; min-height: 0; overflow: auto; background: #ffffff; }
+
+/* ══ FOCUS + REDUCED MOTION (Baked 21) ══ */
+.ws-row:focus-visible .ws-cl,
+.ws-srow:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--shell-focus);
+}
+/* Collapsed, the label is invisible — the ring has to land on the icon cell instead. */
+.ws-shell.shut .ws-row:focus-visible .ws-ib {
+  box-shadow: inset 0 0 0 2px var(--shell-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-shell,
+  .ws-sub,
+  .ws-fade,
+  .ws-row::after,
+  .ws-ib,
+  .ws-cl,
+  .ws-srow,
+  .ws-pch,
+  .ws-crow .ws-ib svg {
+    transition: none;
+  }
+}
