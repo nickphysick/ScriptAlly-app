@@ -26,7 +26,6 @@ import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
-import { attentionCount } from "../../lib/queriesFilterParam";
 import { AccountMenu } from "./AccountMenu";
 import { usePalette } from "./usePalette";
 import { ShellSidebarBody, ShellScope, useShellNavCounts } from "./ShellSidebar";
@@ -145,16 +144,15 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
   const { agents, queries, manuscripts, currentUser, logout } = useScriptAllyDb();
 
-  /* THE NAV'S TWO LIVE FIGURES. `attention` is the past-reply-window set — the SAME derivation
-     the hub's filter and the top-nav mega panel read, never a second count. `todo` is the
-     board's own total, through the hook the old panel already used. */
+  /* ⚠️ ONE FIGURE IN THE NAV NOW (Amendment 1, H5). The Queries attention count went with the
+     filter children: with the sidebar carrying destinations rather than views, there is nothing
+     under Queries for a count to describe, and a navigation column that displays figures is on
+     its way to being a dashboard. `attentionCount` is NOT deleted — it still drives the hub's
+     own filter and the parked mega panel. */
   const navCounts = useShellNavCounts();
   const sections = useMemo(
-    () => workspaceSections({
-      attention: attentionCount(queries, Date.now()),
-      todo: navCounts.todo ?? 0,
-    }),
-    [queries, navCounts.todo],
+    () => workspaceSections({ todo: navCounts.todo ?? 0 }),
+    [navCounts.todo],
   );
 
   const stageRef = useRef<HTMLDivElement>(null);

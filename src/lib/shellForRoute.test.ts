@@ -14,10 +14,18 @@ describe("the map", () => {
     }
   });
 
-  it("pages you READ take the top-nav shell", () => {
+  /* ⚠️ REWRITTEN (Amendment 1, G): there is no top-nav tier in the app any more. Dashboard,
+     Settings, Plans and Help all render in the WORKSPACE shell — with Dashboard on the top-nav
+     shell, going home swapped the entire chrome, which is a jarring loss of wayfinding on the
+     most-visited page. The component is parked for the marketing site, not deleted. */
+  it("the pages that used to READ now take the workspace shell too", () => {
     for (const p of ["/dashboard", "/account", "/plans", "/help"]) {
-      expect(shellForRoute(p, true), p).toBe("topnav");
+      expect(shellForRoute(p, true), p).toBe("workspace");
     }
+  });
+
+  it("the top-nav tier is empty — parked, and the set is kept as its seam back", () => {
+    expect(TOPNAV_SHELL_PATHS.size).toBe(0);
   });
 
   it("no route is in both", () => {

@@ -199,7 +199,7 @@ describe("The token block — the pack's palette, and why it is prefixed", () =>
     "--shell-avatar-bg": "#f5e3da",
     "--shell-page": "#f7eee7",
     "--shell-railw": "52px",
-    "--shell-panelw": "216px",
+    "--shell-panelw": "232px",  // 216 → 232 (Amendment 1, B): the panel is its own element now
     "--shell-spring-out": "cubic-bezier(0.33, 1, 0.5, 1)",
     "--shell-intent": "100ms",
     "--shell-grace": "160ms",

@@ -344,19 +344,21 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
   });
 
-  /* ⚠️ REWRITTEN, NOT DELETED (shell-rebuild pack, Phase 3). The brand still appears ONCE in the
-     workspace shell, but it is no longer the PNG wordmark: both rebuild mockups draw a Playfair
-     "S" glyph on the rail beside a Playfair "ScriptAlly" — type, not artwork.
-     ⚠️ THAT RETIRES THE 68.4%-INK PROBLEM RATHER THAN SOLVING IT. The asset's letterforms span
-     only 513px of its 750px height, so `heightPx` never meant apparent size; a text lockup has
-     no dead margin to compensate for. The artwork is not cropped — it is simply not used here. */
-  it("THE BRAND APPEARS ONCE in the workspace shell — as TYPE now, not the artwork", () => {
+  /* ⚠️ REWRITTEN TWICE, NEVER DELETED. Phase 3 made the brand type rather than the PNG;
+     Amendment 1 (C) moved the wordmark OUT of the sidebar to the head of the breadcrumb, as the
+     real asset, leaving the rail's "S" tile as the sidebar's only mark. So the brand still
+     appears exactly once in each place — one tile, one logotype.
+
+     ⚠️ AND THE 68.4%-INK PROBLEM CAME BACK WITH THE ASSET, so the height is MEASURED: the
+     cap-"S" spans y 190→577 of a 750px file — 51.7% — meaning a 16px cap needs a 31px element.
+     `heightPx` is not cap-height, and 16 here would render an 8px cap. */
+  it("THE BRAND APPEARS ONCE per surface — the S tile in the rail, the asset in the crumb", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
-    expect(ws).not.toContain("ScriptAllyLogo");
-    expect(ws.match(/ws-glyph/g), "one brand glyph").toHaveLength(1);
-    expect(ws).toContain("ScriptAlly");
+    expect(ws.match(/ws-tile/g)?.length, "one tile in the rail").toBeGreaterThan(0);
+    expect(ws.match(/ws-logotype/g)?.length, "one logotype in the crumb").toBeGreaterThan(0);
+    expect(ws).toContain("const LOGOTYPE_PX = 31");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-hrowA \.ws-glyph \{[^}]*Playfair/s);
+    expect(wsCss).toMatch(/\.ws-tile \{[^}]*Playfair/s);
   });
 });
 

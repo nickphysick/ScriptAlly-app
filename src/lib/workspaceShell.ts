@@ -237,6 +237,40 @@ export function sectionClick(
 }
 
 /**
+ * A RAIL click. (Amendment 1, B.)
+ *
+ * ⚠️ THE RAIL NEVER TOGGLES A SECTION SHUT, which is the one way it differs from the panel row.
+ * The rail is a set of destinations, not a set of disclosure controls: an icon that sometimes
+ * navigated and sometimes closed the thing you were looking at would be two controls wearing one
+ * glyph. Clicking a rail icon always lands you in the section and syncs the panel's accordion.
+ */
+export function railClick(
+  sec: ShellSection,
+  hit: ShellHit | null,
+  collapsed: boolean,
+): SectionClick {
+  const hasKids = !!sec.children?.length;
+  if (!hasKids) return { open: null, go: sec.path ?? null, expand: collapsed };
+  const keeps = hit?.section === sec.id && !!hit?.child
+    && sec.children!.some((c) => c.id === hit.child);
+  const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
+  return { open: sec.id, go: keeps ? null : def.path, expand: collapsed };
+}
+
+/**
+ * Does this rail icon carry the attention badge? (Amendment 1, B.)
+ *
+ * ⚠️ A DOT, NOT A NUMBER, and only where attention actually lives. A 52px rail has no room for a
+ * legible figure, and a badge on every section that merely has *items* would make the rail a
+ * count display rather than an alert. Under Amendment 1 (H) that is To-do alone — the Queries
+ * filter children that used to carry a count are gone from the nav.
+ */
+export function railBadge(sec: ShellSection): boolean {
+  if (typeof sec.count === "number" && sec.count > 0 && sec.urgent) return true;
+  return (sec.children ?? []).some((c) => typeof c.count === "number" && c.count > 0 && !!c.urgent);
+}
+
+/**
  * Should hovering this rail row peek its children? (Amendment 1, E1.)
  *
  * ⚠️ ONLY WHEN COLLAPSED, AND ONLY WITH CHILDREN. Expanded, the children are already on screen;

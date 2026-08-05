@@ -15,9 +15,18 @@
  * a route here without building it is the one way to reintroduce a dead link.
  */
 
-/** Pages you WORK IN — the sage desk, the column, the content capsule. */
+/**
+ * ⚠️⚠️ AMENDMENT 1 (G) — EVERY SIGNED-IN ROUTE IS A WORKSPACE ROUTE NOW, and the dashboard is the
+ * reason. With Dashboard on the top-nav shell, every visit home swapped the ENTIRE chrome: the
+ * sidebar vanished, the nav relocated to the top, the ground changed colour. That is a jarring
+ * loss of wayfinding on the most-visited page in the app, and in-shell homes are the norm
+ * everywhere it matters (Linear, Notion, Stripe). Settings, Plans and Help followed it rather
+ * than being stranded in a shell nothing else used.
+ */
 export const WORKSPACE_SHELL_PATHS = new Set([
+  "/dashboard",
   "/queries",
+  "/queries/analytics",
   "/todo",
   "/agents",
   "/agents/discover",
@@ -26,15 +35,18 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/manuscripts/comps",
   // Data entry against your own records — it belongs beside the queries it creates.
   "/import",
-]);
-
-/** Pages you READ — the flat warm page, masthead and mega-menus. */
-export const TOPNAV_SHELL_PATHS = new Set([
-  "/dashboard",
   "/account", // Settings
   "/plans",   // Plan & billing
   "/help",    // Help centre
 ]);
+
+/**
+ * ⚠️ EMPTY, AND DELIBERATELY KEPT (Amendment 1, G4). The top-nav shell is PARKED, not deleted:
+ * `TopNavShell` and its morphing mega-menus are intact and unmounted, held for the public
+ * marketing site (showcase, pricing) where they become the logged-out header. Deleting the set
+ * would delete the seam it comes back through.
+ */
+export const TOPNAV_SHELL_PATHS = new Set<string>([]);
 
 export type ShellKind = "workspace" | "topnav";
 

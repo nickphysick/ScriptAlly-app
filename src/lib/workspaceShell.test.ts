@@ -10,8 +10,8 @@
 import { describe, it, expect } from "vitest";
 import {
   PEEK_GRACE_MS, PEEK_INTENT_MS, SHELL_COLLAPSED_KEY, ShellSection, collapseKeyAllowed, openForHit,
-  peeksOnHover, readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor,
-  writeCollapsed,
+  peeksOnHover, railBadge, railClick, readCollapsed, sectionClick, sectionRowState, shellCrumb,
+  shellHitFor, writeCollapsed,
 } from "./workspaceShell";
 
 const SECTIONS: ShellSection[] = [
@@ -300,5 +300,67 @@ describe("Baked 8 — collapse persists, and a locked-down browser never costs t
   it("survives no storage at all (SSR)", () => {
     expect(readCollapsed(null)).toBe(false);
     expect(() => writeCollapsed(null, true)).not.toThrow();
+  });
+});
+
+/**
+ * ⚠️ AMENDMENT 1 (B) — THE RAIL IS A SET OF DESTINATIONS, NOT DISCLOSURE CONTROLS. It never
+ * toggles a section shut: an icon that sometimes navigated and sometimes closed the thing you
+ * were looking at would be two controls wearing one glyph. That is the ONE way rail and panel
+ * clicks differ, and it is what these fixtures hold.
+ */
+describe("railClick — always lands, never toggles shut", () => {
+  it("expanded, it opens the section and goes to the default child", () => {
+    expect(railClick(sec("queries"), null, false))
+      .toEqual({ open: "queries", go: "/queries", expand: false });
+  });
+
+  /* THE fixture: the panel row shuts here; the rail must not. */
+  it("does NOT shut a section you are already in with its accordion open", () => {
+    const hit = { section: "queries", child: "q-att" };
+    expect(sectionClick(sec("queries"), hit, "queries", false).open).toBeNull();
+    expect(railClick(sec("queries"), hit, false).open).toBe("queries");
+  });
+
+  it("keeps the child you are on when it belongs to the section", () => {
+    const p = railClick(sec("queries"), { section: "queries", child: "q-att" }, false);
+    expect(p.go).toBeNull();
+  });
+
+  it("collapsed, it also expands", () => {
+    expect(railClick(sec("queries"), null, true).expand).toBe(true);
+    expect(railClick(sec("todo"), null, true))
+      .toEqual({ open: null, go: "/todo", expand: true });
+  });
+
+  it("a childless section navigates and opens nothing", () => {
+    expect(railClick(sec("todo"), null, false))
+      .toEqual({ open: null, go: "/todo", expand: false });
+  });
+});
+
+/* ⚠️ A DOT, NOT A NUMBER — 52px has no room for a legible figure, and a badge on every section
+   that merely HAS items would make the rail a count display rather than an alert. */
+describe("railBadge — attention only", () => {
+  it("badges a section with its own urgent count", () => {
+    expect(railBadge(sec("todo"))).toBe(true);
+  });
+
+  it("badges a section whose child carries an urgent count", () => {
+    expect(railBadge(sec("queries"))).toBe(true); // this fixture still has one
+  });
+
+  it("does not badge a section with no counts at all", () => {
+    expect(railBadge(sec("agents"))).toBe(false);
+    expect(railBadge(sec("dashboard"))).toBe(false);
+  });
+
+  it("does not badge a ZERO count", () => {
+    expect(railBadge({ id: "x", label: "X", count: 0, urgent: true })).toBe(false);
+  });
+
+  /* A count without urgency is a quantity, not a demand. */
+  it("does not badge a count that is not urgent", () => {
+    expect(railBadge({ id: "x", label: "X", count: 9 })).toBe(false);
   });
 });

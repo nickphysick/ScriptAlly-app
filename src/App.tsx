@@ -43,7 +43,9 @@ import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
-import { TopNavHost } from "./components/shell/TopNavHost";
+// ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
+// import { TopNavHost } from "./components/shell/TopNavHost";
+import { QueryAnalytics } from "./components/QueryAnalytics";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -575,29 +577,14 @@ function AppContent() {
   // An unmapped route throws in DEVELOPMENT and falls back to the workspace shell in production:
   // a silent default is how a page ends up in the wrong chrome for a month, but a throw in
   // production is worse than wrong chrome.
-  if (shellForRoute(path, import.meta.env.DEV) === "topnav") {
-    return (
-      <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
-        <TopNavPanelData>
-          {(panelInput) => (
-            <TopNavHost
-              onNavigate={handleNavigate}
-              onNavigatePath={(to) => { setSearchQuery(""); navigate(to); }}
-              setSearchQuery={setSearchQuery}
-              panelInput={panelInput}
-            >
-              {path === "/dashboard" && (
-                <Dashboard onNavigate={handleNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-              )}
-              {path === "/account" && <div className="sv2-focuscol"><AccountSettings onNavigate={handleNavigate} /></div>}
-              {path === "/plans" && <div className="sv2-focuscol"><PlansPage /></div>}
-              {path === "/help" && <div className="sv2-focuscol"><HelpCentre /></div>}
-            </TopNavHost>
-          )}
-        </TopNavPanelData>
-      </div>
-    );
-  }
+  /* ⚠️ THE TOP-NAV BRANCH IS GONE, AND THE COMPONENT IS NOT (Amendment 1, G4). Every signed-in
+     route renders in the workspace shell now — with Dashboard on the top-nav shell, going home
+     swapped the entire chrome: sidebar gone, nav relocated, ground recoloured. That is a jarring
+     loss of wayfinding on the most-visited page in the app.
+
+     `TopNavShell`, `TopNavHost` and `TopNavPanelData` are intact and unmounted, PARKED for the
+     public marketing site where the morphing mega nav becomes the logged-out header. No
+     marketing work in this pack — this is the seam it comes back through. */
 
   // Queries subpage-equivalent, read from the URL: ?q=<id> is deep-selection (Queries treats an
   // unrecognised subpage value as a query id, exactly as it did with the old activeSubPage).
@@ -607,6 +594,7 @@ function AppContent() {
      an unknown value falls back to "all" rather than filtering to an empty list, which would
      read as "you have no queries" — the worst lie this page could tell. */
   const queriesStatus = parseStatusFilter(params.get(QUERIES_STATUS_PARAM));
+  const queriesAnalytics = path === "/queries/analytics";
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
@@ -641,11 +629,17 @@ function AppContent() {
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
             its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
-        <StagePage active={routeKey === "queries"} layout="fill" clip>
+        <StagePage active={routeKey === "queries" && !queriesAnalytics} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
             statusFilter={queriesStatus}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
-            routeActive={routeKey === "queries"} />
+            routeActive={routeKey === "queries" && !queriesAnalytics} />
+        </StagePage>
+
+        {/* Amendment 1 (H3) — Analytics is a real destination so the nav carries no dead link.
+            The page itself is a placeholder and says so; TODO(analytics-page). */}
+        <StagePage active={queriesAnalytics} contentVariant="read">
+          <QueryAnalytics />
         </StagePage>
 
         {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page

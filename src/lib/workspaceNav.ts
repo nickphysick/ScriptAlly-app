@@ -2,65 +2,52 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * workspaceNav — THE IA of the double-decker shell (shell-rebuild pack, Phase 3).
+ * workspaceNav — THE IA of the workspace shell (shell-rebuild pack + Amendment 1).
  *
- * ⚠️ THE SHELL RENDERS WHAT EXISTS, NEVER WHAT IS PLANNED. This is the same rule lib/topNav.ts
- * already follows, and the two must not diverge: a nav entry with no route is a dead link, and a
- * dead link in permanent chrome is worse than an absent one because it looks like a decision.
+ * ⚠️ THE SHELL RENDERS WHAT EXISTS, NEVER WHAT IS PLANNED. A nav entry with no route is a dead
+ * link, and a dead link in permanent chrome is worse than an absent one because it looks like a
+ * decision. `Learn` and `Documents` are therefore absent — neither has a route — which is why
+ * Materials is CHILDLESS rather than a one-child accordion. TODO(documents-route).
  *
- * TWO ENTRIES FROM THE PACK'S IA ARE DELIBERATELY ABSENT, both for that reason:
+ * ⚠️⚠️ AMENDMENT 1 (H) — THE SIDEBAR IS NAVIGATION ONLY. It never encodes a filter or a view of a
+ * page; every entry is a distinct destination. This SUPERSEDES the original Baked 14, whose
+ * Queries children were four filters over one hub (All queries / Needs attention / Awaiting
+ * response / Closed).
  *
- *   · `Learn` — no route exists anywhere in the app (recon found zero references). Baked 14
- *     provides for exactly this: "include only if recon finds real routes; otherwise omit from
- *     BOTH shells". Omitted here and in topNav.
- *   · `Documents` — no route exists. TODO(documents-route): when a documents library is built,
- *     Materials gains children and this becomes an accordion.
+ * Why it matters beyond tidiness: filter-children make the nav a second control surface for a
+ * page that already has one, so the sidebar and the page's own filter bar can disagree about
+ * what you are looking at — and the nav starts needing counts, which is how a navigation column
+ * turns into a dashboard. Queries now carries two real destinations, and the `?status=` param
+ * survives as IN-PAGE, linkable state (palette results, dashboard deep-links) rather than
+ * something the sidebar drives.
  *
- * ⚠️ MATERIALS IS THEREFORE CHILDLESS, not a one-child accordion. A chevron that opens onto a
- * single row reads as broken — the affordance promises a choice the section cannot offer. It
- * navigates straight to Submission packages until Documents exists to sit beside it.
- *
- * ⚠️ /import, /manuscripts and /manuscripts/comps have NO ENTRY HERE. They remain reachable by
- * route, by the top-nav mega menus and by the palette; the pack's IA simply does not place them,
- * and inventing a home for them would be designing rather than implementing. Flagged in the
- * report rather than resolved quietly.
+ * ⚠️ AND SO THE ATTENTION SIGNAL LIVES ON TO-DO ALONE. With the filter children gone there is no
+ * count under Queries and no badge on its rail icon.
  */
 import { ShellSection } from "./workspaceShell";
-import { queriesPathFor } from "./queriesFilterParam";
 
 export interface WorkspaceNavInput {
-  /** Queries past their reply window — `attentionCount`. Not the writer's-turn split. */
-  attention: number;
-  /** The To-do board's own total. */
+  /** The To-do board's own total. The ONLY count in the nav (Amendment 1, H5). */
   todo: number;
 }
 
 /**
- * ⚠️ COUNTS ARE INJECTED, NEVER READ HERE. This file has no imports from the db layer, so the
- * nav can be unit-tested in the node environment and so there is exactly one place each figure
- * is derived. A `useScriptAllyDb()` in this module would put a second derivation of "attention"
- * one import away from the first.
+ * ⚠️ COUNTS ARE INJECTED, NEVER READ HERE. This file has no db imports, so the nav is unit-
+ * testable in the node environment and each figure has exactly one derivation.
  */
 export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
   return [
-    // Dashboard lives in the TOP-NAV shell (lib/shellForRoute). The entry is deliberate: it is
-    // the way back out of the workspace, and a shell with no route home is a trap.
+    // Amendment 1 (G): Dashboard renders INSIDE this shell now — a normal childless section,
+    // not a route that swaps the whole chrome.
     { id: "dashboard", label: "Dashboard", path: "/dashboard" },
     {
       id: "queries",
       label: "Queries",
-      def: "q-all",
+      def: "q-centre",
       children: [
-        { id: "q-all", label: "All queries", path: queriesPathFor("all") },
-        {
-          id: "q-att",
-          label: "Needs attention",
-          path: queriesPathFor("attention"),
-          count: input.attention || undefined,
-          urgent: true,
-        },
-        { id: "q-await", label: "Awaiting response", path: queriesPathFor("awaiting") },
-        { id: "q-closed", label: "Closed", path: queriesPathFor("closed") },
+        // "Query Centre" is the hub's name in nav, crumb AND on the page itself.
+        { id: "q-centre", label: "Query Centre", path: "/queries" },
+        { id: "q-analytics", label: "Analytics", path: "/queries/analytics" },
       ],
     },
     {

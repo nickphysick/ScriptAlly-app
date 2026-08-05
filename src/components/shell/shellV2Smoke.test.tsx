@@ -48,14 +48,15 @@ const at = (path: string, node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
 
 describe("v2 shell — smoke renders", () => {
-  /* ⚠️ REWRITTEN (shell-rebuild Phase 3). The brand is TYPE now — a Playfair "S" on the rail
-     beside a Playfair wordmark — and Dashboard is a real nav row rather than a job the masthead
-     quietly did on the side. A masthead that doubled as the route home was an affordance nobody
-     could see; a row that says "Dashboard" says what it does. */
-  it("THE BRAND lives in the shell's head row — as type, and Dashboard is its own row", () => {
+  /* ⚠️ REWRITTEN TWICE, and the second time moved it out of the sidebar entirely. Phase 3 made
+     the brand TYPE rather than the artwork; Amendment 1 (C) then took the wordmark OFF the
+     sidebar and put it at the head of the breadcrumb, as the real asset — leaving the rail's "S"
+     tile as the only mark in the sidebar. Dashboard is a real nav row throughout. */
+  it("THE BRAND leads the crumb; the sidebar keeps only the S tile", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
-    expect(ws).toContain("ws-glyph");
-    expect(ws).not.toContain("ScriptAllyLogo");
+    expect(ws).toContain("ws-tile");                       // the one sidebar mark
+    expect(ws).toContain("ws-logotype");                   // the crumb's asset
+    expect(ws).toContain('src="/scriptally-title-v2.png"');
     const nav = readFileSync(resolve(__dirname, "../../lib/workspaceNav.ts"), "utf8");
     expect(nav).toContain('path: "/dashboard"');
     // the retired panel's brand slot and its Navigate label are gone from the source entirely

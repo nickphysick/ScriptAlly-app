@@ -2604,7 +2604,10 @@ export const Queries: React.FC<{
                prop though compact doesn't render it — the copy stays where it lives, so bringing
                it back is a flag flip rather than a hunt. */
             compact
-            title="Queries Hub"
+            /* ⚠️ RENAMED (Amendment 1, H2): "Queries Hub" → "Query Centre". The nav, the crumb
+               and the page's own heading must say the same thing — a page whose sidebar entry
+               and title disagree makes you check you are where you think you are. */
+            title="Query Centre"
             description="Every query you've sent, and exactly where each one stands."
             actions={queries.length > 0
               ? [

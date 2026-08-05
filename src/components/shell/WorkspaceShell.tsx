@@ -2,21 +2,25 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * WorkspaceShell — the DOUBLE-DECKER (shell-rebuild pack, Phase 2; ref
- * design-refs/shell-workspace-doubledecker.html). Ink icon rail + light panel, collapsible, on
- * the sage desk.
+ * WorkspaceShell — the DECOUPLED rail + panel (shell-rebuild pack + Amendment 1; ref
+ * design-refs/shell-workspace-doubledecker.html).
  *
- * ⚠️⚠️ THE RAIL IS PAINT, NOT A CONTAINER (Baked 3 / T3). There is ONE column here. Its ink band
- * is a background gradient stop, and every row spans the whole width with a fixed 52px icon cell
- * at its head. That is the ENTIRE mechanism by which icons do not drift when the shell collapses
- * — not matched paddings, not a measured offset. A refactor into `<Rail/>` beside `<Panel/>`
- * looks tidier and reintroduces the bug the same afternoon.
+ * ⚠️⚠️ T3b — THE RAIL IS A STATIC COMPONENT THAT NEVER REFLOWS. This SUPERSEDES T3 and the
+ * split-row/painted-rail architecture it protected. Rows that spanned both surfaces kept the
+ * icons aligned by construction, but they also made the rail a function of the panel: an open
+ * accordion punched a void through the icon column, and the anti-echo dimming turned the rest
+ * into a broken strip.
  *
- * ⚠️ THE IA IS A PROP. This component owns the grammar (what is lit, what is open, what rolls
- * up); it owns no section list. Phase 3 passes the real one, so a nav change never means editing
- * the shell.
+ * The rail is now its own component with its own even rhythm — a tile, one 38px button per
+ * section, a foot group — and its contents are IDENTICAL expanded and collapsed. Only two things
+ * change: the » control appears, and the active square moves. That retires the drift problem
+ * outright rather than defending against it, which is why T3's gradient-and-spanning-rows lock
+ * is gone rather than weakened.
  *
- * State grammar, collapse persistence and the crumb are the pure `lib/workspaceShell`.
+ * ⚠️ THE PANEL COLLAPSES TO ZERO WIDTH; THE RAIL DOES NOT MOVE. If you find yourself writing a
+ * rule that changes the rail between states, that is the bug.
+ *
+ * ⚠️ THE IA IS A PROP. This component owns the grammar and no section list.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -27,7 +31,8 @@ import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveActiveManuscript } from "../../lib/shellSidebar";
 import {
   PEEK_GRACE_MS, PEEK_INTENT_MS, ShellSection, collapseKeyAllowed, openForHit, peeksOnHover,
-  readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor, writeCollapsed,
+  railBadge, railClick, readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor,
+  writeCollapsed,
 } from "../../lib/workspaceShell";
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
 import "./primitives.css";
@@ -37,10 +42,19 @@ import "./workspaceShell.css";
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
+/**
+ * ⚠️ 31px, AND THAT NUMBER IS MEASURED (Amendment 1, C). `/scriptally-title-v2.png` is 2400×750
+ * with the cap-"S" spanning y 190→577 — **51.7% of the asset height**, the rest being ascender
+ * and descender clearance baked into the artwork. So `heightPx` is NOT cap-height: asking for a
+ * 16px cap means asking for a 31px element. Setting 16 here would render an 8px cap and look
+ * like the logo had simply been made too small, with nothing to point at.
+ */
+const LOGOTYPE_PX = 31;
+
 export interface WorkspaceShellProps {
-  /** The IA — owned by the caller (Phase 3), never by this component. */
+  /** The IA — owned by the caller, never by this component. */
   sections: ShellSection[];
-  /** Icon per section id. A section with no icon renders its cell empty rather than crashing. */
+  /** Icon per section id, rendered at 20px on the rail and 17px in the panel. */
   icons: Record<string, React.ReactNode>;
   onNavigatePath: (path: string) => void;
   onOpenSearch: () => void;
@@ -64,18 +78,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const [collapsed, setCollapsed] = useState(
     () => readCollapsed(typeof window === "undefined" ? null : window.localStorage)
   );
-  // The route decides which section is expanded on arrival; a click may then override it.
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
   const [flyoutFor, setFlyoutFor] = useState<string | null>(null);
   const [msOpen, setMsOpen] = useState(false);
 
-  const shellRef = useRef<HTMLElement>(null);
-  const rowRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  /* Amendment 1 (E1) — hover peek. Two timers: intent before opening, grace to travel into it. */
+  const railRef = useRef<HTMLElement>(null);
+  const riRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const peekIn = useRef<number | null>(null);
   const peekOut = useRef<number | null>(null);
 
-  // Following the route means a link from anywhere lands with the right section already open.
   useEffect(() => { setOpenId(openForHit(hit)); }, [hit?.section, hit?.child]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setShut = useCallback((next: boolean) => {
@@ -93,9 +104,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     setFlyoutFor(null);
   }, []);
 
-  /* ⚠️ AMENDMENT 1 (E5) — `[` TOGGLES BOTH WAYS, and is suppressed while typing, because `[` is
-     a character: a bare key that fires inside a field eats the keystroke and reads as the app
-     dropping input. The palette counts as typing — it is a text field wearing a dialog. */
+  /* ⚠️ `[` TOGGLES BOTH WAYS, suppressed while typing, because `[` is a character: a bare key
+     firing inside a field eats the keystroke and reads as the app dropping input. The palette
+     counts as typing — it is a text field wearing a dialog. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -109,12 +120,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [toggleCollapsed]);
 
-  /* Dismissal: outside pointer, Escape, and any navigation. The same three the scope chip uses,
-     so every transient surface in the shell behaves identically. */
   useEffect(() => {
     if (!flyoutFor && !msOpen) return;
     const onDown = (e: PointerEvent) => {
-      if (shellRef.current?.contains(e.target as Node)) return;
+      if (railRef.current?.contains(e.target as Node)) return;
       setFlyoutFor(null);
       setMsOpen(false);
     };
@@ -137,26 +146,31 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     onNavigatePath(path);
   }, [onNavigatePath]);
 
-  /* ⚠️ AMENDMENT 1 (E2) — EVERY CLICK IN THE SIDEBAR EXPANDS IT, and no click opens a flyout.
-     Hovering peeks; clicking commits. Collapse is a temporary focus mode here, not a setting, so
-     committed navigation restores your wayfinding. */
-  const onSectionClick = useCallback((sec: ShellSection) => {
-    const plan = sectionClick(sec, hit, openId, collapsed);
+  const runPlan = useCallback((plan: { open: string | null; go: string | null; expand: boolean }) => {
     setFlyoutFor(null);
     if (plan.expand) setShut(false);
     setOpenId(plan.open);
     if (plan.go) go(plan.go);
-  }, [hit, openId, collapsed, go, setShut]);
+  }, [go, setShut]);
 
-  /* Amendment 1 (E1) — hover peeks, pointer only. Sliding along the rail while a flyout is open
-     switches instantly (mega-menu grammar); opening cold waits out the intent delay so a cursor
-     merely crossing the rail does not fire one. */
+  /** The PANEL row — a destination AND a disclosure control, so it can toggle shut. */
+  const onPanelClick = useCallback((sec: ShellSection) => {
+    runPlan(sectionClick(sec, hit, openId, collapsed));
+  }, [hit, openId, collapsed, runPlan]);
+
+  /** The RAIL icon — a destination only; it never toggles a section shut. */
+  const onRailClick = useCallback((sec: ShellSection) => {
+    runPlan(railClick(sec, hit, collapsed));
+  }, [hit, collapsed, runPlan]);
+
+  /* Hover peeks, pointer only. Sliding along the rail while one is open switches instantly;
+     opening cold waits out the intent delay so a cursor merely crossing does not fire one. */
   const clearPeek = useCallback(() => {
     if (peekIn.current) { window.clearTimeout(peekIn.current); peekIn.current = null; }
     if (peekOut.current) { window.clearTimeout(peekOut.current); peekOut.current = null; }
   }, []);
 
-  const onRowEnter = useCallback((sec: ShellSection) => {
+  const onRailEnter = useCallback((sec: ShellSection) => {
     if (!peeksOnHover(sec, collapsed)) return;
     clearPeek();
     if (flyoutFor) { setFlyoutFor(sec.id); return; }
@@ -170,15 +184,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   useEffect(() => () => clearPeek(), [clearPeek]);
 
-  /* ── the manuscript selector (Baked 9) ── */
+  /* ── the manuscript selector ── */
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
   const activeMs = resolveActiveManuscript(manuscripts, storedMs);
   const manyMs = manuscripts.length > 1;
   const pickMs = useCallback((id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* not worth an error */ }
     setMsOpen(false);
-    // Re-render the pages that read the key. They listen to their own state, so a nudge through
-    // the router is the cheapest honest way to make the change visible everywhere at once.
     onNavigatePath(`${pathname}${search}`);
   }, [onNavigatePath, pathname, search]);
 
@@ -187,92 +199,157 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const name = currentUser?.name ?? "";
 
   const flySection = sections.find((s) => s.id === flyoutFor);
-  const flyTop = flyoutFor ? rowRefs.current[flyoutFor]?.offsetTop ?? 0 : 0;
+  const flyTop = flyoutFor ? riRefs.current[flyoutFor]?.offsetTop ?? 0 : 0;
 
   return (
     <div className="ws-app">
 
-        <aside
-          ref={shellRef}
-          className={`ws-shell${collapsed ? " shut" : ""}${flyoutFor ? " flyopen" : ""}`}
-          aria-label="Main navigation"
+      {/* ══ THE RAIL — static. Identical in both states bar the » control and the active square. ══ */}
+      <aside ref={railRef} className={`ws-rail${flyoutFor ? " flyopen" : ""}`} aria-label="Sections">
+        <button
+          type="button"
+          className="ws-tile"
+          data-tip="Dashboard"
+          aria-label="Dashboard"
+          onClick={() => { if (collapsed) setShut(false); go("/dashboard"); }}
         >
-          {/* ── head A: brand + the collapse control (Amendment 1, D) ── */}
-          <div className="ws-row ws-hrowA" data-tip="ScriptAlly">
-            <span className="ws-ci"><span className="ws-glyph">S</span></span>
-            <span className="ws-cl ws-fade">
-              ScriptAlly
+          S
+        </button>
+
+        <div className="ws-railnav">
+          {sections.map((sec) => {
+            const st = sectionRowState(sec, hit, openId, collapsed);
+            return (
               <button
                 type="button"
-                className="ws-ctog"
-                title="Collapse"
-                aria-label="Collapse the navigation"
-                onClick={() => setShut(true)}
+                key={sec.id}
+                ref={(el) => { riRefs.current[sec.id] = el; }}
+                className={`ws-ri${st.railOn ? " on" : ""}`}
+                data-tip={st.tip}
+                aria-label={sec.label}
+                aria-current={st.railOn ? "true" : undefined}
+                onClick={() => onRailClick(sec)}
+                onMouseEnter={() => onRailEnter(sec)}
+                onMouseLeave={schedulePeekClose}
               >
-                <ChevronsLeft aria-hidden="true" />
+                {icons[sec.id]}
+                {/* A DOT, NOT A NUMBER — 52px has no room for a legible figure. */}
+                {railBadge(sec) && <span className="ws-bdg" aria-hidden="true" />}
               </button>
-            </span>
-          </div>
+            );
+          })}
+        </div>
 
-          {/* ⚠️ THE EXPAND-WITHOUT-NAVIGATING PATH (Amendment 1, D). Under the click-commits
-              grammar every other control both expands AND moves you; this one only expands. */}
+        <div className="ws-grow" />
+
+        {/* The expand-without-navigating path. Collapsed only. */}
+        {collapsed && (
           <button
             type="button"
-            className="ws-row ws-xtog"
+            className="ws-ri ws-xtog"
             data-tip="Expand"
             aria-label="Expand the navigation"
             onClick={() => setShut(false)}
           >
-            <span className="ws-ci"><span className="ws-ib"><ChevronsRight aria-hidden="true" /></span></span>
-            <span className="ws-cl ws-fade" />
+            <ChevronsRight aria-hidden="true" />
           </button>
+        )}
 
-          {/* ── head B: the manuscript selector. Single manuscript = the same row, static. ── */}
-          {activeMs && (
-            <div className="ws-msrow">
-              <button
-                type="button"
-                className={`ws-row ws-hrowB${manyMs ? "" : " static"}`}
-                data-tip={activeMs.title}
-                aria-haspopup={manyMs ? "menu" : undefined}
-                aria-expanded={manyMs ? msOpen : undefined}
-                /* ⚠️ NOT `disabled` when there is one manuscript. A disabled button stops firing
-                   hover in several browsers, and the collapsed rail's only way to name this book
-                   is its tooltip — disabling it would silently cost the single-manuscript user
-                   the one label they have. It is inert by handler and by class instead.
+        <button
+          type="button"
+          className="ws-ri"
+          data-tip="Settings"
+          aria-label="Settings"
+          onClick={() => { if (collapsed) { setShut(false); return; } go("/account"); }}
+        >
+          <Settings aria-hidden="true" />
+        </button>
 
-                   Amendment 1 (E2): collapsed, clicking it EXPANDS — like everything else here. */
-                onClick={() => {
-                  if (collapsed) { setShut(false); return; }
-                  if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); }
-                }}
-              >
-                <span className="ws-ci"><span className="ws-ib"><Book aria-hidden="true" /></span></span>
-                <span className="ws-cl ws-fade">
-                  <span className="ws-li"><Book aria-hidden="true" /></span>
-                  <span className="ws-mstitle">{activeMs.title}</span>
-                  {manyMs && <span className="ws-chev"><ChevronsUpDown aria-hidden="true" /></span>}
-                </span>
-              </button>
-              {msOpen && manyMs && (
-                <MenuCard heading="Manuscript" className="ws-fly" style={{ top: 46 }} role="menu">
-                  {manuscripts.map((m) => (
-                    <MenuCardItem
-                      key={m.id}
-                      label={m.title}
-                      on={m.id === activeMs.id}
-                      onSelect={() => pickMs(m.id)}
-                    />
-                  ))}
-                </MenuCard>
-              )}
+        {/* The face lives on the RAIL — it survives collapse, so the panel needs no copy. */}
+        <button
+          type="button"
+          className="ws-avabtn"
+          data-tip={`${name} · ${plan.label}`}
+          aria-label="Account"
+          aria-haspopup="menu"
+          onClick={onOpenAccount}
+        >
+          <AvatarChip name={name} size={30} />
+        </button>
+
+        {/* ⚠️ ANCHORED TO THE RAIL, and selecting COMMITS FULLY (E3) — navigate, close, expand,
+            open that accordion, so it appears where the flyout was. A peek resolving into a
+            still-collapsed rail would leave you where you started.
+            ⚠️ NO FOOT ACTION (E4): "Expand sidebar" was superseded the moment every click did it. */}
+        {flySection && (
+          <MenuCard
+            heading={flySection.label}
+            className="ws-fly"
+            style={{ top: flyTop }}
+            role="menu"
+          >
+            <div onMouseEnter={clearPeek} onMouseLeave={schedulePeekClose}>
+              {(flySection.children ?? []).map((ch) => (
+                <MenuCardItem
+                  key={ch.id}
+                  label={ch.label}
+                  on={hit?.section === flySection.id && hit?.child === ch.id}
+                  count={ch.count}
+                  urgent={ch.urgent}
+                  onSelect={() => { setOpenId(flySection.id); setShut(false); go(ch.path); }}
+                />
+              ))}
             </div>
-          )}
+          </MenuCard>
+        )}
+      </aside>
 
-          <div className="ws-hdiv ws-fade" />
+      {/* ══ THE PANEL — its own tighter rhythm; collapses to zero width. ══ */}
+      <div className={`ws-panel${collapsed ? " shut" : ""}`}>
+        <div className="ws-pin">
 
-          {/* ── nav ── */}
-          <nav className="ws-navwrap">
+          <div className="ws-phead">
+            {activeMs ? (
+              <>
+                <button
+                  type="button"
+                  className={`ws-mspill${manyMs ? "" : " static"}`}
+                  aria-haspopup={manyMs ? "menu" : undefined}
+                  aria-expanded={manyMs ? msOpen : undefined}
+                  onClick={() => { if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); } }}
+                >
+                  <Book aria-hidden="true" />
+                  <span className="ws-mst">{activeMs.title}</span>
+                  {manyMs && <span className="ws-chev"><ChevronsUpDown aria-hidden="true" /></span>}
+                </button>
+                {msOpen && manyMs && (
+                  <MenuCard heading="Manuscript" className="ws-msmenu" role="menu">
+                    {manuscripts.map((m) => (
+                      <MenuCardItem
+                        key={m.id}
+                        label={m.title}
+                        on={m.id === activeMs.id}
+                        onSelect={() => pickMs(m.id)}
+                      />
+                    ))}
+                  </MenuCard>
+                )}
+              </>
+            ) : <span className="ws-mspill static" aria-hidden="true" />}
+            <button
+              type="button"
+              className="ws-ctog"
+              title="Collapse"
+              aria-label="Collapse the navigation"
+              onClick={() => setShut(true)}
+            >
+              <ChevronsLeft aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="ws-pdiv" />
+
+          <nav className="ws-nav">
             {sections.map((sec) => {
               const st = sectionRowState(sec, hit, openId, collapsed);
               const kids = sec.children ?? [];
@@ -280,30 +357,22 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <React.Fragment key={sec.id}>
                   <button
                     type="button"
-                    ref={(el) => { rowRefs.current[sec.id] = el; }}
-                    className={`ws-row fill-${st.fill}${st.railOn ? " rail-on" : ""}${st.open ? " open" : ""}`}
-                    data-tip={st.tip}
+                    className={`ws-ni${st.fill === "pill" ? " on" : ""}${st.fill === "quiet" ? " quiet" : ""}${st.open ? " open" : ""}`}
                     aria-current={st.railOn ? "true" : undefined}
                     aria-expanded={kids.length ? st.open : undefined}
-                    onClick={() => onSectionClick(sec)}
-                    onMouseEnter={() => onRowEnter(sec)}
-                    onMouseLeave={schedulePeekClose}
+                    onClick={() => onPanelClick(sec)}
                   >
-                    <span className="ws-ci"><span className="ws-ib">{icons[sec.id]}</span></span>
-                    <span className="ws-cl ws-fade">
-                      {/* Amendment 1 (C) — the same icon, inline. One set, two mounts. */}
-                      <span className="ws-li">{icons[sec.id]}</span>
-                      {sec.label}
-                      {st.count && <CountChip count={st.count.n} urgent={st.count.urgent} />}
-                      {kids.length > 0 && (
-                        <span className="ws-pch"><ChevronDown aria-hidden="true" /></span>
-                      )}
-                    </span>
+                    <span className="ws-ic">{icons[sec.id]}</span>
+                    {sec.label}
+                    {st.count && <CountChip count={st.count.n} urgent={st.count.urgent} />}
+                    {kids.length > 0 && (
+                      <span className="ws-pch"><ChevronDown aria-hidden="true" /></span>
+                    )}
                   </button>
 
                   {kids.length > 0 && (
                     <div className={`ws-sub${st.open ? " open" : ""}`}>
-                      <div className="ws-subin ws-fade">
+                      <div className="ws-subin">
                         {kids.map((ch) => (
                           <button
                             type="button"
@@ -327,113 +396,66 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             })}
           </nav>
 
-          <div className="ws-spacer" />
+          <div className="ws-grow" />
 
-          {/* ── foot (Baked 10, as amended): hairline → user → Settings. The collapse row is
-              GONE — Amendment 1 (A2) moved that control to the head. ── */}
-          <div className="ws-fdiv ws-fade" />
-
-          <button
-            type="button"
-            className="ws-row ws-urow"
-            data-tip={`${name} · ${plan.label}`}
-            onClick={onOpenAccount}
-            aria-haspopup="menu"
-          >
-            <span className="ws-ci"><AvatarChip name={name} size={28} /></span>
-            <span className="ws-cl ws-fade">
-              <span className="ws-n">{name}</span>
-              <span className="ws-p">
+          {/* ── foot: hairline → name + plan → Settings. NO avatar (the rail carries the face). ── */}
+          <div className="ws-pfoot">
+            <div className="ws-pdiv" />
+            <div className="ws-urow">
+              <div className="ws-n">{name}</div>
+              <div className="ws-p">
                 {plan.label}
                 {plan.upgrade && (
                   <>
                     {" · "}
-                    <span
-                      role="link"
-                      tabIndex={-1}
-                      className="ws-up"
-                      onClick={(e) => { e.stopPropagation(); onUpgrade?.(); }}
-                    >
-                      Upgrade
-                    </span>
+                    <button type="button" className="ws-up" onClick={onUpgrade}>Upgrade</button>
                   </>
                 )}
-              </span>
-            </span>
-          </button>
-          {accountMenu}
-
-          {/* Amendment 1 (E2): collapsed, Settings EXPANDS rather than navigating away from a
-              shell you cannot read. */}
-          <button
-            type="button"
-            className="ws-row ws-setrow"
-            data-tip="Settings"
-            onClick={() => { if (collapsed) { setShut(false); return; } go("/account"); }}
-          >
-            <span className="ws-ci"><span className="ws-ib"><Settings aria-hidden="true" /></span></span>
-            <span className="ws-cl ws-fade">
-              <span className="ws-li"><Settings aria-hidden="true" /></span>
-              Settings
-            </span>
-          </button>
-
-          {/* THE FLYOUT — the same MenuCard the top-nav user menu draws, with identical children,
-              counts and states. Two components here would be two things to keep in agreement.
-
-              ⚠️ NO FOOT ACTION (Amendment 1, E4). "Expand sidebar" was superseded the moment every
-              click expanded: an item promising what the next click does anyway is furniture.
-
-              ⚠️ SELECTING FROM IT COMMITS FULLY (E3) — navigate, close, expand, and open that
-              section's accordion, so the accordion appears where the flyout was. A peek that
-              resolved into a still-collapsed rail would leave you where you started. */}
-          {flySection && (
-            <MenuCard
-              heading={flySection.label}
-              className="ws-fly"
-              style={{ top: flyTop }}
-              role="menu"
-            >
-              <div onMouseEnter={clearPeek} onMouseLeave={schedulePeekClose}>
-                {(flySection.children ?? []).map((ch) => (
-                  <MenuCardItem
-                    key={ch.id}
-                    label={ch.label}
-                    on={hit?.section === flySection.id && hit?.child === ch.id}
-                    count={ch.count}
-                    urgent={ch.urgent}
-                    onSelect={() => {
-                      setOpenId(flySection.id);
-                      setShut(false);
-                      go(ch.path);
-                    }}
-                  />
-                ))}
               </div>
-            </MenuCard>
-          )}
-        </aside>
+            </div>
+            <button type="button" className="ws-ni ws-setrow" onClick={() => go("/account")}>
+              <span className="ws-ic"><Settings aria-hidden="true" /></span>
+              Settings
+            </button>
+          </div>
+        </div>
+      </div>
+      {accountMenu}
 
-        {/* THE CONTENT CARD (Amendment 1, B) — white, floating on the chrome ground. The bar is
-            its HEADER: there is no bar outside the card. */}
-        <div className="ws-main">
-          <div className="ws-card">
+      {/* ══ MAIN — the chrome ground frames a white content card; the bar is its header. ══ */}
+      <div className="ws-main">
+        <div className="ws-card">
           <header className="ws-bar">
-            {crumb && (
-              <span className="ws-crumb">
-                <b>{crumb.section}</b>
-                {crumb.child && <> · {crumb.child}</>}
-              </span>
-            )}
-            {/* Baked 12 — the app's search lives here, beside help. Never in the panel. */}
+            {/* ⚠️ THE BRAND LEADS THE CRUMB (Amendment 1, C) — it left the sidebar entirely, where
+                the rail's "S" tile is now the only mark. The asset, not styled text. */}
+            <span className="ws-crumb">
+              <img
+                className="ws-logotype"
+                src="/scriptally-title-v2.png"
+                alt="ScriptAlly"
+                style={{ height: LOGOTYPE_PX }}
+              />
+              <span className="ws-sep" aria-hidden="true">/</span>
+              {crumb && (
+                <>
+                  <b>{crumb.section}</b>
+                  {crumb.child && (
+                    <>
+                      <span className="ws-sep" aria-hidden="true">·</span>
+                      {crumb.child}
+                    </>
+                  )}
+                </>
+              )}
+            </span>
             <div className="ws-bright">
               <SearchPill onOpen={onOpenSearch} />
               <HelpButton onOpen={onOpenHelp} />
             </div>
           </header>
           <div className="ws-work">{children}</div>
-          </div>
         </div>
+      </div>
 
     </div>
   );

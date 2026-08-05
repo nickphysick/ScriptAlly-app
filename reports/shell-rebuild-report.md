@@ -271,7 +271,13 @@ allowed a third block.
 
 ---
 
-# Amendment 1 — full-screen workspace geometry + collapse grammar
+# Amendment 1 (first revision) — full-screen workspace geometry + collapse grammar
+
+> ⚠️ **PARTLY SUPERSEDED by the revised Amendment 1 below.** The full-screen geometry, the
+> card-on-ground and the collapse grammar in this section all still stand. The **architecture**
+> does not: the split-row/painted-rail model recorded here was replaced by a decoupled rail and
+> panel, and with it T3 by T3b, the anti-echo rule, the panel width, and the brand's position.
+> Kept as the record of what was decided and why.
 
 Applied in one pass, one commit, on top of the six above. The design ref
 `design-refs/shell-workspace-doubledecker.html` was **replaced in place** first (`8858254`): the
@@ -383,3 +389,155 @@ layout-engine work are top of the list:**
 5. The three expansion paths end to end, and the 120/160ms peek at the rail-to-flyout boundary.
 6. `[` from inside a field and with the palette open — the suppression is the interesting half.
 7. Below 768px: the card should lose its frame and become the page, with mobile chrome untouched.
+
+---
+
+# Amendment 1 (revised) — decoupled rail + panel, brand in the crumb, dashboard in-shell
+
+Applied in one pass, one commit. The design ref was replaced in place first (`0102937`) — for the
+**third** time it had not been recommitted, and the newer revision was sitting in `~/Downloads`.
+
+## Supersession list
+
+| # | Superseded | Deleted / replaced |
+|---|---|---|
+| **B / T3** | **The split-row, painted-rail architecture** | `.ws-shell` (the shared gradient column), `.ws-row`/`.ws-ci`/`.ws-cl`/`.ws-ib`/`.ws-fade` and every rule keyed to them, deleted from `workspaceShell.css`. Replaced by `.ws-rail` + `.ws-panel` as siblings. **T3's gradient-and-spanning-rows locks are deleted, not weakened** — see T3b. |
+| **B** | **The anti-echo dimming** (section C of the previous draft) | `rgba(168,154,138,.4)`/`.65` rules deleted; a lock now fails if either reappears. It existed only because the rail mirrored the panel's rows. |
+| **B** | `--shell-panelw` 216 → **232** | Lock rewritten in `primitives.test.tsx`, and a second lock asserts 216 is *gone*. |
+| **B** | The rail shadow as the shell's `::after` | Now the **panel's `::before`** — a shadow cast by the rail would need the rail to own it, and the rail must stay unconditionally static. |
+| **B** | Manuscript icon on the rail | Gone. The rail starts at Dashboard; collapsed users switch book by expanding or via ⌘K. |
+| **C** | The wordmark in the sidebar | Moved to the **head of the breadcrumb**, as the real asset. The rail's "S" tile is the only mark in the sidebar. |
+| **G** | Dashboard (and Settings/Plans/Help) on the top-nav shell | `TOPNAV_SHELL_PATHS` is now **empty**; the branch is deleted from `App.tsx`. `TopNavShell`/`TopNavHost`/`TopNavPanelData` are **intact and unmounted**. |
+| **H** | The four Queries filter children | Replaced by **Query Centre** + **Analytics**. No count under Queries; the rail badge is To-do's alone. |
+| **H2** | "Queries Hub" as the page title | Renamed **Query Centre**, so nav, crumb and heading agree. |
+
+## Why T3 became T3b — the failure it was defending against
+
+T3 said the rail is background paint under rows that span both surfaces, and that kept the icons
+aligned **by construction**. It also made the rail a *function of the panel*: an open accordion
+punched a void through the icon column, and the anti-echo dimming turned what remained into a
+broken strip.
+
+**T3b retires the problem instead of defending against it.** The rail is its own element with its
+own even rhythm, and nothing in it varies with `collapsed` except the `»` control. The active
+square comes from the **route**, not from the collapse state, which is why it is not an exception.
+
+## New / changed tokens, with locks
+
+| Token | Value | Measured |
+|---|---|---|
+| `--shell-panelw` | `232px` *(was 216)* | **`232px`** ✓ |
+| `--shell-railw` | `52px` | **`52px`** ✓ |
+| `--shell-frame` | `14px` | **`14px`** ✓ |
+| `--shell-card-radius` | `16px` | **`16px`** ✓ |
+| `--shell-chrome` (page ground) | `#fbf9f5` | **`#fbf9f5`** ✓ |
+
+## ⚠️ Item C — the logotype, and a number that had to be measured
+
+The asset **exists**, so C did not halt: `/scriptally-title-v2.png`, rendered elsewhere by
+`ScriptAllyLogo`. But the amendment asks for "**~16px cap-height**", and this asset is the one the
+repo already has a warning about.
+
+**Measured in the browser** by reading the PNG into a canvas and scanning for ink:
+
+- Asset **2400 × 750**
+- Full ink span **513px = 68.4%** of the height *(confirms the standing note)*
+- **Cap-"S" spans y 190 → 577 = 388px = 51.7%**
+
+So `heightPx` is **not** cap-height. A 16px cap needs a **31px element** — and setting `16` would
+have rendered an **8px cap**, looking like the logo had simply been made too small, with nothing
+to point at. `LOGOTYPE_PX = 31` is locked, with the derivation in the comment.
+
+## The three expansion paths (unchanged in behaviour, re-anchored to the rail)
+
+Amendment 1 (E) trades **Slack/Jira persistent-collapse** (click navigates, sidebar stays shut —
+collapse as a *setting*) for **Notion/Linear peek-and-restore** (collapse as a temporary *focus
+mode*, ended by committed navigation).
+
+1. **Click anything in the sidebar → expands.** Childless also navigates; sectioned also opens its
+   accordion and lands on the default child, unless the child you are on belongs to that section.
+   The rail's Settings icon expands. **No click path opens a flyout.**
+2. **Flyout selection → commits fully** — navigate, close, expand, open that accordion where the
+   flyout was.
+3. **Expand without navigating** — the `»` rail row above Settings, and `[`. The only path that
+   does not move you, which is exactly why it exists.
+
+**Hover peeks, pointer only**: 120ms intent, 160ms grace, instant switching along the rail;
+childless icons tooltip only. Touch follows path 1, so nothing is unreachable.
+
+**One rail-versus-panel difference worth naming:** the rail **never toggles a section shut**. It is
+a set of destinations; an icon that sometimes navigated and sometimes closed what you were looking
+at would be two controls wearing one glyph. The panel row keeps the toggle.
+
+## G — dashboard in-shell, and what happened to the top-nav shell
+
+With Dashboard on the top-nav shell, **every visit home swapped the entire chrome** — sidebar gone,
+nav relocated, ground recoloured — a jarring loss of wayfinding on the most-visited page. It now
+renders in the content card as a normal childless section; both the S tile and the rail's Dashboard
+icon go there and the sidebar persists. The hero scales **66px → 40px** (container only — structure,
+copy and components untouched). `TODO(dashboard-scope)`: the manuscript pill stays visible but
+dashboard content remains cross-manuscript for v1.
+
+**The top-nav shell is PARKED, not deleted.** `TopNavShell` (with its morphing mega surface),
+`TopNavHost`, `TopNavPanelData` and `lib/topNav.ts` are all intact and unmounted, held for the
+public marketing site where the mega nav becomes the logged-out header. `TOPNAV_SHELL_PATHS` is
+kept as an empty set deliberately — deleting it would delete the seam it returns through.
+
+## H — where the `?status=` param survives
+
+Removed from the **sidebar**, kept everywhere else. It is still parsed in `App.tsx` beside `?q=`,
+still passed to `Queries` as `statusFilter`, and still applied to the hub's own filter model by
+`lib/queriesFilterParam`. That is what lets palette results and dashboard deep-links open the hub
+pre-filtered. `attentionCount` and `isOverdueForReply` also survive — they drive the hub's filter
+and the parked mega panel; only the *nav's* use of them is gone.
+
+`TODO(analytics-page)` — `/queries/analytics` is a real route with an honest placeholder. It
+**invents no figures**: a placeholder showing plausible numbers is worse than an empty one,
+because it is read as data.
+
+## Traps
+
+T1, T2, T4, T5, T6 unchanged. **T3 → T3b**: the rail is static and never reflows; its contents are
+identical between states bar the `»` control and the active square. Locked five ways — no
+`.ws-rail.shut` rule, no transition on the rail, the rail is a real element (not a gradient stop),
+the *panel* is what collapses, and the rail casts no shadow.
+
+## Three more locks that were wrong before they were right
+
+1. **The collapsed render is not reachable in this environment, and two attempts to fake it both
+   failed *silently or loudly*.** Collapse reads `window.localStorage` behind a
+   `typeof window === "undefined"` guard; this env is `node` with no window, so seeding
+   `globalThis.localStorage` did nothing — **every "collapsed" render came back expanded, and the
+   test was green while asserting the wrong state**. Defining a bare `globalThis.window` then broke
+   every other render that branches on it. T3b is therefore asserted at **source**, precisely: the
+   rail's JSX may read `collapsed` in exactly one render branch. The visual half is browser-pending.
+2. **The test fixture still carried the old IA** (All queries / Needs attention), so three
+   assertions failed for the right reason — the fixture, not the code. It now mirrors the shipped IA.
+3. **Six locks in other files failed as a consequence** and were each rewritten rather than muted:
+   the panel-width token, the top-nav tier, the `routeActive` expression (a sibling route now
+   shares its `routeKey`), the hub's title, and the two brand locks.
+
+## Gates
+
+`tsc` clean · `vite build` clean · **Vitest 2447 passed | 2 skipped (147 files)**, up from 2441.
+Browser: five tokens measured live, the logotype geometry measured from the asset itself, and **no
+console errors**.
+
+## Browser-verify pending — refreshed
+
+The shells remain auth-gated. Nothing below is claimed; the two layout-engine items the amendment
+names are first, as instructed.
+
+1. **The rail shadow** — now the panel's `::before`. Check it reads as the rail casting onto the
+   panel and does not band or clip at the seam.
+2. **The card frame** — 14px top/right/bottom, 12px left, and whether the asymmetry reads as even.
+3. **T3b in the flesh** — collapse and watch the rail: no icon should move by a pixel, and no gap
+   should open where the accordion was.
+4. **The panel collapsing to zero** — width + opacity together, with the contents sliding out
+   rather than reflowing.
+5. **The crumb logotype at 31px** — whether the measured ~16px cap actually sits right beside 13px
+   crumb text, and baseline alignment.
+6. The three expansion paths, the 120/160ms peek, and `[` suppression inside a field / with ⌘K open.
+7. **The dashboard inside the card** — the 40px hero, and whether the stat cards breathe at the
+   card's width.
+8. Below 768px: card loses its frame, mobile chrome untouched.

@@ -16,7 +16,7 @@ import {
 import { TOPNAV_SHELL_PATHS, WORKSPACE_SHELL_PATHS } from "./shellForRoute";
 import { shellHitFor } from "./workspaceShell";
 
-const NAV = workspaceSections({ attention: 3, todo: 4 });
+const NAV = workspaceSections({ todo: 4 });
 const byId = (id: string) => NAV.find((s) => s.id === id)!;
 
 describe("The IA renders what exists — and nothing else", () => {
@@ -53,9 +53,27 @@ describe("The IA renders what exists — and nothing else", () => {
     expect(NAV.filter((s) => s.children?.length).map((s) => s.id)).toEqual(["queries", "agents"]);
   });
 
-  it("Queries carries the pack's four children, in order", () => {
-    expect(byId("queries").children!.map((c) => c.label))
-      .toEqual(["All queries", "Needs attention", "Awaiting response", "Closed"]);
+  /* ⚠️⚠️ AMENDMENT 1 (H) — THE SIDEBAR IS NAVIGATION ONLY. The four filter children are GONE:
+     they made the nav a second control surface for a page that already had one, so the two could
+     disagree about what you were looking at — and they forced counts into a navigation column,
+     which is how a nav becomes a dashboard. Two real destinations now. */
+  it("Queries carries exactly Query Centre and Analytics", () => {
+    expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Analytics"]);
+  });
+
+  it("no filter child survives in the nav", () => {
+    const labels = NAV.flatMap((s) => (s.children ?? []).map((c) => c.label));
+    for (const gone of ["All queries", "Needs attention", "Awaiting response", "Closed"]) {
+      expect(labels, gone).not.toContain(gone);
+    }
+  });
+
+  /* H5 — with the filter children gone there is nothing under Queries for a count to describe. */
+  it("no count sits anywhere but To-do", () => {
+    const counted = NAV.filter((s) => typeof s.count === "number").map((s) => s.id);
+    expect(counted).toEqual(["todo"]);
+    const kidCounts = NAV.flatMap((s) => (s.children ?? [])).filter((c) => typeof c.count === "number");
+    expect(kidCounts).toHaveLength(0);
   });
 
   it("Agents carries Contact list and Discover", () => {
@@ -69,9 +87,8 @@ describe("The IA renders what exists — and nothing else", () => {
 
   /* A nav that says "0" where it means "nothing to do" is noise on every quiet day. */
   it("a zero count is omitted rather than rendered as 0", () => {
-    const quiet = workspaceSections({ attention: 0, todo: 0 });
+    const quiet = workspaceSections({ todo: 0 });
     expect(quiet.find((s) => s.id === "todo")!.count).toBeUndefined();
-    expect(quiet.find((s) => s.id === "queries")!.children![1].count).toBeUndefined();
   });
 
   it("the nav's own children resolve against the route matcher", () => {
@@ -85,7 +102,14 @@ describe("The IA renders what exists — and nothing else", () => {
   });
 });
 
-describe("The ?status= filter — new in this pack, because it did not exist", () => {
+/**
+ * ⚠️ THE PARAM SURVIVES AMENDMENT 1 (H4) — it is simply no longer sidebar-driven. It remains
+ * IN-PAGE, linkable state: App.tsx still parses it beside `?q=` and passes it to Queries, which
+ * still applies it to the hub's own filter model. That is what makes palette results and
+ * dashboard deep-links able to open the hub pre-filtered. Deleting it would have removed a
+ * working capability to satisfy a rule about the SIDEBAR.
+ */
+describe("The ?status= filter — still live, now as in-page state", () => {
   it("the param key is `status`", () => {
     expect(QUERIES_STATUS_PARAM).toBe("status");
   });
