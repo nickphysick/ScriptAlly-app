@@ -869,32 +869,30 @@ describe('/users/{userId}/activities', () => {
   });
 });
 
-// ─── /users/{userId}/activity (top-level sync log) ───────────────────────────
+// ─── /users/{userId}/activity (RETIRED legacy store — Tier 3 · Phase 7) ──────
 
-describe('/users/{userId}/activity (top-level sync)', () => {
-  const validTopLevel = () => ({
+describe('/users/{userId}/activity (retired legacy store)', () => {
+  const legacyDoc = () => ({
     type: 'status_change',
     createdAt: '2026-01-01T00:00:00.000Z',
     note: 'Status changed',
   });
 
-  it('owner can create top-level activity', async () => {
-    const db = aliceCtx().firestore();
-    await assertSucceeds(
-      setDoc(doc(db, 'users', ALICE, 'activity', 'tl-1'), validTopLevel())
-    );
-  });
-
-  it('blocks cross-user write', async () => {
-    await assertFails(
-      setDoc(doc(bobCtx().firestore(), 'users', ALICE, 'activity', 'tl-1'), validTopLevel())
-    );
-  });
-
-  it('blocks unauthenticated read', async () => {
+  it('the store is retired — even the OWNER is denied, all ops (default-deny)', async () => {
     await asAdmin(async (ctx) => {
-      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'activity', 'tl-1'), validTopLevel());
+      // A legacy row, seeded rules-free — the orphaned data the retirement leaves in place.
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'activity', 'tl-1'), legacyDoc());
     });
+    const db = aliceCtx().firestore();
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'activity', 'tl-2'), legacyDoc()));
+    await assertFails(getDoc(doc(db, 'users', ALICE, 'activity', 'tl-1')));
+    await assertFails(deleteDoc(doc(db, 'users', ALICE, 'activity', 'tl-1')));
+  });
+
+  it('cross-user and unauthenticated access stay denied too', async () => {
+    await assertFails(
+      setDoc(doc(bobCtx().firestore(), 'users', ALICE, 'activity', 'tl-1'), legacyDoc())
+    );
     await assertFails(getDoc(doc(unauthed().firestore(), 'users', ALICE, 'activity', 'tl-1')));
   });
 });

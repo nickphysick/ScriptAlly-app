@@ -325,14 +325,8 @@ service cloud.firestore {
         && data.note is string && data.note.size() <= 16384;
     }
 
-    function isValidTopLevelActivity(data) {
-      return data.type is string && data.type.size() <= 128
-        && (data.createdAt is timestamp || data.createdAt is string)
-        && data.note is string && data.note.size() <= 16384
-        && (data.get('queryId', null) == null || (data.queryId is string && data.queryId.size() <= 128))
-        && (data.get('agentName', null) == null || (data.agentName is string && data.agentName.size() <= 256))
-        && (data.get('manuscriptTitle', null) == null || (data.manuscriptTitle is string && data.manuscriptTitle.size() <= 512));
-    }
+    // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
+    // Phase 7. Zero writers since the derived-status era; its one reader fed unrendered state.)
 
     // (isValidManuscriptNote is gone with the RETIRED manuscripts/{id}/notes subcollection —
     // Tier 2 · Phase 6. The jottings feed lost its UI long ago; nothing wrote or read the store.)
@@ -581,12 +575,11 @@ service cloud.firestore {
         );
       }
 
-      // ROUTE: Top-level activity sync logs (Fix for permission errors)
-      match /activity/{activityId} {
-        allow get, delete: if isOwner(userId) && isValidId(activityId);
-        allow list: if isOwner(userId);
-        allow create, update: if isOwner(userId) && isValidId(activityId) && isValidTopLevelActivity(incoming());
-      }
+      // The top-level users/{uid}/activity store is RETIRED (Tier 3 · Phase 7): no match block
+      // = default-deny, all ops. It had zero writers and one reader feeding unrendered state.
+      // Legacy documents remain in Firestore, deliberately unreadable and unwritable — left in
+      // place, not migrated (same treatment as the manuscripts-notes retirement). The nested
+      // queries/{queryId}/activity subcollection above is the AUTHORITATIVE log and is unrelated.
 
       // ROUTE: JournalEntries
       match /journalEntries/{entryId} {

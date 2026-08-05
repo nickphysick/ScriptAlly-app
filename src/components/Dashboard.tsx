@@ -12,14 +12,6 @@ import { STATUS_ORDER } from "../lib/statusOrder";
 import { lockStageScroll } from "../lib/stageScroll";
 import { manuscriptGenres } from "../lib/manuscripts";
 import { agentBuckets } from "../lib/lifecycle";
-import { 
-  onSnapshot, 
-  collection, 
-  query, 
-  orderBy, 
-  limit 
-} from "firebase/firestore";
-import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseScreen } from "./RecordResponseScreen";
@@ -563,29 +555,10 @@ export const Dashboard: React.FC<{
   const [activeTouchTaskId, setActiveTouchTaskId] = useState<string | null>(null);
   const [isTouch, setIsTouch] = useState(false);
 
-  const [timelineItems, setTimelineItems] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (!currentUser?.id) {
-      setTimelineItems([]);
-      return;
-    }
-    const unsubscribe = onSnapshot(
-      query(
-        collection(db, 'users', currentUser.id, 'activity'),
-        orderBy('createdAt', 'desc'),
-        limit(20)
-      ),
-      (snapshot) => {
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTimelineItems(items);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/activity`);
-      }
-    );
-    return () => unsubscribe();
-  }, [currentUser?.id]);
+  // (The legacy top-level `users/{uid}/activity` listener is RETIRED — Tier 3 · Phase 7. The
+  // store has had zero writers since the derived-status era, and the listener fed timelineItems,
+  // which nothing rendered: a wasted subscription + 20 document reads on every Dashboard mount.
+  // Rules now default-deny the store; legacy documents stay in Firestore, orphaned by design.)
 
   // Undo Toast + calendar states (the query slide-in panel is retired — query editing is the
   // app-level Edit Query drawer, opened via openEditQuery).
@@ -1093,11 +1066,10 @@ export const Dashboard: React.FC<{
 
   // Group activities/events for Timeline
   const mergedActivities = useMemo(() => {
-    // Single source of truth: the global `activities` collection. We deliberately no longer merge
-    // the legacy top-level `activity` feed (timelineItems). recordQueryResponse no longer writes
-    // that feed, and merging the two collections — which were de-duped only by document id —
-    // produced two rows for a single recorded response (e.g. "Query rejected…" + "Rejection
-    // received from …"). Reading one store keeps every recorded event on the dashboard exactly once.
+    // Single source of truth: the global `activities` collection. The legacy top-level
+    // `activity` feed is RETIRED outright (Tier 3 · Phase 7 — writer-less, listener removed):
+    // merging the two collections — de-duped only by document id — had produced two rows for a
+    // single recorded response. Reading one store keeps every recorded event exactly once.
     const seen = new Set<string>();
     return [...activities].filter(item => {
       if (!item.id || seen.has(item.id)) return false;
