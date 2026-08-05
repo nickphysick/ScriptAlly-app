@@ -9,7 +9,9 @@
  * workspace instead). "See pricing"/Pricing → /pricing; "See what Pro adds" → /pricing;
  * the import-template link downloads the real template; the remaining row text-links point
  * at sign-up (the app is the explainer). Privacy/Terms have no pages yet — rendered inert,
- * logged in BUILD-REPORT.md.
+ * logged in BUILD-REPORT.md. The footer deliberately has NO Help link: /help is a workspace
+ * route, so for a logged-out visitor it dead-ended on the signup screen (Tier 2 · Phase 3);
+ * no marketing help page exists, and inventing one is a separate decision.
  */
 
 import React, { useEffect } from "react";
@@ -52,7 +54,6 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
         </div>
         <div className="mk-footlinks">
           <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
-          <button type="button" onClick={() => onNavigate("help")}>Help</button>
           <span style={{ marginRight: 18 }}>Privacy</span>
           <span>Terms</span>
         </div>

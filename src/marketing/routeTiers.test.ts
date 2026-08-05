@@ -24,7 +24,7 @@ describe("tierForPath", () => {
   it("keeps every workspace route in the workspace tier", () => {
     for (const p of [
       "/dashboard", "/queries", "/todo", "/agents", "/agents/discover",
-      "/manuscripts", "/manuscripts/packages", "/import", "/email-import-dev",
+      "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import", "/email-import-dev",
     ]) {
       expect(tierForPath(p)).toBe("workspace");
     }
