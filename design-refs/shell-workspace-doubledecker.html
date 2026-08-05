@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ScriptAlly — Workspace shell · decoupled rail</title>
+<title>ScriptAlly — Workspace</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -17,11 +17,6 @@
 html,body{height:100%}
 body{font-family:Inter,sans-serif;background:var(--chrome);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
 
-.ctl{flex:none;background:#fff;border-bottom:1px solid #e4dfd6;padding:10px 18px 12px;z-index:60}
-.ctl h1{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:6px}
-.tip{font-size:12px;line-height:1.6;color:var(--ink-soft);max-width:1120px}
-.tip b{color:var(--ink);font-weight:600}
-.tip code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f4f0e9;border-radius:4px;padding:1px 4px}
 
 .app{flex:1;min-height:0;display:flex;background:var(--chrome)}
 
@@ -78,9 +73,9 @@ body.closed .panel{width:0;opacity:0}
 .pdiv{height:1px;background:var(--line);margin:0 4px 8px;flex:none}
 
 /* section rows */
-.ni{height:38px;display:flex;align-items:center;gap:9px;padding:0 10px;border-radius:8px;cursor:pointer;
-  font-size:13.5px;font-weight:500;color:var(--ink-soft);transition:background .13s,color .13s;outline:none;flex:none}
-.ni svg.ic{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none;opacity:.8}
+.ni{height:40px;display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:8px;cursor:pointer;
+  font-size:14px;font-weight:500;color:#544b44;transition:background .13s,color .13s;outline:none;flex:none}
+.ni svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none;opacity:.9}
 .ni:hover{background:rgba(242,237,231,.6);color:var(--ink)}
 .ni:hover svg.ic{opacity:1}
 .ni.on{background:var(--parch);color:var(--ink);font-weight:600}
@@ -100,9 +95,9 @@ body.closed .panel{width:0;opacity:0}
 .sub{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s cubic-bezier(.4,0,.2,1)}
 .sub.open{grid-template-rows:1fr}
 .subin{overflow:hidden;min-width:0;position:relative;padding:1px 0 4px}
-.subin::before{content:'';position:absolute;left:18px;top:4px;bottom:9px;width:1px;background:var(--edge)}
-.srow{height:30px;display:flex;align-items:center;margin:1px 0 1px 0;padding:0 10px 0 36px;border-radius:7px;
-  font-size:12.5px;font-weight:500;color:var(--ink-soft);cursor:pointer;white-space:nowrap;overflow:hidden;outline:none;
+.subin::before{content:'';position:absolute;left:19px;top:4px;bottom:9px;width:1px;background:var(--edge)}
+.srow{height:32px;display:flex;align-items:center;margin:1px 0 1px 0;padding:0 10px 0 38px;border-radius:7px;
+  font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;white-space:nowrap;overflow:hidden;outline:none;
   transition:background .13s,color .13s}
 .srow:hover{background:rgba(242,237,231,.6);color:var(--ink)}
 .srow.on{background:var(--parch);color:var(--ink);font-weight:600}
@@ -133,11 +128,18 @@ body.closed .panel{width:0;opacity:0}
 .card{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border-radius:var(--cardr);
   border:1px solid rgba(46,39,35,.06);
   box-shadow:0 1px 2px rgba(46,39,35,.05),0 8px 24px rgba(46,39,35,.08);overflow:hidden}
-.bar{height:var(--head);flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;border-bottom:1px solid var(--line);background:#fff}
-.logotype{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);letter-spacing:.01em}
-.crumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.crumb .sep{color:#cfc4b4}
-.crumb b{color:var(--ink);font-weight:600}
+.cscroll{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column}
+.bar{height:var(--head);flex:none;display:flex;align-items:center;gap:14px;padding:0 22px;position:sticky;top:0;z-index:8;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 18px -10px rgba(46,39,35,.22)}
+@supports not (backdrop-filter:blur(10px)){.bar{background:#fff}}
+.logotype{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--ink);letter-spacing:.01em;cursor:pointer;transition:opacity .15s}
+.logotype:hover{opacity:.72}
+.crumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:9px}
+.crumb .sep{color:#cfc4b4;font-weight:400}
+.crumb .seg{color:var(--muted);cursor:pointer;transition:color .13s}
+.crumb .seg:hover{color:var(--ink)}
+.crumb .cur{color:var(--ink);font-weight:600}
 .bright{margin-left:auto;display:flex;align-items:center;gap:10px}
 .bsearch{height:34px;width:210px;border-radius:9px;background:#fff;border:1px solid var(--edge);display:flex;align-items:center;gap:8px;padding:0 11px;color:var(--muted);font-size:12px;cursor:pointer;transition:border-color .15s;outline:none}
 .bsearch:hover{border-color:#d6cdbf}
@@ -147,7 +149,7 @@ body.closed .panel{width:0;opacity:0}
 .help:hover{color:var(--ink);background:rgba(242,237,231,.7)}
 .help svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
-.work{flex:1;min-height:0;background:#fff;padding:26px 28px;overflow:auto}
+.work{flex:none;background:#fff;padding:26px 28px}
 .work h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;margin-bottom:4px}
 .work .sub2{font-size:12.5px;color:var(--muted);margin-bottom:20px}
 .skrow{display:flex;gap:14px}
@@ -155,15 +157,21 @@ body.closed .panel{width:0;opacity:0}
 .sk .l{height:10px;border-radius:5px;background:#f1ece3;margin-bottom:12px}
 .sk .l.w60{width:60%}.sk .l.w40{width:40%}.sk .l.w80{width:80%}
 
+/* bar additions */
+
+.nbtn{height:34px;padding:0 14px;border-radius:9px;background:#f5e3da;border:1px solid rgba(124,58,42,.28);
+  color:var(--burgundy);font-family:Inter;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;cursor:pointer;transition:background .15s}
+.nbtn:hover{background:#f1d9cc}
+.nbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.sync{display:inline;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#b3a698;white-space:nowrap}
+.vdiv{display:block;width:1px;height:18px;background:var(--line)}
+
+
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
 
-<header class="ctl">
-  <h1>Decoupled rail + panel — brand in the breadcrumb</h1>
-  <div class="tip"><b>What was missing:</b> professional double-deckers give the rail its own even rhythm, independent of the panel. Ours mirrored the panel rows onto the rail, so open accordions punched voids into the icon column and the dimmed copies read as a broken strip. <b>Now the rail is a static, evenly spaced icon set</b> — 20px icons, one per section, burgundy-dot badge for To-do, avatar at the foot — and it never reflows: expanded, collapsed, accordions open, it is identical, which retires the drift problem outright. The panel has its own tighter rhythm (38px sections, 30px children, all text on one left axis), the wordmark is gone from it — the <b>brand leads the breadcrumb</b> in the card bar (real logotype asset in build) — the manuscript pill heads the panel with the « ghost beside it, and the foot is name + plan + Settings with no rail/panel splits. <b>The sidebar is nav only</b> — Queries carries just Query Centre and Analytics; filters live inside the page, so no counts sit under Queries and the attention signal stays on To-do. The rail now starts at Dashboard (no manuscript icon — switching happens via the panel pill or ⌘K), and both the <b>S tile and the Dashboard icon go straight to the dashboard, which now renders inside the shell</b> — click either to see it in the card; the sidebar never disappears. Collapse grammar unchanged: hover peeks flyouts, any click commits and restores; » appears on the rail above the avatar when collapsed; <code>[</code> toggles.</div>
-</header>
 
 <div class="app">
 
@@ -174,10 +182,10 @@ body.closed .panel{width:0;opacity:0}
     <div class="ri xtog" data-tip="Expand" data-act="expand">
       <svg viewBox="0 0 24 24"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg>
     </div>
+    <div class="ava" title="Nick Physick" style="margin:4px 0 2px">NP</div>
     <div class="ri" style="margin:0" data-tip="Settings" data-act="settings">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
     </div>
-    <div class="ava" title="Nick Physick">NP</div>
     <div class="fly" id="fly"></div>
   </aside>
 
@@ -206,11 +214,15 @@ body.closed .panel{width:0;opacity:0}
 
   <div class="main">
     <div class="card">
+     <div class="cscroll" id="cscroll">
       <div class="bar">
-        <span class="crumb"><span class="logotype">ScriptAlly</span><span class="sep">/</span><span id="crumb"></span></span>
+        <span class="crumb"><span class="logotype" id="logoHome">ScriptAlly</span><span class="sep">/</span><span id="crumb"></span></span>
         <div class="bright">
+          <span class="sync">All changes saved</span>
+          <span class="vdiv"></span>
           <div class="bsearch" tabindex="0"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>Search<span class="k">⌘K</span></div>
           <div class="help" tabindex="0" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 0 1 5.5.7c0 1.8-2.7 2.3-2.7 3.8"/><circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="none"/></svg></div>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New</button>
         </div>
       </div>
       <div class="work">
@@ -221,6 +233,8 @@ body.closed .panel{width:0;opacity:0}
             <div class="sk" style="max-width:320px"><div class="l w60"></div><div class="l w80"></div><div class="l w40"></div><div class="l w80"></div><div class="l w60"></div></div>
             <div class="sk"><div class="l w40"></div><div class="l w80"></div><div class="l w60"></div></div>
           </div>
+          <div class="skrow" style="margin-top:14px"><div class="sk" style="height:220px"><div class="l w40"></div><div class="l w80"></div></div><div class="sk" style="height:220px"><div class="l w60"></div><div class="l w40"></div></div></div>
+          <div class="skrow" style="margin-top:14px"><div class="sk" style="height:220px"><div class="l w80"></div><div class="l w60"></div></div></div>
         </div>
         <div id="view-dash" style="display:none;text-align:center;padding-top:26px">
           <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)">Wednesday 5 August &nbsp;·&nbsp; Week 140 of querying</div>
@@ -235,6 +249,7 @@ body.closed .panel{width:0;opacity:0}
           <div style="font-size:11.5px;color:var(--muted);margin-top:26px">Dashboard now lives inside the shell — the sidebar never disappears.</div>
         </div>
       </div>
+     </div>
     </div>
   </div>
 
@@ -350,6 +365,8 @@ document.addEventListener('click',e=>{if(!rail.contains(e.target))closeFly()});
 function toggleCollapse(e){if(e)e.stopPropagation();closeFly();document.body.classList.toggle('closed');update()}
 document.getElementById('collapseBtn').onclick=toggleCollapse;
 rail.querySelector('[data-act="expand"]').onclick=toggleCollapse;
+document.getElementById('logoHome').onclick=()=>{
+  state.active='dash';state.child=null;closeFly();update()};
 rail.querySelector('[data-act="home"]').onclick=()=>{
   state.active='dash';state.child=null;
   if(closed())document.body.classList.remove('closed');
@@ -378,12 +395,15 @@ function update(){
     if(sec.children)sec.children.forEach(c=>el.srows[c.id].classList.toggle('on',secActive&&state.child===c.id));
   });
   const sec=SECTIONS.find(s=>s.id===state.active),ch=childOf(sec,state.child);
-  crumb.innerHTML=`<b>${sec.label}</b>${ch?' <span class="sep">·</span> '+ch.label:''}`;
+  if(ch){crumb.innerHTML=`<span class="seg" id="crumbSec">${sec.label}</span> <span class="sep">/</span> <span class="cur">${ch.label}</span>`;
+    document.getElementById('crumbSec').onclick=()=>{state.child=sec.def;update()};}
+  else{crumb.innerHTML=`<span class="cur">${sec.label}</span>`}
   document.getElementById('view-dash').style.display=state.active==='dash'?'block':'none';
   document.getElementById('view-page').style.display=state.active==='dash'?'none':'block';
   wtitle.textContent=ch?ch.label:sec.label;
 }
 update();
+
 </script>
 </body>
 </html>
