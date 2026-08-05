@@ -63,9 +63,14 @@
   color: var(--band-meta, #9c8878); display: flex; gap: 10px; align-items: center; justify-content: center;
   margin-bottom: 20px;
 }
+/* ⚠️ INK, NOT --hdr (shell-rebuild pack, Phase 4 · Baked 15). The greeting read the per-theme
+   header token, which is mocha #5d4037 in Cappuccino — warm enough to sit as an accent on a page
+   whose only accent should be urgency. The dashboard renders in the top-nav shell now, and that
+   shell's hero is ink. Section titles elsewhere keep --hdr: this is a rule about the greeting,
+   not about headings. */
 .sa-greet-hi {
   font-family: var(--font-serif); font-size: 66px; font-weight: 600;
-  color: var(--hdr, #5d4037); line-height: 1.03; margin: 0 0 22px;
+  color: var(--shell-ink); line-height: 1.03; margin: 0 0 22px;
 }
 /* the name keeps the heading's own voice — no italics, no colour */
 .sa-greet-hi em { font-style: normal; color: inherit; }

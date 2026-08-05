@@ -99,16 +99,27 @@ describe("the masthead", () => {
     expect(css).not.toContain("var(--shell-cap-rim)");
   });
 
-  it("⚠️ the hairline is SCROLL-REVEALED, where the workspace bar's is permanent", () => {
-    // No capsule here, so no corner to complete. The asymmetry is deliberate.
-    expect(css).toMatch(/\.tn-mast::after \{[^}]*opacity: 0/s);
-    expect(css).toContain(".tn-mast.scrolled::after { opacity: 1; }");
-    const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
-    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*border-bottom: 1px solid var\(--shell-line\)/s);
+  /* ⚠️⚠️ T1 — THE SEAM BELONGS TO THE MEGA, NOT THE BAR, and this is the lock that says so.
+     Absolutely-positioned children paint OVER their parent's borders, so a bar-owned seam is
+     covered by the very panel it is meant to separate. The bar's border is the SCROLL hairline
+     only, and it goes transparent while open; the line you see between them is the mega wrap's
+     own `border-top`. Rewritten from the ::after form in the shell rebuild. */
+  it("⚠️ T1 — the seam is the MEGA's border-top; the bar's border goes transparent while open", () => {
+    expect(css).toMatch(/\.tn-megawrap \{[^}]*border-top: 1px solid var\(--shell-seam\)/s);
+    expect(css).toMatch(/\.tn-mast \{[^}]*border-bottom: 1px solid transparent/s);
+    expect(css).toContain(".tn-mast.scrolled { border-bottom-color: var(--shell-hair); }");
+    expect(css).toContain(".tn-mast.megaopen { border-bottom-color: transparent; }");
+    expect(src).toContain("megaopen");
   });
 
-  it("the wordmark is the route home, so there is no Dashboard nav item", () => {
-    expect(at()).toContain("scriptally-title-v2.png");
+  /* ⚠️ REWRITTEN (shell-rebuild Phase 4): the brand is the ink TILE plus a Playfair wordmark
+     (Baked 15), not the PNG. Same rule — it is the route home, and there is no Dashboard item in
+     these menus — but the artwork is no longer how it is drawn. */
+  it("the brand is the ink tile + Playfair wordmark, and it is the route home", () => {
+    const html = at();
+    expect(html).toContain("tn-tile");
+    expect(html).toContain("ScriptAlly");
+    expect(html).not.toContain("scriptally-title-v2.png");
     expect(src).toContain('onNavigatePath("/dashboard")');
     expect(NAV_MENUS.map((m) => m.label)).not.toContain("Dashboard");
   });
@@ -121,28 +132,85 @@ describe("the masthead", () => {
 
 describe("the mega-menus", () => {
   it("columns come from CONTENT — never three reserved slots", () => {
-    expect(css).toMatch(/grid-template-columns: repeat\(var\(--cols, 2\), minmax\(0, 1fr\)\) 290px/);
+    expect(css).toMatch(/grid-template-columns: repeat\(var\(--cols, 2\), minmax\(0, 1fr\)\) minmax\(300px, 380px\)/);
     expect(src).toContain('["--cols" as string]: menu.columns.length');
     // the menus really are uneven, which is why this matters
     expect(new Set(NAV_MENUS.map((m) => m.columns.length)).size).toBeGreaterThan(0);
   });
 
-  it("same page colour, separated by SHADOW alone", () => {
-    expect(css).toMatch(/\.tn-mega \{[^}]*background: var\(--shell-canvas\)/s);
-    expect(css).toMatch(/\.tn-mega \{[^}]*box-shadow:/s);
+  /* ⚠️⚠️ BAKED 16 — ONE MORPHING SURFACE, NOT FOUR MENUS. Four separate menus would each open
+     and close on their own as the cursor slid along the bar, which reads as flicker no easing
+     can hide. There is one wrap; the panes stack absolutely inside it. */
+  it("is ONE wrap with the panes stacked inside it", () => {
+    expect(css).toMatch(/\.tn-megawrap \{[^}]*position: absolute/s);
+    expect(css).toMatch(/\.tn-mega \{[^}]*position: absolute/s);
+    // one wrap in the markup, however many panes
+    const html = at();
+    expect(html.match(/tn-megawrap/g), "exactly one wrap").toHaveLength(1);
+    expect(html.match(/class="tn-mega[ "]/g)?.length).toBe(NAV_MENUS.length);
+  });
+
+  /* ⚠️⚠️ T2 — THE HEIGHT IS SET IN JS AND CANNOT BE OTHERWISE: `height:auto` does not animate.
+     The `+ 2` is the wrap's own top and bottom borders under border-box — not a fudge factor.
+     Removing either half clips the pane or kills the morph. */
+  it("⚠️ T2 — the wrap's height is JS-measured from the active pane, plus its two borders", () => {
+    expect(src).toContain("offsetHeight + 2");
+    expect(src).toContain("style={{ height: open ? wrapH : 0 }}");
+    expect(css).toMatch(/\.tn-megawrap \{[^}]*height: 0/s);
+    expect(css, "the transition supplies the easing; JS supplies the value")
+      .toMatch(/\.tn-megawrap \{[^}]*transition: height var\(--shell-rollout\)/s);
+    expect(css, "never auto").not.toMatch(/\.tn-megawrap \{[^}]*height: auto/s);
+  });
+
+  it("panes travel from the direction of travel, and leave the opposite way", () => {
+    expect(css).toContain('.tn-mega.on[data-dir="1"]');
+    expect(css).toContain('.tn-mega.on[data-dir="-1"]');
+    expect(css).toContain('.tn-mega.out[data-dir="1"]');
+    expect(css).toContain('.tn-mega.out[data-dir="-1"]');
+    expect(css).toContain("@keyframes tn-in-right");
+    expect(css).toContain("@keyframes tn-in-left");
+  });
+
+  it("Baked 17's timings are the specced ones", () => {
+    expect(src).toContain("const INTENT_MS = 100");
+    expect(src).toContain("const GRACE_MS = 160");
+    expect(css).toMatch(/--shell-rollout/);
+  });
+
+  it("hover opens on intent, and click toggles for touch", () => {
+    expect(src).toContain("onMouseEnter");
+    expect(src).toContain("onClick={() => (open === menu.key ? hide() : show(menu.key))}");
   });
 
   it("scrim, Escape and outside-click all close them", () => {
     expect(src).toContain('e.key === "Escape"');
     expect(src).toContain("pointerdown");
     expect(css).toContain(".tn-scrim");
+    expect(css).toMatch(/\.tn-scrim \{[^}]*background: rgba\(46, 39, 35, 0\.28\)/s);
   });
 
   it("onboarding suppresses the menus but keeps the masthead", () => {
     const html = at({ suppressMenus: true });
     expect(html).toContain("tn-mast");
-    expect(html).toContain("scriptally-title-v2.png");
+    expect(html).toContain("tn-tile"); // the brand stays, so the page still looks like the product
     expect(html).not.toContain("tn-mega");
+  });
+});
+
+describe("the shared primitives — one component each, both shells", () => {
+  it("the bar uses SearchPill, HelpButton and AvatarChip rather than copies", () => {
+    const html = at();
+    expect(html).toContain("sp-search");
+    expect(html).toContain("sp-help");
+    expect(html).toContain("sp-ava");
+  });
+
+  /* The bespoke search field and avatar this shell used to draw are GONE — two implementations
+     of the same control is how the two shells come to disagree about what a search looks like. */
+  it("the bespoke search field and avatar are retired", () => {
+    expect(css).not.toContain(".tn-srch");
+    expect(css).not.toContain(".tn-av ");
+    expect(src).not.toContain("tn-srch");
   });
 });
 
