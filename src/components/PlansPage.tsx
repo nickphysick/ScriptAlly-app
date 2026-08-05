@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * PlansPage — the presentational Free-vs-Pro plans page. VISUAL LAYER ONLY: no billing, no Stripe,
- * no entitlement/gating, no plan state, no Firestore. The price is display copy; CTAs are inert
- * placeholders (// TODO: wire later). Reuses the shared MountPanel clipping card, the dashboard
- * page-ground token, the uniform band-header pieces, and the existing colour/font tokens.
+ * no entitlement/gating, no plan state, no Firestore. The price is display copy. There is
+ * deliberately NO plan-selection control: no payment path exists, so each card's foot states
+ * "coming soon" honestly (the AccountSettings ComingSoonPill pattern) instead of presenting a
+ * button that does nothing. Self-serve upgrade is a separate decision — do not wire upgradeToPro
+ * here (it would hollow out every plan gate in the app). Reuses the shared MountPanel clipping
+ * card, the dashboard page-ground token, the uniform band-header pieces, and the existing
+ * colour/font tokens.
  */
 import React from "react";
 import { MountPanel } from "./MountPanel";
@@ -17,9 +21,6 @@ import {
   pinkBandGradient,
   pinkBandRule,
   statusSageFill,
-  buttonPinkBg,
-  buttonPinkBorder,
-  ghostButtonBorder,
   burgundy,
   headingInk,
   bodyInk,
@@ -97,6 +98,27 @@ const NoMark: React.FC = () => (
   </span>
 );
 
+/* ── The AccountSettings ComingSoonPill pattern (same styles) — an honest non-interactive marker
+ *    for a control that does not exist yet. ── */
+const ComingSoonPill: React.FC = () => (
+  <span
+    style={{
+      fontFamily: FONT_MONO,
+      fontSize: 9,
+      letterSpacing: "0.08em",
+      textTransform: "uppercase",
+      color: mutedInk,
+      background: "rgba(124,58,42,0.06)",
+      border: "0.5px solid rgba(124,58,42,0.16)",
+      borderRadius: 999,
+      padding: "3px 8px",
+      whiteSpace: "nowrap",
+    }}
+  >
+    Coming soon
+  </span>
+);
+
 /* ── Plan card ────────────────────────────────────────────────────────────── */
 interface PlanProps {
   title: string;
@@ -106,11 +128,9 @@ interface PlanProps {
   per: string;
   pill?: string;
   features: string[];
-  ctaLabel: string;
-  ctaClass: string;
 }
 
-const PlanCard: React.FC<PlanProps> = ({ title, strapline, Emblem, amount, per, pill, features, ctaLabel, ctaClass }) => (
+const PlanCard: React.FC<PlanProps> = ({ title, strapline, Emblem, amount, per, pill, features }) => (
   <MountPanel fill style={{ height: "100%" }}>
     <BandHeader title={title} Emblem={Emblem} strapline={strapline} />
     <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px 22px 22px" }}>
@@ -139,14 +159,17 @@ const PlanCard: React.FC<PlanProps> = ({ title, strapline, Emblem, amount, per, 
         ))}
       </ul>
 
-      <button
-        type="button"
-        className={ctaClass}
-        onClick={() => { /* TODO: wire plan selection later — presentational only for now */ }}
-        style={{ marginTop: 22, width: "100%", padding: "11px 16px", borderRadius: 9, fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: burgundy, cursor: "pointer" }}
+      {/* No payment path exists, so no button pretends otherwise — the InertRow grammar from
+          AccountSettings (hairline top, dimmed, aria-disabled, label + pill) states it plainly. */}
+      <div
+        aria-disabled="true"
+        style={{ marginTop: 22, paddingTop: 16, borderTop: "0.5px solid #efe5da", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: 0.72 }}
       >
-        {ctaLabel}
-      </button>
+        <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk }}>
+          Plan selection
+        </span>
+        <ComingSoonPill />
+      </div>
     </div>
   </MountPanel>
 );
@@ -324,12 +347,8 @@ export const PlansPage: React.FC = () => (
   // No bespoke ground (capsule law — fixes P5 re-homing): the page inherits the content capsule.
   <div className="min-h-screen pb-16 font-sans" style={{ color: bodyInk }}>
 
-    {/* scoped CSS: CTA hovers (inline can't express :hover) + founder row stacks below 640px */}
+    {/* scoped CSS: the founder row stacks below 640px (inline can't express media queries) */}
     <style>{`
-      .plans-cta-free { background: #fff; border: 1px solid ${ghostButtonBorder}; transition: background .15s, border-color .15s; }
-      .plans-cta-free:hover { background: #fdf6f2; border-color: #c9a89e; }
-      .plans-cta-pro { background: ${buttonPinkBg}; border: 1px solid ${buttonPinkBorder}; transition: background .15s, border-color .15s; }
-      .plans-cta-pro:hover { background: #efd5ca; border-color: #d8a89a; }
       @media (max-width: 639px) {
         .founder-row { flex-direction: column; }
         .founder-divider { width: 100% !important; height: 1px; }
@@ -355,8 +374,6 @@ export const PlansPage: React.FC = () => (
           amount="£0"
           per="forever"
           features={["Unlimited queries & agents", "Full analytics & pipeline", "Reminders & follow-up nudges", "Smart Import on setup"]}
-          ctaLabel="Get started"
-          ctaClass="plans-cta-free"
         />
         <PlanCard
           title="Pro"
@@ -366,8 +383,6 @@ export const PlansPage: React.FC = () => (
           per="/ month"
           pill="or £35/year · save ~27%"
           features={["Multiple manuscripts", "Submission package A/B testing", "Community-backed agent discovery", "Smart email drop"]}
-          ctaLabel="Go Pro"
-          ctaClass="plans-cta-pro"
         />
       </div>
 
