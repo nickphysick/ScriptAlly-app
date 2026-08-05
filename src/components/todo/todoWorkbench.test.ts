@@ -74,7 +74,10 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the board still composes filters × search
   });
   it("v4 P5 → follow-up P3: the FILTER section carries no setrow (Task settings lives in the v2 sidebar; the sheet opens on its event)", () => {
-    expect(page).toContain("sa:open-task-settings");
+    /* ⚠️ THE LITERAL BECAME A CONSTANT (To-do workspace pack, Phase 1) — TODO_OPEN_TASK_SETTINGS
+       in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
+       listener that silently never fires. The contract is unchanged; the assertion follows it. */
+    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
     const filterFn2 = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
     expect(filterFn2).not.toContain("tdb-setrow");
     // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
@@ -423,7 +426,10 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
   it("Task settings + Help centre live in the v2 sidebar now; the sheet + its open event stay in the page", () => {
     // Shell follow-up P3: the panel foot retired — the v2 sidebar's user block carries both
     // links; the sheet still mounts here and opens via the sa:open-task-settings event.
-    expect(page).toContain("sa:open-task-settings");
+    /* ⚠️ THE LITERAL BECAME A CONSTANT (To-do workspace pack, Phase 1) — TODO_OPEN_TASK_SETTINGS
+       in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
+       listener that silently never fires. The contract is unchanged; the assertion follows it. */
+    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
     expect(page).toContain("setSettingsOpen(true)");
     expect(page).not.toContain("tdb-sic");
   });

@@ -1,0 +1,125 @@
+/* ── THE TO-DO PAGE'S SIDE CONTAINER (To-do workspace pack, Phase 1) ───────────────────────────
+   A FILTER surface, not a nav one: the app sidebar's To-do group is the sole navigation for the
+   four pages, so nothing here links to a page and nothing here holds an active-PAGE state.
+
+   Follows the Package Workshop's page-local sidebar pattern (`.pkgw-side`): a fixed flex:none
+   column beside a flex:1 main. It is a pattern rather than a component — the repo has no shared
+   in-page sidebar to reuse. ── */
+
+.tds {
+  width: 216px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0 0;
+}
+
+.tds-cap {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  padding: 10px 10px 4px;
+}
+
+.tds-group { display: flex; flex-direction: column; }
+
+.tds-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--shell-ink-soft);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+  outline: none;
+}
+.tds-row:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
+/* The same parchment fill the app sidebar uses for a selected row — one active grammar, so a
+   filter selection and a nav selection are recognisably the same kind of state. */
+.tds-row.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
+.tds-row:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+
+.tds-sw { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.tds-lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tds-ct {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  color: var(--shell-muted);
+  flex: none;
+}
+
+/* TAGS — disabled, and looking it. No hover, no pointer, no pretence of being live. */
+.tds-soon {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0 10px;
+  padding: 10px 11px;
+  border: 1px dashed var(--shell-edge);
+  border-radius: 9px;
+  background: transparent;
+}
+.tds-soon-t { font-size: 12px; font-weight: 600; color: var(--shell-muted); }
+.tds-soon-s { font-size: 11px; line-height: 1.45; color: var(--shell-muted); }
+
+.tds-grow { flex: 1; min-height: 0; }
+
+.tds-foot {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  margin-top: 8px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--shell-muted);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+  outline: none;
+}
+.tds-foot svg { width: 15px; height: 15px; stroke-width: 1.7; flex: none; }
+.tds-foot:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink-soft); }
+.tds-foot:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+
+/* The page shell: container beside the body, the Workshop's flex pairing. */
+.tdw { display: flex; gap: 26px; align-items: flex-start; }
+.tdw-main { flex: 1; min-width: 0; }
+
+/* ⚠️ BELOW md THE CONTAINER STANDS DOWN. Two side columns on a phone leaves nothing for the page;
+   the filters return with the mobile pass, which this pack does not cover. */
+@media (max-width: 767px) {
+  .tds { display: none; }
+  .tdw { gap: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tds-row, .tds-foot { transition: none; }
+}
+
+/* ── The Calendar / Noteboard placeholders — honest, and inventing nothing. ── */
+.tdph { max-width: 460px; padding: 40px 4px; }
+.tdph-ic { color: var(--shell-muted); margin-bottom: 14px; }
+.tdph-ic svg { width: 26px; height: 26px; stroke-width: 1.5; }
+.tdph-t {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 26px; font-weight: 600; color: var(--shell-ink); margin: 0 0 10px;
+}
+.tdph-l { font-size: 14px; line-height: 1.6; color: var(--shell-ink-soft); margin: 0 0 10px; }
+.tdph-m { font-size: 12.5px; line-height: 1.6; color: var(--shell-muted); margin: 0; }

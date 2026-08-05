@@ -53,6 +53,7 @@ import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
+import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import "./todo.css";
 // The relocated control surfaces' styles + tokens (the chip bench + the Pro sticker) — the
 // hardback-spine SHELL itself retired in the shell follow-up; its stylesheet survives trimmed.
@@ -649,8 +650,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // same window-event pattern as the tour replay (the page stays mounted behind other routes).
   useEffect(() => {
     const onOpen = () => setSettingsOpen(true);
-    window.addEventListener("sa:open-task-settings", onOpen);
-    return () => window.removeEventListener("sa:open-task-settings", onOpen);
+    window.addEventListener(TODO_OPEN_TASK_SETTINGS, onOpen);
+    return () => window.removeEventListener(TODO_OPEN_TASK_SETTINGS, onOpen);
+  }, []);
+  /* ⚠️ THE BAR'S ＋ New, ON A TO-DO PAGE (Phase 1) — the same window-event pattern again. It opens
+     THIS composer rather than a second create surface, in TASK mode (audit item 7: one verb per
+     control; the page's own pink action is the one that lets you choose). The shell announces and
+     the page opens, so the chrome never has to learn what a composer is. */
+  useEffect(() => {
+    const onCompose = () => { setComposerMode("task"); setComposerAt("ledger"); };
+    window.addEventListener(TODO_OPEN_COMPOSER, onCompose);
+    return () => window.removeEventListener(TODO_OPEN_COMPOSER, onCompose);
   }, []);
   const endTour = () => {
     setTourOpen(false);

@@ -37,6 +37,7 @@ import {
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { invokeCapture } from "./railNav";
+import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import "./primitives.css";
 import "./workspaceShell.css";
 
@@ -569,6 +570,20 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   </button>
                   {newOpen && (
                     <MenuCard className="ws-newmenu" role="menu">
+                      {/* ⚠️ CONTEXT-AWARE, and only here. On a To-do page the global create offers
+                          the thing that page makes — a task — above the app-wide three. It opens
+                          the SAME composer the page's own pink action does, in task mode (audit
+                          item 7: one verb per control), by announcing an event the page listens
+                          for. The shell must not learn what a composer is. */}
+                      {pathname.startsWith("/todo") && (
+                        <MenuCardItem
+                          label="Add a task"
+                          onSelect={() => {
+                            setNewOpen(false);
+                            window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER));
+                          }}
+                        />
+                      )}
                       {/* The SAME capture contracts the dashboard hero actions use — the bar adds
                           a doorway, never a second door. */}
                       <MenuCardItem

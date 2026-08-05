@@ -27,9 +27,13 @@ import { UserPlan } from "../../types";
 import { invokeCapture } from "./railNav";
 import { SHELL_DASHBOARD, SHELL_SECTIONS, shellPageForPath } from "./shellV2Nav";
 import {
-  manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
+  localYMD, manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
   sideNavCounts, sidebarBoardTiles,
 } from "../../lib/shellSidebar";
+import { assembleBoard } from "../../lib/todoBoard";
+import { groupHousekeeping, hkGapCount } from "../../lib/todoHousekeeping";
+import { isFlagSuppressing } from "../../lib/taskFlags";
+import { todoBadgeCount, todoCounts } from "../../lib/todoCount";
 
 /** The shared active-manuscript key (the Package Workshop / Comps / Manuscripts convention). */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -47,10 +51,27 @@ export function useShellNavCounts(): Record<string, number> {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
   );
-  return sideNavCounts({
-    queries, agents, manuscripts, packages,
-    todoTotal: tiles.urgent + tiles.housekeeping + tiles.notes,
-  });
+  /* ⚠️ THE COUNTING LAW (audit item 1). This used to be `urgent + housekeeping + NOTES`, which is
+     what made the badge say 44 while the lists totalled 52 — two numbers both called "To-do", and
+     nothing defining either. Notes are dateless and nothing chases them, so they must not inflate
+     a figure that means "things waiting on you"; open user TASKS take their place.
+
+     The number comes from lib/todoCount, the law's one implementation, so the badge cannot drift
+     from the page counts or the board. */
+  const todoTotal = useMemo(() => {
+    const now = Date.now();
+    const board = assembleBoard({
+      tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
+      now, mutedTaskRules: currentUser?.mutedTaskRules, today: localYMD(now),
+    });
+    const groups = groupHousekeeping(board.hk, agents, currentUser?.mutedTaskRules, queries);
+    const stale = board.hk.filter((c) => c.taskType === "no_response_close");
+    const snoozed = taskFlags.filter((f) => isFlagSuppressing(f, now)).length;
+    return todoBadgeCount(todoCounts(board, hkGapCount(groups) + stale.length, snoozed));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules]);
+
+  return sideNavCounts({ queries, agents, manuscripts, packages, todoTotal });
 }
 
 const SECTION_ICONS: Record<string, React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>> = {
@@ -149,8 +170,11 @@ export const ShellSidebarBody: React.FC<{
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
   );
   const plan = planLine(currentUser?.plan);
-  const total = tiles.urgent + tiles.housekeeping + tiles.notes;
-  const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: total });
+  /* ⚠️ THE SAME LAW AS THE BADGE (audit item 1). This body used to total
+     `urgent + housekeeping + notes` independently, which is exactly how two "To-do" numbers came
+     to exist. It reads the hook now, so there is one derivation and no second answer. */
+  const counts = useShellNavCounts();
+  const total = counts.todo ?? 0;
   const hit = shellPageForPath(pathname);
   // (The accordion's open-section state LIVES IN AppShell now — rail-icon-toggle pack: the
   // rail's click policy must read it, so one owner. Route-sync + snap-on-collapse moved up.)

@@ -43,6 +43,9 @@ import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
+import { todoPageForPath } from "./lib/todoRoutes";
+import { TodoPlaceholderPage } from "./components/todo/TodoPlaceholderPage";
+import { TodoTodayPage } from "./components/todo/TodoTodayPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { QueryAnalytics } from "./components/QueryAnalytics";
@@ -595,6 +598,7 @@ function AppContent() {
      read as "you have no queries" — the worst lie this page could tell. */
   const queriesStatus = parseStatusFilter(params.get(QUERIES_STATUS_PARAM));
   const queriesAnalytics = path === "/queries/analytics";
+  const todoPage = todoPageForPath(path);
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
@@ -642,10 +646,25 @@ function AppContent() {
           <QueryAnalytics />
         </StagePage>
 
-        {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page
-            scrollbar) like the Queries desk; stays mounted so its mode/filter/selection survive. */}
-        <StagePage active={routeKey === "todo"} layout="fill" clip>
+        {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).
+            The list page owns its internal scroll like the Queries desk and stays mounted so its
+            mode/filter/selection survive; the other three are ordinary flow pages. */}
+        <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fill" clip>
           <ToDoPage onNavigate={handleNavigate} />
+        </StagePage>
+
+        <StagePage active={routeKey === "todo" && todoPage === "today"} contentVariant="read">
+          <TodoTodayPage onNavigate={handleNavigate} />
+        </StagePage>
+
+        {/* Routed now, built next — the group lists four pages, so all four must go somewhere
+            real. TODO(todo-calendar) · TODO(todo-noteboard). */}
+        <StagePage active={routeKey === "todo" && todoPage === "calendar"} contentVariant="read">
+          <TodoPlaceholderPage page="calendar" />
+        </StagePage>
+
+        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} contentVariant="read">
+          <TodoPlaceholderPage page="noteboard" />
         </StagePage>
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;

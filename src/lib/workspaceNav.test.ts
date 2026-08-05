@@ -49,8 +49,13 @@ describe("The IA renders what exists — and nothing else", () => {
     expect(labels).not.toContain("Documents");
   });
 
-  it("only Queries and Agents carry accordions", () => {
-    expect(NAV.filter((s) => s.children?.length).map((s) => s.id)).toEqual(["queries", "agents"]);
+  /* ⚠️ TO-DO JOINED THEM (To-do workspace pack, Phase 1) — an expandable group with the four
+     workspace pages as children, rendered through the SAME ShellSection shape as the other two.
+     Materials stays childless until a Documents route exists. */
+  it("Queries, Agents and To-do carry accordions — and nothing else does", () => {
+    expect(NAV.filter((s) => s.children?.length).map((s) => s.id))
+      .toEqual(["queries", "agents", "todo"]);
+    expect(NAV.find((s) => s.id === "materials")!.children).toBeUndefined();
   });
 
   /* ⚠️⚠️ AMENDMENT 1 (H) — THE SIDEBAR IS NAVIGATION ONLY. The four filter children are GONE:

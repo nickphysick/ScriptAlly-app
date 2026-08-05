@@ -15,6 +15,7 @@ import React, { useEffect, useRef } from "react";
 import { Settings, SlidersHorizontal, HelpCircle, LogOut } from "lucide-react";
 import { UserPlan } from "../../types";
 import { planLine } from "../../lib/shellSidebar";
+import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import "./accountMenu.css";
 
 export interface AccountMenuProps {
@@ -70,7 +71,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         role="menuitem"
         onClick={() => {
           onClose();
-          window.dispatchEvent(new CustomEvent("sa:open-task-settings"));
+          window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));
           onNavigatePath("/todo");
         }}
       >

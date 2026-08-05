@@ -25,6 +25,7 @@
  * count under Queries and no badge on its rail icon.
  */
 import { ShellSection } from "./workspaceShell";
+import { TODO_ROUTES } from "./todoRoutes";
 
 export interface WorkspaceNavInput {
   /** The To-do board's own total. The ONLY count in the nav (Amendment 1, H5). */
@@ -61,6 +62,21 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
     },
     // Childless until a Documents route exists — see the file note.
     { id: "materials", label: "Materials", path: "/manuscripts/packages" },
-    { id: "todo", label: "To-do", path: "/todo", count: input.todo || undefined, urgent: true },
+    /* ⚠️ AN EXPANDABLE GROUP, exactly like Queries and Agents — same ShellSection shape, so it
+       renders through the SAME rows, chevron, accordion and flyout. Nothing here is a To-do
+       variant of the nav; the four pages are children, and the group row keeps its urgency dot
+       and count.
+
+       ⚠️ THE APP SIDEBAR IS THE SOLE NAVIGATION FOR THESE FOUR (owner's call). The page's own side
+       container carries LISTS, TAGS and Task settings and NO page links — one set of destinations,
+       one nav surface, one active state. */
+    {
+      id: "todo",
+      label: "To-do",
+      def: "todo-list",
+      count: input.todo || undefined,
+      urgent: true,
+      children: TODO_ROUTES.map((r) => ({ id: `todo-${r.id}`, label: r.label, path: r.path })),
+    },
   ];
 }
