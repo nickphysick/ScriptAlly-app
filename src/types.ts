@@ -349,9 +349,9 @@ export interface Query {
   partialSentDate?: string;
   fullRequestedDate?: string;
   fullSentDate?: string;
-  rejectedDate?: string;
+  rejectedDate?: string; // ⚠️ never written by any live path, but READ by the packageMetrics /
+  // manuscriptPage date chains — so the strip is blocked and the field stays (Tier 2 · Phase 6).
   rejectionType?: string; // Edit-form rejection category, e.g. "Form rejection"
-  rejectionDetails?: string;
   agentComments?: string; // Edit-form free-text notes about the agent's response
 
   // Written by RecordResponseModal on a Revise & Resubmit — the agent's revision guidance.

@@ -333,12 +333,10 @@ service cloud.firestore {
         && (data.get('manuscriptTitle', null) == null || (data.manuscriptTitle is string && data.manuscriptTitle.size() <= 512));
     }
 
-    function isValidManuscriptNote(data) {
-      return data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
-        && data.createdAt is string && data.createdAt.size() <= 64;
-    }
+    // (isValidManuscriptNote is gone with the RETIRED manuscripts/{id}/notes subcollection —
+    // Tier 2 · Phase 6. The jottings feed lost its UI long ago; nothing wrote or read the store.)
 
-    // Agent notes share the manuscript-note shape written by handleAddAgentNote: { text, createdAt }.
+    // Agent notes: { text, createdAt } — the shape written by handleAddAgentNote.
     function isValidAgentNote(data) {
       return data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
         && data.createdAt is string && data.createdAt.size() <= 64;
@@ -491,11 +489,10 @@ service cloud.firestore {
           ])
         );
 
-        match /notes/{noteId} {
-          allow get, delete: if isOwner(userId) && isValidId(noteId);
-          allow list: if isOwner(userId);
-          allow create, update: if isOwner(userId) && isValidId(noteId) && isValidManuscriptNote(incoming());
-        }
+        // The manuscripts/{id}/notes subcollection is RETIRED (Tier 2 · Phase 6): no match block
+        // = default-deny, all ops. Legacy note documents remain in Firestore, deliberately
+        // unreadable and unwritable — left in place, not migrated (run report). The 'notes'
+        // entry in the update allowlist above is the manuscript DOC's own flat field, unrelated.
       }
 
       // ROUTE: ManuscriptVersions

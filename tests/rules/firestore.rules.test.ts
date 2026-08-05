@@ -469,6 +469,26 @@ describe('/users/{userId}/manuscripts', () => {
     });
     await assertFails(getDoc(doc(unauthed().firestore(), 'users', ALICE, 'manuscripts', 'ms-1')));
   });
+
+  it('the notes subcollection is RETIRED — even the owner is denied, all ops (Tier 2 · Phase 6)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'manuscripts', 'ms-1'), validManuscript(ALICE));
+      // A legacy note, seeded rules-free — the orphaned data the retirement leaves in place.
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'manuscripts', 'ms-1', 'notes', 'n-1'), {
+        text: 'a legacy jotting',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      });
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'manuscripts', 'ms-1', 'notes', 'n-2'), {
+        text: 'a new jotting',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      })
+    );
+    await assertFails(getDoc(doc(db, 'users', ALICE, 'manuscripts', 'ms-1', 'notes', 'n-1')));
+    await assertFails(deleteDoc(doc(db, 'users', ALICE, 'manuscripts', 'ms-1', 'notes', 'n-1')));
+  });
 });
 
 // ─── /users/{userId}/versions ────────────────────────────────────────────────

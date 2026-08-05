@@ -1172,12 +1172,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];
-      try {
-        const notesSnap = await getDocs(collection(db, "users", uid, "manuscripts", id, "notes"));
-        notesSnap.forEach(n => refs.push(n.ref));
-      } catch {
-        // Best-effort: an unreadable notes subcollection must not block the delete itself.
-      }
+      // The manuscripts/{id}/notes subcollection is RETIRED (rules default-deny it — Tier 2 ·
+      // Phase 6), so the cascade no longer collects it. Legacy note docs stay put, orphaned by
+      // design: unreadable, unwritable, and undeleted.
       for (const d of plan.docs) {
         if (d.col === "queries") {
           const actSnap = await getDocs(collection(db, "users", uid, "queries", d.id, "activity"));
