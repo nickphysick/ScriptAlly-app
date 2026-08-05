@@ -40,7 +40,12 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
        of a stepped cream trio; the rebuild's content capsule is white in both mockups
        (`--work:#ffffff`). Still painted ONCE, on the stage — that half of the rule is unchanged,
        and it is the half that matters: no page sets a bespoke ground. */
-    expect(shell).toContain('background: "#ffffff"');
+    /* ⚠️ THE STAGE NO LONGER PAINTS (refinement §4) — it moved into the card, and the CARD is
+       white. The rule that mattered was "painted once, never per page", and that still holds:
+       the paint is on `.ws-card`, and no page sets a ground. */
+    const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
+    expect(wsCss).toMatch(/\.ws-card \{[^}]*background: #ffffff/s);
+    expect(shell.includes('background: "var(--shell-canvas)"')).toBe(false);
   });
 
   it("nav chrome is OUTSIDE the cap — the shell column flanks the content column, never wrapped", () => {

@@ -382,8 +382,12 @@
    equal the gap, so it already landed on the capsule edge — tokenised here so the coincidence
    becomes intentional and survives any change to the gap. Below 768px the capsule stands down
    and the tab keeps its flush-to-edge idiom. */
+/* ⚠️ ANCHORED INSIDE THE CARD (refinement §1). It was `position:fixed`, measured from the BROWSER
+   edge — so it floated over the card's rounded corner and stayed put while the page scrolled
+   beneath it. `absolute` puts it in the card's own coordinate space: it clips to the radius and
+   travels with the content, which is what "an edge tab on this card" has to mean. */
 .sa-tltab {
-  position: fixed; right: 0; top: 42%; z-index: 45;
+  position: absolute; right: 0; top: 42%; z-index: 45;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 14px 8px; background: var(--card, #fffefb);
   border: var(--bdw, 1px) solid var(--bd, #e0d6c6); border-right: none;
@@ -393,9 +397,10 @@
 .sa-tltab .sa-tllbl { writing-mode: vertical-rl; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--band-meta, #9c8878); }
 .sa-tltab .sa-tlcnt { font-family: var(--font-mono); font-size: 8px; font-weight: 700; background: var(--acc, #7c3a2a); color: #fdfaf5; border-radius: 99px; padding: 1px 5px; }
 @media (min-width: 768px) {
-  /* The tab tucks against the CONTENT CAPSULE's right edge, not the browser's — so the ground
-     gutter stays equal on both sides. THE FIX. */
-  .sa-tltab { right: var(--shell-cap-gap); }
+  /* ⚠️ NO GAP OFFSET ANY MORE. The tab used to sit `--shell-cap-gap` in from the browser edge to
+     line up with the capsule; now that it is positioned INSIDE the card, `right:0` already IS the
+     card's edge, and re-adding the gap would push it a second inset inwards. */
+  .sa-tltab { right: 0; }
 }
 .sa-tldrawer {
   position: fixed;

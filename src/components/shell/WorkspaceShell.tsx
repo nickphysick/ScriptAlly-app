@@ -25,7 +25,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronsLeft, ChevronsRight, Settings,
+  Book, ChevronDown, ChevronsUpDown, ChevronsLeft, ChevronsRight, Plus, Settings,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveActiveManuscript } from "../../lib/shellSidebar";
@@ -35,6 +35,8 @@ import {
   writeCollapsed,
 } from "../../lib/workspaceShell";
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
+import { useSaveState, saveWhisper } from "../../lib/useSaveState";
+import { invokeCapture } from "./railNav";
 import "./primitives.css";
 import "./workspaceShell.css";
 
@@ -43,13 +45,16 @@ import "./workspaceShell.css";
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
 /**
- * ⚠️ 31px, AND THAT NUMBER IS MEASURED (Amendment 1, C). `/scriptally-title-v2.png` is 2400×750
- * with the cap-"S" spanning y 190→577 — **51.7% of the asset height**, the rest being ascender
- * and descender clearance baked into the artwork. So `heightPx` is NOT cap-height: asking for a
- * 16px cap means asking for a 31px element. Setting 16 here would render an 8px cap and look
- * like the logo had simply been made too small, with nothing to point at.
+ * ⚠️ 33px, AND THAT NUMBER IS MEASURED, NOT CHOSEN. `/scriptally-title-v2.png` is 2400×750 with
+ * the cap-"S" spanning y 190→577 — **51.7% of the asset height**, the rest being ascender and
+ * descender clearance baked into the artwork.
+ *
+ * So `heightPx` is NOT cap-height. The refinement pass asks for a ~17px cap beside 13px crumb
+ * text: 17 ÷ 0.517 = 32.9 → 33. (Amendment 1 asked for ~16px and this was 31px; the target moved,
+ * so the measurement was retaken rather than the number nudged.) Setting 17 here would render a
+ * 9px cap and look like the logo had simply been made too small, with nothing to point at.
  */
-const LOGOTYPE_PX = 31;
+const LOGOTYPE_PX = 33;
 
 export interface WorkspaceShellProps {
   /** The IA — owned by the caller, never by this component. */
@@ -61,6 +66,17 @@ export interface WorkspaceShellProps {
   onOpenHelp: () => void;
   onOpenAccount?: () => void;
   onUpgrade?: () => void;
+  /** The legacy navigate bridge — the + New menu's capture contracts run through it. */
+  onNavigate?: (tab: string, subPageName?: string) => void;
+  /* ⚠️ THE CARD OWNS THE APP'S SCROLL CONTAINER NOW (§4). The sticky bar only works if the page
+     scrolls beneath it, which means the scroller must be INSIDE the card and ABOVE the content —
+     so the host hands its stage identity (id, ref, handler) here rather than keeping a second
+     scroller of its own. Two nested scrollers is the double-scroll this replaces. */
+  scrollId?: string;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
+  onScroll?: React.UIEventHandler<HTMLDivElement>;
+  /** Rendered inside the scroller, after the content — the foot fade. */
+  footFade?: React.ReactNode;
   /** The shared AccountMenu, rendered by the host so one component serves both shells. */
   accountMenu?: React.ReactNode;
   children: React.ReactNode;
@@ -68,7 +84,7 @@ export interface WorkspaceShellProps {
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, onOpenHelp, onOpenAccount, onUpgrade,
-  accountMenu, children,
+  onNavigate, scrollId, scrollRef, onScroll, footFade, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
   const { manuscripts, currentUser } = useScriptAllyDb();
@@ -81,8 +97,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
   const [flyoutFor, setFlyoutFor] = useState<string | null>(null);
   const [msOpen, setMsOpen] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
 
   const railRef = useRef<HTMLElement>(null);
+  const newRef = useRef<HTMLDivElement>(null);
   const riRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const peekIn = useRef<number | null>(null);
   const peekOut = useRef<number | null>(null);
@@ -140,6 +158,23 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     };
   }, [flyoutFor, msOpen]);
 
+  useEffect(() => {
+    if (!newOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (newRef.current?.contains(e.target as Node)) return;
+      setNewOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setNewOpen(false); };
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [newOpen]);
+
+  useEffect(() => { setNewOpen(false); }, [pathname]);
+
   const go = useCallback((path: string) => {
     setFlyoutFor(null);
     setMsOpen(false);
@@ -194,7 +229,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     onNavigatePath(`${pathname}${search}`);
   }, [onNavigatePath, pathname, search]);
 
+  const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
+  /* The section segment navigates to the section's DEFAULT child — the same destination its rail
+     icon and panel row reach, so all three agree about what "Queries" means. */
+  const activeSection = sections.find((sx) => sx.id === hit?.section);
+  const sectionDefaultPath = activeSection?.children?.length
+    ? (activeSection.children.find((c) => c.id === activeSection.def) ?? activeSection.children[0]).path
+    : activeSection?.path ?? null;
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
 
@@ -255,17 +297,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           </button>
         )}
 
-        <button
-          type="button"
-          className="ws-ri"
-          data-tip="Settings"
-          aria-label="Settings"
-          onClick={() => { if (collapsed) { setShut(false); return; } go("/account"); }}
-        >
-          <Settings aria-hidden="true" />
-        </button>
-
-        {/* The face lives on the RAIL — it survives collapse, so the panel needs no copy. */}
+        {/* ⚠️ AVATAR ABOVE SETTINGS — the foot order was flipped to match the PANEL's foot, which
+            reads name-then-Settings. The rail and the panel are two views of one foot, and having
+            them in opposite orders made the pair read as unrelated columns. */}
         <button
           type="button"
           className="ws-avabtn"
@@ -275,6 +309,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           onClick={onOpenAccount}
         >
           <AvatarChip name={name} size={30} />
+        </button>
+
+        <button
+          type="button"
+          className="ws-ri"
+          data-tip="Settings"
+          aria-label="Settings"
+          onClick={() => { if (collapsed) { setShut(false); return; } go("/account"); }}
+        >
+          <Settings aria-hidden="true" />
         </button>
 
         {/* ⚠️ ANCHORED TO THE RAIL, and selecting COMMITS FULLY (E3) — navigate, close, expand,
@@ -422,38 +466,105 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       </div>
       {accountMenu}
 
-      {/* ══ MAIN — the chrome ground frames a white content card; the bar is its header. ══ */}
+      {/* ══ MAIN — the chrome ground frames a white content card. ══
+          ⚠️ ONE SCROLL CONTAINER, AND THE BAR IS STICKY INSIDE IT (§4). The frosted effect only
+          exists because content passes BENEATH the bar; a fixed header above a scrolling body
+          would have nothing to frost. `.ws-work` is therefore `flex:none` and does not scroll —
+          do not "simplify" this back. */}
       <div className="ws-main">
         <div className="ws-card">
-          <header className="ws-bar">
-            {/* ⚠️ THE BRAND LEADS THE CRUMB (Amendment 1, C) — it left the sidebar entirely, where
-                the rail's "S" tile is now the only mark. The asset, not styled text. */}
-            <span className="ws-crumb">
-              <img
-                className="ws-logotype"
-                src="/scriptally-title-v2.png"
-                alt="ScriptAlly"
-                style={{ height: LOGOTYPE_PX }}
-              />
-              <span className="ws-sep" aria-hidden="true">/</span>
-              {crumb && (
-                <>
-                  <b>{crumb.section}</b>
-                  {crumb.child && (
-                    <>
-                      <span className="ws-sep" aria-hidden="true">·</span>
-                      {crumb.child}
-                    </>
+          {/* ⚠️ `sv2-stagepad` RIDES ALONG, and it is not decoration: below md it adds the floating
+              tab bar's clearance. It belonged to the stage element, and the stage element is this
+              one now — dropping the class silently put the tab bar over the last 100px of every
+              mobile page. */}
+          <div
+            className="ws-cscroll sv2-stagepad"
+            id={scrollId}
+            ref={scrollRef}
+            onScroll={onScroll}
+          >
+            <header className="ws-bar">
+              {/* ⚠️ EVERY CRUMB SEGMENT IS INTERACTIVE (§5), and the separator is `/` throughout —
+                  the live mix of `/` and `·` made the brand look like a different KIND of step
+                  from the section. Only the current page is ink; ancestors are muted links. */}
+              <nav className="ws-crumb" aria-label="Breadcrumb">
+                <button
+                  type="button"
+                  className="ws-logobtn"
+                  aria-label="Dashboard"
+                  onClick={() => go("/dashboard")}
+                >
+                  <img
+                    className="ws-logotype"
+                    src="/scriptally-title-v2.png"
+                    alt="ScriptAlly"
+                    style={{ height: LOGOTYPE_PX }}
+                  />
+                </button>
+                {crumb && (
+                  <>
+                    <span className="ws-sep" aria-hidden="true">/</span>
+                    {crumb.child ? (
+                      <>
+                        <button
+                          type="button"
+                          className="ws-seg"
+                          onClick={() => { const d = sectionDefaultPath; if (d) go(d); }}
+                        >
+                          {crumb.section}
+                        </button>
+                        <span className="ws-sep" aria-hidden="true">/</span>
+                        <span className="ws-cur" aria-current="page">{crumb.child}</span>
+                      </>
+                    ) : (
+                      <span className="ws-cur" aria-current="page">{crumb.section}</span>
+                    )}
+                  </>
+                )}
+              </nav>
+
+              <div className="ws-bright">
+                {/* ⚠️ WIRED TO REAL WRITE STATE, never a constant — a bar that always says
+                    "saved" is worse than one that says nothing. See lib/saveSignal. */}
+                <span className="ws-sync">{saveWhisper(save)}</span>
+                <span className="ws-vdiv" aria-hidden="true" />
+                <SearchPill onOpen={onOpenSearch} />
+                <HelpButton onOpen={onOpenHelp} />
+                <div className="ws-newwrap" ref={newRef}>
+                  <button
+                    type="button"
+                    className="ws-nbtn"
+                    aria-haspopup="menu"
+                    aria-expanded={newOpen}
+                    onClick={() => setNewOpen((o) => !o)}
+                  >
+                    <Plus aria-hidden="true" />
+                    New
+                  </button>
+                  {newOpen && (
+                    <MenuCard className="ws-newmenu" role="menu">
+                      {/* The SAME capture contracts the dashboard hero actions use — the bar adds
+                          a doorway, never a second door. */}
+                      <MenuCardItem
+                        label="Log a query"
+                        onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("query", onNavigate); }}
+                      />
+                      <MenuCardItem
+                        label="Record a response"
+                        onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("record", onNavigate); }}
+                      />
+                      <MenuCardItem
+                        label="Add agent"
+                        onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("agent", onNavigate); }}
+                      />
+                    </MenuCard>
                   )}
-                </>
-              )}
-            </span>
-            <div className="ws-bright">
-              <SearchPill onOpen={onOpenSearch} />
-              <HelpButton onOpen={onOpenHelp} />
-            </div>
-          </header>
-          <div className="ws-work">{children}</div>
+                </div>
+              </div>
+            </header>
+            <div className="ws-work">{children}</div>
+            {footFade}
+          </div>
         </div>
       </div>
 

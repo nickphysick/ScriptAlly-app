@@ -211,15 +211,26 @@ describe("Baked 4 + 5 — the active grammar is never a burgundy fill", () => {
 describe("Baked 6 — children are text-only, indented to the parent's text axis", () => {
   it("the thread line hangs under the parent icon's centre", () => {
     const r = rule(".ws-subin::before");
-    expect(r).toContain("left: 18px");
+    // 19px = the row's 10px padding + half the 18px icon; it moved with the icon size (§3).
+    expect(r).toContain("left: 19px");
     expect(r).toContain("width: 1px");
     expect(r).toContain("background: var(--shell-edge)");
   });
 
-  it("child rows are 30px and indent to the text axis", () => {
+  it("child rows are 32px and indent to the text axis", () => {
     const r = rule(".ws-srow");
-    expect(r).toContain("height: 30px");
-    expect(r).toContain("padding: 0 10px 0 36px");
+    expect(r).toContain("height: 32px");
+    expect(r).toContain("padding: 0 10px 0 38px");
+    expect(r).toContain("font-size: 13px");
+  });
+
+  /* §3 — the panel's own rhythm, distinct from the rail's. */
+  it("section rows are 40px at 14px on the panel's resting ink", () => {
+    const r = rule(".ws-ni");
+    expect(r).toContain("height: 40px");
+    expect(r).toContain("font-size: 14px");
+    expect(r).toContain("color: #544b44");
+    expect(r).toContain("gap: 10px");
   });
 
   it("children carry no icon — the indent and thread line carry the hierarchy", () => {
@@ -365,15 +376,54 @@ describe("Baked 12 + 13 + Amendment 1 (C) — the bar", () => {
     expect(html).toContain('src="/scriptally-title-v2.png"');
     expect(html).toContain('alt="ScriptAlly"');
     expect(html).toContain("ws-sep");
-    expect(html.indexOf("ws-logotype")).toBeLessThan(html.indexOf("<b>Queries</b>"));
+    /* ⚠️ SCOPED TO THE BAR. Document-wide, "Query Centre" appears first in the PANEL's nav, so an
+       unscoped index comparison compares the crumb's logotype against a different element's text
+       and fails for a reason that has nothing to do with the crumb. */
+    const bar = html.slice(html.indexOf("ws-crumb"), html.indexOf("ws-bright"));
+    expect(bar.indexOf("ws-logotype")).toBeLessThan(bar.indexOf("Query Centre"));
   });
 
-  /* ⚠️ 31px IS MEASURED, NOT CHOSEN. The asset is 2400×750 with the cap-"S" spanning y 190→577 —
-     51.7% of the height. heightPx is NOT cap-height: asking for a 16px cap means a 31px element,
-     and setting 16 would render an 8px cap that looks like the logo was made too small. */
-  it("renders the logotype at the measured height for a ~16px cap", () => {
-    expect(src).toContain("const LOGOTYPE_PX = 31");
-    expect(at("/queries")).toMatch(/height:31px/);
+  /* ⚠️ EVERY SEGMENT INTERACTIVE (§5). The logotype goes home like the rail's S tile; an ancestor
+     section navigates to its default child — the same place its rail icon and panel row reach. */
+  it("the logotype and the ancestor section are both buttons", () => {
+    const html = at("/queries");
+    expect(html).toContain("ws-logobtn");
+    expect(html).toContain("ws-seg");
+    expect(html).toContain('aria-label="Dashboard"');
+  });
+
+  it("only the current page is ink; the ancestor is a muted link", () => {
+    const html = at("/queries");
+    expect(html).toContain("ws-cur");
+    expect(html).toContain('aria-current="page"');
+    expect(rule(".ws-seg")).toContain("color: var(--shell-muted)");
+    expect(rule(".ws-cur")).toContain("color: var(--shell-ink)");
+  });
+
+  /* ⚠️ `/` THROUGHOUT — the live mix of `/` after the brand and `·` before the child made the
+     brand read as a different KIND of step from the section. */
+  it("uses `/` for every separator, never `·`", () => {
+    const html = at("/queries");
+    const bar = html.slice(html.indexOf("ws-crumb"), html.indexOf("ws-bright"));
+    expect(bar).toContain(">/<");
+    expect(bar).not.toContain("·");
+    expect(rule(".ws-sep")).toContain("color: #cfc4b4");
+  });
+
+  it("a childless section renders one segment and no orphan separator", () => {
+    const html = at("/todo");
+    const bar = html.slice(html.indexOf("ws-crumb"), html.indexOf("ws-bright"));
+    expect(bar).toContain("To-do");
+    expect(bar).not.toContain("ws-seg");
+  });
+
+  /* ⚠️ 33px IS MEASURED, NOT CHOSEN. The asset is 2400×750 with the cap-"S" spanning y 190→577 —
+     51.7% of the height. heightPx is NOT cap-height: a ~17px cap means 17 ÷ 0.517 = 33px, and
+     setting 17 would render a 9px cap that looks like the logo was made too small. The target
+     moved from 16px to 17px between passes, so the measurement was RETAKEN, not nudged. */
+  it("renders the logotype at the measured height for a ~17px cap", () => {
+    expect(src).toContain("const LOGOTYPE_PX = 33");
+    expect(at("/queries")).toMatch(/height:33px/);
   });
 
   it("the wordmark is GONE from the sidebar; the S tile is the only mark there", () => {
@@ -382,9 +432,9 @@ describe("Baked 12 + 13 + Amendment 1 (C) — the bar", () => {
     expect(railHtml).toContain("ws-tile");
   });
 
-  it("the crumb reads Section · Child", () => {
+  it("the crumb reads Section / Child", () => {
     const html = at("/queries");
-    expect(html).toContain("<b>Queries</b>");
+    expect(html).toContain("Queries");
     expect(html).toContain("Query Centre");
   });
 
@@ -468,8 +518,10 @@ describe("Amendment 1 (B) — no rail dimming", () => {
     expect(rule(".ws-ri:hover")).toContain("color: var(--shell-rail-hi)");
   });
 
-  it("panel rows keep their inline icon at .8, full on hover and active", () => {
-    expect(rule(".ws-ic")).toContain("opacity: 0.8");
+  it("panel rows keep their inline icon at .9, full on hover and active", () => {
+    expect(rule(".ws-ic")).toContain("opacity: 0.9");
+    expect(rule(".ws-ic svg")).toContain("width: 18px");
+    expect(rule(".ws-ic svg")).toContain("stroke-width: 1.7");
     expect(rule(".ws-ni:hover .ws-ic")).toContain("opacity: 1");
     expect(rule(".ws-ni.on .ws-ic")).toContain("opacity: 1");
   });
@@ -534,7 +586,9 @@ describe("Amendment 1 (G) — both brand marks route home, shell intact", () => 
   it("Dashboard is a normal section in the nav", () => {
     const html = at("/dashboard");
     expect(html).toContain("Dashboard");
-    expect(html).toContain("<b>Dashboard</b>");
+    const bar = html.slice(html.indexOf("ws-crumb"), html.indexOf("ws-bright"));
+    expect(bar).toContain("ws-cur");
+    expect(bar).toContain("Dashboard");
   });
 
   it("the shell still renders on the dashboard route", () => {
@@ -552,5 +606,140 @@ describe("The IA is a PROP — the shell owns grammar, never a section list", ()
 
   it("children of a shut section are unreachable by keyboard", () => {
     expect(src).toContain("tabIndex={st.open ? 0 : -1}");
+  });
+});
+
+/**
+ * ⚠️ REFINEMENT PASS (§2 · §4). The bar gained a status whisper, a divider and the + New menu; the
+ * card gained a single scroll container with the bar sticky inside it.
+ */
+describe("Refinement §2 — the bar's right cluster", () => {
+  it("orders status → divider → search → help → + New", () => {
+    const html = at("/queries");
+    const bar = html.slice(html.indexOf("ws-bright"));
+    expect(html, "the cluster must exist").toContain("ws-bright");
+    const order = ["ws-sync", "ws-vdiv", "sp-search", "sp-help", "ws-nbtn"];
+    let last = -1;
+    for (const cls of order) {
+      const i = bar.indexOf(cls);
+      expect(i, `${cls} must be present`).toBeGreaterThan(-1);
+      expect(i, `${cls} out of order`).toBeGreaterThan(last);
+      last = i;
+    }
+  });
+
+  /* ⚠️ NOT A HARDCODED STRING. It reads the app's real in-flight-write state, so it can never
+     claim "saved" while a write is in the air. */
+  it("the whisper is wired to save state rather than baked in", () => {
+    expect(src).toContain("useSaveState");
+    expect(src).toContain("{saveWhisper(save)}");
+    expect(src).not.toContain(">ALL CHANGES SAVED<");
+  });
+
+  it("the whisper is mono, uppercased by the stylesheet, at the specced tone", () => {
+    const r = rule(".ws-sync");
+    expect(r).toContain('font-family: "JetBrains Mono", monospace');
+    expect(r).toContain("font-size: 9.5px");
+    expect(r).toContain("letter-spacing: 0.14em");
+    expect(r).toContain("text-transform: uppercase");
+    expect(r).toContain("color: #b3a698");
+  });
+
+  it("the divider is 1px x 18px on the line token", () => {
+    const r = rule(".ws-vdiv");
+    expect(r).toContain("width: 1px");
+    expect(r).toContain("height: 18px");
+    expect(r).toContain("background: var(--shell-hair)");
+  });
+
+  it("+ New carries the specced treatment", () => {
+    const r = rule(".ws-nbtn");
+    expect(r).toContain("height: 34px");
+    expect(r).toContain("border-radius: 9px");
+    expect(r).toContain("background: #f5e3da");
+    expect(r).toContain("border: 1px solid rgba(124, 58, 42, 0.28)");
+    expect(r).toContain("font-size: 12.5px");
+    expect(r).toContain("font-weight: 600");
+    expect(rule(".ws-nbtn:hover")).toContain("background: #f1d9cc");
+  });
+
+  /* ⚠️ THE SAME CAPTURE CONTRACTS THE DASHBOARD HERO USES — the bar adds a doorway, never a
+     second door. If these ever diverge, one of the two creates a query a different way. */
+  it("the menu runs the existing capture handlers", () => {
+    expect(src).toContain('invokeCapture("query", onNavigate)');
+    expect(src).toContain('invokeCapture("record", onNavigate)');
+    expect(src).toContain('invokeCapture("agent", onNavigate)');
+  });
+
+  it("the menu is closed at rest and dismissed by Escape, outside pointer and navigation", () => {
+    expect(at("/queries")).not.toContain("ws-newmenu");
+    expect(src).toContain("useState(false)");
+    expect(src).toMatch(/if \(e\.key === "Escape"\) setNewOpen\(false\)/);
+    expect(src).toContain("newRef.current?.contains");
+    expect(src).toContain("useEffect(() => { setNewOpen(false); }, [pathname]);");
+  });
+
+  /* ⚠️ CREATION LIVES HERE AND NOWHERE ELSE. The sidebar quick actions were explored and
+     REJECTED — a second set of create buttons in the panel would be two homes for one job. */
+  it("the sidebar carries no create buttons", () => {
+    const html = at("/queries");
+    const sidebar = html.slice(0, html.indexOf("ws-main"));
+    for (const word of ["Log a query", "Record a response", "Add agent"]) {
+      expect(sidebar, word).not.toContain(word);
+    }
+  });
+});
+
+describe("Refinement §4 — the frosted sticky bar", () => {
+  /* ⚠️ THE EFFECT DEPENDS ON CONTENT PASSING UNDER THE BAR. A fixed header above a separately
+     scrolling body would have nothing to frost — hence one scroller, with the bar sticky in it. */
+  it("the card holds ONE scroll container and the bar is sticky inside it", () => {
+    expect(rule(".ws-cscroll")).toContain("overflow: auto");
+    expect(rule(".ws-bar")).toContain("position: sticky");
+    expect(rule(".ws-bar")).toContain("top: 0");
+    const html = at("/queries");
+    expect(html.indexOf("ws-cscroll")).toBeLessThan(html.indexOf("ws-bar"));
+  });
+
+  it("the work area no longer scrolls", () => {
+    expect(rule(".ws-work")).not.toContain("overflow");
+    expect(cssRules.match(/overflow: auto/g)?.length, "one scroller in this stylesheet").toBe(1);
+  });
+
+  /* `1 0 auto`: grow so a fill page can claim the space under the bar; NEVER shrink, or a tall
+     page compresses instead of overflowing and the card never scrolls. */
+  it("the work area grows but never shrinks", () => {
+    expect(rule(".ws-work")).toContain("flex: 1 0 auto");
+  });
+
+  it("is always frosted — no scroll state, no transition between states", () => {
+    const r = rule(".ws-bar");
+    expect(r).toContain("background: rgba(255, 255, 255, 0.78)");
+    expect(r).toContain("backdrop-filter: blur(10px)");
+    expect(r).toContain("-webkit-backdrop-filter: blur(10px)");
+    expect(r).toContain("box-shadow: 0 8px 18px -10px rgba(46, 39, 35, 0.22)");
+    expect(r, "no bottom hairline — the shadow separates").not.toContain("border-bottom");
+    expect(cssRules).not.toMatch(/\.ws-bar\.(scrolled|stuck|on)/);
+  });
+
+  /* A feature query, not JS detection: unsupported blur would leave a washed-out band over
+     moving text, so the fallback is opaque. */
+  it("falls back to opaque white via @supports", () => {
+    expect(css).toContain("@supports not (backdrop-filter: blur(10px))");
+    expect(css).toMatch(/@supports not \(backdrop-filter: blur\(10px\)\) \{\s*\.ws-bar \{ background: #ffffff; \}/);
+  });
+});
+
+/* ⚠️ REJECTED TREATMENTS, named so a later "faithful to the reference" pass fails rather than
+   reintroducing them. Both were explored and turned down. */
+describe("Refinement — the rejected treatments stay rejected", () => {
+  it("no card top accent", () => {
+    expect(cssRules).not.toMatch(/\.ws-card \{[^}]*border-top: [23]px/s);
+    expect(cssRules).not.toMatch(/\.ws-card::before/);
+  });
+
+  it("no ink header inversion", () => {
+    expect(rule(".ws-bar")).not.toContain("var(--shell-ink)");
+    expect(rule(".ws-bar")).not.toContain("#2e2723");
   });
 });

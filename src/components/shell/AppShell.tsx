@@ -100,7 +100,12 @@ export const StagePage: React.FC<{
       onAnimationEnd={(e) => { if (e.animationName === "pageIn") setEntering(false); }}
       style={{
         display: active ? (isFillCol ? "flex" : "block") : "none",
-        ...(layout !== "flow" ? { height: "100%" } : {}),
+        /* ⚠️ `flex:1; min-height:0` RATHER THAN `height:100%` (refinement §4). The stage is now a
+           flex COLUMN inside the card, with the sticky bar as its first child. A viewport-locked
+           page asking for 100% of that column would be a full height BELOW a 66px bar — the page
+           would fit, the card would scroll 66px, and Query Centre's internal panes would sit in a
+           second scroller. Filling the REMAINING space is what makes "no page scroll" true again. */
+        ...(layout !== "flow" ? { flex: 1, minHeight: 0 } : {}),
         ...(isFillCol ? { flexDirection: "column" as const } : {}),
         ...(clip ? { overflow: "hidden" } : {}),
         // The slot paints NOTHING (canvas scheme 1): the stage's var(--shell-canvas) shows
@@ -355,6 +360,20 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         onOpenHelp={() => goPath("/help")}
         onOpenAccount={() => setAccountOpen((v) => !v)}
         onUpgrade={() => goPath("/plans")}
+        onNavigate={onNavigate}
+        scrollId={STAGE_SCROLL_ID}
+        scrollRef={stageRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          scrollMemo.current[routeKey] = el.scrollTop;
+          updateFade();
+        }}
+        footFade={
+          /* THE FOOT FADE — only when there IS more below. A permanent fade over a short page
+             reads as a rendering fault, so it is a state, not decoration. It is sticky inside the
+             scroller now (it used to be absolute in a wrapper that no longer exists). */
+          <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
+        }
         accountMenu={
           <AccountMenu
             open={accountOpen}
@@ -384,28 +403,12 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           />
         </div>
 
-        {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
-            foot fade. The stage's id, ref, scroll memory and styles are untouched, because
-            everything from stageScroll.ts to per-route scroll restoration addresses it
-            directly. (sv2-stagepad = the <md clearance for the floating tab bar.) */}
-        <div className="sv2-pgwrap">
-          <div
-            id={STAGE_SCROLL_ID}
-            ref={stageRef}
-            className="sv2-stagepad"
-            onScroll={(e) => {
-              const el = e.target as HTMLElement;
-              scrollMemo.current[routeKey] = el.scrollTop;
-              updateFade();
-            }}
-            style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "#ffffff" }}
-          >
-            <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
-          </div>
-          {/* THE FOOT FADE — only when there IS more below. A permanent fade over a short page
-              reads as a rendering fault, so it is a state, not decoration. */}
-          <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
-        </div>
+        {/* ⚠️ THE STAGE MOVED INTO THE CARD (refinement §4). It is still the app's ONE scroll
+            container and still carries STAGE_SCROLL_ID, the ref and the scroll memory — because
+            stageScroll.ts and per-route restoration address it by id — but the element itself is
+            now the card's `.ws-cscroll`, so the bar can be sticky above the scrolling content.
+            Keeping a second scroller here would have double-scrolled every page. */}
+        <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
       </WorkspaceShell>
 
       {palette}

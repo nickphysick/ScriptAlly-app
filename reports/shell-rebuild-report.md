@@ -541,3 +541,137 @@ names are first, as instructed.
 7. **The dashboard inside the card** — the 40px hero, and whether the stat cards breathe at the
    card's width.
 8. Below 768px: card loses its frame, mobile chrome untouched.
+
+---
+
+# Refinement pass — bar composition, frosted header, crumb, ground sweep
+
+Applied in one pass, one commit, on the amendment-1 shell. The design ref was replaced in place
+first (`ce5625c`) — for the **fourth** time it had not been recommitted; the newer revision was in
+`~/Downloads` as `scriptally-workspace-final.html`. That revision carries **no `.ctl` strip**, so
+the standing "the control strip is demo chrome" caveat no longer applies to it.
+
+## §1 — Ground-sweep inventory
+
+Every occurrence found, and what each resolves to now.
+
+| Component | File | Before → After |
+|---|---|---|
+| **Stage foot fade** *(the one Nick saw: the diary section fading out under "Dates for the diary")* | `shell/shellV2.css` `.sv2-fade` | `rgba(253,251,248,0) → rgba(253,251,248,.72) → var(--shell-canvas)` **→** `rgba(255,255,255,0) → rgba(255,255,255,.72) → #ffffff`. Also `position:absolute` → **`sticky`**, since its positioning wrapper went with the new scroller. |
+| **FadeScroll** (top edge) | `components/FadeScroll.tsx` | `linear-gradient(#fdfaf5, rgba(253,250,245,0))` **→** `linear-gradient(#ffffff, rgba(255,255,255,0))` |
+| **FadeScroll** (bottom edge) | `components/FadeScroll.tsx` | `linear-gradient(rgba(253,250,245,0), #fdfaf5)` **→** `linear-gradient(rgba(255,255,255,0), #ffffff)` |
+
+**Inspected and deliberately unchanged**, with reasons — this is the half of a sweep that is easy
+to get wrong by over-applying it:
+
+- `EdgeFadeScroll` call sites in `Queries.tsx` pass `fade="var(--panel, #fffdfb)"`. That is the
+  **reading pane's** surface, not the page ground — a card within the card. Correct as-is.
+- `diaryCarousel.css` `.dc-wrap` and `whatsLive.css` use **`mask-image`**, which bakes no colour
+  at all (`transparent → #000`). Ground-agnostic by construction; nothing to fix.
+- `Dashboard.tsx:1581` ghost placeholder at `rgba(253,250,245,0.6)` is an **object fill**, not a
+  fade or a match-the-background — a tinted dashed card that reads as a placeholder over either
+  ground.
+- The many `linear-gradient` band fills (`--band-a/--band-b`, sage bands, sticker fills) are
+  **decorative object surfaces**, not "match the ground" treatments.
+
+### Timeline edge tab re-anchor
+
+`.sa-tltab` was `position: fixed; right: 0` (with `right: var(--shell-cap-gap)` at ≥768px), so it
+measured from the **browser** edge — it floated over the card's rounded corner and stayed put while
+the page scrolled beneath it. It is now `position: absolute` inside the card's scroll container,
+with `right: 0` at every breakpoint: **`right:0` already IS the card's edge**, and re-adding the
+gap would have pushed it a second inset inwards. It clips to the card radius and travels with the
+content. The drawer itself is untouched.
+
+## §2 — How the save state is wired
+
+**Nothing exposed a global save state**, so this is a minimal hook rather than a wiring, per the
+prompt's provision.
+
+- `lib/saveSignal.ts` — an in-flight **counter** (not a boolean) with subscribe/notify. A boolean
+  would settle on the first of two overlapping writes and claim "saved" while the second was still
+  in the air; a counter reaches zero only when every outstanding write has finished. `trackWrite`
+  settles in a `finally`, so a **rejection cannot strand the app on "SAVING…"**.
+- `lib/useSaveState.ts` — `useSyncExternalStore` (not effect + state, which can miss a write that
+  starts and finishes inside one commit) plus `saveWhisper`, which has **exactly two strings**.
+  There is no error word: a failed write is the failing flow's business to report, and those flows
+  already do — a third string here would be a second, quieter error surface nobody would check.
+- `lib/db.tsx` — the four write primitives are instrumented **at the import boundary**
+  (`setDoc`/`updateDoc`/`deleteDoc` aliased through `tracked`, `writeBatch` wrapped by its
+  `commit`). That catches ~a hundred call sites without editing — or missing — a single one.
+  **Reads are deliberately not tracked**: "Saving…" while a list loads would be lying the other way.
+
+## §3–§5 — Updated tokens and treatments, with rewritten locks
+
+| Item | Value |
+|---|---|
+| Section rows | 40px, 14px w500, `#544b44`, 18px icons at `stroke-width:1.7` / `.9` opacity, 10px gap |
+| Children | 32px, 13px, `padding-left:38px`, thread at `left:19px` |
+| Status whisper | JetBrains Mono 9.5px, `.14em`, uppercase, `#b3a698` |
+| Divider | 1px × 18px, `--shell-hair` |
+| + New | 34px, radius 9, `#f5e3da`, `1px rgba(124,58,42,.28)`, burgundy 12.5px w600, hover `#f1d9cc` |
+| Bar | `rgba(255,255,255,.78)` + `blur(10px)`, no hairline, `0 8px 18px -10px rgba(46,39,35,.22)` |
+| Crumb separators | `/` throughout, `#cfc4b4`, 9px gaps |
+| **Logotype** | **33px** — see below |
+
+**⚠️ The logotype height was re-measured, not nudged.** The asset's cap-"S" spans 51.7% of its
+750px height. Amendment 1 asked for ~16px (→ 31px); this pass asks for **~17px**, which is
+17 ÷ 0.517 = 32.9 → **33px**, verified in the browser as a **16.04px cap at 31px**. Setting `17`
+would render a 9px cap.
+
+### Rejections recorded (locked against)
+
+- **Sidebar quick actions** — creation lives in the bar's + New only. A lock asserts the sidebar
+  contains none of the three create labels.
+- **Card top accent** — no `border-top` band, no `.ws-card::before`.
+- **Ink header inversion** — the bar carries no ink background.
+
+## §4 — The structural change, and the double-scroll it required fixing
+
+The card now holds **one scroll container** (`.ws-cscroll`) with the bar `position:sticky` inside
+it. That is not cosmetic: the frost only exists because content passes *under* the bar.
+
+**The risk case was real.** The stage (`#app-stage-scroll`) was the scroller, inside `.ws-work`.
+Leaving it there would have put two scrollers in one card. Fixed by **moving the stage's identity
+onto the card's scroller** — same id, same ref, same per-route scroll memory, handed down as props
+— so `stageScroll.ts` and scroll restoration keep addressing the element they always did.
+
+Two consequences that had to be handled rather than discovered later:
+
+- **`StagePage` fill changed from `height:100%` to `flex:1; min-height:0`.** A viewport-locked page
+  asking for 100% of a column whose first child is a 66px bar would be a full height *below* the
+  bar — the card would scroll 66px and Query Centre's panes would sit in a second scroller.
+- **`.ws-work` is `flex: 1 0 auto`**, and each part earns its place: `grow` lets a fill page claim
+  the space under the bar; **`shrink:0` stops a tall page being compressed instead of overflowing**,
+  which would mean the card never scrolled at all.
+- **`sv2-stagepad` moved with the stage.** It carries the `<md` floating-tab-bar clearance; dropping
+  it would silently have put the tab bar over the last 100px of every mobile page.
+
+## Gates
+
+`tsc` clean · `vite build` clean · **Vitest 2488 passed | 2 skipped (148 files)**, up from 2457.
+Browser: `backdrop-filter` support confirmed, the logotype cap measured, **no console errors**.
+
+Twelve locks in other files failed as consequences and were each rewritten rather than muted —
+the pull tab's inset (inverted: `right:0` is now correct), the foot fade's positioning, the stage's
+identity, `StagePage`'s fill, the mobile clearance class, and the panel's §3 values.
+
+## Browser-verify pending — refreshed
+
+Auth-gated still; nothing below is claimed. The frosted bar, sticky-in-overflow behaviour and the
+crumb's baseline alignment are all layout-engine items, listed rather than asserted from rule text.
+
+1. **Safari `backdrop-filter` compositing** — the frost over varied page content, and whether the
+   shadow renders cleanly above a scrolling body.
+2. **Sticky-inside-overflow** — that the bar pins without jitter, and that **Query Centre's
+   list/reading panes do not double-scroll**. This is the one I would check first.
+3. **Crumb baseline alignment** — the 33px logotype (≈17px cap) against 13px crumb text. If height
+   alone does not sit it on the baseline, it needs a wrap-and-translate; that is deliberately not
+   pre-emptively added.
+4. **The ground sweep in the flesh** — the diary section's bottom edge resolving to white, and the
+   `FadeScroll` edges in Record-a-response.
+5. **The timeline tab** clipping to the card's radius and scrolling with content.
+6. **+ New** — menu placement under the button, Escape/outside-click, and that each item opens the
+   same flow as the dashboard hero action.
+7. **The status whisper** actually flipping to "SAVING…" — log a query and watch it.
+8. Panel rhythm at the new 40/32px pitch, and below 768px unchanged.

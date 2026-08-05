@@ -246,9 +246,16 @@ describe("the ground gutter — equal on both edges", () => {
     expect(shellCss).toMatch(/\.sv2-app \{ padding: var\(--shell-cap-gap\); gap: var\(--shell-cap-gap\); \}/);
     expect(shellCss).not.toMatch(/\.sv2-app[^{]*\{[^}]*padding-right/);
   });
-
-  it("the pull tab tucks against the CAPSULE edge on desktop — it no longer sits at right:0", () => {
-    expect(dashCss).toMatch(/\.sa-tltab \{ right: var\(--shell-cap-gap\); \}/);
+  /* ⚠️ INVERTED BY THE REFINEMENT PASS (§1). The tab used to be position:fixed, measured from
+     the BROWSER edge, so it needed --shell-cap-gap to line up with the capsule. It is anchored
+     INSIDE the content card now, where right:0 already IS the card edge — re-adding the gap
+     would push it a second inset inwards. The rule it protects (equal gutters) is unchanged. */
+  it("the pull tab is anchored INSIDE the card, so right:0 is the card edge", () => {
+    const dash = readFileSync(resolve(__dirname, "../dashboard/dashboardV37.css"), "utf8");
+    expect(dash).toMatch(/\.sa-tltab \{[^}]*position: absolute/s);
+    expect(dash).toContain(".sa-tltab { right: 0; }");
+    expect(dash, "fixed positioning is what measured from the browser edge")
+      .not.toMatch(/\.sa-tltab \{[^}]*position: fixed/s);
   });
 
   it("the drawer's insets read the gap token, not a bare number that only coincidentally matched", () => {
@@ -350,13 +357,13 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
      appears exactly once in each place — one tile, one logotype.
 
      ⚠️ AND THE 68.4%-INK PROBLEM CAME BACK WITH THE ASSET, so the height is MEASURED: the
-     cap-"S" spans y 190→577 of a 750px file — 51.7% — meaning a 16px cap needs a 31px element.
-     `heightPx` is not cap-height, and 16 here would render an 8px cap. */
+     cap-"S" spans y 190→577 of a 750px file — 51.7% — meaning a ~17px cap needs a 33px element.
+     `heightPx` is not cap-height, and 17 here would render a 9px cap. */
   it("THE BRAND APPEARS ONCE per surface — the S tile in the rail, the asset in the crumb", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     expect(ws.match(/ws-tile/g)?.length, "one tile in the rail").toBeGreaterThan(0);
     expect(ws.match(/ws-logotype/g)?.length, "one logotype in the crumb").toBeGreaterThan(0);
-    expect(ws).toContain("const LOGOTYPE_PX = 31");
+    expect(ws).toContain("const LOGOTYPE_PX = 33");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
     expect(wsCss).toMatch(/\.ws-tile \{[^}]*Playfair/s);
   });
@@ -390,19 +397,31 @@ describe("the foot fade", () => {
   it("never eats a click, and never covers the capsule's border", () => {
     expect(fade).toContain("pointer-events: none");
     // inset 1px each side: over the border it would darken the capsule edge along its foot
-    expect(fade).toContain("left: 1px");
-    expect(fade).toContain("right: 1px");
+    /* ⚠️ NO LONGER INSET BY 1px, because it is no longer ABSOLUTE inside a bordered wrapper: it
+       is sticky at the foot of the card's own scroller, which already clips to the card radius. */
+    expect(fade).toContain("position: sticky");
     // and the corners follow the capsule, minus that inset, or the fade squares off the curve
     expect(fade).toContain("calc(var(--shell-cap-radius) - 1px)");
     expect(fade).toContain("height: 56px");
   });
 
-  it("the STAGE is untouched — the wrapper is new, its id/ref/memory are not", () => {
-    expect(shellCss).toMatch(/\.sv2-pgwrap \{[^}]*position: relative/s);
-    expect(shell).toContain('className="sv2-pgwrap"');
-    expect(shell).toContain("id={STAGE_SCROLL_ID}");
-    expect(shell).toContain("ref={stageRef}");
-    expect(shell).toContain("scrollMemo.current[routeKey] = el.scrollTop");
+  /* ⚠️ REWRITTEN (refinement §4). The positioning WRAPPER is gone — the card's `.ws-cscroll` is
+     the app's scroll container now, so the fade is sticky inside it rather than absolute inside a
+     wrapper. What must still hold, and what this asserts, is that the STAGE'S IDENTITY TRAVELLED
+     INTACT: the same id, the same ref, the same per-route memory. stageScroll.ts and scroll
+     restoration address that id, and they would fail silently if it moved without following. */
+  it("the STAGE's identity travelled to the card's scroller — id, ref and memory intact", () => {
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    expect(ws).toContain("id={scrollId}");
+    expect(ws).toContain("ref={scrollRef}");
+    const app = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
+    expect(app).toContain("scrollId={STAGE_SCROLL_ID}");
+    expect(app).toContain("scrollRef={stageRef}");
+    expect(app).toContain("scrollMemo.current[routeKey] = el.scrollTop");
+    // exactly one scroller: the work area must not have taken its overflow back
+    const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
+    expect(wsCss).toMatch(/\.ws-cscroll \{[^}]*overflow: auto/s);
+    expect(wsCss).not.toMatch(/\.ws-work \{[^}]*overflow/s);
   });
 
   it("it is driven by CONTENT height, not only by scrolling", () => {

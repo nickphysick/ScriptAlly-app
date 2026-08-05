@@ -73,6 +73,7 @@ describe("the timeline re-homed at <md", () => {
   it("the desktop drawer path survives untouched (tab, pin, capsule-gap inset)", () => {
     expect(drawer).toContain('className="sa-tltab"');
     expect(drawer).toContain("sa-tlpin");
-    expect(css).toContain(".sa-tltab { right: var(--shell-cap-gap); }"); // the locked inset
+    // ⚠️ refinement §1: the tab is anchored INSIDE the card now, where right:0 IS the card edge.
+    expect(css).toContain(".sa-tltab { right: 0; }"); // the locked inset
   });
 });

@@ -103,7 +103,10 @@ describe("the shell at <md — one bar, one capsule, derived clearance", () => {
   });
 
   it("stage clearance derives from the floating bar (replacing pb-[76px]), <md only", () => {
-    expect(appShell).toContain('className="sv2-stagepad"');
+    /* ⚠️ THE CLASS MOVED WITH THE STAGE (refinement §4): the scroll container is the card's
+       `.ws-cscroll` now, so the clearance class rides there. It is still exactly one element. */
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    expect(ws).toContain('className="ws-cscroll sv2-stagepad"');
     expect(appShell).not.toContain('className="pb-[76px]'); // the old Tailwind clearance is gone from the stage
     const mobileBlock = css.split("@media (max-width: 767.98px)")[1] ?? "";
     expect(mobileBlock, "the <md block must exist").not.toBe("");

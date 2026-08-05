@@ -52,20 +52,40 @@ import {
 
 import {
   doc,
-  setDoc,
+  setDoc as _setDoc,
   getDoc,
   getDocFromServer,
-  updateDoc,
-  deleteDoc,
+  updateDoc as _updateDoc,
+  deleteDoc as _deleteDoc,
   collection,
   onSnapshot,
   getDocs,
   deleteField,
-  writeBatch,
+  writeBatch as _writeBatch,
   Timestamp,
   serverTimestamp,
   type DocumentReference
 } from "firebase/firestore";
+
+import { tracked, trackWrite } from "./saveSignal";
+
+/* ⚠️ THE WRITE PRIMITIVES ARE INSTRUMENTED AT THE IMPORT BOUNDARY, not at their call sites. The
+   bar's status whisper must never claim "saved" while a write is in the air, and this file makes
+   roughly a hundred writes — aliasing the four primitives once catches every one of them without
+   editing (or missing) a single call. Reads are deliberately NOT tracked: fetching is not saving,
+   and a whisper that said "Saving…" while a list loaded would be lying in the other direction.
+
+   `writeBatch` is wrapped by its COMMIT, because a batch is one write when it commits and no
+   write at all if it is built and abandoned. */
+const setDoc: typeof _setDoc = tracked(_setDoc) as typeof _setDoc;
+const updateDoc: typeof _updateDoc = tracked(_updateDoc) as typeof _updateDoc;
+const deleteDoc: typeof _deleteDoc = tracked(_deleteDoc as (...a: unknown[]) => Promise<void>) as typeof _deleteDoc;
+const writeBatch: typeof _writeBatch = ((...args: Parameters<typeof _writeBatch>) => {
+  const batch = _writeBatch(...args);
+  const commit = batch.commit.bind(batch);
+  batch.commit = () => trackWrite(commit());
+  return batch;
+}) as typeof _writeBatch;
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 import { TodoWriteError, classifyWriteError } from "./todoWrite";

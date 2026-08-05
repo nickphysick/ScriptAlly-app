@@ -231,26 +231,29 @@
 /* section rows — the panel's own rhythm, 38px */
 .ws-nav { display: flex; flex-direction: column; flex: none; }
 .ws-ni {
-  height: 38px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   padding: 0 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--shell-ink-soft);
+  /* ⚠️ #544b44, NOT --shell-ink-soft. The panel's resting label carries a touch more weight than
+     the shell's general secondary ink — at 14px on a chrome ground, --shell-ink-soft read washed
+     out beside the 18px icons. Ink on hover and active, as before. */
+  color: #544b44;
   text-align: left;
   transition: background 0.13s, color 0.13s;
   outline: none;
   flex: none;
 }
-.ws-ic { display: flex; flex: none; opacity: 0.8; color: inherit; }
-.ws-ic svg { width: 17px; height: 17px; stroke-width: 1.6; }
+.ws-ic { display: flex; flex: none; opacity: 0.9; color: inherit; }
+.ws-ic svg { width: 18px; height: 18px; stroke-width: 1.7; }
 .ws-ni:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
 .ws-ni:hover .ws-ic { opacity: 1; }
 .ws-ni.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
@@ -281,29 +284,29 @@
 }
 .ws-sub.open { grid-template-rows: 1fr; }
 .ws-subin { overflow: hidden; min-width: 0; position: relative; padding: 1px 0 4px; }
-/* ⚠️ 18px = the parent row's own padding (10) + half its 17px icon — the thread hangs under the
+/* ⚠️ 19px = the parent row's own padding (10) + half its 18px icon — the thread hangs under the
    ICON's centre while the child TEXT aligns to the parent's text. Indenting the line from the
-   panel edge instead reads as a margin rather than a hierarchy. */
+   panel edge instead reads as a margin rather than a hierarchy. It moved with the icon size. */
 .ws-subin::before {
   content: "";
   position: absolute;
-  left: 18px;
+  left: 19px;
   top: 4px;
   bottom: 9px;
   width: 1px;
   background: var(--shell-edge);
 }
 .ws-srow {
-  height: 30px;
+  height: 32px;
   display: flex;
   align-items: center;
   margin: 1px 0;
-  padding: 0 10px 0 36px;
+  padding: 0 10px 0 38px;
   border: 0;
   border-radius: 7px;
   background: transparent;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--shell-ink-soft);
   text-align: left;
@@ -360,7 +363,25 @@
   overflow: hidden;
 }
 
-/* THE BAR IS THE CARD'S HEADER — there is no bar outside the card. */
+/* ⚠️ THE CARD'S SINGLE SCROLL CONTAINER (§4). The bar is sticky INSIDE it, so page content
+   passes beneath the frosted band — that is the whole effect. A fixed header above a separately
+   scrolling body would have nothing to frost, and `.ws-work` scrolling again would put two
+   scrollers in one card. It is a flex COLUMN so viewport-locked pages can take the remaining
+   height with `flex:1` rather than `height:100%`, which would have measured past the bar. */
+.ws-cscroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* THE BAR IS THE CARD'S HEADER — there is no bar outside the card.
+   ⚠️ ALWAYS FROSTED — there is no scroll-triggered state and no transition between states. A
+   header that changed on scroll would announce the scroll; this one simply is what it is.
+   ⚠️ NO BOTTOM HAIRLINE. The constant shadow does the separating; a hairline under a translucent
+   band reads as a seam where the blur already implies depth. */
 .ws-bar {
   height: var(--head);
   flex: none;
@@ -368,19 +389,93 @@
   align-items: center;
   gap: 14px;
   padding: 0 22px;
-  border-bottom: 1px solid var(--shell-hair);
-  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 18px -10px rgba(46, 39, 35, 0.22);
+}
+/* ⚠️ A FEATURE QUERY, NOT JS DETECTION. Where the blur is unsupported the translucency would
+   just be a washed-out band over moving text, so the fallback is opaque white. */
+@supports not (backdrop-filter: blur(10px)) {
+  .ws-bar { background: #ffffff; }
 }
 .ws-crumb {
   font-size: 13px;
   color: var(--shell-muted);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
 }
-.ws-crumb b { color: var(--shell-ink); font-weight: 600; }
-.ws-sep { color: #cfc4b4; flex: none; }
+/* ⚠️ `/` THROUGHOUT (§5). The live mix of `/` after the brand and `·` before the child made the
+   brand look like a different KIND of step from the section. One separator, one hierarchy. */
+.ws-sep { color: #cfc4b4; flex: none; font-weight: 400; }
+/* Ancestors are muted and clickable; only the current page is ink. */
+.ws-seg {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: color 0.13s;
+  border-radius: 4px;
+}
+.ws-seg:hover { color: var(--shell-ink); }
+.ws-seg:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
+.ws-cur { color: var(--shell-ink); font-weight: 600; }
+.ws-logobtn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex: none;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+.ws-logobtn:hover { opacity: 0.72; }
+.ws-logobtn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
+
+/* THE STATUS WHISPER — wired to real write state (lib/saveSignal), never a constant. */
+.ws-sync {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b3a698;
+  white-space: nowrap;
+  flex: none;
+}
+.ws-vdiv { width: 1px; height: 18px; background: var(--shell-hair); flex: none; }
+
+/* + NEW — the ONE creation door in the chrome. ⚠️ The sidebar carries no quick actions: creation
+   lives here, and a second set of create buttons in the panel would be two homes for one job. */
+.ws-newwrap { position: relative; display: flex; flex: none; }
+.ws-nbtn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9px;
+  background: #f5e3da;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  color: var(--shell-burgundy);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ws-nbtn:hover { background: #f1d9cc; }
+.ws-nbtn:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--shell-focus); }
+.ws-nbtn svg { width: 14px; height: 14px; stroke-width: 2; }
+.ws-newmenu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 196px; z-index: 40; }
 /* ⚠️ THE HEIGHT IS MEASURED, NOT CHOSEN — see LOGOTYPE_PX in WorkspaceShell.tsx. The asset is
    only 51.7% cap-height, so this element is ~2× the cap it renders. */
 .ws-logotype { width: auto; flex: none; display: block; }
@@ -389,7 +484,15 @@
 /* ⚠️ THE WORK AREA DOES NOT SCROLL — THE STAGE INSIDE IT DOES. `#app-stage-scroll` is the app's
    scroll container, and everything from stageScroll.ts to per-route scroll restoration addresses
    it directly. An `overflow:auto` here would make a second scroller wrapping the first. */
-.ws-work { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #ffffff; }
+/* ⚠️ THE WORK AREA NO LONGER SCROLLS (§4); `.ws-cscroll` above it does. Giving this back its own
+   overflow is how the sticky bar stops working.
+
+   ⚠️ `flex: 1 0 auto` IS EXACT, AND EACH OF THE THREE PARTS EARNS ITS PLACE. `grow:1` lets a
+   short page (or a viewport-locked one) claim the space left under the bar, so a `fill` StagePage
+   inside can take a definite height and scroll internally. `shrink:0` is what stops a TALL page
+   being squeezed to fit — with shrink allowed it would compress instead of overflowing, and the
+   card would never scroll at all. `basis:auto` keeps content height as the starting point. */
+.ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: #ffffff; }
 
 /* ══ BELOW md — MOBILE PASS 1 IS LEFT EXACTLY AS IT IS ══
    Both mockups are desktop-only and the phone has a shipped, locked chrome, so this shell is a
