@@ -349,8 +349,9 @@ export interface Query {
   partialSentDate?: string;
   fullRequestedDate?: string;
   fullSentDate?: string;
-  rejectedDate?: string; // ⚠️ never written by any live path, but READ by the packageMetrics /
-  // manuscriptPage date chains — so the strip is blocked and the field stays (Tier 2 · Phase 6).
+  rejectedDate?: string; // DERIVED by recomputeQuery (sole writer): when the query closed by
+  // rejection — the final rung's time as ISO; absent otherwise, and for provisional-dated
+  // imports. Feeds the packageMetrics reply-time maths (Tier 3 · Phase 3).
   rejectionType?: string; // Edit-form rejection category, e.g. "Form rejection"
   agentComments?: string; // Edit-form free-text notes about the agent's response
 

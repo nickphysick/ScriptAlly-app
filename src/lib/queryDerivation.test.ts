@@ -5,6 +5,7 @@ import {
   deriveStatus,
   deriveResponseFlags,
   deriveResponseReceivedAt,
+  deriveRejectedDate,
   deriveRevisionRound,
   derivePipelineDates,
   deriveQueryFields,
@@ -152,6 +153,36 @@ describe('deriveResponseReceivedAt — first agent action, never fabricated', ()
   it('a provisional LATER rung does not disturb a real earliest one', () => {
     const log = [at(QueryStatus.PARTIAL_REQUESTED, 2), { ...at(QueryStatus.FULL_REQUESTED, 9), dateProvisional: true }];
     expect(deriveResponseReceivedAt(log)).toBe(new Date(t0 + 2 * 86400000).toISOString());
+  });
+});
+
+describe('deriveRejectedDate — closed-by-rejection only, never fabricated', () => {
+  it('null when the log is empty or the query is not closed by rejection', () => {
+    expect(deriveRejectedDate([])).toBeNull();
+    expect(deriveRejectedDate([at(QueryStatus.QUERIED, 0)])).toBeNull();
+    expect(deriveRejectedDate([at(QueryStatus.QUERIED, 0), at(QueryStatus.OFFER, 5)])).toBeNull();
+    expect(deriveRejectedDate([at(QueryStatus.QUERIED, 0), at(QueryStatus.NO_RESPONSE, 60)])).toBeNull();
+  });
+
+  it('a straight rejection → the rejection rung’s own time', () => {
+    const log = [at(QueryStatus.QUERIED, 0), at(QueryStatus.REJECTED, 20)];
+    expect(deriveRejectedDate(log)).toBe(new Date(t0 + 20 * 86400000).toISOString());
+  });
+
+  it('request-then-rejection → the REJECTION rung, not the earlier request', () => {
+    const log = [at(QueryStatus.QUERIED, 0), at(QueryStatus.PARTIAL_REQUESTED, 5), at(QueryStatus.REJECTED, 30)];
+    expect(deriveRejectedDate(log)).toBe(new Date(t0 + 30 * 86400000).toISOString());
+    expect(deriveRejectedDate([...log].reverse())).toBe(new Date(t0 + 30 * 86400000).toISOString());
+  });
+
+  it('a rejection rung that is NOT final (undo restored a later state) → null', () => {
+    const log = [at(QueryStatus.REJECTED, 10), at(QueryStatus.OFFER, 15)];
+    expect(deriveRejectedDate(log)).toBeNull();
+  });
+
+  it('a date-PROVISIONAL closing rejection → null (import guard — never an invented date)', () => {
+    const log = [at(QueryStatus.QUERIED, 0), { ...at(QueryStatus.REJECTED, 20), dateProvisional: true }];
+    expect(deriveRejectedDate(log)).toBeNull();
   });
 });
 

@@ -698,6 +698,26 @@ describe('/users/{userId}/queries', () => {
     );
   });
 
+  it('owner can update rejectedDate as an ISO string (the derived close-by-rejection date)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'queries', 'q-1'), validQuery(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'queries', 'q-1'), { rejectedDate: '2026-03-01T10:00:00.000Z' })
+    );
+  });
+
+  it('rejects a non-string rejectedDate', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'queries', 'q-1'), validQuery(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'queries', 'q-1'), { rejectedDate: 42 })
+    );
+  });
+
   it('owner can update query status', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'queries', 'q-1'), validQuery(ALICE));

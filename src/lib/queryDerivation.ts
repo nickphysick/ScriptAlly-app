@@ -110,6 +110,20 @@ export function deriveResponseReceivedAt(activities: DerivableActivity[]): strin
 }
 
 /**
+ * When the query CLOSED BY REJECTION — the final status-bearing rung's time as ISO, only when
+ * that final rung is REJECTED. `null` otherwise, and when the closing rung is date-provisional
+ * (the Tier 1 import guard — never a fabricated date). Unblocks the package reply-time maths,
+ * whose first-move candidate list reads rejectedDate: with the field never written, straight
+ * rejections (no prior request) were silently excluded from the averages (Tier 3 · Phase 3).
+ */
+export function deriveRejectedDate(activities: DerivableActivity[]): string | null {
+  const ordered = orderedStatusBearing(activities);
+  const last = ordered[ordered.length - 1];
+  if (!last || last.status !== QueryStatus.REJECTED) return null;
+  return last.provisional ? null : new Date(last.time).toISOString();
+}
+
+/**
  * Revision round = 1 + the number of resubmission sends. A resubmission is a FULL_SENT whose
  * nearest preceding status-bearing activity is REVISE_RESUBMIT — derived from log shape, never
  * a stored counter, so editing/deleting an R&R recomputes the round correctly.
@@ -154,6 +168,7 @@ export interface DerivedQueryFields extends DerivedPipelineDates {
   hasAgentResponded: boolean;
   revisionRound: number;
   responseReceivedAt: string | null;
+  rejectedDate: string | null;
 }
 
 /** One call for everything recomputeQuery writes. */
@@ -163,6 +178,7 @@ export function deriveQueryFields(activities: DerivableActivity[]): DerivedQuery
     ...deriveResponseFlags(activities),
     revisionRound: deriveRevisionRound(activities),
     responseReceivedAt: deriveResponseReceivedAt(activities),
+    rejectedDate: deriveRejectedDate(activities),
     ...derivePipelineDates(activities),
   };
 }

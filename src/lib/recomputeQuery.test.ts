@@ -94,7 +94,7 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     expect(written.responseReceivedAt).toEqual(DELETED);
   });
 
-  it('responseReceivedAt = the EARLIEST incoming rung, not the latest', async () => {
+  it('responseReceivedAt = the EARLIEST incoming rung; rejectedDate = the closing rejection', async () => {
     mockGetDocs.mockResolvedValue(snap([
       { id: 'a1', data: () => ({ resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-01T10:00:00Z') }) },
       { id: 'a2', data: () => ({ resultingStatus: QueryStatus.REJECTED, createdAt: iso('2026-03-01T10:00:00Z') }) },
@@ -103,6 +103,25 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     const written: any = mockUpdateDoc.mock.calls[0][1];
     expect(written.status).toBe(QueryStatus.REJECTED);
     expect(written.responseReceivedAt).toBe(iso('2026-02-01T10:00:00Z'));
+    expect(written.rejectedDate).toBe(iso('2026-03-01T10:00:00Z'));
+  });
+
+  it('rejectedDate is deleteField when the query is not closed by rejection', async () => {
+    mockGetDocs.mockResolvedValue(snap([
+      { id: 'a1', data: () => ({ resultingStatus: QueryStatus.OFFER, createdAt: iso('2026-03-01T10:00:00Z') }) },
+    ]));
+    await recomputeQuery('u1', 'q1');
+    expect((mockUpdateDoc.mock.calls[0][1] as any).rejectedDate).toEqual(DELETED);
+  });
+
+  it('a date-provisional closing rejection → deleteField (rejected, date unknown)', async () => {
+    mockGetDocs.mockResolvedValue(snap([
+      { id: 'a1', data: () => ({ resultingStatus: QueryStatus.REJECTED, createdAt: iso('2026-03-01T10:00:00Z'), dateProvisional: true }) },
+    ]));
+    await recomputeQuery('u1', 'q1');
+    const written: any = mockUpdateDoc.mock.calls[0][1];
+    expect(written.status).toBe(QueryStatus.REJECTED);
+    expect(written.rejectedDate).toEqual(DELETED);
   });
 
   it('a date-provisional earliest incoming rung → deleteField (responded, date unknown)', async () => {
@@ -127,26 +146,35 @@ describe('recomputeQuery — derives the query fields from the log and writes th
   });
 });
 
-describe('single-writer lock — responseReceivedAt', () => {
-  it('no non-test file outside the derivation pair carries the write key', () => {
-    // A write is the object-key form `responseReceivedAt:` (assignment in a payload or the
-    // derived-fields interface). Reads are `q.responseReceivedAt` and the Query type declares
-    // `responseReceivedAt?:` — neither matches the pattern, so the sweep flags writers only.
-    const SRC_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-    const ALLOWED = new Set(['lib/queryDerivation.ts', 'lib/recomputeQuery.ts']);
+describe('single-writer lock — the derived date fields', () => {
+  // A write is the object-key form `<field>:` (a payload assignment or the derived-fields
+  // interface). Reads are `q.<field>` and the Query type declares `<field>?:` — neither matches
+  // the pattern, so the sweep flags writers only.
+  const SRC_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  const ALLOWED = new Set(['lib/queryDerivation.ts', 'lib/recomputeQuery.ts']);
+  const offendersFor = (field: string): string[] => {
+    const pattern = new RegExp(`${field}\\s*:`);
     const offenders: string[] = [];
     const walk = (dir: string) => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const p = join(dir, entry.name);
         if (entry.isDirectory()) { walk(p); continue; }
         if (!/\.(ts|tsx)$/.test(entry.name) || /\.test\.(ts|tsx)$/.test(entry.name)) continue;
-        if (/responseReceivedAt\s*:/.test(readFileSync(p, 'utf8'))) offenders.push(relative(SRC_ROOT, p));
+        if (pattern.test(readFileSync(p, 'utf8'))) offenders.push(relative(SRC_ROOT, p));
       }
     };
     walk(SRC_ROOT);
-    // Anchors first: the two allowed homes DO carry the key, proving the sweep sees real writes.
-    expect(offenders).toContain('lib/queryDerivation.ts');
-    expect(offenders).toContain('lib/recomputeQuery.ts');
-    expect(offenders.filter((f) => !ALLOWED.has(f))).toEqual([]);
-  });
+    return offenders;
+  };
+
+  it.each(['responseReceivedAt', 'rejectedDate'])(
+    '%s: no non-test file outside the derivation pair carries the write key',
+    (field) => {
+      const offenders = offendersFor(field);
+      // Anchors first: the two allowed homes DO carry the key, proving the sweep sees real writes.
+      expect(offenders).toContain('lib/queryDerivation.ts');
+      expect(offenders).toContain('lib/recomputeQuery.ts');
+      expect(offenders.filter((f) => !ALLOWED.has(f))).toEqual([]);
+    },
+  );
 });
