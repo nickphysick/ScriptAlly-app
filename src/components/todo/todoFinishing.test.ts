@@ -51,29 +51,37 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
   });
 
   it("undo confirms with Restored; the toast is a status region on the 6s action window", () => {
+    const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
     expect((page.match(/flash\("Restored"\)/g) ?? []).length).toBeGreaterThanOrEqual(8);
     expect((flow.match(/onToast\("Restored"\)/g) ?? []).length).toBeGreaterThanOrEqual(7);
-    expect(page).toContain("action ? 6000 : 2600"); // doc pass P5: undo toasts hold 6 seconds
+    // ⚠️ THE WINDOW MOVED INTO useTodoToast (extraction E1) — same 6s/2.6s, one owner, four pages.
+    expect(hook).toContain("const WITH_UNDO_MS = 6000;");
+    expect(hook).toContain("const PLAIN_MS = 2600;");
     expect(page).toContain('className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}');
   });
 });
 
+/* ⚠️ THE TOAST'S MECHANICS MOVED VERBATIM INTO useTodoToast (extraction E1), so the four To-do
+   pages share ONE takeback window rather than four that could all be open at once. Every rule
+   below is unchanged — only the file it is asserted against moved. */
 describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)", () => {
   const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+  const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
   const css = readFileSync(join(here, "todo.css"), "utf8");
 
   it("6s timer with hover PAUSE (remaining-time model); a new toast replaces (= commits) the current one", () => {
-    expect(page).toContain("const armToastTimer = (ms: number) => {");
-    expect(page).toContain("toastTimer.current = window.setTimeout(() => setToast(null), ms);");
-    expect(page).toContain("const pauseToast = () => { toastDeadline.current = Math.max(600, toastDeadline.current - Date.now()); clearToastTimer(); };");
-    expect(page).toContain("const resumeToast = () => armToastTimer(toastDeadline.current || 6000);");
+    expect(hook).toContain("const arm = useCallback((ms: number) => {");
+    expect(hook).toContain("timer.current = window.setTimeout(() => setToast(null), ms);");
+    // the remaining-time model: pausing banks what is LEFT rather than restarting the window
+    expect(hook).toContain("deadline.current = Math.max(600, deadline.current - Date.now());");
+    expect(hook).toContain("arm(deadline.current || WITH_UNDO_MS)");
     // replacement semantics: flash unconditionally swaps the toast + re-arms — the previous
     // action's write already happened, so replacement simply ends its takeback window
-    expect(page).toContain("setToast({ msg, action });");
-    expect(page).toContain("armToastTimer(action ? 6000 : 2600);");
+    expect(hook).toContain("setToast({ msg, action });");
+    expect(hook).toContain("arm(action ? WITH_UNDO_MS : PLAIN_MS);");
   });
   it("keyboard: the toast is a status region, Undo is a real button, Esc dismisses (= commits)", () => {
-    expect(page).toContain('if (e.key === "Escape") { clearToastTimer(); setToast(null); }');
+    expect(hook).toContain('if (e.key === "Escape") dismiss();');
     expect(page).toContain('<button type="button" className="tdb-toast-act"');
   });
   it("the ink pill: bottom-centre, paper Undo, slide-up; reduced motion = fade only", () => {
