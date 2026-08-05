@@ -8,6 +8,7 @@ import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { ToastProvider } from "./components/toast/ToastProvider";
 import { NotesStoreScan } from "./components/NotesStoreScan"; // ⚠️ TEMP — notes-store scan; delete with the route
+import { RecomputeSweep } from "./components/RecomputeSweep"; // ⚠️ TEMP — one-off recompute sweep; delete with the route
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell, StagePage } from "./components/shell/AppShell";
@@ -466,6 +467,12 @@ function AppContent() {
   // Dev-only Package Workshop review surface (landing + empty/full workshop over stubs, no auth). TEMP.
   if (hash === "#/pkg-lab" && import.meta.env.DEV) {
     return <PkgLab />;
+  }
+  // ⚠️ TEMP — the one-off recompute sweep (heals closed/rejected queries that will never recompute
+  // on their own). DEV-gated: this tool must never reach a production build. Nothing it does is
+  // automatic — the route renders a description and two buttons. DELETE WITH THE COMPONENT.
+  if (hash === "#/recompute-sweep" && import.meta.env.DEV) {
+    return <RecomputeSweep />;
   }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a

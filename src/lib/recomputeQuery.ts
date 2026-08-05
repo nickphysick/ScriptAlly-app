@@ -51,51 +51,94 @@ export async function monotonicEventTime(userId: string, queryId: string, desire
   return Math.max(desiredMillis, latest + 1);
 }
 
+/** One raw activity-subcollection document, as the derivation sees it. */
+export interface RawActivityDoc {
+  id: string;
+  data: Record<string, unknown>;
+}
+
+/**
+ * Exactly the ten fields recomputeQuery writes, with `null` where it writes `deleteField()`.
+ * This is the ONE place the payload shape lives — recomputeQuery maps it to the Firestore write,
+ * and the DEV sweep's dry run reads it to preview a write without performing one.
+ */
+export interface RecomputedFields {
+  status: QueryStatus;
+  partialRequestedDate: string | null;
+  partialSentDate: string | null;
+  fullRequestedDate: string | null;
+  fullSentDate: string | null;
+  revisionRound: number;
+  hasAgentResponded: boolean;
+  responseReceivedAt: string | null;
+  rejectedDate: string | null;
+  lastStatusChange: string | null;
+}
+
+/**
+ * PURE: what recomputeQuery would write for this activity log, computed without touching
+ * Firestore. `null` === the field is cleared. No I/O, no side effects — so a caller can preview
+ * a recompute (the sweep's dry run) without duplicating a line of derivation.
+ */
+export function computeRecomputedFields(docs: RawActivityDoc[]): RecomputedFields {
+  const fields = deriveQueryFields(docs.map((d) => subcollectionDocToDerivable(d.id, d.data)));
+
+  // A pipeline-stage date whose latest rung is PROVISIONAL (an imported, date-unknown rung) must
+  // never be written — its createdAt is only an ordering key, not a real date. Status/responses/
+  // revisionRound still derive from rung existence, so they stay correct; the date is simply
+  // left unset ("date needed"). Non-imported queries carry no provisional rungs, so this is inert.
+  const stageProvisional = (status: QueryStatus): boolean => {
+    let bestTime = -Infinity;
+    let provisional = false;
+    for (const d of docs) {
+      const s = normalizeResultingStatus(d.data.resultingStatus) ?? normalizeResultingStatus(d.data.type);
+      if (s !== status) continue;
+      const t = getActivityTime(d.data.createdAt);
+      if (t >= bestTime) {
+        bestTime = t;
+        provisional = d.data.dateProvisional === true;
+      }
+    }
+    return provisional;
+  };
+  const stageDate = (status: QueryStatus, derived: string | null) =>
+    stageProvisional(status) || !derived ? null : derived;
+
+  return {
+    status: fields.status,
+    partialRequestedDate: stageDate(QueryStatus.PARTIAL_REQUESTED, fields.partialRequestedDate),
+    partialSentDate: stageDate(QueryStatus.PARTIAL_SENT, fields.partialSentDate),
+    fullRequestedDate: stageDate(QueryStatus.FULL_REQUESTED, fields.fullRequestedDate),
+    fullSentDate: stageDate(QueryStatus.FULL_SENT, fields.fullSentDate),
+    revisionRound: fields.revisionRound,
+    hasAgentResponded: fields.hasAgentResponded,
+    // "When the agent first acted" (earliest incoming rung, as ISO). Absent — never fabricated —
+    // when no incoming rung exists or the earliest one is date-provisional.
+    responseReceivedAt: fields.responseReceivedAt,
+    // "When the query closed by rejection" (the final rung, only when REJECTED; same provisional
+    // guard). Feeds the package reply-time maths' first-move candidates.
+    rejectedDate: fields.rejectedDate,
+    // "When the status last changed" — the latest rung's own time, not a recording stamp.
+    lastStatusChange: fields.lastStatusChange,
+  };
+}
+
 export async function recomputeQuery(userId: string, queryId: string): Promise<void> {
   const queryRef = doc(db, "users", userId, "queries", queryId);
   try {
     const snap = await getDocs(collection(db, "users", userId, "queries", queryId, "activity"));
-    const activities = snap.docs.map((d) => subcollectionDocToDerivable(d.id, d.data()));
-    const fields = deriveQueryFields(activities);
-
-    // A pipeline-stage date whose latest rung is PROVISIONAL (an imported, date-unknown rung) must
-    // never be written — its createdAt is only an ordering key, not a real date. Status/responses/
-    // revisionRound still derive from rung existence, so they stay correct; the date is simply
-    // left unset ("date needed"). Non-imported queries carry no provisional rungs, so this is inert.
-    const stageProvisional = (status: QueryStatus): boolean => {
-      let bestTime = -Infinity;
-      let provisional = false;
-      for (const d of snap.docs) {
-        const data = d.data();
-        const s = normalizeResultingStatus(data.resultingStatus) ?? normalizeResultingStatus(data.type);
-        if (s !== status) continue;
-        const t = getActivityTime(data.createdAt);
-        if (t >= bestTime) {
-          bestTime = t;
-          provisional = data.dateProvisional === true;
-        }
-      }
-      return provisional;
-    };
-    const stageDate = (status: QueryStatus, derived: string | null) =>
-      stageProvisional(status) || !derived ? deleteField() : derived;
+    const fields = computeRecomputedFields(snap.docs.map((d) => ({ id: d.id, data: d.data() })));
 
     await updateDoc(queryRef, {
       status: fields.status,
-      partialRequestedDate: stageDate(QueryStatus.PARTIAL_REQUESTED, fields.partialRequestedDate),
-      partialSentDate: stageDate(QueryStatus.PARTIAL_SENT, fields.partialSentDate),
-      fullRequestedDate: stageDate(QueryStatus.FULL_REQUESTED, fields.fullRequestedDate),
-      fullSentDate: stageDate(QueryStatus.FULL_SENT, fields.fullSentDate),
+      partialRequestedDate: fields.partialRequestedDate ?? deleteField(),
+      partialSentDate: fields.partialSentDate ?? deleteField(),
+      fullRequestedDate: fields.fullRequestedDate ?? deleteField(),
+      fullSentDate: fields.fullSentDate ?? deleteField(),
       revisionRound: fields.revisionRound,
       hasAgentResponded: fields.hasAgentResponded,
-      // Derived "when the agent first acted" (earliest incoming rung, as ISO). Absent — never
-      // fabricated — when no incoming rung exists or the earliest one is date-provisional.
       responseReceivedAt: fields.responseReceivedAt ?? deleteField(),
-      // Derived "when the query closed by rejection" (the final rung, only when REJECTED; same
-      // provisional guard). Feeds the package reply-time maths' first-move candidates.
       rejectedDate: fields.rejectedDate ?? deleteField(),
-      // Derived "when the status last changed" — the latest rung's own time, not a recording
-      // stamp; same provisional guard. The last stamped audit field to join the derived set.
       lastStatusChange: fields.lastStatusChange ?? deleteField(),
     });
   } catch (e) {

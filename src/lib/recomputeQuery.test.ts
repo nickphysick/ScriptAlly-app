@@ -19,7 +19,7 @@ import { readdirSync, readFileSync } from 'fs';
 import { join, relative, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getDocs, updateDoc } from 'firebase/firestore';
-import { subcollectionDocToDerivable, monotonicEventTime, recomputeQuery } from './recomputeQuery';
+import { subcollectionDocToDerivable, monotonicEventTime, recomputeQuery, computeRecomputedFields } from './recomputeQuery';
 import { QueryStatus } from '../types';
 
 const mockGetDocs = vi.mocked(getDocs);
@@ -147,6 +147,57 @@ describe('recomputeQuery — derives the query fields from the log and writes th
     const written: any = mockUpdateDoc.mock.calls[0][1];
     expect(written.status).toBe(QueryStatus.FULL_SENT);
     expect(written.revisionRound).toBe(2);
+  });
+});
+
+describe('computeRecomputedFields — the pure preview the DEV sweep dry-runs on', () => {
+  const LOG = [
+    { id: 'a1', data: { resultingStatus: QueryStatus.QUERIED, createdAt: iso('2026-01-01T10:00:00Z') } },
+    { id: 'a2', data: { resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-01T10:00:00Z') } },
+    { id: 'a3', data: { resultingStatus: QueryStatus.REJECTED, createdAt: iso('2026-03-01T10:00:00Z') } },
+  ];
+
+  it('is PURE — no Firestore call, so a dry run can never write', async () => {
+    computeRecomputedFields(LOG);
+    expect(mockGetDocs).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+
+  it('MIRRORS the live write exactly: null ⇄ deleteField, value ⇄ value (one derivation, not two)', async () => {
+    const pure = computeRecomputedFields(LOG);
+    mockGetDocs.mockResolvedValue(snap(LOG.map((d) => ({ id: d.id, data: () => d.data }))));
+    await recomputeQuery('u1', 'q1');
+    const written: any = mockUpdateDoc.mock.calls[0][1];
+
+    // Anchor: the write and the preview cover the same ten keys.
+    expect(Object.keys(written).sort()).toEqual(Object.keys(pure).sort());
+    for (const [key, value] of Object.entries(pure)) {
+      if (value === null) expect(written[key]).toEqual(DELETED);
+      else expect(written[key]).toEqual(value);
+    }
+    // …and this log's substance, spelled out: rejected, so a rejectedDate exists.
+    expect(pure.status).toBe(QueryStatus.REJECTED);
+    expect(pure.rejectedDate).toBe(iso('2026-03-01T10:00:00Z'));
+    expect(pure.responseReceivedAt).toBe(iso('2026-02-01T10:00:00Z'));
+    expect(pure.partialSentDate).toBeNull();
+  });
+
+  it('honours the provisional guard (an imported stage rung yields null, never a made-up date)', () => {
+    const pure = computeRecomputedFields([
+      { id: 'p1', data: { resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-01T10:00:00Z'), dateProvisional: true } },
+    ]);
+    expect(pure.status).toBe(QueryStatus.PARTIAL_REQUESTED);
+    expect(pure.partialRequestedDate).toBeNull();
+    expect(pure.hasAgentResponded).toBe(true); // responded — date unknown
+  });
+
+  it('an empty log previews the clean-slate state (everything datey cleared)', () => {
+    const pure = computeRecomputedFields([]);
+    expect(pure.status).toBe(QueryStatus.QUERIED);
+    expect(pure.hasAgentResponded).toBe(false);
+    expect(pure.revisionRound).toBe(1);
+    expect(pure.lastStatusChange).toBeNull();
+    expect(pure.rejectedDate).toBeNull();
   });
 });
 
