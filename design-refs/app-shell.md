@@ -1,5 +1,14 @@
 # App shell — CAPSULE system (design reference)
 
+> **⚠️ TOKEN NAMING — the mockups and the code differ on purpose.** The sage-desk and top-nav
+> mockups call the ground **`--desk`**; the code calls it **`--shell-desk`**, because `--desk` was
+> already the PER-THEME working-area background (`.t-capp` `#e8ddd0` · `.t-bold` `#c2cfda` ·
+> `.t-edn` `#f4f4f3`) that the hubs and the ultrawide margin rule read. A `:root --desk` would
+> have been overridden by every theme class *silently*. **A prompt that quotes the mockup's
+> `--desk` is naming a token that belongs to something else.** The mockups' `--gap` / `--r` /
+> `--lift` / `--rim` map to `--shell-cap-gap` / `--shell-cap-radius` / `--shell-cap-shadow` /
+> `--shell-cap-rim` for the same reason: one `--shell-*` chrome namespace, no bare names.
+
 Written against the **supplied** mockup `design-refs/scriptally-capsule-shell.html` (Nick's file,
 copied in with capsule Phase 1) — mockup-derived, not spec-derived. **Supersedes the flat v2
 scheme below-documented in git history** (`scriptally-shell-v2.html` + scheme 1 "Raised light"):

@@ -29,9 +29,9 @@ const BAKED: Record<string, string> = {
   "--col-max": "246px",
   "--shell-cap-rim": "inset 0 1px 0 rgba(255,255,255,.55)",
   "--shell-ground": "#e7e0d5",
-  "--shell-rail": "#f1ebe3",
-  "--shell-side": "#f8f4ee",
-  "--shell-canvas": "#fdfbf8",
+  "--shell-rail": "#efe7db",   // the COLUMN capsule (app-shell Baked 3)
+  "--shell-side": "#efe7db",   // legacy alias — the panel it named is gone
+  "--shell-canvas": "#f7f2e9", // the CONTENT capsule, and its top bar
   "--shell-card": "#fdfaf5",
   "--shell-panel": "#f2ede7",
   "--shell-inset": "#efe8df",
@@ -67,14 +67,18 @@ describe("capsule tokens — index.css", () => {
     expect(css).not.toContain("#2e2622"); // the dark umber rail
     expect(css).not.toContain("--shell-side-edge");
   });
-  it("the aliased --shell-topbar stays RETIRED; the bar now joins the RAIL's chrome family", () => {
+  it("the aliased --shell-topbar stays RETIRED; THE BAR IS THE CONTENT CAPSULE'S HEAD", () => {
     expect(css).not.toMatch(/--shell-topbar\s*:/);
     const shellCss = readFileSync(resolve(__dirname, "./shellV2.css"), "utf8");
     expect(shellCss).not.toContain("var(--shell-topbar)");
-    // chrome tokens: a PERMANENT fill sharing the rail's tone — no scroll state (superseded)
-    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*background: var\(--shell-bar-bg\)/s);
-    expect(css).toContain("--shell-bar-bg: #f1ebe3");
-    expect(css).toContain("--shell-rail: #f1ebe3"); // one chrome family, deliberately
+    // It sits INSIDE the content capsule, so it wears that capsule's own colour — not the
+    // column's. (It borrowed the rail's tone while the two were separate components.)
+    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*background: var\(--shell-canvas\)/s);
+    // ⚠️ THE HAIRLINE IS PERMANENT — it completes the corner with the capsule edge. The top-nav
+    // shell reveals its own on scroll instead: no capsule there, so no corner. Deliberate.
+    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*border-bottom: 1px solid var\(--shell-line\)/s);
+    // and it reads --head, the SAME token as the column's masthead
+    expect(shellCss).toMatch(/\.sv2-topbar \{[^}]*height: var\(--head\)/s);
   });
 
   it("THE LAYERED SHADOW is one token of four stops, worn by every capsule", () => {
@@ -115,9 +119,9 @@ describe("capsule tokens — index.css", () => {
 describe("capsule tokens — designTokens.ts twins agree", () => {
   it("surfaces + fills", () => {
     expect(dt.shellGround).toBe("#e7e0d5");
-    expect(dt.shellRail).toBe("#f1ebe3");
-    expect(dt.shellSide).toBe("#f8f4ee");
-    expect(dt.shellCanvas).toBe("#fdfbf8");
+    expect(dt.shellRail).toBe("#efe7db");
+    expect(dt.shellSide).toBe("#efe7db");
+    expect(dt.shellCanvas).toBe("#f7f2e9");
     expect(dt.shellCard).toBe("#fdfaf5");
     expect(dt.shellPanel).toBe("#f2ede7");
     expect(dt.shellInset).toBe("#efe8df");
@@ -150,18 +154,25 @@ const lum = (hex: string): number => {
 };
 
 describe("the STEPPED TRIO depth law (scheme D) — depth recedes leftward", () => {
-  it("ground darkest, then rail, then panel, then content brightest", () => {
-    expect(lum(dt.shellGround)).toBeLessThan(lum(dt.shellRail));
-    expect(lum(dt.shellRail)).toBeLessThan(lum(dt.shellSide));
-    expect(lum(dt.shellSide)).toBeLessThan(lum(dt.shellCanvas));
+  it("⚠️ TWO capsules on a DARK desk — the stepped trio is superseded", () => {
+    // The old law stepped three chrome surfaces brighter left→right over a cream ground. The
+    // panel is gone and the ground is now sage, which is DARKER than any of them — depth comes
+    // from the desk being dark, not from three cream steps.
+    expect(lum(dt.shellDesk)).toBeLessThan(lum(dt.shellRail));
+    expect(lum(dt.shellRail)).toBeLessThan(lum(dt.shellCanvas));
   });
-  it("the three surfaces are DISTINCT — the one-shared-surface law is retired", () => {
-    expect(new Set([dt.shellRail, dt.shellSide, dt.shellCanvas]).size).toBe(3);
+  it("TWO capsules now — the panel folded into the column, so its token is a legacy alias", () => {
+    expect(dt.shellRail).not.toBe(dt.shellCanvas);
+    expect(dt.shellSide).toBe(dt.shellRail); // the alias tracks the column it merged into
   });
-  it("the interior fill moved with the panel: darker than every capsule, lighter than the ground", () => {
-    expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellRail)); // still reads as an inset ON the rail
-    expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellSide));
-    expect(lum(dt.shellInset)).toBeGreaterThan(lum(dt.shellGround));
+  it("⚠️ THE INTERIOR FILL NO LONGER READS AS AN INSET ON THE COLUMN — reported, not hidden", () => {
+    // --shell-inset (#efe8df) and the column (#efe7db) are within a hair of each other now, so a
+    // fill on the column is invisible. The sage-desk mockup does not use a fill there: its
+    // chrome controls are WHITE with a hairline (.qb.g), which is what the column's ghost button
+    // does. Anything else that relied on the fill/column step needs the same treatment.
+    expect(Math.abs(lum(dt.shellInset) - lum(dt.shellRail))).toBeLessThan(0.01);
+    // it still reads on the CONTENT capsule, which is where the search field and chips sit
+    expect(lum(dt.shellInset)).toBeLessThan(lum(dt.shellCanvas));
   });
   it("⚠️ THE ACTIVE FILL IS THE BRIGHTEST SURFACE — laid ON the capsule, not cut through it", () => {
     // The old law made active the GROUND token, so active was the DARKEST step. That only worked

@@ -23,6 +23,7 @@ import { HelpCircle, ListChecks, LogOut, Package, Settings, Upload } from "lucid
 import { parchment, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
 import { ShellColumn } from "./ShellColumn";
+import { AccountMenu } from "./AccountMenu";
 import { SearchPalette } from "./SearchPalette";
 import { buildCorpus, rankItems } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
@@ -152,6 +153,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // register a MobileDetailSpec under their OWN route key (mounted-but-inactive StagePage slots
   // can therefore never hide another route's tab bar); the shell reads only the active route's.
   const [youOpen, setYouOpen] = useState(false);
+  // The SHARED account menu's open state — Phase 4's top-nav shell will drive the same component.
+  const [accountOpen, setAccountOpen] = useState(false);
+
   const [mobileDetailMap, setMobileDetailMap] = useState<Record<string, MobileDetailSpec | null>>({});
   const setMobileDetail = useCallback((route: string, spec: MobileDetailSpec | null) => {
     setMobileDetailMap((prev) => (prev[route] === spec ? prev : { ...prev, [route]: spec }));
@@ -359,7 +363,27 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             pushed detail. One bar, two breakpoint states — never a parallel bar.) */}
 
         {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} onOpenSearch={openPalette} searchOpenerRef={searchOpenerRef} mobileDetail={activeMobileDetail} onOpenYou={() => setYouOpen(true)} />
+        <ShellTopBar
+          onNavigate={onNavigate}
+          scope={<ShellScope onNavigate={onNavigate} />}
+          onOpenSearch={openPalette}
+          searchOpenerRef={searchOpenerRef}
+          onTuck={togglePanel}
+          onOpenAccount={() => setAccountOpen((v) => !v)}
+          accountMenu={
+            <AccountMenu
+              open={accountOpen}
+              onClose={() => setAccountOpen(false)}
+              name={currentUser?.name ?? ""}
+              email={currentUser?.email}
+              plan={currentUser?.plan}
+              onNavigatePath={goPath}
+              onSignOut={logout}
+            />
+          }
+          mobileDetail={activeMobileDetail}
+          onOpenYou={() => setYouOpen(true)}
+        />
 
         {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
             foot fade. The wrapper is new; the stage's id, ref, scroll memory and styles are

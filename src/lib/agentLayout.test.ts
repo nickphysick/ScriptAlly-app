@@ -12,6 +12,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { resolve } from "path";
 
 const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../components/shell/AppShell.tsx", import.meta.url), "utf8");
@@ -82,12 +83,15 @@ describe("agent list · the page column", () => {
  * `.sa-tltab` was moved to the capsule edge in an earlier pack; the help FAB was missed, and its
  * bare right:20 measured from the browser edge, overhanging the ground gutter on the right only.
  */
-describe("the help FAB is RETIRED — help is a bar button now (top-bar rebuild)", () => {
+describe("the help FAB is RETIRED — Help centre lives in the shared account menu now", () => {
   it("the floating FAB and its inline right-inset are gone, so it cannot mismeasure anything", () => {
     expect(shell).not.toContain('className="ashell-help-fab"');
     // it was one of the three suspects in the right-gutter bug; removing it removes the class
     const v2 = readFileSync(new URL("../components/shell/ShellV2.tsx", import.meta.url), "utf8");
-    expect(v2).toContain('className="sv2-tbicon"');
+    // Help is a row in the SHARED account menu now (app-shell pack, Baked 11) — not a bar
+    // button, and certainly not a floating FAB measured from the browser edge.
+    const am = readFileSync(resolve(__dirname, "..", "components", "shell", "AccountMenu.tsx"), "utf8");
+    expect(am).toContain("Help centre");
   });
 });
 

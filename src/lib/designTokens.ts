@@ -131,9 +131,9 @@ export const statusParchment = "#fdfaf5"; // offer tick
    content capsule). JS twins of the --shell-* custom properties in index.css :root; the pair
    is kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
 export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
-export const shellRail = "#f1ebe3"; // RAIL capsule — the deepest surface
-export const shellSide = "#f8f4ee"; // PANEL capsule — one step above the rail
-export const shellCanvas = "#fdfbf8"; // CONTENT capsule — brightest; its top bar too
+export const shellRail = "#efe7db"; // THE COLUMN capsule (app-shell Baked 3)
+export const shellSide = "#efe7db"; // legacy alias — the panel it named folded into the column
+export const shellCanvas = "#f7f2e9"; // THE CONTENT capsule — and its top bar
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
 export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill
 export const shellInset = "#efe8df"; // THE interior fill (search, chips, pills, hovers)

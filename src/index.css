@@ -71,9 +71,12 @@
   --shell-desk: #aebdb0;              /* THE DESK — the sage-grey ground. NOTHING else reads this. */
   --shell-active-fill: #ffffff;       /* the selector + every .on state (app-shell pack) */
   --shell-ground: #e7e0d5;            /* ⚠️ LEGACY cream ground — being retired with the old shell */
-  --shell-rail: #f1ebe3;              /* RAIL capsule — the deepest surface (stepped trio) */
-  --shell-side: #f8f4ee;              /* PANEL capsule — one step above the rail */
-  --shell-canvas: #fdfbf8;            /* CONTENT capsule — the brightest surface; its top bar too */
+  /* THE TWO CAPSULES (app-shell pack, Baked 3). There are two now, not three — the panel folded
+     into the column — and both fills come from the sage-desk mockup. The old cream trio was
+     tuned against a cream ground; against sage it read as three washed-out greys. */
+  --shell-rail: #efe7db;              /* THE COLUMN capsule */
+  --shell-side: #efe7db;              /* ⚠️ LEGACY alias — the panel it named is gone (Phase 2) */
+  --shell-canvas: #f7f2e9;            /* THE CONTENT capsule — and its top bar */
   --shell-card: #fdfaf5;              /* card surface (=== parchment) */
   /* The interior fill moved WITH the panel (#f2ede7 → #efe8df): against a #f8f4ee panel the
      old step had all but vanished. --shell-panel did NOT move — it is an IN-PAGE grouping

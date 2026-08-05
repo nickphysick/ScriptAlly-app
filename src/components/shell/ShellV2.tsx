@@ -53,146 +53,68 @@ const Mark: React.FC = () => (
 
 export const ShellTopBar: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
-  /** The manuscript SCOPE control, rendered by the shell and seated in the bar (top-bar
-   *  rebuild): it left the sidebar entirely, so which manuscript you are working on is visible
-   *  on every page and in every state — it used to vanish the moment the panel collapsed. */
+  /** The manuscript SCOPE control — it lives in the bar so which manuscript you are working on
+   *  is visible on every page and in every state. ⚠️ Whatever renders here MUST keep writing
+   *  `scriptally_active_manuscript_id`: Packages, Comps and Manuscripts read it, and they break
+   *  SILENTLY without it — no error, just the wrong manuscript. */
   scope?: React.ReactNode;
-  /** Help's existing behaviour, lifted out of the retired floating FAB. */
-  onHelp?: () => void;
-  /** THE SEARCH IS AN OPENER now — the palette takes the typing (palette pack). */
   onOpenSearch?: () => void;
-  /** Focus returns to this control when the palette closes. */
   searchOpenerRef?: React.RefObject<HTMLButtonElement | null>;
-  /** Mobile Pass 1 — the ACTIVE route's pushed detail (back/title or Cancel·title·Done). All
-   *  detail elements are <md-only by CSS, so a registered spec changes nothing at md+. */
+  /** The tuck collapses the column — the bar's only chrome control. */
+  onTuck?: () => void;
+  /** The account block opens the SHARED AccountMenu (one component, both shells). */
+  accountMenu?: React.ReactNode;
+  onOpenAccount?: () => void;
   mobileDetail?: MobileDetailSpec | null;
-  /** Mobile Pass 1 — the avatar opens the you-menu sheet (<md only; desktop keeps the user
-   *  block navigating to /account). */
   onOpenYou?: () => void;
-}> = ({ onNavigate, scope, onHelp, onOpenSearch, searchOpenerRef, mobileDetail = null, onOpenYou }) => {
+}> = ({ onNavigate, scope, onOpenSearch, searchOpenerRef, onTuck, accountMenu, onOpenAccount, mobileDetail, onOpenYou }) => {
   const { pathname } = useLocation();
   const { currentUser } = useScriptAllyDb();
-  // THE BAR HAS TWO STATES, ONE COMPONENT (ref design-refs/scriptally-bar-per-page.html).
-  // Exactly two things differ — wordmark vs crumb, and where the search sits — so the bar never
-  // reads as a different component between pages. Everything else is constant.
-  const isDashboard = pathname === SHELL_DASHBOARD.path;
   const crumb = shellCrumbForPath(pathname);
-
-  // (⌘K is registered ONCE, globally, by the palette host in AppShell — it must work from
-  // anywhere including inside a text field, which a bar-local listener could not promise.)
-
-  // THE OPENER — it still looks like the field it replaced, because it is still the thing you
-  // click to search; it simply hands the typing to the palette.
-  const search = (
-    <button type="button" className="sv2-searchopen" onClick={onOpenSearch} ref={searchOpenerRef}>
-      <Search aria-hidden="true" />
-      <span className="sv2-sotext">Search agents, queries, notes…</span>
-      <span className="sv2-sokb" aria-hidden="true">⌘K</span>
-    </button>
-  );
-  // Help stops being a thing stuck to the viewport and becomes chrome. (The TIMELINE is out of
-  // scope entirely — it stays exactly as it is.)
-  const help = (
-    <button type="button" className="sv2-tbicon" onClick={onHelp} title="Help" aria-label="Help">
-      <HelpCircle aria-hidden="true" />
-    </button>
-  );
-
-  // THE USER BLOCK — avatar · name · chevron, at the right end, on EVERY page.
-  // It ALSO sits at the panel's foot. ⚠️ That duplication is INTENTIONAL AND APPROVED (canonical
-  // shell pack): the bar's copy is the one that survives the panel collapsing, and the panel's
-  // carries the plan line. Do not "tidy" either away. The rail's third copy is what went.
   const initials = (currentUser?.name ?? "")
     .split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  const user = currentUser && (
-    <button type="button" className="sv2-tbuser" onClick={() => onNavigate("account")} title="Account">
-      <span className="sv2-tbav" aria-hidden="true">{initials}</span>
-      <span className="sv2-tbname">{currentUser.name}</span>
-      <ChevronDown className="sv2-tbuchev" aria-hidden="true" />
-    </button>
-  );
 
   return (
-    <header className={`sv2-topbar${isDashboard ? " sv2-tb-dash" : ""}${mobileDetail ? " sv2-tb-mdetail" : ""}`}>
-      {/* MOBILE DETAIL (Mobile Pass 1, baked decision 5) — a pushed screen swaps the bar to
-          ‹ back (query detail) or Cancel · title · Done (agent editor). Every element here is
-          display:none at md+ (mobileShell.css), so desktop never sees them. */}
-      {mobileDetail &&
-        (mobileDetail.kind === "back" ? (
-          <button type="button" className="sv2m-back" onClick={mobileDetail.onBack}>
-            <ChevronLeft aria-hidden="true" />
-            {mobileDetail.title}
-          </button>
-        ) : (
-          <>
-            <button type="button" className="sv2m-cancel" onClick={mobileDetail.onCancel}>
-              Cancel
-            </button>
-            <span className="sv2m-dtitle">{mobileDetail.title}</span>
-            <button type="button" className="sv2m-done" onClick={mobileDetail.onDone}>
-              {mobileDetail.doneLabel ?? "Done"}
-            </button>
-          </>
-        ))}
-      {/* LEFT (ref design-refs/scriptally-bar-per-page.html) — the front door names the product;
-          a working page names your location. THE BREADCRUMB IS BACK on every non-dashboard page:
-          with the wordmark gone from those pages the slot stood empty, and orientation is what
-          belongs in it. The DASHBOARD crumb rule stays deleted — the dashboard reads the
-          wordmark, never a crumb, so that rule has nothing to come back to. */}
-      {isDashboard ? (
-        <span className="sv2-tbbrand">
-          {/* The id is set HERE and nowhere else, so inspecting the brand measures THIS
-              instance — the panel's and the mobile bar's copies no longer collide with it. */}
-          <ScriptAllyLogo heightPx={38} id="scriptally-brand-logo-root" />
-        </span>
-      ) : (
-        crumb && (
-          <div className="sv2-crumb">
-            {crumb.section !== crumb.page && (
-              <>
-                <span>{crumb.section}</span>
-                <span className="sv2-sl">/</span>
-              </>
-            )}
-            <b>{crumb.page}</b>
-          </div>
-        )
+    <header className="sv2-topbar">
+      {/* ⚠️ PER-PAGE ACTIONS DO NOT GO IN THIS BAR. It answers two questions — where am I, and
+          which manuscript — and it must not accumulate page-specific buttons. A page's actions
+          live in the tool row beneath its title (PageHeader). */}
+      <button type="button" className="sv2-tuck" onClick={onTuck} title="Collapse the column" aria-label="Collapse the column">
+        <PanelLeft aria-hidden="true" />
+      </button>
+      {crumb && (
+        <div className="sv2-crumb">
+          {crumb.section !== crumb.page && (
+            <>
+              <span>{crumb.section}</span>
+              <span className="sv2-sl">/</span>
+            </>
+          )}
+          <b>{crumb.page}</b>
+        </div>
       )}
       <span className="sv2-vr" aria-hidden="true" />
       {scope}
       <div className="sv2-grow" />
-      {/* SEARCH — on the dashboard it sits on the TRUE MIDLINE, absolutely centred so the flank
-          widths can never pull it off the line; on working pages it returns to the right, and
-          narrower, inside the tools cluster. */}
-      {isDashboard ? (
-        <>
-          <div className="sv2-gsearch sv2-gsearch-c">{search}</div>
-          <div className="sv2-tbright">{help}{user}</div>
-        </>
-      ) : (
-        <div className="sv2-tbright">
-          <div className="sv2-gsearch sv2-gsearch-r">{search}</div>
-          {help}
-          {user}
+      <div className="sv2-tbright">
+        <div className="sv2-gsearch sv2-gsearch-r">
+          <button type="button" className="sv2-searchopen" onClick={onOpenSearch} ref={searchOpenerRef}>
+            <Search aria-hidden="true" />
+            <span className="sv2-sotext">Search…</span>
+            <span className="sv2-sokb" aria-hidden="true">⌘K</span>
+          </button>
         </div>
-      )}
-      {/* MOBILE CLUSTER (Mobile Pass 1, concept frames 01/02/05) — the search opener as an icon
-          and the avatar as the you-menu trigger. <md only by CSS; desktop keeps the pill + the
-          user block above. */}
-      <button type="button" className="sv2m-iconbtn" onClick={onOpenSearch} aria-label="Search">
-        <Search aria-hidden="true" />
-      </button>
-      {currentUser && (
-        <button
-          type="button"
-          className="sv2m-av"
-          onClick={onOpenYou}
-          aria-label="Your account and shortcuts"
-          aria-haspopup="dialog"
-        >
-          {initials}
-        </button>
-      )}
+        {currentUser && (
+          <span className="sv2-acctwrap">
+            <button type="button" className="sv2-tbuser" onClick={onOpenAccount} title="Account" aria-haspopup="menu">
+              <span className="sv2-tbav" aria-hidden="true">{initials}</span>
+              <span className="sv2-tbname">{currentUser.name}</span>
+              <ChevronDown className="sv2-tbuchev" aria-hidden="true" />
+            </button>
+            {accountMenu}
+          </span>
+        )}
+      </div>
     </header>
   );
 };

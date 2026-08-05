@@ -564,16 +564,21 @@
   .sv2-topbar {
     display: flex;
     align-items: center;
-    /* ONE CONTINUOUS LINE: the bar reads the SAME token as the rail head and the panel masthead
-       (bar-per-page pack). Never restate the number here — that is how 56 and 58 drifted apart. */
-    height: var(--shell-head-h);
+    /* ONE CONTINUOUS LINE: the bar reads the SAME token as the column's masthead (--head), so
+       the two capsules' headers close on one line across the gap. Never restate the number. */
+    height: var(--head);
     flex: none;
     gap: 12px;
     padding: 0 18px;
     /* THE HEADER BAR shares the rail's tone — one chrome family, a PERMANENT fill and border
        (no scroll state: that idea is superseded). */
-    background: var(--shell-bar-bg);
-    border-bottom: 1px solid var(--shell-line-soft);
+    /* The bar IS the content capsule's head, so it wears the capsule's own colour. */
+    background: var(--shell-canvas);
+    /* ⚠️ THE HAIRLINE IS PERMANENT (Baked 8). It completes the corner with the capsule edge;
+       without it the bar looks unfinished against a rounded capsule. The top-nav shell's
+       hairline is scroll-revealed instead — no capsule there, so no corner to complete. That
+       asymmetry is deliberate. */
+    border-bottom: 1px solid var(--shell-line);
     /* the containing block for the dashboard's absolutely centred search */
     position: relative;
   }
@@ -598,6 +603,7 @@
 .sv2-tbbrand { display: flex; align-items: center; flex: none; padding: 8px 0; }
 /* the tools cluster — pushed right by .sv2-grow; on working pages the search joins it */
 .sv2-tbright { display: flex; align-items: center; gap: 9px; flex: none; margin-left: auto; }
+.sv2-acctwrap { position: relative; display: inline-flex; }
 /* THE USER BLOCK — avatar · name · chevron, at the right end, on EVERY page, identical in both
    bar states. ⚠️ It ALSO sits at the panel's foot; that duplication is INTENTIONAL AND APPROVED
    (canonical shell pack). The bar's copy is the one that survives the panel collapsing; the

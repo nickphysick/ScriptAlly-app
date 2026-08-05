@@ -54,13 +54,13 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("THE USER BLOCK is in the bar on EVERY page — and the duplication with the panel foot is deliberate", () => {
-    for (const path of ["/dashboard", "/agents", "/queries", "/manuscripts"]) {
+    for (const path of ["/agents", "/queries", "/manuscripts", "/todo"]) {
       const html = bar(path);
       expect(html, path).toContain("sv2-tbuser");
       expect(html, path).toContain("sv2-tbav");
       expect(html, path).toContain("Nick Physick");
-      // identical size and position in both bar states — it always rides the tools cluster
-      expect(html.indexOf("sv2-tbicon"), path).toBeLessThan(html.indexOf("sv2-tbuser"));
+      // it always rides the right-hand tools cluster, after the search
+      expect(html.indexOf("sv2-searchopen"), path).toBeLessThan(html.indexOf("sv2-tbuser"));
     }
     // ...and it ALSO renders at the COLUMN's foot. Approved duplication, asserted so it is not
     // "tidied away" by someone who spots it later: the bar's copy survives the column
@@ -70,7 +70,7 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("THE SEARCH IS AN OPENER — one search implementation, and the palette is it", () => {
-    const html = bar("/dashboard");
+    const html = bar("/queries");
     expect(html).toContain("sv2-searchopen");
     expect(html).toContain("⌘K");
     // it is a BUTTON, not a field: the palette takes the typing
@@ -96,65 +96,57 @@ describe("v2 shell — smoke renders", () => {
   });
 
   const bar = (path: string) =>
-    at(path, <ShellTopBar onNavigate={() => {}} scope={<span className="sv2-scope" />} onHelp={() => {}} onOpenSearch={() => {}} />);
+    at(path, <ShellTopBar onNavigate={() => {}} scope={<span className="sv2-scope" />} onOpenSearch={() => {}} />);
 
-  it("WORKING PAGES: breadcrumb · divider · scope · grow · tools(search · help)", () => {
+  it("THE WORKSPACE BAR (Baked 8): tuck · breadcrumb · divider · scope · grow · search · account", () => {
     const html = bar("/manuscripts");
     expect(html).toContain("sv2-topbar");
+    expect(html).toContain("sv2-tuck");        // the bar's only chrome control
     expect(html).toContain("sv2-crumb");
-    expect(html).toContain("Shelf"); // the section
-    expect(html).toContain("<b>Manuscripts</b>"); // the current page, bold and inert
+    expect(html).toContain("Shelf");           // the section
+    expect(html).toContain("<b>Manuscripts</b>"); // the page, bold and inert
+    expect(html).toContain("sv2-vr");
     expect(html).toContain("sv2-scope");
-    expect(html).toContain("sv2-searchopen"); // the palette OPENER, not an inline field
-    expect(html).toContain("sv2-gsearch-r"); // the right-hand placement
-    expect(html).toContain("sv2-tbicon"); // help, chrome rather than a floating FAB
-    // the wordmark belongs to the dashboard alone
-    expect(html).not.toContain("sv2-tbbrand");
+    expect(html).toContain("sv2-searchopen");
+    expect(html).toContain("sv2-tbuser");
+    // order: tuck → crumb → divider → scope → search → account
+    expect(html.indexOf("sv2-tuck")).toBeLessThan(html.indexOf("sv2-crumb"));
     expect(html.indexOf("sv2-crumb")).toBeLessThan(html.indexOf("sv2-scope"));
     expect(html.indexOf("sv2-scope")).toBeLessThan(html.indexOf("sv2-searchopen"));
-    expect(html.indexOf("sv2-searchopen")).toBeLessThan(html.indexOf("sv2-tbicon"));
+    expect(html.indexOf("sv2-searchopen")).toBeLessThan(html.indexOf("sv2-tbuser"));
   });
 
-  it("THE DASHBOARD: wordmark · divider · scope · centred search · help — and NO crumb", () => {
-    const html = bar("/dashboard");
-    expect(html).toContain("sv2-tb-dash");
-    expect(html).toContain("sv2-tbbrand");
-    expect(html).toContain("scriptally-title-v2.png"); // the real brand asset, height-constrained
-    expect(html).toContain("sv2-gsearch-c"); // the true-midline placement
-    expect(html).toContain("sv2-tbicon");
-    // The dashboard crumb rule stays DELETED — no crumb, no "Your dashboard", no brand stand-in.
-    expect(html).not.toContain("sv2-crumb");
-    expect(html).not.toContain("Your dashboard");
-    expect(html).not.toContain("sv2-crumbmark");
+  it("⚠️ PER-PAGE ACTIONS DO NOT GO IN THE BAR — and the brand is not there either", () => {
+    const html = bar("/queries");
+    // Help left for the account menu; the brand left for the column's masthead; there is no
+    // dashboard variant, because the dashboard is a TOP-NAV page now.
+    expect(html).not.toContain("sv2-tbicon");
+    expect(html).not.toContain("sv2-tbbrand");
+    expect(html).not.toContain("scriptally-brand-logo-root");
+    expect(html).not.toContain("sv2-tb-dash");
+    // the bar answers where-am-I and which-manuscript, and nothing else
+    const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
+    const barFn = v2.slice(v2.indexOf("export const ShellTopBar"));
+    expect(barFn).toContain("PER-PAGE ACTIONS DO NOT GO IN THIS BAR");
   });
 
-  it("the crumb is on EVERY non-dashboard page, and the two states differ ONLY in two things", () => {
-    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do"], ["/import", "Import"], ["/account", "Account"]] as const) {
+  it("the crumb is on EVERY workspace page", () => {
+    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do"], ["/import", "Import"]] as const) {
       const html = bar(path);
       expect(html, path).toContain("sv2-crumb");
       expect(html, path).toContain(`<b>${page}</b>`);
-      expect(html, path).not.toContain("sv2-tbbrand");
-      // constant across both states: the scope, the search, the divider, help
-      for (const constant of ["sv2-scope", "sv2-searchopen", "sv2-vr", "sv2-tbicon"]) {
+      for (const constant of ["sv2-tuck", "sv2-scope", "sv2-searchopen", "sv2-tbuser"]) {
         expect(html, `${path} ${constant}`).toContain(constant);
       }
     }
-    // The dashboard-specific rule stays superseded — deleted, not contradicted.
-    const claude = readFileSync(resolve(__dirname, "..", "..", "..", "CLAUDE.md"), "utf8");
-    expect(claude).not.toContain("brand mark when the panel is collapsed");
   });
 
-  it("the brand's DOM id is a PROP — a hardcoded one measured the wrong instance", () => {
-    const logo = readFileSync(resolve(__dirname, "..", "ScriptAllyLogo.tsx"), "utf8");
-    // The id is a prop, never a constant inside the component: it used to be hardcoded, so the
-    // bar, the panel and the mobile slim bar were duplicates and getElementById returned
-    // whichever came first in the document — the panel's 27px copy, not the bar's.
-    expect(logo).toContain("id={id}");
-    expect(logo).not.toContain('id="scriptally-brand-logo-root"');
-    // Two mounts claim it now (bar on the dashboard, panel elsewhere) but they are MUTUALLY
-    // EXCLUSIVE, so exactly one is ever in the document. That is asserted against the rendered
-    // output in "THE BRAND APPEARS ONCE" above — the count that matters is the rendered one.
-    expect(bar("/dashboard")).toContain('id="scriptally-brand-logo-root"');
-    expect(bar("/agents")).not.toContain('id="scriptally-brand-logo-root"');
+  it("⚠️ THE SCOPE still writes scriptally_active_manuscript_id — Packages/Comps/Manuscripts read it", () => {
+    // It breaks SILENTLY without this: no error, just the wrong manuscript everywhere.
+    const sidebar = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
+    expect(sidebar).toContain('const ACTIVE_MS_KEY = "scriptally_active_manuscript_id"');
+    expect(sidebar).toContain("localStorage.setItem(ACTIVE_MS_KEY, id)");
+    const shell = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
+    expect(shell).toContain("<ShellScope");
   });
 });
