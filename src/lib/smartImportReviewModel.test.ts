@@ -229,6 +229,40 @@ describe('parseModel — agency-less duplicate clustering (the Priya miss, part 
     expect(anyDuplicate(agents)).toBe(false);
   });
 
+  it('ONE-ABSENT: an agency-less name joins the present-agency record — flagged for review, never auto-merged', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 's1', name: 'Priya Raman', agency: 'Saltmarsh Literary' }), agent({ ref: 's2', name: 'Priya Raman', agency: '' })],
+      [query({ agentRef: 's1' })]
+    ));
+    expect(clustered(agents, 's1', 's2')).toBe(true);
+    expect(anyDuplicate(agents)).toBe(true);
+    // The review gate decides: the reason is OPEN and neither record has been merged away.
+    const leader = agents.find((a) => a.mergeWith.length > 0)!;
+    expect(leader.reasons.find((r) => r.kind === 'duplicate')!.resolved).toBe(false);
+    expect(agents.every((a) => !a.deleted)).toBe(true);
+  });
+
+  it('ONE-ABSENT: fuzzy names apply across the divide ("P Raman" joins "Priya Raman" at an agency)', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'f1', name: 'Priya Raman', agency: 'Saltmarsh Literary' }), agent({ ref: 'f2', name: 'P Raman', agency: '' })], []));
+    expect(clustered(agents, 'f1', 'f2')).toBe(true);
+  });
+
+  it('ONE-ABSENT: genuinely different names never flag across the divide', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'd1', name: 'Priya Raman', agency: 'Saltmarsh Literary' }), agent({ ref: 'd2', name: 'Maria Okonkwo', agency: '' })], []));
+    expect(anyDuplicate(agents)).toBe(false);
+  });
+
+  it('ONE-ABSENT: a name matching clusters at TWO different agencies is ambiguous — nothing flagged', () => {
+    const { agents } = parseModel(result([
+      agent({ ref: 'a1', name: 'John Smith', agency: 'Alpha Literary' }),
+      agent({ ref: 'a2', name: 'James Smith', agency: 'Beta Books' }),
+      agent({ ref: 'a3', name: 'J Smith', agency: '' }),
+    ], []));
+    expect(anyDuplicate(agents)).toBe(false); // no guessed merge target — the pool keeps it
+  });
+
   it('unchanged: two DIFFERENT agents at the SAME agency do not cluster', () => {
     const { agents } = parseModel(result(
       [agent({ ref: 'a', name: 'Jane Doe', agency: 'Acme' }), agent({ ref: 'b', name: 'John Smith', agency: 'Acme' })], []));

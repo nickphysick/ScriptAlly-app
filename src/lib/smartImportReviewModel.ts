@@ -357,36 +357,47 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
   // Duplicate clusters: named agents likely the same person — surname match + initial/abbrev-compatible
   // first name (nameCompatible) — are clustered for the writer to confirm. Agency is a POSITIVE signal:
   // named agents at a near-identical agency (agencyKey: suffix/noise stripped) bucket together
-  // ("j pryce"/"Jonathan Pryce" at "Pryce Lit"/"Pryce Literary"). Agency-LESS named agents can't bucket
-  // on agency, so they pool and cluster on NAME alone — the fix for the silent agency-less duplicate
-  // (two "Priya Raman" rows, no agency, that used to skip the matcher entirely at `if (!key)`). Both
-  // agencies present and different ⇒ separate buckets, never compared (a real differentiator).
-  // Agency-only (no name) agents never cluster. The LEADER carries the dedupe control + `duplicate` reason.
-  // TODO: extend to one-absent — an agency-less agent could also match a PRESENT-agency agent by name;
-  //   today it only clusters with other agency-less agents (both-absent). Either-side is the goal.
+  // ("j pryce"/"Jonathan Pryce" at "Pryce Lit"/"Pryce Literary"). Both agencies present and
+  // different ⇒ separate buckets, never compared (a real differentiator). Agency-only (no name)
+  // agents never cluster. The LEADER carries the dedupe control + `duplicate` reason.
+  //
+  // Agency-LESS named agents match EITHER SIDE (Tier 3 · Phase 6 — the one-absent extension):
+  //  · a name compatible with EXACTLY ONE present-agency cluster JOINS it — surfaced as a
+  //    probable duplicate for review, never auto-merged (the review gate decides, as ever);
+  //  · a name matching clusters at TWO different agencies is genuinely ambiguous — guessing a
+  //    merge target would misdirect the writer, so it stays in the pool, unflagged;
+  //  · the leftover pool clusters among itself on name alone (the both-absent path — the
+  //    original fix for the two agency-less "Priya Raman" rows).
   const byAgency = new Map<string, ReviewAgent[]>();
-  const agencyLess: ReviewAgent[] = [];
+  let agencyLess: ReviewAgent[] = [];
   for (const a of agents) {
     if (!a.name.trim()) continue;                  // need a name to cluster on (agency-only never clusters)
     const key = agencyKey(a.agency);
     if (key) (byAgency.get(key) ?? byAgency.set(key, []).get(key)!).push(a);
-    else agencyLess.push(a);                        // agency missing → name-only pool (both-absent path)
+    else agencyLess.push(a);                        // agency missing → the name-only pool
   }
-  // Sub-cluster each candidate group identically (transitive: j ↔ jon ↔ jonathan all merge), then flag
-  // any cluster of 2+. The agency-less pool runs through the SAME nameCompatible sub-clustering.
-  for (const group of [...byAgency.values(), agencyLess]) {
+  // Sub-cluster a group transitively (j ↔ jon ↔ jonathan all merge) — shared by both passes.
+  const subCluster = (group: ReviewAgent[]): ReviewAgent[][] => {
     const clusters: ReviewAgent[][] = [];
     for (const a of group) {
       const hit = clusters.find((c) => c.some((m) => nameCompatible(m.name, a.name)));
       if (hit) hit.push(a); else clusters.push([a]);
     }
-    for (const cluster of clusters) {
-      if (cluster.length < 2) continue;
-      const [leader, ...rest] = cluster;
-      leader.mergeWith = rest.map((r) => r.id);
-      if (!leader.reasons.some((r) => r.kind === "duplicate")) {
-        leader.reasons.unshift({ kind: "duplicate", note: dupNoteOpen(leader.agency), resolved: false, undoable: true });
-      }
+    return clusters;
+  };
+  const agencyClusters = [...byAgency.values()].flatMap(subCluster);
+  agencyLess = agencyLess.filter((a) => {
+    const hits = agencyClusters.filter((c) => c.some((m) => nameCompatible(m.name, a.name)));
+    if (hits.length !== 1) return true; // 0 = nothing to join; 2+ = ambiguous — stays in the pool
+    hits[0].push(a); // joins AFTER the present-agency members, so the leader keeps its agency
+    return false;
+  });
+  for (const cluster of [...agencyClusters, ...subCluster(agencyLess)]) {
+    if (cluster.length < 2) continue;
+    const [leader, ...rest] = cluster;
+    leader.mergeWith = rest.map((r) => r.id);
+    if (!leader.reasons.some((r) => r.kind === "duplicate")) {
+      leader.reasons.unshift({ kind: "duplicate", note: dupNoteOpen(leader.agency), resolved: false, undoable: true });
     }
   }
 
