@@ -38,6 +38,7 @@ import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
+import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib/agentDisplay";
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
@@ -1782,26 +1783,12 @@ export const Queries: React.FC<{
         nudgeDate: null
       });
 
-      const mapActivityToEvent = (act: any): string | null => {
-        const desc = act.description || "";
-        const lower = desc.toLowerCase();
-        if (act.activityType === ActivityType.QUERY_SENT || lower.includes("dispatched query") || lower.includes("logged query")) return null;
-        if (lower.includes("nudge sent") || act.activityType === ActivityType.NUDGE_SENT || lower.includes("nudged")) return "Nudge sent";
-        if (lower.includes("requested a partial") || lower.includes("partial manuscript requested") || lower.includes("partial requested")) return "Partial requested";
-        if (lower.includes("sent partial") || lower.includes("partial sent") || lower.includes("partial manuscript sent")) return "Partial sent";
-        if (lower.includes("requested a full") || lower.includes("full manuscript requested") || lower.includes("full requested")) return "Full requested";
-        if (lower.includes("full manuscript sent") || lower.includes("full sent")) return "Full sent";
-        if (lower.includes("revise") || lower.includes("r&r") || lower.includes("revise and resubmit")) return "Revise & resubmit";
-        if (lower.includes("offer of representation") || lower.includes("received an offer") || lower.includes("offer received")) return "Offer received";
-        if (lower.includes("rejected") || lower.includes("passed") || lower.includes("has rejected")) return "Rejected";
-        if (lower.includes("withdrew") || lower.includes("withdrawn")) return "Withdrawn";
-        if (lower.includes("no response") || lower.includes("archived as no response")) return "No response";
-        return null;
-      };
-
+      // Typed-fields mapping (activityEventLabel, Tier 3 · Phase 2): resultingStatus +
+      // activityType only — rewording activity prose can no longer change the timeline, and a
+      // row with no typed signal is inert rather than mis-mapped.
       const otherActs = activeActivities
-        .filter(act => mapActivityToEvent(act) !== null)
-        .map(act => ({ type: mapActivityToEvent(act)!, date: act.date, details: act.details || null }));
+        .filter(act => activityEventLabel(act) !== null)
+        .map(act => ({ type: activityEventLabel(act)!, date: act.date, details: act.details || null }));
       otherActs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       otherActs.forEach(act => {
