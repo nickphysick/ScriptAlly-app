@@ -24,7 +24,12 @@ const BAKED: Record<string, string> = {
   "--icon": "38px",
   "--pitch": "42px",
   "--kid": "34px",
-  "--head": "72px",
+  // ⚠️ 72 → 66 (shell-rebuild pack, Phase 1). SUPERSEDED, NOT TUNED: both rebuild mockups draw
+  // the head at 66, and it is the one number the workspace bar and the top-nav masthead have to
+  // agree on — they are the same band at the same height on two different pages. The lock is
+  // rewritten rather than deleted so the supersession is on the record, and so a later pass
+  // cannot split it back into a per-shell pair without failing here.
+  "--head": "66px",
   "--pad-r": "18px",
   "--shell-ease": "cubic-bezier(0.4, 0, 0.2, 1)",
   "--shell-spring": "cubic-bezier(0.34, 1.28, 0.64, 1)",

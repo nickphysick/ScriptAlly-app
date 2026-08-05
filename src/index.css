@@ -103,7 +103,11 @@
   --icon: 38px;                       /* icon box */
   --pitch: 42px;                      /* parent row height */
   --kid: 34px;                        /* child row height */
-  --head: 72px;                       /* masthead / top bar — drives BOTH capsules' headers */
+  /* ⚠️ 72px → 66px (shell-rebuild pack). BOTH rebuild mockups draw the head at 66, and it is the
+     one number the workspace bar and the top-nav masthead must agree on — they are the same band
+     at the same height on two different pages. Superseded, not tuned: do not split it back into
+     a per-shell pair. */
+  --head: 66px;                       /* masthead / top bar — drives BOTH capsules' headers */
   /* ⚠️ --pad-r WAS USED BEFORE IT WAS DEFINED. Three rules referenced it and the selector's
      expanded width is `col-max − gutter − pad-r`, so the missing token made that NaN and the
      ONLY active marker rendered 0px wide — with a green build, a green suite, and nothing to
@@ -124,6 +128,49 @@
   --shell-quiet: #b3a598;             /* quiet/tertiary label ink — the group headings */
   --shell-cap-radius: 18px;           /* capsule corner (chrome tokens: 20 → 18) */
   --shell-cap-gap: 14px;              /* capsule gap AND page padding — the OUTER GAP (10 → 14) */
+
+  /* ══ THE SHELL-REBUILD PALETTE (shell-rebuild pack, Phase 1) ═══════════════════════════════
+     Both rebuild mockups share one vocabulary; these are its tokens, and BOTH shells read them
+     so the workspace column and the top-nav masthead cannot be retoned apart.
+
+     ⚠️ THE MOCKUPS' BARE NAMES ARE NOT AVAILABLE, and taking them would have been silent. This
+     file ALREADY defines --ink (#241c15), --muted (#9a8c80), --line (#e6dccd) and --pitch, with
+     values that are NOT these — a bare `--ink: #2e2723` here would have retoned every heading
+     and glyph stroke that reads the old one, with a green build and nothing to point at. Hence
+     the --shell-* prefix on all of them. Where a name already carries the pack's exact value
+     (--pitch 42px, --shell-cap-gap 14px, --shell-cap-radius 18px) it is REUSED, not restated:
+     two tokens holding one number is the drift this prefix exists to prevent.
+
+     ⚠️ --shell-hair IS THE PACK'S `line`. It could not be --shell-line: that name is taken by
+     the interior hairline at #e3d9cf, a different value doing a different job. */
+  --shell-ink: #2e2723;               /* primary ink — labels, headings, the painted rail */
+  --shell-ink-soft: #6a615a;          /* secondary ink — resting nav labels, blurbs */
+  --shell-muted: #9c8878;             /* tertiary — counts, captions, section eyebrows */
+  --shell-burgundy: #7c3a2a;          /* the ONLY accent — urgency dots, Upgrade, panel links */
+  --shell-parch: #f2ede7;             /* THE ACTIVE FILL — nav pills, open menu triggers */
+  --shell-chrome: #fbf9f5;            /* the panel side of the shell, and the workspace bar */
+  --shell-hair: #ece7de;              /* chrome hairline — shell edges, bar base, card dividers */
+  --shell-edge: #e6e0d5;              /* control border — cards, search pill, selector pill */
+  --shell-seam: #ddd2c2;              /* ⚠️ T1: the mega's OWN top border. See topNav rules. */
+  --shell-rail-tx: #a89a8a;           /* resting icon on the ink rail */
+  --shell-rail-hi: #f4efe7;           /* active/hover icon on the ink rail, and the brand glyph */
+  --shell-avatar-bg: #f5e3da;         /* Baked 11 — one avatar everywhere, incl. the ink rail */
+  --shell-avatar-bd: rgba(124, 58, 42, 0.25);
+  --shell-page: #f7eee7;              /* the top-nav ground — flat, no desk, no capsules */
+  --shell-desk-grad: linear-gradient(160deg, #b4c2b6, #a8b8aa);  /* the workspace sage desk */
+  --shell-focus: rgba(124, 58, 42, 0.45);  /* Baked 21 — one focus ring, both shells */
+  /* ⚠️ THE RAIL IS PAINT, NOT A CONTAINER (Baked 3 / T3). These two widths are summed into ONE
+     column whose background is a hard-stopped gradient; they are NOT the widths of two sibling
+     elements. Any refactor that gives the rail its own box reintroduces icon drift on collapse. */
+  --shell-railw: 52px;                /* the ink band — a background stop, not an element */
+  --shell-panelw: 216px;              /* the light band beside it (268px expanded, 52 collapsed) */
+  /* The rebuild's motion, named once. --shell-spring above is the OLD selector spring and stays
+     with the shell it belongs to; this is the rollout curve both mockups use. */
+  --shell-spring-out: cubic-bezier(0.33, 1, 0.5, 1);
+  --shell-intent: 100ms;              /* hover-open delay before a mega commits */
+  --shell-grace: 160ms;               /* leave-region delay before it closes — no boundary flicker */
+  --shell-rollout: 320ms;             /* the height morph */
+  --shell-slide: 28px;                /* directional pane travel on a mega section change */
   /* THE LAYERED SHADOW — one token, every capsule. Four stops rather than one: the near pair
      seats the edge, the far pair carries the float.
      ⚠️ THE TINT BELONGS TO THE DESK'S COLOUR FAMILY, and moves with it. It is green-grey
