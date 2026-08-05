@@ -2,10 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Locks for the Agents-page derivations: filtering, sort orders, tier grouping (pinned top,
- * set-aside bottom, 1★ folds into Long shots), Up next selection, activity-derived last status,
- * and the per-agent timeline build. Plus rule-text locks for the new `pinned` field (the repo's
- * no-emulator pattern — assert the real firestore.rules artefact).
+ * Locks for the Agents-page derivations: filtering, sort orders, tier grouping (set-aside
+ * bottom, 1★ folds into Long shots), Up next selection, activity-derived last status, and the
+ * per-agent timeline build. (The pinned-top group and its rule-text locks went with the
+ * stripped Agent.pinned field — Tier 3+4 · Phase 9.)
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
@@ -115,25 +115,25 @@ describe("agentsPage · sortAgents", () => {
 });
 
 describe("agentsPage · groupAgents (grouping driven by groupBy, not the sort)", () => {
-  const pin = mkAgent({ id: "p", name: "Pinned Pat", starRating: 2, pinned: true });
+  const two = mkAgent({ id: "f2", name: "Two Star", starRating: 2 });
   const five = mkAgent({ id: "f5", name: "Five Star", starRating: 5 });
   const one = mkAgent({ id: "f1", name: "One Star", starRating: 1 as 1 });
   const aside = mkAgent({ id: "sa", name: "Aside Al", starRating: 5, setAside: true });
 
-  it("groupBy none: ONE flat run even under the rating sort; Pinned + set-aside groups kept", () => {
-    const groups = groupAgents([five, one, pin, aside], "rating", "none", [], "");
-    expect(groups.map((g) => g.key)).toEqual(["pinned", "flat", "aside"]);
-    expect(groups[1].label).toBeNull();
-    expect(flattenGroups(groups).map((a) => a.id)).toEqual(["p", "f5", "f1", "sa"]);
+  it("groupBy none: ONE flat run even under the rating sort; the set-aside group kept", () => {
+    const groups = groupAgents([five, one, two, aside], "rating", "none", [], "");
+    expect(groups.map((g) => g.key)).toEqual(["flat", "aside"]);
+    expect(groups[0].label).toBeNull();
+    expect(flattenGroups(groups).map((a) => a.id)).toEqual(["f5", "f2", "f1", "sa"]);
   });
 
   it("groupBy rating: star tiers with labels, 1★ folds into Long shots, set-aside sinks", () => {
-    const groups = groupAgents([five, one, pin, aside], "rating", "rating", [], "");
-    expect(groups.map((g) => g.key)).toEqual(["pinned", "tier-5", "tier-2", "aside"]);
-    expect(groups[1].label).toBe("Top picks");
-    expect(groups[1].stars).toBe("★★★★★");
-    expect(groups[2].label).toBe("Long shots");
-    expect(groups[2].rows.map((a) => a.id)).toEqual(["f1"]); // 1★ retained
+    const groups = groupAgents([five, one, two, aside], "rating", "rating", [], "");
+    expect(groups.map((g) => g.key)).toEqual(["tier-5", "tier-2", "aside"]);
+    expect(groups[0].label).toBe("Top picks");
+    expect(groups[0].stars).toBe("★★★★★");
+    expect(groups[1].label).toBe("Long shots");
+    expect(groups[1].rows.map((a) => a.id)).toEqual(["f2", "f1"]); // 2★ + folded 1★ retained
   });
 
   it("groupBy location: Domestic / International / No location vs the home market", () => {
@@ -155,8 +155,8 @@ describe("agentsPage · groupAgents (grouping driven by groupBy, not the sort)",
     expect(groups[0].rows.map((a) => a.id)).toEqual(["q"]);
   });
 
-  it("a pinned agent that is also set aside sinks (set-aside wins)", () => {
-    const both = mkAgent({ id: "b", pinned: true, setAside: true });
+  it("set-aside always sinks to the bottom group, whatever the sort", () => {
+    const both = mkAgent({ id: "b", setAside: true });
     const groups = groupAgents([both, five], "rating", "rating", [], "");
     expect(groups.map((g) => g.key)).toEqual(["tier-5", "aside"]);
   });
@@ -318,20 +318,17 @@ describe("agentsPage · labels", () => {
   });
 });
 
-describe("firestore.rules · agent pinned flag (rule-text lock, no emulator)", () => {
+describe("firestore.rules · agent pinned flag is STRIPPED (rule-text lock, no emulator)", () => {
   const rules = readFileSync(new URL("../../firestore.rules", import.meta.url), "utf8");
-  const start = rules.indexOf("function isValidAgent");
-  const body = rules.slice(start, rules.indexOf("\n    }", start)).replace(/\s+/g, " ");
   const agentsMatch = rules.indexOf("match /agents/{agentId}");
-  const updateBlock = rules.slice(agentsMatch, rules.indexOf("match /agents/{agentId}", agentsMatch + 1) === -1 ? undefined : rules.length);
-  const allowlist = (updateBlock.match(/affectedKeys\(\)\.hasOnly\(\[([^\]]*)\]\)/) || [])[1] || "";
 
-  it("isValidAgent admits an optional boolean pinned (absent-or-bool, rejects null)", () => {
-    expect(body).toMatch(/!data\.keys\(\)\.hasAll\(\['pinned'\]\) \|\| data\.pinned is bool/);
-  });
-
-  it("the agent-update allowlist permits pinned", () => {
-    expect(allowlist).toContain("'pinned'");
+  it("anchors hold, and neither the validator nor the agents update allowlist mentions pinned", () => {
+    expect(rules).toContain("function isValidAgent"); // anchor before slicing
+    expect(agentsMatch).toBeGreaterThan(-1); // anchor before slicing
+    const body = rules.slice(rules.indexOf("function isValidAgent"), rules.indexOf("\n    }", rules.indexOf("function isValidAgent")));
+    const updateBlock = rules.slice(agentsMatch, agentsMatch + 2000);
+    expect(body).not.toContain("'pinned'");
+    expect(updateBlock).not.toContain("'pinned'");
   });
 });
 

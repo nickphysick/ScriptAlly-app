@@ -44,7 +44,6 @@ import {
   insetBorder,
 } from "../lib/designTokens";
 import { MountCard } from "./MountCard";
-import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
 // Mobile Pass 1 — the <md desk line + To-do doorway read the To-do board's OWN tallies (the
 // sidebar's recipe), so the doorway can never disagree with the page it opens.
@@ -58,7 +57,6 @@ import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import { useFocusSlot } from "./dashboard/focusSlot";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
-import { StatCards } from "./dashboard/StatCards";
 import { DiaryCarousel } from "./dashboard/DiaryCarousel";
 import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
 import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";

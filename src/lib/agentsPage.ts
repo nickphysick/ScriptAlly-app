@@ -90,12 +90,12 @@ export interface AgentListGroup {
 }
 
 /**
- * The rendered list order. A Pinned group always sits on top; set-aside agents always sink to a
- * muted bottom group (existing lifecycle semantics — hidden from suggestions, never interleaved).
- * The MIDDLE is sectioned by the chosen `groupBy` (NOT by the sort): "none" → one flat run;
- * "rating" → star tiers (1★ folds into Long shots so no agent vanishes); "location" → Domestic /
- * International / No location; "queried" → Queried / Not queried. Rows within every section keep the
- * active sort order.
+ * The rendered list order. Set-aside agents always sink to a muted bottom group (existing
+ * lifecycle semantics — hidden from suggestions, never interleaved). The MIDDLE is sectioned by
+ * the chosen `groupBy` (NOT by the sort): "none" → one flat run; "rating" → star tiers (1★ folds
+ * into Long shots so no agent vanishes); "location" → Domestic / International / No location;
+ * "queried" → Queried / Not queried. Rows within every section keep the active sort order.
+ * (The Pinned-on-top group went with the stripped Agent.pinned field — Tier 3+4 · Phase 9.)
  */
 export function groupAgents(
   filtered: Agent[],
@@ -104,12 +104,9 @@ export function groupAgents(
   queries: Query[],
   homeCountry: string,
 ): AgentListGroup[] {
-  const pinned = filtered.filter((a) => a.pinned && !a.setAside);
   const aside = filtered.filter((a) => a.setAside);
-  const rest = filtered.filter((a) => !a.pinned && !a.setAside);
+  const rest = filtered.filter((a) => !a.setAside);
   const groups: AgentListGroup[] = [];
-
-  if (pinned.length) groups.push({ key: "pinned", label: "Pinned", stars: null, rows: sortAgents(pinned, sort) });
 
   const sorted = sortAgents(rest, sort);
   if (groupBy === "rating") {

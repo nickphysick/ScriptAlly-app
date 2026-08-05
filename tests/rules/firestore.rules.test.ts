@@ -616,6 +616,16 @@ describe('/users/{userId}/agents', () => {
     );
   });
 
+  it('the STRIPPED pinned flag is denied on update (off-allowlist since Tier 3+4 · Phase 9)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'agents', 'agent-1'), validAgent(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'agents', 'agent-1'), { pinned: true })
+    );
+  });
+
   it('rejects agent with invalid requeryPreference', async () => {
     const db = aliceCtx().firestore();
     await assertFails(

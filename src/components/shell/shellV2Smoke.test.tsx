@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
@@ -201,11 +201,12 @@ describe("v2 shell — smoke renders", () => {
     // it is a BUTTON, not a field: the palette takes the typing
     expect(html).not.toContain("nav-search-field");
     expect(html).not.toContain("<input");
-    // and nothing in the shell or the slim bar mounts a second search
+    // and nothing in the shell mounts a second search
     const shell = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    const nav = readFileSync(resolve(__dirname, "..", "Nav.tsx"), "utf8");
     expect(shell).not.toContain("<NavSearch");
-    expect(nav).not.toContain("<NavSearch");
+    // The legacy Nav.tsx — the slim bar's historical NavSearch mount — is DELETED outright
+    // (Tier 3+4 · Phase 9, the dead-shell sweep), so "no second search" now holds by absence.
+    expect(existsSync(resolve(__dirname, "..", "Nav.tsx"))).toBe(false);
   });
 
   it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — no row, no pill, no fill", () => {

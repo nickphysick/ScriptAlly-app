@@ -10,7 +10,9 @@
          (--shell-ground), background = the content capsule (--shell-canvas). -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#e7e0d5" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <!-- (The Tabler icons webfont is GONE — Tier 3+4 · Phase 9: zero .ti consumers anywhere in
+         src, TypeGlyph is hand-rolled SVG, and the CDN stylesheet was a render-blocking external
+         request on every page load.) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- App font stack: Playfair Display (serif/display) + Source Sans Pro (sans/body) + JetBrains Mono (labels) + Caveat (handwriting). -->

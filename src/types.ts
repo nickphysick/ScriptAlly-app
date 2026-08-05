@@ -249,8 +249,9 @@ export interface Agent {
   // bucket/Agents stat card, but all queries + history kept. Reversible (Bring back). Absent === active.
   setAside?: boolean;
   // Pinned to the top of the agents list (a "Pinned" group above every sort). Pure list ordering —
-  // no effect on suggestions, stats or Up next. Absent === not pinned (never null).
-  pinned?: boolean;
+  // (Agent.pinned is STRIPPED — Tier 3+4 · Phase 9: never written by any UI, read only by the
+  // retired agentsPage grouping. pinnedNoteId below is the live pinning concept. Legacy stored
+  // values are inert: the type's absence means no typed path can carry the key any more.)
   // Agent photo, stored inline as a data URL (centre-cropped square, 256×256, JPEG q0.82 ≈ 15–30KB).
   // Deliberately NOT Firebase Storage — the agent doc carries it. Absent === the initials avatar.
   image?: string;
