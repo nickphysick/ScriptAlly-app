@@ -14,7 +14,7 @@
   border-radius: var(--shell-cap-radius);
   box-shadow: var(--shell-cap-shadow), var(--shell-cap-rim);
   overflow: hidden;
-  transition: width 0.3s var(--shell-ease, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: width 0.3s var(--shell-ease);
 }
 .sc-col.shut { width: var(--col-min); }
 
@@ -69,10 +69,10 @@
   pointer-events: none;
   z-index: 1;
   transition:
-    transform 0.34s cubic-bezier(0.34, 1.28, 0.64, 1),
-    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    height 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    transform 0.34s var(--shell-spring),
+    width 0.3s var(--shell-ease),
+    height 0.22s var(--shell-ease),
+    border-radius 0.22s var(--shell-ease);
 }
 .sc-sel.mute { transition: none; }
 

@@ -104,6 +104,15 @@
   --pitch: 42px;                      /* parent row height */
   --kid: 34px;                        /* child row height */
   --head: 72px;                       /* masthead / top bar — drives BOTH capsules' headers */
+  /* ⚠️ --pad-r WAS USED BEFORE IT WAS DEFINED. Three rules referenced it and the selector's
+     expanded width is `col-max − gutter − pad-r`, so the missing token made that NaN and the
+     ONLY active marker rendered 0px wide — with a green build, a green suite, and nothing to
+     point at. It is part of the alignment contract, not an afterthought. */
+  /* THE TWO EASINGS, named once. The selector springs on TRAVEL and eases on RESIZE, so a move
+     reads as one object arriving rather than a box being redrawn. */
+  --shell-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --shell-spring: cubic-bezier(0.34, 1.28, 0.64, 1);
+  --pad-r: 18px;                      /* right inset — the selector's and the foot's right edge */
   --col-min: 78px;                    /* column, collapsed */
   --col-max: 246px;                   /* column, expanded */
   --shell-head-h: 58px;               /* ⚠️ LEGACY — retiring in favour of --head; see Baked 1 */

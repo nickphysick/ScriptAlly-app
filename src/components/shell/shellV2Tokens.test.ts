@@ -25,6 +25,9 @@ const BAKED: Record<string, string> = {
   "--pitch": "42px",
   "--kid": "34px",
   "--head": "72px",
+  "--pad-r": "18px",
+  "--shell-ease": "cubic-bezier(0.4, 0, 0.2, 1)",
+  "--shell-spring": "cubic-bezier(0.34, 1.28, 0.64, 1)",
   "--col-min": "78px",
   "--col-max": "246px",
   "--shell-cap-rim": "inset 0 1px 0 rgba(255,255,255,.55)",
@@ -56,6 +59,31 @@ const BAKED: Record<string, string> = {
   "--shell-ink-soft": "#6a615a",
   "--shell-muted": "#9c8878",
 };
+
+/**
+ * ⚠️ EVERY TOKEN THE SHELL CSS *USES* MUST BE DEFINED. `--pad-r` was referenced by three rules
+ * and by the selector's width maths while being defined nowhere: `calc()` on an undefined custom
+ * property yields NaN, so the ONLY active marker rendered 0px wide — through a green build, a
+ * green suite and a clean typecheck. A missing definition is silent in CSS; this makes it loud.
+ */
+describe("no shell rule reads a token that does not exist", () => {
+  const shellFiles = ["./shellV2.css", "./shellColumn.css", "./accountMenu.css", "./searchPalette.css"];
+  it("every var(--x) in the shell stylesheets resolves to a definition", () => {
+    const defined = new Set<string>();
+    for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
+    // a shell stylesheet may define its own scoped token, so collect those too
+    const texts = shellFiles.map((f) => readFileSync(resolve(__dirname, f), "utf8"));
+    for (const t of texts) for (const m of t.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
+    // `--i` is set inline per row (the stagger index), not in a stylesheet
+    const allowed = new Set([...defined, "--i"]);
+    for (const [i, f] of shellFiles.entries()) {
+      const text = texts[i];
+      for (const m of text.matchAll(/var\((--[a-z0-9-]+)/gi)) {
+        expect(allowed.has(m[1]), `${f} reads ${m[1]}, which nothing defines`).toBe(true);
+      }
+    }
+  });
+});
 
 describe("capsule tokens — index.css", () => {
   it("carries every baked value", () => {

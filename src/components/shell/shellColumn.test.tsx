@@ -72,8 +72,8 @@ describe("the selector is the ONLY active marker", () => {
   it("spring on travel, standard easing on resize — one object moving, not a box redrawn", () => {
     const sel = css.match(/\.sc-sel \{([^}]*)\}/s)?.[1] ?? "";
     expect(sel, "the .sc-sel rule must exist").not.toBe("");
-    expect(sel).toMatch(/transform 0\.34s cubic-bezier\(0\.34, 1\.28, 0\.64, 1\)/);
-    expect(sel).toMatch(/width 0\.3s cubic-bezier\(0\.4, 0, 0\.2, 1\)/);
+    expect(sel).toMatch(/transform 0\.34s var\(--shell-spring\)/);
+    expect(sel).toMatch(/width 0\.3s var\(--shell-ease\)/);
   });
 });
 

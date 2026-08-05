@@ -674,23 +674,12 @@
    not the leftover space between the flanks, so it holds still as the scope title changes
    length. Working pages: narrower, right, in the tools cluster. */
 .sv2-gsearch { flex: none; }
-/* ⚠️ TRUE CENTRING NEEDS A RESERVE, or the left flank sits on top of the field. The mockup draws
-   this bar beside a 64px rail with NO panel, where a 440px centred field clears the wordmark and
-   the scope chip easily. In the app the panel is 288px, so at 1440 with it EXPANDED the bar is
-   only ~1026px and the scope chip overlapped the field's left edge by ~38px — z-index decided
-   which won, but the field was still occluded (browser-measured, 30 Jul).
-   So the field reserves TWICE the left flank's bounded maximum and shrinks below 440 when it must.
-   `--sv2-flank` = bar padding + wordmark + divider + gaps + the scope cap; keep the two in step,
-   and re-measure both panel states if either changes. */
-.sv2-tb-dash { --sv2-flank: 365px; }
-.sv2-tb-dash .sv2-scope { max-width: 200px; }
-.sv2-gsearch-c {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(440px, calc(100% - 2 * var(--sv2-flank)));
-  z-index: 1;
-}
+/* (THE DASHBOARD'S CENTRED SEARCH IS RETIRED — app-shell pack Phase 3. The bar has ONE state
+   now: the dashboard moved to the top-nav shell, so there is no wordmark-and-centred-search
+   variant to reserve a flank for. `.sv2-tb-dash`, `.sv2-gsearch-c` and `--sv2-flank` went with
+   it; the hard-won lesson they carried — that stacking is not clearance, and true centring
+   needs a reserve — is kept in CLAUDE.md for whoever centres something next.) */
+.sv2-gsearch { flex: none; }
 .sv2-gsearch-r { width: 264px; }
 
 @media (prefers-reduced-motion: reduce) {
