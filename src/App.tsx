@@ -41,6 +41,9 @@ import { RecordResponseScreen } from "./components/RecordResponseScreen";
 import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { shellForRoute } from "./lib/shellForRoute";
+import { TopNavShell } from "./components/shell/TopNavShell";
+import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
@@ -565,6 +568,33 @@ function AppContent() {
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
   if (!WORKSPACE_PATHS.has(path)) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // ── WHICH SHELL (app-shell pack, Phase 5) — ONE mapping, in one place (lib/shellForRoute).
+  // An unmapped route throws in DEVELOPMENT and falls back to the workspace shell in production:
+  // a silent default is how a page ends up in the wrong chrome for a month, but a throw in
+  // production is worse than wrong chrome.
+  if (shellForRoute(path, import.meta.env.DEV) === "topnav") {
+    return (
+      <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
+        <TopNavPanelData>
+          {(panelInput) => (
+            <TopNavShell
+              onNavigate={handleNavigate}
+              onNavigatePath={(to) => { setSearchQuery(""); navigate(to); }}
+              panelInput={panelInput}
+            >
+              {path === "/dashboard" && (
+                <Dashboard onNavigate={handleNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+              )}
+              {path === "/account" && <div className="sv2-focuscol"><AccountSettings onNavigate={handleNavigate} /></div>}
+              {path === "/plans" && <div className="sv2-focuscol"><PlansPage /></div>}
+              {path === "/help" && <div className="sv2-focuscol"><HelpCentre /></div>}
+            </TopNavShell>
+          )}
+        </TopNavPanelData>
+      </div>
+    );
   }
 
   // Queries subpage-equivalent, read from the URL: ?q=<id> is deep-selection (Queries treats an

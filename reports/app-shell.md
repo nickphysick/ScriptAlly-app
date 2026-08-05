@@ -9,10 +9,9 @@ production build clean · full Vitest).
 | 2 · The one column | `0b57443` | 2259 + 2 skipped |
 | 3 · Workspace bar, account menu | `31c6684` | 2259 + 2 skipped |
 | — · `--pad-r` + the consumption guard | `c48c02a` | 2260 + 2 skipped |
-
-> **Phase 4 (top-nav shell) and Phase 5 (routing) are NOT BUILT.** Their section is at the foot,
-> headed *Pending*. This report is written now rather than held, because the workspace shell is
-> measured and passing, and evidence should be written down when it is gathered.
+| — · Page header tool row | `3a0c121` | 2266 + 2 skipped |
+| 4 · Top-nav masthead and mega-menus | `572b91d` | 2280 + 2 skipped |
+| 5 · Route-to-shell mapping | `eba52bb` | 2288 + 2 skipped |
 
 ---
 
@@ -159,17 +158,82 @@ viewport size and re-measure before believing a zero.
 
 ---
 
-## Top-nav shell — **Pending, not yet built**
+## The top-nav shell — measured
 
-Phase 4 (masthead, mega-menus, the reused account menu) and Phase 5 (route-to-shell mapping) are
-not started. This section will be **appended after Phase 4** with:
+Same harness technique and the same caveat: real built stylesheet, real emitted markup, 1440×900.
 
-- masthead height, confirming it reads `--head`
-- confirmation the top-nav hairline is scroll-revealed, against the workspace hairline's permanence
-- which mega-menu figures are live and which are static
-- the agent-list check: nine sage card bands on the sage desk at once, confirming the bands still
-  read as bands
-- any route that did not classify cleanly under the corrected map
+| | Measured |
+|---|---|
+| Masthead height | **72px**, and `--head` reads **72px** — the same token both shells use |
+| Masthead background | `rgb(247, 242, 233)` = `#f7f2e9` — **identical to the page**, so it is flat, not a bar |
+| Desk | **none** — the app's background is the page colour, not the sage `#aebdb0` |
+| Capsules | **none** — no `--shell-cap-shadow`, no `--shell-cap-rim` in this stylesheet |
+| **Hairline at rest** | **opacity 0** |
+| **Hairline scrolled** | **opacity 1**, `1px` `rgb(227, 217, 207)` |
+| Mega-menu, open | opacity **1**, `pointer-events: auto` |
+| Mega-menu columns | **`413px 413px 290px`** — two content columns + the 290px panel, from `--cols` |
+| Mega-menu separation | same background as the page; **shadow alone** (`0 1px 0` line + a soft drop) |
+| Panel rule | `1px solid rgb(227, 217, 207)` left border |
 
-**No deploy yet** — the live build hash goes here when there is one shell's worth of work to look
-at, not before.
+**The hairline asymmetry is confirmed in both directions**: scroll-revealed here, permanent on the
+workspace bar (`border-bottom: 1px solid var(--shell-line)`, no state). No capsule here, so no
+corner to complete.
+
+**Columns come from content, not from three reserved slots** — the measured template is two
+content columns, because the Queries menu has two. The mockup's three-column grid would have left
+a visible empty third.
+
+### ⚠️ A third measurement trap, found here
+
+**A pseudo-element keeps its OWN transition.** The hairline first measured `0` in *both* states,
+which looks exactly like a dead rule. Suppressing the transition on `.tn-mast` does not reach
+`.tn-mast::after` — the pseudo-element has to be targeted directly (inject
+`.tn-mast::after { transition: none !important }`). That is the third time this session a
+transitioned property has reported its start value and looked like a bug; it is now in `CLAUDE.md`.
+
+### The mega-menu figures — all live, none static
+
+Every panel figure derives from a selector that already existed; **no new stored field and no new
+query.** `TopNavPanelData` is the one place they are computed.
+
+| Panel | Figure | Source |
+|---|---|---|
+| Queries · *This week* | queries past their reply window | `sidebarBoardTiles().urgent` — the To-do board's own recipe, so board, column and menu cannot disagree |
+| Agents · *Idle* | agents saved but never queried | `agentIdleCount(agents, queries)` — the Agents pulse line's definition |
+| Materials · *Tip* | manuscripts with no package | `packages` by `manuscriptId` |
+
+Each has a **calm counterpart** rather than a zero: "Nothing is past its reply window", "Every
+agent on file has been queried". Singulars agree with their verbs.
+
+## Routing — the map, and how it fails
+
+One mapping, in one place (`lib/shellForRoute.ts`). **Workspace:** `/queries` `/todo` `/agents`
+`/agents/discover` `/manuscripts` `/manuscripts/packages` `/manuscripts/comps` `/import`.
+**Top-nav:** `/dashboard` `/account` `/plans` `/help`. Marketing routes and the pre-auth hashes
+never reach it — they have no shell, which is why they are absent rather than mapped to a third
+value.
+
+**An unmapped route throws in development** — naming the path, the file and the fix — **and falls
+back to the workspace shell in production.** A silent default is how a page ends up in the wrong
+chrome for a month; a throw in production is worse than wrong chrome. Both directions are locked,
+and a further lock walks `WORKSPACE_PATHS` to prove the map and the router cannot drift apart.
+
+**Every route classified cleanly.** None was ambiguous once the corrected map replaced Baked 12.
+
+## ⚠️ Phase 4 was complete, committed and entirely inert
+
+The dist grep after Phase 4 found **none** of the `tn-*` classes in the bundle. Not a bug: nothing
+imported `TopNavShell`, so Vite tree-shook it and its stylesheet never entered the build. Phase 5's
+mounting is what made it measurable — and the same grep after Phase 5 shows all five classes
+present.
+
+Worth stating on its own: **a shell can be complete, tested, committed and invisible.** A green
+suite says the component behaves; only the bundle says it exists.
+## Still to check, on dev, signed in
+
+- **The agent list on the sage desk** — nine sage card bands against the sage ground at once,
+  confirming the bands still read as bands. It needs real data, so it is a look rather than a
+  measurement.
+- **The selector's first paint** — a silence, asserted structurally but worth one look.
+- **The mega-menus at a narrow viewport** — the grid is `repeat(--cols, 1fr) 290px` with no
+  breakpoint yet; below roughly 900px the panel will squeeze the columns.
