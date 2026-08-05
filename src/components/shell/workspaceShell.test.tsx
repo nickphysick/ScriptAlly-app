@@ -160,9 +160,12 @@ describe("⚠️ T3b — the rail is static and never reflows", () => {
     expect(rule(".ws-rail")).not.toContain("box-shadow");
   });
 
-  it("the panel width token is 232, not the superseded 216", () => {
+  /* 216 (pre-amendment) → 232 (Amendment 1) → 186 (polish §5, narrowed 20%). Both superseded
+     values are asserted GONE so a revert to either fails loudly. */
+  it("the panel width token is 186, and neither superseded value survives", () => {
     const indexCss = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(indexCss).toMatch(/--shell-panelw:\s*232px\s*;/);
+    expect(indexCss).toMatch(/--shell-panelw:\s*186px\s*;/);
+    expect(indexCss).not.toMatch(/--shell-panelw:\s*232px\s*;/);
     expect(indexCss).not.toMatch(/--shell-panelw:\s*216px\s*;/);
   });
 });
@@ -289,7 +292,7 @@ describe("Baked 9 — the manuscript selector heads the PANEL", () => {
     msFixture = [MANUSCRIPTS[0]];
     const html = at("/queries");
     expect(html).toContain("ws-mspill");
-    const pill = html.slice(html.indexOf("ws-mspill"), html.indexOf("ws-ctog"));
+    const pill = html.slice(html.indexOf("ws-mspill"), html.indexOf("ws-pdiv"));
     expect(pill).toContain("static");
     expect(pill).not.toContain("aria-haspopup");
     expect(pill).not.toContain("ws-chev");
@@ -298,7 +301,7 @@ describe("Baked 9 — the manuscript selector heads the PANEL", () => {
 
   it("DOES show the switch chevron when there is more than one", () => {
     const html = at("/queries");
-    expect(html.slice(html.indexOf("ws-mspill"), html.indexOf("ws-ctog"))).toContain("ws-chev");
+    expect(html.slice(html.indexOf("ws-mspill"), html.indexOf("ws-pdiv"))).toContain("ws-chev");
   });
 
   /* ⚠️ Packages, Comps and Manuscripts READ this key — a selector that stops writing it breaks
@@ -329,13 +332,39 @@ describe("Baked 10 (as amended) — the panel foot", () => {
     expect(at("/queries")).not.toContain("n@example.com");
   });
 
-  it("the Upgrade link is burgundy", () => {
-    expect(rule(".ws-up")).toContain("color: var(--shell-burgundy)");
+  /* ⚠️ POLISH §6 — ONE INTERACTIVE ROW replaces the two small text lines. The NAME takes the full
+     row width on line 1: at 186px a name sharing a line with the plan and an upsell would
+     truncate on ordinary names, and who you are is the wrong thing to abbreviate. */
+  it("is a single interactive row, two lines, name on its own", () => {
+    const html = at("/queries");
+    expect(html).toContain("ws-uacct");
+    expect(html).toContain('role="button"');
+    const r = rule(".ws-uacct");
+    expect(r).toContain("padding: 9px 10px");
+    expect(r).toContain("border-radius: 9px");
+    expect(r).toContain("gap: 4px");
+    expect(rule(".ws-acctline")).toContain("justify-content: space-between");
   });
 
-  it("orders hairline → name → Settings, and stops there", () => {
+  it("the Upgrade PILL carries the specced treatment", () => {
+    const r = rule(".ws-upg");
+    expect(r).toContain("color: var(--shell-burgundy)");
+    expect(r).toContain("border: 1px solid rgba(124, 58, 42, 0.3)");
+    expect(r).toContain("border-radius: 999px");
+    expect(r).toContain("padding: 4px 10px");
+    expect(r).toContain("background: #fdf6f2");
+    expect(rule(".ws-upg:hover")).toContain("background: #f5e3da");
+  });
+
+  /* ⚠️ WITHOUT stopPropagation THE ROW'S HANDLER FIRES TOO, and the upsell would open Settings —
+     the one page that is not the upgrade flow. */
+  it("the Upgrade pill stops propagation so it never lands on Settings", () => {
+    expect(src).toMatch(/className="ws-upg"[\s\S]{0,120}?e\.stopPropagation\(\); onUpgrade/);
+  });
+
+  it("orders hairline → account block → Settings, and stops there", () => {
     const d = src.indexOf("ws-pfoot");
-    const u = src.indexOf("ws-urow");
+    const u = src.indexOf("ws-uacct");
     const st = src.indexOf("ws-setrow");
     expect(d).toBeGreaterThan(-1);
     expect(u).toBeGreaterThan(d);
@@ -350,9 +379,12 @@ describe("Baked 10 (as amended) — the panel foot", () => {
     expect(html.slice(html.indexOf("ws-panel"))).not.toContain("sp-ava");
   });
 
-  it("there is no foot collapse row — the control lives in the panel head", () => {
-    expect(cssRules).not.toContain(".ws-crow");
-    expect(src).not.toContain("ws-crow");
+  /* Amendment 1 retired the FOOT collapse row in favour of a head ghost; polish §3 retired the
+     head ghost in favour of a NAV-FOOT row. Neither of the first two survives. */
+  it("neither the old foot row nor the head ghost survives", () => {
+    expect(cssRules).not.toContain(".ws-crow ");
+    expect(src).not.toContain("ws-ctog");
+    expect(cssRules).not.toContain(".ws-ctog");
   });
 });
 
@@ -528,11 +560,25 @@ describe("Amendment 1 (B) — no rail dimming", () => {
 });
 
 describe("Amendment 1 (D) — the collapse control", () => {
-  it("expanded, the « ghost sits beside the manuscript pill", () => {
+  /* ⚠️ POLISH §3 — the « moved OUT of the head. Beside the manuscript pill it competed with it
+     for the head's attention and read as an action ON the manuscript; at the foot of the nav it
+     reads as a thing you do to the sidebar. */
+  it("expanded, the collapse control is a nav-foot row above the account divider", () => {
     const html = at("/queries");
-    expect(html).toContain("ws-ctog");
+    expect(html).toContain("ws-crow2");
+    expect(html).toContain("Collapse sidebar");
     expect(html).toContain('aria-label="Collapse the navigation"');
-    expect(html.indexOf("ws-mspill")).toBeLessThan(html.indexOf("ws-ctog"));
+    expect(html.indexOf("ws-crow2")).toBeGreaterThan(html.indexOf("ws-nav"));
+    expect(html.indexOf("ws-crow2")).toBeLessThan(html.indexOf("ws-pfoot"));
+  });
+
+  it("the collapse row is muted, 34px, with a 14px chevron", () => {
+    const r = rule(".ws-crow2");
+    expect(r).toContain("height: 34px");
+    expect(r).toContain("font-size: 12.5px");
+    expect(r).toContain("color: var(--shell-muted)");
+    expect(rule(".ws-crow2 svg")).toContain("width: 14px");
+    expect(rule(".ws-crow2:hover")).toContain("color: var(--shell-ink-soft)");
   });
 
   it("» sits on the rail above Settings, in the foot group", () => {
@@ -652,15 +698,18 @@ describe("Refinement §2 — the bar's right cluster", () => {
     expect(r).toContain("background: var(--shell-hair)");
   });
 
-  it("+ New carries the specced treatment", () => {
+  /* ⚠️ INK (polish §1). The soft-pink treatment is SUPERSEDED and asserted gone: pink is the
+     app's upsell and attention colour, and the one button that creates things should not
+     borrow it. */
+  it("+ New is INK, and the pink treatment is gone", () => {
     const r = rule(".ws-nbtn");
     expect(r).toContain("height: 34px");
     expect(r).toContain("border-radius: 9px");
-    expect(r).toContain("background: #f5e3da");
-    expect(r).toContain("border: 1px solid rgba(124, 58, 42, 0.28)");
-    expect(r).toContain("font-size: 12.5px");
-    expect(r).toContain("font-weight: 600");
-    expect(rule(".ws-nbtn:hover")).toContain("background: #f1d9cc");
+    expect(r).toContain("background: var(--shell-ink)");
+    expect(r).toContain("border: 1px solid var(--shell-ink)");
+    expect(r).toContain("color: var(--shell-rail-hi)");
+    expect(r).not.toContain("#f5e3da");
+    expect(rule(".ws-nbtn:hover")).toContain("background: #3f372f");
   });
 
   /* ⚠️ THE SAME CAPTURE CONTRACTS THE DASHBOARD HERO USES — the bar adds a doorway, never a
@@ -741,5 +790,77 @@ describe("Refinement — the rejected treatments stay rejected", () => {
   it("no ink header inversion", () => {
     expect(rule(".ws-bar")).not.toContain("var(--shell-ink)");
     expect(rule(".ws-bar")).not.toContain("#2e2723");
+  });
+});
+
+/**
+ * ⚠️ POLISH §2 — THE PALETTE IS A DROPDOWN, PORTALLED. The pill sits inside `.ws-cscroll`
+ * (overflow:auto) inside `.ws-card` (overflow:hidden), so an absolutely-positioned dropdown —
+ * which is what the standalone ref can get away with — would be CLIPPED by the card at exactly
+ * the moment it mattered. It portals to the body and computes its own position instead.
+ */
+describe("Polish §2 — the palette dropdown", () => {
+  const palSrc = readFileSync(resolve(__dirname, "./SearchPalette.tsx"), "utf8");
+  const palCss = readFileSync(resolve(__dirname, "./searchPalette.css"), "utf8");
+
+  it("portals out of the card's overflow", () => {
+    expect(palSrc).toContain("createPortal");
+    expect(palSrc).toContain("document.body");
+  });
+
+  it("anchors to the opener and positions from the pure maths", () => {
+    expect(palSrc).toContain("palettePosition");
+    expect(palSrc).toContain("openerRef?.current");
+    expect(palSrc).toContain("getBoundingClientRect");
+  });
+
+  /* The anchor lives in a SCROLLING card, so a scroll moves the pill without a resize. */
+  it("re-measures on resize AND on scroll", () => {
+    expect(palSrc).toContain('window.addEventListener("resize", measure)');
+    expect(palSrc).toContain('window.addEventListener("scroll", measure, true)');
+  });
+
+  /* ⚠️ NO SCRIM — nothing behind it is dimmed or inert, so it cannot rely on one swallowing the
+     click, and it must not claim modality it no longer has. */
+  /* ⚠️ ASSERTED AGAINST CODE, NOT PROSE — the first draft caught the comment explaining that
+     aria-modal was removed. The same trap as the "no Expand sidebar" guard catching its own
+     tombstone; absence claims need the comments stripped. */
+  it("has no scrim and no aria-modal", () => {
+    const palCode = palSrc.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(palCode).not.toContain("sp-scrim");
+    expect(palCss.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain(".sp-scrim");
+    expect(palCode).not.toContain("aria-modal");
+  });
+
+  it("closes on outside pointer, ignoring the pill so the opener's toggle survives", () => {
+    expect(palSrc).toContain("palRef.current?.contains");
+    expect(palSrc).toContain("openerRef?.current?.contains");
+  });
+
+  it("is fixed-positioned above the frosted bar", () => {
+    const i = palCss.indexOf(".sp-pal {");
+    expect(palCss, ".sp-pal must exist").toContain(".sp-pal {");
+    const r = palCss.slice(i, palCss.indexOf("}", i));
+    expect(r).toContain("position: fixed");
+    expect(r).toContain("z-index: 81");
+  });
+});
+
+/* ⚠️ POLISH §4 — the toggle grammar, wired. The pure fixtures are in lib/workspaceShell.test.ts;
+   this asserts the component honours `collapse` and that the S tile is exempt. */
+describe("Polish §4 — the active rail icon collapses", () => {
+  it("the plan runner collapses and performs nothing else", () => {
+    expect(src).toMatch(/if \(plan\.collapse\) \{ setShut\(true\); return; \}/);
+  });
+
+  /* The tile is a destination, never a toggle: it always goes to Dashboard. */
+  /* ⚠️ `collapsed` CONTAINS "collapse" — the tile legitimately reads the flag to expand first.
+     What must be absent is the COLLAPSING: setShut(true), and any use of the plan's collapse. */
+  it("the S tile is exempt — it navigates, never toggles", () => {
+    const tile = src.slice(src.indexOf('className="ws-tile"'), src.indexOf("ws-railnav"));
+    expect(tile).toContain('go("/dashboard")');
+    expect(tile).not.toContain("setShut(true)");
+    expect(tile).not.toContain("plan.collapse");
+    expect(tile).not.toContain("railClick");
   });
 });

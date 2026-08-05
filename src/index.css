@@ -166,7 +166,10 @@
   /* ⚠️ 216 → 232 (Amendment 1, B). The panel is its OWN element now, not a band inside a shared
      column, and it carries a wider rhythm: a 40px manuscript pill, 38px section rows and 30px
      children all on one left text axis. 216 was sized for rows that began 52px in. */
-  --shell-panelw: 232px;              /* the panel — a sibling of the rail, not a band within it */
+  /* ⚠️ 232 → 186 (polish §5). The panel was sized before its rhythm settled; at 232 it carried
+     more empty width than content. 186 is the narrowest that still fits the longest label with
+     its count without wrapping — verified against the live IA, not guessed. */
+  --shell-panelw: 186px;              /* the panel — a sibling of the rail, not a band within it */
   /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
      full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever

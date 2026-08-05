@@ -204,6 +204,8 @@ export interface SectionClick {
   go: string | null;
   /** Collapsed clicks always expand the shell (Amendment 1, E2). */
   expand: boolean;
+  /** Polish §4 — clicking the ACTIVE section's rail icon collapses the panel. */
+  collapse?: boolean;
 }
 
 export function sectionClick(
@@ -250,6 +252,19 @@ export function railClick(
   collapsed: boolean,
 ): SectionClick {
   const hasKids = !!sec.children?.length;
+
+  /* ⚠️ POLISH §4 — CLICKING THE ACTIVE SECTION'S ICON COLLAPSES, and it is the natural extension
+     of hover-peeks/click-commits rather than a new idea. Expanded and already in the section,
+     the click has no navigation left to perform: the only thing it could still mean is "give me
+     the room". No navigation occurs — you are already there.
+
+     ⚠️ COLLAPSED IS NOT THE MIRROR OF THIS. A collapsed click ALWAYS restores, including on the
+     active section: collapse is a temporary focus mode, and a click that both failed to navigate
+     and failed to restore would be a control that did nothing at all. */
+  if (!collapsed && hit?.section === sec.id) {
+    return { open: null, go: null, expand: false, collapse: true };
+  }
+
   if (!hasKids) return { open: null, go: sec.path ?? null, expand: collapsed };
   const keeps = hit?.section === sec.id && !!hit?.child
     && sec.children!.some((c) => c.id === hit.child);

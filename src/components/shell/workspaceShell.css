@@ -176,6 +176,9 @@
 
 /* head: manuscript pill + collapse ghost */
 .ws-phead { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; position: relative; }
+/* ⚠️ CENTRED (polish §5). At 186px a left-aligned title with the chevron pushed to the far edge
+   left a gap in the middle that read as a missing element; centring the pair closes it. The
+   chevron sits INLINE after the title rather than being pushed by `margin-left:auto`. */
 .ws-mspill {
   flex: 1;
   min-width: 0;
@@ -185,6 +188,7 @@
   border-radius: 9px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 0 11px;
   cursor: pointer;
@@ -204,27 +208,37 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Shrinks (and ellipsises) as a flex item so a long title never pushes the chevron out. */
+  flex: 0 1 auto;
 }
-.ws-mspill .ws-chev { margin-left: auto; color: var(--shell-muted); display: flex; flex: none; }
+.ws-mspill .ws-chev { color: var(--shell-muted); display: flex; flex: none; }
 .ws-mspill .ws-chev svg { width: 12px; height: 12px; stroke-width: 1.8; }
 .ws-msmenu { position: absolute; top: 46px; left: 0; right: 0; z-index: 20; }
 
-.ws-ctog {
-  width: 30px;
-  height: 30px;
+/* ⚠️ THE HEAD'S « GHOST IS GONE (polish §3) — it competed with the manuscript pill for the head's
+   attention and read as an action ON the manuscript. It is a nav-foot row now: see .ws-crow2. */
+.ws-crow2 {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex: none;
   color: var(--shell-muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.13s, color 0.13s;
+  outline: none;
 }
-.ws-ctog:hover { background: rgba(242, 237, 231, 0.85); color: var(--shell-ink); }
-.ws-ctog svg { width: 15px; height: 15px; stroke-width: 1.7; }
+.ws-crow2 svg { width: 14px; height: 14px; stroke-width: 1.7; flex: none; }
+.ws-crow2:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink-soft); }
+.ws-crow2:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 
 .ws-pdiv { height: 1px; background: var(--shell-hair); margin: 0 4px 8px; flex: none; }
 
@@ -322,20 +336,51 @@
 
 /* foot — name + plan + Settings. NO avatar: the rail carries the face. */
 .ws-pfoot { flex: none; }
-.ws-urow { padding: 8px 10px 2px; line-height: 1.3; }
-.ws-n { font-size: 13px; font-weight: 600; color: var(--shell-ink); }
-.ws-p { font-size: 11px; color: var(--shell-muted); margin-top: 1px; }
-.ws-up {
-  color: var(--shell-burgundy);
-  font-weight: 500;
-  background: none;
-  border: 0;
-  padding: 0;
-  font-size: inherit;
-  font-family: inherit;
+/* ⚠️ ONE INTERACTIVE ROW (polish §6), replacing the two small text lines. The name takes the FULL
+   row width on line 1 — at 186px a name sharing a line with the plan and an upsell would truncate
+   on ordinary names, and a foot block that abbreviates who you are is the wrong thing to
+   abbreviate. Line 2 carries the plan and the pill. */
+.ws-uacct {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 10px;
+  border-radius: 9px;
   cursor: pointer;
+  transition: background 0.13s;
+  outline: none;
 }
-.ws-up:hover { text-decoration: underline; }
+.ws-uacct:hover { background: rgba(242, 237, 231, 0.6); }
+.ws-uacct:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+.ws-n {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--shell-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+/* ⚠️ NOT `.ws-sub` — that name is ALREADY the accordion's container, whose `display:grid;
+   grid-template-rows:0fr` would have collapsed this line to zero height. The collision was
+   invisible in the markup and instant in the render. */
+.ws-acctline { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ws-pl { font-size: 11.5px; color: var(--shell-muted); }
+.ws-upg {
+  flex: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--shell-burgundy);
+  border: 1px solid rgba(124, 58, 42, 0.3);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #fdf6f2;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ws-upg:hover { background: #f5e3da; }
+.ws-upg:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
 .ws-setrow { margin-top: 4px; height: 36px; font-size: 13px; }
 
 /* flyout — anchored to the RAIL */
@@ -456,13 +501,15 @@
 /* + NEW — the ONE creation door in the chrome. ⚠️ The sidebar carries no quick actions: creation
    lives here, and a second set of create buttons in the panel would be two homes for one job. */
 .ws-newwrap { position: relative; display: flex; flex: none; }
+/* ⚠️ INK (polish §1). The soft-pink treatment is SUPERSEDED: pink is the app's upsell and
+   attention colour, and the one button that creates things should not borrow it. */
 .ws-nbtn {
   height: 34px;
   padding: 0 14px;
   border-radius: 9px;
-  background: #f5e3da;
-  border: 1px solid rgba(124, 58, 42, 0.28);
-  color: var(--shell-burgundy);
+  background: var(--shell-ink);
+  border: 1px solid var(--shell-ink);
+  color: var(--shell-rail-hi);
   font: inherit;
   font-size: 12.5px;
   font-weight: 600;
@@ -472,7 +519,7 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.ws-nbtn:hover { background: #f1d9cc; }
+.ws-nbtn:hover { background: #3f372f; }
 .ws-nbtn:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--shell-focus); }
 .ws-nbtn svg { width: 14px; height: 14px; stroke-width: 2; }
 .ws-newmenu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 196px; z-index: 40; }
@@ -523,7 +570,7 @@
   .ws-ic,
   .ws-srow,
   .ws-pch,
-  .ws-ctog,
+  .ws-crow2,
   .ws-mspill {
     transition: none;
   }

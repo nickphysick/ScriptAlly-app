@@ -315,11 +315,40 @@ describe("railClick — always lands, never toggles shut", () => {
       .toEqual({ open: "queries", go: "/queries", expand: false });
   });
 
-  /* THE fixture: the panel row shuts here; the rail must not. */
-  it("does NOT shut a section you are already in with its accordion open", () => {
+  /* ⚠️ SUPERSEDED BY POLISH §4, and rewritten rather than deleted. The rail used to be purely a
+     set of destinations — it never toggled. It now COLLAPSES when you click the section you are
+     already in, which is the natural extension of click-commits: there is no navigation left for
+     that click to perform, so the only thing it can still mean is "give me the room". The rail
+     and the panel row still differ — the panel shuts the ACCORDION, the rail shuts the PANEL. */
+  it("expanded, clicking the ACTIVE section's icon collapses instead of navigating", () => {
+    const hit = { section: "queries", child: "q-att" };
+    const p = railClick(sec("queries"), hit, false);
+    expect(p.collapse).toBe(true);
+    expect(p.go, "no navigation — you are already there").toBeNull();
+    expect(p.expand).toBe(false);
+  });
+
+  it("the panel row shuts the ACCORDION where the rail shuts the PANEL", () => {
     const hit = { section: "queries", child: "q-att" };
     expect(sectionClick(sec("queries"), hit, "queries", false).open).toBeNull();
-    expect(railClick(sec("queries"), hit, false).open).toBe("queries");
+    expect(sectionClick(sec("queries"), hit, "queries", false).collapse).toBeUndefined();
+    expect(railClick(sec("queries"), hit, false).collapse).toBe(true);
+  });
+
+  it("an INACTIVE section's icon never collapses — it navigates", () => {
+    const hit = { section: "queries", child: "q-att" };
+    const p = railClick(sec("agents"), hit, false);
+    expect(p.collapse).toBeFalsy();
+    expect(p.go).toBe("/agents");
+  });
+
+  /* ⚠️ COLLAPSED IS NOT THE MIRROR OF THIS. A collapsed click ALWAYS restores, including on the
+     active section — a click that neither navigated nor restored would do nothing at all. */
+  it("collapsed, the ACTIVE section's icon expands rather than staying shut", () => {
+    const hit = { section: "queries", child: "q-att" };
+    const p = railClick(sec("queries"), hit, true);
+    expect(p.expand).toBe(true);
+    expect(p.collapse).toBeFalsy();
   });
 
   it("keeps the child you are on when it belongs to the section", () => {

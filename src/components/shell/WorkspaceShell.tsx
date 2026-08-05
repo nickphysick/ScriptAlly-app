@@ -181,8 +181,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     onNavigatePath(path);
   }, [onNavigatePath]);
 
-  const runPlan = useCallback((plan: { open: string | null; go: string | null; expand: boolean }) => {
+  const runPlan = useCallback((plan: {
+    open: string | null; go: string | null; expand: boolean; collapse?: boolean;
+  }) => {
     setFlyoutFor(null);
+    // §4: the active section's rail icon collapses. Nothing else in the plan applies — there is
+    // no navigation to perform and no accordion to change, because you are already there.
+    if (plan.collapse) { setShut(true); return; }
     if (plan.expand) setShut(false);
     setOpenId(plan.open);
     if (plan.go) go(plan.go);
@@ -380,15 +385,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 )}
               </>
             ) : <span className="ws-mspill static" aria-hidden="true" />}
-            <button
-              type="button"
-              className="ws-ctog"
-              title="Collapse"
-              aria-label="Collapse the navigation"
-              onClick={() => setShut(true)}
-            >
-              <ChevronsLeft aria-hidden="true" />
-            </button>
           </div>
 
           <div className="ws-pdiv" />
@@ -440,22 +436,52 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             })}
           </nav>
 
+          {/* ⚠️ POLISH §3 — THE COLLAPSE CONTROL IS A NAV-FOOT ROW NOW. It sat as a « ghost beside
+              the manuscript pill, where it competed with the pill for the head's attention and
+              read as an action ON the manuscript. At the foot of the nav it reads as what it is:
+              a thing you do to the sidebar. Same handler, same persistence key. */}
+          <button
+            type="button"
+            className="ws-crow2"
+            onClick={() => setShut(true)}
+            aria-label="Collapse the navigation"
+          >
+            <ChevronsLeft aria-hidden="true" />
+            Collapse sidebar
+          </button>
+
           <div className="ws-grow" />
 
-          {/* ── foot: hairline → name + plan → Settings. NO avatar (the rail carries the face). ── */}
+          {/* ── foot: hairline → account block → Settings. NO avatar (the rail carries the face). ── */}
           <div className="ws-pfoot">
             <div className="ws-pdiv" />
-            <div className="ws-urow">
-              <div className="ws-n">{name}</div>
-              <div className="ws-p">
-                {plan.label}
+            {/* ⚠️ POLISH §6 — ONE INTERACTIVE ROW, not two text lines. The name gets the full row
+                width on line 1 so a realistic name never truncates at 186px; the plan and the
+                Upgrade pill share line 2. Clicking the row opens Settings for now.
+                TODO(account-menu): this is the opener for an account menu when one exists. */}
+            <div
+              className="ws-uacct"
+              role="button"
+              tabIndex={0}
+              onClick={() => go("/account")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("/account"); } }}
+            >
+              <span className="ws-n">{name}</span>
+              <span className="ws-acctline">
+                <span className="ws-pl">{plan.label}</span>
                 {plan.upgrade && (
-                  <>
-                    {" · "}
-                    <button type="button" className="ws-up" onClick={onUpgrade}>Upgrade</button>
-                  </>
+                  /* ⚠️ THE PILL STOPS PROPAGATION. Without it the row's own handler would fire
+                     too and the click would land on Settings — the upsell would open the one
+                     page that is not the upgrade flow. */
+                  <button
+                    type="button"
+                    className="ws-upg"
+                    onClick={(e) => { e.stopPropagation(); onUpgrade?.(); }}
+                  >
+                    Upgrade
+                  </button>
                 )}
-              </div>
+              </span>
             </div>
             <button type="button" className="ws-ni ws-setrow" onClick={() => go("/account")}>
               <span className="ws-ic"><Settings aria-hidden="true" /></span>

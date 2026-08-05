@@ -12,7 +12,8 @@
  * is no debounce, no loading state and no fetch. Ranking, grouping and highlighting are the pure
  * `lib/searchPalette` core; this file owns presentation, keyboard, focus and dispatch.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Search, Plus, Reply, UserPlus, BookPlus, Send, LayoutGrid, Settings, HelpCircle, Book } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
@@ -20,6 +21,7 @@ import { invokeCapture } from "./railNav";
 import {
   GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, emptyStateItems, highlightParts,
 } from "../../lib/searchPalette";
+import { PaletteBox, palettePosition } from "../../lib/palettePosition";
 import "./searchPalette.css";
 
 /** Row glyphs by kind — lucide, as everywhere else in the shell (TypeGlyph stays locked to
@@ -65,6 +67,7 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
   open, onClose, onNavigate, onNavigatePath, items, setSearchQuery, openerRef, term, setTerm,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const palRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [sel, setSel] = useState(0);
 
@@ -147,22 +150,65 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
     }
   };
 
-  if (!open) return null;
+  /* ⚠️ MEASURED AND PORTALLED, because the pill sits inside `.ws-cscroll` (overflow:auto) inside
+     `.ws-card` (overflow:hidden). An absolutely-positioned dropdown — which is what a standalone
+     mockup can get away with — would be CLIPPED by the card at exactly the moment it mattered.
+     Portalling to the body takes it out of that stacking context; the position then has to be
+     computed rather than inherited, which is what `palettePosition` is for. */
+  const [box, setBox] = useState<PaletteBox | null>(null);
+  useLayoutEffect(() => {
+    if (!open) { setBox(null); return; }
+    const measure = () => {
+      const el = openerRef?.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setBox(palettePosition(r, window.innerWidth, window.innerHeight));
+    };
+    measure();
+    // Re-measured on resize AND on scroll: the anchor is inside a scrolling card, so a scroll
+    // moves the pill without a resize ever firing.
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [open, openerRef]);
+
+  /* Click-outside. ⚠️ THERE IS NO SCRIM ANY MORE, so the dropdown cannot rely on one swallowing
+     the click — it listens for itself, and ignores clicks on the pill so the opener's own toggle
+     is not immediately undone by this. */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (palRef.current?.contains(t)) return;
+      if (openerRef?.current?.contains(t)) return;
+      onClose();
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open, onClose, openerRef]);
+
+  if (!open || typeof document === "undefined") return null;
 
   // Group headings are rendered by CHANGE OF GROUP down the ranked list, so a group's heading
   // appears exactly once and only when it has rows.
   let lastGroup: string | null = null;
   const selectedId = rows[sel] ? `sp-row-${sel}` : undefined;
 
-  return (
+  /* ⚠️ NO `aria-modal` NOW. It is a dropdown, not a modal: nothing behind it is inert, the page
+     is not dimmed, and claiming modality to a screen reader would describe a trap that no longer
+     exists. */
+  return createPortal(
     <>
-      <div className="sp-scrim" onClick={closeAndReturn} aria-hidden="true" />
       <div
+        ref={palRef}
         className="sp-pal"
         role="dialog"
-        aria-modal="true"
         aria-label="Search"
         onKeyDown={onKeyDown}
+        style={box ? { left: box.left, top: box.top, width: box.width } : { visibility: "hidden" }}
       >
         <div className="sp-in">
           <Search aria-hidden="true" />
@@ -182,7 +228,14 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
           <span className="sp-esc" aria-hidden="true">ESC</span>
         </div>
 
-        <div className="sp-list" id="sp-list" role="listbox" aria-label="Results" ref={listRef}>
+        <div
+          className="sp-list"
+          id="sp-list"
+          role="listbox"
+          aria-label="Results"
+          ref={listRef}
+          style={box ? { maxHeight: box.maxListHeight } : undefined}
+        >
           {rows.length === 0 ? (
             <div className="sp-empty">Nothing matches “{term.trim()}”.</div>
           ) : (
@@ -234,7 +287,8 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
           <span className="sp-foot-end"><i>esc</i> Close</span>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 };
 

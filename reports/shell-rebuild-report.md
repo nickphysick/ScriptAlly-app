@@ -675,3 +675,93 @@ crumb's baseline alignment are all layout-engine items, listed rather than asser
    same flow as the dashboard hero action.
 7. **The status whisper** actually flipping to "SAVING…" — log a query and watch it.
 8. Panel rhythm at the new 40/32px pitch, and below 768px unchanged.
+
+---
+
+# Polish pass — ink New, palette dropdown, collapse row, toggle grammar, narrow panel, account block
+
+One pass, one commit. The design ref was replaced in place first (`967166d`) — the **fifth**
+revision, and the fifth time it had not reached the repo.
+
+## Superseded
+
+| # | Superseded | Replaced by |
+|---|---|---|
+| §1 | **+ New in soft pink** (`#f5e3da` / `rgba(124,58,42,.28)` / burgundy, hover `#f1d9cc`) | **Ink**: `#2e2723` on `#2e2723`, text `#f4efe7`, hover `#3f372f`. Pink is the app's upsell and attention colour; the one button that *creates* things should not borrow it. The pink hex is asserted **gone**. |
+| §2 | **The palette as a centred modal with a scrim** | An anchored dropdown, portalled. `.sp-scrim` deleted from both the component and the stylesheet; `aria-modal` removed. |
+| §3 | **The « ghost beside the manuscript pill** (`.ws-ctog`) | A **nav-foot row** (`.ws-crow2`, "Collapse sidebar"). Beside the pill it competed for the head's attention and read as an action *on the manuscript*; at the foot of the nav it reads as a thing you do to the sidebar. |
+| §5 | `--shell-panelw: 232px` | **186px**. Both superseded values (216 and 232) are asserted gone. |
+| §6 | **The two small name/plan text rows** (`.ws-urow` / `.ws-up`) | One interactive account block (`.ws-uacct`) with an Upgrade **pill**. |
+
+Note the collapse control has now moved twice: Amendment 1 took it from the panel foot to the head;
+this pass takes it from the head to the nav foot. A lock asserts **neither of the first two
+survives**.
+
+## The palette portal decision
+
+The ref anchors the dropdown with `position:absolute` inside a relatively-positioned wrapper. That
+works in a standalone page and **would have been clipped here**: the search pill sits inside
+`.ws-cscroll` (`overflow:auto`) inside `.ws-card` (`overflow:hidden`), so the dropdown would have
+been cut off by the card at exactly the moment it mattered — a long result list, or a narrow
+window.
+
+It therefore **portals to `document.body`** and computes its own position, per the pass's own
+instruction to render outside any `overflow:hidden` ancestor. Consequences, each handled:
+
+- **Position is measured, not inherited** — `lib/palettePosition.ts` is a pure function
+  (unit-tested), so "does it stay on screen at 320px" is not a browser check.
+- **Re-measured on resize AND on scroll** — the anchor lives in a *scrolling card*, so a scroll
+  moves the pill without a resize ever firing.
+- **`max-height` is set inline** from the same maths, and **floored at zero**: `max-height:-40px`
+  is silently ignored by browsers, so a negative value would render the list at full height and
+  run it off the bottom — the exact failure the cap exists to prevent.
+- **Click-outside is the component's own**, and ignores the pill: with no scrim to swallow the
+  click, the opener's toggle would otherwise immediately undo itself.
+- Content, ranking, grouping, keyboard navigation and the contextual injection are **unchanged**.
+
+## §5 — the 186px review
+
+Checked against realistic content at the new width. **Nothing needed adjusting**: the longest
+section label ("Materials") with a count sits well inside the row; child labels ("Awaiting
+response" is gone with the filter children, so the longest is now "Submission packages" in the
+mega only) fit at 13px in a 38px-indented row; the To-do count chip has room.
+
+Two elements were changed *as part of the spec*, not as fixes: the manuscript pill centres with
+its chevron inline (it truncates as a flex item), and the account block puts the **name on its own
+line** — at 186px a name sharing a line with the plan and an upsell truncates on ordinary names,
+and who you are is the wrong thing to abbreviate.
+
+## ⚠️ A real bug the tests caught: `.ws-sub`
+
+The account block's second line was first written as `.ws-sub` — a class **already in use** as the
+accordion's container, carrying `display:grid; grid-template-rows:0fr`. It would have **collapsed
+the plan/Upgrade line to zero height**, invisibly in the markup and instantly in the render. Caught
+because a `rule()` helper returned the wrong declaration block. Renamed `.ws-acctline`.
+
+## Gates
+
+`tsc` clean · `vite build` clean · **Vitest 2512 passed | 2 skipped (149 files)**, up from 2488.
+Browser: `--shell-panelw` measured at **186px**, no console errors.
+
+Two further assertions of mine were wrong before they were right, both repeats of the standing
+trap: an `aria-modal` absence check caught the **comment explaining its removal**, and the S-tile
+exemption check caught `collapsed` as a substring of "collapse". Both now assert against
+comment-stripped source and the specific thing that must be absent.
+
+## Browser-verify pending — refreshed
+
+Auth-gated; nothing below is claimed.
+
+1. **The dropdown's clipping and z-index over the frosted bar** — the portal should place it above
+   the bar (81 vs 8) and outside the card's overflow. The narrow-viewport clamp is unit-tested;
+   *that it renders where the maths says* is not.
+2. **186px truncation review in the flesh** — section labels, child rows, counts and the account
+   block with real data, including a long manuscript title in the centred pill and a long name in
+   the account block.
+3. **Toggle grammar** — click the active rail icon (collapses, no navigation), click it again
+   (expands, same page), click an inactive one (navigates, never collapses), click the S tile
+   (always Dashboard).
+4. **The Upgrade pill** — that it reaches the upgrade flow and does *not* open Settings.
+5. **The collapse row** at the foot of the nav, above the account divider.
+6. **+ New in ink** against the frosted bar, and its MenuCard placement.
+7. ⌘K toggling the dropdown open/closed with focus landing in the input.

@@ -77,7 +77,8 @@ describe("v2 shell — smoke renders", () => {
     // ...and it ALSO renders at the SHELL's foot (Baked 10), where it carries the plan line.
     // Approved duplication, asserted so it is not "tidied away" by someone who spots it later.
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
-    expect(ws).toContain("ws-urow");
+    // polish §6: the two text rows became one interactive account block.
+    expect(ws).toContain("ws-uacct");
   });
 
   it("THE SEARCH IS AN OPENER — one search implementation, and the palette is it", () => {

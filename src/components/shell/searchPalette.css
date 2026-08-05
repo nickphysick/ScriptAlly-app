@@ -2,27 +2,22 @@
    The app's ONE search. Sits above every other shell layer; the timeline drawer is 45/46, modals
    50, dropdowns 60, so the palette takes 80/81 and is unambiguously on top. ── */
 
-.sp-scrim {
-  position: fixed;
-  inset: 0;
-  background: rgba(46, 39, 35, 0.34);
-  backdrop-filter: blur(2px);
-  z-index: 80;
-}
+/* ⚠️ THE SCRIM IS GONE (polish §2). This is a DROPDOWN anchored to the search pill now, not a
+   centred modal — nothing behind it is dimmed or inert, so a scrim would be dimming the page for
+   a surface that no longer owns it. Click-outside is handled by the component instead.
 
-/* 88px FROM THE TOP, not vertically centred: results grow downward, and a vertically centred box
-   shifts on every keystroke as the list changes length — the one thing a palette must not do. */
+   ⚠️ AND IT IS PORTALLED TO THE BODY. The pill sits inside `.ws-cscroll` (overflow:auto) inside
+   `.ws-card` (overflow:hidden); an absolutely-positioned dropdown would be clipped by the card at
+   exactly the moment it mattered. Position comes from lib/palettePosition, which is also what
+   keeps it on screen at narrow viewports — the whole point of the change.
+
+   z-index 81 keeps it above the frosted bar (8) and every other shell layer. */
 .sp-pal {
   position: fixed;
-  left: 50%;
-  top: 88px;
-  transform: translateX(-50%);
-  width: 640px;
-  max-width: calc(100vw - 48px);
-  background: var(--shell-canvas);
-  border: var(--shell-cap-border);
-  border-radius: var(--shell-cap-radius);
-  box-shadow: 0 28px 70px rgba(58, 28, 20, 0.3);
+  background: #ffffff;
+  border: 1px solid var(--shell-edge);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(46, 39, 35, 0.16), 0 34px 70px rgba(46, 39, 35, 0.2);
   z-index: 81;
   overflow: hidden;
   display: flex;
@@ -62,7 +57,10 @@
 }
 
 /* the results region — capped and scrolling, so the palette never runs off the viewport */
-.sp-list { max-height: 404px; overflow-y: auto; padding: 8px; }
+/* ⚠️ THE CAP IS SET INLINE, from lib/palettePosition — it depends on where the pill ended up in
+   the viewport, which CSS cannot know. This value is the fallback for the frame before the
+   measurement lands. */
+.sp-list { max-height: 340px; overflow-y: auto; padding: 8px; }
 .sp-list::-webkit-scrollbar { width: 7px; }
 .sp-list::-webkit-scrollbar-thumb { background: #ded3c6; border-radius: 9px; }
 
