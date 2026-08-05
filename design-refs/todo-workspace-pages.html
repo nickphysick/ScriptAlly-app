@@ -1,0 +1,343 @@
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>To-do with an on-page side container</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+:root{--gutter:20px;--icon:38px;--pitch:42px;--head:72px;--shell-gap:14px;
+--desk:#dce0d9;--rail:#efe7db;--content:#fdfbf8;--cap-bd:#d8ccbc;--ink:#311e19;--soft:#5d5047;--muted:#8a7a6c;--label:#9c8878;
+--pink:#f5e2da;--pink-bd:#e8c8bc;--burg:#7c3a2a;--hair:#ece0d2}
+body{background:#332d28;padding:34px 0 90px;display:flex;flex-direction:column;align-items:center;font-family:'Source Sans 3',Inter,sans-serif;color:var(--ink)}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a89a88;margin:42px 0 11px;width:1340px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#c3b7a8;margin-left:10px;line-height:1.6}
+.desk{width:1340px;background:var(--desk);border-radius:16px;padding:var(--shell-gap);display:flex;gap:var(--shell-gap);box-sizing:border-box;box-shadow:0 14px 40px rgba(20,16,12,.4)}
+/* the one expanding column */
+.col{width:246px;transition:width .18s;flex:0 0 auto;background:var(--rail);border:1px solid var(--cap-bd);border-radius:14px;display:flex;flex-direction:column;padding-bottom:10px;box-shadow:0 1px 2px rgba(49,30,25,.05),0 6px 16px rgba(49,30,25,.06)}
+.colhead{height:var(--head);display:flex;align-items:center;padding:0 var(--gutter);gap:10px}
+.wm{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--ink)}
+.colhead .tog{margin-left:auto;color:var(--label);font-size:12px;cursor:pointer}
+.nav{padding:0 calc(var(--gutter) - 8px)}
+.item{display:flex;align-items:center;gap:12px;height:var(--pitch);border-radius:9px;padding:0 8px;cursor:pointer;position:relative}
+.item .ico{width:var(--icon);height:var(--icon);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);margin-left:-8px}
+.item .lb{font-size:13.5px;font-weight:500;color:var(--soft)}
+.item .ct{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--label)}
+.item.parent .lb{font-weight:600;color:var(--ink)}
+.item.on{background:#e5dbcb}
+.item.on .lb{color:var(--ink);font-weight:700}
+.item .dot{width:6px;height:6px;border-radius:50%;background:var(--burg);margin-left:6px}
+.kids{padding-left:34px;position:relative}
+.kids::before{content:'';position:absolute;left:20px;top:2px;bottom:6px;width:1px;background:#ded2c0}
+.kid{display:flex;align-items:center;height:36px;border-radius:8px;padding:0 9px;font-size:12.5px;color:var(--soft);cursor:pointer}
+.kid.on{background:#e5dbcb;color:var(--ink);font-weight:700}
+.kid .ct{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label)}
+.sec{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--label);padding:16px var(--gutter) 6px}
+.colfoot{margin-top:auto;padding:0 calc(var(--gutter) - 8px)}
+.plan{display:flex;align-items:center;gap:6px;padding:9px 8px;font-size:11.5px;color:var(--muted)}
+.plan b{color:var(--burg);cursor:pointer;font-weight:600;border-bottom:1px solid #e0c6bc}
+.urow{display:flex;align-items:center;gap:10px;height:44px;padding:0 8px;border-top:1px solid var(--hair);margin:4px 8px 0}
+.avi{width:26px;height:26px;border-radius:50%;border:1px solid #dcc8bc;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--burg)}
+.col.mini{width:78px}
+.col.mini .lb,.col.mini .ct,.col.mini .sec,.col.mini .wm,.col.mini .kids,.col.mini .plan span,.col.mini .urow span:not(.avi){display:none}
+.col.mini .item{justify-content:center;padding:0}
+.col.mini .item .ico{margin-left:0}
+.col.mini .colhead{justify-content:center;padding:0}
+.col.mini .colhead .tog{margin-left:0}
+.col.mini .urow{justify-content:center}
+.col.mini .plan{justify-content:center}
+.col.mini .plan b{border:none}
+/* content capsule */
+.cap{flex:1;min-width:0;background:var(--content);border:1px solid var(--cap-bd);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(49,30,25,.05),0 6px 16px rgba(49,30,25,.06);display:flex;flex-direction:column}
+.wbar{height:var(--head);display:flex;align-items:center;padding:0 26px;gap:14px;border-bottom:1px solid var(--hair)}
+.crumb{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--label)}
+.crumb b{color:var(--ink)}
+.pal{margin-left:auto;display:flex;align-items:center;gap:8px;height:32px;border:1px solid #e6dccc;border-radius:8px;padding:0 11px;color:var(--label);font-size:11.5px;width:230px;background:#fdfbf8;cursor:pointer}
+.pal .kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;background:#f2ece1;border:1px solid #e6dccc;border-radius:4px;padding:2px 5px}
+.body{padding:22px 26px 26px;overflow:auto}
+/* page header contract */
+.ph h1{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;color:var(--ink)}
+.ph .sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.tools{display:flex;align-items:center;gap:7px;margin-top:14px;padding-bottom:11px;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 10px;border-radius:7px;font-size:11px;font-weight:600;color:var(--soft);cursor:pointer}
+.chip.on{background:var(--ink);color:#fff}
+.chip .n{font-family:'JetBrains Mono',monospace;font-size:8px;opacity:.55}
+.chip.zero{opacity:.42}
+.tdiv{width:1px;height:18px;background:#e6dccc;margin:0 3px}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer}
+.tsrch{margin-left:auto;display:flex;align-items:center;gap:6px;height:29px;border:1px solid #e6dccc;border-radius:7px;padding:0 10px;color:var(--label);font-size:11px;width:172px;background:#fff}
+.vtg{display:inline-flex;align-items:center;height:29px;border:1px solid #e6dccc;border-radius:7px;background:#fff;padding:2px;gap:2px}
+.vc{width:26px;height:23px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;font-size:10px;color:var(--muted)}
+.vc.on{background:var(--ink);color:#fff}
+.pkbtn{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pink-bd);color:#5c2f22;border-radius:8px;height:30px;padding:0 13px;font-size:11px;font-weight:700;cursor:pointer}
+.ghbtn{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e6dccc;color:var(--soft);border-radius:8px;height:30px;padding:0 12px;font-size:11px;font-weight:600;cursor:pointer}
+.inkbtn{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#fff;border-radius:8px;height:30px;padding:0 13px;font-size:11px;font-weight:600;cursor:pointer}
+/* page-level side container */
+.inner{display:flex;flex:1;min-height:0}
+.pside{width:216px;flex:0 0 auto;border-right:1px solid var(--hair);padding:18px 12px 12px;box-sizing:border-box;display:flex;flex-direction:column;background:#fcf9f4}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--label);padding:14px 8px 6px}
+.pk2:first-child{padding-top:0}
+.pi{display:flex;align-items:center;gap:10px;height:34px;border-radius:8px;padding:0 9px;font-size:12.5px;font-weight:500;color:var(--soft);cursor:pointer}
+.pi .ic2{width:15px;text-align:center;color:var(--muted);font-size:11.5px}
+.pi.on{background:#efe7db;color:var(--ink);font-weight:700}
+.pi .n2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label)}
+.sw2{width:10px;height:10px;border-radius:4px;flex:0 0 auto}
+.ptags{display:flex;flex-wrap:wrap;gap:6px;padding:6px 6px 0}
+.ptg{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer}
+.pbody{flex:1;min-width:0;padding:20px 24px 26px;overflow:auto}
+/* kanban */
+.kb{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:start;margin-top:14px}
+.kcol{background:#f4f3f1;border:1px solid #e7e5e1;border-radius:11px;padding:8px 8px 9px;min-height:250px}
+.kh{display:flex;align-items:baseline;gap:6px;padding:2px 4px 8px}
+.kh b{font-family:'Playfair Display',serif;font-size:12.5px;font-weight:600;color:var(--ink)}
+.kh .n{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--label)}
+.kc{background:#fff;border:1px solid #eee7db;border-radius:9px;box-shadow:0 2px 7px rgba(49,30,25,.07);overflow:hidden;margin-bottom:8px;cursor:grab;display:flex;flex-direction:column;min-height:104px}
+.kc.u{border:1px solid #2a1a13}
+.kc .b{height:22px;display:flex;align-items:center;gap:5px;padding:0 9px;border-bottom:1px solid var(--bd)}
+.kc.u .b{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.kc.h .b{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.kc.t .b{background:linear-gradient(180deg,#dee4dc,#d5dbd3);--bd:#b9c9b4}
+.kc.n .b{background:linear-gradient(180deg,#f6eed6,#f1e5c4);--bd:#e0d3a8}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:5.5px;letter-spacing:.11em;font-style:normal;color:#3a1c14}
+.kc .b .w{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6px;color:#8a6a58}
+.kc .in{padding:9px 10px 10px;flex:1}
+.kc h4{font-size:12px;font-weight:600;color:var(--ink);line-height:1.3}
+.kc .ms{font-size:10px;color:var(--label);margin-top:3px}
+.dz{border:1.5px dashed #d8ccbc;border-radius:9px;height:30px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.14em;color:#b3a394;margin-bottom:8px}
+/* calendar */
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
+.dow{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.16em;color:var(--label);text-align:center;padding-bottom:2px}
+.cell{background:#fff;border:1px solid #efe6da;border-radius:8px;min-height:86px;padding:5px 6px}
+.cell.today{border:1.5px solid var(--ink)}
+.cell.past{background:#faf7f2}
+.cell .d{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--label);display:flex}
+.cell.today .d{color:var(--ink);font-weight:600}
+.cell .d .c2{margin-left:auto;font-size:6px;color:#b8ab9b}
+.pip{display:block;border-radius:4px;font-size:8px;padding:2px 5px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pip.u{background:#f8e2d9;color:#7a3a28}
+.pip.t{background:#e9ede6;color:#3f5a3d}
+.pip.s{background:#f2ede7;color:#6b5a4e}
+.pip.n{background:#f8f0d9;color:#6f5a2a}
+.more2{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--label);padding:2px}
+/* groups */
+.grp{background:#fff;border:1px solid #eee5d8;border-radius:12px;padding:13px 15px 7px;margin-top:14px}
+.grp h2{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sw{width:10px;height:10px;border-radius:4px}
+.gc{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label);font-weight:400}
+.qadd{display:flex;align-items:center;gap:9px;height:35px;border:1px solid #efe6da;border-radius:9px;padding:0 12px;color:var(--label);font-size:11px;margin-bottom:3px}
+.row{display:flex;align-items:center;gap:11px;padding:9px 3px;border-bottom:1px solid #f5efe5}
+.row:last-child{border-bottom:none}
+.cc{width:17px;height:17px;border-radius:50%;border:1.6px solid #cdbfae;background:#fff;flex:0 0 auto}
+.cc.done{background:linear-gradient(180deg,#dee4dc,#d5dbd3);border-color:#8a9e88;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#4a5f48}
+.tt{font-size:12.5px;font-weight:600;color:var(--ink)}
+.meta{display:flex;gap:6px;margin-top:4px;align-items:center}
+.mc{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;color:var(--muted);border:1px solid #efe6da;border-radius:5px;padding:2px 7px}
+.acts{margin-left:auto;display:flex;gap:5px}
+.ib{height:26px;min-width:26px;border-radius:7px;border:1px solid #eae0d2;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:var(--soft);padding:0 8px}
+.ib.p{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600;font-size:9.5px;padding:0 11px}
+.showmore{text-align:center;padding:8px 0 5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;color:var(--label);cursor:pointer}
+</style></head><body><div class="lbl">1 &middot; THE THREE-PANE READING &mdash; APP COLUMN + PAGE SIDEBAR + CONTENT <em>&mdash; the shell column keeps app navigation only (To-do is one item again, no children); the workspace&rsquo;s own side container lives INSIDE the content capsule and carries TASKS (the four pages), LISTS, TAGS and Task settings &mdash; exactly the reference&rsquo;s structure. The tool row is now just search, view and the page&rsquo;s primary. Content narrows to a comfortable measure instead of stretching.</em></div><div class="desk"><div class="col">
+<div class="colhead"><span class="wm">ScriptAlly</span><span class="tog">&#8676;</span></div>
+<div class="nav">
+<div class="item"><span class="ico">&#8962;</span><span class="lb">Dashboard</span></div>
+<div class="sec">QUERYING</div>
+<div class="item"><span class="ico">&#9993;</span><span class="lb">Queries Hub</span><span class="ct">16</span></div>
+<div class="item parent on"><span class="ico">&#10003;</span><span class="lb">To-do</span><span class="ct">44</span><span class="dot"></span></div>
+<div class="sec">AGENTS</div>
+<div class="item"><span class="ico">&#9823;</span><span class="lb">Contact list</span></div>
+<div class="item"><span class="ico">&#9906;</span><span class="lb">Discover</span></div>
+<div class="sec">MANUSCRIPTS</div>
+<div class="item"><span class="ico">&#9639;</span><span class="lb">Your manuscripts</span></div>
+<div class="item"><span class="ico">&#9635;</span><span class="lb">Submission packages</span></div>
+</div>
+<div class="colfoot">
+<div class="plan">Free plan &middot; <b>Upgrade</b></div>
+<div class="urow"><span class="avi">ML</span><span style="font-size:12px;font-weight:600">Michael Li</span><span style="margin-left:auto;color:#b3a394;font-size:11px">&#9662;</span></div>
+</div></div><div class="cap"><div class="wbar"><span class="crumb">QUERYING / <b>TO-DO</b></span>
+<span class="pal">&#9906; Search or jump to&hellip;<span class="kbd">&#8984;K</span></span></div><div class="inner"><div class="pside">
+<div class="pk2">TASKS</div><div class="pi on"><span class="ic2">&#187;</span>To-do list<span class="n2">44</span></div><div class="pi"><span class="ic2">&#9788;</span>Today<span class="n2">5</span></div><div class="pi"><span class="ic2">&#9639;</span>Calendar</div><div class="pi"><span class="ic2">&#9998;</span>Noteboard<span class="n2">6</span></div>
+<div class="pk2">LISTS</div>
+<div class="pi"><span class="sw2" style="background:#e8a68e"></span>Urgent<span class="n2">3</span></div>
+<div class="pi"><span class="sw2" style="background:#d9c49a"></span>Housekeeping<span class="n2">41</span></div>
+<div class="pi"><span class="sw2" style="background:#a8bca4"></span>Your tasks<span class="n2">2</span></div>
+<div class="pi"><span class="sw2" style="background:#e0c878"></span>Notes to self<span class="n2">6</span></div>
+<div class="pk2">TAGS</div>
+<div class="ptags"><span class="ptg" style="background:#f6e3db;color:#8a4a36">#queryletter</span>
+<span class="ptg" style="background:#e9ede6;color:#4a5f48">#synopsis</span>
+<span class="ptg" style="background:#f4ecd4;color:#7a6030">#ideas</span>
+<span class="ptg" style="background:#fff;border:1px dashed #d9cbb8;color:#a2937f">&#65291; Add</span></div>
+<div style="flex:1"></div>
+<div class="pi"><span class="ic2">&#9881;</span>Task settings</div>
+</div><div class="pbody">
+<div class="ph"><h1>To-do list</h1><div class="sub">Everything the desk is holding &mdash; forty-four items across three lists.</div></div>
+<div class="tools">
+<span class="tsrch">&#9906; Search your list&hellip;</span>
+<span class="vtg"><span class="vc on">&#9776;</span><span class="vc">&#9638;</span></span>
+<span class="pkbtn">&#65291; New</span></div>
+<div class="grp"><h2><span class="sw" style="background:#e8a68e"></span>Urgent<span class="gc">3</span></h2>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Deal with Tom Ellery&rsquo;s offer</div><div class="meta"><span class="mc" style="border-color:#eecfc2;color:#8a4a36">&#9733; OFFER</span><span class="mc">MURPHY&rsquo;S DAY OUT</span><span class="mc">19 JUL</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Send your full to Jonathan Marsh</div><div class="meta"><span class="mc" style="border-color:#eecfc2;color:#8a4a36">AGENT WAITING</span><span class="mc">12 JUL</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Send your partial to Daniel O&rsquo;Rourke</div><div class="meta"><span class="mc" style="border-color:#eecfc2;color:#8a4a36">AGENT WAITING</span><span class="mc">15 JUL</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+</div>
+<div class="grp"><h2><span class="sw" style="background:#d9c49a"></span>Housekeeping<span class="gc">41</span></h2>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Materials sweep &mdash; 16 agents</div><div class="meta"><span class="mc">BATCH FIX &middot; 0 OF 16</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Wish-list sweep &mdash; 15 agents</div><div class="meta"><span class="mc">BATCH FIX &middot; 1 OF 15</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Penhallow Literary silent</div><div class="meta"><span class="mc">STALE &middot; 873 DAYS</span><span class="mc">CONSIDER CLOSING</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Nudge Aisha Kapoor</div><div class="meta"><span class="mc">STALE &middot; 847 DAYS</span><span class="mc" style="border-color:#ddd2c0">&#128340; SNOOZED 28 JUL &middot; BACK TODAY</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="showmore">SHOW 37 MORE &#9662;</div>
+</div>
+<div class="grp"><h2><span class="sw" style="background:#a8bca4"></span>Your tasks &amp; notes<span class="gc">8</span></h2>
+<div class="qadd">&#65291; Add a task or note&hellip;</div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Resubmit your R&amp;R to Sophie Dunn</div><div class="meta"><span class="mc" style="border-color:#c9d6c5;color:#4a5f48">YOUR TASK</span><span class="mc">DUE TODAY</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Redraft the opening chapter</div><div class="meta"><span class="mc" style="border-color:#c9d6c5;color:#4a5f48">YOUR TASK</span><span class="mc">FRI 8 AUG</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+</div></div></div></div></div><div class="lbl">2 &middot; THE SAME, WITH THE APP COLUMN COLLAPSED &nbsp;&#9733; <em>&mdash; the shell&rsquo;s 78px icon state. Two full sidebars side by side is a lot of chrome; collapsed, the app column becomes a quiet spine and the page sidebar does the talking. I&rsquo;d make this the default whenever a page brings its own side container, and let the toggle restore the labels.</em></div><div class="desk"><div class="col mini">
+<div class="colhead"><span class="wm">ScriptAlly</span><span class="tog">&#8676;</span></div>
+<div class="nav">
+<div class="item"><span class="ico">&#8962;</span><span class="lb">Dashboard</span></div>
+<div class="sec">QUERYING</div>
+<div class="item"><span class="ico">&#9993;</span><span class="lb">Queries Hub</span><span class="ct">16</span></div>
+<div class="item parent on"><span class="ico">&#10003;</span><span class="lb">To-do</span><span class="ct">44</span><span class="dot"></span></div>
+<div class="sec">AGENTS</div>
+<div class="item"><span class="ico">&#9823;</span><span class="lb">Contact list</span></div>
+<div class="item"><span class="ico">&#9906;</span><span class="lb">Discover</span></div>
+<div class="sec">MANUSCRIPTS</div>
+<div class="item"><span class="ico">&#9639;</span><span class="lb">Your manuscripts</span></div>
+<div class="item"><span class="ico">&#9635;</span><span class="lb">Submission packages</span></div>
+</div>
+<div class="colfoot">
+<div class="plan">Free plan &middot; <b>Upgrade</b></div>
+<div class="urow"><span class="avi">ML</span><span style="font-size:12px;font-weight:600">Michael Li</span><span style="margin-left:auto;color:#b3a394;font-size:11px">&#9662;</span></div>
+</div></div><div class="cap"><div class="wbar"><span class="crumb">QUERYING / <b>TO-DO / <b>TODAY</b></b></span>
+<span class="pal">&#9906; Search or jump to&hellip;<span class="kbd">&#8984;K</span></span></div><div class="inner"><div class="pside">
+<div class="pk2">TASKS</div><div class="pi"><span class="ic2">&#187;</span>To-do list<span class="n2">44</span></div><div class="pi on"><span class="ic2">&#9788;</span>Today<span class="n2">5</span></div><div class="pi"><span class="ic2">&#9639;</span>Calendar</div><div class="pi"><span class="ic2">&#9998;</span>Noteboard<span class="n2">6</span></div>
+<div class="pk2">LISTS</div>
+<div class="pi"><span class="sw2" style="background:#e8a68e"></span>Urgent<span class="n2">3</span></div>
+<div class="pi"><span class="sw2" style="background:#d9c49a"></span>Housekeeping<span class="n2">41</span></div>
+<div class="pi"><span class="sw2" style="background:#a8bca4"></span>Your tasks<span class="n2">2</span></div>
+<div class="pi"><span class="sw2" style="background:#e0c878"></span>Notes to self<span class="n2">6</span></div>
+<div class="pk2">TAGS</div>
+<div class="ptags"><span class="ptg" style="background:#f6e3db;color:#8a4a36">#queryletter</span>
+<span class="ptg" style="background:#e9ede6;color:#4a5f48">#synopsis</span>
+<span class="ptg" style="background:#f4ecd4;color:#7a6030">#ideas</span>
+<span class="ptg" style="background:#fff;border:1px dashed #d9cbb8;color:#a2937f">&#65291; Add</span></div>
+<div style="flex:1"></div>
+<div class="pi"><span class="ic2">&#9881;</span>Task settings</div>
+</div><div class="pbody">
+<div class="ph"><h1>Today</h1><div class="sub">Two of five cleared &mdash; Tuesday 4 August.</div></div>
+<div class="tools">
+<span class="tsrch">&#9906; Search your list&hellip;</span>
+<span class="vtg"><span class="vc on">&#9776;</span><span class="vc">&#9638;</span></span>
+<span class="ghbtn">&#65291; Add to today</span><span class="inkbtn">&#9654; Work the list</span></div>
+<div class="grp"><h2>Your list for today</h2>
+<div class="qadd">&#65291; Add something to today&hellip;</div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Deal with Tom Ellery&rsquo;s offer</div><div class="meta"><span class="mc" style="border-color:#eecfc2;color:#8a4a36">&#9733; OFFER</span><span class="mc">MURPHY&rsquo;S DAY OUT</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Resubmit your R&amp;R to Sophie Dunn</div><div class="meta"><span class="mc" style="border-color:#c9d6c5;color:#4a5f48">YOUR TASK</span><span class="mc">DUE TODAY</span></div></div><span class="acts"><span class="ib p">Action</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc done">&#10003;</span><div><div class="tt" style="text-decoration:line-through;color:#7a8878">Reply to Curtis Vane</div><div class="meta"><span class="mc">CLEARED 14:02</span></div></div><span class="acts"><span class="ib">Undo</span></span></div>
+</div>
+<div class="grp" style="background:#fbf8f2;border-style:dashed;border-color:#e2d6c4"><h2>Suggested for today<span class="gc">THE MOST PRESSING OF THE 41 REMAINING</span></h2>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Send your partial to Daniel O&rsquo;Rourke</div><div class="meta"><span class="mc" style="border-color:#eecfc2;color:#8a4a36">AGENT WAITING</span><span class="mc">OLDEST UNANSWERED REQUEST</span></div></div><span class="acts"><span class="ib">&#65291; Add</span><span class="ib">&#8942;</span></span></div>
+<div class="row"><span class="cc"></span><div><div class="tt" style="">Close Penhallow Literary</div><div class="meta"><span class="mc">STALE 873 DAYS &middot; ABOUT A MINUTE</span></div></div><span class="acts"><span class="ib">&#65291; Add</span><span class="ib">&#8942;</span></span></div>
+</div></div></div></div></div><div class="lbl">3 &middot; THE BOARD, REBUILT ON TRUE STATES <em>&mdash; To do &middot; Today &middot; Snoozed &middot; Done: every column is a state the rest of the app already shows and edits. The due-today task has arrived in Today by itself (the surfacing rule); the drop zones say what dropping DOES; Done clears at midnight into the log.</em></div><div class="desk"><div class="col mini">
+<div class="colhead"><span class="wm">ScriptAlly</span><span class="tog">&#8676;</span></div>
+<div class="nav">
+<div class="item"><span class="ico">&#8962;</span><span class="lb">Dashboard</span></div>
+<div class="sec">QUERYING</div>
+<div class="item"><span class="ico">&#9993;</span><span class="lb">Queries Hub</span><span class="ct">16</span></div>
+<div class="item parent on"><span class="ico">&#10003;</span><span class="lb">To-do</span><span class="ct">44</span><span class="dot"></span></div>
+<div class="sec">AGENTS</div>
+<div class="item"><span class="ico">&#9823;</span><span class="lb">Contact list</span></div>
+<div class="item"><span class="ico">&#9906;</span><span class="lb">Discover</span></div>
+<div class="sec">MANUSCRIPTS</div>
+<div class="item"><span class="ico">&#9639;</span><span class="lb">Your manuscripts</span></div>
+<div class="item"><span class="ico">&#9635;</span><span class="lb">Submission packages</span></div>
+</div>
+<div class="colfoot">
+<div class="plan">Free plan &middot; <b>Upgrade</b></div>
+<div class="urow"><span class="avi">ML</span><span style="font-size:12px;font-weight:600">Michael Li</span><span style="margin-left:auto;color:#b3a394;font-size:11px">&#9662;</span></div>
+</div></div><div class="cap"><div class="wbar"><span class="crumb">QUERYING / <b>TO-DO</b></span>
+<span class="pal">&#9906; Search or jump to&hellip;<span class="kbd">&#8984;K</span></span></div><div class="inner"><div class="pside">
+<div class="pk2">TASKS</div><div class="pi on"><span class="ic2">&#187;</span>To-do list<span class="n2">44</span></div><div class="pi"><span class="ic2">&#9788;</span>Today<span class="n2">5</span></div><div class="pi"><span class="ic2">&#9639;</span>Calendar</div><div class="pi"><span class="ic2">&#9998;</span>Noteboard<span class="n2">6</span></div>
+<div class="pk2">LISTS</div>
+<div class="pi"><span class="sw2" style="background:#e8a68e"></span>Urgent<span class="n2">3</span></div>
+<div class="pi"><span class="sw2" style="background:#d9c49a"></span>Housekeeping<span class="n2">41</span></div>
+<div class="pi"><span class="sw2" style="background:#a8bca4"></span>Your tasks<span class="n2">2</span></div>
+<div class="pi"><span class="sw2" style="background:#e0c878"></span>Notes to self<span class="n2">6</span></div>
+<div class="pk2">TAGS</div>
+<div class="ptags"><span class="ptg" style="background:#f6e3db;color:#8a4a36">#queryletter</span>
+<span class="ptg" style="background:#e9ede6;color:#4a5f48">#synopsis</span>
+<span class="ptg" style="background:#f4ecd4;color:#7a6030">#ideas</span>
+<span class="ptg" style="background:#fff;border:1px dashed #d9cbb8;color:#a2937f">&#65291; Add</span></div>
+<div style="flex:1"></div>
+<div class="pi"><span class="ic2">&#9881;</span>Task settings</div>
+</div><div class="pbody">
+<div class="ph"><h1>To-do list</h1><div class="sub">Four columns, four states the whole app already agrees on.</div></div>
+<div class="tools">
+<span class="tsrch">&#9906; Search your list&hellip;</span>
+<span class="vtg"><span class="vc on">&#9776;</span><span class="vc">&#9638;</span></span>
+<span class="pkbtn">&#65291; New</span></div>
+<div class="kb">
+<div class="kcol"><div class="kh"><b>To do</b><span class="n">37</span></div>
+<div class="kc u"><div class="b"><i>&#9733; OFFER</i><span class="w">19 JUL</span></div><div class="in"><h4>Tom Ellery has made an offer</h4><div class="ms">Murphy&rsquo;s Day Out</div></div></div>
+<div class="kc u"><div class="b"><i>AGENT WAITING</i><span class="w">12 JUL</span></div><div class="in"><h4>Send your full to Marsh</h4><div class="ms">The Marsh Agency</div></div></div>
+<div class="kc h"><div class="b"><i>MATERIALS</i><span class="w">0/16</span></div><div class="in"><h4>Materials sweep</h4><div class="ms">16 agents &middot; batch</div></div></div>
+<div class="more2" style="text-align:center">+ 34 MORE</div></div>
+<div class="kcol"><div class="kh"><b>Today</b><span class="n">3 &middot; 2 DONE</span></div>
+<div class="dz">DROP TO ADD TO TODAY&rsquo;S LIST</div>
+<div class="kc u"><div class="b"><i>AGENT WAITING</i><span class="w">15 JUL</span></div><div class="in"><h4>Send your partial to O&rsquo;Rourke</h4><div class="ms">Needs the synopsis</div></div></div>
+<div class="kc t"><div class="b"><i>&#10003; YOUR TASK</i><span class="w">DUE TODAY</span></div><div class="in"><h4>Resubmit your R&amp;R to Sophie Dunn</h4><div class="ms">Arrived here itself &mdash; due today</div></div></div></div>
+<div class="kcol"><div class="kh"><b>Snoozed</b><span class="n">1</span></div>
+<div class="dz">DROP TO CHOOSE A RETURN DATE</div>
+<div class="kc h"><div class="b"><i>STALE &middot; &#128340;</i><span class="w">BACK FRI</span></div><div class="in"><h4>Sophie Dunn silent</h4><div class="ms">Snoozed until 8 Aug</div></div></div></div>
+<div class="kcol" style="background:#f0f2ef;border-color:#dde2db"><div class="kh"><b>Done</b><span class="n">3 TODAY</span></div>
+<div class="kc t"><div class="b"><i>&#10003; DONE</i><span class="w">14:02</span></div><div class="in"><h4>Reply to Curtis Vane</h4><div class="ms"></div></div></div>
+<div class="kc t"><div class="b"><i>&#10003; DONE</i><span class="w">09:15</span></div><div class="in"><h4>Nudge sent to S. Dunn</h4><div class="ms"></div></div></div>
+<div class="more2" style="text-align:center">CLEARS AT MIDNIGHT &middot; KEPT IN THE LOG</div></div>
+</div>
+<div style="font-size:10px;color:#8a7a6c;margin-top:10px;line-height:1.6">Dragging is the same act as the buttons: into <b>Today</b> = &#65291;Today anywhere; into <b>Snoozed</b> = the snooze popover (it leaves with a date or not at all); into <b>Done</b> = the tick, undo toast and all. Dragging out reverses each. <b>Notes never appear here</b> &mdash; the board holds actionable work; notes live on the Noteboard.</div>
+</div></div></div></div><div class="lbl">4 &middot; THE CALENDAR &mdash; SEVEN COLUMNS IN THE SAME ROOM <em>&mdash; about 128px per day. Enough for two or three pips and a count; anything busier folds into &ldquo;+2 MORE&rdquo;. Legible, but it is the page with the least headroom &mdash; see the note below the board.</em></div><div class="desk"><div class="col mini">
+<div class="colhead"><span class="wm">ScriptAlly</span><span class="tog">&#8676;</span></div>
+<div class="nav">
+<div class="item"><span class="ico">&#8962;</span><span class="lb">Dashboard</span></div>
+<div class="sec">QUERYING</div>
+<div class="item"><span class="ico">&#9993;</span><span class="lb">Queries Hub</span><span class="ct">16</span></div>
+<div class="item parent on"><span class="ico">&#10003;</span><span class="lb">To-do</span><span class="ct">44</span><span class="dot"></span></div>
+<div class="sec">AGENTS</div>
+<div class="item"><span class="ico">&#9823;</span><span class="lb">Contact list</span></div>
+<div class="item"><span class="ico">&#9906;</span><span class="lb">Discover</span></div>
+<div class="sec">MANUSCRIPTS</div>
+<div class="item"><span class="ico">&#9639;</span><span class="lb">Your manuscripts</span></div>
+<div class="item"><span class="ico">&#9635;</span><span class="lb">Submission packages</span></div>
+</div>
+<div class="colfoot">
+<div class="plan">Free plan &middot; <b>Upgrade</b></div>
+<div class="urow"><span class="avi">ML</span><span style="font-size:12px;font-weight:600">Michael Li</span><span style="margin-left:auto;color:#b3a394;font-size:11px">&#9662;</span></div>
+</div></div><div class="cap"><div class="wbar"><span class="crumb">QUERYING / <b>TO-DO / <b>CALENDAR</b></b></span>
+<span class="pal">&#9906; Search or jump to&hellip;<span class="kbd">&#8984;K</span></span></div><div class="inner"><div class="pside">
+<div class="pk2">TASKS</div><div class="pi"><span class="ic2">&#187;</span>To-do list<span class="n2">44</span></div><div class="pi"><span class="ic2">&#9788;</span>Today<span class="n2">5</span></div><div class="pi on"><span class="ic2">&#9639;</span>Calendar</div><div class="pi"><span class="ic2">&#9998;</span>Noteboard<span class="n2">6</span></div>
+<div class="pk2">LISTS</div>
+<div class="pi"><span class="sw2" style="background:#e8a68e"></span>Urgent<span class="n2">3</span></div>
+<div class="pi"><span class="sw2" style="background:#d9c49a"></span>Housekeeping<span class="n2">41</span></div>
+<div class="pi"><span class="sw2" style="background:#a8bca4"></span>Your tasks<span class="n2">2</span></div>
+<div class="pi"><span class="sw2" style="background:#e0c878"></span>Notes to self<span class="n2">6</span></div>
+<div class="pk2">TAGS</div>
+<div class="ptags"><span class="ptg" style="background:#f6e3db;color:#8a4a36">#queryletter</span>
+<span class="ptg" style="background:#e9ede6;color:#4a5f48">#synopsis</span>
+<span class="ptg" style="background:#f4ecd4;color:#7a6030">#ideas</span>
+<span class="ptg" style="background:#fff;border:1px dashed #d9cbb8;color:#a2937f">&#65291; Add</span></div>
+<div style="flex:1"></div>
+<div class="pi"><span class="ic2">&#9881;</span>Task settings</div>
+</div><div class="pbody">
+<div class="ph"><h1>Calendar</h1><div class="sub">August 2026 &mdash; every item on the day it needs you.</div></div>
+<div class="tools"><span class="ghbtn">&#9664;</span><span class="ghbtn">Today</span><span class="ghbtn">&#9654;</span><span class="ghbtn">Month &#9662;</span>
+<span class="tsrch">&#9906; Search your list&hellip;</span><span class="pkbtn">&#65291; New</span></div>
+<div class="calg"><div class="dow">MON</div><div class="dow">TUE</div><div class="dow">WED</div><div class="dow">THU</div><div class="dow">FRI</div><div class="dow">SAT</div><div class="dow">SUN</div>
+<div class="cell past"><div class="d">27<span class="c2"></span></div></div><div class="cell past"><div class="d">28<span class="c2"></span></div></div><div class="cell past"><div class="d">29<span class="c2"></span></div></div><div class="cell past"><div class="d">30<span class="c2"></span></div></div><div class="cell past"><div class="d">31<span class="c2"></span></div></div><div class="cell past"><div class="d">1<span class="c2"></span></div></div><div class="cell past"><div class="d">2<span class="c2"></span></div></div>
+<div class="cell past"><div class="d">3<span class="c2">1</span></div><span class="pip s">Rolled forward</span></div>
+<div class="cell today"><div class="d">4<span class="c2">5</span></div><span class="pip u">Ellery &mdash; offer</span><span class="pip u">Full &rarr; Marsh</span><span class="pip t">R&amp;R &rarr; Dunn</span><div class="more2">+2 MORE</div></div>
+<div class="cell "><div class="d">5<span class="c2">1</span></div><span class="pip u">Partial &rarr; O&rsquo;Rourke</span></div>
+<div class="cell "><div class="d">6<span class="c2"></span></div></div>
+<div class="cell "><div class="d">7<span class="c2">2</span></div><span class="pip s">Dunn &mdash; back</span><span class="pip t">Redraft ch. 1</span></div>
+<div class="cell "><div class="d">8<span class="c2"></span></div></div><div class="cell "><div class="d">9<span class="c2"></span></div></div>
+<div class="cell "><div class="d">10<span class="c2">1</span></div><span class="pip t">Package check</span></div><div class="cell "><div class="d">11<span class="c2"></span></div></div>
+<div class="cell "><div class="d">12<span class="c2">1</span></div><span class="pip n">Comp titles</span></div>
+<div class="cell "><div class="d">13<span class="c2"></span></div></div><div class="cell "><div class="d">14<span class="c2"></span></div></div><div class="cell "><div class="d">15<span class="c2"></span></div></div><div class="cell "><div class="d">16<span class="c2"></span></div></div>
+</div></div></div></div></div></body></html>
