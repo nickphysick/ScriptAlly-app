@@ -544,6 +544,13 @@ service cloud.firestore {
         allow get, delete: if isOwner(userId) && isValidId(queryId);
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId);
+        // 'status' stays in this update allowlist DELIBERATELY (Tier 3 · Phase 5): recomputeQuery
+        // — the derivation engine, and status's only legitimate writer after addQuery's create
+        // seed — writes via updateDoc, an UPDATE at this layer, and affectedKeys() carries
+        // 'status' exactly when a transition happens, so removing it would deny every real
+        // transition. The door this leaves open (a client update writing a non-derived status)
+        // is closed at the source instead: queryStatusWriters.test.ts locks the known query
+        // mutation paths to zero bare status write keys.
         allow update: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
             'manuscriptId', 'dateSent',
