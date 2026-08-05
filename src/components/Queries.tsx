@@ -37,6 +37,7 @@ import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
+import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib/agentDisplay";
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
@@ -610,13 +611,14 @@ export const Queries: React.FC<{
     });
   };
 
-  // Toast state for Undo
+  // Toast state for Undo. responseStyle is the REAL response union (or null for the
+  // no-specific-type path) — typed so a phantom status string cannot compile (Tier 3 · Phase 1).
   const [undoToast, setUndoToast] = useState<{
     id: string;
     queryId: string;
     agentName: string;
     manuscriptTitle: string;
-    responseStyle: string;
+    responseStyle: ResponseStyle | null;
   } | null>(null);
 
   // Second toast state for status feedback of Undo
@@ -694,7 +696,7 @@ export const Queries: React.FC<{
     queryId: string;
     agentName: string;
     manuscriptTitle: string;
-    responseStyle: string;
+    responseStyle: ResponseStyle | null;
   }) => {
     // Generate unique ID for toast to prevent any stale timeout collision
     const toastId = Math.random().toString(36).substr(2, 9);
@@ -777,16 +779,6 @@ export const Queries: React.FC<{
         return next;
       });
     }
-  };
-
-  const getToastTitle = (resType: string) => {
-    if (resType === "partial" || resType === "partialRequested") return "Partial request recorded";
-    if (resType === "full" || resType === "fullRequested") return "Full request recorded";
-    if (resType === "rr" || resType === "reviseAndResubmit") return "R&R recorded";
-    if (resType === "offer") return "Offer recorded";
-    if (resType === "rejected") return "Rejection recorded";
-    if (resType === "close" || resType === "noResponse") return "Query closed";
-    return "Response recorded";
   };
 
   const [editingJournalId, setEditingJournalId] = useState<string | null>(null);
@@ -3543,8 +3535,11 @@ export const Queries: React.FC<{
         manuscript={{ title: activeMs?.title || "" }}
         initialResponseType={richInitialType}
         initialDraft={richInitialDraft}
-        onSuccessToast={(msg) => {
-          triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: msg });
+        onSuccessToast={() => {
+          // The focus form reports a prose message the toast never rendered (the title comes
+          // from responseToastTitle, the body from agent/manuscript) — null = the honest
+          // generic title, and the union type forbids smuggling prose in as a status.
+          triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: null });
         }}
       />
     )}
@@ -3623,7 +3618,7 @@ export const Queries: React.FC<{
             {/* Center Segment */}
             <div className="flex-1 flex flex-col text-left">
               <span className="text-[12px] font-medium text-[#F8F5F0] leading-tight">
-                {getToastTitle(undoToast.responseStyle)}
+                {responseToastTitle(undoToast.responseStyle)}
               </span>
               <span className="text-[11px] text-[rgba(248,245,240,0.5)] leading-tight mt-0.5">
                 {undoToast.agentName} · {undoToast.manuscriptTitle}

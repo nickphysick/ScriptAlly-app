@@ -79,7 +79,9 @@ export interface RecordResponseResult {
     queryId: string;
     agentName: string;
     manuscriptTitle: string;
-    responseStyle: string;
+    /** Exactly data.responseType — typed on the union so toast titles can't be keyed on
+     *  phantom statuses (Tier 3 · Phase 1). */
+    responseStyle: RecordResponseData["responseType"];
   };
   /** Reverts every write this call performed. Safe to call once. */
   undo: () => Promise<void>;
