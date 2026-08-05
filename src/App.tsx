@@ -44,8 +44,6 @@ import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
-// TEMP (Prompt 2): email-import dev preview route — remove with the Nav dropdown item next prompt.
-import { EmailImportDevPage } from "./components/emailImport/EmailImportDevPage";
 // TEMP: agents-screen B-redesign dev preview — remove after visual sign-off.
 import { SmartImportReview } from "./components/onboarding/SmartImportReview";
 import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES } from "./components/onboarding/SmartImportReviewFixture";
@@ -333,7 +331,6 @@ function pathFor(tab: string, subPageName?: string): string {
     case "import": return "/import";
     case "help": return "/help";
     case "account": return "/account";
-    case "email-import-dev": return "/email-import-dev"; // TEMP dev tab — unreferenced, kept guarded
     default: return "/dashboard";
   }
 }
@@ -650,10 +647,6 @@ function AppContent() {
           <StagePage active>
             <div className="sv2-focuscol"><HelpCentre /></div>
           </StagePage>
-        )}
-        {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
-        {routeKey === "email-import-dev" && (
-          <StagePage active><EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} /></StagePage>
         )}
         {routeKey === "import" && (
           <StagePage active contentVariant="read"><ImportCsv onNavigate={handleNavigate} /></StagePage>

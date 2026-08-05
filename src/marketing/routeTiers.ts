@@ -18,7 +18,6 @@ export const WORKSPACE_PATHS = new Set([
   "/dashboard", "/queries", "/todo", "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
   "/account", "/plans", "/help",
-  "/email-import-dev",
 ]);
 
 export type RouteTier = "marketing" | "workspace" | null;
