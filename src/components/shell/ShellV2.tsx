@@ -47,7 +47,12 @@ const Mark: React.FC = () => (
 /* (THE RAIL, ITS FLYOUTS AND THE SIDE PANEL ARE RETIRED — app-shell pack, Phase 2: one
    expanding column replaced them. Flyouts existed only because the column was hard to open;
    clicking a section while collapsed now expands and opens in one move, so the second surface
-   that had to agree with the panel about everything is gone. See ShellColumn.tsx.) */
+   that had to agree with the panel about everything is gone.
+
+   ⚠️ AND THAT COLUMN IS GONE TOO (shell-rebuild pack, Phase 3): the DOUBLE-DECKER superseded it,
+   and FLYOUTS CAME BACK WITH IT — a 52px rail has nowhere to put an accordion, so the collapsed
+   state needs a second surface again. See WorkspaceShell.tsx. What survives in THIS file is the
+   bar's <768px variant, which is the phone's only bar. */
 
 /* ── top bar (inside the content capsule) ─────────────────────────────────── */
 

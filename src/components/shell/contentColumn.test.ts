@@ -36,18 +36,22 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
     expect(shell).toContain("contentVariant?: \"work\" | \"read\"");
     expect(shell).toContain("sa-content-col sa-content-col--${contentVariant}");
     expect(shell.includes('background: "var(--desk)"')).toBe(false);
-    expect(shell).toContain('background: "var(--shell-canvas)"'); // painted once, on the stage
+    /* ⚠️ --shell-canvas → #ffffff (shell-rebuild Phase 3). The old canvas was the third capsule
+       of a stepped cream trio; the rebuild's content capsule is white in both mockups
+       (`--work:#ffffff`). Still painted ONCE, on the stage — that half of the rule is unchanged,
+       and it is the half that matters: no page sets a bespoke ground. */
+    expect(shell).toContain('background: "#ffffff"');
   });
 
-  it("nav chrome is OUTSIDE the cap — the ONE COLUMN flanks the content column, never wrapped", () => {
-    // App-shell pack Phase 2: ShellRail + ShellSide folded into ONE ShellColumn, a sibling of
-    // the content column — so no nav chrome can inherit the max-width. The cap wrapper lives
+  it("nav chrome is OUTSIDE the cap — the shell column flanks the content column, never wrapped", () => {
+    // Shell-rebuild Phase 3: the one expanding column became the DOUBLE-DECKER, still a sibling
+    // of the content column — so no nav chrome can inherit the max-width. The cap wrapper lives
     // only inside StagePage.
     expect(shell.includes("<NavDrawer")).toBe(false); // the drawer is gone
-    expect(shell).toContain("<ShellColumn");
-    expect(shell).not.toContain("<ShellRail"); // folded into the column
+    expect(shell).toContain("<WorkspaceShell");
+    expect(shell).not.toContain("<ShellColumn"); // superseded by the double-decker
+    expect(shell).not.toContain("<ShellRail");
     expect(shell).not.toContain("<ShellSide");
-    expect(shell).toContain("flex: 1, minWidth: 0, minHeight: 0, display: \"flex\"");
     expect(shell.slice(0, shell.indexOf("StagePage")).includes("sa-content-col")).toBe(false);
   });
 });

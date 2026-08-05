@@ -72,7 +72,10 @@ const BAKED: Record<string, string> = {
  * green suite and a clean typecheck. A missing definition is silent in CSS; this makes it loud.
  */
 describe("no shell rule reads a token that does not exist", () => {
-  const shellFiles = ["./shellV2.css", "./shellColumn.css", "./accountMenu.css", "./searchPalette.css", "./topNav.css", "./pageHeader.css"];
+  // shellColumn.css went with the one-expanding-column shell it styled (shell-rebuild Phase 3);
+  // workspaceShell.css and primitives.css are the surfaces that replaced it, and they are held
+  // to the same no-raw-hex rule.
+  const shellFiles = ["./shellV2.css", "./workspaceShell.css", "./primitives.css", "./accountMenu.css", "./searchPalette.css", "./topNav.css", "./pageHeader.css"];
   it("every var(--x) in the shell stylesheets resolves to a definition", () => {
     const defined = new Set<string>();
     for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);
@@ -341,23 +344,28 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
   });
 
-  it("THE BRAND APPEARS ONCE — the column's masthead carries it, and it is the route home", () => {
-    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
-    expect(col.match(/<ScriptAllyLogo/g), "one mount in the column").toHaveLength(1);
-    expect(col).toContain('onNavigatePath("/dashboard")'); // there is no Dashboard nav item
-    const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    // The panel that used to hold the brand on working pages is GONE; the column's masthead is
-    // the one mount, and it doubles as the route home (hence no Dashboard nav item).
-    expect(v2).not.toContain("sv2-pwm"); // the retired panel's brand slot
-    expect(rule(".sv2-mark")).toContain("width: 27px"); // the rail's plane glyph is unchanged
+  /* ⚠️ REWRITTEN, NOT DELETED (shell-rebuild pack, Phase 3). The brand still appears ONCE in the
+     workspace shell, but it is no longer the PNG wordmark: both rebuild mockups draw a Playfair
+     "S" glyph on the rail beside a Playfair "ScriptAlly" — type, not artwork.
+     ⚠️ THAT RETIRES THE 68.4%-INK PROBLEM RATHER THAN SOLVING IT. The asset's letterforms span
+     only 513px of its 750px height, so `heightPx` never meant apparent size; a text lockup has
+     no dead margin to compensate for. The artwork is not cropped — it is simply not used here. */
+  it("THE BRAND APPEARS ONCE in the workspace shell — as TYPE now, not the artwork", () => {
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    expect(ws).not.toContain("ScriptAllyLogo");
+    expect(ws.match(/ws-glyph/g), "one brand glyph").toHaveLength(1);
+    expect(ws).toContain("ScriptAlly");
+    const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
+    expect(wsCss).toMatch(/\.ws-hrowA \.ws-glyph \{[^}]*Playfair/s);
   });
 });
 
 /**
- * ⚠️ THE SLIDING RAIL INDICATOR IS RETIRED with the rail (app-shell pack, Phase 2). Its job —
- * one floating marker, route-driven, silent on mount — passed to the COLUMN'S SELECTOR, whose
- * geometry is locked in lib/shellColumn.test.ts and whose structure (including the first-paint
- * mute, which jsdom cannot see) is locked in shellColumn.test.tsx.
+ * ⚠️ THE SLIDING RAIL INDICATOR IS RETIRED, and so is the floating SELECTOR that inherited its
+ * job (shell-rebuild pack, Phase 3). The double-decker marks the active row with two fills
+ * instead of one travelling marker — a translucent square on the rail cell, a parchment pill on
+ * the panel label — so there is nothing left to slide. The grammar is locked in
+ * lib/workspaceShell.test.ts and components/shell/workspaceShell.test.tsx.
  */
 
 /**

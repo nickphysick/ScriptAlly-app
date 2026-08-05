@@ -12,6 +12,7 @@ import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
 import { NAV_MENUS, navPanels } from "../../lib/topNav";
 import { WORKSPACE_PATHS } from "../../marketing/routeTiers";
+import { TOPNAV_SHELL_PATHS, WORKSPACE_SHELL_PATHS } from "../../lib/shellForRoute";
 
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
@@ -70,12 +71,23 @@ describe("⚠️ the shell renders what EXISTS, never what is planned", () => {
     expect(am).toContain("Help centre");
   });
 
-  it("the RAIL and the MENUS agree — one rule, both surfaces", () => {
-    const col = readFileSync(resolve(__dirname, "../../lib/shellColumn.ts"), "utf8");
-    for (const gone of ["Archive", "Query letters", "Synopses", "Opening samples"]) {
-      expect(col, gone).not.toContain(`label: "${gone}"`);
+  /* ⚠️ REWRITTEN to assert the RULE rather than identical membership (shell-rebuild Phase 3).
+     The two surfaces no longer carry the same list — the workspace nav follows the pack's IA,
+     which does not place /import, while the mega menus still offer it — and asserting sameness
+     would force one of them to misreport the pack. What must hold on BOTH is that nothing points
+     at a route that does not exist, so that is what this proves now, by walking every path. */
+  it("NEITHER surface points at a route that does not exist", () => {
+    const nav = readFileSync(resolve(__dirname, "../../lib/workspaceNav.ts"), "utf8");
+    for (const gone of ["Archive", "Query letters", "Synopses", "Opening samples", "Documents", "Learn"]) {
+      expect(nav, gone).not.toContain(`label: "${gone}"`);
     }
-    expect(col).toContain('path: "/import"'); // /import exists, so it is in both
+    const real = new Set([...WORKSPACE_SHELL_PATHS, ...TOPNAV_SHELL_PATHS]);
+    const paths = NAV_MENUS
+      .flatMap((m) => m.columns.flatMap((c) => c.items))
+      .filter((i) => i.run.kind === "path")
+      .map((i) => (i.run as { kind: "path"; path: string }).path);
+    expect(paths.length, "the menus must carry paths for this to mean anything").toBeGreaterThan(0);
+    for (const p of paths) expect([...real], p).toContain(p.split("?")[0]);
   });
 });
 

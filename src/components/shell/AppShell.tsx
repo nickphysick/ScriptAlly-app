@@ -19,15 +19,19 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { HelpCircle, ListChecks, LogOut, Package, Settings, Upload } from "lucide-react";
+import {
+  Book, HelpCircle, LayoutGrid, ListChecks, LogOut, Package, Send, Settings, Upload, Users,
+} from "lucide-react";
 import { parchment, PAGE_GRAIN } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
-import { ShellColumn } from "./ShellColumn";
+import { WorkspaceShell } from "./WorkspaceShell";
+import { workspaceSections } from "../../lib/workspaceNav";
+import { attentionCount } from "../../lib/queriesFilterParam";
 import { AccountMenu } from "./AccountMenu";
 import { SearchPalette } from "./SearchPalette";
 import { buildCorpus, rankItems } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
-import { ShellSidebarBody, ShellScope } from "./ShellSidebar";
+import { ShellSidebarBody, ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
 import { MobileSheet } from "./MobileSheet";
@@ -127,10 +131,34 @@ interface AppShellProps {
 
 const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" } as const;
 
+/** ⚠️ A PARALLEL SURFACE TO workspaceSections, and not type-linked to it: a section without an
+ *  icon here renders an empty cell rather than crashing, so the failure is quiet. Add both, or
+ *  the rail simply loses a glyph with nothing to point at. */
+const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
+  dashboard: <LayoutGrid aria-hidden="true" />,
+  queries: <Send aria-hidden="true" />,
+  agents: <Users aria-hidden="true" />,
+  materials: <Book aria-hidden="true" />,
+  todo: <ListChecks aria-hidden="true" />,
+};
+
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
   const { agents, queries, manuscripts, currentUser, logout } = useScriptAllyDb();
+
+  /* THE NAV'S TWO LIVE FIGURES. `attention` is the past-reply-window set — the SAME derivation
+     the hub's filter and the top-nav mega panel read, never a second count. `todo` is the
+     board's own total, through the hook the old panel already used. */
+  const navCounts = useShellNavCounts();
+  const sections = useMemo(
+    () => workspaceSections({
+      attention: attentionCount(queries, Date.now()),
+      todo: navCounts.todo ?? 0,
+    }),
+    [queries, navCounts.todo],
+  );
+
   const stageRef = useRef<HTMLDivElement>(null);
   // Per-route scroll memory: saved continuously while scrolling, restored on route change
   // (top for a first visit). Lives on the stage element — the window never scrolls now.
@@ -333,7 +361,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
   return (
     <div
-      className={`${THEME_CLASS[theme]} sv2-app${panelCollapsed ? " sv2-collapsed" : ""}`}
+      className={`${THEME_CLASS[theme]} sv2-app ws-host${panelCollapsed ? " sv2-collapsed" : ""}`}
       data-sa-ground=""
       // THE DESK — the sage-grey field the capsules float on (app-shell pack, Baked 2). The
       // grain and the light pool are two pointer-events:none layers drawn by .sv2-app::before
@@ -343,53 +371,50 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       // 100vh → 100dvh below md; padding + gap arrive with the class at ≥768px.
       style={{ backgroundColor: "var(--shell-desk)", backgroundImage: PAGE_GRAIN }}
     >
-      {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
-          only (class + media query in shellV2.css — never inline display). The interim layers
-          (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
-      {/* THE ONE COLUMN (app-shell pack, Phase 2) — it replaced the rail AND the side panel,
-          which were two components with their own paddings; that is why alignment kept
-          drifting. Clicking a section while collapsed expands and opens in one move, which is
-          why there are no hover flyouts. */}
-      <ShellColumn
-        collapsed={panelCollapsed}
-        onSetCollapsed={setPanel}
+      {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
+          desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
+          a nav change never means editing the shell. */}
+      <WorkspaceShell
+        sections={sections}
+        icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}
-        onNavigate={onNavigate}
-        onOpenAccount={() => setYouOpen(true)}
-      />
-      <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        {/* (The slim mobile Nav is RETIRED — Mobile Pass 1. The v2 top bar below renders the <md
-            variant itself: wordmark-or-page-title · search icon · avatar, or back/Done on a
-            pushed detail. One bar, two breakpoint states — never a parallel bar.) */}
-
-        {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar
-          onNavigate={onNavigate}
-          scope={<ShellScope onNavigate={onNavigate} />}
-          onOpenSearch={openPalette}
-          searchOpenerRef={searchOpenerRef}
-          onTuck={togglePanel}
-          onOpenAccount={() => setAccountOpen((v) => !v)}
-          accountMenu={
-            <AccountMenu
-              open={accountOpen}
-              onClose={() => setAccountOpen(false)}
-              name={currentUser?.name ?? ""}
-              email={currentUser?.email}
-              plan={currentUser?.plan}
-              onNavigatePath={goPath}
-              onSignOut={logout}
-            />
-          }
-          mobileDetail={activeMobileDetail}
-          onOpenYou={() => setYouOpen(true)}
-        />
+        onOpenSearch={openPalette}
+        onOpenHelp={() => goPath("/help")}
+        onOpenAccount={() => setAccountOpen((v) => !v)}
+        onUpgrade={() => goPath("/plans")}
+        accountMenu={
+          <AccountMenu
+            open={accountOpen}
+            onClose={() => setAccountOpen(false)}
+            name={currentUser?.name ?? ""}
+            email={currentUser?.email}
+            plan={currentUser?.plan}
+            onNavigatePath={goPath}
+            onSignOut={logout}
+          />
+        }
+      >
+        {/* ⚠️ THE MOBILE BAR IS UNTOUCHED AND STILL MOUNTED. Mobile Pass 1 is live and locked,
+            and both rebuild mockups are desktop-only — so the new chrome is a ≥768px
+            replacement and this keeps rendering below it. Removing it would take the phone's
+            only bar with it. */}
+        <div className="ws-mobilebar">
+          <ShellTopBar
+            onNavigate={onNavigate}
+            scope={<ShellScope onNavigate={onNavigate} />}
+            onOpenSearch={openPalette}
+            searchOpenerRef={searchOpenerRef}
+            onTuck={togglePanel}
+            onOpenAccount={() => setAccountOpen((v) => !v)}
+            mobileDetail={activeMobileDetail}
+            onOpenYou={() => setYouOpen(true)}
+          />
+        </div>
 
         {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
-            foot fade. The wrapper is new; the stage's id, ref, scroll memory and styles are
-            untouched, because everything from stageScroll.ts to per-route scroll restoration
-            addresses it directly. (sv2-stagepad = the <md clearance for the floating tab bar,
-            replacing the old pb-[76px] maths; zero at md+.) */}
+            foot fade. The stage's id, ref, scroll memory and styles are untouched, because
+            everything from stageScroll.ts to per-route scroll restoration addresses it
+            directly. (sv2-stagepad = the <md clearance for the floating tab bar.) */}
         <div className="sv2-pgwrap">
           <div
             id={STAGE_SCROLL_ID}
@@ -400,10 +425,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
               scrollMemo.current[routeKey] = el.scrollTop;
               updateFade();
             }}
-            // The ONE canvas (scheme 1, "Raised light"): painted here, inherited by every page —
-            // no page sets a bespoke ground, and the canvas stays lighter than the sidebar (the
-            // depth law, locked in shellV2Tokens.test.ts).
-            style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "var(--shell-canvas)" }}
+            style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "#ffffff" }}
           >
             <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
           </div>
@@ -411,7 +433,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
               reads as a rendering fault, so it is a state, not decoration. */}
           <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
         </div>
-      </div>
+      </WorkspaceShell>
 
       <SearchPalette
         open={paletteOpen}

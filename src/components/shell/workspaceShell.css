@@ -344,7 +344,33 @@
 /* Baked 12 — search lives HERE, next to help. Never in the panel. */
 .ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 
-.ws-work { flex: 1; min-height: 0; overflow: auto; background: #ffffff; }
+/* ⚠️ THE WORK AREA DOES NOT SCROLL — THE STAGE INSIDE IT DOES. `#app-stage-scroll` is the app's
+   scroll container, and everything from stageScroll.ts to per-route scroll restoration addresses
+   it directly. An `overflow:auto` here would make a second scroller wrapping the first: the page
+   would scroll, the stage would not, and every remembered scroll position would silently stop
+   working. */
+.ws-work { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #ffffff; }
+
+/* ══ BELOW md — MOBILE PASS 1 IS LEFT EXACTLY AS IT IS ══
+   ⚠️ BOTH REBUILD MOCKUPS ARE DESKTOP-ONLY, and the phone already has a shipped, locked chrome
+   (the sheet chassis, the floating tab capsule and the one bar's <md variant). This shell is
+   therefore a ≥768px replacement: below it, the column and the new bar are hidden, the desk goes
+   flush and square, and the existing mobile bar renders in their place. Building a phone
+   treatment from mockups that do not contain one would be designing, not implementing. */
+@media (max-width: 767px) {
+  .ws-desk { padding: 0; }
+  .ws-cap { border-radius: 0; box-shadow: none; }
+  .ws-shell,
+  .ws-bar { display: none; }
+}
+.ws-mobilebar { display: block; flex: none; }
+@media (min-width: 768px) {
+  .ws-mobilebar { display: none; }
+}
+
+/* The workspace root owns no outer gap: `.ws-desk` is the desk, and it pads itself. Two paddings
+   would double the inset the moment either moved. */
+.sv2-app.ws-host { padding: 0; gap: 0; }
 
 /* ══ FOCUS + REDUCED MOTION (Baked 21) ══ */
 .ws-row:focus-visible .ws-cl,

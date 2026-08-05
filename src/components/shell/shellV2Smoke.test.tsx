@@ -1,8 +1,16 @@
 /**
  * ⚠️ THE RAIL, THE SIDE PANEL AND THEIR SIDEBAR BODY ARE GONE (app-shell pack, Phase 2) — one
  * expanding column replaced all three, and their blocks were deleted from this file with them
- * rather than left asserting components nothing mounts. The column's own locks live in
- * lib/shellColumn.test.ts (geometry) and shellColumn.test.tsx (structure).
+ * rather than left asserting components nothing mounts.
+ *
+ * ⚠️ AND THAT COLUMN IS NOW GONE TOO (shell-rebuild pack, Phase 3): the DOUBLE-DECKER superseded
+ * it, so every `ShellColumn.tsx` read below was repointed at WorkspaceShell or rewritten where
+ * the rule itself changed. Its locks live in lib/workspaceShell.test.ts (grammar) and
+ * workspaceShell.test.tsx (structure).
+ *
+ * ⚠️ ShellTopBar SURVIVES AS THE MOBILE BAR ONLY. Both rebuild mockups are desktop-only and
+ * Mobile Pass 1 is live, so the new bar is a ≥768px replacement and this one still renders below
+ * it. The bar assertions here therefore describe the PHONE's bar, not the desktop's.
  *
  * jsdom/static smoke render for the v2 shell chrome — structure and classes only (layout is a
  * browser check, per the pack's jsdom limits). The point: the chrome is auth-gated in the app,
@@ -40,13 +48,16 @@ const at = (path: string, node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
 
 describe("v2 shell — smoke renders", () => {
-  it("THE BRAND lives in the COLUMN's masthead now — the panel that used to hold it is gone", () => {
-    // Phase 2 folded the rail and the panel into one column, and the column's masthead carries
-    // the wordmark AND is the route home to the dashboard — which is why there is no Dashboard
-    // nav item. The bar's own brand/crumb split is settled in Phase 3.
-    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
-    expect(col).toContain("<ScriptAllyLogo heightPx={26} />");
-    expect(col).toContain('onNavigatePath("/dashboard")');
+  /* ⚠️ REWRITTEN (shell-rebuild Phase 3). The brand is TYPE now — a Playfair "S" on the rail
+     beside a Playfair wordmark — and Dashboard is a real nav row rather than a job the masthead
+     quietly did on the side. A masthead that doubled as the route home was an affordance nobody
+     could see; a row that says "Dashboard" says what it does. */
+  it("THE BRAND lives in the shell's head row — as type, and Dashboard is its own row", () => {
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    expect(ws).toContain("ws-glyph");
+    expect(ws).not.toContain("ScriptAllyLogo");
+    const nav = readFileSync(resolve(__dirname, "../../lib/workspaceNav.ts"), "utf8");
+    expect(nav).toContain('path: "/dashboard"');
     // the retired panel's brand slot and its Navigate label are gone from the source entirely
     const v2 = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
     expect(v2).not.toContain("sv2-pwm");
@@ -62,11 +73,10 @@ describe("v2 shell — smoke renders", () => {
       // it always rides the right-hand tools cluster, after the search
       expect(html.indexOf("sv2-searchopen"), path).toBeLessThan(html.indexOf("sv2-tbuser"));
     }
-    // ...and it ALSO renders at the COLUMN's foot. Approved duplication, asserted so it is not
-    // "tidied away" by someone who spots it later: the bar's copy survives the column
-    // collapsing, the column's carries the plan line.
-    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
-    expect(col).toContain("sc-fu");
+    // ...and it ALSO renders at the SHELL's foot (Baked 10), where it carries the plan line.
+    // Approved duplication, asserted so it is not "tidied away" by someone who spots it later.
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    expect(ws).toContain("ws-urow");
   });
 
   it("THE SEARCH IS AN OPENER — one search implementation, and the palette is it", () => {
@@ -85,10 +95,10 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — a text link, no row, no pill, no card", () => {
-    const col = readFileSync(resolve(__dirname, "./ShellColumn.tsx"), "utf8");
-    // the plan is stated as fact beside the name, and Upgrade is a plain slate link in that line
+    const col = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    // the plan is stated as fact beside the name, and Upgrade is a plain link in that line
     expect(col).toContain("planLine(currentUser?.plan)");
-    expect(col).toContain("sc-up");
+    expect(col).toContain("ws-up");
     expect(col).toContain("Upgrade");
     // Pro is a text link HERE and a card in the account menu. Nowhere else.
     expect(col).not.toContain("propill");

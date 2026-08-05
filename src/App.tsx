@@ -42,6 +42,7 @@ import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
+import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { TopNavShell } from "./components/shell/TopNavShell";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
@@ -600,6 +601,11 @@ function AppContent() {
   // Queries subpage-equivalent, read from the URL: ?q=<id> is deep-selection (Queries treats an
   // unrecognised subpage value as a query id, exactly as it did with the old activeSubPage).
   const queriesSub = params.get("q") ?? "Query database";
+  /* The shell's four Queries children are ONE hub under four filters (shell-rebuild pack,
+     Phase 3). Parsed here beside `?q=` because this is already where the hub's params are read;
+     an unknown value falls back to "all" rather than filtering to an empty list, which would
+     read as "you have no queries" — the worst lie this page could tell. */
+  const queriesStatus = parseStatusFilter(params.get(QUERIES_STATUS_PARAM));
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
@@ -636,6 +642,7 @@ function AppContent() {
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
         <StagePage active={routeKey === "queries"} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
+            statusFilter={queriesStatus}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
             routeActive={routeKey === "queries"} />
         </StagePage>

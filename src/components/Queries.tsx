@@ -32,6 +32,9 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
+import {
+  QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
+} from "../lib/queriesFilterParam";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
@@ -231,7 +234,9 @@ export const Queries: React.FC<{
   /** v4 P4 — true while /queries is the visible route. Drives the ROUTE-ENTRY load animation:
    *  pages stay mounted here, so a plain CSS mount animation would only ever run once. */
   routeActive?: boolean;
-}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false }) => {
+  /** The shell's Queries child, as `?status=`. Absent = the plain hub, filters untouched. */
+  statusFilter?: QueriesStatusFilter;
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter }) => {
   const {
     currentUser,
     manuscripts,
@@ -884,6 +889,28 @@ export const Queries: React.FC<{
   const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed live (no draft/Apply)
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
   const [needsOverdue, setNeedsOverdue] = useState(false);
+
+  /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
+     The shell's four Queries children are this same hub under different filters. The param is
+     APPLIED to the filter state the hub ALREADY models — it never becomes a fifth filter with
+     its own pipeline, because two filter models over one list is exactly how a nav entry and the
+     page it opens come to disagree.
+
+     ⚠️ IT ARRIVES AS A PROP, NOT FROM useLocation. Queries renders in the app's router but its
+     specs do not mount one; reaching for the router here would make every existing Queries spec
+     depend on a provider it has never needed. App.tsx already reads params for `?q=` — this
+     rides the same seam.
+
+     Re-running only when the PARAM changes is deliberate: navigating to a child sets the
+     filters, and any hand-adjustment you make afterwards survives, because the effect has
+     nothing new to say. */
+  useEffect(() => {
+    if (!statusFilter) return;
+    const next = filterStateFor(statusFilter);
+    setTurnFilter(next.turn);
+    setStatusSel(next.statusSel);
+    setNeedsOverdue(next.needsOverdue);
+  }, [statusFilter]);
   const [needsTasks, setNeedsTasks] = useState(false);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
@@ -1268,10 +1295,11 @@ export const Queries: React.FC<{
 
   // ── F12 filter pipeline (ref queries-hub-v14.html filter popover) ──
   const nowMs = Date.now();
-  /** Derived, never stored: still waiting on the agent with the reply expectation in the past. */
-  const isOverdueForReply = (q: Query): boolean =>
-    queryBucket(q.status as QueryStatus) === "waiting" &&
-    !!q.responseDeadline && new Date(q.responseDeadline).getTime() < nowMs;
+  /* ⚠️ THE OVERDUE PREDICATE MOVED TO lib/queriesFilterParam (shell-rebuild pack, Phase 3). It
+     was inline here; the shell's "Needs attention" count and the top-nav mega panel both needed
+     the same figure, and the choice was to export it or to keep a second copy that would agree
+     until the day it did not. Same rule, one home. */
+  const isOverdueForReply = (q: Query): boolean => isOverdueForReplyPure(q, nowMs);
 
   /* v5 P2 — THE filter predicate, extracted so there is exactly one. The list renders through it,
      and the create flow asks it "would the query I just saved be visible?" — asking a copy would
