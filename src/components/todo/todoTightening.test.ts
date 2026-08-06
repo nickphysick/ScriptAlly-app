@@ -88,8 +88,13 @@ describe("tightening P2 — the ledger as a REAL column grid (system A)", () => 
     expect(ch).toContain('<span className="r">ACTION</span>');
     expect(rule(".tdb-colhead")).toContain("font-family: var(--f12-mono)");
     expect(rule(".tdb-colhead .r")).toContain("text-align: right");
-    // it mounts at the top of each section's rows
-    expect((page.match(/\{ledgerColhead\(\)\}/g) ?? []).length).toBe(3);
+    /* ⚠️ RETARGETED (workspace P2): it used to be typed at all three section sites and counted
+       3. The three sections are now ONE `groupCard` builder called three times, so the header
+       mounts inside it — still at the top of every group's rows, but structurally rather than by
+       repetition, which is the stronger form of the same guarantee. The second occurrence is the
+       snoozed band, which renders rows and therefore needs the same header. */
+    expect(page).toContain('<div className="tdg-rows">{ledgerColhead()}{rows}</div>');
+    expect((page.match(/\{ledgerColhead\(\)\}/g) ?? []).length).toBe(2);
   });
 
   it("the cells: family dot · ellipsised Playfair title over the italic line · squared kind chip · TABULAR figures", () => {

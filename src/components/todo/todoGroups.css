@@ -1,0 +1,167 @@
+/**
+ * The To-do list page's TYPE GROUPS (workspace pack, Phase 2; ref
+ * design-refs/todo-workspace-pages.html).
+ *
+ * Each group is a white card headed by its LIST swatch, a Playfair label and a mono count. The
+ * rows inside keep the ledger's existing grid grammar untouched — the card is a container, not a
+ * new row system, so `--lg-tracks` and every `.tdb-lrow` rule still govern what is in it.
+ */
+
+.tdg {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* THE GROUP CARD. White on the page ground, one hairline, the same radius as the app's other
+   cards — it is a container for rows, so it carries no shadow of its own; a raised card inside a
+   scrolling list makes every group look like a dialogue. */
+.tdg-card {
+  background: #fffefb;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* The head: swatch · Playfair label · mono count. The rule fills the rest of the line so the
+   count never floats in the middle of nowhere on a wide viewport. */
+.tdg-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px 12px;
+}
+
+.tdg-sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.tdg-head h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #2a1a13;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.tdg-cn {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #9a8e80;
+}
+
+.tdg-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--bd, #e7ddd2);
+  margin-left: 4px;
+}
+
+.tdg-rows {
+  border-top: 1px solid #f0e9e0;
+}
+
+/* ── THE FOLD ─────────────────────────────────────────────────────────────
+   One control, stating the number it is holding back. It is a row of the group, not a floating
+   button, so the group still reads as one object. */
+.tdg-fold {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7a6a5e;
+  background: #fbf8f3;
+  border: 0;
+  border-top: 1px solid #f0e9e0;
+  padding: 11px 18px;
+  cursor: pointer;
+}
+
+.tdg-fold:hover { background: #f5efe6; color: #2a1a13; }
+
+/* The quick-add row — ONLY in the Your group (audit item 7: one verb per control). */
+.tdg-add {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  color: #7a6a5e;
+  background: transparent;
+  border: 0;
+  border-top: 1px dashed #ddd2c2;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+
+.tdg-add:hover { background: #fbf8f3; color: #2a1a13; }
+
+/* ── THE RETURNED-FROM-SNOOZE CHIP ────────────────────────────────────────
+   A row reappearing with no explanation reads as a bug. This says why, for one day. */
+.tdg-back {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a6a5e;
+  background: #f3ece1;
+  border: 1px solid #e3d8c8;
+  border-radius: 5px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+/* ── THE SNOOZED BAND ─────────────────────────────────────────────────────
+   Collapsed at the page foot (audit item 4). Snoozed items had no home in list view at all —
+   findable only on the board — and this is that home. It is quiet by construction: you put these
+   away on purpose, so the band states they exist and does not argue for them. */
+.tdg-snz {
+  margin-top: 4px;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+  background: #fbf8f3;
+  overflow: hidden;
+}
+
+.tdg-snzhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  padding: 12px 18px;
+  cursor: pointer;
+  color: #7a6a5e;
+}
+
+.tdg-snzhead:hover { color: #2a1a13; }
+
+.tdg-snzt {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px;
+  color: inherit;
+}
+
+.tdg-snzchev {
+  margin-left: auto;
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tdg-snz.open .tdg-snzchev { transform: rotate(90deg); }
+
+.tdg-snzbody { border-top: 1px solid #f0e9e0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tdg-snzchev { transition: none; }
+}

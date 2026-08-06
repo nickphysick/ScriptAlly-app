@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel, Pin } from "lucide-react";
+import { Funnel, Pin, ChevronRight } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -53,9 +53,13 @@ import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
-import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
+import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS } from "../../lib/todoRoutes";
+import {
+  TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
+} from "../../lib/todoListPage";
 import { ToastAction, useTodoToast } from "./useTodoToast";
 import "./todo.css";
+import "./todoGroups.css";
 // The relocated control surfaces' styles + tokens (the chip bench + the Pro sticker) — the
 // hardback-spine SHELL itself retired in the shell follow-up; its stylesheet survives trimmed.
 import "../shell/todoShell.css";
@@ -251,6 +255,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // folds; <1420 it becomes the 56px icon rail instead, P5.)
   const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
   const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
+  /* Phase 2 — the housekeeping fold and the snoozed band. Both are VIEW state and deliberately
+     session-only: a fold you left open a week ago is not a preference, and a snoozed band that
+     remembered being open would greet you with the things you had put away. */
+  const [hkExpanded, setHkExpanded] = useState(false);
+  const [snzOpen, setSnzOpen] = useState(false);
   // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
   // animation to the just-collapsed batch (never a page-load flash). P3: the expansion
   // persists per-batch (sa. prefs) and is ONE state — expand in cards, arrive expanded in
@@ -1593,6 +1602,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const committed = onList(c);
     const isOffer = c.taskType === "offer_received";
     const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
+    /* Phase 2 — THE RETURNED-FROM-SNOOZE CHIP, for today only. A row that reappears with no
+       explanation reads as a bug in a list you thought you had cleared; this says why it is back.
+       Clock-driven, never stored: it is derived from the flag's own expiry against today. */
+    const backFlag = taskFlags.find((f) =>
+      (c.relatedRecordId && flagMatchesTask(f, c.taskType ?? "", c.relatedRecordId))
+      || (c.userTaskId && flagMatchesTask(f, USER_TASK_FLAG_TYPE, c.userTaskId)));
+    const cameBack = returnedToday(backFlag, now);
     return (
       <div key={c.key} data-tdbkey={c.key} className="tdb-lrow" role="button" tabIndex={0}
         onClick={() => openFlowCards([c])}
@@ -1601,6 +1617,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-ltask">
           <h3 className="tdb-lbt">{c.title}</h3>
           {c.subtitle && <div className="tdb-lbms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+          {cameBack && backFlag?.snoozedUntil && (
+            <div className="tdb-lbms"><span className="tdg-back">{returnedChipLabel(backFlag.snoozedUntil)}</span></div>
+          )}
         </div>
         <div className="tdb-lkind">
           {c.kind && <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>}
@@ -1711,40 +1730,113 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
-  function renderLedger() {
+  /* ── PHASE 2 — THE THREE TYPE GROUPS (ref design-refs/todo-workspace-pages.html) ────────────
+     Each group is a white card headed by its LIST swatch, a Playfair label and a mono count. The
+     ROWS inside are the existing ledger grammar, untouched: the card is a container, not a second
+     row system, so `--lg-tracks` and every `.tdb-lrow` rule still governs what sits in it. ── */
+  function groupCard(
+    id: "urgent" | "housekeeping" | "yours",
+    count: number,
+    rows: React.ReactNode,
+    foot?: React.ReactNode,
+  ) {
+    const def = TODO_GROUPS.find((g) => g.id === id)!;
+    const swatch = TODO_LISTS.find((l) => l.id === def.swatch)!.swatch;
     return (
-      <div className="tdb-runsheet">
-        {doSorted.length > 0 && (
-          <section className="tdb-lsec p">
-            {ledgerHeading("do", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent)}
-            <div className="tdb-rows">{ledgerColhead()}{doSorted.map((c) => runRow(c, "do"))}</div>
-          </section>
+      <section className="tdg-card" id={`tdb-lane-${id === "urgent" ? "do" : id === "housekeeping" ? "hk" : "nt"}`}>
+        <div className="tdg-head">
+          <span className="tdg-sw" style={{ background: swatch }} aria-hidden />
+          <h2>{def.label}</h2>
+          <span className="tdg-cn">{count}</span>
+          <span className="tdg-rule" aria-hidden />
+        </div>
+        <div className="tdg-rows">{ledgerColhead()}{rows}</div>
+        {foot}
+      </section>
+    );
+  }
+
+  function renderLedger() {
+    // THE FOLD (a view, never a filter — the heading still counts everything).
+    const hkFold = foldRows(hkTop, hkExpanded);
+    const snoozedN = snoozedCount(taskFlags, now);
+    return (
+      <div className="tdb-runsheet tdg">
+        {doSorted.length > 0 && groupCard(
+          "urgent",
+          active ? doSorted.length : tiles.urgent,
+          doSorted.map((c) => runRow(c, "do")),
         )}
-        {(vGroups.length > 0 || vStale.length > 0) && (
-          <section className="tdb-lsec l">
-            {ledgerHeading("hk", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping)}
-            <div className="tdb-rows">{ledgerColhead()}{hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c, "hk")))}</div>
-          </section>
+
+        {(vGroups.length > 0 || vStale.length > 0) && groupCard(
+          "housekeeping",
+          active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
+          hkFold.shown.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c, "hk"))),
+          hkFold.hidden > 0 ? (
+            <button type="button" className="tdg-fold" onClick={() => setHkExpanded(true)}>
+              Show {hkFold.hidden} more
+            </button>
+          ) : hkExpanded && hkTop.length > HOUSEKEEPING_FOLD ? (
+            <button type="button" className="tdg-fold" onClick={() => setHkExpanded(false)}>
+              Show fewer
+            </button>
+          ) : null,
         )}
-        {/* detail P3 — the ☰ view keeps Notes to self even when EMPTY (parity with the cards'
-            lane): the dashed add-row invites, wired to the same addTask. The lane still hides
-            under an active narrow with no matches, exactly as the cards view hides its lanes. */}
-        {(!active || vNt.length > 0) && (
-          <section className="tdb-lsec n">
-            {ledgerHeading("nt", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes)}
-            {vNt.length > 0 ? (
-              <div className="tdb-rows">
-                {ledgerColhead()}
-                {composerAt === "ledger" && renderComposer()}
-                {vNt.map((c) => runRow(c, "nt"))}
+
+        {/* Your tasks & notes — the ONE group holding both natures, and the ONLY group with a
+            quick-add (audit item 7: one verb per control; the other two are derived, so there is
+            nothing there for a writer to add). */}
+        {(!active || vNt.length > 0) && groupCard(
+          "yours",
+          active ? vNt.length : tiles.notes,
+          <>
+            {composerAt === "ledger" && renderComposer()}
+            {vNt.map((c) => runRow(c, "nt"))}
+          </>,
+          composerAt === "ledger" ? null : (
+            <button type="button" className="tdg-add" onClick={addTask}>＋ Add a task or note…</button>
+          ),
+        )}
+
+        {/* THE SNOOZED BAND (audit item 4). Before this, a snoozed item was findable nowhere in
+            list view — only on the board. Collapsed by default: you put these away on purpose. */}
+        {snoozedN > 0 && (
+          <div className={`tdg-snz${snzOpen ? " open" : ""}`}>
+            <button
+              type="button"
+              className="tdg-snzhead"
+              aria-expanded={snzOpen}
+              onClick={() => setSnzOpen((v) => !v)}
+            >
+              <span className="tdg-sw" style={{ background: TODO_LISTS.find((l) => l.id === "snoozed")!.swatch }} aria-hidden />
+              <span className="tdg-snzt">Snoozed</span>
+              <span className="tdg-cn">{snoozedN}</span>
+              <ChevronRight className="tdg-snzchev" size={15} aria-hidden />
+            </button>
+            {snzOpen && (
+              <div className="tdg-snzbody">
+                {snoozedRows()}
               </div>
-            ) : composerAt === "ledger" ? renderComposer() : (
-              <button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>
             )}
-          </section>
+          </div>
         )}
       </div>
     );
+  }
+
+  /** The snoozed band's contents — the suppressed cards, read from the same flags the count is. */
+  function snoozedRows() {
+    const asleep = taskFlags.filter((f) => isSnoozed(f, now));
+    const keys = new Set(asleep.map((f) => f.queryId ?? f.agentId).filter(Boolean) as string[]);
+    const rows = [...board.do, ...board.hk, ...board.nt].filter(
+      (c) => (c.relatedRecordId && keys.has(c.relatedRecordId)) || (c.userTaskId && keys.has(c.userTaskId)),
+    );
+    if (rows.length === 0) {
+      // The flags outlive their cards (a snoozed derived task leaves the engine entirely), so an
+      // empty body is a real state and says so rather than rendering a void.
+      return <div className="tdg-add" style={{ borderTop: 0, cursor: "default" }}>These return on their own dates.</div>;
+    }
+    return <>{ledgerColhead()}{rows.map((c) => runRow(c, "hk"))}</>;
   }
 
   // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,

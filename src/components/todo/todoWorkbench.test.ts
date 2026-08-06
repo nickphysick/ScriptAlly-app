@@ -14,14 +14,17 @@ import { dirname, join } from "path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "todo.css"), "utf8");
+/* The group cards live in their own stylesheet (workspace P2) — the page's CSS is now two files,
+   so `rule()` reads both rather than silently missing every .tdg- selector. */
+const groupsCss = readFileSync(join(here, "todoGroups.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
 // Shell follow-up P3: TodoShell is deleted; todoShell.css survives TRIMMED (the chip bench +
 // Pro sticker + their tokens, relocated to the page body).
 const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
 
-const rule = (sel: string): string => {
-  const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+const rule = (sel: string, sheet: string = css + "\n" + groupsCss): string => {
+  const m = sheet.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
   return m[1];
 };
@@ -273,12 +276,16 @@ describe("detail P5 — sweep", () => {
 
 describe("detail P3 — ledger Notes parity + the clock snooze", () => {
   it("the ☰ Notes section stands even when EMPTY: the pack's wash, the dashed add-row wired to addTask", () => {
-    expect(page).toContain("{(!active || vNt.length > 0) && (");
-    expect(page).toContain('<button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>');
-    expect(page).toContain(') : composerAt === "ledger" ? renderComposer() : ('); // the add-row transforms in place
-    const r = rule(".tdb-laddrow");
-    expect(r).toContain("border: 1.5px dashed #d9c87a");
-    expect(r).toContain("justify-content: center");
+    /* ⚠️ RETARGETED (workspace P2): the ☰ view's three washed sections are now three GROUP CARDS,
+       and the dashed `.tdb-laddrow` is superseded by the Your group's own quick-add — which is
+       the audit's one-verb-per-control rule, since the other two groups are derived and have
+       nothing a writer could add to them. The PARITY this case exists to protect is unchanged:
+       the group stands when empty and still offers the add. */
+    expect(page).toContain("{(!active || vNt.length > 0) && groupCard(");
+    expect(page).toContain('<button type="button" className="tdg-add" onClick={addTask}>＋ Add a task or note…</button>');
+    expect(page).toContain('composerAt === "ledger" ? null : ('); // the add-row transforms in place
+    const r = rule(".tdg-add");
+    expect(r).toContain("border-top: 1px dashed #ddd2c2");
     // todo rebuild P1: the WASH is gone — sections are typographic, so no tinted container.
     expect(css).not.toContain(".tdb-lsec.n {");
     expect(rule(".tdb-lsec")).toContain("background: none");
@@ -355,7 +362,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     expect(page).toContain("text: composerDraft.trim()");
     expect(page).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards");'); // openComposer opens the seat
     expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() :'); // the cards seat swaps
-    expect(page).toContain(') : composerAt === "ledger" ? renderComposer() : ('); // the ledger add-row swaps
+    expect(page).toContain('composerAt === "ledger" ? null : ('); // the ledger add-row swaps (P2: the group's foot)
   });
   it("THE DIALOG SWEEP: zero native dialogs in the To-do scope; the styled ask carries the true blocking choices", () => {
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
@@ -815,12 +822,19 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(rule(".tdb-lbt")).toContain("text-overflow: ellipsis");
     expect(rule(".tdb-lbms")).toContain("font-style: italic"); // italic Playfair subtitle
   });
-  it("BOTH views share ONE typographic heading (todo rebuild P1) — the washed sticky bar is extinct", () => {
+  it("the ☰ view's headings are the GROUP CARD heads now (workspace P2); the washed sticky bar stays extinct", () => {
     expect(css).not.toMatch(/\.tdb-lsech[\s.{]/);
-    expect(page).toContain('ledgerHeading("do", "tdb-lane-do", "Urgent"');
-    expect(page).toContain('ledgerHeading("hk", "tdb-lane-hk", "Housekeeping"');
-    expect(page).toContain('ledgerHeading("nt", "tdb-lane-nt", "Notes to self"');
-    expect(page).toContain("<SectionHead cls={lane} label={label} count={count} />"); // the shared builder
+    /* ⚠️ RETARGETED: `ledgerHeading` and its three call sites are superseded by `groupCard`,
+       whose head is swatch · Playfair label · mono count. The labels come from TODO_GROUPS —
+       ONE source shared with the side container's swatches — rather than being typed at each
+       call site, which is what the old three-literal assertion was really guarding against. */
+    expect(page).toContain('groupCard(');
+    expect(page).toContain('const def = TODO_GROUPS.find((g) => g.id === id)!;');
+    expect(page).toContain('const swatch = TODO_LISTS.find((l) => l.id === def.swatch)!.swatch;');
+    expect(page).toContain('<h2>{def.label}</h2>');
+    expect(page).not.toContain('ledgerHeading("do"'); // the old builder is gone from the ☰ view
+    // the cards view keeps SectionHead — the two views diverge here deliberately
+    expect(page).toContain("<SectionHead cls={cls} label={label} count={count} filtered={filtered} />");
   });
   it("COLLAPSE is retired with the header bar (todo rebuild P1): a heading is a heading, not a control", () => {
     // The fold lived on .tdb-lsech, which the typographic section replaces. ledgerFold /
@@ -828,7 +842,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).not.toContain("onClick={() => toggleFold(lane)}");
     expect(page).not.toContain('{folded ? "▸" : "▾"}');
     expect(page).not.toContain("{!ledgerFold.do &&");
-    expect(page).toContain('{doSorted.map((c) => runRow(c, "do"))}'); // rows render unconditionally now
+    expect(page).toContain('doSorted.map((c) => runRow(c, "do")),'); // rows render unconditionally now
   });
   it("the actions live in the RESERVED lane (the tightening P2); Action now OPENS (both kinds), never completes", () => {
     const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
@@ -965,9 +979,10 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
       expect(page).not.toContain(gone);
     }
     // todo rebuild P1: the heading ＋ went with the header bar; "Add task or note" is the page
-    // header's own action. The rows view keeps its dashed add-row.
+    // header's own action. The rows view keeps its add-row — now the Your GROUP's foot (workspace
+    // P2), scoped to the one group a writer can actually add to.
     expect(page).not.toContain("tdb-cadd");
-    expect(page).toContain('className="tdb-laddrow" onClick={addTask}');
+    expect(page).toContain('className="tdg-add" onClick={addTask}');
   });
 });
 
