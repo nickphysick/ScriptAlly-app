@@ -87,6 +87,17 @@
 .tbd-meta { font-size: 11px; color: #9a8e80; padding: 3px 42px 0 9px; }
 .tbd-card { padding-bottom: 13px; }
 
+/* THE DOOR'S WHISPER (board fixes II P2, ref .hint): OPEN ▸ under the band, top of the seat's
+   reserved corridor — present always, visible on the card's hover or focus. Opacity, not display:
+   nothing reflows, and the reveal can ease. */
+.tbd-hint {
+  position: absolute; right: 11px; top: 31px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6.5px; letter-spacing: 0.14em; color: #8a6a58;
+  opacity: 0; pointer-events: none;
+}
+.tbd-card:hover .tbd-hint, .tbd-card:focus-visible .tbd-hint { opacity: 1; }
+
 /* THE SEAT — one ⋯, bottom-right, always present: faint at rest, darkening with a soft chip on
    the card's hover (never its own hover only — the affordance belongs to the card). */
 .tbd-more {

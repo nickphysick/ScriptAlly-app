@@ -206,6 +206,19 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
   const [over, setOver] = useState<TodoColumnId | null>(null);
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   const cardEls = useRef(new Map<string, HTMLElement>());
+  /* ⚠️ CLICK vs DRAG, BY MOVEMENT (board fixes II, P2). The card is the dock's door AND a
+     draggable, and browsers do not reliably suppress the click after an HTML5 drag — so a slow
+     drag could dock the card it just moved. Two guards: a dragstart poisons the gesture outright,
+     and a press that travels more than the threshold is a drag even if dragstart never fired
+     (a cancelled drag must not fall through to an accidental open). */
+  const pressAt = useRef<{ x: number; y: number } | null>(null);
+  const draggedRef = useRef(false);
+  const DRAG_THRESHOLD_PX = 5;
+  const clickIsDrag = (e: React.MouseEvent): boolean => {
+    if (draggedRef.current) { draggedRef.current = false; return true; }
+    const p = pressAt.current;
+    return !!p && Math.hypot(e.clientX - p.x, e.clientY - p.y) > DRAG_THRESHOLD_PX;
+  };
 
   const closeMenu = (returnFocus: boolean) => {
     setMenu((m) => {
@@ -297,9 +310,12 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                   tabIndex={0}
                   role="button"
                   aria-label={c.title}
-                  onDragStart={() => setDragging({ card: c, from: col.id })}
+                  onPointerDown={(e) => { pressAt.current = { x: e.clientX, y: e.clientY }; }}
+                  onDragStart={() => { draggedRef.current = true; setDragging({ card: c, from: col.id }); }}
                   onDragEnd={() => { setDragging(null); setOver(null); }}
-                  onClick={() => onOpen(c)}
+                  /* ⚠️ THE CARD IS THE DOOR (P2): clicking opens the dock on this card — unless
+                     the press was a drag (see clickIsDrag). Enter is the same door for keyboards. */
+                  onClick={(e) => { if (!clickIsDrag(e)) onOpen(c); }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(c); }
                   }}
@@ -314,6 +330,11 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                     <span className="tbd-kind">{c.kind}</span>
                     {c.due && c.due !== c.kind && <span className="tbd-when">{c.due}</span>}
                   </div>
+                  {/* the door's whisper (P2, ref .hint): OPEN ▸ surfaces on hover, tucked under
+                      the band in the seat's reserved corridor — always in the DOM, CSS-revealed,
+                      so nothing reflows and screen readers are not shouted at twice (the card
+                      already announces as a button). */}
+                  <span className="tbd-hint" aria-hidden>OPEN ▸</span>
                   <div className="tbd-t">{c.title}</div>
                   {c.record && <div className="tbd-meta">{c.record}</div>}
 

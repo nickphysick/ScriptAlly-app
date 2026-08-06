@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { TodoDock } from "./TodoDock";
+import { TodoBoard } from "./TodoBoard";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
@@ -194,5 +195,43 @@ describe("keyboard", () => {
 
   it("⚠️ and it never steals keys from a field being typed into", () => {
     expect(dockSrc).toContain('closest("input, textarea, select")');
+  });
+});
+
+/* ── the dock's DOORS (board fixes II, Phase 2) ────────────────────────────────────────────── */
+
+describe("⚠️ the card is the door — click, Enter, and the menu's Action now all dock it", () => {
+  const board = readFileSync(join(here, "TodoBoard.tsx"), "utf8");
+  const css = readFileSync(join(here, "todoBoard.css"), "utf8");
+
+  it("the page's onOpen docks the clicked card (not the whole page's default)", () => {
+    expect(page).toContain("onOpen={(c) => openDock(dockAllCards(), c.key)}");
+  });
+
+  it("click and Enter both call onOpen; the ⋯ trigger stops propagation so the seat never docks", () => {
+    const article = board.slice(board.indexOf("<article"), board.indexOf("</article>"));
+    expect(article).toContain("if (!clickIsDrag(e)) onOpen(c)");
+    expect(article).toContain('e.key === "Enter" || e.key === " "');
+    const seat = article.slice(article.indexOf('className="tbd-more"'));
+    expect(seat).toContain("e.stopPropagation()");
+  });
+
+  it("⚠️ click is distinguished from drag by MOVEMENT — a threshold plus the dragstart poison", () => {
+    expect(board).toContain("const DRAG_THRESHOLD_PX = 5");
+    expect(board).toContain("Math.hypot(e.clientX - p.x, e.clientY - p.y) > DRAG_THRESHOLD_PX");
+    expect(board).toContain("draggedRef.current = true; setDragging(");
+    // the poison is consumed on read — one drag must not eat the NEXT genuine click
+    expect(board).toContain("if (draggedRef.current) { draggedRef.current = false; return true; }");
+  });
+
+  it("OPEN ▸ whispers on every card — always in the DOM, revealed by the card's hover", () => {
+    const columns = { todo: [card({ key: "a" }), card({ key: "b" })], today: [], snoozed: [], done: [] };
+    const html = renderToStaticMarkup(
+      <TodoBoard columns={columns} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,
+    );
+    expect(html.match(/OPEN ▸/g)?.length).toBe(2);
+    // the reveal is opacity in the stylesheet — never conditional render
+    expect(css).toMatch(/\.tbd-hint\s*\{[^}]*opacity:\s*0/);
+    expect(css).toContain(".tbd-card:hover .tbd-hint");
   });
 });
