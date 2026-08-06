@@ -688,14 +688,18 @@ describe("Refinement §2 — the bar's right cluster", () => {
     expect(r).toContain("font-size: 9.5px");
     expect(r).toContain("letter-spacing: 0.14em");
     expect(r).toContain("text-transform: uppercase");
-    expect(r).toContain("color: #b3a698");
+    /* ⚠️ SUPERSEDED BY §7: #b3a698 was a whisper against WHITE; against the oat tint it was very
+       nearly the ground itself, and a status you cannot read is not a status. The MONO /
+       uppercase / tracking grammar this case exists for is unchanged. */
+    expect(r).toContain("color: #a2947f");
   });
 
   it("the divider is 1px x 18px on the line token", () => {
     const r = rule(".ws-vdiv");
     expect(r).toContain("width: 1px");
     expect(r).toContain("height: 18px");
-    expect(r).toContain("background: var(--shell-hair)");
+    // §7: --shell-hair was drawn for a white bar and vanished into the tint. Geometry stands.
+    expect(r).toContain("background: #d9cec0");
   });
 
   /* ⚠️ INK (polish §1). The soft-pink treatment is SUPERSEDED and asserted gone: pink is the
@@ -750,6 +754,56 @@ describe("Refinement §4 — the frosted sticky bar", () => {
     expect(html.indexOf("ws-cscroll")).toBeLessThan(html.indexOf("ws-bar"));
   });
 
+  /* ══ POLISH §7 — THE BAR IS OAT ══════════════════════════════════════════════════════════ */
+  describe("⚠️ the frosted bar is OAT, not white-translucent (polish §7)", () => {
+    const indexCss2 = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+
+    it("both tints are tokens, and the solid is the translucent one's own colour", () => {
+      expect(indexCss2).toMatch(/--shell-bar-tint:\s*rgba\(234, 227, 217, 0\.92\)\s*;/);
+      expect(indexCss2).toMatch(/--shell-bar-tint-solid:\s*#eae3d9\s*;/);
+    });
+
+    it("the bar reads the token, and the WHITE treatment is superseded", () => {
+      const bar = rule(".ws-bar");
+      expect(bar).toContain("background: var(--shell-bar-tint)");
+      expect(bar).not.toContain("rgba(255, 255, 255, 0.78)");
+    });
+
+    it("the blur and the shadow are untouched — only the colour moved", () => {
+      const bar = rule(".ws-bar");
+      expect(bar).toContain("backdrop-filter: blur(10px)");
+      expect(bar).toContain("box-shadow: 0 8px 18px -10px rgba(46, 39, 35, 0.22)");
+      expect(bar).not.toContain("border-bottom"); // still no hairline
+    });
+
+    it("⚠️ the @supports fallback is the SOLID token — an unsupported blur must not leave a wash", () => {
+      expect(cssRules).toContain("@supports not (backdrop-filter: blur(10px))");
+      expect(cssRules).toContain(".ws-bar { background: var(--shell-bar-tint-solid); }");
+      expect(cssRules).not.toContain(".ws-bar { background: #ffffff; }");
+    });
+
+    it("the controls that sit ON the tint were firmed with it", () => {
+      const prim = readFileSync(resolve(__dirname, "./primitives.css"), "utf8");
+      const pill = prim.slice(prim.indexOf(".sp-search {"), prim.indexOf(".sp-search:hover"));
+      expect(pill, "the pill keeps its white fill — the one bright thing on a warm bar").toContain("background: #ffffff");
+      expect(pill, "…and firms its edge, which dissolved against the tint").toContain("border: 1px solid #d9cec0");
+      const kbd = prim.slice(prim.indexOf(".sp-search-k {"), prim.indexOf(".sp-search-k {") + 260);
+      expect(kbd).toContain("background: #f2ede7");
+      const help = prim.slice(prim.indexOf(".sp-help:hover"), prim.indexOf(".sp-help:hover") + 220);
+      expect(help, "white-up, not parchment-up, now the ground is warm").toContain("rgba(255, 255, 255, 0.55)");
+      // the whisper and the divider were drawn for a white bar and vanished into the tint
+      expect(rule(".ws-sync")).toContain("color: #a2947f");
+      expect(rule(".ws-vdiv")).toContain("background: #d9cec0");
+    });
+
+    it("⚠️ and the MenuCard was NOT firmed — it floats over page content, not over the bar", () => {
+      const prim = readFileSync(resolve(__dirname, "./primitives.css"), "utf8");
+      const card = prim.slice(prim.indexOf(".sp-card {"), prim.indexOf(".sp-card-h"));
+      expect(card).toContain("border: 1px solid var(--shell-edge)");
+      expect(card).not.toContain("#d9cec0");
+    });
+  });
+
   it("the work area no longer scrolls", () => {
     expect(rule(".ws-work")).not.toContain("overflow");
     expect(cssRules.match(/overflow: auto/g)?.length, "one scroller in this stylesheet").toBe(1);
@@ -763,7 +817,9 @@ describe("Refinement §4 — the frosted sticky bar", () => {
 
   it("is always frosted — no scroll state, no transition between states", () => {
     const r = rule(".ws-bar");
-    expect(r).toContain("background: rgba(255, 255, 255, 0.78)");
+    /* ⚠️ SUPERSEDED BY §7 — the bar is OAT. What this case protects is that the bar is ALWAYS
+       frosted (no scroll state, no transition between states); only the colour moved. */
+    expect(r).toContain("background: var(--shell-bar-tint)");
     expect(r).toContain("backdrop-filter: blur(10px)");
     expect(r).toContain("-webkit-backdrop-filter: blur(10px)");
     expect(r).toContain("box-shadow: 0 8px 18px -10px rgba(46, 39, 35, 0.22)");
@@ -773,9 +829,9 @@ describe("Refinement §4 — the frosted sticky bar", () => {
 
   /* A feature query, not JS detection: unsupported blur would leave a washed-out band over
      moving text, so the fallback is opaque. */
-  it("falls back to opaque white via @supports", () => {
+  it("falls back to the SOLID OAT via @supports (§7 supersedes the white fallback)", () => {
     expect(css).toContain("@supports not (backdrop-filter: blur(10px))");
-    expect(css).toMatch(/@supports not \(backdrop-filter: blur\(10px\)\) \{\s*\.ws-bar \{ background: #ffffff; \}/);
+    expect(css).toMatch(/@supports not \(backdrop-filter: blur\(10px\)\) \{\s*\.ws-bar \{ background: var\(--shell-bar-tint-solid\); \}/);
   });
 });
 

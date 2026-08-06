@@ -46,6 +46,9 @@
 .sp-card {
   min-width: 192px;
   background: #ffffff;
+  /* (NOT firmed with the pill — a MenuCard floats over PAGE content, not over the oat bar, and it
+     carries a two-stop shadow that already separates it. §7's firming is scoped to what sits on
+     the tint.) */
   border: 1px solid var(--shell-edge);
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(46, 39, 35, 0.14), 0 16px 38px rgba(46, 39, 35, 0.12);
@@ -96,7 +99,11 @@
   height: 34px;
   border-radius: 9px;
   background: #ffffff;
-  border: 1px solid var(--shell-edge);
+  /* ⚠️ FIRMED FOR THE OAT BAR (polish §7). Against white the --shell-edge hairline was enough;
+     against the tint it dissolved, and the pill stopped reading as a control. The white FILL is
+     what keeps it legible — it is the one bright thing on a warm bar — but the edge has to hold
+     its own line. */
+  border: 1px solid #d9cec0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -126,7 +133,8 @@
   margin-left: auto;
   font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-  background: #f4f0e9;
+  /* the ⌘K chip lifts with the bar's family, so it does not read as a hole in the pill */
+  background: #f2ede7;
   border-radius: 4px;
   padding: 1px 5px;
   flex: none;
@@ -147,10 +155,13 @@
   transition: color 0.15s, background 0.15s;
   flex: none;
 }
+/* ⚠️ WHITE-UP, NOT PARCHMENT-UP (polish §7). The old parchment hover was a lift against a white
+   bar; on the oat tint it is nearly the same colour as the ground, so the button appeared to do
+   nothing on hover. Lifting toward white is the same gesture in the other direction. */
 .sp-help:hover,
 .sp-help:focus-visible {
   color: var(--shell-ink);
-  background: rgba(242, 237, 231, 0.7);
+  background: rgba(255, 255, 255, 0.55);
 }
 .sp-help svg {
   width: 17px;

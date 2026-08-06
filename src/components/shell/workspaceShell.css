@@ -437,7 +437,7 @@
   position: sticky;
   top: 0;
   z-index: 8;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--shell-bar-tint);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 8px 18px -10px rgba(46, 39, 35, 0.22);
@@ -445,7 +445,7 @@
 /* ⚠️ A FEATURE QUERY, NOT JS DETECTION. Where the blur is unsupported the translucency would
    just be a washed-out band over moving text, so the fallback is opaque white. */
 @supports not (backdrop-filter: blur(10px)) {
-  .ws-bar { background: #ffffff; }
+  .ws-bar { background: var(--shell-bar-tint-solid); }
 }
 .ws-crumb {
   font-size: 13px;
@@ -492,11 +492,14 @@
   font-size: 9.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #b3a698;
+  /* ⚠️ DARKENED FOR THE OAT BAR (polish §7). #b3a698 was a whisper against white; against the
+     tint it was very nearly the ground itself, and a status you cannot read is not a status. */
+  color: #a2947f;
   white-space: nowrap;
   flex: none;
 }
-.ws-vdiv { width: 1px; height: 18px; background: var(--shell-hair); flex: none; }
+/* likewise the divider — --shell-hair was drawn for a white bar and vanished into the tint */
+.ws-vdiv { width: 1px; height: 18px; background: #d9cec0; flex: none; }
 
 /* + NEW — the ONE creation door in the chrome. ⚠️ The sidebar carries no quick actions: creation
    lives here, and a second set of create buttons in the panel would be two homes for one job. */

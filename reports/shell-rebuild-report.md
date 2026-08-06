@@ -765,3 +765,97 @@ Auth-gated; nothing below is claimed.
 5. **The collapse row** at the foot of the nav, above the account divider.
 6. **+ New in ink** against the frosted bar, and its MenuCard placement.
 7. ⌘K toggling the dropdown open/closed with focus landing in the input.
+
+---
+
+# Polish pass §7 — the bar goes Oat
+
+**A follow-on to the polish pass, and the only part of that pack not already live.**
+
+## ⚠️ Recon finding — §§1–6 were already applied
+
+The pack describing this work listed seven items and asked for a single commit reading *"shell:
+polish pass (ink New, palette dropdown, collapse row, toggle grammar, narrow panel, account
+block)"*. **That commit already exists** — `41b08ea`, with exactly that message, an ancestor of
+HEAD since the claude-il merge. Its six named items are the six in the message; **§7 (the header
+tint) is not in it**, and the pack's own header calls itself "six targeted changes". So §7 reads as
+the genuinely new item appended to an otherwise-run pack.
+
+All six were verified against the spec before anything was touched, rather than assumed from the
+commit's existence:
+
+| § | State | Evidence |
+|---|---|---|
+| 1 ink New | **applied** | `.ws-nbtn` on `--shell-ink` (`#2e2723`) / `--shell-rail-hi` (`#f4efe7`), hover `#3f372f`, carrying its own supersession note |
+| 2 palette dropdown | **applied** | `lib/palettePosition.ts` + its test; clamps at *both* edges and guards the negative cap |
+| 3 collapse row | **applied** | `.ws-crow2` "Collapse sidebar" at the nav foot |
+| 4 toggle grammar | **applied** | the §4 branch in `WorkspaceShell` |
+| 5 panel 186px | **applied** | `--shell-panelw: 186px`, lock rewritten (216 → 232 → 186) |
+| 6 account block | **applied** | two-line row, Upgrade pill with `stopPropagation`, `TODO(account-menu)` |
+
+**So this commit is §7 alone**, and its message says so. Committing six already-landed items under
+a fresh message claiming them would have been false.
+
+## What §7 changed
+
+| Surface | Was | Now |
+|---|---|---|
+| `.ws-bar` | `rgba(255,255,255,.78)` | `var(--shell-bar-tint)` — `rgba(234,227,217,.92)` |
+| `@supports not` fallback | `#ffffff` | `var(--shell-bar-tint-solid)` — `#eae3d9` |
+| SearchPill border | `var(--shell-edge)` `#e6e0d5` | `#d9cec0` (fill stays white) |
+| ⌘K chip | `#f4f0e9` | `#f2ede7` |
+| HelpButton hover | `rgba(242,237,231,.7)` | `rgba(255,255,255,.55)` |
+| Status whisper `.ws-sync` | `#b3a698` | `#a2947f` |
+| Divider `.ws-vdiv` | `var(--shell-hair)` | `#d9cec0` |
+
+The blur, the 66px height, the sticky-inside-the-scroller position, the absent hairline and the
+constant shadow are all untouched — **only the colour moved**, and the locks that protect those
+say so in place rather than being deleted.
+
+## Two judgements worth recording
+
+**The MenuCard was deliberately NOT firmed.** My first pass caught it with the pill — both matched
+`background:#ffffff; border:1px solid var(--shell-edge)`. It is wrong: a MenuCard floats over
+*page* content, not over the bar, and it already carries a two-stop shadow that separates it. §7's
+firming is scoped to what actually sits on the tint, and a test asserts the card kept the token.
+
+**I nearly reported the whisper and the divider as non-existent.** An early grep for `whisper` and
+`ws-vr` found nothing and I was about to write them off — a passing test naming "status → divider"
+caught it. They are `.ws-sync` and `.ws-vdiv`. Recorded because the near-miss is the interesting
+part: absence found by one grep is not absence.
+
+## Legibility check on the four unchanged elements
+
+Reported rather than adjusted, per the pack:
+
+| Element | Against `#eae3d9` | Verdict |
+|---|---|---|
+| Logotype | a dark PNG on a light warm ground | **passes** — it was already carried on parchment elsewhere |
+| Crumb ancestors | `--shell-muted` `#9c8878` | **passes, but it is the thinnest of the four.** Muted-on-oat is a lower-contrast pairing than muted-on-white was. It reads at 13px; I would not take it any lighter, and if the tint is ever deepened this is the first thing that fails. |
+| Current-page ink | `--shell-ink` `#2e2723` | **passes** comfortably |
+| Ink + New | `#2e2723` on `#eae3d9` | **passes** — the ink button gains contrast against oat, having lost some against white |
+
+None needed adjusting. The crumb ancestors are flagged as the one to watch.
+
+## Tests
+
+Six new cases in `workspaceShell.test.tsx`: both tokens by value, the bar reading the token with
+the white treatment asserted **gone**, blur/shadow/no-hairline untouched, the `@supports` fallback
+on the solid token, the four firmed controls, and the MenuCard's deliberate exemption. Five
+existing locks were **retargeted with their supersession stated in place**, not deleted:
+`.ws-sync`'s tone, `.ws-vdiv`'s token, the bar's background, the `@supports` fallback and
+HelpButton's hover.
+
+**Gates: tsc 0 · build pass · 172 files, 2776 passed | 2 skipped.**
+
+## Browser-verify — refreshed
+
+Not deployed, per the pack. When it next goes to dev:
+
+1. **The bar reads as part of the app, not a strip laid on it** — scroll a long page and watch content pass under the blur.
+2. **The SearchPill still reads as a control** at the firmed border; the ⌘K chip should not look like a hole punched in it.
+3. **HelpButton hover is visible** — the old parchment hover was nearly the tint itself.
+4. **The status whisper is readable** at `#a2947f` without shouting.
+5. ⚠️ **Crumb ancestors** — the flagged pairing. Check at 13px on a real crumb, not a short one.
+6. **The palette dropdown over the oat bar** — clipping and z-index, at a narrow viewport and with the pill near the right edge (carried forward from §2; still unverified in a browser).
+7. **186px truncation review** — longest section label + count, and the account block's name line (carried forward from §5).
