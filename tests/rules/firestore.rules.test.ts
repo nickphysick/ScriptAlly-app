@@ -12,10 +12,9 @@
  *   - affectedKeys: update attempts with fields outside the allowlist are rejected
  *   - communityAgents: intended model + open-create finding surfaced
  *   - notes / tasks / taskFlags / genreSuggestions: owner scoping, closed shapes, enum values and
- *     update allowlists — including the tasks committedDate update denial, locked as a KNOWN BUG
- *     (Tier 1 · Phase 3, 4 Aug 2026: the fix is blocked behind a todo-stream-owned artefact lock;
- *     flip that test to assertSucceeds in the same commit that appends 'committedDate' to the
- *     tasks update allowlist and amends todoNotesTasks.test.ts)
+ *     update allowlists — including the tasks committedDate update, FIXED and flipped to
+ *     assertSucceeds on 6 Aug 2026 (it was a silent denial of every Today's-list commit; the
+ *     round trip and a still-denied out-of-list field are both covered)
  *   - /test/connection: public read allowed, write blocked
  *   - /waitlist, /counters: hard deny
  *
@@ -1102,27 +1101,54 @@ describe('/users/{userId}/tasks', () => {
   });
 
   /**
-   * ⚠️ KNOWN BUG, locked deliberately (Tier 1 · Phase 3, 4 Aug 2026).
+   * ⚠️ WAS A KNOWN BUG — FIXED AND FLIPPED (6 Aug 2026).
    *
-   * committedDate IS client-updated post-create — Today's-list commit/uncommit (ToDoPage
-   * toggleToday) and FocusFlow's Monday seeding both route through db.tsx updateUserTask — but
-   * the tasks update allowlist omits it, so every such write is silently denied (updateUserTask
-   * swallows the error; the optimistic patch rolls back on the next snapshot).
+   * committedDate is client-updated post-create: Today's-list commit/uncommit (ToDoPage
+   * toggleToday) and FocusFlow's Monday seeding both route through db.tsx updateUserTask. The
+   * allowlist omitted it, so every one of those writes was denied SILENTLY — updateUserTask
+   * swallowed the error and the optimistic patch rolled back on the next snapshot, which is the
+   * worst shape a permission bug can take: committing a task to Today appeared to work, then
+   * quietly undid itself.
    *
-   * The one-line fix (append 'committedDate' to the hasOnly list) is blocked for this stream:
-   * todoNotesTasks.test.ts pins the exact list string and src/components/todo/** is out of
-   * scope. FLIP THIS TEST to assertSucceeds in the same commit that lands both halves.
+   * Held for two days behind two artefact locks pinning the old string. All three halves landed
+   * together, and this assertion is the one that matters — it proves the WRITE succeeds, not
+   * merely that a string appears in a file.
    */
-  it('[KNOWN BUG] a Today\'s-list commit — update {committedDate, updatedAt} — is DENIED by the allowlist', async () => {
+  it("a Today's-list commit — update {committedDate, updatedAt} — is ALLOWED", async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), {
+        committedDate: '2026-08-04',
+        updatedAt: '2026-08-04T10:00:00.000Z',
+      })
+    );
+  });
+
+  it('…and UNCOMMITTING — clearing committedDate — is allowed too (the round trip, not half of it)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), {
+        ...validUserTask(ALICE), committedDate: '2026-08-04',
+      });
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), {
+        committedDate: deleteField(),
+        updatedAt: '2026-08-04T11:00:00.000Z',
+      })
+    );
+  });
+
+  it('a field OUTSIDE the allowlist is still denied — the list did not become permissive', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
     });
     const db = aliceCtx().firestore();
     await assertFails(
-      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), {
-        committedDate: '2026-08-04',
-        updatedAt: '2026-08-04T10:00:00.000Z',
-      })
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { userId: BOB })
     );
   });
 

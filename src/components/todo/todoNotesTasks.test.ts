@@ -118,7 +118,11 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
     expect(rules).toContain("'text', 'detail', 'done'"); // detail in the isValidUserTask hasOnly
     expect(rules).toContain("'dueDate', 'surfaceOffset', 'committedDate'"); // surfaceOffset in hasOnly
     expect(rules).toContain("data.surfaceOffset in ['on-day', 'day-before', 'week-before']");
-    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset'])"); // update affectedKeys
+    // ⚠️ committedDate JOINED THIS LIST (6 Aug 2026). It is client-updated post-create by the
+    // Today's-list commit, and its absence denied every such write in silence. This lock is what
+    // blocked the fix for two days — so it now pins the CORRECT list, and the rules suite proves
+    // the write actually succeeds rather than merely that a string is present.
+    expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate'])"); // update affectedKeys
   });
 
   it("two entry points, two default natures: the section opens NOTE, the hero opens TASK", () => {
