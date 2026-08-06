@@ -334,21 +334,22 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(railFn).not.toContain("sv2-railspacer-");
   });
 
-  it("ONE group heading now — the desk line is a SENTENCE and needs no label above it", () => {
+  /* ⚠️ RETARGETED, not deleted (sweep, 6 Aug 2026). This asserted the PANEL's group heading and
+     its .sv2-slab token rule. The panel — ShellSidebarBody — is gone: the shell rebuild replaced
+     it with WorkspaceShell and nothing has rendered it since. A test that reads a deleted
+     component's source string passes or fails on nothing, so it now asserts the retirement, which
+     is the fact worth locking: the component AND its orphaned rule are both away, and neither
+     comes back without a surface to come back to. */
+  it("the capsule panel is RETIRED — component and its orphaned token rule both gone", () => {
     const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
-    expect(body).toContain('<div className="sv2-slab">Quick actions</div>');
-    // "Tasks & reminders" went with the two pills (panel-foot pack): the desk line states its
-    // own subject in words, so a mono label above it only repeats the sentence more quietly.
-    expect(body).not.toContain("Tasks &amp; reminders");
-    // The tile caption went with the four tiles it was naming — the two buttons carry real
-    // labels now, so there is nothing left for it to disambiguate.
-    expect(body).not.toContain("Log · Respond · Agent · Manuscript");
-    const slab = rule(".sv2-slab");
-    expect(slab).toContain("font-size: 7.5px");
-    expect(slab).toContain("letter-spacing: 0.17em");
-    expect(slab).toContain("text-transform: uppercase");
-    expect(slab).toContain("color: var(--shell-quiet)"); // the role-named token, not a one-off hex
-    expect(shellCss).not.toContain("#b3a598"); // the hex lives ONLY on the token
+    expect(body).not.toContain("export const ShellSidebarBody");
+    expect(body).not.toContain('<div className="sv2-slab">Quick actions</div>');
+    // …and what SURVIVES this file, because both are live elsewhere:
+    expect(body).toContain("export const ShellScope");
+    expect(body).toContain("export function useShellNavCounts");
+    // the rule went with its only consumer — a token nothing reads is not a token
+    expect(shellCss).not.toContain(".sv2-slab {");
+    expect(shellCss).not.toContain("#b3a598"); // the hex still lives ONLY on the token
   });
 
   /* ⚠️ REWRITTEN TWICE, NEVER DELETED. Phase 3 made the brand type rather than the PNG;

@@ -28,7 +28,7 @@ import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
 import { usePalette } from "./usePalette";
-import { ShellSidebarBody, ShellScope, useShellNavCounts } from "./ShellSidebar";
+import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
 import { MobileSheet } from "./MobileSheet";

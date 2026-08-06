@@ -320,7 +320,6 @@
 
 /* GROUP HEADINGS (sidebar-refinements) — two quiet mono labels grouping the panel's lower
    half. A step lighter than --shell-muted so they group without competing with the rows. */
-.sv2-slab { font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.17em; text-transform: uppercase; color: var(--shell-quiet); padding: 0 5px 9px; flex: none; }
 .sv2-half { flex: 1; min-height: 28px; }
 
 /* ── manuscript row — bare (no card, no deck edges) ── */
