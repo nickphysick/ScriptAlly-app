@@ -23,11 +23,19 @@ describe("the <md dashboard stack", () => {
     expect(before).toContain(".sa-mdeskline,\n.sa-mtodo { display: none; }");
   });
 
-  it("desktop furniture stands down below md: chip, CTA row, fortnight strip", () => {
+  it("desktop furniture stands down below md: the action row, fortnight strip", () => {
+    /* ⚠️ RETARGETED (settled desk, Phase 1). This asserted `.sa-chip` and `.sa-greet-ctas`; the
+       attention chip is RETIRED with the focus slot it opened, and the CTA row is `.sa-hero-actions`
+       now. The rule the case protects is unchanged — the desktop action surfaces stand down below
+       md, where the floating tab capsule carries them. */
     expect(css).toContain(MEDIA);
     const mobile = css.split(MEDIA)[1] ?? "";
-    expect(mobile).toContain(".sa-chip");
-    expect(mobile).toContain(".sa-greet-ctas");
+    expect(mobile).toContain(".sa-hero-actions { display: none; }");
+    /* ⚠️ ABSENCE IS ASSERTED AGAINST RULES, NOT PROSE — comments stripped first. The first draft
+       of this line failed on the CSS comment that RECORDS the retirement: the guard caught its own
+       tombstone. Third time this trap has been hit in this repo; the pattern is the fix. */
+    const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(rules, "the chip retired with the focus slot").not.toContain(".sa-chip");
     expect(mobile).toContain("section.dc { display: none; }"); // WhatsLive's root is a div.dc — untouched
     expect(mobile).toContain(".wl-cf { grid-template-columns: 1fr !important");
   });

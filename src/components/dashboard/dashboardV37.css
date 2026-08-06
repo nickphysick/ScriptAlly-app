@@ -50,91 +50,44 @@
 .sa-dtop-icon:hover { color: var(--acc, #7c3a2a); }
 .sa-dtop-user { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; color: var(--ink, #3a1c14); cursor: pointer; background: none; border: none; }
 
-/* ---------- salutation greeting (hv-o1) + focus slot track ---------- */
-.sa-greet {
-  display: grid; grid-template-columns: 1fr 0px; gap: 0;
-  padding: 52px 0 0; margin-bottom: 4px; text-align: center;
-  transition: grid-template-columns 360ms cubic-bezier(.22,.8,.3,1), gap 360ms cubic-bezier(.22,.8,.3,1);
+/* ---------- the settled-desk HERO ZONE (ref design-refs/dashboard-settled-desk.html) ----------
+   ⚠️ THIS REPLACES THE SALUTATION GREETING AND ITS FOCUS SLOT. The greeting used to be a centred
+   column with an attention chip that opened a right-hand track (the To-do card or a focused stat),
+   collapsing the stat row while it was open. All of that is retired: the To-do card is permanent
+   furniture in the right column, the stat row never moves, and there is no disclosure to find.
+   Retired with it: `.sa-greet*`, `.sa-chip*`, `.sa-greet-side`, the flip keyframes, `.sa-minis`. */
+.sa-herozone {
+  display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 26px; align-items: start;
+  padding: 12px 0 0;
 }
-.sa-greet.split { grid-template-columns: 1fr 380px; gap: 20px; }
-.sa-greet-main { min-width: 0; }
-.sa-greet-eyebrow {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--band-meta, #9c8878); display: flex; gap: 10px; align-items: center; justify-content: center;
-  margin-bottom: 20px;
+.sa-hero { min-width: 0; padding: 20px 6px 0 2px; text-align: left; }
+.sa-hero-datecap { display: flex; gap: 13px; align-items: center; }
+.sa-hero-lbl {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.17em; text-transform: uppercase;
+  font-weight: 500; color: var(--band-meta, #9c8878);
 }
-/* ⚠️ INK, NOT --hdr (shell-rebuild pack, Phase 4 · Baked 15). The greeting read the per-theme
-   header token, which is mocha #5d4037 in Cappuccino — warm enough to sit as an accent on a page
-   whose only accent should be urgency. Section titles elsewhere keep --hdr: this is a rule about
-   the greeting, not about headings. (Phase 4 said "renders in the top-nav shell"; Amendment 1
-   (G) moved it into the WORKSPACE shell — the ink rule is unchanged by that move.) */
-/* ⚠️ 66px → 40px (Amendment 1, G2). The dashboard renders INSIDE the content card now, not on a
-   full-bleed page: 66px was sized against the viewport and overwhelms a card that has a rail, a
-   panel and a 14px frame beside it. Container scaling only — the hero's structure, copy and
-   components are untouched. */
-.sa-greet-hi {
-  font-family: var(--font-serif); font-size: 40px; font-weight: 600;
-  color: var(--shell-ink); line-height: 1.05; margin: 0 0 18px;
+.sa-hero-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--band-meta, #9c8878); }
+.sa-hero-hi {
+  font-family: var(--font-serif); font-weight: 500; font-size: clamp(34px, 3.4vw, 46px);
+  letter-spacing: -0.015em; color: var(--shell-ink); line-height: 1.04; margin: 16px 0 0;
 }
-/* the name keeps the heading's own voice — no italics, no colour */
-.sa-greet-hi em { font-style: normal; color: inherit; }
-.sa-greet-ctas { display: flex; gap: 10px; align-items: center; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
-/* hero closing rule — centred, replacing the old full-width greet border-bottom (ref: dashboard-bigger-cards) */
-.sa-greet-div { height: 1px; background: var(--bd, #ece0d2); max-width: 720px; margin: 34px auto 0; }
-.sa-cta {
-  display: inline-flex; align-items: center; gap: 7px;
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.03em;
-  padding: 10px 18px; border-radius: 10px; cursor: pointer;
-  background: var(--abtn-bg, #ffffff);
-  border: var(--abtn-bdw, 1px) solid var(--abtn-bd, #ded3c2);
-  color: var(--abtn-ink, #5d4037);
+/* ⚠️ BURGUNDY ITALIC — and this SUPERSEDES the v37 lock ("plain Playfair, NO italics/colour on
+   the name"). Recorded rather than silently overwritten: that was a decision, and this replaces
+   it on the authority of the settled-desk ref and its baked decisions. */
+.sa-hero-hi em { font-style: italic; color: var(--acc, #7c3a2a); }
+.sa-hero-actions { display: flex; gap: 11px; margin-top: 32px; flex-wrap: wrap; }
+.sa-hbtn {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 13px; font-weight: 500; border-radius: 99px; padding: 11px 21px; cursor: pointer;
+  background: #ffffff; border: 1px solid #d5c8b8; color: #5c4d42;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
-.sa-cta svg { width: 13px; height: 13px; stroke: currentColor; }
-.sa-cta:hover { background: var(--abtn-hov, #f4f2ef); }
-.sa-cta-div { width: 1px; height: 24px; background: var(--bd, #e7ddd2); }
-
-/* ---------- attention chip ---------- */
-.sa-chip {
-  display: inline-flex; align-items: center; gap: 10px; margin: 0;
-  background: transparent; border: none; cursor: pointer;
-  color: var(--chip-ink, #3b2a20);
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 6px 2px; transition: opacity 260ms ease;
-}
-.t-capp .sa-chip { --chip-ink: #3b2a20; }
-.t-bold .sa-chip { --chip-ink: #000000; }
-.t-edn .sa-chip { --chip-ink: #1a1a1a; }
-.sa-chip:hover { opacity: 0.72; }
-.sa-chip.gone { opacity: 0; pointer-events: none; }
-.sa-chip .sa-chip-dot {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--acc, #7c3a2a);
-  animation: sa-chippulse 2s ease-out infinite;
-}
-@keyframes sa-chippulse {
-  0% { box-shadow: 0 0 0 0 var(--chip-pulse, rgba(124, 58, 42, 0.45)); }
-  70% { box-shadow: 0 0 0 8px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
-.t-capp .sa-chip .sa-chip-dot { --chip-pulse: rgba(124, 58, 42, 0.45); }
-.t-bold .sa-chip .sa-chip-dot { --chip-pulse: rgba(29, 23, 18, 0.45); }
-.t-edn .sa-chip .sa-chip-dot { --chip-pulse: rgba(68, 72, 77, 0.45); }
-.sa-chip .sa-chip-chev { stroke: currentColor; }
-
-/* ---------- focus slot side column ---------- */
-.sa-greet-side {
-  min-width: 0; position: relative; text-align: left;
-  opacity: 0; transform: translateX(14px); pointer-events: none;
-  transition: opacity 240ms ease, transform 340ms cubic-bezier(.22,.8,.3,1);
-  perspective: 1400px;
-}
-.sa-greet.split .sa-greet-side { opacity: 1; transform: none; pointer-events: auto; transition-delay: 90ms; }
-/* panels fill the track absolutely so the LEFT column alone sets the row height */
-.sa-greet-side > .sa-focus-panel { position: absolute; inset: 0; display: flex; flex-direction: column; }
-/* flip hand-off (an-d, locked) */
-@keyframes sa-flip-out { to { opacity: 0; transform: rotateY(-68deg); } }
-@keyframes sa-flip-in { from { opacity: 0; transform: rotateY(68deg); } to { opacity: 1; transform: none; } }
-.sa-greet-side .leaving { z-index: 1; animation: sa-flip-out 240ms cubic-bezier(.5,0,.8,.4) forwards; }
-.sa-greet-side .arriving { z-index: 2; animation: sa-flip-in 340ms cubic-bezier(.22,.8,.3,1) both; }
+.sa-hbtn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; flex: none; }
+.sa-hbtn:hover { border-color: #b9a893; color: var(--ink, #3a1c14); }
+/* the one primary — dark-ink filled, never a coloured fill */
+.sa-hbtn.dark { background: #2b2118; border-color: #2b2118; color: #f6efe8; }
+.sa-hbtn.dark:hover { background: #3a2d22; color: #f6efe8; }
+.sa-hero-todo { min-width: 0; }
 
 /* focused stat panel */
 .sa-fstat {
@@ -161,28 +114,6 @@
 }
 .sa-unpin:hover { color: var(--ink, #3a1c14); border-color: var(--ink, #3a1c14); }
 
-/* mini stat grid under the CTAs while a focus is open */
-.sa-minis {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left;
-  max-height: 0; opacity: 0; overflow: clip; overflow-clip-margin: 28px; margin-top: 0;
-  transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 240ms ease, margin-top 360ms cubic-bezier(.22,.8,.3,1);
-}
-.sa-greet.split .sa-minis { max-height: 340px; opacity: 1; margin-top: 22px; transition-delay: 60ms; }
-.sa-minis.cols3 { grid-template-columns: repeat(3, 1fr); }
-.sa-mini {
-  background: var(--card, #fffefb);
-  border: var(--bdw, 1px) solid var(--bd, #e7ddd2);
-  border-radius: 14px; padding: 14px 17px; cursor: pointer; text-align: left;
-  transition: transform 160ms ease, box-shadow 160ms ease;
-}
-.sa-mini:hover { transform: translateY(-1px); }
-.t-edn .sa-mini { background: #fff; border-color: transparent; border-radius: 16px; box-shadow: 0 1px 2px rgba(20,20,20,0.04), 0 8px 22px rgba(20,20,20,0.06); }
-.sa-mini .sa-cap { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8a7a6c; }
-.t-edn .sa-mini .sa-cap { color: #8b8b8b; }
-.sa-mini .sa-cap svg { stroke: var(--sd-hue, #7c3a2a); flex: none; }
-.sa-mini .sa-n { font-family: var(--font-serif); font-size: 30px; font-weight: 500; color: var(--ink, #3a1c14); line-height: 1.05; margin-top: 8px; }
-.sa-mini .sa-p { font-size: 10.5px; color: #8a7a6c; margin-top: 4px; }
-
 /* ---------- full-width stat row ---------- */
 .sa-stats {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
@@ -192,7 +123,6 @@
   max-height: 360px; margin-bottom: 0; overflow: clip; overflow-clip-margin: 260px;
   transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 240ms ease 100ms, margin-bottom 360ms cubic-bezier(.22,.8,.3,1);
 }
-.sa-dash.split-open .sa-stats { max-height: 0; opacity: 0; margin-bottom: -20px; overflow-clip-margin: 28px; transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 200ms ease, margin-bottom 360ms cubic-bezier(.22,.8,.3,1); }
 .sa-stat {
   /* clip (not hidden) + clip-margin so StatTooltips above the chart are never cut.
      Enlarged container (ref: dashboard-bigger-cards) — padding/min-height/shadow bumped for presence;
@@ -440,17 +370,15 @@
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .sa-greet, .sa-greet-side, .sa-minis, .sa-stats, .sa-tldrawer, .sa-dtop-searchwrap { transition: none !important; }
-  .sa-greet-side .leaving, .sa-greet-side .arriving { animation: none !important; }
-  .sa-chip { transition: none !important; }
-  .sa-chip .sa-chip-dot { animation: none !important; }
+  .sa-stats, .sa-tldrawer, .sa-dtop-searchwrap { transition: none !important; }
 }
 
 /* ---------- narrow stage ---------- */
 @media (max-width: 1100px) {
   .sa-stats { grid-template-columns: repeat(2, 1fr); max-height: 540px; }
-  .sa-greet.split { grid-template-columns: 1fr; }
-  .sa-greet-side { display: none; }
+  /* the hero stacks, TO-DO FIRST — the card is the reason to look at this page */
+  .sa-herozone { grid-template-columns: 1fr; }
+  .sa-hero-todo { order: -1; }
 }
 
 /* ---------- MOBILE (Mobile Pass 1, <md; ref design-refs/mobile-concept-v1.html frame 01) ----
@@ -464,13 +392,11 @@
   /* the viewport law: dvh with the vh fallback (wins over the layered min-h-screen utility) */
   .sa-dashroot { min-height: 100vh; min-height: 100dvh; }
   .sa-dash { padding: 12px 16px 30px; }
-  .sa-greet { padding: 6px 0 0; text-align: left; margin-bottom: 0; }
-  .sa-greet-eyebrow { justify-content: flex-start; margin-bottom: 10px; }
-  .sa-greet-hi { font-size: 27px; margin: 0 0 14px; }
-  .sa-chip,
-  .sa-greet-ctas,
-  .sa-greet-div,
-  .sa-greet-side { display: none; }
+  .sa-herozone { padding: 6px 0 0; gap: 16px; }
+  .sa-hero { padding: 0; }
+  .sa-hero-hi { font-size: 27px; margin: 10px 0 0; }
+  /* the action row stands down below md — the floating tab capsule carries these */
+  .sa-hero-actions { display: none; }
   .sa-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 18px !important; }
   .sa-dash-panels { gap: 24px !important; margin-top: 24px !important; }
   /* the fortnight carousel stands down (the concept stack carries no strip); WhatsLive's own

@@ -49,12 +49,11 @@ import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
 // sidebar's recipe), so the doorway can never disagree with the page it opens.
 import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
-// with focus slot → stat row → Fortnight → What's live; timeline in the right-edge drawer).
+// (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
-import { FocusGreeting } from "./dashboard/FocusGreeting";
+import { DashboardHero } from "./dashboard/DashboardHero";
 import { TimelineDrawer } from "./dashboard/TimelineDrawer";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
-import { useFocusSlot } from "./dashboard/focusSlot";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { DiaryCarousel } from "./dashboard/DiaryCarousel";
@@ -502,10 +501,10 @@ export const Dashboard: React.FC<{
     deleteUserTask
   } = useScriptAllyDb();
 
-  // v37 focus slot + stat definitions (hooks — must precede every conditional return).
-  const prefersReducedMotion =
-    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const slot = useFocusSlot(prefersReducedMotion);
+  // Stat definitions (hook — must precede every conditional return).
+  // ⚠️ THE FOCUS SLOT IS GONE (settled-desk Phase 1). `useFocusSlot` and its reducer survive in
+  // dashboard/focusSlot.ts, unused, with their unit tests — deleting a tested pure module is a
+  // separate decision from restructuring a layout. Flagged in the build report.
   // NOTE: activities (not mergedActivities) — the raw feed is available above the guards; the
   // hover panels' median-reply footer reads agent-response activities from it.
   const statDefs = useStatDefs(queries, agents, activities);
@@ -1467,7 +1466,7 @@ export const Dashboard: React.FC<{
     const t = new Date(a.date).getTime();
     return Number.isFinite(t) && t >= Date.now() - 14 * 86400000;
   }).length;
-  // The real To-do card, hosted by the focus slot (same handlers as its old grid position).
+  // The real To-do card — permanent furniture in the hero's right column now, so no onClose.
   const todoPanel = (
     <OverToYou
       tasks={tasks}
@@ -1483,7 +1482,6 @@ export const Dashboard: React.FC<{
       onAddNote={(f) => addUserTask({ text: f.text, dueDate: f.dueDate ?? undefined })}
       onCompleteNote={(id) => updateUserTask(id, { done: true, completedAt: new Date().toISOString() })}
       onDeleteNote={(t) => deleteUserTask(t.id)}
-      onClose={() => slot.request(null)}
     />
   );
 
@@ -1598,17 +1596,14 @@ export const Dashboard: React.FC<{
         </div>
       )}
 
-      <div className={`sa-dash${slot.focus !== null ? " split-open" : ""}`}>
+      <div className="sa-dash">
         {/* DashTopBar retired (shell rollout Phase 7): the v2 shell's top bar carries the
             search (and now owns dashboard ⌘K), the sidebar carries settings/account, and the
             greeting header's kicker carries the date. */}
-        <FocusGreeting
+        <DashboardHero
           firstName={getUserFirstName()}
           queries={queries}
-          urgentCount={urgentRowCount}
-          slot={slot}
-          statDefs={statDefs}
-          todoPanel={todoPanel}
+          todo={todoPanel}
           onSendQuery={() => onNavigate("queries", "Send a query")}
           onRecordResponse={() => setRecordResponseScreenOpen(true)}
           onAddAgent={() => onNavigate("agents", "Add an agent")}
@@ -1633,10 +1628,10 @@ export const Dashboard: React.FC<{
           <span className="sa-mdesk-go" aria-hidden="true">→</span>
         </button>
 
-        {/* Full-width stat row — collapses while a focus is open (.split-open above) */}
-        <div className="sa-stats" style={{ marginTop: 48 }}>
+        {/* Full-width stat row — always on, always charts, and it never moves. */}
+        <div className="sa-stats" style={{ marginTop: 28 }}>
           {statDefs.map((d) => (
-            <StatCardFull key={d.key} def={d} onPin={() => { if (!slot.animating) slot.request(d.key); }} />
+            <StatCardFull key={d.key} def={d} />
           ))}
         </div>
 

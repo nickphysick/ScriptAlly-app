@@ -430,16 +430,31 @@ export const useStatDefs = (queries: Query[], agents: Agent[], activities: Activ
 
 /* ── renderings ── */
 
-export const StatCardFull: React.FC<{ def: StatDef; onPin: () => void }> = ({ def, onPin }) => (
-  <div className="sa-stat" title="Pin to focus" role="button" tabIndex={0}
-    onClick={onPin}
-    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPin(); } }}
-  >
-    <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
-    <div className="sa-numrow"><span className="sa-num">{def.num}</span><span className="sa-pill">{def.pill}</span></div>
-    <div className={`sa-foot${def.fillFoot ? " sa-foot-fill" : ""}`}>{def.visual(46)}</div>
-  </div>
-);
+/**
+ * ⚠️ `onPin` IS OPTIONAL NOW, and without it the card is NOT a button. The focus slot it pinned
+ * into is retired (settled-desk Phase 1): the stat row is always on, always charts, and never
+ * moves. A card that still announced itself as `role="button"` with "Pin to focus" would be
+ * offering an interaction that no longer exists — worse than a plain card, because a screen
+ * reader would promise it too.
+ */
+export const StatCardFull: React.FC<{ def: StatDef; onPin?: () => void }> = ({ def, onPin }) => {
+  const body = (
+    <>
+      <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
+      <div className="sa-numrow"><span className="sa-num">{def.num}</span><span className="sa-pill">{def.pill}</span></div>
+      <div className={`sa-foot${def.fillFoot ? " sa-foot-fill" : ""}`}>{def.visual(46)}</div>
+    </>
+  );
+  if (!onPin) return <div className="sa-stat">{body}</div>;
+  return (
+    <div className="sa-stat" title="Pin to focus" role="button" tabIndex={0}
+      onClick={onPin}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPin(); } }}
+    >
+      {body}
+    </div>
+  );
+};
 
 export const StatMini: React.FC<{ def: StatDef; onPin: () => void }> = ({ def, onPin }) => (
   <button type="button" className="sa-mini" title="Pin to focus" onClick={onPin}>
