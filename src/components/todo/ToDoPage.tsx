@@ -58,7 +58,7 @@ import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
-import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, TodoColumnId } from "../../lib/todoColumns";
+import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
 import { MenuLeaf } from "../../lib/todoMenu";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 import { activityEventLabel } from "../../lib/activityEvent";
@@ -395,6 +395,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ONE counts object read by BOTH the ribbon tiles and the lane headers (equality by construction).
   // Housekeeping = the gap count + the individual stale cards (12+9 gaps + 4 stale = 25), never piles.
   const tiles = ribbonTiles(board, hkGapCount(hkGroups) + staleCards.length);
+  /* ⚠️ THE COLUMNS, HOISTED — AND CARDS ARE THE UNIT (board fixes II, P5). The page used to show
+     THREE figures from THREE derivations in TWO units: the subtitle summed the tiles (members —
+     every agent inside a sweep counted loose), the FILTERS panel counted the raw lanes (members
+     again, snoozed invisible to it), and the columns drew collapsed sweeps plus a flags-built
+     Snoozed. 42 / 27 / fourteen, all "correct" in their own unit, none describing the board.
+     One derivation now: boardColumns is computed ONCE here, and the subtitle, the FILTERS counts
+     and the rendered columns all read IT. A sweep is one card everywhere; its member figure
+     appears only inside the card, as n-of-m. `tiles` survives for the desk state and the
+     assistant band, whose subjects genuinely are items, not cards. */
+  const boardSweeps = useMemo(
+    () => hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length, g.members.map((m) => m.card.key))),
+    [hkGroups],
+  );
+  const boardCols = useMemo(
+    () => boardColumns({ board, flags: taskFlags, queries, agents, sweeps: boardSweeps, today, nowMs: now }),
+    // now rides today's stability, as the board memo above already accepts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [board, taskFlags, queries, agents, boardSweeps, today],
+  );
   // Empty-state derivation (todo-empty-states.html): A = new desk (zero queries AND agents);
   // E = desk cleared (all three sets empty AND a non-empty done-log — earned, never default);
   // otherwise each reel handles its own clear. All pure views; nothing stored.
@@ -1004,7 +1023,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               rather than to one of its two renderings. */}
           <div className="tdw">
           <TodoSideContainer
-            counts={facetCounts([...board.do, ...board.hk, ...board.nt])}
+            /* ⚠️ THE FILTERS COUNT THE RENDERED CARDS (P5): the live columns' own set — sweeps as
+               ONE card, the flags-built Snoozed included, Done outside. The raw lanes it used to
+               count held every sweep member loose and could not see Snoozed at all, which is how
+               "Everything 27" sat beside columns showing fourteen. */
+            counts={facetCounts(liveBoardCards(boardCols))}
             active={facet}
             onSelect={setFacet}
             onOpenTaskSettings={() => setSettingsOpen(true)}
@@ -1192,12 +1215,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      return's JSX evaluates, so a `const` here throws a ReferenceError on every render and the
      page loads as "something went wrong". A function declaration hoists; a const does not. */
   function boardSubtitle(): string {
-    const total = tiles.urgent + tiles.housekeeping + tiles.notes;
-    const words = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
-    const spell = (n: number) => (n <= 12 ? words[n] : String(n));
-    if (total === 0) return "Nothing waiting on you.";
-    const urgent = tiles.urgent > 0 ? `, ${spell(tiles.urgent)} urgent` : "";
-    return `Everything waiting on you — ${spell(total)} item${total === 1 ? "" : "s"}${urgent}.`;
+    /* ⚠️ CARDS, FROM THE COLUMNS' OWN OBJECT (P5). This used to sum the tiles — a MEMBER count,
+       every sweep uncollapsed — so the header said 42 over columns showing fourteen. It now reads
+       boardFigures(boardCols): the exact cards the four columns render, sweeps as one, Done
+       outside, urgency by the consolidated family. Copy lives in boardSubtitleCopy (locked). */
+    return boardSubtitleCopy(boardFigures(boardCols));
   }
 
   function renderPageHeader() {
@@ -1816,20 +1838,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   function renderBoard() {
-    /* ⚠️ THE SWEEPS COME FROM THE SAME `hkGroups` THE COUNT DOES. Housekeeping is counted by
-       MEMBERS and drawn as one card per rule; passing the groups here is what lets the card
-       account for its members, so the columns reconcile with the badge. */
-    const sweeps = hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length,
-      g.members.map((m) => m.card.key)));
-    const raw = boardColumns({ board, flags: taskFlags, queries, agents, sweeps, today, nowMs: now });
+    /* ⚠️ THE COLUMNS ARE THE HOISTED `boardCols` (P5) — the same object the subtitle and the
+       FILTERS counts read, so the three figures cannot diverge again. */
     /* THE PAGE-LEVEL NARROWINGS, applied to ALL FOUR COLUMNS (P1 sort · P2 facet). Applying
        either to one column would leave the board showing four differently-ordered views of one
        set, and you would have to remember which. */
     const columns = {
-      todo: sortBoardCards(applyFacet(raw.todo, facet), sort),
-      today: sortBoardCards(applyFacet(raw.today, facet), sort),
-      snoozed: sortBoardCards(applyFacet(raw.snoozed, facet), sort),
-      done: sortBoardCards(applyFacet(raw.done, facet), sort),
+      todo: sortBoardCards(applyFacet(boardCols.todo, facet), sort),
+      today: sortBoardCards(applyFacet(boardCols.today, facet), sort),
+      snoozed: sortBoardCards(applyFacet(boardCols.snoozed, facet), sort),
+      done: sortBoardCards(applyFacet(boardCols.done, facet), sort),
     };
     return (
       <TodoBoard

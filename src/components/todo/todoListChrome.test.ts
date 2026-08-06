@@ -92,8 +92,9 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
 describe("FILTERS is the ONE narrowing surface, and it reaches all four columns (P2)", () => {
   it("the facet is applied to EVERY column, not to one", () => {
     const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
+    // P5 hoisted the raw columns to the page-level `boardCols`; the narrowing law is unchanged.
     for (const col of ["todo", "today", "snoozed", "done"]) {
-      expect(fn, `${col} must be filtered`).toContain(`applyFacet(raw.${col}, facet)`);
+      expect(fn, `${col} must be filtered`).toContain(`applyFacet(boardCols.${col}, facet)`);
     }
   });
 
@@ -102,7 +103,11 @@ describe("FILTERS is the ONE narrowing surface, and it reaches all four columns 
     expect((fn.match(/sortBoardCards\(/g) ?? []).length).toBe(4);
   });
 
-  it("its counts come from the cards the columns render, never a second tally", () => {
-    expect(page).toContain("counts={facetCounts([...board.do, ...board.hk, ...board.nt])}");
+  it("its counts come from the cards the columns RENDER, never a second tally", () => {
+    /* ⚠️ SUPERSEDED FEED (P5): the raw lanes this lock used to pin counted every sweep member
+       loose and could not see the flags-built Snoozed — which is exactly how "Everything 27" sat
+       beside columns showing fourteen. The feed is now the hoisted columns' own live set. */
+    expect(page).toContain("counts={facetCounts(liveBoardCards(boardCols))}");
+    expect(page).not.toContain("facetCounts([...board.do");
   });
 });

@@ -25,6 +25,7 @@ import { BoardCard, AssembledBoard } from "./todoBoard";
 import { TaskFlag, Query, Agent } from "../types";
 import { isSnoozed } from "./todoListPage";
 import { agentPrimary, agentInitials } from "./agentDisplay";
+import { cardFamily } from "./todoFamily";
 
 export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
 
@@ -258,6 +259,35 @@ export function boardColumns(input: ColumnInput): BoardColumns {
 
   // Done is today's log, projected — the SAME `cleared` union the Today page reads.
   return { todo, today, snoozed, done: boardEligible(input.board.cleared) };
+}
+
+/**
+ * ⚠️ CARDS ARE THE UNIT (board fixes II, P5). The page's three figures — the subtitle, the
+ * FILTERS' Everything, the column counts — used to come from THREE derivations in TWO units:
+ * the subtitle and the facet counts tallied MEMBERS (every agent inside a sweep, counted loose),
+ * while the columns drew collapsed sweep cards, so the header said 42, the panel said 27 and the
+ * columns showed fourteen. One derivation now: whatever boardColumns renders is what everything
+ * counts. A sweep is ONE card; its member figure appears only INSIDE the card, as n-of-m.
+ *
+ * Done stays OUTSIDE the live figures — it is the day's record, not work waiting on you.
+ */
+export function liveBoardCards(cols: BoardColumns): BoardCard[] {
+  return [...cols.todo, ...cols.today, ...cols.snoozed];
+}
+
+export function boardFigures(cols: BoardColumns): { cards: number; urgent: number } {
+  const live = liveBoardCards(cols);
+  return { cards: live.length, urgent: live.filter((c) => cardFamily(c) === "urgent").length };
+}
+
+/** The header's one line, from the SAME figures. Numbers ≤ twelve read as words (the dashboard
+ *  eyebrow's convention); the noun is CARDS, because that is what the columns show. */
+export function boardSubtitleCopy(f: { cards: number; urgent: number }): string {
+  if (f.cards === 0) return "Nothing waiting on you.";
+  const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+  const spell = (n: number) => (n <= 12 ? words[n] : String(n));
+  const urgent = f.urgent > 0 ? `, ${spell(f.urgent)} urgent` : "";
+  return `Everything waiting on you — ${spell(f.cards)} card${f.cards === 1 ? "" : "s"}${urgent}.`;
 }
 
 /**
