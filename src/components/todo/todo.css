@@ -1325,3 +1325,8 @@ button.tdb-ldot { cursor: pointer; }
   .tdb-tools { flex-wrap: wrap; justify-content: flex-end; }
   .tdb-tools .tdb-bsearch { width: 100%; order: -1; }
 }
+
+/* ── board fixes II P6 — TABULAR NUMERALS, PAGE-WIDE. Every count, date and figure on the page
+   sits in lining tabular digits so columns of numbers align and nothing jitters as counts tick
+   over. Inherited from the root; the board's portal menu (outside this root) opts in itself. ── */
+.tdb-wrap { font-variant-numeric: tabular-nums; }

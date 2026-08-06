@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TodoBoard — the four-column board (workspace pack, Phase 4; board fixes II, Phase 1; ref
+ * TodoBoard — the four-column board (workspace pack, Phase 4; board fixes II, Phases 1–6; ref
  * design-refs/todo-board-settled.html).
  *
  * ⚠️ THE BOARD OWNS NO STATE AND WRITES NOTHING. Every column is a state the app already has, and
@@ -10,12 +10,14 @@
  * where a card is DRAWN; it never decides where a card IS. That is the whole reason the "Doing"
  * column is dead: it was the only one that could not be derived, so it would have had to be
  * stored, and a stored placement is a second system that has to agree with the first.
+ * (The two pieces of local state below — a column's "+ N MORE" expansion and a sweep's
+ * session-high member count — are VIEW memory, not placement: losing them changes nothing true.)
  *
  * ⚠️ DRAG IS NEVER THE ONLY PATH. Every verb a drag performs is also on the card's ⋯ menu, because
  * a board reachable only by pointer is a board some people cannot use at all.
  *
  * ⚠️ THE ⋯ MENU IS A PORTAL TO document.body (board fixes II, P1). It used to render inside the
- * card's foot, and the card carries `overflow` clipping — so the menu drew CLIPPED to the card's
+ * card's foot, and the card carried `overflow` clipping — so the menu drew CLIPPED to the card's
  * box, a strip of buttons with their labels cut off. Positioning is fixed-coordinate from the
  * trigger's rect (the pure `placeMenu` — flips upward at the viewport's bottom edge), and the
  * menu closes on outside press, Escape (focus returns to the trigger), any scroll, resize, and
@@ -26,7 +28,10 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { MoreHorizontal } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
-import { TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily } from "../../lib/todoColumns";
+import {
+  TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily,
+  isSweepCard, wipLine, columnSlice,
+} from "../../lib/todoColumns";
 import { cardMenu, placeMenu, MenuEntry, MenuLeaf, MenuGroup } from "../../lib/todoMenu";
 import "./todoBoard.css";
 
@@ -40,12 +45,16 @@ export interface TodoBoardProps {
   onVerb: (card: BoardCard, item: MenuLeaf, column: TodoColumnId) => void;
 }
 
+/* ⚠️ SPEAKING EMPTY STATES (P6) — a sentence about what the column is FOR, in the column's own
+   voice, never a bare "empty". Snoozed's line is the settled ref's verbatim. */
 const COL_EMPTY: Record<TodoColumnId, string> = {
-  todo: "Nothing waiting.",
+  todo: "Nothing waiting on you here.",
   today: "Nothing committed to today.",
-  snoozed: "Nothing put away.",
+  snoozed: "Snoozed work waits here until its day.",
   done: "Nothing cleared yet today.",
 };
+
+const EASE = "cubic-bezier(.2,.7,.3,1)"; // ⚠️ THE ONE EASING — restated from --tbd-ease for WAAPI
 
 interface OpenMenu {
   key: string;
@@ -201,11 +210,22 @@ const BoardCardMenu: React.FC<{
   );
 };
 
+const reducedMotion = () =>
+  typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
 export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, onVerb }) => {
   const [dragging, setDragging] = useState<{ card: BoardCard; from: TodoColumnId } | null>(null);
   const [over, setOver] = useState<TodoColumnId | null>(null);
   const [menu, setMenu] = useState<OpenMenu | null>(null);
+  /* P6 — "+ N MORE" expansion, per column. Session view memory only. */
+  const [grown, setGrown] = useState<Partial<Record<TodoColumnId, true>>>({});
+  /* P6 — the completion ring: keys newly arrived in Done wear the sage ring for ~600ms. */
+  const [rung, setRung] = useState<Set<string>>(new Set());
+  const prevDone = useRef<Set<string> | null>(null);
   const cardEls = useRef(new Map<string, HTMLElement>());
+  /* P6 — a sweep's session-high member count: with a baseline the rail can show progress
+     ("5 OF 16") as the sweep shrinks. DERIVED VIEW MEMORY — nothing stored, honest at zero. */
+  const sweepBase = useRef(new Map<string, number>());
   /* ⚠️ CLICK vs DRAG, BY MOVEMENT (board fixes II, P2). The card is the dock's door AND a
      draggable, and browsers do not reliably suppress the click after an HTML5 drag — so a slow
      drag could dock the card it just moved. Two guards: a dragstart poisons the gesture outright,
@@ -219,6 +239,56 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
     const p = pressAt.current;
     return !!p && Math.hypot(e.clientX - p.x, e.clientY - p.y) > DRAG_THRESHOLD_PX;
   };
+
+  /* ⚠️ CROSS-COLUMN MOTION IS A FLIP OVER WAAPI (P6): cards ANIMATE between columns rather than
+     teleporting. el.animate composes over the stylesheet and holds no fill — deliberately, per
+     the house motion trap (an entrance animation with `fill-mode: both` outranks inline
+     transforms and silently displaces FLIP offsets; WAAPI with no fill cannot). Same-column
+     reshuffles do not animate — the pack's 220ms is for the column CROSSING. */
+  const prevRects = useRef(new Map<string, DOMRect>());
+  const prevCols = useRef(new Map<string, TodoColumnId>());
+  useLayoutEffect(() => {
+    const nextCols = new Map<string, TodoColumnId>();
+    for (const col of TODO_COLUMNS) for (const c of columns[col.id]) nextCols.set(c.key, col.id);
+    const nextRects = new Map<string, DOMRect>();
+    cardEls.current.forEach((el, key) => nextRects.set(key, el.getBoundingClientRect()));
+    if (!reducedMotion()) {
+      nextRects.forEach((rect, key) => {
+        const was = prevRects.current.get(key);
+        const from = prevCols.current.get(key);
+        if (!was || !from || from === nextCols.get(key)) return;
+        const dx = was.left - rect.left;
+        const dy = was.top - rect.top;
+        if (!dx && !dy) return;
+        cardEls.current.get(key)?.animate(
+          [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
+          { duration: 220, easing: EASE },
+        );
+      });
+    }
+    prevRects.current = nextRects;
+    prevCols.current = nextCols;
+  });
+
+  /* P6 — the completion ring fires for keys NEWLY in Done (never on first mount: arriving at a
+     page with cleared work is not a completion happening). */
+  useEffect(() => {
+    const nowDone = new Set(columns.done.map((c) => c.key));
+    const before = prevDone.current;
+    prevDone.current = nowDone;
+    if (!before || reducedMotion()) return;
+    const fresh = [...nowDone].filter((k) => !before.has(k));
+    if (!fresh.length) return;
+    setRung((r) => new Set([...r, ...fresh]));
+    const t = window.setTimeout(() => {
+      setRung((r) => {
+        const next = new Set(r);
+        for (const k of fresh) next.delete(k);
+        return next;
+      });
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [columns.done]);
 
   const closeMenu = (returnFocus: boolean) => {
     setMenu((m) => {
@@ -241,6 +311,17 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
     onPlan(card, plan, from, to);
   };
 
+  /** The sweep's band figure: "5 OF 16" once this session has seen it shrink, else "16 TO FIX". */
+  const sweepFigure = (c: BoardCard): { label: string; pct: number } => {
+    const m = isSweepCard(c) ? c.sweepOf : 0;
+    const base = Math.max(sweepBase.current.get(c.key) ?? 0, m);
+    sweepBase.current.set(c.key, base);
+    const fixed = base - m;
+    return fixed > 0
+      ? { label: `${fixed} OF ${base}`, pct: Math.round((fixed / base) * 100) }
+      : { label: c.due, pct: 0 };
+  };
+
   return (
     <div className="tbd">
       {menu && (
@@ -253,10 +334,12 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
       {TODO_COLUMNS.map((col) => {
         const cards = columns[col.id];
         const isOver = over === col.id && dragging !== null && dragging.from !== col.id;
+        const { visible, more } = columnSlice(cards, !!grown[col.id]);
+        const wip = col.id === "today" ? wipLine(cards.length) : null;
         return (
           <section
             key={col.id}
-            className={`tbd-col${isOver ? " over" : ""}`}
+            className="tbd-col"
             aria-label={col.label}
             onDragOver={(e) => { e.preventDefault(); setOver(col.id); }}
             onDragLeave={() => setOver((c) => (c === col.id ? null : c))}
@@ -267,15 +350,21 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
               setDragging(null);
             }}
           >
-            <div className="tbd-head">
+            {/* ⚠️ THE EDITORIAL HEAD (P6, ref .fh): Playfair over a 2px ink rule — sage on Done —
+                sticky, with a short ground gradient beneath so cards slide under it rather than
+                colliding with it. The tinted column wells are GONE; the rule is the column. */}
+            <div className={`tbd-fh${col.id === "done" ? " done" : ""}`}>
               <h3>{col.label}</h3>
-              <span className="tbd-cn">{cards.length}</span>
+              <span className="tbd-cn">{col.id === "done" ? `${cards.length} TODAY` : cards.length}</span>
+              {/* ⚠️ THE WIP LINE IS ADVICE, NEVER A BLOCK (P6): it changes tone past five; the
+                  cap itself lives in the commit primitive, not here. */}
+              {wip && <span className="tbd-wip">{wip}</span>}
             </div>
 
-            {/* The drop zone LABELS THE ACT (the copy register). A zone that only highlights
-                leaves you to guess what letting go will do — and for Snoozed the answer is not
-                "snooze it", it is "ask you for a date". */}
-            {isOver && <div className="tbd-drop">{col.dropLabel}</div>}
+            {/* ⚠️ THE GHOST DROP SLOT (P6, ref .ghost): a card-shaped hatched-paper target — the
+                drop looks like where a card will land, not like an alert. It still LABELS THE ACT
+                (the copy register): for Snoozed the answer is "ask you for a date". */}
+            {isOver && <div className="tbd-ghost">{col.dropLabel}</div>}
 
             <div className="tbd-body">
               {cards.length === 0 && (
@@ -291,7 +380,10 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                 </div>
               )}
 
-              {cards.map((c) => (
+              {visible.map((c) => {
+                const sweep = isSweepCard(c);
+                const fig = sweep ? sweepFigure(c) : null;
+                return (
                 <article
                   key={c.key}
                   ref={(el) => {
@@ -303,7 +395,7 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                      they cannot disagree: a pink band always wears the ink border, and no other
                      family ever does. (History: it first keyed on `warn` — most of the board wore
                      ink; then on the lane, which put ink on a promoted user task's sage band.) */
-                  className={`tbd-card${bandFamily(c) === "urgent" ? " urgent" : ""}${c.done ? " done" : ""}`}
+                  className={`tbd-card${bandFamily(c) === "urgent" ? " urgent" : ""}${c.done ? " done" : ""}${sweep ? " tbd-sweep" : ""}`}
                   draggable
                   tabIndex={0}
                   role="button"
@@ -326,7 +418,9 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                       whichever end produced it — and the band is where it shows. */}
                   <div className={`tbd-band fam-${bandFamily(c)}`}>
                     <span className="tbd-kind">{c.kind}</span>
-                    {c.due && c.due !== c.kind && <span className="tbd-when">{c.due}</span>}
+                    {sweep
+                      ? <span className="tbd-when">{fig!.label}</span>
+                      : c.due && c.due !== c.kind && <span className="tbd-when">{c.due}</span>}
                   </div>
                   {/* the door's whisper (P2, ref .hint): OPEN ▸ surfaces on hover, tucked under
                       the band in the seat's reserved corridor — always in the DOM, CSS-revealed,
@@ -335,6 +429,16 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                   <span className="tbd-hint" aria-hidden>OPEN ▸</span>
                   <div className="tbd-t">{c.title}</div>
                   {c.record && <div className="tbd-meta">{c.record}</div>}
+
+                  {/* ⚠️ THE SWEEP'S PROGRESS RAIL (P6): n-of-m lives INSIDE the sweep card — the
+                      one place the member unit is allowed to show (P5's law). The rail fills only
+                      once this session has actually fixed some; a pile you have not started is a
+                      pile, not a 0% failure. */}
+                  {sweep && (
+                    <div className="tbd-prog" aria-hidden>
+                      <i style={{ width: `${fig!.pct}%` }} />
+                    </div>
+                  )}
 
                   {/* ⚠️ THE SEAT (P1, ref option A): ONE ⋯, bottom-right, in a permanently
                       reserved lane — the card's text padding reserves it, so nothing ever sits
@@ -356,8 +460,29 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                   >
                     <MoreHorizontal size={15} aria-hidden />
                   </button>
+
+                  {/* P6 — the completion ring: sage keyline + soft halo, ~600ms, then it settles
+                      into Done like everything else there. Skipped under reduced motion. */}
+                  {rung.has(c.key) && <span className="tbd-ring" aria-hidden />}
                 </article>
-              ))}
+                );
+              })}
+
+              {/* ⚠️ THE FADE HEM (P6, ref .fade): where more cards remain, the column foot fades
+                  into the ground above "+ N MORE" — the fold says there is more, and the button
+                  says how much. Expansion is session view memory. */}
+              {more > 0 && (
+                <>
+                  <div className="tbd-fade" aria-hidden />
+                  <button
+                    type="button"
+                    className="tbd-morebtn"
+                    onClick={() => setGrown((g) => ({ ...g, [col.id]: true }))}
+                  >
+                    + {more} MORE ▾
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Done clears at midnight — but the log keeps it, and saying so is the difference

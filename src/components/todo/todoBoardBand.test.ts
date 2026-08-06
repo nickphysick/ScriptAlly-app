@@ -89,7 +89,11 @@ describe("⚠️ the ink border is URGENT-ONLY (fix 5)", () => {
   });
 
   it("the base card is a hairline and only .urgent is ink", () => {
-    const baseRule = css.slice(css.indexOf(".tbd-card {"), css.indexOf(".tbd-card.urgent"));
+    /* P6 re-anchored (the slice law): ".tbd-card {" now first matches the body-spacing rule, and
+       a slice from there swept in the lift-link's ink hover. Anchor on the surface rule itself. */
+    const anchor = ".tbd-card {\n  background:";
+    expect(css).toContain(anchor);
+    const baseRule = css.slice(css.indexOf(anchor), css.indexOf("}", css.indexOf(anchor)));
     expect(baseRule).toContain("border: 1px solid #efe8dc");
     expect(baseRule).not.toContain("#2a1a13");
     expect(css).toContain(".tbd-card.urgent { border: 1px solid #2a1a13; }");

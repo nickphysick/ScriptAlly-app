@@ -261,6 +261,24 @@ export function boardColumns(input: ColumnInput): BoardColumns {
   return { todo, today, snoozed, done: boardEligible(input.board.cleared) };
 }
 
+/* ── the editorial board's pure fittings (board fixes II, P6) ─────────────────────────────── */
+
+/** Today's WIP line — ADVICE, NEVER A BLOCK. Present from the first committed card; past five it
+ *  changes tone rather than tightening a gate (the cap itself lives in the commit primitive). */
+export function wipLine(committedCount: number): string | null {
+  if (committedCount === 0) return null;
+  return committedCount > 5 ? "THAT'S A FULL DAY" : "A GOOD DAY IS 3–5";
+}
+
+/** A column shows this many cards before the fade hem and "+ N MORE" take over. */
+export const BOARD_COL_CAP = 8;
+
+/** The visible slice — pure, so the cap arithmetic is testable without a DOM. */
+export function columnSlice(cards: BoardCard[], expanded: boolean): { visible: BoardCard[]; more: number } {
+  if (expanded || cards.length <= BOARD_COL_CAP) return { visible: cards, more: 0 };
+  return { visible: cards.slice(0, BOARD_COL_CAP), more: cards.length - BOARD_COL_CAP };
+}
+
 /**
  * ⚠️ CARDS ARE THE UNIT (board fixes II, P5). The page's three figures — the subtitle, the
  * FILTERS' Everything, the column counts — used to come from THREE derivations in TWO units:
