@@ -20,6 +20,8 @@ import { DeskTooltip } from "./DeskTooltip";
 import { Rect } from "../../lib/deskTooltip";
 import {
   activeStageBreakdown,
+  agentGlyphTone,
+  GlyphTone,
   activeQueriesOf,
   activeWeeklySeries,
   awaitingReplyCount,
@@ -311,6 +313,138 @@ export const ActiveQueriesCard: React.FC<{ queries: Query[]; now?: Date }> = ({ 
               ))}
             </div>
           </>
+        )}
+      </DeskTooltip>
+    </DeskCard>
+  );
+};
+
+/* ══════════════ 3 · AGENTS ══════════════ */
+
+const GLOBE = <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z" /></svg>;
+const MAIL = <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4.5" width="20" height="15" rx="2.5" /><path d="m3 6.5 9 6.5 9-6.5" /></svg>;
+const AGENTS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
+
+const TONE_FILL: Record<GlyphTone, string> = {
+  queried: "#7c3a2a",
+  yours: "#a86a52",
+  closed: "#cbbcae",
+};
+
+/** `https://` prefixed only when the stored value has no scheme of its own. */
+export const websiteHref = (site: string): string =>
+  /^https?:\/\//i.test(site.trim()) ? site.trim() : `https://${site.trim()}`;
+
+/** The domain, without a scheme or a trailing slash — what the row shows. */
+export const websiteText = (site: string): string =>
+  site.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+
+/** `mailto:` with the subject pre-filled — the one place the query's subject line is composed. */
+export const mailtoHref = (email: string, manuscriptTitle: string): string =>
+  `mailto:${email.trim()}?subject=${encodeURIComponent(`Query — ${manuscriptTitle}`)}`;
+
+export const AgentsCard: React.FC<{
+  agents: Agent[];
+  queries: Query[];
+  manuscriptTitle: string;
+}> = ({ agents, queries, manuscriptTitle }) => {
+  /* ⚠️ ONE PIN AT A TIME, HELD AT THE CARD, NOT PER GLYPH. Sixteen glyphs each owning a "am I
+     pinned" flag is sixteen chances for two to be open at once — and the bug would look like a
+     rendering glitch rather than a state one. */
+  const [open, setOpen] = useState<{ id: string; anchor: Rect; pinned: boolean } | null>(null);
+  const graceRef = React.useRef<number | null>(null);
+
+  const cancelGrace = () => { if (graceRef.current) { window.clearTimeout(graceRef.current); graceRef.current = null; } };
+  /* 220ms so the pointer can travel from the glyph into the card it just opened. Without it the
+     card closes underneath the cursor on its way there. */
+  const startGrace = () => { cancelGrace(); graceRef.current = window.setTimeout(() => setOpen(null), 220); };
+  React.useEffect(() => cancelGrace, []);
+
+  const agent = open ? agents.find((a) => a.id === open.id) ?? null : null;
+  const idle = agents.filter((a) => agentGlyphTone(a, queries) === "closed").length;
+
+  const openFor = (a: Agent, el: Element, pinned: boolean) => {
+    cancelGrace();
+    setOpen({ id: a.id, anchor: rectOf(el), pinned });
+  };
+
+  return (
+    <DeskCard pill={<span className="dk-pill">Agents</span>} icon={AGENTS_ICON} bare>
+      <div className="ds-inner">
+        <div className="ds-fig">
+          <span className="ds-n">{agents.length}</span>
+          <span className="ds-cap">{idle} idle</span>
+        </div>
+        <div className="ds-viz">
+          <div className="ds-agents" onMouseLeave={() => { if (!open?.pinned) startGrace(); }}>
+            {agents.map((a) => {
+              const tone = agentGlyphTone(a, queries);
+              const isOpen = open?.id === a.id;
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  data-desk-tip-anchor=""
+                  className={`ds-ag${isOpen ? (open!.pinned ? " pinned" : " held") : ""}`}
+                  /* the accessible name is the person, not "glyph 4 of 16" */
+                  aria-label={`${a.name}${a.agency ? `, ${a.agency}` : ""}`}
+                  aria-expanded={isOpen && open!.pinned}
+                  onMouseEnter={(e) => { if (!open?.pinned) openFor(a, e.currentTarget, false); }}
+                  onFocus={(e) => { if (!open?.pinned) openFor(a, e.currentTarget, false); }}
+                  onClick={(e) => {
+                    /* ⚠️ TOUCH HAS NO HOVER, so a tap must PIN directly — this same handler is the
+                       touch path, which is why pinning does not depend on a preview being open. */
+                    if (open?.pinned && open.id === a.id) { setOpen(null); return; } // same glyph closes
+                    openFor(a, e.currentTarget, true);
+                  }}
+                >
+                  <svg viewBox="0 0 16 17" aria-hidden="true">
+                    <circle cx="8" cy="4" r="3.1" fill={TONE_FILL[tone]} />
+                    <path d="M1.6 16c0-3.5 2.8-5.7 6.4-5.7s6.4 2.2 6.4 5.7z" fill={TONE_FILL[tone]} />
+                  </svg>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <DeskTooltip
+        anchor={open?.anchor ?? null}
+        mode={open?.pinned ? "pinned" : "interactive"}
+        label={agent ? `${agent.name} — contact details` : undefined}
+        onClose={() => setOpen(null)}
+      >
+        {agent && (
+          <div onMouseEnter={cancelGrace} onMouseLeave={() => { if (!open?.pinned) startGrace(); }}>
+            {/* ⚠️ NO STATUS ANYWHERE IN HERE — not the stage, not the last activity, not a dot.
+                The card answers "how do I reach them"; where the query stands is three other
+                surfaces' job, and putting it here gives that fact a fourth home to disagree from. */}
+            <div className="ds-cname">{agent.name}</div>
+            {agent.agency && <div className="ds-cagency">{agent.agency}</div>}
+            <hr className="dk-rule" />
+            <div className="ds-clinks">
+              {agent.website?.trim() ? (
+                <a className="ds-clink" href={websiteHref(agent.website)} target="_blank" rel="noopener">
+                  {GLOBE}
+                  <span className="ds-ctxt"><b>Their website</b>{websiteText(agent.website)}</span>
+                  <span className="ds-carr" aria-hidden="true">→</span>
+                </a>
+              ) : (
+                /* dimmed and inert — never a dead link that looks live */
+                <span className="ds-clink off">{GLOBE}<span className="ds-ctxt"><b>Their website</b>No website recorded</span></span>
+              )}
+              {agent.email?.trim() ? (
+                <a className="ds-clink" href={mailtoHref(agent.email, manuscriptTitle)}>
+                  {MAIL}
+                  <span className="ds-ctxt"><b>Write to them</b>{agent.email}</span>
+                  <span className="ds-carr" aria-hidden="true">→</span>
+                </a>
+              ) : (
+                <span className="ds-clink off">{MAIL}<span className="ds-ctxt"><b>Write to them</b>No address recorded</span></span>
+              )}
+            </div>
+          </div>
         )}
       </DeskTooltip>
     </DeskCard>

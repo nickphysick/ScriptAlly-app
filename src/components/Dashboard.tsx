@@ -54,7 +54,7 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { DashboardHero } from "./dashboard/DashboardHero";
 import { TimelineDrawer } from "./dashboard/TimelineDrawer";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
-import { ActiveQueriesCard, QueriesSentCard, ResponsesCard } from "./dashboard/DeskStats";
+import { ActiveQueriesCard, AgentsCard, QueriesSentCard, ResponsesCard } from "./dashboard/DeskStats";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { DiaryCarousel } from "./dashboard/DiaryCarousel";
@@ -1463,6 +1463,13 @@ export const Dashboard: React.FC<{
     now: Date.now(), mutedTaskRules: currentUser?.mutedTaskRules,
   });
   const mobileNotice = deskNotice(mobileTiles);
+  /* ⚠️ THE SAME KEY THE SHELL WRITES — `scriptally_active_manuscript_id`. Packages, Comps and
+     Manuscripts all read it; resolving the scoped book any other way here would put a different
+     title in the query's subject line from the one the chrome says you are working on. */
+  const activeManuscriptTitle = (() => {
+    const stored = typeof window === "undefined" ? null : localStorage.getItem("scriptally_active_manuscript_id");
+    return (manuscripts.find((m) => m.id === stored) ?? manuscripts[0])?.title ?? "";
+  })();
   const fortnightCount = mergedActivities.filter((a: any) => {
     const t = new Date(a.date).getTime();
     return Number.isFinite(t) && t >= Date.now() - 14 * 86400000;
@@ -1630,16 +1637,11 @@ export const Dashboard: React.FC<{
         </button>
 
         {/* Full-width stat row — always on, always charts, and it never moves.
-            ⚠️ MID-MIGRATION, DELIBERATELY. Three of four are the settled desk's; the agents
-            pictogram lands in Phase 5 and keeps its v37 rendering until then. Shipping the row
-            part-new is the honest intermediate — the alternative is a phase that leaves the page
-            broken between commits. */}
+            All four are the settled desk's now. */}
         <div className="ds-row" style={{ marginTop: 28 }}>
           <QueriesSentCard queries={queries} agents={agents} />
           <ActiveQueriesCard queries={queries} />
-          {statDefs.filter((d) => d.key === "agents").map((d) => (
-            <StatCardFull key={d.key} def={d} />
-          ))}
+          <AgentsCard agents={agents} queries={queries} manuscriptTitle={activeManuscriptTitle} />
           <ResponsesCard queries={queries} />
         </div>
 

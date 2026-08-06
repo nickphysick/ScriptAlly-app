@@ -17,6 +17,7 @@
  */
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { agentBuckets } from "./lifecycle";
+import { agentStanding, agentTurn } from "./agentList";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "./agentDisplay";
 import { STATUS_ORDER } from "./statusOrder";
 import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
@@ -214,6 +215,34 @@ export const activeWeeklySeries = (queries: Query[], now: Date, bins = 8): numbe
     }
     return n;
   });
+};
+
+/**
+ * The agents pictogram's glyph tone — one glyph per agent, coloured by where YOUR query with them
+ * stands (ref design-refs/dashboard-settled-desk.html).
+ *
+ * ⚠️ IT REUSES THE THREE AXES, IT DOES NOT RE-DERIVE THEM. `agentStanding` and `agentTurn` already
+ * define "has a live query" and "whose move" — and `agentTurn` reads the CTA engine, so this card
+ * and the To-do board cannot disagree about whose turn it is. Re-listing writer's-turn statuses
+ * here is the mistake this avoids.
+ *
+ * ⚠️ AND "CLOSED" HERE MEANS *YOUR QUERY* IS CLOSED, NOT THEIR DOOR. The agent list's own colour
+ * grammar is a separate, sanctioned convention; on the dashboard this card sits beside three
+ * others that are all about the state of your querying, so the glyph follows the query. An agency
+ * that has shut its doors while holding your full still reads as live, because it is.
+ */
+export type GlyphTone = "queried" | "yours" | "closed";
+
+export const agentGlyphTone = (agent: Agent, queries: Query[]): GlyphTone => {
+  if (agentStanding(agent, queries) !== "active") return "closed";
+  return agentTurn(agent, queries) === "you" ? "yours" : "queried";
+};
+
+/** What each tone means, in the axes' own words — so the legend and the filters cannot drift. */
+export const GLYPH_TONE_LABEL: Record<GlyphTone, string> = {
+  queried: "Waiting on the agent",
+  yours: "Awaiting your pages",
+  closed: "No active query",
 };
 
 export interface AgentStatusSummary {

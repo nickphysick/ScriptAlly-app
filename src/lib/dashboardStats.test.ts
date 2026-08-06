@@ -25,6 +25,8 @@ import {
   weekQueryRows,
   responseSplit,
   activeStageBreakdown,
+  agentGlyphTone,
+  GLYPH_TONE_LABEL,
   STAGE_LABEL,
   agentStatusSummaries,
   agentTooltip,
@@ -511,5 +513,38 @@ describe("⚠️ the stage breakdown — enum keys, display words, and no silent
     const rows = activeStageBreakdown([q({ status: QueryStatus.REJECTED })]);
     expect(rows.map((r) => r.status)).not.toContain(QueryStatus.REJECTED);
     expect(rows.every((r) => r.count === 0)).toBe(true);
+  });
+});
+
+describe("⚠️ the agents pictogram's glyph tone follows YOUR QUERY, not their door", () => {
+  const agent = { id: "a1", name: "Sophie Dunn", agency: "Curtis Vane" } as any;
+  const closedDoor = { ...agent, submissionStatus: "Closed" } as any;
+
+  it("a live query waiting on the agent is the queried tone", () => {
+    expect(agentGlyphTone(agent, [q({ agentId: "a1", status: QueryStatus.QUERIED })])).toBe("queried");
+  });
+
+  /* Whose-turn comes from the CTA engine via agentTurn, so this card and the To-do board cannot
+     disagree about whose move it is. */
+  it("a live query where the writer owes pages is the yours tone", () => {
+    expect(agentGlyphTone(agent, [q({ agentId: "a1", status: QueryStatus.FULL_REQUESTED })])).toBe("yours");
+  });
+
+  it("no live query — terminal or never queried — is the closed tone", () => {
+    expect(agentGlyphTone(agent, [q({ agentId: "a1", status: QueryStatus.REJECTED })])).toBe("closed");
+    expect(agentGlyphTone(agent, [])).toBe("closed");
+  });
+
+  /* ⚠️ THE FIXTURE THAT MATTERS: an agency that has shut its doors while holding your full still
+     reads as LIVE. The agent list inverts this deliberately — colour carries the door there — but
+     this card sits beside three others about the state of your querying, so it follows the query.
+     A closed door is not a closed query. */
+  it("a CLOSED agency holding a live full still reads as live", () => {
+    expect(agentGlyphTone(closedDoor, [q({ agentId: "a1", status: QueryStatus.FULL_SENT })])).toBe("queried");
+  });
+
+  it("every tone has words, and they are the axes' own", () => {
+    expect(GLYPH_TONE_LABEL.yours).toBe("Awaiting your pages");
+    expect(Object.keys(GLYPH_TONE_LABEL).sort()).toEqual(["closed", "queried", "yours"]);
   });
 });
