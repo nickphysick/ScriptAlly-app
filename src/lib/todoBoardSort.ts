@@ -11,6 +11,7 @@
  */
 
 import { BoardCard } from "./todoBoard";
+import { liveFamily, FAMILY_SWATCH, EXTRA_SWATCH } from "./todoFamily";
 
 /* ── SORT ──────────────────────────────────────────────────────────────────────────────────── */
 
@@ -114,18 +115,21 @@ export interface TodoFacetDef {
  * return nothing is worse than no facet: it reads as a fault. Its row is replaced by a road sign
  * to the Noteboard, which is where notes actually live.
  */
+/* ⚠️ THE SWATCHES ARE THE FAMILY MAP'S OWN (board fixes II, P4). They were `--td-sw-*` tokens
+   written under a DIFFERENT semantic (sage = "your live work") — so Urgent wore a sage dot beside
+   pink urgent bands, the exact reverse. One source now: todoFamily. The tokens are deleted. */
 export const TODO_FACETS: TodoFacetDef[] = [
-  { id: "all", label: "Everything", swatch: "#8a7a6d" },
-  { id: "urgent", label: "Urgent", swatch: "var(--td-sw-urgent)" },
-  { id: "housekeeping", label: "Housekeeping", swatch: "var(--td-sw-hk)" },
-  { id: "yours", label: "Your tasks", swatch: "var(--td-sw-yours)" },
+  { id: "all", label: "Everything", swatch: EXTRA_SWATCH.everything },
+  { id: "urgent", label: "Urgent", swatch: FAMILY_SWATCH.urgent },
+  { id: "housekeeping", label: "Housekeeping", swatch: FAMILY_SWATCH.housekeeping },
+  { id: "yours", label: "Your tasks", swatch: FAMILY_SWATCH.yours },
 ];
 
-/** Which facet a card belongs to — one card, one facet, so the counts partition the board. */
+/** Which facet a card belongs to — one card, one facet, so the counts partition the board.
+ *  ⚠️ DELEGATES to the ONE map (P4): this function's own copy keyed on the `hk` glyph flag and
+ *  called STALE urgent — the same half-copy bug as the band's, in a second home. */
 export function facetOf(c: BoardCard): Exclude<TodoFacetId, "all"> {
-  if (c.userTaskId || c.nature) return "yours";
-  if (c.hk) return "housekeeping";
-  return "urgent";
+  return liveFamily(c);
 }
 
 /** Apply the facet to a column. `all` is the identity — never a filter that happens to pass. */

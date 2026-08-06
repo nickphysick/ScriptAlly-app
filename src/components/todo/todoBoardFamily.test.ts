@@ -14,7 +14,9 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
-import { bandFamily } from "../../lib/todoColumns";
+import { bandFamily, sweepCardFor } from "../../lib/todoColumns";
+import { cardFamily, liveFamily, FAMILY_SWATCH, FAMILY_BAND } from "../../lib/todoFamily";
+import { TODO_FACETS, facetOf } from "../../lib/todoBoardSort";
 import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
 
 const here = __dirname;
@@ -26,17 +28,50 @@ const card = (over: Partial<BoardCard>): BoardCard => ({
   hk: false, initials: "•", record: "", committed: false, done: false, ...over,
 });
 
-describe("⚠️ family → tint, as a MAP", () => {
-  it("every card lands in exactly one family", () => {
-    expect(bandFamily(card({ taskType: "offer_received" }))).toBe("urgent");
-    expect(bandFamily(card({ hk: true, taskType: "data_quality_poor" }))).toBe("housekeeping");
-    expect(bandFamily(card({ userTaskId: "u1", nature: "task" }))).toBe("yours");
-    expect(bandFamily(card({ done: true }))).toBe("done");
+/* ⚠️ CONSOLIDATED (board fixes II, P4): the map lives in src/lib/todoFamily.ts and NOWHERE else —
+   it had shipped wrong twice, both times because a second copy existed (bandFamily and facetOf
+   each keyed on the `hk` GLYPH flag, so STALE rendered urgent pink while the counting law filed
+   it under housekeeping; the --td-sw-* swatch tokens were a third home, with sage and pink
+   SWAPPED). bandFamily survives as a delegating re-export; facetOf delegates to liveFamily. */
+describe("⚠️ family → tint, ONE MAP — the exhaustive kind table", () => {
+  it("⚠️ STALE IS HOUSEKEEPING — the regression this pack was called for", () => {
+    // derivedCopy builds a stale card with hk:false in the hk lane; the glyph flag misled both copies
+    const stale = card({ stream: "hk", hk: false, taskType: "no_response_close", kind: "STALE" });
+    expect(cardFamily(stale)).toBe("housekeeping");
+    expect(facetOf(stale)).toBe("housekeeping"); // and the FILTERS agree — same map
+  });
+
+  it("every taskType lands where the counting law files it", () => {
+    // urgent kinds — OFFER and the AGENT-WAITING set (the do lane)
+    for (const t of ["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue"]) {
+      expect(cardFamily(card({ stream: "do", taskType: t })), t).toBe("urgent");
+    }
+    // housekeeping — stale, the data-quality members, the sweeps, the snoozed rebuilds
+    expect(cardFamily(card({ stream: "hk", taskType: "no_response_close" }))).toBe("housekeeping");
+    expect(cardFamily(card({ stream: "hk", hk: true, taskType: "data_quality_poor" }))).toBe("housekeeping");
+    expect(cardFamily(sweepCardFor("dq_materials", "Materials", 16, []).card)).toBe("housekeeping");
+    // the writer's own — wherever the lane put them (a promoted due task sits in "do")
+    expect(cardFamily(card({ stream: "nt", userTaskId: "u1", nature: "task" }))).toBe("yours");
+    expect(cardFamily(card({ stream: "do", userTaskId: "u1", nature: "task" }))).toBe("yours");
+    expect(cardFamily(card({ stream: "nt", nature: "note" }))).toBe("yours");
+    // a snoozed user task rebuilds with stream "hk" + userTaskId — yours wins (the guard order)
+    expect(cardFamily(card({ stream: "hk", hk: true, taskType: "user_task", userTaskId: "u1" }))).toBe("yours");
   });
 
   it("done beats every other family — a finished thing is finished, whatever it was", () => {
-    expect(bandFamily(card({ done: true, taskType: "offer_received" }))).toBe("done");
-    expect(bandFamily(card({ done: true, userTaskId: "u1" }))).toBe("done");
+    expect(cardFamily(card({ done: true, taskType: "offer_received" }))).toBe("done");
+    expect(cardFamily(card({ done: true, userTaskId: "u1" }))).toBe("done");
+    expect(liveFamily(card({ taskType: "offer_received" }))).toBe("urgent"); // the live view ignores done
+  });
+
+  it("bandFamily and facetOf are the SAME map, by delegation — never by agreement", () => {
+    expect(bandFamily).toBe(cardFamily); // the re-export is the function itself
+    const cases = [
+      card({ stream: "do", taskType: "offer_received" }),
+      card({ stream: "hk", taskType: "no_response_close" }),
+      card({ stream: "nt", userTaskId: "u1" }),
+    ];
+    for (const c of cases) expect(facetOf(c)).toBe(liveFamily(c));
   });
 
   it("ALL FOUR families have their own rule — the half-copy is what regressed", () => {
@@ -52,16 +87,33 @@ describe("⚠️ family → tint, as a MAP", () => {
     };
     const tints = ["urgent", "housekeeping", "yours", "done"].map(tint);
     expect(new Set(tints).size).toBe(4);
+    expect(new Set(Object.values(FAMILY_SWATCH)).size).toBe(4); // and so are the swatches
   });
 
-  it("urgent is the family PINK with its own border (the brief's values)", () => {
-    const u = css.slice(css.indexOf(".tbd-band.fam-urgent {"), css.indexOf("}", css.indexOf(".tbd-band.fam-urgent {")));
-    expect(u).toContain("#f8e2d9");
-    expect(u).toContain("#f4d5c9");
-    expect(u).toContain("#e8c8bc");
+  it("⚠️ the CSS restatement matches FAMILY_BAND per family — the consolidation's teeth", () => {
+    for (const fam of ["urgent", "housekeeping", "yours", "done"] as const) {
+      const i = css.indexOf(`.tbd-band.fam-${fam} {`);
+      const rule = css.slice(i, css.indexOf("}", i));
+      const b = FAMILY_BAND[fam];
+      expect(rule, `${fam} from`).toContain(b.from);
+      expect(rule, `${fam} to`).toContain(b.to);
+      expect(rule, `${fam} border`).toContain(b.bd);
+    }
   });
 
-  it("the template actually applies the family — a map nothing reads is not a map", () => {
+  it("⚠️ the FILTERS swatches ARE the family swatches — one source, two consumers", () => {
+    for (const f of TODO_FACETS) {
+      if (f.id === "all") continue;
+      expect(f.swatch, f.label).toBe(FAMILY_SWATCH[f.id]);
+    }
+    // and they are the settled ref's own hexes
+    expect(FAMILY_SWATCH.urgent).toBe("#e8a68e");
+    expect(FAMILY_SWATCH.housekeeping).toBe("#d9c49a");
+    expect(FAMILY_SWATCH.yours).toBe("#a8bca4");
+  });
+
+  it("⚠️ the ink border is worn IFF the family is urgent — same map as the band", () => {
+    expect(board).toContain('`tbd-card${bandFamily(c) === "urgent" ? " urgent" : ""}');
     expect(board).toContain("`tbd-band fam-${bandFamily(c)}`");
   });
 });

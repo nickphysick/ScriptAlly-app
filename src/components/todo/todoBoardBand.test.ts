@@ -78,11 +78,14 @@ describe("the card's meta line is agent · agency, never a second agent (fix 4)"
 });
 
 describe("⚠️ the ink border is URGENT-ONLY (fix 5)", () => {
-  it("the class keys on the URGENT LANE, not on `warn`", () => {
+  it("the class keys on the URGENT FAMILY, not on `warn` (P4 re-keyed the lane onto the map)", () => {
     /* `warn` is true for offers, fulls, stale queries and old nudges alike — most of the board —
-       so keying on it put ink on nearly every card and the border distinguished nothing. */
-    expect(board).toContain('c.stream === "do" ? " urgent" : ""');
+       so keying on it put ink on nearly every card and the border distinguished nothing. The lane
+       fixed that but inked a promoted user task's sage band; the FAMILY is the border's meaning,
+       and it is the same consolidated map the band class reads. */
+    expect(board).toContain('bandFamily(c) === "urgent" ? " urgent" : ""');
     expect(board).not.toContain('c.warn ? " urgent" : ""');
+    expect(board).not.toContain('c.stream === "do" ? " urgent" : ""');
   });
 
   it("the base card is a hairline and only .urgent is ink", () => {

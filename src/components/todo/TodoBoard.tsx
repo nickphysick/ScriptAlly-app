@@ -298,14 +298,12 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                     if (el) cardEls.current.set(c.key, el);
                     else cardEls.current.delete(c.key);
                   }}
-                  /* ⚠️ THE INK BORDER IS URGENT-ONLY, AND URGENT IS THE LANE (corrections fix 5).
-                     It keyed on `warn`, which derivedCopy sets true for offers, fulls, stale
-                     queries and old nudges alike — most of the board. So nearly every card wore
-                     ink and the border stopped distinguishing anything. `stream === "do"` is the
-                     Urgent lane, the same set the counting law calls urgent, so the border now
-                     means what the group heading means. (P4 re-keys this onto the consolidated
-                     family, once the family itself stops calling STALE urgent.) */
-                  className={`tbd-card${c.stream === "do" ? " urgent" : ""}${c.done ? " done" : ""}`}
+                  /* ⚠️ THE INK BORDER IS URGENT-ONLY, AND URGENT IS THE FAMILY (P4). The border
+                     and the band read the SAME consolidated map (todoFamily via bandFamily), so
+                     they cannot disagree: a pink band always wears the ink border, and no other
+                     family ever does. (History: it first keyed on `warn` — most of the board wore
+                     ink; then on the lane, which put ink on a promoted user task's sage band.) */
+                  className={`tbd-card${bandFamily(c) === "urgent" ? " urgent" : ""}${c.done ? " done" : ""}`}
                   draggable
                   tabIndex={0}
                   role="button"

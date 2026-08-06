@@ -13,6 +13,7 @@
  * Two nav surfaces for one set of destinations is how a workspace starts disagreeing about where
  * you are.
  */
+import { FAMILY_SWATCH, EXTRA_SWATCH } from "./todoFamily";
 
 export type TodoPageId = "list" | "today" | "calendar" | "noteboard";
 
@@ -56,12 +57,17 @@ export interface TodoList {
   swatch: string;
 }
 
+/* ⚠️ SWATCHES FROM THE ONE MAP (board fixes II, P4). These were the `--td-sw-*` tokens — written
+   under a semantic ("sage = your live work") that never matched the board's band families, so
+   Urgent wore sage and Your-tasks wore pink, the reverse of every card. The tokens are deleted;
+   the family rows read todoFamily's FAMILY_SWATCH, and the two non-family rows (notes, snoozed)
+   read its EXTRA_SWATCH so even the adjacents have one home. */
 export const TODO_LISTS: TodoList[] = [
-  { id: "urgent", label: "Urgent", swatch: "var(--td-sw-urgent)" },
-  { id: "housekeeping", label: "Housekeeping", swatch: "var(--td-sw-hk)" },
-  { id: "yours", label: "Your tasks", swatch: "var(--td-sw-yours)" },
-  { id: "notes", label: "Notes to self", swatch: "var(--td-sw-notes)" },
-  { id: "snoozed", label: "Snoozed", swatch: "var(--td-sw-snoozed)" },
+  { id: "urgent", label: "Urgent", swatch: FAMILY_SWATCH.urgent },
+  { id: "housekeeping", label: "Housekeeping", swatch: FAMILY_SWATCH.housekeeping },
+  { id: "yours", label: "Your tasks", swatch: FAMILY_SWATCH.yours },
+  { id: "notes", label: "Notes to self", swatch: EXTRA_SWATCH.notes },
+  { id: "snoozed", label: "Snoozed", swatch: EXTRA_SWATCH.snoozed },
 ];
 
 /**

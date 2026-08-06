@@ -80,7 +80,9 @@ describe("FILTERS — four rows, and the two that left", () => {
 
   it("every card belongs to exactly ONE facet, so the counts partition the board", () => {
     expect(facetOf(card({ taskType: "offer_received" }))).toBe("urgent");
-    expect(facetOf(card({ hk: true, taskType: "data_quality_poor" }))).toBe("housekeeping");
+    expect(facetOf(card({ stream: "hk", hk: true, taskType: "data_quality_poor" }))).toBe("housekeeping");
+    // ⚠️ P4: STALE is housekeeping — the glyph flag (hk:false on stale cards) misled the old copy
+    expect(facetOf(card({ stream: "hk", hk: false, taskType: "no_response_close" }))).toBe("housekeeping");
     expect(facetOf(card({ userTaskId: "u1", nature: "task" }))).toBe("yours");
   });
 
@@ -92,7 +94,7 @@ describe("FILTERS — four rows, and the two that left", () => {
   it("a facet narrows to its own family", () => {
     const cards = [
       card({ key: "u", taskType: "offer_received" }),
-      card({ key: "h", hk: true, taskType: "data_quality_poor" }),
+      card({ key: "h", stream: "hk", hk: true, taskType: "data_quality_poor" }),
       card({ key: "y", userTaskId: "u1", nature: "task" }),
     ];
     expect(applyFacet(cards, "urgent").map((c) => c.key)).toEqual(["u"]);
@@ -104,7 +106,7 @@ describe("FILTERS — four rows, and the two that left", () => {
     const cards = [
       card({ key: "u", taskType: "offer_received" }),
       card({ key: "u2", taskType: "full_requested" }),
-      card({ key: "h", hk: true, taskType: "data_quality_poor" }),
+      card({ key: "h", stream: "hk", hk: true, taskType: "data_quality_poor" }),
       card({ key: "y", userTaskId: "u1", nature: "task" }),
     ];
     const c = facetCounts(cards);
@@ -116,7 +118,7 @@ describe("FILTERS — four rows, and the two that left", () => {
   it("each facet's count equals what applying it actually returns — no second tally", () => {
     const cards = [
       card({ key: "u", taskType: "offer_received" }),
-      card({ key: "h", hk: true, taskType: "data_quality_poor" }),
+      card({ key: "h", stream: "hk", hk: true, taskType: "data_quality_poor" }),
     ];
     const c = facetCounts(cards);
     for (const f of ["urgent", "housekeeping", "yours"] as const) {

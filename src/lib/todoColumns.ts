@@ -39,14 +39,13 @@ export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
  * anything; a distinction simply never made the journey. Hence the lock below is on the MAP
  * rather than on any single colour: a map cannot be half-copied without failing.
  */
-export type BandFamily = "urgent" | "housekeeping" | "yours" | "done";
-
-export function bandFamily(c: BoardCard): BandFamily {
-  if (c.done) return "done";
-  if (c.userTaskId || c.nature) return "yours";
-  if (c.hk) return "housekeeping";
-  return "urgent";
-}
+/* ⚠️ SUPERSEDED IN PLACE (board fixes II, P4): the classification moved to src/lib/todoFamily.ts
+   — this file's copy keyed on `c.hk`, the housekeeping GLYPH flag, which derivedCopy sets FALSE
+   for STALE cards, so STALE rendered urgent pink while the counting law filed it under
+   housekeeping. `bandFamily` survives as a delegating re-export because half the board's
+   consumers and locks reach it by this name; the map itself now has one home. */
+export { cardFamily as bandFamily } from "./todoFamily";
+export type { BandFamily } from "./todoFamily";
 
 export interface TodoColumnDef {
   id: TodoColumnId;

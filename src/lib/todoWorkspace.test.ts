@@ -11,6 +11,7 @@ import { resolve } from "node:path";
 import {
   TODO_LISTS, TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_ROUTES, todoPageForPath,
 } from "./todoRoutes";
+import { FAMILY_SWATCH, EXTRA_SWATCH } from "./todoFamily";
 import { AssembledBoard, BoardCard } from "./todoBoard";
 import { todoBadgeCount, todoCounts } from "./todoCount";
 import { WORKSPACE_SHELL_PATHS } from "./shellForRoute";
@@ -159,16 +160,21 @@ describe("the five LISTS (audit item 4)", () => {
     expect(TODO_LISTS.map((l) => l.label)).not.toContain("Dismissed");
   });
 
-  it("every swatch is a token, never a raw hex", () => {
-    for (const l of TODO_LISTS) expect(l.swatch, l.label).toMatch(/^var\(--td-sw-/);
+  /* ⚠️ SUPERSEDED (board fixes II, P4): the swatches were `--td-sw-*` tokens carrying a semantic
+     that never matched the band families — Urgent wore SAGE beside pink urgent bands. The one
+     source is now src/lib/todoFamily.ts; the rows must read it VERBATIM, and the dead tokens must
+     stay dead (a reintroduced copy is how the map shipped wrong twice). */
+  it("every swatch is the family map's own value — one source, read verbatim", () => {
+    expect(TODO_LISTS.find((l) => l.id === "urgent")!.swatch).toBe(FAMILY_SWATCH.urgent);
+    expect(TODO_LISTS.find((l) => l.id === "housekeeping")!.swatch).toBe(FAMILY_SWATCH.housekeeping);
+    expect(TODO_LISTS.find((l) => l.id === "yours")!.swatch).toBe(FAMILY_SWATCH.yours);
+    expect(TODO_LISTS.find((l) => l.id === "notes")!.swatch).toBe(EXTRA_SWATCH.notes);
+    expect(TODO_LISTS.find((l) => l.id === "snoozed")!.swatch).toBe(EXTRA_SWATCH.snoozed);
   });
 
-  it("the swatch tokens are defined", () => {
+  it("the retired --td-sw tokens are EXTINCT in index.css", () => {
     const css = readFileSync(resolve(__dirname, "../index.css"), "utf8");
-    for (const l of TODO_LISTS) {
-      const name = l.swatch.slice(4, -1);
-      expect(css, name).toMatch(new RegExp(`${name}:\\s*#`));
-    }
+    expect(css).not.toMatch(/--td-sw-[a-z]+:\s*#/);
   });
 });
 

@@ -175,15 +175,11 @@
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever
      still wants a desk; it is REJECTED for the workspace, and workspaceShell.test.tsx fails if it
      reappears there. */
-  /* ── THE FIVE TO-DO LIST SWATCHES (To-do workspace pack). The page side container's rows and
-     the list page's group-card headings read the SAME five, so a swatch means one stream
-     wherever it appears. Sage = your live work, tan = housekeeping, butter = your own notes,
-     pink = the writer's dated tasks, grey = set aside. ── */
-  --td-sw-urgent: #8a9e88;
-  --td-sw-hk: #cbb89a;
-  --td-sw-yours: #f2cec1;
-  --td-sw-notes: #eedfae;
-  --td-sw-snoozed: #c4bcb2;
+  /* ── the --td-sw-* swatch tokens are DELETED (board fixes II, P4). They carried a semantic
+     ("sage = your live work") that never matched the board's band families — Urgent wore a sage
+     dot beside pink urgent bands. The swatches live in src/lib/todoFamily.ts (FAMILY_SWATCH /
+     EXTRA_SWATCH), the same module the bands are locked against; do not reintroduce token
+     copies here. ── */
 
   --shell-frame: 14px;                /* the ground visible around the content card */
   --shell-card-radius: 16px;          /* the content card's corner */

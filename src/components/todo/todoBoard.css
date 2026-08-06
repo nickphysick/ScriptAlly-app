@@ -53,10 +53,10 @@
 .tbd-card:focus-visible { outline: 2px solid #2a1a13; outline-offset: 2px; }
 
 /* THE 24px BAND — the fixed measure the ref specifies. */
-/* ⚠️ THE 24px BAND, AND ITS FAMILY MAP. Colour says WHAT KIND OF THING this is — the same
-   vocabulary as the FILTERS rows and the old lane bands. The board's band was written fresh in
-   Phase 4 from the one urgent card the ref drew, so every family wore the urgent tint; the map is
-   carried here now, and locked as a MAP so it cannot be half-copied again. */
+/* ⚠️ THE FAMILY PAINT IS A RESTATEMENT OF src/lib/todoFamily.ts's FAMILY_BAND, UNDER LOCK (P4):
+   CSS cannot read TS, so the hexes appear twice — and todoBoardFamily.test.ts fails the moment
+   these rules and the module disagree. Edit the MODULE first, then bring this file to match.
+   (This map has shipped wrong twice; the lock is the consolidation's teeth.) */
 .tbd-band {
   height: 24px;
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
@@ -66,8 +66,8 @@
 }
 /* urgent — the family pink, with its own border */
 .tbd-band.fam-urgent { background: linear-gradient(180deg, #f8e2d9, #f4d5c9); border-bottom-color: #e8c8bc; }
-/* housekeeping — latte */
-.tbd-band.fam-housekeeping { background: linear-gradient(180deg, #f5efe6, #efe7d9); border-bottom-color: #ddd0bc; }
+/* housekeeping — latte (the settled ref's stops) */
+.tbd-band.fam-housekeeping { background: linear-gradient(180deg, #f6f0e4, #f0e8d8); border-bottom-color: #ddd0bc; }
 /* the writer's own — sage */
 .tbd-band.fam-yours { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-bottom-color: #b9c9b4; }
 /* done — the same sage, muted: finished, not undone */
