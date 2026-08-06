@@ -1,0 +1,216 @@
+/**
+ * The Today page's body (workspace pack, Phase 3).
+ *
+ * The list is a white card like the list page's groups — same vocabulary, because it is the same
+ * kind of object. The bench is DASHED, and that is the whole visual argument: it is a proposal,
+ * and a proposal must not look like a commitment sitting one card above it.
+ */
+
+.tdt-card {
+  background: #fffefb;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.tdt-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px 12px;
+}
+
+.tdt-head h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #2a1a13;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.tdt-cn,
+.tdt-time {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #9a8e80;
+}
+
+.tdt-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--bd, #e7ddd2);
+}
+
+.tdt-rows { border-top: 1px solid #f0e9e0; }
+
+.tdt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-bottom: 1px solid #f5efe7;
+  font-size: 14px;
+  color: #2a1a13;
+}
+
+.tdt-row:last-child { border-bottom: 0; }
+
+.tdt-tick {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #b9c9b4;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #fff;
+}
+
+.tdt-tick.on { background: #5a6e58; border-color: #5a6e58; }
+
+.tdt-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ⚠️ THE STRIKE IS ON THE TITLE, NOT THE ROW — striking the whole row would put a line through
+   the time and the Undo control, which are the two things you might still need. */
+.tdt-row.done .tdt-t { text-decoration: line-through; color: #9a8e80; }
+
+.tdt-meta { font-size: 12px; color: #9a8e80; white-space: nowrap; }
+
+/* The DUE TODAY chip — it arrived on its own date, not by your hand, and says so. */
+.tdt-chip {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7c3a2a;
+  background: #f7e7e0;
+  border: 1px solid #e8c8bc;
+  border-radius: 5px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.tdt-empty { padding: 16px 18px; font-size: 13.5px; color: #7a6a5e; }
+
+/* ── the quick-add ─────────────────────────────────────────────────────── */
+.tdt-add {
+  display: flex;
+  gap: 8px;
+  padding: 10px 18px 12px;
+  border-top: 1px dashed #ddd2c2;
+}
+
+.tdt-add input {
+  flex: 1;
+  font: inherit;
+  font-size: 13.5px;
+  padding: 8px 10px;
+  border: 1px solid #e3d8c8;
+  border-radius: 8px;
+  background: #fffefb;
+  color: #2a1a13;
+}
+
+.tdt-add input:focus { outline: none; border-color: #2a1a13; box-shadow: 0 0 0 3px #f1e9df; }
+
+.tdt-addbtn {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #2a1a13;
+  background: #2a1a13;
+  color: #fdfaf5;
+  cursor: pointer;
+}
+
+.tdt-addbtn:disabled { opacity: 0.45; cursor: default; }
+
+/* ── cleared ───────────────────────────────────────────────────────────── */
+.tdt-done { border-top: 1px solid #f0e9e0; background: #fbf8f3; }
+
+.tdt-donehead {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #7a6a5e;
+  padding: 10px 18px 6px;
+}
+
+.tdt-undo {
+  font: inherit;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  color: #7c3a2a;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.tdt-undo:hover { text-decoration: underline; }
+
+/* ── the bench ─────────────────────────────────────────────────────────── */
+.tdt-bench {
+  margin-top: 18px;
+  border: 1.5px dashed #ddd2c2;
+  border-radius: 12px;
+  background: transparent;
+  padding: 4px 0 6px;
+}
+
+.tdt-benchhead {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a8e80;
+  padding: 10px 18px 8px;
+}
+
+.tdt-brow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font-size: 14px;
+  color: #2a1a13;
+}
+
+.tdt-bt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The why-line — stated, never left for the reader to infer. */
+.tdt-why {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a6a5e;
+  white-space: nowrap;
+}
+
+.tdt-badd {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px solid #dcdcdb;
+  background: #fffefb;
+  color: #2a1a13;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tdt-badd:hover { background: #f4f2ef; }
+
+@media (max-width: 767px) {
+  .tdt-meta, .tdt-why { display: none; }
+}

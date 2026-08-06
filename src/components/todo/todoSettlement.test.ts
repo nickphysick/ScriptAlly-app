@@ -89,7 +89,8 @@ describe("settlement P1 — SAGE headers: one treatment, ONE height, everywhere"
   });
   it("radius continuity: each header takes ITS container's top radii", () => {
     for (const sel of HEADS) expect(rule(sel)).toContain("border-radius: 15px 15px 0 0");
-    expect(rule(".tdb-today2")).toContain("border-radius: 14px"); // the corner card
+    // workspace P3: the corner card is retired — its radius went with it.
+    expect(css).not.toContain(".tdb-today2");
     // (todo rebuild P1) the board PANEL is gone — there is no container radius left to continue.
     expect(css).not.toContain(".tdb-mainc {");
   });
@@ -162,7 +163,7 @@ describe("settlement P4 — the sweep", () => {
     expect(tour).toContain(".tdb-ctrl");
     expect(tshCss).not.toContain(".spine-bench {");
     // every other stop's anchor still exists in the board or the shell
-    for (const sel of [".tdb-tile, .tdb-gcard, .tdb-lrow", ".tdb-today2"]) {
+    for (const sel of [".tdb-tile, .tdb-gcard, .tdb-lrow"]) { // .tdb-today2 retired (P3)
       expect(tour).toContain(sel);
       for (const one of sel.split(", ")) expect(css).toContain(one);
     }

@@ -231,7 +231,7 @@ describe("tightening P4 — the sweep + the record", () => {
 
   it("every tour anchor still resolves after the rebuild", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    for (const sel of [".spine-rail", ".tdb-herobegin", ".svh-btn-primary", ".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink", ".tdb-today2"]) {
+    for (const sel of [".spine-rail", ".tdb-herobegin", ".svh-btn-primary", ".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink"]) { // Today's stop moved to the sidebar (P3)
       expect(tour).toContain(sel);
     }
     // the card/row stop's selectors all survive as live classes

@@ -54,6 +54,7 @@ import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS } from "../../lib/todoRoutes";
+import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
 } from "../../lib/todoListPage";
@@ -249,7 +250,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
-  const [showDone, setShowDone] = useState(false);
+  /* (showDone was the corner panel's done-row toggle — retired with it in workspace P3.) */
   // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
   // (Deck v2 P3: the sidebar fold + its localStorage key retired with the pair — the rail never
   // folds; <1420 it becomes the 56px icon rail instead, P5.)
@@ -563,43 +564,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const briefFigures = briefingFigures(briefCleared, briefReplies);
   const briefNarrative = briefStats ? briefingNarrative(briefStats) : null;
 
-  // v4 P3 — CONDITIONAL TODAY: the column exists only with content (≥1 committed OR ≥1 done
-  // today — the existing derivation); empty → the board runs 4-up. Exit lags 220ms for the
-  // slide-out (reduced motion: instant).
-  const todayActive = committedCards.length > 0 || doneN > 0;
-  const [todayShown, setTodayShown] = useState(false);
-  const [todayLeaving, setTodayLeaving] = useState(false);
-  // THE WORKSPACE SHELL (todo-fix48) — Today is back in its corner pop-up: a minimise control
-  // collapses it to a pill, the state persisted.
-  const [todayMin, setTodayMin] = useState<boolean>(() => { try { return localStorage.getItem("sa.todoTodayMin") === "1"; } catch { return false; } });
-  // save-and-today P2/P3: ticking strikes IN PLACE — the row keeps its seat, struck, until the panel
-  // is next OPENED, so undo stays within reach. Expanding clears the set (that is the "next open").
-  const [strikeIds, setStrikeIds] = useState<Set<string>>(new Set());
-  const [addOpen, setAddOpen] = useState(false); // the ＋ roundel's add flow (hosts "Help me pick")
-  const toggleTodayMin = (v: boolean) => {
-    setTodayMin(v);
-    if (!v) setStrikeIds(new Set()); // opening = the deferred move: struck rows join the done band
-    setAddOpen(false);
-    try { localStorage.setItem("sa.todoTodayMin", v ? "1" : "0"); } catch { /* private mode */ }
-  };
-  // ADJACENCY (save-and-today P3): publish how far the help "?" FAB must step left so it never
-  // overlaps or abuts the Today corner. Expanded clears the full 290px panel; collapsed clears the
-  // narrower launcher; absent clears nothing. Cleared on unmount — no other route inherits a shift.
-  useEffect(() => {
-    const root = document.documentElement;
-    const shift = !todayShown ? "0px" : todayMin ? "var(--td-fab-clear-min, 172px)" : "var(--td-fab-clear, 320px)";
-    root.style.setProperty("--sa-fab-shift", shift);
-    return () => { root.style.removeProperty("--sa-fab-shift"); };
-  }, [todayShown, todayMin]);
-  useEffect(() => {
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (todayActive) { setTodayShown(true); setTodayLeaving(false); return; }
-    if (reduce) { setTodayShown(false); setTodayLeaving(false); return; }
-    setTodayLeaving(true);
-    const t = window.setTimeout(() => { setTodayShown(false); setTodayLeaving(false); }, 220);
-    return () => window.clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayActive]);
+  /* (The corner pop-up and ALL its state went in workspace P3 — todayActive / todayShown /
+     todayLeaving / todayMin, the slide effect and the help-FAB clearance. Today is a route now,
+     and the only reason any of this existed was to float a copy of it over this page.) */
 
   // Deck v2 P2 — the shown/total pair (the deck's SHOWING x OF y) + the Esc chain: search
   // clears first, the narrowing second (editables keep their own Esc except the search input,
@@ -652,6 +619,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     window.addEventListener(TODO_OPEN_COMPOSER, onCompose);
     return () => window.removeEventListener(TODO_OPEN_COMPOSER, onCompose);
   }, []);
+
+  /* ⚠️ THE TODAY PAGE ANNOUNCES; THIS PAGE ANSWERS (workspace P3). Its two controls need verbs
+     that live here — the focused session and the commit primitive — and the alternative was to
+     host a second copy of each on that page, which is how two surfaces start disagreeing about
+     what is on today's list. Both listeners call the EXISTING functions, unchanged.
+
+     This works because the To-do slots stay mounted (StagePage toggles display, it does not
+     unmount), so /todo/today has this page alive beside it. That is a real dependency, so it is
+     stated here rather than left to be discovered. */
+  useEffect(() => {
+    const onWork = () => setSession({ queue: [...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate === today) });
+    const onAdd = (e: Event) => {
+      const key = (e as CustomEvent<{ key?: string }>).detail?.key;
+      const card = [...board.do, ...board.hk, ...board.nt].find((c) => c.key === key);
+      if (card) toggleToday(card); // the cap + the flash come with it, exactly as on this page
+    };
+    window.addEventListener(TODO_WORK_THE_LIST, onWork);
+    window.addEventListener(TODO_ADD_TO_TODAY, onAdd);
+    return () => {
+      window.removeEventListener(TODO_WORK_THE_LIST, onWork);
+      window.removeEventListener(TODO_ADD_TO_TODAY, onAdd);
+    };
+  });
   const endTour = () => {
     setTourOpen(false);
     if (!currentUser?.tourSeenAt) void updateUserProfile({ tourSeenAt: new Date().toISOString() });
@@ -710,13 +700,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     flash(`Done — “${c.title}”`, { label: "Undo", fn });
   }
 
-  // save-and-today P2 — Today's tick: strike the row IN PLACE first, then run the existing
-  // completion (which carries the undo toast). The row only leaves for the done band on the next
-  // open, so a mis-tick is undone where it happened rather than hunted for in another band.
-  function strikeThenDone(c: BoardCard) {
-    setStrikeIds((s) => new Set(s).add(c.key));
-    void quickDone(c);
-  }
+  /* (strikeThenDone + its strikeIds set went with the corner panel in workspace P3 — the
+     strike-in-place was the PANEL's grammar, and its only reader was the panel's own row. The
+     Today PAGE strikes its cleared items from the done set instead, which is derived, so the
+     behaviour survives without a second piece of state to keep in step.) */
   async function quickDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
     if (c.userTaskId) {
@@ -1086,7 +1073,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
             bottom-right of the workspace, minimising to a pill; absent when the list is empty. */}
-        {renderTodayCorner()}
+        {/* ⚠️ THE CORNER POP-UP IS RETIRED (workspace P3). Today is a PAGE now — /todo/today —
+            and a floating duplicate of it on this page would be a second surface that has to
+            agree with the first about what you committed to. One home. */}
       </div>
 
       {assistantOpen && (
@@ -1412,153 +1401,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE WORKSPACE SHELL (todo-fix48) — the Today corner: the floating card (or its minimised
   // pill), bottom-right of the workspace, absent when the list is empty. The card reuses the
   // one renderTodayPanel (checklist + Work the list) and adds a minimise control.
-  // ── save-and-today P3 — COLLAPSE + THE LAUNCHER (design-refs/today-panel.html · frame 2).
-  // ONE container in both states, so collapsing animates HEIGHT ONLY and the corner never jumps:
-  // the 46px header is always mounted and IS the launcher when collapsed (carrying the outstanding
-  // count in a sage pill, chevron up); the body below it collapses to nothing. The chevron ROTATES
-  // rather than swapping glyph. State persists per user (localStorage, via toggleTodayMin), so it
-  // survives a reload AND the session leave/return. Empty → the whole corner is absent (todayShown).
-  function renderTodayCorner() {
-    if (!todayShown) return null;
-    return (
-      <div
-        className={`tdb-tdpop${todayMin ? " min" : ""}${todayLeaving ? " out" : " in"}`}
-        role="complementary"
-        aria-label="Today"
-      >
-        {renderTodayPanel()}
-      </div>
-    );
-  }
-  // ── save-and-today P2 — THE TODAY PANEL, EXPANDED (design-refs/today-panel.html · frame 1).
-  // The 46px sage header carries the Playfair title, a 52px progress bar and the {done}/{total}
-  // fraction, and the WHOLE header is the collapse control. Rows are single-line with truncation, a
-  // sage completion circle, and a mono sub-label only where it means something (DUE TODAY / YOUR
-  // TASK). Ticking strikes IN PLACE — the row moves to the done band only on the next open, so undo
-  // stays easy. Foot: ONE primary (Work the list →) beside a quiet ＋ roundel. ──
-  function renderTodayPanel() {
-    const ghosts = todayGhosts(committedCards.length, doneN);
-    const total = committedCards.length + doneN;
-    const pct = total > 0 ? Math.round((doneN / total) * 100) : 0;
-    const subLabel = (c: BoardCard): string | null => {
-      if (c.nature !== "task") return null; // only the writer's OWN tasks earn a caption
-      if (c.dueState === "today") return "DUE TODAY";
-      if (c.dueState === "overdue") return "OVERDUE";
-      return "YOUR TASK";
-    };
-    return (
-      <div className="tdb-today2">
-        {/* the header is the collapse control in BOTH states — expanded it shows the progress pair,
-            collapsed it becomes the launcher and shows the outstanding count in a sage pill */}
-        <button
-          type="button"
-          className="tdb-th"
-          onClick={() => toggleTodayMin(!todayMin)}
-          aria-expanded={!todayMin}
-          aria-label={todayMin ? "Open Today" : "Collapse Today"}
-        >
-          <b className="tdb-t">Today</b>
-          {todayMin ? (
-            <span className="tdb-cnt">{committedCards.length}</span>
-          ) : (
-            <span className="tdb-tprog" aria-hidden>
-              <span className="tdb-tpbar"><i style={{ width: `${pct}%` }} /></span>
-              <span className="tdb-pnum">{doneN} / {total}</span>
-            </span>
-          )}
-          <span className={`tdb-chev${todayMin ? " up" : ""}`} aria-hidden>▾</span>
-        </button>
-        {/* everything below the header collapses — height only, 180ms (see .tdb-tdbody) */}
-        <div className="tdb-tdbody" aria-hidden={todayMin}>
-        {rolled.length > 0 && (
-          <div className="tdb-rollbar">
-            <span className="tdb-rolltx"><b>{rolled.length}</b> {rolled.length === 1 ? "item" : "items"} rolled over from a previous day.</span>
-            <button type="button" onClick={keepRolled}>Keep</button>
-            <button type="button" className="drop" onClick={dropRolled}>Clear</button>
-          </div>
-        )}
-
-        {/* the middle region — P4 makes this the card's one scroller */}
-        <div className="tdb-tmid2">
-          {committedCards.length > 0 && (
-            <div className="tdb-tcommit">
-              {committedCards.map((c) => {
-                const struck = strikeIds.has(c.key); // ticked THIS open: struck in place, not moved
-                const sub = subLabel(c);
-                return (
-                  <div key={c.key} className={`tdb-trow${struck ? " done" : ""}`} onClick={() => openFlowCards([c])}>
-                    <button
-                      type="button"
-                      className="tdb-cc"
-                      aria-label={`Mark done — ${c.title}`}
-                      onClick={(e) => { e.stopPropagation(); strikeThenDone(c); }}
-                    >
-                      {struck && <span aria-hidden>✓</span>}
-                    </button>
-                    <span className="tdb-trtx">
-                      {c.title}
-                      {sub && <span className="tdb-trsub">{sub}</span>}
-                    </span>
-                    <button type="button" className="tdb-x" title="Take off Today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {ghosts > 0 && (
-            <div className="tdb-ghostbox" aria-hidden>
-              {Array.from({ length: ghosts }, (_, i) => (
-                <div key={i} className="tdb-grow"><span className="tdb-cbx" /><span className="tdb-gbar" style={{ width: `${GHOST_BARS[i % GHOST_BARS.length]}%` }} /></div>
-              ))}
-            </div>
-          )}
-          {/* done today — collapsed to the ✓ row by default, expanding IN PLACE (session-only);
-              the divider + log appear WITH the first completion, never before */}
-          {doneN > 0 && (
-            <>
-              <button type="button" className="tdb-donerow" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}>✓ {doneN} DONE TODAY {showDone ? "▾" : "▸"}</button>
-              {showDone && (
-                <div className="tdb-tdone">
-                  {doneCards.map((c) => (
-                    <div key={c.key} className="tdb-drow">
-                      <span className="tdb-tick">✓</span>
-                      <div className="tdb-tmid"><div className="tdb-dx">{c.title}</div><div className="tdb-dm2">{[c.record, fmtTime(c.whenMs)].filter(Boolean).join(" · ")}</div></div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* ONE primary action. The second ghost button is retired — "Help me pick" moved INSIDE the
-            add flow, as an option on the ＋ roundel. */}
-        <div className="tdb-tf2">
-          <button
-            type="button"
-            className="tdb-pbtn"
-            disabled={committedCards.length === 0}
-            onClick={() => {
-              // C2 family law — the Today walk is a ritual: sage bands whole-walk
-              setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
-            }}
-          >
-            Work the list →
-          </button>
-          <span className="tdb-addwrap">
-            <button type="button" className="tdb-sbtn" aria-label="Add to Today" aria-expanded={addOpen} onClick={() => setAddOpen((v) => !v)}>＋</button>
-            {addOpen && (
-              <div className="tdb-addmenu" role="menu">
-                <button type="button" role="menuitem" onClick={() => { setAddOpen(false); helpMePick(); }}>Help me pick</button>
-                <button type="button" role="menuitem" onClick={() => { setAddOpen(false); scrollToLane("do"); }}>Choose from the board</button>
-              </div>
-            )}
-          </span>
-        </div>
-        </div>
-      </div>
-    );
-  }
+  /* ⚠️ renderTodayCorner + its launcher are GONE (workspace P3, −the corner). The Today list has
+     its own route now; a floating copy of it here would be a second surface owning the same
+     commitment, and the two would disagree the first time one of them was wrong. The panel's
+     collapse state, its localStorage key and its help-FAB clearance went with it. */
+  /* ⚠️ renderTodayPanel IS GONE TOO (workspace P3). It was the corner pop-up's contents, and
+     with the corner retired nothing called it. The Today page renders the day's list from the
+     same `todaySplit` derivation, so the behaviour moved rather than being rebuilt — but the
+     MARKUP had to go: two implementations of one list is how the corner and the page would have
+     started disagreeing. */
 
   // ── doc pass P4: LEDGER v2 (todo-doc-pass-a.html §3 + todo-doc-pass-b.html §2) — each
   // lane's rows live in a family-washed section (whisper pink / whisper latte / a DERIVED

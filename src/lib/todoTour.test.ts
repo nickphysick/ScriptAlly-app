@@ -18,7 +18,8 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       ".tdb-ctrl",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
-      ".tdb-today2",
+      // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
+      '[aria-expanded][class*="asec"], .ws-navrow',
     ]);
     expect(TOUR_STOPS.slice(0, -1).every((s) => s.cta === "Next →")).toBe(true);
     expect(TOUR_STOPS[TOUR_STOPS.length - 1].cta).toBe("Done");
@@ -32,7 +33,7 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       "Narrow the desk.",
       "Your week, reviewed.",
       "Every card works the same.",
-      "Today lives beside your work.",
+      "Today has its own page.",
     ]);
     expect(TOUR_STOPS[0].p).toContain("from the rail"); // the spine's category rail
     expect(TOUR_STOPS[1].p).toContain("focused session");
@@ -42,7 +43,7 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
     expect(TOUR_STOPS[5].p).toContain("turns the dial in your favour");
     expect(TOUR_STOPS[6].p).toContain("Hover for the actions");
     expect(TOUR_STOPS[6].p).toContain("Batches expand in place");
-    expect(TOUR_STOPS[7].p).toContain("struck through as you go");
+    expect(TOUR_STOPS[7].p).toContain("under To-do in the sidebar");
   });
 });
 

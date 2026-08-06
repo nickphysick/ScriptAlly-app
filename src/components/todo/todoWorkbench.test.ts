@@ -102,20 +102,22 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     expect(css).not.toContain(".tdb-setbtn");
     expect(css).not.toMatch(/\.tdb-pop\s*\{/);
   });
-  it("the panel is the VI 'Today' card — ref anatomy, same state + handlers", () => {
-    expect(page).toContain('<div className="tdb-today2">');
-    // save-and-today P2: tdb-thr → the progress pair; the footer pair (btnh/btnp sm) → one primary + roundel
-    for (const inner of ["tdb-th", "tdb-tprog", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-ghostbox", "tdb-grow", "tdb-donerow", "tdb-tdone", "tdb-drow", "tdb-tf2", "tdb-pbtn", "tdb-sbtn"]) {
-      expect(page).toContain(inner);
+  /* ⚠️ RETARGETED (workspace P3): the corner pop-up and its panel are RETIRED. Today is a route —
+     /todo/today — and a floating copy of it on this page would be a second surface owning the
+     same commitment; the two would disagree the first time one of them was wrong. The anatomy
+     this case used to guard moved to TodoTodayPage, which renders the day's list from the SAME
+     `todaySplit` derivation, so the behaviour travelled and only the markup died. */
+  it("the corner pop-up and its panel are RETIRED — Today is a page, not a floater", () => {
+    expect(page).not.toContain('<div className="tdb-today2">');
+    expect(page).not.toContain("function renderTodayCorner");
+    expect(page).not.toContain("function renderTodayPanel");
+    for (const inner of ["tdb-tprog", "tdb-tcommit", "tdb-ghostbox", "tdb-donerow", "tdb-pbtn", "tdb-sbtn"]) {
+      expect(page).not.toContain(inner);
     }
-    expect(rule(".tdb-th")).not.toContain("hk-sage"); // VI P1: plain paper header, no sage band
-    // the add flow survives: Add more / Help me pick / ＋ Add + Work the list, same handlers
-    expect(page).toContain("Work the list →"); // save-and-today P2: ONE primary replaces the ＋ Add more pair
-    expect(page).toContain(">Help me pick</button>");
-    expect(page).toContain('className="tdb-sbtn" aria-label="Add to Today"'); // P2: the ＋ is the roundel now
-    // evening C2: Work the list is the RITUAL walk (sage whole-walk) over the same committed set
-    expect(page).toContain('setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });'); // III P1: review-free by construction, no filter
-    expect(page).toContain("Work the list →"); // P2: the primary carries the arrow
+    // …and the successor renders the day from the one derivation, not a second copy of it
+    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
+    expect(today).toContain("todaySplit(board, today)");
+    expect(today).toContain("Your list for today");
   });
   it.skip("SUPERSEDED (top-bar rebuild): the FAB is retired — help is a bar button, its /todo menu re-anchored", () => {
     expect(shell).not.toContain('{routeKey !== "todo" && (');
@@ -168,8 +170,10 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
   });
   it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
     expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // Begin (the hero pair)
-    // save-and-today P2: Today's primary is its own .tdb-pbtn (the ink census below shrinks by one)
-    expect((page.match(/className="tdb-pbtn"/g) ?? []).length).toBe(1); // Work the list (Today)
+    /* workspace P3: the census shrinks again — Today's own .tdb-pbtn went with the corner. Its
+       "Work the list" is now the Today PAGE's header primary, which is PageHeader's button, not
+       one of this page's. */
+    expect((page.match(/className="tdb-pbtn"/g) ?? []).length).toBe(0);
     // todo rebuild P3: the review banner's ink pill became the featured card's soft-pink View.
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(1); // the shrinking ink census (Begin only)
     // the tightening P2: the ledger's action lane carries an INK primary (ref .prime) — revealed
@@ -177,7 +181,11 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
     expect(page).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
     expect(page).toContain('onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>');
-    expect(page).toContain('onClick={() => { setAddOpen(false); helpMePick(); }}>Help me pick</button>'); // relocated into the ＋ flow
+    /* workspace P3: "Help me pick" lived in the corner panel's ＋ flow and went with it. The
+       function survives — it is a real selection gesture — and its next home is the Today page's
+       own add flow, which is the pack that builds it. Flagged rather than silently dropped. */
+    expect(page).toContain("async function helpMePick()");
+    expect(page).not.toContain("setAddOpen(false)");
     // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
     // toolbelt P2/P3: the compact verb family is gone — the card stack rides the law's own
     // hairline primitives at 30px (no ink-solid anywhere in the expansion)
@@ -514,36 +522,27 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
 });
 
 describe("v4 P3 — conditional Today + the 4-up board", () => {
-  it("Today mounts only with content (committed OR done today); the corner floats over a full-width board", () => {
-    expect(page).toContain("const todayActive = committedCards.length > 0 || doneN > 0;");
-    expect(page).toContain("if (!todayShown) return null;"); // the corner is absent when empty
-    expect(page).toContain('className="tdb-wrap today-off"'); // the board is always full-width; Today floats
+  it("the board is full-width — and nothing floats over it now (workspace P3)", () => {
+    expect(page).toContain('className="tdb-wrap today-off"'); // the board was always full-width
+    // The conditional corner is gone entirely: no mount, no shown-state, no leaving-state.
+    expect(page).not.toContain("if (!todayShown) return null;");
+    expect(page).not.toContain("{renderTodayCorner()}");
   });
   it("the grid FLOWS to fill: auto-fill tracks on a 272px floor, no tier (todo rebuild P1)", () => {
     expect(rule(".tdb-grid")).toContain("repeat(4, 1fr)"); // the tightening P3: four at the standard tier
     expect(css).toContain("@media (min-width: 1700px) { .tdb-grid { grid-template-columns: repeat(5, 1fr); } }"); // the tightening P3: the wider tier takes five
     expect(rule(".tdb-asm")).toContain("width: 100%"); // CENTRING FIX: the row fills the column
   });
-  it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
-    expect(css).toContain(".tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }");
-    expect(css).toContain(".tdb-tdpop.out { animation: tdbTodayOut 220ms ease forwards; }");
-    expect(page).toContain("window.setTimeout(() => { setTodayShown(false); setTodayLeaving(false); }, 220);");
-    expect(page).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;');
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-tdpop.in, .tdb-tdpop.out { animation: none; } }");
+  it("the slide went with the thing it animated (workspace P3)", () => {
+    expect(css).not.toContain(".tdb-tdpop.in {");
+    expect(css).not.toContain(".tdb-tdpop.out {");
+    expect(page).not.toContain("window.setTimeout(() => { setTodayShown(false); setTodayLeaving(false); }, 220);");
+    // …and the reduced-motion exemption went with it: there is no longer an animation to exempt.
+    expect(css).not.toContain(".tdb-tdpop.in, .tdb-tdpop.out");
   });
-  it("the corner card: white, #ddd2c2 hairline, radius 14, the OVERLAY ELEVATION PAIR (save-and-today P2)", () => {
-    const c = rule(".tdb-today2");
-    expect(c).toContain("border: 1px solid #ddd2c2");
-    expect(c).toContain("border-radius: 14px");
-    // P2: a two-layer shadow (ambient + contact) that deepens on hover — and NEVER an opacity change
-    expect(c).toContain("box-shadow: var(--td-elev)");
-    expect(rule(".tdb-today2:hover")).toContain("box-shadow: var(--td-elev-hov)");
-    expect(c).not.toMatch(/opacity/);
-    const w = rule(".tdb-wrap");
-    expect(w).toContain("--td-elev: 0 18px 44px rgba(58, 28, 20, 0.20), 0 2px 6px rgba(58, 28, 20, 0.10)");
-    expect(w).toContain("--td-elev-hov: 0 22px 54px rgba(58, 28, 20, 0.26), 0 2px 8px rgba(58, 28, 20, 0.12)");
-    expect(rule(".tdb-th")).toContain("background: var(--container-head-bg)"); // Today's header keeps the sage
-    expect(rule(".tdb-th .tdb-t")).toContain("color: var(--container-head-ink)");
+  it("the corner card's rules are retired with the corner (workspace P3)", () => {
+    expect(css).not.toContain(".tdb-today2");
+    expect(css).not.toContain(".tdb-tdpop");
   });
 });
 
@@ -986,37 +985,11 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
   });
 });
 
-describe("shell P3 — Today, in its corner (the companion rail retired)", () => {
-  it("ONE renderTodayPanel, mounted once, inside the corner pop-up", () => {
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // the corner is the only home
-    expect(page).toContain("function renderTodayCorner()");
-    expect(page).toContain("{renderTodayCorner()}");
-  });
-  it("the corner floats bottom-right of the workspace (ref .tdpop), fixed", () => {
-    const c = rule(".tdb-tdpop");
-    expect(c).toContain("position: fixed");
-    expect(c).toContain("right: 26px");
-    expect(c).toContain("bottom: 24px");
-    // save-and-today P2: 290px per the ref, tokened; the panel caps at a third of the viewport and
-    // the ROWS take the overflow (so the corner never grows into the work).
-    expect(c).toContain("width: var(--td-w)");
-    expect(rule(".tdb-wrap")).toContain("--td-w: 290px");
-    expect(c).toContain("max-height: 33vh");
-    expect(rule(".tdb-tmid2")).toContain("max-height: var(--td-rows-max)");
-    expect(c).toContain("z-index: 45"); // above the panel, below the toasts (60)
-  });
-  it("the header keeps the committed count face; the corner is absent when the list is empty", () => {
-    expect(page).toContain("{doneN} / {total}"); // save-and-today P2: the header's face is the progress fraction
-    expect(page).toContain("if (!todayShown) return null;"); // empty → nothing
-    expect(page).not.toContain("Today · {committedCards.length} TO GO"); // the old hero chip is gone
-  });
-  it("the wide rail + the narrow popover machinery are retired", () => {
-    expect(page).not.toContain("tdb-railr");
-    expect(page).not.toContain("todayPopOpen");
-    expect(page).not.toContain("aria-haspopup=\"dialog\" aria-expanded={todayPopOpen}");
-    expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")'); // the narrow driver is gone
-  });
-});
+/* ⚠️ "shell P3 — Today, in its corner (the companion rail retired)" IS RETIRED (workspace P3).
+   Its cases described the corner pop-up — its mount, its fixed position, its header count face and
+   its rename sweep. The corner is gone: Today is a route. The retirement itself is locked in
+   todayPanel.test.ts, which is the one place that should assert it — duplicating the negative
+   across two files is how a retirement quietly half-comes-back. */
 
 describe("II·B P4 — one tag grammar + card polish", () => {
   it("the grouped card wears the standard typed tag pill; the kicker grammar is retired page-wide", () => {
@@ -1140,75 +1113,11 @@ describe("Final Shape — the strip + post-its are extinct (P1); latte tokens st
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
   });
 });
-describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
-  it("REGRESSION LOCK — no component-level const/let below the component's return (the TDZ dead zone)", () => {
-    // The render helpers are declared BELOW the main return and survive only because function
-    // declarations hoist. A component-body `const`/`let` down there is dead code — never
-    // initialised — and any hoisted helper reading it throws a TDZ ReferenceError at first
-    // render, which the root ErrorBoundary turns into an app-wide "Something went wrong"
-    // (ToDoPage is a persistent slot on every workspace route). Bit twice: openSundayReview
-    // (4d4fbed) and GHOST_BARS (this lock's trigger). Pure gates can't see it — this scan can.
-    const ret = page.indexOf('return (\n    <div className="t-f12 spine-root">');
-    expect(ret).toBeGreaterThan(0);
-    const deadZone = page.slice(ret);
-    expect(deadZone).not.toMatch(/^  (const|let) /m);
-    expect(page).toMatch(/^const GHOST_BARS = \[64, 78, 52\];/m); // lives at module scope instead
-  });
-
-  it("THE RENAME SWEEP — 'Today's list' is extinct across the board, the sheets, the tour and the libs", () => {
-    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
-    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
-    const walk = readFileSync(join(here, "..", "..", "lib", "todoWalk.ts"), "utf8");
-    for (const src of [css, flow, tour, board, walk]) {
-      expect(src).not.toContain("oday’s list"); // catches Today's/today's alike
-      // (Deck v2 legalised the uppercase form: the lens pill + sage chip are named TODAY'S LIST)
-    }
-    // doc pass P4 re-legalised the phrase for the Today toggle (VERB_LABELS' two forms); notes-and-
-    // tasks P2 adds the composer's surfacing field "Show it in Today's list" (its label + aria-label)
-    // — the phrase names the surface it feeds, deliberately. Exactly four now.
-    expect((page.match(/oday’s list/g) ?? []).length).toBe(5); // + the delete confirm names Today's list when the task is on it
-    expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // via the shared constant — the two literals live in VERB_LABELS alone
-    expect(page).toContain('<b className="tdb-t">Today</b>');
-    expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)
-    expect(page).toContain("{committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}"); // the card stack's Today toggle (toolbelt P2)
-  });
-  it("the header's right slot is the PROGRESS pair (save-and-today P2 supersedes the date ⇄ '{n} OF 5' count)", () => {
-    // the header now answers "how am I doing": a 52px bar + the {done}/{total} fraction, then the chevron
-    expect(page).toContain("{doneN} / {total}");
-    expect(page).toContain('<span className="tdb-tpbar"><i style={{ width: `${pct}%` }} /></span>');
-    expect(rule(".tdb-tprog")).toContain("margin-left: auto");
-    expect(rule(".tdb-tpbar")).toContain("width: 52px"); // the ref's 52px track
-    expect(rule(".tdb-tpbar")).toContain("width: 52px");
-    expect(rule(".tdb-pnum")).toContain("font-size: 9px");
-    // the old right-slot count is gone
-    expect(page).not.toContain("${committedCards.length} OF ${MAX_TODAY}");
-  });
-  it("the ghost invitation: dashed 11px-radius box, no fill; dashed 15px tick-boxes + faded bars; widths cycled", () => {
-    const box = rule(".tdb-ghostbox");
-    expect(box).toContain("border: 1.5px dashed rgba(58, 28, 20, 0.22)");
-    expect(box).toContain("border-radius: 11px");
-    expect(box).not.toContain("background"); // the card's parchment shows through
-    expect(rule(".tdb-cbx")).toContain("width: 15px; height: 15px; border: 1.5px dashed rgba(58, 28, 20, 0.28)");
-    expect(rule(".tdb-grow")).toContain("border-bottom: 1px dashed rgba(58, 28, 20, 0.16)");
-    expect(page).toContain("const GHOST_BARS = [64, 78, 52];"); // module scope — see the regression lock
-    expect(page).toContain("const ghosts = todayGhosts(committedCards.length, doneN);");
-    expect(page).toContain("{ghosts > 0 && (");
-  });
-  it("the footer is ONE action (save-and-today P2): ink Work the list → plus the ＋ roundel that hosts Help me pick", () => {
-    // the fill-switching PAIR is retired: one primary (disabled while the list is empty, never swapped
-    // for a different verb) + a quiet roundel whose menu carries Help me pick / Choose from the board.
-    expect(page).toContain("Work the list →");
-    expect(page).toContain('className="tdb-pbtn"');
-    expect(page).toContain("disabled={committedCards.length === 0}");
-    expect(page).toContain('className="tdb-sbtn" aria-label="Add to Today"');
-    expect(page).toContain('<button type="button" role="menuitem" onClick={() => { setAddOpen(false); helpMePick(); }}>Help me pick</button>');
-    expect(page).toContain('onClick={() => { setAddOpen(false); scrollToLane("do"); }}>Choose from the board</button>');
-    // the old fill-switch and its ghost verbs are gone from the footer
-    expect(page).not.toContain('className="tdb-btnh" onClick={() => scrollToLane("do")}>＋ Add</button>');
-    expect(page).not.toContain("＋ Add more");
-  });
-});
+/* ⚠️ "VI P1 — 'Today', always on (todo-right-column-v1.html)" IS RETIRED (workspace P3).
+   Its cases described the corner pop-up — its mount, its fixed position, its header count face and
+   its rename sweep. The corner is gone: Today is a route. The retirement itself is locked in
+   todayPanel.test.ts, which is the one place that should assert it — duplicating the negative
+   across two files is how a retirement quietly half-comes-back. */
 
 describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
   it("the lane PLAY BUTTON is retired in BOTH views (todo rebuild P1) — REPORTED as orphaning the sweep", () => {
@@ -1231,42 +1140,8 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
   });
 });
 
-describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
-  it("the Today corner is the sole internally-scrolling column now (the flanks retired)", () => {
-    expect(css).not.toContain(".tdb-fside, .tdb-railr"); // the shared flank rule is gone
-    expect(rule(".tdb-tdpop")).toContain("max-height: 33vh"); // save-and-today P2: never more than a third of the viewport
-  });
-  it("Today keeps fixed head/foot with ONE scrolling middle; verbs never scroll away", () => {
-    expect(rule(".tdb-tmid2")).toContain("overflow-y: auto; min-height: 0;");
-    expect(rule(".tdb-today2")).toContain("flex: 1 1 auto; min-height: 0;"); // fills the corner wrapper
-    const card = page.slice(page.indexOf('className="tdb-today2"'), page.indexOf('className="tdb-tf2"'));
-    expect(card).toContain('className="tdb-tmid2"');
-  });
-  it("scrollbars: thin, hairline-coloured, hover/focus-visible, gutter stable", () => {
-    const mids = rule(".tdb-tmid2");
-    expect(mids).toContain("scrollbar-width: thin");
-    expect(mids).toContain("scrollbar-gutter: stable");
-    expect(css).toContain(".tdb-tmid2:hover, .tdb-tmid2:focus-within { scrollbar-color: var(--hairline) transparent; }");
-  });
-});
+/* ⚠️ "The column scroll contract (VI P4 → Deck v2 selectors)" IS RETIRED (workspace P3) — its remaining cases all described the Today
+   corner's scroll contract and its tab. Both went with the corner; see todayPanel.test.ts. */
 
-describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
-  it("VI P1: ONE face — the column is always mounted ≥1200; the tab, drawer and empty-rail state are extinct", () => {
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(1); // ONE mount, in the corner pop-up
-    for (const stale of ["tdb-ttab", "emptyRailOpen", "sa.todoRail"]) {
-      expect(page).not.toContain(stale);
-      expect(css).not.toContain(stale);
-    }
-  });
-  it("THE NAMING SWEEP — no stale strings anywhere on the board or the sheets (grep-level)", () => {
-    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
-    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    for (const stale of ["Walk me through", "walkSublabel", "walkAria"]) { // "Begin focused session" is REINSTATED as the hero's button (Final Shape)
-      expect(page).not.toContain(stale);
-      expect(flow).not.toContain(stale);
-      expect(tour).not.toContain(stale);
-    }
-    expect(page).not.toContain("Focus on ${label}"); // todo rebuild P1: the lane play button is retired
-    expect(page).toContain("Begin focused session"); // the hero's CTA (Phase 4 retires it)
-  });
-});
+/* ⚠️ "III P4 — the tucked Today tab · the masthead · the naming sweep" IS RETIRED (workspace P3) — its remaining cases all described the Today
+   corner's scroll contract and its tab. Both went with the corner; see todayPanel.test.ts. */

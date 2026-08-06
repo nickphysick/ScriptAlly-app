@@ -105,7 +105,8 @@ describe("shell polish P3 — sticker cards", () => {
   it("the ledger rows, the Today pop-up and the session page are NOT stickers", () => {
     // the sticker selectors are the card tiles only — never the ledger row, the Today card or the session page
     expect(rule(".tdb-lrow")).not.toContain("--tdb-sticker-off");
-    expect(rule(".tdb-today2")).not.toContain("--tdb-sticker-off");
+    // workspace P3: the Today pop-up is retired, so there is no rule left to be a non-sticker.
+    expect(css).not.toContain(".tdb-today2");
     expect(rule(".tdb-fspage")).not.toContain("--tdb-sticker-off");
     expect(css).not.toContain(".tdb-lrow.do"); // no family sticker on ledger rows
   });
@@ -149,7 +150,7 @@ describe("shell polish P5 — the sweep + the record", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).not.toContain("tdb-todaychip"); // the removed chip is gone from the tour
     // todo rebuild P1: the search + filter anchors moved to the control line's classes.
-    for (const sel of [".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink", ".tdb-tile", ".tdb-today2"]) {
+    for (const sel of [".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink", ".tdb-tile"]) { // .tdb-today2 retired (P3)
       expect(tour).toContain(sel);
     }
     expect(tour).not.toContain(".tdb-hsearch");

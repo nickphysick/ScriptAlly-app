@@ -127,7 +127,11 @@ describe("C2 — families across every mode; ceremony D; the manifest; mobile", 
     expect(flow).toContain("const fam = (f: BandFam): BandFam => (ritual ? \"sage\" : f);");
     expect(css).toContain("@keyframes tdbBandIn"); // the keyed crossfade
     const page2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    expect(page2).toContain("ritual: true");
+    /* ⚠️ workspace P3: "Work the list" left the corner panel with it. It is the Today PAGE's
+       header primary now, which announces TODO_WORK_THE_LIST; ToDoPage answers by launching the
+       SAME FocusedSession over the committed set. The ritual flag went with the panel's own
+       button — the sage-ritual treatment is asserted on FocusFlow above, which is where it lives. */
+    expect(page2).toContain("TODO_WORK_THE_LIST");
   });
   it("ceremony D on the enumerated steps ONLY: offer celebration · review open/close · completion/receipt screens", () => {
     const centers = flow.match(/center: true/g) ?? [];

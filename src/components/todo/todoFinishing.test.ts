@@ -100,14 +100,21 @@ describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)"
       expect(page).toContain(inv);
     }
   });
-  it("Today's tick (save-and-today P2): the sage circle strikes IN PLACE, then completes via quickDone + toast", () => {
-    // the hover-grown dot is superseded by an always-present sage completion circle; the row is
-    // struck where it sits and only moves to the done band on the next open, so undo stays easy.
-    expect(page).toContain('className="tdb-cc"');
-    expect(page).toContain("onClick={(e) => { e.stopPropagation(); strikeThenDone(c); }}");
-    expect(page).toContain("setStrikeIds((s) => new Set(s).add(c.key));");
-    expect(page).toContain("void quickDone(c);"); // the existing completion + undo toast, unchanged
-    expect(css).toContain(".tdb-trow.done .tdb-trtx { text-decoration: line-through; }");
+  /* ⚠️ RETARGETED (workspace P3): the sage circle and strike-in-place were the CORNER PANEL's
+     grammar — its row, its state, its stylesheet rule. The corner is retired, so the mechanism
+     went with it and `strikeIds` was left write-only, which is why it went too.
+     The behaviour survives on the Today PAGE, and better: it strikes from the DERIVED done set
+     rather than from a second piece of state that had to be kept in step with it. */
+  it("the strike-in-place moved to the Today page, and its duplicate state died with the corner", () => {
+    expect(page).not.toContain('className="tdb-cc"');
+    expect(page).not.toContain("strikeThenDone(c)");
+    expect(page).not.toContain("setStrikeIds(");
+    expect(page).toContain("quickDone(c)"); // the completion + undo toast, unchanged and still here
+    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
+    expect(today).toContain('className="tdt-row done"');
+    const tcss = readFileSync(join(here, "todoToday.css"), "utf8");
+    // the strike is on the TITLE, so the time and the Undo control stay legible
+    expect(tcss).toContain(".tdt-row.done .tdt-t { text-decoration: line-through;");
   });
 });
 

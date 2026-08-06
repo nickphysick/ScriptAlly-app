@@ -68,9 +68,13 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-today2",  // the shell: Today lives in the corner pop-up
-    h: "Today lives beside your work.",
-    p: "Your committed list and everything you\u2019ve done today, struck through as you go.",
+    /* ⚠️ RETARGETED (workspace P3): this stop pointed at `.tdb-today2`, the corner pop-up, which
+       is retired — Today is a route now. A tour stop whose selector matches nothing does not
+       fail, it silently skips, so the stop had to move with the feature rather than be left to
+       rot. It anchors on the app sidebar's To-do group, which is where you actually go. */
+    sel: '[aria-expanded][class*="asec"], .ws-navrow',
+    h: "Today has its own page.",
+    p: "Your committed list, the day\u2019s cleared work and a short bench of suggestions \u2014 under To-do in the sidebar.",
     cta: "Done",
   },
 ];

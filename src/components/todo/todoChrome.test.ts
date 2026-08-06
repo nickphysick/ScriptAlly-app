@@ -25,12 +25,17 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
     expect(css).toContain(".tdb-coachdot { width: 6px; height: 6px;");
   });
 
-  it("VI P1 superseded the badge: the ✓ DONE TODAY row is the toggle — collapsed by default, expands in place", () => {
-    expect(page).toContain('className="tdb-donerow" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}');
-    expect(page).toContain("✓ {doneN} DONE TODAY");
-    expect(page).toContain("{showDone && (");
-    expect(page).toContain("const [showDone, setShowDone] = useState(false);"); // collapsed default (session-only)
-    expect(page).not.toContain("tdb-cdone"); // the header badge is extinct
+  /* ⚠️ RETARGETED (workspace P3): the collapsible DONE TODAY row lived inside the corner panel,
+     which is retired. The day's cleared work is now a permanent band on the Today PAGE — not
+     collapsed, because a page has the room a 250px corner did not, and hiding the only evidence
+     the day went anywhere behind a toggle was a concession to that corner's size. */
+  it("the day's cleared work is a band on the Today page now, not a toggle in a corner", () => {
+    expect(page).not.toContain("tdb-donerow");
+    expect(page).not.toContain("const [showDone, setShowDone] = useState(false);");
+    expect(page).not.toContain("tdb-cdone"); // the header badge stays extinct
+    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
+    expect(today).toContain("cleared today");
+    expect(today).toContain('className="tdt-done"');
   });
 
   it("the done row is the sage-family mono divider (border-top carries the old tdiv's job)", () => {

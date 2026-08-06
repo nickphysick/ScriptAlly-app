@@ -669,26 +669,17 @@ button.tdb-ldot { cursor: pointer; }
    the toasts (60) and modals. ── */
 /* save-and-today P2 — 290px per the ref; the panel never exceeds a THIRD of the viewport, and the
    rows (not the panel) take the overflow — both in CSS, so nothing needs measuring. */
-.tdb-tdpop { position: fixed; right: 26px; bottom: 24px; width: var(--td-w); max-height: 33vh; z-index: 45; display: flex; flex-direction: column; }
-.tdb-tdpop.in { animation: tdbTodayIn 220ms ease; }
-.tdb-tdpop.out { animation: tdbTodayOut 220ms ease forwards; }
 /* the minimise control, top-right of the card */
 /* the minimised pill/FAB */
 @keyframes tdbTodayIn { from { opacity: 0; transform: translateY(14px); } }
 @keyframes tdbTodayOut { to { opacity: 0; transform: translateY(14px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-tdpop.in, .tdb-tdpop.out { animation: none; } }
 
 /* ── the "Today" CARD (VI P1, todo-right-column-v1.html .today) — the cardx family: paper,
    hairline, radius 16, floating shadow. Plain paper header (Playfair "Today" + the mono right
    slot: date when empty ⇄ "{n} OF 5"); the middle region holds committed rows above the dashed
    ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
-/* the corner card (ref .tdpop): white, #ddd2c2 hairline, radius 14, deep shadow; it fills the
-   fixed .tdb-tdpop wrapper and scrolls internally. */
 /* save-and-today P2 — THE OVERLAY ELEVATION PAIR (ambient + contact), deepening on hover. NEVER
    opacity: a functional panel stays full contrast; it recedes by elevation and size, not by fading. */
-.tdb-today2 { flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid #ddd2c2; border-radius: 14px; box-shadow: var(--td-elev); display: flex; flex-direction: column; overflow: hidden; transition: box-shadow 0.16s ease; }
-.tdb-today2:hover { box-shadow: var(--td-elev-hov); }
-@media (prefers-reduced-motion: reduce) { .tdb-today2 { transition: none; } }
 /* the settlement (sage, final): Today's diary-sage head is the FAMILY — its two siblings
    joined it. One sage source (--container-head-*), one height; the sage glyphs (row dots,
    completion ticks, the StatusDot incoming states) are untouched beside it. */
@@ -706,12 +697,8 @@ button.tdb-ldot { cursor: pointer; }
 /* ── save-and-today P3 — COLLAPSE: height ONLY, ~180ms, so the bottom-anchored corner never jumps.
    The body is capped and clipped, and the collapsed card is the header alone (the launcher). ── */
 .tdb-tdbody { overflow: hidden; max-height: var(--td-body-cap); transition: max-height 180ms ease; }
-.tdb-tdpop.min .tdb-tdbody { max-height: 0; }
 @media (prefers-reduced-motion: reduce) { .tdb-tdbody { transition: none; } }
 /* the collapsed launcher: header-only, hugging its content, with the count in a sage pill */
-.tdb-tdpop.min { width: auto; max-width: var(--td-launch-max); height: auto; max-height: none; }
-.tdb-tdpop.min .tdb-today2 { border-radius: 99px; }
-.tdb-tdpop.min .tdb-th { border-radius: 99px; border-bottom: none; padding-right: 10px; }
 .tdb-cnt { margin-left: auto; display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px; background: var(--container-head-bg); border: 1px solid var(--container-head-rule); font-family: var(--f12-mono); font-size: 10px; font-weight: 600; color: var(--container-head-ink); }
 @media (prefers-reduced-motion: reduce) { .tdb-chev { transition: none; } }
 .tdb-tmid2 { flex: 0 1 auto; padding: 0 14px; display: flex; flex-direction: column; }
