@@ -1,6 +1,39 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (sixth pass — the dock is BUILT; the pack is complete).**
+**Last updated: 6 August 2026 (seventh pass — every routed page now has a render tripwire).**
+
+## The app-wide smoke pack is COMPLETE
+
+`85edee7` (P1, the inventory) → `834700b` (the harness + structural check) → `60ce046` (workspace
+pages) → `0190b9c` (settings · marketing · front door · dev labs) → `cf69e5b` (P3's correction) →
+`<this>` (docs). **172 files, 2770 passed | 2 skipped** — up from 163 / 2676, so **+9 files and
++94 tests**. Tests only; no deploy needed. Detail: `reports/app-smoke.md`.
+
+Every routed surface in the app now renders in a test: `renderToStaticMarkup` + a mocked db hook,
+asserting the page renders at all plus one distinctive chrome string. The big pages are smoked
+**twice — empty and populated** — because a first-run panel and the real page are not the same
+component, and smoking only the empty one leaves every derivation unexecuted.
+
+⚠️ **THE PACK'S REAL FINDING: `tsc` DOES NOT CATCH THE TDZ BUG, and the guard written for it did
+not either.** The shape that shipped reads the `const` from inside a **hoisted helper the render
+calls** — TS2448 fires only when the reference shares a scope with the declaration, so TypeScript
+sees nothing. The *tempting* shape to test a guard with (`description={helper()}` straight in the
+JSX) **is** caught by tsc, which is why proving a tripwire against it proves nothing.
+
+Verified against the pre-fix file rather than assumed (`ToDoPage` at `c0698c4^`): return at 933 →
+hoisted `renderPageHeader` at 1119 → reads `boardSubtitle` at 1135 → `const boardSubtitle` at
+1594. **Neither the original structural check nor its first correction could see that** — one
+searched the region above the return, the other searched the returned JSX, and the reference is in
+neither. It now follows the render's **call graph**, and returns `["boardSubtitle"]` on the real
+buggy file and `[]` on the fixed one.
+
+⚠️ **CLAUDE.md gained two rules:** a new routed page ships with a smoke test from day one; and a
+green typecheck is not evidence against this bug class.
+
+⚠️ **`/queries/analytics` is UNREACHABLE** — `App.tsx` renders `QueryAnalytics` in its own
+`StagePage`, but the path is not in `WORKSPACE_PATHS`, so the unknown-path guard redirects to
+`/dashboard` first. Nothing in the nav links to it, so no user meets a dead link. **Flagged, not
+fixed** — adding the path publishes a "coming soon" page, which is Nick's call.
 
 ## The board+dock pack is COMPLETE
 
