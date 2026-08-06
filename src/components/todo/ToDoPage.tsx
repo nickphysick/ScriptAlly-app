@@ -56,7 +56,7 @@ import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
-import { boardColumns, DropPlan } from "../../lib/todoColumns";
+import { boardColumns, sweepCardFor, isSweepCard, DropPlan } from "../../lib/todoColumns";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
 } from "../../lib/todoListPage";
@@ -1644,7 +1644,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   function renderBoard() {
-    const columns = boardColumns({ board, flags: taskFlags, today, nowMs: now });
+    /* ⚠️ THE SWEEPS COME FROM THE SAME `hkGroups` THE COUNT DOES. Housekeeping is counted by
+       MEMBERS and drawn as one card per rule; passing the groups here is what lets the card
+       account for its members, so the columns reconcile with the badge instead of silently
+       dropping the difference. */
+    const sweeps = hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length,
+      g.members.map((m) => m.card.key)));
+    const columns = boardColumns({
+      board, flags: taskFlags, queries, agents, sweeps, today, nowMs: now,
+    });
     return (
       <TodoBoard
         columns={columns}

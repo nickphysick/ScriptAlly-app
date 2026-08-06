@@ -11,7 +11,10 @@ import { join } from "node:path";
 import { QueryStatus, UserTask, Manuscript, TaskFlag, Activity, ActivityType } from "../types";
 import { assembleBoard, todaySplit, BoardCard, BoardInput } from "./todoBoard";
 import { todoCounts } from "./todoCount";
-import { boardColumns, dropPlan, offerGuard, boardEligible, TODO_COLUMNS } from "./todoColumns";
+import {
+  boardColumns, dropPlan, offerGuard, boardEligible, TODO_COLUMNS, snoozedCards, sweepCardFor,
+  columnWeight, cardWeight, isSweepCard,
+} from "./todoColumns";
 
 const TODAY = "2026-08-06";
 const NOW = Date.parse("2026-08-06T14:00:00Z");
@@ -48,7 +51,7 @@ describe("NOTES NEVER RENDER ON THE BOARD (audit item 2)", () => {
 
   it("…and so appears in NONE of the four columns", () => {
     const board = assembleBoard(base({ userTasks: [utask("n1")] })); // dateless → a note
-    const cols = boardColumns({ board, flags: [], today: TODAY, nowMs: NOW });
+    const cols = boardColumns({ board, flags: [], today: TODAY, nowMs: NOW, queries: [], agents: [], sweeps: [] });
     for (const id of ["todo", "today", "snoozed", "done"] as const) {
       expect(cols[id], `a note reached ${id}`).toHaveLength(0);
     }
@@ -63,7 +66,7 @@ describe("⚠️ THE INVARIANTS (audit item 10) — column == source, as an equa
       utask("donetoday", { dueDate: "2026-08-05", done: true, completedAt: "2026-08-06T09:00:00Z" }),
     ],
   }));
-  const cols = boardColumns({ board, flags: [], today: TODAY, nowMs: NOW });
+  const cols = boardColumns({ board, flags: [], today: TODAY, nowMs: NOW, queries: [], agents: [], sweeps: [] });
 
   it("TODAY column == the Today page's committed set — the same derivation, rendered twice", () => {
     const page = todaySplit(board, TODAY).committed;
@@ -75,23 +78,78 @@ describe("⚠️ THE INVARIANTS (audit item 10) — column == source, as an equa
     expect(cols.done.map((c) => c.key).sort()).toEqual(page.map((c) => c.key).sort());
   });
 
-  it("SNOOZED column == the snoozed set, and an expired flag returns the card to To do", () => {
-    const flags = [{ queryId: "later", snoozedUntil: "2026-09-30T00:00:00Z" } as TaskFlag];
-    const asleep = boardColumns({ board, flags, today: TODAY, nowMs: NOW });
-    expect(asleep.snoozed.map((c) => c.userTaskId)).toEqual(["later"]);
-    expect(asleep.todo.some((c) => c.userTaskId === "later")).toBe(false);
-
-    const expired = [{ queryId: "later", snoozedUntil: "2026-08-01T00:00:00Z" } as TaskFlag];
-    const awake = boardColumns({ board, flags: expired, today: TODAY, nowMs: NOW });
-    expect(awake.snoozed).toHaveLength(0);
-    expect(awake.todo.some((c) => c.userTaskId === "later")).toBe(true);
+  /* ⚠️ THE TRIPWIRE FOR THE FALSE PASS. The previous version of this case built a flag with NO
+     taskType — `{queryId, snoozedUntil}` — which matched my column's loose `queryId ?? agentId`
+     lookup but NOT `flagMatchesTask`, the check the real suppression path uses. So the fixture's
+     card survived into the lanes and my column found it there, and the test went green while the
+     live page showed Snoozed 1 in the list and 0 on the board.
+     It was asserting the derivation against a fixture built to satisfy that derivation.
+     These use REAL flag shapes, and assert the column against the COUNT's own source. */
+  it("SNOOZED column is built from the FLAGS — the lanes cannot supply it", () => {
+    const flags = [
+      { id: "f1", userId: "u", taskType: "nudge_overdue", queryId: "q1", snoozeCount: 1, snoozedUntil: "2026-09-30T00:00:00Z" },
+    ] as TaskFlag[];
+    const cols = boardColumns({
+      board: assembleBoard(base()), flags, today: TODAY, nowMs: NOW,
+      queries: [{ id: "q1", agentId: "a1" }], agents: [{ id: "a1", name: "Marcus Reed", agency: "Reed Lit" }],
+      sweeps: [],
+    });
+    // The lanes are EMPTY — the engine already dropped it — and the column still finds it.
+    expect(cols.snoozed).toHaveLength(1);
+    expect(cols.snoozed[0].title).toContain("Marcus Reed");
   });
 
-  it("a snooze BEATS a commit — the more recent decision wins, and the card is in one column only", () => {
-    const flags = [{ queryId: "committed", snoozedUntil: "2026-09-30T00:00:00Z" } as TaskFlag];
-    const cols2 = boardColumns({ board, flags, today: TODAY, nowMs: NOW });
-    expect(cols2.snoozed.map((c) => c.userTaskId)).toEqual(["committed"]);
-    expect(cols2.today.some((c) => c.userTaskId === "committed")).toBe(false);
+  it("⚠️ COLUMN == COUNT: the Snoozed column's length equals the figure the LISTS row shows", () => {
+    const flags = [
+      { id: "f1", userId: "u", taskType: "nudge_overdue", queryId: "q1", snoozeCount: 1, snoozedUntil: "2026-09-30T00:00:00Z" },
+      { id: "f2", userId: "u", taskType: "data_quality_poor", agentId: "a2", snoozeCount: 1, snoozedUntil: "2026-09-30T00:00:00Z" },
+      { id: "f3", userId: "u", taskType: "nudge_overdue", queryId: "q3", snoozeCount: 0, snoozedUntil: "2026-08-01T00:00:00Z" }, // expired
+    ] as TaskFlag[];
+    const args = {
+      board: assembleBoard(base()), flags, today: TODAY, nowMs: NOW,
+      queries: [], agents: [], sweeps: [],
+    };
+    // The count's own source (useTodoCounts uses isFlagSuppressing over the same flags).
+    const countsSays = flags.filter((f) => !!f.snoozedUntil && Date.parse(f.snoozedUntil) > NOW).length;
+    expect(boardColumns(args).snoozed).toHaveLength(countsSays);
+    expect(countsSays).toBe(2); // and the expired one is in neither
+  });
+
+  it("an EXPIRED flag puts nothing in Snoozed — it is awake, not asleep", () => {
+    const expired = [
+      { id: "f", userId: "u", taskType: "nudge_overdue", queryId: "q1", snoozeCount: 0, snoozedUntil: "2026-08-01T00:00:00Z" },
+    ] as TaskFlag[];
+    expect(snoozedCards({ flags: expired, queries: [], agents: [], nowMs: NOW })).toHaveLength(0);
+  });
+
+  /* ⚠️ THE TRIPWIRE FOR THE PARTITION. The badge counted 42 and the columns drew 27: housekeeping
+     is COUNTED by members and RENDERED by rule group, so fifteen members had no card and nothing
+     unfolded them. A sweep card now ACCOUNTS FOR its members, and this asserts the reconciliation
+     rather than the card count. */
+  it("⚠️ THE PARTITION SUMS: To do + Today + Snoozed == the actionable badge", () => {
+    const b = assembleBoard(base({
+      userTasks: [utask("t1", { dueDate: "2026-09-01" }), utask("t2", { dueDate: "2026-09-02" })],
+    }));
+    const sweeps = [sweepCardFor("dq_mswl", "Wish lists", 15, [])];
+    const cols = boardColumns({ board: b, flags: [], today: TODAY, nowMs: NOW, queries: [], agents: [], sweeps });
+    const badge = todoCounts(b, 15, 0).actionable; // 15 gaps is the housekeeping term
+    expect(columnWeight(cols.todo) + columnWeight(cols.today) + columnWeight(cols.snoozed)).toBe(badge);
+  });
+
+  it("a sweep card weighs its members, an ordinary card weighs one", () => {
+    const { card: sweep } = sweepCardFor("dq_mswl", "Wish lists", 15, []);
+    expect(isSweepCard(sweep)).toBe(true);
+    expect(cardWeight(sweep)).toBe(15);
+    expect(cardWeight(card({}))).toBe(1);
+    expect(sweep.due).toBe("15 TO FIX"); // the card states what it stands for
+  });
+
+  it("a member inside a sweep is NOT also loose on the board — that would double-count it", () => {
+    const b = assembleBoard(base({ userTasks: [utask("t1", { dueDate: "2026-09-01" })] }));
+    const loose = b.nt[0] ?? b.do[0];
+    const sweeps = [sweepCardFor("dq_mswl", "Wish lists", 1, [loose.key])];
+    const cols = boardColumns({ board: b, flags: [], today: TODAY, nowMs: NOW, queries: [], agents: [], sweeps });
+    expect(cols.todo.filter((c) => c.key === loose.key)).toHaveLength(0);
   });
 
   it("no card appears in two columns — the board is a partition, not four filters", () => {

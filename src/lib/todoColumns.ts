@@ -22,8 +22,9 @@
  */
 
 import { BoardCard, AssembledBoard } from "./todoBoard";
-import { TaskFlag } from "../types";
+import { TaskFlag, Query, Agent } from "../types";
 import { isSnoozed } from "./todoListPage";
+import { agentPrimary, agentInitials } from "./agentDisplay";
 
 export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
 
@@ -45,7 +46,12 @@ export const TODO_COLUMNS: TodoColumnDef[] = [
 
 export interface ColumnInput {
   board: AssembledBoard;
-  flags: Pick<TaskFlag, "snoozedUntil" | "queryId" | "agentId">[];
+  /** The FULL flags — the Snoozed column is built from them, so it needs their shape. */
+  flags: TaskFlag[];
+  queries: Pick<Query, "id" | "agentId">[];
+  agents: Pick<Agent, "id" | "name" | "agency">[];
+  /** The housekeeping rule groups, already built by the page, as sweep cards. */
+  sweeps: { card: SweepCard; memberKeys: string[] }[];
   today: string;
   nowMs: number;
 }
@@ -61,17 +67,141 @@ export function boardEligible(cards: BoardCard[]): BoardCard[] {
   return cards.filter((c) => c.nature !== "note");
 }
 
-/** The snoozed card keys — flags still asleep, matched to the cards they suppress. */
-function snoozedKeys(input: ColumnInput): Set<string> {
-  const ids = new Set(
-    input.flags.filter((f) => isSnoozed(f, input.nowMs)).map((f) => f.queryId ?? f.agentId).filter(Boolean) as string[]
-  );
-  const keys = new Set<string>();
-  for (const c of [...input.board.do, ...input.board.hk, ...input.board.nt]) {
-    const id = c.relatedRecordId ?? c.userTaskId;
-    if (id && ids.has(id)) keys.add(c.key);
-  }
-  return keys;
+/**
+ * ⚠️ THE SNOOZED COLUMN IS BUILT FROM THE FLAGS, NOT FROM THE LANES — and this is the whole fix.
+ *
+ * THE BUG: the column used to look for lane cards whose record matched a sleeping flag. It could
+ * never find one. The task engine (db.tsx) filters a snoozed derived task OUT of `tasks` BEFORE
+ * the board is assembled, and `assembleBoard` does the same for snoozed user cards. By the time
+ * a column sees the board, everything snoozed has already gone. So the column rendered 0 while
+ * the LISTS row and the chip strip — which count the FLAGS — said 1.
+ *
+ * Two sources for one fact, and the one the column used was structurally incapable of answering.
+ *
+ * THE FIX: the flags are the source, for the count AND the column. A sleeping flag names its own
+ * record (`queryId`/`agentId`) and its `taskType`, which is enough to rebuild the card it is
+ * hiding. Nothing here is stored; it is the same read, projected for display.
+ */
+export interface SnoozedInput {
+  flags: TaskFlag[];
+  queries: Pick<Query, "id" | "agentId">[];
+  agents: Pick<Agent, "id" | "name" | "agency">[];
+  nowMs: number;
+}
+
+/** The KIND facet for a snoozed card — the same vocabulary the lanes use. */
+const SNOOZED_KIND: Record<string, string> = {
+  offer_received: "OFFER",
+  partial_requested: "AGENT WAITING",
+  full_requested: "AGENT WAITING",
+  revise_resubmit: "AGENT WAITING",
+  nudge_overdue: "AGENT WAITING",
+  no_response_close: "STALE",
+  data_quality_poor: "DETAILS",
+  user_task: "YOUR TASK",
+};
+
+/** "Back 12 Aug" — a snoozed card's right-hand slot states when it returns, which is the only
+ *  fact about it that matters while it is asleep. */
+export function backOnLabel(snoozedUntilIso: string): string {
+  const d = new Date(snoozedUntilIso);
+  if (Number.isNaN(d.getTime())) return "ASLEEP";
+  return `BACK ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+}
+
+export function snoozedCards(input: SnoozedInput): BoardCard[] {
+  return input.flags
+    .filter((f) => isSnoozed(f, input.nowMs))
+    .map((f) => {
+      const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
+      const ag = input.agents.find((a) => a.id === (f.agentId ?? q?.agentId));
+      const who = ag ? agentPrimary(ag) : "";
+      const kind = SNOOZED_KIND[f.taskType] ?? "SNOOZED";
+      return {
+        key: `snz-${f.id}`,
+        stream: "hk" as const,
+        title: who ? `${who} — put away` : "Put away",
+        who,
+        subtitle: "",
+        due: f.snoozedUntil ? backOnLabel(f.snoozedUntil) : "ASLEEP",
+        kind,
+        warn: false,
+        snoozes: f.snoozeCount ?? 0,
+        hk: true,
+        initials: ag ? agentInitials(ag) : "•",
+        record: ag ? [agentPrimary(ag), ag.agency].filter(Boolean).join(" · ") : "",
+        committed: false,
+        done: false,
+        taskType: f.taskType,
+        relatedRecordId: f.queryId ?? f.agentId,
+        ...(f.taskType === "user_task" && f.queryId ? { userTaskId: f.queryId } : {}),
+      };
+    });
+}
+
+/**
+ * ⚠️ THE PARTITION MUST SUM, AND BATCH WORK IS WHY IT DID NOT.
+ *
+ * Housekeeping is COUNTED by gaps (`hkGapCount` = the number of members across the rule groups —
+ * forty-one fixable things) but RENDERED as one card per rule group. So the badge said 42 while
+ * the columns drew 27: fifteen members existed in the count and had no card. They were not
+ * hidden behind a fold — there was nothing to unfold.
+ *
+ * The resolution is not to render fifteen more cards. A data-quality gap is not a task you do one
+ * at a time; it is a sweep. So a group renders as ONE SWEEP CARD carrying its own n-of-m, and the
+ * card ACCOUNTS FOR all of its members — which is what makes the sum work again. The card is the
+ * unit on the board; the members are the unit in the count; the sweep card carries the bridge.
+ */
+export interface SweepCard extends BoardCard {
+  /** How many members this one card stands for. The sum reads this, not 1. */
+  sweepOf: number;
+  /** The rule key, so the card can open the existing Batch-fix sheet. */
+  sweepRule: string;
+}
+
+export function isSweepCard(c: BoardCard): c is SweepCard {
+  return typeof (c as SweepCard).sweepOf === "number";
+}
+
+/** What one card ACCOUNTS FOR — 1 for an ordinary card, its member count for a sweep. */
+export function cardWeight(c: BoardCard): number {
+  return isSweepCard(c) ? c.sweepOf : 1;
+}
+
+/** The rendered weight of a column — the figure that must reconcile with the badge. */
+export function columnWeight(cards: BoardCard[]): number {
+  return cards.reduce((n, c) => n + cardWeight(c), 0);
+}
+
+/** Build the one card that stands for a whole rule group. */
+export function sweepCardFor(
+  rule: string,
+  label: string,
+  memberCount: number,
+  memberKeys: string[]
+): { card: SweepCard; memberKeys: string[] } {
+  return {
+    memberKeys,
+    card: {
+      key: `sweep-${rule}`,
+      stream: "hk",
+      title: `${memberCount} ${label.toLowerCase()}`,
+      who: "",
+      subtitle: "",
+      due: `${memberCount} TO FIX`,
+      kind: label.toUpperCase(),
+      warn: false,
+      snoozes: 0,
+      hk: true,
+      initials: "•",
+      record: "Housekeeping",
+      committed: false,
+      done: false,
+      taskType: "data_quality_poor",
+      sweepOf: memberCount,
+      sweepRule: rule,
+    },
+  };
 }
 
 export interface BoardColumns {
@@ -82,20 +212,30 @@ export interface BoardColumns {
 }
 
 export function boardColumns(input: ColumnInput): BoardColumns {
-  const asleep = snoozedKeys(input);
-  const lanes = boardEligible([...input.board.do, ...input.board.hk, ...input.board.nt]);
+  /* The SWEEP CARDS stand in for their groups' members. The grouped hk cards are removed from
+     the flat lane set first, so a member is never both inside a sweep and loose on the board —
+     that would double-count it and break the sum in the other direction. */
+  const grouped = new Set(input.sweeps.flatMap((g) => g.memberKeys));
+  const lanes = boardEligible(
+    [...input.board.do, ...input.board.hk, ...input.board.nt].filter((c) => !grouped.has(c.key))
+  );
 
   const today: BoardCard[] = [];
   const todo: BoardCard[] = [];
-  const snoozed: BoardCard[] = [];
 
   for (const c of lanes) {
-    // Order matters and is stated: asleep beats committed, because a snoozed card is not on
-    // today's list even if it was yesterday — the snooze is the more recent decision.
-    if (asleep.has(c.key)) { snoozed.push(c); continue; }
     if (c.committedDate === input.today || c.surfaced) { today.push(c); continue; }
     todo.push(c);
   }
+  // A sweep is never "today" or "done" — it is a standing pile, so it sits in To do.
+  todo.push(...input.sweeps.map((g) => g.card));
+
+  // ⚠️ Snoozed comes from the FLAGS (see snoozedCards) — the lanes cannot supply it, because
+  // everything asleep has already been filtered out of them. This is the ONE source the LISTS
+  // row and the chip strip also count.
+  const snoozed = boardEligible(snoozedCards({
+    flags: input.flags, queries: input.queries, agents: input.agents, nowMs: input.nowMs,
+  }));
 
   // Done is today's log, projected — the SAME `cleared` union the Today page reads.
   return { todo, today, snoozed, done: boardEligible(input.board.cleared) };
