@@ -85,15 +85,38 @@ function silenced(
   });
 }
 
-/** The why-line for a card — from its own derived facts, never a generic "suggested for you". */
+/**
+ * ⚠️ THE WHY IS A REASON, NOT A KIND (corrections fix 7).
+ *
+ * It used to fall through to `card.kind.toLowerCase()` — so the right-hand line repeated the
+ * meta chip beside it and told you nothing you could not already see. The KIND stays in the
+ * chips; this line answers the only question the bench raises: why THIS one, out of everything?
+ *
+ * So every branch names a reason with its own evidence in it — an offer on the table, the oldest
+ * unanswered request and how long, a stale query that would take about a minute to close. Where
+ * there is genuinely no distinguishing reason, it says the plainest true thing rather than
+ * dressing the kind up as one.
+ */
 export function benchWhy(card: BoardCard): string {
-  if (card.taskType === "offer_received") return "An offer is on the table";
-  if (card.nature === "task" && card.dueState === "overdue") return "Overdue";
-  if (card.nature === "task" && card.dueState === "today") return "Due today";
-  if (card.taskType === "no_response_close") return card.due || "Gone quiet";
-  if (card.taskType === "nudge_overdue") return card.due || "No reply yet";
-  if (card.warn) return "Waiting on you";
-  return card.kind ? card.kind.toLowerCase() : "On your list";
+  if (card.taskType === "offer_received") return "an offer is on the table";
+  if (card.nature === "task" && card.dueState === "overdue") return "overdue";
+  if (card.nature === "task" && card.dueState === "today") return "due today";
+  if (card.taskType === "no_response_close") return "about a minute";
+  if (card.taskType === "nudge_overdue") {
+    const days = /(\d+)\s*DAYS/.exec(card.due ?? "")?.[1];
+    return days ? `oldest unanswered request · ${days} days` : "oldest unanswered request";
+  }
+  if (card.taskType === "partial_requested" || card.taskType === "full_requested") return "they are waiting on you";
+  if (card.taskType === "revise_resubmit") return "a revision was invited";
+  if (card.taskType === "data_quality_poor") return "a small gap to close";
+  return "next on your list";
+}
+
+/** The bench's own heading (the copy register). It states WHAT the bench is and how big the pool
+ *  behind it is — never the implementation guarantee, which is the derivation's business and the
+ *  test's, not the reader's. */
+export function benchHeading(remaining: number): string {
+  return `THE MOST PRESSING OF THE ${remaining} REMAINING`;
 }
 
 export function suggestedBench(input: BenchInput): BenchItem[] {

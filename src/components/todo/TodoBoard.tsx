@@ -75,7 +75,18 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen })
             {isOver && <div className="tbd-drop">{col.dropLabel}</div>}
 
             <div className="tbd-body">
-              {cards.length === 0 && <div className="tbd-empty">{COL_EMPTY[col.id]}</div>}
+              {cards.length === 0 && (
+                <div className="tbd-empty">
+                  {COL_EMPTY[col.id]}
+                  {/* ⚠️ ONE QUIET LINE, NOT A CARD (corrections fix 8). An empty Today is the one
+                      column where the reader can act immediately, and the bench is where the
+                      answer is — so it points there. A card here would look like work; this is a
+                      sentence. */}
+                  {col.id === "today" && (
+                    <> <a className="tbd-lift" href="/todo/today">— lift something from the bench</a></>
+                  )}
+                </div>
+              )}
 
               {cards.map((c) => (
                 <article

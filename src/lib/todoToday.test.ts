@@ -7,7 +7,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  todaySubtitle, clearedAtLabel, suggestedBench, benchWhy, todayQuickAddFields, BENCH_MAX,
+  todaySubtitle, clearedAtLabel, suggestedBench, benchWhy, benchHeading, todayQuickAddFields, BENCH_MAX,
 } from "./todoToday";
 
 const NOW = Date.parse("2026-08-06T14:32:00Z");
@@ -90,17 +90,41 @@ describe("the suggested bench — the four exclusions (audit item 6)", () => {
   });
 });
 
-describe("benchWhy — stated, never left for the reader to infer", () => {
-  it("names the real reason per kind", () => {
-    expect(benchWhy(card({ taskType: "offer_received" }))).toBe("An offer is on the table");
-    expect(benchWhy(card({ nature: "task", dueState: "overdue" }))).toBe("Overdue");
-    expect(benchWhy(card({ nature: "task", dueState: "today" }))).toBe("Due today");
-    expect(benchWhy(card({ taskType: "no_response_close", due: "SILENT 90 DAYS" }))).toBe("SILENT 90 DAYS");
+describe("⚠️ benchWhy is a REASON, not a kind (corrections fix 7)", () => {
+  it("names why THIS one, with its own evidence in it", () => {
+    expect(benchWhy(card({ taskType: "offer_received" }))).toBe("an offer is on the table");
+    expect(benchWhy(card({ nature: "task", dueState: "overdue" }))).toBe("overdue");
+    expect(benchWhy(card({ nature: "task", dueState: "today" }))).toBe("due today");
+    // a stale query is a minute's work — that is the reason to pick it, not the fact it is stale
+    expect(benchWhy(card({ taskType: "no_response_close", due: "SILENT 90 DAYS" }))).toBe("about a minute");
+    // the nudge carries its own age
+    expect(benchWhy(card({ taskType: "nudge_overdue", due: "96 DAYS · NO REPLY" })))
+      .toBe("oldest unanswered request · 96 days");
   });
 
-  it("falls back to something true rather than something vague", () => {
-    expect(benchWhy(card({ warn: true }))).toBe("Waiting on you");
-    expect(benchWhy(card({}))).toBe("On your list");
+  it("⚠️ NEVER echoes the KIND — that is the meta chip's job, sitting right beside it", () => {
+    /* It used to fall through to `card.kind.toLowerCase()`, so the line repeated the chip and
+       told you nothing you could not already see. */
+    for (const kind of ["AGENT WAITING", "STALE", "WISH LIST", "OFFER"]) {
+      const why = benchWhy(card({ kind, taskType: "partial_requested" }));
+      expect(why.toUpperCase()).not.toBe(kind);
+    }
+    expect(benchWhy(card({ kind: "WISH LIST" }))).toBe("next on your list");
+  });
+
+  it("falls back to the plainest true thing, never a dressed-up kind", () => {
+    expect(benchWhy(card({ warn: true }))).toBe("next on your list");
+    expect(benchWhy(card({}))).toBe("next on your list");
+  });
+});
+
+describe("the bench heading states the bench, not its guarantee (fix 7)", () => {
+  it("reads the copy register's line", () => {
+    expect(benchHeading(9)).toBe("THE MOST PRESSING OF THE 9 REMAINING");
+  });
+
+  it("⚠️ does NOT leak the exclusion promise — that is the derivation's business, and the test's", () => {
+    expect(benchHeading(9)).not.toMatch(/snooz|dismiss|never/i);
   });
 });
 

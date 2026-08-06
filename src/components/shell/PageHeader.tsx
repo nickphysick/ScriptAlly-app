@@ -25,6 +25,12 @@ export interface PageHeaderAction {
   icon?: React.ReactNode;
   /** The Form 11 soft-pink primary. At most one per header, rendered where given (rightmost by convention). */
   primary?: boolean;
+  /** ⚠️ THE INK PRIMARY (corrections fix 6). Pink means CREATION or WARNING in this app — "Add a
+   *  task", "Add an agent". A page's principal ACTION on things that already exist ("Work the
+   *  list") is ink: it is not making anything, and dressing it pink puts it in the same family as
+   *  the ＋ beside it, which is exactly the confusion. `ink` and `primary` are mutually
+   *  exclusive; ink wins if both are set. */
+  ink?: boolean;
   /** The HOUSE disabled treatment (todo rebuild P4): paper fill, hairline border, faint text,
    *  no shadow, cursor:not-allowed — never dashed, never opacity-only. */
   disabled?: boolean;
@@ -110,7 +116,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         <button
           key={i}
           type="button"
-          className={action.primary ? "svh-btn svh-btn-primary" : "svh-btn svh-btn-ghost"}
+          className={action.ink ? "svh-btn svh-btn-ink" : action.primary ? "svh-btn svh-btn-primary" : "svh-btn svh-btn-ghost"}
           onClick={action.onClick}
           disabled={action.disabled}
         >

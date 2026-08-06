@@ -26,7 +26,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, todaySplit, BoardCard } from "../../lib/todoBoard";
 import { localYMD } from "../../lib/shellSidebar";
 import {
-  todaySubtitle, clearedAtLabel, suggestedBench, todayQuickAddFields, BENCH_MAX,
+  todaySubtitle, clearedAtLabel, suggestedBench, todayQuickAddFields, benchHeading,
 } from "../../lib/todoToday";
 import { useTodoToast } from "./useTodoToast";
 import "./todoSide.css";
@@ -126,9 +126,15 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps> = () => {
               onClick: () => document.getElementById("tdt-add")?.focus(),
             },
             {
+              /* ⚠️ INK, NOT PINK, AND DISABLED AT ZERO (corrections fix 6). Pink belongs to
+                 creation — its neighbour ＋ Add to today keeps it. And an enabled "Work the list"
+                 with nothing committed offers to walk you through an empty list: it earns its ink
+                 when the first item lands. The disabled grammar is the house one (paper, hairline,
+                 faint, not-allowed), never opacity. */
               label: "Work the list",
               icon: <Play aria-hidden />,
-              primary: true,
+              ink: true,
+              disabled: committed.length === 0,
               onClick: () => window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST)),
             },
           ]}
@@ -214,8 +220,12 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps> = () => {
             longer bench is a second to-do list beside the real one above it. */}
         {bench.length > 0 && (
           <section className="tdt-bench" aria-label="Suggested">
+            {/* ⚠️ THE HEADING STATES THE BENCH, NOT ITS GUARANTEE (corrections fix 7). It used to
+                read "never anything you have snoozed or dismissed" — the implementation promise,
+                shouted at someone who never doubted it. The exclusion rule is still enforced in
+                the derivation and still tested there; it simply does not headline. */}
             <div className="tdt-benchhead">
-              Suggested — never anything you have snoozed or dismissed
+              <b>Suggested for today</b> · {benchHeading(board.do.length + board.hk.length - bench.length)}
             </div>
             {bench.map((b) => (
               <div key={b.card.key} className="tdt-brow">

@@ -32,6 +32,9 @@
 
 .tbd-body { display: flex; flex-direction: column; gap: 8px; }
 .tbd-empty { font-size: 12.5px; color: #9a8e80; padding: 8px 6px 12px; }
+/* muted, inline, and a link rather than a button — it goes somewhere, it does not do something */
+.tbd-lift { color: #9a8e80; text-decoration: underline; text-underline-offset: 2px; }
+.tbd-lift:hover { color: #2a1a13; }
 
 .tbd-card {
   background: #fffefb;

@@ -55,6 +55,14 @@
 .svh-btn-ghost { background: var(--shell-card); border-color: var(--shell-line); color: var(--shell-ink); }
 .svh-btn-ghost svg { color: var(--shell-muted); }
 .svh-btn-ghost:hover { background: #fff; border-color: var(--pink-b); }
+/* ⚠️ THE INK PRIMARY (corrections fix 6) — for a page's principal action on things that already
+   exist. Pink is reserved for creation and warning, so a "Work the list" in pink reads as a
+   sibling of the ＋ beside it. The disabled treatment below is shared: paper fill, hairline,
+   faint text, not-allowed — never opacity, which would make a dead control look like a live one
+   behind glass. */
+.svh-btn-ink { background: #2a1a13; border-color: #2a1a13; color: #fdfaf5; }
+.svh-btn-ink svg { color: #fdfaf5; }
+.svh-btn-ink:hover { background: #3a2a20; }
 .svh-btn-primary { background: var(--pink); border-color: var(--pink-b); color: var(--burg); }
 .svh-btn-primary svg { color: var(--burg); }
 .svh-btn-primary:hover { background: var(--pink-h); }
