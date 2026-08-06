@@ -44,7 +44,8 @@ import {
   insetBorder,
 } from "../lib/designTokens";
 import { MountCard } from "./MountCard";
-import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
+import { buildOverToYouRows } from "./dashboard/OverToYou";
+import { DeskTodoCard } from "./dashboard/DeskTodoCard";
 // Mobile Pass 1 — the <md desk line + To-do doorway read the To-do board's OWN tallies (the
 // sidebar's recipe), so the doorway can never disagree with the page it opens.
 import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
@@ -1472,22 +1473,18 @@ export const Dashboard: React.FC<{
     const t = new Date(a.date).getTime();
     return Number.isFinite(t) && t >= Date.now() - 14 * 86400000;
   }).length;
-  // The real To-do card — permanent furniture in the hero's right column now, so no onClose.
+  /* The hero's to-do card — permanent furniture in the right column. Three tiers, strict
+     priority, at most three items, and never mixed. */
   const todoPanel = (
-    <OverToYou
+    <DeskTodoCard
       tasks={tasks}
       queries={queries}
       agents={agents}
       userNotes={userTasks}
-      onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId, { fromTask: true }) : onNavigate(task.actionPath, task.title)}
-      onNudge={(task) => setNudgeTask(task)}
-      onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
-      onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
-      onAllTasks={() => setIsTasksPanelOpen(true)}
-      onOpenQuery={(qid) => openEditQuery(qid)}
-      onAddNote={(f) => addUserTask({ text: f.text, dueDate: f.dueDate ?? undefined })}
-      onCompleteNote={(id) => updateUserTask(id, { done: true, completedAt: new Date().toISOString() })}
-      onDeleteNote={(t) => deleteUserTask(t.id)}
+      onAction={(task) => task.taskType === "data_quality_poor"
+        ? openEditAgent(task.relatedRecordId, { fromTask: true })
+        : onNavigate(task.actionPath, task.title)}
+      onSeeAll={() => onNavigate("todo")}
     />
   );
 

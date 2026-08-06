@@ -1,0 +1,59 @@
+/* ── THE HERO'S TO-DO CARD (ref design-refs/dashboard-settled-desk.html) ── */
+
+.dt-card {
+  background: #fffdf9; border: 1px solid #e3d9cc; border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
+  overflow: hidden;
+}
+/* ⚠️ THE BAND IS THE SIGNAL. Pink means something needs you, sage means there is tidying if you
+   fancy it, neutral means notes only — legible before a word is read. */
+.dt-band { padding: 11px 15px; display: flex; align-items: center; gap: 10px; transition: background 0.3s; }
+.dt-card.tier-urgent .dt-band { background: linear-gradient(135deg, #f3e0d6 0%, #efd8cb 100%); }
+.dt-card.tier-housekeeping .dt-band { background: linear-gradient(135deg, #d7ddd5 0%, #ccd3c8 100%); }
+.dt-card.tier-notes .dt-band,
+.dt-card.tier-clear .dt-band { background: linear-gradient(135deg, #ece5da 0%, #e2d9cb 100%); }
+.dt-hd { font-family: var(--font-serif); font-size: 15.5px; flex: 1; min-width: 0; }
+.dt-card.tier-urgent .dt-hd { color: #4a241a; }
+.dt-card.tier-housekeeping .dt-hd { color: #33402f; }
+.dt-card.tier-notes .dt-hd, .dt-card.tier-clear .dt-hd { color: #4a3a2e; }
+.dt-card.tier-urgent .dt-pill { border-color: #c09580; color: #6b3023; }
+.dt-card.tier-housekeeping .dt-pill { border-color: #9aa894; color: #3c4a38; }
+.dt-card.tier-notes .dt-pill, .dt-card.tier-clear .dt-pill { border-color: #b9aa97; color: #4a3a2e; }
+
+.dt-body { padding: 2px 15px; }
+.dt-item { padding: 11px 0; border-bottom: 1px solid #ece0d2; display: flex; gap: 11px; align-items: center; }
+.dt-item:last-child { border-bottom: none; }
+.dt-kind {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase;
+  background: #f8ece4; border: 1px solid #f0dccd; color: #7c3a2a;
+  border-radius: 99px; padding: 3px 8px; flex: none;
+}
+.dt-kind.tidy { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
+.dt-kind.note { background: #f3ede4; border-color: #e2d8c8; color: #8a7a6c; }
+.dt-main { flex: 1; min-width: 0; }
+.dt-nm { font-family: var(--font-serif); font-size: 15px; font-weight: 500; color: #2c1a12; line-height: 1.2; }
+/* a note is in the reader's own hand — it is a jotting, not a record */
+.dt-nm.hand { font-family: "Caveat", cursive; font-size: 19px; color: #4a3a2e; }
+.dt-sub { font-size: 11px; color: #8a7a6c; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dt-sub b { color: #3a1c14; font-weight: 600; }
+.dt-btn {
+  font-size: 11.5px; font-weight: 500; border-radius: 99px; padding: 7px 14px; cursor: pointer;
+  background: #2b2118; border: 1px solid #2b2118; color: #f6efe8; flex: none;
+}
+.dt-btn:hover { background: #3a2d22; }
+.dt-btn.ghost { background: #ffffff; border-color: #d5c8b8; color: #5c4d42; }
+.dt-btn.ghost:hover { border-color: #b9a893; color: #3a1c14; }
+
+.dt-clear { padding: 22px 0 24px; text-align: center; }
+.dt-clear-mark {
+  width: 30px; height: 30px; margin: 0 auto 10px; border-radius: 50%;
+  background: #e9ede6; color: #5a6e58; display: grid; place-items: center; font-size: 15px;
+}
+
+.dt-foot {
+  border-top: 1px solid #ece0d2; padding: 9px 15px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) { .dt-band { transition: none; } }

@@ -317,14 +317,21 @@ describe("notes-store convergence — one store owns \"Notes to self\"", () => {
   const oty = readFileSync(join(here, "..", "dashboard", "OverToYou.tsx"), "utf8");
   const dash = readFileSync(join(here, "..", "Dashboard.tsx"), "utf8");
 
-  it("the dashboard's Notes-to-self tab reads the USER-TASK store (what /todo writes), not the post-its", () => {
-    expect(oty).toContain("userNotes: UserTask[];");
-    expect(oty).not.toContain("notes: Note[];"); // the post-it store no longer feeds this tab
-    expect(oty).toContain("const noteRows = [...userNotes].filter((t) => !t.done)");
+  /* ⚠️ RETARGETED (settled desk, Phase 7), and the RULE is unchanged: the dashboard's
+     Notes-to-self reads the user-task store — what /todo writes — never the post-its. What moved
+     is the surface. The hero's card is DeskTodoCard now, and its notes tier carries NO tick and no
+     composer: a note there is a jotting you wrote, not a task the app is holding you to, so the
+     onCompleteNote/onAddNote props this case used to name no longer exist. Asserting them would be
+     pinning a prop rather than the rule. OverToYou itself is untouched and still serves /todo. */
+  it("the dashboard's Notes-to-self reads the USER-TASK store (what /todo writes), not the post-its", () => {
+    const card = readFileSync(join(here, "..", "dashboard", "DeskTodoCard.tsx"), "utf8");
+    expect(card).toContain("userNotes: UserTask[];");
+    expect(card).not.toContain("notes: Note[];"); // the post-it store never feeds this card
+    expect(card).toContain("const noteRows = [...userNotes].filter((t) => !t.done)");
     expect(dash).toContain("userNotes={userTasks}");
-    // tick + create go through the user-task writes (the same store /todo uses)
-    expect(dash).toContain("onCompleteNote={(id) => updateUserTask(id, { done: true");
-    expect(dash).toContain("onAddNote={(f) => addUserTask({ text: f.text");
+    // and OverToYou keeps the same store on the surface that DOES tick and compose
+    expect(oty).toContain("userNotes: UserTask[];");
+    expect(oty).toContain("const noteRows = [...userNotes].filter((t) => !t.done)");
   });
 
   it("NO SURFACE calls both stores \"notes\": the post-its say post-it in every visible string", () => {
