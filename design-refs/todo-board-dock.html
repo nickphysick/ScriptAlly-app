@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The pages as they should look</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+body{background:#3a332c;padding:30px 0 90px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;color:#2b2118}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b3a695;margin:42px 0 11px;width:1500px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#cfc2b0;margin-left:10px;line-height:1.6}
+.frame{width:1500px;background:#fdfcfa;border-radius:14px;overflow:hidden;display:flex;box-shadow:0 16px 44px rgba(20,15,10,.45);border:1px solid #2a2019}
+/* icon rail */
+.rail{width:78px;flex:0 0 auto;background:#261c15;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:4px}
+.rlogo{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#f3e7da;margin-bottom:14px}
+.rli{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#9c8878;position:relative;margin-bottom:2px}
+.rli.on{background:#3d2e22;color:#f3e7da}
+.rli.on::after{content:'';position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:#c96f52}
+.rfoot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:10px}
+.avi{width:34px;height:34px;border-radius:50%;background:#f3e7da;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#7c3a2a}
+/* app sidebar */
+.sb{width:252px;flex:0 0 auto;border-right:1px solid #ede5d8;background:#fdfcfa;display:flex;flex-direction:column;padding:14px 14px 16px;box-sizing:border-box}
+.mspill{display:flex;align-items:center;gap:9px;height:42px;border:1px solid #e2d8c8;border-radius:11px;padding:0 13px;font-size:13px;font-weight:600;color:#2f2419;margin-bottom:16px}
+.si{display:flex;align-items:center;gap:11px;height:40px;border-radius:9px;padding:0 10px;font-size:13.5px;color:#4d4238;font-weight:500}
+.si .ic{width:18px;text-align:center;color:#8a7a6d;font-size:13px}
+.si .chev{margin-left:auto;color:#b3a394;font-size:9px}
+.si.grp{font-weight:700;color:#2b2118}
+.si .dotn{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8a7a6d}
+.si .dotn::before{content:'';width:6px;height:6px;border-radius:50%;background:#c96f52;display:inline-block}
+.kid2{display:flex;align-items:center;height:34px;border-radius:8px;padding:0 10px;margin-left:30px;font-size:12.5px;color:#5d5047;position:relative}
+.kid2.on{background:#f2ede7;color:#2b2118;font-weight:700}
+.collapse{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;color:#8a7a6d;font-size:12px;margin-top:10px}
+.sbfoot{margin-top:auto;border-top:1px solid #efe8dc;padding-top:12px}
+.uname{font-size:13px;font-weight:700;color:#2b2118}
+.uplan{display:flex;align-items:center;gap:9px;font-size:11.5px;color:#8a7a6d;margin-top:3px}
+.upg{border:1px solid #e2b9a8;color:#7c3a2a;border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600}
+/* main + topbar */
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:64px;display:flex;align-items:center;gap:16px;padding:0 26px;border-bottom:1px solid #f0e9dd}
+.wm{font-family:'Playfair Display',serif;font-size:21px;font-weight:800;color:#2b2118}
+.crumb{font-size:13px;color:#8a7a6d}
+.crumb b{color:#2b2118;font-weight:600}
+.saved{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:#b3a394}
+.srch{display:flex;align-items:center;gap:9px;width:240px;height:36px;border:1px solid #e8dfd1;border-radius:9px;padding:0 12px;color:#a5988c;font-size:12px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;background:#f2ede7;border-radius:5px;padding:2px 6px;color:#8a7a6d}
+.newb{display:inline-flex;align-items:center;gap:7px;background:#2a1a13;color:#fff;border-radius:9px;height:38px;padding:0 15px;font-size:12.5px;font-weight:600}
+/* page area: side container + body */
+.inner{display:flex;flex:1;min-height:0}
+.pside{width:216px;flex:0 0 auto;border-right:1px solid #f0e9dd;padding:22px 16px 16px;display:flex;flex-direction:column;box-sizing:border-box}
+.pk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:#b3a394;padding:0 6px 8px}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:#b3a394;padding:18px 6px 8px}
+.pi{display:flex;align-items:center;gap:10px;height:34px;border-radius:8px;padding:0 9px;font-size:13px;color:#4d4238}
+.pi .swd{width:9px;height:9px;border-radius:50%}
+.pi .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.tagbox{border:1px dashed #d9cbb8;border-radius:10px;padding:11px 12px;margin:2px 4px}
+.tagbox b{font-size:12px;color:#2b2118;display:block}
+.tagbox span{font-size:10.5px;color:#8a7a6d;line-height:1.5;display:block;margin-top:3px}
+.tset{display:flex;align-items:center;gap:9px;height:34px;padding:0 9px;color:#4d4238;font-size:12.5px;margin-top:auto}
+.pbody{flex:1;min-width:0;padding:26px 30px 30px;overflow:auto}
+.ph h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#2b2118}
+.ph .sub{font-size:13px;color:#8a7a6d;margin-top:5px}
+.tools{display:flex;align-items:center;gap:8px;margin-top:16px;padding-bottom:13px;border-bottom:1px solid #f0e9dd}
+.tsrch{display:flex;align-items:center;gap:7px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:#a5988c;font-size:11.5px;width:190px;background:#fff}
+.vtg{display:inline-flex;align-items:center;height:32px;border:1px solid #e8dfd1;border-radius:8px;background:#fff;padding:2px;gap:2px}
+.vc{width:29px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;font-size:11px;color:#8a7a6d}
+.vc.on{background:#2a1a13;color:#fff}
+.pkb{display:inline-flex;align-items:center;gap:6px;background:#f5e2da;border:1px solid #e8c8bc;color:#5c2f22;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:700}
+.ghb{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e8dfd1;color:#4d4238;border-radius:9px;height:33px;padding:0 13px;font-size:12px;font-weight:600}
+.inkb{display:inline-flex;align-items:center;gap:7px;background:#2a1a13;color:#fff;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:600}
+/* board */
+.kb{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start;margin-top:16px}
+.kcol{background:#f5f4f2;border:1px solid #e9e7e3;border-radius:12px;padding:10px 10px 11px;min-height:330px}
+.kh{display:flex;align-items:baseline;gap:8px;padding:3px 5px 10px}
+.kh b{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#2b2118}
+.kh .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c}
+.kc{background:#fff;border:1px solid #efe8dc;border-radius:10px;box-shadow:0 2px 8px rgba(58,28,20,.06);overflow:hidden;margin-bottom:9px;display:flex;flex-direction:column;min-height:106px;position:relative}
+.kc.u{border:1px solid #2a1a13}
+.kc .b{height:24px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--bd)}
+.kc.u .b,.kc.uu .b{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.kc.h .b{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.kc.t .b{background:linear-gradient(180deg,#dee4dc,#d5dbd3);--bd:#b9c9b4}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;color:#3a1c14}
+.kc .b .w{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#8a6a58;font-variant-numeric:tabular-nums}
+.kc .in{padding:10px 12px 11px;flex:1}
+.kc h4{font-size:13px;font-weight:600;color:#2b2118;line-height:1.35}
+.kc .ms{font-size:11px;color:#a0958a;margin-top:4px}
+.kc .qa{position:absolute;right:8px;bottom:8px;display:flex;gap:4px}
+.qi{width:23px;height:23px;border-radius:7px;border:1px solid #ece4d6;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:9.5px;color:#6b5a4e}
+.dz{border:1.5px dashed #d8ccbc;border-radius:10px;height:34px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.15em;color:#b3a394;margin-bottom:9px}
+.kfoot{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;color:#b3a394;text-align:center;padding:4px 0 1px}
+/* today page */
+.card{background:#fff;border:1px solid #efe8dc;border-radius:13px;padding:17px 19px 12px;margin-top:16px}
+.card h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#2b2118;display:flex;align-items:baseline;gap:9px}
+.card h2 .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.qadd{display:flex;align-items:center;gap:10px;height:40px;border:1px solid #efe8dc;border-radius:10px;padding:0 13px;color:#a5988c;font-size:12px;margin:11px 0 5px}
+.trow{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid #f6f1e8}
+.trow:last-child{border-bottom:none}
+.cc{width:18px;height:18px;border-radius:50%;border:1.6px solid #cdbfae;background:#fff;flex:0 0 auto}
+.cc.done{background:linear-gradient(180deg,#dee4dc,#d5dbd3);border-color:#8a9e88;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#4a5f48}
+.tt{font-size:13px;font-weight:600;color:#2b2118}
+.meta{display:flex;gap:7px;margin-top:4px}
+.mc{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;color:#8a7d6e;border:1px solid #efe8dc;border-radius:5px;padding:2px 8px}
+.acts{margin-left:auto;display:flex;gap:5px;align-items:center}
+.bench{background:#fbf8f2;border:1.5px dashed #ddd0bc;border-radius:13px;padding:17px 19px 12px;margin-top:16px}
+.why{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#8a7a5e}
+.addg{display:inline-flex;align-items:center;gap:5px;height:29px;padding:0 12px;border-radius:8px;border:1px solid #e2d8c8;background:#fff;font-size:11px;font-weight:600;color:#4d4238;margin-left:12px}
+
+/* filters sidebar active */
+.pi.filt{cursor:pointer}
+.pi.filt.on{background:#f2ede7;font-weight:700;color:#2b2118}
+.pi.filt.on .n{color:#4a3a2c}
+.linkrow{display:flex;align-items:center;gap:9px;height:32px;padding:0 9px;font-size:12px;color:#8a7a6d;border-top:1px solid #f0e9dd;margin-top:8px;padding-top:10px}
+.linkrow b{color:#7c3a2a;font-weight:600;border-bottom:1px solid #e2c6ba;cursor:pointer}
+/* tool row extras */
+.sortb{display:inline-flex;align-items:center;gap:6px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:#4d4238;font-size:11.5px;background:#fff;font-weight:600}
+/* menu popover */
+.menu{position:absolute;right:8px;top:34px;background:#fff;border:1px solid #e2d8c8;border-radius:11px;box-shadow:0 14px 34px rgba(58,28,20,.16);padding:6px;width:200px;z-index:5}
+.mi{display:flex;align-items:center;gap:9px;height:31px;border-radius:8px;padding:0 10px;font-size:11.5px;color:#4d4238;font-weight:500}
+.mi:hover{background:#f7f2e9}
+.mi .k2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:#a5988c}
+.mi.warn{color:#8a4a36}
+.mdiv{height:1px;background:#f0e9dd;margin:5px 4px}
+/* dock */
+.dock{display:flex;gap:16px;margin-top:16px;align-items:stretch}
+.dq{width:30%;flex:0 0 auto;display:flex;flex-direction:column;gap:8px}
+.dqh{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;color:#b3a394;padding:2px 2px 4px}
+.dcard{background:#fff;border:1px solid #efe8dc;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;color:#4d4238;display:flex;align-items:center;gap:9px}
+.dcard .bd{width:8px;height:8px;border-radius:3px;flex:0 0 auto}
+.dcard.live{border:1.5px solid #2a1a13;box-shadow:0 4px 12px rgba(58,28,20,.1)}
+.dcard .st{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#a5988c}
+.work{flex:1;background:#fff;border:1px solid #e8dfd1;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 28px rgba(58,28,20,.08)}
+.wband{height:30px;display:flex;align-items:center;padding:0 16px;background:linear-gradient(180deg,#f8e2d9,#f4d5c9);border-bottom:1px solid #e8c8bc}
+.wband i{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;font-style:normal;color:#3a1c14}
+.wband .x{margin-left:auto;color:#8a6a58;cursor:pointer;font-size:12px}
+.wbody{padding:18px 22px;flex:1}
+.wtl{border-left:2px solid #f0e6d8;margin:12px 0 0 5px;padding-left:15px}
+.wt{position:relative;padding-bottom:9px;font-size:11.5px;color:#4d4238}
+.wt::before{content:'';position:absolute;left:-20.5px;top:3px;width:8px;height:8px;border-radius:50%;background:#d9c49a;border:2px solid #fff}
+.wt.hot::before{background:#d98b74}
+.wt .w2{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#a5988c;display:block}
+.flowbox{background:#fbf8f2;border:1px solid #efe6d8;border-radius:11px;padding:13px 15px;margin-top:13px}
+.flowbox h5{font-family:'Playfair Display',serif;font-size:14px;color:#2b2118;margin-bottom:7px}
+.pkchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;border:1px solid #e2d8c8;background:#fff;font-size:11px;font-weight:600;color:#4d4238;margin-right:7px}
+.pkchip.on{border-color:#8a9e88;background:#e9ede6;color:#31402d}
+.wfoot{display:flex;align-items:center;gap:8px;padding:14px 22px;border-top:1px solid #f0e9dd}
+.disb{display:inline-flex;align-items:center;gap:7px;background:#faf7f2;border:1px solid #e8dfd1;color:#b3a394;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:600;cursor:not-allowed}
+</style></head><body><div class="lbl">1 &middot; THE BOARD PAGE, REDESIGNED <em>&mdash; the standalone control bar is GONE (its search and the retired view toggle fold into the header tool row, joined by sort, the Focused-session launcher and the Add that was orphaned mid-page); LISTS is renamed FILTERS and does what it says &mdash; Everything active by default, one click filters all four columns, counts live; Snoozed row deleted (it is a column), Notes row replaced by its road sign to the Noteboard. URGENT BANDS ARE PINK again &mdash; the family colour, with the ink border; the &#8943; menu now speaks in VERBS (Action now &middot; &#65291;Today &middot; Snooze&hellip; &middot; Open the query), never &ldquo;move to&rdquo;.</em></div><div class="frame"><div class="rail"><div class="rlogo">S</div>
+<span class="rli">&#9638;</span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><span class="rli on">&#10003;</span>
+<div class="rfoot"><span class="avi">ML</span><span class="rli" style="margin:0">&#9881;</span></div></div><div class="sb">
+<div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:#b3a394;font-size:9px">&#9662;</span></div>
+<div class="si"><span class="ic">&#9638;</span>Dashboard</div>
+<div class="si"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9639;</span>Materials</div>
+<div class="si grp"><span class="ic">&#10003;</span>To-do<span class="dotn">42</span><span class="chev" style="margin-left:8px">&#9652;</span></div>
+<div class="kid2 on">To-do list</div><div class="kid2">Today</div><div class="kid2">Calendar</div><div class="kid2">Noteboard</div>
+<div class="collapse">&#171; Collapse sidebar</div>
+<div class="sbfoot"><div class="uname">Michael Li</div><div class="uplan">Free plan <span class="upg">Upgrade</span></div>
+<div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div><div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ To-do / <b>To-do list</b></span>
+<span class="saved">ALL CHANGES SAVED</span><span class="srch">&#9906; Search<span class="k">&#8984;K</span></span><span style="color:#8a7a6d">?</span><span class="newb">&#65291; New</span></div><div class="inner"><div class="pside">
+<div class="pk">FILTERS</div>
+<div class="pi filt on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">42</span></div>
+<div class="pi filt"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi filt"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">39</span></div>
+<div class="pi filt"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">0</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div>
+<div class="tagbox"><b>Coming soon</b><span>Tag notes and tasks, then filter by them here.</span></div>
+<div class="tset">&#9881; Task settings</div></div><div class="pbody">
+<div class="ph"><h1>To-do list</h1><div class="sub">Everything waiting on you &mdash; forty-two items, three urgent.</div></div>
+<div class="tools"><span class="tsrch">&#9906; Search your list&hellip;</span>
+<span class="sortb">&#8645; Most pressing</span>
+<span style="flex:1"></span>
+<span class="ghb">&#9654; Focused session</span>
+<span class="pkb">&#65291; Add task or note</span></div>
+<div class="kb">
+<div class="kcol"><div class="kh"><b>To do</b><span class="n">40</span></div>
+<div style="position:relative"><div class="kc u"><div class="b"><i>&#9733; OFFER</i><span class="w">19 JUL</span></div><div class="in"><h4>Tom Ellery has made an offer</h4><div class="ms">Tom Ellery &middot; Ellery &amp; Frost</div></div><span class="qa"><span class="qi">&#10003;</span><span class="qi">&#128340;</span><span class="qi">&#8942;</span></span></div>
+<div class="menu"><div class="mi"><b style="font-weight:700">Action now</b><span class="k2">OPENS THE DOCK</span></div>
+<div class="mi">&#65291; Add to today</div><div class="mi">&#128340; Snooze&hellip;</div>
+<div class="mdiv"></div><div class="mi">&#128279; Open the query</div><div class="mi" style="color:#b3a394">Dismiss &mdash; not for offers</div></div></div>
+<div class="kc u"><div class="b"><i>AGENT WAITING</i><span class="w">12 JUL</span></div><div class="in"><h4>Send your full to Jonathan Marsh</h4><div class="ms">Jonathan Marsh &middot; The Marsh Agency</div></div><span class="qa"><span class="qi">&#10003;</span><span class="qi">&#128340;</span><span class="qi">&#8942;</span></span></div>
+<div class="kc h"><div class="b"><i>STALE</i><span class="w">SILENT 849 DAYS</span></div><div class="in"><h4>Eleanor Whitfield silent</h4><div class="ms">No reply &mdash; consider closing</div></div></div>
+<div class="kfoot">+ 37 MORE &#9662;</div></div>
+<div class="kcol"><div class="kh"><b>Today</b><span class="n">1</span></div>
+<div class="dz">DROP TO ADD TO TODAY&rsquo;S LIST</div>
+<div class="kc uu"><div class="b"><i>AGENT WAITING</i><span class="w">15 JUL</span></div><div class="in"><h4>Send your partial to Daniel O&rsquo;Rourke</h4><div class="ms">Daniel O&rsquo;Rourke &middot; Inkwell &amp; Stone</div></div><span class="qa"><span class="qi">&#10003;</span><span class="qi">&#128340;</span><span class="qi">&#8942;</span></span></div></div>
+<div class="kcol"><div class="kh"><b>Snoozed</b><span class="n">1</span></div>
+<div class="dz">DROP TO CHOOSE A RETURN DATE</div>
+<div class="kc h"><div class="b"><i>STALE &middot; &#128340;</i><span class="w">BACK FRI 8 AUG</span></div><div class="in"><h4>Marcus Reed silent</h4><div class="ms">Snoozed until Friday</div></div></div></div>
+<div class="kcol" style="background:#f1f3f0;border-color:#e2e6e0"><div class="kh"><b>Done</b><span class="n">2 TODAY</span></div>
+<div class="kc t"><div class="b"><i>&#10003; DONE</i><span class="w">14:02</span></div><div class="in"><h4>Reply to Curtis Vane</h4><div class="ms"></div></div></div>
+<div class="kc t"><div class="b"><i>&#10003; DONE</i><span class="w">09:15</span></div><div class="in"><h4>Wish list added &middot; A. Kapoor</h4><div class="ms"></div></div></div>
+<div class="kfoot">CLEARS AT MIDNIGHT &middot; KEPT IN THE LOG</div></div>
+</div></div></div></div></div><div class="lbl">2 &middot; THE DOCK &mdash; HOW A TASK ACTUALLY GETS DONE <em>&mdash; your 30/70: Action (from card, hover or &#8943;) docks the item. Left: the queue as slim rails, the docked card ringed in ink, Esc returns to the board. Right: the work surface &mdash; band, title, the timeline from the activity log, and the REAL flow inline (here, recording the full sent: choose what goes, one ink act). Completing the flow ticks the card, animates it to Done with its undo toast, and offers the next in the queue. Derived tasks can never be dragged to Done &mdash; the dock is how they finish; a Done-drop bounces with &ldquo;Sending the full is what completes this&rdquo;. User tasks alone tick by hand. &ldquo;Work the list&rdquo; on Today = this dock, walking today&rsquo;s queue.</em></div><div class="frame"><div class="rail"><div class="rlogo">S</div>
+<span class="rli">&#9638;</span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><span class="rli on">&#10003;</span>
+<div class="rfoot"><span class="avi">ML</span><span class="rli" style="margin:0">&#9881;</span></div></div><div class="sb">
+<div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:#b3a394;font-size:9px">&#9662;</span></div>
+<div class="si"><span class="ic">&#9638;</span>Dashboard</div>
+<div class="si"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9639;</span>Materials</div>
+<div class="si grp"><span class="ic">&#10003;</span>To-do<span class="dotn">42</span><span class="chev" style="margin-left:8px">&#9652;</span></div>
+<div class="kid2 on">To-do list</div><div class="kid2">Today</div><div class="kid2">Calendar</div><div class="kid2">Noteboard</div>
+<div class="collapse">&#171; Collapse sidebar</div>
+<div class="sbfoot"><div class="uname">Michael Li</div><div class="uplan">Free plan <span class="upg">Upgrade</span></div>
+<div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div><div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ To-do / <b>To-do list</b></span>
+<span class="saved">ALL CHANGES SAVED</span><span class="srch">&#9906; Search<span class="k">&#8984;K</span></span><span style="color:#8a7a6d">?</span><span class="newb">&#65291; New</span></div><div class="inner"><div class="pside">
+<div class="pk">FILTERS</div>
+<div class="pi filt on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">42</span></div>
+<div class="pi filt"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi filt"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">39</span></div>
+<div class="pi filt"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">0</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div>
+<div class="tagbox"><b>Coming soon</b><span>Tag notes and tasks, then filter by them here.</span></div>
+<div class="tset">&#9881; Task settings</div></div><div class="pbody">
+<div class="ph"><h1>To-do list</h1><div class="sub">Working: send your full to Jonathan Marsh.</div></div>
+<div class="dock">
+<div class="dq"><div class="dqh">THE QUEUE &middot; DOCKED ITEM RINGED</div>
+<div class="dcard"><span class="bd" style="background:#e8a68e"></span>Tom Ellery&rsquo;s offer<span class="st">NEXT</span></div>
+<div class="dcard live"><span class="bd" style="background:#e8a68e"></span>Full &rarr; Jonathan Marsh<span class="st">OPEN</span></div>
+<div class="dcard"><span class="bd" style="background:#e8a68e"></span>Partial &rarr; Daniel O&rsquo;Rourke<span class="st">TODAY</span></div>
+<div class="dcard"><span class="bd" style="background:#d9c49a"></span>Eleanor Whitfield &mdash; close?<span class="st"></span></div>
+<div class="dqh" style="margin-top:6px">ESC OR &#10005; RETURNS TO THE BOARD</div>
+</div>
+<div class="work">
+<div class="wband"><i>AGENT WAITING &middot; REQUESTED 12 JUL &middot; 25 DAYS</i><span class="x">&#10005;</span></div>
+<div class="wbody">
+<h2 style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:#2b2118">Send your full to Jonathan Marsh</h2>
+<div style="font-size:12px;color:#8a7a6d;margin-top:4px">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="wtl">
+<div class="wt"><span class="w2">3 FEB</span>Queried with Package A</div>
+<div class="wt"><span class="w2">28 APR</span>Partial requested &rarr; sent in 2 days</div>
+<div class="wt hot"><span class="w2">12 JUL</span>Full requested &mdash; your turn, 25 days</div>
+</div>
+<div class="flowbox"><h5>Send the full</h5>
+<div style="font-size:11px;color:#8a7a6d;margin-bottom:9px">What goes with it?</div>
+<span class="pkchip on">&#10003; Full manuscript &middot; v4</span><span class="pkchip">Synopsis</span><span class="pkchip">Author note&hellip;</span>
+<div style="font-size:10.5px;color:#8a7a6d;margin-top:11px">Recording this here marks the task done, moves the query to Full Sent, and writes the activity &mdash; one act, three records.</div></div>
+</div>
+<div class="wfoot"><span class="inkb">Record it sent &rarr;</span><span class="ghb">&#128340; Snooze</span><span class="ghb">&#8942;</span><span style="flex:1"></span><span style="font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:#a5988c">DONE HERE TICKS THE CARD &middot; NEXT: TOM ELLERY&rsquo;S OFFER</span></div>
+</div></div></div></div></div></div></body></html>

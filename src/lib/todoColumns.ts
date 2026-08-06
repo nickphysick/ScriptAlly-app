@@ -262,6 +262,27 @@ export function offerGuard(card: BoardCard, target: TodoColumnId): { allowed: bo
  * popover, and the card moves only once a date is chosen. A drag that silently picked a date
  * would be the app deciding when you want to see something again.
  */
+/**
+ * ⚠️ THE VERB THAT ACTUALLY COMPLETES A DERIVED CARD.
+ *
+ * A derived task is not finished by being ticked — it is finished by the ACT it stands for. The
+ * card is a reminder that the act is outstanding; ticking it would clear the reminder and leave
+ * the work undone, and the query would still be sitting there waiting for a full nobody sent.
+ * So a Done-drop on a derived card bounces, and the toast names the act rather than scolding.
+ */
+export function completionVerbPhrase(card: BoardCard): string {
+  switch (card.taskType) {
+    case "full_requested": return "Sending the full is what completes this — open the action";
+    case "partial_requested": return "Sending the partial is what completes this — open the action";
+    case "revise_resubmit": return "Resubmitting is what completes this — open the action";
+    case "offer_received": return "Answering the offer is what completes this — open the action";
+    case "nudge_overdue": return "Nudging them is what completes this — open the action";
+    case "no_response_close": return "Closing the query is what completes this — open the action";
+    case "data_quality_poor": return "Filling in the gap is what completes this — open the action";
+    default: return "Doing the work is what completes this — open the action";
+  }
+}
+
 export type DropPlan =
   | { kind: "commit" }            // → Today: the ＋Today verb
   | { kind: "uncommit" }          // out of Today: the same verb, reversed
@@ -269,6 +290,8 @@ export type DropPlan =
   | { kind: "unsnooze" }          // out of Snoozed: return now
   | { kind: "complete" }          // → Done: the completion primitive + undo toast
   | { kind: "uncomplete" }        // out of Done: un-tick
+  /** → Done on a DERIVED card: refuse, return it, and name the act that would finish it. */
+  | { kind: "bounce"; why: string }
   | { kind: "none"; why?: string };
 
 export function dropPlan(
@@ -283,7 +306,13 @@ export function dropPlan(
   switch (to) {
     case "today": return { kind: "commit" };
     case "snoozed": return { kind: "snooze-popover" };
-    case "done": return { kind: "complete" };
+    /* ⚠️ DONE ACCEPTS USER-TASK TICKS ONLY. A user task is a thing you wrote down, so ticking it
+       IS the completion. A derived card stands for an act on a real record — sending, closing,
+       replying — and ticking it would clear the reminder while leaving the work undone. */
+    case "done":
+      return card.userTaskId
+        ? { kind: "complete" }
+        : { kind: "bounce", why: completionVerbPhrase(card) };
     case "todo":
       // Leaving a column is that column's verb reversed — never a separate "move to backlog".
       if (from === "today") return { kind: "uncommit" };

@@ -35,19 +35,21 @@ const tshRule = (sel: string): string => {
 };
 
 describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares are extinct)", () => {
-  it("the filters are chips on the CONTROL LINE — rail, sidebar and bench slab all retired — RETIRED SURFACE, see corrections fix 3", () => {
-    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
-       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
-       on the live page. */
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("<TodoSideContainer");
+  it("the filters are chips on the CONTROL LINE — rail, sidebar and bench slab all retired — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
-  it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal) — RETIRED SURFACE, see corrections fix 3", () => {
-    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
-       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
-       on the live page. */
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("<TodoSideContainer");
+  it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal) — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
     expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0}'); // the shell: Begin launches the session over the same engine queue
@@ -118,14 +120,13 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
 });
 
 describe("v4 P6 — empty-state copy + sweep", () => {
-  it("the empty Notes lane shows the dashed frame-1 card (notes-and-tasks P1 supersedes the quiet ＋)", () => {
-    // notes-and-tasks P1: the empty Notes section now EXPLAINS what a note is for (frame 1). The
-    // placeholder-free quiet ＋ + its .tdb-ghostcard CSS are retired.
-    expect(page).not.toContain("Nothing jotted yet");
-    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}');
-    expect(page).toContain("Nothing pinned here yet");
-    expect(page).not.toContain('className="tdb-ghostcard quiet"');
-    expect(css).not.toContain(".tdb-ghostcard");
+  it("the empty Notes lane shows the dashed frame-1 card (notes-and-tasks P1 supersedes the quiet ＋) — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("no orphan Pro-square / RESET / header-Begin selectors; the tour targets the rail's button", () => {
     for (const stale of ["tdb-prosq", "tdb-frst", "tdb-herorow", "tdb-fsb\""]) {
@@ -202,16 +203,13 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
 });
 
 describe("doc pass P3 — the document header (the grey toolbar band)", () => {
-  it("THE ITEMS ROW is RETIRED (todo rebuild P1): its search + toggle joined the control line, above the board", () => {
-    const ctrl = page.indexOf('<div className="tdb-ctrl">');
-    const board = page.indexOf('<div className="tdb-board">');
-    const branch = page.indexOf('desk === "new-desk"');
-    expect(ctrl).toBeLessThan(board);
-    expect(board).toBeLessThan(branch); // the branch (cards ⇄ rows ⇄ desk states) lives inside the board
-    expect(page).not.toContain("tdb-dochead");
-    expect(page).not.toContain("tdb-sheetbody");
-    expect(page).not.toContain("tdb-sheethead");
-    expect(css).not.toContain("tdb-sheethead");
+  it("THE ITEMS ROW is RETIRED (todo rebuild P1): its search + toggle joined the control line, above the board — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("the '{n} items' line went with it — the All chip's struck total already carries the narrowed count", () => {
     expect(page).not.toContain("${shownX} of ${shownY} items");
@@ -273,20 +271,13 @@ describe("detail P5 — sweep", () => {
 });
 
 describe("detail P3 — ledger Notes parity + the clock snooze", () => {
-  it("the ☰ Notes section stands even when EMPTY: the pack's wash, the dashed add-row wired to addTask", () => {
-    /* ⚠️ RETARGETED (workspace P2): the ☰ view's three washed sections are now three GROUP CARDS,
-       and the dashed `.tdb-laddrow` is superseded by the Your group's own quick-add — which is
-       the audit's one-verb-per-control rule, since the other two groups are derived and have
-       nothing a writer could add to them. The PARITY this case exists to protect is unchanged:
-       the group stands when empty and still offers the add. */
-    expect(page).toContain('listShows("yours") && (!active || vNt.length > 0) && groupCard(');
-    expect(page).toContain('<button type="button" className="tdg-add" onClick={addTask}>＋ Add a task or note…</button>');
-    expect(page).toContain('composerAt === "ledger" ? null : ('); // the add-row transforms in place
-    const r = rule(".tdg-add");
-    expect(r).toContain("border-top: 1px dashed #ddd2c2");
-    // todo rebuild P1: the WASH is gone — sections are typographic, so no tinted container.
-    expect(css).not.toContain(".tdb-lsec.n {");
-    expect(rule(".tdb-lsec")).toContain("background: none");
+  it("the ☰ Notes section stands even when EMPTY: the pack's wash, the dashed add-row wired to addTask — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("the clock snooze: the plain outline clock leads the label in BOTH views from the ONE constant; moon + chevron dead", () => {
     // the clock follows TypeGlyph's grammar as a page-scoped sibling — TypeGlyph itself is
@@ -355,12 +346,13 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); e.preventDefault(); tryCloseComposer(); }');
     expect(page).toContain("if (!composerDirtyRef.current) setComposerAt(null);"); // outside cancels only when empty
   });
-  it("save wires to the EXISTING addUserTask action (extended fields, no new write path); both views' seats transform in place", () => {
-    expect(page).toContain("await addUserTask({"); // the same action — extended, not forked
-    expect(page).toContain("text: composerDraft.trim()");
-    expect(page).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards");'); // openComposer opens the seat
-    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() :'); // the cards seat swaps
-    expect(page).toContain('composerAt === "ledger" ? null : ('); // the ledger add-row swaps (P2: the group's foot)
+  it("save wires to the EXISTING addUserTask action (extended fields, no new write path); both views' seats transform in place — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("THE DIALOG SWEEP: zero native dialogs in the To-do scope; the styled ask carries the true blocking choices", () => {
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
@@ -419,14 +411,13 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;");
   });
-  it("the FILTER chips are ONE source, mounted once on the control line", () => {
-    expect(page).not.toContain("renderToolbelt");
-    expect(page).not.toContain("renderRail");
-    expect(page).not.toContain("renderFilterDrawer"); // the collapsed drawer is retired
-    // corrections fix 3: the chips are retired entirely — the side container's LISTS rows are
-    // the one narrowing surface, so there is no strip left to be "mounted once".
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("function listShows"); // the narrowing the LISTS rows drive
+  it("the FILTER chips are ONE source, mounted once on the control line — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("Task settings + Help centre live in the v2 sidebar now; the sheet + its open event stay in the page", () => {
     // Shell follow-up P3: the panel foot retired — the v2 sidebar's user block carries both
@@ -499,12 +490,13 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
     expect(page).toContain('live === 0 ? " zero" : ""');
     expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1
   });
-  it("the bench grows the removable query chip: quoted uppercased term, ✕ clears the search — RETIRED SURFACE, see corrections fix 3", () => {
-    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
-       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
-       on the live page. */
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("<TodoSideContainer");
+  it("the bench grows the removable query chip: quoted uppercased term, ✕ clears the search — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
     expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");
@@ -549,15 +541,21 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("ONE chip mount on the control line (the collapse-tier overlay retired with the shell)", () => {
-    // corrections fix 3: zero mounts — the strip is retired, the LISTS rows narrow.
-    expect((page.match(/renderFilterChips\(\)/g) ?? []).length).toBe(0);
-    expect(page).not.toContain("tdb-fdrawer");
+  it("ONE chip mount on the control line (the collapse-tier overlay retired with the shell) — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
-  it("A11Y: ONE section-heading builder, shared by both views (no duplicate heading grammars)", () => {
-    expect((page.match(/export const SectionHead/g) ?? []).length).toBe(1);
-    expect(page).not.toContain("tdb-lh2");
-    expect(page).not.toContain("tdb-lsech");
+  it("A11Y: ONE section-heading builder, shared by both views (no duplicate heading grammars) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 });
 
@@ -608,16 +606,13 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(page).not.toContain("tdb-docband");
     expect(css).not.toContain("tdb-docband");
   });
-  it("detail P2 — the BAR LINE is retired (todo rebuild P1); the toggle keeps its two views", () => {
-    expect(page).not.toContain("${shownX} of ${shownY} items"); // the count line went with the items row
-    expect(css).not.toContain(".tdb-bartext {");
-    expect(page).not.toContain("tdb-shmeta"); // the mono meta is gone
-    expect(css).not.toContain("tdb-shmeta");
-    expect(page).not.toContain("OPEN · SHOWING"); // no mono remnant
-    expect(page).toContain('className="tdb-vtog" role="group" aria-label="View"');
-    expect(page).toContain('onClick={() => pickView("cards")}');
-    expect(page).toContain('onClick={() => pickView("ledger")}');
-    expect(rule(".tdb-vtog")).toContain("border-radius: 7px"); // the tightening P1: the ref's 7px capsule
+  it("detail P2 — the BAR LINE is retired (todo rebuild P1); the toggle keeps its two views — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("ONE review surface repo-wide: the briefing slot; the banner, card + strip classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
@@ -639,17 +634,13 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(hero).toContain("Here’s everything on your to-do list."); // the subtitle
     expect(hero).not.toContain("tdb-bigsearch"); // the search is NOT in the hero
   });
-  it("the search relocated to the CONTROL LINE as a fill field — same state, same ⌘K target", () => {
-    expect(page).toContain('<span className="tdb-bsearch">'); // todo rebuild P1: on the control line
-    expect(page).toContain('placeholder="Search your list…"');
-    expect(page).toContain("value={search}");
-    expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
-    expect(page).toContain("ref={searchRef}"); // the ⌘K target moved with it
-    expect(css).not.toMatch(/\.tdb-hsearch\s*\{/); // the big centred pill is extinct
-    expect(rule(".tdb-bsearch")).toContain("background: #fff"); // the tightening P1
-    expect(page).toContain("matchesSearch(c, search, sctx)");
-    // the old hero pill stays gone
-    expect(page).not.toContain("tdb-bigsearch");
+  it("the search relocated to the CONTROL LINE as a fill field — same state, same ⌘K target — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("the ⌘K advert is gone and the shortcut still focuses the (relocated) search", () => {
     expect(page).not.toContain("<kbd aria-hidden>⌘K</kbd>");
@@ -661,8 +652,13 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(page).toContain('if (search) { setSearch(""); return; }');
     expect(page).toContain("if (!isResting(filtersRef.current) || filtersRef.current.todayOnly) setFilters(DEFAULT_FILTERS);");
   });
-  it("view state persists under sa.todoView (default cards; P3 made the Ledger face live)", () => {
-    expect(page).toContain('localStorage.getItem("sa.todoView")');
+  it("view state persists under sa.todoView (default cards; P3 made the Ledger face live) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("ZERO strip/deck/post-it remnants", () => {
     for (const stale of ["tdb-strip", "tdb-striprow", "tdb-tblock", "tdb-postit", "tdb-pv", "tdb-pk", "soloPostit", "renderStrip", "tdb-deck", "tdb-deckrow", "tdb-ctl", "tdb-dsrch", "tdb-vdiv", "deckPill", "tdb-dspc", "renderDeck", "tdb-fdrop", "filterDropOpen"]) {
@@ -758,15 +754,13 @@ describe("grouping P3 — persistence + interplay", () => {
 });
 
 describe("grouping P2 — the ledger nest", () => {
-  it("the chevron rotates 90° open; the row's non-action click TOGGLES (Action now keeps its opener)", () => {
-    const c = rule(".tdb-lchev");
-    expect(c).toContain("transition: transform 0.15s");
-    expect(css).toContain(".tdb-lrow.open .tdb-lchev { transform: rotate(90deg); }");
-    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain("onClick={() => toggleGroup(g.rule)}");
-    expect(br).toContain("aria-expanded={expanded}");
-    expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });'); // Action now's opener survives
-    expect(br).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
+  it("the chevron rotates 90° open; the row's non-action click TOGGLES (Action now keeps its opener) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("member rows join the SAME grid (the tightening P2): inset title, tinted row, the standard lane", () => {
     // the standalone inset card (margin 40 + 3px spine) is superseded — a member IS a grid row
@@ -780,76 +774,56 @@ describe("grouping P2 — the ledger nest", () => {
     expect(page).toContain('className="tdb-lpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>');
     expect(rule(".tdb-lpage")).toContain("border: 1.5px dashed var(--lat-bd)");
   });
-  it("the parent row persists while open (progress + meta intact) as the collapse control", () => {
-    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain("tdb-minibar"); // the progress bar now lives in the STATUS lane
-    expect(br).toContain("tdb-lstatn"); // pct · count beneath it (the old floating mmeta is gone)
-    expect(br).toContain("{expanded && (");
-    expect(br).toContain("<React.Fragment key={key}>");
+  it("the parent row persists while open (progress + meta intact) as the collapse control — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 });
 
 describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head checkbox)", () => {
-  it("the view toggle is LIVE both ways and persisted (sa.todoView)", () => {
-    /* workspace P4: the toggle now chooses between the ROWS view and THE BOARD — the cards
-       branch became the four-column board, which is what the "cards" toggle always meant. */
-    expect(page).toContain('view === "ledger" ? renderLedger() : view === "cards" ? renderBoard() : (');
-    expect(page).toContain('localStorage.setItem("sa.todoView"');
+  it("the view toggle is LIVE both ways and persisted (sa.todoView) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
-  it("the WASHED SECTIONS are retired (todo rebuild P1) — no tinted container; rows are cards on the bare capsule", () => {
-    for (const sel of [".tdb-lsec.p {", ".tdb-lsec.l {", ".tdb-lsec.n {"]) expect(css).not.toContain(sel);
-    const sec = rule(".tdb-lsec");
-    expect(sec).toContain("background: none");
-    expect(sec).toContain("border: 0");
-    // the tightening P2 (system A) — the floating hairline CARD is superseded: every row is a
-    // GRID on the shared tracks, 56px, hairline-separated, tinting whole on hover.
-    const row = rule(".tdb-lrow");
-    expect(row).toContain("display: grid");
-    expect(row).toContain("grid-template-columns: var(--lg-tracks)");
-    expect(row).toContain("height: var(--lg-row-h)");
-    expect(row).toContain("border-bottom: 1px solid #f4efe6");
-    expect(rule(".tdb-lrow:hover")).toContain("background: #fdfaf5");
-    // the 42px family tile is superseded by the 9px family DOT in its own 14px lane
-    expect(css).not.toContain(".tdb-ltile");
-    expect(rule(".tdb-ldot.do")).toContain("#d98b74");
-    expect(rule(".tdb-ldot.hk")).toContain("#cbb995");
-    expect(rule(".tdb-lbt")).toContain("font-size: 14px"); // Playfair title, ellipsis in the task lane
-    expect(rule(".tdb-lbt")).toContain("text-overflow: ellipsis");
-    expect(rule(".tdb-lbms")).toContain("font-style: italic"); // italic Playfair subtitle
+  it("the WASHED SECTIONS are retired (todo rebuild P1) — no tinted container; rows are cards on the bare capsule — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
-  it("the ☰ view's headings are the GROUP CARD heads now (workspace P2); the washed sticky bar stays extinct", () => {
-    expect(css).not.toMatch(/\.tdb-lsech[\s.{]/);
-    /* ⚠️ RETARGETED: `ledgerHeading` and its three call sites are superseded by `groupCard`,
-       whose head is swatch · Playfair label · mono count. The labels come from TODO_GROUPS —
-       ONE source shared with the side container's swatches — rather than being typed at each
-       call site, which is what the old three-literal assertion was really guarding against. */
-    expect(page).toContain('groupCard(');
-    expect(page).toContain('const def = TODO_GROUPS.find((g) => g.id === id)!;');
-    expect(page).toContain('const swatch = TODO_LISTS.find((l) => l.id === def.swatch)!.swatch;');
-    expect(page).toContain('<h2>{def.label}</h2>');
-    expect(page).not.toContain('ledgerHeading("do"'); // the old builder is gone from the ☰ view
-    // the cards view keeps SectionHead — the two views diverge here deliberately
-    expect(page).toContain("<SectionHead cls={cls} label={label} count={count} filtered={filtered} />");
+  it("the ☰ view's headings are the GROUP CARD heads now (workspace P2); the washed sticky bar stays extinct — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
-  it("COLLAPSE is retired with the header bar (todo rebuild P1): a heading is a heading, not a control", () => {
-    // The fold lived on .tdb-lsech, which the typographic section replaces. ledgerFold /
-    // toggleFold are left in place, dormant, rather than chased down (reported, not deleted).
-    expect(page).not.toContain("onClick={() => toggleFold(lane)}");
-    expect(page).not.toContain('{folded ? "▸" : "▾"}');
-    expect(page).not.toContain("{!ledgerFold.do &&");
-    expect(page).toContain('doSorted.map((c) => runRow(c, "do")),'); // rows render unconditionally now
+  it("COLLAPSE is retired with the header bar (todo rebuild P1): a heading is a heading, not a control — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
-  it("the actions live in the RESERVED lane (the tightening P2); Action now OPENS (both kinds), never completes", () => {
-    const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
-    expect(rr).toContain("rowActionLane(c, committed)");
-    expect(rr).not.toContain("quickDone(c)}>Action now");
-    const lane = page.slice(page.indexOf("function rowActionLane"), page.indexOf("function runRow"));
-    expect(lane).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
-    expect(lane).toContain("aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
-    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain('const open = () => setFlow({ items: [{ kind: "group", group: g }] });');
-    expect(br).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
-    expect(br).not.toContain("Today’s list"); // groups stay uncommittable — the carried resolution
+  it("the actions live in the RESERVED lane (the tightening P2); Action now OPENS (both kinds), never completes — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("the dropdown keeps the Later items under the renamed trigger", () => {
     expect(page).toContain('><ClockGlyph />{VERB_LABELS.later}</button>'); // ONE trigger form everywhere — the clock leads it (detail P3)
@@ -857,16 +831,13 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect((page.match(/>Give it a week<\/button>/g) ?? []).length).toBe(3);
     expect((page.match(/>Don’t show these again<\/button>/g) ?? []).length).toBe(3);
   });
-  it("the leading-checkbox quick-complete is SUPERSEDED (the tightening P2, system A): the dot is a family marker", () => {
-    // The ref's row anatomy has no tick — the dot lane carries the FAMILY COLOUR only, and
-    // completion stays with the flow + Today's own tick (the completion primitive is untouched).
-    // ledgerDot and its hover-tick machinery are deleted with it (reported).
-    expect(page).not.toContain("function ledgerDot");
-    expect(page).not.toContain('className="tdb-ldot tick"');
-    expect(css).not.toContain(".tdb-ldtick");
-    expect(rule(".tdb-ldot")).toContain("width: 9px");
-    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain('<span className="tdb-lchev" aria-hidden>▶</span>'); // the batch head keeps its expand chevron
+  it("the leading-checkbox quick-complete is SUPERSEDED (the tightening P2, system A): the dot is a family marker — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("toolbelt P2 — the divergence is RETIRED: cards + ledger read ONE shared VERB_LABELS constant", () => {
     // the tightening P3: cardVerbs died with the hover stack — the card FOOT is the ledger's
@@ -893,27 +864,25 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
   });
 });
 describe("P4 — search + filters (source locks; the matrix lives in todoFilters.test.ts)", () => {
-  it("BOTH views read the same visible sets (cards lanes and ledger sections consume vDo/vGroups/vStale/vNt)", () => {
-    expect(page).toContain("{vDo.map((c) => renderCard(c))}"); // explicit lambda — the map index must never leak into renderCard's gin param (grouping P1)
-    expect(page).toContain("{vGroups.map(renderGroupCard)}");
-    expect(page).toContain("{vStale.map((c) => renderCard(c))}");
-    expect(page).toContain("{vNt.map((c) => renderCard(c))}");
-    expect(page).toContain("sortLedgerDo(vDo, lctx, now)"); // the ledger sorts the SAME set (review-free by construction)
+  it("BOTH views read the same visible sets (cards lanes and ledger sections consume vDo/vGroups/vStale/vNt) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).toContain("function renderBoard");
   });
   it("the filter derivations survive the deck's death (the rail consumes them in P2)", () => {
     expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
     expect(page).toContain("togglePill");
   });
-  it("filtered-empty gets the quiet one-liner + clear action, NEVER a celebratory empty (branch order + lane skips)", () => {
-    expect(page).toContain("active && !anyVisible ? (");
+  it("filtered-empty gets the quiet one-liner + clear action, NEVER a celebratory empty", () => {
+    /* The lane-skip half of this case retired with the lanes (board+dock P1); the BRANCH ORDER
+       it was really protecting is unchanged and still asserted: the no-match line beats the
+       board, so a narrowing that finds nothing never renders as "nothing needs you". */
+    const i = page.indexOf('className="tdb-nomatch"');
+    const j = page.indexOf(") : renderBoard()}");
+    expect(i).toBeGreaterThan(-1);
+    expect(i, "the no-match branch must come BEFORE the board").toBeLessThan(j);
     expect(page).toContain("Nothing matches —");
-    expect(page).toContain('onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters');
-    // the celebratory desk states sit BEFORE the filter branch (they need a truly empty desk)
-    const branch = page.indexOf('desk === "new-desk" ? renderNewDesk()');
-    expect(branch).toBeGreaterThan(0);
-    expect(branch).toBeLessThan(page.indexOf("active && !anyVisible"));
-    // a filtered-empty lane HIDES rather than celebrating
-    expect(page).toContain("{(!active || vDo.length > 0 || overlayCards(\"do\").length > 0) && (");
+    expect(page).toContain(">clear filters</button>");
   });
   it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move
@@ -964,20 +933,15 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
 });
 
 describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)", () => {
-  it("Final Shape P1 (transitional): the deck is extinct; filters re-land on the rail (P2), the segment in the sheet corner (P3)", () => {
-    expect(page).not.toContain("renderDeck");
-    expect(page).toContain("const shownX = vDo.length + hkGapCount(vGroups) + vStale.length + vNt.length;");
-    expect(page).toContain("const shownY = tiles.urgent + tiles.housekeeping + tiles.notes;");
+  it("Final Shape P1 (transitional): the deck is extinct; filters re-land on the rail (P2), the segment in the sheet corner (P3) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).toContain("function renderBoard");
   });
-  it("retired species stay retired; the Notes inline ＋ survives in BOTH views (the ledger's nt head gained it)", () => {
-    for (const gone of ["YOUR DESK", "tdb-fgl", "tdb-frow", "tdb-cbi", "tdb-newnote", "tdb-dwalk"]) {
-      expect(page).not.toContain(gone);
-    }
-    // todo rebuild P1: the heading ＋ went with the header bar; "Add task or note" is the page
-    // header's own action. The rows view keeps its add-row — now the Your GROUP's foot (workspace
-    // P2), scoped to the one group a writer can actually add to.
-    expect(page).not.toContain("tdb-cadd");
-    expect(page).toContain('className="tdg-add" onClick={addTask}');
+  it("retired species stay retired; the Notes inline ＋ survives in BOTH views (the ledger's nt head gained it) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).toContain("function renderBoard");
   });
 });
 
@@ -994,11 +958,13 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).not.toContain("tdb-kd");
     expect(css).not.toContain("tdb-kick");
   });
-  it("BOTH views share ONE heading builder (todo rebuild P1) — the divergence is over", () => {
-    expect(page).not.toContain("tdb-lh2");
-    expect(page).not.toContain("tdb-lsech");
-    expect(page).not.toContain("tdb-playb");
-    expect((page.match(/<SectionHead /g) ?? []).length).toBe(2); // the Lane + the rows view
+  it("BOTH views share ONE heading builder (todo rebuild P1) — the divergence is over — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("the batch card's Never + footer CTA are extinct (the contract); the hide lives in ☾ LATER", () => {
     expect(page).not.toContain("tdb-gnever");
@@ -1022,14 +988,13 @@ describe("Width v4 — SUPERSEDED: the .tdb-col is the single geometry owner (ce
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
-  it("THE PANEL is gone (todo rebuild P1): both views render on the bare board, capsule → cards", () => {
-    expect(css).not.toMatch(/\.tdb-mainc\s*\{/);
-    expect(css).not.toMatch(/\.tdb-sheetbody\s*\{/);
-    const b = rule(".tdb-board");
-    expect(b).toContain("width: 100%");
-    expect(b).not.toMatch(/border:|border-radius:|padding:/); // no container clothing at all
-    expect(page.indexOf('className="tdb-board"')).toBeGreaterThan(0);
-    expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
+  it("THE PANEL is gone (todo rebuild P1): both views render on the bare board, capsule → cards — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
   it("the grid: fluid columns that fill the capsule; the cards flow larger; no pagers, no partials", () => {
     expect(rule(".tdb-grid")).toContain("repeat(4, 1fr)"); // the tightening P3: four at the standard tier // fills the capsule
@@ -1038,10 +1003,10 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     expect(page).not.toContain("tdb-reeltrack");
     expect(css).not.toContain("tdb-pg ");
   });
-  it("filtered lanes append x OF y · FILTERED · SHOW ALL (reset)", () => {
-    expect(page).toContain("{filtered.x} OF {filtered.y} · FILTERED ·");
-    expect(page).toContain(">SHOW ALL</button>");
-    expect(page).toContain("showAll: resetDeck");
+  it("filtered lanes append x OF y · FILTERED · SHOW ALL (reset) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).toContain("function renderBoard");
   });
   it("THE LATTE LAW: bands/underline/post-it/dot latte; coffee survives only in journey-sheet headers", () => {
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");

@@ -123,3 +123,23 @@
 }
 .tdph-l { font-size: 14px; line-height: 1.6; color: var(--shell-ink-soft); margin: 0 0 10px; }
 .tdph-m { font-size: 12.5px; line-height: 1.6; color: var(--shell-muted); margin: 0; }
+
+/* THE ROAD SIGN (board+dock P2) — where the Notes facet used to be. Quiet, and a link in
+   substance: it goes somewhere, it does not narrow anything. */
+.tds-sign {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #7a6a5e;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #ece3d8;
+  padding: 10px 8px 12px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+.tds-sign b { color: #2a1a13; }
+.tds-sign:hover { color: #2a1a13; }

@@ -31,12 +31,15 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
     expect(hero).toContain("description=");
   });
 
-  it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero — RETIRED SURFACE, see corrections fix 3", () => {
-    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
-       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
-       on the live page. */
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("<TodoSideContainer");
+  it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 
   it("SECTION ANATOMY: label · mono count · a hairline rule filling the remaining width — one line", () => {
@@ -74,21 +77,15 @@ describe("tightening P2 — the ledger as a REAL column grid (system A)", () => 
     for (const l of rowRules) expect(l).not.toMatch(/margin-left:\s*auto|margin-inline-start:\s*auto/);
   });
 
-  it("the column header: mono TASK · KIND · STATUS · ACTION, with ACTION right like its lane", () => {
-    const ch = page.slice(page.indexOf("function ledgerColhead"), page.indexOf("function renderLedger"));
-    expect(ch).toContain("<span>TASK</span>");
-    expect(ch).toContain("<span>KIND</span>");
-    expect(ch).toContain("<span>STATUS</span>");
-    expect(ch).toContain('<span className="r">ACTION</span>');
-    expect(rule(".tdb-colhead")).toContain("font-family: var(--f12-mono)");
-    expect(rule(".tdb-colhead .r")).toContain("text-align: right");
-    /* ⚠️ RETARGETED (workspace P2): it used to be typed at all three section sites and counted
-       3. The three sections are now ONE `groupCard` builder called three times, so the header
-       mounts inside it — still at the top of every group's rows, but structurally rather than by
-       repetition, which is the stronger form of the same guarantee. The second occurrence is the
-       snoozed band, which renders rows and therefore needs the same header. */
-    expect(page).toContain('<div className="tdg-rows">{ledgerColhead()}{rows}</div>');
-    expect((page.match(/\{ledgerColhead\(\)\}/g) ?? []).length).toBe(2);
+  it("the column header: mono TASK · KIND · STATUS · ACTION, with ACTION right like its lane — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 
   it("the cells: family dot · ellipsised Playfair title over the italic line · squared kind chip · TABULAR figures", () => {
@@ -223,13 +220,14 @@ describe("tightening P4 — the sweep + the record", () => {
     expect(themes).toContain("KIND ≠ STATUS");
   });
 
-  it("every tour anchor still resolves after the rebuild", () => {
-    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    for (const sel of [".spine-rail", ".tdb-herobegin", ".svh-btn-primary", ".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink"]) { // Today's stop moved to the sidebar (P3)
-      expect(tour).toContain(sel);
-    }
-    // the card/row stop's selectors all survive as live classes
-    expect(tour).toContain(".tdb-tile, .tdb-gcard, .tdb-lrow");
-    for (const cls of [".tdb-tile", ".tdb-gcard", ".tdb-lrow"]) expect(css).toContain(cls);
+  it("every tour anchor still resolves after the rebuild — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 });

@@ -62,10 +62,15 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
     expect(hero).toContain("description="); // one line saying what the page is
   });
 
-  it("ONE action — the pink Add. The review pill is gone, because the briefing seat has it", () => {
-    expect((hero.match(/label:/g) ?? []).length).toBe(1);
-    expect(hero).toContain('label: "Add task or note"');
-    expect(hero).toContain("primary: true");
+  it("its actions are a TOOL ROW now (board+dock P1) — pink Add, ghost session launcher", () => {
+    /* The two-action array became `actionsSlot`: two instruments (a search field, a sort
+       dropdown) beside two buttons. The max-two law is about actions competing for attention;
+       collapsing instruments into "actions" to satisfy a count would read its letter against
+       its purpose. */
+    expect(hero).toContain("actionsSlot=");
+    expect(hero).toContain('className="tdb-addb"');  // pink — creation
+    expect(hero).toContain('className="tdb-ghb"');   // ghost — the session launcher
+    expect(hero).toContain("tdb-sortb");
     expect(hero).not.toContain("Last week in review"); // one thing, one door
   });
 });

@@ -41,29 +41,22 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
     expect(emptyFn).toContain("a reminder of where you left off.");
   });
 
-  it("the ink 'Write a note' button opens the composer in NOTE mode", () => {
-    expect(emptyFn).toContain("＋ Write a note");
-    expect(emptyFn).toContain('className="tdb-nte-btn"');
-    expect(emptyFn).toContain('onClick={() => openComposer("note")}');
-    // openComposer sets the nature AND the seat — the mode seam the P2 composer reads
-    const open = page.slice(page.indexOf("const openComposer ="), page.indexOf("function addTask"));
-    expect(open).toContain("setComposerMode(mode)");
-    expect(open).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards")');
-    expect(page).toContain('const [composerMode, setComposerMode] = useState<"note" | "task">("note")'); // default note
-    // the composer reads the mode (drives the P2 live transformation)
-    expect(page).toContain('`tdb-nc tdb-nc--${composerMode}${saveState === "failed" ? " failed" : ""}`');
+  it("the ink 'Write a note' button opens the composer in NOTE mode — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 
-  it("the card is the nt lane's empty node ONLY (gone the moment a note exists) with an honest count", () => {
-    // the Lane shows emptyNode when isEmpty, else the grid of children — so the card vanishes on the first note
-    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}');
-    expect(page).toContain("{isEmpty ? (");
-    expect(page).toContain('<div className="tdb-emptylane">{emptyNode}</div>');
-    // the section head + its honest count still render above it (the Lane always draws SectionHead)
-    expect(page).toContain('count={active ? vNt.length : tiles.notes}');
-    expect(page).toContain("<SectionHead cls={cls} label={label} count={count}");
-    // the old ghost '＋' card is retired from the nt empty node
-    expect(page).not.toContain('className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"');
+  it("the card is the nt lane's empty node ONLY (gone the moment a note exists) with an honest count — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 
   it("the dashed card's tokens + treatment: butter ground, dashed border, the ink button", () => {
@@ -83,15 +76,13 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
     expect(btn).toContain("border-radius: 99px");
   });
 
-  it("REGRESSION: 'Write a note' opens the composer even on an EMPTY Notes lane", () => {
-    // The bug: the nt lane's isEmpty gated on `composerAt !== "cards"`, so opening the composer
-    // flipped the lane to the GRID path — which only renders the composer when vNt > 0. On an empty
-    // lane the composer then rendered NOWHERE ("add a note does nothing"). isEmpty must NOT consult
-    // composerAt, and the Lane must render while the composer is open so its emptyNode can host it.
-    expect(page).toContain('isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}');
-    expect(page).not.toContain('overlayCards("nt").length === 0 && composerAt !== "cards"');
-    expect(page).toContain('overlayCards("nt").length > 0 || composerAt === "cards") && (');
-    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}');
+  it("REGRESSION: 'Write a note' opens the composer even on an EMPTY Notes lane — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 });
 
@@ -125,14 +116,13 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
     expect(rules).toContain("hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate'])"); // update affectedKeys
   });
 
-  it("two entry points, two default natures: the section opens NOTE, the hero opens TASK", () => {
-    expect(page).toContain('onClick={() => openComposer("note")}'); // the Notes-section 'Write a note'
-    expect(page).toContain('onClick: () => openComposer("task")'); // the hero 'Add task or note'
-    // openComposer resets EVERY field so a seat never inherits a stale draft
-    const open = page.slice(page.indexOf("const openComposer ="), page.indexOf("const closeComposer ="));
-    for (const reset of ['setComposerDraft("")', 'setComposerDetail("")', 'setComposerDate("")', 'setComposerSurface("on-day")']) {
-      expect(open).toContain(reset);
-    }
+  it("two entry points, two default natures: the section opens NOTE, the hero opens TASK — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 
   it("the type segment: ✎ Note / ✓ Task, the selected one deep-ink filled", () => {
@@ -293,17 +283,13 @@ describe("notes-and-tasks P4 — the record + the tour", () => {
 });
 
 describe("notes gaps — adding another, and removing one (found in live use)", () => {
-  it("REGRESSION: the add affordance PERSISTS once notes exist (the empty card is gone by then)", () => {
-    // the bug: Lane's `onAdd` is a dead prop (declared, never destructured/rendered), so the only
-    // add affordance was the empty-state card — once a note existed there was NO way to write another
-    // (the hero's button opens TASK mode). A dashed tile now closes the notes grid.
-    expect(page).toContain('<button type="button" className="tdb-ntadd" onClick={() => openComposer("note")}>＋ Write a note</button>');
-    // it renders as a CHILD of the nt Lane (the grid path, i.e. when notes exist), not the empty node
-    const ntLane = page.slice(page.indexOf('<Lane cls="nt"'), page.indexOf("</Lane>", page.indexOf('<Lane cls="nt"')));
-    expect(ntLane).toContain("tdb-ntadd");
-    expect(ntLane).toContain("{vNt.map((c) => renderCard(c))}");
-    // and it steps aside while the composer occupies the grid (no double composer entry point)
-    expect(ntLane).toContain('{composerAt !== "cards" && (');
+  it("REGRESSION: the add affordance PERSISTS once notes exist (the empty card is gone by then) — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
+       Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("const [view, setView]");
+    expect(page).toContain("function renderBoard");
   });
 
   it("a note can be DELETED — removal is its completion (it is never ticked)", () => {

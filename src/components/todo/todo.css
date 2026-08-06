@@ -1285,3 +1285,43 @@ button.tdb-ldot { cursor: pointer; }
   .tdb-ffsheet, .tdb-ffsheet.leaving, .tdb-ffcir, .tdb-ffsweepr { animation: none; }
   .tdb-ffdot, .tdb-ffchoice, .tdb-ffck, .tdb-ffbig { transition: none; }
 }
+
+/* ── THE TOOL ROW (board+dock P1) — the page's single instrument ─────────────────────────────
+   Search · sort · the session launcher · the Add. The standalone control bar it replaces is
+   gone, and with it the dead vertical band it occupied. */
+.tdb-tools { display: flex; align-items: center; gap: 8px; }
+.tdb-tools .tdb-bsearch { width: 228px; }
+
+.tdb-sortwrap { position: relative; }
+.tdb-sortb {
+  font: inherit; font-size: 12.5px; height: 34px; padding: 0 12px; border-radius: 9px;
+  background: var(--shell-card, #fdfaf5); border: 1px solid #e2d8c8; color: #4d4238; cursor: pointer;
+  white-space: nowrap;
+}
+.tdb-sortb:hover { background: #f4f2ef; }
+.tdb-sortmenu {
+  position: absolute; right: 0; top: calc(100% + 5px); z-index: 20; min-width: 168px;
+  background: #fffefb; border: 1px solid #e3d8c8; border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(58,28,20,.13); padding: 4px;
+}
+.tdb-sortmenu button {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 12.5px;
+  background: transparent; border: 0; padding: 8px 10px; border-radius: 7px; cursor: pointer; color: #2a1a13;
+}
+.tdb-sortmenu button:hover { background: #f4f2ef; }
+.tdb-sortmenu button[aria-current="true"] { background: #f1e9df; font-weight: 600; }
+
+.tdb-ghb, .tdb-addb {
+  font: inherit; font-size: 12.5px; height: 34px; padding: 0 13px; border-radius: 9px;
+  cursor: pointer; white-space: nowrap;
+}
+.tdb-ghb { background: var(--shell-card, #fdfaf5); border: 1px solid #e2d8c8; color: #4d4238; }
+.tdb-ghb:hover { background: #f4f2ef; }
+/* pink is CREATION — the Add keeps it, the session launcher does not */
+.tdb-addb { background: var(--pink, #f5e2da); border: 1px solid var(--pink-b, #e8c8bc); color: var(--burg, #7c3a2a); }
+.tdb-addb:hover { background: var(--pink-h, #f7e8e1); }
+
+@media (max-width: 900px) {
+  .tdb-tools { flex-wrap: wrap; justify-content: flex-end; }
+  .tdb-tools .tdb-bsearch { width: 100%; order: -1; }
+}

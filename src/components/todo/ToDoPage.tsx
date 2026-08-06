@@ -53,12 +53,15 @@ import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
-import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS, TodoListId } from "../../lib/todoRoutes";
+import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
 import { TodoSideContainer } from "./TodoSideContainer";
-import { useTodoCounts } from "./useTodoCounts";
 import { boardColumns, sweepCardFor, isSweepCard, DropPlan } from "../../lib/todoColumns";
+import {
+  TODO_SORTS, DEFAULT_TODO_SORT, TodoSortId, sortBoardCards,
+  TodoFacetId, applyFacet, facetCounts,
+} from "../../lib/todoBoardSort";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
 } from "../../lib/todoListPage";
@@ -258,18 +261,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
   // (Deck v2 P3: the sidebar fold + its localStorage key retired with the pair — the rail never
   // folds; <1420 it becomes the 56px icon rail instead, P5.)
-  const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
-  const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
   /* Phase 2 — the housekeeping fold and the snoozed band. Both are VIEW state and deliberately
      session-only: a fold you left open a week ago is not a preference, and a snoozed band that
      remembered being open would greet you with the things you had put away. */
   const [hkExpanded, setHkExpanded] = useState(false);
   /* THE LISTS FILTER (corrections fix 3) — the side container's facets, which replace the retired
      chip strip. Session-only: a narrowing you left behind last week is not a preference. */
-  const [listFilter, setListFilter] = useState<TodoListId | null>(null);
-  /* ⚠️ THE SAME HOOK THE SIDEBAR BADGE USES — the counting law has one implementation, and the
-     side container's LIST rows read it rather than a second tally computed here. */
-  const listCounts = useTodoCounts();
+  /* THE PAGE-LEVEL NARROWINGS (board+dock P1/P2). Both are session-only: a sort or a filter you
+     left behind last week is not a preference, and arriving at a board that is silently showing
+     you a third of itself is the worst way to learn you had set one. */
+  const [sort, setSort] = useState<TodoSortId>(DEFAULT_TODO_SORT);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [facet, setFacet] = useState<TodoFacetId>("all");
+  /* ⚠️ THE FILTERS COUNTS COME FROM THE CARDS THE COLUMNS RENDER (P2), not from a second tally.
+     `facetCounts` reads the same assembled lanes the board draws, which is what makes a row's
+     number and the board's contents incapable of disagreeing — the exact split that put Snoozed
+     at 1 in the list and 0 on the board. */
   const [snzOpen, setSnzOpen] = useState(false);
   // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
   // animation to the just-collapsed batch (never a page-load flash). P3: the expansion
@@ -829,7 +836,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDate("");
     setComposerSurface("on-day");
     resetSaveMachine();
-    setComposerAt(view === "ledger" ? "ledger" : "cards");
+    setComposerAt("cards"); // one view now (board+dock P1)
   };
   const closeComposer = () => {
     setComposerAt(null);
@@ -940,10 +947,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               rather than to one of its two renderings. */}
           <div className="tdw">
           <TodoSideContainer
-            counts={listCounts.byList}
-            active={listFilter}
-            onSelect={setListFilter}
+            counts={facetCounts([...board.do, ...board.hk, ...board.nt])}
+            active={facet}
+            onSelect={setFacet}
             onOpenTaskSettings={() => setSettingsOpen(true)}
+            onNoteboard={() => onNavigate("todo", "Noteboard")}
           />
           <div className="tdw-main">
           <div className="tdb-centre">
@@ -982,34 +990,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               the view toggle. No container, no label slab — the filter slab's funnel/FILTER head
               and the board panel both went with it. The "{n} items" line went too: the All chip's
               struck total already carries the narrowed count. */}
-          {/* THE TOOL ROW — local search + the view toggle. The chip strip is RETIRED: its
-              facets are the LISTS rows in the side container, and its query chip is this search.
-              Two surfaces for one narrowing is how they came to disagree. */}
-          <div className="tdb-ctrl">
-            <span className="tdb-ctrlsp" />
-            <span className="tdb-bsearch">
-              <span className="tdb-bsmag" aria-hidden>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
-              </span>
-              <input
-                ref={searchRef}
-                type="text"
-                placeholder="Search your list…"
-                aria-label="Search your list"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-              />
-            </span>
-            <span className="tdb-vtog" role="group" aria-label="View">
-              <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} aria-label="Cards" title="Cards" onClick={() => pickView("cards")}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
-              </button>
-              <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} aria-label="Rows" title="Rows" onClick={() => pickView("ledger")}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-              </button>
-            </span>
-          </div>
+          {/* ⚠️ THE STANDALONE CONTROL BAR IS GONE (board+dock P1). Its search and the retired
+              view toggle fold into the header's tool row, which is now the page's single
+              instrument — one place to look for anything that changes what the board shows. Two
+              instrument rows, one under the other, is how the chip strip and the LISTS rows came
+              to disagree; this is the same mistake in a different arrangement. */}
           <div className="tdb-board">
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
@@ -1017,81 +1002,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-nomatch">
             Nothing matches — <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters</button>
           </div>
-        ) : view === "ledger" ? renderLedger() : view === "cards" ? renderBoard() : (
-        <div className="tdb-lanes">
-          {(!active || vDo.length > 0 || overlayCards("do").length > 0) && (
-          <Lane cls="do" label="Urgent" count={active ? vDo.length : tiles.urgent} isEmpty={vDo.length === 0 && overlayCards("do").length === 0}
-            filtered={active && vDo.length < tiles.urgent ? { x: vDo.length, y: tiles.urgent, showAll: resetDeck } : null}
-            onFocusedSession={() => setFlow({ items: vDo.map((card) => ({ kind: "card", card })), mode: "sweep" })}
-            emptyNode={
-              <div className="tdb-clear do">
-                <span className="tdb-clric" aria-hidden>✓</span>
-                <div><div className="tdb-clrt">Nothing needs you.</div>
-                <div className="tdb-clrs">{liveQueriesLine(liveQueryCount(queries))}</div></div>
-                <span className="tdb-clrhand" aria-hidden>— go write something</span>
-              </div>
-            }>
-            {overlayCards("do")}
-            {vDo.map((c) => renderCard(c))}
-          </Lane>
-          )}
-          {(!active || vGroups.length > 0 || vStale.length > 0 || overlayCards("hk").length > 0) && (
-          <Lane
-            cls="hk"
-            label="Housekeeping"
-            count={active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping}
-            filtered={active && hkGapCount(vGroups) + vStale.length < tiles.housekeeping ? { x: hkGapCount(vGroups) + vStale.length, y: tiles.housekeeping, showAll: resetDeck } : null}
-            isEmpty={vGroups.length === 0 && vStale.length === 0 && overlayCards("hk").length === 0}
-            onFocusedSession={() => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
-            emptyNode={
-              <div className="tdb-clear hk">
-                <div><div className="tdb-clrt">Spotless.</div>
-                <div className="tdb-clrs">Every agent record is complete and nothing has gone stale.</div></div>
-                <div className="tdb-clrbar">
-                  <div className="tdb-pbar"><i style={{ width: "100%" }} /></div>
-                  <div className="tdb-pcap"><span>{hkGroupProgress(agents.length, 0).caption}</span><span>100%</span></div>
-                </div>
-              </div>
-            }
-            strip={mutedRules.length > 0 && (
-              <div className="tdb-rulestrip">
-                <span className="tdb-rulestrip-l">Muted:</span>
-                {mutedRules.map((r) => (
-                  <button key={r} type="button" className="tdb-rulechip" title="Unmute — bring these reminders back" onClick={() => unmuteRule(r)}>
-                    {HK_RULES[r].label} ✕
-                  </button>
-                ))}
-              </div>
-            )}
-          >
-            {overlayCards("hk")}
-            {vGroups.map(renderGroupCard)}
-            {vStale.map((c) => renderCard(c))}
-          </Lane>
-          )}
-          {(!active || vNt.length > 0 || overlayCards("nt").length > 0 || composerAt === "cards") && (
-          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
-            filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
-            emptyNode={composerAt === "cards" ? renderComposer() : renderNotesEmpty()}>
-            {composerAt === "cards" && vNt.length > 0 && renderComposer()}
-            {overlayCards("nt")}
-            {vNt.map((c) => renderCard(c))}
-            {/* notes-gaps: the add affordance must persist once notes EXIST (the empty-state card is
-                gone by then, and the hero's button opens task mode) — a dashed tile closes the grid. */}
-            {composerAt !== "cards" && (
-              <button type="button" className="tdb-ntadd" onClick={() => openComposer("note")}>＋ Write a note</button>
-            )}
-          </Lane>
-          )}
-        </div>
-        )}
-          </div>
-          {/* THE ASSISTANT BAND (briefing-slot P2) — the page's closing note at the foot of the
-              content, full column width. The ONE Pro surface on this page. */}
+        ) : renderBoard()}
+          </div>{/* .tdb-board */}
+
+          {/* THE ASSISTANT BAND — the page's closing note, and the ONE Pro surface here.
+              (It sits below the board, at full column width, as it always has.) */}
           {!isProUser(currentUser) && (
             <AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
           )}
-          </div>
+          </div>{/* .tdb-centre */}
           </div>{/* .tdw-main */}
           </div>{/* .tdw */}
         </div>
@@ -1202,22 +1121,63 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       // the tightening P1 — the subtitle is REMOVED: with no description the shared PageHeader
       // lays the title and the two actions on one line (svh-top is a flex row); the buttons take
       // the page-scoped 34px step in todo.css. Copy lives nowhere else.
-      /* ⚠️ THE PAGE NAMES ITSELF (corrections fix 3). "What's on your desk?" was the old era's
-         hero: it does not match the breadcrumb, which reads "To-do list", and a page whose title
-         and crumb disagree makes you check which one is lying. The subtitle is the page's job in
-         one line. The review pill is GONE — the briefing seat below already
-         carries the review, and a pill that duplicates it gives one thing two doors. */
+      /* ⚠️ THE HEADER'S TOOL ROW IS THE PAGE'S SINGLE INSTRUMENT (board+dock P1). Search, sort,
+         the session launcher and the Add all live here — one place to look for anything that
+         changes what the board shows. The standalone control bar below is gone: two instrument
+         rows, one under the other, is how the chip strip and the LISTS rows came to disagree.
+
+         It rides `actionsSlot` rather than `actions`, deliberately. The max-two-actions law is
+         about ACTIONS competing for attention; this row is two instruments (a field and a
+         dropdown) beside two buttons, and collapsing the instruments into "actions" to satisfy a
+         count would be reading the rule's letter against its purpose. */
       <PageHeader
         title="To-do list"
-        description="Everything waiting on you, grouped by kind."
-        actions={[
-          {
-            label: "Add task or note",
-            onClick: () => openComposer("task"), // the hero opens TASK mode by default
-            primary: true,
-            icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>,
-          },
-        ]}
+        description={boardSubtitle}
+        actionsSlot={
+          <div className="tdb-tools">
+            <span className="tdb-bsearch">
+              <span className="tdb-bsmag" aria-hidden>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
+              </span>
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder="Search your list…"
+                aria-label="Search your list"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+              />
+            </span>
+
+            {/* SORT — it reorders all four columns at once, which is why it sits with the page's
+                instruments and not on a column. */}
+            <span className="tdb-sortwrap">
+              <button type="button" className="tdb-sortb" aria-haspopup="menu" aria-expanded={sortOpen}
+                onClick={() => setSortOpen((v) => !v)}>
+                ⇅ {TODO_SORTS.find((x) => x.id === sort)!.label}
+              </button>
+              {sortOpen && (
+                <div className="tdb-sortmenu" role="menu">
+                  {TODO_SORTS.map((o) => (
+                    <button key={o.id} type="button" role="menuitem" aria-current={o.id === sort}
+                      onClick={() => { setSort(o.id); setSortOpen(false); }}>
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </span>
+
+            <button type="button" className="tdb-ghb" onClick={openFocusedSession}>
+              ▶ Focused session
+            </button>
+            {/* The Add was orphaned mid-page; it belongs with the page's other instruments. */}
+            <button type="button" className="tdb-addb" onClick={() => openComposer("task")}>
+              ＋ Add task or note
+            </button>
+          </div>
+        }
       />
     );
   }
@@ -1588,37 +1548,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
     );
   }
-  /* ── PHASE 2 — THE THREE TYPE GROUPS (ref design-refs/todo-workspace-pages.html) ────────────
-     Each group is a white card headed by its LIST swatch, a Playfair label and a mono count. The
-     ROWS inside are the existing ledger grammar, untouched: the card is a container, not a second
-     row system, so `--lg-tracks` and every `.tdb-lrow` rule still governs what sits in it. ── */
-  function groupCard(
-    id: "urgent" | "housekeeping" | "yours",
-    count: number,
-    rows: React.ReactNode,
-    foot?: React.ReactNode,
-  ) {
-    const def = TODO_GROUPS.find((g) => g.id === id)!;
-    const swatch = TODO_LISTS.find((l) => l.id === def.swatch)!.swatch;
-    return (
-      <section className="tdg-card" id={`tdb-lane-${id === "urgent" ? "do" : id === "housekeeping" ? "hk" : "nt"}`}>
-        <div className="tdg-head">
-          <span className="tdg-sw" style={{ background: swatch }} aria-hidden />
-          <h2>{def.label}</h2>
-          <span className="tdg-cn">{count}</span>
-          <span className="tdg-rule" aria-hidden />
-        </div>
-        <div className="tdg-rows">{ledgerColhead()}{rows}</div>
-        {foot}
-      </section>
-    );
-  }
-
-  /* ── PHASE 4 — THE BOARD (the card toggle) ─────────────────────────────────────────────────
-     Four columns, every one a state the app already owns. The board asks; this page performs —
-     and performs with the EXISTING verbs, so a card moved here and a card moved from a row are
-     the same write. Snooze is the one that is not a write at all: dropping on Snoozed opens the
-     date popover, and the card moves only once a date is chosen. */
   /** Return a snoozed card NOW — the snooze's own reversal (the same write its undo performs). */
   function unsnoozeCard(c: BoardCard) {
     const key = c.userTaskId
@@ -1633,39 +1562,68 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     catch { flash("Couldn’t undo that — try again?"); }
   }
 
+  /* ── THE MOVE MATRIX, PERFORMED (board+dock P3) ────────────────────────────────────────────
+     The board asks; this performs, and every branch is a verb the app already has. */
   function performBoardPlan(card: BoardCard, plan: DropPlan) {
     switch (plan.kind) {
       case "commit": toggleToday(card); break;            // the cap + its flash come with it
       case "uncommit": setCommitted(card, false); break;
-      /* ⚠️ THE POPOVER, NOT A SNOOZE. Opening the card's own Later menu is the whole point of
-         the gate: the card stays where it is until a date is chosen there. Reusing `laterKey` —
-         the menu's existing key — means the board opens the SAME menu the rows do. */
+      /* ⚠️ THE POPOVER, NOT A SNOOZE — opening the card's own Later menu. The card stays where it
+         is until a date is chosen there. */
       case "snooze-popover": setLaterKey(card.key); break;
       case "unsnooze": unsnoozeCard(card); break;
-      case "complete": void quickDone(card); break;       // the completion primitive + undo toast
+      /* ⚠️ COMPLETION ALWAYS GOES THROUGH THE PRIMITIVE (P3). quickDone carries the undo toast;
+         a drag that wrote `done: true` directly would complete the task with no way back — which
+         is exactly what the drag path used to do. */
+      case "complete": void quickDone(card); break;
       case "uncomplete": void unDone(card); break;
+      /* ⚠️ THE BOUNCE — a derived card cannot be ticked, because ticking is not what finishes it.
+         The card returns and the toast names the act that WOULD, with a way straight to it. */
+      case "bounce":
+        flash(plan.why ?? "That is not what completes this", {
+          label: "Open",
+          fn: async () => { openFlowCards([card]); },
+        });
+        break;
       case "none": if (plan.why) flash(plan.why); break;  // the offer guard states its reason
     }
   }
 
-  /** Does a group survive the LISTS narrowing? `null` = everything. */
-  function listShows(id: "urgent" | "housekeeping" | "yours"): boolean {
-    if (!listFilter) return true;
-    if (listFilter === "snoozed") return false;      // the band below carries that one
-    if (listFilter === "notes" || listFilter === "yours") return id === "yours";
-    return listFilter === id;
+  /* The header's one line, derived: what the board holds and how much of it will not wait.
+     Numbers ≤ twelve read as words (the dashboard eyebrow's convention). */
+  const boardSubtitle = (() => {
+    const total = tiles.urgent + tiles.housekeeping + tiles.notes;
+    const words = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
+    const spell = (n: number) => (n <= 12 ? words[n] : String(n));
+    if (total === 0) return "Nothing waiting on you.";
+    const urgent = tiles.urgent > 0 ? `, ${spell(tiles.urgent)} urgent` : "";
+    return `Everything waiting on you — ${spell(total)} item${total === 1 ? "" : "s"}${urgent}.`;
+  })();
+
+  /** ⚠️ ONE WORK SURFACE, TWO ENTRANCES (P4 makes this the dock; until then, the existing flow).
+   *  "Focused session" here and "Work the list" on Today walk the same queue machinery. */
+  function openFocusedSession() {
+    const queue = [...board.do, ...board.hk].filter((c) => c.nature !== "note");
+    if (queue.length === 0) { flash("Nothing to work through"); return; }
+    setSession({ queue });
   }
 
   function renderBoard() {
     /* ⚠️ THE SWEEPS COME FROM THE SAME `hkGroups` THE COUNT DOES. Housekeeping is counted by
        MEMBERS and drawn as one card per rule; passing the groups here is what lets the card
-       account for its members, so the columns reconcile with the badge instead of silently
-       dropping the difference. */
+       account for its members, so the columns reconcile with the badge. */
     const sweeps = hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length,
       g.members.map((m) => m.card.key)));
-    const columns = boardColumns({
-      board, flags: taskFlags, queries, agents, sweeps, today, nowMs: now,
-    });
+    const raw = boardColumns({ board, flags: taskFlags, queries, agents, sweeps, today, nowMs: now });
+    /* THE PAGE-LEVEL NARROWINGS, applied to ALL FOUR COLUMNS (P1 sort · P2 facet). Applying
+       either to one column would leave the board showing four differently-ordered views of one
+       set, and you would have to remember which. */
+    const columns = {
+      todo: sortBoardCards(applyFacet(raw.todo, facet), sort),
+      today: sortBoardCards(applyFacet(raw.today, facet), sort),
+      snoozed: sortBoardCards(applyFacet(raw.snoozed, facet), sort),
+      done: sortBoardCards(applyFacet(raw.done, facet), sort),
+    };
     return (
       <TodoBoard
         columns={columns}
@@ -1675,89 +1633,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  function renderLedger() {
-    // THE FOLD (a view, never a filter — the heading still counts everything).
-    const hkFold = foldRows(hkTop, hkExpanded);
-    const snoozedN = snoozedCount(taskFlags, now);
-    return (
-      <div className="tdb-runsheet tdg">
-        {listShows("urgent") && doSorted.length > 0 && groupCard(
-          "urgent",
-          active ? doSorted.length : tiles.urgent,
-          doSorted.map((c) => runRow(c, "do")),
-        )}
+  /* ⚠️ THE THREE GROUP CARDS, renderLedger AND snoozedRows ARE RETIRED (board+dock P1).
+     They were the ROWS view, and this page is the board now: the four columns say where each
+     thing stands, which is what the groups were approximating by kind. Keeping both would leave
+     two renderings of one set — and the rows view was already the one nobody saw, because it was
+     never the default.
 
-        {listShows("housekeeping") && (vGroups.length > 0 || vStale.length > 0) && groupCard(
-          "housekeeping",
-          active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
-          hkFold.shown.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c, "hk"))),
-          hkFold.hidden > 0 ? (
-            <button type="button" className="tdg-fold" onClick={() => setHkExpanded(true)}>
-              Show {hkFold.hidden} more
-            </button>
-          ) : hkExpanded && hkTop.length > HOUSEKEEPING_FOLD ? (
-            <button type="button" className="tdg-fold" onClick={() => setHkExpanded(false)}>
-              Show fewer
-            </button>
-          ) : null,
-        )}
-
-        {/* Your tasks & notes — the ONE group holding both natures, and the ONLY group with a
-            quick-add (audit item 7: one verb per control; the other two are derived, so there is
-            nothing there for a writer to add). */}
-        {listShows("yours") && (!active || vNt.length > 0) && groupCard(
-          "yours",
-          active ? vNt.length : tiles.notes,
-          <>
-            {composerAt === "ledger" && renderComposer()}
-            {vNt.map((c) => runRow(c, "nt"))}
-          </>,
-          composerAt === "ledger" ? null : (
-            <button type="button" className="tdg-add" onClick={addTask}>＋ Add a task or note…</button>
-          ),
-        )}
-
-        {/* THE SNOOZED BAND (audit item 4). Before this, a snoozed item was findable nowhere in
-            list view — only on the board. Collapsed by default: you put these away on purpose. */}
-        {snoozedN > 0 && (!listFilter || listFilter === "snoozed") && (
-          <div className={`tdg-snz${snzOpen ? " open" : ""}`}>
-            <button
-              type="button"
-              className="tdg-snzhead"
-              aria-expanded={snzOpen}
-              onClick={() => setSnzOpen((v) => !v)}
-            >
-              <span className="tdg-sw" style={{ background: TODO_LISTS.find((l) => l.id === "snoozed")!.swatch }} aria-hidden />
-              <span className="tdg-snzt">Snoozed</span>
-              <span className="tdg-cn">{snoozedN}</span>
-              <ChevronRight className="tdg-snzchev" size={15} aria-hidden />
-            </button>
-            {snzOpen && (
-              <div className="tdg-snzbody">
-                {snoozedRows()}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  /** The snoozed band's contents — the suppressed cards, read from the same flags the count is. */
-  function snoozedRows() {
-    const asleep = taskFlags.filter((f) => isSnoozed(f, now));
-    const keys = new Set(asleep.map((f) => f.queryId ?? f.agentId).filter(Boolean) as string[]);
-    const rows = [...board.do, ...board.hk, ...board.nt].filter(
-      (c) => (c.relatedRecordId && keys.has(c.relatedRecordId)) || (c.userTaskId && keys.has(c.userTaskId)),
-    );
-    if (rows.length === 0) {
-      // The flags outlive their cards (a snoozed derived task leaves the engine entirely), so an
-      // empty body is a real state and says so rather than rendering a void.
-      return <div className="tdg-add" style={{ borderTop: 0, cursor: "default" }}>These return on their own dates.</div>;
-    }
-    return <>{ledgerColhead()}{rows.map((c) => runRow(c, "hk"))}</>;
-  }
-
+     The pieces they carried all survive on the board: the housekeeping FOLD is the column's
+     "+ n more", the SNOOZED BAND is the Snoozed column, and the KIND facet is the card's band. */
   // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,
   // the ledger's head checkbox + "Snooze or dismiss" menu, and the undo toast are the quick surfaces.)
 

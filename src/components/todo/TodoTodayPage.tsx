@@ -20,8 +20,8 @@ import React, { useMemo, useState } from "react";
 import { Play, Plus, Undo2 } from "lucide-react";
 import { PageHeader } from "../shell/PageHeader";
 import { TodoSideContainer } from "./TodoSideContainer";
-import { TODO_OPEN_TASK_SETTINGS, TodoListId } from "../../lib/todoRoutes";
-import { useTodoCounts } from "./useTodoCounts";
+import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
+import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, todaySplit, BoardCard } from "../../lib/todoBoard";
 import { localYMD } from "../../lib/shellSidebar";
@@ -41,9 +41,8 @@ export interface TodoTodayPageProps {
   onNavigate: (tab: string, subPageName?: string) => void;
 }
 
-export const TodoTodayPage: React.FC<TodoTodayPageProps> = () => {
-  const counts = useTodoCounts();
-  const [list, setList] = useState<TodoListId | null>(null);
+export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p: string) => void }> = ({ onNavigatePath = () => {} }) => {
+  const [facet, setFacet] = useState<TodoFacetId>("all");
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
     addUserTask, updateUserTask,
@@ -65,7 +64,9 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps> = () => {
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules],
   );
 
-  const { committed, done } = todaySplit(board, today);
+  const split = todaySplit(board, today);
+  const committed = applyFacet(split.committed, facet);
+  const done = applyFacet(split.done, facet);
   const subtitle = todaySubtitle(done.length, committed.length, now);
 
   /* THE BENCH — the open lanes minus everything the four exclusions rule out. Urgent before
@@ -109,11 +110,15 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps> = () => {
 
   return (
     <div className="tdw">
+      {/* The SAME container the board page mounts — one filter surface, two pages. Today's own
+          list is already a single committed set, so the facet narrows what it shows without the
+          board's four columns behind it. */}
       <TodoSideContainer
-        counts={counts.byList}
-        active={list}
-        onSelect={setList}
+        counts={facetCounts([...board.do, ...board.hk, ...board.nt])}
+        active={facet}
+        onSelect={setFacet}
         onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
+        onNoteboard={() => onNavigatePath("/todo/noteboard")}
       />
       <div className="tdw-main">
         <PageHeader

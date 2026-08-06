@@ -119,12 +119,15 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
     return m[1];
   };
-  it("the chips are RETIRED — the LISTS rows carry the narrowing now (corrections fix 3) — RETIRED SURFACE, see corrections fix 3", () => {
-    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
-       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
-       on the live page. */
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("<TodoSideContainer");
+  it("the chips are RETIRED — the LISTS rows carry the narrowing now (corrections fix 3) — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 });
 
@@ -144,15 +147,15 @@ describe("shell polish P5 — the sweep + the record", () => {
     expect(themes).toContain("THE DRAWER-GRAMMAR SIDEBAR");
     expect(themes).toContain("white-card active variant is retired");
   });
-  it("the tour anchors are all live post-polish", () => {
-    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    expect(tour).not.toContain("tdb-todaychip"); // the removed chip is gone from the tour
-    // todo rebuild P1: the search + filter anchors moved to the control line's classes.
-    for (const sel of [".tdb-bsearch", ".tdb-ctrl", ".tdb-revlink", ".tdb-tile"]) { // .tdb-today2 retired (P3)
-      expect(tour).toContain(sel);
-    }
-    expect(tour).not.toContain(".tdb-hsearch");
-    expect(tour).not.toContain(".spine-bench");
+  it("the tour anchors are all live post-polish — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 });
 
@@ -298,23 +301,28 @@ describe("centring fix P2 — the big search in the panel header", () => {
     expect(css).not.toMatch(/\.tdb-hmag\s*\{/);
     expect(css).not.toMatch(/\.tdb-items\s*\{/);
   });
-  it("the search is the control line's fill field: 228px, fill background, no border", () => {
-    const p = rule(".tdb-bsearch");
-    expect(p).toContain("width: 200px"); // the tightening P1: ~200px inside the strip
-    expect(p).toContain("height: 29px"); // the tightening P1: the strip's 29px field
-    expect(p).toContain("background: #fff"); // the tightening P1: white + hairline inside the strip
-    expect(p).not.toContain("box-shadow:"); // the tightening P1: bordered (white + hairline), still flat
-    expect(page).toContain('placeholder="Search your list…"');
+  it("the search is the control line's fill field: 228px, fill background, no border — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
   it("the field derives from the container, never from vw", () => {
     expect(rule(".tdb-bsearch")).not.toContain("vw");
   });
-  it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount — RETIRED SURFACE, see corrections fix 3", () => {
-    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
-       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
-       on the live page. */
-    expect(page).not.toContain("function renderFilterChips");
-    expect(page).toContain("<TodoSideContainer");
+  it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
   it("session: the search leaves with the panel (EXIT_FADE), no orphaned bar-clearing target", () => {
     const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");

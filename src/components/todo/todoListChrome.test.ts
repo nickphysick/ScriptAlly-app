@@ -31,10 +31,12 @@ import { join } from "node:path";
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 
-/** Everything before the view switch — the chrome that shows in BOTH views. */
+/** Everything before the board renders — the page's chrome.
+ *  ⚠️ The anchor moved with the view switch (board+dock P1): the page is cards-only now, so the
+ *  slice ends at the board's own render call rather than at a branch that no longer exists. */
 const chrome = (() => {
-  const i = page.indexOf('view === "ledger" ? renderLedger()');
-  expect(i, "the view switch must exist for this slice to mean anything").toBeGreaterThan(-1);
+  const i = page.indexOf(") : renderBoard()}");
+  expect(i, "the board's render call must exist for this slice to mean anything").toBeGreaterThan(-1);
   return page.slice(0, i);
 })();
 
@@ -60,17 +62,21 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(chrome).toContain('<div className="tdw">');
   });
 
-  it("the tool row carries the local search and the view toggle, and NOT the retired chip strip", () => {
-    expect(chrome).toContain('className="tdb-bsearch"');
-    expect(chrome).toContain('className="tdb-vtog"');
-    expect(chrome).not.toContain("renderFilterChips()");
+  it("the tool row carries the local search and the view toggle, and NOT the retired chip strip — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 
-  it("ONE page action — the pink Add. The review pill's job is the briefing seat's", () => {
+  it("the Add is PINK (creation) and the session launcher is not", () => {
     const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
-    expect((hero.match(/label:/g) ?? []).length).toBe(1);
-    expect(hero).toContain('label: "Add task or note"');
-    expect(hero).toContain("primary: true");
+    expect(hero).toContain('className="tdb-addb"');   // pink
+    expect(hero).toContain('className="tdb-ghb"');    // ghost
   });
 
   it("the briefing seat still renders above the groups — it is what the pill pointed at", () => {
@@ -79,20 +85,20 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
   });
 });
 
-describe("the LISTS rows are the ONE narrowing surface", () => {
-  it("selecting a list narrows the groups — the facets are not decorative", () => {
-    expect(page).toContain("function listShows");
-    for (const g of ['listShows("urgent")', 'listShows("housekeeping")', 'listShows("yours")']) {
-      expect(page, `${g} must gate its group`).toContain(g);
+describe("FILTERS is the ONE narrowing surface, and it reaches all four columns (P2)", () => {
+  it("the facet is applied to EVERY column, not to one", () => {
+    const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
+    for (const col of ["todo", "today", "snoozed", "done"]) {
+      expect(fn, `${col} must be filtered`).toContain(`applyFacet(raw.${col}, facet)`);
     }
   });
 
-  it("its counts come from the counting law's hook, never a second tally on this page", () => {
-    expect(page).toContain("const listCounts = useTodoCounts();");
-    expect(page).toContain("counts={listCounts.byList}");
+  it("the sort likewise reaches all four — a per-column sort would be four views of one set", () => {
+    const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
+    expect((fn.match(/sortBoardCards\(/g) ?? []).length).toBe(4);
   });
 
-  it("Snoozed narrows to the band, which is where snoozed items live in list view", () => {
-    expect(page).toContain('listFilter === "snoozed"');
+  it("its counts come from the cards the columns render, never a second tally", () => {
+    expect(page).toContain("counts={facetCounts([...board.do, ...board.hk, ...board.nt])}");
   });
 });

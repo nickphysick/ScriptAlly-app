@@ -179,10 +179,33 @@ describe("drags are the EXISTING verbs, and snooze is popover-gated", () => {
     expect(dropPlan(c, "todo", "snoozed")).not.toEqual({ kind: "snooze" });
   });
 
-  it("out of Snoozed returns it now; → Done completes; out of Done un-ticks", () => {
+  it("out of Snoozed returns it now; out of Done un-ticks", () => {
     expect(dropPlan(c, "snoozed", "todo")).toEqual({ kind: "unsnooze" });
-    expect(dropPlan(c, "todo", "done")).toEqual({ kind: "complete" });
     expect(dropPlan(c, "done", "todo")).toEqual({ kind: "uncomplete" });
+  });
+
+  /* ⚠️ DONE ACCEPTS USER-TASK TICKS ONLY (board+dock P3). A user task is a thing you wrote down,
+     so ticking it IS the completion. A derived card stands for an act on a real record, and
+     ticking it would clear the reminder while leaving the work undone. */
+  it("→ Done COMPLETES a user task", () => {
+    expect(dropPlan(card({ key: "u", userTaskId: "u1" }), "todo", "done")).toEqual({ kind: "complete" });
+  });
+
+  it("⚠️ → Done BOUNCES a derived card, naming the act that would finish it", () => {
+    const plan = dropPlan(card({ key: "d", taskType: "full_requested" }), "todo", "done");
+    expect(plan.kind).toBe("bounce");
+    expect((plan as { why: string }).why).toBe("Sending the full is what completes this — open the action");
+  });
+
+  it("the verb phrase is derived per KIND — it is never a generic scolding", () => {
+    const phrase = (t: string) => (dropPlan(card({ taskType: t }), "todo", "done") as { why: string }).why;
+    expect(phrase("partial_requested")).toContain("Sending the partial");
+    expect(phrase("no_response_close")).toContain("Closing the query");
+    expect(phrase("revise_resubmit")).toContain("Resubmitting");
+    expect(phrase("offer_received")).toContain("Answering the offer");
+    for (const t of ["full_requested", "data_quality_poor", "nudge_overdue"]) {
+      expect(phrase(t)).toContain("open the action"); // every one offers the way through
+    }
   });
 
   it("a drop on its own column does nothing", () => {
@@ -201,7 +224,8 @@ describe("an offer cannot be put away", () => {
 
   it("can still be committed and completed — the guard is narrow, not a freeze", () => {
     expect(dropPlan(offer, "todo", "today")).toEqual({ kind: "commit" });
-    expect(dropPlan(offer, "todo", "done")).toEqual({ kind: "complete" });
+    // an offer is derived, so Done bounces it like any other — it is answered, not ticked
+    expect(dropPlan(offer, "todo", "done").kind).toBe("bounce");
     expect(offerGuard(offer, "today").allowed).toBe(true);
   });
 });

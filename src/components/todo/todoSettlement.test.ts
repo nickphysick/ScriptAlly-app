@@ -108,11 +108,15 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
   // top. The workspace shell moves the search into the breadcrumb bar (a white pill) and the
   // CTA pair into the hero. These locks re-point to the new seats; the reactive filter
   // behaviour they used to guard lives on in todoWorkspaceShell.test.ts.
-  it("the search is the control line's fill field (todo rebuild P1 — the panel-header pill is gone)", () => {
-    expect(page).toContain('<span className="tdb-bsearch">');
-    expect(page).toContain("ref={searchRef}");
-    expect(page).not.toContain("tdb-bigsearch");
-    expect(page).not.toContain('className="tdb-hsearch"');
+  it("the search is the control line's fill field (todo rebuild P1 — the panel-header pill is gone) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
   it("the CTA pair is in the hero; there is NO CTA in the sidebar", () => {
     const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
@@ -154,18 +158,14 @@ describe("settlement P4 — the sweep", () => {
     expect(css).toContain(".tdb-band"); // the card band grammar
     expect(rule(".tdb-ktag")).toContain("background: #f7f2e9"); // the tightening: the kind chip is the one tag
   });
-  it("the tour still lands: Begin's anchor rode to the hero (the workspace shell)", () => {
-    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    expect(tour).toContain('sel: ".tdb-herobegin"');
-    expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // the anchor exists at that (hero) seat
-    // todo rebuild P1: the filter step anchors the CONTROL LINE (the bench slab is deleted)
-    const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
-    expect(tour).toContain(".tdb-ctrl");
-    expect(tshCss).not.toContain(".spine-bench {");
-    // every other stop's anchor still exists in the board or the shell
-    for (const sel of [".tdb-tile, .tdb-gcard, .tdb-lrow"]) { // .tdb-today2 retired (P3)
-      expect(tour).toContain(sel);
-      for (const one of sel.split(", ")) expect(css).toContain(one);
-    }
+  it("the tour still lands: Begin's anchor rode to the hero (the workspace shell) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
+       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
+       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
+       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
+       locked in todoListChrome.test.ts. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).not.toContain("function groupCard");
+    expect(page).toContain("function renderBoard");
   });
 });

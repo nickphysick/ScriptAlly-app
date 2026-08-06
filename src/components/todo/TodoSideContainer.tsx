@@ -24,25 +24,30 @@
  */
 import React from "react";
 import { Settings2 } from "lucide-react";
-import { TODO_LISTS, TodoListId } from "../../lib/todoRoutes";
+import { TODO_FACETS, TodoFacetId } from "../../lib/todoBoardSort";
 import "./todoSide.css";
 
 export interface TodoSideContainerProps {
-  /** Derived counts, one per list — never stored, never recomputed here. */
-  counts: Record<TodoListId, number>;
-  /** The active filter, or null for "everything". Filtering is the page's job; this only asks. */
-  active: TodoListId | null;
-  onSelect: (id: TodoListId | null) => void;
+  /** Derived counts, one per facet — from the cards the columns render, never a second tally. */
+  counts: Record<TodoFacetId, number>;
+  /** The active facet. `all` is the default and the reset — there is no null state. */
+  active: TodoFacetId;
+  onSelect: (id: TodoFacetId) => void;
   onOpenTaskSettings: () => void;
+  /** The road sign — notes are not on this board, so the row points at where they are. */
+  onNoteboard: () => void;
 }
 
 export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
-  counts, active, onSelect, onOpenTaskSettings,
+  counts, active, onSelect, onOpenTaskSettings, onNoteboard,
 }) => (
   <aside className="tds" aria-label="Filters">
-    <div className="tds-cap">Lists</div>
-    <div className="tds-group" role="group" aria-label="Lists">
-      {TODO_LISTS.map((l) => {
+    {/* ⚠️ FILTERS, NOT LISTS (board+dock P2) — renamed because the rows now DO what the heading
+        says. "Lists" named five things you could look at; these four narrow what the board shows,
+        all four columns at once, one active at a time. */}
+    <div className="tds-cap">Filters</div>
+    <div className="tds-group" role="group" aria-label="Filters">
+      {TODO_FACETS.map((l) => {
         const on = active === l.id;
         return (
           <button
@@ -50,19 +55,28 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
             type="button"
             className={`tds-row${on ? " on" : ""}`}
             aria-pressed={on}
-            /* Clicking the active row clears the filter — the row is a toggle, so there is always
-               a way back to "everything" without hunting for a reset control. */
-            onClick={() => onSelect(on ? null : l.id)}
+            /* ⚠️ ONE ACTIVE AT A TIME, and "Everything" IS the way back — so there is no toggle-
+               off state to leave the board in. Clicking the active row does nothing rather than
+               dropping you into a fourth, unnamed state that looks identical to Everything. */
+            onClick={() => onSelect(l.id)}
           >
             <span className="tds-sw" style={{ background: l.swatch }} aria-hidden="true" />
             <span className="tds-lbl">{l.label}</span>
-            {/* A zero is shown here, unlike the nav badge: this is a LIST of five, and a blank
-                where the other four carry figures reads as a loading fault rather than "none". */}
+            {/* A zero is shown, unlike the nav badge: these four sit together, and a blank where
+                the others carry figures reads as a loading fault rather than "none". */}
             <span className="tds-ct">{counts[l.id] ?? 0}</span>
           </button>
         );
       })}
     </div>
+
+    {/* ⚠️ THE ROAD SIGN, replacing the Notes row (P2). Notes are not on this board at all — a
+        note has no date and no tick, so three of the four columns are meaningless for it. A facet
+        that could only ever return nothing reads as a fault; a sign that says where they DO live
+        is the honest thing to put in its place. */}
+    <button type="button" className="tds-sign" onClick={onNoteboard}>
+      Notes to self live on the <b>Noteboard →</b>
+    </button>
 
     <div className="tds-cap">Tags</div>
     <div className="tds-soon" aria-disabled="true">
