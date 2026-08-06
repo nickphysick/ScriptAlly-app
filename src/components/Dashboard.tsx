@@ -52,13 +52,11 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { DashboardHero } from "./dashboard/DashboardHero";
-import { TimelineDrawer } from "./dashboard/TimelineDrawer";
+import { DiaryCard, PipelineCard, StoryCard } from "./dashboard/DeskBelow";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import { ActiveQueriesCard, AgentsCard, QueriesSentCard, ResponsesCard } from "./dashboard/DeskStats";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
-import { DiaryCarousel } from "./dashboard/DiaryCarousel";
-import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
 import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
@@ -1648,20 +1646,23 @@ export const Dashboard: React.FC<{
         {/* Section spacing: 48px above the diary panel, 56px before "What's live". At <md the
             diary carousel stands down (the concept's stack has no fortnight strip) and the
             spacing tightens — sa-dash-panels carries the override. */}
-        <div className="sa-dash-panels" style={{ display: "flex", flexDirection: "column", gap: 56, marginTop: 48 }}>
-          <DiaryCarousel
-            queries={queries}
-            agents={agents}
-            manuscripts={manuscripts}
-            activities={mergedActivities}
+        {/* The settled desk's lower half: the story and the diary side by side, the pipeline
+            full-width beneath. ⚠️ THE TIMELINE IS INLINE — the right-edge drawer it lived in is
+            retired from this page. */}
+        <div className="db-below">
+          <StoryCard
+            queries={queries} agents={agents} manuscripts={manuscripts} activities={mergedActivities}
+            onOpenTimeline={() => onNavigate("queries")}
           />
-          <WhatsLivePanel
-            queries={queries}
-            agents={agents}
-            manuscripts={manuscripts}
-            onSendQuery={() => onNavigate("queries", "Send a query")}
+          <DiaryCard
+            queries={queries} agents={agents} manuscripts={manuscripts} activities={mergedActivities}
           />
+        </div>
+        <div className="db-pipe">
+          <PipelineCard queries={queries} agents={agents} manuscripts={manuscripts} />
+        </div>
 
+        <div className="sa-dash-panels">
           {/* THE TO-DO DOORWAY (Mobile Pass 1, <md only — CSS-gated; concept frame 01): three
               lane tallies in the live board's own vocabulary, opening /todo. A doorway, not the
               working panel — OverToYou stays the desktop focus slot's. */}
@@ -1683,240 +1684,13 @@ export const Dashboard: React.FC<{
           </section>
         </div>
 
-        {/* Timeline — "The story so far", relocated into the right-edge floating drawer (v37).
-            The entry markup below is the existing story feed, unchanged. */}
-        <TimelineDrawer fortnightCount={fortnightCount} active={isDashRoute}>
-          {/* "The story so far" — activity timeline */}
-          {(() => {
-            const timelineBody = (
-              <div
-                ref={timelineScrollRef}
-                onScroll={handleTimelineScroll}
-                className="flex-1 overflow-y-auto pr-1 scrollbar-thin min-h-0"
-                style={{
-                  maskImage: `linear-gradient(to bottom, ${
-                    timelineScrollState.isAtTop ? "black 0%" : "transparent 0%, black 8%"
-                  }, ${
-                    timelineScrollState.isAtBottom ? "black 100%" : "black 92%, transparent 100%"
-                  })`,
-                  WebkitMaskImage: `linear-gradient(to bottom, ${
-                    timelineScrollState.isAtTop ? "black 0%" : "transparent 0%, black 8%"
-                  }, ${
-                    timelineScrollState.isAtBottom ? "black 100%" : "black 92%, transparent 100%"
-                  })`
-                }}
-              >
-                {chronologicalKeys.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-4 animate-fade-in">
-                    <Send className="w-[22px] h-[22px]" style={{ color: "#aab8a4", marginBottom: 10 }} strokeWidth={1.6} />
-                    <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13.5, color: "#5a6258", lineHeight: 1.65 }}>
-                      The story starts with your first query.
-                    </div>
-                    <div style={{ ...labelStyle, marginTop: 13 }}>No activity logged yet</div>
-                  </div>
-                ) : (
-                  <div>
-                    {chronologicalKeys.map((dateKey) => {
-                      const formattedDateHeader = getDisplayDateHeader(dateKey);
-                      const events = [...groupedEventsByDate[dateKey]].sort((a, b) => {
-                        return new Date(b.date).getTime() - new Date(a.date).getTime();
-                      });
+        {/* ⚠️ THE TIMELINE DRAWER IS UNMOUNTED (settled desk, Phase 6) — at EVERY width, not just
+            desktop. It was a right-edge pull tab holding the page's only narrative behind furniture
+            you had to discover; its <md variant went with it, because the story is now the inline
+            `StoryCard` above, which stacks at 1180px and reads better on a phone than a drawer did.
+            `TimelineDrawer.tsx` itself SURVIVES on disk — `focusSlot.test.ts` imports its pin
+            helpers — and deleting a module is a different decision from re-siting a section. */}
 
-                      return (
-                        <div key={dateKey} style={{ marginBottom: 4 }}>
-                          {/* Day group caption */}
-                          <div style={{ ...labelStyle, marginBottom: 12 }}>{formattedDateHeader}</div>
-
-                          {events.map((act, evIdx) => {
-                            // Smart Import summary — no agent/query context; render through the
-                            // standard event-card structure (icon + title + meta) rather than raw text.
-                            if (typeof act.description === "string" && act.description.startsWith("Smart import ·")) {
-                              const dotIdx = act.description.indexOf(" · ");
-                              const summaryTitle = dotIdx >= 0 ? act.description.slice(0, dotIdx) : act.description;
-                              const summaryMeta = dotIdx >= 0 ? act.description.slice(dotIdx + 3) : "";
-                              const isLast = evIdx === events.length - 1;
-                              const importCardStyle = FAMILY_CARD_STYLE["outgoing"];
-                              return (
-                                <div key={act.id} className="flex animate-fade-in" style={{ gap: 12, marginBottom: isLast ? 18 : 14 }}>
-                                  <div className="flex flex-col items-center shrink-0" style={{ width: 22 }}>
-                                    <span style={{ marginTop: 13 }}>{renderTimelineDot("Smart import")}</span>
-                                    {!isLast && <span style={{ width: 1.5, flex: 1, background: "#e8dcd0", marginTop: 5 }} />}
-                                  </div>
-                                  <div
-                                    className="transition-all"
-                                    style={{ flex: 1, minWidth: 0, position: "relative", overflow: "hidden", borderRadius: 11, padding: "11px 14px 12px", background: "#fffdfa", border: "0.5px solid #f0eae2" }}
-                                  >
-                                    <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: importCardStyle.accent }} />
-                                    <div className="flex justify-between items-center" style={{ gap: 8 }}>
-                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500, padding: "3px 8px", borderRadius: 20, background: importCardStyle.chipBg, color: importCardStyle.chipText, whiteSpace: "nowrap" }}>
-                                        Import
-                                      </span>
-                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#bcaa9c", whiteSpace: "nowrap" }}>{getFormattedTime(act.date)}</span>
-                                    </div>
-                                    <div style={{ fontFamily: FONT_SERIF, fontWeight: 500, fontSize: 16, color: "#7c3a2a", lineHeight: 1.2, marginTop: 3 }}>{summaryTitle}</div>
-                                    {summaryMeta && (
-                                      <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", marginTop: 3, overflowWrap: "break-word" }}>{summaryMeta}</div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            }
-                            const q = queries.find(item => item.id === act.queryId);
-                            const agent = q ? agents.find(ag => ag.id === q.agentId) : null;
-                            const resolvedAgent = agent || extractAgentFromText(act.description);
-                            const ms = (q && manuscripts.find(m => m.id === q.manuscriptId)) || manuscripts.find(m => m.id === act.manuscriptId) || null;
-                            const msTitle = ms ? ms.title : "";
-                            const agency = resolvedAgent?.agency || "";
-                            const agentName = resolvedAgent?.name || resolvedAgent?.agency || "the agent";
-                            const formattedTime = getFormattedTime(act.date);
-
-                            const pillData = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);
-                            const family = getTimelineFamily(act);
-                            const isOffer = family === "offer";
-                            const cardKey: "incoming" | "outgoing" | "closed" =
-                              family === "incoming" || family === "closed" ? family : "outgoing"; // nudge → outgoing palette
-                            const cardStyle = FAMILY_CARD_STYLE[cardKey];
-                            const isLastInGroup = evIdx === events.length - 1;
-
-                            const displayPillLabel = replacePlaceholders(
-                              pillData.label,
-                              msTitle,
-                              resolvedAgent ? { name: resolvedAgent.name, agency: resolvedAgent.agency } : null,
-                              q,
-                              act.details
-                            );
-
-                            // Every respond-by/check-back date derives from the live query fields only
-                            // (responseDeadline / nudgeDate) — never the stale stamped activity.details.
-                            const fmtDate = (d?: string | null) =>
-                              d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
-                            const respondBy = fmtDate(q?.responseDeadline);
-                            const coerceDate = (v: any): Date | null => {
-                              if (!v) return null;
-                              if (typeof v === "string") { const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
-                              if (typeof v.seconds === "number") return new Date(v.seconds * 1000);
-                              if (typeof v.toDate === "function") return v.toDate();
-                              if (v instanceof Date) return v;
-                              return null;
-                            };
-                            // A logged nudge's optional note (the bit after the check-back in details).
-                            const nudgeNote = (() => {
-                              const m = (act.details || "").match(/·\s*"([^"]+)"/);
-                              return m ? m[1] : null;
-                            })();
-
-                            // Consequence tag — at most one fact per card.
-                            let tag: React.ReactNode = null;
-                            if (pillData.key === "partial_req" || pillData.key === "full_req") {
-                              if (respondBy) tag = <StoryTag tone="sage" Icon={CalendarClock}>Respond by {respondBy}</StoryTag>;
-                            } else if (pillData.key === "rr") {
-                              const v = q?.revisionRound;
-                              tag = <StoryTag tone="sage" Icon={RefreshCw}>{`Revision${v ? ` v${v}` : ""}${respondBy ? ` · respond by ${respondBy}` : ""}`}</StoryTag>;
-                            } else if (pillData.key === "nudge_sent") {
-                              const nd = fmtDate(q?.nudgeDate);
-                              tag = <StoryTag tone="burgundy" Icon={Clock}>{`Follow-up reminder${nd ? ` · ${nd}` : ""}`}</StoryTag>;
-                            } else if (family === "closed") {
-                              const reason = (act.details || "").trim();
-                              if (reason) tag = <StoryTag tone="muted">{reason}</StoryTag>;
-                            }
-
-                            // Offer hero gold tag — reply-by from the offer response deadline.
-                            let offerTag: React.ReactNode = null;
-                            if (isOffer) {
-                              const replyBy = coerceDate(q?.offerResponseDeadline);
-                              if (replyBy) {
-                                const days = Math.max(0, Math.round((replyBy.getTime() - Date.now()) / 86400000));
-                                offerTag = <StoryTag tone="gold" Icon={Sparkles}>{`Reply by ${replyBy.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${days} day${days === 1 ? "" : "s"}`}</StoryTag>;
-                              }
-                            }
-
-                            const openEvent = () => {
-                              if (act.queryId) { openEditQuery(act.queryId); }
-                              else { onNavigate("queries", act.description); }
-                            };
-
-                            return (
-                              <div key={act.id} className="flex animate-fade-in" style={{ gap: 12, marginBottom: isLastInGroup ? 18 : 14 }}>
-                                {/* StatusDot on a 22px rail, top-aligned */}
-                                <div className="flex flex-col items-center shrink-0" style={{ width: 22 }}>
-                                  <span style={{ marginTop: 13 }}>{pillData.dot}</span>
-                                  {!isLastInGroup && <span style={{ width: 1.5, flex: 1, background: "#e8dcd0", marginTop: 5 }} />}
-                                </div>
-
-                                {/* Event card */}
-                                <div
-                                  onClick={openEvent}
-                                  className="cursor-pointer transition-all"
-                                  style={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    position: "relative",
-                                    overflow: "hidden",
-                                    borderRadius: 11,
-                                    padding: "11px 14px 12px",
-                                    background: isOffer ? "linear-gradient(135deg, #fffaf0 0%, #fffdfa 100%)" : "#fffdfa",
-                                    border: isOffer ? "0.5px solid rgba(186,117,23,0.35)" : "0.5px solid #f0eae2",
-                                  }}
-                                >
-                                  {!isOffer && <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: cardStyle.accent }} />}
-
-                                  {/* Eyebrow row */}
-                                  <div className="flex justify-between items-center" style={{ gap: 8 }}>
-                                    {isOffer ? (
-                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9a6a12", fontWeight: 500 }}>
-                                        An offer of representation
-                                      </span>
-                                    ) : pillData.show ? (
-                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500, padding: "3px 8px", borderRadius: 20, background: cardStyle.chipBg, color: cardStyle.chipText, whiteSpace: "nowrap" }}>
-                                        {formatRichText(displayPillLabel)}
-                                      </span>
-                                    ) : <span />}
-                                    <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#bcaa9c", whiteSpace: "nowrap" }}>{formattedTime}</span>
-                                  </div>
-
-                                  {/* Headline: agent name */}
-                                  <div style={{ fontFamily: FONT_SERIF, fontWeight: 500, fontSize: isOffer ? 18 : 16, color: isOffer ? "#7c3d3d" : (family === "closed" ? "#8a7a6e" : "#7c3a2a"), lineHeight: 1.2, marginTop: 3 }}>
-                                    {agentName}
-                                  </div>
-
-                                  {/* Meta: agency (line 1, may ellipsis) over the full manuscript title (line 2, wraps) */}
-                                  {(agency || msTitle) && (
-                                    <div style={{ marginTop: 3 }}>
-                                      {agency && (
-                                        <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                          {agency}
-                                        </div>
-                                      )}
-                                      {msTitle && (
-                                        <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", lineHeight: 1.4, marginTop: agency ? 2 : 0, overflowWrap: "break-word" }}>
-                                          {msTitle}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-
-                                  {/* Consequence tag (0 or 1) */}
-                                  {isOffer ? offerTag : tag}
-                                  {pillData.key === "nudge_sent" && nudgeNote && (
-                                    <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 11.5, color: "#6a5a50", marginTop: 6, lineHeight: 1.45 }}>
-                                      “{nudgeNote}”
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-
-            return timelineBody;
-          })()}
-          </TimelineDrawer>
       </div>
 
       {/* Quiet Pro upsell (replaces the old three-format banner review arena) */}

@@ -66,7 +66,13 @@ describe("the <md dashboard stack", () => {
   });
 });
 
-describe("the timeline re-homed at <md", () => {
+/* ⚠️ THESE READ THE FILE, AND THE FILE IS NO LONGER MOUNTED (settled desk, Phase 6). The drawer —
+   both its desktop and its <md variant — is unmounted at every width; the story is the inline
+   StoryCard now. They are kept, retargeted in intent: they pin the SHAPE of a component still on
+   disk whose pin helpers focusSlot.test.ts imports, so a future re-mount finds it intact. They no
+   longer say anything about what the dashboard renders, and this comment is here so nobody reads
+   them as if they did. */
+describe("the timeline drawer's shape, retained on disk but unmounted", () => {
   it("the mobile variant is in-flow with the drawer's own head/body classes", () => {
     expect(drawer).toContain("useIsMobile()");
     expect(drawer).toContain('className="sa-tlmobile"');

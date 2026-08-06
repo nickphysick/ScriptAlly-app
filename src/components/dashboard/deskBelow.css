@@ -1,0 +1,79 @@
+/* ── THE SETTLED DESK'S LOWER HALF (ref design-refs/dashboard-settled-desk.html) ── */
+
+.db-below {
+  display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px; margin-top: 28px; align-items: start;
+}
+.db-pipe { margin-top: 20px; }
+
+/* ══ THE STORY SO FAR ══ */
+.db-tlday { margin: 12px 0 8px; }
+.db-tlev { display: flex; gap: 12px; }
+.db-thread { width: 14px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.db-tlline { width: 1.5px; flex: 1; background: #e8dcd0; }
+.db-tldot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #cfc6bb; background: #efeae2; flex: none; }
+.db-cardlet {
+  flex: 1; min-width: 0; background: #fdfbf6; border: 1px solid #ece0d2; border-radius: 11px;
+  padding: 11px 14px; margin-bottom: 9px; display: flex; align-items: center; gap: 14px;
+}
+.db-cl-left { flex: 1; min-width: 0; }
+.db-who { font-family: var(--font-serif); font-size: 16px; color: #2c1a12; }
+.db-cap {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #9c8878; margin-top: 4px;
+}
+.db-st {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: #ece5da; color: #4a3a2e; border-radius: 99px; padding: 3px 9px; flex: none;
+  max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-st.sg { background: #e9ede6; color: #5a6e58; }
+.db-st.hot { background: #f3e0d6; color: #7c3a2a; }
+.db-tm { font-family: "JetBrains Mono", monospace; font-size: 9px; color: #b3a596; flex: none; }
+
+/* ══ DATES FOR THE DIARY ══ */
+.db-dibody { padding: 6px 17px 4px; }
+.db-dirow { display: flex; align-items: baseline; gap: 13px; padding: 10.5px 0; border-bottom: 1px solid #ece0d2; }
+.db-dirow:last-child { border-bottom: none; }
+.db-dw {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.15em; text-transform: uppercase; color: #9c8878;
+  width: 38px; flex: none;
+}
+.db-dn { font-family: var(--font-serif); font-size: 15px; color: #2c1a12; width: 48px; flex: none; }
+.db-what { flex: 1; min-width: 0; font-size: 12px; color: #5c5148; line-height: 1.4; }
+.db-due { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 3px; }
+.db-due i { width: 6px; height: 6px; border-radius: 50%; flex: none; margin-top: 4px; }
+.db-due i.b { background: #7c3a2a; }
+.db-due i.s { background: #8a9e88; }
+/* today carries a sage left-fade and a sage weekday — the only row that is marked */
+.db-dirow.today {
+  background: linear-gradient(90deg, #eef1ec, rgba(238, 241, 236, 0));
+  margin: 0 -17px; padding-left: 17px; padding-right: 17px; border-radius: 9px;
+}
+.db-dirow.today .db-dw { color: #5a6e58; }
+/* a diary still shows the days you have walked past — dimmed, not removed */
+.db-dirow.past { opacity: 0.55; }
+
+/* ══ LIVE PIPELINE ══ */
+.db-pstages { display: flex; align-items: center; gap: 22px; overflow-x: auto; flex: 1; justify-content: flex-end; }
+.db-pstage {
+  display: flex; align-items: center; gap: 7px; white-space: nowrap;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6e58; opacity: 0.55;
+}
+.db-pstage.hot { opacity: 1; }
+.db-pstage b { font-family: var(--font-serif); font-size: 13px; letter-spacing: 0; text-transform: none; color: #33402f; }
+.db-prows { padding: 4px 18px 8px; }
+.db-prow { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #ece0d2; }
+.db-prow:last-child { border-bottom: none; }
+.db-pnm { font-family: var(--font-serif); font-size: 15.5px; color: #2c1a12; flex: none; }
+.db-pmeta {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #9c8878;
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.db-pwhen { font-family: "JetBrains Mono", monospace; font-size: 9px; color: #7c3a2a; flex: none; }
+
+@media (max-width: 1180px) { .db-below { grid-template-columns: 1fr; } }
