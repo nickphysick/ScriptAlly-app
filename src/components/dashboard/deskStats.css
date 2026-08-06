@@ -66,3 +66,15 @@
 @media (prefers-reduced-motion: reduce) {
   .ds-bar, .ds-rfill, .ds-rseg { transition: none; }
 }
+
+/* ══ 2 · ACTIVE QUERIES ══ */
+.ds-trend { width: 100%; height: 46px; cursor: crosshair; display: block; }
+.ds-stagelist { margin-top: 2px; }
+.ds-strow { display: flex; align-items: center; gap: 9px; padding: 6px 0; }
+/* ⚠️ DIMMED, NEVER REMOVED. A breakdown that omits an empty stage says the stage does not exist,
+   and the list jumps as data changes. Their absence is information. */
+.ds-strow.dim { opacity: 0.42; }
+.ds-sname { font-size: 12px; color: #5c5148; flex: 1; white-space: nowrap; }
+.ds-smeter { width: 52px; height: 5px; border-radius: 99px; background: #efe5d8; overflow: hidden; flex: none; }
+.ds-smeter i { display: block; height: 100%; border-radius: 99px; background: #a86a52; }
+.ds-scount { font-family: var(--font-serif); font-size: 14px; color: #2c1a12; width: 16px; text-align: right; flex: none; }

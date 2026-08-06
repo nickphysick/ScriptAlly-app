@@ -134,6 +134,51 @@ export const pipelineMix = (queries: Query[]): { status: QueryStatus; count: num
     .filter((s) => s.count > 0);
 };
 
+/**
+ * ⚠️ THE STAGE'S DISPLAY LABEL — a MAPPING, never a comparison.
+ *
+ * The enum strings are canonical and are not touched (`"Revise & Resubmit"`, `"Partial Requested"`).
+ * The settled-desk ref writes them in sentence case, and writes REVISE_RESUBMIT as "In revision".
+ * Both are true at once because one is a value and the other is words on a card.
+ *
+ * ⚠️ CAMELCASE DRIFT HERE IS A NAMED, RECURRING REGRESSION. The failure mode is a component
+ * comparing against the label instead of the enum, or hand-writing `"reviseResubmit"`. Every stage
+ * row keys off `QueryStatus`; this map is the only place the words live, and it is locked
+ * exhaustively — a new enum member fails the test rather than rendering `undefined`.
+ */
+export const STAGE_LABEL: Record<QueryStatus, string> = {
+  [QueryStatus.QUERIED]: "Queried",
+  [QueryStatus.PARTIAL_REQUESTED]: "Partial requested",
+  [QueryStatus.PARTIAL_SENT]: "Partial sent",
+  [QueryStatus.FULL_REQUESTED]: "Full requested",
+  [QueryStatus.FULL_SENT]: "Full sent",
+  [QueryStatus.REVISE_RESUBMIT]: "In revision",
+  [QueryStatus.OFFER]: "Offer",
+  [QueryStatus.REJECTED]: "Rejected",
+  [QueryStatus.WITHDRAWN]: "Withdrawn",
+  [QueryStatus.NO_RESPONSE]: "No response",
+};
+
+export interface StageRow {
+  status: QueryStatus;
+  label: string;
+  count: number;
+}
+
+/**
+ * Where the active queries stand, by stage, in journey order.
+ *
+ * ⚠️ ZERO-COUNT STAGES ARE KEPT, DIMMED — never dropped. `pipelineMix` filters them out, which is
+ * right for a pipeline strip and wrong here: a breakdown that silently omits "In revision" says
+ * the stage does not exist, and the list jumps as data changes. Their absence is information.
+ */
+export const activeStageBreakdown = (queries: Query[]): StageRow[] =>
+  STATUS_ORDER.map((status) => ({
+    status,
+    label: STAGE_LABEL[status],
+    count: queries.filter((q) => q.status === status).length,
+  }));
+
 const TERMINAL_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.OFFER,
   QueryStatus.REJECTED,

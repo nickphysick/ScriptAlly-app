@@ -9,6 +9,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
+import { STATUS_ORDER } from "./statusOrder";
 import {
   activeQueriesOf,
   activeTooltip,
@@ -23,6 +24,8 @@ import {
   weekRecipients,
   weekQueryRows,
   responseSplit,
+  activeStageBreakdown,
+  STAGE_LABEL,
   agentStatusSummaries,
   agentTooltip,
   awaitingReplyCount,
@@ -468,5 +471,45 @@ describe("⚠️ responseSplit RECONCILES WITH THE HEADLINE, by construction", (
 
   it("an empty pipeline is all zeroes, never NaN", () => {
     expect(responseSplit([])).toEqual({ requests: 0, passes: 0, offers: 0, unclassified: 0, total: 0 });
+  });
+});
+
+describe("⚠️ the stage breakdown — enum keys, display words, and no silent omissions", () => {
+  /* THE NAMED REGRESSION: a component comparing against the label instead of the enum, or
+     hand-writing "reviseResubmit". Every row keys off QueryStatus; these assertions are what
+     fail if the words and the values are ever confused for one another. */
+  it("labels EVERY QueryStatus, so a new member cannot render undefined", () => {
+    for (const status of Object.values(QueryStatus)) {
+      expect(STAGE_LABEL[status], String(status)).toBeTruthy();
+    }
+    expect(Object.keys(STAGE_LABEL).sort()).toEqual(Object.values(QueryStatus).sort());
+  });
+
+  it("the keys are the EXACT enum strings — Title Case, ampersand and all", () => {
+    expect(STAGE_LABEL["Revise & Resubmit" as QueryStatus]).toBe("In revision");
+    expect(STAGE_LABEL["Partial Requested" as QueryStatus]).toBe("Partial requested");
+    // the label is words, never a value: this is the pair that documents the divergence
+    expect(QueryStatus.REVISE_RESUBMIT).toBe("Revise & Resubmit");
+    expect(STAGE_LABEL[QueryStatus.REVISE_RESUBMIT]).not.toBe(QueryStatus.REVISE_RESUBMIT);
+  });
+
+  it("walks the journey in order and KEEPS the empty stages", () => {
+    const rows = activeStageBreakdown([
+      q({ status: QueryStatus.QUERIED }),
+      q({ status: QueryStatus.QUERIED }),
+      q({ status: QueryStatus.OFFER }),
+    ]);
+    expect(rows.map((r) => r.status)).toEqual(STATUS_ORDER);
+    expect(rows.find((r) => r.status === QueryStatus.QUERIED)!.count).toBe(2);
+    // "In revision" has nobody in it and STILL renders — its absence is information
+    const rr = rows.find((r) => r.status === QueryStatus.REVISE_RESUBMIT)!;
+    expect(rr.count).toBe(0);
+    expect(rr.label).toBe("In revision");
+  });
+
+  it("terminal statuses are not stages of the ACTIVE journey", () => {
+    const rows = activeStageBreakdown([q({ status: QueryStatus.REJECTED })]);
+    expect(rows.map((r) => r.status)).not.toContain(QueryStatus.REJECTED);
+    expect(rows.every((r) => r.count === 0)).toBe(true);
   });
 });
