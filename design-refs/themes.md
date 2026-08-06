@@ -1254,3 +1254,58 @@ family shares it (unit, batch, AND the user note/task cards), so feet sit level 
 whatever the title lengths. The hover-verb reveal machinery is extinct: feet cannot align if
 actions only exist on hover. Four columns at the standard tier; ≥1700px takes five. The
 sticker treatment (ink border + family offset block) is untouched.
+
+## The To-do workspace (settled)
+
+*(Workspace pack, Phases 1–4, 6 Aug 2026. Refs: `todo-workspace-pages.html` for the pages,
+`todo-ecosystem.html` for lifecycle and copy, `todo-audit.md` for the decision register.)*
+
+**Four routes, one section.** `/todo` (the list, and the bare path — every existing link lands on
+it without a redirect) · `/todo/today` · `/todo/calendar` · `/todo/noteboard`. To-do is a group in
+the app sidebar with the four as children, carrying its count and its urgency dot on the GROUP row
+— collapsed, the group row is all you can see, so a badge living on a child would vanish exactly
+when it is doing its job. **The app sidebar is the sole navigation for the four**; the page's own
+side container carries LISTS, TAGS and Task settings and NO page links, so there is one set of
+destinations and one active state.
+
+**⚠️ THE COUNTING LAW has exactly one implementation: `lib/todoCount`.** Actionable = urgent +
+housekeeping gaps + open user TASKS; **notes are excluded** — they are dateless and nothing chases
+them, so they must not inflate a number meaning "things waiting on you". The badge, the page counts
+and the board all read it. Do not add an `actionable` field back to `LedgerTiles`: two answers to
+one question is the fault the law was written to end.
+
+**The list page is three GROUP CARDS** — Urgent · Housekeeping · Your tasks & notes — each headed
+by its LIST swatch, a Playfair label and a mono count. Note the deliberate asymmetry: the side
+container lists **five** filters (notes separate), the page shows **three** groups (both natures
+together), because they are separate things to filter by and one thing you wrote down.
+**The housekeeping fold is a VIEW, not a filter** — hidden rows stay in the group and stay in the
+count; a fold that changed the total would be hiding work rather than deferring it.
+**The quick-add is scoped to the Your group** (one verb per control): the other two are derived and
+have nothing a writer could add to.
+
+**Today is a list you BUILT, not a view of what exists.** The subtitle counts done against
+done + open — the size of your list, never the backlog. The quick-add makes a **dated task, never
+a note**: a note made there would leave the page the instant it was made. Cleared items settle **in
+place**, struck through, with the time and an Undo, and stay for the rest of the day — a list that
+erased what you finished would hide the only evidence the day went anywhere. The strike is on the
+TITLE, so the time and the Undo stay legible.
+
+**The bench proposes; it never argues.** Max three, each with a why-line from the card's own facts,
+and **four exclusions**: never a note, never anything snoozed, dismissed, or already on Today. A
+suggestion engine that ignores answers it has been given teaches you to stop reading it.
+
+**⚠️ THE BOARD HAS NO STORED PLACEMENT.** To do · Today · Snoozed · Done are four states the app
+already owns; a card's column is derived from its own facts, and moving it changes the fact. The
+"Doing" column is dead because it was the only one that could not be derived. **Every column equals
+its source** — Today == the Today page, Done == today's log, Snoozed == the snoozed set — asserted
+as equalities, not parallel expectations. Drags are the **existing verbs**, and **snooze is
+popover-gated**: dropping on Snoozed opens the date menu and the card moves only once a date is
+chosen. Notes never render. Offers cannot be put away. **Every drag verb is also on the ⋯ menu** —
+a board reachable only by pointer is a board some people cannot use.
+
+**Copy register:** "Snoozed {date} · back today", never "wakes". Drop zones name the act, so the
+Snoozed zone reads "choose a return date" rather than "snooze".
+
+**Retired here, and locked as retired:** the Today corner pop-up and its whole family (both
+renderers, `.tdb-today2`/`.tdb-tdpop`, the collapse key, the slide, `strikeIds`). Today is a route;
+a floating copy of it would be a second surface owning the same commitment.
