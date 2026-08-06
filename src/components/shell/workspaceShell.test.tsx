@@ -570,6 +570,14 @@ describe("Amendment 1 (D) — the collapse control", () => {
     expect(html).toContain('aria-label="Collapse the navigation"');
     expect(html.indexOf("ws-crow2")).toBeGreaterThan(html.indexOf("ws-nav"));
     expect(html.indexOf("ws-crow2")).toBeLessThan(html.indexOf("ws-pfoot"));
+    /* ⚠️ AND THE SPACER PRECEDES IT — the assertion this case was missing, and the reason the row
+       shipped sitting under the last nav item with the panel's empty space BELOW it. Ordered that
+       way it reads as a sixth navigation item; nav < crow2 < pfoot was true either way, so only
+       the spacer's position distinguishes "at the foot" from "under the nav". Matches the ref:
+       nav → grow → crow2 → pfoot. */
+    const grow = html.indexOf("ws-grow", html.indexOf("ws-nav"));
+    expect(grow, "the panel's spacer must exist after the nav").toBeGreaterThan(-1);
+    expect(html.indexOf("ws-crow2")).toBeGreaterThan(grow);
   });
 
   it("the collapse row is muted, 34px, with a 14px chevron", () => {

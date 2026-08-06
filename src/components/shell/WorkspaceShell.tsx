@@ -441,6 +441,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               the manuscript pill, where it competed with the pill for the head's attention and
               read as an action ON the manuscript. At the foot of the nav it reads as what it is:
               a thing you do to the sidebar. Same handler, same persistence key. */}
+          {/* ⚠️ THE SPACER COMES FIRST. Ordered the other way round, the row sits directly under
+              the last nav item with the panel's empty space BELOW it — which is where it shipped,
+              and it reads as a sixth navigation item rather than a thing you do to the sidebar.
+              The grow pushes it to the panel foot, just above the account divider, which is what
+              "at the bottom of the navigation section" means. */}
+          <div className="ws-grow" />
+
           <button
             type="button"
             className="ws-crow2"
@@ -450,8 +457,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             <ChevronsLeft aria-hidden="true" />
             Collapse sidebar
           </button>
-
-          <div className="ws-grow" />
 
           {/* ── foot: hairline → account block → Settings. NO avatar (the rail carries the face). ── */}
           <div className="ws-pfoot">
