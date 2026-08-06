@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!-- ⚠️ SCOPE (board fixes II, 6 Aug): NORMATIVE for the BOARD's appearance and the card grammar —
+     the editorial column heads, the card/band/seat/menu (M2), the sweep stack, the ghost slot, the
+     completion ring, the fade hem, the WIP line, the FILTERS swatch hexes, tabular numerals, and
+     the motion notes in the header label. The CHROME AROUND IT (rail, sidebar, top bar, page
+     header) is DEMONSTRATION ONLY — the repo's shell wins on all of it. One deliberate deviation
+     from this file: the DONE card here reuses the sage band (.kc.t); the pack's written law gives
+     done work the MUTED sage family, and a reasoned value in prose beats an unreasoned one in an
+     artefact (the house mockup-wins carve-out). -->
+<html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The board, settled</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+:root{--ink:#2a1a13;--soft:#4d4238;--muted:#8a7a6c;--label:#b3a394;--hair:#f0e9dd;--pink:#f5e2da;--pinkbd:#e8c8bc;--burg:#7c3a2a}
+*{font-variant-numeric:tabular-nums}
+body{background:#3a332c;padding:30px 0 80px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;color:#2b2118}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b3a695;margin:34px 0 11px;width:1500px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#cfc2b0;margin-left:10px;line-height:1.6}
+.frame{width:1500px;background:#fdfcfa;border-radius:14px;overflow:hidden;display:flex;box-shadow:0 16px 44px rgba(20,15,10,.45);border:1px solid #2a2019}
+.rail{width:78px;flex:0 0 auto;background:#261c15;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:2px}
+.rlogo{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#f3e7da;margin-bottom:14px}
+.rli{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#9c8878;position:relative}
+.rli.on{background:#3d2e22;color:#f3e7da}
+.rli.on::after{content:'';position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:#c96f52}
+.rfoot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:10px}
+.avi{width:34px;height:34px;border-radius:50%;background:#f3e7da;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#7c3a2a}
+.sb{width:252px;flex:0 0 auto;border-right:1px solid #ede5d8;display:flex;flex-direction:column;padding:14px 14px 16px;box-sizing:border-box}
+.mspill{display:flex;align-items:center;gap:9px;height:42px;border:1px solid #e2d8c8;border-radius:11px;padding:0 13px;font-size:13px;font-weight:600;margin-bottom:16px}
+.si{display:flex;align-items:center;gap:11px;height:40px;border-radius:9px;padding:0 10px;font-size:13.5px;color:var(--soft);font-weight:500}
+.si .ic{width:18px;text-align:center;color:var(--muted);font-size:13px}
+.si .chev{margin-left:auto;color:var(--label);font-size:9px}
+.si.grp{font-weight:700;color:#2b2118}
+.si .dotn{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+.si .dotn::before{content:'';width:6px;height:6px;border-radius:50%;background:#c96f52}
+.kid2{display:flex;align-items:center;height:34px;border-radius:8px;padding:0 10px;margin-left:30px;font-size:12.5px;color:#5d5047}
+.kid2.on{background:#f2ede7;color:#2b2118;font-weight:700}
+.collapse{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;color:var(--muted);font-size:12px;margin-top:10px}
+.sbfoot{margin-top:auto;border-top:1px solid var(--hair);padding-top:12px}
+.upg{border:1px solid #e2b9a8;color:var(--burg);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600}
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:64px;display:flex;align-items:center;gap:16px;padding:0 26px;border-bottom:1px solid var(--hair)}
+.wm{font-family:'Playfair Display',serif;font-size:21px;font-weight:800}
+.crumb{font-size:13px;color:var(--muted)}
+.crumb b{color:#2b2118;font-weight:600}
+.saved{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--label)}
+.srch{display:flex;align-items:center;gap:9px;width:240px;height:36px;border:1px solid #e8dfd1;border-radius:9px;padding:0 12px;color:#a5988c;font-size:12px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;background:#f2ede7;border-radius:5px;padding:2px 6px;color:var(--muted)}
+.newb{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border-radius:9px;height:38px;padding:0 15px;font-size:12.5px;font-weight:600}
+.inner{display:flex;flex:1;min-height:0}
+.pside{width:216px;flex:0 0 auto;border-right:1px solid var(--hair);padding:22px 16px 16px;display:flex;flex-direction:column;box-sizing:border-box}
+.pk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:0 6px 8px}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:18px 6px 8px}
+.pi{display:flex;align-items:center;gap:10px;height:34px;border-radius:8px;padding:0 9px;font-size:13px;color:var(--soft)}
+.pi.on{background:#f2ede7;font-weight:700;color:#2b2118}
+.pi .swd{width:9px;height:9px;border-radius:50%}
+.pi .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.linkrow{display:flex;align-items:center;font-size:11.5px;color:var(--muted);border-top:1px solid var(--hair);margin-top:10px;padding:11px 9px 0;line-height:1.5}
+.linkrow b{color:var(--burg);font-weight:600;border-bottom:1px solid #e2c6ba;margin-left:4px}
+.tagbox{border:1px dashed #d9cbb8;border-radius:10px;padding:11px 12px;margin:2px 4px}
+.tagbox b{font-size:12px;display:block}
+.tagbox span{font-size:10.5px;color:var(--muted);line-height:1.5;display:block;margin-top:3px}
+.tset{display:flex;align-items:center;gap:9px;height:34px;padding:0 9px;color:var(--soft);font-size:12.5px;margin-top:auto}
+.pbody{flex:1;min-width:0;padding:26px 30px 30px;overflow:auto}
+.ph h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700}
+.ph .sub{font-size:13px;color:var(--muted);margin-top:5px}
+.tools{display:flex;align-items:center;gap:8px;margin-top:16px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.tsrch{display:flex;align-items:center;gap:7px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:#a5988c;font-size:11.5px;width:190px;background:#fff}
+.sortb{display:inline-flex;align-items:center;gap:6px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:var(--soft);font-size:11.5px;background:#fff;font-weight:600}
+.pkb{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pinkbd);color:#5c2f22;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:700}
+/* board */
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start;margin-top:18px}
+.fh{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px;display:flex;align-items:baseline;gap:9px;position:sticky;top:0;background:linear-gradient(#fdfcfa 74%,rgba(253,252,250,0));z-index:2}
+.fh .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.fh.done{border-bottom-color:#b9c9b4}
+.fh .wip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--label);font-weight:400;letter-spacing:.1em}
+.kc{background:#fff;border:1px solid #efe8dc;border-radius:10px;box-shadow:0 2px 8px rgba(58,28,20,.06);margin-bottom:12px;position:relative;transition:transform .14s cubic-bezier(.2,.7,.3,1),box-shadow .14s}
+.kc.u{border:1px solid var(--ink)}
+.kc .b{height:24px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--bd);border-radius:10px 10px 0 0;overflow:hidden}
+.kc.u .b{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.kc.h .b{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.kc.t .b{background:linear-gradient(180deg,#dee4dc,#d5dbd3);--bd:#b9c9b4}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;color:#3a1c14}
+.kc .b .w{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#8a6a58}
+.kc .in{padding:12px 13px 13px}
+.kc h4{font-size:13px;font-weight:600;line-height:1.35}
+.kc .ms{font-size:11px;color:#a0958a;margin-top:4px}
+.kc.lift{transform:translateY(-2px);box-shadow:0 8px 20px rgba(58,28,20,.13)}
+.hint{position:absolute;right:11px;top:31px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:#8a6a58}
+.dots{position:absolute;right:8px;bottom:8px;width:26px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#c4b6a6;letter-spacing:1px}
+.kc:hover .dots,.kc.lift .dots{color:#6b5a4e;background:#faf6f0;border:1px solid #ece4d6}
+.kc .in{padding-right:42px}
+.kc .ms{padding-right:0}
+/* B: band-mounted */
+.bdots{margin-left:8px;color:#8a6a58;font-size:10px;letter-spacing:1px}
+/* C: right gutter */
+.gut{position:absolute;top:24px;right:0;bottom:0;width:32px;border-left:1px solid #f4eee4;display:flex;align-items:center;justify-content:center;color:#c4b6a6;font-size:11px;letter-spacing:1px;background:#fdfbf7;border-radius:0 0 10px 0}
+.kc.gutc .in{padding-right:44px}
+.tick{position:absolute;inset:-1px;border-radius:10px;border:1.5px solid #8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,.16)}
+.stack::before,.stack::after{content:'';position:absolute;left:5px;right:5px;height:10px;border:1px solid #efe8dc;border-top:none;border-radius:0 0 9px 9px;background:#fdfbf7;z-index:-1}
+.stack::before{bottom:-5px}
+.stack::after{bottom:-9px;left:10px;right:10px;background:#fbf8f3;z-index:-2}
+.prog{height:3px;border-radius:2px;background:#efe7d9;overflow:hidden;margin:9px 0 0}
+.prog i{display:block;height:100%;background:#b9a98e;width:31%}
+.ghost{border:1.5px dashed #d8ccbc;border-radius:10px;height:78px;background:repeating-linear-gradient(135deg,#fdfbf7,#fdfbf7 6px,#faf6ef 6px,#faf6ef 12px);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.15em;color:var(--label)}
+.fade{height:30px;background:linear-gradient(rgba(253,252,250,0),#fdfcfa);margin-top:-30px;position:relative;z-index:1}
+.more{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;color:var(--label);text-align:center;padding:2px}
+.empty{font-size:11.5px;color:var(--muted);line-height:1.6;padding:4px 2px}
+.empty b{color:var(--burg);border-bottom:1px solid #e2c6ba}
+/* menu M2 */
+.menu{position:absolute;background:#fff;border:1px solid #e2d8c8;border-radius:12px;box-shadow:0 18px 44px rgba(58,28,20,.2);padding:6px;width:228px;z-index:20}
+.mhead{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.17em;color:var(--label);padding:8px 10px 4px}
+.mi{display:flex;align-items:center;gap:10px;height:32px;border-radius:8px;padding:0 10px;font-size:11.5px;color:var(--soft);font-weight:500}
+.mi b{font-weight:700;color:#2b2118}
+.mi.hot{background:#f7f2e9}
+.mi.dim{color:#c1b4a5}
+.kbd{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 5px;border:1px solid #e2d8c8;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:'JetBrains Mono',monospace;font-size:8px;color:#6b5a4e}
+</style></head><body><div class="lbl">THE BOARD, SETTLED <em>&mdash; editorial heads (sticky, ink rule; sage on Done) &middot; hover = 2px lift, OPEN &#9656; in the band, and the corner dots darkening &middot; M2 menu with its three intent groups &middot; stacked sweep with its progress rail &middot; ghost drop slot &middot; the gentle WIP line on Today &middot; completion ring in Done &middot; fade hem over &ldquo;+9 more&rdquo; &middot; speaking empty state under Snoozed &middot; tabular numerals throughout. No ageing spine.</em></div><div class="frame">
+<div class="rail"><div class="rlogo">S</div><span class="rli">&#9638;</span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><span class="rli on">&#10003;</span>
+<div class="rfoot"><span class="avi">ML</span><span class="rli">&#9881;</span></div></div>
+<div class="sb"><div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:var(--label);font-size:9px">&#9662;</span></div>
+<div class="si"><span class="ic">&#9638;</span>Dashboard</div>
+<div class="si"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9639;</span>Materials</div>
+<div class="si grp"><span class="ic">&#10003;</span>To-do<span class="dotn">15</span><span class="chev" style="margin-left:8px">&#9652;</span></div>
+<div class="kid2 on">To-do list</div><div class="kid2">Today</div><div class="kid2">Calendar</div><div class="kid2">Noteboard</div>
+<div class="collapse">&#171; Collapse sidebar</div>
+<div class="sbfoot"><div style="font-size:13px;font-weight:700">Michael Li</div>
+<div style="display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted);margin-top:3px">Free plan <span class="upg">Upgrade</span></div>
+<div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div>
+<div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ To-do / <b>To-do list</b></span>
+<span class="saved">ALL CHANGES SAVED</span><span class="srch">&#9906; Search<span class="k">&#8984;K</span></span><span style="color:var(--muted)">?</span><span class="newb">&#65291; New</span></div>
+<div class="inner"><div class="pside">
+<div class="pk">FILTERS</div>
+<div class="pi on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">15</span></div>
+<div class="pi"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">12</span></div>
+<div class="pi"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">0</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div><div class="tagbox"><b>Coming soon</b><span>Tag notes and tasks, then filter by them here.</span></div>
+<div class="tset">&#9881; Task settings</div></div><div class="pbody">
+<div class="ph"><h1>To-do list</h1><div class="sub">Everything waiting on you &mdash; fifteen cards, three urgent.</div></div>
+<div class="tools"><span class="tsrch">&#9906; Search your list&hellip;</span><span class="sortb">&#8645; Most pressing</span><span style="flex:1"></span><span class="pkb">&#65291; Add task or note</span></div>
+<div class="cols">
+<div style="position:relative"><div class="fh">To do<span class="n">13</span></div>
+<div class="kc u lift"><div class="b"><i>&#9733; OFFER</i><span class="w">19 JUL</span></div>
+<div class="in"><h4>Tom Ellery has made an offer</h4><div class="ms">Tom Ellery &middot; Ellery &amp; Frost</div></div><span class="hint">OPEN &#9656;</span><span class="dots">&#8943;</span></div>
+<div class="kc u "><div class="b"><i>AGENT WAITING</i><span class="w">15 JUL</span></div>
+<div class="in"><h4>Send your partial to Daniel O&rsquo;Rourke</h4><div class="ms">Daniel O&rsquo;Rourke &middot; Inkwell &amp; Stone</div></div><span class="dots">&#8943;</span></div>
+<div class="kc h stack"><div class="b"><i>MATERIALS</i><span class="w">5 OF 16</span></div>
+<div class="in"><h4>Materials sweep</h4><div class="ms">16 agents &middot; one card, one sweep</div></div><div style="padding:0 13px 13px"><div class="prog"><i></i></div></div><span class="dots">&#8943;</span></div>
+<div class="kc h "><div class="b"><i>STALE</i><span class="w">SILENT 849 DAYS</span></div>
+<div class="in"><h4>Eleanor Whitfield silent</h4><div class="ms">No reply &mdash; consider closing</div></div><span class="dots">&#8943;</span></div>
+<div class="fade"></div><div class="more">+ 9 MORE &#9662;</div>
+<div class="menu" style="right:-190px;top:120px">
+<div class="mhead">DO IT</div>
+<div class="mi hot"><b>Action now</b></div>
+<div class="mi">&#65291; Add to today</div>
+<div class="mhead">PUT IT OFF</div>
+<div class="mi">&#128340; Snooze&hellip;<span style="margin-left:auto;color:#b3a394;font-size:9px">&#9656;</span></div>
+<div class="mi dim">Dismiss &mdash; not for offers</div>
+<div class="mhead">GO ELSEWHERE</div>
+<div class="mi">&#128279; Open the query</div>
+<div class="mi">&#9823; View the agent</div></div></div>
+<div><div class="fh">Today<span class="n">1</span><span class="wip">A GOOD DAY IS 3&ndash;5</span></div>
+<div class="kc u "><div class="b"><i>AGENT WAITING</i><span class="w">12 JUL</span></div>
+<div class="in"><h4>Send your full to Jonathan Marsh</h4><div class="ms">Jonathan Marsh &middot; The Marsh Agency</div></div><span class="dots">&#8943;</span></div>
+<div class="ghost">DROP HERE</div></div>
+<div><div class="fh">Snoozed<span class="n">1</span></div>
+<div class="kc h "><div class="b"><i>STALE &middot; &#128340;</i><span class="w">BACK FRI 8 AUG</span></div>
+<div class="in"><h4>Marcus Reed silent</h4><div class="ms">Snoozed until Friday</div></div><span class="dots">&#8943;</span></div>
+<div class="empty" style="margin-top:8px">Snoozed work waits here until its day.</div></div>
+<div><div class="fh done">Done<span class="n">1 TODAY</span></div>
+<div class="kc t "><div class="b"><i>&#10003; DONE</i><span class="w">16:44</span></div>
+<div class="in"><h4>Closed Jonathan Marsh</h4><div class="ms">No response &mdash; 849 days</div></div><span class="tick"></span></div>
+<div class="more" style="margin-top:6px">CLEARS AT MIDNIGHT &middot; KEPT IN THE LOG</div></div>
+</div></div></div></div></div></body></html>
