@@ -99,11 +99,12 @@ Noteboard from Today; those are page-level views of one place, not peers in the 
 remain real and individually reachable in ⌘K — asserted, so the two facts cannot drift.
 **`/todo/calendar` is the exception: it has no in-page link.** That is a real gap, and it is
 recorded here rather than papered over by leaving a nav row standing to cover for it.
-- **§7's Greige tint and white-up help hover.** **Nick's instruction after that pass — "keep the
-  breadcrumb header just slightly off-white" — supersedes it.** The bar is
-  `rgba(251,249,245,.92)` / `#fbf9f5`, and the help hover stays parchment because lifting toward
-  white is invisible on an off-white bar. **This pass did not revert it**; re-applying Greige now
-  would undo an explicit instruction with a canned spec.
+- ~~**§7's Greige tint**~~ — **REINSTATED.** The off-white came from an instruction given against
+  the interim ref; with `(4)` in hand Nick asked where the greige had gone. The bar is
+  `rgba(232,227,221,.93)` / `#e8e3dd` again, and the help hover flips back to white-up. **The rule
+  under it never changed and is what to keep: the hover lifts AWAY from its ground.** On off-white,
+  white was invisible so it went parchment; on greige, parchment is the one that disappears. Move
+  the tint and the hover moves with it, in the same commit.
 
 ## Two guards repaired in passing
 
@@ -119,6 +120,21 @@ recorded here rather than papered over by leaving a nav row standing to cover fo
   30s, with the reason recorded: **a guard that flips with machine load is a guard people learn to
   ignore**, and this one exists to catch a crash that ships silently.
 
+## The typeface — the invisible half of "not faithfully recreated"
+
+⚠️ **EVERY TYPE SIZE IN THE PANEL AND BAR ALREADY MATCHED THE REF, and the sidebar still read as
+smaller.** Compared mechanically, ref against ours: `.ni` 13.5px, `.glabel` 9px, `.crow2` 12.5px,
+the account name 13.5, plan 11.5, Upgrade 11, pill title 12.5, meta 10.5, crumb 13, `+ New` 12.5,
+whisper 9.5, tile 17, search 12 — **fifteen values, all identical.**
+
+The difference was the **typeface**: the shell inherited Source Sans Pro, whose x-height is markedly
+shorter than Inter's, so the same number renders visibly smaller. Bumping the size would have made
+the numbers disagree with the ref in order to make the picture agree with it.
+
+Inter is now set on `.ws-rail, .ws-panel, .ws-bar, .ws-fly, .sp-card` — **scoped to the chrome, not
+on `.ws-app`**, because the app's body font is Source Sans Pro and every page inherits it. That
+scoping is the difference between restyling the shell and restyling the product.
+
 ## Browser-verify list (refreshed)
 
 Measured this pass at 1440×900 on the render harness:
@@ -127,6 +143,13 @@ Measured this pass at 1440×900 on the render harness:
 - ✅ the nav **no longer scrolls** at 900px — folding To-do to one row removed the overflow that had
   put Discover and Materials below the fold
 - ✅ panel 214px · pill 56px · cover slot 30×40 · meta line "Thriller · 50,000 words"
+- ✅ the bar's right cluster all present and fitting at 1440: crumb 283 + cluster 481 in a 1146px
+  bar, search exactly 210px, help 32, `+ New` 78. **They looked missing in a screenshot** — the
+  pane's viewport was narrower than the width the harness forced, so the right end was cropped.
+  Measure before believing a screenshot that shows something absent.
+- ✅ every icon key the new nav asks for exists in `WORKSPACE_ICONS` (four ribs, seven row keys).
+  `todo`, `sun`, `calendar` and `note` are now unused but left in place — a missing icon there is a
+  runtime crash, a spare one costs nothing.
 - ✅ nothing overflows at 214px — all rows (labels, nav items, count, collapse row, account
   block, pill) have `scrollWidth === clientWidth`, longest label "Submission packages"
 

@@ -226,8 +226,8 @@
      sits between: warm enough to belong to the ground, light enough that the bar still reads as
      the paper the content is on. The solid twin is the @supports fallback — where the blur is
      unsupported, translucency alone is just a washed band over moving text. */
-  --shell-bar-tint: rgba(251, 249, 245, 0.92);
-  --shell-bar-tint-solid: #fbf9f5;
+  --shell-bar-tint: rgba(232, 227, 221, 0.93);   /* GREIGE (final ref) */
+  --shell-bar-tint-solid: #e8e3dd;               /* the @supports-not fallback */
   /* sidebar spacing scale (unchanged) */
   --shell-gutter: 16px;               /* panel side gutter */
   --shell-group: 24px;                /* between groups */

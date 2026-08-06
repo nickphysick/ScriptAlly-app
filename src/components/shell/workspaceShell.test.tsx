@@ -867,12 +867,36 @@ describe("Refinement §4 — the frosted sticky bar", () => {
   });
 
   /* ══ POLISH §7 — THE BAR IS OAT ══════════════════════════════════════════════════════════ */
-  describe("⚠️ the frosted bar is SLIGHTLY OFF-WHITE (polish §7, amended)", () => {
+  /* ⚠️ THE CHROME IS INTER, AND SCOPED. Every type SIZE in the panel and bar already matched the
+     ref — `.ws-ni` 13.5px, browser-measured, along with fourteen others — and the sidebar still
+     read as smaller than the mockup, because the shell inherited Source Sans Pro whose x-height
+     is markedly shorter at the same px. A size bump would have made the numbers disagree with the
+     ref in order to make the picture agree with it.
+
+     ⚠️ AND IT MUST NOT LAND ON `.ws-app`: the app's body font is Source Sans Pro and every page
+     inherits it, so scoping this to the chrome is the difference between restyling the shell and
+     restyling the product. */
+  it("the shell chrome is Inter, and the app's body font is untouched", () => {
+    const r = rule(".ws-rail, .ws-panel, .ws-bar, .ws-fly, .sp-card");
+    expect(r).toContain("font-family: Inter");
+    // the rows themselves inherit rather than restating it — one declaration, one owner
+    expect(rule(".ws-ni")).toContain("font: inherit");
+    expect(rule(".ws-ni")).toContain("font-size: 13.5px");
+    // the shell root must NOT carry it, or every page changes typeface with the chrome
+    expect(rule(".ws-app")).not.toContain("font-family");
+  });
+
+  /* ⚠️ GREIGE (final ref). It went off-white on an instruction given against an INTERIM ref, and
+     back to greige when the real one arrived — so this lock has now asserted both, and the value
+     is only ever whatever the current ref says. What does NOT change is the rule underneath: the
+     controls sitting on the tint are firmed against it, and the help hover lifts AWAY from the
+     ground. Move the tint and those move with it, in the same commit. */
+  describe("⚠️ the frosted bar is GREIGE (final ref)", () => {
     const indexCss2 = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
 
     it("both tints are tokens, and the solid is the translucent one's own colour", () => {
-      expect(indexCss2).toMatch(/--shell-bar-tint:\s*rgba\(251, 249, 245, 0\.92\)\s*;/);
-      expect(indexCss2).toMatch(/--shell-bar-tint-solid:\s*#fbf9f5\s*;/);
+      expect(indexCss2).toMatch(/--shell-bar-tint:\s*rgba\(232, 227, 221, 0\.93\)\s*;/);
+      expect(indexCss2).toMatch(/--shell-bar-tint-solid:\s*#e8e3dd\s*;/);
     });
 
     it("the bar reads the token, and the WHITE treatment is superseded", () => {
@@ -902,9 +926,9 @@ describe("Refinement §4 — the frosted sticky bar", () => {
       const kbd = prim.slice(prim.indexOf(".sp-search-k {"), prim.indexOf(".sp-search-k {") + 260);
       expect(kbd).toContain("background: #f2ede7");
       const help = prim.slice(prim.indexOf(".sp-help:hover"), prim.indexOf(".sp-help:hover") + 220);
-      /* The ref pairs a white-up hover with its full-oat bar; at slightly off-white a white
-         hover is invisible, so the lift goes back to parchment. Contrast follows the surface. */
-      expect(help).toContain("rgba(242, 237, 231, 0.7)");
+      /* White-UP, because the ground is greige. On the interim off-white bar this was parchment,
+         for the same reason pointed the other way: the hover lifts away from its ground. */
+      expect(help).toContain("rgba(255, 255, 255, 0.55)");
       // the whisper and the divider were drawn for a white bar and vanished into the tint
       expect(rule(".ws-sync")).toContain("color: #a2947f");
       expect(rule(".ws-vdiv")).toContain("background: #d9cec0");

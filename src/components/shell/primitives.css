@@ -155,14 +155,15 @@
   transition: color 0.15s, background 0.15s;
   flex: none;
 }
-/* ⚠️ PARCHMENT-UP, and the reasoning reversed with the tint. The ref pairs a white-up hover with
-   its full-oat bar, where lifting toward white is the visible direction. With the bar at slightly
-   off-white a white hover is invisible — so the lift goes back to parchment, which is the same
-   gesture pointed the way the ground now sits. Contrast follows the surface, not the spec sheet. */
+/* ⚠️ WHITE-UP, because the bar is GREIGE again. This flipped twice and the rule behind it never
+   changed: the hover lifts AWAY from the ground it sits on. On the interim off-white bar a white
+   hover was invisible, so it went parchment; on greige, white is the visible direction and
+   parchment is the one that disappears. Contrast follows the surface — so if the tint moves
+   again, this moves with it. */
 .sp-help:hover,
 .sp-help:focus-visible {
   color: var(--shell-ink);
-  background: rgba(242, 237, 231, 0.7);
+  background: rgba(255, 255, 255, 0.55);
 }
 .sp-help svg {
   width: 17px;

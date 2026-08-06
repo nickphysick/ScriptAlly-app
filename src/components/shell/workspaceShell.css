@@ -25,6 +25,19 @@
 }
 
 /* ══ THE RAIL ══ */
+/* ⚠️ THE SHELL CHROME IS INTER (final ref: `body{font-family:Inter}`), SCOPED TO THE CHROME.
+   The app's body font is Source Sans Pro and every page depends on it, so this cannot go on
+   `.ws-app` — it would cascade into page content the ref says nothing about.
+
+   ⚠️ AND THIS IS WHY THE SIDEBAR READ AS SMALLER THAN THE MOCKUP WHILE EVERY SIZE ALREADY MATCHED
+   IT. Browser-measured: `.ws-ni` is 13.5px in both, as are all fourteen other type sizes in the
+   panel and bar. Source Sans Pro simply has a markedly smaller x-height than Inter, so the same
+   number renders visibly smaller. Bumping the size would have made the numbers disagree with the
+   ref in order to make the picture agree with it — the typeface was the difference. */
+.ws-rail, .ws-panel, .ws-bar, .ws-fly, .sp-card {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
 .ws-rail {
   flex: none;
   width: var(--shell-railw);

@@ -164,10 +164,10 @@ describe("HelpButton", () => {
     expect(html).toContain('aria-label="Help centre"');
   });
 
-  it("is a 32px ghost square that lifts to parchment on hover (the bar is off-white again)", () => {
+  it("is a 32px ghost square that lifts to WHITE on hover (the bar is greige)", () => {
     expect(rule(".sp-help")).toContain("width: 32px");
     expect(rule(".sp-help")).toContain("background: transparent");
-    expect(css).toMatch(/\.sp-help:hover[^{]*\{[^}]*background: rgba\(242, 237, 231, 0\.7\)/s);
+    expect(css).toMatch(/\.sp-help:hover[^{]*\{[^}]*background: rgba\(255, 255, 255, 0\.55\)/s);
   });
 });
 
