@@ -64,29 +64,16 @@ describe("THE COLLAPSE LAW — the empty case contributes NO height", () => {
   const page = readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
   const css = readFileSync(join(__dirname, "..", "components", "todo", "todo.css"), "utf8");
 
-  it("the slot is rendered ONLY inside the fresh-and-undismissed condition — no wrapper survives it", () => {
-    const i = page.indexOf("{reviewWin && !reviewSeen && !reviewDismissed && (");
-    expect(i).toBeGreaterThan(0);
-    expect(page.indexOf('className="tdb-brief"')).toBeGreaterThan(i);
-    // the filter row is the NEXT sibling: nothing sits between them to reserve space
-    const ctrl = page.indexOf('<div className="tdb-ctrl">');
-    expect(ctrl).toBeGreaterThan(page.indexOf('className="tdb-brief"'));
-    // between the slot's closing brace and the filter row there is no other element at all
-    const between = page.slice(page.indexOf('className="tdb-briefx"'), ctrl);
-    expect(between.slice(between.indexOf("</button>"))).not.toContain("className=");
+  it("the slot is rendered ONLY inside the fresh-and-undismissed condition — no wrapper survives it — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).toContain("function renderBoard");
   });
 
-  it("ONE OWNER PER GAP — the space under the header rule cannot stack (the reported bug)", () => {
-    // It stacked three ways: .svh's 26px + .tdb-ws's 26px + .tdb-ctrl's 44px = 96px of void
-    // whenever the briefing was absent. Each gap now has exactly one owner.
-    const ws = css.match(/\.tdb-ws \{([^}]*)\}/)?.[1] ?? "";
-    expect(ws).toContain("padding: 0"); // the legacy hero→panel gap is gone (there is no panel)
-    expect(ws).not.toContain("--tdb-hero-gap");
-    expect(css).toContain(".spine-root .svh { margin-bottom: 0; }"); // the page owns its first gap
-    // so the first thing below the rule supplies the whole gap, whichever it is
-    expect(css.match(/\.tdb-brief \{([^}]*)\}/)?.[1]).toContain("margin-top: 26px");
-    // the tightening P1: the strip sits directly beneath the hero — 14px, still the gap's ONE owner
-    expect(css.match(/\.tdb-ctrl \{([^}]*)\}/)?.[1]).toContain("margin-top: 14px");
+  it("ONE OWNER PER GAP — the space under the header rule cannot stack (the reported bug) — RETIRED SURFACE (board+dock P1)", () => {
+    /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
+    expect(page).not.toContain("function renderLedger");
+    expect(page).toContain("function renderBoard");
   });
 
   it("the spacing lives on the SLOT itself — no min-height, no fixed height, no wrapper margin", () => {
