@@ -146,9 +146,15 @@ export function postReturnConstsReadByRender(src: string): string[] {
   return found;
 }
 
+/* ⚠️ 30s, BECAUSE THIS CHECK IS GENUINELY SLOW ON THE BIGGEST PAGES — not because it hangs.
+   It walks the render's call graph and then regex-tests every post-return `const` against the
+   render text, which on `Queries.tsx` (thousands of lines) measures ~7.6s idle and ~9.3s with a
+   dev server running: over the 5s default, so it went red on a tree where nothing had changed and
+   passed earlier the same day on the same commit. A guard that flips with machine load is a guard
+   people learn to ignore, and this one exists to catch a crash that ships silently. */
 describe("⚠️ no page reads a post-return const from its render (the crash's shape)", () => {
   for (const rel of PAGE_SOURCES) {
-    it(`${rel} declares nothing below its return that the JSX above it touches`, () => {
+    it(`${rel} declares nothing below its return that the JSX above it touches`, { timeout: 30_000 }, () => {
       const src = read(rel);
       expect(src.length, `${rel} must be readable`).toBeGreaterThan(0);
       expect(

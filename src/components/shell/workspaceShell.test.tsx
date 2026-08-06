@@ -307,7 +307,9 @@ describe("Baked 9 — the manuscript selector heads the PANEL", () => {
     const r = rule(".ws-mspill");
     expect(r).toContain("background: #ffffff");
     expect(r).toContain("border: 1px solid var(--shell-edge)");
-    expect(r).toContain("height: 40px");
+    // 38, per the final ref. The polish pack asked for 56 with a 30x40 cover slot — superseded
+    // along with the 214px panel it was drawn for; see reports/shell-polish.md.
+    expect(r).toContain("height: 38px");
   });
 
   it("offers a switcher when there is more than one manuscript", () => {
@@ -621,6 +623,29 @@ describe("Amendment 1 (D) — the collapse control", () => {
     expect(panel, "the panel must contain the nav").toContain("ws-nav");
     expect(panel).not.toContain("ws-grow");
     expect(rule(".ws-nav")).toContain("flex: 1");
+  });
+
+  /* ⚠️ THE SEAM: the manuscript pill and the breadcrumb must sit on ONE line, and the two boxes
+     that carry them do not start from the same place. The panel begins at the viewport's top edge;
+     the bar begins inside the card, which is inset by `--shell-frame` plus its 1px border. So the
+     head zone has to carry that offset or the pill floats 15px high — measured, not reasoned:
+     pill centre 33.0 against bar centre 48.0.
+
+     ⚠️ AND IT MUST BE PADDING **ONLY**. These boxes are content-box (browser-measured), so the
+     padding already extends the element; adding the frame to `height` as well double-counts it and
+     overshoots to 56.0 — past the line, in the other direction, and still looking "moved". Both
+     failure modes are asserted because both were written during this pass, one after the other.
+
+     A rule-text lock, deliberately: this repo has no jsdom, so the alternative is nothing. */
+  it("the panel's head zone carries the card's inset, as padding and not as height", () => {
+    const r = rule(".ws-phead");
+    expect(r).toContain("padding-top: calc(var(--shell-frame) + 1px)");
+    // exactly the bar's height — NOT a calc folding the frame in on top of the padding
+    expect(r).toMatch(/height:\s*var\(--head\)/);
+    expect(r, "the frame belongs in the padding only, never also in the height")
+      .not.toMatch(/height:\s*calc\([^)]*--shell-frame/);
+    // and the bar it aligns to is the plain 66 — if this moves, the pill's offset is wrong too
+    expect(rule(".ws-bar")).toContain("height: var(--head)");
   });
 
   it("the collapse row is muted, 34px, with a 14px chevron", () => {

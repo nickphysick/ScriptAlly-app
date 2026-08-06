@@ -86,8 +86,14 @@ describe("no shell rule reads a token that does not exist", () => {
     // `--cols` is a mega-menu's column count. Both carry a fallback in the CSS, so an element
     // that somehow renders without them still lays out.
     const allowed = new Set([...defined, "--i", "--cols"]);
+    /* ⚠️ READ THE RULES, NOT THE PROSE. A `var(--frame)` QUOTED IN A COMMENT is not read by any
+       browser, and this guard failed on exactly that: a comment citing the design ref's own
+       `.main{padding:var(--frame)}` was reported as a dangling token. Same trap as the sibling
+       guard in workspaceShell.test.ts, which once caught its own warning — a rule about the
+       stylesheet must be asserted against the stylesheet's rules. Definitions above are collected
+       from the raw text on purpose: a token defined only inside a comment SHOULD NOT count. */
     for (const [i, f] of shellFiles.entries()) {
-      const text = texts[i];
+      const text = texts[i].replace(/\/\*[\s\S]*?\*\//g, "");
       for (const m of text.matchAll(/var\((--[a-z0-9-]+)/gi)) {
         expect(allowed.has(m[1]), `${f} reads ${m[1]}, which nothing defines`).toBe(true);
       }

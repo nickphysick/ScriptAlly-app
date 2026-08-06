@@ -179,14 +179,39 @@
 /* ⚠️ THE HEAD ZONE IS THE BAR'S OWN HEIGHT, so the manuscript pill centres against the
    breadcrumb rather than floating above it. Two chrome elements on one line only look
    deliberate if they are actually on one line. */
-.ws-phead { height: var(--head); flex: none; display: flex; align-items: center; }
+/* ⚠️ THE HEAD ZONE CARRIES THE CARD'S OFFSET, AND `height: var(--head)` IS THE BUG.
+   The panel starts at the viewport's top edge; the bar does NOT — it lives inside the card, which
+   begins `--shell-frame` (14px) plus its 1px border below the top. So a 66px head zone centres the
+   pill at 33 while the crumb centres at 48, and the two objects that read as one horizontal line
+   sit 15px apart. Measured both ways: arithmetic, and the rendered page (pill ~14.5px high).
+
+   ⚠️ THE FINAL REF IS WRONG HERE and its own comment says so out loud — "head zone matches the
+   bar's 66px so the pill centres against the breadcrumb". It does not: the ref has the same
+   `.main{padding:var(--frame)}` inset, so it misaligns by the same 15px. This is the pack's
+   carve-out — a reasoned value in prose beats an unreasoned one in an artefact — so the number
+   comes from the geometry, not from the mock. Anyone "restoring" this to the ref reintroduces it.
+
+   ⚠️ AND THE OFFSET IS PADDING ONLY — DO NOT ALSO ADD IT TO `height`. These boxes are
+   CONTENT-BOX (browser-measured), so the padding already extends the element; folding the frame
+   into the height as well double-counts it and lands the pill 8px BELOW the crumb instead of 15px
+   above. That is what the first attempt did, and it looked plausible enough to keep — the pill had
+   visibly moved. Measured: bar centre 48.0, and the pill went 33.0 → 56.0, sailing past it. */
+.ws-phead {
+  height: var(--head);
+  padding-top: calc(var(--shell-frame) + 1px);
+  flex: none;
+  display: flex;
+  align-items: center;
+}
 /* ⚠️ CENTRED (polish §5). At 186px a left-aligned title with the chevron pushed to the far edge
    left a gap in the middle that read as a missing element; centring the pair closes it. The
    chevron sits INLINE after the title rather than being pushed by `margin-left:auto`. */
 .ws-mspill {
   flex: 1;
   min-width: 0;
-  height: 40px;
+  /* 38, from the ref. The pack asked for 56 with a 30x40 cover slot — superseded: that geometry
+     belongs to the 214px panel the final ref replaced with 186. See the report. */
+  height: 38px;
   background: #ffffff;
   border: 1px solid var(--shell-edge);
   border-radius: 9px;
