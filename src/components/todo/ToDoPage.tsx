@@ -1116,6 +1116,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    *  the UI. Per the pack, nothing further is deleted: `session`, `heroSession`, `HeroSession`,
    *  `FocusedSession`, `renderHero` below and all their CSS stay in place, dormant, awaiting a
    *  new entry point. */
+  /* The header's one line, derived: what the board holds and how much of it will not wait.
+     Numbers ≤ twelve read as words (the dashboard eyebrow's convention).
+
+     ⚠️ A HOISTED FUNCTION, NOT A post-return CONST — this file's own standing warning, which I
+     walked into anyway. Everything below the `return` is in the temporal dead zone while the
+     return's JSX evaluates, so a `const` here throws a ReferenceError on every render and the
+     page loads as "something went wrong". A function declaration hoists; a const does not. */
+  function boardSubtitle(): string {
+    const total = tiles.urgent + tiles.housekeeping + tiles.notes;
+    const words = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
+    const spell = (n: number) => (n <= 12 ? words[n] : String(n));
+    if (total === 0) return "Nothing waiting on you.";
+    const urgent = tiles.urgent > 0 ? `, ${spell(tiles.urgent)} urgent` : "";
+    return `Everything waiting on you — ${spell(total)} item${total === 1 ? "" : "s"}${urgent}.`;
+  }
+
   function renderPageHeader() {
     return (
       // the tightening P1 — the subtitle is REMOVED: with no description the shared PageHeader
@@ -1132,7 +1148,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
          count would be reading the rule's letter against its purpose. */
       <PageHeader
         title="To-do list"
-        description={boardSubtitle}
+        description={boardSubtitle()}
         actionsSlot={
           <div className="tdb-tools">
             <span className="tdb-bsearch">
@@ -1588,17 +1604,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       case "none": if (plan.why) flash(plan.why); break;  // the offer guard states its reason
     }
   }
-
-  /* The header's one line, derived: what the board holds and how much of it will not wait.
-     Numbers ≤ twelve read as words (the dashboard eyebrow's convention). */
-  const boardSubtitle = (() => {
-    const total = tiles.urgent + tiles.housekeeping + tiles.notes;
-    const words = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
-    const spell = (n: number) => (n <= 12 ? words[n] : String(n));
-    if (total === 0) return "Nothing waiting on you.";
-    const urgent = tiles.urgent > 0 ? `, ${spell(tiles.urgent)} urgent` : "";
-    return `Everything waiting on you — ${spell(total)} item${total === 1 ? "" : "s"}${urgent}.`;
-  })();
 
   /** ⚠️ ONE WORK SURFACE, TWO ENTRANCES (P4 makes this the dock; until then, the existing flow).
    *  "Focused session" here and "Work the list" on Today walk the same queue machinery. */
