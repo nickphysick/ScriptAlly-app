@@ -6,12 +6,20 @@
  * design-refs/scriptally-capsule-shell.html). One source for the rail ribs, the panel's
  * accordion, and the top-bar breadcrumb.
  *
- * The accordion's grammar: DASHBOARD IS A FLAT LINK (no children); three collapsible sections
- * — Querying (Queries Hub · To-do · Packages), Agents (Agent list · Discover), Shelf
- * (Manuscripts · Comparable titles). One section open at a time, following the route. Import
- * is OFF the nav (baked) — it keeps a breadcrumb entry via CRUMB_EXTRAS and stays reachable
- * from the Queries empty state. Paths are matched EXACTLY (query strings are
- * pathname-invisible).
+ * The accordion's grammar: DASHBOARD IS A FLAT LINK (no children); FOUR collapsible sections —
+ * Querying (Queries Hub · Packages), To-do (To-do list · Today · Calendar · Noteboard), Agents
+ * (Agent list · Discover), Shelf (Manuscripts · Comparable titles). One section open at a time,
+ * following the route. Import is OFF the nav (baked) — it keeps a breadcrumb entry via
+ * CRUMB_EXTRAS and stays reachable from the Queries empty state. Paths are matched EXACTLY
+ * (query strings are pathname-invisible).
+ *
+ * ⚠️ TO-DO IS A SECTION, NOT A PAGE UNDER QUERYING (workspace pack P1, Nick's call). It became a
+ * workspace of four pages, and a workspace cannot be a leaf in someone else's section. The
+ * consequence is deliberate and was chosen with its cost known: it LEAVES Querying (which is now
+ * Queries Hub · Packages) and it takes a fifth rib on the rail. The rib is not decoration — the
+ * rail's active state derives from the route's section, so without one, all four To-do routes
+ * would light nothing, or would have to light Querying, which would be an active state that
+ * lies about where you are.
  */
 
 export interface ShellV2Page {
@@ -21,7 +29,7 @@ export interface ShellV2Page {
 }
 
 export interface ShellV2Section {
-  key: "querying" | "agents" | "shelf";
+  key: "querying" | "agents" | "shelf" | "todo";
   label: string;
   pages: ShellV2Page[];
 }
@@ -35,8 +43,19 @@ export const SHELL_SECTIONS: ShellV2Section[] = [
     label: "Querying",
     pages: [
       { key: "queries-hub", label: "Queries Hub", path: "/queries" },
-      { key: "todo", label: "To-do", path: "/todo" },
       { key: "packages", label: "Packages", path: "/manuscripts/packages" },
+    ],
+  },
+  {
+    key: "todo",
+    label: "To-do",
+    pages: [
+      // The list is the DEFAULT — /todo itself, so every existing link, the ⌘K entry and the
+      // rail's section-select all land on it without a redirect.
+      { key: "todo", label: "To-do list", path: "/todo" },
+      { key: "todo-today", label: "Today", path: "/todo/today" },
+      { key: "todo-calendar", label: "Calendar", path: "/todo/calendar" },
+      { key: "todo-noteboard", label: "Noteboard", path: "/todo/noteboard" },
     ],
   },
   {
@@ -57,10 +76,12 @@ export const SHELL_SECTIONS: ShellV2Section[] = [
   },
 ];
 
-/** The rail's four ribs — Dashboard + the three sections (each routes to its lead page). */
+/** The rail's five ribs — Dashboard + the four sections (each routes to its lead page). Order
+ *  follows the accordion exactly: a rib and its section must never be in different places. */
 export const SHELL_RAIL = [
   { key: "dashboard", caption: "Dashboard", path: "/dashboard" },
   { key: "querying", caption: "Querying", path: "/queries" },
+  { key: "todo", caption: "To-do", path: "/todo" },
   { key: "agents", caption: "Agents", path: "/agents" },
   { key: "shelf", caption: "Shelf", path: "/manuscripts" },
 ] as const;

@@ -98,7 +98,12 @@ export const PALETTE_ACTIONS: PaletteItem[] = [
 export const PALETTE_PAGES: PaletteItem[] = [
   { id: "page:dashboard", group: "Pages", kind: "page", title: "Dashboard", subtitle: "Your desk", run: { kind: "path", path: "/dashboard" } },
   { id: "page:queries", group: "Pages", kind: "page", title: "Queries Hub", subtitle: "Every query and where it stands", run: { kind: "path", path: "/queries" } },
-  { id: "page:todo", group: "Pages", kind: "page", title: "To-do", subtitle: "Urgent tasks and housekeeping", run: { kind: "path", path: "/todo" } },
+  // The To-do workspace — each page indexed SEPARATELY (workspace pack P1). One entry for a
+  // four-page workspace would make three of them unreachable from the app's one search.
+  { id: "page:todo", group: "Pages", kind: "page", title: "To-do list", subtitle: "Urgent tasks and housekeeping", run: { kind: "path", path: "/todo" } },
+  { id: "page:todo-today", group: "Pages", kind: "page", title: "Today", subtitle: "The list you are working today", run: { kind: "path", path: "/todo/today" } },
+  { id: "page:todo-calendar", group: "Pages", kind: "page", title: "Calendar", subtitle: "Your tasks and notes by date", run: { kind: "path", path: "/todo/calendar" } },
+  { id: "page:todo-noteboard", group: "Pages", kind: "page", title: "Noteboard", subtitle: "Notes to self, undated", run: { kind: "path", path: "/todo/noteboard" } },
   { id: "page:packages", group: "Pages", kind: "page", title: "Packages", subtitle: "Submission package workshop", run: { kind: "path", path: "/manuscripts/packages" } },
   { id: "page:agents", group: "Pages", kind: "page", title: "Agent list", subtitle: "Everyone you are querying", run: { kind: "path", path: "/agents" } },
   { id: "page:discover", group: "Pages", kind: "page", title: "Discover", subtitle: "Find new agents", run: { kind: "path", path: "/agents/discover" } },

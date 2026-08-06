@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, silentDays, BoardCard, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, silentDays, actionableCount, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
 
 const TODAY = "2026-07-09";
@@ -445,5 +445,63 @@ describe("no card states a value it does not have", () => {
       }
       expect(c.title.trim()).not.toMatch(/[:—]$/); // no dangling label with nothing after it
     }
+  });
+});
+
+/* ═══════ THE COUNTING LAW (workspace P1; audit item 1) ═════════════════════════════════════
+   The badge said 44 and the lists summed to 52 because nothing defined what 44 counted. One
+   derivation now answers it, and these are the equalities that make it an invariant rather
+   than a convention. */
+describe("actionableCount — one number, and notes are not in it", () => {
+  const board = () => assembleBoard(base({
+    tasks: [
+      task("t-offer", "offer_received", "q1"),      // urgent
+      task("t-full", "full_requested", "q2"),        // urgent
+      task("t-dq", "data_quality_poor", "a1"),       // housekeeping
+    ],
+    queries: [query("q1", "a1", QueryStatus.OFFER), query("q2", "a1", QueryStatus.FULL_REQUESTED)],
+    agents: [agent("a1", "Marcus Reed")],
+    userTasks: [
+      utask("n1"),                                   // a NOTE — dateless
+      utask("n2"),                                   // a NOTE — dateless
+      utask("k1", { dueDate: "2026-12-01" }),        // an open TASK, future-dated
+      utask("k2", { dueDate: TODAY }),               // a TASK, promoted today → already urgent
+    ],
+  }));
+
+  it("counts urgent + housekeeping + open user TASKS, and excludes notes", () => {
+    const b = board();
+    // do = 2 derived + the promoted task; hk gaps passed as 1; nt = 2 notes + 1 future task
+    expect(b.do).toHaveLength(3);
+    expect(b.nt).toHaveLength(3);
+    expect(actionableCount(b, 1)).toBe(3 + 1 + 1);
+  });
+
+  it("a note NEVER moves the number — the whole point of the exclusion", () => {
+    const b = board();
+    const before = actionableCount(b, 1);
+    const withMoreNotes = assembleBoard(base({
+      ...({} as object),
+      userTasks: [utask("x1"), utask("x2"), utask("x3"), utask("x4")],
+    }));
+    expect(actionableCount(withMoreNotes, 0)).toBe(0);
+    expect(before).toBe(actionableCount(b, 1)); // pure
+  });
+
+  it("does NOT double-count a task that promoted into the urgent lane on its due day", () => {
+    const promoted = assembleBoard(base({ userTasks: [utask("k", { dueDate: TODAY })] }));
+    expect(promoted.do).toHaveLength(1); // it is in `do`…
+    expect(promoted.nt).toHaveLength(0); // …and therefore not in `nt`
+    expect(actionableCount(promoted, 0)).toBe(1); // counted once
+  });
+
+  it("THE EQUALITY: the figure is the sum of its named parts, never a re-tally", () => {
+    const b = board();
+    const urgent = b.do.length;
+    const openTasks = b.nt.filter((c) => c.nature === "task").length;
+    const notes = b.nt.filter((c) => c.nature === "note").length;
+    expect(actionableCount(b, 7)).toBe(urgent + 7 + openTasks);
+    // …and stating it the other way round: adding the notes is exactly the old, wrong number.
+    expect(actionableCount(b, 7)).not.toBe(urgent + 7 + openTasks + notes);
   });
 });

@@ -8,7 +8,7 @@
  * never disagree with the page.
  */
 import { Agent, Manuscript, Query, SubmissionPackage, UserPlan } from "../types";
-import { assembleBoard, ribbonTiles, BoardInput } from "./todoBoard";
+import { assembleBoard, ribbonTiles, actionableCount, BoardInput } from "./todoBoard";
 import { groupHousekeeping, hkGapCount } from "./todoHousekeeping";
 import { activeQueryCount, isShelvedPresentation } from "./manuscriptPage";
 
@@ -16,6 +16,11 @@ export interface LedgerTiles {
   urgent: number;
   housekeeping: number;
   notes: number;
+  /** THE COUNTING LAW's figure (todoBoard.actionableCount) — urgent + housekeeping + open user
+   *  tasks, notes excluded. Carried on the tiles so the panel, the rail flyouts and the page all
+   *  read one number from one assembly, rather than each summing the tiles their own way (which
+   *  is how the badge and the lists came to disagree). */
+  actionable: number;
 }
 
 /** "YYYY-MM-DD" local — the same shape ToDoPage derives (kept private there). */
@@ -34,7 +39,8 @@ export function sidebarBoardTiles(input: Omit<BoardInput, "today">): LedgerTiles
   const board = assembleBoard({ ...input, today: localYMD(input.now) });
   const groups = groupHousekeeping(board.hk, input.agents, input.mutedTaskRules, input.queries);
   const stale = board.hk.filter((c) => c.taskType === "no_response_close");
-  return ribbonTiles(board, hkGapCount(groups) + stale.length);
+  const gaps = hkGapCount(groups) + stale.length;
+  return { ...ribbonTiles(board, gaps), actionable: actionableCount(board, gaps) };
 }
 
 /* (The PANEL's notification desk line was removed by the canonical shell pack — the panel
@@ -59,7 +65,9 @@ const plural = (n: number, one: string, many: string): string => `${n} ${n === 1
  *  dashboard, Mobile Pass 1). One line says what needs you; the housekeeping total rides
  *  behind it as context rather than as a peer. No stored field — both figures come off the
  *  tiles. The quiet state is a genuinely different treatment, not the loud one greyed out. */
-export function deskNotice(tiles: LedgerTiles): DeskNotice {
+/** Takes the tiles MINUS the actionable figure — stated in the type, because the desk line is
+ *  about urgency and housekeeping and the counting law's number is neither. */
+export function deskNotice(tiles: Omit<LedgerTiles, "actionable">): DeskNotice {
   const hk = tiles.housekeeping;
   const sub = hk > 0 ? plural(hk, "housekeeping item", "housekeeping items") : null;
   if (tiles.urgent > 0) {

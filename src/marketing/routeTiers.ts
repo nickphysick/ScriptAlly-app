@@ -15,7 +15,10 @@ export const MARKETING_PATHS = new Set(["/", "/pricing"]);
 
 /** The workspace route set — the capsule-shell tier (every authenticated route). */
 export const WORKSPACE_PATHS = new Set([
-  "/dashboard", "/queries", "/todo", "/agents", "/agents/discover",
+  "/dashboard", "/queries",
+  // The To-do WORKSPACE — four pages, one section (workspace pack P1).
+  "/todo", "/todo/today", "/todo/calendar", "/todo/noteboard",
+  "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
   "/account", "/plans", "/help",
 ]);

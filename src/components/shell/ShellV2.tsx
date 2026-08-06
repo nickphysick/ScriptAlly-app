@@ -18,7 +18,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, Settings, PanelLeft, List, Package, User, Compass, BookCopy,
-  SlidersHorizontal, HelpCircle, ChevronDown, ChevronLeft, Search,
+  SlidersHorizontal, HelpCircle, ChevronDown, ChevronLeft, Search, ListChecks, CalendarDays, StickyNote, Sun,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
@@ -33,6 +33,9 @@ import "./shellV2.css";
 const RAIL_ICONS: Record<string, React.ComponentType<{ "aria-hidden"?: boolean | "true" }>> = {
   dashboard: LayoutGrid,
   querying: Send,
+  // ⚠️ A PARALLEL SURFACE, not type-linked to SHELL_SECTIONS (the same trap the comps rail entry
+  // hit): a section with no icon here renders nothing at all. Add both, always.
+  todo: ListChecks,
   agents: Users,
   shelf: Book,
 };
@@ -54,12 +57,15 @@ const Mark: React.FC = () => (
    fuller menu-key system, per the pack. ── */
 
 /** The rail sections that carry a flyout while collapsed — Dashboard deliberately absent. */
-export const FLYOUT_SECTIONS = ["querying", "agents", "shelf", "setup"] as const;
+export const FLYOUT_SECTIONS = ["querying", "todo", "agents", "shelf", "setup"] as const;
 export type FlyoutKey = (typeof FLYOUT_SECTIONS)[number];
 
 const PAGE_ICONS: Record<string, React.ReactNode> = {
   "queries-hub": <Send aria-hidden="true" />,
   todo: <List aria-hidden="true" />,
+  "todo-today": <Sun aria-hidden="true" />,
+  "todo-calendar": <CalendarDays aria-hidden="true" />,
+  "todo-noteboard": <StickyNote aria-hidden="true" />,
   packages: <Package aria-hidden="true" />,
   "agents-list": <User aria-hidden="true" />,
   "agents-discover": <Compass aria-hidden="true" />,

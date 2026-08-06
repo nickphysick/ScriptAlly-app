@@ -93,7 +93,7 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("rail flyouts (flyouts pack): hover targets on the four sections while collapsed — never Dashboard, none expanded", () => {
-    expect([...FLYOUT_SECTIONS]).toEqual(["querying", "agents", "shelf", "setup"]); // Dashboard absent (baked)
+    expect([...FLYOUT_SECTIONS]).toEqual(["querying", "todo", "agents", "shelf", "setup"]); // Dashboard absent (baked)
     const collapsed = at("/queries", <ShellRail onNavigatePath={() => {}} collapsed onExpand={() => {}} />);
     for (const key of FLYOUT_SECTIONS) expect(collapsed).toContain(`data-fly="${key}"`);
     expect(collapsed).not.toContain('data-fly="dashboard"');
@@ -148,7 +148,10 @@ describe("v2 shell — smoke renders", () => {
     // the dot's home is the nav row; the empty fixture desk has nothing urgent, so none renders
     expect(html).not.toContain("sv2-akdot");
     const body = readFileSync(resolve(__dirname, "./ShellSidebar.tsx"), "utf8");
-    expect(body).toContain('page.key === "todo" && tiles.urgent > 0');
+    // The dot moved to the GROUP row when To-do became a section (workspace P1): collapsed, the
+    // group row is all there is, so a dot on a child would vanish exactly when it matters.
+    expect(body).toContain('section.key === "todo" && (');
+    expect(body).toContain('tiles.urgent > 0 && <span className="sv2-akdot"');
   });
 
   it("SETTINGS is in the panel foot AND stays a rail rib — it must survive the collapse", () => {
@@ -256,7 +259,7 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("the crumb is on EVERY non-dashboard page, and the two states differ ONLY in two things", () => {
-    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do"], ["/import", "Import"], ["/account", "Account"]] as const) {
+    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do list"], ["/todo/today", "Today"], ["/import", "Import"], ["/account", "Account"]] as const) {
       const html = bar(path);
       expect(html, path).toContain("sv2-crumb");
       expect(html, path).toContain(`<b>${page}</b>`);

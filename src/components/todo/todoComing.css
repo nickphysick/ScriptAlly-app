@@ -1,0 +1,70 @@
+/**
+ * The two unbuilt To-do pages (workspace P1). Deliberately plain: this is a statement, not a
+ * surface. It borrows the page's own measure and the app's paper/hairline vocabulary and adds
+ * nothing of its own that would have to be unpicked when the real pages land.
+ */
+
+.tdc-wrap {
+  height: 100%;
+  overflow-y: auto;
+  padding: 28px 60px 48px;
+}
+
+.tdc-body {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* One card, left-aligned on the page's measure — not centred in the viewport. A centred
+   apology in the middle of an empty page reads as an error state; this is simply a page that
+   has not been written yet. */
+.tdc-card {
+  max-width: 560px;
+  margin-top: 34px;
+  padding: 26px 28px 24px;
+  background: #fffefb;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+}
+
+.tdc-kicker {
+  margin: 0 0 10px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #9a8e80;
+}
+
+.tdc-lede {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #3a2f28;
+}
+
+.tdc-where {
+  margin: 0 0 20px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #7a6a5e;
+}
+
+.tdc-back {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  background: #fffefb;
+  border: 1px solid #dcdcdb;
+  color: #2a1a13;
+  cursor: pointer;
+}
+
+.tdc-back:hover {
+  background: #f4f2ef;
+}
+
+@media (max-width: 767px) {
+  .tdc-wrap { padding: 20px 16px 40px; }
+}

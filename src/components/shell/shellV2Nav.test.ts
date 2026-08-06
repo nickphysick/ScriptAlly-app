@@ -1,7 +1,11 @@
 /**
  * Locks for the CAPSULE shell navigation model (ref design-refs/scriptally-capsule-shell.html):
- * Dashboard is a FLAT link; three accordion sections; Import is off the nav (baked) but keeps
+ * Dashboard is a FLAT link; FOUR accordion sections; Import is off the nav (baked) but keeps
  * a breadcrumb; Packages files under Querying (product grammar, not URL shape).
+ *
+ * ⚠️ AMENDED by the workspace pack P1: To-do LEFT Querying and became a section of its own with
+ * four pages, taking a fifth rail rib with it. The rib is load-bearing — the rail's active state
+ * derives from the route's section, so a section without one would light nothing.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -17,15 +21,24 @@ import {
 } from "./shellV2Nav";
 
 describe("shellV2Nav — the accordion model", () => {
-  it("Dashboard is flat (no children) and the three sections carry the baked pages", () => {
+  it("Dashboard is flat (no children) and the FOUR sections carry the baked pages", () => {
     expect(SHELL_DASHBOARD.path).toBe("/dashboard");
-    expect(SHELL_SECTIONS.map((s) => s.key)).toEqual(["querying", "agents", "shelf"]);
-    expect(SHELL_SECTIONS.map((s) => s.label)).toEqual(["Querying", "Agents", "Shelf"]);
+    expect(SHELL_SECTIONS.map((s) => s.key)).toEqual(["querying", "todo", "agents", "shelf"]);
+    expect(SHELL_SECTIONS.map((s) => s.label)).toEqual(["Querying", "To-do", "Agents", "Shelf"]);
   });
 
-  it("files To-do and Packages under Querying (product grammar, not URL tree)", () => {
+  it("files Packages under Querying (product grammar, not URL tree) — and To-do is no longer there", () => {
     const querying = SHELL_SECTIONS.find((s) => s.key === "querying")!;
-    expect(querying.pages.map((p) => p.path)).toEqual(["/queries", "/todo", "/manuscripts/packages"]);
+    expect(querying.pages.map((p) => p.path)).toEqual(["/queries", "/manuscripts/packages"]);
+  });
+
+  it("To-do is a WORKSPACE of four pages, and the list is the default at /todo itself", () => {
+    const todo = SHELL_SECTIONS.find((s) => s.key === "todo")!;
+    expect(todo.pages.map((p) => p.label)).toEqual(["To-do list", "Today", "Calendar", "Noteboard"]);
+    expect(todo.pages.map((p) => p.path)).toEqual(["/todo", "/todo/today", "/todo/calendar", "/todo/noteboard"]);
+    // The default page keeps the BARE path, so every existing link and the rail's
+    // section-select land on it with no redirect.
+    expect(todo.pages[0].path).toBe("/todo");
   });
 
   it("Agents = Agent list + Discover; Shelf = Manuscripts + Comparable titles (Import is OFF the nav — baked)", () => {
@@ -36,10 +49,18 @@ describe("shellV2Nav — the accordion model", () => {
     expect(shelf.pages.some((p) => p.path === "/import")).toBe(false);
   });
 
-  it("the rail = Dashboard + the three sections; Setup routes to /account", () => {
-    expect(SHELL_RAIL.map((r) => r.key)).toEqual(["dashboard", "querying", "agents", "shelf"]);
-    expect(SHELL_RAIL.map((r) => r.path)).toEqual(["/dashboard", "/queries", "/agents", "/manuscripts"]);
+  it("the rail = Dashboard + the four sections, IN THE ACCORDION'S ORDER; Setup routes to /account", () => {
+    expect(SHELL_RAIL.map((r) => r.key)).toEqual(["dashboard", "querying", "todo", "agents", "shelf"]);
+    expect(SHELL_RAIL.map((r) => r.path)).toEqual(["/dashboard", "/queries", "/todo", "/agents", "/manuscripts"]);
     expect(SHELL_SETUP.path).toBe("/account");
+  });
+
+  it("EVERY section has a rib — the invariant behind the fifth one, not a coincidence", () => {
+    for (const section of SHELL_SECTIONS) {
+      expect(SHELL_RAIL.some((r) => r.key === section.key), `no rib for ${section.key}`).toBe(true);
+    }
+    // …and the rib order follows the accordion, so a rib and its section are never apart.
+    expect(SHELL_RAIL.slice(1).map((r) => r.key)).toEqual(SHELL_SECTIONS.map((s) => s.key));
   });
 });
 
@@ -52,7 +73,10 @@ describe("shellV2Nav — path matching", () => {
 
   it("lights the owning rib per route (Import lights Shelf via its crumb extra)", () => {
     expect(shellSectionKeyForPath("/dashboard")).toBe("dashboard");
-    expect(shellSectionKeyForPath("/todo")).toBe("querying");
+    expect(shellSectionKeyForPath("/todo")).toBe("todo");
+    expect(shellSectionKeyForPath("/todo/today")).toBe("todo");
+    expect(shellSectionKeyForPath("/todo/calendar")).toBe("todo");
+    expect(shellSectionKeyForPath("/todo/noteboard")).toBe("todo");
     expect(shellSectionKeyForPath("/agents/discover")).toBe("agents");
     expect(shellSectionKeyForPath("/manuscripts/comps")).toBe("shelf");
     expect(shellSectionKeyForPath("/import")).toBe("shelf");
@@ -61,7 +85,9 @@ describe("shellV2Nav — path matching", () => {
   });
 
   it("builds the crumb — Section / Page; the flat Dashboard is its own name; off-nav routes keep crumbs", () => {
-    expect(shellCrumbForPath("/todo")).toEqual({ section: "Querying", page: "To-do" });
+    expect(shellCrumbForPath("/todo")).toEqual({ section: "To-do", page: "To-do list" });
+    expect(shellCrumbForPath("/todo/today")).toEqual({ section: "To-do", page: "Today" });
+    expect(shellCrumbForPath("/todo/noteboard")).toEqual({ section: "To-do", page: "Noteboard" });
     expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Agent list" });
     expect(shellCrumbForPath("/dashboard")).toEqual({ section: "Dashboard", page: "Dashboard" });
     expect(shellCrumbForPath("/import")).toEqual({ section: "Shelf", page: "Import" });

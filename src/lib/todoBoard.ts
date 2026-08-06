@@ -406,6 +406,28 @@ export function ribbonTiles(board: AssembledBoard, housekeepingGaps: number): { 
   return { urgent: board.do.length, housekeeping: housekeepingGaps, notes: board.nt.length };
 }
 
+/**
+ * ⚠️ THE COUNTING LAW (workspace pack P1; audit item 1) — the ONE derivation of "the To-do
+ * number", read by the sidebar badge, every page count, and anything else claiming to be it.
+ *
+ * The counts did not reconcile: the badge said 44 while the lists summed to 52, and nothing
+ * defined what 44 counted. The rule that settles it: **the number counts ACTIONABLE items** —
+ * urgent + housekeeping gaps + open user TASKS — and **notes are excluded**. A note is dateless
+ * by definition and nothing chases it, so it must not inflate a number that means "things
+ * waiting on you". A note is still findable, still counted in its own list; it is simply not
+ * part of this figure.
+ *
+ * The user-task half is subtler than "the notes lane": a dated task PROMOTES into the urgent
+ * lane on its due day, so it is already inside `board.do`. Counting the whole `nt` lane would
+ * therefore double-count the promoted ones and add the notes. So the third term is exactly the
+ * TASKS still sitting in the notes lane — future-dated, not yet promoted — and nature is the
+ * discriminator, never the lane.
+ */
+export function actionableCount(board: AssembledBoard, housekeepingGaps: number): number {
+  const openUserTasks = board.nt.filter((c) => c.nature === "task").length;
+  return board.do.length + housekeepingGaps + openUserTasks;
+}
+
 
 
 

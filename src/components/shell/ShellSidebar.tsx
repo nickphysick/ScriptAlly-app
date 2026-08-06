@@ -20,12 +20,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   LayoutGrid, Send, Users, Book, ChevronRight, ChevronsUpDown, Plus, Reply, UserPlus, BookPlus,
-  Settings,
+  Settings, ListChecks,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
 import { invokeCapture } from "./railNav";
-import { SHELL_DASHBOARD, SHELL_SECTIONS, shellPageForPath } from "./shellV2Nav";
+import { SHELL_DASHBOARD, SHELL_SECTIONS, ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import {
   manuscriptInitials, manuscriptSubtitle, planLine, resolveActiveManuscript,
   sideNavCounts, sidebarBoardTiles,
@@ -47,14 +47,15 @@ export function useShellNavCounts(): Record<string, number> {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
   );
-  return sideNavCounts({
-    queries, agents, manuscripts, packages,
-    todoTotal: tiles.urgent + tiles.housekeeping + tiles.notes,
-  });
+  // THE COUNTING LAW (workspace P1) — one figure, derived once. This used to sum the three
+  // tiles by hand, which included NOTES and so disagreed with every list on the page.
+  return sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: tiles.actionable });
 }
 
 const SECTION_ICONS: Record<string, React.ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>> = {
   querying: Send,
+  // Kept in step with ShellV2's RAIL_ICONS — a section absent from either map renders no glyph.
+  todo: ListChecks,
   agents: Users,
   shelf: Book,
 };
@@ -129,9 +130,9 @@ export const ShellSidebarBody: React.FC<{
   onNavigatePath: (path: string) => void;
   /** The accordion's open section — OWNED BY AppShell (rail-icon-toggle pack) so the rail's
    *  click policy can read the real open section at click time. null = none open. */
-  openSection: "querying" | "agents" | "shelf" | null;
+  openSection: ShellV2Section["key"] | null;
   /** Accordion header click — AppShell toggles the section open/shut. */
-  onToggleSection: (key: "querying" | "agents" | "shelf") => void;
+  onToggleSection: (key: ShellV2Section["key"]) => void;
 }> = ({ onNavigate, onNavigatePath, openSection, onToggleSection }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, packages,
@@ -149,8 +150,8 @@ export const ShellSidebarBody: React.FC<{
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, currentUser?.mutedTaskRules],
   );
   const plan = planLine(currentUser?.plan);
-  const total = tiles.urgent + tiles.housekeeping + tiles.notes;
-  const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: total });
+  // THE COUNTING LAW (workspace P1): the ONE figure, off the tiles — never re-summed here.
+  const counts = sideNavCounts({ queries, agents, manuscripts, packages, todoTotal: tiles.actionable });
   const hit = shellPageForPath(pathname);
   // (The accordion's open-section state LIVES IN AppShell now — rail-icon-toggle pack: the
   // rail's click policy must read it, so one owner. Route-sync + snap-on-collapse moved up.)
@@ -233,6 +234,18 @@ export const ShellSidebarBody: React.FC<{
               >
                 <Icon className="sv2-ai" aria-hidden="true" />
                 <span className="sv2-albl">{section.label}</span>
+                {/* THE GROUP ROW KEEPS THE URGENCY DOT AND THE COUNT (workspace P1). To-do
+                    became a section, and the badge has to survive that: collapsed, the group
+                    row is all you can see, so a count that lived only on a child would vanish
+                    exactly when it is doing its job. The figure is the counting law's
+                    (tiles.actionable) — notes excluded — and the child row drops its copy so
+                    the same number is never stated twice in one column. */}
+                {section.key === "todo" && (
+                  <>
+                    {tiles.urgent > 0 && <span className="sv2-akdot" aria-label={`${tiles.urgent} urgent`} />}
+                    <span className="sv2-akct">{tiles.actionable}</span>
+                  </>
+                )}
                 <ChevronRight className="sv2-acv" aria-hidden="true" />
               </button>
               <div className={`sv2-akids${open ? " open" : ""}`}>
@@ -248,13 +261,10 @@ export const ShellSidebarBody: React.FC<{
                       onClick={() => onNavigatePath(page.path)}
                     >
                       <span className="sv2-aklbl">{page.label}</span>
-                      {/* URGENCY LIVES HERE NOW — one 6px burgundy dot beside the To-do count,
-                          replacing the whole notification block (canonical shell pack). A count
+                      {/* URGENCY IS ON THE GROUP ROW NOW (workspace P1) — one 6px burgundy dot
+                          beside the To-do count, where it survives the group collapsing. A count
                           says how much; the dot says some of it will not wait. */}
-                      {page.key === "todo" && tiles.urgent > 0 && (
-                        <span className="sv2-akdot" aria-label={`${tiles.urgent} urgent`} />
-                      )}
-                      {count !== undefined && <span className="sv2-akct">{count}</span>}
+                      {count !== undefined && page.key !== "todo" && <span className="sv2-akct">{count}</span>}
                     </button>
                   );
                 })}

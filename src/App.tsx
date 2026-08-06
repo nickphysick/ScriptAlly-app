@@ -20,6 +20,7 @@ import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { ToDoPage } from "./components/todo/ToDoPage";
+import { TodoComingPage } from "./components/todo/TodoComingPage";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
@@ -564,6 +565,10 @@ function AppContent() {
   // unrecognised subpage value as a query id, exactly as it did with the old activeSubPage).
   const queriesSub = params.get("q") ?? "Query database";
   const agentsDiscover = path === "/agents/discover";
+  // The To-do WORKSPACE's sub-routes (workspace P1). Today is the pack's next phase and still
+  // renders the board meanwhile; Calendar and Noteboard are routed placeholders so no sidebar
+  // entry leads nowhere.
+  const todoComing = path === "/todo/calendar" ? "calendar" : path === "/todo/noteboard" ? "noteboard" : null;
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
 
@@ -605,8 +610,11 @@ function AppContent() {
 
         {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page
             scrollbar) like the Queries desk; stays mounted so its mode/filter/selection survive. */}
-        <StagePage active={routeKey === "todo"} layout="fill" clip>
+        <StagePage active={routeKey === "todo" && !todoComing} layout="fill" clip>
           <ToDoPage onNavigate={handleNavigate} />
+        </StagePage>
+        <StagePage active={routeKey === "todo" && !!todoComing} layout="fill" clip>
+          {todoComing && <TodoComingPage kind={todoComing} onNavigatePath={(p) => navigate(p)} />}
         </StagePage>
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;
