@@ -38,6 +38,7 @@ vi.mock("../../lib/db", () => ({
 
 import { ToDoPage } from "./ToDoPage";
 import { TodoTodayPage } from "./TodoTodayPage";
+import { TodoPlaceholderPage } from "./TodoPlaceholderPage";
 
 const render = (node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={["/todo"]}>{node}</MemoryRouter>);
@@ -63,22 +64,27 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("Today");
     expect(html).toContain("Your list for today");
   });
-});
 
-describe("⚠️ no post-return const is read by the render (the crash's shape)", () => {
-  it("every `const` below the return is one the JSX above it does not touch", async () => {
-    const { readFileSync } = await import("node:fs");
-    const src = readFileSync(new URL("./ToDoPage.tsx", import.meta.url), "utf8");
-    const ret = src.indexOf("\n  return (");
-    expect(ret, "the component's return must be findable").toBeGreaterThan(-1);
-    const above = src.slice(0, ret);
-    const below = src.slice(ret);
-    for (const m of below.matchAll(/^  const (\w+)/gm)) {
-      const name = m[1];
-      // A const declared below the return is in the TDZ for the whole render, so the JSX above
-      // must never name it. (Functions hoist and are fine — that is why they are functions.)
-      expect(above.includes(`{${name}(`) || above.includes(`{${name}}`) || above.includes(`${name}.`),
-        `${name} is declared below the return but read by the render — it will throw`).toBe(false);
-    }
+  it("the Calendar placeholder renders and says what it is", () => {
+    const html = render(<TodoPlaceholderPage page="calendar" />);
+    expect(html).toContain("Calendar");
+  });
+
+  it("the Noteboard placeholder renders and says what it is", () => {
+    const html = render(<TodoPlaceholderPage page="noteboard" />);
+    expect(html).toContain("Noteboard");
   });
 });
+
+/*
+ * ⚠️ THE STRUCTURAL CASE MOVED — and the copy that stood here was BROKEN.
+ *
+ * It split the file at `return (` and searched the part ABOVE for the reference. But the JSX is
+ * part of the return statement: it is BELOW that line, not above it. So the check compared the
+ * trailing consts against the hooks and handlers — the one region that cannot be in the temporal
+ * dead zone — and would have passed on the very bug it was written for.
+ *
+ * The corrected check lives in `src/test/pageStructure.test.ts`, runs against every page component
+ * in the app rather than this one file, and carries three self-tests including one that fails on
+ * the broken model. That is the point of the exercise: a tripwire nobody has seen trip is a guess.
+ */
