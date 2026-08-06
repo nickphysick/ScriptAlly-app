@@ -1,6 +1,53 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (eighth pass — the sidebar rebuilt to the FINAL ref: flat groups).**
+**Last updated: 6 August 2026 (ninth pass — board fixes II + the editorial board, dev-deployed).**
+
+## Board fixes II + the editorial board — COMPLETE (`678e733` ref → `05fa643`→`c3b26d4`→`7b9eeea`→`ee0b0d6`→`7f2546f`→`58cb2c9`)
+
+The patch pack from Nick's dev walk, plus the board's settled visual design (normative ref
+committed at `design-refs/todo-board-settled.html`; the chrome around it is demonstration only).
+Full report: `reports/todo-board-fixes2.md`. Suite **2884 passed | 2 skipped** at close.
+
+- **P1** — the ⋯ menu is a **portal to document.body** (it used to render inside the card, which
+  clips), placed by the pure `placeMenu` (edge-flip locked as arithmetic); the seat is ONE
+  always-present ⋯ bottom-right in a permanently reserved 42px lane; contents are the pure
+  `cardMenu` model in **`src/lib/todoMenu.ts`** — three intent groups with per-kind/per-column
+  shapes (offer capped + disabled dismiss · sweep "Start the sweep" · Today reverses · Snoozed
+  "Return it now"/"Change the date…" · Done collapses · user task gains Edit/Delete). The
+  composer gained EDIT mode (updateUserTask learned null→deleteField clears); "View the agent"
+  lands via the one-shot `sa.agentReveal` sessionStorage key AgentList consumes once; the board's
+  drag-to-Snoozed now actually asks for a date (it opened a popover that never mounted there).
+- **P2** — the card is the dock's door: click docks (5px movement threshold + dragstart poison —
+  browsers don't reliably suppress post-drag clicks), Enter docks, OPEN ▸ whispers on hover.
+- **P3** — the "▶ Focused session" tool-row launcher is DELETED (button + one-line opener);
+  KEPT whole: openDock, dockAllCards, TodoDock, FocusFlow, Today's "Work the list". The ＋ Add
+  composer is finally MOUNTED (`{composerAt && renderComposer()}` — the button used to set state
+  nothing rendered).
+- **P4** — ⚠️ **ONE kind→family map: `src/lib/todoFamily.ts`.** The map had shipped wrong twice,
+  both times via a second copy: `bandFamily` + `facetOf` were duplicate classifiers keyed on the
+  `hk` GLYPH flag (false on STALE → urgent pink), and the `--td-sw-*` tokens were a third home
+  with sage/pink SWAPPED. Classification keys on the LANE (the counting law's split); swatches
+  are the module's hexes; the CSS band paint is restated UNDER LOCK (todoBoardFamily fails if
+  they diverge); the ink border is worn iff family === urgent. The tokens are deleted and
+  extinction-locked.
+- **P5** — ⚠️ **CARDS ARE THE UNIT.** 42 / 27 / fourteen were three derivations in two units
+  (tiles = members; facet feed = raw lanes, blind to Snoozed; columns = cards). `boardColumns`
+  is computed once (hoisted `boardCols`) and the subtitle (`boardFigures`/`boardSubtitleCopy` —
+  "…six cards, two urgent."), the FILTERS counts (`liveBoardCards`) and the rendered columns all
+  read it. Locked against the RENDERED DOM in todoBoardCounts.test.tsx. Done stays outside.
+- **P6** — the editorial board: sticky Playfair heads over 2px ink rules (sage on Done, "N
+  TODAY"), tinted wells REMOVED, sweep cards as stacks with a session progress rail (n-of-m
+  inside the card only), ghost hatched drop slot (still labels the act), completion ring
+  (~600ms), fade hem + "+ N MORE ▾" past eight, WIP line ("A GOOD DAY IS 3–5" / past five
+  "THAT'S A FULL DAY" — advice, never a block), speaking empty states, tabular numerals
+  page-wide, one easing `cubic-bezier(.2,.7,.3,1)` with 220ms cross-column FLIP over WAAPI
+  (no fill — the house motion trap), all off under reduced motion.
+
+⚠️ **A PARALLEL DASHBOARD STREAM WAS COMMITTING IN THIS SAME CHECKOUT throughout this pack**
+(three+ commits landed under it; `src/lib/dashboardStats.*` sat modified-uncommitted with a
+duplicate-identifier tsc break for part of the run). Handled per the house rules: never touched,
+never staged; my tsc gates ran in an isolated worktree at HEAD + my files. This is exactly the
+one-session-per-worktree rule being violated upstream — flagged, not fixed.
 
 ## The sidebar is FLAT GROUPS now — the accordion is retired
 
