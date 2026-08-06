@@ -1,0 +1,104 @@
+/* ── THE SETTLED DESK'S TOOLTIP + CARD CHROME (ref design-refs/dashboard-settled-desk.html) ──
+   Values are the ref's, and they are literal rather than tokenised: this is one surface drawn once,
+   and reading them from tokens would imply a shared rhythm with the shell that does not exist. */
+
+/* ══ TOOLTIP ══ */
+.dk-tip {
+  position: fixed;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.16s, transform 0.16s;
+  background: #fdfaf5;
+  border: 1px solid #e3d9cc;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.08), 0 12px 32px rgba(58, 28, 20, 0.15);
+  padding: 13px 15px 14px;
+  min-width: 170px;
+  max-width: 280px;
+}
+.dk-tip.show { opacity: 1; transform: translateY(0); }
+/* interactive: the pointer may travel INTO it, so it must accept events */
+.dk-tip.live { pointer-events: auto; }
+.dk-tip.pinned {
+  border-color: #cdbfae;
+  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.1), 0 16px 42px rgba(58, 28, 20, 0.2);
+  outline: none;
+}
+.dk-pinnote {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #c4b6a7; margin-top: 9px; padding-top: 8px;
+  border-top: 1px solid #ece0d2; text-align: center;
+}
+
+/* the tooltip's own type scale */
+.dk-cap {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: #9c8878; margin-bottom: 6px;
+}
+.dk-n { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: #2c1a12; }
+.dk-n small { font-family: var(--font-sans); font-size: 11px; color: #8a7a6c; font-weight: 400; margin-left: 5px; }
+.dk-sub { font-size: 11.5px; color: #8a7a6c; margin-top: 4px; line-height: 1.45; }
+.dk-sub b { color: #3a1c14; font-weight: 600; }
+.dk-rule { border: none; border-top: 1px solid #ece0d2; margin: 9px 0; }
+.dk-quiet { font-style: italic; }
+
+/* ══ CARD CHROME ══
+   ⚠️ A DASHBOARD-LOCAL WRAPPER, NOT A FORK OF MountCard. MountCard/MountPanel are the parchment
+   mount: paper texture, 14px radius, the mount shadow and a burgundy-tinted hairline. The settled
+   desk's card is a different object — flat parchment, a neutral two-stop shadow, 16px radius and a
+   sage band across its head. Expressing one through the other would mean adding a band, a pill, a
+   radius override and a shadow override to a LOCKED component that four other pages consume. */
+.dk-card {
+  background: #fffdf9;
+  border: 1px solid #e3d9cc;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.dk-band {
+  background: linear-gradient(135deg, #d7ddd5, #d5dbd3);
+  padding: 11px 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dk-band h2 {
+  font-family: var(--font-serif); font-size: 17px; font-weight: 600; color: #33402f;
+  flex: 1; margin: 0; min-width: 0;
+}
+.dk-band svg { width: 12px; height: 12px; stroke: #4a5a46; fill: none; stroke-width: 1.8; flex: none; }
+/* the outlined mono pill — #9aa894 on a sage band, per the chrome rule */
+.dk-pill {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  background: #fffdf9; border: 1px solid #9aa894; border-radius: 99px;
+  padding: 5px 12px; color: #3c4a38; white-space: nowrap;
+}
+/* off a sage band (a card body, a foot) the pill takes the warm hairline instead */
+.dk-pill.warm { border-color: #b9aa97; color: #4a3a2e; }
+.dk-body { padding: 12px 18px 18px; }
+.dk-foot {
+  border-top: 1px solid #ece0d2; padding: 10px 18px;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+}
+.dk-foot a, .dk-link {
+  font-size: 12px; font-weight: 500; color: #7c3a2a; text-decoration: none;
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+.dk-foot a:hover, .dk-link:hover { text-decoration: underline; }
+.dk-lbl {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.17em; text-transform: uppercase; font-weight: 500; color: #9c8878;
+}
+/* the empty states, in italic Playfair — "A quiet day." never a dash or a zero */
+.dk-empty { font-family: var(--font-serif); font-style: italic; color: #b3a596; font-size: 12.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dk-tip { transition: none; }
+}
