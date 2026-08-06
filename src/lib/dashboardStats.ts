@@ -231,6 +231,84 @@ export const weekRecipients = (queries: Query[], agents: Agent[], weekStart: Dat
     });
 };
 
+/**
+ * The queries sent in an ISO week, as the settled desk's hover rows.
+ *
+ * ⚠️ A SIBLING OF `weekRecipients`, NOT A REPLACEMENT. That one feeds the v37 hover panel, which
+ * shows a monogram and a day chip; this one feeds the settled desk, which shows the real
+ * `StatusDot` and a calendar date. Same source, same week maths, different presentation — and
+ * folding them together would mean one shape carrying two panels' fields, half of them unread.
+ */
+export interface WeekQueryRow {
+  id: string;
+  agentName: string;
+  agency: string;
+  /** The query's CURRENT status — the dot says where it stands now, not where it stood then. */
+  status: QueryStatus;
+  /** "22 Jun" — the day it went out. */
+  sentLabel: string;
+}
+
+export const weekQueryRows = (queries: Query[], agents: Agent[], weekStart: Date): WeekQueryRow[] => {
+  const from = weekStart.getTime();
+  const to = from + WEEK_MS;
+  return queries
+    .map((q) => ({ q, t: parseWhen(q.dateSent) }))
+    .filter((x): x is { q: Query; t: number } => x.t !== null && x.t >= from && x.t < to)
+    .sort((a, b) => a.t - b.t)
+    .map(({ q, t }) => {
+      const agent = agents.find((a) => a.id === q.agentId);
+      return {
+        id: q.id,
+        agentName: agent ? agentPrimary(agent) : AGENT_NOT_SPECIFIED,
+        agency: agent && agent.name?.trim() ? agent.agency || "" : "",
+        status: q.status,
+        sentLabel: new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+      };
+    });
+};
+
+/**
+ * The responses bar's split: requests for more · passes · offers.
+ *
+ * ⚠️ IT RECONCILES BY CONSTRUCTION. The headline "responses received" is the canonical
+ * once-per-query count; this split is derived from the SAME responded set, and whatever the
+ * precedence chain cannot classify is returned as `unclassified` rather than dropped. So
+ * `requests + passes + offers + unclassified === total`, always — a bar whose segments quietly
+ * summed to less than the number printed above it would be the page disagreeing with itself.
+ *
+ * `unclassified` is the rare legacy shape `outcomeGroups` already documents (e.g. withdrawn with a
+ * bare `hasAgentResponded`). It is counted, never drawn as a segment and never guessed at.
+ */
+export interface ResponseSplit {
+  requests: number;
+  passes: number;
+  offers: number;
+  unclassified: number;
+  total: number;
+}
+
+export const responseSplit = (queries: Query[]): ResponseSplit => {
+  const responded = queries.filter((q) =>
+    q.hasAgentResponded !== undefined ? q.hasAgentResponded : LEGACY_RESPONSE_STATUSES.has(q.status),
+  );
+  let requests = 0, passes = 0, offers = 0, unclassified = 0;
+  for (const q of responded) {
+    if (q.status === QueryStatus.OFFER) offers++;
+    /* An R&R IS a request for more — the agent asked for the work again. Grouping it with passes
+       would read as a rejection, and giving it a fourth segment would split a three-part bar into
+       one nobody can see at 8px tall. */
+    else if (
+      q.status === QueryStatus.REVISE_RESUBMIT ||
+      q.fullRequestedDate || q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT ||
+      q.partialRequestedDate || q.status === QueryStatus.PARTIAL_REQUESTED || q.status === QueryStatus.PARTIAL_SENT
+    ) requests++;
+    else if (q.status === QueryStatus.REJECTED) passes++;
+    else unclassified++;
+  }
+  return { requests, passes, offers, unclassified, total: responded.length };
+};
+
 /** Footer for the recipients panel: `▲ +1 VS PRIOR WEEK · 10 TOTAL` (total = cumulative sends
  *  through the hovered week). Delta omitted for the oldest bin (prior week underivable). */
 export const sentWeekFooter = (series: number[], idx: number): string => {

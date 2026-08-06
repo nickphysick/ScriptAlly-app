@@ -1,0 +1,68 @@
+/* ── THE SETTLED DESK'S STAT CARDS (ref design-refs/dashboard-settled-desk.html) ── */
+
+.ds-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.ds-inner { padding: 13px 16px 0; flex: 1; display: flex; flex-direction: column; }
+.ds-fig { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.ds-n { font-family: var(--font-serif); font-size: 33px; font-weight: 500; color: #2c1a12; line-height: 1; }
+.ds-cap { font-size: 11.5px; color: #8a7a6c; }
+.ds-viz { height: 58px; margin: auto -2px 0; position: relative; padding-bottom: 12px; }
+
+/* ══ 1 · QUERIES SENT ══ */
+.ds-bars { display: flex; align-items: flex-end; gap: 6px; height: 44px; padding: 0 3px; }
+.ds-bar {
+  flex: 1; border-radius: 3px 3px 0 0; background: #e8d8ca; min-height: 3px;
+  border: 0; padding: 0; cursor: pointer;
+  transition: transform 0.16s, background 0.16s;
+}
+/* the two most recent weeks carry the emphasis; the current one is lighter because it is still
+   filling up, and reading it as the biggest bar would flatter it */
+.ds-bar.recent { background: #a86a52; }
+.ds-bar.now { background: #d8b8aa; }
+.ds-bar:hover, .ds-bar.on, .ds-bar:focus-visible {
+  background: #7c3a2a; transform: translateY(-2px); outline: none;
+}
+
+/* the vertical query list inside the tooltip */
+.ds-qlist { margin-top: 2px; }
+.ds-qrow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #ece0d2; }
+.ds-qrow:last-child { border-bottom: none; }
+.ds-qn {
+  font-family: var(--font-serif); font-size: 14px; color: #2c1a12;
+  flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ds-qa {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: #9c8878;
+  display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ds-qd { font-family: "JetBrains Mono", monospace; font-size: 8.5px; color: #b3a596; flex: none; }
+
+/* ══ 4 · RESPONSES ══ */
+.ds-rtrack {
+  height: 8px; border-radius: 99px; background: #efe5d8; margin: 0 3px;
+  position: relative; top: 16px;
+}
+.ds-rfill {
+  position: absolute; top: 0; bottom: 0; left: 0; border-radius: 99px;
+  background: #8a9e88; transition: opacity 0.25s;
+}
+.ds-rseg {
+  position: absolute; top: 0; bottom: 0; border-radius: 99px;
+  opacity: 0; transition: opacity 0.25s; border: 0; padding: 0; cursor: pointer;
+}
+.ds-rseg.req { background: #8a9e88; }
+.ds-rseg.pass { background: #d8cbbd; }
+.ds-rseg.offer { background: #7c3a2a; }
+/* the whole is the first reading; the parts are the second */
+.ds-rtrack:hover .ds-rfill, .ds-rtrack:focus-within .ds-rfill { opacity: 0; }
+.ds-rtrack:hover .ds-rseg, .ds-rtrack:focus-within .ds-rseg { opacity: 1; }
+.ds-rseg:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
+.ds-rmark {
+  position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%;
+  background: #fdfaf5; border: 1.6px solid #7c3a2a; transform: translate(-50%, -50%);
+}
+
+@media (max-width: 1180px) { .ds-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) {
+  .ds-bar, .ds-rfill, .ds-rseg { transition: none; }
+}

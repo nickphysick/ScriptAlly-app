@@ -21,6 +21,8 @@ import {
   outcomeGroups,
   sentWeekFooter,
   weekRecipients,
+  weekQueryRows,
+  responseSplit,
   agentStatusSummaries,
   agentTooltip,
   awaitingReplyCount,
@@ -391,5 +393,80 @@ describe("salutation", () => {
     expect(salutation(new Date(2026, 6, 3, 8))).toBe("Good morning");
     expect(salutation(new Date(2026, 6, 3, 14))).toBe("Good afternoon");
     expect(salutation(new Date(2026, 6, 3, 21))).toBe("Good evening");
+  });
+});
+
+/* ── settled-desk selectors (dashboard redesign, Phase 3) ── */
+
+describe("weekQueryRows — the queries-sent hover list", () => {
+  const agents = [
+    { id: "a1", name: "Sophie Dunn", agency: "Curtis Vane" },
+    { id: "a2", name: "Tom Ellery", agency: "Curtis Vane" },
+  ] as any[];
+
+  it("returns the week's queries in send order, with the dot's status and a calendar date", () => {
+    const weekStart = isoWeekStart(NOW);
+    const rows = weekQueryRows([
+      q({ id: "q2", agentId: "a2", dateSent: daysAgo(1), status: QueryStatus.FULL_REQUESTED }),
+      q({ id: "q1", agentId: "a1", dateSent: daysAgo(3), status: QueryStatus.QUERIED }),
+    ], agents, weekStart);
+    expect(rows.map((r) => r.id)).toEqual(["q1", "q2"]);
+    expect(rows[0]).toMatchObject({ agentName: "Sophie Dunn", agency: "Curtis Vane", status: QueryStatus.QUERIED });
+    expect(rows[1].status).toBe(QueryStatus.FULL_REQUESTED);
+    expect(rows[0].sentLabel).toMatch(/^\d{1,2} \w{3}$/); // "30 Jun"
+  });
+
+  it("excludes queries outside the week, and unsent queries entirely", () => {
+    const weekStart = isoWeekStart(NOW);
+    const rows = weekQueryRows([
+      q({ id: "old", agentId: "a1", dateSent: daysAgo(30) }),
+      q({ id: "never", agentId: "a1" }),
+    ], agents, weekStart);
+    expect(rows).toEqual([]);
+  });
+});
+
+describe("⚠️ responseSplit RECONCILES WITH THE HEADLINE, by construction", () => {
+  /* A bar whose segments quietly summed to less than the number printed above it would be the
+     page disagreeing with itself. Whatever cannot be classified is COUNTED, not dropped. */
+  it("the three segments plus the unclassified remainder equal the responded total", () => {
+    const queries = [
+      q({ status: QueryStatus.OFFER, hasAgentResponded: true }),
+      q({ status: QueryStatus.FULL_REQUESTED, hasAgentResponded: true }),
+      q({ status: QueryStatus.PARTIAL_SENT, hasAgentResponded: true }),
+      q({ status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ status: QueryStatus.QUERIED, hasAgentResponded: false }),
+    ];
+    const s = responseSplit(queries);
+    expect(s).toMatchObject({ requests: 2, passes: 2, offers: 1, unclassified: 0, total: 5 });
+    expect(s.requests + s.passes + s.offers + s.unclassified).toBe(s.total);
+  });
+
+  it("and the total IS the headline figure — one responded set, two readings", () => {
+    const queries = [
+      q({ status: QueryStatus.OFFER, hasAgentResponded: true }),
+      q({ status: QueryStatus.REJECTED, hasAgentResponded: true }),
+      q({ status: QueryStatus.QUERIED, hasAgentResponded: false }),
+    ];
+    expect(responseSplit(queries).total).toBe(responsesReceivedCount(queries));
+  });
+
+  /* An R&R is a request for more — the agent asked for the work again. Filing it under passes
+     would read as a rejection. */
+  it("counts Revise & Resubmit as a request, never a pass", () => {
+    const s = responseSplit([q({ status: QueryStatus.REVISE_RESUBMIT, hasAgentResponded: true })]);
+    expect(s).toMatchObject({ requests: 1, passes: 0, offers: 0 });
+  });
+
+  /* The legacy shape outcomeGroups already documents: responded, but matching no branch. It is
+     surfaced as a number rather than guessed into a segment. */
+  it("a responder matching no branch lands in `unclassified`, not in a segment", () => {
+    const s = responseSplit([q({ status: QueryStatus.WITHDRAWN, hasAgentResponded: true })]);
+    expect(s).toMatchObject({ requests: 0, passes: 0, offers: 0, unclassified: 1, total: 1 });
+  });
+
+  it("an empty pipeline is all zeroes, never NaN", () => {
+    expect(responseSplit([])).toEqual({ requests: 0, passes: 0, offers: 0, unclassified: 0, total: 0 });
   });
 });

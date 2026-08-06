@@ -54,6 +54,7 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { DashboardHero } from "./dashboard/DashboardHero";
 import { TimelineDrawer } from "./dashboard/TimelineDrawer";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
+import { QueriesSentCard, ResponsesCard } from "./dashboard/DeskStats";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { DiaryCarousel } from "./dashboard/DiaryCarousel";
@@ -1628,11 +1629,17 @@ export const Dashboard: React.FC<{
           <span className="sa-mdesk-go" aria-hidden="true">→</span>
         </button>
 
-        {/* Full-width stat row — always on, always charts, and it never moves. */}
-        <div className="sa-stats" style={{ marginTop: 28 }}>
-          {statDefs.map((d) => (
+        {/* Full-width stat row — always on, always charts, and it never moves.
+            ⚠️ MID-MIGRATION, DELIBERATELY. Cards 1 and 4 are the settled desk's (Phase 3); the
+            active-queries trend and the agents pictogram land in Phases 4 and 5 and keep their
+            v37 rendering until then. Shipping the row half-new is the honest intermediate — the
+            alternative is a phase that leaves the page broken between commits. */}
+        <div className="ds-row" style={{ marginTop: 28 }}>
+          <QueriesSentCard queries={queries} agents={agents} />
+          {statDefs.filter((d) => d.key === "active" || d.key === "agents").map((d) => (
             <StatCardFull key={d.key} def={d} />
           ))}
+          <ResponsesCard queries={queries} />
         </div>
 
         {/* Section spacing: 48px above the diary panel, 56px before "What's live". At <md the
