@@ -1053,6 +1053,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               instrument rows, one under the other, is how the chip strip and the LISTS rows came
               to disagree; this is the same mistake in a different arrangement. */}
           <div className="tdb-board">
+        {/* ⚠️ THE COMPOSER'S MOUNT (board fixes II, P3). "＋ Add task or note" set composerAt and
+            NOTHING RENDERED IT — the mount lived in the retired lane/grid views, so the button
+            did nothing a reader could see. It sits here, above whichever body state renders,
+            because the add must work from every one of them (a new desk included). */}
+        {composerAt && renderComposer()}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -1248,9 +1253,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               )}
             </span>
 
-            <button type="button" className="tdb-ghb" onClick={openFocusedSession}>
-              ▶ Focused session
-            </button>
+            {/* ⚠️ THE ▶ SESSION LAUNCHER IS RETIRED (board fixes II, P3). The dock has real
+                doors now — every card opens it, and so does the menu's Action now — so a separate
+                launch button was a second name for a thing you were already touching. What it
+                launched SURVIVES WHOLE: openDock, dockAllCards, the FocusFlow engine and Today's
+                "Work the list" listener are all untouched; only the button and its orphaned
+                opener function are gone. */}
             {/* The Add was orphaned mid-page; it belongs with the page's other instruments. */}
             <button type="button" className="tdb-addb" onClick={() => openComposer("task")}>
               ＋ Add task or note
@@ -1670,9 +1678,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
   }
 
-  /** ⚠️ ONE WORK SURFACE, TWO ENTRANCES (P4 makes this the dock; until then, the existing flow).
-   *  "Focused session" here and "Work the list" on Today walk the same queue machinery. */
-  function openFocusedSession() { openDock(dockAllCards()); }
+  /* (The session launcher's one-line opener is DELETED — board fixes II P3. It was
+     openDock(dockAllCards()), and its only caller was the retired tool-row button. The dock's
+     entrances are now the cards themselves, the menu's Action now, the bounce toast's Open, and
+     Today's "Work the list".) */
 
   /** The queue the dock walks — the board's own order, filtered view respected, so what you work
    *  through is exactly what you were looking at. */

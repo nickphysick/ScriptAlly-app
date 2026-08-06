@@ -158,13 +158,17 @@ describe("⚠️ ONE ACT, THREE RECORDS — and only two of them are writes", ()
 });
 
 describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
-  it("Action now, the bounce toast's Open, Focused session and Work the list all call openDock", () => {
+  it("Action now, the bounce toast's Open, the card doors and Work the list all call openDock", () => {
     /* board fixes II P1 reshaped the action case: a SWEEP routes to its batch sheet first, and
-       every other card docks — the assert follows the call, not the old one-line layout. */
+       every other card docks — the assert follows the call, not the old one-line layout.
+       P3 then retired the tool-row launcher: openFocusedSession is DELETED (its one line lives
+       on as the card doors' own call), so the entrances are cards · menu · bounce · Today. */
     expect(page).toContain('case "action":');
     expect(page).toContain("openDock(dockAllCards(), card.key);");
     expect(page).toContain("fn: async () => { openDock(");                   // the bounce
-    expect(page).toContain("function openFocusedSession() { openDock(");     // the tool row
+    expect(page).not.toContain("openFocusedSession");                        // the identifier is extinct
+    expect(page).not.toContain("tdb-ghb");                                   // and so is its button
+    expect(page).toContain("onOpen={(c) => openDock(dockAllCards(), c.key)}"); // the doors
     expect(page).toContain("const onWork = () => openDock(");                // Today
   });
 

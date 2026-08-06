@@ -18,7 +18,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
-import { sweepCardFor } from "../../lib/todoColumns";
+import { sweepCardFor, boardColumns } from "../../lib/todoColumns";
 import { cardMenu, placeMenu, MenuLeaf, MenuEntry } from "../../lib/todoMenu";
 import { TodoBoard } from "./TodoBoard";
 
@@ -334,5 +334,33 @@ describe("the composer edits in place — one surface, two verbs", () => {
     expect(db).toContain("patch.dueDate = dueDate === null ? deleteField() : dueDate");
     expect(db).toContain("patch.detail = detail === null ? deleteField() : detail");
     expect(db).toContain("patch.surfaceOffset = surfaceOffset === null ? deleteField() : surfaceOffset");
+  });
+});
+
+/* ── P3 — the Add is wired, and a created item lands in the right column ───────────────────── */
+
+describe("⚠️ ＋ Add task or note reaches a MOUNTED composer (P3)", () => {
+  it("the composer renders in the board body — the button used to set state nothing read", () => {
+    expect(page).toContain("{composerAt && renderComposer()}");
+    // exactly one mount: definition + this invocation, nothing else
+    expect(page.match(/renderComposer\(\)/g)?.length).toBe(2);
+  });
+
+  it("the tool-row Add opens task mode; the session launcher beside it is gone", () => {
+    const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+    expect(hero).toContain('onClick={() => openComposer("task")}');
+    expect(hero).not.toContain("tdb-ghb");
+  });
+
+  it("a fresh task lands in To do — and a surfaced one in Today — without any reload logic", () => {
+    const fresh = card({ key: "nt1", stream: "nt", userTaskId: "u1", nature: "task", hk: false });
+    const surfaced = card({ key: "nt2", stream: "nt", userTaskId: "u2", nature: "task", surfaced: true });
+    const cols = boardColumns({
+      board: { do: [], hk: [], nt: [fresh, surfaced], cleared: [] },
+      flags: [], queries: [], agents: [], sweeps: [],
+      today: "2026-08-06", nowMs: Date.parse("2026-08-06T12:00:00Z"),
+    });
+    expect(cols.todo.map((c) => c.key)).toEqual(["nt1"]);
+    expect(cols.today.map((c) => c.key)).toEqual(["nt2"]);
   });
 });

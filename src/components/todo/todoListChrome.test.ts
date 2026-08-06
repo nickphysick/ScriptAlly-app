@@ -73,10 +73,14 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).toContain("function renderBoard");
   });
 
-  it("the Add is PINK (creation) and the session launcher is not", () => {
+  it("the Add is PINK (creation); the session launcher is RETIRED (board fixes II P3)", () => {
     const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
     expect(hero).toContain('className="tdb-addb"');   // pink
-    expect(hero).toContain('className="tdb-ghb"');    // ghost
+    /* ⚠️ SUPERSEDED: "tdb-ghb ▶ Focused session" is gone — the dock's doors (every card, the
+       menu's Action now) made a separate launcher a second name for a thing already under your
+       pointer. The ENGINE survives whole; only the button went. */
+    expect(hero).not.toContain('className="tdb-ghb"');
+    expect(hero).not.toContain("Focused session");
   });
 
   it("the briefing seat still renders above the groups — it is what the pill pointed at", () => {

@@ -69,7 +69,8 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
        its purpose. */
     expect(hero).toContain("actionsSlot=");
     expect(hero).toContain('className="tdb-addb"');  // pink — creation
-    expect(hero).toContain('className="tdb-ghb"');   // ghost — the session launcher
+    // board fixes II P3: the ghost session launcher is retired — the dock's doors replaced it
+    expect(hero).not.toContain('className="tdb-ghb"');
     expect(hero).toContain("tdb-sortb");
     expect(hero).not.toContain("Last week in review"); // one thing, one door
   });
