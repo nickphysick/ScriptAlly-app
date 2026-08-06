@@ -1,6 +1,24 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (fifth pass — the board redesigned; the dock NOT started).**
+**Last updated: 6 August 2026 (sixth pass — the dock is BUILT; the pack is complete).**
+
+## The board+dock pack is COMPLETE
+
+`72f6138` (P1+P2) → `0aafdea` (P3) → `eb41345` (P5) → `a303ef3` + `c0698c4` (two fixes) →
+`ca96721` (git discipline) → `afbf5e4` (**P4, the dock**). **163 files, 2676 passed | 2 skipped.**
+Detail: `reports/todo-board-dock.md`.
+
+**The dock is the one place work gets finished** — 30/70, queue left, work surface right, per-kind
+flows inline. ⚠️ **ONE ACT, THREE RECORDS, and only two are writes**: `recordMaterialsSent`
+appends the activity and moves the status; the task going away is DERIVED, not written.
+⚠️ **ONE SURFACE, EVERY ENTRANCE** — Action now, the bounce toast's Open, "Focused session" and
+Today's "Work the list". `FocusedSession` is RETIRED; `FocusFlow` survives as the flow engine.
+
+⚠️ **CLAUDE.md gained two rules this session, both paid for:** after explicit-path staging,
+`git status` must be CLEAN before the gates are believed (a fix left in the working tree made
+"green locally" meaningless, and CI was right); and **comments are not guards** — a constraint
+worth a warning comment is worth a test (a file's own ⚠️ against post-return consts did not stop
+that bug being written into it, shipping a page that would not load through a green suite).
 
 ## The board+dock pack — Phases 1–3 landed, ⚠️ PHASE 4 (THE DOCK) NOT STARTED
 

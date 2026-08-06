@@ -1348,3 +1348,46 @@ undo always exists.
 **THE ⋯ MENU SPEAKS VERBS, never "Move to X"**: Action now · ＋Add to today (reversing to "− Take
 off today" when it is already there) · Snooze… · Open the query · Dismiss. An offer's Dismiss
 renders disabled and says why — its absence would read as an oversight.
+
+### The dock — the one place work gets finished (board+dock P4, 6 Aug 2026)
+
+*(Ref: `design-refs/todo-board-dock.html` frame 2.)*
+
+**The board says where everything stands; the dock is where it gets done.** That division is the
+reason a derived card cannot be ticked on the board — ticking would clear the reminder and leave
+the work undone — so the board **bounces** it here instead. The dock takes the board's place
+rather than floating over it: a modal would leave the board visible behind, implying you could
+still reach it, when the whole point is that this is where the work happens now. Esc and × bring
+it back **with the scroll position it had**.
+
+**30/70.** Left, the queue as slim rails in the board's own order, filtered view respected — the
+same array the board just drew, handed over rather than recomputed. The docked rail is **ringed in
+ink**; the others are **not dimmed**, because they are where you go next, not clutter. Right, the
+work surface: family band (the board's own map, so a card looks like itself when it docks),
+Playfair title, the record line, the timeline **derived from the activity log**, then the real flow
+inline for the kind.
+
+**⚠️ ONE ACT, THREE RECORDS — and only two of them are writes.** Recording a send calls
+`recordMaterialsSent`, which appends the activity and moves the query's status. The third — the
+task going away — is **derived, not written**: the engine generates a `partial_requested` task
+*because* the query sits at PARTIAL_REQUESTED, so moving the status retires it by construction. A
+write there would be a second record of a fact the first already carries.
+
+**The dock performs nothing itself.** It decides what to OFFER; the page runs the existing
+primitive. Offers, stale closes and housekeeping hand off to the flow that already owns them
+rather than the dock growing a second implementation of a dialogue that exists.
+
+**The send confirms, it does not choose.** What goes is derived from the task, and material and
+target status travel together so they cannot drift. The ink act stays disabled until the writer
+confirms, in the house grammar, and it **names what it records** — never a bare "Done".
+
+**⚠️ Advancing OFFERS the next item; it never runs it.** A surface that started the next act on
+your behalf would be deciding at exactly the moment you had stopped paying attention.
+
+**⚠️ ONE SURFACE, EVERY ENTRANCE.** Action now, the bounce toast's Open, "Focused session" and
+Today's "Work the list" all open this. `FocusedSession` is **retired** — two work surfaces would
+have had to agree about what "done" means, and the first time they disagreed one would have been
+silently wrong. `FocusFlow` survives as the per-kind flow engine.
+
+**Keyboard:** Esc closes, ↑↓ walk the queue (clamped, never wrapping — wrapping hides that you
+reached the end), Enter is the primary. It never steals keys from a field being typed into.
