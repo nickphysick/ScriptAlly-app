@@ -1,0 +1,145 @@
+/**
+ * The dock (board+dock P4) — 30/70, the queue left, the work surface right.
+ * Families reuse the board's map, so a card looks like itself when it docks.
+ */
+
+.tdk {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  gap: 14px;
+  align-items: start;
+  margin-top: 20px;
+  outline: none;
+}
+
+/* ── the queue ───────────────────────────────────────────────────────── */
+.tdk-q {
+  background: #fbf8f3;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.tdk-qcap {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #9a8e80; padding: 2px 6px 6px;
+}
+
+/* A rail is the card, slimmed — same family colour, so it is recognisable at a glance. */
+.tdk-rail {
+  display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
+  background: #fffefb; border: 1px solid #efe8dc; border-left-width: 3px;
+  border-radius: 8px; padding: 7px 9px;
+}
+.tdk-rail.fam-urgent { border-left-color: #e8c8bc; }
+.tdk-rail.fam-housekeeping { border-left-color: #ddd0bc; }
+.tdk-rail.fam-yours { border-left-color: #b9c9b4; }
+.tdk-rail.fam-done { border-left-color: #cfd8cc; }
+.tdk-rail:hover { background: #f7f3ec; }
+
+/* ⚠️ THE DOCKED RAIL IS RINGED IN INK — the others stay legible rather than dimmed, because
+   they are where you are going next, not clutter. */
+.tdk-rail.on { border-color: #2a1a13; border-left-color: #2a1a13; background: #fffefb; }
+
+.tdk-railk {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7.5px; letter-spacing: 0.13em; text-transform: uppercase; color: #8a7a6d;
+}
+.tdk-railt {
+  display: block; font-size: 12.5px; color: #2a1a13; margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── the work surface ────────────────────────────────────────────────── */
+.tdk-w {
+  background: #fffefb;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 340px;
+}
+
+/* the family band — the same map as the board's card */
+.tdk-band {
+  height: 30px; display: flex; align-items: center; padding: 0 16px;
+  border-bottom: 1px solid #e8c8bc;
+}
+.tdk-band.fam-urgent { background: linear-gradient(180deg, #f8e2d9, #f4d5c9); border-bottom-color: #e8c8bc; }
+.tdk-band.fam-housekeeping { background: linear-gradient(180deg, #f5efe6, #efe7d9); border-bottom-color: #ddd0bc; }
+.tdk-band.fam-yours { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-bottom-color: #b9c9b4; }
+.tdk-band.fam-done { background: #e7ebe5; border-bottom-color: #cfd8cc; }
+
+.tdk-band i {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7.5px; letter-spacing: 0.14em; font-style: normal; text-transform: uppercase; color: #3a1c14;
+}
+.tdk-x { margin-left: auto; background: transparent; border: 0; color: #8a6a58; cursor: pointer; line-height: 0; padding: 3px; border-radius: 5px; }
+.tdk-x:hover { background: rgba(0,0,0,.06); color: #2a1a13; }
+
+.tdk-body { padding: 18px 20px 6px; flex: 1; }
+
+.tdk-t {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 25px; font-weight: 600; color: #2a1a13; margin: 0; line-height: 1.15;
+}
+.tdk-rec { font-size: 12.5px; color: #8a7a6d; margin-top: 5px; }
+
+/* the timeline — quiet, and only when there is history to show */
+.tdk-tl { list-style: none; margin: 16px 0 0; padding: 0 0 0 12px; border-left: 2px solid #efe8dc; }
+.tdk-tl li { display: flex; gap: 10px; font-size: 12.5px; color: #4d4238; padding: 4px 0; }
+.tdk-tlw {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: .08em; color: #a5988c; white-space: nowrap; min-width: 62px;
+}
+
+.tdk-flow { margin-top: 18px; }
+.tdk-fk {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #8a7a6d; margin-bottom: 7px;
+}
+.tdk-check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #2a1a13; cursor: pointer; }
+.tdk-note { font-size: 13px; color: #6b6055; line-height: 1.5; }
+.tdk-detail { font-size: 13.5px; color: #2a1a13; line-height: 1.5; margin: 0 0 10px; }
+
+/* ── the foot ────────────────────────────────────────────────────────── */
+.tdk-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; border-top: 1px solid #f0e9e0; background: #fdfcfa;
+}
+
+.tdk-prime {
+  font: inherit; font-size: 13px; height: 36px; padding: 0 15px; border-radius: 9px;
+  background: #2a1a13; border: 1px solid #2a1a13; color: #fdfaf5; cursor: pointer;
+}
+.tdk-prime:hover:not(:disabled) { background: #3a2a20; }
+/* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity */
+.tdk-prime:disabled {
+  background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
+}
+
+.tdk-quiet {
+  background: transparent; border: 1px solid #e2d8c8; border-radius: 8px; color: #6b6055;
+  height: 32px; width: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.tdk-quiet:hover { background: #f4f2ef; color: #2a1a13; }
+
+.tdk-next {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: .13em; text-transform: uppercase; color: #a5988c;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40%;
+}
+
+@media (max-width: 900px) {
+  .tdk { grid-template-columns: 1fr; }
+  .tdk-q { max-height: 170px; }
+}

@@ -42,7 +42,7 @@ import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { useConfirmAsk } from "./ConfirmAsk";
-import { FocusedSession, HeroSession } from "./FocusedSession";
+import { HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
@@ -56,8 +56,12 @@ import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
+import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, CardVerb, TodoColumnId } from "../../lib/todoColumns";
+import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
+import { activityEventLabel } from "../../lib/activityEvent";
+import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import {
   TODO_SORTS, DEFAULT_TODO_SORT, TodoSortId, sortBoardCards,
   TodoFacetId, applyFacet, facetCounts,
@@ -543,7 +547,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [assistantOpen, setAssistantOpen] = useState(false);
   // the focused session (the session pack): the queue = the ENGINE's own boardCards order,
   // captured at launch; the cinematic container drives it.
-  const [session, setSession] = useState<{ queue: BoardCard[] } | null>(null);
+  /* ⚠️ THE DOCK (board+dock P4) — the one work surface. `queue` is the board's own column order,
+     handed over rather than recomputed, so what you walk is what you were looking at. The board's
+     scroll position is remembered here because closing the dock must put you back where you were,
+     not at the top of a board you had scrolled halfway down. */
+  const [dock, setDock] = useState<{ queue: BoardCard[]; activeKey: string } | null>(null);
+  const boardScroll = useRef(0);
   // the inverses the undo toast already carries, kept by card key so the session's REDO can
   // offer "Undo handled" on a card it stamped (see doneToast — no parallel undo store)
   // v7 — the hero in session: the title crossfade + the fixed sub-slot's single occupant are
@@ -646,7 +655,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      unmount), so /todo/today has this page alive beside it. That is a real dependency, so it is
      stated here rather than left to be discovered. */
   useEffect(() => {
-    const onWork = () => setSession({ queue: [...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate === today) });
+    /* ⚠️ "Work the list" opens THE SAME DOCK (P4) — walking today's committed queue instead of
+       the board's. One engine, two entrances; the queue is the only thing that differs. */
+    const onWork = () => openDock([...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate === today || c.surfaced));
     const onAdd = (e: Event) => {
       const key = (e as CustomEvent<{ key?: string }>).detail?.key;
       const card = [...board.do, ...board.hk, ...board.nt].find((c) => c.key === key);
@@ -1002,6 +1013,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-nomatch">
             Nothing matches — <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters</button>
           </div>
+        ) : dock ? (
+          /* ⚠️ THE DOCK TAKES THE BOARD'S PLACE rather than floating over it. A modal would leave
+             the board visible behind, implying you could still reach it — and the whole point of
+             the dock is that this is where the work happens now. Esc and × bring it back, with
+             the scroll position it had. */
+          <TodoDock
+            queue={dock.queue}
+            activeKey={dock.activeKey}
+            onSelect={(key) => setDock((d) => (d ? { ...d, activeKey: key } : d))}
+            onClose={closeDock}
+            timeline={dockTimeline}
+            onPrimary={(c, spec) => void dockPrimary(c, spec)}
+            onSnooze={(c) => setLaterKey(c.key)}
+            onMore={(c) => openFlowCards([c])}
+          />
         ) : renderBoard()}
           </div>{/* .tdb-board */}
 
@@ -1041,20 +1067,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       )}
       {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
-      {session && (
-        <FocusedSession
-          queue={session.queue}
-          wrapEl={wrapRef.current}
-          liveKeys={new Set(boardCards.map((c) => c.key))}
-          onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}
-          onQuickComplete={quickDone}
-          canQuickComplete={sessionCanQuick}
-          canUndoHandled={(c) => !!recallUndo(c.key)}
-          onUndoHandled={async (c) => { const fn = recallUndo(c.key); if (fn) await fn(); }}
-          onHero={setHeroSession}
-          onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}
-        />
-      )}
+      {/* ⚠️ FocusedSession IS RETIRED (board+dock P4). It was a SECOND work surface, and two of
+          them would have had to agree about what "done" means — the first time they disagreed,
+          one would have been silently wrong. The dock is the one surface, and "Focused session"
+          and Today's "Work the list" are entrances to it rather than to anything of their own.
+          FocusFlow survives as the per-kind flow engine, which is what it was always good at. */}
     </div>
   );
 
@@ -1240,7 +1257,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             It unmounts for the session (the opening owns the departure). */}
         {heroSession.slot?.kind !== "session" && (
           <div className={`tdb-heroright${heroSession.clearing ? " insession" : ""}`}>
-            <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => setSession({ queue: boardCards })}>
+            <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => openDock(boardCards)}>
               <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
               Begin focused session
             </button>
@@ -1598,7 +1615,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       case "bounce":
         flash(plan.why ?? "That is not what completes this", {
           label: "Open",
-          fn: async () => { openFlowCards([card]); },
+          /* ⚠️ THE BOUNCE'S WAY THROUGH — it docks the item, which is where the act it named
+             actually happens. Bouncing without a route would be a rule with no door. */
+          fn: async () => { openDock(dockAllCards(), card.key); },
         });
         break;
       case "none": if (plan.why) flash(plan.why); break;  // the offer guard states its reason
@@ -1607,16 +1626,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /** ⚠️ ONE WORK SURFACE, TWO ENTRANCES (P4 makes this the dock; until then, the existing flow).
    *  "Focused session" here and "Work the list" on Today walk the same queue machinery. */
-  function openFocusedSession() {
-    const queue = [...board.do, ...board.hk].filter((c) => c.nature !== "note");
-    if (queue.length === 0) { flash("Nothing to work through"); return; }
-    setSession({ queue });
+  function openFocusedSession() { openDock(dockAllCards()); }
+
+  /** The queue the dock walks — the board's own order, filtered view respected, so what you work
+   *  through is exactly what you were looking at. */
+  function dockAllCards(): BoardCard[] {
+    const raw = [...board.do, ...board.hk, ...board.nt];
+    return sortBoardCards(applyFacet(raw, facet), sort);
   }
 
   /* ⚠️ THE ⋯ VERBS, PERFORMED — every one an EXISTING primitive, exactly as the drags are. */
   function performCardVerb(card: BoardCard, verb: CardVerb, column: TodoColumnId) {
     switch (verb.id) {
-      case "action": openFlowCards([card]); break;              // → the dock (P4); the sheet until then
+      case "action": openDock(dockAllCards(), card.key); break;  // ⚠️ the dock — the one work surface
       case "today": performBoardPlan(card, dropPlan(card, column, column === "today" ? "todo" : "today")); break;
       case "snooze": setLaterKey(card.key); break;              // the popover, never a silent snooze
       case "open": if (card.relatedRecordId) onNavigate("queries", card.relatedRecordId); break;
@@ -1625,6 +1647,86 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
          stance with its own bugs. */
       case "dismiss": if (!verb.disabled) forkStale(card, "notNow"); break;
     }
+  }
+
+  /** ⚠️ THE ONE ENTRANCE FUNCTION — Action now, the bounce toast's Open, "Focused session" and
+   *  Today's "Work the list" all arrive here. Two work surfaces would have to agree about what
+   *  "done" means; there is one. */
+  function openDock(queue: BoardCard[], activeKey?: string) {
+    const q = dockQueue(queue);
+    if (q.length === 0) { flash("Nothing to work through"); return; }
+    boardScroll.current = document.getElementById(STAGE_SCROLL_ID)?.scrollTop ?? 0;
+    setDock({ queue: q, activeKey: activeKey && q.some((c) => c.key === activeKey) ? activeKey : q[0].key });
+  }
+
+  function closeDock() {
+    setDock(null);
+    // restore where the board was — after the board has painted again
+    requestAnimationFrame(() => {
+      const el = document.getElementById(STAGE_SCROLL_ID);
+      if (el) el.scrollTop = boardScroll.current;
+    });
+  }
+
+  /** The docked item's timeline — derived from the activity log, never stored. */
+  function dockTimeline(card: BoardCard): DockTimelineEvent[] {
+    if (!card.relatedRecordId) return [];
+    return activities
+      .filter((a) => a.queryId === card.relatedRecordId)
+      .map((a, i) => ({ a, i, label: activityEventLabel(a) }))
+      .filter((x) => x.label !== null)
+      .map((x) => ({
+        key: x.a.id ?? `ev-${x.i}`,
+        label: x.label as string,
+        when: new Date(x.a.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+      }));
+  }
+
+  /**
+   * ⚠️ THE FLOW'S ONE INK ACT — and for a send, ONE ACT, THREE RECORDS.
+   *
+   * `recordMaterialsSent` is the existing primitive and it does two of them: it appends the
+   * MATERIALS_SENT activity and moves the query's status. The third — the task going away — is
+   * DERIVED, not written: the engine generates a partial_requested task because the query sits at
+   * PARTIAL_REQUESTED, so moving the status retires the task by construction. Nothing ticks it,
+   * and nothing needs to; a write there would be a second record of a fact the first already
+   * carries, and the two would eventually disagree.
+   */
+  async function dockPrimary(card: BoardCard, spec: SendSpec | null) {
+    const flow = dockFlowKind(card);
+    if (spec && card.relatedRecordId) {
+      try {
+        await recordMaterialsSent({
+          queryId: card.relatedRecordId,
+          targetStatus: spec.targetStatus === "Partial Sent" ? QueryStatus.PARTIAL_SENT : QueryStatus.FULL_SENT,
+          sentDate: new Date().toISOString(),
+          ...(spec.isResubmit ? { isResubmit: true } : {}),
+        });
+        flash(`Recorded — the ${spec.material} is away`, { label: "Undo", fn: async () => {
+          if (card.relatedRecordId) await undoQueryStatus(card.relatedRecordId, card.status as QueryStatus, spec.targetStatus === "Partial Sent" ? QueryStatus.PARTIAL_SENT : QueryStatus.FULL_SENT);
+        } });
+      } catch { flash("Couldn’t record that — try again?"); return; }
+      advanceDock(card);
+      return;
+    }
+    /* Every other flow hands off to the surface that already owns it, rather than the dock
+       growing a second implementation of a dialogue that exists. */
+    if (flow === "user-task") { await quickDone(card); advanceDock(card); return; }
+    if (flow === "offer" || flow === "stale" || flow === "housekeeping" || flow === "agent-waiting") {
+      openFlowCards([card]);
+    }
+  }
+
+  /** ⚠️ ADVANCE OFFERS THE NEXT ITEM — it never runs it. A surface that started the next act on
+   *  your behalf would be deciding at exactly the moment you had stopped paying attention. */
+  function advanceDock(done: BoardCard) {
+    setDock((d) => {
+      if (!d) return d;
+      const next = nextInQueue(d.queue, done.key);
+      const queue = d.queue.filter((c) => c.key !== done.key);
+      if (queue.length === 0) return null;      // the queue is finished — back to the board
+      return { queue, activeKey: (next ?? queue[0]).key };
+    });
   }
 
   function renderBoard() {
@@ -1646,7 +1748,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <TodoBoard
         columns={columns}
-        onOpen={(c) => openFlowCards([c])}
+        onOpen={(c) => openDock(dockAllCards(), c.key)}
         onPlan={(c, plan) => performBoardPlan(c, plan)}
         onVerb={(c, v, column) => performCardVerb(c, v, column)}
       />

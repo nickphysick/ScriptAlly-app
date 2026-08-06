@@ -51,16 +51,14 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderBoard");
   });
-  it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
-    expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0}'); // the shell: Begin launches the session over the same engine queue
-    expect(page).toContain("onClick={() => setSession({ queue: boardCards })}");
-    expect(rule(".tdb-btnp")).toContain("height: 42px");
-    // the CTA pair lives in the HERO (right side); there is no CTA in the sidebar
-    const filterFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
-    expect(filterFn).not.toContain("tdb-herobegin");
-    expect(filterFn).not.toContain("Begin focused session");
-    const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
-    expect(heroFn).toContain("tdb-herobegin");
+  it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card — RETIRED SURFACE (board+dock P4)", () => {
+    /* ⚠️ FocusedSession IS RETIRED (board+dock P4) — it was a SECOND work surface, and two of
+       them would have had to agree about what "done" means. The dock replaced it: "Focused
+       session" and Today's "Work the list" are entrances to ONE surface. Its own locks live in
+       todoDock.test.ts and todoDockSurface.test.tsx. */
+    expect(page).not.toContain("<FocusedSession");
+    expect(page).not.toContain("setSession(");
+    expect(page).toContain("function openDock");
   });
   it("panel-final P2: the Today's-list lens is retired from the panel (it lives in the corner pop-up)", () => {
     expect(page).not.toContain("Today’s list<span"); // the lens row is gone from the filters

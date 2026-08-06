@@ -24,22 +24,23 @@ const rule = (sel: string): string => {
 };
 
 describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritual", () => {
-  it("Begin launches the session with the engine's own queue; the overlay stays transparent", () => {
-    expect(page).toContain('onClick={() => setSession({ queue: boardCards })}>');
-    expect(page).toContain("queue={session.queue}");
-    expect(rule(".tdb-ss")).not.toContain("background");
-    expect(ss).not.toContain("canvas");
+  it("Begin launches the session with the engine's own queue; the overlay stays transparent — RETIRED SURFACE (board+dock P4)", () => {
+    /* ⚠️ FocusedSession IS RETIRED (board+dock P4) — it was a SECOND work surface, and two of
+       them would have had to agree about what "done" means. The dock replaced it: "Focused
+       session" and Today's "Work the list" are entrances to ONE surface. Its own locks live in
+       todoDock.test.ts and todoDockSurface.test.tsx. */
+    expect(page).not.toContain("<FocusedSession");
+    expect(page).not.toContain("setSession(");
+    expect(page).toContain("function openDock");
   });
-  it("the title crossfades gently (opacity only, 800ms) between the two lines — a stacked pair, driven by clearing", () => {
-    expect(page).toContain('<h1 className={`tdb-ask t1${heroSession.clearing ? " out" : ""}`}>What’s on your desk?</h1>');
-    expect(page).toContain('<h1 className={`tdb-ask t2${heroSession.clearing ? " in" : ""}`} aria-hidden={!heroSession.clearing}>In focus</h1>'); // v9
-    expect(css).toContain(".tdb-ask.t1, .tdb-ask.t2 { transition: opacity 800ms ease; }");
-    expect(rule(".tdb-ask.t2")).toContain("opacity: 0"); // t2 waits; .in reveals it
-    expect(css).toContain(".tdb-ask.t1.out { opacity: 0; }");
-    expect(css).toContain(".tdb-ask.t2.in { opacity: 1; }");
-    // FocusedSession drives it BOTH ways: clearing:true on start, clearing:false on Back to desk
-    expect(ss).toContain('onHero({ clearing: true, slot: null }); // the title crossfades to "In focus" as the session begins');
-    expect(ss).toContain("onHero({ clearing: false, slot: null }); // the title crossfades back WITH the reassembly");
+  it("the title crossfades gently (opacity only, 800ms) between the two lines — a stacked pair, driven by clearing — RETIRED SURFACE (board+dock P4)", () => {
+    /* ⚠️ FocusedSession IS RETIRED (board+dock P4) — it was a SECOND work surface, and two of
+       them would have had to agree about what "done" means. The dock replaced it: "Focused
+       session" and Today's "Work the list" are entrances to ONE surface. Its own locks live in
+       todoDock.test.ts and todoDockSurface.test.tsx. */
+    expect(page).not.toContain("<FocusedSession");
+    expect(page).not.toContain("setSession(");
+    expect(page).toContain("function openDock");
   });
   it("the spacing law: the hero is a stacked flow — the sub-slot is FIXED HEIGHT with even gaps; no absolute over the board", () => {
     const slot = rule(".tdb-srchrow");
@@ -173,14 +174,12 @@ describe("v7 P4 — the card + the carriage (transition A)", () => {
     expect(ss).toContain('if (c.userTaskId) return "";'); // notes say nothing
     expect(ss).toContain("owed: q ? STATUS_OWED[q.status as string] : undefined");
   });
-  it("the actions: Action now (opens the journey OVER the session) · ✓ Mark handled (gated) · Skip; the page wires the primitives", () => {
-    expect(ss).toContain('onClick={() => onOpenJourney(current)}>Action now</button>');
-    expect(ss).toContain("{canQuickComplete(current) && (");
-    expect(ss).toContain('onClick={() => onQuickComplete(current)}>✓ Mark handled</button>');
-    expect(ss).toContain("SKIP · NEXT ›"); // v9 — skip is the running footer's right side
-    expect(page).toContain('onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}');
-    expect(page).toContain("onQuickComplete={quickDone}");
-    expect(page).toContain('if (c.taskType === "offer_received") return false;'); // the standing no-one-tap rule
+  it("the actions: Action now (opens the journey OVER the session) · ✓ Mark handled (gated) · Skip; the page wires the primitives — RETIRED SURFACE (board+dock P4)", () => {
+    /* ⚠️ FocusedSession IS RETIRED (board+dock P4). These wirings were its props; the dock owns
+       the work surface now, and its per-kind flows hand off to FocusFlow, which survives as the
+       engine it always was. Locks: todoDock.test.ts, todoDockSurface.test.tsx. */
+    expect(page).not.toContain("<FocusedSession");
+    expect(page).toContain("function openDock");
   });
   it("the round-trip law: a completed task VANISHES from liveKeys and deals as handled; a survivor resumes in place", () => {
     expect(ss).toContain("if (!liveKeys.has(current.key)) markHandledAdvance(current);");
@@ -365,26 +364,12 @@ describe("v9 P2 — THE MANUSCRIPT PAGE (composition A) + the running footer", (
     expect(css).not.toContain("tdb-ssnext");
     expect(ss).not.toContain("NEXT UP");
   });
-  it("REDO reverses the carriage; a stamped page returns stamped and offers the BOARD's own inverse", () => {
-    expect(ss).toContain("function goPrevious()");
-    expect(ss).toContain("if (index <= 0 || dealRef.current) return;");
-    expect(ss).toContain('setDeal({ card: current, kind: "back" })');
-    expect(css).toContain("@keyframes tdbCarriageBack { from { transform: translateX(-120%); } }");
-    expect(css).toContain("@keyframes tdbCarriageOutR { to { transform: translateX(120%); opacity: 0; } }");
-    expect(ss).toContain("const stampedCurrent = !!current && handled.some((x) => x.key === current.key);");
-    expect(ss).toContain("{stampedCurrent && canUndoHandled(current) && (");
-    expect(ss).toContain("onClick={() => onUndoHandled(current)}");
-    /* ONE inverse in the app: the toast's, remembered by key — no parallel undo store.
-       ⚠️ THE REGISTRY MOVED INTO useTodoToast (extraction E1) so the four To-do pages share one
-       takeback window; the RULE is unchanged, and this asserts it in its new form. The page still
-       hands the toast an inverse and reads it back by card key — it never keeps a second one. */
-    expect(page).toContain("function doneToast(c: BoardCard, fn: () => Promise<void>) {");
-    expect(page).toContain("rememberUndo(c.key, fn);");
-    expect(page).toContain('flash(`Done — “${c.title}”`, { label: "Undo", fn });');
-    expect(page).toContain("canUndoHandled={(c) => !!recallUndo(c.key)}");
-    const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
-    expect(hook, "the hook stores an inverse; it must never learn to build one")
-      .toContain("Map<string, () => Promise<void>>");
+  it("REDO reverses the carriage; a stamped page returns stamped and offers the BOARD's own inverse — RETIRED SURFACE (board+dock P4)", () => {
+    /* ⚠️ FocusedSession IS RETIRED (board+dock P4). These wirings were its props; the dock owns
+       the work surface now, and its per-kind flows hand off to FocusFlow, which survives as the
+       engine it always was. Locks: todoDock.test.ts, todoDockSurface.test.tsx. */
+    expect(page).not.toContain("<FocusedSession");
+    expect(page).toContain("function openDock");
   });
   it("the session still writes NOTHING — the takeback is the board's callback, not a session write", () => {
     for (const w of ["updateQueryStatus", "upsertTaskFlag", "updateUserTask", "logNudge", "addDoc", "setDoc"]) {
@@ -471,15 +456,14 @@ describe("v9 P4 — THE QUIET EXIT (option 3) — and it works", () => {
     expect(ss).toContain("const onPop = () => backToDesk();");
     expect(ss).not.toContain("const onPop = () => onClose();");
   });
-  it("THE DERIVATION ASSERTION: the board is already correct — the session keeps no counts to sync", () => {
-    // the session holds NO board state: the queue is handed in, live-ness is handed in
-    expect(ss).toContain("liveKeys");
-    expect(ss).not.toContain("useMemo(() => buildBoard");
-    expect(ss).not.toContain("boardCards =");
-    for (const w of ["refresh(", "reload(", "invalidate(", "setBoard("]) expect(ss).not.toContain(w);
-    // the board's own derivation drives both the board and the session's live set
-    expect(page).toContain("liveKeys={new Set(boardCards.map((c) => c.key))}");
-    expect(page).toContain("onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}");
+  it("THE DERIVATION ASSERTION: the board is already correct — the session keeps no counts to sync — RETIRED SURFACE (board+dock P4)", () => {
+    /* ⚠️ FocusedSession IS RETIRED (board+dock P4) — it was a SECOND work surface, and two of
+       them would have had to agree about what "done" means. The dock replaced it: "Focused
+       session" and Today's "Work the list" are entrances to ONE surface. Its own locks live in
+       todoDock.test.ts and todoDockSurface.test.tsx. */
+    expect(page).not.toContain("<FocusedSession");
+    expect(page).not.toContain("setSession(");
+    expect(page).toContain("function openDock");
   });
 });
 
