@@ -55,6 +55,8 @@ import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
+import { TodoBoard } from "./TodoBoard";
+import { boardColumns, DropPlan } from "../../lib/todoColumns";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
 } from "../../lib/todoListPage";
@@ -994,7 +996,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-nomatch">
             Nothing matches — <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters</button>
           </div>
-        ) : view === "ledger" ? renderLedger() : (
+        ) : view === "ledger" ? renderLedger() : view === "cards" ? renderBoard() : (
         <div className="tdb-lanes">
           {(!active || vDo.length > 0 || overlayCards("do").length > 0) && (
           <Lane cls="do" label="Urgent" count={active ? vDo.length : tiles.urgent} isEmpty={vDo.length === 0 && overlayCards("do").length === 0}
@@ -1604,6 +1606,51 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdg-rows">{ledgerColhead()}{rows}</div>
         {foot}
       </section>
+    );
+  }
+
+  /* ── PHASE 4 — THE BOARD (the card toggle) ─────────────────────────────────────────────────
+     Four columns, every one a state the app already owns. The board asks; this page performs —
+     and performs with the EXISTING verbs, so a card moved here and a card moved from a row are
+     the same write. Snooze is the one that is not a write at all: dropping on Snoozed opens the
+     date popover, and the card moves only once a date is chosen. */
+  /** Return a snoozed card NOW — the snooze's own reversal (the same write its undo performs). */
+  function unsnoozeCard(c: BoardCard) {
+    const key = c.userTaskId
+      ? { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId }
+      : c.taskType && c.relatedRecordId ? flagKeyForTask(c.taskType, c.relatedRecordId) : null;
+    if (key) upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true });
+  }
+  /** Un-tick — quickDone's own reverse, which is exactly what its undo toast already calls. */
+  async function unDone(c: BoardCard) {
+    if (!c.userTaskId) return;
+    try { await updateUserTask(c.userTaskId, { done: false }); }
+    catch { flash("Couldn’t undo that — try again?"); }
+  }
+
+  function performBoardPlan(card: BoardCard, plan: DropPlan) {
+    switch (plan.kind) {
+      case "commit": toggleToday(card); break;            // the cap + its flash come with it
+      case "uncommit": setCommitted(card, false); break;
+      /* ⚠️ THE POPOVER, NOT A SNOOZE. Opening the card's own Later menu is the whole point of
+         the gate: the card stays where it is until a date is chosen there. Reusing `laterKey` —
+         the menu's existing key — means the board opens the SAME menu the rows do. */
+      case "snooze-popover": setLaterKey(card.key); break;
+      case "unsnooze": unsnoozeCard(card); break;
+      case "complete": void quickDone(card); break;       // the completion primitive + undo toast
+      case "uncomplete": void unDone(card); break;
+      case "none": if (plan.why) flash(plan.why); break;  // the offer guard states its reason
+    }
+  }
+
+  function renderBoard() {
+    const columns = boardColumns({ board, flags: taskFlags, today, nowMs: now });
+    return (
+      <TodoBoard
+        columns={columns}
+        onOpen={(c) => openFlowCards([c])}
+        onPlan={(c, plan) => performBoardPlan(c, plan)}
+      />
     );
   }
 

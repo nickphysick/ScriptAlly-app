@@ -797,7 +797,9 @@ describe("grouping P2 — the ledger nest", () => {
 
 describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head checkbox)", () => {
   it("the view toggle is LIVE both ways and persisted (sa.todoView)", () => {
-    expect(page).toContain('view === "ledger" ? renderLedger() : (');
+    /* workspace P4: the toggle now chooses between the ROWS view and THE BOARD — the cards
+       branch became the four-column board, which is what the "cards" toggle always meant. */
+    expect(page).toContain('view === "ledger" ? renderLedger() : view === "cards" ? renderBoard() : (');
     expect(page).toContain('localStorage.setItem("sa.todoView"');
   });
   it("the WASHED SECTIONS are retired (todo rebuild P1) — no tinted container; rows are cards on the bare capsule", () => {

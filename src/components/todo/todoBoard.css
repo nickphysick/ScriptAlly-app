@@ -1,0 +1,96 @@
+/**
+ * The four-column board (workspace pack, Phase 4).
+ *
+ * Four equal columns on the page ground. The cards are white with a 24px band; URGENT wears a 1px
+ * INK border — a border rather than a fill, because a fill would compete with the band's colour
+ * and the band is already saying what kind of thing this is.
+ */
+
+.tbd { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 20px; align-items: start; }
+
+.tbd-col {
+  background: #fbf8f3;
+  border: 1px solid var(--bd, #e7ddd2);
+  border-radius: 12px;
+  padding: 12px 10px 10px;
+  min-height: 160px;
+}
+
+/* The drop target says so with a colour AND a label — highlight alone leaves you guessing. */
+.tbd-col.over { background: #f5efe6; border-color: #cbb89a; }
+
+.tbd-head { display: flex; align-items: center; gap: 8px; padding: 0 6px 10px; }
+.tbd-head h3 { font-family: "Playfair Display", Georgia, serif; font-size: 15px; font-weight: 600; color: #2a1a13; margin: 0; }
+.tbd-cn { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; color: #9a8e80; }
+
+.tbd-drop {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.13em; text-transform: uppercase; text-align: center;
+  color: #7a6a5e; background: #efe6d8; border: 1px dashed #cbb89a; border-radius: 8px;
+  padding: 8px 6px; margin: 0 4px 8px;
+}
+
+.tbd-body { display: flex; flex-direction: column; gap: 8px; }
+.tbd-empty { font-size: 12.5px; color: #9a8e80; padding: 8px 6px 12px; }
+
+.tbd-card {
+  background: #fffefb;
+  border: 1px solid #e7ddd2;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+/* ⚠️ URGENT IS A 1px INK BORDER, never a fill: the band already carries a colour, and two colour
+   systems on one small card stop meaning anything. */
+.tbd-card.urgent { border: 1px solid #2a1a13; }
+.tbd-card.done .tbd-t { text-decoration: line-through; color: #9a8e80; }
+.tbd-card:focus-visible { outline: 2px solid #2a1a13; outline-offset: 2px; }
+
+/* THE 24px BAND — the fixed measure the ref specifies. */
+.tbd-band {
+  height: 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 0 9px;
+  background: #f3ece1;
+  border-bottom: 1px solid #ece3d8;
+}
+
+.tbd-kind, .tbd-when {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: #7a6a5e;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.tbd-t { font-size: 13px; color: #2a1a13; padding: 9px 9px 0; line-height: 1.35; }
+.tbd-meta { font-size: 11px; color: #9a8e80; padding: 3px 9px 0; }
+
+.tbd-foot { display: flex; justify-content: flex-end; padding: 6px 6px 7px; position: relative; }
+
+.tbd-more { background: transparent; border: 0; color: #9a8e80; cursor: pointer; padding: 2px 4px; border-radius: 6px; line-height: 0; }
+.tbd-more:hover { background: #f1e9df; color: #2a1a13; }
+
+.tbd-menu {
+  position: absolute; right: 6px; bottom: 100%; z-index: 5;
+  background: #fffefb; border: 1px solid #e3d8c8; border-radius: 9px;
+  box-shadow: 0 6px 18px rgba(58, 28, 20, 0.12);
+  padding: 4px; min-width: 150px;
+}
+
+.tbd-menu button {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 12.5px;
+  background: transparent; border: 0; padding: 7px 9px; border-radius: 6px; cursor: pointer; color: #2a1a13;
+}
+
+.tbd-menu button:hover:not(:disabled) { background: #f4f2ef; }
+.tbd-menu button:disabled { color: #b3a598; cursor: not-allowed; }
+
+.tbd-foot-note {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #9a8e80;
+  padding: 10px 6px 2px; text-align: center;
+}
+
+@media (max-width: 1100px) { .tbd { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .tbd { grid-template-columns: 1fr; } }
