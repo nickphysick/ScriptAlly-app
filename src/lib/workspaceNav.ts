@@ -49,6 +49,15 @@ export interface WorkspaceNavInput {
  * The groups map 1:1 to the rail's ribs, which is what makes the collapsed rail a complete map of
  * the app rather than a subset of it.
  */
+/** The four To-do pages' row icons — keyed by TODO_ROUTES' own ids, so a fifth page cannot be
+ *  added to the routes without this map (and therefore the nav) noticing. */
+const TASKS_ICON: Record<string, string> = {
+  list: "check",
+  today: "sun",
+  calendar: "calendar",
+  noteboard: "note",
+};
+
 export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
   return [
     {
@@ -57,16 +66,29 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       def: "dash",
       children: [
         { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" },
-        /* ⚠️ ONE ROW, NOT A GROUP OF FOUR. The earlier build gave To-do its own group with
-           To-do list · Today · Calendar · Noteboard, reasoning that folding it would hide three
-           destinations. It does not: Today is linked from the board, Noteboard from Today, and
-           the sub-routes are page-level views of one place rather than four peers in the IA.
-           The ref files To-do here, and it is right — a nav column that lists every view of every
-           page stops being navigation and becomes a table of contents.
-           ⚠️ `/todo/calendar` HAS NO IN-PAGE LINK — flagged in reports/shell-polish.md, not
-           solved by leaving a nav row in place to cover for it. */
-        { id: "todo", label: "To-do", path: "/todo", icon: "check", count: input.todo || undefined, urgent: true },
+        /* ⚠️ TO-DO LEFT THIS GROUP (sidebar-IA fix, 6 Aug — Nick's call, REVERSING the one-row
+           fold below). It is the TASKS section now. The old reasoning ("the sub-routes are
+           page-level views of one place") is superseded: four routed pages with their own
+           chrome are peers in the IA, and the fold left Calendar reachable from nowhere. */
       ],
+    },
+    /* ⚠️ THE TASKS SECTION (sidebar-IA fix, 6 Aug) — directly after WORKSPACE, the same
+       section grammar as Queries/Agents/Materials, NO new variant. Its rows ARE `TODO_ROUTES`
+       — the one definition of the four pages (labels, paths, palette blurbs), so the sidebar,
+       the ⌘K palette, the breadcrumb ("Tasks / To-do list") and every route-section lookup
+       follow from the same source and cannot drift. The urgency dot + count ride the To-do
+       list row alone — the board's own total, the ONLY count in the nav (Amendment 1, H5). */
+    {
+      id: "tasks",
+      label: "Tasks",
+      def: "list",
+      children: TODO_ROUTES.map((r) => ({
+        id: r.id,
+        label: r.label,
+        path: r.path,
+        icon: TASKS_ICON[r.id],
+        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
+      })),
     },
     {
       id: "queries",

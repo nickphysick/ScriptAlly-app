@@ -1,6 +1,28 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (ninth pass — board fixes II + the editorial board, dev-deployed).**
+**Last updated: 6 August 2026 (tenth pass — the sidebar's TASKS section).**
+
+## The sidebar IA: To-do left WORKSPACE for its own TASKS section (sidebar-IA fix, Nick's call)
+
+**This REVERSES the eighth pass's one-row fold** (which itself reversed the earlier four-row
+group — the row's history is two reversals deep; the current shape is Nick's explicit call and
+the comments at each site say so). `workspaceSections` now yields **five groups**: WORKSPACE
+(Dashboard alone) · **TASKS** (directly after, same section grammar, no new variant) · QUERIES ·
+AGENTS · MATERIALS. TASKS' four rows **ARE `TODO_ROUTES`** — To-do list (default, `/todo`) ·
+Today · Calendar · Noteboard — with the urgency dot + count riding the To-do list row ALONE
+(still the nav's only count, Amendment 1 H5 intact). One definition drives every surface:
+- the **sidebar + rail rib** (workspaceNav → WorkspaceShell; `tasks` rib icon in
+  WORKSPACE_ICONS, the dead `todo` group key deleted);
+- the **desktop breadcrumb** ("Tasks / To-do list") via shellCrumb over the same sections;
+- the **mobile capsule bar's crumb** — shellV2Nav's section relabelled "Tasks" (key stays
+  `todo`; an identifier, not a caption) and its pages now DERIVE from TODO_ROUTES instead of
+  restating them;
+- the **⌘K palette** — the four page entries derive from TODO_ROUTES (ids keep their
+  established `page:todo*` form).
+Locks: `workspaceTasksNav.test.tsx` (rendered rows/order, the one chip, both crumbs, the
+palette) + supersessions in workspaceNav/todoWorkspace/shellV2Nav suites. The mobile you-menu's
+"To-do" row is deliberately untouched (a demoted page link, not the sidebar; mobile pass 1 is
+locked). Undeployed — rides the next dev deploy.
 
 ## Board fixes II + the editorial board — COMPLETE (`678e733` ref → `05fa643`→`c3b26d4`→`7b9eeea`→`ee0b0d6`→`7f2546f`→`58cb2c9`)
 

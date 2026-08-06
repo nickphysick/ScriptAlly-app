@@ -22,6 +22,8 @@
  * lies about where you are.
  */
 
+import { TODO_ROUTES } from "../../lib/todoRoutes";
+
 export interface ShellV2Page {
   key: string;
   label: string;
@@ -47,16 +49,20 @@ export const SHELL_SECTIONS: ShellV2Section[] = [
     ],
   },
   {
+    /* ⚠️ THE SECTION READS "Tasks" AND ITS PAGES ARE `TODO_ROUTES` (sidebar-IA fix, 6 Aug).
+       This model's four rows duplicated todoRoutes verbatim — two hand-agreeing lists of the
+       same pages — so they now derive from the one definition the sidebar and the palette also
+       read, and the (mobile) breadcrumb says "Tasks / To-do list" for free. The `key` stays
+       "todo" (the union type, railClickPlan and the section-for-path lookups all hold it; a key
+       is an identifier, not a caption). The list is the DEFAULT — /todo itself, so every
+       existing link and section-select lands on it without a redirect. */
     key: "todo",
-    label: "To-do",
-    pages: [
-      // The list is the DEFAULT — /todo itself, so every existing link, the ⌘K entry and the
-      // rail's section-select all land on it without a redirect.
-      { key: "todo", label: "To-do list", path: "/todo" },
-      { key: "todo-today", label: "Today", path: "/todo/today" },
-      { key: "todo-calendar", label: "Calendar", path: "/todo/calendar" },
-      { key: "todo-noteboard", label: "Noteboard", path: "/todo/noteboard" },
-    ],
+    label: "Tasks",
+    pages: TODO_ROUTES.map((r) => ({
+      key: r.id === "list" ? "todo" : `todo-${r.id}`,
+      label: r.label,
+      path: r.path,
+    })),
   },
   {
     key: "agents",

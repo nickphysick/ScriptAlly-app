@@ -24,7 +24,8 @@ describe("shellV2Nav — the accordion model", () => {
   it("Dashboard is flat (no children) and the FOUR sections carry the baked pages", () => {
     expect(SHELL_DASHBOARD.path).toBe("/dashboard");
     expect(SHELL_SECTIONS.map((s) => s.key)).toEqual(["querying", "todo", "agents", "shelf"]);
-    expect(SHELL_SECTIONS.map((s) => s.label)).toEqual(["Querying", "To-do", "Agents", "Shelf"]);
+    // sidebar-IA fix (6 Aug): the section reads "Tasks"; its KEY stays "todo" (an identifier)
+    expect(SHELL_SECTIONS.map((s) => s.label)).toEqual(["Querying", "Tasks", "Agents", "Shelf"]);
   });
 
   it("files Packages under Querying (product grammar, not URL tree) — and To-do is no longer there", () => {
@@ -85,9 +86,9 @@ describe("shellV2Nav — path matching", () => {
   });
 
   it("builds the crumb — Section / Page; the flat Dashboard is its own name; off-nav routes keep crumbs", () => {
-    expect(shellCrumbForPath("/todo")).toEqual({ section: "To-do", page: "To-do list" });
-    expect(shellCrumbForPath("/todo/today")).toEqual({ section: "To-do", page: "Today" });
-    expect(shellCrumbForPath("/todo/noteboard")).toEqual({ section: "To-do", page: "Noteboard" });
+    expect(shellCrumbForPath("/todo")).toEqual({ section: "Tasks", page: "To-do list" });
+    expect(shellCrumbForPath("/todo/today")).toEqual({ section: "Tasks", page: "Today" });
+    expect(shellCrumbForPath("/todo/noteboard")).toEqual({ section: "Tasks", page: "Noteboard" });
     expect(shellCrumbForPath("/agents")).toEqual({ section: "Agents", page: "Agent list" });
     expect(shellCrumbForPath("/dashboard")).toEqual({ section: "Dashboard", page: "Dashboard" });
     expect(shellCrumbForPath("/import")).toEqual({ section: "Shelf", page: "Import" });

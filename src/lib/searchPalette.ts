@@ -15,6 +15,7 @@
  * an EXISTING handler (invokeCapture / the navigate bridge) rather than a new one.
  */
 import { RailCaptureKey } from "../components/shell/railNav";
+import { TODO_ROUTES } from "./todoRoutes";
 
 /** What activating a row does. Data only — the palette component performs it. */
 export type PaletteRun =
@@ -110,11 +111,16 @@ export const PALETTE_PAGES: PaletteItem[] = [
   { id: "page:dashboard", group: "Pages", kind: "page", title: "Dashboard", subtitle: "Your desk", run: { kind: "path", path: "/dashboard" } },
   { id: "page:queries", group: "Pages", kind: "page", title: "Queries Hub", subtitle: "Every query and where it stands", run: { kind: "path", path: "/queries" } },
   /* ⚠️ ALL FOUR INDEXED SEPARATELY. One "To-do" entry would make the palette the only place in the
-     app that treats the workspace as a single page — and ⌘K is global by definition (audit 9). */
-  { id: "page:todo", group: "Pages", kind: "page", title: "To-do list", subtitle: "Everything waiting on you, grouped by kind", run: { kind: "path", path: "/todo" } },
-  { id: "page:todo-today", group: "Pages", kind: "page", title: "Today", subtitle: "The list you built for today", run: { kind: "path", path: "/todo/today" } },
-  { id: "page:todo-calendar", group: "Pages", kind: "page", title: "Calendar", subtitle: "Your work by date", run: { kind: "path", path: "/todo/calendar" } },
-  { id: "page:todo-noteboard", group: "Pages", kind: "page", title: "Noteboard", subtitle: "Notes to self, undated", run: { kind: "path", path: "/todo/noteboard" } },
+     app that treats the workspace as a single page — and ⌘K is global by definition (audit 9).
+     ⚠️ DERIVED FROM `TODO_ROUTES` (sidebar-IA fix, 6 Aug): these four restated the routes' labels
+     and blurbs by hand — the same definition the TASKS sidebar section and both breadcrumbs now
+     read, so the palette cannot drift from the nav. Ids keep their established `page:todo*` form
+     (an id is an identifier, not a caption). */
+  ...TODO_ROUTES.map((r): PaletteItem => ({
+    id: r.id === "list" ? "page:todo" : `page:todo-${r.id}`,
+    group: "Pages", kind: "page", title: r.label, subtitle: r.blurb,
+    run: { kind: "path", path: r.path },
+  })),
   { id: "page:packages", group: "Pages", kind: "page", title: "Packages", subtitle: "Submission package workshop", run: { kind: "path", path: "/manuscripts/packages" } },
   { id: "page:agents", group: "Pages", kind: "page", title: "Agent list", subtitle: "Everyone you are querying", run: { kind: "path", path: "/agents" } },
   { id: "page:discover", group: "Pages", kind: "page", title: "Discover", subtitle: "Find new agents", run: { kind: "path", path: "/agents/discover" } },

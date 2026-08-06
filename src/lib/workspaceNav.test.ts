@@ -44,7 +44,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -68,7 +69,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -100,7 +102,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -114,13 +117,14 @@ describe("The IA renders what exists — and nothing else", () => {
     expect(byId("agents").children!.map((c) => c.label)).toEqual(["Contact list", "Discover"]);
   });
 
-  it("To-do shows its count with the burgundy dot — FLAT GROUPS NOW (final ref)", () => {
+  it("the To-do list row (TASKS section) shows its count with the burgundy dot — FLAT GROUPS NOW (final ref)", () => {
     /* ⚠️ THE ACCORDION IS RETIRED (final ref): flat groups, EVERY destination visible, each with
        its own icon, under a mono group label that is pure typography. A parent row that both
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -133,7 +137,8 @@ describe("The IA renders what exists — and nothing else", () => {
   /* A nav that says "0" where it means "nothing to do" is noise on every quiet day. */
   it("a zero count is omitted rather than rendered as 0", () => {
     const quiet = workspaceSections({ todo: 0 });
-    const row = quiet.find((s) => s.id === "workspace")!.children!.find((c) => c.id === "todo")!;
+    // sidebar-IA fix (6 Aug): the row lives on the TASKS section's list child now
+    const row = quiet.find((s) => s.id === "tasks")!.children!.find((c) => c.id === "list")!;
     expect(row.count).toBeUndefined();
   });
 

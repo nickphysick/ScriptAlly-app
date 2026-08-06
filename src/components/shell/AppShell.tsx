@@ -141,10 +141,13 @@ const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" }
    from, so every destination carries one — a row without an icon among rows with them reads as
    broken. The GROUP keys (workspace/queries/…) stay: the rail's ribs still read them. */
 const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
-  // rail ribs — one per group
+  // rail ribs — one per group. (The `todo` GROUP key became `tasks` with the sidebar-IA fix,
+  // 6 Aug — the To-do row left Workspace for its own TASKS section; the old key is deleted, not
+  // aliased, so a stale section id loses its glyph loudly in the parity lock rather than half
+  // working here.)
   workspace: <LayoutGrid aria-hidden="true" />,
+  tasks: <ListChecks aria-hidden="true" />,
   queries: <Send aria-hidden="true" />,
-  todo: <ListChecks aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
   materials: <Book aria-hidden="true" />,
   // panel rows — one per destination

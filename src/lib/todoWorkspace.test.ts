@@ -52,40 +52,46 @@ describe("the four routes", () => {
   });
 });
 
-describe("the app sidebar's To-do row", () => {
-  /* ⚠️ RETARGETED (final ref, "(4)"): To-do is ONE ROW UNDER WORKSPACE, not a group of four.
-     The earlier lock required four children on a `todo` section, reasoning that folding it would
-     hide three destinations. It does not — Today is linked from the board and Noteboard from
-     Today; those are page-level views of one place, not peers in the IA. A nav column that lists
-     every view of every page has stopped being navigation.
-
-     `/todo/calendar` is the one with NO in-page link. That is a real gap and it is recorded in
-     reports/shell-polish.md — a nav row left standing to cover for a missing link would hide it. */
+describe("the app sidebar's TASKS section", () => {
+  /* ⚠️ RE-REVERSED (sidebar-IA fix, 6 Aug — Nick's call). The one-row-under-Workspace fold is
+     superseded: To-do left WORKSPACE for its own TASKS section, positioned directly after it,
+     with all four routes as rows in the same section grammar as Queries/Agents/Materials. The
+     rows ARE `TODO_ROUTES` — one definition for the sidebar, the ⌘K palette and both
+     breadcrumbs. (The fold's real cost was Calendar: reachable from nowhere in-page, its "gap"
+     was the nav row this restores.) */
   const nav = workspaceSections({ todo: 7 });
-  const workspace = nav.find((s) => s.id === "workspace")!;
-  const row = workspace.children!.find((c) => c.id === "todo")!;
+  const tasks = nav.find((s) => s.id === "tasks")!;
 
-  it("sits under Workspace, beside Dashboard, and there is no To-do section", () => {
-    expect(nav.map((s) => s.id)).not.toContain("todo");
-    expect(workspace.children!.map((c) => c.id)).toEqual(["dash", "todo"]);
-    expect(row.path).toBe("/todo");
+  it("sits directly after WORKSPACE — and no To-do row survives under Workspace", () => {
+    expect(nav.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
+    expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 
-  it("carries the count and the urgency dot — the app's only nav count", () => {
-    const r = workspaceSections({ todo: 42 })
-      .find((s) => s.id === "workspace")!.children!.find((c) => c.id === "todo")!;
-    expect(r.count).toBe(42);
-    expect(r.urgent).toBe(true);
+  it("its four rows ARE the routes, in order, with the list as the default", () => {
+    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Today", "Calendar", "Noteboard"]);
+    expect(tasks.children!.map((c) => c.path)).toEqual(TODO_ROUTES.map((r) => r.path));
+    expect(tasks.def).toBe("list");
+    expect(tasks.children![0].path).toBe("/todo");
+  });
+
+  it("the count and the urgency dot ride the To-do list row — and ONLY that row", () => {
+    const secs = workspaceSections({ todo: 42 });
+    const rows = secs.find((s) => s.id === "tasks")!.children!;
+    expect(rows[0].count).toBe(42);
+    expect(rows[0].urgent).toBe(true);
+    for (const r of rows.slice(1)) {
+      expect(r.count, r.label).toBeUndefined();
+      expect(r.urgent, r.label).toBeUndefined();
+    }
   });
 
   it("a zero count is omitted rather than rendered as 0", () => {
-    const r = workspaceSections({ todo: 0 })
-      .find((s) => s.id === "workspace")!.children!.find((c) => c.id === "todo")!;
+    const r = workspaceSections({ todo: 0 }).find((s) => s.id === "tasks")!.children![0];
     expect(r.count).toBeUndefined();
   });
 
-  /* The four ROUTES still exist and are still individually reachable — the nav is what changed,
-     not the workspace. This is the assertion that keeps the two facts apart. */
+  /* The four ROUTES still exist and are still individually reachable — one definition serves
+     the nav, the palette and the route table alike. */
   it("all four To-do routes remain real, and remain in the palette", () => {
     expect(TODO_ROUTES).toHaveLength(4);
     for (const r of TODO_ROUTES) expect([...WORKSPACE_SHELL_PATHS], r.label).toContain(r.path);
