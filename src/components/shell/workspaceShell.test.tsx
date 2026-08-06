@@ -628,23 +628,26 @@ describe("Amendment 1 (D) — the collapse control", () => {
   /* ⚠️ THE SEAM: the manuscript pill and the breadcrumb must sit on ONE line, and the two boxes
      that carry them do not start from the same place. The panel begins at the viewport's top edge;
      the bar begins inside the card, which is inset by `--shell-frame` plus its 1px border. So the
-     head zone has to carry that offset or the pill floats 15px high — measured, not reasoned:
-     pill centre 33.0 against bar centre 48.0.
+     head zone has to carry that offset or the pill floats high.
 
-     ⚠️ AND IT MUST BE PADDING **ONLY**. These boxes are content-box (browser-measured), so the
-     padding already extends the element; adding the frame to `height` as well double-counts it and
-     overshoots to 56.0 — past the line, in the other direction, and still looking "moved". Both
-     failure modes are asserted because both were written during this pass, one after the other.
+     ⚠️ THE OFFSET GOES IN **BOTH** THE HEIGHT AND THE PADDING, because the box is BORDER-BOX: the
+     padding eats into the declared height, so the height must grow by the same amount for the
+     content box to stay a full `--head`. And `box-sizing` is declared ON the rule rather than
+     inherited from Tailwind's preflight — asserted here, because the whole calculation changes
+     with it.
 
-     A rule-text lock, deliberately: this repo has no jsdom, so the alternative is nothing. */
-  it("the panel's head zone carries the card's inset, as padding and not as height", () => {
+     ⚠️ THIS LOCK PREVIOUSLY ASSERTED THE OPPOSITE, AND WAS GREEN. It was written from a render
+     harness that inlined index.css plus the shell sheets and therefore had NO PREFLIGHT: every box
+     in it was content-box, so padding-only measured as aligned and this shape measured as an
+     overshoot. Both readings were of a page the app never serves. Against the built CSS,
+     padding-only leaves the pill at 41.0 against the bar's 48.0. A harness loads
+     `dist/assets/index-*.css` or it is measuring a different application. */
+  it("the panel's head zone carries the card's inset in both height and padding", () => {
     const r = rule(".ws-phead");
+    expect(r).toContain("box-sizing: border-box");
+    expect(r).toContain("height: calc(var(--head) + var(--shell-frame) + 1px)");
     expect(r).toContain("padding-top: calc(var(--shell-frame) + 1px)");
-    // exactly the bar's height — NOT a calc folding the frame in on top of the padding
-    expect(r).toMatch(/height:\s*var\(--head\)/);
-    expect(r, "the frame belongs in the padding only, never also in the height")
-      .not.toMatch(/height:\s*calc\([^)]*--shell-frame/);
-    // and the bar it aligns to is the plain 66 — if this moves, the pill's offset is wrong too
+    // the bar it aligns to is the plain 66 — if that moves, the pill's offset is wrong too
     expect(rule(".ws-bar")).toContain("height: var(--head)");
   });
 

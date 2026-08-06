@@ -191,13 +191,23 @@
    carve-out — a reasoned value in prose beats an unreasoned one in an artefact — so the number
    comes from the geometry, not from the mock. Anyone "restoring" this to the ref reintroduces it.
 
-   ⚠️ AND THE OFFSET IS PADDING ONLY — DO NOT ALSO ADD IT TO `height`. These boxes are
-   CONTENT-BOX (browser-measured), so the padding already extends the element; folding the frame
-   into the height as well double-counts it and lands the pill 8px BELOW the crumb instead of 15px
-   above. That is what the first attempt did, and it looked plausible enough to keep — the pill had
-   visibly moved. Measured: bar centre 48.0, and the pill went 33.0 → 56.0, sailing past it. */
+   ⚠️ THE HEIGHT CARRIES THE OFFSET **AND** THE PADDING DOES, because the box is BORDER-BOX: the
+   padding eats into the declared height, so the height must grow by the same amount for the
+   content box to stay a full `--head` tall. Under content-box the same pair double-counts — which
+   is why `box-sizing` is declared above rather than inherited.
+
+   ⚠️ AND THE MEASUREMENT THAT SAID OTHERWISE WAS THE BUG. A render harness inlining index.css +
+   the shell sheets omits TAILWIND'S PREFLIGHT, so every box in it is content-box while every box
+   in the app is border-box. Measured in that harness, padding-only "aligned" at 48.0 and this
+   version overshot to 56.0 — so the wrong one shipped, verified, with a lock written around it.
+   Measured against the BUILT css: padding-only leaves the pill at 41.0 against the bar's 48.0.
+   A harness must load `dist/assets/index-*.css`, never a hand-picked list of sources. */
 .ws-phead {
-  height: var(--head);
+  /* ⚠️ DECLARED, NOT INHERITED — this rule's maths depends on the box model, so it states it.
+     The app gets border-box from Tailwind's preflight; a harness that inlines only index.css and
+     the shell sheets does NOT, and that difference is what shipped the wrong fix. */
+  box-sizing: border-box;
+  height: calc(var(--head) + var(--shell-frame) + 1px);
   padding-top: calc(var(--shell-frame) + 1px);
   flex: none;
   display: flex;

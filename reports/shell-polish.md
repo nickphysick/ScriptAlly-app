@@ -32,19 +32,37 @@ bar's 66px so the pill centres against the breadcrumb"* — but the ref carries 
 `.main{padding:var(--frame)}` inset, so it misaligns by the same 15px. This is CLAUDE.md's
 mockup-wins carve-out: a reasoned value in prose beats an unreasoned one in an artefact.
 
-⚠️ **THE FIX IS PADDING ONLY — AND MY FIRST ATTEMPT WASN'T.** The pack specifies both a `height`
-calc *and* a `padding-top`, which assumes border-box. These boxes are **content-box**
-(browser-measured), so the padding already extends the element: folding the frame into the height as
-well double-counts it. Measured, in order:
+The pack specifies both a `height` calc and a `padding-top`. **That instruction was correct and I
+overrode it** — see the correction immediately below, which is the more important half of this
+report.
 
-| | pill centre | bar centre |
+## ⚠️ THE CORRECTION — the first fix was wrong, and every measurement behind it was real
+
+**It shipped to dev, Nick saw it unchanged, and the numbers that justified it were taken from a
+page the app never serves.**
+
+The harness inlined `index.css` plus the shell stylesheets. That omits **Tailwind's preflight**, so
+every box in it was `content-box` — while every box in the app is `border-box`. The same CSS
+therefore measures differently in the two places, and the pack's original instruction (add the
+frame to `height` **and** `padding-top`) was right all along for the app's box model.
+
+| | harness (content-box) | app (border-box, built CSS) |
 |---|---|---|
-| before | 33.0 | 48.0 |
-| first attempt (height + padding) | **56.0** | 48.0 |
-| shipped (padding only) | **48.0** | 48.0 |
+| before | pill 33.0 · bar 48.0 | pill 33.0 · bar 48.0 |
+| height + padding *(the pack's shape)* | 56.0 — "overshoot" | **48.0 — correct** |
+| padding only *(what I shipped)* | 48.0 — "aligned" | **41.0 — 7px out** |
 
-The overshoot is the part worth remembering: the pill had visibly moved, and a screenshot check
-would have accepted it. Only the numbers showed it had sailed past the line in the other direction.
+**Shipped now:** `box-sizing: border-box` declared **on the rule**, height `calc(--head + frame +
+1px)`, padding-top `calc(frame + 1px)`. Verified against `dist/assets/index-*.css`: pill 48.0, bar
+48.0. The box model is declared rather than inherited precisely because the whole calculation turns
+on it.
+
+**The lock previously asserted the opposite and was green**, which is the part that matters: a
+tripwire written from a bad harness is a tripwire pointed at the wrong thing. It now fails on both
+wrong shapes — padding-only, and box-sizing left to the ambient reset — each verified by
+reintroducing it.
+
+**Rule, now in CLAUDE.md: a render harness loads the BUILT css, never a hand-picked list.**
 
 ⚠️ **AND THE MEASUREMENT ITSELF HAD A TRAP.** `getBoundingClientRect` returned **zeros for every
 element** in the browser pane — `document.documentElement.clientHeight` is `0` there, so `100vh`
@@ -52,8 +70,8 @@ collapses and rects are meaningless. `offsetTop`/`offsetHeight` are layout-relat
 Two further conditions: the harness must pin explicit pixel dimensions rather than `100vh`, and a
 screenshot must be taken first to force layout, or the first JS call still reads zeros.
 
-**Locked** in `workspaceShell.test.tsx`, against *both* failure modes — verified by reintroducing
-each and watching it fail: the ref's plain 66px, and the double-counted height.
+**Locked** in `workspaceShell.test.tsx` against both wrong shapes — padding-only, and `box-sizing`
+left to the ambient reset — each verified by reintroducing it and watching the lock fail.
 
 ## Superseded, deliberately
 
@@ -92,7 +110,11 @@ each and watching it fail: the ref's plain 66px, and the double-counted height.
 
 Measured this pass at 1440×900 on the render harness:
 
-- ✅ pill / crumb centres coincide at 48.0
+- ✅ pill / crumb centres coincide at 48.0 — **measured against the built CSS**
+- ⚠️ at a **900px-tall** window the panel's nav scrolls: 550px of content in 454px, so Discover and
+  the whole Materials group sit below the fold. The ref behaves the same way (`.nav{overflow:auto}`)
+  and nothing is unreachable, so this is reported rather than "fixed" — but it is worth a decision
+  on a small laptop.
 - ✅ nothing overflows at 186px — all 19 rows (labels, nav items, count, collapse row, account
   block, pill) have `scrollWidth === clientWidth`, longest label "Submission packages"
 
