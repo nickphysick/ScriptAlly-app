@@ -9,6 +9,24 @@ on:
     branches: [main]
   pull_request:
 
+# ⚠️ SUPERSEDED RUNS ARE CANCELLED, AND THAT IS WHAT STOPS THE "All jobs were cancelled" FAILURES.
+#
+# Twice on 6 Aug a run sat queued for exactly 15 minutes and died with "The job was not acquired by
+# Runner of type hosted" — GitHub's queue timeout, reported as a RUN FAILURE (job conclusion
+# `cancelled`, run conclusion `failure`), which is what sent the red CI emails. Both times the
+# starved run was the OLDER of two in flight: a newer push got a runner while the older one waited.
+# Nothing in this repo failed on either occasion.
+#
+# Work here lands as bursts of commits on main, and only the tip is ever the tree we care about —
+# main is linear, so verifying the newest commit verifies everything under it. Cancelling the
+# superseded run removes the second queued job entirely, which is the exposure. A run cancelled
+# this way ends as `cancelled`, not `failure`, so it does not notify.
+#
+# Grouped PER REF so a PR can never cancel main's run, or vice versa.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest

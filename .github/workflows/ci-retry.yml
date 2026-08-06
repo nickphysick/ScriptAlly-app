@@ -1,0 +1,49 @@
+name: CI retry
+
+# ⚠️ THIS RETRIES EXACTLY ONE FAILURE MODE: a run GitHub never gave a runner to.
+#
+# The concurrency group on CI removes the common cause (two runs queued, the older starved), but a
+# single run can still time out waiting for hosted capacity — GitHub's own queue, nothing in this
+# repo. That arrives as a run whose conclusion is `failure` while its job conclusion is `cancelled`
+# and `runner_name` is empty: the job never started, so it has no steps and nothing was verified.
+#
+# ⚠️ THE DISCRIMINATOR IS `runner_name`, NOT the conclusion. A job that ran and genuinely failed
+# carries the name of the machine that ran it. Retrying on `failure` alone would re-run real red
+# builds until they went green by luck, which is the opposite of a safety net.
+#
+# One retry only (`run_attempt == 1`). If the second attempt also fails to find a runner, that is a
+# real capacity problem and it should be visible rather than papered over.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  retry:
+    if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt == 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Re-run only if no runner was ever assigned
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          jobs_json=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" --paginate)
+          total=$(echo "$jobs_json" | jq '[.jobs[]] | length')
+          unacquired=$(echo "$jobs_json" \
+            | jq '[.jobs[] | select(.conclusion == "cancelled" and ((.runner_name // "") == ""))] | length')
+          echo "run $RUN_ID: $unacquired of $total jobs never got a runner"
+          # EVERY job must be unacquired. A mixed run had something actually execute, and whatever
+          # that was is the thing to look at.
+          if [ "$total" -gt 0 ] && [ "$unacquired" -eq "$total" ]; then
+            echo "No runner was ever assigned — re-running $RUN_ID."
+            gh run rerun "$RUN_ID" -R "$REPO"
+          else
+            echo "This run failed for a real reason. Leaving it red."
+          fi
