@@ -8,19 +8,30 @@ on:
   push:
     branches: [main]
   pull_request:
+  # ⚠️ SO MAIN CAN BE VERIFIED WITHOUT AN EMPTY COMMIT. During the 6 Aug outage a push landed on
+  # main and GitHub created no run for it — the tip sat unverified with no way to ask for a run
+  # except by pushing again. `gh workflow run CI --ref main` covers that, and any other case where
+  # a run is missing or a re-run is wanted on an unchanged tree.
+  workflow_dispatch:
 
-# ⚠️ SUPERSEDED RUNS ARE CANCELLED, AND THAT IS WHAT STOPS THE "All jobs were cancelled" FAILURES.
+# ⚠️ SUPERSEDED RUNS ARE CANCELLED — but read the next paragraph before crediting this with a fix.
 #
 # Twice on 6 Aug a run sat queued for exactly 15 minutes and died with "The job was not acquired by
 # Runner of type hosted" — GitHub's queue timeout, reported as a RUN FAILURE (job conclusion
-# `cancelled`, run conclusion `failure`), which is what sent the red CI emails. Both times the
-# starved run was the OLDER of two in flight: a newer push got a runner while the older one waited.
-# Nothing in this repo failed on either occasion.
+# `cancelled`, run conclusion `failure`), which is what sent the red CI emails. Nothing in this repo
+# failed on either occasion.
 #
-# Work here lands as bursts of commits on main, and only the tip is ever the tree we care about —
-# main is linear, so verifying the newest commit verifies everything under it. Cancelling the
-# superseded run removes the second queued job entirely, which is the exposure. A run cancelled
-# this way ends as `cancelled`, not `failure`, so it does not notify.
+# ⚠️ THE CAUSE WAS A GITHUB ACTIONS OUTAGE, NOT ANYTHING HERE. githubstatus.com logged a critical
+# incident from 15:22 UTC that day — "workflow runs are failing or delayed, and some queued jobs may
+# time out", plus webhook delivery delays. The correlation is exact: every run before 15:22 either
+# passed or failed for a real reason; both starvations, and a later push that produced NO run at all,
+# are after it. The first read of this — that bursts of commits caused it — was wrong, and the
+# evidence for it (the starved run being the older of two in flight) was a coincidence of timing.
+#
+# So this block is HYGIENE, NOT THE CURE. It is still right: main is linear, only the tip is ever
+# the tree we care about, and holding a second job in a queue that is degraded buys nothing. It
+# narrows the window. It cannot make GitHub hand out a runner. A run cancelled this way ends as
+# `cancelled`, not `failure`, so it does not notify.
 #
 # Grouped PER REF so a PR can never cancel main's run, or vice versa.
 concurrency:
