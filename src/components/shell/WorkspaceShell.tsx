@@ -390,64 +390,45 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
           <div className="ws-pdiv" />
 
+          {/* ⚠️ FLAT GROUPS, EVERY DESTINATION VISIBLE (final ref). The accordion is retired:
+              a parent row that both navigated AND disclosed was one control doing two jobs, and
+              it put half the app behind a state you had to know to open. The group label is pure
+              typography — not a button, no state, nothing to click. */}
           <nav className="ws-nav">
-            {sections.map((sec) => {
-              const st = sectionRowState(sec, hit, openId, collapsed);
-              const kids = sec.children ?? [];
-              return (
-                <React.Fragment key={sec.id}>
-                  <button
-                    type="button"
-                    className={`ws-ni${st.fill === "pill" ? " on" : ""}${st.fill === "quiet" ? " quiet" : ""}${st.open ? " open" : ""}`}
-                    aria-current={st.railOn ? "true" : undefined}
-                    aria-expanded={kids.length ? st.open : undefined}
-                    onClick={() => onPanelClick(sec)}
-                  >
-                    <span className="ws-ic">{icons[sec.id]}</span>
-                    {sec.label}
-                    {st.count && <CountChip count={st.count.n} urgent={st.count.urgent} />}
-                    {kids.length > 0 && (
-                      <span className="ws-pch"><ChevronDown aria-hidden="true" /></span>
-                    )}
-                  </button>
-
-                  {kids.length > 0 && (
-                    <div className={`ws-sub${st.open ? " open" : ""}`}>
-                      <div className="ws-subin">
-                        {kids.map((ch) => (
-                          <button
-                            type="button"
-                            key={ch.id}
-                            className={`ws-srow${st.railOn && hit?.child === ch.id ? " on" : ""}`}
-                            aria-current={st.railOn && hit?.child === ch.id ? "page" : undefined}
-                            tabIndex={st.open ? 0 : -1}
-                            onClick={(e) => { e.stopPropagation(); go(ch.path); }}
-                          >
-                            {ch.label}
-                            {typeof ch.count === "number" && (
-                              <CountChip count={ch.count} urgent={ch.urgent} />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </React.Fragment>
-              );
-            })}
+            {sections.map((sec, gi) => (
+              <React.Fragment key={sec.id}>
+                <div className={`ws-glabel${gi === 0 ? " first" : ""}`}>{sec.label}</div>
+                {(sec.children ?? []).map((ch) => {
+                  const on = hit?.section === sec.id && hit?.child === ch.id;
+                  return (
+                    <button
+                      type="button"
+                      key={ch.id}
+                      className={`ws-ni${on ? " on" : ""}`}
+                      aria-current={on ? "page" : undefined}
+                      onClick={() => go(ch.path)}
+                    >
+                      <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
+                      {ch.label}
+                      {typeof ch.count === "number" && <CountChip count={ch.count} urgent={ch.urgent} />}
+                    </button>
+                  );
+                })}
+              </React.Fragment>
+            ))}
           </nav>
 
           {/* ⚠️ POLISH §3 — THE COLLAPSE CONTROL IS A NAV-FOOT ROW NOW. It sat as a « ghost beside
               the manuscript pill, where it competed with the pill for the head's attention and
               read as an action ON the manuscript. At the foot of the nav it reads as what it is:
               a thing you do to the sidebar. Same handler, same persistence key. */}
-          {/* ⚠️ THE SPACER COMES FIRST. Ordered the other way round, the row sits directly under
-              the last nav item with the panel's empty space BELOW it — which is where it shipped,
-              and it reads as a sixth navigation item rather than a thing you do to the sidebar.
-              The grow pushes it to the panel foot, just above the account divider, which is what
-              "at the bottom of the navigation section" means. */}
-          <div className="ws-grow" />
-
+          {/* ⚠️ NO SPACER HERE — THE NAV IS THE GROWER (final ref: `.nav{flex:1;min-height:0;
+              overflow:auto}` and nothing between it and the collapse row). The row still has to
+              sit at the panel foot rather than under the last item, but a `ws-grow` BESIDE a
+              flex:1 nav is two claimants on the same slack: the browser splits it, so the nav
+              gets half the column, scrolls internally, and the app's last two groups sit below a
+              fold with empty panel underneath them. Let the nav take all of it and the foot is
+              pushed down for free. */}
           <button
             type="button"
             className="ws-crow2"

@@ -36,19 +36,49 @@ export interface WorkspaceNavInput {
  * ⚠️ COUNTS ARE INJECTED, NEVER READ HERE. This file has no db imports, so the nav is unit-
  * testable in the node environment and each figure has exactly one derivation.
  */
+/**
+ * ⚠️ FLAT GROUPS — EVERY DESTINATION IS VISIBLE (final ref, `shell-workspace-doubledecker.html`:
+ * "every destination is visible; groups map 1:1 to rail icons").
+ *
+ * THE ACCORDION IS RETIRED. Parent rows that expanded to reveal children meant half the app was
+ * behind a disclosure you had to know to open, and the row you clicked to open it was ALSO a
+ * destination — so one control did two jobs and the nav had a state to remember. Now every page
+ * has its own row with its own icon, under a mono group label that is pure typography: a label is
+ * not clickable, does not navigate, and holds no state.
+ *
+ * The groups map 1:1 to the rail's ribs, which is what makes the collapsed rail a complete map of
+ * the app rather than a subset of it.
+ */
 export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
   return [
-    // Amendment 1 (G): Dashboard renders INSIDE this shell now — a normal childless section,
-    // not a route that swaps the whole chrome.
-    { id: "dashboard", label: "Dashboard", path: "/dashboard" },
+    {
+      id: "workspace",
+      label: "Workspace",
+      def: "dash",
+      children: [{ id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" }],
+    },
     {
       id: "queries",
       label: "Queries",
       def: "q-centre",
       children: [
-        // "Query Centre" is the hub's name in nav, crumb AND on the page itself.
-        { id: "q-centre", label: "Query Centre", path: "/queries" },
-        { id: "q-analytics", label: "Analytics", path: "/queries/analytics" },
+        { id: "q-centre", label: "Query Centre", path: "/queries", icon: "send" },
+        { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
+      ],
+    },
+    {
+      /* ⚠️ A DEVIATION FROM THE REF, TAKEN ON THE REF'S OWN PRINCIPLE. The mock files To-do as a
+         single item under Workspace — but To-do is four routes now, and folding it to one row
+         would hide three destinations, which is the exact thing "every destination is visible"
+         forbids. So it keeps its own group, as Materials does with one item. */
+      id: "todo",
+      label: "To-do",
+      def: "todo-list",
+      children: [
+        { id: "todo-list", label: "To-do list", path: "/todo", icon: "check", count: input.todo || undefined, urgent: true },
+        { id: "todo-today", label: "Today", path: "/todo/today", icon: "sun" },
+        { id: "todo-calendar", label: "Calendar", path: "/todo/calendar", icon: "calendar" },
+        { id: "todo-noteboard", label: "Noteboard", path: "/todo/noteboard", icon: "note" },
       ],
     },
     {
@@ -56,27 +86,15 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       label: "Agents",
       def: "a-list",
       children: [
-        { id: "a-list", label: "Contact list", path: "/agents" },
-        { id: "a-disc", label: "Discover", path: "/agents/discover" },
+        { id: "a-list", label: "Contact list", path: "/agents", icon: "people" },
+        { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass" },
       ],
     },
-    // Childless until a Documents route exists — see the file note.
-    { id: "materials", label: "Materials", path: "/manuscripts/packages" },
-    /* ⚠️ AN EXPANDABLE GROUP, exactly like Queries and Agents — same ShellSection shape, so it
-       renders through the SAME rows, chevron, accordion and flyout. Nothing here is a To-do
-       variant of the nav; the four pages are children, and the group row keeps its urgency dot
-       and count.
-
-       ⚠️ THE APP SIDEBAR IS THE SOLE NAVIGATION FOR THESE FOUR (owner's call). The page's own side
-       container carries LISTS, TAGS and Task settings and NO page links — one set of destinations,
-       one nav surface, one active state. */
     {
-      id: "todo",
-      label: "To-do",
-      def: "todo-list",
-      count: input.todo || undefined,
-      urgent: true,
-      children: TODO_ROUTES.map((r) => ({ id: `todo-${r.id}`, label: r.label, path: r.path })),
+      id: "materials",
+      label: "Materials",
+      def: "m-pkg",
+      children: [{ id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" }],
     },
   ];
 }

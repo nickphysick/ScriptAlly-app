@@ -20,7 +20,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, HelpCircle, LayoutGrid, ListChecks, LogOut, Package, Send, Settings, Upload, Users,
+  Book, CalendarDays, Compass, HelpCircle, LayoutGrid, LineChart, ListChecks, LogOut, Package,
+  Send, Settings, StickyNote, Sun, Upload, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -136,12 +137,27 @@ const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" }
 /** ⚠️ A PARALLEL SURFACE TO workspaceSections, and not type-linked to it: a section without an
  *  icon here renders an empty cell rather than crashing, so the failure is quiet. Add both, or
  *  the rail simply loses a glyph with nothing to point at. */
+/* ⚠️ KEYED BY THE ITEM'S OWN ICON, not by section. The flat nav has no parent row to inherit
+   from, so every destination carries one — a row without an icon among rows with them reads as
+   broken. The GROUP keys (workspace/queries/…) stay: the rail's ribs still read them. */
 const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
-  dashboard: <LayoutGrid aria-hidden="true" />,
+  // rail ribs — one per group
+  workspace: <LayoutGrid aria-hidden="true" />,
   queries: <Send aria-hidden="true" />,
+  todo: <ListChecks aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
   materials: <Book aria-hidden="true" />,
-  todo: <ListChecks aria-hidden="true" />,
+  // panel rows — one per destination
+  dash: <LayoutGrid aria-hidden="true" />,
+  send: <Send aria-hidden="true" />,
+  chart: <LineChart aria-hidden="true" />,
+  check: <ListChecks aria-hidden="true" />,
+  sun: <Sun aria-hidden="true" />,
+  calendar: <CalendarDays aria-hidden="true" />,
+  note: <StickyNote aria-hidden="true" />,
+  people: <Users aria-hidden="true" />,
+  compass: <Compass aria-hidden="true" />,
+  folder: <Book aria-hidden="true" />,
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {

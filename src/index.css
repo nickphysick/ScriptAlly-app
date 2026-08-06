@@ -220,13 +220,14 @@
   /* THE HEADER BAR joins the rail's family: one chrome tone, a permanent fill and border.
      This supersedes the hairline-on-scroll idea — there is no scroll state. */
   --shell-bar-bg: #f1ebe3;
-  /* ⚠️ THE BAR IS OAT, NOT WHITE (polish §7). A white-translucent bar over a warm ground read as
-     a cold strip laid on top of the app rather than part of it. The tint is the ground's own
-     family at 92%, so the blur still shows movement beneath without the band changing temperature.
-     The solid twin is the @supports fallback: where the blur is unsupported, translucency alone
-     is just a washed band over moving text. */
-  --shell-bar-tint: rgba(234, 227, 217, 0.92);
-  --shell-bar-tint-solid: #eae3d9;
+  /* ⚠️ THE BAR IS SLIGHTLY OFF-WHITE (Nick's call, amending polish §7). A pure-white bar over a
+     warm ground read as a cold strip laid on top of the app; the ref answers that with full oat
+     (rgba(234,227,217,.92)), which goes the other way and makes the bar a band of its own. This
+     sits between: warm enough to belong to the ground, light enough that the bar still reads as
+     the paper the content is on. The solid twin is the @supports fallback — where the blur is
+     unsupported, translucency alone is just a washed band over moving text. */
+  --shell-bar-tint: rgba(251, 249, 245, 0.92);
+  --shell-bar-tint-solid: #fbf9f5;
   /* sidebar spacing scale (unchanged) */
   --shell-gutter: 16px;               /* panel side gutter */
   --shell-group: 24px;                /* between groups */

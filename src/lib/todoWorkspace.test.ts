@@ -71,9 +71,14 @@ describe("the app sidebar's To-do group", () => {
     expect(todo.children!.map((c) => c.path)).toEqual(TODO_ROUTES.map((r) => r.path));
   });
 
-  it("keeps its count and its urgency dot", () => {
-    expect(todo.count).toBe(7);
-    expect(todo.urgent).toBe(true);
+  it("keeps its count and its urgency dot — now on the To-do LIST row (final ref)", () => {
+    /* The count moved from the group header to the destination it describes: with flat groups the
+       header is a label, and a label cannot carry a figure it does not own. */
+    const todo = workspaceSections({ todo: 42 }).find((s) => s.id === "todo")!;
+    const list = todo.children!.find((c) => c.id === "todo-list")!;
+    expect(list.count).toBe(42);
+    expect(list.urgent).toBe(true);
+    expect(todo.children!.map((c) => c.label)).toEqual(["To-do list", "Today", "Calendar", "Noteboard"]);
   });
 
   it("a zero count is omitted rather than rendered as 0", () => {

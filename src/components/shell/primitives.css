@@ -155,13 +155,14 @@
   transition: color 0.15s, background 0.15s;
   flex: none;
 }
-/* ⚠️ WHITE-UP, NOT PARCHMENT-UP (polish §7). The old parchment hover was a lift against a white
-   bar; on the oat tint it is nearly the same colour as the ground, so the button appeared to do
-   nothing on hover. Lifting toward white is the same gesture in the other direction. */
+/* ⚠️ PARCHMENT-UP, and the reasoning reversed with the tint. The ref pairs a white-up hover with
+   its full-oat bar, where lifting toward white is the visible direction. With the bar at slightly
+   off-white a white hover is invisible — so the lift goes back to parchment, which is the same
+   gesture pointed the way the ground now sits. Contrast follows the surface, not the spec sheet. */
 .sp-help:hover,
 .sp-help:focus-visible {
   color: var(--shell-ink);
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(242, 237, 231, 0.7);
 }
 .sp-help svg {
   width: 17px;

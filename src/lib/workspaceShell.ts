@@ -31,6 +31,9 @@ export interface ShellChild {
   count?: number;
   /** Burgundy dot — attention, not volume. */
   urgent?: boolean;
+  /** The row's OWN icon key. Every destination carries one now — the flat nav has no parent row
+   *  to inherit from, and a row without an icon in a list of rows with them reads as broken. */
+  icon?: string;
 }
 
 export interface ShellSection {
@@ -175,6 +178,11 @@ export function shellCrumb(
   const sec = sections.find((s) => s.id === hit.section);
   if (!sec) return null;
   const child = hit.child ? sec.children?.find((c) => c.id === hit.child) : undefined;
+  /* ⚠️ A ONE-ITEM GROUP CONTRIBUTES NO SEGMENT (final ref: the group segment appears only when
+     `items.length > 1`). "Workspace / Dashboard" states a grouping that exists for the nav's
+     benefit, not the reader's — the group tells you nothing the page does not, and a crumb whose
+     first half never varies is a crumb with one real step in it. */
+  if (child && (sec.children?.length ?? 0) < 2) return { section: child.label };
   return { section: sec.label, child: child?.label };
 }
 

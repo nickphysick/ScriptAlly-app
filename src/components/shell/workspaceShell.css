@@ -168,14 +168,18 @@
    out of view rather than reflowing to nothing on the way. */
 .ws-pin {
   width: var(--shell-panelw);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 12px 10px 10px;
+  /* ⚠️ NO TOP PADDING — the head zone below supplies it, so the pill lands on the bar's line. */
+  padding: 0 10px 10px;
 }
 
 /* head: manuscript pill + collapse ghost */
-.ws-phead { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; position: relative; }
+/* ⚠️ THE HEAD ZONE IS THE BAR'S OWN HEIGHT, so the manuscript pill centres against the
+   breadcrumb rather than floating above it. Two chrome elements on one line only look
+   deliberate if they are actually on one line. */
+.ws-phead { height: var(--head); flex: none; display: flex; align-items: center; }
 /* ⚠️ CENTRED (polish §5). At 186px a left-aligned title with the chevron pushed to the far edge
    left a gap in the middle that read as a missing element; centring the pair closes it. The
    chevron sits INLINE after the title rather than being pushed by `margin-left:auto`. */
@@ -218,6 +222,7 @@
 /* ⚠️ THE HEAD'S « GHOST IS GONE (polish §3) — it competed with the manuscript pill for the head's
    attention and read as an action ON the manuscript. It is a nav-foot row now: see .ws-crow2. */
 .ws-crow2 {
+  margin-top: 6px;
   height: 34px;
   display: flex;
   align-items: center;
@@ -240,12 +245,25 @@
 .ws-crow2:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink-soft); }
 .ws-crow2:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 
-.ws-pdiv { height: 1px; background: var(--shell-hair); margin: 0 4px 8px; flex: none; }
+.ws-pdiv { height: 1px; background: var(--shell-hair); margin: 8px 4px 6px; flex: none; }
 
 /* section rows — the panel's own rhythm, 38px */
-.ws-nav { display: flex; flex-direction: column; flex: none; }
+.ws-nav { flex: 1; min-height: 0; overflow: auto; padding-top: 20px; }
+
+/* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
+   which is the whole point of retiring the accordion's parent rows. */
+.ws-glabel {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  padding: 0 10px 6px;
+  margin-top: 18px;
+}
+.ws-glabel.first { margin-top: 0; }
 .ws-ni {
-  height: 40px;
+  height: 36px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -255,16 +273,13 @@
   background: transparent;
   cursor: pointer;
   font: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
-  /* ⚠️ #544b44, NOT --shell-ink-soft. The panel's resting label carries a touch more weight than
-     the shell's general secondary ink — at 14px on a chrome ground, --shell-ink-soft read washed
-     out beside the 18px icons. Ink on hover and active, as before. */
   color: #544b44;
-  text-align: left;
   transition: background 0.13s, color 0.13s;
   outline: none;
-  flex: none;
+  width: 100%;
+  text-align: left;
 }
 .ws-ic { display: flex; flex: none; opacity: 0.9; color: inherit; }
 .ws-ic svg { width: 18px; height: 18px; stroke-width: 1.7; }

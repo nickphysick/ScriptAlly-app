@@ -1,6 +1,44 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (seventh pass — every routed page now has a render tripwire).**
+**Last updated: 6 August 2026 (eighth pass — the sidebar rebuilt to the FINAL ref: flat groups).**
+
+## The sidebar is FLAT GROUPS now — the accordion is retired
+
+`design-refs/shell-workspace-doubledecker.html` was replaced in place with the final ref Nick
+attached (`scriptally-workspace-final (2).html`). **The committed ref had been lagging the real
+one, and every comparison run against it agreed with a document nobody was designing to.** Read
+the ref, not a screenshot, and not last week's copy of it.
+
+**What actually differed, and it was structural, not cosmetic:** our nav was an **accordion** —
+parent rows with chevrons revealing collapsible children. The ref has **flat groups**: a mono
+group label (pure typography — not clickable, no state) and *every destination as its own row with
+its own icon*. Ten rows, all visible, no disclosure to discover. Groups map 1:1 to the rail ribs,
+which is what makes the collapsed rail a complete map of the app rather than a subset of it.
+
+- `workspaceSections()` rewritten to five flat groups; every child now carries an `icon`.
+- `WORKSPACE_ICONS` rekeyed by BOTH group id (rail ribs) and item icon key (panel rows).
+- ~12 accordion-era locks retargeted rather than deleted — including the `SECTIONS` fixture and
+  the two-scroller lock.
+- **One deviation, taken on the ref's own principle:** To-do keeps its own group with four items.
+  The mock files it as a single row under Workspace, but To-do is four routes now, and folding it
+  to one row would hide three destinations — the exact thing "every destination is visible"
+  forbids.
+
+⚠️ **THE PANEL HAS NO SPACER — THE NAV IS THE GROWER,** and the lock that used to *require* a
+`ws-grow` between nav and collapse row was wrong. That lock was written against a real bug (the
+row sat under the last nav item), and it fixed it — but a spacer beside a `flex:1` nav is two
+claimants on one pool of slack. The browser splits it: browser-measured, the nav got **279px for
+540px of content**, so Agents and Materials sat below a fold with empty panel underneath them. The
+lock now states the ref's structure — nav grows, nothing between it and the row.
+
+⚠️ **A ONE-ITEM GROUP CONTRIBUTES NO CRUMB SEGMENT** (ref: `items.length > 1 ? "Group / Current" :
+"Current"`). "Workspace / Dashboard" states a grouping that exists for the nav's benefit; a crumb
+whose first half never varies has one real step in it.
+
+⚠️ **THE BAR TINT IS OFF-WHITE, NOT THE REF'S OAT** — `--shell-bar-tint: rgba(251,249,245,.92)`
+(solid fallback `#fbf9f5`), per Nick's amendment. That reverses the help button's hover direction
+too: the ref lifts toward white, which is invisible on an off-white bar, so `.sp-help:hover` went
+back to parchment. **Contrast follows the surface, not the spec sheet.**
 
 ## The app-wide smoke pack is COMPLETE
 

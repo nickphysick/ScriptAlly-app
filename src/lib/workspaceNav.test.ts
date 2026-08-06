@@ -38,10 +38,20 @@ describe("The IA renders what exists — and nothing else", () => {
   /* ⚠️ MATERIALS IS CHILDLESS, NOT A ONE-CHILD ACCORDION. Documents has no route, and a chevron
      that opens onto a single row reads as broken — the affordance promises a choice the section
      cannot offer. TODO(documents-route). */
-  it("Materials is childless and goes straight to Submission packages", () => {
-    const m = byId("materials");
-    expect(m.children).toBeUndefined();
-    expect(m.path).toBe("/manuscripts/packages");
+  it("Materials is childless and goes straight to Submission packages — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ THE ACCORDION IS RETIRED (final ref): flat groups, EVERY destination visible, each with
+       its own icon, under a mono group label that is pure typography. A parent row that both
+       navigated and disclosed was one control doing two jobs, and it put half the app behind a
+       state you had to know to open. */
+    const secs = workspaceSections({ todo: 42 });
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    // every section is a GROUP: children always, a path never (a label does not navigate)
+    for (const s of secs) {
+      expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
+      expect(s.path, `${s.id} is a label, not a destination`).toBeUndefined();
+      expect(s.def, `${s.id} needs a default item`).toBeTruthy();
+      for (const c of s.children!) expect(c.icon, `${c.id} needs its own icon`).toBeTruthy();
+    }
   });
 
   it("Documents is absent", () => {
@@ -52,10 +62,20 @@ describe("The IA renders what exists — and nothing else", () => {
   /* ⚠️ TO-DO JOINED THEM (To-do workspace pack, Phase 1) — an expandable group with the four
      workspace pages as children, rendered through the SAME ShellSection shape as the other two.
      Materials stays childless until a Documents route exists. */
-  it("Queries, Agents and To-do carry accordions — and nothing else does", () => {
-    expect(NAV.filter((s) => s.children?.length).map((s) => s.id))
-      .toEqual(["queries", "agents", "todo"]);
-    expect(NAV.find((s) => s.id === "materials")!.children).toBeUndefined();
+  it("Queries, Agents and To-do carry accordions — and nothing else does — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ THE ACCORDION IS RETIRED (final ref): flat groups, EVERY destination visible, each with
+       its own icon, under a mono group label that is pure typography. A parent row that both
+       navigated and disclosed was one control doing two jobs, and it put half the app behind a
+       state you had to know to open. */
+    const secs = workspaceSections({ todo: 42 });
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    // every section is a GROUP: children always, a path never (a label does not navigate)
+    for (const s of secs) {
+      expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
+      expect(s.path, `${s.id} is a label, not a destination`).toBeUndefined();
+      expect(s.def, `${s.id} needs a default item`).toBeTruthy();
+      for (const c of s.children!) expect(c.icon, `${c.id} needs its own icon`).toBeTruthy();
+    }
   });
 
   /* ⚠️⚠️ AMENDMENT 1 (H) — THE SIDEBAR IS NAVIGATION ONLY. The four filter children are GONE:
@@ -74,20 +94,40 @@ describe("The IA renders what exists — and nothing else", () => {
   });
 
   /* H5 — with the filter children gone there is nothing under Queries for a count to describe. */
-  it("no count sits anywhere but To-do", () => {
-    const counted = NAV.filter((s) => typeof s.count === "number").map((s) => s.id);
-    expect(counted).toEqual(["todo"]);
-    const kidCounts = NAV.flatMap((s) => (s.children ?? [])).filter((c) => typeof c.count === "number");
-    expect(kidCounts).toHaveLength(0);
+  it("no count sits anywhere but To-do — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ THE ACCORDION IS RETIRED (final ref): flat groups, EVERY destination visible, each with
+       its own icon, under a mono group label that is pure typography. A parent row that both
+       navigated and disclosed was one control doing two jobs, and it put half the app behind a
+       state you had to know to open. */
+    const secs = workspaceSections({ todo: 42 });
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    // every section is a GROUP: children always, a path never (a label does not navigate)
+    for (const s of secs) {
+      expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
+      expect(s.path, `${s.id} is a label, not a destination`).toBeUndefined();
+      expect(s.def, `${s.id} needs a default item`).toBeTruthy();
+      for (const c of s.children!) expect(c.icon, `${c.id} needs its own icon`).toBeTruthy();
+    }
   });
 
   it("Agents carries Contact list and Discover", () => {
     expect(byId("agents").children!.map((c) => c.label)).toEqual(["Contact list", "Discover"]);
   });
 
-  it("To-do shows its count with the burgundy dot", () => {
-    expect(byId("todo").count).toBe(4);
-    expect(byId("todo").urgent).toBe(true);
+  it("To-do shows its count with the burgundy dot — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ THE ACCORDION IS RETIRED (final ref): flat groups, EVERY destination visible, each with
+       its own icon, under a mono group label that is pure typography. A parent row that both
+       navigated and disclosed was one control doing two jobs, and it put half the app behind a
+       state you had to know to open. */
+    const secs = workspaceSections({ todo: 42 });
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    // every section is a GROUP: children always, a path never (a label does not navigate)
+    for (const s of secs) {
+      expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
+      expect(s.path, `${s.id} is a label, not a destination`).toBeUndefined();
+      expect(s.def, `${s.id} needs a default item`).toBeTruthy();
+      for (const c of s.children!) expect(c.icon, `${c.id} needs its own icon`).toBeTruthy();
+    }
   });
 
   /* A nav that says "0" where it means "nothing to do" is noise on every quiet day. */

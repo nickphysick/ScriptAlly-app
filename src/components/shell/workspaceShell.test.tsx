@@ -46,16 +46,28 @@ const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
    the component is asserted against code with block comments stripped. */
 const srcCode = src.replace(/\/\*[\s\S]*?\*\//g, "");
 
+/* ⚠️ FLAT GROUPS (final ref) — a section is a LABEL with items, never a destination itself, and
+   every item carries its own icon. The old fixture had childless sections that navigated; under
+   this model such a section renders a heading with nothing under it. */
 const SECTIONS: ShellSection[] = [
-  { id: "dashboard", label: "Dashboard", path: "/dashboard" },
+  {
+    id: "workspace", label: "Workspace", def: "dash",
+    children: [{ id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" }],
+  },
   {
     id: "queries", label: "Queries", def: "q-centre",
     children: [
-      { id: "q-centre", label: "Query Centre", path: "/queries" },
-      { id: "q-analytics", label: "Analytics", path: "/queries/analytics" },
+      { id: "q-centre", label: "Query Centre", path: "/queries", icon: "send" },
+      { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
     ],
   },
-  { id: "todo", label: "To-do", path: "/todo", count: 4, urgent: true },
+  {
+    id: "todo", label: "To-do", def: "todo-list",
+    children: [
+      { id: "todo-list", label: "To-do list", path: "/todo", icon: "check", count: 4, urgent: true },
+      { id: "todo-today", label: "Today", path: "/todo/today", icon: "sun" },
+    ],
+  },
 ];
 
 /* ⚠️ THE COLLAPSED RENDER IS NOT REACHABLE HERE, and two attempts to fake it are worth recording.
@@ -228,19 +240,34 @@ describe("Baked 6 — children are text-only, indented to the parent's text axis
   });
 
   /* §3 — the panel's own rhythm, distinct from the rail's. */
-  it("section rows are 40px at 14px on the panel's resting ink", () => {
+  it("section rows are 40px at 14px on the panel's resting ink — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ FLAT GROUPS (final ref) — the accordion, its children, its thread line and its chevron
+       are all retired. Rows are 36px at 13.5px on #544b44, every one carrying its own icon,
+       under a mono group label that is not a control. */
     const r = rule(".ws-ni");
-    expect(r).toContain("height: 40px");
-    expect(r).toContain("font-size: 14px");
+    expect(r).toContain("height: 36px");
+    expect(r).toContain("font-size: 13.5px");
     expect(r).toContain("color: #544b44");
-    expect(r).toContain("gap: 10px");
+    const html = at("/queries");
+    expect(html).toContain("ws-glabel");
+    expect(html).not.toContain("ws-sub");     // no disclosure
+    expect(html).not.toContain("ws-pch");     // no chevron
+    expect((html.match(/ws-ic/g) ?? []).length, "every row carries an icon").toBeGreaterThan(4);
   });
 
-  it("children carry no icon — the indent and thread line carry the hierarchy", () => {
+  it("children carry no icon — the indent and thread line carry the hierarchy — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ FLAT GROUPS (final ref) — the accordion, its children, its thread line and its chevron
+       are all retired. Rows are 36px at 13.5px on #544b44, every one carrying its own icon,
+       under a mono group label that is not a control. */
+    const r = rule(".ws-ni");
+    expect(r).toContain("height: 36px");
+    expect(r).toContain("font-size: 13.5px");
+    expect(r).toContain("color: #544b44");
     const html = at("/queries");
-    const kids = html.match(/<button[^>]*class="ws-srow[^"]*"[\s\S]*?<\/button>/g) ?? [];
-    expect(kids.length).toBe(SECTIONS[1].children!.length);
-    for (const k of kids) expect(k).not.toContain("ws-ic");
+    expect(html).toContain("ws-glabel");
+    expect(html).not.toContain("ws-sub");     // no disclosure
+    expect(html).not.toContain("ws-pch");     // no chevron
+    expect((html.match(/ws-ic/g) ?? []).length, "every row carries an icon").toBeGreaterThan(4);
   });
 });
 
@@ -442,11 +469,23 @@ describe("Baked 12 + 13 + Amendment 1 (C) — the bar", () => {
     expect(rule(".ws-sep")).toContain("color: #cfc4b4");
   });
 
-  it("a childless section renders one segment and no orphan separator", () => {
-    const html = at("/todo");
+  it("a ONE-ITEM group renders one segment and no orphan separator", () => {
+    /* ⚠️ RETARGETED (final ref): there are no childless sections under flat groups — a section is
+       a label with items. The equivalent case is a group holding ONE destination, which
+       contributes no segment: "Workspace / Dashboard" states a grouping that exists for the nav's
+       benefit, not the reader's. */
+    const html = at("/dashboard");
     const bar = html.slice(html.indexOf("ws-crumb"), html.indexOf("ws-bright"));
-    expect(bar).toContain("To-do");
+    expect(bar).toContain("Dashboard");
+    expect(bar).not.toContain("Workspace");
     expect(bar).not.toContain("ws-seg");
+  });
+
+  it("…and a MULTI-item group does render its segment", () => {
+    const bar = at("/queries").slice(0, at("/queries").indexOf("ws-bright"));
+    expect(bar).toContain("ws-seg");
+    expect(bar).toContain("Queries");
+    expect(bar).toContain("Query Centre");
   });
 
   /* ⚠️ 33px IS MEASURED, NOT CHOSEN. The asset is 2400×750 with the cap-"S" spanning y 190→577 —
@@ -570,14 +609,18 @@ describe("Amendment 1 (D) — the collapse control", () => {
     expect(html).toContain('aria-label="Collapse the navigation"');
     expect(html.indexOf("ws-crow2")).toBeGreaterThan(html.indexOf("ws-nav"));
     expect(html.indexOf("ws-crow2")).toBeLessThan(html.indexOf("ws-pfoot"));
-    /* ⚠️ AND THE SPACER PRECEDES IT — the assertion this case was missing, and the reason the row
-       shipped sitting under the last nav item with the panel's empty space BELOW it. Ordered that
-       way it reads as a sixth navigation item; nav < crow2 < pfoot was true either way, so only
-       the spacer's position distinguishes "at the foot" from "under the nav". Matches the ref:
-       nav → grow → crow2 → pfoot. */
-    const grow = html.indexOf("ws-grow", html.indexOf("ws-nav"));
-    expect(grow, "the panel's spacer must exist after the nav").toBeGreaterThan(-1);
-    expect(html.indexOf("ws-crow2")).toBeGreaterThan(grow);
+    /* ⚠️ AND THE NAV IS WHAT PUSHES IT DOWN — there must be NO second spacer in the panel.
+       This assertion replaces an earlier one that REQUIRED a `ws-grow` between nav and row. That
+       version was written against the bug where the row sat directly under the last nav item, and
+       it fixed that — but a spacer beside a `flex:1` nav is two claimants on one pool of slack:
+       the browser splits it, the nav takes half the column and scrolls, and the last two groups
+       fall below a fold with empty panel beneath them. Browser-measured: nav 279px tall against
+       540px of content. So the lock now states the ref's own structure — nav grows, nothing
+       between it and the row. */
+    const panel = html.slice(html.indexOf("ws-panel"), html.indexOf("ws-pfoot"));
+    expect(panel, "the panel must contain the nav").toContain("ws-nav");
+    expect(panel).not.toContain("ws-grow");
+    expect(rule(".ws-nav")).toContain("flex: 1");
   });
 
   it("the collapse row is muted, 34px, with a 14px chevron", () => {
@@ -658,8 +701,19 @@ describe("The IA is a PROP — the shell owns grammar, never a section list", ()
     expect(src).not.toContain("SECTIONS =");
   });
 
-  it("children of a shut section are unreachable by keyboard", () => {
-    expect(src).toContain("tabIndex={st.open ? 0 : -1}");
+  it("children of a shut section are unreachable by keyboard — FLAT GROUPS NOW (final ref)", () => {
+    /* ⚠️ FLAT GROUPS (final ref) — the accordion, its children, its thread line and its chevron
+       are all retired. Rows are 36px at 13.5px on #544b44, every one carrying its own icon,
+       under a mono group label that is not a control. */
+    const r = rule(".ws-ni");
+    expect(r).toContain("height: 36px");
+    expect(r).toContain("font-size: 13.5px");
+    expect(r).toContain("color: #544b44");
+    const html = at("/queries");
+    expect(html).toContain("ws-glabel");
+    expect(html).not.toContain("ws-sub");     // no disclosure
+    expect(html).not.toContain("ws-pch");     // no chevron
+    expect((html.match(/ws-ic/g) ?? []).length, "every row carries an icon").toBeGreaterThan(4);
   });
 });
 
@@ -763,12 +817,12 @@ describe("Refinement §4 — the frosted sticky bar", () => {
   });
 
   /* ══ POLISH §7 — THE BAR IS OAT ══════════════════════════════════════════════════════════ */
-  describe("⚠️ the frosted bar is OAT, not white-translucent (polish §7)", () => {
+  describe("⚠️ the frosted bar is SLIGHTLY OFF-WHITE (polish §7, amended)", () => {
     const indexCss2 = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
 
     it("both tints are tokens, and the solid is the translucent one's own colour", () => {
-      expect(indexCss2).toMatch(/--shell-bar-tint:\s*rgba\(234, 227, 217, 0\.92\)\s*;/);
-      expect(indexCss2).toMatch(/--shell-bar-tint-solid:\s*#eae3d9\s*;/);
+      expect(indexCss2).toMatch(/--shell-bar-tint:\s*rgba\(251, 249, 245, 0\.92\)\s*;/);
+      expect(indexCss2).toMatch(/--shell-bar-tint-solid:\s*#fbf9f5\s*;/);
     });
 
     it("the bar reads the token, and the WHITE treatment is superseded", () => {
@@ -798,7 +852,9 @@ describe("Refinement §4 — the frosted sticky bar", () => {
       const kbd = prim.slice(prim.indexOf(".sp-search-k {"), prim.indexOf(".sp-search-k {") + 260);
       expect(kbd).toContain("background: #f2ede7");
       const help = prim.slice(prim.indexOf(".sp-help:hover"), prim.indexOf(".sp-help:hover") + 220);
-      expect(help, "white-up, not parchment-up, now the ground is warm").toContain("rgba(255, 255, 255, 0.55)");
+      /* The ref pairs a white-up hover with its full-oat bar; at slightly off-white a white
+         hover is invisible, so the lift goes back to parchment. Contrast follows the surface. */
+      expect(help).toContain("rgba(242, 237, 231, 0.7)");
       // the whisper and the divider were drawn for a white bar and vanished into the tint
       expect(rule(".ws-sync")).toContain("color: #a2947f");
       expect(rule(".ws-vdiv")).toContain("background: #d9cec0");
@@ -814,7 +870,12 @@ describe("Refinement §4 — the frosted sticky bar", () => {
 
   it("the work area no longer scrolls", () => {
     expect(rule(".ws-work")).not.toContain("overflow");
-    expect(cssRules.match(/overflow: auto/g)?.length, "one scroller in this stylesheet").toBe(1);
+    /* ⚠️ TWO scrollers, and they are different objects: the CARD's content scroller (the one this
+       case was written about — the work area must not add a second inside it) and the PANEL's nav,
+       which scrolls its own list when the destinations outgrow the column. The ref has both. */
+    expect(cssRules.match(/overflow: auto/g)?.length, "the card's scroller and the panel's nav").toBe(2);
+    expect(rule(".ws-cscroll")).toContain("overflow: auto");
+    expect(rule(".ws-nav")).toContain("overflow: auto");
   });
 
   /* `1 0 auto`: grow so a fill page can claim the space under the bar; NEVER shrink, or a tall
