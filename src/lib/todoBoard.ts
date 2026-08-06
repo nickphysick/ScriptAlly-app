@@ -161,10 +161,15 @@ const dqSub = (gap?: string) =>
  * field the dashboard's deadline chip reads). Unset → the plain OFFER chip (no invented default).
  */
 export function offerDue(replyByMs: number | null, nowMs: number): string {
-  if (replyByMs == null || Number.isNaN(replyByMs)) return "OFFER";
+  /* ⚠️ THE RIGHT SLOT NEVER REPEATS THE LEFT (corrections fix 4). This used to return the literal
+     "OFFER" with no reply-by, and prefix "OFFER · " when there was one — so the band read
+     "OFFER · OFFER", the KIND lane's word printed twice, once in each lane. The left lane already
+     says what kind of thing this is; the right lane's only job is WHEN. With no reply-by there is
+     no when, so it says nothing rather than echoing. */
+  if (replyByMs == null || Number.isNaN(replyByMs)) return "";
   const days = Math.ceil((replyByMs - nowMs) / 86400000);
-  if (days <= 0) return "OFFER · REPLY-BY PASSED";
-  return `OFFER · ${days} DAY${days === 1 ? "" : "S"} TO REPLY`;
+  if (days <= 0) return "REPLY-BY PASSED";
+  return `${days} DAY${days === 1 ? "" : "S"} TO REPLY`;
 }
 
 /**

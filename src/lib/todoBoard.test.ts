@@ -183,12 +183,16 @@ describe("ribbonTiles — the header tiles mirror the lanes", () => {
 describe("offer card — quiet/wake + the reply-by countdown (journey-logic P4)", () => {
   const DAY = 86400000;
 
-  it("offerDue counts down to reply-by; unset → the plain OFFER chip (no invented default)", () => {
-    expect(offerDue(null, NOW)).toBe("OFFER");
-    expect(offerDue(NaN, NOW)).toBe("OFFER");
-    expect(offerDue(NOW + 14 * DAY, NOW)).toBe("OFFER · 14 DAYS TO REPLY");
-    expect(offerDue(NOW + 1 * DAY, NOW)).toBe("OFFER · 1 DAY TO REPLY");
-    expect(offerDue(NOW - DAY, NOW)).toBe("OFFER · REPLY-BY PASSED");
+  /* ⚠️ AMENDED (corrections fix 4): unset now yields "", not "OFFER". The right band lane's only
+     job is WHEN; the KIND lane already says OFFER, and returning "OFFER" here printed the word
+     twice — "OFFER · OFFER" on the live board. Saying nothing when there is no date is the
+     honest form of "no invented default", which is what this case was always protecting. */
+  it("offerDue counts down to reply-by; unset → NOTHING (the kind lane already says OFFER)", () => {
+    expect(offerDue(null, NOW)).toBe("");
+    expect(offerDue(NaN, NOW)).toBe("");
+    expect(offerDue(NOW + 14 * DAY, NOW)).toBe("14 DAYS TO REPLY");
+    expect(offerDue(NOW + 1 * DAY, NOW)).toBe("1 DAY TO REPLY");
+    expect(offerDue(NOW - DAY, NOW)).toBe("REPLY-BY PASSED");
   });
 
   it("offerQuiet: quiet before the reminder, woken once it passes", () => {
@@ -220,7 +224,7 @@ describe("offer card — quiet/wake + the reply-by countdown (journey-logic P4)"
     const b = assembleBoard(flagged);
     const card = b.do.find((c) => c.taskType === "offer_received")!;
     expect(card.quiet).toBe(true);
-    expect(card.due).toBe("OFFER · 14 DAYS TO REPLY");
+    expect(card.due).toBe("14 DAYS TO REPLY");
     expect(card.warn).toBe(true); // urgency never drops while quiet
     // woken: same board a week later
     const woken = assembleBoard({ ...flagged, now: NOW + 6 * DAY });

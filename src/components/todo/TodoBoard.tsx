@@ -80,7 +80,13 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen })
               {cards.map((c) => (
                 <article
                   key={c.key}
-                  className={`tbd-card${c.warn ? " urgent" : ""}${c.done ? " done" : ""}`}
+                  /* ⚠️ THE INK BORDER IS URGENT-ONLY, AND URGENT IS THE LANE (corrections fix 5).
+                     It keyed on `warn`, which derivedCopy sets true for offers, fulls, stale
+                     queries and old nudges alike — most of the board. So nearly every card wore
+                     ink and the border stopped distinguishing anything. `stream === "do"` is the
+                     Urgent lane, the same set the counting law calls urgent, so the border now
+                     means what the group heading means. */
+                  className={`tbd-card${c.stream === "do" ? " urgent" : ""}${c.done ? " done" : ""}`}
                   draggable
                   tabIndex={0}
                   role="button"
@@ -94,9 +100,13 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen })
                 >
                   {/* THE 24px BAND — kind on the left, its figures on the right. Populated per
                       Phase 0B: the facet is carried through now, so this is never blank. */}
+                  {/* ⚠️ BAND GRAMMAR: KIND left | STATUS-OR-DATE right, and the right lane NEVER
+                      mirrors the left (corrections fix 4). The guard is here as well as at the
+                      derivation, because a lane that echoes its neighbour is a rendering fault
+                      whichever end produced it — and the band is where it shows. */}
                   <div className="tbd-band">
                     <span className="tbd-kind">{c.kind}</span>
-                    <span className="tbd-when">{c.due}</span>
+                    {c.due && c.due !== c.kind && <span className="tbd-when">{c.due}</span>}
                   </div>
                   <div className="tbd-t">{c.title}</div>
                   {c.record && <div className="tbd-meta">{c.record}</div>}
