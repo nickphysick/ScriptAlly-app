@@ -1,15 +1,17 @@
 name: CI retry
 
-# ⚠️ THIS RETRIES EXACTLY ONE FAILURE MODE: a run GitHub never gave a runner to.
+# ⚠️ THIS RETRIES INFRASTRUCTURE FAILURES ONLY — runs where NOTHING WAS EVER EXECUTED.
 #
-# The concurrency group on CI removes the common cause (two runs queued, the older starved), but a
-# single run can still time out waiting for hosted capacity — GitHub's own queue, nothing in this
-# repo. That arrives as a run whose conclusion is `failure` while its job conclusion is `cancelled`
-# and `runner_name` is empty: the job never started, so it has no steps and nothing was verified.
+# ⚠️ THE DISCRIMINATOR IS "ZERO COMPLETED STEPS", not `runner_name`. The first version keyed off an
+# empty `runner_name`, which covers the queue timeout ("The job was not acquired by Runner of type
+# hosted") but MISSED the very next infrastructure failure to arrive: "The hosted runner lost
+# communication with the server" (6 Aug, the tail of the same Actions incident). That job HAD a
+# runner name and still ran nothing, so the guard sat out a failure it existed for.
 #
-# ⚠️ THE DISCRIMINATOR IS `runner_name`, NOT the conclusion. A job that ran and genuinely failed
-# carries the name of the machine that ran it. Retrying on `failure` alone would re-run real red
-# builds until they went green by luck, which is the opposite of a safety net.
+# Zero completed steps is the honest signal, and it is safe in the direction that matters: a real
+# code failure always leaves steps behind — checkout, setup, install, and the one that went red.
+# Retrying on `failure` alone would re-run genuinely red builds until they passed by luck, which is
+# the opposite of a safety net.
 #
 # One retry only (`run_attempt == 1`). If the second attempt also fails to find a runner, that is a
 # real capacity problem and it should be visible rather than papered over.
@@ -36,13 +38,14 @@ jobs:
           set -euo pipefail
           jobs_json=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" --paginate)
           total=$(echo "$jobs_json" | jq '[.jobs[]] | length')
-          unacquired=$(echo "$jobs_json" \
-            | jq '[.jobs[] | select(.conclusion == "cancelled" and ((.runner_name // "") == ""))] | length')
-          echo "run $RUN_ID: $unacquired of $total jobs never got a runner"
-          # EVERY job must be unacquired. A mixed run had something actually execute, and whatever
-          # that was is the thing to look at.
-          if [ "$total" -gt 0 ] && [ "$unacquired" -eq "$total" ]; then
-            echo "No runner was ever assigned — re-running $RUN_ID."
+          # a step that reports a conclusion RAN; a job with none of those executed nothing
+          ran_nothing=$(echo "$jobs_json" \
+            | jq '[.jobs[] | select([.steps[]? | select(.conclusion != null and .conclusion != "skipped")] | length == 0)] | length')
+          echo "run $RUN_ID: $ran_nothing of $total jobs executed no steps"
+          # EVERY job must have run nothing. A mixed run had something actually execute, and
+          # whatever that was is the thing to look at.
+          if [ "$total" -gt 0 ] && [ "$ran_nothing" -eq "$total" ]; then
+            echo "Nothing was ever executed — re-running $RUN_ID."
             gh run rerun "$RUN_ID" -R "$REPO"
           else
             echo "This run failed for a real reason. Leaving it red."
