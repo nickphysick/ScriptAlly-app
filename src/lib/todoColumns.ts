@@ -322,35 +322,12 @@ export type DropPlan =
  * cannot move to Done, and offering the move only to bounce it is a menu that wastes your click
  * to teach you a rule. Each line names the act, and the ones that do not apply say why.
  */
-export interface CardVerb {
-  id: "action" | "today" | "snooze" | "open" | "dismiss";
-  label: string;
-  disabled?: boolean;
-  /** Shown as the control's title when disabled — the refusal states its reason. */
-  why?: string;
-}
-
-export function cardVerbs(card: BoardCard, column: TodoColumnId): CardVerb[] {
-  const isOffer = card.taskType === "offer_received";
-  const onToday = column === "today";
-  const verbs: CardVerb[] = [
-    { id: "action", label: "Action now" },
-    onToday
-      ? { id: "today", label: "− Take off today" }
-      : { id: "today", label: "＋ Add to today" },
-    { id: "snooze", label: "Snooze…" },
-  ];
-  if (card.relatedRecordId && !card.userTaskId) verbs.push({ id: "open", label: "Open the query" });
-  /* ⚠️ AN OFFER HAS NO DISMISS, ANYWHERE. The line still renders, disabled and saying so — its
-     absence would read as an oversight, and a writer who has been told once still deserves the
-     reminder at the moment they reach for it. */
-  verbs.push(
-    isOffer
-      ? { id: "dismiss", label: "Dismiss — not for offers", disabled: true, why: "An offer has a reply-by date that is not yours to move." }
-      : { id: "dismiss", label: "Dismiss…" },
-  );
-  return verbs;
-}
+/* ⚠️ `cardVerbs` / `CardVerb` ARE RETIRED (board fixes II, P1 — 6 Aug). The flat five-verb list
+   became the grouped, per-kind, per-column `cardMenu` model in src/lib/todoMenu.ts: three intent
+   groups (DO IT · PUT IT OFF · GO ELSEWHERE), tier submenus that reuse the fork's and the Later
+   menu's own copy, and the whole-menu collapses (Done; sweeps lose GO ELSEWHERE). The one rule
+   carried over verbatim: AN OFFER HAS NO DISMISS, ANYWHERE — the line renders disabled and says
+   why, because its absence would read as an oversight. */
 
 export function dropPlan(
   card: BoardCard,

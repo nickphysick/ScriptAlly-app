@@ -435,7 +435,9 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
   // Retired as a lane; re-projected here (newest-first) for the Today's-list done-band.
   const cleared = clearedTodayItems({ activities: input.activities, userTasks: input.userTasks, taskFlags: input.taskFlags, now: input.now });
   const clearedCards: BoardCard[] = [
-    ...cleared.userTasks.map((t) => ({ ...blankDone(`done-task-${t.id}`), title: t.text || "Task", record: "Your task", whenMs: msOf(t.completedAt) })),
+    // ⚠️ userTaskId rides the done card (board fixes II P1): the Done column's ⋯ menu offers
+    // "Undo — put it back" only where an untick primitive exists, and the id is how it finds it.
+    ...cleared.userTasks.map((t) => ({ ...blankDone(`done-task-${t.id}`), title: t.text || "Task", record: "Your task", whenMs: msOf(t.completedAt), userTaskId: t.id })),
     ...cleared.activities.map((a, i) => clearedActivityCard(a, i, input)),
     ...cleared.flags.map((f, i) => clearedFlagCard(f, i, input)),
   ].sort((a, b) => (b.whenMs ?? 0) - (a.whenMs ?? 0));

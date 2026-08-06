@@ -14,7 +14,8 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
-import { bandFamily, cardVerbs } from "../../lib/todoColumns";
+import { bandFamily } from "../../lib/todoColumns";
+import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoBoard.css"), "utf8");
@@ -65,38 +66,44 @@ describe("⚠️ family → tint, as a MAP", () => {
   });
 });
 
+/* ⚠️ SUPERSEDED (board fixes II, P1 — 6 Aug): `cardVerbs` retired; the menu model is now the
+   grouped `cardMenu` in src/lib/todoMenu.ts and its own suite (todoBoardMenu.test.ts) carries the
+   exhaustive per-kind/per-column tables. What survives HERE are the two laws this file has always
+   held: verbs never say "Move to X", and an offer's Dismiss renders disabled with its reason. */
+const flatten = (c: BoardCard, col: "todo" | "today" | "snoozed" | "done"): MenuLeaf[] =>
+  cardMenu(c, col).flatMap((g) => g.entries.flatMap((e) => (e.kind === "leaf" ? [e] : e.sub)));
+
 describe("⚠️ the ⋯ menu speaks VERBS, never 'Move to X'", () => {
   it("names acts", () => {
-    const labels = cardVerbs(card({ relatedRecordId: "q1", taskType: "full_requested" }), "todo").map((v) => v.label);
+    const labels = flatten(card({ relatedRecordId: "q1", taskType: "full_requested" }), "todo").map((v) => v.label);
     expect(labels).toContain("Action now");
     expect(labels).toContain("＋ Add to today");
-    expect(labels).toContain("Snooze…");
     expect(labels).toContain("Open the query");
   });
 
   it("NOWHERE says 'Move to' — that describes the card, not the work", () => {
     for (const col of ["todo", "today", "snoozed", "done"] as const) {
       for (const c of [card({ taskType: "full_requested" }), card({ userTaskId: "u1" })]) {
-        for (const v of cardVerbs(c, col)) expect(v.label).not.toMatch(/move to/i);
+        for (const v of flatten(c, col)) expect(v.label).not.toMatch(/move to/i);
       }
     }
     expect(board).not.toMatch(/Move to \{/);
   });
 
   it("on Today the verb REVERSES rather than repeating — it is a state, not a command list", () => {
-    expect(cardVerbs(card({}), "today").map((v) => v.label)).toContain("− Take off today");
-    expect(cardVerbs(card({}), "todo").map((v) => v.label)).toContain("＋ Add to today");
+    expect(flatten(card({}), "today").map((v) => v.label)).toContain("− Remove from today");
+    expect(flatten(card({}), "todo").map((v) => v.label)).toContain("＋ Add to today");
   });
 
   it("⚠️ an offer's Dismiss RENDERS, disabled, and says why — absence would read as an oversight", () => {
-    const d = cardVerbs(card({ taskType: "offer_received" }), "todo").find((v) => v.id === "dismiss")!;
+    const d = flatten(card({ taskType: "offer_received" }), "todo").find((v) => v.label.startsWith("Dismiss"))!;
     expect(d.label).toBe("Dismiss — not for offers");
     expect(d.disabled).toBe(true);
     expect(d.why).toContain("reply-by");
   });
 
   it("a user task has no 'Open the query' — there is no query to open", () => {
-    const labels = cardVerbs(card({ userTaskId: "u1" }), "todo").map((v) => v.label);
+    const labels = flatten(card({ userTaskId: "u1" }), "todo").map((v) => v.label);
     expect(labels).not.toContain("Open the query");
   });
 });

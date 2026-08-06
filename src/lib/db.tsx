@@ -266,7 +266,7 @@ interface DbContextType {
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "detail" | "done" | "completedAt" | "dueDate" | "surfaceOffset">> & { committedDate?: string | null }) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
 
   // Activity Actions
@@ -2185,13 +2185,22 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const updateUserTask = async (
     id: string,
-    fields: Partial<Pick<UserTask, "text" | "detail" | "done" | "completedAt" | "dueDate" | "surfaceOffset">> & { committedDate?: string | null },
+    fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & {
+      detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
+      committedDate?: string | null;
+    },
   ) => {
     if (!currentUser) return;
-    const { committedDate, ...rest } = fields;
+    const { committedDate, detail, dueDate, surfaceOffset, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
     // `null` clears the Today's-list commitment (uncommit); a string sets it.
     if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
+    /* board fixes II P1 — the ⋯ Edit needs to CLEAR fields (a task losing its date becomes a
+       note, per the two-natures law), so the committedDate null-convention now covers the three
+       optional fields too. `undefined` still means "leave it alone" — never sent. */
+    if (detail !== undefined) patch.detail = detail === null ? deleteField() : detail;
+    if (dueDate !== undefined) patch.dueDate = dueDate === null ? deleteField() : dueDate;
+    if (surfaceOffset !== undefined) patch.surfaceOffset = surfaceOffset === null ? deleteField() : surfaceOffset;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {

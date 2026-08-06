@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TodoBoard — the four-column board (workspace pack, Phase 4; ref
- * design-refs/todo-workspace-pages.html).
+ * TodoBoard — the four-column board (workspace pack, Phase 4; board fixes II, Phase 1; ref
+ * design-refs/todo-board-settled.html).
  *
  * ⚠️ THE BOARD OWNS NO STATE AND WRITES NOTHING. Every column is a state the app already has, and
  * every drag resolves through `dropPlan` to a verb that already exists. This component decides
@@ -13,21 +13,31 @@
  *
  * ⚠️ DRAG IS NEVER THE ONLY PATH. Every verb a drag performs is also on the card's ⋯ menu, because
  * a board reachable only by pointer is a board some people cannot use at all.
+ *
+ * ⚠️ THE ⋯ MENU IS A PORTAL TO document.body (board fixes II, P1). It used to render inside the
+ * card's foot, and the card carries `overflow` clipping — so the menu drew CLIPPED to the card's
+ * box, a strip of buttons with their labels cut off. Positioning is fixed-coordinate from the
+ * trigger's rect (the pure `placeMenu` — flips upward at the viewport's bottom edge), and the
+ * menu closes on outside press, Escape (focus returns to the trigger), any scroll, resize, and
+ * history navigation. Its CONTENTS are the pure `cardMenu` model — the component renders whatever
+ * that returns and decides nothing per-kind itself.
  */
-import React, { useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { MoreHorizontal } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
-import { TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily, cardVerbs, CardVerb } from "../../lib/todoColumns";
+import { TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily } from "../../lib/todoColumns";
+import { cardMenu, placeMenu, MenuEntry, MenuLeaf, MenuGroup } from "../../lib/todoMenu";
 import "./todoBoard.css";
 
 export interface TodoBoardProps {
   columns: BoardColumns;
   /** The board asks; the page performs. Every one of these is an EXISTING verb. */
   onPlan: (card: BoardCard, plan: DropPlan, from: TodoColumnId, to: TodoColumnId) => void;
-  /** Opening a card — the same handler the rows use. */
+  /** Opening a card — the dock's door (board fixes II, P2). */
   onOpen: (card: BoardCard) => void;
-  /** A ⋯ verb, performed by the page with its existing primitives. */
-  onVerb: (card: BoardCard, verb: CardVerb, column: TodoColumnId) => void;
+  /** A ⋯ menu leaf, performed by the page with its existing primitives. */
+  onVerb: (card: BoardCard, item: MenuLeaf, column: TodoColumnId) => void;
 }
 
 const COL_EMPTY: Record<TodoColumnId, string> = {
@@ -37,18 +47,196 @@ const COL_EMPTY: Record<TodoColumnId, string> = {
   done: "Nothing cleared yet today.",
 };
 
+interface OpenMenu {
+  key: string;
+  card: BoardCard;
+  column: TodoColumnId;
+  anchor: HTMLElement;
+  /** Pre-open a submenu — the drag-to-Snoozed drop opens the menu AT its date tiers. */
+  openSub?: "snooze" | "resnooze" | "dismiss";
+}
+
+/**
+ * The portal menu. Rendered once at board level for whichever card is open — never inside a
+ * card, so no card style (overflow, transform, z-index) can clip or trap it.
+ */
+const BoardCardMenu: React.FC<{
+  open: OpenMenu;
+  onPick: (item: MenuLeaf) => void;
+  onClose: (returnFocus: boolean) => void;
+}> = ({ open, onPick, onClose }) => {
+  const elRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const [sub, setSub] = useState<string | null>(open.openSub ?? null);
+  const groups = cardMenu(open.card, open.column);
+
+  /* Position after first paint (the menu's height depends on its contents), and re-place when a
+     submenu expands — the height change can push it past the viewport's bottom edge. */
+  useLayoutEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    const r = open.anchor.getBoundingClientRect();
+    const p = placeMenu(r, { w: el.offsetWidth, h: el.offsetHeight },
+      { w: window.innerWidth, h: window.innerHeight });
+    setPos({ left: p.left, top: p.top });
+  }, [open.anchor, sub]);
+
+  // Focus the first enabled item once placed — the keyboard arrives inside the menu.
+  useEffect(() => {
+    if (!pos) return;
+    const first = elRef.current?.querySelector<HTMLButtonElement>("button.tbd-mi:not(:disabled)");
+    first?.focus();
+    // run once, on placement — not again when a submenu re-places the menu
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pos !== null]);
+
+  /* The closers: outside press · Escape (focus back to the trigger) · any scroll · resize ·
+     history navigation. The trigger itself counts as "outside" here deliberately — its own click
+     handler toggles, and a pointerdown-close followed by a click-reopen would make the button
+     unable to close its menu. */
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node | null;
+      if (t && (elRef.current?.contains(t) || open.anchor.contains(t))) return;
+      onClose(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.stopPropagation(); onClose(true); }
+    };
+    const onAway = () => onClose(false);
+    document.addEventListener("pointerdown", onDown);
+    // capture-phase: the stage scrolls, not the window — a bubbling listener would never hear it
+    document.addEventListener("keydown", onKey, true);
+    window.addEventListener("scroll", onAway, true);
+    window.addEventListener("resize", onAway);
+    window.addEventListener("popstate", onAway);
+    window.addEventListener("hashchange", onAway);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("scroll", onAway, true);
+      window.removeEventListener("resize", onAway);
+      window.removeEventListener("popstate", onAway);
+      window.removeEventListener("hashchange", onAway);
+    };
+  }, [open.anchor, onClose]);
+
+  const walk = (e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const items = Array.from(
+      elRef.current?.querySelectorAll<HTMLButtonElement>("button.tbd-mi:not(:disabled)") ?? [],
+    );
+    if (!items.length) return;
+    const i = items.indexOf(document.activeElement as HTMLButtonElement);
+    const next = e.key === "ArrowDown"
+      ? items[(i + 1 + items.length) % items.length]
+      : items[(i - 1 + items.length) % items.length];
+    next.focus();
+  };
+
+  const renderLeaf = (item: MenuLeaf, inSub: boolean) => (
+    <button
+      key={item.id + (inSub ? "-sub" : "")}
+      type="button"
+      role="menuitem"
+      className={`tbd-mi${item.weight ? " weight" : ""}${item.danger ? " danger" : ""}${inSub ? " insub" : ""}`}
+      disabled={item.disabled}
+      title={item.why}
+      onClick={() => onPick(item)}
+    >
+      {item.label}
+      {item.goes && <span className="tbd-mgo" aria-hidden>▸</span>}
+    </button>
+  );
+
+  const renderEntry = (entry: MenuEntry) => {
+    if (entry.kind === "leaf") return renderLeaf(entry, false);
+    const openSub = sub === entry.id;
+    return (
+      <React.Fragment key={entry.id}>
+        <button
+          type="button"
+          role="menuitem"
+          aria-haspopup="true"
+          aria-expanded={openSub}
+          className="tbd-mi"
+          onClick={() => setSub((s) => (s === entry.id ? null : entry.id))}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") { e.preventDefault(); setSub(entry.id); }
+            if (e.key === "ArrowLeft") { e.preventDefault(); setSub(null); }
+          }}
+        >
+          {entry.label}
+          <span className={`tbd-mgo${openSub ? " open" : ""}`} aria-hidden>▸</span>
+        </button>
+        {openSub && <div className="tbd-misub">{entry.sub.map((s) => renderLeaf(s, true))}</div>}
+      </React.Fragment>
+    );
+  };
+
+  const renderGroup = (g: MenuGroup, i: number) => (
+    <React.Fragment key={i}>
+      {g.head ? (
+        <div className="tbd-mhead">{g.head}</div>
+      ) : (
+        i > 0 && <div className="tbd-msep" aria-hidden />
+      )}
+      {g.entries.map(renderEntry)}
+    </React.Fragment>
+  );
+
+  return createPortal(
+    <div
+      ref={elRef}
+      className="t-f12 tbd-menu2"
+      role="menu"
+      aria-label={`Actions for ${open.card.title}`}
+      style={pos ? { left: pos.left, top: pos.top } : { left: 0, top: 0, visibility: "hidden" }}
+      onKeyDown={walk}
+    >
+      {groups.filter((g) => g.entries.length > 0).map(renderGroup)}
+    </div>,
+    document.body,
+  );
+};
+
 export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, onVerb }) => {
   const [dragging, setDragging] = useState<{ card: BoardCard; from: TodoColumnId } | null>(null);
   const [over, setOver] = useState<TodoColumnId | null>(null);
-  const [menu, setMenu] = useState<string | null>(null);
+  const [menu, setMenu] = useState<OpenMenu | null>(null);
+  const cardEls = useRef(new Map<string, HTMLElement>());
+
+  const closeMenu = (returnFocus: boolean) => {
+    setMenu((m) => {
+      if (m && returnFocus) m.anchor.focus();
+      return null;
+    });
+  };
 
   const perform = (card: BoardCard, from: TodoColumnId, to: TodoColumnId) => {
     const plan = dropPlan(card, from, to);
+    /* ⚠️ THE SNOOZE DROP OPENS THE DATE CHOICE ON THE CARD (P1). The plan says "ask for a date";
+       the page's Later popover only ever mounted on the ledger rows, so on the board the drop
+       used to ask NOTHING — the card just stayed put. The ⋯ menu is the board's chooser now, so
+       the drop opens it with the date tiers already expanded. The zone's label ("DROP TO CHOOSE
+       A RETURN DATE") was always the promise; this is the promise kept. */
+    if (plan.kind === "snooze-popover") {
+      const anchor = cardEls.current.get(card.key);
+      if (anchor) { setMenu({ key: card.key, card, column: from, anchor, openSub: "snooze" }); return; }
+    }
     onPlan(card, plan, from, to);
   };
 
   return (
     <div className="tbd">
+      {menu && (
+        <BoardCardMenu
+          open={menu}
+          onClose={closeMenu}
+          onPick={(item) => { setMenu(null); onVerb(menu.card, item, menu.column); }}
+        />
+      )}
       {TODO_COLUMNS.map((col) => {
         const cards = columns[col.id];
         const isOver = over === col.id && dragging !== null && dragging.from !== col.id;
@@ -93,12 +281,17 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
               {cards.map((c) => (
                 <article
                   key={c.key}
+                  ref={(el) => {
+                    if (el) cardEls.current.set(c.key, el);
+                    else cardEls.current.delete(c.key);
+                  }}
                   /* ⚠️ THE INK BORDER IS URGENT-ONLY, AND URGENT IS THE LANE (corrections fix 5).
                      It keyed on `warn`, which derivedCopy sets true for offers, fulls, stale
                      queries and old nudges alike — most of the board. So nearly every card wore
                      ink and the border stopped distinguishing anything. `stream === "do"` is the
                      Urgent lane, the same set the counting law calls urgent, so the border now
-                     means what the group heading means. */
+                     means what the group heading means. (P4 re-keys this onto the consolidated
+                     family, once the family itself stops calling STALE urgent.) */
                   className={`tbd-card${c.stream === "do" ? " urgent" : ""}${c.done ? " done" : ""}`}
                   draggable
                   tabIndex={0}
@@ -124,37 +317,26 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                   <div className="tbd-t">{c.title}</div>
                   {c.record && <div className="tbd-meta">{c.record}</div>}
 
-                  {/* ⚠️ KEYBOARD PARITY. The same verbs, off the pointer. */}
-                  <div className="tbd-foot" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      type="button"
-                      className="tbd-more"
-                      aria-haspopup="menu"
-                      aria-expanded={menu === c.key}
-                      aria-label={`Move ${c.title}`}
-                      onClick={() => setMenu((k) => (k === c.key ? null : c.key))}
-                    >
-                      <MoreHorizontal size={15} aria-hidden />
-                    </button>
-                    {/* ⚠️ VERBS, NEVER "Move to X" — the menu names the ACT, not what happens to
-                        the card. */}
-                    {menu === c.key && (
-                      <div className="tbd-menu" role="menu">
-                        {cardVerbs(c, col.id).map((v) => (
-                          <button
-                            key={v.id}
-                            type="button"
-                            role="menuitem"
-                            disabled={v.disabled}
-                            title={v.why}
-                            onClick={() => { setMenu(null); onVerb(c, v, col.id); }}
-                          >
-                            {v.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* ⚠️ THE SEAT (P1, ref option A): ONE ⋯, bottom-right, in a permanently
+                      reserved lane — the card's text padding reserves it, so nothing ever sits
+                      under it and nothing appears or disappears on hover. Faint at rest; the
+                      card's hover darkens it and gives it its chip. KEYBOARD PARITY: the same
+                      verbs, off the pointer. */}
+                  <button
+                    type="button"
+                    className="tbd-more"
+                    aria-haspopup="menu"
+                    aria-expanded={menu?.key === c.key}
+                    aria-label={`Actions for ${c.title}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const anchor = e.currentTarget;
+                      setMenu((m) => (m?.key === c.key ? null : { key: c.key, card: c, column: col.id, anchor }));
+                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    <MoreHorizontal size={15} aria-hidden />
+                  </button>
                 </article>
               ))}
             </div>

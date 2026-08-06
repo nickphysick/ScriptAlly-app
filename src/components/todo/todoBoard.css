@@ -79,28 +79,60 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.tbd-t { font-size: 13px; color: #2a1a13; padding: 9px 9px 0; line-height: 1.35; }
-.tbd-meta { font-size: 11px; color: #9a8e80; padding: 3px 9px 0; }
+/* ⚠️ THE RESERVED LANE (board fixes II P1, ref option A): the card's right padding PERMANENTLY
+   reserves the seat's corner — body text never runs under the ⋯, in any state, so nothing has to
+   appear or disappear on hover to make room. 42px = the seat's 26px width + its 8px inset + 8px
+   clearance (the ref's own `.in { padding-right: 42px }`). */
+.tbd-t { font-size: 13px; color: #2a1a13; padding: 9px 42px 0 9px; line-height: 1.35; }
+.tbd-meta { font-size: 11px; color: #9a8e80; padding: 3px 42px 0 9px; }
+.tbd-card { padding-bottom: 13px; }
 
-.tbd-foot { display: flex; justify-content: flex-end; padding: 6px 6px 7px; position: relative; }
+/* THE SEAT — one ⋯, bottom-right, always present: faint at rest, darkening with a soft chip on
+   the card's hover (never its own hover only — the affordance belongs to the card). */
+.tbd-more {
+  position: absolute; right: 8px; bottom: 8px;
+  width: 26px; height: 24px; border-radius: 7px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid transparent;
+  color: #c4b6a6; cursor: pointer; line-height: 0;
+}
+.tbd-card:hover .tbd-more,
+.tbd-more:focus-visible,
+.tbd-more[aria-expanded="true"] { color: #6b5a4e; background: #faf6f0; border-color: #ece4d6; }
 
-.tbd-more { background: transparent; border: 0; color: #9a8e80; cursor: pointer; padding: 2px 4px; border-radius: 6px; line-height: 0; }
-.tbd-more:hover { background: #f1e9df; color: #2a1a13; }
-
-.tbd-menu {
-  position: absolute; right: 6px; bottom: 100%; z-index: 5;
-  background: #fffefb; border: 1px solid #e3d8c8; border-radius: 9px;
-  box-shadow: 0 6px 18px rgba(58, 28, 20, 0.12);
-  padding: 4px; min-width: 150px;
+/* ⚠️ THE MENU IS A PORTAL — fixed-positioned on document.body (menu M2, the settled ref), so no
+   card overflow/transform can clip it. Colours are self-contained; the type inherits from body.
+   z-index 80: above the board and the toast (70-ish surfaces), below nothing it must yield to —
+   it closes on any scroll or navigation before stacking could matter. */
+.tbd-menu2 {
+  position: fixed; z-index: 80; width: 228px;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(58, 28, 20, 0.2);
+  padding: 6px;
 }
 
-.tbd-menu button {
-  display: block; width: 100%; text-align: left; font: inherit; font-size: 12.5px;
-  background: transparent; border: 0; padding: 7px 9px; border-radius: 6px; cursor: pointer; color: #2a1a13;
+.tbd-mhead {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6.5px; letter-spacing: 0.17em; text-transform: uppercase;
+  color: #b3a394; padding: 8px 10px 4px;
 }
 
-.tbd-menu button:hover:not(:disabled) { background: #f4f2ef; }
-.tbd-menu button:disabled { color: #b3a598; cursor: not-allowed; }
+.tbd-msep { border-top: 1px solid #f0e9dd; margin: 5px 4px; }
+
+.tbd-mi {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  height: 32px; border-radius: 8px; padding: 0 10px;
+  font: inherit; font-size: 11.5px; font-weight: 500; color: #4d4238;
+  background: transparent; border: 0; cursor: pointer;
+}
+.tbd-mi.weight { font-weight: 700; color: #2b2118; }
+.tbd-mi.danger { color: #7c3a2a; }
+.tbd-mi:hover:not(:disabled), .tbd-mi:focus-visible { background: #f7f2e9; }
+.tbd-mi:disabled { color: #c1b4a5; cursor: not-allowed; }
+.tbd-mi.insub { height: 30px; font-size: 11px; padding-left: 26px; }
+
+.tbd-mgo { margin-left: auto; color: #b3a394; font-size: 9px; }
+.tbd-mgo.open { transform: rotate(90deg); }
 
 .tbd-foot-note {
   font-family: "JetBrains Mono", ui-monospace, monospace;

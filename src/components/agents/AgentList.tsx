@@ -176,6 +176,22 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newAgent?.id]);
 
+  /* ⚠️ THE ONE-SHOT REVEAL (board fixes II, P1). The To-do board's ⋯ menu offers "View the
+     agent"; this is the receiving end. sessionStorage rather than a route param, deliberately:
+     a reveal is a GESTURE, not an address — it must not survive the tab, must not enter history,
+     and must fire exactly once (the key is cleared the moment it is read). Same scroll mechanics
+     as the new-agent land above; an id that no longer exists simply clears and does nothing. */
+  useLayoutEffect(() => {
+    let id: string | null = null;
+    try { id = sessionStorage.getItem("sa.agentReveal"); } catch { /* private mode */ }
+    if (!id || agents.length === 0) return;        // hold the key until the list can answer
+    try { sessionStorage.removeItem("sa.agentReveal"); } catch { /* private mode */ }
+    if (!agents.some((a) => a.id === id)) return;  // stale id — consumed, nothing to show
+    const card = document.querySelector<HTMLElement>(`[data-agent-card="${id}"]`);
+    card?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agents.length]);
+
   // Both axes counted over the WHOLE list — a filter row must state what it would reveal, so it
   // can never read from the already-filtered view.
   const counts = useMemo(() => agentAxisCounts(agents, queries), [agents, queries]);

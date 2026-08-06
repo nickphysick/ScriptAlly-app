@@ -147,7 +147,7 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
     // the date + surfacing fields are task-only; the note shows the NO-DATE line; the verb changes
     expect(comp).toContain("isTask ? (");
     expect(comp).toContain("NO DATE · NOTHING WILL CHASE YOU");
-    expect(comp).toContain('{isTask ? "Add the task" : "Pin the note"}');
+    expect(comp).toContain('{composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}');
   });
 
   it("the surfacing field is IN-APP Today's-list timing, never a reminder — and it needs a date first", () => {

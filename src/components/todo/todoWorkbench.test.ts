@@ -337,7 +337,7 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     expect(rule(".tdb-nc-ttl.note")).toContain("font-family: Caveat"); // the note title is handwriting
     expect(page).toContain("autoFocus"); // the title autofocuses on open
     expect(page).toContain("ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING"); // the mono hint
-    expect(page).toContain('{isTask ? "Add the task" : "Pin the note"}'); // the save verb changes by nature
+    expect(page).toContain('{composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}'); // the save verb changes by nature
   });
   it("keyboard + outside-click law: ⌘⏎/Ctrl⏎ saves · Esc cancels (styled confirm) · outside cancels ONLY when empty", () => {
     expect(page).toContain('if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }');

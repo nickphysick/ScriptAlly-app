@@ -58,7 +58,8 @@ import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
-import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, CardVerb, TodoColumnId } from "../../lib/todoColumns";
+import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, TodoColumnId } from "../../lib/todoColumns";
+import { MenuLeaf } from "../../lib/todoMenu";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -231,6 +232,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [composerDetail, setComposerDetail] = useState("");     // the optional detail line
   const [composerDate, setComposerDate] = useState("");         // task only — ISO "YYYY-MM-DD"
   const [composerSurface, setComposerSurface] = useState<SurfaceOffset>("on-day"); // task only
+  /* board fixes II P1 — EDIT MODE: the ⋯ menu's "Edit the task…" opens the SAME composer seeded
+     from the card, and save routes to `updateUserTask` on this id instead of a create. One
+     surface, two verbs — a second edit sheet would be a second copy of every field rule here. */
+  const [composerEdit, setComposerEdit] = useState<string | null>(null); // the UserTask id under edit
   // save-and-today P1 — THE SAVE STATE MACHINE: idle → pending → (saved | failed). A denied/dropped
   // write must fail VISIBLY (never a silent close), and the optimistic insert must not flicker — so
   // the in-flight id is hidden from the board until the write resolves.
@@ -842,6 +847,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const resetSaveMachine = () => { setSaveState("idle"); setSaveError(null); setPendingSaveId(null); setSaveSlow(false); };
   const openComposer = (mode: "note" | "task") => {
     setComposerMode(mode);
+    setComposerEdit(null);
     setComposerDraft("");
     setComposerDetail("");
     setComposerDate("");
@@ -849,8 +855,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     resetSaveMachine();
     setComposerAt("cards"); // one view now (board+dock P1)
   };
+  /* board fixes II P1 — the ⋯ menu's Edit: the same composer, seeded from the card. The nature
+     follows the card's own (a dated task edits as a task); clearing the date on save DOWNGRADES
+     it to a note through the same update, which is the two-natures law applied to editing. */
+  const openComposerEdit = (c: BoardCard) => {
+    if (!c.userTaskId) return;
+    setComposerMode(c.dueYmd ? "task" : "note");
+    setComposerEdit(c.userTaskId);
+    setComposerDraft(c.title);
+    setComposerDetail(c.detail ?? "");
+    setComposerDate(c.dueYmd ?? "");
+    setComposerSurface(c.surfaceOffset ?? "on-day");
+    resetSaveMachine();
+    setComposerAt("cards");
+  };
   const closeComposer = () => {
     setComposerAt(null);
+    setComposerEdit(null);
     setComposerDraft("");
     setComposerDetail("");
     setComposerDate("");
@@ -912,6 +933,31 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   async function saveComposer() {
     if (!composerCanSave || savePending) return;
     const isTask = composerMode === "task";
+    /* board fixes II P1 — the EDIT branch: same machine, same states, the update primitive
+       instead of the create. Clears are explicit nulls (a task losing its date becomes a note);
+       there is no pendingSaveId to hide because the doc already renders — a failed update leaves
+       it exactly as it was, which is the honest outcome. */
+    if (composerEdit) {
+      setSaveState("pending");
+      setSaveError(null);
+      const slow = window.setTimeout(() => setSaveSlow(true), 300);
+      try {
+        await updateUserTask(composerEdit, {
+          text: composerDraft.trim(),
+          detail: composerDetail.trim() || null,
+          dueDate: isTask && composerDate ? composerDate : null,
+          surfaceOffset: isTask && composerDate && composerSurface !== "on-day" ? composerSurface : null,
+        });
+        window.clearTimeout(slow);
+        closeComposer();
+      } catch (e) {
+        window.clearTimeout(slow);
+        setSaveSlow(false);
+        setSaveError(classifyWriteError(e));
+        setSaveState("failed");
+      }
+      return;
+    }
     const id = "task-" + Math.random().toString(36).slice(2, 11);
     setSaveState("pending");
     setSaveError(null);
@@ -1352,7 +1398,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             )}
             <button type="button" className="tdb-nc-save" disabled={!composerCanSave || savePending} onClick={saveComposer}>
               {saveSlow && <span className="tdb-nc-spin" aria-hidden />}
-              {isTask ? "Add the task" : "Pin the note"}
+              {composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}
             </button>
           </div>
           {saveState === "failed" && (
@@ -1635,17 +1681,48 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return sortBoardCards(applyFacet(raw, facet), sort);
   }
 
-  /* ⚠️ THE ⋯ VERBS, PERFORMED — every one an EXISTING primitive, exactly as the drags are. */
-  function performCardVerb(card: BoardCard, verb: CardVerb, column: TodoColumnId) {
-    switch (verb.id) {
-      case "action": openDock(dockAllCards(), card.key); break;  // ⚠️ the dock — the one work surface
+  /* ⚠️ THE ⋯ VERBS, PERFORMED — every one an EXISTING primitive, exactly as the drags are (board
+     fixes II P1: the menu grew its per-kind and per-column shapes in `cardMenu`; this switch just
+     routes each leaf to the verb that already owns it). */
+  function performCardVerb(card: BoardCard, item: MenuLeaf, column: TodoColumnId) {
+    /* A sweep card's verbs act on its RULE GROUP — the same group the batch sheet and the group
+       fork already operate on. The card is one stand-in; the group is the thing. */
+    const group = isSweepCard(card) ? hkGroups.find((g) => g.rule === card.sweepRule) : undefined;
+    switch (item.id) {
+      case "action":
+        if (group) { setFlow({ items: [{ kind: "group", group }] }); break; } // Start the sweep — the batch sheet
+        openDock(dockAllCards(), card.key);                                   // ⚠️ the dock — the one work surface
+        break;
       case "today": performBoardPlan(card, dropPlan(card, column, column === "today" ? "todo" : "today")); break;
-      case "snooze": setLaterKey(card.key); break;              // the popover, never a silent snooze
-      case "open": if (card.relatedRecordId) onNavigate("queries", card.relatedRecordId); break;
-      /* ⚠️ DISMISS IS THE EXISTING FORK, not a new write. `forkStale` carries the undo and the
-         "never this" escalation; a board-local dismissal would be a second path to the same
-         stance with its own bugs. */
-      case "dismiss": if (!verb.disabled) forkStale(card, "notNow"); break;
+      /* The date tiers write through the EXISTING snooze primitives — never a menu-local date. */
+      case "snooze-1": group ? snoozeGroup(group, 1, "tomorrow") : snoozeCard(card, 1, "tomorrow"); break;
+      case "snooze-7": group ? snoozeGroup(group, 7, "in a week") : snoozeCard(card, 7, "in a week"); break;
+      case "unsnooze": performBoardPlan(card, dropPlan(card, "snoozed", "todo")); break;
+      /* ⚠️ DISMISS IS THE EXISTING FORK, not a new write — each tier is one of `forkStale`'s (or
+         the group fork's) own arms, so the menu and the fork card cannot disagree about what a
+         tier does. A board-local dismissal would be a second path to the same stance. */
+      case "dismiss-week": group ? forkNotNowGroup(group) : forkStale(card, "notNow"); break;
+      case "dismiss-never": group ? forkNeverThese(group) : forkStale(card, "neverThis"); break;
+      case "dismiss-rule": if (group) forkNeverRule(group); break;
+      case "undo-done":
+        if (card.userTaskId) {
+          void updateUserTask(card.userTaskId, { done: false })
+            .then(() => flash("Put back on the board"))
+            .catch(() => flash("Couldn’t undo that — try again?"));
+        }
+        break;
+      case "open-query": if (card.relatedRecordId) onNavigate("queries", card.relatedRecordId); break;
+      /* ⚠️ VIEW THE AGENT hands the id over via the one-shot reveal key — the agent list reads it
+         once on arrival, scrolls the card into view and clears it. sessionStorage, deliberately:
+         a reveal is a gesture, not a preference, and it must not survive the tab. */
+      case "view-agent":
+        if (card.agentId) {
+          try { sessionStorage.setItem("sa.agentReveal", card.agentId); } catch { /* private mode */ }
+          onNavigate("agents");
+        }
+        break;
+      case "edit-task": openComposerEdit(card); break;
+      case "delete-task": void deleteUserNote(card); break;     // the styled confirm + undo ride along
     }
   }
 

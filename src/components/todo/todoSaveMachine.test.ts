@@ -66,24 +66,37 @@ describe("save machine P1 — idle → pending → (saved | failed)", () => {
     expect(save).toContain("window.setTimeout(() => setSaveSlow(true), 300)");
   });
 
+  /* ⚠️ board fixes II P1 added the EDIT branch ABOVE the create inside saveComposer, so these
+     two locks now slice per branch (anchored, per the slice law) instead of trusting "the first
+     catch is the create's". The machine's states are shared; each branch is held to them. */
   it("SAVED: the composer closes only AFTER the write resolves; the item is unhidden in place", () => {
-    // the close happens strictly AFTER the awaited write — never fire-and-forget before it resolves
-    const awaitIdx = save.indexOf("await addUserTask(");
-    const closeIdx = save.indexOf("closeComposer();");
+    expect(save).toContain('const id = "task-"'); // the branch anchor
+    const create = save.slice(save.indexOf('const id = "task-"'));
+    const awaitIdx = create.indexOf("await addUserTask(");
+    const closeIdx = create.indexOf("closeComposer();");
     expect(awaitIdx).toBeGreaterThan(-1);
     expect(closeIdx).toBeGreaterThan(awaitIdx);
     // the settled item is unhidden (id cleared) as it closes
-    expect(save).toContain("setPendingSaveId(null); // the settled item may now render");
+    expect(create).toContain("setPendingSaveId(null); // the settled item may now render");
+    // the edit branch honours the same order: its close follows ITS awaited write
+    expect(save).toContain("if (composerEdit) {"); // the branch anchor
+    const edit = save.slice(save.indexOf("if (composerEdit) {"), save.indexOf('const id = "task-"'));
+    expect(edit.indexOf("closeComposer();")).toBeGreaterThan(edit.indexOf("await updateUserTask("));
   });
 
   it("FAILED: the write throws → the composer STAYS open with content intact, editable, error set", () => {
-    expect(save).toContain("} catch (e) {");
     expect(save).toContain("setSaveError(classifyWriteError(e))");
     expect(save).toContain('setSaveState("failed")');
-    // the failure branch does NOT close the composer and does NOT clear the draft
-    const failBranch = save.slice(save.indexOf("} catch (e) {"));
-    expect(failBranch).not.toContain("closeComposer()");
-    expect(failBranch).not.toContain("setComposerDraft");
+    // NEITHER branch's failure closes the composer or clears the draft
+    for (const branch of [
+      save.slice(save.indexOf("if (composerEdit) {"), save.indexOf('const id = "task-"')),
+      save.slice(save.indexOf('const id = "task-"')),
+    ]) {
+      expect(branch).toContain("} catch (e) {");
+      const failBranch = branch.slice(branch.indexOf("} catch (e) {"));
+      expect(failBranch).not.toContain("closeComposer()");
+      expect(failBranch).not.toContain("setComposerDraft");
+    }
     // the inline error + a Try again that RE-RUNS the write (retry after a failure)
     expect(page).toContain('{saveErrorCopy(saveError ?? "unknown")}');
     expect(page).toContain('<button type="button" className="tdb-nc-retry" onClick={saveComposer}>Try again</button>');

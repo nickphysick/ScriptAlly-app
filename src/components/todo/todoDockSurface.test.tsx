@@ -158,7 +158,10 @@ describe("⚠️ ONE ACT, THREE RECORDS — and only two of them are writes", ()
 
 describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
   it("Action now, the bounce toast's Open, Focused session and Work the list all call openDock", () => {
-    expect(page).toContain('case "action": openDock(');
+    /* board fixes II P1 reshaped the action case: a SWEEP routes to its batch sheet first, and
+       every other card docks — the assert follows the call, not the old one-line layout. */
+    expect(page).toContain('case "action":');
+    expect(page).toContain("openDock(dockAllCards(), card.key);");
     expect(page).toContain("fn: async () => { openDock(");                   // the bounce
     expect(page).toContain("function openFocusedSession() { openDock(");     // the tool row
     expect(page).toContain("const onWork = () => openDock(");                // Today
