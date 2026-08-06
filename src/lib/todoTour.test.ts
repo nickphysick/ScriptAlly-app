@@ -15,7 +15,7 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       ".tdb-herobegin",
       ".svh-btn-primary", // notes-and-tasks P4: the hero's "Add task or note"
       ".tdb-bsearch",
-      ".tdb-ctrl",
+      ".tdb-tools", // board+dock P1: the control bar became the header tool row
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.

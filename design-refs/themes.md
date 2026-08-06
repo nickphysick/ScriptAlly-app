@@ -1309,3 +1309,42 @@ Snoozed zone reads "choose a return date" rather than "snooze".
 **Retired here, and locked as retired:** the Today corner pop-up and its whole family (both
 renderers, `.tdb-today2`/`.tdb-tdpop`, the collapse key, the slide, `strikeIds`). Today is a route;
 a floating copy of it would be a second surface owning the same commitment.
+
+### Amendment — the board page and its instrument (board+dock pack, 6 Aug 2026)
+
+*(Ref: `design-refs/todo-board-dock.html`. Supersedes the "list page is three GROUP CARDS"
+paragraph above: that grammar was the ROWS view, and the rows view is gone.)*
+
+**The To-do list page IS the board — cards only.** The Lane/ledger grammar, the standalone control
+bar and the view toggle are all retired. What they carried survives: the housekeeping fold is a
+column's "+ n more", the snoozed band is the Snoozed column, and the kind facet is the card's band.
+
+**THE TOOL ROW IS THE PAGE'S SINGLE INSTRUMENT** — search · sort · ▶ Focused session · ＋ Add task
+or note, all in the header. One place to look for anything that changes what the board shows. Two
+instrument rows stacked is how the chip strip and the LISTS rows came to disagree; the rule is
+general, not a reaction to that one case. **Sort and filter apply to ALL FOUR COLUMNS** — a
+per-column narrowing would leave the board showing four differently-ordered views of one set.
+"Most pressing" is a real order (offer → what you are holding up → what has gone quiet →
+housekeeping), and absence sorts last in both date directions.
+
+**FILTERS (not LISTS)** — Everything · Urgent · Housekeeping · Your tasks, one active at a time,
+counts from the cards the columns render. **Snoozed is not a facet: it is a column**, and filtering
+to it would leave one populated column and three empty. **Notes are not a facet either** — they are
+not on this board at all, so it could only ever return nothing; a road sign to the Noteboard stands
+in its place.
+
+**⚠️ THE BAND'S FAMILY MAP** — urgent pink `#f8e2d9→#f4d5c9` / `#e8c8bc` · housekeeping latte ·
+the writer's own sage · done the same sage, muted. It is locked as a MAP, and as four DISTINCT
+tints, because the way it broke was being half-carried: the board's band was written fresh from
+one urgent card and that family's tint became the only tint.
+
+**⚠️ DONE ACCEPTS USER-TASK TICKS ONLY.** A user task is something you wrote down, so ticking it is
+the completion. A derived card stands for an ACT on a real record, and ticking it would clear the
+reminder while leaving the work undone. A Done-drop on a derived card **bounces**, and the toast
+names the act — "Sending the full is what completes this — open the action" — with a way straight
+through. **Every completion, from tick or drag, goes through the completion primitive**, so its
+undo always exists.
+
+**THE ⋯ MENU SPEAKS VERBS, never "Move to X"**: Action now · ＋Add to today (reversing to "− Take
+off today" when it is already there) · Snooze… · Open the query · Dismiss. An offer's Dismiss
+renders disabled and says why — its absence would read as an oversight.

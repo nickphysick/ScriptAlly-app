@@ -49,7 +49,10 @@ export const TOUR_STOPS: TourStop[] = [
   },
   {
     // todo rebuild P1: the filters are bare chips on the control line (the bench slab is gone)
-    sel: ".tdb-ctrl",
+    /* ⚠️ RETARGETED (board+dock P1): `.tdb-ctrl` was the standalone control bar, which is gone —
+       its search, the sort, the session launcher and the Add are the header's tool row now. A
+       tour stop whose selector matches nothing SKIPS SILENTLY, so it moves with the feature. */
+    sel: ".tdb-tools",
     h: "Narrow the desk.",
     p: "Quiet filters with live counts: click one to see only that kind of work. All brings everything back.",
     cta: "Next →",

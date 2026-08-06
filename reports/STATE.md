@@ -1,6 +1,27 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (fourth pass — corrections from Nick's dev walk).**
+**Last updated: 6 August 2026 (fifth pass — the board redesigned; the dock NOT started).**
+
+## The board+dock pack — Phases 1–3 landed, ⚠️ PHASE 4 (THE DOCK) NOT STARTED
+
+`72f6138` (P1+P2: the tool row is the page's one instrument; LISTS becomes FILTERS) → `0aafdea`
+(P3: the band family map, the move matrix, the undo repair) → `<this>` (P5, scoped to what
+landed). **159 files, 2636 passed | 2 skipped.** Detail: `reports/todo-board-dock.md`.
+
+**The To-do list page is the BOARD now — cards only.** The Lane/ledger grammar, the standalone
+control bar and the view toggle are retired. Sort and FILTERS apply to all four columns. Done
+accepts user-task ticks only; a derived card BOUNCES with a per-kind verb phrase. The ⋯ menu
+speaks verbs, never "Move to X".
+
+⚠️ **PHASE 4 IS UNSTARTED, deliberately** — the brief named this the clean split point. `Action
+now` and the bounce toast's `Open` route to the existing item sheet, which is the interim the
+brief specifies. Building a dock that mounted but could not finish work would be worse than
+none: every card would gain an Action that opens something unusable.
+
+⚠️ **Two causes recorded**, both in the report: the family map never regressed — it was never
+CARRIED between two grammars (hence the lock is on the MAP and on the tints being DISTINCT); and
+the drag path bypassed undo by writing the completion field directly instead of calling the
+primitive that raises the toast.
 
 ## Corrections landed (from the walk of `ffc1f45`)
 
