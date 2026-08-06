@@ -10,9 +10,9 @@
   --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a;
   --parch:#f2ede7; --chrome:#fbf9f5; --line:#ece7de; --edge:#e6e0d5;
   --rail-tx:#a89a8a; --rail-hi:#f4efe7;
-  --railw:52px; --panelw:186px;
+  --railw:52px; --panelw:214px;
   --head:66px; --frame:14px; --cardr:16px;
-  --bartint:rgba(234,227,217,.92); --bartint-solid:#eae3d9;
+  --bartint:rgba(232,227,221,.93); --bartint-solid:#e8e3dd;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
@@ -53,16 +53,22 @@ body.closed .panel{width:0;opacity:0}
 .pin{width:var(--panelw);height:100%;display:flex;flex-direction:column;padding:0 10px 10px}
 
 /* head zone matches the bar's 66px so the pill centres against the breadcrumb */
-.phead{height:var(--head);flex:none;display:flex;align-items:center}
-.mspill{flex:1;min-width:0;height:38px;background:#fff;border:1px solid var(--edge);border-radius:9px;
-  display:flex;align-items:center;justify-content:center;gap:7px;padding:0 10px;cursor:pointer;transition:border-color .15s}
+.phead{height:calc(var(--head) + var(--frame) + 1px);padding-top:calc(var(--frame) + 1px);flex:none;display:flex;align-items:center}
+.mspill{flex:1;min-width:0;height:56px;background:#fff;border:1px solid var(--edge);border-radius:10px;
+  display:flex;align-items:center;gap:10px;padding:0 10px;cursor:pointer;transition:border-color .15s}
 .mspill:hover{border-color:#d6cdbf}
-.mspill svg{width:14px;height:14px;stroke:var(--burgundy);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.mspill .t{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.mcov{width:30px;height:40px;border-radius:4px;flex:none;background:var(--parch);border:1px solid var(--edge);
+  display:flex;align-items:center;justify-content:center;color:var(--burgundy);overflow:hidden;
+  box-shadow:0 1px 2px rgba(46,39,35,.10)}
+.mcov svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mcov img{width:100%;height:100%;object-fit:cover;display:block}
+.mspill .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;line-height:1.2}
+.mspill .t{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mspill .g{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mspill .chev{color:var(--muted);display:flex;flex:none}
-.mspill .chev svg{width:11px;height:11px;stroke:currentColor;stroke-width:1.8}
+.mspill .chev svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
 
-.nav{flex:1;min-height:0;overflow:auto;padding-top:20px}
+.nav{flex:1;min-height:0;overflow:auto;padding-top:30px}
 .glabel{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.17em;text-transform:uppercase;
   color:var(--muted);padding:0 10px 6px;margin-top:18px}
 .glabel.first{margin-top:0}
@@ -173,9 +179,9 @@ body.closed .panel{width:0;opacity:0}
     <div class="pin">
       <div class="phead">
         <div class="mspill">
-          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <span class="t">Murphy's Day Out</span>
-          <span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg></span>
+          <span class="mcov"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+          <span class="tt"><span class="t">Murphy's Day Out</span><span class="g">Thriller · 50,000 words</span></span>
+          <span class="chev"><svg viewBox="0 0 24 24"><path d="M7 15l5 5 5-5"/><path d="M7 9l5-5 5 5"/></svg></span>
         </div>
       </div>
       <nav class="nav" id="nav"></nav>

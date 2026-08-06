@@ -44,7 +44,7 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -68,7 +68,7 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -100,7 +100,7 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -120,7 +120,7 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "todo", "agents", "materials"]);
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -133,7 +133,8 @@ describe("The IA renders what exists — and nothing else", () => {
   /* A nav that says "0" where it means "nothing to do" is noise on every quiet day. */
   it("a zero count is omitted rather than rendered as 0", () => {
     const quiet = workspaceSections({ todo: 0 });
-    expect(quiet.find((s) => s.id === "todo")!.count).toBeUndefined();
+    const row = quiet.find((s) => s.id === "workspace")!.children!.find((c) => c.id === "todo")!;
+    expect(row.count).toBeUndefined();
   });
 
   it("the nav's own children resolve against the route matcher", () => {

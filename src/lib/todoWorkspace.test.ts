@@ -51,38 +51,43 @@ describe("the four routes", () => {
   });
 });
 
-describe("the app sidebar's To-do group", () => {
+describe("the app sidebar's To-do row", () => {
+  /* ⚠️ RETARGETED (final ref, "(4)"): To-do is ONE ROW UNDER WORKSPACE, not a group of four.
+     The earlier lock required four children on a `todo` section, reasoning that folding it would
+     hide three destinations. It does not — Today is linked from the board and Noteboard from
+     Today; those are page-level views of one place, not peers in the IA. A nav column that lists
+     every view of every page has stopped being navigation.
+
+     `/todo/calendar` is the one with NO in-page link. That is a real gap and it is recorded in
+     reports/shell-polish.md — a nav row left standing to cover for a missing link would hide it. */
   const nav = workspaceSections({ todo: 7 });
-  const todo = nav.find((s) => s.id === "todo")!;
+  const workspace = nav.find((s) => s.id === "workspace")!;
+  const row = workspace.children!.find((c) => c.id === "todo")!;
 
-  /* Reuse asserted by SHAPE: it is an ordinary ShellSection with children, so it renders through
-     the same rows, chevron, accordion and flyout as Queries and Agents. A To-do-specific nav
-     variant is exactly what this prevents. */
-  it("is an expandable group like Queries and Agents", () => {
-    expect(todo.children).toHaveLength(4);
-    const queries = nav.find((s) => s.id === "queries")!;
-    expect(Object.keys(todo).sort()).toEqual(
-      expect.arrayContaining(Object.keys(queries).filter((k) => k !== "path").sort()),
-    );
+  it("sits under Workspace, beside Dashboard, and there is no To-do section", () => {
+    expect(nav.map((s) => s.id)).not.toContain("todo");
+    expect(workspace.children!.map((c) => c.id)).toEqual(["dash", "todo"]);
+    expect(row.path).toBe("/todo");
   });
 
-  it("its children are the four pages", () => {
-    expect(todo.children!.map((c) => c.label)).toEqual(TODO_ROUTES.map((r) => r.label));
-    expect(todo.children!.map((c) => c.path)).toEqual(TODO_ROUTES.map((r) => r.path));
-  });
-
-  it("keeps its count and its urgency dot — now on the To-do LIST row (final ref)", () => {
-    /* The count moved from the group header to the destination it describes: with flat groups the
-       header is a label, and a label cannot carry a figure it does not own. */
-    const todo = workspaceSections({ todo: 42 }).find((s) => s.id === "todo")!;
-    const list = todo.children!.find((c) => c.id === "todo-list")!;
-    expect(list.count).toBe(42);
-    expect(list.urgent).toBe(true);
-    expect(todo.children!.map((c) => c.label)).toEqual(["To-do list", "Today", "Calendar", "Noteboard"]);
+  it("carries the count and the urgency dot — the app's only nav count", () => {
+    const r = workspaceSections({ todo: 42 })
+      .find((s) => s.id === "workspace")!.children!.find((c) => c.id === "todo")!;
+    expect(r.count).toBe(42);
+    expect(r.urgent).toBe(true);
   });
 
   it("a zero count is omitted rather than rendered as 0", () => {
-    expect(workspaceSections({ todo: 0 }).find((s) => s.id === "todo")!.count).toBeUndefined();
+    const r = workspaceSections({ todo: 0 })
+      .find((s) => s.id === "workspace")!.children!.find((c) => c.id === "todo")!;
+    expect(r.count).toBeUndefined();
+  });
+
+  /* The four ROUTES still exist and are still individually reachable — the nav is what changed,
+     not the workspace. This is the assertion that keeps the two facts apart. */
+  it("all four To-do routes remain real, and remain in the palette", () => {
+    expect(TODO_ROUTES).toHaveLength(4);
+    for (const r of TODO_ROUTES) expect([...WORKSPACE_SHELL_PATHS], r.label).toContain(r.path);
   });
 });
 

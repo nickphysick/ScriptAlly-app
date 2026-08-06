@@ -213,33 +213,57 @@
   display: flex;
   align-items: center;
 }
-/* ⚠️ CENTRED (polish §5). At 186px a left-aligned title with the chevron pushed to the far edge
-   left a gap in the middle that read as a missing element; centring the pair closes it. The
-   chevron sits INLINE after the title rather than being pushed by `margin-left:auto`. */
+/* ⚠️ LEFT-ALIGNED, AND THE COVER IS WHY. An earlier build centred the title+chevron pair, because
+   at 186px with nothing on the left a left-aligned row left a gap in the middle that read as a
+   missing element. The cover slot IS that missing element: with it in place the row anchors left
+   and the gap closes for the right reason. Superseded, not reversed on taste. */
 .ws-mspill {
   flex: 1;
   min-width: 0;
-  /* 38, from the ref. The pack asked for 56 with a 30x40 cover slot — superseded: that geometry
-     belongs to the 214px panel the final ref replaced with 186. See the report. */
-  height: 38px;
+  height: 56px;
   background: #ffffff;
   border: 1px solid var(--shell-edge);
-  border-radius: 9px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 11px;
+  gap: 10px;
+  padding: 0 10px;
   cursor: pointer;
   transition: border-color 0.15s;
   font: inherit;
+  text-align: left;
+}
+
+/* ⚠️ THE COVER SLOT ANCHORS THE LEFT EDGE, which is why the row is left-aligned and not centred.
+   It renders the manuscript's cover when there is one and the parchment book glyph when there is
+   not — built to take an image now, though upload lands later. TODO(cover-upload). */
+.ws-mcov {
+  width: 30px;
+  height: 40px;
+  border-radius: 4px;
+  flex: none;
+  background: var(--shell-parch);
+  border: 1px solid var(--shell-edge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--shell-burgundy);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(46, 39, 35, 0.1);
+}
+.ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
+.ws-mcov img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
+.ws-msg {
+  font-size: 10.5px;
+  color: var(--shell-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .ws-mspill:hover { border-color: #d6cdbf; }
 .ws-mspill.static { cursor: default; }
 .ws-mspill.static:hover { border-color: var(--shell-edge); }
-.ws-mspill > svg {
-  width: 15px; height: 15px; stroke: var(--shell-burgundy); stroke-width: 1.6; flex: none;
-}
 .ws-mst {
   font-size: 12.5px;
   font-weight: 600;
@@ -283,7 +307,8 @@
 .ws-pdiv { height: 1px; background: var(--shell-hair); margin: 8px 4px 6px; flex: none; }
 
 /* section rows — the panel's own rhythm, 38px */
-.ws-nav { flex: 1; min-height: 0; overflow: auto; padding-top: 20px; }
+/* 30px, so the pill reads as its own object rather than the first row of the navigation. */
+.ws-nav { flex: 1; min-height: 0; overflow: auto; padding-top: 30px; }
 
 /* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
    which is the whole point of retiring the accordion's parent rows. */

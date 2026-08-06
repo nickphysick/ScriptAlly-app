@@ -55,7 +55,18 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       id: "workspace",
       label: "Workspace",
       def: "dash",
-      children: [{ id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" }],
+      children: [
+        { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" },
+        /* ⚠️ ONE ROW, NOT A GROUP OF FOUR. The earlier build gave To-do its own group with
+           To-do list · Today · Calendar · Noteboard, reasoning that folding it would hide three
+           destinations. It does not: Today is linked from the board, Noteboard from Today, and
+           the sub-routes are page-level views of one place rather than four peers in the IA.
+           The ref files To-do here, and it is right — a nav column that lists every view of every
+           page stops being navigation and becomes a table of contents.
+           ⚠️ `/todo/calendar` HAS NO IN-PAGE LINK — flagged in reports/shell-polish.md, not
+           solved by leaving a nav row in place to cover for it. */
+        { id: "todo", label: "To-do", path: "/todo", icon: "check", count: input.todo || undefined, urgent: true },
+      ],
     },
     {
       id: "queries",
@@ -64,21 +75,6 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       children: [
         { id: "q-centre", label: "Query Centre", path: "/queries", icon: "send" },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
-      ],
-    },
-    {
-      /* ⚠️ A DEVIATION FROM THE REF, TAKEN ON THE REF'S OWN PRINCIPLE. The mock files To-do as a
-         single item under Workspace — but To-do is four routes now, and folding it to one row
-         would hide three destinations, which is the exact thing "every destination is visible"
-         forbids. So it keeps its own group, as Materials does with one item. */
-      id: "todo",
-      label: "To-do",
-      def: "todo-list",
-      children: [
-        { id: "todo-list", label: "To-do list", path: "/todo", icon: "check", count: input.todo || undefined, urgent: true },
-        { id: "todo-today", label: "Today", path: "/todo/today", icon: "sun" },
-        { id: "todo-calendar", label: "Calendar", path: "/todo/calendar", icon: "calendar" },
-        { id: "todo-noteboard", label: "Noteboard", path: "/todo/noteboard", icon: "note" },
       ],
     },
     {

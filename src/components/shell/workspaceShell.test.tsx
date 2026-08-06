@@ -31,7 +31,7 @@ vi.mock("../../lib/db", () => ({
   }),
 }));
 
-import { WorkspaceShell } from "./WorkspaceShell";
+import { WorkspaceShell, msMeta } from "./WorkspaceShell";
 
 const css = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
 const src = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
@@ -172,11 +172,11 @@ describe("⚠️ T3b — the rail is static and never reflows", () => {
     expect(rule(".ws-rail")).not.toContain("box-shadow");
   });
 
-  /* 216 (pre-amendment) → 232 (Amendment 1) → 186 (polish §5, narrowed 20%). Both superseded
+  /* 216 (pre-amendment) → 232 (Amendment 1) → 186 (an interim ref) → 214 (final ref). Superseded
      values are asserted GONE so a revert to either fails loudly. */
-  it("the panel width token is 186, and neither superseded value survives", () => {
+  it("the panel width token is 214, and no superseded value survives", () => {
     const indexCss = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(indexCss).toMatch(/--shell-panelw:\s*186px\s*;/);
+    expect(indexCss).toMatch(/--shell-panelw:\s*214px\s*;/);
     expect(indexCss).not.toMatch(/--shell-panelw:\s*232px\s*;/);
     expect(indexCss).not.toMatch(/--shell-panelw:\s*216px\s*;/);
   });
@@ -307,9 +307,31 @@ describe("Baked 9 — the manuscript selector heads the PANEL", () => {
     const r = rule(".ws-mspill");
     expect(r).toContain("background: #ffffff");
     expect(r).toContain("border: 1px solid var(--shell-edge)");
-    // 38, per the final ref. The polish pack asked for 56 with a 30x40 cover slot — superseded
-    // along with the 214px panel it was drawn for; see reports/shell-polish.md.
-    expect(r).toContain("height: 38px");
+    /* ⚠️ 56 WITH A COVER SLOT (final ref). An interim ref drew a 38px glyph-and-title pill on a
+       186px panel, and this lock asserted that — so "the pack asked for 56" was recorded as
+       superseded when it was in fact the destination. The slot is what makes the row left-aligned:
+       an earlier build centred the title because nothing anchored the left edge. */
+    expect(r).toContain("height: 56px");
+    expect(r).toContain("border-radius: 10px");
+    expect(rule(".ws-mcov")).toContain("width: 30px");
+    expect(rule(".ws-mcov")).toContain("height: 40px");
+    // it takes a real cover when there is one — built now, uploads later
+    expect(css).toContain(".ws-mcov img");
+    expect(css).toContain("object-fit: cover");
+    // and the second line is the genre/word-count meta
+    expect(rule(".ws-msg")).toContain("font-size: 10.5px");
+  });
+
+  /* ⚠️ EACH HALF OPTIONAL, AND THE WHOLE LINE ABSENT WHEN BOTH ARE — a manuscript with neither
+     would otherwise render a bare interpunct, or an empty row holding the 56px pill open at a
+     height its content does not fill. */
+  it("the pill's second line is genre · word count, and it degrades cleanly", () => {
+    expect(msMeta({ genre: "Thriller", wordCount: 50000 })).toBe("Thriller · 50,000 words");
+    expect(msMeta({ genre: "Thriller" })).toBe("Thriller");
+    expect(msMeta({ wordCount: 50000 })).toBe("50,000 words");
+    expect(msMeta({})).toBe("");
+    // a zero count is not a count — "0 words" is a fact about an empty record, not a manuscript
+    expect(msMeta({ genre: "Thriller", wordCount: 0 })).toBe("Thriller");
   });
 
   it("offers a switcher when there is more than one manuscript", () => {

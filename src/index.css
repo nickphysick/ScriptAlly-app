@@ -169,7 +169,7 @@
   /* ⚠️ 232 → 186 (polish §5). The panel was sized before its rhythm settled; at 232 it carried
      more empty width than content. 186 is the narrowest that still fits the longest label with
      its count without wrapping — verified against the live IA, not guessed. */
-  --shell-panelw: 186px;              /* the panel — a sibling of the rail, not a band within it */
+  --shell-panelw: 214px;              /* the panel — a sibling of the rail, not a band within it */
   /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
      full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever

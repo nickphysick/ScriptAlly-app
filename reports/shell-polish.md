@@ -73,19 +73,32 @@ screenshot must be taken first to force layout, or the first JS call still reads
 **Locked** in `workspaceShell.test.tsx` against both wrong shapes — padding-only, and `box-sizing`
 left to the ambient reset — each verified by reintroducing it and watching the lock fail.
 
-## Superseded, deliberately
+## ⚠️ THE SECOND CORRECTION — I was building against an interim ref
 
-- **§5's 214px panel, 56px pill and 30×40 cover slot.** The final ref Nick attached sets the panel
-  to **186px** and draws the pill at **38px** — a book glyph, a title and a chevron. The cover slot
-  cannot exist in a 38px pill, so this is not a detail that can be part-taken: **the pack's §5
-  geometry belongs to a design the final ref replaced.** The pill was corrected 40 → 38 for ref
-  fidelity. `TODO(cover-upload)` is **not** planted, because planting it would imply a slot that the
-  current design has nowhere to put. **Live decision for Nick:** covers are a real product intent,
-  and taking them means widening the panel again.
-- **§5's "navigation begins 30px below the head zone".** Kept at the ref's 20px. The offset moves
-  the whole head zone down, so the gap under the pill is unchanged either way (33px); taking 30
-  while rejecting the 56px pill and 214px width would be cherry-picking one number out of a
-  geometry that was replaced whole.
+Nick attached `scriptally-workspace-final (4).html`. The file I had been treating as final was
+**(2)**, and the two differ on exactly the points I had been recording as "superseded":
+
+| | (2), what I built | (4), the real one |
+|---|---|---|
+| panel | 186px | **214px** |
+| manuscript pill | 38px, glyph + title | **56px, 30×40 cover slot + title over `Genre · N words`** |
+| nav offset | 20px | **30px** |
+| To-do | its own group of four | **one row under Workspace** |
+
+So §5 of the polish pack was right in every particular, and I had written each of its points off as
+belonging to a replaced design. **The lesson is not "read the ref" — I did — it is that a ref
+handed over in conversation needs its version confirmed before anything is called superseded.**
+Three separate decisions were justified against the wrong document.
+
+The pill is left-aligned now, and the cover slot is why: an earlier build centred the title because
+nothing anchored the left edge. `TODO(cover-upload)` is planted on the slot, which renders
+`object-fit: cover` art today and falls back to the parchment book glyph.
+
+**To-do folds to one row, and it costs less than I argued.** Today is linked from the board and
+Noteboard from Today; those are page-level views of one place, not peers in the IA. All four routes
+remain real and individually reachable in ⌘K — asserted, so the two facts cannot drift.
+**`/todo/calendar` is the exception: it has no in-page link.** That is a real gap, and it is
+recorded here rather than papered over by leaving a nav row standing to cover for it.
 - **§7's Greige tint and white-up help hover.** **Nick's instruction after that pass — "keep the
   breadcrumb header just slightly off-white" — supersedes it.** The bar is
   `rgba(251,249,245,.92)` / `#fbf9f5`, and the help hover stays parchment because lifting toward
@@ -111,11 +124,10 @@ left to the ambient reset — each verified by reintroducing it and watching the
 Measured this pass at 1440×900 on the render harness:
 
 - ✅ pill / crumb centres coincide at 48.0 — **measured against the built CSS**
-- ⚠️ at a **900px-tall** window the panel's nav scrolls: 550px of content in 454px, so Discover and
-  the whole Materials group sit below the fold. The ref behaves the same way (`.nav{overflow:auto}`)
-  and nothing is unreachable, so this is reported rather than "fixed" — but it is worth a decision
-  on a small laptop.
-- ✅ nothing overflows at 186px — all 19 rows (labels, nav items, count, collapse row, account
+- ✅ the nav **no longer scrolls** at 900px — folding To-do to one row removed the overflow that had
+  put Discover and Materials below the fold
+- ✅ panel 214px · pill 56px · cover slot 30×40 · meta line "Thriller · 50,000 words"
+- ✅ nothing overflows at 214px — all rows (labels, nav items, count, collapse row, account
   block, pill) have `scrollWidth === clientWidth`, longest label "Submission packages"
 
 Still needing eyes on the real signed-in app:

@@ -83,6 +83,20 @@ export interface WorkspaceShellProps {
   children: React.ReactNode;
 }
 
+/**
+ * The pill's second line — `Thriller · 50,000 words`.
+ *
+ * ⚠️ EACH HALF IS OPTIONAL AND THE LINE IS ABSENT WHEN BOTH ARE. A manuscript with no genre and
+ * no count would otherwise render a bare interpunct, or an empty row holding the pill open at a
+ * height its content does not fill. Derived on read — nothing about this is stored.
+ */
+export function msMeta(ms: { genre?: string; wordCount?: number }): string {
+  const bits: string[] = [];
+  if (ms.genre) bits.push(ms.genre);
+  if (ms.wordCount) bits.push(`${ms.wordCount.toLocaleString("en-GB")} words`);
+  return bits.join(" · ");
+}
+
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, onOpenHelp, onOpenAccount, onUpgrade,
   onNavigate, scrollId, scrollRef, onScroll, footFade, accountMenu, children,
@@ -368,8 +382,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   aria-expanded={manyMs ? msOpen : undefined}
                   onClick={() => { if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); } }}
                 >
-                  <Book aria-hidden="true" />
-                  <span className="ws-mst">{activeMs.title}</span>
+                  {/* TODO(cover-upload): renders `activeMs.coverUrl` once uploads land; the
+                      parchment glyph is the fallback, not a placeholder for a missing feature. */}
+                  <span className="ws-mcov"><Book aria-hidden="true" /></span>
+                  <span className="ws-mstt">
+                    <span className="ws-mst">{activeMs.title}</span>
+                    {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}
+                  </span>
                   {manyMs && <span className="ws-chev"><ChevronsUpDown aria-hidden="true" /></span>}
                 </button>
                 {msOpen && manyMs && (
