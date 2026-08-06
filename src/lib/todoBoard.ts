@@ -106,6 +106,33 @@ const auditMs = (v: unknown): number | null => {
   return d instanceof Date ? d.getTime() : null;
 };
 
+/**
+ * HOW LONG THEY HAVE BEEN SILENT — with the fallback the ambient reading does not have
+ * (workspace P0B).
+ *
+ * `queryAmbientStatus`'s agent branch anchors on a STATUS-SPECIFIC send date: QUERIED reads
+ * `dateSent`, PARTIAL_SENT reads `partialSentDate`, and everything else reads `fullSentDate`.
+ * When that stage date is missing — routinely true of imported records, which carry a send date
+ * but no per-stage dates — it returns `sentMs: null`, and the board printed a bare "SILENT" /
+ * "NO REPLY YET" with no figure at all. The silence was perfectly derivable the whole time:
+ * `dateSent` was sitting right there. That is a figure the data can supply and the template
+ * dropped, so it is fixed at the derivation.
+ *
+ * The fallback is the query's own send date — the honest floor for "nothing has come back since
+ * we last put something in front of them". Only when there is no date anywhere does this return
+ * null, and the caller then says "SILENT" with no number, which is then the truth.
+ *
+ * ⚠️ The SAME gap exists in `queryAmbientStatus` itself, so the Queries command bar can still
+ * read "WAITING TO HEAR BACK" with no day count on those records. Widening it there changes a
+ * readout outside this pack's scope — flagged in the report as a follow-up, not silently done.
+ */
+export function silentDays(q: Query | undefined, ambientDays: number | null, now: number): number | null {
+  if (ambientDays != null) return ambientDays;
+  const ms = q?.dateSent ? Date.parse(q.dateSent) : NaN;
+  if (Number.isNaN(ms)) return null;
+  return Math.max(0, Math.floor((now - ms) / 86400000));
+}
+
 /** "REQUESTED 12 JUL" from the query's lastStatusChange audit stamp; absent → "" (honest). */
 const requestedFigures = (q: Query | undefined): string => {
   const ms = auditMs(q?.lastStatusChange);
@@ -163,12 +190,12 @@ function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms
       return { kind: "AGENT WAITING", title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
     case "nudge_overdue": {
       const a = agentWait();
-      const days = a && a.sentMs != null ? a.nDays : null;
+      const days = silentDays(q, a && a.sentMs != null ? a.nDays : null, now);
       return { kind: "AGENT WAITING", title: `Nudge ${name}`, who: name, subtitle: msTitle, due: days != null ? `${days} DAYS · NO REPLY` : "NO REPLY YET", warn: days != null && days > 84, status: q?.status, hk: false };
     }
     case "no_response_close": {
       const a = agentWait();
-      const days = a && a.sentMs != null ? a.nDays : null;
+      const days = silentDays(q, a && a.sentMs != null ? a.nDays : null, now);
       return { kind: "STALE", title: `${name} silent${days != null ? ` for ${days} days` : ""}`, who: name, subtitle: "No reply — consider closing", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
     }
     case "data_quality_poor": {
@@ -196,6 +223,14 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
     who: c.who,
     subtitle: c.subtitle,
     due: c.due,
+    // ⚠️ THE DROPPED FACET (workspace P0B) — this was the cause of TWO of the live board's
+    // visible faults, and it is one missing line. derivedCopy computes `kind` for every task
+    // type (OFFER · AGENT WAITING · STALE · WISH LIST · …); derivedCard never copied it onto
+    // the card, so EVERY derived card reached the view with `kind: undefined`. The ledger's
+    // KIND lane therefore sat empty on every row, and the card band — whose pill was the one
+    // unguarded render in the page — drew a blank badge, or the literal "★ undefined" on an
+    // offer. The tag was never missing from the data; it was dropped in transit.
+    kind: c.kind,
     warn: c.warn,
     snoozes: flag?.snoozeCount ?? 0,
     status: c.status,

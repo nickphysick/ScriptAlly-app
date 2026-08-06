@@ -1919,7 +1919,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
           <div className={`tdb-band ${c.stream}`}>
             <span className="tdb-bandl">
-              <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>
+              {/* ⚠️ GUARDED, like both ledger rows (workspace P0B). This span was the one KIND
+                  render in the page with no guard on it, and `.tdb-ktag` carries a fill, padding
+                  and a border — so a card whose kind was empty drew a small blank pill, and an
+                  offer without one would have interpolated the literal "★ undefined". A pill is
+                  a claim; with nothing in it, it claims nothing and still occupies the band. An
+                  empty string is falsy, so this one guard covers absent and empty alike. */}
+              {c.kind && <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>}
               {c.snoozes > 0 && <span className="tdb-ktag snz">×{c.snoozes}</span>}
               {committed && <span className="tdb-ktag on">✓ TODAY</span>}
             </span>

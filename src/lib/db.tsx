@@ -81,6 +81,7 @@ import { replyTask } from "./taskPrecedence";
 import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
+import { agentPrimary } from "./agentDisplay";
 import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 
@@ -644,7 +645,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!manuscript || !agent) return;
 
       const mTitle = manuscript.title;
-      const aName = agent.name;
+      // THE CANONICAL DISPLAY FIELD, not the raw column (workspace P0B). Validity here is "name
+      // OR agency", so an agency-only record has an EMPTY name — and every one of the titles
+      // below interpolates this straight into a sentence, producing "Nudge due: " with nothing
+      // after the colon. agentPrimary exists precisely to answer "what do I call this record",
+      // falling back to the agency; the engine was the one derivation still going around it.
+      const aName = agentPrimary(agent);
 
       if (q.status === QueryStatus.OFFER && !hasOfferDecision(q.id, activities)) {
         calculatedTasks.push({
@@ -772,8 +778,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           calculatedTasks.push({
             id: `task-dream-agent-${a.id}`,
             priority: "suggested",
-            title: `Query Dream Agent: ${a.name}`,
-            description: `${a.name} is a 5★ fit for your catalog and is open to subs. Build a pitch!`,
+            title: `Query Dream Agent: ${agentPrimary(a)}`,
+            description: `${agentPrimary(a)} is a 5★ fit for your catalog and is open to subs. Build a pitch!`,
             manuscriptTitle: manuscripts[0]?.title || "Your manuscript",
             context: `High-value match`,
             relatedRecordId: a.id,
@@ -789,7 +795,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         calculatedTasks.push({
           id: `task-dq-${a.id}`,
           priority: "suggested",
-          title: `Complete MSWL details for ${a.name}`,
+          title: `Complete MSWL details for ${agentPrimary(a)}`,
           description: `Keep submission rules clean. Add guidelines or MSWL cues to secure your pitch.`,
           manuscriptTitle: "",
           context: `Research clean-up`,

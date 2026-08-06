@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, silentDays, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
 
 const TODAY = "2026-07-09";
@@ -329,5 +329,121 @@ describe("II·B P4 — stale titles always carry the duration", () => {
     } as never);
     expect(board.hk).toHaveLength(1);
     expect(board.hk[0].title).toBe("Marcus Reed silent for 100 days");
+  });
+});
+
+/* ═══════ THE VISIBLE DATA BUGS, AT THEIR CAUSE (workspace P0B) ═══════════════════════════════
+   Three of the four faults the live board showed are derivations, not templates, so they are
+   locked here. (The fourth — the unguarded KIND pill — is a render guard, locked in
+   todoWorkspaceP0B.test.ts against the source.) */
+
+describe("silentDays — the figure the data can supply and the template dropped", () => {
+  // An imported query that reached FULL_SENT without ever recording fullSentDate. The ambient
+  // reading anchors on the STAGE date, finds none, and reports no send anchor at all — while
+  // dateSent has been sitting on the record the whole time.
+  const imported = query("q-imp", "a1", QueryStatus.FULL_SENT, { dateSent: "2026-01-01T00:00:00Z" });
+
+  it("falls back to the query's own send date when the stage date is missing", () => {
+    expect(silentDays(imported, null, NOW)).toBe(189); // 1 Jan → 9 Jul
+  });
+
+  it("prefers the ambient reading whenever it HAS an anchor — one derivation, not two", () => {
+    expect(silentDays(imported, 12, NOW)).toBe(12);
+  });
+
+  it("returns null only when there is genuinely no date anywhere — then 'SILENT' is the truth", () => {
+    expect(silentDays(query("q-x", "a1", QueryStatus.FULL_SENT, { dateSent: undefined }), null, NOW)).toBeNull();
+    expect(silentDays(undefined, null, NOW)).toBeNull();
+  });
+
+  it("never invents a negative count from a future send date", () => {
+    expect(silentDays(query("q-f", "a1", QueryStatus.FULL_SENT, { dateSent: "2027-01-01T00:00:00Z" }), null, NOW)).toBe(0);
+  });
+
+  it("THE BOARD READS IT: a stale card on an imported query states its days, not a bare SILENT", () => {
+    const board = assembleBoard(base({
+      tasks: [task("t-stale", "no_response_close", "q-imp")],
+      queries: [imported],
+      agents: [agent("a1", "Marcus Reed")],
+    }));
+    expect(board.hk).toHaveLength(1);
+    expect(board.hk[0].due).toBe("SILENT 189 DAYS");
+    expect(board.hk[0].title).toBe("Marcus Reed silent for 189 days");
+  });
+
+  it("…and a nudge card likewise counts the silence rather than shrugging", () => {
+    const board = assembleBoard(base({
+      tasks: [task("t-nudge", "nudge_overdue", "q-imp")],
+      queries: [imported],
+      agents: [agent("a1", "Marcus Reed")],
+    }));
+    expect(board.do[0].due).toBe("189 DAYS · NO REPLY");
+  });
+});
+
+describe("the done band — one completion is one row, not one per record it wrote", () => {
+  it("a close that logged an activity AND resolved its flag appears ONCE", () => {
+    const board = assembleBoard(base({
+      queries: [query("q1", "a1", QueryStatus.NO_RESPONSE)],
+      agents: [agent("a1", "Marcus Reed")],
+      activities: [
+        { id: "act1", queryId: "q1", activityType: ActivityType.STATUS_CHANGED, date: "2026-07-09T09:00:00Z", resultingStatus: QueryStatus.NO_RESPONSE, description: "" } as unknown as Activity,
+      ],
+      taskFlags: [{ id: "f1", userId: "u", taskType: "no_response_close", queryId: "q1", snoozeCount: 0, resolvedAt: "2026-07-09T09:00:01Z" } as TaskFlag],
+    }));
+    expect(board.cleared).toHaveLength(1);
+    // …and it is the ACTIVITY that survives, because it says what happened.
+    expect(board.cleared[0].title).toBe("Closed Marcus Reed — no response");
+    // The agent's name appears exactly once across the whole band.
+    expect(board.cleared.filter((c) => c.title.includes("Marcus Reed"))).toHaveLength(1);
+  });
+});
+
+describe("no card states a value it does not have", () => {
+  it("every assembled card's KIND is a non-empty string or absent — never an empty pill", () => {
+    const board = assembleBoard(base({
+      tasks: [
+        task("t1", "offer_received", "q1"), task("t2", "partial_requested", "q2"),
+        task("t3", "full_requested", "q3"), task("t4", "revise_resubmit", "q4"),
+        task("t5", "nudge_overdue", "q5"), task("t6", "no_response_close", "q6"),
+        task("t7", "data_quality_poor", "a1"),
+      ],
+      queries: [
+        query("q1", "a1", QueryStatus.OFFER), query("q2", "a1", QueryStatus.PARTIAL_REQUESTED),
+        query("q3", "a1", QueryStatus.FULL_REQUESTED), query("q4", "a1", QueryStatus.REVISE_RESUBMIT),
+        query("q5", "a1", QueryStatus.QUERIED), query("q6", "a1", QueryStatus.QUERIED),
+      ],
+      agents: [agent("a1", "Marcus Reed")],
+      userTasks: [utask("u1"), utask("u2", { dueDate: TODAY })],
+    }));
+    for (const c of [...board.do, ...board.hk, ...board.nt]) {
+      expect(c.kind, `card ${c.key} has an empty kind`).toBeTruthy();
+      expect(String(c.kind)).not.toContain("undefined");
+    }
+    // THE CAUSE, pinned by value: derivedCopy computed these all along and derivedCard dropped
+    // them, so every derived card arrived with kind undefined. Asserting the facets themselves
+    // (not merely "truthy") means a silent return to the dropped-in-transit state cannot pass.
+    const kindOf = (key: string) =>
+      [...board.do, ...board.hk].find((c) => c.key === key)?.kind;
+    expect(kindOf("t1")).toBe("OFFER");
+    expect(kindOf("t2")).toBe("AGENT WAITING");
+    expect(kindOf("t5")).toBe("AGENT WAITING");
+    expect(kindOf("t6")).toBe("STALE");
+    expect(kindOf("t7")).toBeTruthy(); // the data-quality facet varies with the gap
+  });
+
+  it("no card's rendered copy contains the literal 'undefined', even for a nameless agency-only agent", () => {
+    const board = assembleBoard(base({
+      tasks: [task("t1", "no_response_close", "q1"), task("t2", "data_quality_poor", "a1")],
+      queries: [query("q1", "a1", QueryStatus.QUERIED)],
+      // name OR agency — the agency-only record the display helpers exist for
+      agents: [{ id: "a1", name: "", agency: "Reed Literary" } as unknown as Agent],
+    }));
+    for (const c of [...board.do, ...board.hk]) {
+      for (const field of [c.title, c.subtitle, c.due, c.kind ?? "", c.record, c.who]) {
+        expect(field).not.toContain("undefined");
+      }
+      expect(c.title.trim()).not.toMatch(/[:—]$/); // no dangling label with nothing after it
+    }
   });
 });

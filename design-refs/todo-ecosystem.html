@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The ecosystem - no dead ends</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+body{background:#e9e2d6;padding:28px 0 100px;display:flex;flex-direction:column;align-items:center}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#5d4d40;margin:44px 0 10px;width:1340px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#4d4238;margin-left:10px;line-height:1.6}
+.board{width:1340px;background:#fdfcfa;border:1px solid #ddd2c2;border-radius:13px;padding:20px 22px;box-sizing:border-box;box-shadow:0 6px 16px rgba(58,28,20,.09)}
+h1{font-family:'Playfair Display',serif;font-weight:700;color:#2b2118}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.12em;color:#a5988c}
+.ink{display:inline-flex;align-items:center;gap:6px;background:#2a1a13;color:#ffffff;border-radius:8px;height:29px;padding:0 13px;font-size:10.5px;font-weight:600;cursor:pointer}
+.gh{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e0d6c6;color:#4d4238;border-radius:8px;height:29px;padding:0 12px;font-size:10.5px;font-weight:600;cursor:pointer}
+.danger{display:inline-flex;align-items:center;gap:6px;background:#f6d8cc;border:1px solid #e8c8bc;color:#5c2f22;border-radius:8px;height:29px;padding:0 13px;font-size:10.5px;font-weight:700;cursor:pointer}
+.mchip{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;color:#8a7d6e;border:1px solid #ece5d9;border-radius:5px;padding:2px 7px}
+/* lifecycle map */
+.map{display:grid;grid-template-columns:170px 1fr 190px;gap:18px;align-items:start}
+.node{background:#fff;border:1px solid #e4dbcd;border-radius:10px;padding:10px 12px;margin-bottom:10px}
+.node b{font-family:'Playfair Display',serif;font-size:13px;color:#2b2118;display:block}
+.node span{font-size:10px;color:#8a7d6e;line-height:1.5;display:block;margin-top:3px}
+.node.hub{border:1.5px solid #2a1a13;box-shadow:3px 3px 0 #e6ddcf}
+.arrowline{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;color:#8a7a5e;padding:2px 0 8px 4px}
+/* row states */
+.trow{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid #f0e9dd;border-radius:9px;background:#fff;margin-bottom:8px}
+.cc{width:17px;height:17px;border-radius:50%;border:1.6px solid #c9bcae;background:#fff;flex:0 0 auto}
+.tt{font-size:12.5px;font-weight:600;color:#2b2118}
+.acts{margin-left:auto;display:flex;gap:5px;align-items:center}
+.ib{height:26px;min-width:26px;border-radius:7px;border:1px solid #e4dbcd;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#6b5a4e;padding:0 7px;cursor:pointer}
+.ib.p{background:#2a1a13;border-color:#1d100c;color:#ffffff;font-weight:600;font-size:9.5px;padding:0 11px}
+/* sheet */
+.sheet{width:390px;background:#fff;border:1px solid #ddd2c2;border-radius:13px;box-shadow:0 18px 44px rgba(58,28,20,.18);overflow:hidden}
+.sheet .bnd{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);border-bottom:1px solid #e8c8bc;padding:10px 15px;display:flex;align-items:center;gap:8px}
+.sheet .bnd i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;background:#fff;border:1px solid rgba(58,28,20,.2);border-radius:99px;padding:2px 8px;color:#3a1c14}
+.timeline{border-left:2px solid #efe7d9;margin:10px 0 0 6px;padding-left:14px}
+.tl{position:relative;padding-bottom:10px;font-size:10.5px;color:#4d4238}
+.tl::before{content:'';position:absolute;left:-19.5px;top:3px;width:8px;height:8px;border-radius:50%;background:#d9c49a;border:2px solid #fff}
+.tl.hot::before{background:#d98b74}
+.tl .w{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#a5988c;display:block}
+/* popovers/modals */
+.pop{background:#fff;border:1px solid #ddd2c2;border-radius:12px;box-shadow:0 14px 36px rgba(58,28,20,.16);padding:13px 15px;width:300px}
+.pop h4{font-family:'Playfair Display',serif;font-size:13.5px;color:#2b2118;margin-bottom:8px}
+.orow{display:flex;align-items:center;gap:9px;height:31px;padding:0 9px;border-radius:8px;font-size:11px;color:#4d4238;cursor:pointer}
+.orow:hover{background:#f7f2e9}
+.orow .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:#a5988c}
+.finept{font-size:9.5px;color:#8a7d6e;line-height:1.55;border-top:1px solid #f0e9dd;margin-top:9px;padding-top:9px}
+.modal{background:#fff;border:1px solid #ddd2c2;border-radius:13px;box-shadow:0 18px 44px rgba(58,28,20,.2);padding:16px 18px;width:352px}
+.modal h4{font-family:'Playfair Display',serif;font-size:15px;color:#2b2118}
+.modal p{font-size:11px;color:#5d5245;line-height:1.6;margin-top:7px}
+.warnbox{background:#fbeee9;border:1px solid #ecc9bc;border-radius:9px;padding:9px 11px;font-size:10.5px;color:#6e3020;line-height:1.55;margin-top:9px}
+.mfoot{display:flex;gap:8px;margin-top:13px;align-items:center}
+.threecol{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+/* batch bar + sweep */
+.selbar{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #ddd2c2;border-radius:12px;padding:9px 14px;color:#2b2118;box-shadow:0 14px 34px rgba(58,28,20,.16)}
+.selbar b{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#8a7a6d}
+.sb{display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 11px;border-radius:7px;border:1px solid #e0d6c6;background:#fff;color:#4d4238;font-size:10px;font-weight:600;cursor:pointer}
+.sb.warn{border-color:#e8c8bc;background:#f6d8cc;color:#5c2f22}
+.toast{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #ddd2c2;color:#3a2c22;border-radius:10px;padding:10px 14px;font-size:11px;box-shadow:0 10px 26px rgba(58,28,20,.15);width:fit-content}
+.toast b{color:#8a4a36;cursor:pointer;border-bottom:1px solid #e8c8bc}
+.toast .vw{color:#4a5f48;cursor:pointer;border-bottom:1px solid #c3d0bf}
+.stepper{background:#fff;border:1px solid #e4dbcd;border-radius:12px;overflow:hidden}
+.sthead{display:flex;align-items:center;gap:10px;padding:11px 15px;background:#f5f0e8;border-bottom:1px solid #e4dbcd}
+.stbar{flex:1;height:4px;border-radius:2px;background:#e7dfd2;overflow:hidden}
+.stbar i{display:block;height:100%;width:31%;background:#8a9e88}
+</style></head><body><div class="lbl">1 &middot; THE LIFECYCLE &mdash; EVERY ITEM, EVERY EXIT, EVERY RETURN <em>&mdash; two sources, one desk with four lenses, four exits &mdash; and every exit is a place, not a void. The three rules on the right govern everything below.</em></div><div class="board"><div class="map">
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:7px">HOW ITEMS ARRIVE</div>
+<div class="node"><b>The engine</b><span>Derives urgent + housekeeping from your queries. You can never add here; it is never wrong for long &mdash; fix the query, the task follows.</span></div>
+<div class="node"><b>You</b><span>The composer: tasks (dated, remindable) and notes (dateless). Quick-add on any list you own.</span></div>
+</div>
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:7px">WHERE THEY LIVE &middot; EVERY EXIT HAS A RETURN</div>
+<div class="node hub"><b>The desk (To-do list &middot; Today &middot; Calendar &middot; Noteboard)</b><span>One item, four lenses. Same actions everywhere: <b style="font-family:Inter;font-size:10px">Action &middot; ＋Today &middot; Snooze &middot; &#8942; (Dismiss / Open the query / Tag / Edit)</b>. Clicking any row opens the ITEM SHEET &mdash; no row is a dead end.</span></div>
+<div class="arrowline">&darr; TICK &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &darr; SNOOZE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &darr; DISMISS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &darr; DELETE (yours only)</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
+<div class="node"><b>Done</b><span>Struck through, timed, clears at midnight into the activity log. Undo 8s.</span></div>
+<div class="node"><b>Snoozed</b><span>Carries &ldquo;Snoozed until Fri 8 Aug&rdquo; wherever it appears. Comes back on its own &mdash; and sooner if circumstances change.</span></div>
+<div class="node"><b>Dismissed</b><span>Never deleted &mdash; a ledger in Task settings, restorable forever. Warnings scale.</span></div>
+<div class="node"><b>Gone</b><span>Only YOUR notes/tasks can be deleted. Confirm + 8s undo; then truly gone.</span></div>
+</div>
+</div>
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:7px">THE HOUSE RULES</div>
+<div class="node"><b>Nothing lost</b><span>Every exit lands somewhere visible and searchable. Search has an &ldquo;include snoozed &amp; dismissed&rdquo; toggle.</span></div>
+<div class="node"><b>Everything undoable</b><span>Every mutation raises a toast with Undo + a link to where the item went. Batches undo as ONE.</span></div>
+<div class="node"><b>Offers hold their place</b><span>An offer can&rsquo;t be dismissed, and will wait no more than a day.</span></div>
+</div>
+</div></div><div class="lbl">2 &middot; THE ROW AND THE SHEET <em>&mdash; the same four actions on every row everywhere; clicking any row opens the ITEM SHEET with the timeline (from your activity log) and the primary routed to the REAL flow &mdash; completing the flow completes the task, so &ldquo;done&rdquo; is verified, never claimed.</em></div><div class="board"><div class="twocol">
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">THE ROW &mdash; REST, HOVER, SELECTED</div>
+<div class="trow"><span class="cc"></span><span class="tt">Send your full to Jonathan Marsh</span><span class="mchip" style="margin-left:auto">12 JUL</span></div>
+<div class="trow" style="background:#fdfaf5;border-color:#e4dbcd"><span class="cc"></span><span class="tt">Send your full to Jonathan Marsh</span>
+<span class="acts"><span class="ib p">Action</span><span class="ib">&#65291; Today</span><span class="ib">&#128340;</span><span class="ib">&#8942;</span></span></div>
+<div class="trow" style="border:1.5px solid #2a1a13"><span style="width:17px;height:17px;border-radius:5px;background:#2a1a13;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:9px">&#10003;</span><span class="tt">Send your full to Jonathan Marsh</span><span class="mono" style="margin-left:auto;font-size:7px">SELECTED &middot; SHIFT-CLICK FOR RANGE</span></div>
+<div class="mono" style="font-size:7px;margin:14px 0 8px">THE OVERFLOW &#8942;</div>
+<div class="pop" style="width:250px">
+<div class="orow">&#128279; Open the query<span class="k">&#8984;O</span></div>
+<div class="orow">&#9823; View the agent</div>
+<div class="orow">&#127991; Tags&hellip;</div>
+<div class="orow" style="color:#8a3a28">&#128683; Dismiss&hellip;<span class="k">SEE WARNINGS</span></div>
+</div>
+</div>
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">THE ITEM SHEET &mdash; CLICK ANY ROW, ANYWHERE</div>
+<div class="sheet">
+<div class="bnd"><i>AGENT WAITING</i><span class="mono" style="font-size:7px;margin-left:auto;color:#8a6a58">REQUESTED 12 JUL &middot; 23 DAYS</span></div>
+<div style="padding:14px 16px">
+<h1 style="font-size:17px">Send your full to Jonathan Marsh</h1>
+<div style="font-size:11px;color:#8a7d6e;margin-top:3px">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="timeline" style="margin-top:12px">
+<div class="tl"><span class="w">3 FEB</span>Queried with Package A</div>
+<div class="tl"><span class="w">28 APR</span>Partial requested &rarr; sent in 2 days</div>
+<div class="tl hot"><span class="w">12 JUL</span>Full requested &mdash; <b>your turn, 23 days</b></div>
+</div>
+<div style="display:flex;gap:7px;margin-top:12px"><span class="ink">Send the full &rarr;</span><span class="gh">&#65291; Today</span><span class="gh">&#128340;</span><span class="gh">&#8942;</span></div>
+<div class="finept">The primary button leads to the flow itself &mdash; the submission composer, the offer flow, the close-query dialogue &mdash; and finishing the flow ticks this task on your behalf. Where the record can speak for itself, you&rsquo;re never asked to repeat it.</div>
+</div></div>
+</div>
+</div></div><div class="lbl">3 &middot; SNOOZE PARAMETERS + THE DISMISS TIERS <em>&mdash; snooze always shows the wake day, wakes early when circumstances change, and on the third snooze asks whether this one deserves a decision instead. Dismissal scales: housekeeping = a light confirmation; an agent waiting = a plain-spoken warning that sets out the better course; an offer = no dismiss exists.</em></div><div class="board"><div class="threecol">
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">SNOOZE &mdash; CLEAR PARAMETERS</div>
+<div class="pop">
+<h4>&#128340; Snooze this</h4>
+<div class="orow">Until tomorrow<span class="k">WED</span></div>
+<div class="orow">A few days<span class="k">FRI</span></div>
+<div class="orow">Next week<span class="k">MON 11</span></div>
+<div class="orow">Pick a date&hellip;<span class="k">&#9639;</span></div>
+<div class="orow" style="background:#e9ede6;border:1px solid #c3d0bf">Until something changes<span class="k" style="color:#4a5f48">SMART</span></div>
+<div class="finept">A snoozed item sits in the Snoozed list reading <b>Snoozed until Fri 8 Aug</b>. It returns to your list on that date, carrying a <b>Snoozed 28 Jul &middot; back today</b> marker in its detail line for the rest of the day. A reply, a request or an offer brings it back at once. Snoozing the same item a third time asks if you&rsquo;d rather dismiss or deal with it.</div>
+</div>
+</div>
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">DISMISS &mdash; TIER 1 &middot; HOUSEKEEPING</div>
+<div class="pop">
+<h4>Dismiss this reminder?</h4>
+<div style="font-size:11px;color:#5d5245;line-height:1.6">&ldquo;Penhallow Literary silent&rdquo; won&rsquo;t appear again. The query itself is untouched.</div>
+<div class="mfoot"><span class="ink">Dismiss</span><span class="gh">Cancel</span><span class="mono" style="font-size:6.5px;margin-left:auto">RESTORE ANY TIME<br>IN TASK SETTINGS</span></div>
+</div>
+<div class="mono" style="font-size:7px;margin:14px 0 8px">TIER 3 &middot; OFFERS &mdash; NO DISMISS EXISTS</div>
+<div class="pop"><div style="font-size:11px;color:#5d5245;line-height:1.6">An offer has no dismiss control at all. Its overflow offers only <b>Snooze until tomorrow</b> and <b>Start the offer flow</b>. An offer stays in view until you&rsquo;ve answered it.</div></div>
+</div>
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">DISMISS &mdash; TIER 2 &middot; AN AGENT IS WAITING</div>
+<div class="modal">
+<h4>An agent is waiting on you</h4>
+<p>Jonathan Marsh asked for your full manuscript 23 days ago. Dismissing this reminder <b>does not send anything and does not close the query</b> &mdash; he will still be waiting; you just won&rsquo;t be reminded.</p>
+<div class="warnbox">If you&rsquo;ve decided not to send it, <b>close the query properly</b> &mdash; the decision goes on the record, and the slot returns to your pipeline.</div>
+<div class="mfoot"><span class="ink">Close the query instead &rarr;</span><span class="gh">&#128340; Snooze</span><span class="danger" style="margin-left:auto">Dismiss anyway</span></div>
+</div>
+</div>
+</div></div><div class="lbl">4 &middot; BATCH &mdash; MULTI-SELECT AND THE SWEEPS <em>&mdash; the action bar as a floating WHITE card (ink primary, white ghosts, soft-pink for the destructive), typed counts, guarded mixed selections, offers auto-excluded; toasts white with the sage tick and pink warning; one undo, and an itemised account whenever anything fails. The sweeps are resumable steppers where every save commits immediately and nothing typed can be lost.</em></div><div class="board">
+<div class="twocol">
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">MULTI-SELECT &mdash; THE ACTION BAR (APPEARS BOTTOM-CENTRE)</div>
+<div class="selbar"><b>7 SELECTED &middot; 5 STALE &middot; 2 WAITING</b>
+<span class="sb" style="background:#2a1a13;border-color:#1d100c;color:#ffffff">&#65291; Today</span><span class="sb">&#128340; Snooze&hellip;</span><span class="sb">Close queries&hellip;</span><span class="sb warn">Dismiss&hellip;</span><span style="color:#a5988c;font-size:10px;cursor:pointer">&#10005;</span></div>
+<div class="finept" style="border:none;margin-top:10px;padding:0">Selection survives filtering and scrolling (the count is the proof). Mixed selections grey out actions that can&rsquo;t apply and say why (&ldquo;Close queries &mdash; 2 items aren&rsquo;t queries&rdquo;). <b>Offers are silently excluded from batch dismiss and the bar says so.</b> Batch dismiss of 5+ shows the Tier-2 modal with the counts by type.</div>
+<div class="mono" style="font-size:7px;margin:14px 0 8px">THE RESULT &mdash; ONE TOAST, ONE UNDO, PER-ITEM HONESTY</div>
+<div class="toast"><span style="width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg,#dee4dc,#d5dbd3);border:1px solid #8a9e88;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#4a5f48">&#10003;</span> 12 snoozed until Friday &middot; <b>Undo all</b> &middot; <span class="vw">View snoozed</span></div>
+<div style="height:8px"></div>
+<div class="toast" style="border-color:#e8c8bc;background:#fdf4f0"><span style="color:#8a4a36">&#9888;</span> 10 closed &middot; 2 failed to save &middot; <b>Retry the 2</b> &middot; <span class="vw">Which ones?</span></div>
+</div>
+<div>
+<div class="mono" style="font-size:7px;margin-bottom:8px">THE SWEEP &mdash; BATCH FIXES AS A RESUMABLE STEPPER</div>
+<div class="stepper">
+<div class="sthead"><b style="font-family:'Playfair Display',serif;font-size:13px">Materials sweep</b><span class="stbar"><i></i></span><span class="mono" style="font-size:7.5px;color:#4a3a2c">5 OF 16</span><span class="mono" style="font-size:7.5px;cursor:pointer">SAVE &amp; EXIT</span></div>
+<div style="padding:13px 15px">
+<div style="font-size:12.5px;font-weight:600;color:#2b2118">Aisha Kapoor &middot; Kapoor Literary</div>
+<div style="font-size:10.5px;color:#8a7d6e;margin-top:2px">What does she ask to receive?</div>
+<div style="display:flex;gap:6px;margin-top:9px"><span class="gh">Query letter</span><span class="gh" style="border-color:#8a9e88;background:#e9ede6;color:#31402d;font-weight:700">&#10003; Synopsis</span><span class="gh">First 3 chapters</span><span class="gh">Other&hellip;</span></div>
+<div style="display:flex;gap:8px;margin-top:12px;align-items:center"><span class="ink">Save &amp; next &rarr;</span><span class="gh">Skip her</span><span class="mono" style="font-size:6.5px;margin-left:auto">EVERY SAVE COMMITS AT ONCE &middot; EXIT ANY TIME, THE COUNT WAITS</span></div>
+</div></div>
+<div class="finept" style="border:none;margin-top:10px;padding:0">What could go wrong, answered: <b>abandonment</b> &mdash; progress is per-agent, the widget reads &ldquo;Continue &middot; 5 of 16&rdquo; forever; <b>a failed write</b> &mdash; the step doesn&rsquo;t advance, the error shows inline, nothing typed is lost; <b>wrong data entered</b> &mdash; each agent&rsquo;s row in the sweep summary has an Edit; <b>the same fix twice</b> &mdash; completed agents are skipped automatically and say why.</div>
+</div>
+</div></div></body></html>

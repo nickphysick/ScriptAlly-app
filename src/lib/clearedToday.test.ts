@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ActivityType } from "../types";
-import { clearedTodayCount } from "./clearedToday";
+import { clearedTodayCount, clearedTodayItems } from "./clearedToday";
 
 const NOW = Date.parse("2026-07-09T12:00:00Z");
 const today = (h = 9) => new Date(Date.parse(`2026-07-09T${String(h).padStart(2, "0")}:00:00Z`)).toISOString();
@@ -41,5 +41,58 @@ describe("clearedTodayCount — the union", () => {
       taskFlags: [{ resolvedAt: today(9) }],
       now: NOW,
     })).toBe(3);
+  });
+});
+
+/* ── THE OVERLAP (workspace P0B) — the duplicate-row bug, at its cause ──────────────────────
+   Closing a query logs a clearing activity AND resolves the matching flag. Both are true, both
+   are dated today, and a flat union rendered them as two done rows naming the same agent. */
+describe("clearedTodayItems — one act is one item, however many records it wrote", () => {
+  const CLOSE_ACTIVITY = { activityType: ActivityType.STATUS_CHANGED, date: today(9), queryId: "q1" };
+
+  it("drops a resolved flag whose query already reported itself through the log", () => {
+    const c = clearedTodayItems({
+      activities: [CLOSE_ACTIVITY],
+      userTasks: [],
+      taskFlags: [{ resolvedAt: today(9), queryId: "q1" }],
+      now: NOW,
+    });
+    // The activity survives — it carries the vocabulary of what actually happened.
+    expect(c.activities).toHaveLength(1);
+    expect(c.flags).toHaveLength(0);
+    expect(clearedTodayCount({
+      activities: [CLOSE_ACTIVITY], userTasks: [], taskFlags: [{ resolvedAt: today(9), queryId: "q1" }], now: NOW,
+    })).toBe(1); // ← was 2: the overcount that put the same agent on the board twice
+  });
+
+  it("keeps a flag for a DIFFERENT query — two closes are genuinely two items", () => {
+    const c = clearedTodayItems({
+      activities: [CLOSE_ACTIVITY],
+      userTasks: [],
+      taskFlags: [{ resolvedAt: today(9), queryId: "q2" }],
+      now: NOW,
+    });
+    expect(c.flags).toHaveLength(1);
+  });
+
+  it("keeps a flag with NO queryId — an agent-scoped gap cannot collide with a query's log", () => {
+    const c = clearedTodayItems({
+      activities: [CLOSE_ACTIVITY],
+      userTasks: [],
+      taskFlags: [{ resolvedAt: today(9) }],
+      now: NOW,
+    });
+    expect(c.flags).toHaveLength(1); // absence of a pointer is not a match
+  });
+
+  it("only TODAY's activities speak for a query — yesterday's log cannot silence today's flag", () => {
+    const c = clearedTodayItems({
+      activities: [{ activityType: ActivityType.STATUS_CHANGED, date: yesterday, queryId: "q1" }],
+      userTasks: [],
+      taskFlags: [{ resolvedAt: today(9), queryId: "q1" }],
+      now: NOW,
+    });
+    expect(c.activities).toHaveLength(0);
+    expect(c.flags).toHaveLength(1);
   });
 });
