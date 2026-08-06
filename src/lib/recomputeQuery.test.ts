@@ -150,14 +150,17 @@ describe('recomputeQuery — derives the query fields from the log and writes th
   });
 });
 
-describe('computeRecomputedFields — the pure preview the DEV sweep dry-runs on', () => {
+// The pure payload builder recomputeQuery is built on. Extracted for the (since-removed) one-off
+// sweep tool, kept because it is the honest unit: the derivation with no Firestore in it, so the
+// null ⇄ deleteField mapping is testable at the boundary rather than through a mock.
+describe('computeRecomputedFields — the pure derivation behind the live write', () => {
   const LOG = [
     { id: 'a1', data: { resultingStatus: QueryStatus.QUERIED, createdAt: iso('2026-01-01T10:00:00Z') } },
     { id: 'a2', data: { resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-01T10:00:00Z') } },
     { id: 'a3', data: { resultingStatus: QueryStatus.REJECTED, createdAt: iso('2026-03-01T10:00:00Z') } },
   ];
 
-  it('is PURE — no Firestore call, so a dry run can never write', async () => {
+  it('is PURE — deriving the payload touches no Firestore call, read or write', async () => {
     computeRecomputedFields(LOG);
     expect(mockGetDocs).not.toHaveBeenCalled();
     expect(mockUpdateDoc).not.toHaveBeenCalled();

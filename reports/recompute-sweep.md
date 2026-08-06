@@ -1,6 +1,8 @@
 # One-off recompute sweep — tool + run notes (5 Aug 2026)
 
-A **temporary, DEV-only** tool at `#/recompute-sweep`, built to heal historical queries that will never recompute on their own. **It is Nick's to run, and it gets deleted afterwards** (Phase 3 below).
+A **temporary, DEV-only** tool at `#/recompute-sweep`, built to heal historical queries that will never recompute on their own.
+
+> **Closed 6 Aug 2026.** Nick ran the sweep on dev; the tool has been **removed** — the route, its `App.tsx` branch and `RecomputeSweep.tsx` are gone. The "How to run it" section went with them. The pure `computeRecomputedFields` export **stays**: `recomputeQuery` is built on it, and its tests are now titled for that job rather than for the deleted preview. This report is kept as the record of why the sweep was needed and what it changed.
 
 ## Why it exists
 
@@ -22,24 +24,6 @@ Three states, and nothing happens between them without a button press.
 
 Stored `lastStatusChange` may be a Firestore `Timestamp` while the derived value is an ISO string. The dry run compares dates **by instant**, not by shape, so a same-moment `Timestamp` → ISO rewrite is not reported as a change — otherwise every query would look like it needed one and the real differences would drown. Presence/absence always counts. (The live sweep does still rewrite those to ISO; the rules accept both shapes.)
 
-## How to run it
-
-**On dev, on a local dev server. That is the whole answer.**
-
-```bash
-npm run dev
-```
-
-→ `http://localhost:3000/#/recompute-sweep` → sign in with your dev account → **Dry run** → read the table → **Run sweep** → dry-run once more to confirm zero changes.
-
-The page prints the live Firebase project at the top; it should read **scriptally-dev**. Read it before pressing anything.
-
-**The tool exists only on a local dev server** — `import.meta.env.DEV` is false in *any* `vite build`, whatever `--mode` says. Verified empirically: neither `Recompute sweep` nor `recompute-sweep` appears in the `npm run build` (prod) bundle **or** the `npm run build:dev` bundle, while the deliberately un-gated `Notes-store scan` string does — the control proving the grep works. So it is not on `scriptally-dev.web.app` either, and it cannot reach a production build.
-
-**Dev rules are ready.** The 5 Aug dev rules deploy carries `rejectedDate` in the queries update allowlist, so the sweep's writes pass today.
-
-> **Correction (5 Aug).** The first version of this report steered towards running against prod via a production-mode dev server, on my assumption that the history worth healing lived there. That assumption was never verified and does not match how this project is worked: **dev only**. The prod paragraph has been removed rather than softened.
-
 ## The owner-scoped limitation — a rules guarantee, not a gap
 
 The tool uses the app's own auth and the **client** SDK, so the security rules confine every read and write to the **signed-in account's own queries** (`isOwner(userId)` on every path). There is no admin SDK and no service-account credential here, and repurposing the Firebase CLI's tokens to reach other users' data is off-limits. So this heals **your** records. If other accounts ever need the same heal, that is a server-side job (a Cloud Function under the Admin SDK), scoped and reviewed separately — not something to engineer around from the client.
@@ -56,6 +40,11 @@ The sweep runs against `scriptally-dev`, under the signed-in dev account — the
 
 **Prod is untouched, and does not need this tool to become correct.** The fix is forward-correct by construction: once prod receives the Tier 3+4 rules and hosting deploy, every response recorded from that moment derives `rejectedDate`, `responseReceivedAt` and `lastStatusChange` properly. Only queries already *closed* before that deploy would keep stale fields — and with no live users, whether any such record matters is a separate question, parked here rather than answered. (If it ever needs answering: the dry run writes nothing, so it can report the shape of the problem without changing anything. That would be a deliberate decision, not part of this run.)
 
-## After the sweep
+## After the sweep — done
 
-This tool is temporary. On your confirmation that the sweep is done, a follow-up commit removes the route, the component, and the "How to run it" section of this report (the findings stay): `chore(dev): remove the recompute sweep tool after use`. The pure `computeRecomputedFields` export **stays** — `recomputeQuery` itself is built on it now.
+Nick ran it on dev on 6 Aug 2026 and confirmed it complete; the tool was removed the same day. What survives the removal:
+
+- **`computeRecomputedFields`** — the pure payload builder, now simply the honest unit inside `recomputeQuery`, with its own tests (purity, the `null` ⇄ `deleteField` mirror, the provisional guard, the empty log).
+- **This report**, as the record of why closed records needed healing and what changed when they were.
+
+What is gone: `src/components/RecomputeSweep.tsx`, its `App.tsx` route branch, and this report's "How to run it" section.
