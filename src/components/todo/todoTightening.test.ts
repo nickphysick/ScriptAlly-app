@@ -23,26 +23,20 @@ const rule = (sel: string): string => {
 };
 
 describe("tightening P1 — the hero on one line + the recessed control strip", () => {
-  it("NO SUBTITLE NODE: the header renders title + actions only, on one row", () => {
-    const hdr = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
-    expect(hdr).not.toContain("description=");
-    // the shared PageHeader's svh-top is a flex row — with no .svh-sub the title and the two
-    // buttons share the line; the buttons take the page-scoped 34px step
-    expect(rule(".tdb-wrap .svh-btn")).toContain("height: var(--hero-btn-h, 34px)");
+  it("THE HEADER NAMES THE PAGE and carries its one line (amended, corrections fix 3)", () => {
+    const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+    /* The no-subtitle rule was written for a hero that named nothing. The page is titled for its
+       crumb now, and a bare title with no line under it leaves the page unexplained. */
+    expect(hero).toContain('title="To-do list"');
+    expect(hero).toContain("description=");
   });
 
-  it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero", () => {
-    const ctrl = page.slice(page.indexOf('<div className="tdb-ctrl">'), page.indexOf('<div className="tdb-board">'));
-    expect(ctrl).toContain("{renderFilterChips()}");
-    expect(ctrl).toContain("tdb-bsearch");
-    expect(ctrl).toContain("tdb-vtog");
-    const row = rule(".tdb-ctrl");
-    expect(row).toContain("background: var(--strip-bg)");
-    expect(row).toContain("border: 1px solid var(--strip-bd)");
-    expect(row).toContain("padding: 6px 8px");
-    expect(rule(".tdb-wrap")).toContain("--strip-bg: #f5f0e8");
-    expect(rule(".tdb-wrap")).toContain("--strip-bd: #e4dbcd");
-    expect(rule(".tdb-wrap")).toContain("--strip-r: 10px");
+  it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero — RETIRED SURFACE, see corrections fix 3", () => {
+    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
+       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
+       on the live page. */
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("<TodoSideContainer");
   });
 
   it("SECTION ANATOMY: label · mono count · a hairline rule filling the remaining width — one line", () => {

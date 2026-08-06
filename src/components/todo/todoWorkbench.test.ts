@@ -35,29 +35,19 @@ const tshRule = (sel: string): string => {
 };
 
 describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares are extinct)", () => {
-  it("the filters are chips on the CONTROL LINE — rail, sidebar and bench slab all retired", () => {
-    // todo rebuild P1: the last container went; the chips ride bare on the one control row.
-    expect(page).toContain("{renderFilterChips()}");
-    expect(page).toContain('<div className="tdb-ctrl">');
-    expect(page).not.toContain('<aside className="tdb-fside" aria-label="Filters">');
-    expect(page).not.toContain("tdb-benchgrow");
+  it("the filters are chips on the CONTROL LINE — rail, sidebar and bench slab all retired — RETIRED SURFACE, see corrections fix 3", () => {
+    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
+       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
+       on the live page. */
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("<TodoSideContainer");
   });
-  it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal)", () => {
-    // the vertical row-list rail is RETIRED — the facets are wrapping chips (benchChip), same order
-    const order = ["Offers", "Agent waiting", "Materials", "Wish lists", "Stale", "Snoozed", "Notes"];
-    let last = -1;
-    for (const l of order) { const i = page.indexOf(`benchChip("${l}"`); expect(i).toBeGreaterThan(last); last = i; }
-    // All leads as the Show-all reset, before the facets, with the match total during search
-    const all = page.indexOf("spine-chip all");
-    expect(all).toBeGreaterThan(-1);
-    expect(all).toBeLessThan(page.indexOf('benchChip("Offers"'));
-    expect(page).toContain("fnFace(shownY, searchTotal ?? shownY)");
-    // selected = the ink fill; a zero chip fades but renders (never hidden, never reordered)
-    expect(tshRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)");
-    expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1
-    // the ruled 'TO-DO · FILTERS' label + the old REVIEW & FILTER band are retired
-    expect(page).not.toContain('contextLabel="TO-DO · FILTERS"');
-    expect(page).not.toContain("REVIEW &amp; FILTER");
+  it("panel-final P2: the seven facets are toggle chips in the locked order, All leading (detail in todoPanelFinal) — RETIRED SURFACE, see corrections fix 3", () => {
+    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
+       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
+       on the live page. */
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("<TodoSideContainer");
   });
   it("hero-pair P1: Begin leads the HERO PAIR (same wiring); the rail begins with the filter card", () => {
     expect(page).toContain('className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0}'); // the shell: Begin launches the session over the same engine queue
@@ -289,7 +279,7 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
        the audit's one-verb-per-control rule, since the other two groups are derived and have
        nothing a writer could add to them. The PARITY this case exists to protect is unchanged:
        the group stands when empty and still offers the add. */
-    expect(page).toContain("{(!active || vNt.length > 0) && groupCard(");
+    expect(page).toContain('listShows("yours") && (!active || vNt.length > 0) && groupCard(');
     expect(page).toContain('<button type="button" className="tdg-add" onClick={addTask}>＋ Add a task or note…</button>');
     expect(page).toContain('composerAt === "ledger" ? null : ('); // the add-row transforms in place
     const r = rule(".tdg-add");
@@ -433,10 +423,10 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     expect(page).not.toContain("renderToolbelt");
     expect(page).not.toContain("renderRail");
     expect(page).not.toContain("renderFilterDrawer"); // the collapsed drawer is retired
-    expect((page.match(/renderFilterChips\(\)/g) ?? []).length).toBe(2); // the definition + the one mount
-    const cardFn = page.slice(page.indexOf("function renderFilterChips"), page.indexOf("function renderTodayCorner"));
-    expect(cardFn).not.toContain("tdb-herobegin"); // no CTA in the filters
-    expect(cardFn).not.toContain("tdb-setrow");
+    // corrections fix 3: the chips are retired entirely — the side container's LISTS rows are
+    // the one narrowing surface, so there is no strip left to be "mounted once".
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("function listShows"); // the narrowing the LISTS rows drive
   });
   it("Task settings + Help centre live in the v2 sidebar now; the sheet + its open event stay in the page", () => {
     // Shell follow-up P3: the panel foot retired — the v2 sidebar's user block carries both
@@ -509,11 +499,12 @@ describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck total
     expect(page).toContain('live === 0 ? " zero" : ""');
     expect(tshRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1
   });
-  it("the bench grows the removable query chip: quoted uppercased term, ✕ clears the search", () => {
-    expect(page).toContain("“{search.trim().toUpperCase()}” <span aria-hidden>✕</span>");
-    expect(page).toContain('className="spine-chip q" aria-label="Clear the search" onClick={() => setSearch("")}'); // the chip rides the bench
-    // the query chip is the first child of the chip row, before the All chip
-    expect(page.indexOf('className="spine-chip q"')).toBeLessThan(page.indexOf("spine-chip all"));
+  it("the bench grows the removable query chip: quoted uppercased term, ✕ clears the search — RETIRED SURFACE, see corrections fix 3", () => {
+    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
+       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
+       on the live page. */
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("<TodoSideContainer");
   });
   it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
     expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");
@@ -559,7 +550,8 @@ describe("Final Shape P6 — remnant sweep · a11y", () => {
     }
   });
   it("ONE chip mount on the control line (the collapse-tier overlay retired with the shell)", () => {
-    expect((page.match(/renderFilterChips\(\)/g) ?? []).length).toBe(2); // the definition + the one mount
+    // corrections fix 3: zero mounts — the strip is retired, the LISTS rows narrow.
+    expect((page.match(/renderFilterChips\(\)/g) ?? []).length).toBe(0);
     expect(page).not.toContain("tdb-fdrawer");
   });
   it("A11Y: ONE section-heading builder, shared by both views (no duplicate heading grammars)", () => {
@@ -715,8 +707,10 @@ describe("doc pass P6 — sweep", () => {
     expect(tour).not.toContain("tdb-step");
   });
   it("the reactive rail rode through; the heights hold on the law's primitives (rewritten in frame P2)", () => {
-    expect(page).toContain("const searchFc = searchActive");
-    expect(page).toContain('{searchActive && ('); // the query chip is conditional in renderFilterSection
+    /* corrections fix 3: the query chip went with the chip strip — the tool row's search field
+       IS the search now, so there is no chip to make conditional. The heights below are the
+       law's primitives and stand unchanged. */
+    expect(page).not.toContain('{searchActive && ('); 
     expect(rule(".tdb-btnp")).toContain("height: 42px");
     expect(rule(".tdb-btnp.sm")).toContain("height: 34px");
     expect(rule(".tdb-btnh")).toContain("height: 34px");

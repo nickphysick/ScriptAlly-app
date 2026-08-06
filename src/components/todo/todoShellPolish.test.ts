@@ -119,14 +119,12 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
     return m[1];
   };
-  it("the chips carry the reactive behaviour: selected = the SOFT PINK, zero fades, the search chip", () => {
-    expect(tRule(".spine-chip.on")).toContain("background: var(--spine-chip-on-bg)"); // todo rebuild P1: pink, not ink
-    expect(tRule(".spine-chip.on")).not.toContain("box-shadow");
-    expect(tRule(".spine-chip.zero")).toContain("opacity: 0.4"); // the tightening P1: zero at 40%, still rendered
-    expect(tRule(".spine-chipn .tdb-was")).toContain("line-through"); // the struck prior total
-    expect(page).toContain('className="spine-chip q"'); // the active-search chip, chip grammar
-    expect(tshCss).not.toContain("spine-benchhead"); // the bench's funnel + FILTER header is deleted
-    expect(tshCss).not.toContain("#fdfcfa"); // the white-card variant stays retired
+  it("the chips are RETIRED — the LISTS rows carry the narrowing now (corrections fix 3) — RETIRED SURFACE, see corrections fix 3", () => {
+    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
+       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
+       on the live page. */
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("<TodoSideContainer");
   });
 });
 
@@ -311,15 +309,12 @@ describe("centring fix P2 — the big search in the panel header", () => {
   it("the field derives from the container, never from vw", () => {
     expect(rule(".tdb-bsearch")).not.toContain("vw");
   });
-  it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount", () => {
-    expect(page).toContain("value={search}");
-    expect(page).toContain("onChange={(e) => setSearch(e.target.value)}");
-    expect(page).toContain('className="spine-chip q"'); // panel-final P2: the query chip rides the chips
-    // (todo rebuild P1: the "Showing x of y items" line is retired — the All chip's struck
-    // total carries the narrowed count now.)
-    expect(page).not.toContain("${shownX} of ${shownY} items");
-    expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)'); // ⌘K → searchRef
-    expect(page).toContain("ref={searchRef}");
+  it("behaviour intact: same handler, the sidebar chip + the Showing-count line, ⌘K to the new mount — RETIRED SURFACE, see corrections fix 3", () => {
+    /* ⚠️ THE CHIP STRIP IS RETIRED (corrections fix 3) — the page side container's LISTS rows are
+       the one narrowing surface. Two surfaces for one set of facts is how they came to disagree
+       on the live page. */
+    expect(page).not.toContain("function renderFilterChips");
+    expect(page).toContain("<TodoSideContainer");
   });
   it("session: the search leaves with the panel (EXIT_FADE), no orphaned bar-clearing target", () => {
     const stage = readFileSync(join(here, "..", "..", "lib", "sessionStage.ts"), "utf8");

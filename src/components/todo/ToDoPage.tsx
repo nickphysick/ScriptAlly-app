@@ -53,9 +53,11 @@ import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
-import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS } from "../../lib/todoRoutes";
+import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_LISTS, TodoListId } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
+import { TodoSideContainer } from "./TodoSideContainer";
+import { useTodoCounts } from "./useTodoCounts";
 import { boardColumns, sweepCardFor, isSweepCard, DropPlan } from "../../lib/todoColumns";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
@@ -262,6 +264,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      session-only: a fold you left open a week ago is not a preference, and a snoozed band that
      remembered being open would greet you with the things you had put away. */
   const [hkExpanded, setHkExpanded] = useState(false);
+  /* THE LISTS FILTER (corrections fix 3) — the side container's facets, which replace the retired
+     chip strip. Session-only: a narrowing you left behind last week is not a preference. */
+  const [listFilter, setListFilter] = useState<TodoListId | null>(null);
+  /* ⚠️ THE SAME HOOK THE SIDEBAR BADGE USES — the counting law has one implementation, and the
+     side container's LIST rows read it rather than a second tally computed here. */
+  const listCounts = useTodoCounts();
   const [snzOpen, setSnzOpen] = useState(false);
   // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
   // animation to the just-collapsed batch (never a page-load flash). P3: the expansion
@@ -925,8 +933,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-col">
         {renderPageHeader()}
         <div className="tdb-asm tdb-ws">
-          {/* THE WORKSPACE SHELL (todo-fix48) — the filters live in the sidebar now; the body
-              is the centre stack (the panel arrives in Phase 2) beside the Today corner. */}
+          {/* ⚠️ THE PAGE SIDE CONTAINER, IN BOTH VIEWS (corrections fix 3). It was built in
+              Phase 1 and mounted only on Today — this page never received it, so the LISTS
+              facets had nowhere to live and the retired chip strip stayed on as their stand-in.
+              It wraps the WHOLE body, outside the view switch, because it belongs to the page
+              rather than to one of its two renderings. */}
+          <div className="tdw">
+          <TodoSideContainer
+            counts={listCounts.byList}
+            active={listFilter}
+            onSelect={setListFilter}
+            onOpenTaskSettings={() => setSettingsOpen(true)}
+          />
+          <div className="tdw-main">
           <div className="tdb-centre">
           {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
               SUPERSEDES the todo-rebuild featured card). ONE region between the hero rule and the
@@ -963,8 +982,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               the view toggle. No container, no label slab — the filter slab's funnel/FILTER head
               and the board panel both went with it. The "{n} items" line went too: the All chip's
               struck total already carries the narrowed count. */}
+          {/* THE TOOL ROW — local search + the view toggle. The chip strip is RETIRED: its
+              facets are the LISTS rows in the side container, and its query chip is this search.
+              Two surfaces for one narrowing is how they came to disagree. */}
           <div className="tdb-ctrl">
-            {renderFilterChips()}
             <span className="tdb-ctrlsp" />
             <span className="tdb-bsearch">
               <span className="tdb-bsmag" aria-hidden>
@@ -1071,6 +1092,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
           )}
           </div>
+          </div>{/* .tdw-main */}
+          </div>{/* .tdw */}
         </div>
         </div>
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
@@ -1164,7 +1187,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // reserved for the focused session's opening screen, not this page). The search pill is the
   // ⌘K home and live-filters both views; the narrow Today chip rides beside it. ──
   /** THE PAGE HEADER (todo rebuild P4) — the app-wide `PageHeader`, full variant, with exactly
-   *  two actions: "Last week in review" (ghost; the house disabled treatment when no review
+   *  (corrections fix 3: ONE action now — the review pill went to the briefing seat.) Formerly
+   *  two actions: the review pill (ghost; the house disabled treatment when no review
    *  exists) and "Add task or note" (the soft-pink primary).
    *
    *  ⚠️ RED GATE, REPORTED: "Begin focused session" is retired here, and it was the ONLY thing
@@ -1178,15 +1202,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       // the tightening P1 — the subtitle is REMOVED: with no description the shared PageHeader
       // lays the title and the two actions on one line (svh-top is a flex row); the buttons take
       // the page-scoped 34px step in todo.css. Copy lives nowhere else.
+      /* ⚠️ THE PAGE NAMES ITSELF (corrections fix 3). "What's on your desk?" was the old era's
+         hero: it does not match the breadcrumb, which reads "To-do list", and a page whose title
+         and crumb disagree makes you check which one is lying. The subtitle is the page's job in
+         one line. The review pill is GONE — the briefing seat below already
+         carries the review, and a pill that duplicates it gives one thing two doors. */
       <PageHeader
-        title="What’s on your desk?"
+        title="To-do list"
+        description="Everything waiting on you, grouped by kind."
         actions={[
-          {
-            label: "Last week in review",
-            onClick: openReview,
-            disabled: !reviewWin,
-            icon: <RewindGlyph />,
-          },
           {
             label: "Add task or note",
             onClick: () => openComposer("task"), // the hero opens TASK mode by default
@@ -1372,29 +1396,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // grammar as a dismissable chip. Baked: Today's list does NOT join the bench — it lives in the
   // corner pop-up, so its old lens row is retired here (filters.todayOnly is untouched, dormant).
   // Every reactive behaviour carries over verbatim (counts, struck totals via fnFace, zero-fade).
-  function renderFilterChips() {
-    return (
-      <>
-          {searchActive && (
-            <button type="button" className="spine-chip q" aria-label="Clear the search" onClick={() => setSearch("")}>
-              “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
-            </button>
-          )}
-          {/* All is the default-selected chip AND the Show-all reset (filters only; the query
-              chip clears the search) */}
-          <button type="button" className={`spine-chip all${resting ? " on" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>
-            All<span className="spine-chipn">{fnFace(shownY, searchTotal ?? shownY)}</span>
-          </button>
-          {benchChip("Offers", "offers", fc.offers)}
-          {benchChip("Agent waiting", "overToYou", fc.overToYou)}
-          {benchChip("Materials", "materials", fc.materials)}
-          {benchChip("Wish lists", "mswl", fc.mswl)}
-          {benchChip("Stale", "stale", fc.stale)}
-          {benchChip("Snoozed", "snoozed", fc.snoozed)}
-          {benchChip("Notes", "notes", fc.notes)}
-      </>
-    );
-  }
+  /* (renderFilterChips is GONE — corrections fix 3. The chip strip was the LISTS facets'
+     stand-in while the page had no side container. It has one now, so the strip is a second
+     narrowing surface with nothing to narrow that the sidebar does not. Its search chip is the
+     tool row's field.) */
 
   // ── the "Today" card (VI P1, todo-right-column-v1.html) — same state, same handlers
   // (rollover Keep/Clear, committed rows + take-off, Help me pick, Work the list); the anatomy is
@@ -1643,6 +1648,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
   }
 
+  /** Does a group survive the LISTS narrowing? `null` = everything. */
+  function listShows(id: "urgent" | "housekeeping" | "yours"): boolean {
+    if (!listFilter) return true;
+    if (listFilter === "snoozed") return false;      // the band below carries that one
+    if (listFilter === "notes" || listFilter === "yours") return id === "yours";
+    return listFilter === id;
+  }
+
   function renderBoard() {
     /* ⚠️ THE SWEEPS COME FROM THE SAME `hkGroups` THE COUNT DOES. Housekeeping is counted by
        MEMBERS and drawn as one card per rule; passing the groups here is what lets the card
@@ -1668,13 +1681,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const snoozedN = snoozedCount(taskFlags, now);
     return (
       <div className="tdb-runsheet tdg">
-        {doSorted.length > 0 && groupCard(
+        {listShows("urgent") && doSorted.length > 0 && groupCard(
           "urgent",
           active ? doSorted.length : tiles.urgent,
           doSorted.map((c) => runRow(c, "do")),
         )}
 
-        {(vGroups.length > 0 || vStale.length > 0) && groupCard(
+        {listShows("housekeeping") && (vGroups.length > 0 || vStale.length > 0) && groupCard(
           "housekeeping",
           active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
           hkFold.shown.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c, "hk"))),
@@ -1692,7 +1705,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {/* Your tasks & notes — the ONE group holding both natures, and the ONLY group with a
             quick-add (audit item 7: one verb per control; the other two are derived, so there is
             nothing there for a writer to add). */}
-        {(!active || vNt.length > 0) && groupCard(
+        {listShows("yours") && (!active || vNt.length > 0) && groupCard(
           "yours",
           active ? vNt.length : tiles.notes,
           <>
@@ -1706,7 +1719,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
         {/* THE SNOOZED BAND (audit item 4). Before this, a snoozed item was findable nowhere in
             list view — only on the board. Collapsed by default: you put these away on purpose. */}
-        {snoozedN > 0 && (
+        {snoozedN > 0 && (!listFilter || listFilter === "snoozed") && (
           <div className={`tdg-snz${snzOpen ? " open" : ""}`}>
             <button
               type="button"
