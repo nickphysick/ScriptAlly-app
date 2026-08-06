@@ -1,6 +1,21 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026.**
+**Last updated: 6 August 2026 (second pass — the merge is now LIVE).**
+
+## Landed this session
+
+- **Pushed.** `origin/main` had been 33 commits behind, holding the entire shell rebuild on one
+  laptop. It now reaches `4d42807`. CI green on every commit.
+- **Dev rules deploy — DONE, 6 Aug 2026, BOTH dev databases** (`(default)` and the `ai-studio` one
+  the dev app actually reads; verified by release `updateTime`, because the CLI's success line
+  never names which database it hit).
+- **`committedDate` silent denial FIXED** (`49ec1d7`) — every Today's-list commit had been denied
+  without a word for as long as the rules have existed. Proven allowed in CI: 129 rules tests.
+- **`ShellSidebarBody` retired** (`4d42807`, −241 lines) — the panel nothing had rendered since the
+  rebuild.
+- **Dev hosting** deployed from merged main at **`4d42807`**.
+
+Full detail, the gap map and the walk Nick needs to do: **`reports/todo-pages.md`**.
 
 ## One line, and it is `main`
 
@@ -50,14 +65,16 @@ first cannot catch a promotion that silently stops.
 
 ## Known loose ends from the merge
 
-- **`ShellSidebarBody` is no longer mounted** — only a test renders it. The rebuild retired it and
-  the merge left it standing. A sweep candidate; harmless meanwhile.
+- ~~`ShellSidebarBody` is no longer mounted~~ — **SWEPT 6 Aug** (`4d42807`). Seven other
+  export-without-import candidates are listed with their evidence in `reports/todo-pages.md`;
+  `TasksDropdown` among them is a documented deliberate keep, which is why they were not swept on
+  the grep alone. Many orphaned `.sv2-*` CSS rules also survive the panel — named there, not
+  removed, because deleting CSS by grep breaks surfaces nobody tested.
 - **`reports/onboarding-recon.md`** was uncommitted in the `claude-il` worktree and is **NOT in this
   merge.** It is that session's to finish, on this `main`.
-- Everything the pack has not reached yet: Phases 2–5 (the list page, Today's rebuild, the board as
-  four true states, the sweep + report), plus tags — which need their own pack, because **no tag
-  model exists in the repo** (confirmed by recon: nothing in the types, the To-do libs or the
-  rules). TAGS ships as a disabled affordance until then.
+- Phases 2–4 of the pages pack remain **unstarted** (Phase 5's named sweep item is done). The gap
+  map in `reports/todo-pages.md` records exactly what each phase still needs, so the next session
+  starts at Phase 2 without re-deriving anything.
 
 ## Gates at the merge commit
 
@@ -65,7 +82,20 @@ first cannot catch a promotion that silently stops.
 
 ## Deploy state
 
-- **dev** — deployed from the merge commit, hosting only. No rules or functions changed.
-- **prod** — untouched, and still behind: the Tier 3+4 rules/hosting sequencing constraint stands
-  (`firestore.rules` must deploy **before or with** any hosting deploy of this code, because
-  `rejectedDate` joined the queries update allowlist). Prod deploys are Nick's alone.
+- **dev** — hosting at `4d42807`; **rules DONE 6 Aug on both databases**.
+- **prod** — untouched, and still behind. ⚠️ The sequencing constraint stands and has GROWN: the
+  prod `firestore.rules` deploy must land **before or with** any prod hosting deploy of this code,
+  and it now carries `rejectedDate` (queries allowlist), `detail`/`surfaceOffset` (tasks) **and
+  `committedDate`** (tasks update). Until it lands, a prod user's Today's-list commit is denied in
+  silence. Prod deploys are Nick's alone.
+
+## The queue
+
+1. **Phases 2–4 of the pages pack** — the list page body, the Today page body, the board on true
+   states. All three unstarted; `reports/todo-pages.md` maps exactly what is missing.
+2. **Calendar + Noteboard pack** — the two routed placeholders.
+3. **Tags pack** — blocked by fact, not order: **no tag model exists** anywhere in the repo, so
+   TAGS ships as a disabled affordance until one does.
+4. **Prod sequencing pass** (Nick) — rules before hosting, per the constraint above.
+5. **Correction UI.**
+6. **Notes-store convergence.**
