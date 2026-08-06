@@ -1,6 +1,20 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (second pass — the merge is now LIVE).**
+**Last updated: 6 August 2026 (third pass — the To-do workspace is BUILT).**
+
+## Landed this session (Phases 2–5)
+
+The To-do workspace pack is **complete through Phase 5**. `e806b7a` (deploy-target rule) →
+`ce894a1` (P2, the list page's three group cards, fold and snoozed band) → `16dca29` (P3, the
+Today page + the corner's retirement) → `4eb58db` (P4, the board as four derived states) →
+`6309a22` (P5, the sweep + themes.md). **155 files, 2583 passed | 2 skipped.**
+
+⚠️ **CLAUDE.md's Deployment section is amended and is now a hard rule:** every `firebase deploy`
+NAMES ITS TARGET. `.firebaserc`'s default is **prod**, so a bare deploy typed in a dev session
+goes to production. The dual-database note is rewritten too — both configs print the identical
+success line, so verify by release `updateTime`, never by the message.
+
+Detail, the orphan verdicts and Nick's walk: **`reports/todo-pages.md`**.
 
 ## Landed this session
 
@@ -91,11 +105,15 @@ first cannot catch a promotion that silently stops.
 
 ## The queue
 
-1. **Phases 2–4 of the pages pack** — the list page body, the Today page body, the board on true
-   states. All three unstarted; `reports/todo-pages.md` maps exactly what is missing.
-2. **Calendar + Noteboard pack** — the two routed placeholders.
-3. **Tags pack** — blocked by fact, not order: **no tag model exists** anywhere in the repo, so
+1. **Calendar + Noteboard pack** — the two routes ship as honest placeholders; their bodies are
+   the next build.
+2. **Tags pack** — blocked by fact, not order: **no tag model exists** anywhere in the repo, so
    TAGS ships as a disabled affordance until one does.
-4. **Prod sequencing pass** (Nick) — rules before hosting, per the constraint above.
-5. **Correction UI.**
-6. **Notes-store convergence.**
+3. **Prod sequencing pass** (Nick) — rules before hosting, per the constraint above.
+4. **Correction UI.**
+5. **Notes-store convergence.**
+
+Smaller, flagged rather than done: the six remaining orphan-component candidates (verdicts and
+evidence in `reports/todo-pages.md`), the orphaned `.sv2-*` rules left by the retired capsule
+panel, and "Help me pick", which survives as a function but lost its mount with the Today corner —
+its next home is the Today page's add flow.

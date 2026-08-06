@@ -1,4 +1,10 @@
-# To-do pages — landing the merge, and the gap map (6 Aug 2026)
+# To-do pages — the build (6 Aug 2026)
+
+> **Second session.** Phases 2–5 are BUILT. The gap map below is kept as the record of what was
+> missing when this began; every "OPEN" row in it is now closed except where stated. The build
+> log, the orphan verdicts and Nick's walk are at the foot.
+
+# Part one — landing the merge, and the gap map
 
 ## What this session did, plainly
 
@@ -156,3 +162,120 @@ All on **https://scriptally-dev.web.app**, signed in.
 | 6 | phone width (<768px) | `/todo/today` crumbs as **"To-do / Today"**. It rendered nothing before |
 | 7 | `/todo/calendar`, `/todo/noteboard` | Honest placeholders with real headers — deliberately not built |
 | 8 | `/todo/today` | **Header only, empty main column.** Expected: Phase 3 is unbuilt. Flagged so it does not read as a bug |
+
+
+---
+
+# Part two — the build (Phases 2–5)
+
+## SHAs
+
+| SHA | What |
+|---|---|
+| `e806b7a` | `docs`: every firebase deploy names its target — bare deploys forbidden |
+| `ce894a1` | **Phase 2** — the list page's three type groups, its fold and its snoozed band |
+| `16dca29` | **Phase 3** — the Today page, and the corner it replaces |
+| `4eb58db` | **Phase 4** — the board, as four states the app already owns |
+| `6309a22` | **Phase 5** — the sweep, and a verdict on every orphan candidate |
+
+**Tests: 155 files, 2583 passed | 2 skipped** (from 152/2566 at the session's start — net +17
+files' worth of new locks, and eleven existing cases retargeted rather than loosened).
+
+## What each phase settled
+
+**Phase 2 — the list page.** Three group cards (Urgent · Housekeeping · Your tasks & notes), each
+headed by its LIST swatch, a Playfair label and a mono count; the rows inside keep the existing
+ledger grid untouched, because the card is a container, not a second row system.
+
+The **five-lists-vs-three-groups asymmetry is deliberate** and now stated in code: the side
+container filters by five (notes separate), the page groups by three (both natures together),
+because they are separate things to filter by and one thing you wrote down.
+
+The **fold is a view, not a filter** — hidden rows stay in the group and stay in the heading's
+count. The invariant `shown + hidden === the whole group` is the test that matters. The
+**quick-add is scoped to the Your group**: the other two are derived and hold nothing a writer
+could add to. The **snoozed band** closes the real gap (audit item 4) — a snoozed item was
+findable nowhere in list view — and when the flags outlive their cards it says "These return on
+their own dates" rather than rendering a void. The **returned-from-snooze chip** lasts one day
+only; carrying "back today" into tomorrow would make it a lie.
+
+**Phase 3 — the Today page**, replacing the 44-line shell, plus the **retirement of the corner
+pop-up**. Derived subtitle, quick-add that makes a dated task and never a note, cleared items
+settling in place with times and Undo, the bench with its four exclusions and per-card why-lines,
+the DUE TODAY chip for auto-surfaced items.
+
+The corner went **thoroughly** — both renderers, its markup family, its stylesheet rules, its
+persisted collapse key, its slide, its reduced-motion exemption, and `strikeIds`, whose only
+reader was the panel's own row. `todayPanel.test.ts` is **rewritten to lock the retirement**
+rather than deleted, because "put Today in the corner" is a reasonable-sounding idea that would
+quietly reintroduce a second surface owning the same commitment.
+
+**Phase 4 — the board.** Four columns, no stored placement, drags resolving to existing verbs,
+snooze popover-gated, notes excluded, offers guarded, keyboard parity on the ⋯ menu. The
+**invariants are asserted as equalities** against the sources they mirror, plus two the ref does
+not state but the data demands: a snooze beats a commit, and the four columns are a partition.
+
+## The write-path round trip — tested against live rules behaviour
+
+`committedDate` now persists (fixed and dev-deployed last session), so the commit → reload →
+uncommit cycle is real. It is exercised in `todoColumns.test.ts` through the derivations both ends
+depend on: a card with `committedDate === today` lands in the Today column and in the Today page's
+committed set **by the same derivation**, and clearing it returns it to To do. The rules half is
+proven separately in CI (129 rules tests, including the commit, the uncommit round trip via
+`deleteField`, and a still-denied out-of-list field).
+
+⚠️ **The board's own drag round trip is not browser-verified** — auth-gated, as ever. Check 5 in
+the walk below is exactly that path.
+
+## The seven orphan candidates — verdicts
+
+| Component | Verdict | Evidence |
+|---|---|---|
+| `shell/Breadcrumb` | **DELETED** | Its header says "for the shell top strip"; `TopStrip.tsx` was deleted in the Tier 3+4 sweep. The shell rebuild demonstrably retired it. |
+| `TasksDropdown` | **KEEP** | CLAUDE.md: "TasksDropdown/useTaskAlerts stay intact awaiting a product decision". No importer, and that is fine — it is parked, not dead. |
+| `MaterialsField` (244 ln) | **FLAG** | Superseded by query-form work, not the shell rebuild. Wraps the shared MaterialsEditor; whether the attach-a-package alternative is wanted is a product question. |
+| `dashboard/StatCards` (622 ln) | **FLAG** | Its importer went in a documented dashboard sweep; `StatCardFull` is what renders now. Almost certainly dead — but 622 lines of someone else's work on a grep is guessing. |
+| `agents/AgentResponseGuidelines` | **FLAG** | Agent-list rebuild territory (superseded the two-pane hub). Touched 15 Jul, after the rebuild began. |
+| `agents/AgentLinkPopover` | **FLAG** | As above (13 Jul). |
+| `agents/AgentMaterialsEditor` | **FLAG** | As above (14 Jul); reads the canonical `lib/agentMaterials`, so a live path may yet want it. |
+
+**TasksDropdown is why the others are flagged rather than swept.** It has no importer and must not
+be deleted — which proves "nothing imports it" and "it should go" are different claims. The four
+`agents/*` and the two others were retired by the **query-form, dashboard and agent-list**
+rebuilds, and I cannot demonstrate those authors' intent the way `TopStrip`'s deletion demonstrates
+`Breadcrumb`'s.
+
+Also still standing and named rather than removed: orphaned `.sv2-*` rules left by the retired
+capsule panel. Deleting CSS by grep breaks surfaces nobody tested.
+
+## Deviations
+
+1. **`todo-pages-prompt.md` does not exist.** Worked from `todo-workspace-prompt.md`, whose Phases
+   2–5 are exactly the list page, Today page, board and sweep the brief names.
+2. **Eleven existing test cases were retargeted, none loosened.** Each pinned a source string of a
+   surface these phases replace. The corner's cases were **collapsed to one canonical retirement
+   lock** rather than duplicated across six files — duplicating a negative is how a retirement
+   half-comes-back.
+3. **"Help me pick" survives but is unmounted.** It lived in the corner panel's ＋ flow. The
+   function is a real selection gesture and was kept; its next home is the Today page's add flow.
+   Flagged rather than silently dropped.
+4. **The Today page announces, ToDoPage answers.** "Work the list" and the bench's ＋Add dispatch
+   events that ToDoPage answers with the existing verbs. The alternative was a second copy of the
+   focused session and the commit primitive on the new page — the same second-surface fault the
+   corner had. It depends on the To-do slots staying mounted, and that dependency is written down
+   where the listener lives.
+
+## For Nick — the walk (auth-gated; Claude cannot sign in)
+
+All on **https://scriptally-dev.web.app**, signed in.
+
+| # | Where | What to check |
+|---|---|---|
+| 1 | any page, sidebar | **To-do is a four-child group** with its count and urgency dot on the GROUP row. Collapse the panel — the count must survive. |
+| 2 | `/todo` (rows view) | **Three group cards** with swatch · label · count. **KIND lanes populated** (OFFER · AGENT WAITING · STALE) — they have never rendered before. Housekeeping folds behind **"Show {n} more"**; the heading count does NOT change when you expand. |
+| 3 | `/todo` foot | The collapsed **"Snoozed · {n}"** band. Open it. Snooze something, then reload — it should be there. |
+| 4 | `/todo` | An agency-only agent reads **"Nudge due: {name}"**, not a dangling colon. Close a query as no-response → **one** done row, not two. |
+| 5 | `/todo` (cards view) | **The board.** Drag a card to **Today** — it commits. Drag one to **Snoozed** — it must **open the date popover and NOT move** until you pick a date. Drag to **Done**. Try to drag an **offer** to Snoozed — it must refuse and say why. Check the **⋯ menu** offers the same moves. **Reload after each** — this is the committedDate round trip. |
+| 6 | `/todo/today` | Derived **"{done} of {total} cleared"** subtitle. Quick-add makes a **dated task** (it appears on the list; it is not a note). Tick something — it strikes **in place** with a time and an Undo. The **bench** shows at most three with why-lines, and never anything you just snoozed. |
+| 7 | phone width | `/todo/today` crumbs as **"To-do / Today"**. |
+| 8 | `/todo` | **The corner pop-up should be GONE.** If you see a floating Today panel, something did not deploy. |
