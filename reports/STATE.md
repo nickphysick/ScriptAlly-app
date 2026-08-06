@@ -1,6 +1,22 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (third pass — the To-do workspace is BUILT).**
+**Last updated: 6 August 2026 (fourth pass — corrections from Nick's dev walk).**
+
+## Corrections landed (from the walk of `ffc1f45`)
+
+Eight faults, three of them law violations, each fixed with the test that should have caught it:
+`a0cb634` (Snoozed split + the partition) → `32682f5` (the list page's chrome) → `56cae1e` (band
+lanes + ink border) → `7bf8316` (Today's buttons, bench register, empty column). **158 files,
+2605 passed | 2 skipped.**
+
+⚠️ **Two failure modes worth carrying forward**, both in `reports/todo-corrections.md`:
+a test can assert a **derivation against a fixture built to satisfy that derivation** (the Snoozed
+invariant passed while the page disagreed with itself), and a **source-string test cannot prove
+the code it reads is reached** (Phase 2's group cards lived in a view that is not the default, and
+its tests only ever read inside that function).
+
+⚠️ **Still open, flagged not taken:** the sum/column equalities assert the derivation, not the
+DOM — this repo has no jsdom, and adding one is a tooling decision across 158 test files.
 
 ## Landed this session (Phases 2–5)
 
