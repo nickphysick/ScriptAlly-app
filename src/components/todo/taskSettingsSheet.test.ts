@@ -40,7 +40,10 @@ describe("TaskSettingsSheet — source locks", () => {
     expect(sheet).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
   });
   it("the entry + the fork doorway both open the sheet (follow-up P3: the entry is the v2 sidebar's event)", () => {
-    expect(page).toContain("sa:open-task-settings"); // the sidebar's Task-settings button dispatches; the page listens
+    /* ⚠️ THE LITERAL BECAME A CONSTANT (To-do workspace pack, Phase 1) — TODO_OPEN_TASK_SETTINGS
+       in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
+       listener that silently never fires. The contract is unchanged; the assertion follows it. */
+    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
     expect(page).toContain("setSettingsOpen(true)");
     expect(page).toContain("{settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}");
   });

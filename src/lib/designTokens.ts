@@ -131,9 +131,9 @@ export const statusParchment = "#fdfaf5"; // offer tick
    content capsule). JS twins of the --shell-* custom properties in index.css :root; the pair
    is kept in step by shellV2Tokens.test.ts (the same flagged duplication as the pink trio). ── */
 export const shellGround = "#e7e0d5"; // the page ground behind all three capsules
-export const shellRail = "#f1ebe3"; // RAIL capsule — the deepest surface
-export const shellSide = "#f8f4ee"; // PANEL capsule — one step above the rail
-export const shellCanvas = "#fdfbf8"; // CONTENT capsule — brightest; its top bar too
+export const shellRail = "#efe7db"; // THE COLUMN capsule (app-shell Baked 3)
+export const shellSide = "#efe7db"; // legacy alias — the panel it named folded into the column
+export const shellCanvas = "#f7f2e9"; // THE CONTENT capsule — and its top bar
 export const shellCard = "#fdfaf5"; // card surface (=== parchment)
 export const shellPanel = "#f2ede7"; // IN-PAGE grouping surface — content, not chrome fill
 export const shellInset = "#efe8df"; // THE interior fill (search, chips, pills, hovers)
@@ -141,9 +141,15 @@ export const shellLine = "#e3d9cf"; // interior hairline
 export const shellLineSoft = "#ece3da"; // soft interior hairline
 export const shellCapRadius = 18; // capsule corner (px) — chrome tokens
 export const shellCapGap = 14; // capsule gap AND page padding (px) — the outer gap
-// THE LAYERED SHADOW — four stops, one token, every capsule.
+// THE LAYERED SHADOW — four stops, one token, every capsule. GREEN-GREY: the tint belongs to
+// the desk's colour family and moves with it (the desk is sage). A cool-blue or warm-brown
+// shadow on a sage desk reads as dirt rather than depth.
 export const shellCapShadow =
-  "0 1px 2px rgba(58,28,20,.04), 0 2px 6px rgba(58,28,20,.045), 0 8px 18px rgba(58,28,20,.05), 0 20px 44px rgba(58,28,20,.055)";
+  "0 1px 2px rgba(56,66,58,.08), 0 4px 10px rgba(56,66,58,.09), 0 14px 30px rgba(56,66,58,.11), 0 34px 66px rgba(56,66,58,.13)";
+/** THE DESK — the sage-grey ground the capsules float on. Nothing else reads it. */
+export const shellDesk = "#aebdb0";
+/** The nav's active fill — a bright surface LAID ON the capsule, never a hole cut to the desk. */
+export const shellActiveFill = "#ffffff";
 export const shellCapBorder = "1px solid #d8ccbc"; // the warm capsule edge (was a cold #9e9e9e in the export)
 export const shellBarBg = "#f1ebe3"; // the header bar joins the rail's chrome family
 export const shellGutter = 16; // sidebar side gutter (px)

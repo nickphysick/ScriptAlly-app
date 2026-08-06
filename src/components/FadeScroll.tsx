@@ -52,18 +52,21 @@ export const FadeScroll: React.FC<FadeScrollProps> = ({ maxHeight, children, sty
     zIndex: 2,
   };
 
+  /* ⚠️ THE EDGE FADES RESOLVE TO THE CARD'S WHITE (refinement §1). They faded to parchment
+     #fdfaf5 — correct while every page sat on a parchment ground, wrong now that this renders
+     inside the white content card, where the fade ended in a visible cream band. */
   return (
     <div style={{ position: "relative", ...style }}>
       <div
         aria-hidden="true"
-        style={{ ...fade, top: 0, background: "linear-gradient(#fdfaf5, rgba(253,250,245,0))", opacity: atTop ? 0 : 1 }}
+        style={{ ...fade, top: 0, background: "linear-gradient(#ffffff, rgba(255,255,255,0))", opacity: atTop ? 0 : 1 }}
       />
       <div ref={ref} onScroll={measure} style={{ maxHeight, overflowY: "auto" }}>
         {children}
       </div>
       <div
         aria-hidden="true"
-        style={{ ...fade, bottom: 0, background: "linear-gradient(rgba(253,250,245,0), #fdfaf5)", opacity: atBottom ? 0 : 1 }}
+        style={{ ...fade, bottom: 0, background: "linear-gradient(rgba(255,255,255,0), #ffffff)", opacity: atBottom ? 0 : 1 }}
       />
     </div>
   );

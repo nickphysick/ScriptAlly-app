@@ -63,9 +63,18 @@
   color: var(--band-meta, #9c8878); display: flex; gap: 10px; align-items: center; justify-content: center;
   margin-bottom: 20px;
 }
+/* ⚠️ INK, NOT --hdr (shell-rebuild pack, Phase 4 · Baked 15). The greeting read the per-theme
+   header token, which is mocha #5d4037 in Cappuccino — warm enough to sit as an accent on a page
+   whose only accent should be urgency. Section titles elsewhere keep --hdr: this is a rule about
+   the greeting, not about headings. (Phase 4 said "renders in the top-nav shell"; Amendment 1
+   (G) moved it into the WORKSPACE shell — the ink rule is unchanged by that move.) */
+/* ⚠️ 66px → 40px (Amendment 1, G2). The dashboard renders INSIDE the content card now, not on a
+   full-bleed page: 66px was sized against the viewport and overwhelms a card that has a rail, a
+   panel and a 14px frame beside it. Container scaling only — the hero's structure, copy and
+   components are untouched. */
 .sa-greet-hi {
-  font-family: var(--font-serif); font-size: 66px; font-weight: 600;
-  color: var(--hdr, #5d4037); line-height: 1.03; margin: 0 0 22px;
+  font-family: var(--font-serif); font-size: 40px; font-weight: 600;
+  color: var(--shell-ink); line-height: 1.05; margin: 0 0 18px;
 }
 /* the name keeps the heading's own voice — no italics, no colour */
 .sa-greet-hi em { font-style: normal; color: inherit; }
@@ -373,8 +382,12 @@
    equal the gap, so it already landed on the capsule edge — tokenised here so the coincidence
    becomes intentional and survives any change to the gap. Below 768px the capsule stands down
    and the tab keeps its flush-to-edge idiom. */
+/* ⚠️ ANCHORED INSIDE THE CARD (refinement §1). It was `position:fixed`, measured from the BROWSER
+   edge — so it floated over the card's rounded corner and stayed put while the page scrolled
+   beneath it. `absolute` puts it in the card's own coordinate space: it clips to the radius and
+   travels with the content, which is what "an edge tab on this card" has to mean. */
 .sa-tltab {
-  position: fixed; right: 0; top: 42%; z-index: 45;
+  position: absolute; right: 0; top: 42%; z-index: 45;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 14px 8px; background: var(--card, #fffefb);
   border: var(--bdw, 1px) solid var(--bd, #e0d6c6); border-right: none;
@@ -384,9 +397,10 @@
 .sa-tltab .sa-tllbl { writing-mode: vertical-rl; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--band-meta, #9c8878); }
 .sa-tltab .sa-tlcnt { font-family: var(--font-mono); font-size: 8px; font-weight: 700; background: var(--acc, #7c3a2a); color: #fdfaf5; border-radius: 99px; padding: 1px 5px; }
 @media (min-width: 768px) {
-  /* The tab tucks against the CONTENT CAPSULE's right edge, not the browser's — so the ground
-     gutter stays equal on both sides. THE FIX. */
-  .sa-tltab { right: var(--shell-cap-gap); }
+  /* ⚠️ NO GAP OFFSET ANY MORE. The tab used to sit `--shell-cap-gap` in from the browser edge to
+     line up with the capsule; now that it is positioned INSIDE the card, `right:0` already IS the
+     card's edge, and re-adding the gap would push it a second inset inwards. */
+  .sa-tltab { right: 0; }
 }
 .sa-tldrawer {
   position: fixed;

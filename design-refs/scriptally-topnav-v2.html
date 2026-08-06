@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScriptAlly — Top nav</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2e2723; --ink-soft:#6a615a; --muted:#9c8878; --burgundy:#7c3a2a; --sage-deep:#5a6e58; --sage:#8a9e88;
+  --pink:#f5e2da; --pink-line:#e8c8bc; --sage-band:#dce0d9; --slate:#6a89a7;
+  --paper:#f7f2e9; --edge:#e2d8c8; --line:#ded2bf; --card:#fdfaf5;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --mast:72px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Inter",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;background:var(--paper);overflow:hidden;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E")}
+.shell{height:100vh;display:flex;flex-direction:column}
+
+/* ── masthead · same colour as page ── */
+.mast{height:var(--mast);flex:none;background:var(--paper);position:relative;z-index:40}
+.mast::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--edge);
+  opacity:0;transition:opacity .22s var(--ease)}
+.mast.scrolled::after{opacity:1}
+.mrow{max-width:1240px;margin:0 auto;height:100%;display:flex;align-items:center;gap:4px;padding:0 30px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:26px;cursor:pointer;border-radius:9px;padding:5px 8px 5px 4px}
+.brand:hover{background:rgba(255,255,255,.6)}
+.brand svg{width:22px;height:22px;color:var(--burgundy)}
+.brand span{font-family:"Playfair Display",serif;font-size:22px;letter-spacing:-.015em}
+.nl{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 13px;border-radius:10px;font-size:14px;color:var(--ink-soft);cursor:pointer;
+  transition:background .15s var(--ease),color .15s var(--ease);position:relative}
+.nl:hover{color:var(--ink);background:rgba(255,255,255,.66)}
+.nl.on{color:var(--ink);font-weight:500}
+.nl.on::after{content:"";position:absolute;left:13px;right:13px;bottom:4px;height:2px;background:var(--pink-line);border-radius:2px}
+.nl svg{width:11px;height:11px;color:#c4b8a9;transition:transform .2s var(--ease)}
+.nl.open svg{transform:rotate(180deg)}
+.nl.open{background:rgba(255,255,255,.66);color:var(--ink)}
+.right{margin-left:auto;display:flex;align-items:center;gap:6px;position:relative}
+.srch{display:flex;align-items:center;gap:9px;width:214px;height:36px;padding:0 12px;border-radius:99px;border:1px solid var(--line);
+  background:rgba(255,255,255,.5);color:var(--muted);font-size:12.5px;cursor:text;transition:border-color .15s var(--ease)}
+.srch:hover{border-color:#cfc2b4}
+.srch svg{width:14px;height:14px}
+.srch .k{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:8.5px;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.acct{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 9px 0 4px;border-radius:99px;cursor:pointer;font-size:13.5px}
+.acct:hover,.acct.open{background:rgba(255,255,255,.66)}
+.acct .av{width:30px;height:30px;border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);display:grid;place-items:center;
+  font-family:"Playfair Display",serif;font-size:11.5px;color:var(--burgundy)}
+.acct svg{width:11px;height:11px;color:var(--muted);transition:transform .2s var(--ease)}
+.acct.open svg{transform:rotate(180deg)}
+
+/* ── dropdowns · same colour, separated by shadow only ── */
+.mega{position:absolute;left:0;right:0;top:100%;background:var(--paper);
+  opacity:0;pointer-events:none;transform:translateY(-5px);transition:opacity .17s var(--ease),transform .2s var(--ease);z-index:39;
+  box-shadow:0 1px 0 var(--edge),0 20px 44px rgba(58,28,20,.11)}
+.mega.on{opacity:1;pointer-events:auto;transform:translateY(0)}
+.minner{max-width:1240px;margin:0 auto;padding:26px 30px 30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 290px;gap:32px}
+.mcol .cap{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.17em;text-transform:uppercase;color:#b3a598;display:block;margin-bottom:11px}
+.mi{display:flex;align-items:flex-start;gap:11px;padding:8px 9px;margin-left:-9px;border-radius:9px;cursor:pointer;transition:background .13s var(--ease)}
+.mi:hover{background:rgba(255,255,255,.72)}
+.mi .g{width:17px;height:17px;color:#a89a8a;flex:none;margin-top:1px}
+.mi:hover .g{color:var(--burgundy)}
+.mi .tx .t{font-size:13.5px;display:block}
+.mi .tx .s{font-size:11.5px;color:var(--muted);margin-top:3px;display:block;line-height:1.45}
+.mi .ct{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);font-variant-numeric:tabular-nums;padding-left:8px}
+.promo{border-left:1px solid var(--edge);padding-left:28px}
+.promo .cap2{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+.promo h5{font-family:"Playfair Display",serif;font-size:19px;font-weight:500;line-height:1.25;margin-top:9px}
+.promo p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-top:9px}
+.promo .lk{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--burgundy);margin-top:12px;cursor:pointer}
+.promo .lk svg{width:11px;height:11px}
+
+/* user menu */
+.umenu{position:absolute;right:0;top:calc(100% + 8px);width:246px;background:var(--paper);border:1px solid var(--edge);border-radius:14px;
+  padding:7px;box-shadow:0 20px 44px rgba(58,28,20,.16);opacity:0;pointer-events:none;transform:translateY(-5px);
+  transition:opacity .16s var(--ease),transform .2s var(--ease);z-index:45}
+.umenu.on{opacity:1;pointer-events:auto;transform:translateY(0)}
+.uhead{padding:10px 11px 11px;border-bottom:1px solid var(--edge);margin-bottom:6px}
+.uhead .n{font-size:13.5px}
+.uhead .e{font-size:11.5px;color:var(--muted);margin-top:3px}
+.ur{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;font-size:13px;color:var(--ink-soft);cursor:pointer}
+.ur:hover{background:rgba(255,255,255,.75);color:var(--ink)}
+.ur svg{width:15px;height:15px;color:#a89a8a;flex:none}
+.ur .kb{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:8.5px;color:#bcb0a3}
+.uup{margin:6px 4px;padding:12px;border-radius:11px;background:var(--card);border:1px solid var(--edge);cursor:pointer}
+.uup .p1{font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate)}
+.uup .p2{font-size:12.5px;margin-top:6px;line-height:1.4}
+.uup .p3{font-size:11.5px;color:var(--muted);margin-top:5px}
+.udiv{height:1px;background:var(--edge);margin:6px 4px}
+.scrim{position:fixed;inset:var(--mast) 0 0 0;background:rgba(46,39,35,.14);opacity:0;pointer-events:none;transition:opacity .2s var(--ease);z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+
+/* ── page ── */
+.page{flex:1;overflow-y:auto;position:relative;z-index:10}
+.page::-webkit-scrollbar{width:8px}
+.page::-webkit-scrollbar-thumb{background:#ded3c6;border-radius:9px}
+.wrap{max-width:1240px;margin:0 auto;padding:38px 30px 70px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"Playfair Display",serif;font-size:46px;font-weight:500;letter-spacing:-.028em;line-height:1.05;margin-top:12px}
+.lede{font-family:"Playfair Display",serif;font-size:17px;color:var(--ink-soft);margin-top:12px;max-width:620px}
+.hr{height:1px;background:var(--line);margin:26px 0}
+.v{display:none}
+.v.on{display:block}
+.acts{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.act{display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 17px;border-radius:11px;background:var(--card);border:1px solid var(--line);font-size:13.5px;cursor:pointer;transition:border-color .15s var(--ease),box-shadow .15s var(--ease)}
+.act:hover{border-color:#cfc2b4;box-shadow:0 2px 10px rgba(58,28,20,.07)}
+.act.p{background:var(--pink);border-color:var(--pink-line);color:#5c2d21}
+.act svg{width:15px;height:15px;color:var(--burgundy)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+.st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px}
+.st .l{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.st .l svg{width:14px;height:14px;color:var(--burgundy)}
+.st .r{display:flex;align-items:baseline;gap:11px;margin-top:12px}
+.st .val{font-family:"Playfair Display",serif;font-size:34px;line-height:1}
+.st .pl{font-size:11.5px;color:var(--ink-soft);background:#efe8df;border-radius:99px;padding:4px 10px}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:16px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.blk h3{font-family:"Playfair Display",serif;font-size:20px;font-weight:500}
+.li{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #f0e9df;font-size:13px}
+.li:last-child{border-bottom:0}
+.li .dot{width:8px;height:8px;border-radius:99px;flex:none}
+.li .n{flex:1}
+.li .m{font-family:"JetBrains Mono",monospace;font-size:9.5px;color:var(--muted)}
+.sgrid{display:grid;grid-template-columns:210px 1fr;gap:34px;margin-top:4px}
+.snav{position:sticky;top:0;align-self:start}
+.snav .si{padding:9px 12px;border-radius:9px;font-size:13.5px;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;gap:10px}
+.snav .si:hover{background:rgba(255,255,255,.7);color:var(--ink)}
+.snav .si.on{background:var(--card);border:1px solid var(--line);color:var(--ink);font-weight:500}
+.snav .si svg{width:15px;height:15px;color:#a89a8a}
+.snav .si.on svg{color:var(--burgundy)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px}
+.sec h3{font-family:"Playfair Display",serif;font-size:19px;font-weight:500}
+.sec .d{font-size:12.5px;color:var(--muted);margin-top:5px}
+.fld{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #f0e9df}
+.fld:last-child{border-bottom:0}
+.fld .fl{flex:1}
+.fld .t{font-size:13.5px}
+.fld .s{font-size:11.5px;color:var(--muted);margin-top:3px}
+.inp{height:36px;width:230px;border-radius:9px;border:1px solid var(--line);background:#fff;padding:0 11px;display:flex;align-items:center;font-size:13px;color:var(--ink-soft)}
+.sw{width:38px;height:22px;border-radius:99px;background:var(--pink);border:1px solid var(--pink-line);position:relative;flex:none;cursor:pointer}
+.sw i{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:99px;background:#fff;border:1px solid var(--pink-line)}
+.sw.off{background:#efe8df;border-color:var(--line)}
+.sw.off i{right:auto;left:2px;border-color:var(--line)}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
+.tier{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;position:relative}
+.tier.mid{border-color:var(--burgundy);box-shadow:0 0 0 1px var(--burgundy),0 10px 30px rgba(58,28,20,.09)}
+.tier .flag{position:absolute;top:-10px;left:24px;font-family:"JetBrains Mono",monospace;font-size:7.5px;letter-spacing:.15em;text-transform:uppercase;background:var(--burgundy);color:#fff;border-radius:6px;padding:4px 9px}
+.tier .nm{font-family:"Playfair Display",serif;font-size:24px;font-weight:500}
+.tier .sub{font-size:12.5px;color:var(--muted);margin-top:5px}
+.tier .pr{display:flex;align-items:baseline;gap:6px;margin-top:18px}
+.tier .pr .n{font-family:"Playfair Display",serif;font-size:40px;line-height:1}
+.tier .pr .p{font-size:12.5px;color:var(--muted)}
+.tier ul{list-style:none;margin-top:18px;flex:1}
+.tier li{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:13px;color:var(--ink-soft)}
+.tier li svg{width:14px;height:14px;color:var(--sage-deep);flex:none;margin-top:2px}
+.tier li.off{color:#b8ada2}
+.tier li.off svg{color:#cfc3b5}
+.tier .btn{height:42px;border-radius:11px;display:grid;place-items:center;font-size:13.5px;margin-top:20px;cursor:pointer;background:transparent;border:1px solid var(--line);color:var(--ink)}
+.tier.mid .btn{background:var(--pink);border-color:var(--pink-line);color:#5c2d21}
+.tier.pro .btn{background:var(--slate);border-color:var(--slate);color:#fff}
+.tier.pro .nm{color:#4d6b87}
+
+.hint{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:80;max-width:820px;background:#2b2622;color:#fff;border-radius:12px;padding:11px 16px;font-size:12px;line-height:1.6;box-shadow:0 10px 28px rgba(0,0,0,.3)}
+.hint b{font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="mast" id="mast">
+    <div class="mrow">
+      <div class="brand" data-v="dash"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 2.3 2.6 9.6c-.8.3-.8 1.4 0 1.7l6.1 2.3 2.3 6.1c.3.8 1.4.8 1.7 0l7.3-19.1c.3-.7-.4-1.4-1.1-1.1Z"/></svg><span>ScriptAlly</span></div>
+      <span class="nl" data-m="q">Queries<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="nl" data-m="a">Agents<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="nl" data-m="m">Materials<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <span class="nl" data-m="l">Learn<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <div class="right">
+        <span class="srch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>Search…<span class="k">⌘K</span></span>
+        <span class="acct" id="acct"><span class="av">ML</span>Michael Li<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+        <div class="umenu" id="umenu">
+          <div class="uhead"><div class="n">Michael Li</div><div class="e">michael@example.com</div></div>
+          <div class="ur" data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Settings<span class="kb">⌘,</span></div>
+          <div class="ur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>Task settings</div>
+          <div class="ur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.9.7c0 1.6-2.5 2-2.5 3.4M12 16.8h.01"/></svg>Help centre<span class="kb">?</span></div>
+          <div class="udiv"></div>
+          <div class="uup" data-v="plans">
+            <div class="p1">Free plan</div>
+            <div class="p2">Upgrade for packages, smart import and unlimited queries</div>
+            <div class="p3">From £6 a month →</div>
+          </div>
+          <div class="udiv"></div>
+          <div class="ur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5"/><path d="M20 12H9M13 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7"/></svg>Sign out</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUERIES -->
+    <div class="mega" id="m-q">
+      <div class="minner">
+        <div class="mcol"><span class="cap">Track</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg><span class="tx"><span class="t">Queries Hub</span><span class="s">Every query and exactly where it stands</span></span><span class="ct">21</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg><span class="tx"><span class="t">To-do</span><span class="s">What needs you, and what can wait</span></span><span class="ct">44</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 17l5-6 4 3 4-6 5 4M3 21h18"/></svg><span class="tx"><span class="t">Progress</span><span class="s">Response rates and how the round is going</span></span></div>
+        </div>
+        <div class="mcol"><span class="cap">Act</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="tx"><span class="t">Log a query</span><span class="s">Record one you've just sent</span></span><span class="ct">⌘L</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg><span class="tx"><span class="t">Record a response</span><span class="s">Log what an agent said back</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3.4"/></svg><span class="tx"><span class="t">Smart import</span><span class="s">Paste a reply, update the query</span></span></div>
+        </div>
+        <div class="mcol"><span class="cap">Closed</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg><span class="tx"><span class="t">Archive</span><span class="s">Closed and no-reply queries</span></span><span class="ct">5</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v18M5 8h14M5 16h14"/></svg><span class="tx"><span class="t">Export CSV</span><span class="s">Download your full query log</span></span></div>
+        </div>
+        <div class="promo">
+          <span class="cap2">This week</span>
+          <h5>Three queries are past their reply window</h5>
+          <p>Jonathan Marsh, Aisha Kapoor and Priya Raghavan are all beyond their typical response time. A short nudge is entirely normal at this point.</p>
+          <span class="lk">Open your to-do list<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENTS -->
+    <div class="mega" id="m-a">
+      <div class="minner">
+        <div class="mcol"><span class="cap">Yours</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg><span class="tx"><span class="t">Agent list</span><span class="s">Everyone you're querying or watching</span></span><span class="ct">16</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.2"/><path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"/><path d="M18 8.5v5M15.5 11h5"/></svg><span class="tx"><span class="t">Add an agent</span><span class="s">Create a record from scratch</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16"/></svg><span class="tx"><span class="t">Agencies</span><span class="s">Grouped by who they work for</span></span><span class="ct">11</span></div>
+        </div>
+        <div class="mcol"><span class="cap">Find</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4" stroke-linecap="round"/></svg><span class="tx"><span class="t">Discover</span><span class="s">Agents open to your genre right now</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 19.5 9 18l10-10a2.1 2.1 0 0 0-3-3L6 15l-2 4.5Z"/></svg><span class="tx"><span class="t">Manuscript wish lists</span><span class="s">What agents say they're looking for</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 3h10M8 3v4l4 4 4-4V3M8 21v-4l4-4 4 4v4M7 21h10"/></svg><span class="tx"><span class="t">Response times</span><span class="s">Who replies quickly, who doesn't</span></span></div>
+        </div>
+        <div class="mcol"><span class="cap">Reference</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span class="tx"><span class="t">Closed to queries</span><span class="s">Who isn't open, and when they reopen</span></span><span class="ct">4</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.5l2 4.6 4.8 1.9-4.8 1.9-2 4.6-2-4.6L5.2 10 10 8.1 12 3.5Z"/></svg><span class="tx"><span class="t">Submission rules</span><span class="s">What each agent wants to receive</span></span></div>
+        </div>
+        <div class="promo">
+          <span class="cap2">Idle</span>
+          <h5>Four agents you've saved but never queried</h5>
+          <p>Hugh Mercer, Rebecca Vale, Sam Okoro and Ines Duarte are all currently open to submissions in your genre.</p>
+          <span class="lk">Review them<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATERIALS -->
+    <div class="mega" id="m-m">
+      <div class="minner">
+        <div class="mcol"><span class="cap">The book</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M8 3v18"/></svg><span class="tx"><span class="t">Manuscripts</span><span class="s">Your shelf, with every version</span></span><span class="ct">2</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.5l2 4.6 4.8 1.9-4.8 1.9-2 4.6-2-4.6L5.2 10 10 8.1 12 3.5Z"/></svg><span class="tx"><span class="t">Comparable titles</span><span class="s">Find the comps for your book</span></span></div>
+        </div>
+        <div class="mcol"><span class="cap">What you send</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 19.5 9 18l10-10a2.1 2.1 0 0 0-3-3L6 15l-2 4.5Z"/></svg><span class="tx"><span class="t">Query letters</span><span class="s">Drafts, versions and what you sent</span></span><span class="ct">4</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 4h14M5 9h14M5 14h9"/></svg><span class="tx"><span class="t">Synopses</span><span class="s">One page, two page, and the long one</span></span><span class="ct">3</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4"/></svg><span class="tx"><span class="t">Opening samples</span><span class="s">First pages, chapters or words</span></span><span class="ct">2</span></div>
+        </div>
+        <div class="mcol"><span class="cap">Assembled</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg><span class="tx"><span class="t">Submission packages</span><span class="s">Letter, synopsis and sample, bundled once</span></span><span class="ct">3</span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v12M8 11l4 4 4-4M4 20h16"/></svg><span class="tx"><span class="t">Downloads</span><span class="s">Export any material as a document</span></span></div>
+        </div>
+        <div class="promo">
+          <span class="cap2">Tip</span>
+          <h5>A package saves you the rebuild</h5>
+          <p>Bundle a letter, synopsis and sample once, then send the same set to twelve agents without reassembling it each time.</p>
+          <span class="lk">Build a package<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEARN -->
+    <div class="mega" id="m-l">
+      <div class="minner">
+        <div class="mcol"><span class="cap">Guides</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v18H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/></svg><span class="tx"><span class="t">How querying works</span><span class="s">The whole process, start to offer</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 19.5 9 18l10-10a2.1 2.1 0 0 0-3-3L6 15l-2 4.5Z"/></svg><span class="tx"><span class="t">Writing a query letter</span><span class="s">Structure, tone and common traps</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span class="tx"><span class="t">Reading a rejection</span><span class="s">What form and personal replies mean</span></span></div>
+        </div>
+        <div class="mcol"><span class="cap">The industry</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg><span class="tx"><span class="t">How agents work</span><span class="s">Commission, contracts and lists</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v18M5 8h14M5 16h14"/></svg><span class="tx"><span class="t">UK vs US submissions</span><span class="s">The differences that matter</span></span></div>
+        </div>
+        <div class="mcol"><span class="cap">Help</span>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.9.7c0 1.6-2.5 2-2.5 3.4M12 16.8h.01"/></svg><span class="tx"><span class="t">Help centre</span><span class="s">Answers to the common questions</span></span></div>
+          <div class="mi"><svg class="g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="tx"><span class="t">Contact us</span><span class="s">A real person, usually same day</span></span></div>
+        </div>
+        <div class="promo">
+          <span class="cap2">Week 140</span>
+          <h5>You've sent 21 queries</h5>
+          <p>That puts you past the point where most writers stop. The median UK debut takes 40 to 80 queries before an offer.</p>
+          <span class="lk">Read the querying guide<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="scrim" id="scrim"></div>
+
+  <div class="page" id="page">
+    <div class="wrap">
+      <section class="v on" data-p="dash">
+        <div class="eyebrow">Tuesday 4 August · Week 140 of querying</div>
+        <h1>Good evening, Michael</h1>
+        <div class="lede">Three things need you today. Everything else is ticking along.</div>
+        <div class="acts">
+          <span class="act p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>Log a query</span>
+          <span class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 3 11l6 6"/><path d="M3 11h9a8 8 0 0 1 8 8v1"/></svg>Record a response</span>
+          <span class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.2"/><path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"/><path d="M18 8.5v5M15.5 11h5"/></svg>Add an agent</span>
+        </div>
+        <div class="stats">
+          <div class="st"><div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 14 21 3M21 3l-6.5 18-4.5-7-7-4.5L21 3Z"/></svg>Queries sent</div><div class="r"><span class="val">21</span><span class="pl">0 this week</span></div></div>
+          <div class="st"><div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 3h10M8 3v4l4 4 4-4V3M8 21v-4l4-4 4 4v4M7 21h10"/></svg>Active queries</div><div class="r"><span class="val">16</span><span class="pl">13 awaiting</span></div></div>
+          <div class="st"><div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg>Agents</div><div class="r"><span class="val">16</span><span class="pl">0 idle</span></div></div>
+          <div class="st"><div class="l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Responses</div><div class="r"><span class="val">11</span><span class="pl">52% rate</span></div></div>
+        </div>
+        <div class="two">
+          <div class="blk"><h3>Recent movement</h3>
+            <div class="li"><span class="dot" style="background:var(--burgundy)"></span><span class="n">Tom Ellery made an offer</span><span class="m">2d</span></div>
+            <div class="li"><span class="dot" style="background:var(--sage)"></span><span class="n">Jonathan Marsh requested the full</span><span class="m">4d</span></div>
+            <div class="li"><span class="dot" style="background:var(--sage)"></span><span class="n">Priya Raghavan sent an R&amp;R</span><span class="m">1w</span></div>
+            <div class="li"><span class="dot" style="background:#c4b8a9"></span><span class="n">Marcus Reed closed, no reply</span><span class="m">2w</span></div>
+            <div class="li"><span class="dot" style="background:var(--sage)"></span><span class="n">Aisha Kapoor requested a partial</span><span class="m">3w</span></div>
+            <div class="li"><span class="dot" style="background:#c4b8a9"></span><span class="n">Fenella Str declined</span><span class="m">4w</span></div>
+          </div>
+          <div class="blk"><h3>Dates for the diary</h3>
+            <div class="li"><span class="n">Nudge Aisha Kapoor</span><span class="m">Fri</span></div>
+            <div class="li"><span class="n">Foxglove reopens to queries</span><span class="m">12 Aug</span></div>
+            <div class="li"><span class="n">R&amp;R due back</span><span class="m">30 Aug</span></div>
+            <div class="li"><span class="n">Curtis Vane closes</span><span class="m">1 Sept</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="v" data-p="settings">
+        <div class="eyebrow">Settings</div>
+        <h1>Your account</h1>
+        <div class="hr"></div>
+        <div class="sgrid">
+          <nav class="snav">
+            <div class="si on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg>Profile</div>
+            <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Notifications</div>
+            <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>Task settings</div>
+            <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5l2 4.6 4.8 1.9-4.8 1.9-2 4.6-2-4.6L5.2 10 10 8.1 12 3.5Z"/></svg>Plan &amp; billing</div>
+            <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Privacy &amp; data</div>
+          </nav>
+          <div>
+            <div class="sec">
+              <h3>Profile</h3><div class="d">How you appear in the app and in exports.</div>
+              <div class="fld"><span class="fl"><span class="t">Display name</span><span class="s">Shown on the dashboard greeting</span></span><span class="inp">Michael Li</span></div>
+              <div class="fld"><span class="fl"><span class="t">Email</span><span class="s">Used for sign-in and reminders</span></span><span class="inp">michael@example.com</span></div>
+              <div class="fld"><span class="fl"><span class="t">Writing since</span><span class="s">Sets your week count</span></span><span class="inp">March 2023</span></div>
+            </div>
+            <div class="sec">
+              <h3>Reminders</h3><div class="d">When ScriptAlly should nudge you about a waiting query.</div>
+              <div class="fld"><span class="fl"><span class="t">Nudge reminders</span><span class="s">When an agent is past their typical response time</span></span><span class="sw"><i></i></span></div>
+              <div class="fld"><span class="fl"><span class="t">Weekly summary</span><span class="s">A Monday email with what moved</span></span><span class="sw"><i></i></span></div>
+              <div class="fld"><span class="fl"><span class="t">Agency reopenings</span><span class="s">Tell me when a closed agency opens again</span></span><span class="sw off"><i></i></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="v" data-p="plans">
+        <div class="eyebrow">Plan &amp; billing</div>
+        <h1>Pay when it's working</h1>
+        <div class="lede">You're on the free plan. Upgrade when you want the tools that save you the most time.</div>
+        <div class="hr"></div>
+        <div class="tiers">
+          <div class="tier">
+            <div class="nm">Free</div><div class="sub">Everything you need to start</div>
+            <div class="pr"><span class="n">£0</span><span class="p">forever</span></div>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Up to 25 queries</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>One manuscript</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Agent database</li>
+              <li class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>Submission packages</li>
+              <li class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>Smart import</li>
+            </ul>
+            <div class="btn">Your current plan</div>
+          </div>
+          <div class="tier mid">
+            <span class="flag">Most writers choose this</span>
+            <div class="nm">Writer</div><div class="sub">For an active submission round</div>
+            <div class="pr"><span class="n">£6</span><span class="p">a month</span></div>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Unlimited queries</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Unlimited manuscripts</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Submission packages</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Nudge reminders</li>
+              <li class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>Smart import</li>
+            </ul>
+            <div class="btn">Upgrade to Writer</div>
+          </div>
+          <div class="tier pro">
+            <div class="nm">Pro</div><div class="sub">Every tool, including the clever ones</div>
+            <div class="pr"><span class="n">£12</span><span class="p">a month</span></div>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Everything in Writer</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Smart import from email</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Comparable titles scout</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Export and backups</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 6 6L20 6"/></svg>Priority support</li>
+            </ul>
+            <div class="btn">Upgrade to Pro</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="hint" id="hint"></div>
+
+<script>
+const HINTS={
+ dash:'<b>Nav is the page colour</b> — no fill, no border. <b>Scroll the page</b> and a single hairline fades in beneath it. The dropdowns are the same <code>#f7f2e9</code> too, separated from the page by shadow alone rather than a different tone.',
+ settings:'<b>Settings lives under your initials</b>, not in the nav. Local left nav inside the page — it belongs to Settings and leaves when you do.',
+ plans:'<b>Plan &amp; billing</b>, reached from the account menu. No nav item: you are already signed in, so pricing is an account matter rather than a destination.'
+};
+const page=document.getElementById('page'),mast=document.getElementById('mast'),scrim=document.getElementById('scrim');
+page.addEventListener('scroll',()=>mast.classList.toggle('scrolled',page.scrollTop>2));
+function close(){
+ document.querySelectorAll('.mega').forEach(m=>m.classList.remove('on'));
+ document.querySelectorAll('.nl[data-m]').forEach(n=>n.classList.remove('open'));
+ document.getElementById('umenu').classList.remove('on');
+ document.getElementById('acct').classList.remove('open');
+ scrim.classList.remove('on');
+}
+document.querySelectorAll('.nl[data-m]').forEach(n=>{
+ n.onclick=e=>{e.stopPropagation();
+  const m=document.getElementById('m-'+n.dataset.m),was=m.classList.contains('on');
+  close(); if(!was){m.classList.add('on');n.classList.add('open');scrim.classList.add('on');}};
+});
+const acct=document.getElementById('acct'),um=document.getElementById('umenu');
+acct.onclick=e=>{e.stopPropagation();const was=um.classList.contains('on');close();
+ if(!was){um.classList.add('on');acct.classList.add('open');scrim.classList.add('on');}};
+um.onclick=e=>e.stopPropagation();
+document.querySelectorAll('.mega').forEach(m=>m.onclick=e=>e.stopPropagation());
+scrim.onclick=close;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+function show(p){
+ document.querySelectorAll('.v').forEach(v=>v.classList.toggle('on',v.dataset.p===p));
+ document.getElementById('hint').innerHTML=HINTS[p];
+ close(); page.scrollTop=0; mast.classList.remove('scrolled');
+}
+document.querySelectorAll('[data-v]').forEach(el=>el.addEventListener('click',()=>show(el.dataset.v)));
+show('dash');
+</script>
+</body>
+</html>

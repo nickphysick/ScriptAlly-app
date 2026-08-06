@@ -47,7 +47,7 @@
 .sv2-railpill {
   position: absolute; top: 0; left: 50%; margin-left: -20px;
   width: 40px; height: 40px; border-radius: 13px;
-  background: var(--shell-ground); pointer-events: none; z-index: 0;
+  background: var(--shell-active-fill); pointer-events: none; z-index: 0;
 }
 .sv2-railpill.ready { transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1); }
 .sv2-railnav .sv2-rib { position: relative; z-index: 1; }
@@ -74,10 +74,12 @@
 .sv2-rib svg { width: 18px; height: 18px; stroke-width: 1.8; transition: stroke-width 0.16s; }
 .sv2-rib.on svg { stroke-width: 2.4; }
 .sv2-rib:hover { background: var(--shell-inset); }
-/* THE ACTIVE LAW (fixes pack): active = the GROUND token — a window cut through to the page
-   ground. Never pink (retired from nav states; it stays the button/content accent), never
-   burgundy. Hover stays the interior fill — adjacent tones, browser-checked for distinction. */
-.sv2-rib.on { background: var(--shell-ground); color: var(--burg); }
+/* ⚠️ THE ACTIVE LAW (RESTATED, app-shell pack): active is a BRIGHT SURFACE LAID ON the capsule
+   — `--shell-active-fill` (#fff) — NOT a hole cut through to the ground. The old wording said
+   "a window cut through to the page ground", which held only while the ground was neutral
+   cream; on the sage desk that metaphor produces a GREEN PILL. Never pink (retired from nav
+   states; it stays the button/content accent), never burgundy. */
+.sv2-rib.on { background: var(--shell-active-fill); color: var(--burg); }
 /* PRESS FEEDBACK — :active only, 120ms, house easing. The press scales the ICON while the
    indicator moves the PILL: separate elements, so they cannot fight. */
 .sv2-rib:active { transform: scale(.92); transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1); }
@@ -87,7 +89,7 @@
    flyout footer and ⌘\ carry expansion now.) */
 /* The rib whose flyout is open holds its hover look while the pointer travels across. */
 .sv2-rib.hovering { background: var(--shell-inset); color: var(--shell-ink); }
-.sv2-rib.on.hovering { background: var(--shell-ground); color: var(--burg); }
+.sv2-rib.on.hovering { background: var(--shell-active-fill); color: var(--burg); }
 
 /* ── rail flyouts (collapsed only; ref scriptally-rail-flyouts.html) ── */
 .sv2-fly {
@@ -133,7 +135,7 @@
 .sv2-frow.on svg { color: var(--burg); }
 .sv2-frow:hover { background: var(--shell-inset); color: var(--shell-ink); }
 /* The nav active law — ground fill, in the flyout too. */
-.sv2-frow.on { background: var(--shell-ground); color: var(--shell-ink); }
+.sv2-frow.on { background: var(--shell-active-fill); color: var(--shell-ink); }
 .sv2-flbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sv2-fct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 .sv2-ff {
@@ -290,7 +292,7 @@
 .sv2-asec.open .sv2-acv { transform: rotate(90deg); }
 /* THE ACTIVE LAW (fixes pack): active = GROUND fill, ink text, burgundy icon — never pink,
    never burgundy fills. One law, both columns (rail ribs + panel rows). */
-.sv2-asec.sv2-flat.on { background: var(--shell-ground); color: var(--shell-ink); font-weight: 500; }
+.sv2-asec.sv2-flat.on { background: var(--shell-active-fill); color: var(--shell-ink); font-weight: 500; }
 .sv2-asec.sv2-flat.on .sv2-ai { color: var(--burg); }
 .sv2-akids { overflow: hidden; max-height: 0; transition: max-height 0.26s ease; }
 .sv2-akids.open { max-height: 160px; }
@@ -312,7 +314,7 @@
   transition: background 0.16s;
 }
 .sv2-akid:hover { background: var(--shell-inset); }
-.sv2-akid.on { background: var(--shell-ground); color: var(--shell-ink); }
+.sv2-akid.on { background: var(--shell-active-fill); color: var(--shell-ink); }
 .sv2-aklbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sv2-akct { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: var(--shell-muted); }
 
@@ -562,16 +564,21 @@
   .sv2-topbar {
     display: flex;
     align-items: center;
-    /* ONE CONTINUOUS LINE: the bar reads the SAME token as the rail head and the panel masthead
-       (bar-per-page pack). Never restate the number here — that is how 56 and 58 drifted apart. */
-    height: var(--shell-head-h);
+    /* ONE CONTINUOUS LINE: the bar reads the SAME token as the column's masthead (--head), so
+       the two capsules' headers close on one line across the gap. Never restate the number. */
+    height: var(--head);
     flex: none;
     gap: 12px;
     padding: 0 18px;
     /* THE HEADER BAR shares the rail's tone — one chrome family, a PERMANENT fill and border
        (no scroll state: that idea is superseded). */
-    background: var(--shell-bar-bg);
-    border-bottom: 1px solid var(--shell-line-soft);
+    /* The bar IS the content capsule's head, so it wears the capsule's own colour. */
+    background: var(--shell-canvas);
+    /* ⚠️ THE HAIRLINE IS PERMANENT (Baked 8). It completes the corner with the capsule edge;
+       without it the bar looks unfinished against a rounded capsule. The top-nav shell's
+       hairline is scroll-revealed instead — no capsule there, so no corner to complete. That
+       asymmetry is deliberate. */
+    border-bottom: 1px solid var(--shell-line);
     /* the containing block for the dashboard's absolutely centred search */
     position: relative;
   }
@@ -596,6 +603,7 @@
 .sv2-tbbrand { display: flex; align-items: center; flex: none; padding: 8px 0; }
 /* the tools cluster — pushed right by .sv2-grow; on working pages the search joins it */
 .sv2-tbright { display: flex; align-items: center; gap: 9px; flex: none; margin-left: auto; }
+.sv2-acctwrap { position: relative; display: inline-flex; }
 /* THE USER BLOCK — avatar · name · chevron, at the right end, on EVERY page, identical in both
    bar states. ⚠️ It ALSO sits at the panel's foot; that duplication is INTENTIONAL AND APPROVED
    (canonical shell pack). The bar's copy is the one that survives the panel collapsing; the
@@ -666,23 +674,12 @@
    not the leftover space between the flanks, so it holds still as the scope title changes
    length. Working pages: narrower, right, in the tools cluster. */
 .sv2-gsearch { flex: none; }
-/* ⚠️ TRUE CENTRING NEEDS A RESERVE, or the left flank sits on top of the field. The mockup draws
-   this bar beside a 64px rail with NO panel, where a 440px centred field clears the wordmark and
-   the scope chip easily. In the app the panel is 288px, so at 1440 with it EXPANDED the bar is
-   only ~1026px and the scope chip overlapped the field's left edge by ~38px — z-index decided
-   which won, but the field was still occluded (browser-measured, 30 Jul).
-   So the field reserves TWICE the left flank's bounded maximum and shrinks below 440 when it must.
-   `--sv2-flank` = bar padding + wordmark + divider + gaps + the scope cap; keep the two in step,
-   and re-measure both panel states if either changes. */
-.sv2-tb-dash { --sv2-flank: 365px; }
-.sv2-tb-dash .sv2-scope { max-width: 200px; }
-.sv2-gsearch-c {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(440px, calc(100% - 2 * var(--sv2-flank)));
-  z-index: 1;
-}
+/* (THE DASHBOARD'S CENTRED SEARCH IS RETIRED — app-shell pack Phase 3. The bar has ONE state
+   now: the dashboard moved to the top-nav shell, so there is no wordmark-and-centred-search
+   variant to reserve a flank for. `.sv2-tb-dash`, `.sv2-gsearch-c` and `--sv2-flank` went with
+   it; the hard-won lesson they carried — that stacking is not clearance, and true centring
+   needs a reserve — is kept in CLAUDE.md for whoever centres something next.) */
+.sv2-gsearch { flex: none; }
 .sv2-gsearch-r { width: 264px; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -718,18 +715,25 @@
    Inset 1px left and right so it sits INSIDE the capsule's border rather than over it, and the
    bottom corners are the capsule radius minus that inset, or the fade squares off the curve. */
 .sv2-pgwrap { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+/* ⚠️ IT RESOLVES TO THE CARD'S WHITE NOW (refinement §1). It faded to the old page cream — via
+   rgba(253,251,248) and --shell-canvas — which was right when the stage sat on a cream capsule
+   and wrong the moment the content became a WHITE card. On the dashboard that showed as the
+   diary section fading out to a colour the page no longer had.
+
+   ⚠️ AND IT IS STICKY, NOT ABSOLUTE. Its old positioning wrapper (.sv2-pgwrap) is gone with the
+   card's single scroll container, so it pins to the scroller's foot instead. */
 .sv2-fade {
-  position: absolute;
-  left: 1px;
-  right: 1px;
+  position: sticky;
   bottom: 0;
+  margin-top: -56px;
   height: 56px;
+  flex: none;
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(253, 251, 248, 0) 0%,
-    rgba(253, 251, 248, 0.72) 45%,
-    var(--shell-canvas) 100%
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.72) 45%,
+    #ffffff 100%
   );
   border-radius: 0 0 calc(var(--shell-cap-radius) - 1px) calc(var(--shell-cap-radius) - 1px);
   opacity: 0;

@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, silentDays, actionableCount, BoardCard, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
+import { todoCounts } from "./todoCount";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -337,50 +338,6 @@ describe("II·B P4 — stale titles always carry the duration", () => {
    locked here. (The fourth — the unguarded KIND pill — is a render guard, locked in
    todoWorkspaceP0B.test.ts against the source.) */
 
-describe("silentDays — the figure the data can supply and the template dropped", () => {
-  // An imported query that reached FULL_SENT without ever recording fullSentDate. The ambient
-  // reading anchors on the STAGE date, finds none, and reports no send anchor at all — while
-  // dateSent has been sitting on the record the whole time.
-  const imported = query("q-imp", "a1", QueryStatus.FULL_SENT, { dateSent: "2026-01-01T00:00:00Z" });
-
-  it("falls back to the query's own send date when the stage date is missing", () => {
-    expect(silentDays(imported, null, NOW)).toBe(189); // 1 Jan → 9 Jul
-  });
-
-  it("prefers the ambient reading whenever it HAS an anchor — one derivation, not two", () => {
-    expect(silentDays(imported, 12, NOW)).toBe(12);
-  });
-
-  it("returns null only when there is genuinely no date anywhere — then 'SILENT' is the truth", () => {
-    expect(silentDays(query("q-x", "a1", QueryStatus.FULL_SENT, { dateSent: undefined }), null, NOW)).toBeNull();
-    expect(silentDays(undefined, null, NOW)).toBeNull();
-  });
-
-  it("never invents a negative count from a future send date", () => {
-    expect(silentDays(query("q-f", "a1", QueryStatus.FULL_SENT, { dateSent: "2027-01-01T00:00:00Z" }), null, NOW)).toBe(0);
-  });
-
-  it("THE BOARD READS IT: a stale card on an imported query states its days, not a bare SILENT", () => {
-    const board = assembleBoard(base({
-      tasks: [task("t-stale", "no_response_close", "q-imp")],
-      queries: [imported],
-      agents: [agent("a1", "Marcus Reed")],
-    }));
-    expect(board.hk).toHaveLength(1);
-    expect(board.hk[0].due).toBe("SILENT 189 DAYS");
-    expect(board.hk[0].title).toBe("Marcus Reed silent for 189 days");
-  });
-
-  it("…and a nudge card likewise counts the silence rather than shrugging", () => {
-    const board = assembleBoard(base({
-      tasks: [task("t-nudge", "nudge_overdue", "q-imp")],
-      queries: [imported],
-      agents: [agent("a1", "Marcus Reed")],
-    }));
-    expect(board.do[0].due).toBe("189 DAYS · NO REPLY");
-  });
-});
-
 describe("the done band — one completion is one row, not one per record it wrote", () => {
   it("a close that logged an activity AND resolved its flag appears ONCE", () => {
     const board = assembleBoard(base({
@@ -448,60 +405,33 @@ describe("no card states a value it does not have", () => {
   });
 });
 
-/* ═══════ THE COUNTING LAW (workspace P1; audit item 1) ═════════════════════════════════════
-   The badge said 44 and the lists summed to 52 because nothing defined what 44 counted. One
-   derivation now answers it, and these are the equalities that make it an invariant rather
-   than a convention. */
-describe("actionableCount — one number, and notes are not in it", () => {
-  const board = () => assembleBoard(base({
-    tasks: [
-      task("t-offer", "offer_received", "q1"),      // urgent
-      task("t-full", "full_requested", "q2"),        // urgent
-      task("t-dq", "data_quality_poor", "a1"),       // housekeeping
-    ],
-    queries: [query("q1", "a1", QueryStatus.OFFER), query("q2", "a1", QueryStatus.FULL_REQUESTED)],
-    agents: [agent("a1", "Marcus Reed")],
-    userTasks: [
-      utask("n1"),                                   // a NOTE — dateless
-      utask("n2"),                                   // a NOTE — dateless
-      utask("k1", { dueDate: "2026-12-01" }),        // an open TASK, future-dated
-      utask("k2", { dueDate: TODAY }),               // a TASK, promoted today → already urgent
-    ],
-  }));
+/* ═══════ THE COUNTING LAW, END TO END (port plan, charter item 3) ═════════════════════════
+   The law's own suite (todoWorkspace.test.ts) exercises `todoCounts` against HAND-BUILT board
+   objects, which proves the sum but not its premise. The premise is that the ASSEMBLER promotes
+   a due-today task into the urgent lane — and if that ever stopped being true, those tests would
+   all still pass while the badge quietly went wrong. So this one runs the real assembler. */
+describe("the counting law, through assembleBoard rather than a hand-built board", () => {
+  const promoted = assembleBoard(base({ userTasks: [utask("k", { dueDate: TODAY })] }));
 
-  it("counts urgent + housekeeping + open user TASKS, and excludes notes", () => {
-    const b = board();
-    // do = 2 derived + the promoted task; hk gaps passed as 1; nt = 2 notes + 1 future task
-    expect(b.do).toHaveLength(3);
-    expect(b.nt).toHaveLength(3);
-    expect(actionableCount(b, 1)).toBe(3 + 1 + 1);
+  it("the fixture really does promote — the anchor the sum-only tests cannot state", () => {
+    expect(promoted.do, "a task dated today belongs in the urgent lane").toHaveLength(1);
+    expect(promoted.nt, "…and therefore not in the notes lane").toHaveLength(0);
   });
 
-  it("a note NEVER moves the number — the whole point of the exclusion", () => {
-    const b = board();
-    const before = actionableCount(b, 1);
-    const withMoreNotes = assembleBoard(base({
-      ...({} as object),
-      userTasks: [utask("x1"), utask("x2"), utask("x3"), utask("x4")],
+  it("so it is counted ONCE, not once per lane it could have been in", () => {
+    expect(todoCounts(promoted, 0, 0).actionable).toBe(1);
+  });
+
+  it("a mixed desk: notes out, future tasks in, the promoted one counted once", () => {
+    const mixed = assembleBoard(base({
+      userTasks: [
+        utask("n1"), utask("n2"),                 // notes — excluded
+        utask("f1", { dueDate: "2026-12-01" }),   // future task — counted
+        utask("p1", { dueDate: TODAY }),          // promoted — counted once
+      ],
     }));
-    expect(actionableCount(withMoreNotes, 0)).toBe(0);
-    expect(before).toBe(actionableCount(b, 1)); // pure
-  });
-
-  it("does NOT double-count a task that promoted into the urgent lane on its due day", () => {
-    const promoted = assembleBoard(base({ userTasks: [utask("k", { dueDate: TODAY })] }));
-    expect(promoted.do).toHaveLength(1); // it is in `do`…
-    expect(promoted.nt).toHaveLength(0); // …and therefore not in `nt`
-    expect(actionableCount(promoted, 0)).toBe(1); // counted once
-  });
-
-  it("THE EQUALITY: the figure is the sum of its named parts, never a re-tally", () => {
-    const b = board();
-    const urgent = b.do.length;
-    const openTasks = b.nt.filter((c) => c.nature === "task").length;
-    const notes = b.nt.filter((c) => c.nature === "note").length;
-    expect(actionableCount(b, 7)).toBe(urgent + 7 + openTasks);
-    // …and stating it the other way round: adding the notes is exactly the old, wrong number.
-    expect(actionableCount(b, 7)).not.toBe(urgent + 7 + openTasks + notes);
+    const c = todoCounts(mixed, 3, 0);
+    expect(c.notes).toBe(2);
+    expect(c.actionable).toBe(1 /* do */ + 3 /* gaps */ + 1 /* future task */);
   });
 });

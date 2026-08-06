@@ -20,7 +20,6 @@ import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { ToDoPage } from "./components/todo/ToDoPage";
-import { TodoComingPage } from "./components/todo/TodoComingPage";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
@@ -41,6 +40,15 @@ import { RecordResponseScreen } from "./components/RecordResponseScreen";
 import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { shellForRoute } from "./lib/shellForRoute";
+import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
+import { todoPageForPath } from "./lib/todoRoutes";
+import { TodoPlaceholderPage } from "./components/todo/TodoPlaceholderPage";
+import { TodoTodayPage } from "./components/todo/TodoTodayPage";
+// ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
+// import { TopNavHost } from "./components/shell/TopNavHost";
+import { QueryAnalytics } from "./components/QueryAnalytics";
+import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
@@ -561,14 +569,30 @@ function AppContent() {
     return <Navigate to="/dashboard" replace />;
   }
 
+  // ── WHICH SHELL (app-shell pack, Phase 5) — ONE mapping, in one place (lib/shellForRoute).
+  // An unmapped route throws in DEVELOPMENT and falls back to the workspace shell in production:
+  // a silent default is how a page ends up in the wrong chrome for a month, but a throw in
+  // production is worse than wrong chrome.
+  /* ⚠️ THE TOP-NAV BRANCH IS GONE, AND THE COMPONENT IS NOT (Amendment 1, G4). Every signed-in
+     route renders in the workspace shell now — with Dashboard on the top-nav shell, going home
+     swapped the entire chrome: sidebar gone, nav relocated, ground recoloured. That is a jarring
+     loss of wayfinding on the most-visited page in the app.
+
+     `TopNavShell`, `TopNavHost` and `TopNavPanelData` are intact and unmounted, PARKED for the
+     public marketing site where the morphing mega nav becomes the logged-out header. No
+     marketing work in this pack — this is the seam it comes back through. */
+
   // Queries subpage-equivalent, read from the URL: ?q=<id> is deep-selection (Queries treats an
   // unrecognised subpage value as a query id, exactly as it did with the old activeSubPage).
   const queriesSub = params.get("q") ?? "Query database";
+  /* The shell's four Queries children are ONE hub under four filters (shell-rebuild pack,
+     Phase 3). Parsed here beside `?q=` because this is already where the hub's params are read;
+     an unknown value falls back to "all" rather than filtering to an empty list, which would
+     read as "you have no queries" — the worst lie this page could tell. */
+  const queriesStatus = parseStatusFilter(params.get(QUERIES_STATUS_PARAM));
+  const queriesAnalytics = path === "/queries/analytics";
+  const todoPage = todoPageForPath(path);
   const agentsDiscover = path === "/agents/discover";
-  // The To-do WORKSPACE's sub-routes (workspace P1). Today is the pack's next phase and still
-  // renders the board meanwhile; Calendar and Noteboard are routed placeholders so no sidebar
-  // entry leads nowhere.
-  const todoComing = path === "/todo/calendar" ? "calendar" : path === "/todo/noteboard" ? "noteboard" : null;
   const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
 
@@ -602,19 +626,38 @@ function AppContent() {
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
             its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
-        <StagePage active={routeKey === "queries"} layout="fill" clip>
+        <StagePage active={routeKey === "queries" && !queriesAnalytics} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
+            statusFilter={queriesStatus}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
-            routeActive={routeKey === "queries"} />
+            routeActive={routeKey === "queries" && !queriesAnalytics} />
         </StagePage>
 
-        {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page
-            scrollbar) like the Queries desk; stays mounted so its mode/filter/selection survive. */}
-        <StagePage active={routeKey === "todo" && !todoComing} layout="fill" clip>
+        {/* Amendment 1 (H3) — Analytics is a real destination so the nav carries no dead link.
+            The page itself is a placeholder and says so; TODO(analytics-page). */}
+        <StagePage active={queriesAnalytics} contentVariant="read">
+          <QueryAnalytics />
+        </StagePage>
+
+        {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).
+            The list page owns its internal scroll like the Queries desk and stays mounted so its
+            mode/filter/selection survive; the other three are ordinary flow pages. */}
+        <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fill" clip>
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
-        <StagePage active={routeKey === "todo" && !!todoComing} layout="fill" clip>
-          {todoComing && <TodoComingPage kind={todoComing} onNavigatePath={(p) => navigate(p)} />}
+
+        <StagePage active={routeKey === "todo" && todoPage === "today"} contentVariant="read">
+          <TodoTodayPage onNavigate={handleNavigate} />
+        </StagePage>
+
+        {/* Routed now, built next — the group lists four pages, so all four must go somewhere
+            real. TODO(todo-calendar) · TODO(todo-noteboard). */}
+        <StagePage active={routeKey === "todo" && todoPage === "calendar"} contentVariant="read">
+          <TodoPlaceholderPage page="calendar" />
+        </StagePage>
+
+        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} contentVariant="read">
+          <TodoPlaceholderPage page="noteboard" />
         </StagePage>
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;

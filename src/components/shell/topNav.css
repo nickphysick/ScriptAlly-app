@@ -1,0 +1,297 @@
+/* ── THE TOP-NAV SHELL (shell-rebuild pack, Phase 4; ref design-refs/shell-topnav-mega.html) ───
+   For pages you READ rather than work in. ⚠️ NO DESK, NO CAPSULES — a flat warm page. The
+   workspace's sage desk and floating capsule are the other shell's idiom; mixing them would make
+   two shells look like one shell behaving inconsistently. ── */
+
+.tn-app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--shell-page);
+}
+
+/* ⚠️ T1 — THE SEAM IS NOT DRAWN HERE. This border is the SCROLL hairline only, and it goes
+   TRANSPARENT while a mega is open. The line you see between the bar and an open panel is the
+   panel's own `border-top` (see .tn-megawrap): an absolutely-positioned child paints OVER its
+   parent's border, so a bar-owned seam is covered by the very thing it is meant to separate.
+   Putting the rule back on the bar is the bug this comment exists to prevent. */
+.tn-mast {
+  height: var(--head);
+  flex: none;
+  background: var(--shell-page);
+  position: relative;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.22s var(--shell-ease);
+}
+.tn-mast.scrolled { border-bottom-color: var(--shell-hair); }
+.tn-mast.megaopen { border-bottom-color: transparent; }
+
+.tn-row {
+  max-width: 1560px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 max(28px, 4vw);
+}
+
+/* Baked 15 — the ink tile and the wordmark, both Playfair. */
+.tn-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 18px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 9px;
+  padding: 4px 8px 4px 4px;
+}
+.tn-brand:hover { background: rgba(255, 255, 255, 0.6); }
+.tn-tile {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--shell-ink);
+  color: var(--shell-rail-hi);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  flex: none;
+}
+.tn-wm {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--shell-ink);
+}
+
+.tn-links { display: flex; align-items: center; gap: 2px; }
+.tn-nl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--shell-ink-soft);
+  transition: background 0.15s, color 0.15s;
+}
+.tn-nl:hover { background: rgba(242, 237, 231, 0.75); color: var(--shell-ink); }
+.tn-nl.open { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
+.tn-nl svg {
+  width: 12px; height: 12px; stroke-width: 1.8; opacity: 0.55;
+  transition: transform 0.24s var(--shell-spring-out);
+}
+.tn-nl.open svg { transform: rotate(180deg); }
+.tn-nl:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--shell-focus); }
+
+.tn-right { margin-left: auto; display: flex; align-items: center; gap: 10px; position: relative; }
+
+.tn-acctwrap { position: relative; display: inline-flex; }
+.tn-acct {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--shell-ink);
+  transition: background 0.15s;
+}
+.tn-acct:hover, .tn-acct.open { background: rgba(242, 237, 231, 0.75); }
+.tn-acct.open { background: var(--shell-parch); }
+.tn-acct svg {
+  width: 12px; height: 12px; stroke-width: 1.8; color: var(--shell-muted);
+  transition: transform 0.2s;
+}
+.tn-acct.open svg { transform: rotate(180deg); }
+.tn-acct:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
+
+/* ══ ONE MORPHING SURFACE (Baked 16) ══════════════════════════════════════════════════════════
+   ⚠️ T2 — THE HEIGHT IS SET IN JS and cannot be otherwise: `height:auto` does not animate. This
+   rule supplies only the TRANSITION; the value comes from the active pane's offsetHeight + 2 (the
+   wrap's own two borders under border-box). Do not "simplify" this to auto.
+
+   ⚠️ T1 — the `border-top` here IS the seam between bar and panel. */
+.tn-megawrap {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--shell-page);
+  border-top: 1px solid var(--shell-seam);
+  border-bottom: 1px solid var(--shell-hair);
+  box-shadow: 0 22px 34px -20px rgba(46, 39, 35, 0.22);
+  overflow: hidden;
+  height: 0;
+  visibility: hidden;
+  z-index: 39;
+  transition: height var(--shell-rollout) var(--shell-spring-out), visibility 0s var(--shell-rollout);
+}
+.tn-megawrap.show {
+  visibility: visible;
+  transition: height var(--shell-rollout) var(--shell-spring-out);
+}
+
+/* The panes STACK — all four in the same place, one visible. */
+.tn-mega {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s, transform 0.3s var(--shell-spring-out);
+}
+.tn-mega.on {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  transition: opacity 0.22s 0.05s, transform 0.3s var(--shell-spring-out);
+}
+
+/* Baked 16 — the incoming pane arrives FROM the direction of travel; opening fresh, it rises. */
+.tn-mega.on[data-dir="1"] { animation: tn-in-right var(--shell-rollout) var(--shell-spring-out); }
+.tn-mega.on[data-dir="-1"] { animation: tn-in-left var(--shell-rollout) var(--shell-spring-out); }
+.tn-mega.on[data-dir="0"] { animation: tn-in-fresh var(--shell-rollout) var(--shell-spring-out); }
+
+/* ...and the outgoing pane leaves the OPPOSITE way, which is why the direction is carried on the
+   transition rather than on either pane. */
+.tn-mega.out { opacity: 0; }
+.tn-mega.out[data-dir="1"] { transform: translateX(calc(-1 * var(--shell-slide))); }
+.tn-mega.out[data-dir="-1"] { transform: translateX(var(--shell-slide)); }
+
+@keyframes tn-in-right {
+  from { opacity: 0; transform: translateX(var(--shell-slide)); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tn-in-left {
+  from { opacity: 0; transform: translateX(calc(-1 * var(--shell-slide))); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tn-in-fresh {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ⚠️ COLUMNS COME FROM CONTENT, never three reserved slots — the menus are thinner than the
+   mockup drew them (half its items had no route), and three fixed columns with two items in
+   them looks broken. */
+.tn-minner {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 34px max(28px, 4vw) 44px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)) minmax(300px, 380px);
+  gap: 56px;
+}
+.tn-cap {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  display: block;
+  margin-bottom: 20px;
+}
+.tn-mi {
+  display: block;
+  padding: 8px 9px;
+  margin: 0 0 18px -9px;
+  border-radius: 9px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  width: calc(100% + 9px);
+  text-align: left;
+  font: inherit;
+  transition: background 0.13s;
+}
+.tn-mi:hover { background: rgba(255, 255, 255, 0.72); }
+.tn-mi:hover .tn-t { color: var(--shell-burgundy); }
+.tn-mi:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--shell-focus); }
+.tn-mt { min-width: 0; display: block; }
+.tn-t {
+  font-size: 15.5px; font-weight: 500; display: block; color: var(--shell-ink);
+  transition: color 0.13s;
+}
+.tn-s { font-size: 13px; color: var(--shell-muted); margin-top: 3px; display: block; line-height: 1.45; }
+
+/* THE EDITORIAL PANEL, behind a vertical hairline (Baked 16). Live data, never marketing copy —
+   and it carries more weight here than in the mockup because the menus are shorter: it is what
+   stops a short menu looking empty. */
+.tn-promo { border-left: 1px solid var(--shell-hair); padding-left: 44px; }
+.tn-cap2 {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  display: block;
+  margin-bottom: 16px;
+}
+.tn-promo h5 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 12px;
+  color: var(--shell-ink);
+}
+.tn-promo p { font-size: 13.5px; color: var(--shell-ink-soft); line-height: 1.55; margin-bottom: 16px; }
+.tn-lk {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--shell-burgundy);
+  padding: 0;
+}
+.tn-lk svg { width: 14px; height: 14px; stroke-width: 1.8; transition: transform 0.15s; }
+.tn-lk:hover svg { transform: translateX(3px); }
+.tn-lk:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
+
+/* Baked 17 — the scrim dims everything below the open section. */
+.tn-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 38;
+  background: rgba(46, 39, 35, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s;
+}
+.tn-scrim.show { opacity: 1; pointer-events: auto; }
+
+.tn-page { flex: 1; min-height: 0; overflow-y: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tn-mast, .tn-megawrap, .tn-mega, .tn-nl, .tn-nl svg, .tn-acct, .tn-acct svg,
+  .tn-mi, .tn-t, .tn-lk svg, .tn-scrim {
+    transition: none;
+  }
+  .tn-mega.on[data-dir] { animation: none; }
+}

@@ -19,13 +19,16 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { HelpCircle, ListChecks, LogOut, Package, Settings, Upload } from "lucide-react";
-import { parchment, PAGE_GRAIN } from "../../lib/designTokens";
-import { ShellRail, ShellSide, ShellTopBar } from "./ShellV2";
-import { SearchPalette } from "./SearchPalette";
-import { buildCorpus, rankItems } from "../../lib/searchPalette";
-import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
-import { ShellSidebarBody, ShellScope } from "./ShellSidebar";
+import {
+  Book, HelpCircle, LayoutGrid, ListChecks, LogOut, Package, Send, Settings, Upload, Users,
+} from "lucide-react";
+import { parchment } from "../../lib/designTokens";
+import { ShellTopBar } from "./ShellV2";
+import { WorkspaceShell } from "./WorkspaceShell";
+import { workspaceSections } from "../../lib/workspaceNav";
+import { AccountMenu } from "./AccountMenu";
+import { usePalette } from "./usePalette";
+import { ShellSidebarBody, ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
 import { MobileSheet } from "./MobileSheet";
@@ -97,7 +100,12 @@ export const StagePage: React.FC<{
       onAnimationEnd={(e) => { if (e.animationName === "pageIn") setEntering(false); }}
       style={{
         display: active ? (isFillCol ? "flex" : "block") : "none",
-        ...(layout !== "flow" ? { height: "100%" } : {}),
+        /* ⚠️ `flex:1; min-height:0` RATHER THAN `height:100%` (refinement §4). The stage is now a
+           flex COLUMN inside the card, with the sticky bar as its first child. A viewport-locked
+           page asking for 100% of that column would be a full height BELOW a 66px bar — the page
+           would fit, the card would scroll 66px, and Query Centre's internal panes would sit in a
+           second scroller. Filling the REMAINING space is what makes "no page scroll" true again. */
+        ...(layout !== "flow" ? { flex: 1, minHeight: 0 } : {}),
         ...(isFillCol ? { flexDirection: "column" as const } : {}),
         ...(clip ? { overflow: "hidden" } : {}),
         // The slot paints NOTHING (canvas scheme 1): the stage's var(--shell-canvas) shows
@@ -125,10 +133,33 @@ interface AppShellProps {
 
 const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" } as const;
 
+/** ⚠️ A PARALLEL SURFACE TO workspaceSections, and not type-linked to it: a section without an
+ *  icon here renders an empty cell rather than crashing, so the failure is quiet. Add both, or
+ *  the rail simply loses a glyph with nothing to point at. */
+const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
+  dashboard: <LayoutGrid aria-hidden="true" />,
+  queries: <Send aria-hidden="true" />,
+  agents: <Users aria-hidden="true" />,
+  materials: <Book aria-hidden="true" />,
+  todo: <ListChecks aria-hidden="true" />,
+};
+
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
   const { agents, queries, manuscripts, currentUser, logout } = useScriptAllyDb();
+
+  /* ⚠️ ONE FIGURE IN THE NAV NOW (Amendment 1, H5). The Queries attention count went with the
+     filter children: with the sidebar carrying destinations rather than views, there is nothing
+     under Queries for a count to describe, and a navigation column that displays figures is on
+     its way to being a dashboard. `attentionCount` is NOT deleted — it still drives the hub's
+     own filter and the parked mega panel. */
+  const navCounts = useShellNavCounts();
+  const sections = useMemo(
+    () => workspaceSections({ todo: navCounts.todo ?? 0 }),
+    [navCounts.todo],
+  );
+
   const stageRef = useRef<HTMLDivElement>(null);
   // Per-route scroll memory: saved continuously while scrolling, restored on route change
   // (top for a first visit). Lives on the stage element — the window never scrolls now.
@@ -151,6 +182,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // register a MobileDetailSpec under their OWN route key (mounted-but-inactive StagePage slots
   // can therefore never hide another route's tab bar); the shell reads only the active route's.
   const [youOpen, setYouOpen] = useState(false);
+  // The SHARED account menu's open state — Phase 4's top-nav shell will drive the same component.
+  const [accountOpen, setAccountOpen] = useState(false);
+
   const [mobileDetailMap, setMobileDetailMap] = useState<Record<string, MobileDetailSpec | null>>({});
   const setMobileDetail = useCallback((route: string, spec: MobileDetailSpec | null) => {
     setMobileDetailMap((prev) => (prev[route] === spec ? prev : { ...prev, [route]: spec }));
@@ -271,36 +305,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     return () => { ro.disconnect(); window.removeEventListener("resize", updateFade); };
   }, [pathname, updateFade]);
 
-  // ── THE COMMAND PALETTE (palette pack). Hosted HERE, above the page tree, so one instance
-  // serves every route and ⌘K can be registered exactly once.
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [paletteTerm, setPaletteTerm] = useState("");
-  const searchOpenerRef = useRef<HTMLButtonElement>(null);
-  const openPalette = useCallback(() => { setPaletteTerm(""); setPaletteOpen(true); }, []);
-  // THE CORPUS — built from already-loaded state (DbProvider subscribes on every route), so the
-  // palette never fetches and has no loading state. Rebuilt when the data changes, not per
-  // keystroke; the ranking is the cheap part.
-  const corpus = useMemo(
-    () => buildCorpus({
-      agents, queries, manuscripts, now: Date.now(),
-      agentLabel: (a) => ({ primary: agentPrimary(a), secondary: agentSecondary(a) }),
-    }),
-    [agents, queries, manuscripts],
-  );
-  const paletteItems = useMemo(() => rankItems(corpus, paletteTerm), [corpus, paletteTerm]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) return;
-      // ⌘K WORKS FROM ANYWHERE, INCLUDING INSIDE A TEXT FIELD — deliberately no editable-target
-      // guard. It is the one shortcut that should never be swallowed by whatever has focus.
-      e.preventDefault();
-      openPalette();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [openPalette]);
-  // The palette is a doorway, not a place: any navigation closes it.
-  useEffect(() => { setPaletteOpen(false); }, [pathname]);
+  /* ── THE COMMAND PALETTE. ⚠️ THE HOSTING MOVED TO `usePalette` (shell-rebuild pack, Phase 5)
+     because it lived HERE, inside the workspace shell — which meant the top-nav shell had no
+     palette at all: on /dashboard the search pill opened nothing and ⌘K did nothing. Copying the
+     block into the second shell would have registered ⌘K twice. */
+  const { openPalette, searchOpenerRef, palette } = usePalette({
+    onNavigate, onNavigatePath: (to) => goPath(to), setSearchQuery,
+  });
 
   // Chrome navigation — router-direct (new-code rule), clearing the global search the way the
   // handleNavigate bridge does on real navigation.
@@ -328,69 +339,79 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
   return (
     <div
-      className={`${THEME_CLASS[theme]} sv2-app${panelCollapsed ? " sv2-collapsed" : ""}`}
+      className={`${THEME_CLASS[theme]} sv2-app ws-host${panelCollapsed ? " sv2-collapsed" : ""}`}
       data-sa-ground=""
-      // The capsule GROUND — the warm grained field all three capsules float on (the paper
-      // grain reuses the canonical PAGE_GRAIN data-URI inline; the CSS parser rejects it in
-      // .css files). Layout (flex · viewport height · overflow) lives on the .sv2-app class
-      // (shellV2.css) so the mobile pass can swap 100vh → 100dvh below md; padding + gap
-      // arrive with the class at ≥768px.
-      style={{ backgroundColor: "var(--shell-ground)", backgroundImage: PAGE_GRAIN }}
+      // ⚠️ THE DESK IS GONE (Amendment 1, A1). This was the sage-grey field the capsules floated
+      // on; the workspace is full-screen now, so --shell-chrome IS the page ground and the
+      // content is a white card laid on it. The grain went with the desk: it was texture for a
+      // field that no longer exists, and grain under a full-bleed chrome ground is invisible work.
+      // Layout (flex · viewport height · overflow) still lives on the .sv2-app class so the
+      // mobile pass can swap 100vh → 100dvh below md.
+      style={{ backgroundColor: "var(--shell-chrome)" }}
     >
-      {/* v2 shell chrome (ref scriptally-shell-v2.html): icon rail + paper sidebar, desktop
-          only (class + media query in shellV2.css — never inline display). The interim layers
-          (NavDrawer, CrumbStrip, per-page strips) are gone — shell follow-up P3. */}
-      <ShellRail onNavigatePath={goPath} collapsed={panelCollapsed} onExpand={togglePanel} onBrowse={onBrowse} openSection={openSec} onCollapse={collapsePanel} />
-      <ShellSide collapsed={panelCollapsed} onCollapse={togglePanel}>
-        <ShellSidebarBody onNavigate={onNavigate} onNavigatePath={goPath} openSection={openSec} onToggleSection={onToggleSection} />
-      </ShellSide>
-      <div className="sv2-cap sv2-plane" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
-        {/* (The slim mobile Nav is RETIRED — Mobile Pass 1. The v2 top bar below renders the <md
-            variant itself: wordmark-or-page-title · search icon · avatar, or back/Done on a
-            pushed detail. One bar, two breakpoint states — never a parallel bar.) */}
-
-        {/* v2 top bar — breadcrumb · save-state chip · the shared NavSearch (⌘K). */}
-        <ShellTopBar onNavigate={onNavigate} scope={<ShellScope onNavigate={onNavigate} />} onHelp={() => (routeKey === "todo" ? setHelpMenuOpen((v) => !v) : onNavigate("help"))} onOpenSearch={openPalette} searchOpenerRef={searchOpenerRef} mobileDetail={activeMobileDetail} onOpenYou={() => setYouOpen(true)} />
-
-        {/* THE STAGE — the app's scroll container, inside a positioning wrapper that hosts the
-            foot fade. The wrapper is new; the stage's id, ref, scroll memory and styles are
-            untouched, because everything from stageScroll.ts to per-route scroll restoration
-            addresses it directly. (sv2-stagepad = the <md clearance for the floating tab bar,
-            replacing the old pb-[76px] maths; zero at md+.) */}
-        <div className="sv2-pgwrap">
-          <div
-            id={STAGE_SCROLL_ID}
-            ref={stageRef}
-            className="sv2-stagepad"
-            onScroll={(e) => {
-              const el = e.target as HTMLElement;
-              scrollMemo.current[routeKey] = el.scrollTop;
-              updateFade();
-            }}
-            // The ONE canvas (scheme 1, "Raised light"): painted here, inherited by every page —
-            // no page sets a bespoke ground, and the canvas stays lighter than the sidebar (the
-            // depth law, locked in shellV2Tokens.test.ts).
-            style={{ flex: 1, minHeight: 0, overflowY: "auto", position: "relative", background: "var(--shell-canvas)" }}
-          >
-            <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
-          </div>
-          {/* THE FOOT FADE — only when there IS more below. A permanent fade over a short page
-              reads as a rendering fault, so it is a state, not decoration. */}
-          <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
-        </div>
-      </div>
-
-      <SearchPalette
-        open={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
-        onNavigate={onNavigate}
+      {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
+          desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
+          a nav change never means editing the shell. */}
+      <WorkspaceShell
+        sections={sections}
+        icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}
-        items={paletteItems}
-        setSearchQuery={setSearchQuery}
-        openerRef={searchOpenerRef}
-        term={paletteTerm}
-        setTerm={setPaletteTerm}
-      />
+        onOpenSearch={openPalette}
+        onOpenHelp={() => goPath("/help")}
+        onOpenAccount={() => setAccountOpen((v) => !v)}
+        onUpgrade={() => goPath("/plans")}
+        onNavigate={onNavigate}
+        scrollId={STAGE_SCROLL_ID}
+        scrollRef={stageRef}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          scrollMemo.current[routeKey] = el.scrollTop;
+          updateFade();
+        }}
+        footFade={
+          /* THE FOOT FADE — only when there IS more below. A permanent fade over a short page
+             reads as a rendering fault, so it is a state, not decoration. It is sticky inside the
+             scroller now (it used to be absolute in a wrapper that no longer exists). */
+          <div className={`sv2-fade${fadeOn ? " on" : ""}`} aria-hidden="true" />
+        }
+        accountMenu={
+          <AccountMenu
+            open={accountOpen}
+            onClose={() => setAccountOpen(false)}
+            name={currentUser?.name ?? ""}
+            email={currentUser?.email}
+            plan={currentUser?.plan}
+            onNavigatePath={goPath}
+            onSignOut={logout}
+          />
+        }
+      >
+        {/* ⚠️ THE MOBILE BAR IS UNTOUCHED AND STILL MOUNTED. Mobile Pass 1 is live and locked,
+            and both rebuild mockups are desktop-only — so the new chrome is a ≥768px
+            replacement and this keeps rendering below it. Removing it would take the phone's
+            only bar with it. */}
+        <div className="ws-mobilebar">
+          <ShellTopBar
+            onNavigate={onNavigate}
+            scope={<ShellScope onNavigate={onNavigate} />}
+            onOpenSearch={openPalette}
+            searchOpenerRef={searchOpenerRef}
+            onTuck={togglePanel}
+            onOpenAccount={() => setAccountOpen((v) => !v)}
+            mobileDetail={activeMobileDetail}
+            onOpenYou={() => setYouOpen(true)}
+          />
+        </div>
+
+        {/* ⚠️ THE STAGE MOVED INTO THE CARD (refinement §4). It is still the app's ONE scroll
+            container and still carries STAGE_SCROLL_ID, the ref and the scroll memory — because
+            stageScroll.ts and per-route restoration address it by id — but the element itself is
+            now the card's `.ws-cscroll`, so the bar can be sticky above the scrolling content.
+            Keeping a second scroller here would have double-scrolled every page. */}
+        <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
+      </WorkspaceShell>
+
+      {palette}
 
       {/* (The floating help FAB is RETIRED — top-bar rebuild: help is a bar button now, so it
           is chrome rather than a thing measured from the browser edge. Its /todo two-item menu

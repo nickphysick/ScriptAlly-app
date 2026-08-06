@@ -1,0 +1,346 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * workspaceShell — the pure state grammar of the DOUBLE-DECKER shell (shell-rebuild pack, Phase 2;
+ * ref design-refs/shell-workspace-doubledecker.html).
+ *
+ * ⚠️ ONE FILL ON SCREEN AT A TIME (Baked 5). This is the rule the whole file exists to hold, and
+ * it is the one most likely to be "simplified" into "the active row gets the fill":
+ *
+ *   · accordion OPEN  → the active CHILD carries the parchment pill; the parent goes QUIET
+ *                       (bold ink, no fill) — it is context, not a destination.
+ *   · accordion SHUT  → the fill AND the attention count ROLL UP to the parent, because the
+ *                       child that owns them is not on screen to carry them.
+ *
+ * A parent and its child both filled reads as two selections; a shut section with no count hides
+ * the attention that made it worth opening. Both are locked.
+ *
+ * ⚠️ ACTIVE STATE IS OWNED BY THE ROUTE, never by click. The shell derives what is lit from the
+ * pathname and search, so a link, a back button and a click all agree. `openId` is the ONLY piece
+ * of local state, because "which section is expanded" genuinely is not in the URL.
+ */
+
+/** A child row — always a real destination. A child with no route is a dead link, so there is no
+ *  optional path here: absence is expressed by omitting the child. */
+export interface ShellChild {
+  id: string;
+  label: string;
+  /** Where it goes, search included (e.g. "/queries?status=attention"). */
+  path: string;
+  count?: number;
+  /** Burgundy dot — attention, not volume. */
+  urgent?: boolean;
+}
+
+export interface ShellSection {
+  id: string;
+  label: string;
+  /** Childless sections navigate directly; parents fall back to this when nothing else is lit. */
+  path?: string;
+  children?: ShellChild[];
+  /** The child a parent opens onto. Required when `children` is present. */
+  def?: string;
+  count?: number;
+  urgent?: boolean;
+}
+
+/** What the route says is lit. `child` is absent for childless sections. */
+export interface ShellHit {
+  section: string;
+  child?: string;
+}
+
+/**
+ * ⚠️ LONGEST PATH WINS, and the ordering is why. `/agents` is a prefix of `/agents/discover`, so a
+ * first-match scan lights the contact list while you are on Discover. Matching is exact on
+ * pathname+search first, then exact on pathname, then longest-prefix — never "startsWith, first
+ * hit", which is the bug this comment exists to prevent.
+ */
+export function shellHitFor(
+  sections: ShellSection[],
+  pathname: string,
+  search = "",
+): ShellHit | null {
+  const full = `${pathname}${search && !search.startsWith("?") ? `?${search}` : search}`;
+
+  // 1. A child whose whole path (including its filter) matches what the browser is showing.
+  for (const sec of sections) {
+    for (const ch of sec.children ?? []) {
+      if (ch.path === full) return { section: sec.id, child: ch.id };
+    }
+  }
+  // 2. A childless section's own exact path.
+  for (const sec of sections) {
+    if (!sec.children && sec.path === pathname) return { section: sec.id };
+  }
+  // 3. A child on this pathname, ignoring the filter — the default child of an unfiltered visit.
+  for (const sec of sections) {
+    const bare = (sec.children ?? []).filter((c) => c.path.split("?")[0] === pathname);
+    if (bare.length) {
+      const def = bare.find((c) => c.id === sec.def) ?? bare[0];
+      return { section: sec.id, child: def.id };
+    }
+  }
+  // 4. Longest matching prefix, so a sub-route lights its own section rather than a shorter one.
+  let best: ShellHit | null = null;
+  let bestLen = -1;
+  for (const sec of sections) {
+    const own = sec.path && pathname.startsWith(sec.path) ? sec.path.length : -1;
+    if (own > bestLen) { bestLen = own; best = { section: sec.id }; }
+    for (const ch of sec.children ?? []) {
+      const base = ch.path.split("?")[0];
+      if (pathname.startsWith(base) && base.length > bestLen) {
+        bestLen = base.length;
+        best = { section: sec.id, child: ch.id };
+      }
+    }
+  }
+  return best;
+}
+
+/** The panel label's treatment. `quiet` is bold ink with NO fill — context, not a destination. */
+export type LabelFill = "none" | "pill" | "quiet";
+
+export interface ShellCount {
+  n: number;
+  urgent: boolean;
+}
+
+export interface RowState {
+  /** The rail icon cell's rounded square. Lit for the active SECTION in every state. */
+  railOn: boolean;
+  fill: LabelFill;
+  /** Own count, or a child's rolled up while shut. Null when there is nothing to say. */
+  count: ShellCount | null;
+  open: boolean;
+  /** Composed `Section · Child` — the collapsed tooltip (Baked 7). */
+  tip: string;
+}
+
+/**
+ * The whole of Baked 5, in one function.
+ *
+ * ⚠️ `collapsed` FORCES EVERY SECTION SHUT (Baked 7). The accordion cannot be open in a 52px rail
+ * — there is nowhere for a child to render — so the roll-up is what a collapsed parent shows, and
+ * the flyout is where its children go. Passing the real `openId` here while collapsed would light
+ * a parent quiet with no children beneath it: a row that has given its fill away to nothing.
+ */
+export function sectionRowState(
+  sec: ShellSection,
+  hit: ShellHit | null,
+  openId: string | null,
+  collapsed: boolean,
+): RowState {
+  const secActive = hit?.section === sec.id;
+  const hasKids = !!sec.children?.length;
+  const open = !collapsed && hasKids && openId === sec.id;
+
+  const fill: LabelFill = !secActive ? "none" : open ? "quiet" : "pill";
+
+  let count: ShellCount | null = typeof sec.count === "number"
+    ? { n: sec.count, urgent: !!sec.urgent }
+    : null;
+  // THE ROLL-UP: a shut parent speaks for the child that is not on screen to speak for itself.
+  if (!count && hasKids && !open) {
+    const kid = sec.children!.find((c) => typeof c.count === "number");
+    if (kid) count = { n: kid.count!, urgent: !!kid.urgent };
+  }
+
+  const child = secActive && hit?.child
+    ? sec.children?.find((c) => c.id === hit.child)
+    : undefined;
+
+  return {
+    railOn: secActive,
+    fill,
+    count,
+    open,
+    tip: sec.label + (child ? ` · ${child.label}` : ""),
+  };
+}
+
+/**
+ * The bar's crumb (Baked 13) — `Section · Child`.
+ *
+ * ⚠️ THE MANUSCRIPT IS DELIBERATELY ABSENT. The shell's selector carries which book you are in,
+ * on every page and in every state; repeating it in the crumb gives that fact two homes, and two
+ * homes eventually disagree.
+ */
+export function shellCrumb(
+  sections: ShellSection[],
+  hit: ShellHit | null,
+): { section: string; child?: string } | null {
+  if (!hit) return null;
+  const sec = sections.find((s) => s.id === hit.section);
+  if (!sec) return null;
+  const child = hit.child ? sec.children?.find((c) => c.id === hit.child) : undefined;
+  return { section: sec.label, child: child?.label };
+}
+
+/**
+ * What a click on a parent row does.
+ *
+ * ⚠️ A PARENT IS A DESTINATION AS WELL AS A TOGGLE. Clicking `Queries` opens the accordion AND
+ * lands on its default child — an accordion that only expands leaves you looking at a menu when
+ * you asked for a page. Re-clicking the section you are already in collapses it, because at that
+ * point the toggle is the only thing left to want.
+ *
+ * ⚠️⚠️ AMENDMENT 1 (E2) — ANY CLICK IN THE SIDEBAR EXPANDS IT, and there is NO click path that
+ * opens a flyout. This SUPERSEDES the original Baked 7, where a collapsed parent's click opened
+ * one. The two grammars are genuinely different products:
+ *
+ *   · Slack/Jira: click navigates and the sidebar STAYS collapsed — collapse is a setting.
+ *   · Notion/Linear: click commits and the sidebar RESTORES — collapse is a temporary focus mode.
+ *
+ * This is the second. Hovering peeks (the flyout, pointer-only); clicking commits, and committed
+ * navigation restores your wayfinding. It is the whole reason the flyout needs no foot action:
+ * "Expand sidebar" was redundant the moment every click did it.
+ */
+export interface SectionClick {
+  /** The section to expand, or null to shut the accordion. */
+  open: string | null;
+  /** Where to navigate. Null when the click only toggles, or you are already there. */
+  go: string | null;
+  /** Collapsed clicks always expand the shell (Amendment 1, E2). */
+  expand: boolean;
+  /** Polish §4 — clicking the ACTIVE section's rail icon collapses the panel. */
+  collapse?: boolean;
+}
+
+export function sectionClick(
+  sec: ShellSection,
+  hit: ShellHit | null,
+  openId: string | null,
+  collapsed: boolean,
+): SectionClick {
+  const hasKids = !!sec.children?.length;
+
+  if (collapsed) {
+    // Childless: expand AND navigate. Sectioned: expand, open the accordion, and land on the
+    // default child — unless the child you are already on belongs to this section, in which case
+    // moving you would be the surprise.
+    if (!hasKids) return { open: null, go: sec.path ?? null, expand: true };
+    const keeps = hit?.section === sec.id && !!hit?.child
+      && sec.children!.some((c) => c.id === hit.child);
+    const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
+    return { open: sec.id, go: keeps ? null : def.path, expand: true };
+  }
+
+  if (!hasKids) return { open: null, go: sec.path ?? null, expand: false };
+
+  const alreadyHere = hit?.section === sec.id;
+  if (alreadyHere && openId === sec.id) return { open: null, go: null, expand: false };
+
+  const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
+  // Already in the section but shut: reopen without moving off the child you are actually on.
+  const go = alreadyHere && hit?.child ? null : def.path;
+  return { open: sec.id, go, expand: false };
+}
+
+/**
+ * A RAIL click. (Amendment 1, B.)
+ *
+ * ⚠️ THE RAIL NEVER TOGGLES A SECTION SHUT, which is the one way it differs from the panel row.
+ * The rail is a set of destinations, not a set of disclosure controls: an icon that sometimes
+ * navigated and sometimes closed the thing you were looking at would be two controls wearing one
+ * glyph. Clicking a rail icon always lands you in the section and syncs the panel's accordion.
+ */
+export function railClick(
+  sec: ShellSection,
+  hit: ShellHit | null,
+  collapsed: boolean,
+): SectionClick {
+  const hasKids = !!sec.children?.length;
+
+  /* ⚠️ POLISH §4 — CLICKING THE ACTIVE SECTION'S ICON COLLAPSES, and it is the natural extension
+     of hover-peeks/click-commits rather than a new idea. Expanded and already in the section,
+     the click has no navigation left to perform: the only thing it could still mean is "give me
+     the room". No navigation occurs — you are already there.
+
+     ⚠️ COLLAPSED IS NOT THE MIRROR OF THIS. A collapsed click ALWAYS restores, including on the
+     active section: collapse is a temporary focus mode, and a click that both failed to navigate
+     and failed to restore would be a control that did nothing at all. */
+  if (!collapsed && hit?.section === sec.id) {
+    return { open: null, go: null, expand: false, collapse: true };
+  }
+
+  if (!hasKids) return { open: null, go: sec.path ?? null, expand: collapsed };
+  const keeps = hit?.section === sec.id && !!hit?.child
+    && sec.children!.some((c) => c.id === hit.child);
+  const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
+  return { open: sec.id, go: keeps ? null : def.path, expand: collapsed };
+}
+
+/**
+ * Does this rail icon carry the attention badge? (Amendment 1, B.)
+ *
+ * ⚠️ A DOT, NOT A NUMBER, and only where attention actually lives. A 52px rail has no room for a
+ * legible figure, and a badge on every section that merely has *items* would make the rail a
+ * count display rather than an alert. Under Amendment 1 (H) that is To-do alone — the Queries
+ * filter children that used to carry a count are gone from the nav.
+ */
+export function railBadge(sec: ShellSection): boolean {
+  if (typeof sec.count === "number" && sec.count > 0 && sec.urgent) return true;
+  return (sec.children ?? []).some((c) => typeof c.count === "number" && c.count > 0 && !!c.urgent);
+}
+
+/**
+ * Should hovering this rail row peek its children? (Amendment 1, E1.)
+ *
+ * ⚠️ ONLY WHEN COLLAPSED, AND ONLY WITH CHILDREN. Expanded, the children are already on screen;
+ * childless rows have nothing to show and get a tooltip instead. Peeking is a POINTER-ONLY
+ * accelerator — E6: taps follow the click rule, so nothing is unreachable by touch.
+ */
+export function peeksOnHover(sec: ShellSection, collapsed: boolean): boolean {
+  return collapsed && !!sec.children?.length;
+}
+
+/** Amendment 1 (E1) — hover-peek timings, named once so the shell and its locks agree. */
+export const PEEK_INTENT_MS = 120;
+export const PEEK_GRACE_MS = 160;
+
+/**
+ * Should `[` act? (Amendment 1, E5.)
+ *
+ * ⚠️ SUPPRESSED WHILE TYPING, because `[` is a character. A bare letter-key shortcut that fires
+ * inside a field eats the keystroke and reads as the app dropping input. The palette is excluded
+ * for the same reason — it is a text field wearing a dialog.
+ */
+export function collapseKeyAllowed(
+  tag: string | null | undefined,
+  isContentEditable: boolean,
+  paletteOpen: boolean,
+): boolean {
+  if (paletteOpen || isContentEditable) return false;
+  const t = (tag ?? "").toUpperCase();
+  return t !== "INPUT" && t !== "TEXTAREA" && t !== "SELECT";
+}
+
+/** The section that should be open when the route decides for you (arriving, or navigating in). */
+export function openForHit(hit: ShellHit | null): string | null {
+  return hit?.child ? hit.section : null;
+}
+
+/** Baked 8 — the persisted collapse key. Named once so the shell and its locks cannot disagree. */
+export const SHELL_COLLAPSED_KEY = "scriptally.shell.collapsed";
+
+export function readCollapsed(store: Pick<Storage, "getItem"> | null | undefined): boolean {
+  try {
+    return store?.getItem(SHELL_COLLAPSED_KEY) === "1";
+  } catch {
+    // A locked-down browser must not cost the user their shell.
+    return false;
+  }
+}
+
+export function writeCollapsed(
+  store: Pick<Storage, "setItem"> | null | undefined,
+  collapsed: boolean,
+): void {
+  try {
+    store?.setItem(SHELL_COLLAPSED_KEY, collapsed ? "1" : "0");
+  } catch {
+    /* Persistence is a convenience; failing to save it is not worth an error. */
+  }
+}

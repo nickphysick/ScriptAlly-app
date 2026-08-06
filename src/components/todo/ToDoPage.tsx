@@ -53,6 +53,8 @@ import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
+import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
+import { ToastAction, useTodoToast } from "./useTodoToast";
 import "./todo.css";
 // The relocated control surfaces' styles + tokens (the chip bench + the Pro sticker) — the
 // hardback-spine SHELL itself retired in the shell follow-up; its stylesheet survives trimmed.
@@ -191,7 +193,9 @@ export interface ToDoPageProps {
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
 }
 
-type ToastAction = { label: string; fn: () => void };
+/* ⚠️ THE TOAST MOVED OUT (extraction E1) — useTodoToast, so the four To-do pages share ONE
+   takeback window. Four page-local toasts could all be open at once, each with its own timer and
+   an Undo that reversed whichever you happened to click. The type comes with it. */
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
@@ -199,7 +203,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
-  const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
+  const { toast, flash, dismiss: dismissToast, pause: pauseToast, resume: resumeToast, remember: rememberUndo, recall: recallUndo } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
   // hero-pair P4 — the inline note composer's seat + draft (one composer, two view seats)
   const [composerAt, setComposerAt] = useState<null | "cards" | "ledger">(null);
@@ -371,27 +375,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // toast, which COMMITS the previous (its write already happened; replacement just ends the
   // takeback). Esc dismisses (= commits). Undo reverses via each action's EXISTING inverse —
   // the primitives are already reversible through the derivation layer; nothing new here. ──
-  const toastTimer = useRef<number | null>(null);
-  const toastDeadline = useRef(0);
-  const clearToastTimer = () => { if (toastTimer.current) { window.clearTimeout(toastTimer.current); toastTimer.current = null; } };
-  const armToastTimer = (ms: number) => {
-    clearToastTimer();
-    toastDeadline.current = Date.now() + ms;
-    toastTimer.current = window.setTimeout(() => setToast(null), ms);
-  };
-  const pauseToast = () => { toastDeadline.current = Math.max(600, toastDeadline.current - Date.now()); clearToastTimer(); };
-  const resumeToast = () => armToastTimer(toastDeadline.current || 6000);
-  const flash = (msg: string, action?: ToastAction) => {
-    setToast({ msg, action });
-    armToastTimer(action ? 6000 : 2600);
-  };
-  useEffect(() => {
-    if (!toast) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { clearToastTimer(); setToast(null); } };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]);
   function unmuteRule(rule: HkRule) {
     updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== rule) });
     flash("Unmuted — those reminders are back.");
@@ -536,7 +519,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [session, setSession] = useState<{ queue: BoardCard[] } | null>(null);
   // the inverses the undo toast already carries, kept by card key so the session's REDO can
   // offer "Undo handled" on a card it stamped (see doneToast — no parallel undo store)
-  const doneUndos = useRef<Map<string, () => Promise<void>>>(new Map());
   // v7 — the hero in session: the title crossfade + the fixed sub-slot's single occupant are
   // driven by the FocusedSession through this ONE lifted view-model (the hero stays a real
   // stacked flow — nothing absolutely positioned over the board).
@@ -649,8 +631,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // same window-event pattern as the tour replay (the page stays mounted behind other routes).
   useEffect(() => {
     const onOpen = () => setSettingsOpen(true);
-    window.addEventListener("sa:open-task-settings", onOpen);
-    return () => window.removeEventListener("sa:open-task-settings", onOpen);
+    window.addEventListener(TODO_OPEN_TASK_SETTINGS, onOpen);
+    return () => window.removeEventListener(TODO_OPEN_TASK_SETTINGS, onOpen);
+  }, []);
+  /* ⚠️ THE BAR'S ＋ New, ON A TO-DO PAGE (Phase 1) — the same window-event pattern again. It opens
+     THIS composer rather than a second create surface, in TASK mode (audit item 7: one verb per
+     control; the page's own pink action is the one that lets you choose). The shell announces and
+     the page opens, so the chrome never has to learn what a composer is. */
+  useEffect(() => {
+    const onCompose = () => { setComposerMode("task"); setComposerAt("ledger"); };
+    window.addEventListener(TODO_OPEN_COMPOSER, onCompose);
+    return () => window.removeEventListener(TODO_OPEN_COMPOSER, onCompose);
   }, []);
   const endTour = () => {
     setTourOpen(false);
@@ -706,7 +697,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE SAME inverse the undo toast already carries, remembered by card key — there is no
   // parallel undo store and no second inverse anywhere in the app.
   function doneToast(c: BoardCard, fn: () => Promise<void>) {
-    doneUndos.current.set(c.key, fn);
+    rememberUndo(c.key, fn);
     flash(`Done — “${c.title}”`, { label: "Undo", fn });
   }
 
@@ -1104,7 +1095,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       {toast && (
         <div className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}>
           {toast.msg}
-          {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); clearToastTimer(); setToast(null); }}>{toast.action.label}</button>}
+          {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismissToast(); }}>{toast.action.label}</button>}
         </div>
       )}
       {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
@@ -1116,8 +1107,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onOpenJourney={(card) => setFlow({ items: [{ kind: "card", card }] })}
           onQuickComplete={quickDone}
           canQuickComplete={sessionCanQuick}
-          canUndoHandled={(c) => doneUndos.current.has(c.key)}
-          onUndoHandled={async (c) => { const fn = doneUndos.current.get(c.key); if (fn) { doneUndos.current.delete(c.key); await fn(); } }}
+          canUndoHandled={(c) => !!recallUndo(c.key)}
+          onUndoHandled={async (c) => { const fn = recallUndo(c.key); if (fn) await fn(); }}
           onHero={setHeroSession}
           onClose={() => { setSession(null); setHeroSession({ clearing: false, slot: null }); }}
         />
@@ -1919,12 +1910,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
           <div className={`tdb-band ${c.stream}`}>
             <span className="tdb-bandl">
-              {/* ⚠️ GUARDED, like both ledger rows (workspace P0B). This span was the one KIND
-                  render in the page with no guard on it, and `.tdb-ktag` carries a fill, padding
-                  and a border — so a card whose kind was empty drew a small blank pill, and an
-                  offer without one would have interpolated the literal "★ undefined". A pill is
-                  a claim; with nothing in it, it claims nothing and still occupies the band. An
-                  empty string is falsy, so this one guard covers absent and empty alike. */}
+              {/* ⚠️ GUARDED, like the list row at the top of this file. `kind` is "" for a user
+                  task (todoBoard's default branch), so an unguarded render drew an EMPTY PILL —
+                  chrome with nothing in it, which reads as a load failure rather than an absence. */}
               {c.kind && <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>}
               {c.snoozes > 0 && <span className="tdb-ktag snz">×{c.snoozes}</span>}
               {committed && <span className="tdb-ktag on">✓ TODAY</span>}

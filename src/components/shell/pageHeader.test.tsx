@@ -143,3 +143,55 @@ describe("PageHeader — the two-action maximum", () => {
     expect(rejected.length).toBe(3);
   });
 });
+
+/**
+ * THE TOOL ROW (app-shell pack, Baked 10) — and the two-action cap, which the row did NOT relax.
+ */
+describe("the tool row", () => {
+  const src = readFileSync(resolve(__dirname, "./PageHeader.tsx"), "utf8");
+
+  it("DEFAULT: the actions get their own row, above the hairline", () => {
+    const html = renderToStaticMarkup(
+      <PageHeader title="Your agent list" actions={[{ label: "Add agent", onClick: () => {}, primary: true }]} />
+    );
+    expect(html).toContain("svh-tools");
+    expect(html).toContain("svh-btn-primary");
+    expect(html.indexOf("svh-tools")).toBeLessThan(html.indexOf("svh-rule"));
+  });
+
+  it("⚠️ COMPACT keeps the actions INLINE — the row would add back the height it removes", () => {
+    // On a fixed-height master–detail surface, header height is taken from the panes below.
+    const html = renderToStaticMarkup(
+      <PageHeader compact title="Queries Hub" actions={[{ label: "Log a query", onClick: () => {}, primary: true }]} />
+    );
+    expect(html).toContain("svh-acts");
+    expect(html).not.toContain("svh-tools");
+  });
+
+  it("⚠️ THE TWO-ACTION CAP SURVIVED THE ROW — a third is a type error, and sliced at runtime", () => {
+    expect(src).toContain("MAX TWO ACTIONS");
+    expect(src).toContain("export type PageHeaderActions = [] | [PageHeaderAction] | [PageHeaderAction, PageHeaderAction];");
+    expect(src).toContain("(actions ?? []).slice(0, 2)");
+  });
+
+  it("beyond two goes to OVERFLOW, behind a ⋯ at the end of the row", () => {
+    const html = renderToStaticMarkup(
+      <PageHeader
+        title="Queries Hub"
+        actions={[{ label: "Log a query", onClick: () => {}, primary: true }]}
+        overflow={[{ label: "Export CSV", onClick: () => {} }, { label: "Mark closed", onClick: () => {} }]}
+      />
+    );
+    expect(html).toContain("svh-more");
+    expect(html).toContain('aria-label="More actions"');
+    // the menu is closed at rest — the items are behind it, not laid out beside the primary
+    expect(html).not.toContain("Export CSV");
+  });
+
+  it("a compact header has no overflow — its actions are inline and capped at two", () => {
+    const html = renderToStaticMarkup(
+      <PageHeader compact title="Queries Hub" overflow={[{ label: "Export CSV", onClick: () => {} }]} />
+    );
+    expect(html).not.toContain("svh-more");
+  });
+});

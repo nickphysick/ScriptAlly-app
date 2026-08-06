@@ -1,5 +1,45 @@
 # App shell — CAPSULE system (design reference)
 
+> **⚠️ THE TOP-NAV SHELL HAS THREE HEADINGS — Queries · Agents · Materials** *(this restates
+> Baked 9, which listed four)*. `Learn` is gone: its one real destination is Help centre, which the
+> shared account menu carries, so nothing became unreachable. **A heading that opens onto a single
+> link advertises a section that does not exist.** It returns when there are guides to put in it.
+> Mega-menu **columns are rendered from content, one to three — never three reserved** — and the
+> live-data panel stays in every menu, because with the menus this thin it is what stops a short
+> one looking empty.
+>
+> **⚠️ PAGE HEADERS — AT MOST TWO ACTIONS IN THE ROW, PLUS OVERFLOW; THE PRIMARY IS PINK AND SITS
+> AT THE RIGHT.** *(This restates Baked 10, which said "that page's actions" with no cap.)* The cap
+> exists because **a page header is where actions go to be noticed, and a row of five is a row of
+> none** — and that reasoning survived the move to a tool row unchanged: the row is a new
+> ARRANGEMENT of the same constraint, not a licence to relax it. Anything beyond two goes behind a
+> `⋯` at the end of the row. If a page has six things it can do, five of them are not primary.
+> **A page that seems to need three co-equal primaries is usually a header doing a job that belongs
+> in the content — raise the page, do not widen the tuple.**
+>
+> **⚠️ `compact` KEEPS ITS ACTIONS INLINE on the title row.** The tool row is the default, but on a
+> fixed-height master–detail surface **header height is taken directly from the panes below** —
+> which is the whole reason `compact` exists, and giving the actions their own row would add back
+> exactly the height it was built to remove. One layout, one density flag; the flag already
+> governed alignment, so governing row-versus-inline is an extension rather than a new concept.
+>
+> **⚠️ THE SELECTOR NEVER MARKS A ROW THAT IS NOT RENDERED — a collapsed child resolves to its
+> parent.** The floating selector is the ONLY active marker, so what it points at is the entire
+> answer to "where am I". Children are hidden while the column is collapsed, so honouring a child
+> target there would put the one marker over a row that is not on screen — it would be marking
+> something invisible. **This is a decision, not a missing case: do not "fix" it by making the
+> collapsed state honour child targets.** (`selectorBox` in `lib/shellColumn.ts`; locked as state
+> four of four in `lib/shellColumn.test.ts`.)
+>
+> **⚠️ TOKEN NAMING — the mockups and the code differ on purpose.** The sage-desk and top-nav
+> mockups call the ground **`--desk`**; the code calls it **`--shell-desk`**, because `--desk` was
+> already the PER-THEME working-area background (`.t-capp` `#e8ddd0` · `.t-bold` `#c2cfda` ·
+> `.t-edn` `#f4f4f3`) that the hubs and the ultrawide margin rule read. A `:root --desk` would
+> have been overridden by every theme class *silently*. **A prompt that quotes the mockup's
+> `--desk` is naming a token that belongs to something else.** The mockups' `--gap` / `--r` /
+> `--lift` / `--rim` map to `--shell-cap-gap` / `--shell-cap-radius` / `--shell-cap-shadow` /
+> `--shell-cap-rim` for the same reason: one `--shell-*` chrome namespace, no bare names.
+
 Written against the **supplied** mockup `design-refs/scriptally-capsule-shell.html` (Nick's file,
 copied in with capsule Phase 1) — mockup-derived, not spec-derived. **Supersedes the flat v2
 scheme below-documented in git history** (`scriptally-shell-v2.html` + scheme 1 "Raised light"):
@@ -204,11 +244,16 @@ avatar chip at the bottom.
    second mounts. The canonical pack overrules that: both are built, the duplication is approved,
    and it is the RAIL's avatar that gave way instead.)*
 
-**The nav active-state law (fixes pack): active = GROUND fill `#e7e0d5` — the row reads as a
-window cut through to the page ground — ink text, burgundy icon, same radii; one law for the
-rail ribs and both panel row kinds. Hover stays the interior fill `#f2ede7` (adjacent tones —
-browser-check the distinction). Soft pink is RETIRED from nav states everywhere; it survives as
-the primary-button colour and content accent. Never pink, never burgundy, in nav states.**
+**⚠️ THE NAV ACTIVE-STATE LAW, RESTATED (app-shell pack — this REPLACES the old wording, which is
+deleted rather than left standing):** active = **`--shell-active-fill` (#fff)** — **a bright surface
+LAID ON the capsule, not a hole cut through to the ground** — ink text, burgundy icon, same radii;
+one law for the rail ribs and both panel row kinds. Hover stays the interior fill.
+
+The old sentence read *"active = GROUND fill `#e7e0d5`, the row reads as a window cut through to the
+page ground"*. That held only while the ground was a neutral cream. **The ground is now sage
+`#aebdb0`, and cutting a window through to sage produces a green pill** — so the metaphor had to go
+with the colour. Soft pink stays RETIRED from nav states everywhere; it survives as the
+primary-button colour and content accent. **Never pink, never burgundy, in nav states.**
 
 ## Content capsule
 

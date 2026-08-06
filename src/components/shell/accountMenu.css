@@ -1,0 +1,62 @@
+/* ── THE ACCOUNT MENU — one component, both shells (app-shell pack, Baked 11) ─────────────────
+   The only place Settings and the upgrade card live. It floats above everything the shells draw
+   (the palette is 80/81, so this sits just under it — a palette opened over the menu should
+   cover it, not the other way round). ── */
+
+.am-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 236px;
+  background: var(--shell-canvas);
+  border: 1px solid var(--shell-line);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(56, 66, 58, 0.2);
+  padding: 7px;
+  z-index: 62;
+}
+
+.am-who { padding: 9px 11px 8px; }
+.am-name { display: block; font-size: 13px; color: var(--shell-ink); }
+.am-email {
+  display: block; font-size: 11px; color: var(--shell-muted); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.am-row {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  border: 0; background: transparent; border-radius: 10px;
+  padding: 9px 11px; cursor: pointer;
+  font: inherit; font-size: 12.5px; color: var(--shell-ink-soft); text-align: left;
+}
+.am-row:hover { background: var(--shell-inset); color: var(--shell-ink); }
+.am-row svg { width: 15px; height: 15px; color: var(--shell-rail-icon); flex: none; }
+
+.am-div {
+  height: 1px; margin: 6px 4px;
+  background: linear-gradient(90deg, transparent, var(--shell-line) 14%, var(--shell-line) 86%, transparent);
+}
+
+/* THE PLAN CARD — slate, because slate is Pro's colour everywhere in the app. A Pro user gets
+   the label and no button: a paying user is never sold to. */
+.am-plan {
+  display: flex; align-items: center; gap: 10px;
+  margin: 2px 4px;
+  padding: 10px 11px;
+  border-radius: 11px;
+  background: var(--slate-tint);
+  border: 1px solid var(--slate-line);
+}
+.am-plan.pro { background: transparent; border-color: transparent; padding: 6px 11px; }
+.am-planlab { flex: 1; font-size: 12px; color: var(--slate-deep); }
+.am-plan.pro .am-planlab { color: var(--shell-muted); }
+.am-planbtn {
+  border: 1px solid var(--slate-line); background: #fff; color: var(--slate-deep);
+  border-radius: 8px; padding: 5px 10px; cursor: pointer;
+  font: inherit; font-size: 11.5px; flex: none;
+}
+.am-planbtn:hover { border-color: var(--slate); }
+
+@media (prefers-reduced-motion: reduce) {
+  .am-row, .am-planbtn { transition: none; }
+}

@@ -36,17 +36,27 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
     expect(shell).toContain("contentVariant?: \"work\" | \"read\"");
     expect(shell).toContain("sa-content-col sa-content-col--${contentVariant}");
     expect(shell.includes('background: "var(--desk)"')).toBe(false);
-    expect(shell).toContain('background: "var(--shell-canvas)"'); // painted once, on the stage
+    /* ⚠️ --shell-canvas → #ffffff (shell-rebuild Phase 3). The old canvas was the third capsule
+       of a stepped cream trio; the rebuild's content capsule is white in both mockups
+       (`--work:#ffffff`). Still painted ONCE, on the stage — that half of the rule is unchanged,
+       and it is the half that matters: no page sets a bespoke ground. */
+    /* ⚠️ THE STAGE NO LONGER PAINTS (refinement §4) — it moved into the card, and the CARD is
+       white. The rule that mattered was "painted once, never per page", and that still holds:
+       the paint is on `.ws-card`, and no page sets a ground. */
+    const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
+    expect(wsCss).toMatch(/\.ws-card \{[^}]*background: #ffffff/s);
+    expect(shell.includes('background: "var(--shell-canvas)"')).toBe(false);
   });
 
-  it("nav chrome is OUTSIDE the cap — the v2 rail + sidebar flank the content column, never wrapped", () => {
-    // Shell follow-up P3: NavDrawer retired (its last trigger left with CrumbStrip); the v2
-    // ShellRail + ShellSide are the desktop navigation, siblings of the content column — so no
-    // nav chrome can inherit the max-width. The cap wrapper lives only inside StagePage.
+  it("nav chrome is OUTSIDE the cap — the shell column flanks the content column, never wrapped", () => {
+    // Shell-rebuild Phase 3: the one expanding column became the DOUBLE-DECKER, still a sibling
+    // of the content column — so no nav chrome can inherit the max-width. The cap wrapper lives
+    // only inside StagePage.
     expect(shell.includes("<NavDrawer")).toBe(false); // the drawer is gone
-    expect(shell).toContain("<ShellRail");
-    expect(shell).toContain("<ShellSide");
-    expect(shell).toContain("flex: 1, minWidth: 0, minHeight: 0, display: \"flex\"");
+    expect(shell).toContain("<WorkspaceShell");
+    expect(shell).not.toContain("<ShellColumn"); // superseded by the double-decker
+    expect(shell).not.toContain("<ShellRail");
+    expect(shell).not.toContain("<ShellSide");
     expect(shell.slice(0, shell.indexOf("StagePage")).includes("sa-content-col")).toBe(false);
   });
 });

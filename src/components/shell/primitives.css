@@ -1,0 +1,175 @@
+/* ── SHELL PRIMITIVES (shell-rebuild pack, Phase 1) ────────────────────────────────────────────
+   The five pieces both shells share. Every colour and border here is a `--shell-*` token, so the
+   two shells cannot be retoned apart, and Tailwind never gets a say in a critical colour.
+
+   ⚠️ SIZES THE MOCKUPS FIX ARE LITERAL HERE, not tokens: the search pill's 34px height, the help
+   square's 32px, the card's 12px radius. They are drawn once each and reading them from a token
+   would imply a shared rhythm that does not exist — the two bars simply draw these controls at
+   these sizes. Geometry that IS shared (rail width, row pitch, head height) lives in index.css. */
+
+/* ══ COUNT CHIP ══ */
+.sp-ct {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  color: var(--shell-muted);
+}
+.sp-ct-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--shell-burgundy);
+  flex: none;
+}
+
+/* ══ AVATAR ══
+   Baked 11: parchment fill + burgundy Playfair initials, at EVERY mount — including the ink rail
+   foot, where the mockup drew an ink disc. One identity, one treatment. */
+.sp-ava {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--shell-avatar-bg);
+  border: 1px solid var(--shell-avatar-bd);
+  color: var(--shell-burgundy);
+  font-family: "Playfair Display", serif;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ══ MENU CARD ══ */
+.sp-card {
+  min-width: 192px;
+  background: #ffffff;
+  border: 1px solid var(--shell-edge);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(46, 39, 35, 0.14), 0 16px 38px rgba(46, 39, 35, 0.12);
+  padding: 6px;
+}
+.sp-card-h {
+  padding: 6px 10px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--shell-muted);
+}
+.sp-card-i {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--shell-ink-soft);
+  text-align: left;
+  cursor: pointer;
+}
+.sp-card-i:hover {
+  background: rgba(242, 237, 231, 0.6);
+  color: var(--shell-ink);
+}
+/* The parchment fill — the SAME active grammar as a nav pill, so a flyout child and a panel
+   child read as one state rather than two conventions. */
+.sp-card-i.on {
+  background: var(--shell-parch);
+  color: var(--shell-ink);
+  font-weight: 600;
+}
+.sp-card-div {
+  height: 1px;
+  margin: 5px 8px;
+  background: var(--shell-hair);
+}
+
+/* ══ SEARCH PILL ══ */
+.sp-search {
+  height: 34px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid var(--shell-edge);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  color: var(--shell-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.sp-search:hover,
+.sp-search:focus-visible {
+  border-color: #d6cdbf;
+}
+.sp-search svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.7;
+  flex: none;
+}
+.sp-search-l {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sp-search-k {
+  margin-left: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  background: #f4f0e9;
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex: none;
+}
+
+/* ══ HELP BUTTON ══ */
+.sp-help {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  flex: none;
+}
+.sp-help:hover,
+.sp-help:focus-visible {
+  color: var(--shell-ink);
+  background: rgba(242, 237, 231, 0.7);
+}
+.sp-help svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.6;
+}
+
+/* ══ FOCUS + REDUCED MOTION (Baked 21) ══
+   One ring treatment across every primitive, inset so it never enlarges the control's box. */
+.sp-card-i:focus-visible,
+.sp-search:focus-visible,
+.sp-help:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--shell-focus);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-search,
+  .sp-help {
+    transition: none;
+  }
+}

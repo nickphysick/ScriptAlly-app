@@ -27,7 +27,7 @@ describe("sidebarBoardTiles", () => {
         tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [],
         taskFlags: [], activities: [], now: Date.parse("2026-07-27T12:00:00"),
       })
-    ).toEqual({ urgent: 0, housekeeping: 0, notes: 0, actionable: 0 });
+    ).toEqual({ urgent: 0, housekeeping: 0, notes: 0 });
   });
 });
 

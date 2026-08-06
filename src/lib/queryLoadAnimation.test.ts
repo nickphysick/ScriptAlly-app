@@ -16,7 +16,8 @@ const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
 describe("it runs on ROUTE ENTRY, not on every render", () => {
   it("the page is told when it is the visible route", () => {
-    expect(app).toContain('routeActive={routeKey === "queries"}');
+    // Amendment 1 (H3) added a sibling route under the same routeKey, so the flag now excludes it.
+    expect(app).toContain('routeActive={routeKey === "queries" && !queriesAnalytics}');
     expect(queries).toContain("routeActive");
   });
 

@@ -374,11 +374,17 @@ describe("v9 P2 — THE MANUSCRIPT PAGE (composition A) + the running footer", (
     expect(ss).toContain("const stampedCurrent = !!current && handled.some((x) => x.key === current.key);");
     expect(ss).toContain("{stampedCurrent && canUndoHandled(current) && (");
     expect(ss).toContain("onClick={() => onUndoHandled(current)}");
-    // ONE inverse in the app: the toast's, remembered by key — no parallel undo store
+    /* ONE inverse in the app: the toast's, remembered by key — no parallel undo store.
+       ⚠️ THE REGISTRY MOVED INTO useTodoToast (extraction E1) so the four To-do pages share one
+       takeback window; the RULE is unchanged, and this asserts it in its new form. The page still
+       hands the toast an inverse and reads it back by card key — it never keeps a second one. */
     expect(page).toContain("function doneToast(c: BoardCard, fn: () => Promise<void>) {");
-    expect(page).toContain("doneUndos.current.set(c.key, fn);");
+    expect(page).toContain("rememberUndo(c.key, fn);");
     expect(page).toContain('flash(`Done — “${c.title}”`, { label: "Undo", fn });');
-    expect(page).toContain("canUndoHandled={(c) => doneUndos.current.has(c.key)}");
+    expect(page).toContain("canUndoHandled={(c) => !!recallUndo(c.key)}");
+    const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
+    expect(hook, "the hook stores an inverse; it must never learn to build one")
+      .toContain("Map<string, () => Promise<void>>");
   });
   it("the session still writes NOTHING — the takeback is the board's callback, not a session write", () => {
     for (const w of ["updateQueryStatus", "upsertTaskFlag", "updateUserTask", "logNudge", "addDoc", "setDoc"]) {
