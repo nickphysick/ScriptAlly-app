@@ -17,7 +17,7 @@
 import React, { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
-import { TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan } from "../../lib/todoColumns";
+import { TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily, cardVerbs, CardVerb } from "../../lib/todoColumns";
 import "./todoBoard.css";
 
 export interface TodoBoardProps {
@@ -26,6 +26,8 @@ export interface TodoBoardProps {
   onPlan: (card: BoardCard, plan: DropPlan, from: TodoColumnId, to: TodoColumnId) => void;
   /** Opening a card — the same handler the rows use. */
   onOpen: (card: BoardCard) => void;
+  /** A ⋯ verb, performed by the page with its existing primitives. */
+  onVerb: (card: BoardCard, verb: CardVerb, column: TodoColumnId) => void;
 }
 
 const COL_EMPTY: Record<TodoColumnId, string> = {
@@ -35,7 +37,7 @@ const COL_EMPTY: Record<TodoColumnId, string> = {
   done: "Nothing cleared yet today.",
 };
 
-export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen }) => {
+export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, onVerb }) => {
   const [dragging, setDragging] = useState<{ card: BoardCard; from: TodoColumnId } | null>(null);
   const [over, setOver] = useState<TodoColumnId | null>(null);
   const [menu, setMenu] = useState<string | null>(null);
@@ -115,7 +117,7 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen })
                       mirrors the left (corrections fix 4). The guard is here as well as at the
                       derivation, because a lane that echoes its neighbour is a rendering fault
                       whichever end produced it — and the band is where it shows. */}
-                  <div className="tbd-band">
+                  <div className={`tbd-band fam-${bandFamily(c)}`}>
                     <span className="tbd-kind">{c.kind}</span>
                     {c.due && c.due !== c.kind && <span className="tbd-when">{c.due}</span>}
                   </div>
@@ -134,24 +136,22 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen })
                     >
                       <MoreHorizontal size={15} aria-hidden />
                     </button>
+                    {/* ⚠️ VERBS, NEVER "Move to X" — the menu names the ACT, not what happens to
+                        the card. */}
                     {menu === c.key && (
                       <div className="tbd-menu" role="menu">
-                        {TODO_COLUMNS.filter((t) => t.id !== col.id).map((t) => {
-                          const plan = dropPlan(c, col.id, t.id);
-                          const blocked = plan.kind === "none";
-                          return (
-                            <button
-                              key={t.id}
-                              type="button"
-                              role="menuitem"
-                              disabled={blocked}
-                              title={blocked ? (plan as { why?: string }).why : undefined}
-                              onClick={() => { setMenu(null); perform(c, col.id, t.id); }}
-                            >
-                              Move to {t.label}
-                            </button>
-                          );
-                        })}
+                        {cardVerbs(c, col.id).map((v) => (
+                          <button
+                            key={v.id}
+                            type="button"
+                            role="menuitem"
+                            disabled={v.disabled}
+                            title={v.why}
+                            onClick={() => { setMenu(null); onVerb(c, v, col.id); }}
+                          >
+                            {v.label}
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>

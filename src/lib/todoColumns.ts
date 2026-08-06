@@ -28,6 +28,26 @@ import { agentPrimary, agentInitials } from "./agentDisplay";
 
 export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
 
+/**
+ * ⚠️ THE BAND'S FAMILY — colour says WHAT KIND OF THING this is, and it is the same vocabulary
+ * the lanes, the FILTERS rows and the group swatches use.
+ *
+ * THE CAUSE OF THE REGRESSION, named: the family map was never lost — it was never CARRIED. The
+ * old card grammar has it (`.tdb-band.do/.hk/.nt` in todo.css). When the board was built in Phase
+ * 4 its band rule was written FRESH from the one card the ref happened to draw, which was an
+ * urgent one, so one family's tint was encoded as the band's only tint. Nothing overwrote
+ * anything; a distinction simply never made the journey. Hence the lock below is on the MAP
+ * rather than on any single colour: a map cannot be half-copied without failing.
+ */
+export type BandFamily = "urgent" | "housekeeping" | "yours" | "done";
+
+export function bandFamily(c: BoardCard): BandFamily {
+  if (c.done) return "done";
+  if (c.userTaskId || c.nature) return "yours";
+  if (c.hk) return "housekeeping";
+  return "urgent";
+}
+
 export interface TodoColumnDef {
   id: TodoColumnId;
   label: string;
@@ -293,6 +313,44 @@ export type DropPlan =
   /** → Done on a DERIVED card: refuse, return it, and name the act that would finish it. */
   | { kind: "bounce"; why: string }
   | { kind: "none"; why?: string };
+
+/**
+ * ⚠️ THE ⋯ MENU SPEAKS VERBS, NEVER "MOVE TO X".
+ *
+ * "Move to Done" describes what happens to the CARD; it says nothing about what happens to the
+ * query, the agent or the writer's afternoon. Worse, on a derived card it is a lie — the card
+ * cannot move to Done, and offering the move only to bounce it is a menu that wastes your click
+ * to teach you a rule. Each line names the act, and the ones that do not apply say why.
+ */
+export interface CardVerb {
+  id: "action" | "today" | "snooze" | "open" | "dismiss";
+  label: string;
+  disabled?: boolean;
+  /** Shown as the control's title when disabled — the refusal states its reason. */
+  why?: string;
+}
+
+export function cardVerbs(card: BoardCard, column: TodoColumnId): CardVerb[] {
+  const isOffer = card.taskType === "offer_received";
+  const onToday = column === "today";
+  const verbs: CardVerb[] = [
+    { id: "action", label: "Action now" },
+    onToday
+      ? { id: "today", label: "− Take off today" }
+      : { id: "today", label: "＋ Add to today" },
+    { id: "snooze", label: "Snooze…" },
+  ];
+  if (card.relatedRecordId && !card.userTaskId) verbs.push({ id: "open", label: "Open the query" });
+  /* ⚠️ AN OFFER HAS NO DISMISS, ANYWHERE. The line still renders, disabled and saying so — its
+     absence would read as an oversight, and a writer who has been told once still deserves the
+     reminder at the moment they reach for it. */
+  verbs.push(
+    isOffer
+      ? { id: "dismiss", label: "Dismiss — not for offers", disabled: true, why: "An offer has a reply-by date that is not yours to move." }
+      : { id: "dismiss", label: "Dismiss…" },
+  );
+  return verbs;
+}
 
 export function dropPlan(
   card: BoardCard,

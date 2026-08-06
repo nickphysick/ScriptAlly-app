@@ -57,7 +57,7 @@ import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoute
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
 import { TodoSideContainer } from "./TodoSideContainer";
-import { boardColumns, sweepCardFor, isSweepCard, DropPlan } from "../../lib/todoColumns";
+import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, CardVerb, TodoColumnId } from "../../lib/todoColumns";
 import {
   TODO_SORTS, DEFAULT_TODO_SORT, TodoSortId, sortBoardCards,
   TodoFacetId, applyFacet, facetCounts,
@@ -1573,8 +1573,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       case "snooze-popover": setLaterKey(card.key); break;
       case "unsnooze": unsnoozeCard(card); break;
       /* ⚠️ COMPLETION ALWAYS GOES THROUGH THE PRIMITIVE (P3). quickDone carries the undo toast;
-         a drag that wrote `done: true` directly would complete the task with no way back — which
-         is exactly what the drag path used to do. */
+         a drag that wrote the completion field directly would finish the task with no way back —
+         which is exactly what the drag path used to do. */
       case "complete": void quickDone(card); break;
       case "uncomplete": void unDone(card); break;
       /* ⚠️ THE BOUNCE — a derived card cannot be ticked, because ticking is not what finishes it.
@@ -1608,6 +1608,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setSession({ queue });
   }
 
+  /* ⚠️ THE ⋯ VERBS, PERFORMED — every one an EXISTING primitive, exactly as the drags are. */
+  function performCardVerb(card: BoardCard, verb: CardVerb, column: TodoColumnId) {
+    switch (verb.id) {
+      case "action": openFlowCards([card]); break;              // → the dock (P4); the sheet until then
+      case "today": performBoardPlan(card, dropPlan(card, column, column === "today" ? "todo" : "today")); break;
+      case "snooze": setLaterKey(card.key); break;              // the popover, never a silent snooze
+      case "open": if (card.relatedRecordId) onNavigate("queries", card.relatedRecordId); break;
+      /* ⚠️ DISMISS IS THE EXISTING FORK, not a new write. `forkStale` carries the undo and the
+         "never this" escalation; a board-local dismissal would be a second path to the same
+         stance with its own bugs. */
+      case "dismiss": if (!verb.disabled) forkStale(card, "notNow"); break;
+    }
+  }
+
   function renderBoard() {
     /* ⚠️ THE SWEEPS COME FROM THE SAME `hkGroups` THE COUNT DOES. Housekeeping is counted by
        MEMBERS and drawn as one card per rule; passing the groups here is what lets the card
@@ -1629,6 +1643,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         columns={columns}
         onOpen={(c) => openFlowCards([c])}
         onPlan={(c, plan) => performBoardPlan(c, plan)}
+        onVerb={(c, v, column) => performCardVerb(c, v, column)}
       />
     );
   }
