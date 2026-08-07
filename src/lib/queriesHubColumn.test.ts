@@ -54,13 +54,20 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
     });
   }
 
-  it("the WORKSPACE keeps its own wider cap — the differential is the point", () => {
+  /* ⚠️ SUPERSEDED — and this one reverses a real decision, so it is recorded rather than deleted.
+     The workspace USED to keep its own wider cap (--maxw 1520) against the header's narrower
+     column, and that differential was deliberate: "exactly the ref's Guides view, not an
+     accident". The Query Centre frame retires it. Once the workspace gained a visible HAIRLINE,
+     the differential stopped reading as a considered width and started reading as a frame that
+     misses the page's own margins — its edges ran to the sheet while the title sat 87px inside.
+     Nick's call, on the rendered page: the frame's edges align with the title and the header
+     buttons. A differential you can see the seam of is not the same object as one you can't. */
+  it("the WORKSPACE now shares the header's column, so the frame aligns with the title", () => {
     const body = block(".f12-body");
-    expect(
-      body,
-      "the list + reading pane fell into the header column — the hub's workspace is deliberately wider (ref Guides view)",
-    ).toContain("var(--maxw)");
-    expect(body).not.toContain("var(--sa-col-max)");
+    expect(body, "the frame went back to its own wider cap").not.toContain("var(--maxw)");
+    expect(body).toContain("max-width: var(--sa-col-max)");
+    expect(body, "the inset must read the header's gutter, not a hand-matched number")
+      .toContain("width: calc(100% - 2 * var(--sa-col-gut))");
   });
 
   it("the action row right-aligns; the --listw spacer that locked it to the list pane is gone", () => {

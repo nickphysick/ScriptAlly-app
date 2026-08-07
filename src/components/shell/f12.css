@@ -507,7 +507,13 @@
    of growing it (see .ws-work--fit for the other half of that chain). ── */
 .f12-body {
   flex: 1; display: flex; gap: var(--gut); min-height: 0;
-  width: 100%; max-width: var(--maxw); margin: 22px auto 26px;
+  /* ⚠️ THE FRAME'S OUTER EDGE IS THE HEADER'S INNER EDGE — alignment is STRUCTURAL, not a
+     matched number. The frame reads the header's own column tokens (--sa-col-max / --sa-col-gut),
+     so its left border lands on the "Query Centre" title's left edge and its right border on the
+     Export/Log query buttons' right edge, at every breakpoint including the narrow step where
+     --sa-col-gut drops to 16px. It previously used --maxw (1520px) with no inset, which is why
+     the hairline ran to the sheet's edges. Vertical margins are untouched. */
+  width: calc(100% - 2 * var(--sa-col-gut)); max-width: var(--sa-col-max); margin: 22px auto 26px;
   padding: 20px 22px;
   border: 1px solid var(--line); border-radius: 18px;
 }

@@ -68,6 +68,22 @@ describe("the workspace frame", () => {
     expect(body, "hairline only — a shadow would make it a card inside a card").not.toContain("box-shadow");
   });
 
+  /* The frame's OUTER edge is the header's INNER edge — browser-measured at 1440×800: frame
+     left 99 = title left 99, frame right 1339 = buttons right 1339, both deltas 0. It reads the
+     header's own column tokens, so the two track each other at every breakpoint (including the
+     narrow step where --sa-col-gut drops to 16px) instead of being kept in step by hand. */
+  it("aligns to the header grid structurally, not by a matched number", () => {
+    const body = rule(f12, ".f12-body");
+    expect(body, "the frame is back on its own width system").not.toContain("var(--maxw)");
+    expect(body).toContain("max-width: var(--sa-col-max)");
+    expect(body).toContain("width: calc(100% - 2 * var(--sa-col-gut))");
+  });
+
+  it("the vertical rhythm is untouched by the inset", () => {
+    expect(rule(f12, ".f12-body")).toContain("margin: 22px auto 26px");
+    expect(rule(f12, ".f12-body")).toContain("padding: 20px 22px");
+  });
+
   it("the fit chain runs the whole way down", () => {
     expect(rule(f12, ".f12-body")).toContain("min-height: 0");
     expect(rule(f12, ".f12-rows")).toContain("overflow-y: auto");
