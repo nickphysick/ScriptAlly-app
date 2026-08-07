@@ -2259,10 +2259,18 @@ export const Queries: React.FC<{
 
 
 
-      {/* MAIN CONTENT — the control bar then the two-column desk (list + reading pane). */}
+      {/* MAIN CONTENT — the control bar then the two-column desk (list + reading pane).
+          ⚠️ NO GROUND HERE. This carried a hardcoded `background: "#faf5ee"` — a cream inline
+          style, predating the white sheet, that wrapped the header, the frame, the list AND the
+          pane. It was THE cream ground, and it survived two passes that hunted for it in
+          stylesheets and theme tokens: an inline hex matches no token grep and outranks every
+          rule. The sheet is white; nothing between it and the cards paints.
+          (`overflowY: auto` is kept deliberately — it is a nested scroller inside the shell's
+          own, currently inert under .ws-work--fit, and it is the safety net if content ever
+          exceeds the fit. Retiring it is a separate call — flagged, not taken.) */}
       <div
         className="w-full"
-        style={{ paddingLeft: 0, background: "#faf5ee", flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}
+        style={{ paddingLeft: 0, flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}
         id="queries-main-panel-container"
       >
 
