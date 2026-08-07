@@ -26,12 +26,12 @@ import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
-import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft } from "../lib/queryDraft";
+import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, listHeadLabel } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -308,7 +308,9 @@ export const Queries: React.FC<{
   const [draftIn, setDraftIn] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [stashedSelection, setStashedSelection] = useState<string | null>(null);
-  const [pendingSave, setPendingSave] = useState<{ id: string; fromTop: number } | null>(null);
+  const [pendingSave, setPendingSave] = useState<
+    { id: string; fromTop: number; again?: { dateSent: string; sendMethod: SubmissionMethod; reminder: ReminderChoice; manuscriptId: string } } | null
+  >(null);
   const [settleId, setSettleId] = useState<string | null>(null);
   const [graceRow, setGraceRow] = useState<{ id: string; leaving: boolean } | null>(null);
   const draftRowRef = useRef<HTMLDivElement>(null);
@@ -446,7 +448,9 @@ export const Queries: React.FC<{
     return () => setMobileDetail("queries", null);
   }, [isMobile, mobileDetailOn, setMobileDetail]);
 
-  const saveCreate = async () => {
+  /* `logAnother` keeps create mode open after the write instead of handing over to the saved
+     record — the batch case (a morning's worth of queries in one sitting). */
+  const saveCreate = async (logAnother = false) => {
     if (!createDraft || !draftReady(createDraft) || createSaving) return;
     setCreateSaving(true);
     setCreateError(null);
@@ -468,7 +472,15 @@ export const Queries: React.FC<{
          appearing. */
       const fromTop = draftRowRef.current?.getBoundingClientRect().top ?? 0;
       setDraftSaved(true);
-      setPendingSave({ id: newId, fromTop });
+      setPendingSave({
+        id: newId, fromTop,
+        /* The facts that outlive the agent. Captured HERE, at the write, not read back off the
+           draft in the effect — by then it may already have been replaced. */
+        again: logAnother ? {
+          dateSent: createDraft.dateSent, sendMethod: createDraft.sendMethod,
+          reminder: createDraft.reminder, manuscriptId: createDraft.manuscriptId,
+        } : undefined,
+      });
     } catch {
       setCreateError("Couldn't save that query — please try again.");
     } finally {
@@ -484,9 +496,28 @@ export const Queries: React.FC<{
     if (!pendingSave) return;
     const saved = queries.find((q) => q.id === pendingSave.id);
     if (!saved) return; // the listener hasn't caught up yet
+    setDraftSaved(false);
+    /* ⚠️ BATCH FORK. "Save & log another" keeps create mode open: the rail grows the saved row
+       exactly as a normal save does, and the draft tile RESETS rather than leaving. The agent is
+       cleared because it is the one thing that must differ; the manuscript, date, send method and
+       nudge are agent-INDEPENDENT facts about this sitting and carry over.
+       Materials are deliberately NOT carried: they are derived from the agent's stated
+       requirements, so keeping B's ticks from A would quietly claim you sent B what A asked for.
+       They re-derive from the next agent (P4 adds the no-data fallback). */
+    if (pendingSave.again) {
+      const next: QueryDraft = {
+        ...emptyDraft({ manuscriptId: pendingSave.again.manuscriptId }),
+        dateSent: pendingSave.again.dateSent,
+        sendMethod: pendingSave.again.sendMethod,
+        reminder: pendingSave.again.reminder,
+      };
+      setCreateDraft(next);
+      setCreateBase(next);
+      setPendingSave(null);
+      return;
+    }
     setCreateDraft(null);
     setCreateBase(null);
-    setDraftSaved(false);
     setStashedSelection(null);
     setSelectedQueryId(pendingSave.id);
     // Would the current filters hide it? Ask THE predicate, never a copy of it.
@@ -1404,6 +1435,13 @@ export const Queries: React.FC<{
     ...(needsTasks ? [{ key: "tasks", label: "HAS OPEN TASKS", remove: () => setNeedsTasks(false) }] : []),
   ];
   const activeFilterCount = activeFilterChips.length;
+  /* Is the list narrowed? Both doors count — the filter popovers AND either search (the list's
+     own field or the shell's global one), since matchesFilters reads both. Declared here, well
+     above the return, deliberately: the render reads it. */
+  /* The save gate, in ONE place: the header's two save buttons must agree, and a second copy of
+     draftReady(createDraft) is how they would stop agreeing. */
+  const createReady = createDraft ? draftReady(createDraft) : false;
+  const listNarrowed = activeFilterCount > 0 || (listSearch || searchQuery || "").trim() !== "";
 
   const OPEN_STATUSES_F12 = STATUS_SORT_ORDER.slice(0, 7);
   const CLOSED_STATUSES_F12 = STATUS_SORT_ORDER.slice(7);
@@ -2115,10 +2153,7 @@ export const Queries: React.FC<{
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-focus" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
-      {/* The focus scrim. Always mounted, opacity-toggled by `qh-focus`, so it fades BOTH ways
-          from one CSS transition rather than needing a mount frame. */}
-      <div className="qh-scrim" aria-hidden="true" />
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-create" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -2795,8 +2830,11 @@ export const Queries: React.FC<{
                 over a 1px #ece5d9 hairline). The search and the Filter/Sort pills keep their own
                 row beneath it, wiring untouched. */}
             <div className="f12-lhtitle">
-              <h2>Your queries</h2>
-              <span className="f12-lhcount">{sortedList.length === queries.length ? `${queries.length}` : `${sortedList.length} of ${queries.length}`}</span>
+              {/* ONE sentence, not a label beside a figure: the count IS the label. The
+                  "Showing" form is keyed on the CONTROLS being active, never on the two counts
+                  differing — a filter that happens to match everything still says it is
+                  filtering. See listHeadLabel. */}
+              <h2>{listHeadLabel(sortedList.length, queries.length, listNarrowed)}</h2>
             </div>
             <div className="f12-lhead">
               <div className="f12-lsearch">
@@ -2845,11 +2883,7 @@ export const Queries: React.FC<{
                 return (
                   <div
                     ref={draftRowRef}
-                    /* qh-lit goes on the ROW, never on anything inside it: the row animates its
-                       own opacity 0→1 on open, and opacity < 1 makes it a stacking context — so a
-                       z-index on a child would be trapped inside the row and never clear the
-                       scrim. Raise the whole row or nothing. */
-                    className={`f12-row f12-draft qh-lit${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
+                    className={`f12-row f12-draft${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
                     aria-label="New query draft"
                     // The collapse finishing is what clears the draft — so its contents are reset
                     // only once the row has gone, never visibly blanked in place.
@@ -2895,6 +2929,12 @@ export const Queries: React.FC<{
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
+                    /* In the rail the name is withdrawn to opacity 0 — still in the
+                       accessibility tree (opacity hides from the eye, not from a reader), so the
+                       button keeps its accessible name either way. The title is for the POINTER,
+                       which has no such fallback; it is create-mode only so full-width rows
+                       don't grow a tooltip they don't need. */
+                    title={creating ? agentPrimary(agent) : undefined}
                     className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
@@ -2947,7 +2987,7 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className={`qp-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
+          <div className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
                here put a bordered, shadowed card around all of them — a card inside the frame,
@@ -2970,32 +3010,12 @@ export const Queries: React.FC<{
               const waitingOnAgent = ctrlAction?.ballHolder === "agent";
               const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
 
-              /* CREATE MODE TAKES THE BAR (ref qdb-focus-spotlight.html). The record actions are
-                 REPLACED, not disabled: none of them applies to a query that doesn't exist yet, and
-                 a row of dead buttons reads as breakage. Save and Cancel keep the very handlers the
-                 retired pane footer called — this is a relocation, not a rewire. */
-              if (creating) {
-                const ready = createDraft ? draftReady(createDraft) : false;
-                return (
-                  <div className="f12-ctl f12-ctl-create">
-                    <span className="qcb-ctx"><span className="qcb-dot" aria-hidden="true" />New query</span>
-                    {/* The requirement line doubles as the error slot — the same job it did in the
-                        footer, so a failed save still explains itself rather than vanishing. */}
-                    <span className={`qcb-req${createError ? " qcb-err" : ""}`}>
-                      {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
-                    </span>
-                    <span style={{ flex: 1 }} />
-                    <span className="qcb-esc">Esc to cancel</span>
-                    {/* No qh-lit: these sit INSIDE the pane, which is itself lit, so a second raise was dead
-                    weight the moment the toolbar moved in here. */}
-                <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
-                    <button type="button" className="f12-btn-pri" onClick={saveCreate} disabled={!ready || createSaving}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                      {createSaving ? "Saving…" : "Save query"}
-                    </button>
-                  </div>
-                );
-              }
+              /* ⚠️ CREATE MODE HIDES THE TOOLBAR ENTIRELY (ref qc-create-v2.html) — it does not
+                 disable it, and it no longer takes it over. None of the record verbs applies to a
+                 query that does not exist yet, so a row of dead or greyed buttons is chrome that
+                 states nothing. The illustrated header below IS the create view's action surface;
+                 two of them would be two homes for one job. */
+              if (creating) return null;
 
               return (
                 <div className="f12-ctl">
@@ -3068,6 +3088,46 @@ export const Queries: React.FC<{
             {createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
+                {/* ── THE ILLUSTRATED HEADER (ref qc-create-v2.html) — replaces the retired
+                    command bar. It says what you are doing, what it needs, and offers the three
+                    ways out, in one band at the top of the work. ── */}
+                <div className="qch">
+                  <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  <div className="qch-txt">
+                    <h2 className="qch-title">Logging new query</h2>
+                    {/* ⚠️ ONE LINE, TWO JOBS: the requirement by default, the save error in
+                        burgundy when there is one. A failure belongs beside the button that
+                        failed, not in a toast that can be missed.
+                        The live region is PERMANENT rather than a role toggled on when the error
+                        arrives. A live region announces CHANGES after first render, so the static
+                        subtitle is not read on mount but the swap to an error is — whereas adding
+                        role="alert" to an element already in the tree is unreliably announced
+                        across screen readers. aria-atomic because the line replaces its text
+                        rather than appending to it. */}
+                    <p className={`qch-sub${createError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
+                      {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
+                    </p>
+                  </div>
+                  <div className="qch-acts">
+                    <span className="qch-esc" aria-hidden="true">Esc</span>
+                    <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
+                    <button
+                      type="button"
+                      className="qch-tert"
+                      onClick={() => saveCreate(true)}
+                      disabled={!createReady || createSaving}
+                    >Save &amp; log another</button>
+                    <button
+                      type="button"
+                      className="f12-btn-pri"
+                      onClick={() => saveCreate()}
+                      disabled={!createReady || createSaving}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                      {createSaving ? "Saving…" : "Save query"}
+                    </button>
+                  </div>
+                </div>
                 <QueryCreatePane
                   draft={createDraft}
                   onChange={setCreateDraft}
@@ -3100,7 +3160,7 @@ export const Queries: React.FC<{
                     : heroAction.kind === "mark-sent" ? (heroAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
                     : "Record response";
                   return (
-                    <div className="f12-hero" style={{ margin: "20px 20px 0", flexShrink: 0 }}>
+                    <div className="f12-hero" style={{ margin: "var(--f12-headgap) 20px 0", flexShrink: 0 }}>
                       <span className="f12-bigav" aria-hidden="true">{initials}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>

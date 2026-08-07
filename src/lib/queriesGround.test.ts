@@ -46,11 +46,9 @@ describe("the cards still read as raised against the lighter ground", () => {
   });
 });
 
-describe("focus mode is unaffected by the lighter ground", () => {
-  it("the scrim still sits over everything, unchanged", () => {
-    const scrim = css.slice(css.indexOf("\n.qh-scrim {"), css.indexOf("}", css.indexOf("\n.qh-scrim {")));
-    expect(scrim).toContain("background: var(--qh-scrim)");
-    expect(scrim).toContain("pointer-events: none");
-    expect(css).toContain(".qh-focus .qh-lit { position: relative; z-index: 60; }");
-  });
-});
+/* ⚠️ RETIRED with the scrim (create-mode v2, Phase 1). This asserted that the lighter ground
+   left focus mode's spotlight intact — a real check while the page darkened itself to focus.
+   The whole scrim system is deleted: create mode now focuses by CHANGING THE LAYOUT (the list
+   collapses to a rail and the pane takes the width), not by dimming what surrounds it. There is
+   no overlay left for a ground change to interact with, so the check has no subject.
+   The ground's own assertions above are untouched and still live. */

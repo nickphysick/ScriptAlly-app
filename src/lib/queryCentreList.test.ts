@@ -40,9 +40,16 @@ describe("the head reuses To-do's values, it does not approximate them", () => {
     expect(head, "the ref's 2px ink rule must not arrive here").not.toContain("2px solid var(--ink)");
   });
 
-  it("the count is mono, as To-do's is", () => {
-    expect(rule(css, ".f12-lhtitle .f12-lhcount")).toContain("var(--f12-mono)");
-    expect(queries).toContain('<span className="f12-lhcount">');
+  /* ⚠️ SUPERSEDED, recorded rather than deleted: the count USED to be a separate mono figure
+     beside the title ("Your queries" · 21), reusing To-do's head grammar wholesale. It is now
+     part of the sentence — "21 queries" / "Showing 12 of 21 queries" — so there is no trailing
+     figure left to style and the mono rule is gone with the span. What survives from To-do is
+     the Playfair 17/700 and the warm hairline, asserted above; only the count moved. */
+  it("the count is INSIDE the label now — no separate mono figure", () => {
+    expect(rule(css, ".f12-lhtitle .f12-lhcount"), "the dead count rule is still in the sheet").toBe("");
+    expect(queries, "the count span outlived its rule").not.toContain('className="f12-lhcount"');
+    expect(queries, "the head must read the shared label helper, not build a string inline")
+      .toContain("listHeadLabel(sortedList.length, queries.length, listNarrowed)");
   });
 });
 

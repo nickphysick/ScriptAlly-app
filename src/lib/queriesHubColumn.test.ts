@@ -61,11 +61,20 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
      the differential stopped reading as a considered width and started reading as a frame that
      misses the page's own margins — its edges ran to the sheet while the title sat 87px inside.
      Nick's call, on the rendered page: the frame's edges align with the title and the header
-     buttons. A differential you can see the seam of is not the same object as one you can't. */
-  it("the WORKSPACE now shares the header's column, so the frame aligns with the title", () => {
+     buttons. A differential you can see the seam of is not the same object as one you can't.
+
+     ⚠️ AMENDED AGAIN, and the amendment is the interesting half: sharing the header's column
+     also inherited the header's CAP, so the inset stopped being the gutter and became half the
+     leftover — 60px at a 1026px sheet, 87px at 1414, ~230px at 1700. A margin that grows with
+     the window is not a margin, it is centring. So the cap is gone and the inset is a constant
+     one gutter. THE COST, measured and accepted: past a 1360px sheet the header still caps
+     while the frame does not, so the title sits INSIDE the frame's edge — 27px at 1414, 170px
+     at 1700. Alignment at every width and a constant margin cannot both hold; the margin won. */
+  it("the WORKSPACE insets by one gutter and does NOT cap — a constant margin, not centring", () => {
     const body = block(".f12-body");
     expect(body, "the frame went back to its own wider cap").not.toContain("var(--maxw)");
-    expect(body).toContain("max-width: var(--sa-col-max)");
+    expect(body, "a cap turns the margin back into a share of the surplus")
+      .not.toContain("max-width:");
     expect(body, "the inset must read the header's gutter, not a hand-matched number")
       .toContain("width: calc(100% - 2 * var(--sa-col-gut))");
   });
