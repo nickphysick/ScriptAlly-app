@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { QueryStatus, UserTask, Manuscript, TaskFlag, Activity, ActivityType } from "../types";
+import { QueryStatus, UserTask, Manuscript, TaskFlag, Activity, ActivityType, Agent, Query } from "../types";
 import { assembleBoard, todaySplit, BoardCard, BoardInput } from "./todoBoard";
 import { todoCounts } from "./todoCount";
 import {
@@ -91,7 +91,8 @@ describe("⚠️ THE INVARIANTS (audit item 10) — column == source, as an equa
     ] as TaskFlag[];
     const cols = boardColumns({
       board: assembleBoard(base()), flags, today: TODAY, nowMs: NOW,
-      queries: [{ id: "q1", agentId: "a1" }], agents: [{ id: "a1", name: "Marcus Reed", agency: "Reed Lit" }],
+      queries: [{ id: "q1", agentId: "a1", status: "Query Sent" } as unknown as Query],
+      agents: [{ id: "a1", name: "Marcus Reed", agency: "Reed Lit" } as unknown as Agent],
       sweeps: [],
     });
     // The lanes are EMPTY — the engine already dropped it — and the column still finds it.

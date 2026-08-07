@@ -42,7 +42,10 @@ export interface TodoDockProps {
   timeline: (card: BoardCard) => DockTimelineEvent[];
   /** The flow's ink act. `spec` is present only for the send flow. */
   onPrimary: (card: BoardCard, spec: SendSpec | null) => void;
-  onSnooze: (card: BoardCard) => void;
+  /* ⚠️ A DATED VERB (tasks-pages P2, walk fix 2). The old `onSnooze(card)` handed the choice to
+     a page popover that never mounted for the dock — the clock button silently did nothing. The
+     dock owns its own tier menu now (capped for offers) and reports the CHOSEN date. */
+  onSnoozeDays: (card: BoardCard, days: number, when: string) => void;
   onMore: (card: BoardCard) => void;
 }
 
@@ -60,15 +63,16 @@ function primaryLabel(card: BoardCard): string {
 }
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnooze, onMore,
+  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [confirmSend, setConfirmSend] = useState(false);
+  const [snoozeOpen, setSnoozeOpen] = useState(false);
 
   /* A new item arrives with its own decisions unmade — a confirmation carried over from the last
      one would be the surface agreeing to something on your behalf. */
-  useEffect(() => { setConfirmSend(false); }, [activeKey]);
+  useEffect(() => { setConfirmSend(false); setSnoozeOpen(false); }, [activeKey]);
 
   /* ⚠️ KEYBOARD. Esc closes, ↑↓ walk the queue, Enter is the primary. Bound on the surface rather
      than the document so it cannot reach past an open popover or a field the flow owns. */
@@ -186,9 +190,21 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           >
             {primaryLabel(card)}
           </button>
-          <button type="button" className="tdk-quiet" aria-label="Snooze" title="Snooze" onClick={() => onSnooze(card)}>
-            <Clock size={14} aria-hidden />
-          </button>
+          <span className="tdk-snzwrap">
+            <button type="button" className="tdk-quiet" aria-label="Snooze" title="Snooze" aria-haspopup="menu" aria-expanded={snoozeOpen} onClick={() => setSnoozeOpen((v) => !v)}>
+              <Clock size={14} aria-hidden />
+            </button>
+            {snoozeOpen && (
+              <div className="tdk-snzmenu" role="menu" aria-label="Snooze">
+                <button type="button" role="menuitem" onClick={() => { setSnoozeOpen(false); onSnoozeDays(card, 1, "tomorrow"); }}>Remind me tomorrow</button>
+                {/* ⚠️ AN OFFER'S SNOOZE IS CAPPED AT TOMORROW — the week tier is ABSENT for it,
+                    not disabled: a tier that can never be chosen is not a choice. */}
+                {card.taskType !== "offer_received" && (
+                  <button type="button" role="menuitem" onClick={() => { setSnoozeOpen(false); onSnoozeDays(card, 7, "in a week"); }}>Give it a week</button>
+                )}
+              </div>
+            )}
+          </span>
           <button type="button" className="tdk-quiet" aria-label="More" title="More" onClick={() => onMore(card)}>
             <MoreHorizontal size={15} aria-hidden />
           </button>

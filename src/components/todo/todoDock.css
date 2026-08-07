@@ -143,3 +143,20 @@
   .tdk { grid-template-columns: 1fr; }
   .tdk-q { max-height: 170px; }
 }
+
+/* ── the dock's snooze tier menu (tasks-pages P2, walk fix 2). The old clock pointed at a page
+   popover that never mounted here — a silently dead control. It opens UPWARD (the button sits in
+   the dock's footer) and an offer sees only the tomorrow tier. ── */
+.tdk-snzwrap { position: relative; display: inline-flex; }
+.tdk-snzmenu {
+  position: absolute; bottom: calc(100% + 6px); right: 0; z-index: 30;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(58, 28, 20, 0.16);
+  padding: 5px; min-width: 176px;
+}
+.tdk-snzmenu button {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 12px;
+  background: transparent; border: 0; padding: 8px 10px; border-radius: 7px;
+  color: #4d4238; cursor: pointer;
+}
+.tdk-snzmenu button:hover { background: #f7f2e9; }

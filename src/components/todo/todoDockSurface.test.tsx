@@ -41,7 +41,7 @@ const render = (active = "a", queue = QUEUE) =>
       onClose={() => {}}
       timeline={() => [{ key: "e1", label: "Full requested", when: "12 Jul" }]}
       onPrimary={() => {}}
-      onSnooze={() => {}}
+      onSnoozeDays={() => {}}
       onMore={() => {}}
     />
   );
@@ -81,7 +81,7 @@ describe("the dock renders, 30/70, queue left and work surface right", () => {
     expect(render()).toContain("Full requested");
     const bare = renderToStaticMarkup(
       <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
-        timeline={() => []} onPrimary={() => {}} onSnooze={() => {}} onMore={() => {}} />
+        timeline={() => []} onPrimary={() => {}} onSnoozeDays={() => {}} onMore={() => {}} />
     );
     expect(bare).not.toContain("tdk-tl");
   });

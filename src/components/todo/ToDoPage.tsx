@@ -58,7 +58,7 @@ import { TodoBoard } from "./TodoBoard";
 import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
-import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
+import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
 import { MenuLeaf } from "../../lib/todoMenu";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 import { activityEventLabel } from "../../lib/activityEvent";
@@ -373,23 +373,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // banner, on any device).
   const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
   const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
-  const board = useMemo(
-    // save-and-today P1 — hide the in-flight create (pendingSaveId) so the optimistic insert never
-    // flashes: the item's node is inserted ONCE, when the write resolves, never inserted-then-removed.
-    () => assembleBoard({ tasks, userTasks: pendingSaveId ? userTasks.filter((t) => t.id !== pendingSaveId) : userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
+  /* ⚠️ THE ONE DERIVATION (tasks-pages P2): assemble → groups → sweeps → columns, through the
+     SAME assembleBoardColumns every Tasks surface and the sidebar badge use — identically scoped,
+     so no two counts can disagree again. save-and-today P1's in-flight hide rides the input
+     (hiddenUserTaskId); the Sunday CARD's mutedTaskRules dep is unchanged. */
+  const assembled = useMemo(
+    () => assembleBoardColumns({
+      tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now,
+      mutedTaskRules: currentUser?.mutedTaskRules, hiddenUserTaskId: pendingSaveId,
+    }),
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
-    // mutedTaskRules is a board dep because the Sunday CARD reads it directly (nudge/dq/stale mutes
-    // change `tasks` upstream, but sunday_review does not).
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, pendingSaveId, queries, agents, manuscripts, taskFlags, today, currentUser?.mutedTaskRules],
   );
-  // The Housekeeping lane renders the dq rules GROUPED (one card per rule, queried-first members) +
-  // STALE queries as INDIVIDUAL cards (real one-off decisions, never batched). The flat board.hk
-  // still feeds Today's-list + Help-me-pick unchanged. Rule-muted groups drop out here too.
-  const hkGroups = useMemo(
-    () => groupHousekeeping(board.hk, agents, currentUser?.mutedTaskRules, queries),
-    [board.hk, agents, currentUser, queries],
-  );
+  const board = assembled.board;
+  const hkGroups = assembled.hkGroups;
   const staleCards = useMemo(() => board.hk.filter((c) => c.taskType === "no_response_close"), [board.hk]);
   const mutedRules = (currentUser?.mutedTaskRules ?? []).filter((r): r is HkRule => r in HK_RULES);
   // ONE counts object read by BOTH the ribbon tiles and the lane headers (equality by construction).
@@ -404,16 +402,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      and the rendered columns all read IT. A sweep is one card everywhere; its member figure
      appears only inside the card, as n-of-m. `tiles` survives for the desk state and the
      assistant band, whose subjects genuinely are items, not cards. */
-  const boardSweeps = useMemo(
-    () => hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length, g.members.map((m) => m.card.key))),
-    [hkGroups],
-  );
-  const boardCols = useMemo(
-    () => boardColumns({ board, flags: taskFlags, queries, agents, sweeps: boardSweeps, today, nowMs: now }),
-    // now rides today's stability, as the board memo above already accepts
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [board, taskFlags, queries, agents, boardSweeps, today],
-  );
+  const boardCols = assembled.cols; // the same object the subtitle, FILTERS and badge read
   // Empty-state derivation (todo-empty-states.html): A = new desk (zero queries AND agents);
   // E = desk cleared (all three sets empty AND a non-empty done-log — earned, never default);
   // otherwise each reel handles its own clear. All pure views; nothing stored.
@@ -460,6 +449,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, [laterKey]);
   // the Later snoozes — the EXISTING primitives, day-parameterised (undo everywhere)
   function snoozeCard(c: BoardCard, days: number, when: string) {
+    /* ⚠️ AN OFFER'S SNOOZE IS CAPPED AT TOMORROW — AT THE CHOKE POINT (tasks-pages P2, walk fix
+       2). The menu's tiers already cap it, but a cap that lives only in one menu's options is a
+       cap every OTHER path walks past — which is how an offer surfaced reading "BACK 7 AUG". */
+    if (c.taskType === "offer_received" && days > 1) { days = 1; when = "tomorrow"; }
     const lane = (c.stream === "nt" ? "nt" : c.stream === "hk" ? "hk" : "do") as "do" | "hk" | "nt";
     const text = `Snoozed — back ${when}.`;
     if (c.userTaskId) {
@@ -1105,7 +1098,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             onClose={closeDock}
             timeline={dockTimeline}
             onPrimary={(c, spec) => void dockPrimary(c, spec)}
-            onSnooze={(c) => setLaterKey(c.key)}
+            onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}
             onMore={(c) => openFlowCards([c])}
           />
         ) : renderBoard()}

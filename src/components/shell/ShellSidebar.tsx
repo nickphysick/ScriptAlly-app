@@ -33,7 +33,7 @@ import {
 import { assembleBoard } from "../../lib/todoBoard";
 import { groupHousekeeping, hkGapCount } from "../../lib/todoHousekeeping";
 import { isFlagSuppressing } from "../../lib/taskFlags";
-import { todoBadgeCount, todoCounts } from "../../lib/todoCount";
+import { assembleBoardColumns, boardFigures } from "../../lib/todoColumns";
 
 /** The shared active-manuscript key (the Package Workshop / Comps / Manuscripts convention). */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -58,16 +58,18 @@ export function useShellNavCounts(): Record<string, number> {
 
      The number comes from lib/todoCount, the law's one implementation, so the badge cannot drift
      from the page counts or the board. */
+  /* ⚠️ THE BADGE IS A CONSUMER OF THE ONE DERIVATION (tasks-pages P2, walk fix 1). It was left
+     on the member-unit law when P5 moved the page to cards — 42 in the nav beside "fifteen
+     cards" on the page, both "correct" in their own unit. It now walks the SAME
+     assembleBoardColumns as every Tasks page and shows the SAME figure the subtitle speaks:
+     the live columns' cards. */
   const todoTotal = useMemo(() => {
     const now = Date.now();
-    const board = assembleBoard({
+    const { cols } = assembleBoardColumns({
       tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
-      now, mutedTaskRules: currentUser?.mutedTaskRules, today: localYMD(now),
+      now, today: localYMD(now), mutedTaskRules: currentUser?.mutedTaskRules,
     });
-    const groups = groupHousekeeping(board.hk, agents, currentUser?.mutedTaskRules, queries);
-    const stale = board.hk.filter((c) => c.taskType === "no_response_close");
-    const snoozed = taskFlags.filter((f) => isFlagSuppressing(f, now)).length;
-    return todoBadgeCount(todoCounts(board, hkGapCount(groups) + stale.length, snoozed));
+    return boardFigures(cols).cards;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules]);
 

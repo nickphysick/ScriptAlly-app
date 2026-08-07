@@ -23,7 +23,8 @@ import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
-import { assembleBoard, todaySplit, BoardCard } from "../../lib/todoBoard";
+import { todaySplit, BoardCard } from "../../lib/todoBoard";
+import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { localYMD } from "../../lib/shellSidebar";
 import {
   todaySubtitle, clearedAtLabel, suggestedBench, todayQuickAddFields, benchHeading,
@@ -54,8 +55,11 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   const now = Date.now();
   const today = localYMD(now);
 
-  const board = useMemo(
-    () => assembleBoard({
+  /* ⚠️ THE ONE DERIVATION (tasks-pages P2, walk fix 1): the SAME assembleBoardColumns the board
+     page and the sidebar badge use, identically scoped — this page's FILTERS used to count the
+     raw lanes (members, blind to Snoozed) and read 27/24 against the list's 15/12. */
+  const assembled = useMemo(
+    () => assembleBoardColumns({
       tasks, userTasks, queries, agents, manuscripts, taskFlags, activities,
       now, today, mutedTaskRules: currentUser?.mutedTaskRules,
     }),
@@ -63,6 +67,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules],
   );
+  const board = assembled.board;
 
   const split = todaySplit(board, today);
   const committed = applyFacet(split.committed, facet);
@@ -148,7 +153,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
              list is already a single committed set, so the facet narrows what it shows without the
              board's four columns behind it. */
           <TodoSideContainer
-            counts={facetCounts([...board.do, ...board.hk, ...board.nt])}
+            counts={facetCounts(liveBoardCards(assembled.cols))}
             active={facet}
             onSelect={setFacet}
             onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}

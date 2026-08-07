@@ -59,7 +59,13 @@ export function todoCounts(
   };
 }
 
-/** The single number the sidebar badge shows. Named so no caller has to remember the rule. */
+/** ⚠️ SUPERSEDED AS THE BADGE (tasks-pages P2, walk fix 1). The badge now shows the CARDS
+ *  figure — boardFigures(assembleBoardColumns(...).cols).cards in todoColumns — the same number
+ *  the page subtitle speaks, through the same derivation every Tasks page counts with. This
+ *  member-unit figure said 42 beside a page saying "fifteen cards": both correct in their own
+ *  unit, which is exactly the two-numbers-both-called-To-do fault this file was written to end.
+ *  `todoCounts` itself survives (the per-list rows still speak items); this alias keeps the old
+ *  name for its remaining test consumers and no live surface. */
 export function todoBadgeCount(counts: TodoCounts): number {
   return counts.actionable;
 }

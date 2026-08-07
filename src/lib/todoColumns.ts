@@ -21,8 +21,9 @@
  * cannot quietly drift into a second answer.
  */
 
-import { BoardCard, AssembledBoard } from "./todoBoard";
-import { TaskFlag, Query, Agent } from "../types";
+import { BoardCard, AssembledBoard, derivedCopy, assembleBoard, BoardInput } from "./todoBoard";
+import { groupHousekeeping, HkGroup } from "./todoHousekeeping";
+import { TaskFlag, Query, Agent, Manuscript, UserTask, Task } from "../types";
 import { isSnoozed } from "./todoListPage";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 import { cardFamily } from "./todoFamily";
@@ -68,8 +69,15 @@ export interface ColumnInput {
   board: AssembledBoard;
   /** The FULL flags — the Snoozed column is built from them, so it needs their shape. */
   flags: TaskFlag[];
-  queries: Pick<Query, "id" | "agentId">[];
-  agents: Pick<Agent, "id" | "name" | "agency">[];
+  /* ⚠️ FULL queries now (tasks-pages P2): the Snoozed rebuild speaks the card's ORIGINAL title
+     through derivedCopy, which reads the query's status and dates — a Pick could not carry them
+     and the column was reduced to the "{name} — put away" template this widening retires. */
+  queries: Query[];
+  agents: Agent[];
+  manuscripts?: Manuscript[];
+  /** The raw user-task collection — a SNOOZED user task is filtered out of the board before
+   *  assembly, so its text can only come from here. */
+  userTasks?: UserTask[];
   /** The housekeeping rule groups, already built by the page, as sweep cards. */
   sweeps: { card: SweepCard; memberKeys: string[] }[];
   today: string;
@@ -104,22 +112,16 @@ export function boardEligible(cards: BoardCard[]): BoardCard[] {
  */
 export interface SnoozedInput {
   flags: TaskFlag[];
-  queries: Pick<Query, "id" | "agentId">[];
-  agents: Pick<Agent, "id" | "name" | "agency">[];
+  queries: Query[];
+  agents: Agent[];
+  manuscripts?: Manuscript[];
+  userTasks?: UserTask[];
   nowMs: number;
 }
 
-/** The KIND facet for a snoozed card — the same vocabulary the lanes use. */
-const SNOOZED_KIND: Record<string, string> = {
-  offer_received: "OFFER",
-  partial_requested: "AGENT WAITING",
-  full_requested: "AGENT WAITING",
-  revise_resubmit: "AGENT WAITING",
-  nudge_overdue: "AGENT WAITING",
-  no_response_close: "STALE",
-  data_quality_poor: "DETAILS",
-  user_task: "YOUR TASK",
-};
+/* (SNOOZED_KIND is RETIRED — tasks-pages P2, walk fix 3. It restated each card's facet on a
+   sleeping card whose band now says what matters while it sleeps: SNOOZED · BACK {date}. The
+   TITLE carries the work's identity, rebuilt through derivedCopy — never a template.) */
 
 /** "Back 12 Aug" — a snoozed card's right-hand slot states when it returns, which is the only
  *  fact about it that matters while it is asleep. */
@@ -135,16 +137,26 @@ export function snoozedCards(input: SnoozedInput): BoardCard[] {
     .map((f) => {
       const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
       const ag = input.agents.find((a) => a.id === (f.agentId ?? q?.agentId));
+      const ms = q ? input.manuscripts?.find((m) => m.id === q.manuscriptId) : undefined;
       const who = ag ? agentPrimary(ag) : "";
-      const kind = SNOOZED_KIND[f.taskType] ?? "SNOOZED";
+      /* ⚠️ THE ORIGINAL TITLE, KEPT (tasks-pages P2, walk fix 3). "Tom Ellery — put away" told
+         you who, not WHAT — the work's identity vanished the moment it slept. A user task keeps
+         its own text; a derived card rebuilds its title through derivedCopy — THE title source,
+         never a second template. The band carries the sleeping state: SNOOZED · BACK {date}. */
+      const userTask = f.taskType === "user_task" && f.queryId
+        ? input.userTasks?.find((t) => t.id === f.queryId)
+        : undefined;
+      const rebuilt = f.taskType === "user_task"
+        ? (userTask?.text ?? "Task")
+        : derivedCopy({ taskType: f.taskType, title: "", context: "" } as unknown as Task, q, ag, ms, input.nowMs).title;
       return {
         key: `snz-${f.id}`,
         stream: "hk" as const,
-        title: who ? `${who} — put away` : "Put away",
+        title: rebuilt || (who ? who : "Snoozed"),
         who,
         subtitle: "",
         due: f.snoozedUntil ? backOnLabel(f.snoozedUntil) : "ASLEEP",
-        kind,
+        kind: "SNOOZED",
         warn: false,
         snoozes: f.snoozeCount ?? 0,
         hk: true,
@@ -254,7 +266,8 @@ export function boardColumns(input: ColumnInput): BoardColumns {
   // everything asleep has already been filtered out of them. This is the ONE source the LISTS
   // row and the chip strip also count.
   const snoozed = boardEligible(snoozedCards({
-    flags: input.flags, queries: input.queries, agents: input.agents, nowMs: input.nowMs,
+    flags: input.flags, queries: input.queries, agents: input.agents,
+    manuscripts: input.manuscripts, userTasks: input.userTasks, nowMs: input.nowMs,
   }));
 
   // Done is today's log, projected — the SAME `cleared` union the Today page reads.
@@ -277,6 +290,38 @@ export const BOARD_COL_CAP = 8;
 export function columnSlice(cards: BoardCard[], expanded: boolean): { visible: BoardCard[]; more: number } {
   if (expanded || cards.length <= BOARD_COL_CAP) return { visible: cards, more: 0 };
   return { visible: cards.slice(0, BOARD_COL_CAP), more: cards.length - BOARD_COL_CAP };
+}
+
+/**
+ * ⚠️ THE ONE DERIVATION, ASSEMBLED ONCE (tasks-pages P2, walk fix 1). The sidebar badge said 42
+ * while the page said 15 cards, and Today's FILTERS said 27/24 against the list's 15/12 — four
+ * surfaces, three hand-assembled pipelines, two units. The badge was still on the member-unit
+ * law; Today still fed its FILTERS the raw lanes. EVERY consumer now walks through here:
+ * assemble → group housekeeping → sweeps → columns, identically scoped, and counts come off the
+ * result (boardFigures / facetCounts over liveBoardCards). A count that wants to differ now has
+ * to fork this function in plain sight.
+ */
+export interface AssembleColumnsInput extends Omit<BoardInput, "userTasks"> {
+  userTasks: BoardInput["userTasks"];
+  /** The composer's in-flight create — hidden until the write resolves (save-and-today P1). */
+  hiddenUserTaskId?: string | null;
+}
+
+export function assembleBoardColumns(input: AssembleColumnsInput): {
+  board: AssembledBoard; hkGroups: HkGroup[]; cols: BoardColumns;
+} {
+  const userTasks = input.hiddenUserTaskId
+    ? input.userTasks.filter((t) => t.id !== input.hiddenUserTaskId)
+    : input.userTasks;
+  const board = assembleBoard({ ...input, userTasks });
+  const hkGroups = groupHousekeeping(board.hk, input.agents, input.mutedTaskRules, input.queries);
+  const sweeps = hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length, g.members.map((m) => m.card.key)));
+  const cols = boardColumns({
+    board, flags: input.taskFlags, queries: input.queries, agents: input.agents,
+    manuscripts: input.manuscripts, userTasks: input.userTasks, sweeps,
+    today: input.today, nowMs: input.now,
+  });
+  return { board, hkGroups, cols };
 }
 
 /**

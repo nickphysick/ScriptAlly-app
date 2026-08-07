@@ -187,7 +187,10 @@ export function offerQuiet(snoozedUntil: string | undefined | null, replyByMs: n
 }
 
 /** The derived-task card copy (title/who/subtitle/due/warn/status/hk). */
-function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms: Manuscript | undefined, now: number) {
+/** EXPORTED for the Snoozed column's rebuild (tasks-pages P2): a sleeping flag names its
+ *  taskType and record, and THIS is the one place a derived card's title comes from — a second
+ *  title template in todoColumns would drift the moment this one changed. */
+export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms: Manuscript | undefined, now: number) {
   const name = ag ? agentPrimary(ag) : "an agent";
   const msTitle = ms?.title ?? "";
   const agentWait = () => (q ? queryAmbientStatus(q, "agent", undefined, now) : null);
@@ -437,7 +440,7 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
   const clearedCards: BoardCard[] = [
     // ⚠️ userTaskId rides the done card (board fixes II P1): the Done column's ⋯ menu offers
     // "Undo — put it back" only where an untick primitive exists, and the id is how it finds it.
-    ...cleared.userTasks.map((t) => ({ ...blankDone(`done-task-${t.id}`), title: t.text || "Task", record: "Your task", whenMs: msOf(t.completedAt), userTaskId: t.id })),
+    ...cleared.userTasks.map((t) => ({ ...blankDone(`done-task-${t.id}`), title: t.text || "Task", record: "Your task", whenMs: msOf(t.completedAt), due: doneClock(msOf(t.completedAt)), userTaskId: t.id })),
     ...cleared.activities.map((a, i) => clearedActivityCard(a, i, input)),
     ...cleared.flags.map((f, i) => clearedFlagCard(f, i, input)),
   ].sort((a, b) => (b.whenMs ?? 0) - (a.whenMs ?? 0));
@@ -629,19 +632,28 @@ export function terseDoneLabel(a: Pick<Activity, "activityType" | "description" 
   return a.description || String(type);
 }
 
+/** The done band's clock — "16:44". Local time, en-GB, from the completion instant. */
+function doneClock(ms: number | undefined): string {
+  if (!ms || Number.isNaN(ms)) return "";
+  return new Date(ms).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+/* ⚠️ THE DONE BAND IS POPULATED (tasks-pages P2, walk fix 4; ref band `✓ DONE | 16:44`). These
+   cards used to carry kind "" and due "" — a BLANK band on every Done card, reading as a fault.
+   The kind lane states the state; each builder stamps the completion time on the right. */
 function blankDone(key: string): BoardCard {
-  return { key, stream: "done", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: true };
+  return { key, stream: "done", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: true, kind: "✓ DONE" };
 }
 function clearedActivityCard(a: Activity, i: number, input: BoardInput): BoardCard {
   const q = input.queries.find((x) => x.id === a.queryId);
   const ag = q ? input.agents.find((x) => x.id === q.agentId) : undefined;
-  return { ...blankDone(`done-act-${a.id ?? i}`), title: terseDoneLabel(a, ag ? agentPrimary(ag) : undefined), record: ag ? agentPrimary(ag) : "Query", whenMs: msOf(a.date) };
+  return { ...blankDone(`done-act-${a.id ?? i}`), title: terseDoneLabel(a, ag ? agentPrimary(ag) : undefined), record: ag ? agentPrimary(ag) : "Query", whenMs: msOf(a.date), due: doneClock(msOf(a.date)) };
 }
 function clearedFlagCard(f: TaskFlag, i: number, input: BoardInput): BoardCard {
   const ag = f.agentId ? input.agents.find((x) => x.id === f.agentId) : undefined;
   const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
   const agent2 = q ? input.agents.find((x) => x.id === q.agentId) : ag;
-  return { ...blankDone(`done-flag-${f.id ?? i}`), title: agent2 ? `${agentPrimary(agent2)} — sorted` : "Sorted", record: "Housekeeping", whenMs: msOf(f.resolvedAt) };
+  return { ...blankDone(`done-flag-${f.id ?? i}`), title: agent2 ? `${agentPrimary(agent2)} — sorted` : "Sorted", record: "Housekeeping", whenMs: msOf(f.resolvedAt), due: doneClock(msOf(f.resolvedAt)) };
 }
 
 /* ── THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1) ─────

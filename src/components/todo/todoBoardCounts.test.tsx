@@ -18,6 +18,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
+import { Query, Agent } from "../../types";
 import {
   boardColumns, sweepCardFor, liveBoardCards, boardFigures, boardSubtitleCopy, cardWeight, columnWeight,
 } from "../../lib/todoColumns";
@@ -54,8 +55,8 @@ function fixture() {
       cleared: [card({ key: "cleared", stream: "done" as const, done: true, kind: "DONE" })],
     },
     flags: [{ id: "f1", userId: "u", taskType: "no_response_close", queryId: "q9", snoozeCount: 1, snoozedUntil: "2026-08-08T00:00:00Z" }],
-    queries: [{ id: "q9", agentId: "a9" }],
-    agents: [{ id: "a9", name: "Marcus Reed", agency: "Reed Literary" }],
+    queries: [{ id: "q9", agentId: "a9", status: "Query Sent" } as unknown as Query],
+    agents: [{ id: "a9", name: "Marcus Reed", agency: "Reed Literary" } as unknown as Agent],
     sweeps: [sweepCardFor("dq_materials", "Materials", sweepMembers.length, sweepMembers.map((m) => m.key))],
     today: TODAY,
     nowMs: NOW,
@@ -136,7 +137,9 @@ describe("the copy, at its edges", () => {
     expect(fn).toContain("applyFacet(boardCols.todo, facet)");
     /* the old member-unit SUBTITLE is extinct. (`tiles` itself survives, deliberately, for the
        desk state and the assistant band — surfaces whose subject genuinely is items, not cards.) */
-    const sub = page.slice(page.indexOf("function boardSubtitle"), page.indexOf("function renderPageHeader"));
+    // tasks-pages P1 renamed the neighbour: anchor restated per the slice law
+    expect(page).toContain("function renderTools");
+    const sub = page.slice(page.indexOf("function boardSubtitle"), page.indexOf("function renderTools"));
     expect(sub).not.toContain("tiles.");
   });
 });

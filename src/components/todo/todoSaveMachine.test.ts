@@ -103,7 +103,10 @@ describe("save machine P1 — idle → pending → (saved | failed)", () => {
   });
 
   it("NO FLICKER: the in-flight create is hidden from the board until it resolves (inserted once, never removed)", () => {
-    expect(page).toContain("userTasks: pendingSaveId ? userTasks.filter((t) => t.id !== pendingSaveId) : userTasks");
+    /* tasks-pages P2 moved the hide into the ONE derivation's input — same contract, one home. */
+    expect(page).toContain("hiddenUserTaskId: pendingSaveId");
+    const cols = readFileSync(join(here, "..", "..", "lib", "todoColumns.ts"), "utf8");
+    expect(cols).toContain("input.userTasks.filter((t) => t.id !== input.hiddenUserTaskId)");
     expect(page).toContain("[tasks, userTasks, pendingSaveId,"); // the board recomputes as the id clears
   });
 
