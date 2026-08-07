@@ -88,6 +88,9 @@ export const feedRows = (
 /* ── the rail ── */
 
 export interface OneScreenRailProps {
+  /* lifted to the page so the tour can collapse the rail before starting (§12) */
+  expanded: boolean;
+  setExpanded: (on: boolean) => void;
   loading: boolean;
   queries: Query[];
   agents: Agent[];
@@ -102,10 +105,9 @@ export interface OneScreenRailProps {
 }
 
 export const OneScreenRail: React.FC<OneScreenRailProps> = ({
-  loading, queries, agents, manuscripts, activities, currentUser, activeManuscript,
-  onNavigate, updateUserProfile, now,
+  expanded, setExpanded, loading, queries, agents, manuscripts, activities, currentUser,
+  activeManuscript, onNavigate, updateUserProfile, now,
 }) => {
-  const [expanded, setExpanded] = useState(false);
   const [editingGoal, setEditingGoal] = useState(false);
   const [goalDraft, setGoalDraft] = useState({ target: 25, period: "quarter" as GoalPeriod });
   const actvRef = useRef<HTMLDivElement>(null);

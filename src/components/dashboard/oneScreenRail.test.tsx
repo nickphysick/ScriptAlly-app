@@ -62,6 +62,7 @@ describe("§6 · the 30-day feed", () => {
 describe("the rendered rail", () => {
   const html = renderToStaticMarkup(
     <OneScreenRail
+      expanded={false} setExpanded={() => {}}
       loading={false} queries={[]} agents={[]} manuscripts={manuscripts} userTasks={[]}
       activities={[act({})]}
       currentUser={{ id: "u", name: "Nick Physick", plan: UserPlan.FREE, goalTarget: 25, goalPeriod: "quarter" } as any}
@@ -103,6 +104,7 @@ describe("the rendered rail", () => {
   it("no goal set → the ghost meter and Set a goal, never fake progress", () => {
     const bare = renderToStaticMarkup(
       <OneScreenRail
+        expanded={false} setExpanded={() => {}}
         loading={false} queries={[]} agents={[]} manuscripts={[]} userTasks={[]} activities={[]}
         currentUser={{ id: "u", name: "N", plan: UserPlan.FREE } as any}
         activeManuscript={null} onNavigate={() => {}} updateUserProfile={async () => {}} now={NOW}

@@ -18,7 +18,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
 import { longDate, weekOfQuerying } from "../../lib/dashboardStats";
-import { achievementPill, Achievement, runStage, tenureLine } from "../../lib/oneScreen";
+import { achievementPill, Achievement, runStage, tenureLine, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
+import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
@@ -81,6 +82,46 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   const lockH = useStageLock();
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
+  /* ── §12 · the tour ── */
+  const [touring, setTouring] = useState(false);
+  /* the rail's expanded state is lifted here so the tour can collapse it before starting */
+  const [railExpanded, setRailExpanded] = useState(false);
+  const tourChipRef = useRef<HTMLButtonElement>(null);
+  const autoRan = useRef(false);
+  const wideEnough = () => typeof window !== "undefined" && window.innerWidth > TOUR_BREAKPOINT;
+  /* the 7-day chip derives from the AUTH account's creation time — never a stored flag.
+     ⚠️ LAZY-LOADED IN AN EFFECT: importing lib/firebase at module level initialises the SDK,
+     which the node test environment cannot do (and renderToStaticMarkup never runs effects, so
+     the tests never touch it). */
+  const [createdAt, setCreatedAt] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    import("../../lib/firebase")
+      .then(({ auth }) => { if (live) setCreatedAt(auth.currentUser?.metadata?.creationTime ?? undefined); })
+      .catch(() => { /* no auth (dev labs) → no chip, never a guess */ });
+    return () => { live = false; };
+  }, []);
+  const chipShows = tourChipShows(createdAt, now, wideEnough());
+
+  useEffect(() => {
+    if (loading || autoRan.current) return;
+    if (!tourAutoRuns(currentUser?.tourCompletedAt, wideEnough())) return;
+    autoRan.current = true;
+    const id = window.setTimeout(() => { setRailExpanded(false); setTouring(true); }, 700);
+    return () => window.clearTimeout(id);
+  }, [loading, currentUser?.tourCompletedAt]);
+
+  const endTour = (skipped: boolean) => {
+    setTouring(false);
+    tourChipRef.current?.focus(); // focus returns to the launcher (§12)
+    /* ⚠️ SKIPPING COUNTS AS COMPLETING for auto-run purposes — both roads stamp completion.
+       Rules-gated: silently denied until the firestore.rules revision deploys; the tour still
+       closes, it just may auto-run again next load until the rules land. */
+    void updateUserProfile(skipped
+      ? { tourCompletedAt: new Date().toISOString(), tourDismissed: true }
+      : { tourCompletedAt: new Date().toISOString() });
+  };
+
   /* One-time entrance stagger — the class is REMOVED after it runs (§6 trap: a persistent
      fill-mode would pin opacity against every later class change). */
   const rootRef = useRef<HTMLDivElement>(null);
@@ -121,6 +162,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
                   burgundy-italic name on the new spec's authority. */}
               <h1>Hello, {firstName}</h1>
               <span className="os-spacer" />
+              {chipShows && (
+                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>
+                  Take the tour
+                </button>
+              )}
               <span className="os-datechip">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
                 {longDate(now)}
@@ -170,6 +216,8 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         </div>
 
         <OneScreenRail
+          expanded={railExpanded}
+          setExpanded={setRailExpanded}
           loading={loading}
           queries={queries}
           agents={agents}
@@ -183,6 +231,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           now={now}
         />
       </div>
+      {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}
     </div>
   );
 };
