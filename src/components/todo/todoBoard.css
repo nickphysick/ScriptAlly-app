@@ -12,10 +12,20 @@
  * All of it switches off under prefers-reduced-motion — the lift becomes border darkening.
  */
 
+/* ⚠️ THE COLUMN MEASURE IS CAPPED, AND THE BOARD RAGS LEFT (board-optimise P1; ref
+   board-optimised.html §1 — the Linear/Things discipline). `1fr` columns stretched a card to
+   whatever the monitor offered: at 2560 the same four cards wore ~600px each, and a 13px title
+   in a 600px measure is a line you scan rather than read. Columns take a MAX of --tbd-col-w and
+   the surplus becomes calm left-to-right margin — wide screens get space, never wider cards.
+   `minmax(0, …)` keeps the min at zero so a long title still wraps instead of forcing overflow. */
 .tbd {
   --tbd-ground: #ffffff;
+  --tbd-col-w: 290px;
   --tbd-ease: cubic-bezier(.2, .7, .3, 1);
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, var(--tbd-col-w)));
+  justify-content: start;
+  gap: 20px; margin-top: 20px;
   align-items: start;
   font-variant-numeric: tabular-nums;
 }
@@ -252,5 +262,8 @@
   .tbd-ring { animation: none; opacity: 0; }
 }
 
-@media (max-width: 1100px) { .tbd { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .tbd { grid-template-columns: 1fr; } }
+/* ⚠️ THE NARROW STEPS KEEP THE CAP AND LOSE NOTHING: minmax(0, …) means a column may still
+   SHRINK below the cap when the viewport cannot afford it — that is what stops the capped grid
+   overflowing at the breakpoints. `1fr` here would let two columns stretch past 290 again. */
+@media (max-width: 1100px) { .tbd { grid-template-columns: repeat(2, minmax(0, var(--tbd-col-w))); } }
+@media (max-width: 640px) { .tbd { grid-template-columns: minmax(0, var(--tbd-col-w)); } }
