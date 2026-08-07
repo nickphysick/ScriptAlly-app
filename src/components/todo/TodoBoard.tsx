@@ -25,14 +25,14 @@
  * that returns and decides nothing per-kind itself.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { MoreHorizontal } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily,
   isSweepCard, wipLine, columnSlice,
 } from "../../lib/todoColumns";
-import { cardMenu, placeMenu, MenuEntry, MenuLeaf, MenuGroup } from "../../lib/todoMenu";
+import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
+import { PortalMenu } from "./PortalMenu";
 import "./todoBoard.css";
 
 export interface TodoBoardProps {
@@ -66,149 +66,24 @@ interface OpenMenu {
 }
 
 /**
- * The portal menu. Rendered once at board level for whichever card is open — never inside a
- * card, so no card style (overflow, transform, z-index) can clip or trap it.
+ * The board's menu — a thin feed into the SHARED PortalMenu (extracted, tasks-pages P4: the
+ * Noteboard's cards wear the same grammar from the same component). The portal, the placement,
+ * the closers and the keyboard all live THERE; this supplies the board's own contents model.
  */
 const BoardCardMenu: React.FC<{
   open: OpenMenu;
   onPick: (item: MenuLeaf) => void;
   onClose: (returnFocus: boolean) => void;
-}> = ({ open, onPick, onClose }) => {
-  const elRef = useRef<HTMLDivElement | null>(null);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-  const [sub, setSub] = useState<string | null>(open.openSub ?? null);
-  const groups = cardMenu(open.card, open.column);
-
-  /* Position after first paint (the menu's height depends on its contents), and re-place when a
-     submenu expands — the height change can push it past the viewport's bottom edge. */
-  useLayoutEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
-    const r = open.anchor.getBoundingClientRect();
-    const p = placeMenu(r, { w: el.offsetWidth, h: el.offsetHeight },
-      { w: window.innerWidth, h: window.innerHeight });
-    setPos({ left: p.left, top: p.top });
-  }, [open.anchor, sub]);
-
-  // Focus the first enabled item once placed — the keyboard arrives inside the menu.
-  useEffect(() => {
-    if (!pos) return;
-    const first = elRef.current?.querySelector<HTMLButtonElement>("button.tbd-mi:not(:disabled)");
-    first?.focus();
-    // run once, on placement — not again when a submenu re-places the menu
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pos !== null]);
-
-  /* The closers: outside press · Escape (focus back to the trigger) · any scroll · resize ·
-     history navigation. The trigger itself counts as "outside" here deliberately — its own click
-     handler toggles, and a pointerdown-close followed by a click-reopen would make the button
-     unable to close its menu. */
-  useEffect(() => {
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as Node | null;
-      if (t && (elRef.current?.contains(t) || open.anchor.contains(t))) return;
-      onClose(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.stopPropagation(); onClose(true); }
-    };
-    const onAway = () => onClose(false);
-    document.addEventListener("pointerdown", onDown);
-    // capture-phase: the stage scrolls, not the window — a bubbling listener would never hear it
-    document.addEventListener("keydown", onKey, true);
-    window.addEventListener("scroll", onAway, true);
-    window.addEventListener("resize", onAway);
-    window.addEventListener("popstate", onAway);
-    window.addEventListener("hashchange", onAway);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("scroll", onAway, true);
-      window.removeEventListener("resize", onAway);
-      window.removeEventListener("popstate", onAway);
-      window.removeEventListener("hashchange", onAway);
-    };
-  }, [open.anchor, onClose]);
-
-  const walk = (e: React.KeyboardEvent) => {
-    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-    e.preventDefault();
-    const items = Array.from(
-      elRef.current?.querySelectorAll<HTMLButtonElement>("button.tbd-mi:not(:disabled)") ?? [],
-    );
-    if (!items.length) return;
-    const i = items.indexOf(document.activeElement as HTMLButtonElement);
-    const next = e.key === "ArrowDown"
-      ? items[(i + 1 + items.length) % items.length]
-      : items[(i - 1 + items.length) % items.length];
-    next.focus();
-  };
-
-  const renderLeaf = (item: MenuLeaf, inSub: boolean) => (
-    <button
-      key={item.id + (inSub ? "-sub" : "")}
-      type="button"
-      role="menuitem"
-      className={`tbd-mi${item.weight ? " weight" : ""}${item.danger ? " danger" : ""}${inSub ? " insub" : ""}`}
-      disabled={item.disabled}
-      title={item.why}
-      onClick={() => onPick(item)}
-    >
-      {item.label}
-      {item.goes && <span className="tbd-mgo" aria-hidden>▸</span>}
-    </button>
-  );
-
-  const renderEntry = (entry: MenuEntry) => {
-    if (entry.kind === "leaf") return renderLeaf(entry, false);
-    const openSub = sub === entry.id;
-    return (
-      <React.Fragment key={entry.id}>
-        <button
-          type="button"
-          role="menuitem"
-          aria-haspopup="true"
-          aria-expanded={openSub}
-          className="tbd-mi"
-          onClick={() => setSub((s) => (s === entry.id ? null : entry.id))}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowRight") { e.preventDefault(); setSub(entry.id); }
-            if (e.key === "ArrowLeft") { e.preventDefault(); setSub(null); }
-          }}
-        >
-          {entry.label}
-          <span className={`tbd-mgo${openSub ? " open" : ""}`} aria-hidden>▸</span>
-        </button>
-        {openSub && <div className="tbd-misub">{entry.sub.map((s) => renderLeaf(s, true))}</div>}
-      </React.Fragment>
-    );
-  };
-
-  const renderGroup = (g: MenuGroup, i: number) => (
-    <React.Fragment key={i}>
-      {g.head ? (
-        <div className="tbd-mhead">{g.head}</div>
-      ) : (
-        i > 0 && <div className="tbd-msep" aria-hidden />
-      )}
-      {g.entries.map(renderEntry)}
-    </React.Fragment>
-  );
-
-  return createPortal(
-    <div
-      ref={elRef}
-      className="t-f12 tbd-menu2"
-      role="menu"
-      aria-label={`Actions for ${open.card.title}`}
-      style={pos ? { left: pos.left, top: pos.top } : { left: 0, top: 0, visibility: "hidden" }}
-      onKeyDown={walk}
-    >
-      {groups.filter((g) => g.entries.length > 0).map(renderGroup)}
-    </div>,
-    document.body,
-  );
-};
+}> = ({ open, onPick, onClose }) => (
+  <PortalMenu
+    anchor={open.anchor}
+    groups={cardMenu(open.card, open.column)}
+    openSub={open.openSub}
+    ariaLabel={`Actions for ${open.card.title}`}
+    onPick={onPick}
+    onClose={onClose}
+  />
+);
 
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;

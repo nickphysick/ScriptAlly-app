@@ -37,7 +37,7 @@ export interface TodoToast {
 export interface TodoToastApi {
   toast: TodoToast | null;
   /** Show a message, optionally with a takeback. */
-  flash: (msg: string, action?: ToastAction) => void;
+  flash: (msg: string, action?: ToastAction, ms?: number) => void;
   /** Dismiss now — which COMMITS, because the write already happened. */
   dismiss: () => void;
   /** Hover handlers for the pill: the timer holds while the cursor is on it. */
@@ -71,9 +71,11 @@ export function useTodoToast(): TodoToastApi {
     timer.current = window.setTimeout(() => setToast(null), ms);
   }, [clear]);
 
-  const flash = useCallback((msg: string, action?: ToastAction) => {
+  const flash = useCallback((msg: string, action?: ToastAction, ms?: number) => {
     setToast({ msg, action });
-    arm(action ? WITH_UNDO_MS : PLAIN_MS);
+    // tasks-pages P4: an explicit window may override the defaults (the Noteboard's delete undo
+    // holds 8s — user content deserves the longest way back).
+    arm(ms ?? (action ? WITH_UNDO_MS : PLAIN_MS));
   }, [arm]);
 
   const dismiss = useCallback(() => { clear(); setToast(null); }, [clear]);

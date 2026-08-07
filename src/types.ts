@@ -46,6 +46,8 @@ export interface User {
   // Housekeeping rules the writer has muted app-wide ("Don't ask again → All of them"). Per-item
   // mutes live on a TaskFlag instead. Muting stops the reminder; it never deletes the underlying gap.
   mutedTaskRules?: string[];
+  // tasks-pages P4/P5: the user's tag definitions (see TagDef).
+  tags?: TagDef[];
   // The To-do board's first-visit spotlight tour has run (ISO timestamp; set on Done OR skip — the
   // hasSeenTour pattern). Absent === never seen; the ? popover's "Replay the tour" ignores it.
   // NOTE: in the committed user-update allowlist (firestore.rules); live behaviour tracks the
@@ -526,6 +528,19 @@ export interface TaskFlag {
  */
 export type SurfaceOffset = "on-day" | "day-before" | "week-before";
 
+/* ⚠️ TAGS (tasks-pages P4 types · P5 model). User-owned labels applied to notes and tasks.
+   Labels are LOWERCASE, no spaces, unique per user; colour comes from the FIXED palette of the
+   existing family tones — assigned at creation, changeable, never free-form. Owned on the USER
+   doc (the mutedTaskRules pattern: small, listener-free); items carry tag IDS. Deleting a tag
+   detaches it from items and never deletes the items. */
+export type TagColour = "pink" | "sage" | "butter" | "latte" | "parchment";
+
+export interface TagDef {
+  id: string;
+  label: string;
+  colour: TagColour;
+}
+
 export interface UserTask {
   id: string;
   userId: string;
@@ -542,6 +557,9 @@ export interface UserTask {
   // notes-and-tasks: the in-app surfacing lead for a dated task — how early it joins Today's list
   // (on the day / a day early / a week early). Derived-over-stored at render; NEVER a notification.
   surfaceOffset?: SurfaceOffset;
+  // tasks-pages P4/P5: applied tag IDS (the defs live on the user doc). Survive note↔task
+  // conversion untouched — the date is the door, the tags are the luggage.
+  tags?: string[];
   // The day a reminder resurfaces — ISO date, NO time ("YYYY-MM-DD"). Every Stage-6 reminder (door
   // check-back, nudge remind-me, response-window) is a date-triggered task, so this is load-bearing,
   // not decoration: unset = a plain to-do; set = surfaces (and renders overdue) on that day. Dates

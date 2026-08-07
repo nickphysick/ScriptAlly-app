@@ -28,6 +28,10 @@ import { replyTask } from "./taskPrecedence";
  *  them here (the same suppress-while-snoozed rule the engine applies to derived tasks). */
 export const USER_TASK_FLAG_TYPE = "user_task";
 
+/** A NOTE, by the two-natures law: a user card that is dateless and unticked. The Noteboard's
+ *  membership predicate (tasks-pages P4) — lib-level so tests and pages share one definition. */
+export const isNoteTask = (t: Pick<UserTask, "dueDate" | "done">): boolean => !t.dueDate && !t.done;
+
 export type BoardStream = "do" | "hk" | "nt" | "done";
 
 /** Derived task types the board surfaces (querying_unstarted / dream_agent are OUT of scope). */

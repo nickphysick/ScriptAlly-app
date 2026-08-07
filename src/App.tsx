@@ -43,9 +43,9 @@ import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath } from "./lib/todoRoutes";
-import { TodoPlaceholderPage } from "./components/todo/TodoPlaceholderPage";
 import { TodoTodayPage } from "./components/todo/TodoTodayPage";
 import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
+import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { QueryAnalytics } from "./components/QueryAnalytics";
@@ -656,8 +656,9 @@ function AppContent() {
           <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
+        {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
         <StagePage active={routeKey === "todo" && todoPage === "noteboard"} contentVariant="read">
-          <TodoPlaceholderPage page="noteboard" />
+          <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;

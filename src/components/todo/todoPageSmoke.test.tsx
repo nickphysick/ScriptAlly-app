@@ -43,7 +43,7 @@ vi.mock("../../lib/db", () => ({
 import { ToDoPage } from "./ToDoPage";
 import { TodoTodayPage } from "./TodoTodayPage";
 import { TodoCalendarPage } from "./TodoCalendarPage";
-import { TodoPlaceholderPage } from "./TodoPlaceholderPage";
+import { TodoNoteboardPage } from "./TodoNoteboardPage";
 
 const render = (node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={["/todo"]}>{node}</MemoryRouter>);
@@ -96,9 +96,20 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("cal-pip");
   });
 
-  it("the Noteboard placeholder renders and says what it is", () => {
-    const html = render(<TodoPlaceholderPage page="noteboard" />);
+  /* tasks-pages P4 — the Noteboard is real too. Empty AND populated. */
+  it("the Noteboard renders, teaches when empty, and carries no sidebar", () => {
+    const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
     expect(html).toContain("Noteboard");
+    expect(html).toContain("Nothing pinned yet");     // the teaching state
+    expect(html).not.toContain("<aside");             // the contract's optional sidebar, absent
+  });
+
+  it("…and a pinned note REACHES the masonry (the populated smoke)", () => {
+    seed.userTasks = [{ id: "n1", userId: "u1", text: "Open with the flood", detail: "Chapter one drags.", done: false, createdAt: "2026-08-01T09:00:00Z", updatedAt: "" }];
+    const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
+    expect(html).toContain("Open with the flood");
+    expect(html).toContain("nb-grid");
+    expect(html).toContain("1 AUG"); // the pin date
   });
 });
 

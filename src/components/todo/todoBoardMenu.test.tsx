@@ -24,6 +24,10 @@ import { TodoBoard } from "./TodoBoard";
 
 const here = __dirname;
 const board = readFileSync(join(here, "TodoBoard.tsx"), "utf8");
+/* tasks-pages P4: the menu SHELL (portal, placement, closers, keyboard) was extracted to
+   PortalMenu so the Noteboard wears the same grammar — the shell locks read ITS source, and the
+   board is asserted to feed it. One component, two content models. */
+const menuShell = readFileSync(join(here, "PortalMenu.tsx"), "utf8");
 const css = readFileSync(join(here, "todoBoard.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 
@@ -42,9 +46,10 @@ const entryOf = (c: BoardCard, col: "todo" | "today" | "snoozed" | "done", id: s
 /* ── the portal ────────────────────────────────────────────────────────────────────────────── */
 
 describe("⚠️ the menu is a PORTAL — never a descendant of the card", () => {
-  it("mounts through createPortal to document.body", () => {
-    expect(board).toContain("createPortal(");
-    expect(board).toContain("document.body,");
+  it("mounts through createPortal to document.body — via the SHARED PortalMenu", () => {
+    expect(menuShell).toContain("createPortal(");
+    expect(menuShell).toContain("document.body,");
+    expect(board).toContain("<PortalMenu"); // the board feeds it, never a lookalike
   });
 
   it("a rendered board contains no menu markup — the card subtree cannot clip what it does not hold", () => {
@@ -63,16 +68,16 @@ describe("⚠️ the menu is a PORTAL — never a descendant of the card", () =>
   });
 
   it("positions fixed from the trigger's rect via the pure placeMenu", () => {
-    expect(board).toContain("placeMenu(");
+    expect(menuShell).toContain("placeMenu(");
     expect(css).toMatch(/\.tbd-menu2\s*\{[^}]*position:\s*fixed/);
   });
 
   it("closes on outside press, Escape, scroll, resize and history navigation", () => {
-    expect(board).toContain('document.addEventListener("pointerdown", onDown)');
-    expect(board).toContain('"scroll", onAway, true'); // capture — the stage scrolls, not the window
-    expect(board).toContain('"resize", onAway');
-    expect(board).toContain('"popstate", onAway');
-    expect(board).toContain('e.key === "Escape"');
+    expect(menuShell).toContain('document.addEventListener("pointerdown", onDown)');
+    expect(menuShell).toContain('"scroll", onAway, true'); // capture — the stage scrolls, not the window
+    expect(menuShell).toContain('"resize", onAway');
+    expect(menuShell).toContain('"popstate", onAway');
+    expect(menuShell).toContain('e.key === "Escape"');
   });
 });
 
@@ -300,23 +305,23 @@ describe("⚠️ performCardVerb routes each leaf to the verb that already owns 
 
 describe("⚠️ the focus round trip (source-locked; no DOM here to run it)", () => {
   it("opening focuses the first enabled item", () => {
-    expect(board).toContain('querySelector<HTMLButtonElement>("button.tbd-mi:not(:disabled)")');
-    expect(board).toContain("first?.focus()");
+    expect(menuShell).toContain('querySelector<HTMLButtonElement>("button.tbd-mi:not(:disabled)")');
+    expect(menuShell).toContain("first?.focus()");
   });
 
   it("↑↓ walk the enabled items, wrapping", () => {
-    expect(board).toContain('e.key !== "ArrowDown" && e.key !== "ArrowUp"');
-    expect(board).toContain("(i + 1 + items.length) % items.length");
+    expect(menuShell).toContain('e.key !== "ArrowDown" && e.key !== "ArrowUp"');
+    expect(menuShell).toContain("(i + 1 + items.length) % items.length");
   });
 
   it("Escape returns focus to the trigger", () => {
-    expect(board).toContain("onClose(true)");
-    expect(board).toContain("m.anchor.focus()");
+    expect(menuShell).toContain("onClose(true)");
+    expect(board).toContain("m.anchor.focus()"); // the board still returns focus to ITS trigger
   });
 
   it("submenus open with ArrowRight and close with ArrowLeft", () => {
-    expect(board).toContain('e.key === "ArrowRight"');
-    expect(board).toContain('e.key === "ArrowLeft"');
+    expect(menuShell).toContain('e.key === "ArrowRight"');
+    expect(menuShell).toContain('e.key === "ArrowLeft"');
   });
 });
 

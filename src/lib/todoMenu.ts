@@ -37,7 +37,8 @@ export type MenuItemId =
   | "open-query"
   | "view-agent"
   | "edit-task"
-  | "delete-task";
+  | "delete-task"
+  | "give-date";   // the Noteboard's conversion door (tasks-pages P4)
 
 export interface MenuLeaf {
   kind: "leaf";
@@ -170,6 +171,30 @@ export function cardMenu(card: BoardCard, column: TodoColumnId): MenuGroup[] {
     });
   }
   return groups;
+}
+
+/**
+ * ⚠️ THE NOTEBOARD'S ⋯ MENU (tasks-pages P4) — grouped as everywhere else, through the same
+ * PortalMenu shell. A note is USER CONTENT, the only deletable kind, so Delete is here — behind
+ * the styled confirm and an 8s undo at the page. "Give it a date…" is the CONVERSION door: one
+ * write (dueDate), and the note becomes a task — leaves this board, joins Your tasks, appears on
+ * the Calendar. ("Tags…" joins this menu in Phase 5 WITH its picker — a menu line shipped ahead
+ * of its surface would be a dead affordance.)
+ */
+export function noteMenu(): MenuGroup[] {
+  return [
+    {
+      head: null,
+      entries: [
+        leaf("edit-task", "Edit the note…"),
+        leaf("give-date", "Give it a date…"),
+      ],
+    },
+    {
+      head: null,
+      entries: [leaf("delete-task", "Delete the note…", { danger: true })],
+    },
+  ];
 }
 
 /* ── placement ─────────────────────────────────────────────────────────────────────────────── */

@@ -41,7 +41,9 @@ export const PAGE_SOURCES = [
   "components/Onboarding.tsx",
   "components/todo/ToDoPage.tsx",
   "components/todo/TodoTodayPage.tsx",
-  "components/todo/TodoPlaceholderPage.tsx",
+  // tasks-pages P3/P4: the placeholder retired with its last consumer; the real pages join
+  "components/todo/TodoCalendarPage.tsx",
+  "components/todo/TodoNoteboardPage.tsx",
   "marketing/Landing.tsx",
   "marketing/MarketingShell.tsx",
   "components/shell/AppShell.tsx",

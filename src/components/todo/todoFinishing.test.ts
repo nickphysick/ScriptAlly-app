@@ -78,7 +78,9 @@ describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)"
     // replacement semantics: flash unconditionally swaps the toast + re-arms — the previous
     // action's write already happened, so replacement simply ends its takeback window
     expect(hook).toContain("setToast({ msg, action });");
-    expect(hook).toContain("arm(action ? WITH_UNDO_MS : PLAIN_MS);");
+    // tasks-pages P4: flash may take an explicit window (the Noteboard's 8s delete undo) — the
+    // defaults are unchanged and the override rides the SAME arm, never a second timer.
+    expect(hook).toContain("arm(ms ?? (action ? WITH_UNDO_MS : PLAIN_MS));");
   });
   it("keyboard: the toast is a status region, Undo is a real button, Esc dismisses (= commits)", () => {
     expect(hook).toContain('if (e.key === "Escape") dismiss();');

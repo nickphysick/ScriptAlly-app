@@ -345,12 +345,17 @@ export function boardFigures(cols: BoardColumns): { cards: number; urgent: numbe
 
 /** The header's one line, from the SAME figures. Numbers ≤ twelve read as words (the dashboard
  *  eyebrow's convention); the noun is CARDS, because that is what the columns show. */
+/** Numbers ≤ twelve read as words (the dashboard eyebrow's convention) — exported so page copy
+ *  never grows a second spelling table (tasks-pages P4: the Noteboard's subtitle reuses it). */
+export function spellNumber(n: number): string {
+  const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+  return n <= 12 ? words[n] : String(n);
+}
+
 export function boardSubtitleCopy(f: { cards: number; urgent: number }): string {
   if (f.cards === 0) return "Nothing waiting on you.";
-  const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
-  const spell = (n: number) => (n <= 12 ? words[n] : String(n));
-  const urgent = f.urgent > 0 ? `, ${spell(f.urgent)} urgent` : "";
-  return `Everything waiting on you — ${spell(f.cards)} card${f.cards === 1 ? "" : "s"}${urgent}.`;
+  const urgent = f.urgent > 0 ? `, ${spellNumber(f.urgent)} urgent` : "";
+  return `Everything waiting on you — ${spellNumber(f.cards)} card${f.cards === 1 ? "" : "s"}${urgent}.`;
 }
 
 /**
