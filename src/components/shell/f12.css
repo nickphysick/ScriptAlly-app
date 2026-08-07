@@ -513,7 +513,14 @@
      Export/Log query buttons' right edge, at every breakpoint including the narrow step where
      --sa-col-gut drops to 16px. It previously used --maxw (1520px) with no inset, which is why
      the hairline ran to the sheet's edges. Vertical margins are untouched. */
-  width: calc(100% - 2 * var(--sa-col-gut)); max-width: var(--sa-col-max); margin: 22px auto 26px;
+  /* ⚠️ NO CAP — the inset is a constant, not a share of the leftover. With `max-width` the frame
+     capped at --sa-col-max and CENTRED, so past ~1360px of sheet the margins stopped being the
+     gutter and became half the surplus: 87px at 1440, ~280px at 1800. The frame is now simply the
+     sheet minus one gutter each side, at every width.
+     THE TRADE, deliberate: the header column still caps and centres, so past that width the frame
+     is WIDER than the header and the title/buttons sit inside its edges rather than on them —
+     the old workspace differential, but inset by the gutter instead of running to the sheet. */
+  width: calc(100% - 2 * var(--sa-col-gut)); margin: 22px auto 26px;
   padding: 20px 22px;
   border: 1px solid var(--line); border-radius: 18px;
 }
