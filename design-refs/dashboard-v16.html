@@ -776,8 +776,34 @@
   .colR{gap:13px;}
 
   /* ---- header: muted date above, large bold greeting, goals to the right ---- */
-  .greet{display:flex; align-items:flex-start; gap:18px; padding:14px 2px 26px;}
-  .greet .gl{flex:1; min-width:0;}
+  .greet{display:flex; align-items:center; gap:32px; padding:14px 2px 26px;}
+
+  /* counters: a card in the header's spare width, contents centred within it */
+  .counters{
+    flex:1; min-width:0; display:flex; align-items:stretch;
+    padding:16px 10px; background:var(--card);
+    border:1px solid var(--border); border-radius:15px;
+    box-shadow:var(--shadow-card);
+  }
+  .counters .ct{
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    flex:1; min-width:0; padding:2px 14px;
+    border-left:1px solid var(--hairline);
+  }
+  .counters .ct:first-child{border-left:none;}
+  .counters .cic{
+    width:38px; height:38px; border-radius:50%; flex-shrink:0;
+    background:var(--pink-soft); border:1px solid #f0dccd;
+    display:grid; place-items:center;
+  }
+  .counters .cic svg{width:16px; height:16px; stroke:var(--burgundy); fill:none; stroke-width:1.7;}
+  .counters .cw{min-width:0;}
+  .counters .cl{font-size:12px; color:#5c5148; white-space:nowrap;}
+  .counters .cv{display:flex; align-items:baseline; gap:8px; margin-top:4px;}
+  .counters .cn{font-family:'Playfair Display',serif; font-size:24px; font-weight:500; color:#241811; line-height:1; font-variant-numeric:tabular-nums;}
+  .counters.lift:hover{box-shadow:var(--shadow-card);}
+  .counters .cd{font-size:10px; border-radius:99px; padding:2px 8px; white-space:nowrap; background:var(--sage-soft); border:1px solid #d6ddd2; color:#3f5a3c;}
+  .greet .gl{flex:0 0 auto; min-width:0;}
   .greet .dateline{
     font-size:12.5px; color:#a4968a; letter-spacing:.01em; margin-bottom:5px;
   }
@@ -968,12 +994,20 @@
     .content{grid-template-columns:minmax(0,1fr) 340px;}
     .midrow{grid-template-columns:230px minmax(0,1fr);}
     .greet h1{font-size:40px;}
+    .greet{gap:24px;}
+    .counters{padding:14px 6px;}
+    .counters .ct{padding:2px 10px; gap:10px;}
+    .counters .cn{font-size:21px;}
     .goalhead{width:252px;}
   }
   @media (max-width:1240px){
     .content{grid-template-columns:minmax(0,1fr) 300px; gap:13px; padding:14px 20px 20px;}
     .midrow{grid-template-columns:210px minmax(0,1fr);}
     .greet h1{font-size:34px;}
+    .greet{gap:18px;}
+    .counters .cic{display:none;}
+    .counters{padding:12px 4px;}
+    .counters .ct{padding:2px 8px;}
     .greet .pill:nth-child(2){display:none;}
     .goalhead{width:224px;}
   }
@@ -982,7 +1016,8 @@
     .app{height:auto; min-height:100vh; overflow:visible;}
     .main{height:auto; overflow:visible;}
     .content{display:flex; flex-direction:column; padding:14px 18px 26px; row-gap:14px;}
-    .greet{flex-direction:column; padding-bottom:0;}
+    .greet{flex-direction:column; align-items:flex-start; padding-bottom:0;}
+    .counters{width:100%; margin-top:4px;}
     .midrow .autC, .midrow .lead{height:auto;}
     .midrow .autC{min-height:250px;}
     .goalhead{width:100%;}
@@ -1045,7 +1080,20 @@
     <div class="pills">
       <span class="pill">Querying since <b>December 2023</b></span>
       <span class="pill sg">Best month yet &mdash; <b>11 sent in July</b></span>
-      <span class="pill pk"><b>16</b> agents on file</span>
+    </div>
+  </div>
+  <div class="card counters">
+    <div class="ct">
+      <span class="cic"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+      <div class="cw"><div class="cl">Queries sent</div><div class="cv"><span class="cn">21</span><span class="cd">&uarr; 3</span></div></div>
+    </div>
+    <div class="ct">
+      <span class="cic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+      <div class="cw"><div class="cl">Agents on file</div><div class="cv"><span class="cn">16</span><span class="cd">&uarr; 2</span></div></div>
+    </div>
+    <div class="ct">
+      <span class="cic"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></span>
+      <div class="cw"><div class="cl">Responses</div><div class="cv"><span class="cn">11</span><span class="cd">52%</span></div></div>
     </div>
   </div>
 </div>

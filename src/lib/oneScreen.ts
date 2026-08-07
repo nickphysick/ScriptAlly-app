@@ -9,8 +9,8 @@
  * pill, the goal progress — all pure functions over the collections. The two stored fields this
  * page introduces (`goalTarget`/`goalPeriod`) hold only the TARGET; progress derives (§6).
  */
-import { Query, QueryStatus } from "../types";
-import { isoWeekStart } from "./dashboardStats";
+import { Agent, Query, QueryStatus } from "../types";
+import { isoWeekStart, responsesReceivedCount } from "./dashboardStats";
 
 const WEEK_MS = 7 * 86400000;
 const DAY_MS = 86400000;
@@ -52,6 +52,16 @@ export interface LedgerPoint {
   closed: number;
 }
 
+/**
+ * ⚠️ THE ONE DEFINITION OF "SENT", and every count of sends goes through it. A query is sent when
+ * it carries a usable `dateSent` — a draft with no send date is not on the board. The header
+ * counter and the chart's daily ledger both read THIS, so the number above the chart and the
+ * number the line is drawn from cannot drift apart; they are the same predicate applied twice.
+ */
+export const sentAt = (q: Query): number | null => parseWhen(q.dateSent);
+export const queriesSentCount = (queries: Query[]): number =>
+  queries.reduce((n, q) => (sentAt(q) !== null ? n + 1 : n), 0);
+
 const dayStart = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayEnd = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
 
@@ -69,7 +79,7 @@ export const dailyLedger = (queries: Query[], now: Date): LedgerPoint[] => {
   const sends: number[] = [];
   const closes: number[] = [];
   for (const q of queries) {
-    const s = parseWhen(q.dateSent);
+    const s = sentAt(q); // the shared predicate — never a second reading of dateSent
     if (s === null) continue; // an unsent query is not on the board
     sends.push(s);
     const c = closedAt(q);
@@ -180,6 +190,59 @@ export const rangeChip = (view: LedgerPoint[]): string => {
   if (diff > 0) return `↑ +${diff} over this range`;
   if (diff < 0) return `↓ ${diff} over this range`;
   return "Level over this range";
+};
+
+/* ══════════════════════════ §H · THE HEADER COUNTERS ══════════════════════════ */
+
+export interface HeaderCounter {
+  key: "sent" | "agents" | "responses";
+  label: string;
+  n: number;
+  /** ⚠️ ABSENT when there is nothing to report. Never "↑ 0", never "0%" — a chip that reports
+   *  nothing is worse than no chip, because it reads as a measurement rather than a silence. */
+  chip?: string;
+}
+
+/** The chips look back a ROLLING month, not a calendar one — on the 1st, a calendar reading would
+ *  blank a chip that had twenty sends behind it the day before. */
+export const COUNTER_WINDOW_DAYS = 30;
+
+/**
+ * The three header figures, all derived at read time (no stored counters, ever).
+ *
+ * ⚠️ THE RESPONSE RATE DIVIDES BY QUERIES **SENT**, not by every query on file. Dividing by all
+ * queries lets an unsent draft quietly pull the rate down — a writer with drafts in the system is
+ * shown a rate lower than reality. Beside a "Queries sent" counter reading the sent figure, the
+ * two would visibly disagree.
+ *
+ * ⚠️ `dashboardStats.responseRatePercent` STILL DIVIDES BY ALL QUERIES and is therefore
+ * understated wherever it is used. That is a bug in the shared selector, not a local deviation
+ * here; fixing it at source and checking each caller is a tracked follow-up. Until it lands, two
+ * things named "response rate" disagree — deliberately, and not indefinitely.
+ */
+export const headerCounters = (queries: Query[], agents: Agent[], now: Date): HeaderCounter[] => {
+  const since = now.getTime() - COUNTER_WINDOW_DAYS * 86400000;
+
+  const sent = queriesSentCount(queries);
+  const sentRecently = queries.reduce((n, q) => {
+    const t = sentAt(q);
+    return t !== null && t >= since ? n + 1 : n;
+  }, 0);
+
+  const addedRecently = agents.reduce((n, a) => {
+    const t = parseWhen(a.dateAdded);
+    return t !== null && t >= since ? n + 1 : n;
+  }, 0);
+
+  const responses = responsesReceivedCount(queries);
+  /* the rate is omitted outright when there is nothing to divide or nothing to report */
+  const rate = sent > 0 && responses > 0 ? Math.round((responses / sent) * 100) : null;
+
+  return [
+    { key: "sent", label: "Queries sent", n: sent, ...(sentRecently > 0 ? { chip: `↑ ${sentRecently}` } : {}) },
+    { key: "agents", label: "Agents on file", n: agents.length, ...(addedRecently > 0 ? { chip: `↑ ${addedRecently}` } : {}) },
+    { key: "responses", label: "Responses", n: responses, ...(rate !== null ? { chip: `${rate}%` } : {}) },
+  ];
 };
 
 /* ══════════════════════════ §3 · Y-SCALE ══════════════════════════ */

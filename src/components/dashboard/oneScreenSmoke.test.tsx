@@ -125,19 +125,23 @@ describe("§2 · the greeting", () => {
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);
   });
 
-  it("the three pills, in the spec's order — tenure · achievement · agents on file", () => {
+  /* ⚠️ TWO PILLS NOW. The agents count moved to the counters card — one number, one home; two
+     homes is how they come to disagree. */
+  it("the pills are tenure then achievement, and the agents pill is GONE", () => {
     const html = render();
     const pills = html.indexOf("os-pills");
+    expect(pills).toBeGreaterThan(-1);
     const tenure = html.indexOf("Querying since", pills);
     const ach = html.indexOf("awaiting a reply", pills);
-    const agents = html.indexOf("agents on file", pills);
     expect(tenure).toBeGreaterThan(-1);
     expect(ach).toBeGreaterThan(tenure);
-    expect(agents).toBeGreaterThan(ach);
+    // the phrase survives ONLY as the counter's label, never as a pill
+    const pillRow = html.slice(pills, html.indexOf("os-counters"));
+    expect(pillRow).not.toContain("agents on file");
   });
 
-  it('"on file", never "met"', () => {
-    expect(render()).toContain("agents on file");
+  it('the counter says "Agents on file" — "on file", never "met"', () => {
+    expect(render()).toContain("Agents on file");
     expect(render()).not.toContain("agents met");
   });
 
@@ -185,8 +189,8 @@ describe("§9 · first-run states", () => {
   it("day one: the single Day one pill, the invitation chart, the two ghost CTAs", () => {
     const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
     expect(html).toContain(">Day one<");
-    // the pill row holds ONLY Day one — no tenure, no achievement, no agents count
-    expect(html).not.toContain("agents on file");
+    // the pill row holds ONLY Day one — no tenure, no achievement
+    expect(html.slice(html.indexOf("os-pills"), html.indexOf("os-counters"))).not.toContain("Querying since");
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
     /* ⚠️ the header's day-one line folded into the shared empty state (v16 §4) — the "yet" it
@@ -201,15 +205,14 @@ describe("§9 · first-run states", () => {
   /* ⚠️ EARLY DAYS SUPPRESSES THE ACHIEVEMENT PILL even though §7's fallback is always true — §9
      is explicit, and a day-three account told "2 queries awaiting a reply" as an ACHIEVEMENT is
      the padding the facts-only rule exists to stop. The chart's chip carries that fact instead. */
-  it("early days: tenure + agents pills only; the chart chip is the awaiting count", () => {
+  it("early days: the tenure pill only; the chart chip is the awaiting count", () => {
     const html = render({ queries: [q({ dateSent: daysAgo(3) }), q({ dateSent: daysAgo(9) })] });
     expect(html).toContain("Querying since");
-    expect(html).toContain("agents on file");
     expect(html).not.toContain("os-pill ach");
     expect(html).toContain("awaiting a reply");
   });
 
-  it("settled: all three pills, achievement in the middle", () => {
+  it("settled: both pills, achievement second", () => {
     const html = render(); // base fixture: first send 30 days ago
     expect(html).toContain("os-pill ach");
   });

@@ -25,6 +25,7 @@ import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenPro } from "./OneScreenPro";
+import { OneScreenCounters } from "./OneScreenCounters";
 import { OneScreenRail } from "./OneScreenRail";
 import "./oneScreen.css";
 
@@ -160,42 +161,50 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     >
       <div className="os-content">
         {/* ⚠️ THE HEADER IS ITS OWN GRID ROW, spanning both columns — not the first thing in the
-            main column. That is what lets the two columns below it start level. */}
+            main column. That is what lets the two columns below it start level.
+
+            ⚠️ AND IT IS A FLEX ROW: the greeting sizes to its content, the counters card takes the
+            rest, vertically centred against it. The greeting's own stack lives inside `.os-gl` —
+            without that wrapper the dateline, name and pills would each become flex items on the
+            same line. */}
         <div className={`os-greet${loading ? " isload" : ""}`}>
           {loading && <Skel bars={["h", ""]} />}
-          {/* ⚠️ NO KICKER (v16 §1). A muted DATE LINE sits above the greeting instead — the week
-              number and the manuscript were repeating what the chrome already says. */}
-          <div className="os-dateline">{longDate(now)}</div>
-          <div className="os-grow2">
-            {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
-                swing of that pendulum, recorded at each turn. */}
-            <h1>Hello, {firstName}</h1>
-            <span className="os-spacer" />
-            {chipShows && (
-              <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>
-                Take the tour
-              </button>
-            )}
+          <div className="os-gl">
+            {/* ⚠️ NO KICKER (v16 §1). A muted DATE LINE sits above the greeting instead — the week
+                number and the manuscript were repeating what the chrome already says. */}
+            <div className="os-dateline">{longDate(now)}</div>
+            <div className="os-grow2">
+              {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
+                  swing of that pendulum, recorded at each turn. */}
+              <h1>Hello, {firstName}</h1>
+              <span className="os-spacer" />
+              {chipShows && (
+                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>
+                  Take the tour
+                </button>
+              )}
+            </div>
+            <div className="os-pills">
+              {/* §2: tenure · achievement. ⚠️ THE AGENTS PILL IS GONE — the counters card states
+                  that figure now, and two homes for one number is how they come to disagree.
+                  §9: day one is a single pill; early days drops the achievement slot — a day-three
+                  account told "2 awaiting a reply" as an ACHIEVEMENT is the padding the facts-only
+                  rule exists to stop. */}
+              {stage === "day-one" ? (
+                <span className="os-pill">Day one</span>
+              ) : (
+                <>
+                  {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
+                  {stage === "settled" && (
+                    <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
+                      {ach.pre}<b>{ach.strong}</b>{ach.post}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-          <div className="os-pills">
-            {/* §2: tenure · achievement · agents-on-file. §9: day one is a single pill; early days
-                drops the achievement slot — a day-three account told "2 awaiting a reply" as an
-                ACHIEVEMENT is the padding the facts-only rule exists to stop. */}
-            {stage === "day-one" ? (
-              <span className="os-pill">Day one</span>
-            ) : (
-              <>
-                {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
-                {stage === "settled" && (
-                  <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
-                    {ach.pre}<b>{ach.strong}</b>{ach.post}
-                  </span>
-                )}
-                {/* "on file", never "met" (§2) */}
-                <span className="os-pill pk"><b>{agents.length}</b> agents on file</span>
-              </>
-            )}
-          </div>
+          <OneScreenCounters loading={loading} queries={queries} agents={agents} now={now} />
         </div>
 
         <div className="os-colM">
