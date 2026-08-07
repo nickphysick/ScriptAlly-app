@@ -1391,3 +1391,11 @@ silently wrong. `FocusFlow` survives as the per-kind flow engine.
 
 **Keyboard:** Esc closes, ↑↓ walk the queue (clamped, never wrapping — wrapping hides that you
 reached the end), Enter is the primary. It never steals keys from a field being typed into.
+
+## The calendar's pip families (tasks-audit P4, 7 Aug 2026)
+
+Four live families, from `todoFamily.CAL_PIP`: agent pink · your tasks sage · snoozed returns
+parchment · completed muted. **The butter "dated notes" family is RETIRED**: under the
+two-natures law a dated user card IS a task, so the set was structurally empty — a legend entry
+for a thing that cannot exist. It returns only if the model ever records note-ORIGIN on tasks;
+until then no render path, tone or legend row exists for it.

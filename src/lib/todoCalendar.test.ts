@@ -154,9 +154,10 @@ describe("the fold, the map, the wiring", () => {
     expect(pageSrc).toContain("CAL_PIP[it.family]");
     expect(pageSrc).toContain("CAL_LEGEND.map");
     expect(pageSrc).not.toMatch(/cal-pip[^}]*#f8e2d9/); // no hex beside the pip render
-    expect(Object.keys(CAL_PIP).sort()).toEqual(["agent", "done", "note", "snoozed", "task"]);
+    // tasks-audit P4: the butter "dated notes" family is retired — LIVE families only, exactly
+    expect(Object.keys(CAL_PIP).sort()).toEqual(["agent", "done", "snoozed", "task"]);
     expect(CAL_LEGEND.map((l) => l.label)).toEqual([
-      "AGENT DEADLINES", "YOUR TASKS", "SNOOZED RETURNS", "DATED NOTES", "COMPLETED",
+      "AGENT DEADLINES", "YOUR TASKS", "SNOOZED RETURNS", "COMPLETED",
     ]);
   });
 

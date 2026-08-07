@@ -84,22 +84,25 @@ export const FAMILY_BAND: Record<BandFamily, { from: string; to: string; bd: str
  * butter EXTRA_SWATCH.notes belongs to, `done` the muted sage. The legend renders FROM this
  * record — a legend drawn from a second list is the half-copied map all over again.
  */
-export type CalPipFamily = "agent" | "task" | "snoozed" | "note" | "done";
+/* ⚠️ THE BUTTER "DATED NOTES" FAMILY IS RETIRED (tasks-audit P4). Under the two-natures law a
+   dated user card IS a task, so the set was STRUCTURALLY EMPTY — a legend entry and a pip
+   branch for a thing that cannot exist taught a category the model does not have. It returns
+   only if the model ever records note-ORIGIN on tasks (themes.md carries the note). No dead
+   render path survives: the type, the tone and the legend row all went together. */
+export type CalPipFamily = "agent" | "task" | "snoozed" | "done";
 
 export const CAL_PIP: Record<CalPipFamily, { bg: string; tx: string; bd: string }> = {
   agent: { bg: "#f8e2d9", tx: "#7a3a28", bd: "#eecfc2" },
   task: { bg: "#e9ede6", tx: "#3f5a3d", bd: "#c9d6c5" },
   snoozed: { bg: "#f4efe7", tx: "#6b5a4e", bd: "#e6dccc" },
-  note: { bg: "#f8f0d9", tx: "#6f5a2a", bd: "#e6d9ae" },
   done: { bg: "#f2f4f1", tx: "#7a8878", bd: "#dfe5dd" },
 };
 
-/** The legend's order and wording — the ref's own row. */
+/** The legend's order and wording — the LIVE families only, exactly. */
 export const CAL_LEGEND: { family: CalPipFamily; label: string }[] = [
   { family: "agent", label: "AGENT DEADLINES" },
   { family: "task", label: "YOUR TASKS" },
   { family: "snoozed", label: "SNOOZED RETURNS" },
-  { family: "note", label: "DATED NOTES" },
   { family: "done", label: "COMPLETED" },
 ];
 

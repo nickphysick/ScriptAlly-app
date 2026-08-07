@@ -10,10 +10,8 @@
  *  · an AGENT task on the day it landed on your desk — the request's `lastStatusChange` audit
  *    stamp, the SAME basis the board's REQUESTED figures read, falling back to dateSent;
  *  · a SNOOZED item on its return date (the flag's own snoozedUntil);
- *  · a NOTE only if dated — ⚠️ under the two-natures law a dated user card IS a task, so this
- *    set is STRUCTURALLY EMPTY today. The rule is implemented as specified (nature "note" +
- *    dueYmd → the butter family) so the room exists the day the model distinguishes origin;
- *    until then the butter pips simply never fire. Stated in reports/tasks-pages.md.
+ *  · notes never calendar — a dated user card IS a task (two-natures), so the old butter
+ *    "dated notes" family was structurally empty and is RETIRED (tasks-audit P4; themes.md).
  *  · housekeeping (sweeps, data-quality, stale) has NO action date — a standing pile is not an
  *    appointment — so it never reaches the calendar. The legend says the same by omission.
  *
@@ -33,7 +31,7 @@ import { agentPrimary } from "./agentDisplay";
 import { CLEARING_ACTIVITY_TYPES } from "./clearedToday";
 import { flagSleeps } from "./taskFlags";
 
-export type CalFamily = "agent" | "task" | "snoozed" | "note" | "done";
+export type CalFamily = "agent" | "task" | "snoozed" | "done";
 
 export interface CalendarItem {
   key: string;
@@ -149,8 +147,10 @@ export function cardActionYmd(c: BoardCard, queries: Query[]): string | null {
   return null; // hk piles (stale, data-quality, sweeps) have no action date
 }
 
+/* the butter "note" branch is RETIRED (tasks-audit P4): notes never board (boardEligible) and a
+   dated user card is a task by law — the branch was a door onto a room that cannot exist. */
 const liveFamilyOf = (c: BoardCard): CalFamily =>
-  c.userTaskId || c.nature ? (c.nature === "note" ? "note" : "task") : "agent";
+  c.userTaskId || c.nature ? "task" : "agent";
 
 /**
  * The whole month's placement in one pass. Returns per-day items (live, rolled-in, completed)
