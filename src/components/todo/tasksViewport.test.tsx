@@ -242,3 +242,48 @@ describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
     expect(seg).not.toContain("tbd-body");
   });
 });
+
+/* ── Phase 4: the Noteboard to standard ────────────────────────────────────────────────────── */
+
+describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty slot", () => {
+  const nbCss = readFileSync(join(here, "todoNoteboard.css"), "utf8");
+
+  it("no sidebar (settled) — header, hairline, then full-width masonry", () => {
+    expect(note).not.toContain("sidebar={");
+    expect(note).not.toContain("TodoSideContainer");
+  });
+
+  it("the masonry is the zone, and it hems only when there are notes to continue into", () => {
+    expect(note).toContain("<TplZone");
+    expect(note).toContain("hem={notes.length > 0}");
+  });
+
+  it("the empty state carries its ArtSlot ABOVE the copy that was already written", () => {
+    const empty = note.slice(note.indexOf("nb-empty"));
+    expect(note.indexOf("nb-empty")).toBeGreaterThan(-1); // the anchor, per the slice law
+    expect(empty.indexOf('<ArtSlot name="noteboard-empty"')).toBeGreaterThan(-1);
+    // the art precedes the heading — a slot beneath the copy is a footnote, not an empty state
+    expect(empty.indexOf('<ArtSlot name="noteboard-empty"'))
+      .toBeLessThan(empty.indexOf("Nothing pinned yet"));
+  });
+
+  it("⚠️ 'READ AS A COLUMN' IS CENTRED and changes the columns, never the scroller", () => {
+    const col = nbCss.slice(nbCss.indexOf(".nb-grid.column {"));
+    expect(nbCss.indexOf(".nb-grid.column {")).toBeGreaterThan(-1);
+    const rule = col.slice(0, col.indexOf("}"));
+    expect(rule).toContain("columns: 1");
+    expect(rule).toContain("margin-inline: auto");
+    // one zone for both views — the toggle must not grow a second scroller
+    expect((note.match(/<TplZone/g) ?? []).length).toBe(1);
+  });
+
+  it("the tool row's controls share ONE height — search, tag, view toggle, pink", () => {
+    /* the shared 32px step; the pink creation action takes the layout's own 34px rule, which is
+       the tool row's single exception and is asserted in tasksLayout.test.tsx */
+    const search = nbCss.slice(nbCss.indexOf(".nb-search {"));
+    expect(search.slice(0, search.indexOf("}"))).toContain("height: 32px");
+    const calCssNav = readFileSync(join(here, "todoCalendar.css"), "utf8");
+    const nav = calCssNav.slice(calCssNav.indexOf(".cal-nav {"));
+    expect(nav.slice(0, nav.indexOf("}"))).toContain("height: 32px");
+  });
+});

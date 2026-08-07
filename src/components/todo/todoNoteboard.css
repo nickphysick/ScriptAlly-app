@@ -6,7 +6,11 @@
 /* ⚠️ MASONRY, NOT GRID: CSS columns pack by LENGTH — a short note sits under a short note. The
    ref's own mechanism (`columns:3`), kept. "Read as a column" collapses to one reading column. */
 .nb-grid { columns: 3; column-gap: 16px; }
-.nb-grid.column { columns: 1; max-width: 620px; }
+/* ⚠️ "READ AS A COLUMN" IS CENTRED, AND IT OBEYS THE LOCK (tasks-viewport P4). A single 620px
+   column pinned to the left edge of a wide frame reads as a masonry that failed to lay out; the
+   auto margins are what make it a deliberate reading measure. It scrolls inside the same
+   `.tpl-zone` as the masonry — the view changes the columns, never the scroller. */
+.nb-grid.column { columns: 1; max-width: 620px; margin-inline: auto; }
 @media (max-width: 1100px) { .nb-grid { columns: 2; } }
 @media (max-width: 700px) { .nb-grid { columns: 1; } }
 
