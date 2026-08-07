@@ -126,11 +126,19 @@ TasksPageLayout is the axis's only owner: `.tdb-col`'s `--tdb-col-gutter` (40px)
 widen from the 1200 cap to the board's 1360 — one max width on every Tasks page, as the
 contract demands.
 
-**Locks:** the alignment suite gained its horizontal describe — no `padding-left/right/inline`
-in the layout's stylesheet, `.tdb-col` carries the gutter token + cap + auto-centre, all FOUR
-slots asserted `contentVariant`-free (the cause pinned in the test's own comment), and no page
-wraps the layout in a capped container. Neither axis can drift silently again. Commit: see the
-addendum SHA in git (`fix(todo): tasks-audit addendum`).
+**Hardened on Nick's follow-up ("align the other 3 pages to the width of the to-do page"):**
+removing the caps left ONE slot-level difference standing — the board mounts in a `fill` slot
+and scrolls inside its own `.tdb-wrap`, while the other three mounted in `flow` slots and
+scrolled the STAGE. Two different scrollers meant two different available widths for the centred
+column (scrollbar reservation and stage chrome land differently), so the edges could still
+disagree. All four Tasks slots are now BYTE-IDENTICAL — `layout="fill" clip`, no contentVariant
+— one slot shape, one scroller (`.tdb-wrap`), one column. The pages cannot diverge on either
+axis because nothing about their mounting differs at all.
+
+**Locks:** the alignment suite's horizontal describe — no `padding-left/right/inline` in the
+layout's stylesheet; `.tdb-col` carries the gutter token + cap + auto-centre; all FOUR slots
+asserted IDENTICAL in shape (fill + clip + `contentVariant`-free, the two-layer cause pinned in
+the test's own comment); no page wraps the layout in a capped container.
 
 ## Deploy
 

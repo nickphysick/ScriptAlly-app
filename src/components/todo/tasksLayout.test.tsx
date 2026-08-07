@@ -79,13 +79,20 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
     expect(rule).toContain("var(--tdb-col-gutter)");
   });
 
-  it("⚠️ NO Tasks route slot adds a second horizontal owner — contentVariant stays OFF all four", () => {
-    /* THE CAUSE, pinned: three slots carried the ultrawide read cap (a placeholder-era leftover)
-       while the board slot was bare — below the cap-bite width the capped pages gained centring
-       margin the board lacked, and its title started further LEFT. Two owners on one axis. */
+  it("⚠️ the four Tasks slots are IDENTICAL in shape — fill+clip, no contentVariant, no exceptions", () => {
+    /* THE CAUSE, pinned in two layers: three slots carried the ultrawide read cap (a
+       placeholder-era leftover) while the board slot was bare — AND the board scrolled inside
+       its own .tdb-wrap (a fill slot) while the other three scrolled the stage (flow slots),
+       so the two chassis centred their columns in different available widths. Hardened on
+       Nick's call (align the three to the BOARD): every slot is the board's own shape, so
+       nothing about the mounting can differ at all. */
     const slots = [...app.matchAll(/<StagePage[^>]*routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
     expect(slots.length).toBe(4); // list · today · calendar · noteboard
-    for (const slot of slots) expect(slot, slot).not.toContain("contentVariant");
+    for (const slot of slots) {
+      expect(slot, slot).not.toContain("contentVariant");
+      expect(slot, slot).toContain('layout="fill"');
+      expect(slot, slot).toContain("clip");
+    }
   });
 
   it("no page wraps the layout in a capped or padded container of its own", () => {

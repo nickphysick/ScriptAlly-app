@@ -647,24 +647,25 @@ function AppContent() {
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
-        {/* ⚠️ NO contentVariant ON ANY TASKS SLOT (tasks-audit addendum): TasksPageLayout owns
-            the horizontal axis — .tdb-col's max width + --tdb-col-gutter — on all four pages.
-            Three of them carried the slot's read cap (a placeholder-era leftover) while the
-            board slot was bare, so BELOW the cap-bite width the board's title started further
-            left: two owners on one axis. One owner now; a deliberate carve-out from the
-            ultrawide opt-in law, mirroring the Dashboard's own exemption — the layout caps and
-            centres instead of the slot. */}
-        <StagePage active={routeKey === "todo" && todoPage === "today"}>
+        {/* ⚠️ ALL FOUR TASKS SLOTS ARE IDENTICAL — `layout="fill" clip`, no contentVariant
+            (tasks-audit addendum, hardened on Nick's call: align the three to the BOARD's
+            width). The first fix removed the three slots' leftover read caps; this one removes
+            the LAST slot-level difference — the board scrolled inside its own .tdb-wrap (fill)
+            while the other three scrolled the stage (flow), leaving the two chassis with
+            different scrollers and different available widths to centre in. One slot shape,
+            one scroller, one column: the four pages cannot diverge on either axis because
+            nothing about their mounting differs at all. */}
+        <StagePage active={routeKey === "todo" && todoPage === "today"} layout="fill" clip>
           <TodoTodayPage onNavigate={handleNavigate} />
         </StagePage>
 
         {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
-        <StagePage active={routeKey === "todo" && todoPage === "calendar"}>
+        <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fill" clip>
           <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
-        <StagePage active={routeKey === "todo" && todoPage === "noteboard"}>
+        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fill" clip>
           <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
