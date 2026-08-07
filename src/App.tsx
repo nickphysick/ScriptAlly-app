@@ -45,6 +45,7 @@ import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterPara
 import { todoPageForPath } from "./lib/todoRoutes";
 import { TodoPlaceholderPage } from "./components/todo/TodoPlaceholderPage";
 import { TodoTodayPage } from "./components/todo/TodoTodayPage";
+import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
 import { QueryAnalytics } from "./components/QueryAnalytics";
@@ -650,10 +651,9 @@ function AppContent() {
           <TodoTodayPage onNavigate={handleNavigate} />
         </StagePage>
 
-        {/* Routed now, built next — the group lists four pages, so all four must go somewhere
-            real. TODO(todo-calendar) · TODO(todo-noteboard). */}
+        {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
         <StagePage active={routeKey === "todo" && todoPage === "calendar"} contentVariant="read">
-          <TodoPlaceholderPage page="calendar" />
+          <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         <StagePage active={routeKey === "todo" && todoPage === "noteboard"} contentVariant="read">

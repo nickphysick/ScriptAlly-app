@@ -17,15 +17,19 @@
  *
  * It asserts almost nothing about appearance on purpose. Its job is: THE PAGE RENDERS AT ALL.
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
 
+/* The seedable mock (tasks-pages P3): the Calendar's populated smoke needs a dated task in the
+   db, and vi.mock is hoisted — so the factory reads this holder, and a test mutates it. Reset in
+   afterEach so no file order matters. */
+const seed: { userTasks: unknown[] } = { userTasks: [] };
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
-    tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], packages: [],
+    tasks: [], userTasks: seed.userTasks, queries: [], agents: [], manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], dismissedTasks: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },
     addUserTask: async () => undefined,
@@ -38,6 +42,7 @@ vi.mock("../../lib/db", () => ({
 
 import { ToDoPage } from "./ToDoPage";
 import { TodoTodayPage } from "./TodoTodayPage";
+import { TodoCalendarPage } from "./TodoCalendarPage";
 import { TodoPlaceholderPage } from "./TodoPlaceholderPage";
 
 const render = (node: React.ReactNode) =>
@@ -65,9 +70,30 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("Your list for today");
   });
 
-  it("the Calendar placeholder renders and says what it is", () => {
-    const html = render(<TodoPlaceholderPage page="calendar" />);
+  /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,
+     empty AND populated (a page that only smokes its first-run panel leaves every derivation
+     unexecuted — the app-smoke law). */
+  afterEach(() => { seed.userTasks = []; });
+
+  it("the Calendar page renders without throwing", () => {
+    expect(() => render(<TodoCalendarPage onNavigate={() => {}} />)).not.toThrow();
+  });
+
+  it("…and carries its grid, its legend and its tools", () => {
+    const html = render(<TodoCalendarPage onNavigate={() => {}} />);
     expect(html).toContain("Calendar");
+    expect(html).toContain("cal-grid");
+    expect(html).toContain("AGENT DEADLINES"); // the legend renders from CAL_LEGEND
+    expect(html).toContain("MON");
+  });
+
+  it("…and a dated task REACHES its day (the populated smoke)", () => {
+    const today = new Date();
+    const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening", done: false, dueDate: ymd, createdAt: "", updatedAt: "" }];
+    const html = render(<TodoCalendarPage onNavigate={() => {}} />);
+    expect(html).toContain("Redraft the opening");
+    expect(html).toContain("cal-pip");
   });
 
   it("the Noteboard placeholder renders and says what it is", () => {

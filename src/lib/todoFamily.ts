@@ -75,3 +75,30 @@ export const FAMILY_BAND: Record<BandFamily, { from: string; to: string; bd: str
   yours: { from: "#dee4dc", to: "#d5dbd3", bd: "#b9c9b4" },
   done: { from: "#e7ebe5", to: "#e7ebe5", bd: "#cfd8cc" },
 };
+
+/**
+ * ⚠️ THE CALENDAR'S PIP TONES LIVE IN THE SAME MODULE AS THE FAMILY MAP (tasks-pages P3) — the
+ * one place colour vocabulary is allowed to live, per this file's own history. The tie to the
+ * band families is deliberate and visible: `agent` is the urgent pink family at pip strength,
+ * `task` the sage, `snoozed` the parchment the snoozed cards' latte descends from, `note` the
+ * butter EXTRA_SWATCH.notes belongs to, `done` the muted sage. The legend renders FROM this
+ * record — a legend drawn from a second list is the half-copied map all over again.
+ */
+export type CalPipFamily = "agent" | "task" | "snoozed" | "note" | "done";
+
+export const CAL_PIP: Record<CalPipFamily, { bg: string; tx: string; bd: string }> = {
+  agent: { bg: "#f8e2d9", tx: "#7a3a28", bd: "#eecfc2" },
+  task: { bg: "#e9ede6", tx: "#3f5a3d", bd: "#c9d6c5" },
+  snoozed: { bg: "#f4efe7", tx: "#6b5a4e", bd: "#e6dccc" },
+  note: { bg: "#f8f0d9", tx: "#6f5a2a", bd: "#e6d9ae" },
+  done: { bg: "#f2f4f1", tx: "#7a8878", bd: "#dfe5dd" },
+};
+
+/** The legend's order and wording — the ref's own row. */
+export const CAL_LEGEND: { family: CalPipFamily; label: string }[] = [
+  { family: "agent", label: "AGENT DEADLINES" },
+  { family: "task", label: "YOUR TASKS" },
+  { family: "snoozed", label: "SNOOZED RETURNS" },
+  { family: "note", label: "DATED NOTES" },
+  { family: "done", label: "COMPLETED" },
+];
