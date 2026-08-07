@@ -47,7 +47,6 @@ import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { AssistantBand, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
-import { PageHeader } from "../shell/PageHeader";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
@@ -56,6 +55,7 @@ import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
+import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { boardColumns, sweepCardFor, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
@@ -1013,15 +1013,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             max-width column (~1360px), centred with equal side gutters that grow with the
             viewport. The title sits flush with the panel's left edge, the CTA/review pair flush
             with its right — one column, one pair of edges. A ≥44px gap sits under the bar. */}
-        <div className="tdb-col">
-        {renderPageHeader()}
-        <div className="tdb-asm tdb-ws">
-          {/* ⚠️ THE PAGE SIDE CONTAINER, IN BOTH VIEWS (corrections fix 3). It was built in
+        {/* ⚠️ THE ALIGNMENT CONTRACT (tasks-pages P1): one TasksPageLayout on every Tasks page —
+            the header block (title → subtitle → tool row) spans the full content width, the
+            hairline is the tool row's own bottom edge, and the sidebar + body start together
+            BELOW it. This page's hand-assembled column (tdb-col → PageHeader → tdb-ws → tdw)
+            is superseded by the shared grid. */}
+        <TasksPageLayout
+          title="To-do list"
+          subtitle={boardSubtitle()}
+          tools={renderTools()}
+          sidebar={
+          /* ⚠️ THE PAGE SIDE CONTAINER, IN BOTH VIEWS (corrections fix 3). It was built in
               Phase 1 and mounted only on Today — this page never received it, so the LISTS
               facets had nowhere to live and the retired chip strip stayed on as their stand-in.
-              It wraps the WHOLE body, outside the view switch, because it belongs to the page
-              rather than to one of its two renderings. */}
-          <div className="tdw">
+              It belongs to the page rather than to one of its two renderings. */
           <TodoSideContainer
             /* ⚠️ THE FILTERS COUNT THE RENDERED CARDS (P5): the live columns' own set — sweeps as
                ONE card, the flags-built Snoozed included, Done outside. The raw lanes it used to
@@ -1033,7 +1038,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             onOpenTaskSettings={() => setSettingsOpen(true)}
             onNoteboard={() => onNavigate("todo", "Noteboard")}
           />
-          <div className="tdw-main">
+          }
+        >
           <div className="tdb-centre">
           {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
               SUPERSEDES the todo-rebuild featured card). ONE region between the hero rule and the
@@ -1111,10 +1117,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
           )}
           </div>{/* .tdb-centre */}
-          </div>{/* .tdw-main */}
-          </div>{/* .tdw */}
-        </div>
-        </div>
+        </TasksPageLayout>
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
             bottom-right of the workspace, minimising to a pill; absent when the list is empty. */}
         {/* ⚠️ THE CORNER POP-UP IS RETIRED (workspace P3). Today is a PAGE now — /todo/today —
@@ -1222,25 +1225,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return boardSubtitleCopy(boardFigures(boardCols));
   }
 
-  function renderPageHeader() {
+  /* ⚠️ THE TOOL ROW IS THE PAGE'S SINGLE INSTRUMENT (board+dock P1; re-homed by tasks-pages P1
+     into TasksPageLayout's tool row — the shared PageHeader mount is superseded, the contract's
+     header block owns the title and subtitle now). Search, sort and the Add all live here — one
+     place to look for anything that changes what the board shows, with the pink creation action
+     pinned to the RIGHT SLOT per the contract.
+     (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.) */
+  function renderTools() {
     return (
-      // the tightening P1 — the subtitle is REMOVED: with no description the shared PageHeader
-      // lays the title and the two actions on one line (svh-top is a flex row); the buttons take
-      // the page-scoped 34px step in todo.css. Copy lives nowhere else.
-      /* ⚠️ THE HEADER'S TOOL ROW IS THE PAGE'S SINGLE INSTRUMENT (board+dock P1). Search, sort,
-         the session launcher and the Add all live here — one place to look for anything that
-         changes what the board shows. The standalone control bar below is gone: two instrument
-         rows, one under the other, is how the chip strip and the LISTS rows came to disagree.
-
-         It rides `actionsSlot` rather than `actions`, deliberately. The max-two-actions law is
-         about ACTIONS competing for attention; this row is two instruments (a field and a
-         dropdown) beside two buttons, and collapsing the instruments into "actions" to satisfy a
-         count would be reading the rule's letter against its purpose. */
-      <PageHeader
-        title="To-do list"
-        description={boardSubtitle()}
-        actionsSlot={
-          <div className="tdb-tools">
+      <>
             <span className="tdb-bsearch">
               <span className="tdb-bsmag" aria-hidden>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
@@ -1282,12 +1275,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 "Work the list" listener are all untouched; only the button and its orphaned
                 opener function are gone. */}
             {/* The Add was orphaned mid-page; it belongs with the page's other instruments. */}
+            <TplGrow />
             <button type="button" className="tdb-addb" onClick={() => openComposer("task")}>
               ＋ Add task or note
             </button>
-          </div>
-        }
-      />
+      </>
     );
   }
   /** DORMANT (todo rebuild P4): the bespoke hero — the focused session's title crossfade,

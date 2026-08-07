@@ -18,8 +18,8 @@
  */
 import React, { useMemo, useState } from "react";
 import { Play, Plus, Undo2 } from "lucide-react";
-import { PageHeader } from "../shell/PageHeader";
 import { TodoSideContainer } from "./TodoSideContainer";
+import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
@@ -109,41 +109,53 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   };
 
   return (
-    <div className="tdw">
-      {/* The SAME container the board page mounts — one filter surface, two pages. Today's own
-          list is already a single committed set, so the facet narrows what it shows without the
-          board's four columns behind it. */}
-      <TodoSideContainer
-        counts={facetCounts([...board.do, ...board.hk, ...board.nt])}
-        active={facet}
-        onSelect={setFacet}
-        onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
-        onNoteboard={() => onNavigatePath("/todo/noteboard")}
-      />
-      <div className="tdw-main">
-        <PageHeader
-          title="Today"
-          description={subtitle}
-          actions={[
-            {
-              label: "Add to today",
-              icon: <Plus aria-hidden />,
-              onClick: () => document.getElementById("tdt-add")?.focus(),
-            },
-            {
-              /* ⚠️ INK, NOT PINK, AND DISABLED AT ZERO (corrections fix 6). Pink belongs to
-                 creation — its neighbour ＋ Add to today keeps it. And an enabled "Work the list"
-                 with nothing committed offers to walk you through an empty list: it earns its ink
-                 when the first item lands. The disabled grammar is the house one (paper, hairline,
-                 faint, not-allowed), never opacity. */
-              label: "Work the list",
-              icon: <Play aria-hidden />,
-              ink: true,
-              disabled: committed.length === 0,
-              onClick: () => window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST)),
-            },
-          ]}
-        />
+    /* ⚠️ THE ALIGNMENT CONTRACT (tasks-pages P1). This page used to render `.tdw` at its root —
+       no theme root, no column, no top token — so the sidebar mounted LEVEL WITH THE TITLE and
+       the header sat squashed against the top bar. The squash WAS the missing token: the page
+       never wore `.tdb-col`, whose `--tdb-chrome-gap` is where every other Tasks title gets its
+       offset. It stands on TasksPageLayout now, same as the rest. */
+    <div className="t-f12 spine-root">
+      <div className="tdb-wrap today-off">
+      <TasksPageLayout
+        title="Today"
+        subtitle={subtitle}
+        tools={
+          <>
+            {/* ⚠️ INK, NOT PINK, AND DISABLED AT ZERO (corrections fix 6). Pink belongs to
+                creation — the ＋ Add in the right slot keeps it. An enabled "Work the list" with
+                nothing committed offers to walk an empty list: it earns its ink when the first
+                item lands. The disabled grammar is the house one, never opacity. */}
+            <button
+              type="button"
+              className="tdb-btnp tdt-work"
+              disabled={committed.length === 0}
+              onClick={() => window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST))}
+            >
+              <Play size={12} aria-hidden /> Work the list
+            </button>
+            <TplGrow />
+            <button
+              type="button"
+              className="tdb-addb"
+              onClick={() => document.getElementById("tdt-add")?.focus()}
+            >
+              <Plus size={13} aria-hidden /> Add to today
+            </button>
+          </>
+        }
+        sidebar={
+          /* The SAME container the board page mounts — one filter surface, two pages. Today's own
+             list is already a single committed set, so the facet narrows what it shows without the
+             board's four columns behind it. */
+          <TodoSideContainer
+            counts={facetCounts([...board.do, ...board.hk, ...board.nt])}
+            active={facet}
+            onSelect={setFacet}
+            onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
+            onNoteboard={() => onNavigatePath("/todo/noteboard")}
+          />
+        }
+      >
 
         {/* ── YOUR LIST FOR TODAY ──────────────────────────────────────────── */}
         <section className="tdt-card">
@@ -247,6 +259,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             ))}
           </section>
         )}
+      </TasksPageLayout>
       </div>
 
       {toast && (

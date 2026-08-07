@@ -347,7 +347,8 @@ describe("⚠️ ＋ Add task or note reaches a MOUNTED composer (P3)", () => {
   });
 
   it("the tool-row Add opens task mode; the session launcher beside it is gone", () => {
-    const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+    // tasks-pages P1: the tools live in renderTools (TasksPageLayout's tool row)
+    const hero = page.slice(page.indexOf("function renderTools"), page.indexOf("function renderHero"));
     expect(hero).toContain('onClick={() => openComposer("task")}');
     expect(hero).not.toContain("tdb-ghb");
   });

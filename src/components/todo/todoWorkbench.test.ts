@@ -897,8 +897,9 @@ describe("Final Shape P5 — the ledger's selection machinery is extinct", () =>
 });
 describe("A1 → Final Shape — the hero band (supersedes the strip)", () => {
   it("v4: the hero band is gone — bare ground above the work row; the strip family stays extinct", () => {
-    const band = page.indexOf("{renderPageHeader()}"); // todo rebuild P4: the app-wide header
-    const ws = page.indexOf('className="tdb-asm tdb-ws"');
+    // tasks-pages P1: the header block is TasksPageLayout's — the layout mount precedes the body
+    const band = page.indexOf("<TasksPageLayout");
+    const ws = page.indexOf('className="tdb-centre"');
     expect(band).toBeGreaterThan(0);
     expect(band).toBeLessThan(ws);
     expect(page).not.toContain("tdb-herorow");

@@ -15,10 +15,14 @@ const boardCss = readFileSync(join(here, "todoBoard.css"), "utf8");
 const headerCss = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
 
 describe("⚠️ Work the list is INK, and pink stays with creation (fix 6)", () => {
-  it("carries `ink`, never `primary`", () => {
-    const slice = today.slice(today.indexOf('label: "Work the list"') - 400, today.indexOf('label: "Work the list"') + 300);
-    expect(slice).toContain("ink: true");
-    expect(slice).not.toContain("primary: true");
+  it("carries the INK class, never the pink one", () => {
+    /* tasks-pages P1: the PageHeader actions array became real buttons in the layout's tool row —
+       ink = .tdb-btnp (the tailored solid), pink = .tdb-addb (creation only). Same law. */
+    expect(today).toContain('className="tdb-btnp tdt-work"'); // the anchor (the slice law)
+    const at = today.indexOf('className="tdb-btnp tdt-work"');
+    const btn = today.slice(at, today.indexOf("</button>", at)); // the Work button's own JSX only
+    expect(btn).toContain("Work the list");
+    expect(btn).not.toContain("tdb-addb"); // ink stays ink; pink belongs to the ＋ Add beside it
   });
 
   it("its neighbour ＋ Add to today keeps the ghost — the page's pink belongs to creation", () => {
@@ -35,7 +39,7 @@ describe("⚠️ Work the list is INK, and pink stays with creation (fix 6)", ()
 
 describe("⚠️ disabled at zero committed, in the HOUSE grammar (fix 6)", () => {
   it("is disabled exactly when nothing is committed", () => {
-    expect(today).toContain("disabled: committed.length === 0");
+    expect(today).toContain("disabled={committed.length === 0}"); // tasks-pages P1: a real button now
   });
 
   it("the disabled treatment is paper + hairline + faint + not-allowed, NEVER opacity", () => {

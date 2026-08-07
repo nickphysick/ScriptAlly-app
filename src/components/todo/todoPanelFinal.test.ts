@@ -52,14 +52,16 @@ describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", ()
 
 /* ⚠️ AMENDED (corrections fix 3) — the header changed on purpose, so its lock changes with it. */
 describe("the To-do PAGE HEADER — it names the page, and carries ONE action", () => {
-  const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+  /* tasks-pages P1: the header block is TasksPageLayout's; the page's tools live in renderTools.
+     The slice spans the layout mount through the tools so title + controls stay covered. */
+  const hero = page.slice(page.indexOf("<TasksPageLayout"), page.indexOf("function renderHero"));
 
   it("titles itself 'To-do list' — the same words as the breadcrumb", () => {
     /* "What's on your desk?" named nothing and disagreed with the crumb, which reads "To-do
        list". A page whose title and crumb differ makes you check which one is lying. */
     expect(hero).toContain('title="To-do list"');
     expect(hero).not.toContain("What’s on your desk?");
-    expect(hero).toContain("description="); // one line saying what the page is
+    expect(hero).toContain("subtitle={boardSubtitle()}"); // one line saying what the page is
   });
 
   it("its actions are a TOOL ROW now (board+dock P1) — pink Add, ghost session launcher", () => {
@@ -67,7 +69,7 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
        dropdown) beside two buttons. The max-two law is about actions competing for attention;
        collapsing instruments into "actions" to satisfy a count would read its letter against
        its purpose. */
-    expect(hero).toContain("actionsSlot=");
+    expect(hero).toContain("tools={renderTools()}"); // the layout's tool row is the one instrument home
     expect(hero).toContain('className="tdb-addb"');  // pink — creation
     // board fixes II P3: the ghost session launcher is retired — the dock's doors replaced it
     expect(hero).not.toContain('className="tdb-ghb"');

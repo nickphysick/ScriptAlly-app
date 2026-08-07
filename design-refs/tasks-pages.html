@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<!-- ⚠️ SCOPE (tasks-pages pack, 7 Aug): NORMATIVE for the alignment contract (the .pbody header
+     block: Playfair 30 title → 13px sub → 32px tool row over the hairline) and the CALENDAR and
+     NOTEBOARD designs (grid/cells/pips/legend; masonry columns/butter cards/tags/tool row). The
+     CHROME AROUND THE CONTENT (rail, app sidebar, top bar) is DEMONSTRATION ONLY — the repo
+     shell wins. Two places the PACK PROSE wins over this file's own drawing, per the house
+     carve-out (a reasoned value in prose beats an unreasoned one in an artefact):
+     1. the page sidebar starts BELOW the header's hairline, aligned with the body — this file
+        draws .pside full-height beside the title, which is exactly the Today bug the pack names;
+     2. the NOTEBOARD has NO page sidebar — its only filter dimension is tags, in the tool row —
+        though this file draws the sidebar on that frame too. -->
+<html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>The board, settled</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+:root{--ink:#2a1a13;--soft:#4d4238;--muted:#8a7a6c;--label:#b3a394;--hair:#f0e9dd;--pink:#f5e2da;--pinkbd:#e8c8bc;--burg:#7c3a2a}
+*{font-variant-numeric:tabular-nums}
+body{background:#3a332c;padding:30px 0 80px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;color:#2b2118}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b3a695;margin:34px 0 11px;width:1500px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#cfc2b0;margin-left:10px;line-height:1.6}
+.frame{width:1500px;background:#fdfcfa;border-radius:14px;overflow:hidden;display:flex;box-shadow:0 16px 44px rgba(20,15,10,.45);border:1px solid #2a2019}
+.rail{width:78px;flex:0 0 auto;background:#261c15;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:2px}
+.rlogo{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#f3e7da;margin-bottom:14px}
+.rli{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#9c8878;position:relative}
+.rli.on{background:#3d2e22;color:#f3e7da}
+.rli.on::after{content:'';position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:#c96f52}
+.rfoot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:10px}
+.avi{width:34px;height:34px;border-radius:50%;background:#f3e7da;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#7c3a2a}
+.sb{width:252px;flex:0 0 auto;border-right:1px solid #ede5d8;display:flex;flex-direction:column;padding:14px 14px 16px;box-sizing:border-box}
+.mspill{display:flex;align-items:center;gap:9px;height:42px;border:1px solid #e2d8c8;border-radius:11px;padding:0 13px;font-size:13px;font-weight:600;margin-bottom:16px}
+.si{display:flex;align-items:center;gap:11px;height:40px;border-radius:9px;padding:0 10px;font-size:13.5px;color:var(--soft);font-weight:500}
+.si .ic{width:18px;text-align:center;color:var(--muted);font-size:13px}
+.si .chev{margin-left:auto;color:var(--label);font-size:9px}
+.si.grp{font-weight:700;color:#2b2118}
+.si .dotn{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+.si .dotn::before{content:'';width:6px;height:6px;border-radius:50%;background:#c96f52}
+.kid2{display:flex;align-items:center;height:34px;border-radius:8px;padding:0 10px;margin-left:30px;font-size:12.5px;color:#5d5047}
+.kid2.on{background:#f2ede7;color:#2b2118;font-weight:700}
+.collapse{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;color:var(--muted);font-size:12px;margin-top:10px}
+.sbfoot{margin-top:auto;border-top:1px solid var(--hair);padding-top:12px}
+.upg{border:1px solid #e2b9a8;color:var(--burg);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600}
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:64px;display:flex;align-items:center;gap:16px;padding:0 26px;border-bottom:1px solid var(--hair)}
+.wm{font-family:'Playfair Display',serif;font-size:21px;font-weight:800}
+.crumb{font-size:13px;color:var(--muted)}
+.crumb b{color:#2b2118;font-weight:600}
+.saved{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--label)}
+.srch{display:flex;align-items:center;gap:9px;width:240px;height:36px;border:1px solid #e8dfd1;border-radius:9px;padding:0 12px;color:#a5988c;font-size:12px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;background:#f2ede7;border-radius:5px;padding:2px 6px;color:var(--muted)}
+.newb{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border-radius:9px;height:38px;padding:0 15px;font-size:12.5px;font-weight:600}
+.inner{display:flex;flex:1;min-height:0}
+.pside{width:216px;flex:0 0 auto;border-right:1px solid var(--hair);padding:22px 16px 16px;display:flex;flex-direction:column;box-sizing:border-box}
+.pk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:0 6px 8px}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:18px 6px 8px}
+.pi{display:flex;align-items:center;gap:10px;height:34px;border-radius:8px;padding:0 9px;font-size:13px;color:var(--soft)}
+.pi.on{background:#f2ede7;font-weight:700;color:#2b2118}
+.pi .swd{width:9px;height:9px;border-radius:50%}
+.pi .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.linkrow{display:flex;align-items:center;font-size:11.5px;color:var(--muted);border-top:1px solid var(--hair);margin-top:10px;padding:11px 9px 0;line-height:1.5}
+.linkrow b{color:var(--burg);font-weight:600;border-bottom:1px solid #e2c6ba;margin-left:4px}
+.tagbox{border:1px dashed #d9cbb8;border-radius:10px;padding:11px 12px;margin:2px 4px}
+.tagbox b{font-size:12px;display:block}
+.tagbox span{font-size:10.5px;color:var(--muted);line-height:1.5;display:block;margin-top:3px}
+.tset{display:flex;align-items:center;gap:9px;height:34px;padding:0 9px;color:var(--soft);font-size:12.5px;margin-top:auto}
+.pbody{flex:1;min-width:0;padding:26px 30px 30px;overflow:auto}
+.ph h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700}
+.ph .sub{font-size:13px;color:var(--muted);margin-top:5px}
+.tools{display:flex;align-items:center;gap:8px;margin-top:16px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.tsrch{display:flex;align-items:center;gap:7px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:#a5988c;font-size:11.5px;width:190px;background:#fff}
+.sortb{display:inline-flex;align-items:center;gap:6px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:var(--soft);font-size:11.5px;background:#fff;font-weight:600}
+.pkb{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pinkbd);color:#5c2f22;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:700}
+/* board */
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start;margin-top:18px}
+.fh{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px;display:flex;align-items:baseline;gap:9px;position:sticky;top:0;background:linear-gradient(#fdfcfa 74%,rgba(253,252,250,0));z-index:2}
+.fh .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.fh.done{border-bottom-color:#b9c9b4}
+.fh .wip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--label);font-weight:400;letter-spacing:.1em}
+.kc{background:#fff;border:1px solid #efe8dc;border-radius:10px;box-shadow:0 2px 8px rgba(58,28,20,.06);margin-bottom:12px;position:relative;transition:transform .14s cubic-bezier(.2,.7,.3,1),box-shadow .14s}
+.kc.u{border:1px solid var(--ink)}
+.kc .b{height:24px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--bd);border-radius:10px 10px 0 0;overflow:hidden}
+.kc.u .b{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.kc.h .b{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.kc.t .b{background:linear-gradient(180deg,#dee4dc,#d5dbd3);--bd:#b9c9b4}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;color:#3a1c14}
+.kc .b .w{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#8a6a58}
+.kc .in{padding:12px 13px 13px}
+.kc h4{font-size:13px;font-weight:600;line-height:1.35}
+.kc .ms{font-size:11px;color:#a0958a;margin-top:4px}
+.kc.lift{transform:translateY(-2px);box-shadow:0 8px 20px rgba(58,28,20,.13)}
+.hint{position:absolute;right:11px;top:31px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:#8a6a58}
+.dots{position:absolute;right:8px;bottom:8px;width:26px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#c4b6a6;letter-spacing:1px}
+.kc:hover .dots,.kc.lift .dots{color:#6b5a4e;background:#faf6f0;border:1px solid #ece4d6}
+.kc .in{padding-right:42px}
+.kc .ms{padding-right:0}
+/* B: band-mounted */
+.bdots{margin-left:8px;color:#8a6a58;font-size:10px;letter-spacing:1px}
+/* C: right gutter */
+.gut{position:absolute;top:24px;right:0;bottom:0;width:32px;border-left:1px solid #f4eee4;display:flex;align-items:center;justify-content:center;color:#c4b6a6;font-size:11px;letter-spacing:1px;background:#fdfbf7;border-radius:0 0 10px 0}
+.kc.gutc .in{padding-right:44px}
+.tick{position:absolute;inset:-1px;border-radius:10px;border:1.5px solid #8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,.16)}
+.stack::before,.stack::after{content:'';position:absolute;left:5px;right:5px;height:10px;border:1px solid #efe8dc;border-top:none;border-radius:0 0 9px 9px;background:#fdfbf7;z-index:-1}
+.stack::before{bottom:-5px}
+.stack::after{bottom:-9px;left:10px;right:10px;background:#fbf8f3;z-index:-2}
+.prog{height:3px;border-radius:2px;background:#efe7d9;overflow:hidden;margin:9px 0 0}
+.prog i{display:block;height:100%;background:#b9a98e;width:31%}
+.ghost{border:1.5px dashed #d8ccbc;border-radius:10px;height:78px;background:repeating-linear-gradient(135deg,#fdfbf7,#fdfbf7 6px,#faf6ef 6px,#faf6ef 12px);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.15em;color:var(--label)}
+.fade{height:30px;background:linear-gradient(rgba(253,252,250,0),#fdfcfa);margin-top:-30px;position:relative;z-index:1}
+.more{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;color:var(--label);text-align:center;padding:2px}
+.empty{font-size:11.5px;color:var(--muted);line-height:1.6;padding:4px 2px}
+.empty b{color:var(--burg);border-bottom:1px solid #e2c6ba}
+
+/* calendar */
+.calbar{display:flex;align-items:center;gap:8px;margin-top:18px}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.dow{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.17em;color:var(--label);text-align:center;padding-bottom:3px}
+.cell{background:#fff;border:1px solid #efe8dc;border-radius:9px;min-height:104px;padding:6px 7px}
+.cell.today{border:1.5px solid var(--ink)}
+.cell.past{background:#faf7f2}
+.cell .d{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--label);display:flex}
+.cell.today .d{color:#2b2118;font-weight:700}
+.cell .d .c2{margin-left:auto;font-size:6.5px;color:#c3b6a6}
+.pip{display:block;border-radius:5px;font-size:8.5px;padding:3px 6px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pip.u{background:#f8e2d9;color:#7a3a28;border:1px solid #eecfc2}
+.pip.t{background:#e9ede6;color:#3f5a3d;border:1px solid #c9d6c5}
+.pip.s{background:#f4efe7;color:#6b5a4e;border:1px solid #e6dccc}
+.pip.n{background:#f8f0d9;color:#6f5a2a;border:1px solid #e6d9ae}
+.pip.done{background:#f2f4f1;color:#7a8878;border:1px solid #dfe5dd;text-decoration:line-through}
+.rolled{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;color:#b3a394;margin-top:4px;display:block}
+.more2{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--label);padding:3px 2px 0}
+.legend{display:flex;gap:12px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;color:var(--label)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:3px;display:inline-block}
+/* noteboard */
+.nbg{columns:3;column-gap:16px;margin-top:18px}
+.note{break-inside:avoid;background:#fdf6e3;border:1px solid #e6d9ae;border-radius:11px;box-shadow:0 3px 10px rgba(58,28,20,.08);padding:14px 16px 15px;margin-bottom:16px;position:relative}
+.note .nt{font-family:'Caveat',cursive;font-size:21px;line-height:1.22;color:#4a3a1e}
+.note .nb{font-family:'Caveat',cursive;font-size:16px;color:#6f5f42;margin-top:6px;line-height:1.3}
+.note .nf{display:flex;align-items:center;gap:6px;margin-top:11px;padding-right:30px}
+.note .when{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#b3a279;margin-left:auto}
+.note .dots{color:#c9b98c}
+.note:hover .dots{color:#6b5a4e;background:#fbf3dd;border-color:#e6d9ae}
+.mtag{display:inline-flex;align-items:center;font-size:9px;font-weight:600;border-radius:5px;padding:2px 8px}
+.addnote{break-inside:avoid;border:1.5px dashed #d9cbb8;border-radius:11px;min-height:88px;display:flex;align-items:center;justify-content:center;color:var(--label);font-size:11.5px;margin-bottom:16px}
+/* menu M2 */
+.menu{position:absolute;background:#fff;border:1px solid #e2d8c8;border-radius:12px;box-shadow:0 18px 44px rgba(58,28,20,.2);padding:6px;width:228px;z-index:20}
+.mhead{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.17em;color:var(--label);padding:8px 10px 4px}
+.mi{display:flex;align-items:center;gap:10px;height:32px;border-radius:8px;padding:0 10px;font-size:11.5px;color:var(--soft);font-weight:500}
+.mi b{font-weight:700;color:#2b2118}
+.mi.hot{background:#f7f2e9}
+.mi.dim{color:#c1b4a5}
+.kbd{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 5px;border:1px solid #e2d8c8;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:'JetBrains Mono',monospace;font-size:8px;color:#6b5a4e}
+</style></head><body><div class="lbl">THE BOARD, SETTLED <em>&mdash; editorial heads (sticky, ink rule; sage on Done) &middot; hover = 2px lift, OPEN &#9656; in the band, and the corner dots darkening &middot; M2 menu with its three intent groups &middot; stacked sweep with its progress rail &middot; ghost drop slot &middot; the gentle WIP line on Today &middot; completion ring in Done &middot; fade hem over &ldquo;+9 more&rdquo; &middot; speaking empty state under Snoozed &middot; tabular numerals throughout. No ageing spine.</em></div><div class="lbl">TO-DO LIST</div><div class="frame">
+<div class="rail"><div class="rlogo">S</div><span class="rli">&#9638;</span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><span class="rli on">&#10003;</span>
+<div class="rfoot"><span class="avi">ML</span><span class="rli">&#9881;</span></div></div>
+<div class="sb"><div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:var(--label);font-size:9px">&#9662;</span></div>
+<div class="si"><span class="ic">&#9638;</span>Dashboard</div>
+<div class="si"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9639;</span>Materials</div>
+<div class="pk" style="padding:14px 10px 6px">TASKS</div>
+<div class="kid2 on" style="margin-left:0;padding-left:10px">To-do list<span style='margin-left:auto;display:flex;align-items:center;gap:6px;font-family:JetBrains Mono,monospace;font-size:10px;color:#8a7a6c'><span style='width:6px;height:6px;border-radius:50%;background:#c96f52'></span>15</span></div><div class="kid2" style="margin-left:0;padding-left:10px">Today</div><div class="kid2" style="margin-left:0;padding-left:10px">Calendar</div><div class="kid2" style="margin-left:0;padding-left:10px">Noteboard</div>
+<div class="collapse">&#171; Collapse sidebar</div>
+<div class="sbfoot"><div style="font-size:13px;font-weight:700">Michael Li</div>
+<div style="display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted);margin-top:3px">Free plan <span class="upg">Upgrade</span></div>
+<div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div>
+<div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ Tasks / <b>To-do list</b></span>
+<span class="saved">ALL CHANGES SAVED</span><span class="srch">&#9906; Search<span class="k">&#8984;K</span></span><span style="color:var(--muted)">?</span><span class="newb">&#65291; New</span></div>
+<div class="inner"><div class="pside">
+<div class="pk">FILTERS</div>
+<div class="pi on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">15</span></div>
+<div class="pi"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">12</span></div>
+<div class="pi"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">0</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div><div class="tagbox"><b>Coming soon</b><span>Tag notes and tasks, then filter by them here.</span></div>
+<div class="tset">&#9881; Task settings</div></div><div class="pbody">
+<div class="ph"><h1>To-do list</h1><div class="sub">Everything waiting on you &mdash; fifteen cards, three urgent.</div></div>
+<div class="tools"><span class="tsrch">&#9906; Search your list&hellip;</span><span class="sortb">&#8645; Most pressing</span><span style="flex:1"></span><span class="pkb">&#65291; Add task or note</span></div>
+<div class="cols">
+<div style="position:relative"><div class="fh">To do<span class="n">13</span></div>
+<div class="kc u lift"><div class="b"><i>&#9733; OFFER</i><span class="w">19 JUL</span></div>
+<div class="in"><h4>Tom Ellery has made an offer</h4><div class="ms">Tom Ellery &middot; Ellery &amp; Frost</div></div><span class="hint">OPEN &#9656;</span><span class="dots">&#8943;</span></div>
+<div class="kc u "><div class="b"><i>AGENT WAITING</i><span class="w">15 JUL</span></div>
+<div class="in"><h4>Send your partial to Daniel O&rsquo;Rourke</h4><div class="ms">Daniel O&rsquo;Rourke &middot; Inkwell &amp; Stone</div></div><span class="dots">&#8943;</span></div>
+<div class="kc h stack"><div class="b"><i>MATERIALS</i><span class="w">5 OF 16</span></div>
+<div class="in"><h4>Materials sweep</h4><div class="ms">16 agents &middot; one card, one sweep</div></div><div style="padding:0 13px 13px"><div class="prog"><i></i></div></div><span class="dots">&#8943;</span></div>
+<div class="kc h "><div class="b"><i>STALE</i><span class="w">SILENT 849 DAYS</span></div>
+<div class="in"><h4>Eleanor Whitfield silent</h4><div class="ms">No reply &mdash; consider closing</div></div><span class="dots">&#8943;</span></div>
+<div class="fade"></div><div class="more">+ 9 MORE &#9662;</div>
+<div class="menu" style="right:-190px;top:120px">
+<div class="mhead">DO IT</div>
+<div class="mi hot"><b>Action now</b></div>
+<div class="mi">&#65291; Add to today</div>
+<div class="mhead">PUT IT OFF</div>
+<div class="mi">&#128340; Snooze&hellip;<span style="margin-left:auto;color:#b3a394;font-size:9px">&#9656;</span></div>
+<div class="mi dim">Dismiss &mdash; not for offers</div>
+<div class="mhead">GO ELSEWHERE</div>
+<div class="mi">&#128279; Open the query</div>
+<div class="mi">&#9823; View the agent</div></div></div>
+<div><div class="fh">Today<span class="n">1</span><span class="wip">A GOOD DAY IS 3&ndash;5</span></div>
+<div class="kc u "><div class="b"><i>AGENT WAITING</i><span class="w">12 JUL</span></div>
+<div class="in"><h4>Send your full to Jonathan Marsh</h4><div class="ms">Jonathan Marsh &middot; The Marsh Agency</div></div><span class="dots">&#8943;</span></div>
+<div class="ghost">DROP HERE</div></div>
+<div><div class="fh">Snoozed<span class="n">1</span></div>
+<div class="kc h "><div class="b"><i>STALE &middot; &#128340;</i><span class="w">BACK FRI 8 AUG</span></div>
+<div class="in"><h4>Marcus Reed silent</h4><div class="ms">Snoozed until Friday</div></div><span class="dots">&#8943;</span></div>
+<div class="empty" style="margin-top:8px">Snoozed work waits here until its day.</div></div>
+<div><div class="fh done">Done<span class="n">1 TODAY</span></div>
+<div class="kc t "><div class="b"><i>&#10003; DONE</i><span class="w">16:44</span></div>
+<div class="in"><h4>Closed Jonathan Marsh</h4><div class="ms">No response &mdash; 849 days</div></div><span class="tick"></span></div>
+<div class="more" style="margin-top:6px">CLEARS AT MIDNIGHT &middot; KEPT IN THE LOG</div></div>
+</div></div></div></div></div><div class="lbl">CALENDAR</div><div class="frame">
+<div class="rail"><div class="rlogo">S</div><span class="rli">&#9638;</span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><span class="rli on">&#10003;</span>
+<div class="rfoot"><span class="avi">ML</span><span class="rli">&#9881;</span></div></div>
+<div class="sb"><div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:var(--label);font-size:9px">&#9662;</span></div>
+<div class="si"><span class="ic">&#9638;</span>Dashboard</div>
+<div class="si"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9639;</span>Materials</div>
+<div class="pk" style="padding:14px 10px 6px">TASKS</div>
+<div class="kid2" style="margin-left:0;padding-left:10px">To-do list<span style='margin-left:auto;display:flex;align-items:center;gap:6px;font-family:JetBrains Mono,monospace;font-size:10px;color:#8a7a6c'><span style='width:6px;height:6px;border-radius:50%;background:#c96f52'></span>15</span></div><div class="kid2" style="margin-left:0;padding-left:10px">Today</div><div class="kid2 on" style="margin-left:0;padding-left:10px">Calendar</div><div class="kid2" style="margin-left:0;padding-left:10px">Noteboard</div>
+<div class="collapse">&#171; Collapse sidebar</div>
+<div class="sbfoot"><div style="font-size:13px;font-weight:700">Michael Li</div>
+<div style="display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted);margin-top:3px">Free plan <span class="upg">Upgrade</span></div>
+<div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div>
+<div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ Tasks / <b>Calendar</b></span>
+<span class="saved">ALL CHANGES SAVED</span><span class="srch">&#9906; Search<span class="k">&#8984;K</span></span><span style="color:var(--muted)">?</span><span class="newb">&#65291; New</span></div>
+<div class="inner"><div class="pside">
+<div class="pk">FILTERS</div>
+<div class="pi on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">15</span></div>
+<div class="pi"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">12</span></div>
+<div class="pi"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">0</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div><div class="tagbox"><b>Coming soon</b><span>Tag notes and tasks, then filter by them here.</span></div>
+<div class="tset">&#9881; Task settings</div></div><div class="pbody">
+<div class="ph"><h1>Calendar</h1><div class="sub">August 2026 &mdash; every item on the day it needs you.</div></div>
+<div class="tools"><span class="sortb">&#9664;</span><span class="sortb">Today</span><span class="sortb">&#9654;</span><span class="sortb">Month &#9662;</span><span style="flex:1"></span><span class="pkb">&#65291; Add task or note</span></div>
+<div class="calg"><div class="dow">MON</div><div class="dow">TUE</div><div class="dow">WED</div><div class="dow">THU</div><div class="dow">FRI</div><div class="dow">SAT</div><div class="dow">SUN</div>
+<div class="cell past"><div class="d">27<span class="c2"></span></div></div><div class="cell past"><div class="d">28<span class="c2"></span></div></div><div class="cell past"><div class="d">29<span class="c2"></span></div></div><div class="cell past"><div class="d">30<span class="c2"></span></div></div><div class="cell past"><div class="d">31<span class="c2"></span></div></div><div class="cell past"><div class="d">1<span class="c2"></span></div></div><div class="cell past"><div class="d">2<span class="c2"></span></div></div>
+<div class="cell past"><div class="d">3<span class="c2">1</span></div><span class="pip done">Closed Marcus Reed</span></div>
+<div class="cell past"><div class="d">4<span class="c2"></span></div><span class="rolled">2 ROLLED FORWARD &#8599;</span></div>
+<div class="cell past"><div class="d">5<span class="c2">1</span></div><span class="pip done">Wish list &middot; A. Kapoor</span></div>
+<div class="cell past"><div class="d">6<span class="c2">1</span></div><span class="pip done">Replied to Curtis Vane</span></div>
+<div class="cell today"><div class="d">7<span class="c2">5</span></div><span class="pip u">Ellery &mdash; offer waiting</span><span class="pip u">Full &rarr; Marsh</span><span class="pip t">R&amp;R &rarr; Dunn</span><div class="more2">+2 MORE</div></div>
+<div class="cell "><div class="d">8<span class="c2">2</span></div><span class="pip s">Marcus Reed &mdash; back</span><span class="pip t">Redraft chapter one</span></div>
+<div class="cell "><div class="d">9<span class="c2"></span></div></div>
+<div class="cell "><div class="d">10<span class="c2">1</span></div><span class="pip u">Partial &rarr; O&rsquo;Rourke</span></div>
+<div class="cell "><div class="d">11<span class="c2"></span></div></div><div class="cell "><div class="d">12<span class="c2"></span></div></div>
+<div class="cell "><div class="d">13<span class="c2">1</span></div><span class="pip n">Comp titles &mdash; revisit</span></div>
+<div class="cell "><div class="d">14<span class="c2"></span></div></div><div class="cell "><div class="d">15<span class="c2"></span></div></div><div class="cell "><div class="d">16<span class="c2"></span></div></div>
+</div>
+<div class="legend"><span><i style="background:#f8e2d9;border:1px solid #eecfc2"></i>AGENT DEADLINES</span><span><i style="background:#e9ede6;border:1px solid #c9d6c5"></i>YOUR TASKS</span><span><i style="background:#f4efe7;border:1px solid #e6dccc"></i>SNOOZED RETURNS</span><span><i style="background:#f8f0d9;border:1px solid #e6d9ae"></i>DATED NOTES</span><span><i style="background:#f2f4f1;border:1px solid #dfe5dd"></i>COMPLETED</span></div>
+</div></div></div></div><div class="lbl">NOTEBOARD</div><div class="frame">
+<div class="rail"><div class="rlogo">S</div><span class="rli">&#9638;</span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><span class="rli on">&#10003;</span>
+<div class="rfoot"><span class="avi">ML</span><span class="rli">&#9881;</span></div></div>
+<div class="sb"><div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:var(--label);font-size:9px">&#9662;</span></div>
+<div class="si"><span class="ic">&#9638;</span>Dashboard</div>
+<div class="si"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div>
+<div class="si"><span class="ic">&#9639;</span>Materials</div>
+<div class="pk" style="padding:14px 10px 6px">TASKS</div>
+<div class="kid2" style="margin-left:0;padding-left:10px">To-do list<span style='margin-left:auto;display:flex;align-items:center;gap:6px;font-family:JetBrains Mono,monospace;font-size:10px;color:#8a7a6c'><span style='width:6px;height:6px;border-radius:50%;background:#c96f52'></span>15</span></div><div class="kid2" style="margin-left:0;padding-left:10px">Today</div><div class="kid2" style="margin-left:0;padding-left:10px">Calendar</div><div class="kid2 on" style="margin-left:0;padding-left:10px">Noteboard</div>
+<div class="collapse">&#171; Collapse sidebar</div>
+<div class="sbfoot"><div style="font-size:13px;font-weight:700">Michael Li</div>
+<div style="display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted);margin-top:3px">Free plan <span class="upg">Upgrade</span></div>
+<div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div>
+<div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ Tasks / <b>Noteboard</b></span>
+<span class="saved">ALL CHANGES SAVED</span><span class="srch">&#9906; Search<span class="k">&#8984;K</span></span><span style="color:var(--muted)">?</span><span class="newb">&#65291; New</span></div>
+<div class="inner"><div class="pside">
+<div class="pk">FILTERS</div>
+<div class="pi on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">15</span></div>
+<div class="pi"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">12</span></div>
+<div class="pi"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">0</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div><div class="tagbox"><b>Coming soon</b><span>Tag notes and tasks, then filter by them here.</span></div>
+<div class="tset">&#9881; Task settings</div></div><div class="pbody">
+<div class="ph"><h1>Noteboard</h1><div class="sub">Six notes pinned &mdash; thoughts that aren&rsquo;t tasks yet.</div></div>
+<div class="tools"><span class="tsrch">&#9906; Search your notes&hellip;</span><span class="sortb">#All &#9662;</span><span class="sortb">&#9776; Read as a column</span><span style="flex:1"></span><span class="pkb">&#65291; Pin a note</span></div>
+<div class="nbg">
+<div class="addnote">&#65291; Pin a note</div>
+<div class="note"><div class="nt">Ask Sophie about the R&amp;R deadline</div><div class="nb">She said six weeks &mdash; check the email from the 12th.</div><div class="nf"><span class="mtag" style="background:#e9ede6;color:#4a5f48">#synopsis</span><span class="when">23 JUL</span></div><span class="dots">&#8943;</span></div>
+<div class="note"><div class="nt">Comp titles &mdash; check the Waterstones table</div><div class="nb">Anything shelved beside Nightingale.</div><div class="nf"><span class="mtag" style="background:#f4ecd4;color:#7a6030">#ideas</span><span class="when">2 AUG</span></div><span class="dots">&#8943;</span></div>
+<div class="note"><div class="nt">Open with the flood, not the funeral</div><div class="nb">Chapter one drags until page nine.</div><div class="nf"><span class="mtag" style="background:#f6e3db;color:#8a4a36">#queryletter</span><span class="when">28 JUL</span></div><span class="dots">&#8943;</span></div>
+<div class="note"><div class="nt">Marsh likes a short bio</div><div class="nb">Two lines, no credits list &mdash; from his wish list.</div><div class="nf"><span class="mtag" style="background:#f6e3db;color:#8a4a36">#queryletter</span><span class="when">19 JUL</span></div><span class="dots">&#8943;</span></div>
+<div class="note"><div class="nt">Reread the O&rsquo;Rourke guidelines</div><div class="nb">First fifty pages, not three chapters.</div><div class="nf"><span class="when">15 JUL</span></div><span class="dots">&#8943;</span></div>
+<div class="note"><div class="nt">Agents who close in September</div><div class="nb">Kapoor, Tan, Penhallow &mdash; query before the 30th.</div><div class="nf"><span class="mtag" style="background:#f4ecd4;color:#7a6030">#ideas</span><span class="when">1 AUG</span></div><span class="dots">&#8943;</span></div>
+</div></div></div></div></div></body></html>

@@ -24,11 +24,12 @@ const rule = (sel: string): string => {
 
 describe("tightening P1 — the hero on one line + the recessed control strip", () => {
   it("THE HEADER NAMES THE PAGE and carries its one line (amended, corrections fix 3)", () => {
-    const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+    // tasks-pages P1: the header block is TasksPageLayout's — title + subtitle ride its props
+    const hero = page.slice(page.indexOf("<TasksPageLayout"), page.indexOf("function renderHero"));
     /* The no-subtitle rule was written for a hero that named nothing. The page is titled for its
        crumb now, and a bare title with no line under it leaves the page unexplained. */
     expect(hero).toContain('title="To-do list"');
-    expect(hero).toContain("description=");
+    expect(hero).toContain("subtitle={boardSubtitle()}");
   });
 
   it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {

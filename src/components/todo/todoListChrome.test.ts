@@ -42,24 +42,23 @@ const chrome = (() => {
 
 describe("the To-do list page's chrome — present in BOTH views", () => {
   it("the page names itself for its breadcrumb", () => {
-    /* ⚠️ The header is CALLED in the chrome and DEFINED below the view switch, so the call and
-       the copy are asserted separately. Conflating them is how a test ends up proving a function
-       exists while saying nothing about whether the page renders it. */
-    expect(chrome).toContain("{renderPageHeader()}");
-    const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
-    expect(hero).toContain('title="To-do list"');
-    expect(hero).toContain("description=");
-    /* Scoped to the LIVE header: `renderHero` is the dormant bespoke hero, kept whole behind its
+    /* ⚠️ Re-anchored (tasks-pages P1): the header block is TasksPageLayout's now — the page hands
+       it the title/subtitle and renderTools feeds its tool row. Same law, new home. */
+    expect(chrome).toContain("<TasksPageLayout");
+    expect(chrome).toContain('title="To-do list"');
+    expect(chrome).toContain("subtitle={boardSubtitle()}");
+    /* Scoped to the LIVE chrome: `renderHero` is the dormant bespoke hero, kept whole behind its
        red gate, and it legitimately still carries the old wording. Asserting over the whole file
        would fail on a thing that is deliberately preserved. */
-    expect(hero).not.toContain("What’s on your desk?");
+    expect(chrome.slice(chrome.indexOf("<TasksPageLayout"))).not.toContain("What’s on your desk?");
   });
 
   it("⚠️ THE SIDE CONTAINER IS MOUNTED, and OUTSIDE the view switch", () => {
     // This is the assertion Phase 2 needed and did not have: not "the component exists" but
     // "this page mounts it, before the branch that chooses a view".
     expect(chrome).toContain("<TodoSideContainer");
-    expect(chrome).toContain('<div className="tdw">');
+    // tasks-pages P1: the sidebar rides the layout's `sidebar` prop — below the hairline by construction
+    expect(chrome).toContain("sidebar={");
   });
 
   it("the tool row carries the local search and the view toggle, and NOT the retired chip strip — RETIRED SURFACE (board+dock P1)", () => {
@@ -74,7 +73,8 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
   });
 
   it("the Add is PINK (creation); the session launcher is RETIRED (board fixes II P3)", () => {
-    const hero = page.slice(page.indexOf("function renderPageHeader"), page.indexOf("function renderHero"));
+    // tasks-pages P1: the controls live in renderTools (the layout's tool row) now
+    const hero = page.slice(page.indexOf("function renderTools"), page.indexOf("function renderHero"));
     expect(hero).toContain('className="tdb-addb"');   // pink
     /* ⚠️ SUPERSEDED: "tdb-ghb ▶ Focused session" is gone — the dock's doors (every card, the
        menu's Action now) made a separate launcher a second name for a thing already under your

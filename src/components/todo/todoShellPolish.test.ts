@@ -21,13 +21,11 @@ const rule = (sel: string): string => {
 
 describe("shell polish P1 — the centred column + the chrome gap", () => {
   it("the hero AND the panel live on ONE centred max-width column", () => {
-    // the JSX wraps both in .tdb-col
-    const col = page.indexOf('<div className="tdb-col">');
-    const hero = page.indexOf("{renderPageHeader()}"); // todo rebuild P4: the app-wide header
-    const ws = page.indexOf('className="tdb-asm tdb-ws"');
-    expect(col).toBeGreaterThan(0);
-    expect(hero).toBeGreaterThan(col);
-    expect(ws).toBeGreaterThan(hero);
+    /* tasks-pages P1: TasksPageLayout WEARS .tdb-col (the single geometry owner) — the header
+       and the columns both live inside it by construction, so the page needs no hand wrapper. */
+    const layout = readFileSync(join(__dirname, "TasksPageLayout.tsx"), "utf8");
+    expect(layout).toContain('className="tdb-col tpl"');
+    expect(page).toContain("<TasksPageLayout");
     const c = rule(".tdb-col");
     expect(c).toContain("max-width: var(--tdb-col-max)");
     expect(c).toContain("margin-inline: auto"); // centred, equal gutters grow with the viewport
