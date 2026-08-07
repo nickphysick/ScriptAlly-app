@@ -11,6 +11,12 @@
 **⚠️ PHASE 8 IS NOT BUILT — its premise does not hold. See the finding at the foot; it needs
 your call before anything is written.**
 
+**⚠️ PHASE 6 WAS REVERTED on 7 Aug at Nick's call — parked, not paused.** Its section below is
+kept as the record of what was built and why, but none of it is live: the lib, the locks, the
+rail, the span and the lane split are all deleted. It also turned out to be the cause of the
+board's cramped card spacing — the lane div broke a direct-child selector, silently, on every
+column. Full account: `reports/board-fold-revert.md`.
+
 ---
 
 ## P1 — the column measure (`97fddcc`)
@@ -95,7 +101,7 @@ been read was answering a question nobody had asked. **Tags moved to their own s
 that grows with the writer was pushing four fixed behaviours off the first screen. Delete still
 detaches and never deletes items (order locked: ids leave the tasks first).
 
-## P6 — collapsible columns + reflow (`8d5dedc`)
+## P6 — collapsible columns + reflow (`8d5dedc`) — ⚠️ REVERTED, kept as history
 
 **The fold:** a 44px rail, the Playfair name rotated up it, the count pilled, ▸ restores — a real
 named button, so a keyboard meets a control rather than a decoration.

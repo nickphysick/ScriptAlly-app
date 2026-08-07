@@ -1,12 +1,36 @@
 # STATE — where the repo stands
 
-**Last updated: 7 August 2026 (thirteenth pass — the board optimisation).**
+**Last updated: 7 August 2026 (fourteenth pass — P6 reverted, the card gap pinned).**
 
-## The board optimisation is IN — P1–P7 (board-optimise pack; report: `reports/board-optimise.md`)
+## ⚠️ P6 (collapsible columns + reflow) IS REVERTED — parked, not paused (report: `reports/board-fold-revert.md`)
+
+Nick's call. `todoFold.ts` and its 24 locks are DELETED; the fold state, the `foldOverride` prop,
+the rail, the ▾ control, the span, the `SHOWING · WAS` figures and the lane split are out of
+`TodoBoard`; the whole P6 CSS block is out of `todoBoard.css`. **No dormant code and no stored
+preference** — the fold used `localStorage["sa.todoFolded"]` and never reached Firestore, so the
+rules and types needed no change; the orphaned key is inert and gets NO cleanup shim (that would
+be the dormant code the revert exists to avoid). P7's estimate locks moved to
+`boardEstimate.test.tsx` rather than dying with the file they were appended to.
+
+- **⚠️ `todoPrefs` SURVIVES and the prod queue does NOT shorten.** It is P5's (`6c0fb97`) — the
+  four settings-sheet behaviours — not the fold's. Live readers: TaskSettingsSheet, `wipLine`,
+  `todoEstimate`, TodoBoard, ToDoPage. **The queue stands: rejectedDate · detail/surfaceOffset ·
+  committedDate · tags · todoPrefs · estimateMin.**
+- **⚠️ THE CARD GAP WAS P6's DOING, AND IT IS NOW LOCKED.** `.tbd-body > .tbd-card` is a
+  DIRECT-CHILD selector; the lane div put a node in between and the rule stopped matching — the
+  12px between cards AND the 21px under a sweep. The wrapper rendered **unconditionally**, so
+  every card on every column went flush even with nothing folded. tsc, the build and 3264 tests
+  all stayed green: **a CSS combinator can stop applying in perfect silence.** `boardMeasure.
+  test.tsx` now asserts the rule TOGETHER WITH the DOM shape it needs (no element opens between
+  the body and its cards; all siblings; no competing `gap`) — a value-only lock would have sailed
+  through the entire regression. Verified red under the reintroduced wrapper before being kept.
+
+## The board optimisation is IN — P1–P5 + P7 (board-optimise pack; report: `reports/board-optimise.md`)
 
 `2fb9287` (four scope-fenced refs) → `97fddcc` (P1 column measure) → `d3b5efd` (P2 sidebar) →
 `f2c49c0` (P3 ArtSlot) → `a2d1d6b` (P4 dock work surface) → `6c0fb97` (P5 settings + tag sheets)
-→ `8d5dedc` (P6 fold + reflow) → `b83154b` (P7 estimates). Suite **3264 | 2 skipped, 207 files**.
+→ ~~`8d5dedc` (P6)~~ **reverted, see above** → `b83154b` (P7 estimates). Suite after the revert:
+**3248 | 2 skipped, 207 files**.
 
 - **⚠️ PHASE 8 (multi-select) IS NOT BUILT — ITS PREMISE IS FALSE, and this needs Nick's call.**
   The pack says "reuse the list's batch model wholesale — no second selection system" and "the
@@ -21,12 +45,6 @@
   start`; the surplus is margin, never card width. The **zero min is load-bearing** (it lets a
   column shrink rather than overflow), so both narrow breakpoints keep the same track function
   with fewer tracks.
-- **⚠️ THE FOLD IS A UI PREFERENCE, NEVER BOARD DATA** — `sa.todoFolded` in localStorage, read
-  defensively; the schema diff is LOCKED (no fold field in the rules or the types). Freed width
-  goes to the **leftmost OVERFLOWING** column, at most **two lanes**, one spanning head carrying
-  "SHOWING {n} · WAS {m}". **Reading fills top-to-bottom THEN the next lane** — locked by
-  asserting the lanes concatenate back to the derived order. The lanes can be pure presentation
-  precisely BECAUSE order is derived and never stored.
 - **ONE stored map for the four behaviours** (`User.todoPrefs`: staleMonths · goodDay ·
   rollForward · weeklyBriefing) — one rules entry, one write path; every reader goes through the
   TOTAL `todoPrefs()`, and **the defaults are the behaviour the app already had**. `wipLine`'s
