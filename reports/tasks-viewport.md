@@ -153,3 +153,77 @@ meeting a metaphor). Both are written into `design-refs/themes.md`.
 Dev hosting redeployed at `c8e6e79`. **No rules change** — this phase touches neither
 `firestore.rules` nor `types.ts`. The prod queue is unchanged and still Nick's: rejectedDate ·
 detail/surfaceOffset · committedDate · tags · todoPrefs · estimateMin.
+
+
+---
+
+# Four contained fixes (`7ca87e4`)
+
+## 1 · The left gutter is law
+
+**The cause:** `.tdb-col` carried `margin-inline: auto`. A **centred** column's left edge moves
+with the width available to it, so pages that resolved to different widths started their titles
+at different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+**left-anchored** now (`margin-inline: 0 auto`); the surplus past the 1360px cap becomes right
+margin.
+
+**Why it shipped:** the existing alignment test covered the **sidebar pages only** — so the two
+pages that diverged were the two nobody was checking. It now asserts all four wear the same
+column and that none caps or centres a measure of its own.
+
+## 2 · The calendar — ⚠️ THE CULPRIT IS NOT PROVEN, AND I AM NOT GUESSING AT ONE
+
+**I could not reproduce the page scroll.** A harness built from `dist/assets/index-*.css` shows
+**zero overflow at 760px**, and it stays zero when I rebuild the real nesting — `.ws-cscroll` as
+an `overflow: auto` flex column, a `flex: none` bar above, a `display: block` slot whose height
+comes from `flex: 1` rather than an explicit pixel value. Rows resolve to
+`12.75px 73.83px × 6`; the grid is 492px inside a 516px body.
+
+So the fix below is **the removal of the one genuinely fragile link**, not a proven cure:
+
+> **`.spine-root` used `height: 100%`.** A percentage height must resolve against a parent with a
+> **definite** height, and its parent is a flex item inside the app's real scroll container. Whether
+> that percentage resolves depends on every ancestor above it — which is not something a layout law
+> should rest on. It asks for the remaining space now (`flex: 1; min-height: 0`), which is the
+> pattern **StagePage's own comment already recommends**, and the four Tasks slots moved
+> `layout="fill"` → `layout="fillColumn"` so it has a flex parent to be an item of. (`fill` renders
+> the slot `display: block`, which is what left the percentage in play.)
+
+**⚠️ jsdom CANNOT PROVE THE FLEX CHAIN. This needs a browser check on dev.** If `/todo/calendar`
+still scrolls, the culprit is an element my harness does not have — walk the chain table above
+top-down in devtools and report the first ancestor whose `scrollHeight > clientHeight`. That
+element is the answer, and I would rather hand you the method than a guess.
+
+## 3 · Briefs are not user-facing copy
+
+Every placeholder rendered its illustrator brief as body text — a writer met *"An empty letter
+tray, a pen laid down."* as though the app were telling them something. `.art-cap` is **deleted**
+(rule removed, not emptied, so nothing can quietly render into it again); the placeholder shows
+the slot name in mono and nothing else. **Where an asset exists it stands alone** — no ratio box,
+no dashed frame. Placeholder chrome around finished artwork makes it look unfinished.
+
+## 4 · Up next must not truncate
+
+**The row stacks now** — title, why-line, verb — so two pieces of text no longer compete for one
+line's width. The title wraps to two lines with `-webkit-line-clamp: 2`, no ellipsis, and
+`overflow-wrap: anywhere` so a long unbroken word cannot force the rail wider than its track. The
+rail widens **320 → 360px** to pay for it.
+
+**And the same fault had a second home:** `.tdt-t` truncated every committed item on Today's list
+for exactly the same reason. Fixed with it — a title is the only part of a row that says what it
+*is*; the chips beneath may be clipped, the title may not.
+
+## The drift that keeps recurring
+
+Four **pre-redesign rules survived P2 as second rules for live selectors** (`.tdt-brow`,
+`.tdt-bt`, `.tdt-why`, and a media query hiding the why-line entirely). That is why the redesigned
+row read as half-applied. Deleted rather than left inert: **a stale rule for a live selector wins
+or loses on parse order**, which is not a thing anyone should have to reason about. This is the
+third time in one day the same duplicate-rule drift has bitten — twice in rules I had just
+written myself.
+
+## Gates
+
+Tasks suites **1048 passed | 2 skipped, 58 files**; tsc green. Seven locks superseded in place,
+dated. The four reds elsewhere in the tree are the dashboard stream's own specs against their
+live WIP — verified not to involve any file in this commit.
