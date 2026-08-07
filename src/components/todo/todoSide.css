@@ -143,3 +143,11 @@
 }
 .tds-sign b { color: #2a1a13; }
 .tds-sign:hover { color: #2a1a13; }
+
+/* ── the real TAGS section (tasks-pages P5) — the Coming-soon box is retired ── */
+.tds-tagcap { display: flex; align-items: center; justify-content: space-between; }
+.tds-tagclear {
+  background: transparent; border: 0; font: inherit; font-size: 10px; font-weight: 600;
+  color: #7c3a2a; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; padding: 0;
+}
+.tds-tagnone { font-size: 11px; color: #a5988c; line-height: 1.55; padding: 2px 9px 6px; }

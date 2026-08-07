@@ -102,3 +102,17 @@ export const CAL_LEGEND: { family: CalPipFamily; label: string }[] = [
   { family: "note", label: "DATED NOTES" },
   { family: "done", label: "COMPLETED" },
 ];
+
+/**
+ * ⚠️ THE TAG PALETTE (tasks-pages P5) — the FIXED set of chip tones, one per family colour,
+ * assigned at creation and changeable, never free-form. pink/sage/butter are the ref's own mtag
+ * pairs; latte and parchment complete the family vocabulary at the same strength. Keys are the
+ * TagColour union — a colour outside this record cannot be stored.
+ */
+export const TAG_PALETTE: Record<"pink" | "sage" | "butter" | "latte" | "parchment", { bg: string; tx: string }> = {
+  pink: { bg: "#f6e3db", tx: "#8a4a36" },
+  sage: { bg: "#e9ede6", tx: "#4a5f48" },
+  butter: { bg: "#f4ecd4", tx: "#7a6030" },
+  latte: { bg: "#f0e8d8", tx: "#6b5a4e" },
+  parchment: { bg: "#f4efe7", tx: "#6b5a4e" },
+};

@@ -83,10 +83,10 @@ describe("⚠️ the date is the door — one write, three rooms", () => {
 });
 
 describe("⚠️ the ⋯ menu — the SAME grammar, the SAME shell", () => {
-  it("the note menu: Edit · Give it a date… · a separated danger Delete (Tags… joins in P5 with its picker)", () => {
+  it("the note menu: Edit · Give it a date… · Tags… · a separated danger Delete (Tags… ARRIVED with its picker, P5)", () => {
     const groups = noteMenu();
     const flat = groups.flatMap((g) => g.entries) as MenuLeaf[];
-    expect(flat.map((l) => l.label)).toEqual(["Edit the note…", "Give it a date…", "Delete the note…"]);
+    expect(flat.map((l) => l.label)).toEqual(["Edit the note…", "Give it a date…", "Tags…", "Delete the note…"]);
     expect(groups).toHaveLength(2); // the danger group stands apart, the board's own pattern
     expect(flat.find((l) => l.id === "delete-task")!.danger).toBe(true);
     // every opener says so

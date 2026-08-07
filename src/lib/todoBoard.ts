@@ -112,6 +112,7 @@ export interface BoardCard {
   dueYmd?: string; // the raw dueDate "YYYY-MM-DD"
   surfaceOffset?: SurfaceOffset;
   surfaced?: boolean; // DERIVED — reached its in-app surfacing window (today >= dueDate − lead) → on Today's list
+  tags?: string[]; // tasks-pages P5 — applied tag ids (user cards only; the defs live on the user doc)
 }
 
 /**
@@ -356,6 +357,7 @@ function userCard(t: UserTask, input: BoardInput): BoardCard {
     dueYmd: t.dueDate,
     surfaceOffset: t.surfaceOffset,
     surfaced,
+    tags: t.tags, // tasks-pages P5 — the luggage rides the card
     userTaskId: t.id,
   };
 }

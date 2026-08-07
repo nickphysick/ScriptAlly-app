@@ -47,6 +47,9 @@ export interface TodoDockProps {
      dock owns its own tier menu now (capped for offers) and reports the CHOSEN date. */
   onSnoozeDays: (card: BoardCard, days: number, when: string) => void;
   onMore: (card: BoardCard) => void;
+  /** tasks-pages P5 — MOUNT 2 of 3: the item sheet's tag surface. The page supplies the ONE
+   *  TagPicker for user-task cards; derived work cannot be tagged, so the slot stays empty. */
+  tagsSlot?: (card: BoardCard) => React.ReactNode;
 }
 
 /** The ink primary's words per flow — the act, never a bare "Done". */
@@ -63,7 +66,7 @@ function primaryLabel(card: BoardCard): string {
 }
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore,
+  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore, tagsSlot,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -181,6 +184,13 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
         {/* ── THE FOOT ─────────────────────────────────────────────────────
             The flow's ink primary, the two quiet verbs, and where you are going next. */}
+
+        {tagsSlot && card.userTaskId && (
+
+          <div className="tdk-tags">{tagsSlot(card)}</div>
+
+        )}
+
         <footer className="tdk-foot">
           <button
             type="button"

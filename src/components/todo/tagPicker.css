@@ -1,0 +1,28 @@
+/**
+ * TagPicker (tasks-pages pack, Phase 5) — the one tag surface. Chips in the fixed family
+ * palette; the create affordance appears inline the moment the typed label matches nothing.
+ */
+.tgp { display: flex; flex-direction: column; gap: 8px; }
+.tgp.compact { gap: 6px; }
+
+.tgp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tgp-chip {
+  display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 600;
+  border-radius: 6px; padding: 3px 9px; border: 1px solid transparent;
+  cursor: pointer; font-family: inherit;
+}
+.tgp-tick { font-size: 9px; }
+.tgp-none { font-size: 11px; color: #a5988c; }
+
+.tgp-row { display: flex; align-items: center; gap: 7px; }
+.tgp-row input {
+  flex: 1; min-width: 0; height: 28px; border: 1px solid #e8dfd1; border-radius: 7px;
+  padding: 0 9px; font: inherit; font-size: 11.5px; color: #2b2118; background: #fff; outline: none;
+}
+.tgp-row input::placeholder { color: #a5988c; }
+.tgp-row input:focus { border-color: #cbb89a; }
+.tgp-create {
+  height: 28px; padding: 0 10px; border-radius: 7px; white-space: nowrap;
+  background: #f5e2da; border: 1px solid #e8c8bc; color: #5c2f22;
+  font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+}

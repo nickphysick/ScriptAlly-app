@@ -25,6 +25,8 @@
 import React from "react";
 import { Settings2 } from "lucide-react";
 import { TODO_FACETS, TodoFacetId } from "../../lib/todoBoardSort";
+import { TAG_PALETTE } from "../../lib/todoFamily";
+import { TagDef } from "../../types";
 import "./todoSide.css";
 
 export interface TodoSideContainerProps {
@@ -36,10 +38,19 @@ export interface TodoSideContainerProps {
   onOpenTaskSettings: () => void;
   /** The road sign — notes are not on this board, so the row points at where they are. */
   onNoteboard: () => void;
+  /* ⚠️ TAGS, FOR REAL (tasks-pages P5) — the Coming-soon box retires. The rows are the user's
+     own definitions with live usage counts; selection is MULTI (additive with FILTERS: Urgent
+     AND #synopsis), and a clear control appears the moment anything is active. */
+  tags?: TagDef[];
+  tagCounts?: Map<string, number>;
+  selectedTags?: string[];
+  onToggleTag?: (id: string) => void;
+  onClearTags?: () => void;
 }
 
 export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
   counts, active, onSelect, onOpenTaskSettings, onNoteboard,
+  tags = [], tagCounts, selectedTags = [], onToggleTag, onClearTags,
 }) => (
   <aside className="tds" aria-label="Filters">
     {/* ⚠️ FILTERS, NOT LISTS (board+dock P2) — renamed because the rows now DO what the heading
@@ -78,11 +89,37 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
       Notes to self live on the <b>Noteboard →</b>
     </button>
 
-    <div className="tds-cap">Tags</div>
-    <div className="tds-soon" aria-disabled="true">
-      <span className="tds-soon-t">Coming soon</span>
-      <span className="tds-soon-s">Tag notes and tasks, then filter by them here.</span>
+    {/* ⚠️ THE REAL TAGS LIST (tasks-pages P5) — the "Coming soon" box is retired. Multi-select
+        rows (additive with FILTERS above), usage counts derived live, and a clear control the
+        moment any are active. No tags yet = one quiet line pointing at where creation lives. */}
+    <div className="tds-cap tds-tagcap">
+      Tags
+      {selectedTags.length > 0 && onClearTags && (
+        <button type="button" className="tds-tagclear" onClick={onClearTags}>Clear</button>
+      )}
     </div>
+    {tags.length === 0 ? (
+      <div className="tds-tagnone">Tag notes and tasks as you write them — they gather here.</div>
+    ) : (
+      <div className="tds-group" role="group" aria-label="Tags">
+        {tags.map((t) => {
+          const on = selectedTags.includes(t.id);
+          return (
+            <button
+              key={t.id}
+              type="button"
+              className={`tds-row${on ? " on" : ""}`}
+              aria-pressed={on}
+              onClick={() => onToggleTag?.(t.id)}
+            >
+              <span className="tds-sw" style={{ background: TAG_PALETTE[t.colour].bg, border: `1px solid ${TAG_PALETTE[t.colour].tx}` }} aria-hidden="true" />
+              <span className="tds-lbl">#{t.label}</span>
+              <span className="tds-ct">{tagCounts?.get(t.id) ?? 0}</span>
+            </button>
+          );
+        })}
+      </div>
+    )}
 
     <div className="tds-grow" />
 

@@ -265,8 +265,8 @@ interface DbContextType {
   // User tasks — the canonical stored to-do object (record-scoped; read by the To-do board + the
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
-  addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null }) => Promise<void>;
+  addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[] }) => Promise<string | undefined>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
 
   // Activity Actions
@@ -2152,7 +2152,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // ── User tasks (users/{uid}/tasks) — the canonical stored to-do object. Record scope is INPUT
   //    (queryId/agentId/manuscriptId), not derived state; omitted when absent (Firestore rejects
   //    undefined). The "N tasks" badge count stays DERIVED — nothing counts is cached here. ──
-  const addUserTask = async (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset }): Promise<string | undefined> => {
+  const addUserTask = async (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[] }): Promise<string | undefined> => {
     if (!currentUser) return undefined;
     const text = (fields.text ?? "").trim();
     if (!text) return undefined; // never create an empty task
@@ -2169,6 +2169,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       ...(fields.dueDate ? { dueDate: fields.dueDate } : {}),
       // surfaceOffset only rides a DATED task; the "on-day" default is omitted (leanest write).
       ...(fields.dueDate && fields.surfaceOffset && fields.surfaceOffset !== "on-day" ? { surfaceOffset: fields.surfaceOffset } : {}),
+      ...(fields.tags && fields.tags.length ? { tags: fields.tags } : {}),
     };
     try {
       await setDoc(doc(db, "users", currentUser.id, "tasks", id), newTask);
@@ -2187,11 +2188,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     id: string,
     fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & {
       detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
-      committedDate?: string | null;
+      committedDate?: string | null; tags?: string[] | null;
     },
   ) => {
     if (!currentUser) return;
-    const { committedDate, detail, dueDate, surfaceOffset, ...rest } = fields;
+    const { committedDate, detail, dueDate, surfaceOffset, tags, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
     // `null` clears the Today's-list commitment (uncommit); a string sets it.
     if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
@@ -2201,6 +2202,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (detail !== undefined) patch.detail = detail === null ? deleteField() : detail;
     if (dueDate !== undefined) patch.dueDate = dueDate === null ? deleteField() : dueDate;
     if (surfaceOffset !== undefined) patch.surfaceOffset = surfaceOffset === null ? deleteField() : surfaceOffset;
+    // tasks-pages P5: null (or an emptied list) detaches every tag — the field leaves the doc.
+    if (tags !== undefined) patch.tags = tags === null || tags.length === 0 ? deleteField() : tags;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {

@@ -25,6 +25,7 @@ import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
 import { todaySplit, BoardCard } from "../../lib/todoBoard";
 import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
+import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { localYMD } from "../../lib/shellSidebar";
 import {
   todaySubtitle, clearedAtLabel, suggestedBench, todayQuickAddFields, benchHeading,
@@ -44,6 +45,7 @@ export interface TodoTodayPageProps {
 
 export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p: string) => void }> = ({ onNavigatePath = () => {} }) => {
   const [facet, setFacet] = useState<TodoFacetId>("all");
+  const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
     addUserTask, updateUserTask,
@@ -70,8 +72,8 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   const board = assembled.board;
 
   const split = todaySplit(board, today);
-  const committed = applyFacet(split.committed, facet);
-  const done = applyFacet(split.done, facet);
+  const committed = applyFacet(split.committed, facet).filter((c) => matchesTags(c.tags, tagSel));
+  const done = applyFacet(split.done, facet).filter((c) => matchesTags(c.tags, tagSel));
   const subtitle = todaySubtitle(done.length, committed.length, now);
 
   /* THE BENCH — the open lanes minus everything the four exclusions rule out. Urgent before
@@ -158,6 +160,11 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             onSelect={setFacet}
             onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
             onNoteboard={() => onNavigatePath("/todo/noteboard")}
+            tags={currentUser?.tags ?? []}
+            tagCounts={tagUsageCounts(userTasks)}
+            selectedTags={tagSel}
+            onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
+            onClearTags={() => setTagSel([])}
           />
         }
       >

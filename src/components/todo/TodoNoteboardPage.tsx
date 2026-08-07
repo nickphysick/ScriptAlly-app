@@ -29,9 +29,12 @@ import { useConfirmAsk } from "./ConfirmAsk";
 import { useTodoToast } from "./useTodoToast";
 import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
+import { TagPicker } from "./TagPicker";
+import { toggleTagSel } from "../../lib/todoTags";
+import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
-import { UserTask } from "../../types";
+import { UserTask, TagDef } from "../../types";
 import "./tasksLayout.css";
 import "./todoNoteboard.css";
 
@@ -47,7 +50,7 @@ const pinDate = (iso: string | undefined): string =>
   iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase() : "";
 
 export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
-  const { userTasks, addUserTask, updateUserTask, deleteUserTask, currentUser } = useScriptAllyDb();
+  const { userTasks, addUserTask, updateUserTask, deleteUserTask, updateUserProfile, currentUser } = useScriptAllyDb();
   const { toast, flash, dismiss, pause, resume } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
 
@@ -57,6 +60,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
   const [column, setColumn] = useState(false);
   const [menu, setMenu] = useState<{ note: UserTask; anchor: HTMLElement } | null>(null);
   const [dateFor, setDateFor] = useState<UserTask | null>(null);
+  const [tagsFor, setTagsFor] = useState<UserTask | null>(null); // tasks-pages P5 — the ⋯ Tags… sheet
   const [dateDraft, setDateDraft] = useState("");
   /** The composer: null closed · "new" pinning · a task id editing. */
   const [compose, setCompose] = useState<null | { id?: string; text: string; detail: string }>(null);
@@ -132,12 +136,23 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     }, 8000);
   };
 
+  const applyTagToggle = async (taskId: string, current: string[] | undefined, id: string) => {
+    const next = toggleTagSel(current ?? [], id);
+    try { await updateUserTask(taskId, { tags: next.length ? next : null }); }
+    catch { flash("Couldn’t change the tags — try again?"); }
+  };
+  const createTagDef = async (tag: TagDef) => {
+    try { await updateUserProfile({ tags: [...userTags, tag] }); }
+    catch { flash("Couldn’t create the tag — try again?"); }
+  };
+
   const onMenuPick = (item: MenuLeaf) => {
     if (!menu) return;
     const note = menu.note;
     setMenu(null);
     if (item.id === "edit-task") setCompose({ id: note.id, text: note.text, detail: note.detail ?? "" });
     if (item.id === "give-date") { setDateFor(note); setDateDraft(""); }
+    if (item.id === "tags") setTagsFor(note);
     if (item.id === "delete-task") void deleteNote(note);
   };
 
@@ -245,9 +260,15 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
                   <div className="nb-nt">{n.text}</div>
                   {n.detail && <div className="nb-nb">{n.detail}</div>}
                   <div className="nb-nf">
-                    {(n.tags ?? []).map((tid) => (
-                      <span key={tid} className="nb-tag">#{tagLabel(tid)}</span>
-                    ))}
+                    {(n.tags ?? []).map((tid) => {
+                      const def = userTags.find((t) => t.id === tid);
+                      const tone = def ? TAG_PALETTE[def.colour] : undefined;
+                      return (
+                        <span key={tid} className="nb-tag" style={tone ? { background: tone.bg, color: tone.tx } : undefined}>
+                          #{tagLabel(tid)}
+                        </span>
+                      );
+                    })}
                     <span className="nb-when">{pinDate(n.createdAt)}</span>
                   </div>
                   {/* the same reserved-corner ⋯ as board cards, feeding the same PortalMenu shell */}
@@ -300,6 +321,31 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
               <button type="button" className="nb-csave" disabled={!dateDraft} onClick={() => void giveDate()}>Make it a task</button>
               <button type="button" className="nb-ccancel" onClick={() => setDateFor(null)}>Keep it a note</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* the ⋯ Tags… — the ONE picker, immediate writes */}
+      {tagsFor && (
+        <div className="cal-dayscrim" onClick={() => setTagsFor(null)}>
+          <div className="cal-daypanel nb-datepanel" role="dialog" aria-label={`Tags for ${tagsFor.text}`} onClick={(e) => e.stopPropagation()}>
+            <div className="cal-dayhead">
+              Tags — {tagsFor.text}
+              <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTagsFor(null)}>✕</button>
+            </div>
+            <TagPicker
+              tags={userTags}
+              selected={(userTasks.find((t) => t.id === tagsFor.id)?.tags) ?? []}
+              onToggle={(tid) => {
+                const cur = userTasks.find((t) => t.id === tagsFor.id)?.tags;
+                void applyTagToggle(tagsFor.id, cur, tid);
+              }}
+              onCreate={(tag) => {
+                const cur = userTasks.find((t) => t.id === tagsFor.id)?.tags;
+                void createTagDef(tag);
+                void applyTagToggle(tagsFor.id, cur, tag.id);
+              }}
+            />
           </div>
         </div>
       )}

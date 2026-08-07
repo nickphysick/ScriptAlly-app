@@ -32,6 +32,7 @@ import {
   shiftMonth, shiftWeek, sameMonth, CAL_CELL_CAP,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
+import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import "./todoSide.css";
 import "./tasksLayout.css";
 import "./todoCalendar.css";
@@ -50,6 +51,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   const now = Date.now();
   const today = localYMD(now);
   const [facet, setFacet] = useState<TodoFacetId>("all");
+  const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   const [view, setView] = useState<"month" | "week">("month");
   const [viewOpen, setViewOpen] = useState(false);
   const [anchor, setAnchor] = useState(today);
@@ -70,10 +72,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   /* FILTERS narrow the LIVE cards exactly as the board narrows its columns; completed items ride
      only the unfiltered view (see the head note). Tag selection joins here in Phase 5. */
   const byDay = useMemo(() => {
+    const narrow = (cards: BoardCard[]) =>
+      applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel));
     const cols = {
-      todo: applyFacet(assembled.cols.todo, facet),
-      today: applyFacet(assembled.cols.today, facet),
-      snoozed: applyFacet(assembled.cols.snoozed, facet),
+      todo: narrow(assembled.cols.todo),
+      today: narrow(assembled.cols.today),
+      snoozed: narrow(assembled.cols.snoozed),
       done: assembled.cols.done,
     };
     return calendarDays({
@@ -83,7 +87,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
       today, nowMs: now,
     }, visible);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assembled, facet, taskFlags, queries, agents, userTasks, activities, today, visible.join("|")]);
+  }, [assembled, facet, tagSel, taskFlags, queries, agents, userTasks, activities, today, visible.join("|")]);
 
   const subtitle = view === "month"
     ? `${monthLabel(anchor)} — every item on the day it needs you.`
@@ -139,6 +143,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
               onSelect={setFacet}
               onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
               onNoteboard={() => onNavigatePath("/todo/noteboard")}
+              tags={currentUser?.tags ?? []}
+              tagCounts={tagUsageCounts(userTasks)}
+              selectedTags={tagSel}
+              onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
+              onClearTags={() => setTagSel([])}
             />
           }
         >

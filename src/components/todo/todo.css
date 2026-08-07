@@ -1330,3 +1330,18 @@ button.tdb-ldot { cursor: pointer; }
    sits in lining tabular digits so columns of numbers align and nothing jitters as counts tick
    over. Inherited from the root; the board's portal menu (outside this root) opts in itself. ── */
 .tdb-wrap { font-variant-numeric: tabular-nums; }
+
+/* ── tasks-pages P5 — the settings sheet's TAGS rows + the composer's tag row + the dock's slot ── */
+.tdb-tsettag { gap: 9px; }
+.tdb-tsettagsw { width: 12px; height: 12px; border-radius: 4px; border: 1px solid transparent; flex: 0 0 auto; }
+.tdb-tsettagl { background: transparent; border: 0; font: inherit; font-size: 13px; font-weight: 600; color: #2b2118; cursor: text; padding: 0; text-align: left; }
+.tdb-tsettagl:hover { text-decoration: underline; text-underline-offset: 2px; }
+.tdb-tsettagin { font: inherit; font-size: 13px; border: 1px solid #cbb89a; border-radius: 6px; padding: 2px 7px; outline: none; width: 130px; }
+.tdb-tsettagct { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; color: #a5988c; }
+.tdb-tsettagpal { display: inline-flex; gap: 4px; margin-left: auto; }
+.tdb-tsettagc { width: 15px; height: 15px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; padding: 0; }
+.tdb-tsettagc.on { outline: 1.5px solid #2a1a13; outline-offset: 1px; }
+.tdb-tsettagdel { background: transparent; border: 0; font: inherit; font-size: 11px; color: #8a7a6c; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.tdb-tsettagdel.armed { color: #7c3a2a; font-weight: 700; }
+.tdb-nc-tags { display: block; width: 100%; margin-top: 8px; }
+.tdk-tags { padding: 10px 0 2px; border-top: 1px solid #f0e9dd; margin-top: 12px; }

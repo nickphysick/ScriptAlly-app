@@ -134,7 +134,9 @@ describe("the copy, at its edges", () => {
     expect(page).toContain("counts={facetCounts(liveBoardCards(boardCols))}");
     // renderBoard renders the SAME hoisted object
     const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 900);
-    expect(fn).toContain("applyFacet(boardCols.todo, facet)");
+    // P5: the facet composes with tags in one narrow helper — same object, same law
+    expect(fn).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
+    expect(fn).toContain("todo: narrow(boardCols.todo)");
     /* the old member-unit SUBTITLE is extinct. (`tiles` itself survives, deliberately, for the
        desk state and the assistant band — surfaces whose subject genuinely is items, not cards.) */
     // tasks-pages P1 renamed the neighbour: anchor restated per the slice law

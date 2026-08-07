@@ -38,7 +38,8 @@ export type MenuItemId =
   | "view-agent"
   | "edit-task"
   | "delete-task"
-  | "give-date";   // the Noteboard's conversion door (tasks-pages P4)
+  | "give-date"    // the Noteboard's conversion door (tasks-pages P4)
+  | "tags";        // the tag sheet (tasks-pages P5 — arrives WITH its picker)
 
 export interface MenuLeaf {
   kind: "leaf";
@@ -166,6 +167,7 @@ export function cardMenu(card: BoardCard, column: TodoColumnId): MenuGroup[] {
       head: null,
       entries: [
         leaf("edit-task", "Edit the task…"),
+        leaf("tags", "Tags…"), // tasks-pages P5 — lands with the picker, never a dead line
         leaf("delete-task", "Delete the task…", { danger: true }),
       ],
     });
@@ -188,6 +190,7 @@ export function noteMenu(): MenuGroup[] {
       entries: [
         leaf("edit-task", "Edit the note…"),
         leaf("give-date", "Give it a date…"),
+        leaf("tags", "Tags…"), // tasks-pages P5 — lands with the picker
       ],
     },
     {

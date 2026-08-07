@@ -60,6 +60,9 @@ import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
 import { MenuLeaf } from "../../lib/todoMenu";
+import { TagPicker } from "./TagPicker";
+import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
+import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -232,6 +235,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [composerDetail, setComposerDetail] = useState("");     // the optional detail line
   const [composerDate, setComposerDate] = useState("");         // task only — ISO "YYYY-MM-DD"
   const [composerSurface, setComposerSurface] = useState<SurfaceOffset>("on-day"); // task only
+  const [composerTags, setComposerTags] = useState<string[]>([]); // tasks-pages P5 — the draft's tags
   /* board fixes II P1 — EDIT MODE: the ⋯ menu's "Edit the task…" opens the SAME composer seeded
      from the card, and save routes to `updateUserTask` on this id instead of a create. One
      surface, two verbs — a second edit sheet would be a second copy of every field rule here. */
@@ -282,6 +286,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [sort, setSort] = useState<TodoSortId>(DEFAULT_TODO_SORT);
   const [sortOpen, setSortOpen] = useState(false);
   const [facet, setFacet] = useState<TodoFacetId>("all");
+  /* tasks-pages P5 — the TAGS multi-selection (additive with FILTERS: Urgent AND #synopsis) +
+     the tag sheet the ⋯ menu and the dock's item surface open. */
+  const [tagSel, setTagSel] = useState<string[]>([]);
+  const [tagsFor, setTagsFor] = useState<BoardCard | null>(null);
   /* ⚠️ THE FILTERS COUNTS COME FROM THE CARDS THE COLUMNS RENDER (P2), not from a second tally.
      `facetCounts` reads the same assembled lanes the board draws, which is what makes a row's
      number and the board's contents incapable of disagreeing — the exact split that put Snoozed
@@ -403,6 +411,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      appears only inside the card, as n-of-m. `tiles` survives for the desk state and the
      assistant band, whose subjects genuinely are items, not cards. */
   const boardCols = assembled.cols; // the same object the subtitle, FILTERS and badge read
+  const userTags: TagDef[] = currentUser?.tags ?? [];
+  const tagCounts = useMemo(() => tagUsageCounts(userTasks), [userTasks]);
   // Empty-state derivation (todo-empty-states.html): A = new desk (zero queries AND agents);
   // E = desk cleared (all three sets empty AND a non-empty done-log — earned, never default);
   // otherwise each reel handles its own clear. All pure views; nothing stored.
@@ -864,6 +874,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDetail("");
     setComposerDate("");
     setComposerSurface("on-day");
+    setComposerTags([]);
     resetSaveMachine();
     setComposerAt("cards"); // one view now (board+dock P1)
   };
@@ -878,6 +889,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDetail(c.detail ?? "");
     setComposerDate(c.dueYmd ?? "");
     setComposerSurface(c.surfaceOffset ?? "on-day");
+    setComposerTags(c.tags ?? []);
     resetSaveMachine();
     setComposerAt("cards");
   };
@@ -888,6 +900,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerDetail("");
     setComposerDate("");
     setComposerSurface("on-day");
+    setComposerTags([]);
     resetSaveMachine();
   };
   // Esc / Cancel: confirm the discard ONLY when the draft carries content (no native dialog —
@@ -959,6 +972,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           detail: composerDetail.trim() || null,
           dueDate: isTask && composerDate ? composerDate : null,
           surfaceOffset: isTask && composerDate && composerSurface !== "on-day" ? composerSurface : null,
+          tags: composerTags.length ? composerTags : null, // P5 — the draft's tags land with the same save
         });
         window.clearTimeout(slow);
         closeComposer();
@@ -982,6 +996,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         detail: composerDetail.trim() || undefined,
         dueDate: isTask ? composerDate : undefined,
         surfaceOffset: isTask ? composerSurface : undefined,
+        tags: composerTags.length ? composerTags : undefined, // P5
       });
       window.clearTimeout(slow);
       setPendingSaveId(null); // the settled item may now render
@@ -1030,6 +1045,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             onSelect={setFacet}
             onOpenTaskSettings={() => setSettingsOpen(true)}
             onNoteboard={() => onNavigate("todo", "Noteboard")}
+            tags={userTags}
+            tagCounts={tagCounts}
+            selectedTags={tagSel}
+            onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
+            onClearTags={() => setTagSel([])}
           />
           }
         >
@@ -1099,6 +1119,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             timeline={dockTimeline}
             onPrimary={(c, spec) => void dockPrimary(c, spec)}
             onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}
+            tagsSlot={(c) => c.userTaskId ? (
+              <TagPicker
+                compact
+                tags={userTags}
+                selected={c.tags ?? []}
+                onToggle={(tid) => void applyTagToggle(c.userTaskId!, c.tags, tid)}
+                onCreate={(tag) => { void createTagDef(tag); void applyTagToggle(c.userTaskId!, c.tags, tag.id); }}
+              />
+            ) : null}
             onMore={(c) => openFlowCards([c])}
           />
         ) : renderBoard()}
@@ -1129,6 +1158,31 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       )}
       {confirmAskNode}
       {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
+      {/* tasks-pages P5 — MOUNT 3 of 3: the ⋯ menu's "Tags…" sheet, the same ONE picker. Writes
+          are immediate (toggle → the task; create → the definitions + the task in hand). */}
+      {tagsFor && tagsFor.userTaskId && (
+        <div className="cal-dayscrim" onClick={() => setTagsFor(null)}>
+          <div className="cal-daypanel tdb-tagsheet" role="dialog" aria-label={`Tags for ${tagsFor.title}`} onClick={(e) => e.stopPropagation()}>
+            <div className="cal-dayhead">
+              Tags — {tagsFor.title}
+              <button type="button" className="cal-dayx" aria-label="Close" onClick={() => setTagsFor(null)}>✕</button>
+            </div>
+            <TagPicker
+              tags={userTags}
+              selected={(userTasks.find((t) => t.id === tagsFor.userTaskId)?.tags) ?? []}
+              onToggle={(tid) => {
+                const cur = userTasks.find((t) => t.id === tagsFor.userTaskId)?.tags;
+                void applyTagToggle(tagsFor.userTaskId!, cur, tid);
+              }}
+              onCreate={(tag) => {
+                const cur = userTasks.find((t) => t.id === tagsFor.userTaskId)?.tags;
+                void createTagDef(tag);
+                void applyTagToggle(tagsFor.userTaskId!, cur, tag.id);
+              }}
+            />
+          </div>
+        </div>
+      )}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
         <div className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}>
@@ -1411,6 +1465,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ) : (
               <span className="tdb-nc-nomark">NO DATE · NOTHING WILL CHASE YOU</span>
             )}
+            {/* tasks-pages P5 — MOUNT 1 of 3: the composer's tag row (compact). Creation happens
+                where tagging happens; the draft holds ids until the one save writes them. */}
+            <span className="tdb-nc-tags">
+              <TagPicker
+                compact
+                tags={userTags}
+                selected={composerTags}
+                onToggle={(tid) => setComposerTags((sel) => toggleTagSel(sel, tid))}
+                onCreate={(tag) => { void createTagDef(tag); setComposerTags((sel) => [...sel, tag.id]); }}
+              />
+            </span>
             <button type="button" className="tdb-nc-save" disabled={!composerCanSave || savePending} onClick={saveComposer}>
               {saveSlow && <span className="tdb-nc-spin" aria-hidden />}
               {composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}
@@ -1697,6 +1762,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return sortBoardCards(applyFacet(raw, facet), sort);
   }
 
+  /* tasks-pages P5 — THE TAG WRITES, shared by every mount (the ⋯ sheet, the dock's item
+     surface, the composer's save). Toggling writes the task; creating writes the user doc's
+     definitions AND applies to the item in hand. An emptied list detaches the field. */
+  async function applyTagToggle(taskId: string, current: string[] | undefined, id: string) {
+    const next = toggleTagSel(current ?? [], id);
+    try { await updateUserTask(taskId, { tags: next.length ? next : null }); }
+    catch { flash("Couldn’t change the tags — try again?"); }
+  }
+  async function createTagDef(tag: TagDef) {
+    try { await updateUserProfile({ tags: [...userTags, tag] }); }
+    catch { flash("Couldn’t create the tag — try again?"); }
+  }
+
   /* ⚠️ THE ⋯ VERBS, PERFORMED — every one an EXISTING primitive, exactly as the drags are (board
      fixes II P1: the menu grew its per-kind and per-column shapes in `cardMenu`; this switch just
      routes each leaf to the verb that already owns it). */
@@ -1738,6 +1816,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         }
         break;
       case "edit-task": openComposerEdit(card); break;
+      case "tags": setTagsFor(card); break;                     // tasks-pages P5 — the tag sheet
       case "delete-task": void deleteUserNote(card); break;     // the styled confirm + undo ride along
     }
   }
@@ -1828,11 +1907,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     /* THE PAGE-LEVEL NARROWINGS, applied to ALL FOUR COLUMNS (P1 sort · P2 facet). Applying
        either to one column would leave the board showing four differently-ordered views of one
        set, and you would have to remember which. */
+    /* tasks-pages P5: the tag selection composes ADDITIVELY with the facet — Urgent AND
+       #synopsis. Derived cards carry no tags, so any selection narrows to user content: the
+       honest answer, since only user content can be tagged. */
+    const narrow = (cards: BoardCard[]) =>
+      sortBoardCards(applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel)), sort);
     const columns = {
-      todo: sortBoardCards(applyFacet(boardCols.todo, facet), sort),
-      today: sortBoardCards(applyFacet(boardCols.today, facet), sort),
-      snoozed: sortBoardCards(applyFacet(boardCols.snoozed, facet), sort),
-      done: sortBoardCards(applyFacet(boardCols.done, facet), sort),
+      todo: narrow(boardCols.todo),
+      today: narrow(boardCols.today),
+      snoozed: narrow(boardCols.snoozed),
+      done: narrow(boardCols.done),
     };
     return (
       <TodoBoard

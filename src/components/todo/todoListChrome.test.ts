@@ -92,15 +92,21 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
 describe("FILTERS is the ONE narrowing surface, and it reaches all four columns (P2)", () => {
   it("the facet is applied to EVERY column, not to one", () => {
     const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
-    // P5 hoisted the raw columns to the page-level `boardCols`; the narrowing law is unchanged.
+    // tasks-pages P5: facet ∧ tags compose in ONE narrow helper applied to every column.
+    expect(fn).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
     for (const col of ["todo", "today", "snoozed", "done"]) {
-      expect(fn, `${col} must be filtered`).toContain(`applyFacet(boardCols.${col}, facet)`);
+      expect(fn, `${col} must be narrowed`).toContain(`${col}: narrow(boardCols.${col})`);
     }
   });
 
   it("the sort likewise reaches all four — a per-column sort would be four views of one set", () => {
+    /* P5: the ONE narrow helper carries the sort (and the facet ∧ tag filter), and every column
+       walks through it — sorting still cannot diverge per column, now by construction. */
     const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
-    expect((fn.match(/sortBoardCards\(/g) ?? []).length).toBe(4);
+    expect(fn).toContain("sortBoardCards(applyFacet(cards, facet)");
+    for (const col of ["todo", "today", "snoozed", "done"]) {
+      expect(fn, col).toContain(`${col}: narrow(boardCols.${col})`);
+    }
   });
 
   it("its counts come from the cards the columns RENDER, never a second tally", () => {

@@ -58,6 +58,8 @@ service cloud.firestore {
         && data.email is string && data.email.size() <= 256
         && data.plan is string && (data.plan == 'Free' || data.plan == 'Pro')
         && data.trialStartDate is string && data.trialStartDate.size() <= 64
+        // tasks-pages P5: the user's tag definitions — a list when present (safe hasAny pattern)
+        && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 64))
         && data.subscriptionStatus is string && (
           data.subscriptionStatus == 'active' ||
           data.subscriptionStatus == 'trialing' ||
@@ -356,13 +358,15 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
         && data.text is string && data.text.size() <= 16384
         // notes-and-tasks: the optional detail line beneath the title.
         && (!data.keys().hasAny(['detail']) || (data.detail is string && data.detail.size() <= 16384))
+        // tasks-pages P5: applied tag IDS — a list when present (the safe hasAny pattern; never == null)
+        && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 32))
         && data.done is bool
         // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
         // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
@@ -469,7 +473,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags'])
       );
 
       // ROUTE: Manuscripts
@@ -617,7 +621,7 @@ service cloud.firestore {
         // locks pinned the old string; all three halves land together. The VALUE shape needs no
         // guard here — isValidUserTask already enforces it on every update.
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags'])
         );
       }
 

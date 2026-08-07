@@ -166,8 +166,10 @@ describe("the fold, the map, the wiring", () => {
   });
 
   it("⚠️ FILTERS narrow the live cards BEFORE placement — the same applyFacet the board uses", () => {
-    expect(pageSrc).toContain("applyFacet(assembled.cols.todo, facet)");
-    expect(pageSrc).toContain("applyFacet(assembled.cols.snoozed, facet)");
+    // P5 composed tags in: facet ∧ tags, one narrow helper over the same applyFacet
+    expect(pageSrc).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
+    expect(pageSrc).toContain("todo: narrow(assembled.cols.todo)");
+    expect(pageSrc).toContain("snoozed: narrow(assembled.cols.snoozed)");
     // completed items ride only the unfiltered view — finished work is not waiting
     expect(pageSrc).toContain('facet === "all" ? userTasks : []');
   });

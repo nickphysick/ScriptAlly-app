@@ -9,15 +9,18 @@
  * scrim re-derives live, which is the feedback. HIDDEN RIGHT NOW restores via existing primitives
  * only (rule removal / flag unset). Home is the board (per the pack), not Account Settings.
  */
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
+import { TAG_PALETTE } from "../../lib/todoFamily";
+import { TAG_COLOURS, normaliseTagLabel, tagUsageCounts } from "../../lib/todoTags";
+import { TagColour } from "../../types";
 import { lockStageScroll } from "../../lib/stageScroll";
 import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
 
 const GROUPS: TaskSettingGroup[] = ["urgent", "housekeeping", "rituals"];
 
 export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { currentUser, updateUserProfile, upsertTaskFlag, taskFlags, agents, queries } = useScriptAllyDb();
+  const { currentUser, updateUserProfile, upsertTaskFlag, updateUserTask, userTasks, taskFlags, agents, queries } = useScriptAllyDb();
   const muted = currentUser?.mutedTaskRules;
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +66,37 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
 
   const hidden = hiddenItems(muted, taskFlags, agents, queries, Date.now());
 
+  /* ⚠️ TAGS CRUD (tasks-pages P5). Rename and recolour edit the DEFINITION (one user-doc write);
+     ⚠️ DELETE DETACHES, NEVER DELETES ITEMS: the def leaves the user doc and the id is removed
+     from every task carrying it — the tasks themselves are untouched. Arm-then-confirm inline
+     (no native dialogs). Usage counts are derived live. */
+  const tags = currentUser?.tags ?? [];
+  const tagCounts = tagUsageCounts(userTasks);
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
+  const [armedDelete, setArmedDelete] = useState<string | null>(null);
+
+  const renameTag = async (id: string) => {
+    const label = normaliseTagLabel(renameDraft);
+    if (!label || tags.some((t) => t.id !== id && t.label === label)) return;
+    await updateUserProfile({ tags: tags.map((t) => (t.id === id ? { ...t, label } : t)) });
+    setRenaming(null);
+  };
+  const recolourTag = async (id: string, colour: TagColour) => {
+    await updateUserProfile({ tags: tags.map((t) => (t.id === id ? { ...t, colour } : t)) });
+  };
+  const deleteTag = async (id: string) => {
+    setArmedDelete(null);
+    // detach from every item first, then drop the definition — the items survive whole
+    for (const t of userTasks) {
+      if (t.tags?.includes(id)) {
+        const rest = t.tags.filter((x) => x !== id);
+        await updateUserTask(t.id, { tags: rest.length ? rest : null });
+      }
+    }
+    await updateUserProfile({ tags: tags.filter((t) => t.id !== id) });
+  };
+
   return (
     <div className="tdb-ff" role="dialog" aria-modal="true" aria-labelledby="tdb-tset-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
       <div className="tdb-ffstage">
@@ -106,6 +140,57 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
                 })}
               </div>
             ))}
+
+            <div className="tdb-tsetgroup">
+              <div className="tdb-tsetgl"><span className="tdb-tsetgd" aria-hidden />TAGS</div>
+              {tags.length === 0 ? (
+                <div className="tdb-tsetempty">No tags yet — create them where you tag: the composer, an item’s sheet, or a card’s ⋯ menu.</div>
+              ) : (
+                tags.map((t) => (
+                  <div key={t.id} className="tdb-tsetrow tdb-tsettag">
+                    <span className="tdb-tsettagsw" style={{ background: TAG_PALETTE[t.colour].bg, borderColor: TAG_PALETTE[t.colour].tx }} aria-hidden />
+                    {renaming === t.id ? (
+                      <input
+                        className="tdb-tsettagin"
+                        value={renameDraft}
+                        autoFocus
+                        aria-label={`Rename #${t.label}`}
+                        onChange={(e) => setRenameDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") void renameTag(t.id);
+                          if (e.key === "Escape") setRenaming(null);
+                        }}
+                        onBlur={() => void renameTag(t.id)}
+                      />
+                    ) : (
+                      <button type="button" className="tdb-tsettagl" title="Rename" onClick={() => { setRenaming(t.id); setRenameDraft(t.label); }}>
+                        #{t.label}
+                      </button>
+                    )}
+                    <span className="tdb-tsettagct">{tagCounts.get(t.id) ?? 0}</span>
+                    <span className="tdb-tsettagpal" role="group" aria-label={`Colour for #${t.label}`}>
+                      {TAG_COLOURS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          className={`tdb-tsettagc${t.colour === c ? " on" : ""}`}
+                          style={{ background: TAG_PALETTE[c].bg, borderColor: TAG_PALETTE[c].tx }}
+                          aria-label={c}
+                          aria-pressed={t.colour === c}
+                          onClick={() => void recolourTag(t.id, c)}
+                        />
+                      ))}
+                    </span>
+                    {armedDelete === t.id ? (
+                      <button type="button" className="tdb-tsettagdel armed" onClick={() => void deleteTag(t.id)}>Sure?</button>
+                    ) : (
+                      <button type="button" className="tdb-tsettagdel" onClick={() => setArmedDelete(t.id)}>Delete</button>
+                    )}
+                  </div>
+                ))
+              )}
+              <div className="tdb-tsetfoot">Deleting a tag detaches it from notes and tasks — it never deletes them.</div>
+            </div>
 
             <div className="tdb-tsetgroup">
               <div className="tdb-tsetgl"><span className="tdb-tsetgd hidden" aria-hidden />HIDDEN RIGHT NOW</div>
