@@ -1,6 +1,35 @@
 # STATE — where the repo stands
 
-**Last updated: 7 August 2026 (fourteenth pass — P6 reverted, the card gap pinned).**
+**Last updated: 7 August 2026 (fifteenth pass — the Tasks viewport lock, Phase 1 of 5).**
+
+## The viewport lock is IN — ⚠️ PHASE 1 ONLY (tasks-viewport pack; report: `reports/tasks-viewport.md`)
+
+`c8e6e79`. Suite **3290 | 2 skipped, 209 files**. Refs `design-refs/tasks-viewport.html` +
+`today-redesign.html` (the latter normative for Today, and unused so far).
+
+- **⚠️ PHASES 2–5 ARE NOT BUILT** — Today's redesign, Calendar to standard, Noteboard to standard,
+  and Task settings' second door. Stopped at a phase boundary on budget rather than half-building
+  Today; the report's foot lists what is ready for the next run (the ref's measurements, the
+  base64 illustration to extract, the two derivations to consume, the copy laws).
+- **⚠️ THE PAGE NEVER SCROLLS.** `.tdb-wrap` was `overflow-y: auto` — inverted AT ITS OWN RULE in
+  todo.css (a second single-class rule elsewhere resolves on import order). Designated
+  `.tpl-zone`s below the fixed header own all scrolling, hem iff overflow.
+- **⚠️ IT IS A CHAIN, NOT A RULE, AND jsdom CANNOT VERIFY IT.** `flex:1; min-height:0` must hold on
+  all seven links (slot → `.spine-root` → `.tdb-wrap` → `.tdb-col.tpl` → `.tpl-cols` →
+  `.tpl-body` → `.tpl-zone`); one link at `auto` and the page scrolls as before with every
+  declaration below it still correct. **The table is in the report for the browser walk.**
+- **The scroll-restore contract followed the scroller** to the zone — the wrap's scrollTop is
+  permanently 0 now, so batch collapse would have jumped to the top of the board in silence.
+  Calendar **compresses instead of scrolling** (`grid-auto-rows: 1fr`) and is deliberately the one
+  region with no zone.
+- **⚠️ The sidebar is the To-do list's alone.** Two carried consequences, both stated in the
+  report: **Calendar has no filter control until P3**, and **Task settings needs its second door
+  (P5)** because three of four pages can no longer reach the sheet.
+- Four locks superseded in place, dated. **And a rule-text helper fixed twice-over:** assert on
+  DECLARATIONS, not raw rule text — the house style explains a rule by quoting what it replaced,
+  so a naive reader fails a correct rule.
+
+
 
 ## ⚠️ P6 (collapsible columns + reflow) IS REVERTED — parked, not paused (report: `reports/board-fold-revert.md`)
 
