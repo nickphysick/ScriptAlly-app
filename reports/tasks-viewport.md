@@ -291,3 +291,66 @@ alt text with it) and never a bare `<img>`. The Seize the day slot is **62×62, 
 flex row**, left of the title; the card is an ordinary row of icon, text, button.
 
 Suite **3385 passed | 2 skipped, 212 files**; tsc green.
+
+
+---
+
+# THE FRAME'S REAL BOUND (`e27bafb`) — and it was never in the chain
+
+## ⚠️ The culprit, at last: `.ws-work` is `flex: 1 0 auto`
+
+**Shrink 0.** It can never be smaller than its content, so **no number of correct `min-height: 0`
+links below it can make the card fit.** That is why two full passes of chain work failed, and why
+no harness reproduced it: every harness faked the tree from the route slot down, and the break
+sits **above** everything the chain covers.
+
+`.ws-work--fit` swaps in a definite basis (`flex: 1 1 0`). The Tasks routes had simply never
+opted in. The dashboard stream found this for their own page the same afternoon — *"66px was
+exactly `--head`"* — and this is the same fix applied to `todo`.
+
+## ⚠️ NOT 100dvh, and the reason is measured rather than stylistic
+
+A frame of `100dvh` sits inside a scroller that **already contains the 66px bar**, so the card
+overflows by exactly the bar — the fault just fixed next door. `calc(100dvh - bar)` is worse:
+CLAUDE.md forbids bar offsets outright, and it hardcodes the shell's chrome into every page. The
+bounded flex chain was the right instinct; it just needed its top link.
+
+## Measured — fit OFF vs ON, all four pages, both viewports
+
+Against the built CSS with the real shell chain reproduced (`.ws-cscroll` → `.ws-work` → slot →
+`.spine-root` → …). Page scroll on `.ws-cscroll`:
+
+| page | fit OFF @1440×900 | fit OFF @1280×800 | **fit ON** |
+|---|---|---|---|
+| Calendar | 115px | 215px | **0 / 0** |
+| To-do list | 707px | 807px | **0 / 0** |
+| Today | 384px | 484px | **0 / 0** |
+| Noteboard | 816px | 916px | **0 / 0** |
+
+## ⚠️ THE CHAIN, ENUMERATED — all required, none sufficient
+
+One omission restores the old behaviour with every other declaration still perfectly correct.
+That is the failure mode, and it is why the list is explicit:
+
+| # | element | declaration | file |
+|---|---|---|---|
+| **1** | `.ws-work--fit` | `flex: 1 1 0; min-height: 0` | `workspaceShell.css` **← the missing one** |
+| 2 | StagePage slot | `flex: 1; min-height: 0` | `AppShell.tsx` (`layout="fillColumn"`) |
+| 3 | `.spine-root` | `flex: 1; min-height: 0` | `tasksLayout.css` |
+| 4 | `.tdb-wrap` | `flex: 1; min-height: 0` | `todo.css` |
+| 5 | `.tdb-col.tpl` | `flex: 1; min-height: 0` | `tasksLayout.css` |
+| 6 | `.tpl-cols` | `flex: 1; min-height: 0` | `tasksLayout.css` |
+| 7 | `.tpl-body` | `flex: 1; min-height: 0` | `tasksLayout.css` |
+| 8 | `.tpl-zone` | `flex: 1; min-height: 0; overflow: auto` | `tasksLayout.css` **← the scroller** |
+
+The header block is `flex: 0 0 auto` throughout — it never shrinks and never scrolls away.
+
+## Widths, asserted beside the height
+
+Both viewports, all four pages, **both fit states**: the column equals `min(container, 1360)` and
+the body equals the available width less any sidebar. Measured: Calendar cells 178/166, board
+cards 236/216, Today's rail 360.
+
+That test exists because **one of my own fixes did reach the width** — `margin-inline: 0 auto`
+disabled the cross-axis stretch and collapsed three pages to 295/557/477px. Height and width are
+measured together now rather than assumed independent.
