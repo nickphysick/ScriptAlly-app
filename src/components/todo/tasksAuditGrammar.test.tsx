@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { Query, Agent, UserTask, TaskFlag, Task, QueryStatus } from "../../types";
 import { snoozedCards, assembleBoardColumns } from "../../lib/todoColumns";
 import { benchWhy, benchHeading, suggestedBench } from "../../lib/todoToday";
+import { applyFacet } from "../../lib/todoBoardSort";
 import { BoardCard } from "../../lib/todoBoard";
 
 const here = __dirname;
@@ -66,7 +67,9 @@ describe("⚠️ the snoozed band: '{KIND} · 🕐 | BACK {date}' — the kind s
 
 describe("⚠️ the bench header derives from the card-unit derivation, like every other figure", () => {
   it("the page passes the To do column's own card count — never the raw member lanes", () => {
-    expect(todayPage).toContain("benchHeading(assembled.cols.todo.length)");
+    // P5 narrowed the pool by the active filter — same card-unit source, filtered the same way
+    expect(todayPage).toContain("applyFacet(assembled.cols.todo, facet)");
+    expect(todayPage).toContain("benchHeading(benchPool, filtersActive)");
     expect(todayPage).not.toContain("benchHeading(board.do.length + board.hk.length");
   });
 
@@ -120,5 +123,34 @@ describe("⚠️ bench why-lines: a REASON each, never generic — differing rea
       flags: [], onToday: new Set(), nowMs: NOW,
     });
     expect(bench.map((b) => b.why)).toEqual(["an offer is on the table", "about a minute"]);
+  });
+});
+
+/* ── tasks-audit P5 — FILTERS reach BOTH of Today's regions ────────────────────────────────── */
+
+describe("⚠️ the active filter applies to the committed list AND the bench (tasks-audit P5)", () => {
+  it("both regions narrow through the same facet ∧ tags; the bench pool follows", () => {
+    // the committed list (and done) — unchanged law
+    expect(todayPage).toContain("applyFacet(split.committed, facet).filter((c) => matchesTags(c.tags, tagSel))");
+    // the bench candidates — the SAME narrowing, not an exemption
+    expect(todayPage).toContain("applyFacet([...board.do, ...board.hk], facet).filter((c) => matchesTags(c.tags, tagSel))");
+  });
+
+  it('a filtered bench header says "MATCHING"; a resting one says "REMAINING"', () => {
+    expect(benchHeading(7, true)).toBe("THE MOST PRESSING OF THE 7 MATCHING");
+    expect(benchHeading(7)).toBe("THE MOST PRESSING OF THE 7 REMAINING");
+    expect(todayPage).toContain('const filtersActive = facet !== "all" || tagSel.length > 0;');
+  });
+
+  it("the bench genuinely narrows — an Urgent filter drops housekeeping suggestions", () => {
+    const candidates = [
+      card({ key: "u", taskType: "offer_received", relatedRecordId: "q1" }),
+      card({ key: "h", taskType: "no_response_close", relatedRecordId: "q2", stream: "hk" }),
+    ];
+    const urgentOnly = suggestedBench({
+      candidates: applyFacet(candidates, "urgent"),
+      flags: [], onToday: new Set(), nowMs: NOW,
+    });
+    expect(urgentOnly.map((b) => b.card.key)).toEqual(["u"]);
   });
 });

@@ -51,7 +51,7 @@ const COL_EMPTY: Record<TodoColumnId, string> = {
   todo: "Nothing waiting on you here.",
   today: "Nothing committed to today.",
   snoozed: "Snoozed work waits here until its day.",
-  done: "Nothing cleared yet today.",
+  done: "Tick anything and it settles here until midnight.", // tasks-audit P5 — teaches, plainly
 };
 
 const EASE = "cubic-bezier(.2,.7,.3,1)"; // ⚠️ THE ONE EASING — restated from --tbd-ease for WAAPI

@@ -145,7 +145,7 @@ describe("⚠️ speaking empty states — a sentence in the column's voice", ()
     expect(html).toContain("Nothing waiting on you here.");
     expect(html).toContain("Nothing committed to today.");
     expect(html).toContain("Snoozed work waits here until its day.");
-    expect(html).toContain("Nothing cleared yet today.");
+    expect(html).toContain("Tick anything and it settles here until midnight."); // tasks-audit P5 — Done teaches
     expect(html).toContain("lift something from the bench"); // Today's pointer survives
   });
 });

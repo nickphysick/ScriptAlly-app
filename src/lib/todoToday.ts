@@ -115,8 +115,10 @@ export function benchWhy(card: BoardCard): string {
 /** The bench's own heading (the copy register). It states WHAT the bench is and how big the pool
  *  behind it is — never the implementation guarantee, which is the derivation's business and the
  *  test's, not the reader's. */
-export function benchHeading(remaining: number): string {
-  return `THE MOST PRESSING OF THE ${remaining} REMAINING`;
+export function benchHeading(remaining: number, filtered = false): string {
+  /* tasks-audit P5: while a filter narrows the page, the header says so — "MATCHING" is the
+     narrowed pool, "REMAINING" the whole one. The figure is card-unit either way. */
+  return `THE MOST PRESSING OF THE ${remaining} ${filtered ? "MATCHING" : "REMAINING"}`;
 }
 
 export function suggestedBench(input: BenchInput): BenchItem[] {

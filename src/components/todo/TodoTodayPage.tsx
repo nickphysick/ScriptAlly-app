@@ -77,17 +77,24 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   const subtitle = todaySubtitle(done.length, committed.length, now);
 
   /* THE BENCH — the open lanes minus everything the four exclusions rule out. Urgent before
-     housekeeping: the order is what you would reach for, not what the array happened to hold. */
+     housekeeping: the order is what you would reach for, not what the array happened to hold.
+     ⚠️ THE ACTIVE FILTER REACHES THE BENCH TOO (tasks-audit P5): a page narrowed to Urgent
+     suggesting housekeeping would be the FILTERS contract holding for one region and not the
+     other — the bench honours facet ∧ tags exactly as the committed list does, and its header
+     says "matching" while anything narrows. */
+  const filtersActive = facet !== "all" || tagSel.length > 0;
   const bench = useMemo(
     () => suggestedBench({
-      candidates: [...board.do, ...board.hk],
+      candidates: applyFacet([...board.do, ...board.hk], facet).filter((c) => matchesTags(c.tags, tagSel)),
       flags: taskFlags,
       onToday: new Set(committed.map((c) => c.key)),
       nowMs: now,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [board.do, board.hk, taskFlags, committed.length],
+    [board.do, board.hk, taskFlags, committed.length, facet, tagSel],
   );
+  /* the header's pool, card-unit and narrowed the same way — the To do column under this filter */
+  const benchPool = applyFacet(assembled.cols.todo, facet).filter((c) => matchesTags(c.tags, tagSel)).length;
 
   /** ⚠️ Creates a TASK DUE TODAY — never a note (audit item 7). A note made here would leave the
    *  page the instant it was made, which is the clearest possible sign the verb was wrong. */
@@ -258,7 +265,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
                   This summed the raw LANES (member units — every sweep agent loose): 24 against
                   a 16-card world. The pool behind the bench is the To do column itself — the
                   card-unit remaining after today's list — so the header states THAT number. */}
-              <b>Suggested for today</b> · {benchHeading(assembled.cols.todo.length)}
+              <b>Suggested for today</b> · {benchHeading(benchPool, filtersActive)}
             </div>
             {bench.map((b) => (
               <div key={b.card.key} className="tdt-brow">
