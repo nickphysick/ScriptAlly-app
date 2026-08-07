@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- ⚠️ SCOPE (board-optimise pack, 7 Aug): NORMATIVE for the column measure (290px max, rag
+     left), the refined page sidebar, the dock's two-column work surface, the Task-settings and
+     Tags sheets, and the feature register's HAVE/ADD/SKIP verdicts. The app chrome around it
+     (rail, app sidebar, top bar) is DEMONSTRATION ONLY — the repo shell wins. Note the register
+     marks estimates + multi-select "ADD LATER": this pack brings them forward on Nick's call,
+     which is a scheduling change, not a reversal of the reasoning. --><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Board optimisation study</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+:root{--ink:#2a1a13;--soft:#4d4238;--muted:#8a7a6c;--label:#b3a394;--hair:#f0e9dd;--pink:#f5e2da;--pinkbd:#e8c8bc;--burg:#7c3a2a}
+*{font-variant-numeric:tabular-nums}
+body{background:#3a332c;padding:30px 0 90px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;color:#2b2118}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b3a695;margin:40px 0 11px;width:1460px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#cfc2b0;margin-left:10px;line-height:1.6}
+.board{width:1460px;background:#fdfcfa;border:1px solid #2a2019;border-radius:14px;padding:26px 28px 28px;box-sizing:border-box;box-shadow:0 16px 44px rgba(20,15,10,.45)}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.12em;color:#a5988c}
+.split{display:flex;gap:26px}
+/* sidebar */
+.pside{width:218px;flex:0 0 auto;display:flex;flex-direction:column}
+.pk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:0 6px 8px;display:flex;align-items:center}
+.pk .clr{margin-left:auto;font-size:7px;color:var(--burg);letter-spacing:.08em;cursor:pointer;border-bottom:1px solid #e2c6ba}
+.pi{display:flex;align-items:center;gap:10px;height:34px;border-radius:8px;padding:0 9px;font-size:13px;color:var(--soft);cursor:pointer}
+.pi:hover{background:#f7f2ea}
+.pi.on{background:#f2ede7;font-weight:700;color:#2b2118;box-shadow:inset 2px 0 0 var(--ink)}
+.pi .swd{width:9px;height:9px;border-radius:50%}
+.pi .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.pi.on .n{color:#4a3a2c}
+.linkrow{font-size:11.5px;color:var(--muted);border-top:1px solid var(--hair);margin-top:12px;padding:12px 9px 0;line-height:1.5}
+.linkrow b{color:var(--burg);font-weight:600;border-bottom:1px solid #e2c6ba}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:20px 6px 8px;display:flex;align-items:center}
+.tset{display:flex;align-items:center;gap:9px;height:36px;padding:0 9px;color:var(--soft);font-size:12.5px;margin-top:auto;border-top:1px solid var(--hair);border-radius:0}
+/* columns */
+.cols{display:grid;grid-template-columns:repeat(4,minmax(0,290px));gap:20px;align-items:start;flex:1;justify-content:start}
+.fh{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px;display:flex;align-items:baseline;gap:9px}
+.fh .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.fh.done{border-bottom-color:#b9c9b4}
+.fh .wip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--label);font-weight:400;letter-spacing:.1em}
+.kc{background:#fff;border:1px solid #efe8dc;border-radius:10px;box-shadow:0 2px 8px rgba(58,28,20,.06);margin-bottom:12px;position:relative}
+.kc.u{border:1px solid var(--ink)}
+.kc .b{height:24px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--bd);border-radius:10px 10px 0 0;overflow:hidden}
+.kc.u .b{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.kc.h .b{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.kc.t .b{background:linear-gradient(180deg,#dee4dc,#d5dbd3);--bd:#b9c9b4}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;color:#3a1c14}
+.kc .b .w{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#8a6a58}
+.kc .in{padding:12px 42px 13px 13px}
+.kc h4{font-size:13px;font-weight:600;line-height:1.35}
+.kc .ms{font-size:11px;color:#a0958a;margin-top:4px}
+.dots{position:absolute;right:8px;bottom:8px;width:26px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#c4b6a6}
+/* art slots */
+.art{border:1.5px dashed #d3b98a;background:repeating-linear-gradient(135deg,#fdf9f0,#fdf9f0 8px,#faf3e4 8px,#faf3e4 16px);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#a58a55;text-align:center;padding:10px}
+.art b{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em}
+.art span{font-size:10px;color:#b9a06a;line-height:1.45;max-width:200px}
+/* dock */
+.dock{display:flex;gap:18px;align-items:stretch}
+.dq{width:29%;flex:0 0 auto;display:flex;flex-direction:column;gap:8px}
+.dqh{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;color:var(--label);padding:2px 2px 4px}
+.dcard{background:#fff;border:1px solid #efe8dc;border-radius:10px;padding:10px 13px;font-size:12.5px;font-weight:600;color:var(--soft);display:flex;align-items:center;gap:10px}
+.dcard .bd2{width:8px;height:8px;border-radius:3px;flex:0 0 auto}
+.dcard.live{border:1.5px solid var(--ink);box-shadow:0 4px 12px rgba(58,28,20,.1)}
+.dcard .st{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#a5988c}
+.work{flex:1;background:#fff;border:1px solid #e8dfd1;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(58,28,20,.1)}
+.wband{height:32px;display:flex;align-items:center;padding:0 17px;background:linear-gradient(180deg,#f8e2d9,#f4d5c9);border-bottom:1px solid #e8c8bc}
+.wband i{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;font-style:normal;color:#3a1c14}
+.wband .x{margin-left:auto;color:#8a6a58;cursor:pointer;font-size:12px}
+.wbody{padding:20px 24px;flex:1;display:flex;gap:26px}
+.wtl{border-left:2px solid #f0e6d8;margin:4px 0 0 5px;padding-left:15px;width:230px;flex:0 0 auto}
+.wt{position:relative;padding-bottom:10px;font-size:11.5px;color:var(--soft)}
+.wt::before{content:'';position:absolute;left:-20.5px;top:3px;width:8px;height:8px;border-radius:50%;background:#d9c49a;border:2px solid #fff}
+.wt.hot::before{background:#d98b74}
+.wt .w2{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#a5988c;display:block}
+.flowbox{background:#fbf8f2;border:1px solid #efe6d8;border-radius:12px;padding:15px 17px;flex:1}
+.flowbox h5{font-family:'Playfair Display',serif;font-size:15px;color:#2b2118;margin-bottom:8px}
+.pkchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;border:1px solid #e2d8c8;background:#fff;font-size:11px;font-weight:600;color:var(--soft);margin:0 7px 7px 0}
+.pkchip.on{border-color:#8a9e88;background:#e9ede6;color:#31402d}
+.wfoot{display:flex;align-items:center;gap:8px;padding:14px 24px;border-top:1px solid var(--hair)}
+.inkb{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:600}
+.ghb{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e8dfd1;color:var(--soft);border-radius:9px;height:33px;padding:0 13px;font-size:12px;font-weight:600}
+/* tiles */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tile{background:#fff;border:1px solid #e8dfd1;border-radius:12px;padding:14px 16px}
+.tile h5{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:700;margin-bottom:5px;display:flex;gap:8px;align-items:baseline}
+.tile p{font-size:10.5px;color:#6b5a4e;line-height:1.6}
+.tag2{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;border-radius:5px;padding:2px 7px}
+.have{background:#e9ede6;color:#3f5a3d}
+.add{background:#f5e2da;color:#7a3a28}
+.skip{background:#f2ede7;color:#8a7a6d}
+/* settings sheet */
+.sheet{background:#fff;border:1px solid #ddd2c2;border-radius:13px;box-shadow:0 18px 44px rgba(58,28,20,.18);width:420px;overflow:hidden}
+.sheet .sh{padding:14px 18px;border-bottom:1px solid var(--hair)}
+.sheet .sh b{font-family:'Playfair Display',serif;font-size:16px}
+.srow{display:flex;align-items:center;gap:11px;padding:11px 18px;border-bottom:1px solid #f6f1e8;font-size:12px;color:var(--soft)}
+.srow:last-child{border-bottom:none}
+.srow .sub2{display:block;font-size:10px;color:var(--label);margin-top:2px}
+.tog{margin-left:auto;width:34px;height:19px;border-radius:99px;background:#8a9e88;position:relative}
+.tog::after{content:'';position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;background:#fff}
+.tog.off{background:#e0d6c6}
+.tog.off::after{right:auto;left:2px}
+.tagrow{display:flex;align-items:center;gap:9px;padding:9px 18px;border-bottom:1px solid #f6f1e8;font-size:12px}
+.tagrow .cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--label)}
+.tagrow .op{color:var(--label);font-size:10px;margin-left:9px;cursor:pointer}
+</style></head><body><div class="lbl">1 &middot; THE BOARD BENEATH THE HEADER, OPTIMISED <em>&mdash; columns take a MAX-WIDTH (290px) and rag left rather than stretching to fill any monitor &mdash; the Linear/Things discipline; wide screens get calm margins, not wider cards. The sidebar refined: active row carries an ink inset bar; CLEAR appears beside FILTERS only when one is active; TAGS is the live list with counts and an inline &#65291;New tag; Task settings pinned above the fold-line at the foot. Two ART SLOTS specced in place &mdash; the Done empty vignette, and the DESK-CLEAR hero that appears only when urgent is empty and the bench exhausted.</em></div><div class="board"><div class="split"><div class="pside">
+<div class="pk">FILTERS<span class="clr">CLEAR</span></div>
+<div class="pi on"><span class="swd" style="background:#8a7a6d"></span>Everything<span class="n">16</span></div>
+<div class="pi"><span class="swd" style="background:#e8a68e"></span>Urgent<span class="n">3</span></div>
+<div class="pi"><span class="swd" style="background:#d9c49a"></span>Housekeeping<span class="n">11</span></div>
+<div class="pi"><span class="swd" style="background:#a8bca4"></span>Your tasks<span class="n">2</span></div>
+<div class="linkrow">Notes to self live on the <b>Noteboard &rarr;</b></div>
+<div class="pk2">TAGS</div>
+<div class="pi"><span class="swd" style="background:#7c3a2a"></span>#queryletter<span class="n">4</span></div>
+<div class="pi"><span class="swd" style="background:#8a9e88"></span>#synopsis<span class="n">1</span></div>
+<div class="pi" style="color:#a5988c;font-size:12px"><span style="width:9px;text-align:center">&#65291;</span>New tag</div>
+<div class="tset">&#9881; Task settings</div></div>
+<div class="cols">
+<div><div class="fh">To do<span class="n">13</span></div>
+<div class="kc u "><div class="b"><i>&#9733; OFFER</i><span class="w">19 JUL</span></div>
+<div class="in"><h4>Tom Ellery has made an offer</h4><div class="ms">Tom Ellery &middot; Ellery &amp; Frost</div></div><span class="dots">&#8943;</span></div>
+<div class="kc u "><div class="b"><i>AGENT WAITING</i><span class="w">12 JUL</span></div>
+<div class="in"><h4>Send your full to Jonathan Marsh</h4><div class="ms">Jonathan Marsh &middot; The Marsh Agency</div></div><span class="dots">&#8943;</span></div>
+<div class="kc h "><div class="b"><i>MATERIALS</i><span class="w">5 OF 16</span></div>
+<div class="in"><h4>Materials sweep</h4><div class="ms">16 agents &middot; one card, one sweep</div></div><span class="dots">&#8943;</span></div>
+<div class="mono" style="font-size:7px;text-align:center;padding:3px">+ 10 MORE &#9662;</div></div>
+<div><div class="fh">Today<span class="n">2</span><span class="wip">A GOOD DAY IS 3&ndash;5</span></div>
+<div class="kc u "><div class="b"><i>AGENT WAITING</i><span class="w">15 JUL</span></div>
+<div class="in"><h4>Send your partial to Daniel O&rsquo;Rourke</h4><div class="ms">Daniel O&rsquo;Rourke &middot; Inkwell &amp; Stone</div></div><span class="dots">&#8943;</span></div>
+<div class="kc t "><div class="b"><i>&#10003; YOUR TASK</i><span class="w">DUE TODAY</span></div>
+<div class="in"><h4>Redraft the opening chapter</h4><div class="ms">Before the next batch goes out</div></div><span class="dots">&#8943;</span></div></div>
+<div><div class="fh">Snoozed<span class="n">1</span></div>
+<div class="kc h "><div class="b"><i>STALE &middot; &#128340;</i><span class="w">BACK MON 11</span></div>
+<div class="in"><h4>Marcus Reed silent</h4><div class="ms">Snoozed until Monday</div></div><span class="dots">&#8943;</span></div></div>
+<div><div class="fh done">Done<span class="n">0 TODAY</span></div>
+<div class="art" style="height:150px"><b>ART &middot; DONE-EMPTY</b><span>A small vignette &mdash; an empty letter tray, a resting pen. Beneath it: &ldquo;Tick anything and it settles here until midnight.&rdquo;</span></div>
+</div></div></div>
+<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--hair)">
+<div class="mono" style="font-size:7.5px;margin-bottom:10px">THE ALL-CLEAR &mdash; WHEN URGENT IS EMPTY AND THE BENCH IS EXHAUSTED, THE BOARD EARNS ITS HERO MOMENT</div>
+<div class="art" style="height:110px;max-width:640px"><b>ART &middot; DESK-CLEAR</b><span>The workspace&rsquo;s one full illustration: the writer&rsquo;s desk at rest &mdash; manuscript squared, lamp off, teacup done. &ldquo;The desk is clear. Go write.&rdquo; Shown on Today when nothing is committed, nothing urgent, bench empty.</span></div>
+</div></div><div class="lbl">2 &middot; THE DOCK, DESIGNED <em>&mdash; stays the 30/70 (a slide-over would hide the queue; the queue is half the point). The work surface becomes a two-column sheet: THE STORY SO FAR (the timeline) at left, the flow at right under the Playfair title, footer carrying the ink act and the NEXT line. The queue&rsquo;s art slot: the DOCK-DONE stamp &mdash; a 600ms inked flourish when a flow completes, the wax-seal moment.</em></div><div class="board"><div class="dock">
+<div class="dq"><div class="dqh">THE QUEUE</div>
+<div class="dcard"><span class="bd2" style="background:#e8a68e"></span>Tom Ellery&rsquo;s offer<span class="st">NEXT</span></div>
+<div class="dcard live"><span class="bd2" style="background:#e8a68e"></span>Full &rarr; Jonathan Marsh<span class="st">OPEN</span></div>
+<div class="dcard"><span class="bd2" style="background:#e8a68e"></span>Partial &rarr; O&rsquo;Rourke<span class="st">TODAY</span></div>
+<div class="dcard"><span class="bd2" style="background:#d9c49a"></span>Whitfield &mdash; close?<span class="st"></span></div>
+<div class="dqh" style="margin-top:4px">ESC RETURNS TO THE BOARD &middot; &uarr;&darr; MOVE</div>
+<div class="art" style="height:86px;margin-top:auto"><b>ART &middot; DOCK-DONE STAMP</b><span>A small inked stamp/flourish that appears for 600ms when a flow completes &mdash; the wax-seal moment.</span></div>
+</div>
+<div class="work">
+<div class="wband"><i>AGENT WAITING &middot; REQUESTED 12 JUL &middot; 25 DAYS</i><span class="x">&#10005;</span></div>
+<div class="wbody">
+<div class="wtl"><div class="mono" style="font-size:6.5px;margin-bottom:8px">THE STORY SO FAR</div>
+<div class="wt"><span class="w2">3 FEB</span>Queried with Package A</div>
+<div class="wt"><span class="w2">28 APR</span>Partial requested &rarr; sent in 2 days</div>
+<div class="wt hot"><span class="w2">12 JUL</span>Full requested &mdash; your turn, 25 days</div></div>
+<div style="flex:1">
+<h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700">Send your full to Jonathan Marsh</h2>
+<div style="font-size:12px;color:var(--muted);margin-top:4px">Murphy&rsquo;s Day Out &middot; The Marsh Agency</div>
+<div class="flowbox" style="margin-top:14px"><h5>Send the full</h5>
+<div style="font-size:11px;color:var(--muted);margin-bottom:9px">What goes with it?</div>
+<span class="pkchip on">&#10003; Full manuscript &middot; v4</span><span class="pkchip">Synopsis</span><span class="pkchip">Author note&hellip;</span>
+<div style="font-size:10.5px;color:var(--muted);margin-top:9px">Recording it here marks the task done, moves the query to Full Sent, and writes the activity &mdash; one act, three records.</div></div>
+</div></div>
+<div class="wfoot"><span class="inkb">Record it sent &rarr;</span><span class="ghb">&#128340; Snooze</span><span class="ghb">&#8943;</span><span style="flex:1"></span><span class="mono" style="font-size:7.5px">NEXT: TOM ELLERY&rsquo;S OFFER</span></div>
+</div></div></div><div class="lbl">3 &middot; TASK SETTINGS + TAG MANAGEMENT <em>&mdash; a sheet, not a page: four behaviours (stale threshold, the good-day line, roll-forward, the briefing) each with its plain-spoken subtitle, and the dismissed ledger&rsquo;s door. Tags manage in their own sheet: rename, recolour within the family palette, delete-detaches.</em></div><div class="board"><div style="display:flex;gap:26px;align-items:flex-start">
+<div class="sheet"><div class="sh"><b>Task settings</b><div style="font-size:10.5px;color:var(--muted);margin-top:2px">How the desk behaves. Opens as a sheet over the page.</div></div>
+<div class="srow">Stale threshold<span class="sub2">When a silent query becomes housekeeping</span><span style="margin-left:auto" class="ghb" style="height:26px">12 months &#9662;</span></div>
+<div class="srow">A good day is<span class="sub2">The Today column&rsquo;s gentle line</span><span style="margin-left:auto" class="ghb">3&ndash;5 &#9662;</span></div>
+<div class="srow">Roll unfinished work forward<span class="sub2">At midnight, undone moves to today</span><span class="tog"></span></div>
+<div class="srow">Weekly review briefing<span class="sub2">Mondays, above the list</span><span class="tog"></span></div>
+<div class="srow"><b style="font-size:12px">Dismissed items</b><span class="sub2">14 in the ledger &mdash; restorable</span><span style="margin-left:auto;color:var(--burg);font-size:11px;border-bottom:1px solid #e2c6ba">Review &rarr;</span></div>
+</div>
+<div class="sheet" style="width:400px"><div class="sh"><b>Tags</b><div style="font-size:10.5px;color:var(--muted);margin-top:2px">Rename, recolour, retire. Deleting detaches; it never deletes items.</div></div>
+<div class="tagrow"><span class="swd" style="width:10px;height:10px;border-radius:50%;background:#7c3a2a"></span>#queryletter<span class="cnt">4 ITEMS</span><span class="op">Rename</span><span class="op">&#9679;</span><span class="op">Delete</span></div>
+<div class="tagrow"><span class="swd" style="width:10px;height:10px;border-radius:50%;background:#8a9e88"></span>#synopsis<span class="cnt">1 ITEM</span><span class="op">Rename</span><span class="op">&#9679;</span><span class="op">Delete</span></div>
+<div class="tagrow" style="color:#a5988c">&#65291; New tag &mdash; colour assigned from the family palette</div>
+</div></div></div><div class="lbl">4 &middot; THE BEST-IN-CLASS FEATURE REGISTER <em>&mdash; researched against Sunsama, Linear, Things, Trello, Notion and the 2026 pattern literature; each marked HAVE / ADD / SKIP with the reason. The skips are as deliberate as the adds.</em></div><div class="board"><div class="grid3">
+<div class="tile"><h5>Saved custom views <span class="tag2 skip">SKIP FOR NOW</span></h5><p>Linear/Notion let users save filter+sort combos as named views. Your FILTERS + tags cover the need at this scale; revisit if power users ask.</p></div>
+<div class="tile"><h5>Priority keystrokes <span class="tag2 skip">SKIP</span></h5><p>Sunsama sets priority with a single key. Your priority is derived (the engine ranks), so a manual priority would fight the bench. Deliberate absence.</p></div>
+<div class="tile"><h5>Time estimates on Today <span class="tag2 add">ADD LATER</span></h5><p>Sunsama&rsquo;s defining move: tasks carry estimates and the plan sums them (&ldquo;est. 45 min&rdquo;), which keeps a day honest. Fits your Today header line; a later pack.</p></div>
+<div class="tile"><h5>Carry-over review <span class="tag2 have">HAVE</span></h5><p>Sunsama&rsquo;s morning ritual reviews yesterday&rsquo;s leftovers. Your roll-forward + &ldquo;rolled forward&rdquo; markers + the weekly briefing are the calm version.</p></div>
+<div class="tile"><h5>Hyperfocus mode <span class="tag2 have">HAVE</span></h5><p>Their one-task fullscreen is your dock walking the queue &mdash; same job, already unified with Work the list.</p></div>
+<div class="tile"><h5>Collapsible columns <span class="tag2 add">ADD</span></h5><p>Trello/GitHub let a column fold to a slim rail (name + count, rotated). Cheap, and useful when Snoozed/Done are noise during triage. One session.</p></div>
+<div class="tile"><h5>Column sort override <span class="tag2 skip">SKIP</span></h5><p>Per-column manual ordering means stored positions &mdash; the exact state class the board was rebuilt to avoid. The global sort control is the answer.</p></div>
+<div class="tile"><h5>Multi-select on the board <span class="tag2 add">ADD LATER</span></h5><p>Shift-click cards &rarr; the batch bar (already designed for the list). Wire the same selection model to cards when batch ships.</p></div>
+<div class="tile"><h5>Density toggle <span class="tag2 skip">SKIP</span></h5><p>Linear offers compact/comfortable. One well-judged density beats a setting; your cards are already the compact end of Trello&rsquo;s.</p></div>
+<div class="tile"><h5>Sync/offline indicator <span class="tag2 have">HAVE</span></h5><p>ALL CHANGES SAVED in the top bar is the shell&rsquo;s; the save machine feeds it. Nothing more needed.</p></div>
+<div class="tile"><h5>Progressive disclosure <span class="tag2 have">HAVE</span></h5><p>The 2026 trend the whole board already obeys: folds, benches, sweeps-as-one-card, the dock revealing flows only when summoned.</p></div>
+<div class="tile"><h5>Illustration system <span class="tag2 add">ADD &mdash; SLOTS SPECCED</span></h5><p>Five art slots: DONE-EMPTY &middot; DESK-CLEAR (the hero) &middot; DOCK-DONE stamp &middot; NOTEBOARD-EMPTY &middot; REVIEW-MASTHEAD. Fixed-ratio placeholder component now; the illustrator&rsquo;s work drops in without layout shift.</p></div>
+</div></div></body></html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!-- ⚠️ SCOPE (board-optimise pack, 7 Aug): NORMATIVE for the art system — the two REJECTED
+     homes (page headers, per-card) and the six briefed slots with their triggers, treatments,
+     ratios and frequencies. The illustrations themselves do not exist yet: this pack ships the
+     ArtSlot component and its placeholders, so nothing shifts when the artwork arrives. NOTE:
+     the ref names the dock slot "DOCK-DONE" in section 2 of board-optimised and "DOCK-SEAL" in
+     its own brief; the pack's word (dock-seal) is the built name. --><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Where the illustrations go</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+:root{--ink:#2a1a13;--soft:#4d4238;--muted:#8a7a6c;--label:#b3a394;--hair:#f0e9dd;--pink:#f5e2da;--pinkbd:#e8c8bc;--burg:#7c3a2a}
+*{font-variant-numeric:tabular-nums}
+body{background:#3a332c;padding:30px 0 90px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;color:#2b2118}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b3a695;margin:40px 0 11px;width:1420px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#cfc2b0;margin-left:10px;line-height:1.6}
+.board{width:1420px;background:#fdfcfa;border:1px solid #2a2019;border-radius:14px;padding:24px 26px 26px;box-sizing:border-box;box-shadow:0 16px 44px rgba(20,15,10,.45)}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.12em;color:#a5988c}
+h1{font-family:'Playfair Display',serif;font-weight:700;color:#2b2118}
+.art{border:1.5px dashed #d3b98a;background:repeating-linear-gradient(135deg,#fdf9f0,#fdf9f0 8px,#faf3e4 8px,#faf3e4 16px);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#a58a55;text-align:center;padding:12px}
+.art b{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.15em}
+.art span{font-size:10px;color:#b9a06a;line-height:1.45;max-width:250px}
+.no{border:1.5px dashed #e0c6bc;background:repeating-linear-gradient(135deg,#fdf6f3,#fdf6f3 8px,#fbeee9 8px,#fbeee9 16px);color:#b58a7c}
+.no span{color:#c49a8c}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pane{border:1px solid #e8dfd1;border-radius:12px;padding:16px 18px;background:#fff}
+.pane h5{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:baseline;gap:8px}
+.pane p{font-size:10.5px;color:#6b5a4e;line-height:1.6}
+.verdict{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;border-radius:5px;padding:2px 7px}
+.yes{background:#e9ede6;color:#3f5a3d}
+.nope{background:#f5e2da;color:#7a3a28}
+.maybe{background:#f4ecd4;color:#7a6030}
+.fh{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px;display:flex;align-items:baseline;gap:9px}
+.fh .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.fh.done{border-bottom-color:#b9c9b4}
+.kc{background:#fff;border:1px solid #efe8dc;border-radius:10px;box-shadow:0 2px 8px rgba(58,28,20,.06);margin-bottom:11px;position:relative}
+.kc .b{height:23px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid #ddd0bc;background:linear-gradient(180deg,#f6f0e4,#f0e8d8);border-radius:10px 10px 0 0}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;color:#3a1c14}
+.kc .in{padding:11px 13px 12px}
+.kc h4{font-size:12.5px;font-weight:600;line-height:1.35}
+.kc .ms{font-size:10.5px;color:#a0958a;margin-top:3px}
+.inkb{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border-radius:9px;height:32px;padding:0 14px;font-size:11.5px;font-weight:600}
+.pkb{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pinkbd);color:#5c2f22;border-radius:9px;height:32px;padding:0 14px;font-size:11.5px;font-weight:700}
+.hairline{border-bottom:1px solid var(--hair);margin:14px 0}
+.slot{display:flex;gap:14px;align-items:center;border:1px solid #e8dfd1;border-radius:12px;padding:13px 15px;background:#fff;margin-bottom:11px}
+.slot .meta2{flex:1}
+.slot .meta2 b{font-family:'Playfair Display',serif;font-size:14px;display:block}
+.slot .meta2 span{font-size:10.5px;color:#6b5a4e;line-height:1.55;display:block;margin-top:3px}
+.slot .spec{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;color:#a5988c;display:block;margin-top:5px}
+</style></head><body><div class="lbl">1 &middot; WHERE ART GOES &mdash; AND WHERE IT DOESN&rsquo;T <em>&mdash; three candidate homes, two rejected with reasons.</em></div><div class="board"><div class="grid3">
+<div class="pane"><h5>In the page header <span class="verdict nope">NO</span></h5>
+<div class="art no" style="height:74px;margin:9px 0"><b>DECORATIVE BANNER</b><span>Art beside every title</span></div>
+<p>A permanent illustration in the header is seen five hundred times and read once. It pushes the work down the page on every visit, and your headers already carry meaning &mdash; Playfair title, derived subtitle, the tool row. Decoration that never changes becomes furniture, then becomes noise.</p></div>
+<div class="pane"><h5>Beside the cards <span class="verdict nope">NO</span></h5>
+<div class="art no" style="height:74px;margin:9px 0"><b>PER-CARD ICONOGRAPHY</b><span>A little drawing per kind</span></div>
+<p>Kind is already carried by the pastille band and the family colour. A second signal in the same place doesn&rsquo;t reinforce, it competes &mdash; and sixteen small illustrations on one screen is a sticker album, not a desk.</p></div>
+<div class="pane"><h5>In the empty and the earned <span class="verdict yes">YES</span></h5>
+<div class="art" style="height:74px;margin:9px 0"><b>EMPTY &amp; MILESTONE STATES</b><span>Where the interface has nothing to show, or something to celebrate</span></div>
+<p>Illustration earns its place exactly where data doesn&rsquo;t exist yet, or where a moment deserves marking. It costs nothing when the page is busy, appears when the page would otherwise be blank, and is seen rarely enough to stay charming.</p></div>
+</div>
+<div style="font-size:11px;color:#4d4238;line-height:1.75;margin-top:16px;max-width:1000px">
+<b>The principle:</b> art goes where the interface has <b>nothing to say</b> (an empty column, a fresh page, a cleared desk) or <b>something to mark</b> (a flow completed, a week reviewed). Never in the chrome, never repeated per item, never between the user and their work. That keeps the illustrator&rsquo;s budget on six pieces that land rather than forty that decorate &mdash; and every one of them is a moment the writer will actually feel.</div>
+</div><div class="lbl">2 &middot; THE SIX SLOTS, BRIEFED <em>&mdash; each with its trigger, its treatment, its ratio and its frequency &mdash; ready to hand to an illustrator.</em></div><div class="board">
+<div class="grid2">
+<div>
+<div class="slot"><div class="art" style="width:150px;height:104px;flex:0 0 auto"><b>1 &middot; DESK-CLEAR</b></div>
+<div class="meta2"><b>The all-clear &mdash; the hero</b><span>Shown on <b>Today</b> when nothing is committed, nothing is urgent and the bench is exhausted. The writer&rsquo;s desk at rest: manuscript squared, lamp off, teacup done. Caption: &ldquo;The desk is clear. Go write.&rdquo; The one piece anyone will screenshot.</span><span class="spec">FULL COLOUR &middot; ~520&times;300 &middot; RARE &middot; CENTRED IN THE CONTENT COLUMN</span></div></div>
+<div class="slot"><div class="art" style="width:150px;height:104px;flex:0 0 auto"><b>2 &middot; NOTEBOARD-EMPTY</b></div>
+<div class="meta2"><b>Nothing pinned yet</b><span>The Noteboard&rsquo;s first-run state, which is already written and currently text alone. A corkboard with one blank card and a pin; sits above the existing copy and the pink &ldquo;Pin your first note&rdquo;.</span><span class="spec">TWO-COLOUR &middot; ~380&times;200 &middot; FIRST RUN ONLY</span></div></div>
+<div class="slot"><div class="art" style="width:150px;height:104px;flex:0 0 auto"><b>3 &middot; DONE-EMPTY</b></div>
+<div class="meta2"><b>The Done column, before the first tick</b><span>Small vignette inside the column: an empty letter tray, a pen laid down. Under it the existing line &mdash; &ldquo;Tick anything and it settles here until midnight.&rdquo; Must read at 260px wide.</span><span class="spec">LINE ART &middot; ~240&times;150 &middot; DAILY UNTIL FIRST TICK</span></div></div>
+</div>
+<div>
+<div class="slot"><div class="art" style="width:150px;height:104px;flex:0 0 auto"><b>4 &middot; DOCK-SEAL</b></div>
+<div class="meta2"><b>The completion stamp</b><span>A 600ms inked flourish &mdash; wax seal, or a compositor&rsquo;s mark &mdash; struck over the dock&rsquo;s work surface the instant a flow completes, before the card animates to Done. Motion: appears, settles, fades. Off under reduced motion.</span><span class="spec">SINGLE COLOUR INK &middot; ~120&times;120 &middot; SVG, ANIMATABLE</span></div></div>
+<div class="slot"><div class="art" style="width:150px;height:104px;flex:0 0 auto"><b>5 &middot; REVIEW-MASTHEAD</b></div>
+<div class="meta2"><b>Last week in review</b><span>A slim banner across the weekly briefing card when it&rsquo;s fresh &mdash; the only place a header illustration earns its keep, because the card is temporary and celebratory. Weekly, dismissible.</span><span class="spec">SLIM BANNER &middot; ~640&times;90 &middot; WEEKLY</span></div></div>
+<div class="slot"><div class="art" style="width:150px;height:104px;flex:0 0 auto"><b>6 &middot; FIRST-RUN BOARD</b></div>
+<div class="meta2"><b>Before the first query</b><span>The To-do list with genuinely nothing in it &mdash; a new writer, pre-first-query. An empty desk waiting to be used, with the route out: &ldquo;Add your first agent&rdquo;. Distinct from DESK-CLEAR: this is <i>not yet</i>, that is <i>well done</i>.</span><span class="spec">FULL COLOUR &middot; ~460&times;260 &middot; ONCE PER MANUSCRIPT</span></div></div>
+</div>
+</div>
+<div style="font-size:10.5px;color:#8a7a6c;line-height:1.7;margin-top:14px">
+<b style="color:#4d4238">One component, six slots.</b> <code style="font-family:JetBrains Mono,monospace;font-size:9.5px">&lt;ArtSlot name="desk-clear" /&gt;</code> renders a fixed-ratio placeholder now and the illustration later &mdash; so nothing shifts when the artwork arrives, and a missing asset degrades to the caption alone rather than a broken image. Ship the placeholders in this pack; hand the illustrator the six briefs and the ratios above.</div>
+</div><div class="lbl">3 &middot; TWO OF THEM IN SITU <em>&mdash; the Done vignette sitting inside its column at 260px, and the DESK-CLEAR hero as it would appear on Today when everything is genuinely finished.</em></div><div class="board">
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,290px));gap:20px;align-items:start;justify-content:start">
+<div><div class="fh">To do<span class="n">13</span></div>
+<div class="kc"><div class="b"><i>MATERIALS</i></div><div class="in"><h4>Materials sweep</h4><div class="ms">16 agents &middot; one card, one sweep</div></div></div>
+<div class="kc"><div class="b"><i>STALE</i></div><div class="in"><h4>Marcus Reed silent for 787 days</h4><div class="ms">Marcus Reed &middot; Bloomsbury Quill</div></div></div>
+<div class="mono" style="font-size:7px;text-align:center;padding:3px">+ 11 MORE &#9662;</div></div>
+<div><div class="fh">Today<span class="n">0</span></div>
+<div style="font-size:11px;color:#8a7a6c;line-height:1.6;padding:2px">Nothing committed to today. <span style="color:#7c3a2a;border-bottom:1px solid #e2c6ba">Lift something from the bench &rarr;</span></div></div>
+<div><div class="fh">Snoozed<span class="n">0</span></div>
+<div style="font-size:11px;color:#8a7a6c;line-height:1.6;padding:2px">Snoozed work waits here until its day.</div></div>
+<div><div class="fh done">Done<span class="n">0 TODAY</span></div>
+<div class="art" style="height:158px"><b>ART &middot; DONE-EMPTY</b><span>Letter tray, pen laid down</span></div>
+<div style="font-size:11px;color:#8a7a6c;line-height:1.6;padding:8px 2px 0;text-align:center">Tick anything and it settles here until midnight.</div></div>
+</div>
+<div class="hairline"></div>
+<div style="display:flex;gap:24px;align-items:center;justify-content:center;padding:10px 0 4px">
+<div class="art" style="width:300px;height:172px;flex:0 0 auto"><b>ART &middot; DESK-CLEAR</b><span>The hero &mdash; desk at rest</span></div>
+<div style="max-width:330px"><h1 style="font-size:22px">The desk is clear.</h1>
+<div style="font-size:12px;color:#6b5a4e;line-height:1.65;margin-top:7px">Nothing urgent, nothing waiting, nothing left on the bench. Sixteen queries are out there doing their work without you.</div>
+<div style="display:flex;gap:8px;margin-top:13px"><span class="inkb">Go and write &rarr;</span><span class="pkb">&#65291; Add a task</span></div></div>
+</div>
+<div class="mono" style="font-size:6.5px;text-align:center;margin-top:12px">SHOWN ON TODAY ONLY, AND ONLY WHEN EVERY CONDITION IS TRUE &mdash; RARE BY DESIGN</div>
+</div></body></html>
