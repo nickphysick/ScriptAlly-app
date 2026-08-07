@@ -55,11 +55,30 @@ describe("§1 · the lock", () => {
     expect(releases.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("the grid is the spec's: minmax(0,1fr) 308px, capped 1560 and centred", () => {
+  it("the grid is v16's: minmax(0,1fr) 383px, capped 1660 and centred", () => {
     const c = rule(".os-content");
-    expect(c).toContain("grid-template-columns: minmax(0, 1fr) 308px");
-    expect(c).toContain("max-width: 1560px");
+    expect(c).toContain("grid-template-columns: minmax(0, 1fr) 383px");
+    expect(c).toContain("max-width: 1660px");
     expect(c).toContain("margin: 0 auto");
+  });
+
+  /* ⚠️ THE HEADER IS ITS OWN ROW, AND THE ROWS ARE `auto auto`. With `1fr` the RAIL would drive
+     the row height and the page would grow past the fold with nothing to scroll it — the left
+     column owns the height, which is the whole reason the two columns end level. */
+  it("the header spans both columns; the rows are auto, never 1fr", () => {
+    const c = rule(".os-content");
+    expect(c).toContain("grid-template-rows: auto auto");
+    /* target the ROWS — the columns legitimately carry minmax(0, 1fr) */
+    expect(c).not.toMatch(/grid-template-rows:[^;]*1fr/);
+    expect(cssRules).toContain(".os-greet { grid-column: 1 / -1; grid-row: 1; }");
+    expect(cssRules).toContain(".os-colM { grid-column: 1; grid-row: 2; }");
+  });
+
+  it("the midrow is a FIXED 302px: author 252 beside the chart", () => {
+    const m = rule(".os-midrow");
+    expect(m).toContain("grid-template-columns: 252px minmax(0, 1fr)");
+    expect(m).toContain("height: 302px");
+    expect(m).toContain("flex: 0 0 auto");
   });
 
   it("⚠️ the rail spaces with MARGINS, not gap — a collapsing panel takes its spacing with it", () => {
@@ -78,9 +97,12 @@ describe("§1 · the lock", () => {
 });
 
 describe("§2 · the greeting", () => {
-  it("kicker reads WEEK … OF QUERYING · manuscript, and the name is plain ink", () => {
+  /* ⚠️ NO KICKER (v16 §1) — a muted DATE LINE replaces it. The week number and the manuscript
+     were repeating what the chrome already says. */
+  it("a muted date line sits above the greeting, and the name is plain ink", () => {
     const html = render();
-    expect(html).toContain("of querying · Murphy&#x27;s Day Out");
+    expect(html).toContain('class="os-dateline"');
+    expect(html).not.toContain("os-kicker");
     expect(html).toContain("Hello, Nick");
     // no italic-burgundy name: the h1 carries no <em>
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);
@@ -143,9 +165,8 @@ describe("the sparse chart state and the tasks empty state (shells)", () => {
 });
 
 describe("§9 · first-run states", () => {
-  it("day one: Getting started kicker, the single Day one pill, the invitation chart, the two ghost CTAs", () => {
+  it("day one: the single Day one pill, the invitation chart, the two ghost CTAs", () => {
     const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
-    expect(html).toContain("Getting started");
     expect(html).toContain(">Day one<");
     // the pill row holds ONLY Day one — no tenure, no achievement, no agents count
     expect(html).not.toContain("agents on file");

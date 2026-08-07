@@ -17,10 +17,11 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
-import { longDate, weekOfQuerying } from "../../lib/dashboardStats";
+import { longDate } from "../../lib/dashboardStats";
 import { achievementPill, Achievement, runStage, tenureLine, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
+import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenRail } from "./OneScreenRail";
@@ -140,10 +141,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   const tenure = tenureLine(queries);
   const ach = achievementPill(queries, now);
   const stage = runStage(queries, manuscripts, now);
-  /* §9: day one's kicker is "Getting started" — there is no week to number yet. */
-  const kicker = stage === "day-one"
-    ? "Getting started"
-    : `${weekOfQuerying(queries, now)} of querying${activeManuscript ? ` · ${activeManuscript.title}` : ""}`;
 
   return (
     <div
@@ -153,54 +150,61 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
       style={lockH !== null ? { height: lockH } : undefined}
     >
       <div className="os-content">
-        <div className="os-colM">
-          <div className={`os-greet${loading ? " isload" : ""}`}>
-            {loading && <Skel bars={["h", ""]} />}
-            <span className="os-kicker">{kicker}</span>
-            <div className="os-grow2">
-              {/* ⚠️ PLAIN INK, NO BURGUNDY, NO ITALICS (§2) — this reverses the settled desk's
-                  burgundy-italic name on the new spec's authority. */}
-              <h1>Hello, {firstName}</h1>
-              <span className="os-spacer" />
-              {chipShows && (
-                <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>
-                  Take the tour
-                </button>
-              )}
-              <span className="os-datechip">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
-                {longDate(now)}
-              </span>
-            </div>
-            <div className="os-pills">
-              {/* §2: tenure · achievement · agents-on-file, in that order — the middle one is the
-                  one ≤1200px drops first, and the CSS indexes on that.
-                  §9: DAY ONE is a single "Day one" pill; EARLY DAYS drops the achievement slot —
-                  §7's fallback is technically always true, but a day-three account being told
-                  "2 queries awaiting a reply" as an achievement is the padding the facts-only
-                  rule exists to stop. §9 is the specific section and wins. */}
-              {stage === "day-one" ? (
-                <span className="os-pill">Day one</span>
-              ) : (
-                <>
-                  {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
-                  {stage === "settled" && (
-                    <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
-                      {ach.pre}<b>{ach.strong}</b>{ach.post}
-                    </span>
-                  )}
-                  {/* "on file", never "met" (§2) */}
-                  <span className="os-pill pk"><b>{agents.length}</b> agents on file</span>
-                </>
-              )}
-            </div>
+        {/* ⚠️ THE HEADER IS ITS OWN GRID ROW, spanning both columns — not the first thing in the
+            main column. That is what lets the two columns below it start level. */}
+        <div className={`os-greet${loading ? " isload" : ""}`}>
+          {loading && <Skel bars={["h", ""]} />}
+          {/* ⚠️ NO KICKER (v16 §1). A muted DATE LINE sits above the greeting instead — the week
+              number and the manuscript were repeating what the chrome already says. */}
+          <div className="os-dateline">{longDate(now)}</div>
+          <div className="os-grow2">
+            {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
+                swing of that pendulum, recorded at each turn. */}
+            <h1>Hello, {firstName}</h1>
+            <span className="os-spacer" />
+            {chipShows && (
+              <button type="button" ref={tourChipRef} className="os-tourchip" onClick={() => { if (wideEnough()) { setRailExpanded(false); setTouring(true); } }}>
+                Take the tour
+              </button>
+            )}
           </div>
+          <div className="os-pills">
+            {/* §2: tenure · achievement · agents-on-file. §9: day one is a single pill; early days
+                drops the achievement slot — a day-three account told "2 awaiting a reply" as an
+                ACHIEVEMENT is the padding the facts-only rule exists to stop. */}
+            {stage === "day-one" ? (
+              <span className="os-pill">Day one</span>
+            ) : (
+              <>
+                {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
+                {stage === "settled" && (
+                  <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
+                    {ach.pre}<b>{ach.strong}</b>{ach.post}
+                  </span>
+                )}
+                {/* "on file", never "met" (§2) */}
+                <span className="os-pill pk"><b>{agents.length}</b> agents on file</span>
+              </>
+            )}
+          </div>
+        </div>
 
-          <OneScreenChart
-            loading={loading} queries={queries} agents={agents} now={now}
-            dayOne={stage === "day-one"} earlyDays={stage === "early-days"}
-            onSendFirst={() => onNavigate("queries", "Send a query")}
-          />
+        <div className="os-colM">
+          {/* ⚠️ A FIXED 302px ROW, and the LEFT column owns the height. The author tile's natural
+              size sets it; the chart fills beside it. Never `1fr` — the rail would then drive the
+              row and the page would grow past the fold. */}
+          <div className="os-midrow">
+            <OneScreenAuthor
+              loading={loading} queries={queries} manuscripts={manuscripts}
+              currentUser={currentUser} activeManuscript={activeManuscript}
+              onNavigate={onNavigate} now={now}
+            />
+            <OneScreenChart
+              loading={loading} queries={queries} agents={agents} now={now}
+              dayOne={stage === "day-one"} earlyDays={stage === "early-days"}
+              onSendFirst={() => onNavigate("queries", "Send a query")}
+            />
+          </div>
 
           <OneScreenTasks
             loading={loading}

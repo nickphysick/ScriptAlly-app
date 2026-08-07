@@ -14,26 +14,44 @@
   font-size: 14px;
   color: #3a1c14;
 }
+/* ⚠️ THE HEADER IS ITS OWN ROW, spanning both columns (v16 §1) — so the two columns beneath it
+   start level. ⚠️ AND THE ROWS ARE `auto auto`, NEVER `1fr`: with `1fr` the RAIL would drive the
+   row height, and the page would grow past the fold with nothing to scroll it. The LEFT column
+   owns the height. */
 .os-content {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 308px;
-  gap: 16px;
-  padding: 18px 26px 26px;
-  max-width: 1560px;
+  grid-template-columns: minmax(0, 1fr) 383px;
+  grid-template-rows: auto auto;
+  align-content: start;
+  column-gap: 16px;
+  row-gap: 0;
+  padding: 16px 26px 24px;
+  max-width: 1660px;
   margin: 0 auto;
   width: 100%;
 }
+.os-greet { grid-column: 1 / -1; grid-row: 1; }
+.os-colM { grid-column: 1; grid-row: 2; }
+.os-colR { grid-column: 2; grid-row: 2; }
 .os-colM, .os-colR { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
-.os-colM { gap: 13px; }
+.os-colM { gap: 15px; }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
 .os-colR { gap: 0; }
 .os-colR > * { margin-bottom: 13px; }
 .os-colR > *:last-child { margin-bottom: 0; }
 
-/* the vertical budget (§1): the chart flexes, tasks are content-driven */
+/* ⚠️ A FIXED 302px ROW (v16 §1). The author tile's natural size sets it and the chart fills
+   beside it; the row never stretches with the viewport, which is what keeps the columns level. */
+.os-midrow {
+  display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 13px;
+  flex: 0 0 auto; height: 302px;
+}
+.os-midrow .os-aut, .os-midrow .os-lead { height: 302px; min-height: 0; }
+
+/* the vertical budget (§1): tasks are content-driven */
 .os-colM .os-lead { flex: 1 1 auto; min-height: 0; }
 .os-colM .os-tasks { flex: 0 1 auto; min-height: 118px; max-height: 318px; }
 
@@ -85,17 +103,14 @@
   padding: 5px 12px; color: #4a3a2e; white-space: nowrap;
 }
 
-/* ══ §2 · GREETING (header F) ══ */
-.os-greet { padding: 2px 2px; flex: none; }
-.os-greet .os-kicker {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #9c8878;
-  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; margin-top: 7px; }
+/* ══ THE HEADER (v16 §1) ══ */
+.os-greet { padding: 14px 2px 26px; flex: none; }
+/* the muted date line replaces the kicker — it says the one thing the chrome does not */
+.os-dateline { font-size: 12.5px; color: #a4968a; letter-spacing: 0.01em; margin-bottom: 5px; }
+.os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; }
 .os-greet h1 {
-  font-family: var(--font-serif); font-weight: 500; font-size: 29px;
-  letter-spacing: -0.015em; color: #241811; line-height: 1.05; margin: 0;
+  font-family: var(--font-serif); font-weight: 700; font-size: 46px;
+  letter-spacing: -0.025em; color: #241811; line-height: 1; margin: 0;
 }
 .os-greet .os-spacer { flex: 1; }
 .os-datechip {
@@ -104,7 +119,7 @@
   border: 1px solid #e3d9cc; border-radius: 10px; padding: 7px 12px; white-space: nowrap;
 }
 .os-datechip svg { width: 13px; height: 13px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; flex: none; }
-.os-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+.os-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; padding-bottom: 6px; }
 .os-pill {
   display: inline-flex; align-items: center; gap: 6px;
   background: #ffffff; border: 1px solid #e3d9cc; border-radius: 99px;
@@ -136,12 +151,15 @@
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
 @media (max-width: 1360px) {
-  .os-content { grid-template-columns: minmax(0, 1fr) 282px; gap: 14px; padding: 16px 22px 22px; }
-  .os-greet h1 { font-size: 26px; }
+  .os-content { grid-template-columns: minmax(0, 1fr) 350px; column-gap: 14px; padding: 16px 22px 22px; }
+  .os-greet h1 { font-size: 40px; }
   .os-pills { gap: 6px; }
 }
+@media (max-width: 1240px) {
+  .os-greet h1 { font-size: 34px; }
+}
 @media (max-width: 1200px) {
-  .os-content { grid-template-columns: minmax(0, 1fr) 262px; }
+  .os-content { grid-template-columns: minmax(0, 1fr) 320px; }
   /* the achievement slot is the softest fact — it gives ground first (§11) */
   .os-pills .os-pill:nth-child(2) { display: none; }
 }
@@ -150,6 +168,11 @@
 @media (max-width: 1024px) {
   .os-root { height: auto !important; overflow: visible; }
   .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
+  /* the grid placements go with the grid, or the flex order is wrong */
+  .os-greet, .os-colM, .os-colR { grid-column: auto; grid-row: auto; }
+  .os-midrow { display: flex; flex-direction: column; height: auto; }
+  .os-midrow .os-aut, .os-midrow .os-lead { height: auto; }
+  .os-midrow .os-lead { min-height: 280px; }
   .os-colM, .os-colR { gap: 14px; }
   .os-colR > * { margin-bottom: 0; }
   .os-colM .os-lead { flex: none; height: 280px; }

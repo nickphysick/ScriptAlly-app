@@ -26,7 +26,10 @@ describe("/dashboard renders", () => {
      by §9's DAY ONE — Getting started kicker, the chart as an invitation, the ghost CTAs. */
   it("…and produces the day-one chrome, so it is not an empty shell that merely did not crash", () => {
     const html = renderPage(page());
-    expect(html).toContain("Getting started");
+    /* ⚠️ RETARGETED (v16 §1): the kicker line is RETIRED — a muted date line sits above the
+       greeting instead, and day one now announces itself with its pill and the chart's
+       invitation rather than a "Getting started" kicker. */
+    expect(html).toContain(">Day one<");
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
   });
@@ -43,8 +46,8 @@ describe("/dashboard renders", () => {
   it("…and that render is the real dashboard — the chart card, not the day-one panel", () => {
     const html = renderPageSeeded(page());
     expect(html).toContain("Active queries");   // the chart card, the page's spine
-    expect(html).toContain("of querying");      // the kicker
+    expect(html).toContain("Querying since");   // the tenure pill
     expect(html).toContain("Querying goals");   // the rail
-    expect(html).not.toContain("Getting started"); // day one has stood down
+    expect(html).not.toContain(">Day one<"); // day one has stood down
   });
 });

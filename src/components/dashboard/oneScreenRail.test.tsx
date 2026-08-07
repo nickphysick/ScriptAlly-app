@@ -71,11 +71,12 @@ describe("the rendered rail", () => {
     />,
   );
 
-  it("the author tile: band, overlapping avatar with the + badge, shelf with the manuscript", () => {
-    expect(html).toContain("os-aut-band");
-    expect(html).toContain('aria-label="Add a photo"');
-    expect(html).toContain("Murphy&#x27;s Day Out");
-    expect(html).toContain("82,400 words");
+  /* ⚠️ THE AUTHOR TILE LEFT THE RAIL (v16 §1) — it sits beside the chart in the main column's
+     fixed 302px row now, and OneScreenAuthor owns it. This case pins the DEPARTURE so the tile
+     cannot quietly return here and be rendered twice. */
+  it("the author tile is NOT in the rail any more", () => {
+    expect(html).not.toContain("os-aut-band");
+    expect(html).not.toContain('aria-label="Add a photo"');
   });
 
   it("goals: the sentence, 25 blocks, and 0/25 done derives from sends", () => {
@@ -113,7 +114,6 @@ describe("the rendered rail", () => {
     expect(bare).toContain("Set a target for the quarter");
     expect(bare).toContain("Set a goal");
     expect(bare).toContain("os-blocks ghost");
-    expect(bare).toContain("+ Add your manuscript");
     expect(bare).toContain("The story starts with your first query.");
   });
 });
