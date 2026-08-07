@@ -941,10 +941,44 @@ describe("Polish §2 — the palette dropdown's presentation", () => {
     expect(pcss).toContain("@media (max-width: 767.98px) { .sp-in input { font-size: 16px; } }");
   });
 
-  it("the footer's keys read ESC, matching the chip in the search row", () => {
+  /* ⚠️ THIS CASE PASSED FOR THE WRONG REASON and is why the JSX is stripped of comments first.
+     It asserted "Open in new" was present; when the hint was REMOVED the words survived in the
+     comment explaining the removal, and `toContain` kept passing. The tombstone trap, fourth
+     sighting — assert against code, never prose. */
+  it("the footer hints are the ones that WORK, and ESC matches the search row's chip", () => {
     const tsx = readFileSync(resolve(__dirname, "./SearchPalette.tsx"), "utf8");
-    expect(tsx).toContain("<i>ESC</i> Close");
-    for (const hint of ["Navigate", "Open", "Open in new"]) expect(tsx).toContain(hint);
+    const code = tsx.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code).toContain("<i>ESC</i> Close");
+    for (const hint of ["Navigate", "Open"]) expect(code).toContain(hint);
+    /* ⌘↵ was advertised and NEVER implemented — Enter has no metaKey branch, so the chord did
+       nothing. A hint for a dead key teaches a gesture and then fails silently. */
+    expect(code).not.toContain("Open in new");
+    expect(code).not.toContain("⌘↵");
+  });
+
+  /* ⚠️ THE ANCHOR, WHICH IS WHAT ACTUALLY BROKE. The placement maths was correct throughout; the
+     rect fed to it came from the MOBILE opener, `display:none` at desktop, measuring all zeros —
+     so the dropdown opened in the top-left corner. The desktop pill must carry its own ref. */
+  it("the DESKTOP pill is an anchor: the shell threads a ref to it", () => {
+    expect(src).toContain("<SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} />");
+    const prim = readFileSync(resolve(__dirname, "./primitives.tsx"), "utf8");
+    expect(prim).toContain("anchorRef?: React.Ref<HTMLButtonElement>");
+    expect(prim).toContain("ref={anchorRef}");
+    const shell = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
+    expect(shell).toContain("searchAnchorRef={desktopSearchRef}");
+    // and the palette picks whichever opener is really on screen
+    const pal = readFileSync(resolve(__dirname, "./SearchPalette.tsx"), "utf8");
+    expect(pal).toContain("visibleAnchorRect(");
+  });
+
+  it("the result tile is ONE parchment/burgundy pair — the per-kind tints are superseded", () => {
+    const ic = prule(".sp-ic");
+    expect(ic).toContain("background: var(--shell-parch)");
+    expect(ic).toContain("color: var(--shell-burgundy)");
+    expect(ic).toContain("border-radius: 8px");
+    for (const kind of ["act", "agent", "query", "page", "ms"]) {
+      expect(pcss, `.sp-ic.${kind} must be gone`).not.toContain(`.sp-ic.${kind} {`);
+    }
   });
 });
 

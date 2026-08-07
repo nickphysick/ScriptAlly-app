@@ -265,3 +265,79 @@ Not testable in this repo (node env, no jsdom, no layout engine):
 4. **The seam** — the pill's centre against the breadcrumb's (measured 48.0/48.0 against the built
    CSS in the previous pass; re-eyeball after the cover-slot change).
 5. **The cover slot's framed interim** — that it still reads as a book cover at 30×40.
+
+
+---
+
+# Palette — anchored dropdown + restyle (7 Aug)
+
+## ⚠️ THE BUG WAS THE ANCHOR, NOT THE MATHS
+
+The placement function was correct the whole time, unit-tested, clamping at both edges. What fed
+it was wrong.
+
+**There are TWO search openers** — the desktop pill in the workspace bar, and the mobile bar's
+button — and only one is ever on screen. `usePalette`'s ref was attached to **the mobile one**,
+inside `.ws-mobilebar`, which is `display:none` above 768px. A hidden element's
+`getBoundingClientRect()` is **all zeros**, so the placer did exactly what it was told:
+`top = 0 + 10`, `left = 0 − 580` clamped to `12`. **The top-left corner of the window** — the
+reported symptom, produced by arithmetic that was never wrong.
+
+The fix is two-part and both halves are locked:
+
+1. **The desktop pill carries its own ref.** `SearchPill` gained an `anchorRef` prop, `WorkspaceShell`
+   threads it, `AppShell` supplies `desktopSearchRef` from `usePalette`. A lock asserts the whole
+   chain, verified by removing the ref and watching it fail.
+2. **A zero rect is not an anchor.** The rule is extracted as the pure `visibleAnchorRect`, which
+   takes the first rect with a real box and returns `null` when nothing is on screen — so the
+   caller declines to place rather than placing wrongly. Four unit tests, including one that
+   **proves the zero rect lands top-left**, so the guard's reason is pinned to the behaviour it
+   prevents rather than to a comment.
+
+## The portal decision
+
+Unchanged and re-affirmed: the palette portals to `document.body`. The pill sits inside
+`.ws-cscroll` (`overflow:auto`) inside `.ws-card` (`overflow:hidden`) — an absolutely-positioned
+dropdown, which a standalone mockup can get away with, would be **clipped by the card at exactly
+the moment it mattered**, and would fight the sticky bar's stacking context. Portalling takes it
+out of both; the position then has to be computed rather than inherited, which is what
+`palettePosition` exists for. It repositions on window resize and on **capture-phase** scroll, so
+an ancestor scrolling the pill out from under it is caught too.
+
+## The restyle
+
+Row gap 11px · tile radius 8 · group labels `10px 10px 5px` on `--shell-muted` · footer `9px 14px`
+with 11px muted labels beside each key.
+
+⚠️ **The five per-kind icon tints are SUPERSEDED — one parchment tile, one burgundy glyph, every
+row.** They were kept in the previous pass and flagged as a question; the re-issue answers it
+twice over. The reasoning that replaces mine: a row's kind is already said by its group heading and
+its words, and five pastel tiles made one list read as five.
+
+⚠️ **The `⌘↵ Open in new` hint is REMOVED, not implemented.** `Enter` has no `metaKey` branch — the
+chord did nothing, so the footer was teaching a gesture that failed silently. The pack's own
+instruction was to remove rather than advertise; if opening in a new tab ever lands, the hint
+comes back *with* it.
+
+## A lock of mine that passed for the wrong reason
+
+The polish pass's footer lock asserted `"Open in new"` was **present**. When the hint was removed,
+those words survived in the comment explaining the removal, and `toContain` kept passing. **The
+tombstone trap, fourth sighting in this repo.** The case now strips comments and line-comments
+before asserting, and checks the hint is *absent*.
+
+## Asset path
+
+`src/assets/shell/search-icon.png` (Vite-hashed and bundled), rendered at 26px `object-fit:contain`
+in the search row. Illustrated marks stay confined to that row; result-row glyphs remain monoline,
+per the standing rule.
+
+## Browser-verify list
+
+1. **⌘K from the workspace bar** — the dropdown opens *under the pill*, right edges aligned, not
+   in the corner. This is the fix; it is the first thing to check.
+2. **Not clipped by the card, and above the frosted bar** at every scroll position.
+3. **Reposition** — resize the window with it open; scroll the card under it.
+4. **Narrow the window hard** — the left edge clamps to 12px rather than running off.
+5. **A short viewport** — the results list caps and scrolls internally instead of overflowing.
+6. **Below 768px**, where the mobile opener is the visible one, the anchor should follow it.

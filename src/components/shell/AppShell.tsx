@@ -328,7 +328,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
      because it lived HERE, inside the workspace shell — which meant the top-nav shell had no
      palette at all: on /dashboard the search pill opened nothing and ⌘K did nothing. Copying the
      block into the second shell would have registered ⌘K twice. */
-  const { openPalette, searchOpenerRef, palette } = usePalette({
+  const { openPalette, searchOpenerRef, desktopSearchRef, palette } = usePalette({
     onNavigate, onNavigatePath: (to) => goPath(to), setSearchQuery,
   });
 
@@ -380,6 +380,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}
         onOpenSearch={openPalette}
+        searchAnchorRef={desktopSearchRef}
         onOpenHelp={() => goPath("/help")}
         onOpenAccount={() => setAccountOpen((v) => !v)}
         onUpgrade={() => goPath("/plans")}

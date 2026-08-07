@@ -58,3 +58,26 @@ export function palettePosition(anchor: AnchorRect, vw: number, vh: number): Pal
 
   return { left, top, width, maxListHeight };
 }
+
+
+/**
+ * ⚠️ A HIDDEN OPENER IS NOT AN ANCHOR — the rule that shipped broken.
+ *
+ * There are two search openers, the desktop pill and the mobile bar's button, and only one is on
+ * screen at a time. The palette was wired to the mobile one; at desktop it is `display:none`, and
+ * a hidden element's `getBoundingClientRect()` is **all zeros**. The placement maths then did
+ * exactly what it was told — `top = 0 + gap`, `left` clamped to the edge — and the dropdown opened
+ * in the top-left corner of the window. Every number was right; the rect was a lie.
+ *
+ * So: take the first anchor with a REAL box, and treat a zero rect as no anchor at all.
+ */
+export const visibleAnchorRect = (
+  rects: (AnchorRect & { width?: number; height?: number } | undefined | null)[],
+): (AnchorRect & { width: number; height: number }) | null => {
+  for (const r of rects) {
+    if (r && (r.width ?? 0) > 0 && (r.height ?? 0) > 0) {
+      return r as AnchorRect & { width: number; height: number };
+    }
+  }
+  return null;
+};

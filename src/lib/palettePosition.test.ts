@@ -9,9 +9,7 @@
  * The RENDERING is a browser check; "does it stay on screen at 320px" should not be.
  */
 import { describe, it, expect } from "vitest";
-import {
-  PALETTE_EDGE, PALETTE_GAP, PALETTE_MAX_LIST, PALETTE_MAX_W, palettePosition,
-} from "./palettePosition";
+import { PALETTE_EDGE, PALETTE_GAP, PALETTE_MAX_LIST, PALETTE_MAX_W, palettePosition, visibleAnchorRect } from "./palettePosition";
 
 /** A pill at the right of a roomy window — the ordinary case. */
 const pill = { left: 1100, right: 1310, bottom: 60 };
@@ -81,3 +79,39 @@ describe("short viewports — the list must not run off the bottom", () => {
     expect(b.maxListHeight).toBeGreaterThanOrEqual(0);
   });
 });
+
+/* ── ⚠️ THE BUG THAT SHIPPED: the maths was right, the rect was a lie ── */
+
+describe("visibleAnchorRect — a hidden opener is not an anchor", () => {
+  const real = { left: 900, right: 1110, bottom: 94, width: 210, height: 34 };
+  const hidden = { left: 0, right: 0, bottom: 0, width: 0, height: 0 }; // display:none → all zeros
+
+  it("takes the first anchor with a REAL box", () => {
+    expect(visibleAnchorRect([real, hidden])).toBe(real);
+  });
+
+  /* The live failure, exactly: the ref was wired to the MOBILE opener, which is display:none at
+     desktop. Its zero rect placed the dropdown at top = 0 + gap with left clamped to the edge —
+     the top-left corner of the window. Skipping it is the whole fix. */
+  it("SKIPS a zero rect and uses the one behind it", () => {
+    expect(visibleAnchorRect([hidden, real])).toBe(real);
+  });
+
+  it("returns null when nothing is on screen, so the caller can decline to place", () => {
+    expect(visibleAnchorRect([hidden, undefined, null])).toBeNull();
+    expect(visibleAnchorRect([])).toBeNull();
+  });
+
+  /* ⚠️ AND THE PROOF THAT THE ZERO RECT IS WHAT PRODUCED THE CORNER. Fed straight to the placer,
+     a hidden opener lands the dropdown at the viewport's top-left — which is what was reported. */
+  it("placing from a zero rect DOES land top-left — the behaviour this guard prevents", () => {
+    const bad = placeFromZero();
+    expect(bad.left).toBe(PALETTE_EDGE);
+    expect(bad.top).toBe(PALETTE_GAP);
+  });
+});
+
+/* a display:none element's DOMRect — every field zero, which is the shape that fooled the placer */
+function placeFromZero() {
+  return palettePosition({ left: 0, right: 0, bottom: 0 }, 1440, 900);
+}

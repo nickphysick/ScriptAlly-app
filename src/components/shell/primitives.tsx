@@ -123,15 +123,19 @@ export const MenuCardDivider: React.FC = () => <div className="sp-card-div" aria
 
 export interface SearchPillProps {
   onOpen: () => void;
+  /** ⚠️ THE PALETTE ANCHORS TO THIS NODE. Without it the dropdown falls back to the other (hidden)
+   *  opener, whose zero rect drags it to the top-left corner of the window. */
+  anchorRef?: React.Ref<HTMLButtonElement>;
   /** The workspace bar and the top-nav bar both draw it 210px; kept a prop for narrow bars. */
   width?: number;
   label?: string;
 }
 
 export const SearchPill: React.FC<SearchPillProps> = ({
-  onOpen, width = 210, label = "Search",
+  onOpen, width = 210, label = "Search", anchorRef,
 }) => (
   <button
+    ref={anchorRef}
     type="button"
     className="sp-search"
     style={{ width }}

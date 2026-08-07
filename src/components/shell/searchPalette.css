@@ -81,14 +81,14 @@
   font-size: 9px;
   letter-spacing: 0.17em;
   text-transform: uppercase;
-  color: var(--shell-quiet);
-  padding: 11px 12px 6px;
+  color: var(--shell-muted);
+  padding: 10px 10px 5px;
 }
 
 .sp-res {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   height: 44px;
   padding: 0 12px;
   border-radius: 9px;
@@ -98,16 +98,16 @@
    disagree with the keyboard about what Enter would open. */
 .sp-res.sel { background: var(--shell-inset); }
 
+/* ⚠️ ONE TILE, ONE COLOUR (palette restyle). The five per-kind tints are SUPERSEDED: a row's
+   kind is already said by its group heading and its words, and five pastel tiles made the list
+   read as five lists. Parchment ground, burgundy glyph, every row. */
 .sp-ic {
-  width: 30px; height: 30px; border-radius: 9px; flex: none;
+  width: 30px; height: 30px; border-radius: 8px; flex: none;
   display: grid; place-items: center;
+  background: var(--shell-parch);
+  color: var(--shell-burgundy);
 }
 .sp-ic svg { width: 15px; height: 15px; }
-.sp-ic.act { background: var(--pink); color: var(--burg); }
-.sp-ic.agent { background: #dce0d9; color: var(--sage-d); }
-.sp-ic.query { background: #f8ece6; color: var(--burg); }
-.sp-ic.page { background: var(--shell-inset); color: var(--shell-ink-soft); }
-.sp-ic.ms { background: #efe7db; color: #8a7358; }
 
 .sp-tx { flex: 1; min-width: 0; }
 .sp-t1 {
@@ -152,7 +152,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 18px;
+  padding: 9px 14px;
   flex: none;
   border-top: 1px solid var(--shell-line-soft);
   background: #fdfcfa;
@@ -215,3 +215,6 @@
 /* ⚠️ THE ILLUSTRATED SEARCH MARK (polish §2) — an OBJECT, so it is illustrated rather than
    monoline; 26px on `contain` so the artwork's own margins are respected rather than cropped. */
 .sp-in-mark { width: 26px; height: 26px; object-fit: contain; flex: none; display: block; }
+
+/* the footer's hint labels sit beside their key, quieter than it */
+.sp-foot span { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--shell-muted); }

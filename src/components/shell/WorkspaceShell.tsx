@@ -65,6 +65,8 @@ export interface WorkspaceShellProps {
   icons: Record<string, React.ReactNode>;
   onNavigatePath: (path: string) => void;
   onOpenSearch: () => void;
+  /** Attached to the desktop SearchPill so the palette can anchor to it. */
+  searchAnchorRef?: React.Ref<HTMLButtonElement>;
   onOpenHelp: () => void;
   onOpenAccount?: () => void;
   onUpgrade?: () => void;
@@ -105,7 +107,7 @@ export function msMeta(ms: { genre?: string; wordCount?: number }): string {
 }
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
-  sections, icons, onNavigatePath, onOpenSearch, onOpenHelp, onOpenAccount, onUpgrade,
+  sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenAccount, onUpgrade,
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
@@ -575,7 +577,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     "saved" is worse than one that says nothing. See lib/saveSignal. */}
                 <span className="ws-sync">{saveWhisper(save)}</span>
                 <span className="ws-vdiv" aria-hidden="true" />
-                <SearchPill onOpen={onOpenSearch} />
+                <SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} />
                 <HelpButton onOpen={onOpenHelp} />
                 <div className="ws-newwrap" ref={newRef}>
                   <button

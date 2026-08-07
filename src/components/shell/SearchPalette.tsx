@@ -21,7 +21,7 @@ import { invokeCapture } from "./railNav";
 import {
   GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, emptyStateItems, highlightParts,
 } from "../../lib/searchPalette";
-import { PaletteBox, palettePosition } from "../../lib/palettePosition";
+import { PaletteBox, palettePosition, visibleAnchorRect } from "../../lib/palettePosition";
 import searchMark from "../../assets/shell/search-icon.png";
 import "./searchPalette.css";
 
@@ -58,14 +58,20 @@ export interface SearchPaletteProps {
   /** Seeds the Agents page's list filter when an agent row is opened (existing behaviour). */
   setSearchQuery: (q: string) => void;
   /** Focus returns here on close — the control that opened it. */
+  /** The MOBILE bar's opener. */
   openerRef?: React.RefObject<HTMLElement | null>;
+  /** The DESKTOP pill. Only one of the two is ever on screen — the dropdown anchors to whichever
+   *  has a real rect, because a `display:none` opener measures as zeros and would drag the
+   *  dropdown to the top-left corner. */
+  desktopOpenerRef?: React.RefObject<HTMLElement | null>;
   /** The live search term, owned by the host so ⌘K can clear it on open. */
   term: string;
   setTerm: (t: string) => void;
 }
 
 export const SearchPalette: React.FC<SearchPaletteProps> = ({
-  open, onClose, onNavigate, onNavigatePath, items, setSearchQuery, openerRef, term, setTerm,
+  open, onClose, onNavigate, onNavigatePath, items, setSearchQuery, openerRef, desktopOpenerRef,
+  term, setTerm,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const palRef = useRef<HTMLDivElement>(null);
@@ -155,15 +161,29 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
      `.ws-card` (overflow:hidden). An absolutely-positioned dropdown — which is what a standalone
      mockup can get away with — would be CLIPPED by the card at exactly the moment it mattered.
      Portalling to the body takes it out of that stacking context; the position then has to be
-     computed rather than inherited, which is what `palettePosition` is for. */
+     computed rather than inherited, which is what `palettePosition` is for.
+
+     ⚠️⚠️ A HIDDEN OPENER IS NOT AN ANCHOR, AND THIS IS THE BUG THAT SHIPPED. There are TWO search
+     openers — the desktop pill in the workspace bar, and the mobile bar's button — and only one is
+     ever on screen. The ref was wired to the MOBILE one, which is `display:none` at desktop; a
+     hidden element's `getBoundingClientRect()` is all zeros, so the maths dutifully computed
+     `top = 0 + gap` and clamped `left` to the edge, and the dropdown opened at the top-left corner
+     of the window. Every number was right; the rect was a lie. So: measure the first anchor with a
+     REAL rect, and never trust a zero one. */
+  const anchorContains = useCallback(
+    (n: Node) => !!openerRef?.current?.contains(n) || !!desktopOpenerRef?.current?.contains(n),
+    [openerRef, desktopOpenerRef],
+  );
+
   const [box, setBox] = useState<PaletteBox | null>(null);
   useLayoutEffect(() => {
     if (!open) { setBox(null); return; }
     const measure = () => {
-      const el = openerRef?.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      setBox(palettePosition(r, window.innerWidth, window.innerHeight));
+      const rect = visibleAnchorRect(
+        [desktopOpenerRef, openerRef].map((ref) => ref?.current?.getBoundingClientRect()),
+      );
+      if (!rect) return;
+      setBox(palettePosition(rect, window.innerWidth, window.innerHeight));
     };
     measure();
     // Re-measured on resize AND on scroll: the anchor is inside a scrolling card, so a scroll
@@ -174,7 +194,7 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [open, openerRef]);
+  }, [open, openerRef, desktopOpenerRef]);
 
   /* Click-outside. ⚠️ THERE IS NO SCRIM ANY MORE, so the dropdown cannot rely on one swallowing
      the click — it listens for itself, and ignores clicks on the pill so the opener's own toggle
@@ -184,12 +204,12 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
     const onDown = (e: PointerEvent) => {
       const t = e.target as Node;
       if (palRef.current?.contains(t)) return;
-      if (openerRef?.current?.contains(t)) return;
+      if (anchorContains(t)) return;
       onClose();
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
-  }, [open, onClose, openerRef]);
+  }, [open, onClose, anchorContains]);
 
   if (!open || typeof document === "undefined") return null;
 
@@ -287,7 +307,10 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
         <div className="sp-foot">
           <span><i>↑</i><i>↓</i> Navigate</span>
           <span><i>↵</i> Open</span>
-          <span><i>⌘↵</i> Open in new</span>
+          {/* ⚠️ NO "⌘↵ Open in new" HINT. It was advertised and NEVER IMPLEMENTED — `Enter` has no
+              metaKey branch, so the chord did nothing. A hint for a key that does nothing is worse
+              than no hint: it teaches a gesture and then fails silently. Removed rather than
+              faked; if opening in a new tab ever lands, the hint comes back WITH it. */}
           <span className="sp-foot-end"><i>ESC</i> Close</span>
         </div>
       </div>

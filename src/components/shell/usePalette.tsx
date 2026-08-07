@@ -31,6 +31,8 @@ export interface UsePaletteInput {
 export interface PaletteHandle {
   openPalette: () => void;
   searchOpenerRef: React.RefObject<HTMLButtonElement | null>;
+  /** Attach to the DESKTOP search pill — see SearchPalette on why both exist. */
+  desktopSearchRef: React.RefObject<HTMLButtonElement | null>;
   /** Render this somewhere above the page tree. One instance serves every route. */
   palette: React.ReactElement;
 }
@@ -42,6 +44,7 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery }: UsePa
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
   const searchOpenerRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchRef = useRef<HTMLButtonElement>(null);
   const openPalette = useCallback(() => { setTerm(""); setOpen(true); }, []);
 
   /* THE CORPUS — built from already-loaded state (DbProvider subscribes on every route), so the
@@ -86,10 +89,11 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery }: UsePa
       items={items}
       setSearchQuery={setSearchQuery}
       openerRef={searchOpenerRef}
+      desktopOpenerRef={desktopSearchRef}
       term={term}
       setTerm={setTerm}
     />
   );
 
-  return { openPalette, searchOpenerRef, palette };
+  return { openPalette, searchOpenerRef, desktopSearchRef, palette };
 }
