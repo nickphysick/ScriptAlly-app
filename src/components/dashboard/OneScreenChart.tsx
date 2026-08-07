@@ -24,8 +24,9 @@ import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
-  awaitingChip, chartEvents, ChartEvent, LedgerRange, LedgerWeek, ledgerView, monotonePath,
-  rangeChip, weeklyLedger, yScale,
+  aggregateLedger, awaitingChip, bindEvents, chartEvents, ChartEvent, dailyLedger, DEFAULT_RANGE_DAYS,
+  defaultFreq, Freq, LedgerPoint, monotonePath, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
+  rangeWindow, stopForDays, yScale,
 } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
 
@@ -55,8 +56,10 @@ export const lineYAtX = (ys: number[], xLocal: number, W: number): number => {
   return ys[i0] + (ys[i0 + 1] - ys[i0]) * f;
 };
 
-/** §3: x labels thin automatically — every ceil(len/8)th, plus always the last. */
-export const xLabelEvery = (len: number): number => Math.ceil(len / 8);
+/** §3: x labels thin automatically — plus always the last. Daily dates are wider than "3 Aug"
+    week starts, so daily gets fewer of them. */
+export const xLabelEvery = (len: number, freq: Freq = "weekly"): number =>
+  Math.max(1, Math.ceil(len / (freq === "daily" ? 6 : 8)));
 
 /** The mockup's short stage names — display-only; the keys are the exact enum strings. */
 export const STAGE_SHORT: Partial<Record<QueryStatus, string>> = {
@@ -126,7 +129,11 @@ export const OneScreenChart: React.FC<{
   const lineRef = useRef<SVGPathElement>(null);
   const areaRef = useRef<SVGPathElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
-  const [range, setRange] = useState<LedgerRange>("8");
+  /* ⚠️ TWO INDEPENDENT CONTROLS: frequency is the GRAIN of a point, range is the WINDOW of days
+     on show. They compose — 8 weeks of daily points and 8 weeks of weekly points are the same
+     history at two resolutions. `freq` is null until the record decides the opening grain. */
+  const [freq, setFreq] = useState<Freq | null>(null);
+  const [rangeDays, setRangeDays] = useState<number>(DEFAULT_RANGE_DAYS);
   const [tableOn, setTableOn] = useState(false);
   const [reading, setReading] = useState(false);
   const [focusIdx, setFocusIdx] = useState(-1);
@@ -135,9 +142,14 @@ export const OneScreenChart: React.FC<{
   const [liveText, setLiveText] = useState("");
   const drewIn = useRef(false);
 
-  const ledger = useMemo(() => weeklyLedger(queries, now), [queries, now]);
-  const view = useMemo(() => ledgerView(ledger, range), [ledger, range]);
-  const active = ledger.length ? ledger[ledger.length - 1].active : 0;
+  const daily = useMemo(() => dailyLedger(queries, now), [queries, now]);
+  /* ⚠️ A NEW ACCOUNT OPENS ON DAILY — under a month of record makes a two-point weekly line,
+     which says nothing. Once chosen by hand, the choice stands. */
+  const openFreq = defaultFreq(daily);
+  const effFreq: Freq = freq ?? openFreq;
+  const ledger = useMemo(() => aggregateLedger(daily, effFreq), [daily, effFreq]);
+  const view = useMemo(() => rangeWindow(ledger, rangeDays), [ledger, rangeDays]);
+  const active = daily.length ? daily[daily.length - 1].active : 0;
   const shownActive = useCountUp(active);
   const stages = useMemo(() => activeStageBreakdown(queries), [queries]);
   const activeTotal = stages.reduce((a, r) => a + r.count, 0);
@@ -146,11 +158,11 @@ export const OneScreenChart: React.FC<{
     const a = agents.find((x) => x.id === q.agentId);
     return a?.name || a?.agency || "An agent";
   }, [agents]);
-  const events = useMemo(() => {
-    const map = new Map<number, ChartEvent>();
-    for (const e of chartEvents(queries, agentName)) if (!map.has(e.weekStart)) map.set(e.weekStart, e);
-    return map;
-  }, [queries, agentName]);
+  /* ⚠️ EVENTS LAND ON REAL DATES and a point carries a pin if it CONTAINS one — so the same
+     offer pins one day at daily grain and the week that holds it at weekly, without the event
+     itself knowing anything about periods. Rebinds whenever the view changes. */
+  const allEvents = useMemo(() => chartEvents(queries, agentName), [queries, agentName]);
+  const events = useMemo(() => bindEvents(view, allEvents), [view, allEvents]);
 
   /* §3: measured, and remeasured on resize. */
   useEffect(() => {
@@ -210,9 +222,9 @@ export const OneScreenChart: React.FC<{
     setTipAnchor({ left: r.left + chartX(i, W, view.length), top: r.top + chartY(view[i].active, H, lo, hi), width: 0, height: 0 });
     if (announce) {
       const w = view[i];
-      setLiveText(`Week of ${w.label}. ${w.active} active ${w.active === 1 ? "query" : "queries"}. ${w.sent} sent, ${w.closed} closed.`);
+      setLiveText(`${periodLabel(effFreq, w.label)}. ${w.active} active ${w.active === 1 ? "query" : "queries"}. ${w.sent} sent, ${w.closed} closed.`);
     }
-  }, [view, W, H, lo, hi]);
+  }, [view, W, H, lo, hi, effFreq]);
 
   const onMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (sparse || !svgRef.current || pinIdx !== null) return;
@@ -237,25 +249,44 @@ export const OneScreenChart: React.FC<{
     focusPoint(i, true);
   };
 
-  const setRangeAnd = (r: LedgerRange) => { setRange(r); blurPoint(); setPinIdx(null); };
+  /* every control change drops the focused point and any open pin — both index into a view that
+     is about to be a different length */
+  const resetRead = () => { blurPoint(); setPinIdx(null); };
+  const stop = stopForDays(rangeDays);
 
-  const every = xLabelEvery(view.length);
+  const every = xLabelEvery(view.length, effFreq);
   const lastIdx = view.length - 1;
-  const focusedWeek: LedgerWeek | null = focusIdx >= 0 ? view[focusIdx] : null;
-  const pinEvent = pinIdx !== null ? events.get(view[pinIdx]?.start.getTime() ?? -1) ?? null : null;
+  const focusedWeek: LedgerPoint | null = focusIdx >= 0 ? view[focusIdx] : null;
+  const pinEvent = pinIdx !== null ? events.get(pinIdx) ?? null : null;
 
   return (
     <div className={`os-card os-lift os-lead${loading ? " isload" : ""}`}>
       {loading && <Skel bars={["h", "grow", ""]} />}
       <div className="os-lh">
         <span className="os-ll">Active queries</span>
-        <div className="os-ranges" role="group" aria-label="Chart range">
-          {(["8", "26", "all"] as LedgerRange[]).map((r) => (
-            <button key={r} type="button" className={range === r ? "on" : undefined} onClick={() => setRangeAnd(r)}>
-              {r === "8" ? "8 weeks" : r === "26" ? "6 months" : "All"}
-            </button>
-          ))}
+        <div className="os-freqsel">
+          <select
+            aria-label="Chart frequency"
+            value={effFreq}
+            onChange={(e) => { setFreq(e.target.value as Freq); resetRead(); }}
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <span className="os-cv" aria-hidden="true">▾</span>
         </div>
+        {/* ⚠️ CONTINUOUS BUT SNAPPING: the thumb can only rest on a landmark, so every position
+            it can hold names a real span. The label is the control's value in words. */}
+        <div className="os-rangeslider">
+          <input
+            type="range" min={0} max={100} step={1} value={stop.p}
+            aria-label="Chart range"
+            aria-valuetext={stop.label}
+            onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
+          />
+        </div>
+        <span className="os-rangelbl">{stop.label}</span>
         {/* §3: the WCAG text alternative — a ledger, not a spreadsheet */}
         <button
           type="button"
@@ -291,7 +322,10 @@ export const OneScreenChart: React.FC<{
           </div>
         ) : sparse ? (
           <div className="os-sparse on">
-            <span>The line begins once you have queried in two separate weeks.</span>
+            {/* ⚠️ GRAIN-AWARE, because the grain decides when the second point arrives. The old
+                wording named weeks unconditionally and became false the moment the chart could
+                be read daily — at that grain the line begins the next day. */}
+            <span>The line begins once there are two {effFreq === "daily" ? "days" : effFreq === "weekly" ? "weeks" : "months"} on the record.</span>
           </div>
         ) : (
           <svg
@@ -302,7 +336,7 @@ export const OneScreenChart: React.FC<{
             viewBox={W && H ? `0 0 ${W} ${H}` : undefined}
             tabIndex={0}
             role="img"
-            aria-label="Active queries over time. Use the arrow keys to step through each week."
+            aria-label="Active queries over time. Use the arrow keys to step through each point."
             onMouseMove={onMove}
             onMouseLeave={() => { setReading(false); blurPoint(); setPinIdx(null); }}
             onKeyDown={onKey}
@@ -324,7 +358,7 @@ export const OneScreenChart: React.FC<{
                 <path ref={lineRef} d={path} fill="none" stroke="#8a9e88" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
                 {/* event pins — 20px above the line, priority over the crosshair (§3) */}
                 {view.map((w, i) => {
-                  const ev = events.get(w.start.getTime());
+                  const ev = events.get(i);
                   if (!ev) return null;
                   const x = chartX(i, W, view.length), y = chartY(w.active, H, lo, hi);
                   return (
@@ -347,8 +381,16 @@ export const OneScreenChart: React.FC<{
                     </g>
                   );
                 })}
-                {/* resting dot on the latest point */}
-                <circle cx={chartX(lastIdx, W, view.length)} cy={chartY(view[lastIdx].active, H, lo, hi)} r={4} fill="#fdfaf5" stroke="#8a9e88" strokeWidth={2} />
+                {/* ⚠️ A NODE AT EVERY POINT — the line alone hides how many readings it is drawn
+                    from, and at daily grain that is the difference between a trend and a guess.
+                    The latest sits bigger, as the resting mark. */}
+                {pts.map(([x, y], i) => (
+                  <circle
+                    key={i} cx={x.toFixed(1)} cy={y.toFixed(1)}
+                    r={i === lastIdx ? 4 : 2.6} fill="#fdfaf5" stroke="#8a9e88"
+                    strokeWidth={i === lastIdx ? 2 : 1.6}
+                  />
+                ))}
                 {/* crosshair + black node while a week is focused */}
                 {focusIdx >= 0 && (
                   <>
@@ -365,12 +407,12 @@ export const OneScreenChart: React.FC<{
         <div className={`os-dtable${tableOn ? " on" : ""}`}>
           <table>
             <thead>
-              <tr><th>Week</th><th>Active</th><th>Sent</th><th>Closed</th><th>Net</th><th aria-hidden="true" /></tr>
+              <tr><th>{effFreq === "monthly" ? "Month" : effFreq === "weekly" ? "Week" : "Day"}</th><th>Active</th><th>Sent</th><th>Closed</th><th>Net</th><th aria-hidden="true" /></tr>
             </thead>
             <tbody>
               {view.map((w, i) => {
                 const net = w.sent - w.closed;
-                const ev = events.get(w.start.getTime());
+                const ev = events.get(i);
                 const num = (v: number) => <td className={`num${v === 0 ? " zero" : ""}`}>{v === 0 ? "—" : v}</td>;
                 return (
                   <tr key={w.start.toISOString()} className={i === lastIdx ? "now" : undefined}>
@@ -408,7 +450,7 @@ export const OneScreenChart: React.FC<{
           </div>
         ) : focusedWeek ? (
           <div className="frame">
-            <div className="fhdr"><span className="wkl">Week of {focusedWeek.label}</span><span className="big">{focusedWeek.active}</span></div>
+            <div className="fhdr"><span className="wkl">{periodLabel(effFreq, focusedWeek.label)}</span><span className="big">{focusedWeek.active}</span></div>
             <div className="fbd">
               <div className="flowrow">
                 <div className="fc"><div className="fv">{focusedWeek.sent}</div><div className="fl">Sent</div></div>

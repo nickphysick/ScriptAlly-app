@@ -71,29 +71,51 @@ describe("the chart card's structure", () => {
     const html = render(twoWeeks);
     expect(html).toContain('tabindex="0"');
     expect(html).toContain('role="img"');
-    expect(html).toContain("Use the arrow keys to step through each week.");
+    expect(html).toContain("Use the arrow keys to step through each point.");
     expect(html).toContain('aria-live="polite"');
   });
 
-  it("the range toggle is a group of three; the numbers toggle carries aria-pressed", () => {
+  /* ⚠️ THE THREE-PILL RANGE GROUP IS RETIRED (v16 §3) — it spent a pill per range and left no
+     room to say anything about GRAIN. Two controls now: a select for grain, a slider for span. */
+  it("frequency is a select of three; range is a snapping slider that states its value", () => {
     const html = render(twoWeeks);
+    expect(html).toContain('aria-label="Chart frequency"');
+    for (const f of ["Daily", "Weekly", "Monthly"]) expect(html).toContain(`>${f}</option>`);
+    expect(html).toContain('type="range"');
     expect(html).toContain('aria-label="Chart range"');
-    expect(html).toContain("8 weeks");
-    expect(html).toContain("6 months");
-    expect(html).toContain('aria-pressed="false"');
+    expect(html).toContain('aria-valuetext="Last 8 weeks"'); // the label is the value, spoken
+    expect(html).toContain("Last 8 weeks");
+    expect(html).toContain('aria-pressed="false"');          // the numbers toggle
+    /* ⚠️ anchor the class, not the stem — "os-rangeslider" contains "os-ranges" and a bare
+       substring check passes for the wrong reason (it did, on the first run of this very case) */
+    expect(html).not.toContain('class="os-ranges"');
   });
 
   it("the ledger table exists with the spec's columns, zeroes as em dashes", () => {
     const html = render(twoWeeks);
-    for (const h of ["Week", "Active", "Sent", "Closed", "Net"]) expect(html).toContain(`<th>${h}</th>`);
+    /* ⚠️ THE FIRST COLUMN NAMES THE GRAIN ON SHOW. This fixture is 11 days old, so the chart
+       opens DAILY and the column is "Day" — calling it "Week" would be the table disagreeing
+       with the rows underneath it. */
+    for (const h of ["Day", "Active", "Sent", "Closed", "Net"]) expect(html).toContain(`<th>${h}</th>`);
     expect(html).toContain("—"); // a quiet cell is a dash, never a zero
   });
 
-  it("sparse (<2 weeks) shows the line-begins message and no CHART svg", () => {
+  it("a long record opens WEEKLY, and the column says so", () => {
+    const html = render([q({ dateSent: daysAgo(120) }), q({ dateSent: daysAgo(2) })]);
+    expect(html).toContain("<th>Week</th>");
+    expect(html).toContain('value="weekly"'); // the select agrees with the table
+  });
+
+  it("sparse (a single point) shows the line-begins message and no CHART svg", () => {
     /* the header's table-toggle icon is also an svg — the assertion targets the chart's role=img,
        not the tag name, or it fails on furniture that is meant to stay */
-    const html = render([q({ dateSent: daysAgo(1) })]);
-    expect(html).toContain("The line begins once you have queried in two separate weeks.");
+    /* ⚠️ ONE DAY ON THE RECORD is now the only sparse case. Sent-yesterday gives TWO daily
+       points and a real (flat) line — which is the honest picture, and better than telling
+       someone with data on the board to come back later. */
+    const html = render([q({ dateSent: daysAgo(0) })]);
+    /* ⚠️ the message names the GRAIN — at daily the second point arrives the next day, so the
+       old unconditional "two separate weeks" was simply false there */
+    expect(html).toMatch(/The line begins once there are two (days|weeks|months) on the record\./);
     expect(html).not.toContain('role="img"');
   });
 

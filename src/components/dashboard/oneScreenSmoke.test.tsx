@@ -152,9 +152,9 @@ describe("§6 trap · the entrance animation is scoped to .enter", () => {
 });
 
 describe("the sparse chart state and the tasks empty state (shells)", () => {
-  it("under two ledger weeks the chart says how the line begins", () => {
-    const html = render({ queries: [q({ dateSent: daysAgo(1) })] });
-    expect(html).toContain("The line begins once you have queried in two separate weeks.");
+  it("a single point on the record: the chart says how the line begins", () => {
+    const html = render({ queries: [q({ dateSent: daysAgo(0) })] });
+    expect(html).toContain("The line begins once there are two days on the record.");
   });
 
   it("no tasks → the italic empty line, and the header says Nothing needs you", () => {

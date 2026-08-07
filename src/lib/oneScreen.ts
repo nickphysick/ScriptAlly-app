@@ -34,27 +34,38 @@ const closedAt = (q: Query): number | null => {
   return parseWhen(q.lastStatusChange) ?? parseWhen(q.responseReceivedAt) ?? parseWhen(q.dateSent);
 };
 
-/* ══════════════════════════ §3 · THE WEEKLY LEDGER ══════════════════════════ */
+/* ══════════════════════════ §3 · THE LEDGER ══════════════════════════ */
 
-export interface LedgerWeek {
-  /** Monday of the ISO week, local midnight. */
+export type Freq = "daily" | "weekly" | "monthly";
+
+export interface LedgerPoint {
+  /** First instant the period covers. */
   start: Date;
-  /** "3 Aug" */
+  /** Last instant it covers — where the closing position is read, and what a pin falls inside. */
+  end: Date;
+  /** "7 Aug" (daily / weekly Monday) · "Aug 26" (monthly). */
   label: string;
-  /** Active at the END of the week (the last week samples at `now`). */
+  /** ⚠️ A STOCK: active at the period's CLOSE. Never summed across periods. */
   active: number;
+  /** ⚠️ FLOWS: summed across the period. */
   sent: number;
   closed: number;
 }
 
+const dayStart = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const dayEnd = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+
 /**
- * The full weekly history, first-send week → current week.
+ * ⚠️ THE DAILY ROW IS THE SOURCE OF TRUTH (§3) and every other frequency is aggregated FROM it —
+ * weekly and monthly are never derived from the queries a second time. One pass over the data,
+ * three views of it, so the three can never disagree about a day they all contain.
  *
- * ⚠️ IT RECONCILES BY CONSTRUCTION (§3): active is cumulative sent minus cumulative closed
- * sampled at week end, so `active[i] − active[i−1] === sent[i] − closed[i]` is an identity, not a
- * hope. The chart's deltas and the Net column are the same numbers read twice.
+ * ⚠️ IT RECONCILES BY CONSTRUCTION: active is cumulative sent minus cumulative closed read at the
+ * period's close, so `active[i] − active[i−1] === sent[i] − closed[i]` is an identity at EVERY
+ * frequency (the periods tile the timeline with no gaps, which is what makes the identity hold
+ * through aggregation). Locked at all three.
  */
-export const weeklyLedger = (queries: Query[], now: Date): LedgerWeek[] => {
+export const dailyLedger = (queries: Query[], now: Date): LedgerPoint[] => {
   const sends: number[] = [];
   const closes: number[] = [];
   for (const q of queries) {
@@ -66,37 +77,104 @@ export const weeklyLedger = (queries: Query[], now: Date): LedgerWeek[] => {
   }
   if (sends.length === 0) return [];
 
-  const first = isoWeekStart(new Date(Math.min(...sends)));
-  const current = isoWeekStart(now);
-  const bins = Math.round((current.getTime() - first.getTime()) / WEEK_MS) + 1;
+  const first = dayStart(new Date(Math.min(...sends)));
+  const last = dayStart(now);
+  const days = Math.round((last.getTime() - first.getTime()) / DAY_MS) + 1;
 
-  const out: LedgerWeek[] = [];
+  const out: LedgerPoint[] = [];
   let cumSent = 0, cumClosed = 0;
-  for (let i = 0; i < bins; i++) {
-    const start = new Date(first.getTime() + i * WEEK_MS);
-    const end = i === bins - 1 ? now.getTime() : start.getTime() + WEEK_MS - 1;
-    const from = start.getTime();
-    const sent = sends.filter((t) => t >= from && t <= end).length;
-    const closed = closes.filter((t) => t >= from && t <= end).length;
+  for (let i = 0; i < days; i++) {
+    const start = new Date(first.getFullYear(), first.getMonth(), first.getDate() + i);
+    const end = dayEnd(start);
+    const from = start.getTime(), to = end.getTime();
+    const sent = sends.filter((t) => t >= from && t <= to).length;
+    const closed = closes.filter((t) => t >= from && t <= to).length;
     cumSent += sent; cumClosed += closed;
+    out.push({ start, end, label: `${start.getDate()} ${MONTHS[start.getMonth()]}`, active: cumSent - cumClosed, sent, closed });
+  }
+  return out;
+};
+
+/**
+ * Roll the daily rows up. ⚠️ THE TWO KINDS OF NUMBER ROLL UP DIFFERENTLY: sent and closed are
+ * flows and SUM; active is a stock and takes the period's CLOSING value. Summing active would
+ * report a 3-query month as 90.
+ */
+export const aggregateLedger = (daily: LedgerPoint[], freq: Freq): LedgerPoint[] => {
+  if (freq === "daily" || daily.length === 0) return daily;
+  const keyOf = (d: Date) => freq === "weekly"
+    ? isoWeekStart(d).getTime()
+    : new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+
+  const out: LedgerPoint[] = [];
+  for (const row of daily) {
+    const k = keyOf(row.start);
+    const open = out[out.length - 1];
+    if (open && keyOf(open.start).valueOf() === k) {
+      open.sent += row.sent;
+      open.closed += row.closed;
+      open.active = row.active; // the closing position, rewritten as the period advances
+      open.end = row.end;
+      continue;
+    }
+    const bucketStart = new Date(k);
     out.push({
-      start,
-      label: `${start.getDate()} ${MONTHS[start.getMonth()]}`,
-      active: cumSent - cumClosed,
-      sent,
-      closed,
+      start: bucketStart,
+      end: row.end,
+      label: freq === "weekly"
+        ? `${bucketStart.getDate()} ${MONTHS[bucketStart.getMonth()]}`
+        : `${MONTHS[bucketStart.getMonth()]} ${String(bucketStart.getFullYear()).slice(2)}`,
+      active: row.active, sent: row.sent, closed: row.closed,
     });
   }
   return out;
 };
 
-/** The view for a range: 8 weeks, 26 weeks (6 months), or everything. */
-export type LedgerRange = "8" | "26" | "all";
-export const ledgerView = (ledger: LedgerWeek[], range: LedgerRange): LedgerWeek[] =>
-  range === "all" ? ledger : ledger.slice(-parseInt(range, 10));
+/** How each frequency names one of its periods in prose. */
+export const periodLabel = (freq: Freq, label: string): string =>
+  freq === "weekly" ? `Week of ${label}` : label;
+
+/**
+ * ⚠️ THE RANGE IS A WINDOW OF DAYS, NOT A COUNT OF POINTS (§3) — which is precisely why range and
+ * frequency are two independent controls. "Last 8 weeks" is the same 56 days of history whether
+ * it is drawn as 56 daily points or 8 weekly ones; slicing N points instead would make the range
+ * mean something different at each frequency.
+ */
+export interface RangeStop { p: number; days: number; label: string }
+export const RANGE_STOPS: RangeStop[] = [
+  { p: 0, days: 14, label: "Last 2 weeks" },
+  { p: 14, days: 30, label: "Last month" },
+  { p: 34, days: 56, label: "Last 8 weeks" },
+  { p: 52, days: 91, label: "Last 3 months" },
+  { p: 70, days: 182, label: "Last 6 months" },
+  { p: 86, days: 365, label: "Last year" },
+  { p: 100, days: 0, label: "Everything" }, // 0 = no cutoff
+];
+export const DEFAULT_RANGE_DAYS = 56;
+
+/** The slider is continuous but SNAPS, so every position it can rest at means something. */
+export const nearestStop = (v: number): RangeStop =>
+  RANGE_STOPS.reduce((a, b) => (Math.abs(b.p - v) < Math.abs(a.p - v) ? b : a));
+export const stopForDays = (days: number): RangeStop =>
+  RANGE_STOPS.find((s) => s.days === days) ?? RANGE_STOPS[2];
+
+export const rangeWindow = (rows: LedgerPoint[], days: number): LedgerPoint[] => {
+  if (days <= 0 || rows.length === 0) return rows;
+  const cutoff = rows[rows.length - 1].end.getTime() - days * DAY_MS;
+  const win = rows.filter((r) => r.end.getTime() >= cutoff);
+  return win.length >= 2 ? win : rows.slice(-2); // a line needs two points
+};
+
+/**
+ * ⚠️ A NEW ACCOUNT OPENS ON DAILY. Under a month of history makes one or two weekly points, and
+ * a two-point line says nothing at all — the grain has to match the record.
+ */
+export const DAILY_UNTIL_DAYS = 28;
+export const defaultFreq = (daily: LedgerPoint[]): Freq =>
+  daily.length < DAILY_UNTIL_DAYS ? "daily" : "weekly";
 
 /** The headline chip: the range's first-to-last movement, in words at zero. */
-export const rangeChip = (view: LedgerWeek[]): string => {
+export const rangeChip = (view: LedgerPoint[]): string => {
   if (view.length < 2) return "";
   const diff = view[view.length - 1].active - view[0].active;
   if (diff > 0) return `↑ +${diff} over this range`;
@@ -162,8 +240,9 @@ export const monotonePath = (p: [number, number][]): string => {
 /* ══════════════════════════ §3 · EVENT PINS ══════════════════════════ */
 
 export interface ChartEvent {
-  /** Key into the ledger by week-start time. */
-  weekStart: number;
+  /** ⚠️ THE REAL MOMENT IT HAPPENED — not a period key. Which point carries the pin depends on
+      the frequency being drawn, so binding is the VIEW's job (`bindEvents`), never the event's. */
+  on: number;
   kind: "First request" | "First full" | "Offer";
   /** "<b>…</b>"-free plain text — the card renders the name bold itself. */
   who: string;
@@ -179,7 +258,6 @@ export const chartEvents = (
   agentName: (q: Query) => string,
 ): ChartEvent[] => {
   const out: ChartEvent[] = [];
-  const wk = (t: number) => isoWeekStart(new Date(t)).getTime();
 
   let firstReq: { t: number; q: Query } | null = null;
   let firstFull: { t: number; q: Query } | null = null;
@@ -193,19 +271,33 @@ export const chartEvents = (
      "your first full" is the stronger statement of the two. */
   if (firstReq && (!firstFull || firstReq.t < firstFull.t)) {
     const name = agentName(firstReq.q);
-    out.push({ weekStart: wk(firstReq.t), kind: "First request", who: name, text: "asked for pages — the first anyone had." });
+    out.push({ on: firstReq.t, kind: "First request", who: name, text: "asked for pages — the first anyone had." });
   }
   if (firstFull) {
     const name = agentName(firstFull.q);
-    out.push({ weekStart: wk(firstFull.t), kind: "First full", who: name, text: "asked for the full manuscript — your first." });
+    out.push({ on: firstFull.t, kind: "First full", who: name, text: "asked for the full manuscript — your first." });
   }
   for (const q of queries) {
     if (q.status !== QueryStatus.OFFER) continue;
     const t = parseWhen(q.lastStatusChange) ?? parseWhen(q.responseReceivedAt);
     if (t === null) continue;
-    out.push({ weekStart: wk(t), kind: "Offer", who: agentName(q), text: "made an offer of representation." });
+    out.push({ on: t, kind: "Offer", who: agentName(q), text: "made an offer of representation." });
   }
   return out;
+};
+
+/**
+ * Bind events to the points that CONTAIN them — one pin per point, earliest wins. Events outside
+ * the window simply do not appear; they are not clamped to the edge, which would put a pin on a
+ * date it did not happen.
+ */
+export const bindEvents = (view: LedgerPoint[], events: ChartEvent[]): Map<number, ChartEvent> => {
+  const map = new Map<number, ChartEvent>();
+  for (const e of [...events].sort((a, b) => a.on - b.on)) {
+    const i = view.findIndex((r) => e.on >= r.start.getTime() && e.on <= r.end.getTime());
+    if (i >= 0 && !map.has(i)) map.set(i, e);
+  }
+  return map;
 };
 
 /* ══════════════════════════ §2 · GREETING FACTS ══════════════════════════ */
