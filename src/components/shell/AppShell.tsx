@@ -372,6 +372,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
           a nav change never means editing the shell. */}
       <WorkspaceShell
+        /* Query Centre is a fixed-viewport workspace: it fills the sheet and scrolls internally,
+           so the work wrapper takes a definite height rather than growing. Every other route
+           keeps the growing wrapper the sticky frosted bar depends on. */
+        fit={routeKey === "queries"}
         sections={sections}
         icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}

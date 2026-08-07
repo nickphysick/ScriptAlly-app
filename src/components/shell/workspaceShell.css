@@ -631,6 +631,14 @@
    being squeezed to fit — with shrink allowed it would compress instead of overflowing, and the
    card would never scroll at all. `basis:auto` keeps content height as the starting point. */
 .ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: #ffffff; }
+/* ⚠️ FIXED-VIEWPORT OPT-IN (Query Centre) — and `min-height: 0` ALONE DOES NOTHING HERE.
+   The blocker on the base rule is `flex-shrink: 0` (the `0` in `flex: 1 0 auto`): the wrapper can
+   never shrink below its content, so min-height is never consulted. Measured at a 720px viewport
+   with a tall page: as-built 2345px, and 2345px again with min-height:0 added — the shell scrolled
+   both times and the page's own regions never did. Only a definite basis fixes it (634px, page
+   scroll gone, rows and columns scrolling as intended). So do NOT "simplify" this to min-height:0;
+   that silently restores the page scroll this exists to remove. */
+.ws-work--fit { flex: 1 1 0; min-height: 0; }
 
 /* ══ BELOW md — MOBILE PASS 1 IS LEFT EXACTLY AS IT IS ══
    Both mockups are desktop-only and the phone has a shipped, locked chrome, so this shell is a

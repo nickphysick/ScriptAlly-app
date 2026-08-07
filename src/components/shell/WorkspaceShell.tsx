@@ -78,6 +78,12 @@ export interface WorkspaceShellProps {
   onScroll?: React.UIEventHandler<HTMLDivElement>;
   /** Rendered inside the scroller, after the content — the foot fade. */
   footFade?: React.ReactNode;
+  /**
+   * FIXED-VIEWPORT pages (Query Centre): the work wrapper takes a definite height so the page
+   * fills it exactly and scrolls internally, instead of growing the sheet. Default false — every
+   * other page keeps the growing wrapper the sticky frosted bar depends on. See .ws-work--fit.
+   */
+  fit?: boolean;
   /** The shared AccountMenu, rendered by the host so one component serves both shells. */
   accountMenu?: React.ReactNode;
   children: React.ReactNode;
@@ -99,7 +105,7 @@ export function msMeta(ms: { genre?: string; wordCount?: number }): string {
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, onOpenHelp, onOpenAccount, onUpgrade,
-  onNavigate, scrollId, scrollRef, onScroll, footFade, accountMenu, children,
+  onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
   const { manuscripts, currentUser } = useScriptAllyDb();
@@ -608,7 +614,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 </div>
               </div>
             </header>
-            <div className="ws-work">{children}</div>
+            <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>{children}</div>
             {footFade}
           </div>
         </div>
