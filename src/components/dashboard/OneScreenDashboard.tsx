@@ -195,9 +195,9 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               row and the page would grow past the fold. */}
           <div className="os-midrow">
             <OneScreenAuthor
-              loading={loading} queries={queries} manuscripts={manuscripts}
+              loading={loading} manuscripts={manuscripts}
               currentUser={currentUser} activeManuscript={activeManuscript}
-              onNavigate={onNavigate} now={now}
+              onNavigate={onNavigate}
             />
             <OneScreenChart
               loading={loading} queries={queries} agents={agents} now={now}

@@ -17,7 +17,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
-import { weekOfQuerying } from "../../lib/dashboardStats";
 import { GOAL_BLOCKS, goalBlocksFilled, GoalPeriod, goalState } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
 
