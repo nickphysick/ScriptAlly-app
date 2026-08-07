@@ -88,16 +88,17 @@ describe("the handlers are the SAME ones — relocation, not rewire", () => {
     expect(queries).toContain("const ready = createDraft ? draftReady(createDraft) : false;");
   });
 
-  /* SUPERSEDED (Query Centre P3): the bar moved inside the reading pane, and the pane is itself
-     lit — so the buttons' own z-raise became dead weight and was REMOVED rather than left in
-     place. Verified in the browser: both render above the scrim at zIndex:auto, carried by the
-     pane's lift. What matters now is that no dead raising crept back. */
-  it("the buttons no longer carry their own raise — the lit pane carries them", () => {
-    // Comments stripped: the bar carries a comment SAYING "No qh-lit", and an assertion about
-    // the code must not be able to match prose about the code.
+  /* SUPERSEDED TWICE, and the second time removed the subject. Query Centre P3 moved the bar
+     into the reading pane, so the buttons' own z-raise became dead weight carried by the lit
+     pane. Create-mode v2 Phase 1 then deleted the scrim entirely — create mode focuses by
+     collapsing the list to a rail, not by dimming the page — so there is nothing to be raised
+     above at all. The assertion survives as the simplest form of itself: no raise, anywhere. */
+  it("no z-raise anywhere — the scrim it ranked against is gone", () => {
+    // Comments stripped: an assertion about the code must not be able to match prose about it.
     const code = bar().replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(code).not.toContain("qh-lit");
-    expect(queries, "a dead raise came back").not.toContain("f12-btn-pri qh-lit");
+    expect(code).not.toContain("z-index");
+    expect(queries, "a dead raise came back").not.toContain("qh-lit");
   });
 });
 

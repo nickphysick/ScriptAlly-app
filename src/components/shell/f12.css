@@ -234,7 +234,7 @@
 
 /* ── CREATE-MODE COMMAND BAR (ref qdb-focus-spotlight.html) — the record actions are replaced
    by this while a draft is open. Same .f12-ctl seat, so the bar neither moves nor changes height
-   as it swaps. The two buttons carry qh-lit and stay above the scrim. */
+   as it swaps. (Phase 3 of create-mode v2 retires this bar for the illustrated header.) */
 .f12-ctl-create { align-items: center; gap: 12px; }  /* same pane seat — the takeover swaps the row's contents, not its box */
 .qcb-ctx { display: inline-flex; align-items: center; gap: 9px; flex: none; font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); }
 .qcb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; }
@@ -246,29 +246,6 @@
 .f12-ctl-create .f12-btn-sec, .f12-ctl-create .f12-btn-pri { flex: none; white-space: nowrap; }
 @media (max-width: 1100px) { .qcb-req { display: none; } }
 
-/* ── FOCUS MODE — THE SCRIM (ref design-refs/qdb-focus-spotlight.html) ──────────────────
-   SUPERSEDES the per-surface dim (.qh-dim opacity/brightness) and the darkened ground
-   (--qh-focus-ground). Both are deleted, not layered under this.
-
-   ⚠️ The scrim is a child of .f12-root, NOT portalled to <body>. On route entry the stage slot
-   runs `pageIn`, which animates transform+opacity for 180ms — and for that window the slot is a
-   stacking context AND the containing block for position:fixed. Arriving from the rail's
-   "+ Query" opens create mode inside exactly that window, so a body-level scrim would paint OVER
-   the lit pane (which would be trapped in the slot's context) at the one moment it's most
-   visible. Keeping both in the same context makes the z-order true at all times; the cost is
-   that for ≤180ms the scrim covers the stage but not the rail, then reaches full viewport.
-
-   pointer-events:none is load-bearing: the darkened list stays fully clickable, so clicking
-   another row still runs the click-away/discard-confirm path. */
-.qh-scrim { position: fixed; inset: 0; background: var(--qh-scrim); opacity: 0; pointer-events: none; transition: opacity 0.24s ease; z-index: 50; }
-.qh-focus .qh-scrim { opacity: 1; }
-
-/* The three lit things. No ancestor between the page root and any of them creates a stacking
-   context (audited: the stage is position:relative with z-index:auto, which does not), so a
-   plain raise is enough — no ancestor was adjusted and no shared shell file was touched. */
-.qh-focus .qh-lit { position: relative; z-index: 60; }
-
-@media (prefers-reduced-motion: reduce) { .qh-scrim { transition: none; } }
 
 
 /* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
@@ -734,9 +711,6 @@
   /* touch rule: the note actions are hover-revealed on desktop and unreachable by tap — always
      visible below md (out-specifies the pane's inline <style> rule) */
   .f12-root .qp-note .qp-noteacts { opacity: 1; }
-
-  /* the create-mode focus scrim is desktop spotlight furniture */
-  .f12-root .qh-scrim { display: none; }
 
   /* THE COMMAND BAR — the hub's settled espresso container, condensed (concept frame 03).
      Espresso = the F12 sheet's own --ink; the primary inside stays the soft-pink .f12-btn-pri

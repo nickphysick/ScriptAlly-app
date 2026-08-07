@@ -2119,10 +2119,7 @@ export const Queries: React.FC<{
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-focus" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
-      {/* The focus scrim. Always mounted, opacity-toggled by `qh-focus`, so it fades BOTH ways
-          from one CSS transition rather than needing a mount frame. */}
-      <div className="qh-scrim" aria-hidden="true" />
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -2852,11 +2849,7 @@ export const Queries: React.FC<{
                 return (
                   <div
                     ref={draftRowRef}
-                    /* qh-lit goes on the ROW, never on anything inside it: the row animates its
-                       own opacity 0→1 on open, and opacity < 1 makes it a stacking context — so a
-                       z-index on a child would be trapped inside the row and never clear the
-                       scrim. Raise the whole row or nothing. */
-                    className={`f12-row f12-draft qh-lit${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
+                    className={`f12-row f12-draft${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
                     aria-label="New query draft"
                     // The collapse finishing is what clears the draft — so its contents are reset
                     // only once the row has gone, never visibly blanked in place.
@@ -2954,7 +2947,7 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className={`qp-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
+          <div className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
                here put a bordered, shadowed card around all of them — a card inside the frame,
@@ -2993,8 +2986,6 @@ export const Queries: React.FC<{
                     </span>
                     <span style={{ flex: 1 }} />
                     <span className="qcb-esc">Esc to cancel</span>
-                    {/* No qh-lit: these sit INSIDE the pane, which is itself lit, so a second raise was dead
-                    weight the moment the toolbar moved in here. */}
                 <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
                     <button type="button" className="f12-btn-pri" onClick={saveCreate} disabled={!ready || createSaving}>
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>

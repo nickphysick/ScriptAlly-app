@@ -25,7 +25,7 @@ const rule = (selector: string): string => {
 
 describe("the toolbar is a pane row now", () => {
   it("it renders INSIDE the reading pane, not in the page column", () => {
-    const pane = code.indexOf("qp-pane f12-detail qh-lit");
+    const pane = code.indexOf("qp-pane f12-detail ");
     const bar = code.indexOf('className="f12-ctl', pane);
     const body = code.indexOf('className="f12-body"');
     expect(pane, "the pane is missing").toBeGreaterThan(-1);
@@ -47,43 +47,51 @@ describe("the toolbar is a pane row now", () => {
 });
 
 describe("the redundant raises are gone", () => {
-  /* Cancel and Save sit inside the pane now, and the pane is itself lit — so their own
-     z-raise became dead weight the moment the toolbar moved in. Verified in the browser:
-     both render above the scrim with zIndex:auto, carried by the pane's lift. */
-  it("Cancel and Save no longer carry qh-lit", () => {
+  /* ⚠️ AMENDED (create-mode v2, Phase 1): this used to assert that Cancel and Save carry NO
+     qh-lit while the pane and the draft row do — a live distinction while a scrim existed to
+     rank things against. The scrim is gone, so the assertion becomes the stronger and simpler
+     one: NOTHING carries a raise, because there is nothing left to be raised above. */
+  it("no z-raise survives anywhere — the scrim it existed for is gone", () => {
     expect(code).toContain('className="f12-btn-sec" onClick={() => closeCreate()}');
     expect(code).toContain('className="f12-btn-pri" onClick={saveCreate}');
-    expect(code, "a dead raise was left in place").not.toContain("f12-btn-sec qh-lit");
-    expect(code, "a dead raise was left in place").not.toContain("f12-btn-pri qh-lit");
-  });
-
-  it("exactly two things still carry it: the pane and the draft row", () => {
-    expect(code.match(/qh-lit/g)?.length ?? 0).toBe(2);
+    expect(code, "a raise outlived the scrim").not.toContain("qh-lit");
+    expect(code, "the scrim element outlived its system").not.toContain("qh-scrim");
+    expect(code, "the focus class outlived its system").not.toContain("qh-focus");
   });
 });
 
-describe("the scrim survives the new frame (audit, not assumption)", () => {
-  it("no ancestor of a lit element creates a stacking context", () => {
-    const CREATORS = ["transform:", "filter:", "will-change:", "z-index:", "contain:", "isolation:", "backdrop-filter:"];
-    for (const sel of [".f12-root", ".f12-body", ".f12-list", ".f12-pane", ".f12-detail", ".f12-rows", ".f12-ctl"]) {
-      const r = rule(sel);
-      for (const c of CREATORS) {
-        expect(r, `${sel} creates a stacking context (${c}) — it would trap the lit elements`).not.toContain(c);
-      }
-    }
+describe("the scrim system is gone, and stays gone", () => {
+  /* A deletion this wide needs a lock, or it comes back one rule at a time. The three names and
+     the token are asserted absent from BOTH stylesheets and the page — anywhere a fragment could
+     survive and quietly do nothing (or, worse, quietly do something). */
+  const indexCss = readFileSync(new URL("../index.css", import.meta.url), "utf8");
+  for (const name of ["qh-scrim", "qh-focus", "qh-lit"]) {
+    it(`.${name} is absent from the page and both stylesheets`, () => {
+      expect(code, `${name} survives in Queries.tsx`).not.toContain(name);
+      expect(css, `${name} survives in f12.css`).not.toContain(name);
+      expect(indexCss, `${name} survives in index.css`).not.toContain(name);
+    });
+  }
+
+  it("the --qh-scrim token went with it — an unread token is a landmine, not a spare", () => {
+    expect(indexCss).not.toContain("--qh-scrim");
   });
 
-  it("the scrim's mount is unchanged — still a child of the page root, still not portalled", () => {
-    expect(code).toContain('<div className="qh-scrim" aria-hidden="true" />');
-    const root = code.indexOf("t-f12 f12-root");
-    const scrim = code.indexOf('className="qh-scrim"');
-    expect(scrim).toBeGreaterThan(root);
-    expect(code.slice(root, scrim)).not.toContain("createPortal");
-  });
-
-  it("and the lit elements still out-rank it", () => {
-    const lit = Number(rule(".qh-focus .qh-lit").match(/z-index: (\d+)/)?.[1]);
-    const scrim = Number(rule(".qh-scrim").match(/z-index: (\d+)/)?.[1]);
-    expect(lit).toBeGreaterThan(scrim);
+  /* ⚠️ NOT a scrim-system class, and deliberately KEPT: .qh-enter is the ROUTE-ENTRY stagger
+     (masthead → toolbar → list → hero → cards → rows), shipped as its own phase with its own
+     lock. It shares a prefix with the deleted classes and nothing else. */
+  it("but the route-entry animation is untouched", () => {
+    expect(code, "the load animation was deleted along with the scrim").toContain("qh-enter");
+    expect(css).toContain(".qh-enter .f12-list");
   });
 });
+
+/* ⚠️ DELETED WITH THE SCRIM (create-mode v2, Phase 1) — a stacking-context audit over every
+   ancestor of a "lit" element, a z-order comparison, and a check that the scrim stayed a child
+   of the page root rather than being portalled. Every one of them was load-bearing while the
+   focus system existed; none has a subject now. Recorded rather than dropped silently, because
+   the reasoning is worth keeping: a `position: fixed` overlay mounted at body level would have
+   painted OVER the pane during the 180ms `pageIn` window, when the stage slot is both a
+   stacking context and the containing block for fixed positioning. Anyone reaching for an
+   overlay on this page again should read that before mounting it. */
+
