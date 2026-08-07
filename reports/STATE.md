@@ -1,6 +1,42 @@
 # STATE — where the repo stands
 
-**Last updated: 6 August 2026 (tenth pass — the sidebar's TASKS section).**
+**Last updated: 7 August 2026 (eleventh pass — the Tasks workspace COMPLETE).**
+
+## The Tasks workspace is COMPLETE (tasks-pages pack; report: `reports/tasks-pages.md`)
+
+`599d902` (P1 alignment) → `3ab2042` (P2 carry-overs) → `96eb7e6` (P3 Calendar) → `11117d5`
+(P4 Noteboard) → `2a6a247` (P5 tags). Suite **2993 | 2 skipped, 187 files**. Ref
+`design-refs/tasks-pages.html` (scope-fenced; pack prose wins on sidebar-below-hairline and
+Noteboard-has-no-sidebar). All four routes are REAL pages now — TodoPlaceholderPage is deleted.
+
+- **THE ALIGNMENT CONTRACT = `TasksPageLayout`**: every Tasks page stands on it; the title
+  offset is `--tdb-chrome-gap` via `.tdb-col` (the single geometry owner — the layout's own CSS
+  restates NO top padding, locked); header block → hairline (the tool row's bottom edge) →
+  sidebar+body below; the tool row is the ONLY control home, pink creation in the right slot;
+  the sidebar (TodoSideContainer) is optional per page.
+- **ONE COUNT DERIVATION**: `assembleBoardColumns` (todoColumns) feeds the badge
+  (ShellSidebar), both pages' boards and every FILTERS count — the badge shows the SAME cards
+  figure the subtitle speaks. todoCount's member-unit badge law is superseded in place.
+- **THE OFFER CAP holds on every path** — the bypass was FocusFlow's generic 7-day snooze
+  (clamped, three points); the dock's clock was a DEAD button (popover never mounted there) and
+  now owns a capped tier menu. Snoozed cards keep their ORIGINAL titles (derivedCopy exported;
+  band = SNOOZED · BACK {date}); Done bands read ✓ DONE | time.
+- **CALENDAR** (`/todo/calendar`): placement per source (user tasks dueDate · agent tasks the
+  lastStatusChange landing day · snoozed returns · dated notes = structurally empty under
+  two-natures, built as specified); roll-forward DERIVED from the clock ("{n} ROLLED FORWARD ↗"
+  markers); completed struck from the clearing union, never rolls; pips + legend from
+  todoFamily's CAL_PIP; FILTERS ∧ tags narrow before placement; pip → FocusFlow sheet, day →
+  its list panel.
+- **NOTEBOARD** (`/todo/noteboard`): CSS-columns masonry, notes only (isNoteTask), NO page
+  sidebar, tag filter in the tool row; ⚠️ THE DATE IS THE DOOR — one write converts note→task
+  (leaves the board, joins Your tasks, appears on the Calendar); PortalMenu extracted from
+  TodoBoard (one menu shell, two content models); delete = confirm + 8s same-id undo.
+- **TAGS ARE REAL**: TagDef on User.tags, ids on UserTask.tags; lowercase/unique/palette-only
+  (TAG_PALETTE in todoFamily); ONE TagPicker in three mounts (composer · dock item sheet ·
+  ⋯ Tags…) with inline creation; sidebar TAGS list live with counts + additive filtering;
+  settings CRUD (delete DETACHES, never deletes). ⚠️ RULES: dev deployed BOTH DBs (07 Aug
+  09:41, verified by updateTime); **prod rules pending Nick** — the sequencing deploy now
+  carries rejectedDate · detail/surfaceOffset · committedDate · **tags**.
 
 ## The sidebar IA: To-do left WORKSPACE for its own TASKS section (sidebar-IA fix, Nick's call)
 
