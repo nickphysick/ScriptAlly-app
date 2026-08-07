@@ -1345,3 +1345,9 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tsettagdel.armed { color: #7c3a2a; font-weight: 700; }
 .tdb-nc-tags { display: block; width: 100%; margin-top: 8px; }
 .tdk-tags { padding: 10px 0 2px; border-top: 1px solid #f0e9dd; margin-top: 12px; }
+
+/* ART slots on the board page (board-optimise P3): the first-run desk's hero and the weekly
+   briefing's slim banner. Both sit INSIDE their own temporary card — never in the page header. */
+.tdb-ndart { max-width: 460px; margin: 0 auto 18px; }
+.tdb-briefart { grid-column: 1 / -1; max-width: 640px; margin: 0 0 12px; }
+.tdb-briefart .art-cap { display: none; }  /* the banner is decoration; the card carries the words */

@@ -214,3 +214,13 @@
 @media (max-width: 767px) {
   .tdt-meta, .tdt-why { display: none; }
 }
+
+/* ⚠️ ART · DESK-CLEAR (board-optimise P3) — the hero, centred in the content column. The one
+   full illustration in the workspace, and the rarest state it has. */
+.tdt-deskclear { text-align: center; padding: 8px 0 18px; max-width: 520px; margin: 0 auto; }
+.tdt-deskclear h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 25px; font-weight: 700; color: #2b2118; margin: 14px 0 6px;
+}
+.tdt-deskclear p { font-size: 13px; color: #8a7a6c; line-height: 1.6; margin: 0 0 16px; }
+.tdt-dcacts { display: flex; gap: 10px; justify-content: center; }

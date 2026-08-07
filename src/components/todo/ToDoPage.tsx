@@ -56,6 +56,7 @@ import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoute
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
 import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
+import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
@@ -1069,6 +1070,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               (sa.todoReviewDismissed keyed on reviewWin.key), so a new review brings it back. */}
           {reviewWin && !reviewSeen && !reviewDismissed && (
             <div className="tdb-brief">
+              {/* ⚠️ ART · REVIEW-MASTHEAD (board-optimise P3) — the ONE place a header
+                  illustration earns its keep, and the ref says why: the card is TEMPORARY and
+                  celebratory. It is inside the briefing card, never the page header, and it
+                  leaves with the card when the week is read or dismissed. */}
+              <ArtSlot name="review-masthead" className="tdb-briefart" />
               <div className="tdb-brieftxt">
                 <div className="tdb-briefk">↺ LAST WEEK IN REVIEW</div>
                 <div className="tdb-brieft">{briefingHeadline(briefCleared, briefReplies)}</div>
@@ -1208,6 +1214,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function renderNewDesk() {
     return (
       <div className="tdb-newdesk">
+        {/* ⚠️ ART · FIRST-RUN-BOARD (board-optimise P3) — the board before the first query.
+            DISTINCT FROM DESK-CLEAR, and the distinction is the whole point: this one is NOT
+            YET, that one is WELL DONE. Same page, opposite meanings — so they are two briefs,
+            never one asset reused. Once per manuscript, by the desk state's own derivation. */}
+        <ArtSlot name="first-run-board" className="tdb-ndart" />
         <div className="tdb-ndtxt">
           <h2>A clean desk — <em>for now.</em></h2>
           <p>Once you’re querying, this page fills itself: requests and deadlines land in <b>Urgent</b>, record tidy-ups gather in <b>Housekeeping</b>, and your own reminders live in <b>Notes to self</b>. Nothing to track by hand.</p>

@@ -1,0 +1,45 @@
+/**
+ * ArtSlot (board-optimise pack, Phase 3; ref design-refs/art-slots.html).
+ *
+ * The placeholder is deliberately QUIET — hatched paper and a mono key, the same vocabulary as
+ * the board's ghost drop slot. It is scaffolding, and scaffolding that tries to look finished is
+ * how a placeholder ends up shipping.
+ */
+.art { margin: 0; display: block; }
+
+/* the ratio box — padding-top holds the space; the child fills it absolutely */
+.art-box {
+  position: relative; width: 100%; height: 0;
+  border: 1.5px dashed #d8ccbc; border-radius: 10px;
+  background: repeating-linear-gradient(135deg, #fdfbf7, #fdfbf7 6px, #faf6ef 6px, #faf6ef 12px);
+  overflow: hidden;
+}
+.art-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
+.art-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.art-phk {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px; letter-spacing: 0.16em; color: #b3a394;
+}
+
+.art-cap {
+  font-size: 11px; line-height: 1.5; color: #8a7a6c;
+  margin-top: 8px; text-align: center;
+}
+
+/* ⚠️ THE DOCK SEAL IS THE ONE MOVING SLOT — appear, settle, fade over 600ms. Its caption is
+   suppressed: a stamp that explained itself would not be a stamp. */
+.art--dock-seal { position: absolute; inset: 0; margin: auto; width: 120px; height: 120px; z-index: 5; pointer-events: none; }
+.art--dock-seal .art-cap { display: none; }
+.art--dock-seal .art-box { animation: artSeal 600ms cubic-bezier(.2, .7, .3, 1) forwards; }
+@keyframes artSeal {
+  0% { opacity: 0; transform: scale(1.25) rotate(-8deg); }
+  30% { opacity: 1; transform: scale(1) rotate(0deg); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ⚠️ OFF UNDER REDUCED MOTION — the component also skips the mount entirely (see TodoDock), so
+   this is the belt to that braces: a seal that slipped through renders still and fades nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .art--dock-seal .art-box { animation: none; }
+}

@@ -20,6 +20,7 @@ import React, { useMemo, useState } from "react";
 import { Play, Plus, Undo2 } from "lucide-react";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { useTagWrites } from "./useTagWrites";
+import { ArtSlot } from "./ArtSlot";
 import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
@@ -98,6 +99,14 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   );
   /* the header's pool, card-unit and narrowed the same way — the To do column under this filter */
   const benchPool = applyFacet(assembled.cols.todo, facet).filter((c) => matchesTags(c.tags, tagSel)).length;
+
+  /* ⚠️ THE ALL-CLEAR IS A THREE-WAY AND (board-optimise P3; ref art-slots §1 brief 1): nothing
+     COMMITTED, nothing URGENT, and the bench EXHAUSTED. Any two of the three is an ordinary
+     quiet moment — it is the third that makes it earned, and the hero is worthless the day it
+     appears over work the writer can still see. Read UNFILTERED, deliberately: a desk that looks
+     clear only because a filter is hiding the rest would be the app congratulating you for
+     narrowing a view. Rare by design. */
+  const deskClear = committed.length === 0 && board.do.length === 0 && bench.length === 0;
 
   /** ⚠️ Creates a TASK DUE TODAY — never a note (audit item 7). A note made here would leave the
    *  page the instant it was made, which is the clearest possible sign the verb was wrong. */
@@ -203,7 +212,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
               </div>
             ))}
 
-            {committed.length === 0 && (
+            {committed.length === 0 && !deskClear && (
               <div className="tdt-empty">
                 Nothing committed yet — add something below, or lift one from the bench.
               </div>
@@ -234,6 +243,25 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
               </button>
             </div>
           </div>
+
+          {/* ⚠️ ART · DESK-CLEAR (board-optimise P3) — the workspace's one full illustration, and
+              the rarest thing in it. Playfair line, the plain sentence, the ink way out and the
+              pink way back in, per the ref. */}
+          {deskClear && (
+            <div className="tdt-deskclear">
+              <ArtSlot name="desk-clear" />
+              <h3>The desk is clear.</h3>
+              <p>Nothing urgent, nothing waiting, nothing left on the bench.</p>
+              <div className="tdt-dcacts">
+                <button type="button" className="tdb-btnp" onClick={() => onNavigatePath("/manuscripts")}>
+                  Go and write →
+                </button>
+                <button type="button" className="tdb-addb" onClick={() => document.getElementById("tdt-add")?.focus()}>
+                  ＋ Add a task
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* CLEARED — settling IN PLACE, struck through, with the time and a way back. They stay
               for the rest of the day: a list that erased what you finished would hide the only

@@ -33,6 +33,7 @@ import {
 } from "../../lib/todoColumns";
 import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
 import { PortalMenu } from "./PortalMenu";
+import { ArtSlot } from "./ArtSlot";
 import "./todoBoard.css";
 
 export interface TodoBoardProps {
@@ -244,6 +245,12 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
             <div className="tbd-body">
               {cards.length === 0 && (
                 <div className="tbd-empty">
+                  {/* ⚠️ ART · DONE-EMPTY (board-optimise P3) — the Done column before the first
+                      tick today, ABOVE its existing line, capped at 260px so it reads inside the
+                      column measure (the brief's own requirement). Daily until the first tick:
+                      the column is non-empty the moment anything is cleared, so the trigger is
+                      the emptiness itself — nothing to store, nothing to reset at midnight. */}
+                  {col.id === "done" && <ArtSlot name="done-empty" maxWidth={260} className="tbd-art" />}
                   {COL_EMPTY[col.id]}
                   {/* ⚠️ ONE QUIET LINE, NOT A CARD (corrections fix 8). An empty Today is the one
                       column where the reader can act immediately, and the bench is where the

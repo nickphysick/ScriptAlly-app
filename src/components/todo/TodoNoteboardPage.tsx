@@ -30,6 +30,7 @@ import { useTodoToast } from "./useTodoToast";
 import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
+import { ArtSlot } from "./ArtSlot";
 import { useTagWrites } from "./useTagWrites";
 import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
@@ -198,6 +199,10 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
           {notes.length === 0 && !compose ? (
             /* the empty state TEACHES rather than apologises */
             <div className="nb-empty">
+              {/* ⚠️ ART · NOTEBOARD-EMPTY (board-optimise P3) — first run only, ABOVE the copy
+                  that was already written. The trigger is the same emptiness the state itself
+                  keys on; nothing new is derived. */}
+              <ArtSlot name="noteboard-empty" className="nb-art" />
               <h3>Nothing pinned yet</h3>
               <p>
                 Notes are for the things you want to remember but don’t need chasing — a thought
