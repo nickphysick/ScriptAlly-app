@@ -254,7 +254,11 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
                 shouted at someone who never doubted it. The exclusion rule is still enforced in
                 the derivation and still tested there; it simply does not headline. */}
             <div className="tdt-benchhead">
-              <b>Suggested for today</b> · {benchHeading(board.do.length + board.hk.length - bench.length)}
+              {/* ⚠️ CARDS, from the SAME derivation as every other figure (tasks-audit P2).
+                  This summed the raw LANES (member units — every sweep agent loose): 24 against
+                  a 16-card world. The pool behind the bench is the To do column itself — the
+                  card-unit remaining after today's list — so the header states THAT number. */}
+              <b>Suggested for today</b> · {benchHeading(assembled.cols.todo.length)}
             </div>
             {bench.map((b) => (
               <div key={b.card.key} className="tdt-brow">

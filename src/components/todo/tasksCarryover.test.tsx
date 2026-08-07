@@ -114,7 +114,8 @@ describe("⚠️ a snoozed card keeps the work's identity", () => {
   it("a derived card's title rebuilds through derivedCopy — the original, not a template", () => {
     const [c] = snoozedCards({ flags: [flag], queries: [q({})], agents: [ag({})], nowMs: NOW });
     expect(c.title).toBe("Send your full to Marcus Reed");
-    expect(c.kind).toBe("SNOOZED");
+    // tasks-audit P2: the KIND survives snoozing — "{KIND} · 🕐 | BACK {date}", never bare SNOOZED
+    expect(c.kind).toBe("AGENT WAITING · 🕐");
     expect(c.due).toBe("BACK 8 AUG");
   });
 
@@ -123,7 +124,7 @@ describe("⚠️ a snoozed card keeps the work's identity", () => {
     const userTasks = [{ id: "t9", userId: "u", text: "Redraft the opening", done: false, createdAt: "", updatedAt: "" } as UserTask];
     const [c] = snoozedCards({ flags: [utFlag], queries: [], agents: [], userTasks, nowMs: NOW });
     expect(c.title).toBe("Redraft the opening");
-    expect(c.kind).toBe("SNOOZED");
+    expect(c.kind).toBe("YOUR TASK · 🕐"); // tasks-audit P2 — the kind survives
   });
 
   it('the "put away" template is extinct (the supersession comment may still QUOTE it)', () => {

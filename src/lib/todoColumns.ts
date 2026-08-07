@@ -152,17 +152,24 @@ export function snoozedCards(input: SnoozedInput): BoardCard[] {
       const userTask = f.taskType === "user_task" && f.queryId
         ? input.userTasks?.find((t) => t.id === f.queryId)
         : undefined;
-      const rebuilt = f.taskType === "user_task"
-        ? (userTask?.text ?? "Task")
-        : derivedCopy({ taskType: f.taskType, title: "", context: "" } as unknown as Task, q, ag, ms, input.nowMs).title;
+      /* ⚠️ THE KIND SURVIVES SNOOZING (tasks-audit P2). A bare "SNOOZED" band told you the
+         card's state twice (the column already says it) and its nature never — the grammar is
+         "{KIND} · 🕐 | BACK {date}": what it is, that it sleeps, when it returns. The kind comes
+         from the SAME derivedCopy rebuild the title does — never a second map. */
+      const copy = f.taskType === "user_task"
+        ? { title: userTask?.text ?? "Task", kind: "YOUR TASK" }
+        : (() => {
+            const c = derivedCopy({ taskType: f.taskType, title: "", context: "" } as unknown as Task, q, ag, ms, input.nowMs);
+            return { title: c.title, kind: c.kind || "SNOOZED" };
+          })();
       return {
         key: `snz-${f.id}`,
         stream: "hk" as const,
-        title: rebuilt || (who ? who : "Snoozed"),
+        title: copy.title || (who ? who : "Snoozed"),
         who,
         subtitle: "",
         due: f.snoozedUntil ? backOnLabel(f.snoozedUntil) : "ASLEEP",
-        kind: "SNOOZED",
+        kind: `${copy.kind} · 🕐`,
         warn: false,
         snoozes: f.snoozeCount ?? 0,
         hk: true,
