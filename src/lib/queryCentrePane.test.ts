@@ -40,9 +40,14 @@ describe("the toolbar is a pane row now", () => {
     expect(ctl, "it no longer centres itself in the content column").not.toContain("margin: 0 auto");
   });
 
-  it("create mode replaces it IN PLACE, in the same seat", () => {
-    expect(code).toContain('className="f12-ctl f12-ctl-create"');
-    expect(code).toContain("if (creating) {");
+  /* ⚠️ SUPERSEDED (create-mode v2 P3). Create mode used to TAKE the toolbar's seat — same box,
+     swapped contents, so the bar neither moved nor changed height as it swapped. It now VACATES
+     it: the record verbs do not apply to a query that does not exist, and the illustrated header
+     below is the create view's one action surface. The seat stays empty rather than holding a
+     row of greyed buttons. */
+  it("create mode vacates the seat entirely — it no longer takes it over", () => {
+    expect(code).toContain("if (creating) return null;");
+    expect(code, "the takeover bar came back").not.toContain("f12-ctl-create");
   });
 });
 
@@ -52,8 +57,10 @@ describe("the redundant raises are gone", () => {
      rank things against. The scrim is gone, so the assertion becomes the stronger and simpler
      one: NOTHING carries a raise, because there is nothing left to be raised above. */
   it("no z-raise survives anywhere — the scrim it existed for is gone", () => {
+    /* Both buttons moved to the illustrated header (P3) and the primary's handler is wrapped
+       now — onClick={saveCreate} would hand the click event in as the batch flag. */
     expect(code).toContain('className="f12-btn-sec" onClick={() => closeCreate()}');
-    expect(code).toContain('className="f12-btn-pri" onClick={saveCreate}');
+    expect(code).toContain("onClick={() => saveCreate()}");
     expect(code, "a raise outlived the scrim").not.toContain("qh-lit");
     expect(code, "the scrim element outlived its system").not.toContain("qh-scrim");
     expect(code, "the focus class outlived its system").not.toContain("qh-focus");

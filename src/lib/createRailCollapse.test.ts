@@ -30,9 +30,17 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 const css = read("../components/shell/f12.css");
 const queries = read("../components/Queries.tsx");
 
+/* The rail rules live inside a min-width media block, so every selector is indented. Matching
+   on a bare newline would silently find nothing and every `.toContain` on "" would pass. */
 const rule = (selector: string): string => {
-  const at = css.indexOf("\n" + selector + " {");
-  return at < 0 ? "" : css.slice(at, css.indexOf("}", at) + 1);
+  // Anchored on a line start (the rules are indented inside a media block) and allowing the
+  // selector to be followed by `,` as well as `{`, so a GROUPED rule can be looked up by its
+  // first selector. Returns "" when absent — every caller asserts that first.
+  const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = new RegExp("\\n[ \\t]*" + esc + "\\s*[,{]").exec(css);
+  if (!m) return "";
+  const open = css.indexOf("{", m.index);
+  return open < 0 ? "" : css.slice(m.index, css.indexOf("}", open) + 1);
 };
 
 describe("the list collapses to a rail", () => {
@@ -58,7 +66,7 @@ describe("the list collapses to a rail", () => {
   /* Fading the furniture is not enough: an invisible 48px head, 36px control row and footer
      still hold their boxes and still push the rows down inside a 62px rail. */
   it("the furniture collapses its BOX, not just its opacity", () => {
-    const out = rule(".qh-create .f12-lhtitle,\n.qh-create .f12-lhead,\n.qh-create .f12-lfoot");
+    const out = rule(".qh-create .f12-lhtitle");
     expect(out, "the collapse rule is missing").not.toBe("");
     for (const prop of ["opacity: 0", "height: 0", "margin: 0", "padding: 0", "border-width: 0", "overflow: hidden"]) {
       expect(out, `the furniture keeps ${prop.split(":")[0]} — it will still hold space`).toContain(prop);
@@ -73,7 +81,7 @@ describe("the rows keep only their monogram", () => {
      which put the monogram at -7.6px, clipped outside its own row. After collapsing the width
      the monogram measures 9.5px from the row's left edge against a computed centre of 9.5. */
   it("the withdrawn parts leave the flex line, not merely the eye", () => {
-    const withdrawn = rule(".qh-create .f12-row .f12-mid,\n.qh-create .f12-row .f12-end");
+    const withdrawn = rule(".qh-create .f12-row .f12-mid");
     expect(withdrawn, "the withdraw rule is missing").not.toBe("");
     expect(withdrawn).toContain("opacity: 0");
     expect(withdrawn, "opacity hides from the eye, not from layout — the monogram will clip")
@@ -100,8 +108,22 @@ describe("the rows keep only their monogram", () => {
 });
 
 describe("motion and reach", () => {
+  /* ⚠️ The rail is a DESKTOP move. Below md the two panes are two screens and create mode
+     already pushes to the detail one — that is the small breakpoint's focus-through-space.
+     Built inside a min-width block for the case it serves, rather than built globally and
+     undone in the mobile block. */
+  it("the collapse is scoped to >=768px, not built then undone", () => {
+    const at = css.indexOf("@media (min-width: 768px) {");
+    expect(at, "the rail block is no longer desktop-scoped").toBeGreaterThan(-1);
+    expect(css.indexOf(".qh-create .f12-list"), "the rail rule escaped its media block")
+      .toBeGreaterThan(at);
+    const mobile = css.slice(css.indexOf("@media (max-width: 767.98px) {"));
+    expect(mobile, "a counter-rule was needed — the scoping is not doing its job")
+      .not.toContain(".qh-create .f12-list");
+  });
+
   it("reduced motion applies the collapse instantly", () => {
-    const at = css.indexOf("@media (prefers-reduced-motion: reduce) {\n  .f12-list,");
+    const at = css.indexOf("@media (prefers-reduced-motion: reduce) {");
     expect(at, "the reduced-motion block for the rail is missing").toBeGreaterThan(-1);
     const block = css.slice(at, css.indexOf("}\n", css.indexOf(".f12-end { transition: none", at)));
     for (const sel of [".f12-list", ".f12-lhtitle", ".f12-lhead", ".f12-lfoot", ".f12-mid", ".f12-end"]) {
