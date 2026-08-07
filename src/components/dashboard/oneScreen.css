@@ -78,7 +78,7 @@
 .os-colM .os-greet.enter { animation-delay: 0s; }
 .os-colM .os-lead.enter { animation-delay: 0.05s; }
 .os-colM .os-tasks.enter { animation-delay: 0.1s; }
-.os-colR .os-aut.enter { animation-delay: 0.07s; }
+.os-colM .os-aut.enter { animation-delay: 0.07s; }
 .os-colR .os-goal.enter { animation-delay: 0.12s; }
 .os-colR .os-actv.enter { animation-delay: 0.17s; }
 .os-colM .os-probanner.enter { animation-delay: 0.22s; }

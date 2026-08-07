@@ -197,3 +197,36 @@ describe("§9 · first-run states", () => {
     expect(html).toContain("os-pill ach");
   });
 });
+
+/* ══ v16 §6 · the entrance stagger cleans up after itself ══ */
+
+describe("⚠️ the entrance class is REMOVED, and the guard is a ref", () => {
+  const src = readFileSync(resolve(__dirname, "./OneScreenDashboard.tsx"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+
+  /* ⚠️ THE BUG THIS PINS: with `entered` in state AND in the deps, setting it re-ran the effect
+     — the cleanup fired first and cleared the pending timeout, and the re-run returned early at
+     the guard without re-arming it. The `enter` class was added and NEVER removed, which leaves
+     a `fill-mode: both` animation permanently outranking any inline transform on every card.
+     Verified in the browser as `stillAnimating: true` long after settling. */
+  it("the stagger guard is a ref and is NOT in the effect's deps", () => {
+    expect(src).toContain("const entered = useRef(false)");
+    expect(src).toContain("if (loading || entered.current) return;");
+    expect(src).toContain("entered.current = true;");
+    // the deps that matter: `entered` must not appear, or the effect cancels its own timeout
+    expect(src).toMatch(/items\.forEach\(\(el\) => el\.classList\.remove\("enter"\)\), 900\);\s*return \(\) => window\.clearTimeout\(id\);\s*\}, \[loading\]\);/);
+    expect(src).not.toContain("[loading, entered]");
+  });
+
+  it("the animation still carries `both`, so removal is what keeps it safe", () => {
+    expect(cssRules).toContain(".os-card.enter, .os-greet.enter { animation: os-rise");
+    expect(cssRules).toMatch(/\.os-card\.enter[^}]*both;/);
+  });
+
+  /* the author tile moved to the main column in §1; its stagger delay had stayed in the rail */
+  it("every stagger delay names the column its card actually lives in", () => {
+    expect(cssRules).toContain(".os-colM .os-aut.enter");
+    expect(cssRules).not.toContain(".os-colR .os-aut.enter");
+    expect(cssRules).toContain(".os-colM .os-probanner.enter");
+  });
+});

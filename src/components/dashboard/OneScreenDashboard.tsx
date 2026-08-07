@@ -124,20 +124,28 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
       : { tourCompletedAt: new Date().toISOString() });
   };
 
-  /* One-time entrance stagger — the class is REMOVED after it runs (§6 trap: a persistent
-     fill-mode would pin opacity against every later class change). */
+  /* One-time entrance stagger — the class is REMOVED after it runs (§6 trap: the animation is
+     `fill-mode: both`, so while the class is on, its final keyframe OUTRANKS any inline transform;
+     leaving it on arms that trap across every card on the page).
+
+     ⚠️ THE GUARD IS A REF, NOT STATE, AND THAT IS THE WHOLE POINT. With `entered` in state and in
+     the deps, setting it re-ran the effect; the cleanup fired FIRST and cleared the pending
+     timeout, and the re-run then returned early at the guard without ever re-arming it. The class
+     was added and never removed — a self-cancelling effect that read as correct and was verified
+     `stillAnimating: true` long after settling. A ref survives the re-render without re-running
+     anything, the same reason the chart's `drewIn` is a ref. */
   const rootRef = useRef<HTMLDivElement>(null);
-  const [entered, setEntered] = useState(false);
+  const entered = useRef(false);
   useEffect(() => {
-    if (loading || entered) return;
-    setEntered(true);
+    if (loading || entered.current) return;
+    entered.current = true;
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const items = root.querySelectorAll(".os-card, .os-greet");
     items.forEach((el) => el.classList.add("enter"));
     const id = window.setTimeout(() => items.forEach((el) => el.classList.remove("enter")), 900);
     return () => window.clearTimeout(id);
-  }, [loading, entered]);
+  }, [loading]);
 
   const tenure = tenureLine(queries);
   const ach = achievementPill(queries, now);
