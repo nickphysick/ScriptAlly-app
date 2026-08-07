@@ -24,10 +24,18 @@
 }
 .tpl-grow { flex: 1; }
 
-/* the house disabled grammar for tool-row buttons — paper, hairline, faint, not-allowed;
-   never opacity */
+/* ⚠️ ONE CONTROL HEIGHT ACROSS THE ROW (tasks-audit P3): the ink primary (.tdb-btnp, 42px on
+   the board's own surfaces) takes the ROW'S 34px step here — the pink Add's height and
+   single-line grammar. Nothing in a tool row renders as a taller block. */
+.tpl-tools .tdb-btnp {
+  height: 34px; padding: 0 14px; border-radius: 9px; font-size: 12.5px;
+}
+
+/* ⚠️ the house DISABLED grammar for tool-row buttons — paper fill, hairline, faint text,
+   not-allowed cursor; NEVER opacity-only, never an enabled ghost (tasks-audit P3). The
+   attribute selector outweighs each button's own fill, ink primaries included. */
 .tpl-tools button[disabled] {
-  background: #faf7f1; border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
+  background: #faf7f1; border: 1px solid #e8dfd1; color: #b3a394; cursor: not-allowed;
 }
 
 /* ── the columns: sidebar (optional) + body, BELOW the hairline, on the same line ── */

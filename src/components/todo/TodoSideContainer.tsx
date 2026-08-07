@@ -112,7 +112,9 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
               aria-pressed={on}
               onClick={() => onToggleTag?.(t.id)}
             >
-              <span className="tds-sw" style={{ background: TAG_PALETTE[t.colour].bg, border: `1px solid ${TAG_PALETTE[t.colour].tx}` }} aria-hidden="true" />
+              {/* ⚠️ FILLED, the FILTERS grammar (tasks-audit P3) — a solid dot in the tag's strong
+                  tone, never an outlined ring: two dot styles in one sidebar read as two systems. */}
+              <span className="tds-sw" style={{ background: TAG_PALETTE[t.colour].tx }} aria-hidden="true" />
               <span className="tds-lbl">#{t.label}</span>
               <span className="tds-ct">{tagCounts?.get(t.id) ?? 0}</span>
             </button>
