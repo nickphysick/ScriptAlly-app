@@ -24,6 +24,7 @@ import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
+import { OneScreenPro } from "./OneScreenPro";
 import { OneScreenRail } from "./OneScreenRail";
 import "./oneScreen.css";
 
@@ -219,6 +220,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
             onAddAgent={() => onNavigate("agents", "Add an agent")}
           />
+
+          {/* ⚠️ SHOWN ONLY WHERE THE EXTRA ROW GENUINELY FITS — the CSS gates it on viewport
+              height AND width (§5). Below either threshold it is not rendered small, it is not
+              rendered at all: a squeezed upsell costs the page its one-screen promise. */}
+          <OneScreenPro loading={loading} currentUser={currentUser} onNavigate={onNavigate} />
         </div>
 
         <OneScreenRail

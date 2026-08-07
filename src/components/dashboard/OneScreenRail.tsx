@@ -255,17 +255,9 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
         <div className="os-afoot"><span className="os-ac">Last 30 days</span></div>
       </div>
 
-      {/* ══ Pro mini-card — quiet, pastille-blue detailing; Pro's accent is blue, sitewide ══ */}
-      <button type="button" className={`os-card os-promini${loading ? " isload" : ""}`} onClick={() => onNavigate("plans")}>
-        {loading && <Skel bars={["h"]} />}
-        <span className="os-pimg" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
-        </span>
-        <span className="os-pt2">
-          <span className="os-plab">ScriptAlly Pro</span>
-          <span className="os-plink">See what's included <span className="os-arr">→</span></span>
-        </span>
-      </button>
+      {/* ⚠️ THE PRO MINI LEFT THE RAIL (v16 §5) — it is the full-width banner beneath tasks now
+          (OneScreenPro). Do not reinstate one here: two upsells on one screen sell the same thing
+          twice, and the rail's job is goals and the record. */}
     </div>
   );
 };

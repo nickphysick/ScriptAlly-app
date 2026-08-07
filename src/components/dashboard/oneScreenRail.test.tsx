@@ -96,10 +96,12 @@ describe("the rendered rail", () => {
     expect(foot.slice(0, foot.indexOf("</div>"))).not.toContain("<a");
   });
 
-  it("the Pro card is blue-detailed and quiet: no tagline, no gradient", () => {
-    expect(html).toContain("ScriptAlly Pro");
-    expect(html).toContain("See what&#x27;s included");
-    expect(cssRules).not.toMatch(/os-promini[^}]*linear-gradient/);
+  /* ⚠️ THE PRO MINI LEFT THE RAIL (v16 §5) — it is the banner beneath tasks now. This pins the
+     departure so a second upsell cannot reappear here and sell the same thing twice. */
+  it("no Pro upsell in the rail any more — one per screen", () => {
+    expect(html).not.toContain("ScriptAlly Pro");
+    expect(html).not.toContain("os-promini");
+    expect(cssRules).not.toContain(".os-promini");
   });
 
   it("no goal set → the ghost meter and Set a goal, never fake progress", () => {

@@ -81,7 +81,7 @@
 .os-colR .os-aut.enter { animation-delay: 0.07s; }
 .os-colR .os-goal.enter { animation-delay: 0.12s; }
 .os-colR .os-actv.enter { animation-delay: 0.17s; }
-.os-colR .os-promini.enter { animation-delay: 0.22s; }
+.os-colM .os-probanner.enter { animation-delay: 0.22s; }
 
 /* §10: keyboard parity with hover */
 .os-root a:focus-visible, .os-root button:focus-visible, .os-root [tabindex]:focus-visible {
@@ -704,35 +704,52 @@
   .os-colR .os-actv { flex: none; min-height: 300px; }
 }
 
-/* ══ §6 · PRO MINI-CARD ══ */
-.os-promini {
-  display: flex; align-items: center; gap: 12px; padding: 11px 13px; flex: none;
+/* ══ §5 · THE PRO BANNER (v16 — supersedes the rail's mini) ══ */
+/* ⚠️ display:none BY DEFAULT and switched on only where the extra row genuinely fits. The gate is
+   viewport HEIGHT and WIDTH together: a short window has no room for it beneath tasks, and a
+   narrow one puts its three text lines into a column. Below either it is absent, never squeezed —
+   the page's one-screen promise outranks the upsell. */
+.os-probanner {
+  display: none; align-items: center; gap: 20px; padding: 22px; flex: none;
+  min-height: 132px;
   border-top: 2px solid #c2cfda;
   cursor: pointer; text-align: left; font: inherit;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.os-promini:hover {
+@media (min-height: 940px) and (min-width: 1025px) {
+  .os-probanner { display: flex; }
+}
+.os-probanner:hover {
   transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(58, 28, 20, 0.05), 0 9px 22px rgba(58, 28, 20, 0.09);
 }
-.os-pimg {
-  width: 44px; height: 44px; border-radius: 11px;
+.os-pimg2 {
+  width: 96px; height: 96px; border-radius: 14px;
   background: #e3eaf1; border: 1px solid #c9d6e2;
   display: grid; place-items: center; flex: none;
   transition: border-color 0.16s ease, background 0.16s ease;
 }
-.os-promini:hover .os-pimg { background: #dae4ee; border-color: #b6c7d8; }
-.os-pimg svg { width: 20px; height: 20px; stroke: #7590b4; fill: none; stroke-width: 1.5; }
-.os-pt2 { flex: 1; min-width: 0; }
-.os-plab {
+.os-probanner:hover .os-pimg2 { background: #dae4ee; border-color: #b6c7d8; }
+.os-pimg2 svg { width: 38px; height: 38px; stroke: #7590b4; fill: none; stroke-width: 1.3; }
+.os-ptxt { flex: 1; min-width: 0; }
+.os-plab2 {
   font-family: "JetBrains Mono", monospace;
-  font-size: 7.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #46608a;
+  font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #46608a;
   display: flex; align-items: center; gap: 6px;
 }
-.os-plab::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #c2cfda; }
-.os-plink { font-size: 11.5px; color: #46608a; font-weight: 500; margin-top: 5px; display: inline-block; }
-.os-promini:hover .os-plink { text-decoration: underline; }
-.os-promini:hover .os-arr { transform: translateX(3px); }
+.os-plab2::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #c2cfda; }
+.os-phead {
+  display: block; font-family: var(--font-serif); font-size: 22px; font-weight: 600;
+  color: #241811; margin-top: 8px; line-height: 1.15;
+}
+.os-pline { display: block; font-size: 13.5px; color: #5c5148; margin-top: 7px; line-height: 1.5; }
+.os-plink2 {
+  font-size: 13px; color: #46608a; font-weight: 500; white-space: nowrap; flex: none;
+  border: 1px solid #c9d6e2; border-radius: 99px; padding: 9px 18px; background: #ffffff;
+  transition: background 0.15s, border-color 0.15s;
+}
+.os-probanner:hover .os-plink2 { background: #f2f6fa; border-color: #a9bccd; text-decoration: underline; }
+.os-probanner:hover .os-arr { transform: translateX(3px); }
 
 /* ══ §9 · DAY ONE ══ */
 .os-dayone { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 12px; padding: 16px; text-align: center; }
