@@ -98,7 +98,12 @@
 .tdt-empty { padding: 16px 18px; font-size: 13.5px; color: #7a6a5e; }
 
 /* ── the quick-add ─────────────────────────────────────────────────────── */
+/* ⚠️ `flex: 0 0 auto` — the quick-add sits OUTSIDE the zone at the region's foot, so it never
+   scrolls away from the list it adds to (tasks-viewport P2). Merged into this rule rather than
+   appended as a second `.tdt-add` block: two rules for one selector is the drift this file's own
+   locks exist to catch. */
 .tdt-add {
+  flex: 0 0 auto;
   display: flex;
   gap: 8px;
   padding: 10px 18px 12px;
@@ -224,3 +229,148 @@
 }
 .tdt-deskclear p { font-size: 13px; color: #8a7a6c; line-height: 1.6; margin: 0 0 16px; }
 .tdt-dcacts { display: flex; gap: 10px; justify-content: center; }
+
+/* ══ TODAY, REDESIGNED (tasks-viewport pack, Phase 2; ref design-refs/today-redesign.html) ══
+ *
+ * ⚠️ THIS PAGE READS AS A SIBLING OF THE DASHBOARD, not as a narrow board. That is the whole
+ * brief: mono eyebrow over a Playfair title at the greeting's scale, a pill stat row where the
+ * prose subtitle used to be, section heads as Playfair over hairlines, white cards on hairline
+ * borders. Every measure below is the ref's own.
+ */
+
+/* the header block's two new rows — owned by TasksPageLayout, styled here */
+.tpl-eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.17em; color: #a5988c; margin-bottom: 9px;
+}
+.tpl-titlerow { display: flex; align-items: flex-start; gap: 14px; }
+/* the Dashboard's greeting scale — 32px, not the 30px page title */
+.tpl-titlerow .tpl-title { font-size: 32px; }
+
+.tdt-stats { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+/* ⚠️ ROUNDED HAIRLINE PILLS WITH PLAYFAIR FIGURES — the Dashboard's chip grammar. The label is
+   body text and the figure is the serif: a stat row that set both in the same face reads as a
+   sentence someone forgot to finish. */
+.tdt-stat {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid #e6ddcd; border-radius: 99px; height: 36px; padding: 0 17px;
+  font-size: 12.5px; color: #6b5a4e; background: #fff;
+}
+.tdt-stat b {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px; font-weight: 700; color: #2b2118;
+}
+
+/* ⚠️ THE PAIR ON THE TITLE ROW SHARE ONE HEIGHT (36px). A ghost and an ink button at different
+   heights read as two unrelated controls that happen to sit together. */
+.tdt-ghost, .tdt-ink {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 14px; border-radius: 9px;
+  font-size: 12px; font-weight: 600; cursor: pointer; flex: 0 0 auto;
+}
+.tdt-ghost { background: #fff; border: 1px solid #e2d8c8; color: #4d4238; }
+.tdt-ghost:hover { background: #faf7f1; }
+.tdt-ink { background: #2a1a13; border: 1px solid #2a1a13; color: #fff; }
+.tdt-ink:hover { background: #3a2c20; }
+.tdt-ghost.sm, .tdt-ink.sm { height: 28px; padding: 0 11px; font-size: 11px; }
+/* the house disabled grammar — paper, hairline, faint, not-allowed; NEVER opacity */
+.tdt-ink[disabled], .tdt-ghost[disabled] {
+  background: #faf7f1; border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
+}
+
+/* ── the two regions ── */
+/* ⚠️ THE RAIL IS ~320px BEHIND A LEFT HAIRLINE, and both regions are flex columns with
+   `min-height: 0` so each can own its own scrollzone. Without the zero min the taller one
+   dictates the page height and the lock has nothing to hold. */
+.tdt-split {
+  display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 30px;
+  flex: 1; min-height: 0;
+}
+.tdt-region { display: flex; flex-direction: column; min-height: 0; }
+.tdt-rail {
+  display: flex; flex-direction: column; min-height: 0;
+  border-left: 1px solid #eee7db; padding-left: 24px;
+}
+
+@media (max-width: 1080px) {
+  /* the rail folds under rather than squeezing the list below its measure */
+  .tdt-split { grid-template-columns: minmax(0, 1fr); }
+  .tdt-rail { border-left: 0; padding-left: 0; border-top: 1px solid #eee7db; padding-top: 18px; }
+}
+
+/* ⚠️ THE SECTION HEAD: the icon is 18px at 1.8 stroke and sits on the CAP-HEIGHT, not the
+   baseline — `align-items: baseline` would hang it below the letters. The subtitle beneath is
+   indented to the TITLE's text (icon width + gap), and is a plain sentence: never italic. */
+.tdt-sechead {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 9px; border-bottom: 1px solid #eee7db; margin-bottom: 4px; flex: 0 0 auto;
+}
+.tdt-secicon { color: #6b5a4e; flex: 0 0 auto; }
+.tdt-sechead h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px; font-weight: 700; color: #2b2118; margin: 0;
+}
+.tdt-seccount {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.1em; color: #a5988c;
+}
+.tdt-secsub {
+  font-size: 11.5px; color: #8a7a6c; margin: 7px 0 4px; padding-left: 28px;
+  font-style: normal; flex: 0 0 auto;
+}
+
+/* ── the plan card ── */
+.tdt-plan {
+  display: flex; align-items: center; gap: 16px;
+  border: 1px solid #ece4d6; background: #fff; border-radius: 13px;
+  padding: 14px 18px; margin-bottom: 18px; flex: 0 0 auto;
+}
+.tdt-planart { flex: 0 0 auto; margin: 0; }
+.tdt-plantx { flex: 1; min-width: 0; }
+.tdt-plantx b {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px; display: block; color: #2b2118;
+}
+.tdt-plantx p { font-size: 12px; color: #8a7a6c; line-height: 1.5; margin: 3px 0 0; }
+
+/* ── rows ── */
+.tdt-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 13px 2px; border-bottom: 1px solid #f4eee4;
+}
+.tdt-rowmain { flex: 1; min-width: 0; }
+.tdt-row .tdt-t { font-size: 14px; font-weight: 600; color: #2b2118; line-height: 1.3; }
+.tdt-row.done .tdt-t { text-decoration: line-through; color: #9a8e80; }
+.tdt-chips { display: flex; gap: 7px; margin-top: 5px; align-items: center; flex-wrap: wrap; }
+.tdt-chip {
+  display: inline-flex; align-items: center;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px; letter-spacing: 0.09em; color: #8a7d6e;
+  border: 1px solid #efe8dc; border-radius: 5px; padding: 2px 8px;
+}
+.tdt-chip.pk { border-color: #eecfc2; color: #8a4a36; background: #fdf4f0; }
+.tdt-chip.est { border-color: #c9d6c5; color: #5a6e58; background: #e9ede6; }
+/* ⚠️ THE ACTION CORNER IS RESERVED, always. The ⋯ keeps its seat whether or not the row is
+   actionable, so rows do not shuffle sideways as you read down the list. */
+.tdt-act { margin-left: auto; display: flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+.tdt-rowink {
+  display: inline-flex; align-items: center; background: #2a1a13; color: #fff;
+  border: 0; border-radius: 8px; height: 30px; padding: 0 13px;
+  font-size: 11.5px; font-weight: 600; cursor: pointer;
+}
+.tdt-dots {
+  width: 24px; height: 22px; border-radius: 6px; border: 0; background: transparent;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #c4b6a6; cursor: pointer;
+}
+.tdt-row:hover .tdt-dots { color: #6b5a4e; background: #faf6f0; }
+
+/* ── Up next ── */
+.tdt-brow { padding: 12px 2px; border-bottom: 1px solid #f4eee4; cursor: grab; }
+.tdt-brow .tdt-bt { font-size: 13px; font-weight: 600; color: #2b2118; line-height: 1.3; }
+.tdt-brow .tdt-why {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px; letter-spacing: 0.1em; color: #9a8a6e; margin: 5px 0 8px;
+}
+.tdt-drag { font-size: 10.5px; color: #b3a394; margin: 10px 0 0; flex: 0 0 auto; }

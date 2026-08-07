@@ -62,8 +62,16 @@ describe("the corner pop-up is retired — component, state and styles", () => {
 describe("the behaviour moved rather than died", () => {
   it("Today is a page, rendering the day from the ONE derivation", () => {
     expect(today).toContain("todaySplit(board, today)");
-    expect(today).toContain("Your list for today");
-    expect(today).toContain("cleared today");
+    expect(today).toContain("Today’s list");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P2): the cleared work used to sit under its own
+       "{n} cleared today" band. It settles IN PLACE among the rows now, struck through with its
+       time and an Undo, and the count moved into the section head's "{n} open · {n} done" — one
+       figure per region rather than a count band and a head that both speak. What this test
+       protects is unchanged: the day's cleared work lives on the Today PAGE, visible, not in a
+       corner toggle. */
+    expect(today).toContain("tdt-row done");
+    expect(today).toContain("clearedAtLabel(c.whenMs)");
+    expect(today).toContain("todayListCount(committed.length, done.length)");
   });
 
   it("the tour stop moved with it — a selector matching nothing SKIPS SILENTLY, it does not fail", () => {

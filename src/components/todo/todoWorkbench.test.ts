@@ -107,7 +107,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     // …and the successor renders the day from the one derivation, not a second copy of it
     const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
     expect(today).toContain("todaySplit(board, today)");
-    expect(today).toContain("Your list for today");
+    expect(today).toContain("Today’s list");
   });
   it.skip("SUPERSEDED (top-bar rebuild): the FAB is retired — help is a bar button, its /todo menu re-anchored", () => {
     expect(shell).not.toContain('{routeKey !== "todo" && (');

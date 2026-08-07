@@ -147,3 +147,73 @@ export function todayQuickAddFields(text: string, todayYmd: string): {
 } {
   return { text: text.trim(), dueDate: todayYmd };
 }
+
+/* ══ TODAY, REDESIGNED (tasks-viewport pack, Phase 2; ref design-refs/today-redesign.html) ══ */
+
+/**
+ * ⚠️ THE EYEBROW IS THE DASHBOARD'S OWN, NOT A LOOKALIKE. Today has to read as a sibling of the
+ * Dashboard rather than a narrow board, so it takes the SAME two derivations that page uses —
+ * `longDate` and `weekOfQuerying` from lib/dashboardStats — rather than growing its own date
+ * format and its own week count. Two formats for one fact is how two pages come to disagree
+ * about what day it is.
+ *
+ * The caller supplies both strings; this only joins and cases them, so nothing here can drift
+ * from the source it is quoting.
+ */
+export function todayEyebrow(dateLine: string, weekLine: string): string {
+  return `${dateLine} · ${weekLine} of querying`.toUpperCase();
+}
+
+export interface TodayStat {
+  label: string;
+  value: string;
+}
+
+/**
+ * ⚠️ THE PILL ROW REPLACES THE PROSE SUBTITLE, AND IT REPORTS RATHER THAN APPRAISES. The old line
+ * read "One of three cleared — Friday 7 August · est. 35 min remaining"; a stat row states the
+ * same three facts and says nothing about whether that is a good showing. THE COPY LAW: this app
+ * reports, it never appraises — no "well within the day", no verdict on a writer's workload.
+ *
+ * ⚠️ THE ESTIMATE PILL RENDERS ONLY WHEN SOMETHING CARRIES AN ESTIMATE. "Estimated 0 min" over a
+ * list nobody has estimated is not a zero, it is an absence — and stating it as a figure invites
+ * the reader to believe the day is empty. Absent, it simply does not appear.
+ */
+export function todayStats(committed: number, doneToday: number, estimatedMin: number): TodayStat[] {
+  const out: TodayStat[] = [
+    { label: "Committed", value: String(committed) },
+    { label: "Done today", value: String(doneToday) },
+  ];
+  if (estimatedMin > 0) out.push({ label: "Estimated", value: `${estimatedMin} min` });
+  return out;
+}
+
+/** "{n} open · {n} done" — the section head's own figures, stated beside the region they count. */
+export function todayListCount(open: number, done: number): string {
+  return `${open} open · ${done} done`;
+}
+
+const PLAN_KEY = "sa.todoPlanUsed";
+
+/**
+ * ⚠️ THE PLAN CARD DISMISSES FOR THE DAY, NOT FOREVER. "Seize the day" is an invitation to run
+ * the pass over Up next; once you have taken it, repeating the offer the same afternoon is the
+ * app nagging. Tomorrow it is a fresh day and a fresh offer, so the stored value is the DAY it
+ * was used rather than a boolean — a flag would have to be cleared by something, and nothing
+ * would own that job.
+ *
+ * ⚠️ A UI PREFERENCE, NEVER TASK DATA — localStorage under the house `sa.` prefix, read
+ * defensively (private mode throws on access; a corrupt value reads as "not used today", which
+ * shows the card, which is the harmless direction to fail in).
+ */
+export function planUsedToday(todayYmd: string): boolean {
+  try {
+    return localStorage.getItem(PLAN_KEY) === todayYmd;
+  } catch {
+    return false;
+  }
+}
+
+export function markPlanUsed(todayYmd: string): void {
+  try { localStorage.setItem(PLAN_KEY, todayYmd); } catch { /* private mode */ }
+}

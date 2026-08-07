@@ -43,8 +43,19 @@ export interface TasksPageLayoutProps {
   title: string;
   /** The one-line subtitle under the title. Optional — a page with nothing to say says nothing. */
   subtitle?: string;
+  /** ⚠️ THE MONO EYEBROW, above the title (tasks-viewport P2) — Today's "{DAY DATE} · WEEK {n} OF
+   *  QUERYING", the Dashboard's own grammar. It sits INSIDE the header block rather than being
+   *  hand-assembled by the page, because a page that assembles its own header is exactly how the
+   *  four of them came to disagree about their top edge in the first place. */
+  eyebrow?: string;
+  /** ⚠️ THE ROW BENEATH THE TITLE — Today's stat pills. Renders under the title/actions line and
+   *  above the tool row's hairline, so the header block stays one fixed unit. */
+  beneath?: React.ReactNode;
+  /** Actions on the TITLE's own line (Today's ghost + ink pair), right-aligned. Distinct from
+   *  `tools`: these are the page's two verbs, not its control row. */
+  titleActions?: React.ReactNode;
   /** The page's controls — the ONLY place they may live. Right slot = the pink creation action. */
-  tools: React.ReactNode;
+  tools?: React.ReactNode;
   /** The shared side container. Absent = the body takes the full width (the Noteboard). */
   sidebar?: React.ReactNode;
   children: React.ReactNode;
@@ -87,15 +98,28 @@ export const TplZone: React.FC<TplZoneProps> = ({ children, hem = true, classNam
   </div>
 );
 
-export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({ title, subtitle, tools, sidebar, children }) => (
+export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
+  title, subtitle, eyebrow, beneath, titleActions, tools, sidebar, children,
+}) => (
   /* `.tdb-col` is the SINGLE geometry owner (max-width, gutters, and the top token) — the layout
      wears it rather than restating its numbers. `.tpl` adds only what the contract needs. */
   <div className="tdb-col tpl">
     <header className="tpl-head">
-      <h1 className="tpl-title">{title}</h1>
+      {eyebrow && <div className="tpl-eyebrow">{eyebrow}</div>}
+      {titleActions ? (
+        <div className="tpl-titlerow">
+          <h1 className="tpl-title">{title}</h1>
+          <span className="tpl-grow" aria-hidden />
+          {titleActions}
+        </div>
+      ) : (
+        <h1 className="tpl-title">{title}</h1>
+      )}
       {subtitle && <p className="tpl-sub">{subtitle}</p>}
-      {/* the hairline lives on this row's bottom edge — the header ends where the columns begin */}
-      <div className="tpl-tools tdb-tools">{tools}</div>
+      {beneath}
+      {/* the hairline lives on this row's bottom edge — the header ends where the columns begin.
+          An empty tool row would draw a bare rule, so a page with no controls renders none. */}
+      {tools && <div className="tpl-tools tdb-tools">{tools}</div>}
     </header>
     <div className="tpl-cols">
       {sidebar && <aside className="tpl-side">{sidebar}</aside>}

@@ -17,12 +17,10 @@
  * Every derivation is in lib/todoToday (pure, unit-locked). This file is wiring and presentation.
  */
 import React, { useMemo, useState } from "react";
-import { Play, Plus, Undo2 } from "lucide-react";
-import { TodoSideContainer } from "./TodoSideContainer";
+import { Play, Plus, Undo2, ListChecks, LoaderCircle, MoreHorizontal } from "lucide-react";
 import { useTagWrites } from "./useTagWrites";
 import { ArtSlot } from "./ArtSlot";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
-import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
 import { todaySplit, BoardCard } from "../../lib/todoBoard";
@@ -30,10 +28,12 @@ import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { localYMD } from "../../lib/shellSidebar";
 import {
-  todaySubtitle, clearedAtLabel, suggestedBench, todayQuickAddFields, benchHeading,
+  clearedAtLabel, suggestedBench, todayQuickAddFields,
+  todayEyebrow, todayStats, todayListCount, planUsedToday, markPlanUsed,
 } from "../../lib/todoToday";
+import { longDate, weekOfQuerying } from "../../lib/dashboardStats";
+import { estimateTotal, estimateChip } from "../../lib/todoEstimate";
 import { useTodoToast } from "./useTodoToast";
-import "./todoSide.css";
 import "./todoToday.css";
 
 /** The Today page announces these; ToDoPage owns the surfaces that answer them. One event each,
@@ -56,6 +56,11 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   // board-optimise P2 — the shared tag-write pair
   const { createTagDef } = useTagWrites(flash);
   const [draft, setDraft] = useState("");
+  /* ⚠️ THE PLAN CARD'S DISMISSAL IS PER DAY, and it is a UI preference — localStorage, never
+     task data. Seeded from the store on mount so a reload inside the same day does not bring the
+     card back; the state is what makes the dismissal immediate rather than waiting for a
+     re-render from somewhere else. */
+  const [planUsed, setPlanUsed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const now = Date.now();
@@ -78,7 +83,6 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
   const split = todaySplit(board, today);
   const committed = applyFacet(split.committed, facet).filter((c) => matchesTags(c.tags, tagSel));
   const done = applyFacet(split.done, facet).filter((c) => matchesTags(c.tags, tagSel));
-  const subtitle = todaySubtitle(done.length, committed.length, now);
 
   /* THE BENCH — the open lanes minus everything the four exclusions rule out. Urgent before
      housekeeping: the order is what you would reach for, not what the array happened to hold.
@@ -110,6 +114,8 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
 
   /** ⚠️ Creates a TASK DUE TODAY — never a note (audit item 7). A note made here would leave the
    *  page the instant it was made, which is the clearest possible sign the verb was wrong. */
+  React.useEffect(() => { setPlanUsed(planUsedToday(today)); }, [today]);
+
   const quickAdd = async () => {
     const text = draft.trim();
     if (!text || saving) return;
@@ -144,65 +150,164 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
       <div className="tdb-wrap today-off">
       <TasksPageLayout
         title="Today"
-        subtitle={subtitle}
-        tools={
+        /* ⚠️ THE DASHBOARD'S GRAMMAR (tasks-viewport P2; ref today-redesign.html). Mono eyebrow
+           over a Playfair title over a pill stat row — this page must read as a sibling of the
+           Dashboard, not as a narrow board. Both derivations are the DASHBOARD'S OWN, imported
+           rather than reimplemented, so the two pages cannot disagree about the date or the
+           week. */
+        eyebrow={todayEyebrow(longDate(new Date(now)), weekOfQuerying(queries, new Date(now)))}
+        titleActions={
           <>
-            {/* ⚠️ INK, NOT PINK, AND DISABLED AT ZERO (corrections fix 6). Pink belongs to
-                creation — the ＋ Add in the right slot keeps it. An enabled "Work the list" with
-                nothing committed offers to walk an empty list: it earns its ink when the first
-                item lands. The disabled grammar is the house one, never opacity. */}
+            {/* ⚠️ ONE HEIGHT FOR THE PAIR, and the ink one is DISABLED AT ZERO — an enabled
+                "Work the list" with nothing committed offers to walk an empty list. The house
+                disabled grammar (paper, hairline, faint, not-allowed), never opacity. */}
             <button
               type="button"
-              className="tdb-btnp tdt-work"
+              className="tdt-ghost"
+              onClick={() => document.getElementById("tdt-add")?.focus()}
+            >
+              <Plus size={13} aria-hidden /> Add to today
+            </button>
+            <button
+              type="button"
+              className="tdt-ink"
               disabled={committed.length === 0}
               onClick={() => window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST))}
             >
               <Play size={12} aria-hidden /> Work the list
             </button>
-            <TplGrow />
-            <button
-              type="button"
-              className="tdb-addb"
-              onClick={() => document.getElementById("tdt-add")?.focus()}
-            >
-              <Plus size={13} aria-hidden /> Add to today
-            </button>
           </>
         }
-      >
-
-        {/* ⚠️ THE VIEWPORT LOCK (tasks-viewport P1): the header block is fixed above; everything
-            here scrolls inside the zone. Phase 2 splits this into the page's two named regions
-            (Today's list and Up next), each with its own zone. */}
-        <TplZone label="Today">
-        {/* ── YOUR LIST FOR TODAY ──────────────────────────────────────────── */}
-        <section className="tdt-card">
-          <div className="tdt-head">
-            <h2>Your list for today</h2>
-            <span className="tdt-cn">{committed.length}</span>
-            <span className="tdt-rule" aria-hidden />
+        /* ⚠️ THE PILL ROW REPLACES THE PROSE SUBTITLE ENTIRELY, and it REPORTS rather than
+            appraises: three figures, no verdict on whether that is a good day's showing. The
+            estimate pill is absent when nothing carries one — "Estimated 0 min" would state an
+            absence as a figure. */
+        beneath={
+          <div className="tdt-stats">
+            {todayStats(committed.length, done.length, estimateTotal(committed.map((c) => c.estimateMin)))
+              .map((st) => (
+                <span key={st.label} className="tdt-stat">
+                  {st.label} <b>{st.value}</b>
+                </span>
+              ))}
           </div>
+        }
+      >
+        {/* ⚠️ TWO NAMED REGIONS, SIDE BY SIDE (tasks-viewport P2; ref today-redesign.html).
+            Today's list takes the measure; Up next sits in a ~320px right rail behind a left
+            hairline. EACH SCROLLS INDEPENDENTLY under its own hem, so a long list never pushes
+            the suggestions off the page and neither region can take the header with it. */}
+        <div className="tdt-split">
 
-          <div className="tdt-rows">
-            {committed.map((c) => (
-              <div key={c.key} className="tdt-row">
-                <span className="tdt-tick" aria-hidden />
-                <span className="tdt-t">{c.title}</span>
-                {/* ⚠️ THE DUE-TODAY CHIP is the seam between "a list you built" and the surfacing
-                    rule. An item that arrived on its own date, rather than by your hand, says so —
-                    otherwise the list quietly stops being yours. */}
-                {c.surfaced && c.committedDate !== today && <span className="tdt-chip">Due today</span>}
-                {c.record && <span className="tdt-meta">{c.record}</span>}
-              </div>
-            ))}
-
-            {committed.length === 0 && !deskClear && (
-              <div className="tdt-empty">
-                Nothing committed yet — add something below, or lift one from the bench.
+          {/* ── TODAY'S LIST ──────────────────────────────────────────────── */}
+          <div className="tdt-region">
+            {/* ⚠️ THE PLAN CARD — white, hairline, above the list. It opens the pass over Up next
+                and DISMISSES FOR THE DAY once used: repeating the offer the same afternoon is
+                nagging, and tomorrow it is a fresh day. Not rendered when there is nothing to
+                plan from. */}
+            {!planUsed && bench.length > 0 && (
+              <div className="tdt-plan">
+                <ArtSlot name="seize-the-day" maxWidth={62} className="tdt-planart" />
+                <div className="tdt-plantx">
+                  <b>Seize the day</b>
+                  <p>Populate today’s list with your most pressing actions, then get them done.</p>
+                </div>
+                <button
+                  type="button"
+                  className="tdt-ink"
+                  onClick={() => {
+                    markPlanUsed(today);
+                    setPlanUsed(true);
+                    window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST));
+                  }}
+                >
+                  Start →
+                </button>
               </div>
             )}
 
-            {/* THE QUICK-ADD — one verb, one kind of thing. */}
+            {/* ⚠️ THE SECTION HEAD: 18px line icon centred on the cap-height, Playfair title, the
+                figures right of it, then a PLAIN sentence beneath — never italic. */}
+            <div className="tdt-sechead">
+              <ListChecks size={18} strokeWidth={1.8} aria-hidden className="tdt-secicon" />
+              <h2>Today’s list</h2>
+              <span className="tdt-seccount">{todayListCount(committed.length, done.length)}</span>
+            </div>
+
+            <TplZone label="Today’s list" hem={committed.length + done.length > 6}>
+              {committed.map((c) => (
+                <div key={c.key} className="tdt-row">
+                  <span className="tdt-tick" aria-hidden />
+                  <div className="tdt-rowmain">
+                    <div className="tdt-t">{c.title}</div>
+                    <div className="tdt-chips">
+                      {/* ⚠️ THE DUE-TODAY CHIP is the seam between "a list you built" and the
+                          surfacing rule — an item that arrived on its own date says so, or the
+                          list quietly stops being yours. */}
+                      {c.surfaced && c.committedDate !== today && <span className="tdt-chip pk">Due today</span>}
+                      {c.record && <span className="tdt-chip">{c.record}</span>}
+                      {estimateChip(c.estimateMin) && (
+                        <span className="tdt-chip est">⏲ {estimateChip(c.estimateMin)}</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* the reserved corner — the ⋯ keeps its seat whether or not the row is
+                      actionable, so rows do not shuffle as you read down them */}
+                  <span className="tdt-act">
+                    {c.record && <button type="button" className="tdt-rowink">Action</button>}
+                    <button type="button" className="tdt-dots" aria-label={`Actions for ${c.title}`}>
+                      <MoreHorizontal size={14} aria-hidden />
+                    </button>
+                  </span>
+                </div>
+              ))}
+
+              {committed.length === 0 && !deskClear && (
+                <div className="tdt-empty">Nothing committed yet — add something below, or take one from Up next.</div>
+              )}
+
+              {/* CLEARED — settling IN PLACE, struck through, with the time and a way back. They
+                  stay for the rest of the day: erasing what you finished would hide the only
+                  evidence the day went anywhere. */}
+              {done.map((c) => (
+                <div key={c.key} className="tdt-row done">
+                  <span className="tdt-tick on" aria-hidden>✓</span>
+                  <div className="tdt-rowmain">
+                    <div className="tdt-t">{c.title}</div>
+                    <div className="tdt-chips"><span className="tdt-chip">{clearedAtLabel(c.whenMs)}</span></div>
+                  </div>
+                  {c.userTaskId && (
+                    <span className="tdt-act">
+                      <button type="button" className="tdt-ghost sm" onClick={() => void undoDone(c)}>
+                        <Undo2 size={12} aria-hidden /> Undo
+                      </button>
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              {/* ⚠️ ART · DESK-CLEAR — the workspace's one full illustration, and the rarest
+                  thing in it (the three-way AND above). */}
+              {deskClear && (
+                <div className="tdt-deskclear">
+                  <ArtSlot name="desk-clear" />
+                  <h3>The desk is clear.</h3>
+                  <p>Nothing urgent, nothing waiting, nothing left to suggest.</p>
+                  <div className="tdt-dcacts">
+                    <button type="button" className="tdt-ink" onClick={() => onNavigatePath("/manuscripts")}>
+                      Go and write →
+                    </button>
+                    <button type="button" className="tdt-ghost" onClick={() => document.getElementById("tdt-add")?.focus()}>
+                      ＋ Add a task
+                    </button>
+                  </div>
+                </div>
+              )}
+            </TplZone>
+
+            {/* THE QUICK-ADD — at the region's foot, OUTSIDE the zone so it never scrolls away
+                from the list it adds to. One verb, one kind of thing: a TASK DUE TODAY, never a
+                note (a note made here would leave the page the instant it was made). */}
             <div className="tdt-add">
               <input
                 id="tdt-add"
@@ -228,79 +333,48 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             </div>
           </div>
 
-          {/* ⚠️ ART · DESK-CLEAR (board-optimise P3) — the workspace's one full illustration, and
-              the rarest thing in it. Playfair line, the plain sentence, the ink way out and the
-              pink way back in, per the ref. */}
-          {deskClear && (
-            <div className="tdt-deskclear">
-              <ArtSlot name="desk-clear" />
-              <h3>The desk is clear.</h3>
-              <p>Nothing urgent, nothing waiting, nothing left on the bench.</p>
-              <div className="tdt-dcacts">
-                <button type="button" className="tdb-btnp" onClick={() => onNavigatePath("/manuscripts")}>
-                  Go and write →
-                </button>
-                <button type="button" className="tdb-addb" onClick={() => document.getElementById("tdt-add")?.focus()}>
-                  ＋ Add a task
-                </button>
-              </div>
+          {/* ── UP NEXT ───────────────────────────────────────────────────────
+              ⚠️ "UP NEXT", NEVER "THE BENCH". THE COPY LAW: no private metaphors for functional
+              elements. "The bench" meant something to whoever named it and nothing to a writer
+              reading it for the first time; a suggestion list is called what it is.
+              ⚠️ AND IT CARRIES NO COUNT, ANYWHERE. A number here invites you to work through a
+              pile; these are the most pressing few, and the list above is the only one with a
+              length worth stating. */}
+          <aside className="tdt-rail" aria-label="Up next">
+            <div className="tdt-sechead">
+              <LoaderCircle size={18} strokeWidth={1.8} aria-hidden className="tdt-secicon" />
+              <h2>Up next</h2>
             </div>
-          )}
+            <p className="tdt-secsub">Suggested items from your to-do list</p>
 
-          {/* CLEARED — settling IN PLACE, struck through, with the time and a way back. They stay
-              for the rest of the day: a list that erased what you finished would hide the only
-              evidence the day went anywhere. */}
-          {done.length > 0 && (
-            <div className="tdt-done">
-              <div className="tdt-donehead">{done.length} cleared today</div>
-              {done.map((c) => (
-                <div key={c.key} className="tdt-row done">
-                  <span className="tdt-tick on" aria-hidden>✓</span>
-                  <span className="tdt-t">{c.title}</span>
-                  <span className="tdt-time">{clearedAtLabel(c.whenMs)}</span>
-                  {c.userTaskId && (
-                    <button type="button" className="tdt-undo" onClick={() => void undoDone(c)}>
-                      <Undo2 size={13} aria-hidden /> Undo
-                    </button>
-                  )}
+            <TplZone label="Up next" hem={bench.length > 3}>
+              {bench.map((b) => (
+                <div
+                  key={b.card.key}
+                  className="tdt-brow"
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", b.card.key)}
+                >
+                  <div className="tdt-bt">{b.card.title}</div>
+                  {/* the why-line is per REASON, from the shared derivation — never a generic
+                      "suggested", which would make three rows look like one rule */}
+                  <div className="tdt-why">{b.why}</div>
+                  <button
+                    type="button"
+                    className="tdt-ghost sm"
+                    onClick={() => window.dispatchEvent(new CustomEvent(TODO_ADD_TO_TODAY, { detail: { key: b.card.key } }))}
+                  >
+                    <Plus size={12} aria-hidden /> Add to today
+                  </button>
                 </div>
               ))}
-            </div>
-          )}
-        </section>
-
-        {/* ── THE SUGGESTED BENCH ──────────────────────────────────────────
-            Dashed, because it is a proposal rather than a commitment. Capped at BENCH_MAX: a
-            longer bench is a second to-do list beside the real one above it. */}
-        {bench.length > 0 && (
-          <section className="tdt-bench" aria-label="Suggested">
-            {/* ⚠️ THE HEADING STATES THE BENCH, NOT ITS GUARANTEE (corrections fix 7). It used to
-                read "never anything you have snoozed or dismissed" — the implementation promise,
-                shouted at someone who never doubted it. The exclusion rule is still enforced in
-                the derivation and still tested there; it simply does not headline. */}
-            <div className="tdt-benchhead">
-              {/* ⚠️ CARDS, from the SAME derivation as every other figure (tasks-audit P2).
-                  This summed the raw LANES (member units — every sweep agent loose): 24 against
-                  a 16-card world. The pool behind the bench is the To do column itself — the
-                  card-unit remaining after today's list — so the header states THAT number. */}
-              <b>Suggested for today</b> · {benchHeading(benchPool, filtersActive)}
-            </div>
-            {bench.map((b) => (
-              <div key={b.card.key} className="tdt-brow">
-                <span className="tdt-bt">{b.card.title}</span>
-                <span className="tdt-why">{b.why}</span>
-                <button
-                  type="button"
-                  className="tdt-badd"
-                  onClick={() => window.dispatchEvent(new CustomEvent(TODO_ADD_TO_TODAY, { detail: { key: b.card.key } }))}
-                >
-                  ＋ Add
-                </button>
-              </div>
-            ))}
-          </section>
-        )}
-        </TplZone>
+              {bench.length === 0 && (
+                <div className="tdt-empty">Nothing to suggest — your to-do list is clear.</div>
+              )}
+            </TplZone>
+            <p className="tdt-drag">Drag an item across to add it.</p>
+          </aside>
+        </div>
       </TasksPageLayout>
       </div>
 

@@ -28,7 +28,7 @@ describe("⚠️ 'Work the list' — disabled grammar at zero, ink primary with 
   });
 
   it("the ENABLED state is the ink primary — and disabling is the zero-committed condition", () => {
-    expect(todayPage).toContain('className="tdb-btnp tdt-work"');
+    expect(todayPage).toContain('className="tdt-ink"');
     expect(todayPage).toContain("disabled={committed.length === 0}");
   });
 

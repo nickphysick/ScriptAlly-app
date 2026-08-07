@@ -34,8 +34,16 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
     expect(page).not.toContain("const [showDone, setShowDone] = useState(false);");
     expect(page).not.toContain("tdb-cdone"); // the header badge stays extinct
     const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
-    expect(today).toContain("cleared today");
-    expect(today).toContain('className="tdt-done"');
+    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P2): the cleared work used to sit under its own
+       "{n} cleared today" band. It settles IN PLACE among the rows now, struck through with its
+       time and an Undo, and the count moved into the section head's "{n} open · {n} done" — one
+       figure per region rather than a count band and a head that both speak. What this test
+       protects is unchanged: the day's cleared work lives on the Today PAGE, visible, not in a
+       corner toggle. */
+    expect(today).toContain("tdt-row done");
+    expect(today).toContain("clearedAtLabel(c.whenMs)");
+    expect(today).toContain("todayListCount(committed.length, done.length)");
+    expect(today).toContain('className="tdt-row done"');
   });
 
   it("the done row is the sage-family mono divider (border-top carries the old tdiv's job)", () => {

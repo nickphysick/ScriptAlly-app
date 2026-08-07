@@ -149,16 +149,20 @@ describe("⚠️ the tool row is the ONLY home for page controls", () => {
     expect(listPage).toContain("tools={renderTools()}");
   });
 
-  it("Today's two controls live in its tools prop — the pink creation action in the right slot", () => {
-    const tools = todayPage.slice(todayPage.indexOf("tools={"), todayPage.indexOf("sidebar={"));
-    expect(tools).toContain("Work the list");
-    expect(tools).toContain("Add to today");
-    expect(tools).toContain("<TplGrow />");
-    // the pink (tdb-addb) sits AFTER the grow — the right slot
-    expect(tools.indexOf("tdb-addb")).toBeGreaterThan(tools.indexOf("<TplGrow />"));
-    // and no button renders outside the tools/sidebar props before the body
-    const afterTools = todayPage.slice(todayPage.indexOf("</TasksPageLayout>"));
-    expect(afterTools).not.toContain("tdb-addb");
+  it("⚠️ Today's two controls live on the TITLE ROW — it has no tool row at all", () => {
+    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P2): Today used to put its pair in the tool row
+       like every other page. Redesigned to the Dashboard's grammar, the ghost + ink pair sit on
+       the title's own line and the page has NO tool row and NO filter control — a committed list
+       of a few items needs no sifting, and the absence is the design. The header block is still
+       ONE fixed unit owned by the layout, which is the contract this file exists to hold; the
+       three-slot rule (grow → pink right) still governs every page that HAS a tool row. */
+    const head = todayPage.slice(todayPage.indexOf("titleActions={"), todayPage.indexOf("beneath={"));
+    expect(todayPage.indexOf("titleActions={")).toBeGreaterThan(-1); // the anchor, per the slice law
+    expect(head).toContain("Work the list");
+    expect(head).toContain("Add to today");
+    // no tool row, and no filter control anywhere on the page
+    expect(todayPage).not.toContain("tools={");
+    expect(todayPage).not.toContain("TodoSideContainer");
   });
 
   it("the sidebar prop carries the ONE TodoSideContainer — on the ONE page that has one", () => {

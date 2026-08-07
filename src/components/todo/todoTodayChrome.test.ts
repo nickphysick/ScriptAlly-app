@@ -18,8 +18,8 @@ describe("⚠️ Work the list is INK, and pink stays with creation (fix 6)", ()
   it("carries the INK class, never the pink one", () => {
     /* tasks-pages P1: the PageHeader actions array became real buttons in the layout's tool row —
        ink = .tdb-btnp (the tailored solid), pink = .tdb-addb (creation only). Same law. */
-    expect(today).toContain('className="tdb-btnp tdt-work"'); // the anchor (the slice law)
-    const at = today.indexOf('className="tdb-btnp tdt-work"');
+    expect(today).toContain('className="tdt-ink"'); // the anchor (the slice law)
+    const at = today.indexOf('className="tdt-ink"');
     const btn = today.slice(at, today.indexOf("</button>", at)); // the Work button's own JSX only
     expect(btn).toContain("Work the list");
     expect(btn).not.toContain("tdb-addb"); // ink stays ink; pink belongs to the ＋ Add beside it

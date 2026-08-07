@@ -67,7 +67,7 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
   it("…and carries its own header", () => {
     const html = render(<TodoTodayPage onNavigate={() => {}} />);
     expect(html).toContain("Today");
-    expect(html).toContain("Your list for today");
+    expect(html).toContain("Today’s list");
   });
 
   /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,

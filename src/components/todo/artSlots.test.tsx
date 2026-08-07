@@ -24,11 +24,16 @@ const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 
+/* ⚠️ SEVEN 7 Aug 2026 (tasks-viewport P2): "seize-the-day" joins the six, and it is the FIRST
+   slot to carry a real asset — the illustration arrived embedded in today-redesign.html and is
+   committed at public/todo-seize-the-day.png. The census stays exhaustive so a slot cannot be
+   added without a brief, which is the whole point of this list. */
 const NAMES: ArtSlotName[] = [
   "desk-clear", "noteboard-empty", "done-empty", "dock-seal", "review-masthead", "first-run-board",
+  "seize-the-day",
 ];
 
-describe("⚠️ ONE component, SIX slots — the briefs are the contract", () => {
+describe("⚠️ ONE component, SEVEN slots — the briefs are the contract", () => {
   it("every briefed slot exists, with its ratio and its caption", () => {
     expect(Object.keys(ART_SLOTS).sort()).toEqual([...NAMES].sort());
     for (const n of NAMES) {
@@ -62,12 +67,25 @@ describe("⚠️ ONE component, SIX slots — the briefs are the contract", () =
   });
 
   it("⚠️ A MISSING ASSET DEGRADES TO THE CAPTION — never a broken image", () => {
-    // no slot has an asset today, so every render is the placeholder + its caption
+    /* ⚠️ AMENDED 7 Aug 2026 (tasks-viewport P2): this read "no slot has an asset today", which
+       was true of all six and is now true of six of seven. The rule it protects is unchanged and
+       is the important half — a slot WITHOUT a src renders its caption and never an <img>, so an
+       empty state cannot show a broken-image glyph. The one slot WITH a src is asserted below,
+       so the two directions are pinned rather than one. */
     for (const n of NAMES) {
       const html = renderToStaticMarkup(<ArtSlot name={n} />);
-      expect(html, n).not.toContain("<img");
-      expect(html, n).toContain(ART_SLOTS[n].caption.slice(0, 20));
+      const hasAsset = !!ART_SLOTS[n].src;
+      if (hasAsset) {
+        expect(html, n).toContain("<img");
+        expect(html, n).toContain(ART_SLOTS[n].alt); // described, and it is the brief's own alt
+      } else {
+        expect(html, n).not.toContain("<img");
+        expect(html, n).toContain(ART_SLOTS[n].caption.slice(0, 20));
+      }
     }
+    // exactly ONE slot carries an asset today — the plan card's mark
+    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day"]);
+    expect(ART_SLOTS["seize-the-day"].src).toBe("/todo-seize-the-day.png");
     // and when one DOES land, an onError flips it back to the caption rather than the glyph
     const src = readFileSync(join(here, "ArtSlot.tsx"), "utf8");
     expect(src).toContain("onError={() => setFailed(true)}");

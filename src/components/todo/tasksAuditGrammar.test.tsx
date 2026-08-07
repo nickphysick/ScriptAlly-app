@@ -69,7 +69,14 @@ describe("⚠️ the bench header derives from the card-unit derivation, like ev
   it("the page passes the To do column's own card count — never the raw member lanes", () => {
     // P5 narrowed the pool by the active filter — same card-unit source, filtered the same way
     expect(todayPage).toContain("applyFacet(assembled.cols.todo, facet)");
-    expect(todayPage).toContain("benchHeading(benchPool, filtersActive)");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P2): the suggestion region is "Up next" now and
+       it carries NO COUNT anywhere — a number invites you to work through a pile, when these are
+       the most pressing few. So there is no header figure left to derive. THE RULE THIS WAS
+       REALLY PROTECTING SURVIVES and is asserted above: the pool is still the card-unit To do
+       column narrowed by the same facet, so the suggestions cannot disagree with the board about
+       what is outstanding. */
+    expect(todayPage).not.toContain("benchHeading");
+    expect(todayPage).toContain("Up next");
     expect(todayPage).not.toContain("benchHeading(board.do.length + board.hk.length");
   });
 

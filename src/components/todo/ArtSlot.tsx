@@ -31,7 +31,8 @@ export type ArtSlotName =
   | "done-empty"        // the Done column before the first tick today (must read at 260px)
   | "dock-seal"         // 600ms flourish as a flow completes, before the card animates to Done
   | "review-masthead"   // the weekly briefing card, while fresh
-  | "first-run-board";  // the To-do list before the first query — "not yet", not "well done"
+  | "first-run-board"   // the To-do list before the first query — "not yet", not "well done"
+  | "seize-the-day";    // Today's plan card — the ONE slot with a real asset committed
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -80,6 +81,17 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "An empty desk waiting to be used — before the first query.",
     w: 460, h: 260,
     alt: "An empty writing desk, waiting to be used",
+  },
+  /* ⚠️ THE ONLY SLOT WITH A REAL ASSET (tasks-viewport P2). It arrived embedded in
+     today-redesign.html as base64; it is committed at public/todo-seize-the-day.png and read by
+     path like any other. The `src` is what takes this slot off the placeholder path — every
+     other brief still renders its caption, and the degrade route is shared, so a 404 here lands
+     back on the caption rather than a broken-image glyph. */
+  "seize-the-day": {
+    caption: "The plan-your-day mark, on the card that opens the pass over Up next.",
+    w: 100, h: 100,
+    src: "/todo-seize-the-day.png",
+    alt: "A mark for planning the day ahead",
   },
 };
 
