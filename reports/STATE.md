@@ -1,6 +1,48 @@
 # STATE — where the repo stands
 
-**Last updated: 7 August 2026 (twelfth pass — the Tasks audit fixes).**
+**Last updated: 7 August 2026 (thirteenth pass — the board optimisation).**
+
+## The board optimisation is IN — P1–P7 (board-optimise pack; report: `reports/board-optimise.md`)
+
+`2fb9287` (four scope-fenced refs) → `97fddcc` (P1 column measure) → `d3b5efd` (P2 sidebar) →
+`f2c49c0` (P3 ArtSlot) → `a2d1d6b` (P4 dock work surface) → `6c0fb97` (P5 settings + tag sheets)
+→ `8d5dedc` (P6 fold + reflow) → `b83154b` (P7 estimates). Suite **3264 | 2 skipped, 207 files**.
+
+- **⚠️ PHASE 8 (multi-select) IS NOT BUILT — ITS PREMISE IS FALSE, and this needs Nick's call.**
+  The pack says "reuse the list's batch model wholesale — no second selection system" and "the
+  existing batch bar". **There is no batch bar and no selection model in live code**:
+  `ToDoPage.tsx:342` records "the ledger's selection/keyboard/kebab machinery retired with the run
+  sheet — Final Shape P5"; `todoLedger`'s `batch*` helpers are the housekeeping COHORT (agents
+  under one rule), not selection; `git log -S "SELECTED ·"` finds no bar ever shipped. Building it
+  fresh would contradict the phase's own central test ("selection model reuse, asserted not
+  reimplemented") and is a pack of its own. **Nothing is half-built** — no selection state, no
+  checkbox, no bar exists on the board. Options are argued at the foot of the report.
+- **The column measure caps at 290px** — `repeat(4, minmax(0, --tbd-col-w))` + `justify-content:
+  start`; the surplus is margin, never card width. The **zero min is load-bearing** (it lets a
+  column shrink rather than overflow), so both narrow breakpoints keep the same track function
+  with fewer tracks.
+- **⚠️ THE FOLD IS A UI PREFERENCE, NEVER BOARD DATA** — `sa.todoFolded` in localStorage, read
+  defensively; the schema diff is LOCKED (no fold field in the rules or the types). Freed width
+  goes to the **leftmost OVERFLOWING** column, at most **two lanes**, one spanning head carrying
+  "SHOWING {n} · WAS {m}". **Reading fills top-to-bottom THEN the next lane** — locked by
+  asserting the lanes concatenate back to the derived order. The lanes can be pure presentation
+  precisely BECAUSE order is derived and never stored.
+- **ONE stored map for the four behaviours** (`User.todoPrefs`: staleMonths · goodDay ·
+  rollForward · weeklyBriefing) — one rules entry, one write path; every reader goes through the
+  TOTAL `todoPrefs()`, and **the defaults are the behaviour the app already had**. `wipLine`'s
+  hardcoded 3–5 now takes the writer's number — the row was a control over nothing.
+- **`UserTask.estimateMin?: number`** — the one new stored field, justified in full in the report
+  and in `src/lib/todoEstimate.ts`'s head: nothing in the app knows how long *your* redraft takes,
+  so it is a judgement rather than a derivation; a scalar on the object the writer already owns;
+  the "none" rung `deleteField`s it. The ladder is offered on **Today only**, and the head sums
+  only what carries an estimate — it never guesses.
+- **ArtSlot** is one component, six named slots, each reserving its brief's RATIO so nothing
+  shifts when art lands (no `src` today; degrades to the caption). **The two rejections are
+  enforced, not noted** — no art in a page header, none per card, both asserted.
+- **Both sheets, never routes** (a route would take the board off screen and make Back the way out
+  of a rename); tags moved to their own sheet; the dismissed ledger is a door that states its
+  count. Tag WRITES consolidated into `useTagWrites` — four pages needed them, so four copies of
+  the null-detach convention were one edit away.
 
 ## The Tasks audit fixes are IN (tasks-audit pack; report: `reports/tasks-audit-fixes.md`)
 
@@ -362,22 +404,22 @@ first cannot catch a promotion that silently stops.
 
 ## Deploy state
 
-- **dev** — hosting at `4d42807`; **rules DONE 6 Aug on both databases**.
-- **prod** — untouched, and still behind. ⚠️ The sequencing constraint stands and has GROWN: the
-  prod `firestore.rules` deploy must land **before or with** any prod hosting deploy of this code,
-  and it now carries `rejectedDate` (queries allowlist), `detail`/`surfaceOffset` (tasks) **and
-  `committedDate`** (tasks update). Until it lands, a prod user's Today's-list commit is denied in
-  silence. Prod deploys are Nick's alone.
+- **dev** — hosting + rules at the board-optimise tip (7 Aug, both databases).
+- **prod** — untouched, and still behind. ⚠️ The sequencing constraint stands and has GROWN
+  AGAIN: the prod `firestore.rules` deploy must land **before or with** any prod hosting deploy of
+  this code, and it now carries `rejectedDate` (queries allowlist), `detail`/`surfaceOffset`
+  (tasks), `committedDate` (tasks update), **`tags`**, **`todoPrefs`** (user doc) and
+  **`estimateMin`** (tasks, both allowlists). Until it lands, a prod user's Today's-list commit,
+  their tags, their task settings and their estimates are all denied in silence. Prod deploys are
+  Nick's alone.
 
 ## The queue
 
-1. **Calendar + Noteboard pack** — the two routes ship as honest placeholders; their bodies are
-   the next build.
-2. **Tags pack** — blocked by fact, not order: **no tag model exists** anywhere in the repo, so
-   TAGS ships as a disabled affordance until one does.
-3. **Prod sequencing pass** (Nick) — rules before hosting, per the constraint above.
-4. **Correction UI.**
-5. **Notes-store convergence.**
+1. **The P8 call** (Nick) — multi-select: its own pack, skip it, or the minimal gesture. The
+   premise finding is at the foot of `reports/board-optimise.md`; nothing is half-built.
+2. **Prod sequencing pass** (Nick) — rules before hosting, per the grown constraint above.
+3. **Correction UI.**
+4. **Notes-store convergence.**
 
 Smaller, flagged rather than done: the six remaining orphan-component candidates (verdicts and
 evidence in `reports/todo-pages.md`), the orphaned `.sv2-*` rules left by the retired capsule
