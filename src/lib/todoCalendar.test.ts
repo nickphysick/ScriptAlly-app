@@ -13,7 +13,7 @@ import { Query, Agent, UserTask, TaskFlag, Activity, ActivityType, QueryStatus }
 import { BoardCard } from "./todoBoard";
 import {
   monthGridDays, weekDays, monthLabel, weekLabel, shiftMonth, shiftWeek, sameMonth,
-  cardActionYmd, calendarDays, CAL_CELL_CAP, toYmd,
+  cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
 } from "./todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "./todoFamily";
 
@@ -145,7 +145,13 @@ describe("completed items derive from the activity log — the Done column's own
 describe("the fold, the map, the wiring", () => {
   it("busy days fold past the cap", () => {
     expect(CAL_CELL_CAP).toBe(3);
-    expect(pageSrc).toContain("items.slice(0, CAL_CELL_CAP)");
+    /* ⚠️ AMENDED 7 Aug 2026 (tasks-viewport P3): the cap is DERIVED from the row height the grid
+       resolved to, not read flat off the constant. A flat 3 asked a 44px row on a short laptop to
+       hold three 19px pips, and the third was sheared in half — a clipped pip is worse than an
+       honest fold, because the fold says "there are more" while a half-pip says the app is
+       broken. CAL_CELL_CAP survives as the CEILING, which is what this test really pinned. */
+    expect(pageSrc).toContain("items.slice(0, cellCap)");
+    expect(pageSrc).toContain("calFoldCap(rowPx)");
     expect(pageSrc).toContain("+{overflow} MORE");
   });
 
@@ -188,5 +194,33 @@ describe("the fold, the map, the wiring", () => {
 
   it("toYmd is local, not UTC — a late-evening task must not land on tomorrow", () => {
     expect(toYmd(new Date(2026, 7, 7, 23, 30))).toBe("2026-08-07");
+  });
+});
+
+/* ── the derived fold (tasks-viewport P3) ──────────────────────────────────────────────────── */
+
+describe("⚠️ the fold threshold derives from the cell, never from a flat constant", () => {
+  it("a tall row shows the ceiling; a short one folds sooner", () => {
+    // 26px chrome + 3 × 19px pips = 83px of room for the full three
+    expect(calFoldCap(120)).toBe(CAL_CELL_CAP);
+    expect(calFoldCap(84)).toBe(3);
+    expect(calFoldCap(64)).toBe(2);   // 38px of room — two fit
+    expect(calFoldCap(46)).toBe(1);   // 20px — one
+  });
+
+  it("⚠️ AT LEAST ONE PIP ALWAYS SHOWS — a cell that folds everything says only '+3 MORE'", () => {
+    /* which tells you the day is busy but not what it holds — the fold is meant to abbreviate a
+       list, not replace it. */
+    expect(calFoldCap(30)).toBe(1);
+    expect(calFoldCap(1)).toBe(1);
+  });
+
+  it("it never exceeds the ceiling, however tall the row", () => {
+    expect(calFoldCap(2000)).toBe(CAL_CELL_CAP);
+  });
+
+  it("an unmeasured grid reads as the old flat cap — nothing renders emptier while it settles", () => {
+    expect(calFoldCap(0)).toBe(CAL_CELL_CAP);
+    expect(calFoldCap(-5)).toBe(CAL_CELL_CAP);
   });
 });

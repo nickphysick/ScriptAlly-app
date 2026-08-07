@@ -218,3 +218,32 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
 
 /** Busy days fold past this many pips to "+N MORE" (the ref draws 3 + the fold). */
 export const CAL_CELL_CAP = 3;
+
+/* ══ THE FOLD THRESHOLD (tasks-viewport pack, Phase 3) ══════════════════════════════════════ */
+
+/** A pip's own height plus its top margin — the ref's `.pip2` (2px pad × 2 + ~11px line + 3px). */
+export const CAL_PIP_H = 19;
+/** The date line at the cell's head, plus the cell's vertical padding and border. */
+export const CAL_CELL_CHROME = 26;
+
+/**
+ * ⚠️ THE FOLD DERIVES FROM THE CELL, NOT FROM A CONSTANT. `CAL_CELL_CAP` was a flat 3 whatever
+ * the screen did — right on a desktop, and on a short laptop it asked a 44px row to hold three
+ * 19px pips, so the third was sheared in half. A clipped pip is worse than an honest fold: the
+ * fold says "there are more", a half-pip says the app is broken.
+ *
+ * So the cap is a function of the row height the grid actually resolved to, and the page measures
+ * that rather than guessing. At least ONE pip always shows — a cell that folds everything says
+ * only "+3 MORE", which tells you a day is busy but not what it holds.
+ *
+ * `rowPx` of 0 (before the first measure, and in any test with no layout) yields the default cap,
+ * so nothing renders emptier than it used to while the measurement settles.
+ */
+export function calFoldCap(rowPx: number): number {
+  if (!rowPx || rowPx <= 0) return CAL_CELL_CAP;
+  const room = rowPx - CAL_CELL_CHROME;
+  /* one row is reserved for the "+N MORE" line itself whenever anything folds — counting it here
+     would let a cell promise a pip it then has to take back to make room for the fold line */
+  const fits = Math.floor(room / CAL_PIP_H);
+  return Math.max(1, Math.min(CAL_CELL_CAP, fits));
+}

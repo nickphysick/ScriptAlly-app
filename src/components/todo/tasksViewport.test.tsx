@@ -205,6 +205,30 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
   });
 });
 
+describe("⚠️ the Calendar's tool-row facet — the sidebar's filter, rehoused (P3)", () => {
+  it("it exists, and it reads the ONE facet definition rather than a second label list", () => {
+    expect(cal).toContain("cal-facetwrap");
+    expect(cal).toContain("TODO_FACETS.map");
+    expect(cal).not.toContain("FACET_LABEL"); // no per-page vocabulary
+  });
+
+  it("⚠️ ITS COUNTS ARE THE BOARD'S OWN — the two surfaces cannot state different numbers", () => {
+    expect(cal).toContain("facetCounts(liveBoardCards(assembled.cols))");
+  });
+
+  it("the facet reaches the pips, the day lists AND the day sheet — all read byDay", () => {
+    /* byDay is derived UNDER the facet, so narrowing cannot reach one surface and miss another;
+       that is why the filter is applied at the derivation rather than at each render site. */
+    expect(cal).toContain("userTasks: facet === \"all\" ? userTasks : []");
+    expect(cal).toContain("dayData(ymd)");
+  });
+
+  it("the week view obeys the same lock — no zone, the grid still fills", () => {
+    expect(cal).not.toContain("<TplZone");
+    expect(cal).toContain('view === "month" ? 6 : 1'); // the row divisor follows the view
+  });
+});
+
 describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
   it("the zone wraps the grid — it does not sit between the body and its cards", () => {
     /* The pack's own instruction: if the scrollzone changes margin handling, the fix is the

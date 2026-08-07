@@ -26,12 +26,12 @@ import { FocusFlow } from "./FocusFlow";
 import { useScriptAllyDb } from "../../lib/db";
 import { localYMD } from "../../lib/shellSidebar";
 import { TODO_OPEN_TASK_SETTINGS, TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
-import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
+import { TodoFacetId, facetCounts, applyFacet, TODO_FACETS } from "../../lib/todoBoardSort";
 import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, weekDays, monthLabel, weekLabel,
-  shiftMonth, shiftWeek, sameMonth, CAL_CELL_CAP,
+  shiftMonth, shiftWeek, sameMonth, CAL_CELL_CAP, calFoldCap,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
@@ -59,7 +59,29 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   const [facet, setFacet] = useState<TodoFacetId>("all");
   const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   const [view, setView] = useState<"month" | "week">("month");
+  /* ⚠️ THE FOLD THRESHOLD IS MEASURED, NOT GUESSED (tasks-viewport P3). The grid resolves its own
+     row height from whatever the frame leaves it, so the only honest source for "how many pips
+     fit" is the grid itself. A ResizeObserver keeps it true through window resizes and through
+     the month↔week switch; before the first measure `calFoldCap(0)` returns the old flat cap, so
+     nothing renders emptier while it settles. */
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const [rowPx, setRowPx] = useState(0);
+  React.useEffect(() => {
+    const el = gridRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const rows = view === "month" ? 6 : 1;
+      /* the grid's height less the day-name row, divided by the week rows it holds */
+      const first = el.firstElementChild as HTMLElement | null;
+      const dow = first?.offsetHeight ?? 0;
+      setRowPx(Math.max(0, (el.clientHeight - dow) / rows));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [view]);
+  const cellCap = calFoldCap(rowPx);
   const [viewOpen, setViewOpen] = useState(false);
+  const [facetOpen, setFacetOpen] = useState(false);
   const [anchor, setAnchor] = useState(today);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [flowCard, setFlowCard] = useState<BoardCard | null>(null);
@@ -94,6 +116,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
     }, visible);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assembled, facet, tagSel, taskFlags, queries, agents, userTasks, activities, today, visible.join("|")]);
+
+  /* ⚠️ THE COUNTS ARE THE ONE DERIVATION'S (tasks-viewport P3) — the same `facetCounts` over the
+     same `liveBoardCards(assembled.cols)` the sidebar fed, so the Calendar's control cannot state
+     a different number from the board's for the same facet. */
+  const facetTotals = facetCounts(liveBoardCards(assembled.cols));
 
   const subtitle = view === "month"
     ? `${monthLabel(anchor)} — every item on the day it needs you.`
@@ -131,6 +158,34 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                   </div>
                 )}
               </span>
+              {/* ⚠️ THE FACET LIVES IN THE TOOL ROW NOW (tasks-viewport P3). It was the page
+                  sidebar's FILTERS list; the sidebar is the To-do list's alone since P1, and
+                  between P1 and here the Calendar could not be narrowed at all. Same four facets
+                  from the SAME derivation the board and the badge read, in the Noteboard's
+                  `#All ▾` grammar so the two pages' filters are one control with two vocabularies
+                  rather than two controls. It reaches the pips, the day lists AND the day sheet,
+                  because they all read `byDay`, which is derived under the facet. */}
+              <span className="cal-facetwrap">
+                <button type="button" className="cal-nav cal-facet" aria-haspopup="menu"
+                  aria-expanded={facetOpen} onClick={() => setFacetOpen((o) => !o)}>
+                  {TODO_FACETS.find((f) => f.id === facet)?.label} ▾
+                </button>
+                {facetOpen && (
+                  <div className="cal-menu" role="menu">
+                    {/* ⚠️ TODO_FACETS, never a second label list — the sidebar, the board and this
+                        control all read the one definition, so they cannot come to disagree about
+                        what "Urgent" means or which four exist. */}
+                    {TODO_FACETS.map((f) => (
+                      <button key={f.id} type="button" role="menuitem" aria-current={facet === f.id}
+                        onClick={() => { setFacet(f.id); setFacetOpen(false); }}>
+                        <span className="cal-facetsw" style={{ background: f.swatch }} aria-hidden />
+                        {f.label}
+                        <span className="cal-facetn">{facetTotals[f.id]}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </span>
               <TplGrow />
               {/* the pink creation action: the ONE composer lives on the To-do list page — go
                   there and announce, the bar's ＋ New pattern (never a second create surface) */}
@@ -143,12 +198,15 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
             </>
           }
         >
-          <div className="cal-grid" role="grid" aria-label={view === "month" ? monthLabel(anchor) : weekLabel(anchor)}>
+          <div className="cal-grid" role="grid" ref={gridRef} aria-label={view === "month" ? monthLabel(anchor) : weekLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
               const { items, rolled } = dayData(ymd);
-              const overflow = Math.max(0, items.length - CAL_CELL_CAP);
-              const shown = items.slice(0, CAL_CELL_CAP);
+              /* ⚠️ THE FOLD RESPONDS TO THE VIEWPORT (tasks-viewport P3): the cap comes from the
+                 row height the grid actually resolved to, so a short laptop folds sooner rather
+                 than shearing a pip in half. */
+              const overflow = Math.max(0, items.length - cellCap);
+              const shown = items.slice(0, cellCap);
               const past = ymd < today;
               const off = view === "month" && !sameMonth(ymd, anchor);
               return (

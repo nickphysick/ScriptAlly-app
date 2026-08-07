@@ -124,3 +124,29 @@
 .cal-dayrow:disabled { cursor: default; }
 .cal-dayrow.struck { text-decoration: line-through; color: #8a7a6c; }
 .cal-dayrow i { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto; border: 1px solid transparent; }
+
+/* ══ THE TOOL-ROW FACET (tasks-viewport pack, Phase 3) ══════════════════════════════════════
+ * The page sidebar's FILTERS list moved here when the sidebar became the To-do list's alone.
+ * Same anatomy as the Noteboard's `#All ▾` — one control with two vocabularies, never two
+ * controls that happen to do the same job.
+ */
+.cal-facetwrap { position: relative; display: inline-flex; }
+.cal-facet { padding: 0 11px; width: auto; }
+.cal-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 20;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(58, 28, 20, 0.2); padding: 6px; min-width: 190px;
+}
+.cal-menu button {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  height: 32px; border: 0; background: transparent; border-radius: 8px; padding: 0 10px;
+  font: inherit; font-size: 11.5px; color: #4d4238; cursor: pointer; text-align: left;
+}
+.cal-menu button:hover { background: #f7f2e9; }
+.cal-menu button[aria-current="true"] { background: #f2ede7; font-weight: 700; color: #2b2118; }
+.cal-facetsw { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.cal-facetn {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px; color: #a5988c;
+}
