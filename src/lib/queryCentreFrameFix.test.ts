@@ -25,7 +25,7 @@ const rule = (sel: string): string => {
 describe("no double container", () => {
   it("the reading-pane wrapper is not a .f12-pane", () => {
     expect(queries, "the wrapper card came back").not.toContain("qp-pane f12-pane f12-detail");
-    expect(queries).toContain("qp-pane f12-detail qh-lit");
+    expect(queries).toContain("qp-pane f12-detail ");
   });
 
   it("...but the hero and the columns keep their card skin", () => {

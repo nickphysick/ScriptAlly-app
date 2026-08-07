@@ -77,11 +77,16 @@ describe("the espresso command bar (concept frame 03)", () => {
 });
 
 describe("create mode below md", () => {
-  it("is a detail screen with the in-flow Save/Cancel bar surviving (requirement line included)", () => {
+  /* ⚠️ AMENDED (create-mode v2 P3): the in-flow create BAR is retired for the illustrated
+     header, which lives in the pane's own flow rather than the .f12-ctl seat — so it needs no
+     counter-rule to survive the toolbar's mobile hide. What this test protects is unchanged and
+     is the reason it existed: below md the actions and the error line must stay reachable. */
+  it("is a detail screen with the header's actions and error line surviving", () => {
     expect(hub).toContain("if (creating) setMobileView(\"detail\");");
     expect(css).toContain(".f12-root .f12-ctl { display: none; }");
-    expect(css).toContain(".f12-root .f12-ctl.f12-ctl-create { display: flex;");
-    expect(css).toContain(".f12-root .f12-ctl-create .qcb-req { display: block;");
+    expect(css, "the header must wrap rather than truncate on a phone").toContain(".f12-root .qch { flex-wrap: wrap;");
+    expect(css, "the error slot must come back below md").toContain(".f12-root .qch-sub { display: block; }");
+    expect(css, "the actions must get their own line rather than squeeze").toContain(".f12-root .qch-acts { margin-left: 0; flex-basis: 100%; }");
     // back from a draft runs the dirty-guarded closeCreate, never a silent drop
     expect(hub).toContain("closeCreateRef.current(() => setMobileView(\"list\"))");
   });

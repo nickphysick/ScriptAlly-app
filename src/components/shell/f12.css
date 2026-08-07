@@ -83,7 +83,7 @@
 /* ⚠️ THE TOOLBAR IS A PANE ROW NOW (Query Centre P3), not a page-width band. It no longer
    centres itself in the content column or carries the page gutters — it sits inside the pane,
    its left edge flush with the cards below, and closes with a hairline. */
-.f12-ctl { flex: none; display: flex; align-items: center; height: 48px; width: 100%; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
+.f12-ctl { flex: none; display: flex; align-items: center; height: var(--f12-headh); width: 100%; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
 .f12-zone-read { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
 .f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
 .f12-ctl .f12-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
@@ -232,43 +232,33 @@
 /* Below the two-up width the text block would squeeze the field, so it stacks back. */
 @media (max-width: 980px) { .f12-hero.qc-hero { flex-wrap: wrap; } .qc-htxt { flex: 1 0 100%; } }
 
-/* ── CREATE-MODE COMMAND BAR (ref qdb-focus-spotlight.html) — the record actions are replaced
-   by this while a draft is open. Same .f12-ctl seat, so the bar neither moves nor changes height
-   as it swaps. The two buttons carry qh-lit and stay above the scrim. */
-.f12-ctl-create { align-items: center; gap: 12px; }  /* same pane seat — the takeover swaps the row's contents, not its box */
-.qcb-ctx { display: inline-flex; align-items: center; gap: 9px; flex: none; font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); }
-.qcb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; }
-/* Advisory copy, so it yields first: it truncates rather than pushing the buttons, and below
-   1100px it goes entirely. Cancel and Save must never wrap or be pushed out of the bar. */
-.qcb-req { flex: 0 1 auto; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qcb-err { color: var(--pink-i); }
-.qcb-esc { flex: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); }
-.f12-ctl-create .f12-btn-sec, .f12-ctl-create .f12-btn-pri { flex: none; white-space: nowrap; }
-@media (max-width: 1100px) { .qcb-req { display: none; } }
+/* ══ THE ILLUSTRATED CREATE HEADER (ref design-refs/qc-create-v2.html) ══════════════════════
+   RETIRES the create-mode command bar (.f12-ctl-create / .qcb-*) outright. That bar squeezed
+   the job, the requirement, the Esc hint and two buttons into one 48px pane row, where the
+   advisory copy had to truncate and then vanish below 1100px to protect the buttons. This band
+   gives the same information room: the icon and title say what you are doing, the subtitle says
+   what it needs, and the actions sit at the end of the same line rather than fighting it.
 
-/* ── FOCUS MODE — THE SCRIM (ref design-refs/qdb-focus-spotlight.html) ──────────────────
-   SUPERSEDES the per-surface dim (.qh-dim opacity/brightness) and the darkened ground
-   (--qh-focus-ground). Both are deleted, not layered under this.
+   ⚠️ THE PANE TOOLBAR IS HIDDEN, NOT DISABLED, while creating (Queries.tsx returns null): none
+   of the record verbs applies to a query that does not exist yet. ── */
+.qch { flex: none; display: flex; align-items: center; gap: 18px; padding: 2px 6px 14px; }
+.qch-ill { width: 64px; height: 64px; flex: none; object-fit: contain; }
+.qch-txt { min-width: 0; }
+.qch-title { font-family: var(--f12-serif); font-weight: 700; font-size: 26px; line-height: 1; color: var(--ink); margin: 0; }
+/* ONE line, two jobs — the requirement, or the save error. The burgundy is the only signal it
+   changes job; the text is what carries the meaning. */
+.qch-sub { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--ink-2); margin: 5px 0 0; }
+.qch-err { color: var(--pink-i); font-style: normal; }
+.qch-acts { margin-left: auto; display: flex; align-items: center; gap: 9px; flex: none; }
+.qch-esc { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-right: 4px; }
+/* Tertiary: the batch door, quieter than Cancel so the two saves do not read as a pair of
+   equals — one is the ordinary end of the job, the other is a continuation. */
+.qch-tert { flex: none; background: none; border: none; padding: 9px 6px; font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--ink-2); cursor: pointer; border-radius: var(--r-sm); white-space: nowrap; transition: color 0.14s, background 0.14s; }
+.qch-tert:hover:not(:disabled) { background: var(--paper); color: var(--ink); }
+.qch-tert:disabled, .qch .f12-btn-pri:disabled, .qch .f12-btn-sec:disabled { opacity: 0.45; cursor: not-allowed; }
+/* The title block yields before the actions do — the buttons must never wrap or be pushed out. */
+@media (max-width: 1100px) { .qch { gap: 12px; } .qch-ill { width: 48px; height: 48px; } .qch-sub { display: none; } }
 
-   ⚠️ The scrim is a child of .f12-root, NOT portalled to <body>. On route entry the stage slot
-   runs `pageIn`, which animates transform+opacity for 180ms — and for that window the slot is a
-   stacking context AND the containing block for position:fixed. Arriving from the rail's
-   "+ Query" opens create mode inside exactly that window, so a body-level scrim would paint OVER
-   the lit pane (which would be trapped in the slot's context) at the one moment it's most
-   visible. Keeping both in the same context makes the z-order true at all times; the cost is
-   that for ≤180ms the scrim covers the stage but not the rail, then reaches full viewport.
-
-   pointer-events:none is load-bearing: the darkened list stays fully clickable, so clicking
-   another row still runs the click-away/discard-confirm path. */
-.qh-scrim { position: fixed; inset: 0; background: var(--qh-scrim); opacity: 0; pointer-events: none; transition: opacity 0.24s ease; z-index: 50; }
-.qh-focus .qh-scrim { opacity: 1; }
-
-/* The three lit things. No ancestor between the page root and any of them creates a stacking
-   context (audited: the stage is position:relative with z-index:auto, which does not), so a
-   plain raise is enough — no ancestor was adjusted and no shared shell file was touched. */
-.qh-focus .qh-lit { position: relative; z-index: 60; }
-
-@media (prefers-reduced-motion: reduce) { .qh-scrim { transition: none; } }
 
 
 /* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
@@ -513,7 +503,14 @@
      Export/Log query buttons' right edge, at every breakpoint including the narrow step where
      --sa-col-gut drops to 16px. It previously used --maxw (1520px) with no inset, which is why
      the hairline ran to the sheet's edges. Vertical margins are untouched. */
-  width: calc(100% - 2 * var(--sa-col-gut)); max-width: var(--sa-col-max); margin: 22px auto 26px;
+  /* ⚠️ NO CAP — the inset is a constant, not a share of the leftover. With `max-width` the frame
+     capped at --sa-col-max and CENTRED, so past ~1360px of sheet the margins stopped being the
+     gutter and became half the surplus: 87px at 1440, ~280px at 1800. The frame is now simply the
+     sheet minus one gutter each side, at every width.
+     THE TRADE, deliberate: the header column still caps and centres, so past that width the frame
+     is WIDER than the header and the title/buttons sit inside its edges rather than on them —
+     the old workspace differential, but inset by the gutter instead of running to the sheet. */
+  width: calc(100% - 2 * var(--sa-col-gut)); margin: 22px auto 26px;
   padding: 20px 22px;
   border: 1px solid var(--line); border-radius: 18px;
 }
@@ -521,18 +518,26 @@
 /* ── THE EDITORIAL LIST (ref query-centre-final.html) — DE-CARDED. It is no longer a .f12-pane:
    inside the workspace frame a bordered card would be a card inside a card, so the list is now
    just a column of rows separated by hairlines. ── */
-.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; }
+.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; transition: width 0.34s cubic-bezier(0.22, 0.9, 0.3, 1); }
 
 /* The head reuses TO-DO'S values verbatim (todo.css .tdb-sec / .tdb-cn / .tdb-secrule) rather
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.
    ⚠️ The ref draws a 2px ink rule — that is the AGENT LIST's grouping treatment, and the live
    To-do grammar wins here (reuse, don't approximate). */
-.f12-lhtitle { flex: none; display: flex; align-items: baseline; gap: 9px; padding-bottom: 8px; border-bottom: 1px solid #ece5d9; margin-bottom: 10px; }
+/* ⚠️ THE HAIRLINE IS SHARED WITH THE PANE'S TOOLBAR — height, not padding, is what holds it.
+   The head used to be content-height + 8px of padding, so its rule sat wherever the type
+   happened to land (~31px) while the toolbar's sat at 47px: two rules, one frame, 16px apart.
+   Both now take --f12-headh, so the rule lands at the same y whatever the label says. */
+.f12-lhtitle { flex: none; display: flex; align-items: center; height: var(--f12-headh); border-bottom: 1px solid #ece5d9; margin-bottom: var(--f12-headgap); }
 .f12-lhtitle h2 { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
-.f12-lhtitle .f12-lhcount { font-family: var(--f12-mono); font-size: 10px; color: var(--muted); }
 /* list head — search takes the remaining width; Filter/Sort(/Group) triggers sit to its right */
 .f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
-.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; }
+/* ⚠️ THE ROW'S CONTROLS ARE ONE HEIGHT — the field matches the pills (36px), it is not merely
+   centred against them. At its own 34px, `align-items: center` set it 1px BELOW the Filter/Sort
+   pills and the hero card opposite (104 vs 103, browser-measured): a difference too small to
+   look deliberate and too real to be nothing. Equal heights align the tops AND the bottoms,
+   which no amount of margin arithmetic can do while the heights differ. */
+.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: 36px; }
 .f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
 .f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
 .f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
@@ -540,6 +545,72 @@
 .f12-lsearch input::placeholder { color: var(--muted); }
 .f12-lsearch .f12-kbd { margin-left: auto; }
 .f12-rows { flex: 1; overflow-y: auto; min-height: 0; }
+
+/* ══ CREATE MODE: FOCUS THROUGH SPACE (ref design-refs/qc-create-v2.html) ══════════════════
+   SUPERSEDES the scrim outright (deleted in P1 — no dimming, tinting or overlay survives).
+   Focus is now a LAYOUT change: the list collapses to a monogram rail and the pane takes the
+   freed width, so the thing you are doing is simply the biggest thing on the page.
+
+   ⚠️ WIDTH IS THE ONLY GEOMETRY THAT MOVES, and that is what keeps the viewport-fit chain
+   intact. The chain is entirely VERTICAL — .ws-work--fit (flex: 1 1 0; min-height: 0) →
+   .f12-body → .f12-list (min-height: 0) → .f12-rows scrolls — and none of it reads width.
+   The list stays `flex: none` with a definite width throughout, so no height basis is
+   recomputed and the rows keep their own scroll container the whole way across.
+
+   ⚠️ THE FURNITURE COLLAPSES ITS BOX, it does not merely fade. Fading alone would leave a
+   48px head, a 36px control row and a footer holding space in a 62px rail — invisible, and
+   still pushing the rows down. Height/margin/padding go to 0 alongside the opacity.
+
+   CSS only: every transition below is driven by the .qh-create class toggling. No JS timer
+   drives a frame. ── */
+/* ⚠️ DESKTOP ONLY, and that is a design statement rather than a guard. Below md the two panes
+   are two SCREENS and create mode already pushes to the detail one — the pusher IS this
+   breakpoint's focus-through-space. Collapsing the (off-screen) list to 62px there would buy
+   nothing and would leave the way back looking broken. Built once, for the case it serves,
+   rather than built globally and undone in the mobile block. */
+@media (min-width: 768px) {
+  .qh-create .f12-list { width: var(--f12-railw); }
+
+  /* Head · search+pills · footer — out, and out of the flow. */
+  .qh-create .f12-lhtitle,
+  .qh-create .f12-lhead,
+  .qh-create .f12-lfoot {
+    opacity: 0; pointer-events: none;
+    height: 0; min-height: 0; margin: 0; padding: 0;
+    border-width: 0; overflow: hidden;
+  }
+  .f12-lhtitle, .f12-lhead, .f12-lfoot {
+    transition: opacity 0.18s ease, height 0.28s cubic-bezier(0.22, 0.9, 0.3, 1),
+      margin 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), padding 0.28s cubic-bezier(0.22, 0.9, 0.3, 1);
+  }
+
+  /* The rows keep their monogram and lose everything else. The row box itself is untouched —
+     same 56px height, same seat — so the rail is the list with its text withdrawn, not a
+     different list. */
+  .f12-row .f12-mid, .f12-row .f12-end { transition: opacity 0.18s ease, width 0.28s cubic-bezier(0.22, 0.9, 0.3, 1); }
+  /* ⚠️ THEY MUST LEAVE THE FLEX LINE, NOT JUST FADE — opacity hides from the eye, not from
+     layout. Browser-measured with fade alone: .f12-end still held 34.2px, so monogram (32) +
+     end (34.2) overflowed the 51px rail row, and `justify-content: center` centred the OVERFLOW
+     — putting the monogram at -7.6px, clipped outside its own row. Collapsing the width is what
+     actually centres the monogram; the opacity is only so it goes quietly. */
+  .qh-create .f12-row .f12-mid,
+  .qh-create .f12-row .f12-end {
+    opacity: 0; pointer-events: none;
+    flex: 0 0 0; width: 0; min-width: 0; overflow: hidden;
+  }
+  .qh-create .f12-row { gap: 0; padding: 0; justify-content: center; border-bottom-color: transparent; }
+  /* Selection is stashed while a draft is open, so marking a row would point at something the
+     page is not currently showing you. The draft is the only thing worth marking here. */
+  .qh-create .f12-row.f12-sel { background: transparent; }
+  .qh-create .f12-row.f12-sel::before { opacity: 0; }
+  /* ...except the draft, which keeps its dashed tile and its fill-on-resolve. */
+  .qh-create .f12-row.f12-draft { justify-content: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .f12-list, .f12-lhtitle, .f12-lhead, .f12-lfoot,
+    .f12-row .f12-mid, .f12-row .f12-end { transition: none !important; }
+  }
+}
 
 /* ── QUIET SCROLLBARS — the To-do pattern, reused (todo.css .tdb-tmid2): invisible at rest,
    a hairline thumb on hover or keyboard focus, so a grey system bar never sits against the
@@ -678,12 +749,15 @@
 .qh-msdiv { height: 1px; background: var(--hairline); margin: 4px 0; }
 
 @media (max-width: 767.98px) {
-  /* the top control bar's read actions re-home; the CREATE bar survives in flow (Save/Cancel +
-     the requirement/error line must stay reachable) */
+  /* the top control bar's read actions re-home. The create BAR is retired; its successor is the
+     illustrated header, which lives in the pane's own flow rather than the .f12-ctl seat — so
+     the hide below never touched it and it needs no counter-rule to survive. */
   .f12-root .f12-ctl { display: none; }
-  .f12-root .f12-ctl.f12-ctl-create { display: flex; height: auto; min-height: 0; flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
-  .f12-root .f12-ctl-create .qcb-req { display: block; flex-basis: 100%; } /* wins over the 1100px hide */
-  .f12-root .f12-ctl-create .qcb-esc { display: none; } /* no Esc key on a phone */
+  .f12-root .qch { flex-wrap: wrap; gap: 12px; padding-bottom: 12px; }
+  .f12-root .qch-ill { width: 44px; height: 44px; }
+  .f12-root .qch-sub { display: block; } /* wins over the 1100px hide — it is the error slot */
+  .f12-root .qch-acts { margin-left: 0; flex-basis: 100%; }
+  .f12-root .qch-esc { display: none; } /* no Esc key on a phone */
 
   /* THE PUSHER — the body is the viewport; the panes are its two screens */
   .f12-root .f12-body { position: relative; overflow: hidden; padding: 0 !important; }
@@ -719,9 +793,6 @@
   /* touch rule: the note actions are hover-revealed on desktop and unreachable by tap — always
      visible below md (out-specifies the pane's inline <style> rule) */
   .f12-root .qp-note .qp-noteacts { opacity: 1; }
-
-  /* the create-mode focus scrim is desktop spotlight furniture */
-  .f12-root .qh-scrim { display: none; }
 
   /* THE COMMAND BAR — the hub's settled espresso container, condensed (concept frame 03).
      Espresso = the F12 sheet's own --ink; the primary inside stays the soft-pink .f12-btn-pri

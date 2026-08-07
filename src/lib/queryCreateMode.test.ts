@@ -100,8 +100,11 @@ describe("the draft is LOCAL until Save", () => {
 describe("the create pane follows the live idiom, not the ref's espresso", () => {
   /* Save MOVED to the command bar with the takeover (see createCommandBar.test.ts) — so the
      treatment is asserted where the button now lives, not where it used to. */
+  /* The primary moved from the command bar to the illustrated header (create mode v2 P3), so
+     the gap between the class and the label grew — the button now carries a disabled gate and
+     an icon between them. The treatment is what this asserts, and that is unchanged. */
   it("Save is the soft-pink house primary; there is no dark-pill CTA", () => {
-    expect(queries, "the Save primary lost its house treatment").toMatch(/f12-btn-pri"[\s\S]{0,300}Save query/);
+    expect(queries, "the Save primary lost its house treatment").toMatch(/f12-btn-pri"[\s\S]{0,600}Save query/);
     expect(pane, "the pane must not grow a second Save").not.toContain("f12-btn-pri");
     expect(pane).not.toContain("#3a2d1f");
     expect(queries).not.toContain("#3a2d1f");
