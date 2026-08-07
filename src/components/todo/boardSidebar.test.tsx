@@ -97,10 +97,17 @@ describe("⚠️ CLEAR sits beside FILTERS, appears only when something narrows,
 
   it("⚠️ it resets BOTH narrowings — every page hands it a facet reset AND a tag reset", () => {
     expect(src).toContain("const narrowed = active !== \"all\" || selectedTags.length > 0;");
-    for (const page of ["ToDoPage.tsx", "TodoTodayPage.tsx", "TodoCalendarPage.tsx"]) {
-      const p = readFileSync(join(here, page), "utf8");
-      expect(p, page).toContain('onClearAll={() => { setFacet("all"); setTagSel([]); }}');
-      expect(p, page).not.toContain("onClearTags=");
+    /* ⚠️ NARROWED 7 Aug 2026 (tasks-viewport P1): this ran over three pages, because three
+       mounted the sidebar. The sidebar is the To-do list's alone now — Today, Calendar and the
+       Noteboard run full width — so ONE page hands CLEAR its resets. The rule itself is
+       unchanged and is the point: wherever the sidebar mounts, CLEAR resets BOTH narrowings,
+       never half of them. */
+    const p = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(p).toContain('onClearAll={() => { setFacet("all"); setTagSel([]); }}');
+    expect(p).not.toContain("onClearTags=");
+    for (const page of ["TodoTodayPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+      const q = readFileSync(join(here, page), "utf8");
+      expect(q, `${page} runs full width — no sidebar to clear`).not.toContain("onClearAll=");
     }
   });
 });

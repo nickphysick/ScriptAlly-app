@@ -18,7 +18,7 @@
  */
 import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
+import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { useTagWrites } from "./useTagWrites";
 import { useTodoToast } from "./useTodoToast";
@@ -141,23 +141,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                 <Plus size={13} aria-hidden /> Add task or note
               </button>
             </>
-          }
-          sidebar={
-            <TodoSideContainer
-              counts={facetCounts(liveBoardCards(assembled.cols))}
-              active={facet}
-              onSelect={setFacet}
-              onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
-              onNoteboard={() => onNavigatePath("/todo/noteboard")}
-              tags={currentUser?.tags ?? []}
-              tagCounts={tagUsageCounts(userTasks)}
-              selectedTags={tagSel}
-              onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
-              /* board-optimise P2: ONE clear resets both narrowings — a half-reset that did not
-                 say so was the fault. */
-              onClearAll={() => { setFacet("all"); setTagSel([]); }}
-              onCreateTag={(tag) => void createTagDef(tag)}
-            />
           }
         >
           <div className="cal-grid" role="grid" aria-label={view === "month" ? monthLabel(anchor) : weekLabel(anchor)}>

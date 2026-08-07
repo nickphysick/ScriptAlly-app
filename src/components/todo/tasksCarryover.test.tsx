@@ -68,7 +68,11 @@ describe("⚠️ every count walks assembleBoardColumns — badge, page, FILTERS
     expect(listPage).toContain("assembleBoardColumns({");
     expect(listPage).toContain("hiddenUserTaskId: pendingSaveId");
     expect(todayPage).toContain("assembleBoardColumns({");
-    expect(todayPage).toContain("counts={facetCounts(liveBoardCards(assembled.cols))}");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P1): Today fed `facetCounts` to its sidebar's
+       FILTERS. It has no sidebar and no filter control now — a committed list of a few items
+       needs no sifting, and the absence is the design. What this test actually guards survives
+       intact: Today still derives from the ONE `assembleBoardColumns`, asserted above, so it
+       cannot disagree with the badge or the board about what is on the list. */
     expect(todayPage).not.toContain("facetCounts([...board.do"); // the raw-lane feed is extinct
   });
 });

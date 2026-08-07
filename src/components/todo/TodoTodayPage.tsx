@@ -21,7 +21,7 @@ import { Play, Plus, Undo2 } from "lucide-react";
 import { TodoSideContainer } from "./TodoSideContainer";
 import { useTagWrites } from "./useTagWrites";
 import { ArtSlot } from "./ArtSlot";
-import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
+import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
@@ -169,28 +169,12 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             </button>
           </>
         }
-        sidebar={
-          /* The SAME container the board page mounts — one filter surface, two pages. Today's own
-             list is already a single committed set, so the facet narrows what it shows without the
-             board's four columns behind it. */
-          <TodoSideContainer
-            counts={facetCounts(liveBoardCards(assembled.cols))}
-            active={facet}
-            onSelect={setFacet}
-            onOpenTaskSettings={() => window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS))}
-            onNoteboard={() => onNavigatePath("/todo/noteboard")}
-            tags={currentUser?.tags ?? []}
-            tagCounts={tagUsageCounts(userTasks)}
-            selectedTags={tagSel}
-            onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
-            /* board-optimise P2: ONE clear resets both narrowings — a half-reset that did not
-               say so was the fault. */
-            onClearAll={() => { setFacet("all"); setTagSel([]); }}
-            onCreateTag={(tag) => void createTagDef(tag)}
-          />
-        }
       >
 
+        {/* ⚠️ THE VIEWPORT LOCK (tasks-viewport P1): the header block is fixed above; everything
+            here scrolls inside the zone. Phase 2 splits this into the page's two named regions
+            (Today's list and Up next), each with its own zone. */}
+        <TplZone label="Today">
         {/* ── YOUR LIST FOR TODAY ──────────────────────────────────────────── */}
         <section className="tdt-card">
           <div className="tdt-head">
@@ -316,6 +300,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             ))}
           </section>
         )}
+        </TplZone>
       </TasksPageLayout>
       </div>
 

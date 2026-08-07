@@ -13,10 +13,14 @@ import { join } from "node:path";
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const css = readFileSync(join(here, "todo.css"), "utf8");
+/* ⚠️ COMMENTS ARE STRIPPED. A rule that explains itself by NAMING the declaration it dropped
+   ("`scrollbar-gutter` went with it") reads as still carrying it — the helper cannot tell prose
+   from CSS unless it is told to. Cost an assertion twice in one session; stripped once, here. */
+const decls = (body: string): string => body.replace(/\/\*[\s\S]*?\*\//g, "");
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
-  return m[1];
+  return decls(m[1]);
 };
 
 describe("shell polish P1 — the centred column + the chrome gap", () => {
@@ -115,7 +119,7 @@ describe("shell polish P4 — superseded (shell follow-up P3): the spine sidebar
   const tRule = (sel: string): string => {
     const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
-    return m[1];
+    return decls(m[1]);
   };
   it("the chips are RETIRED — the LISTS rows carry the narrowing now (corrections fix 3) — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
@@ -162,15 +166,22 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
   const tRule = (sel: string): string => {
     const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
-    return m[1];
+    return decls(m[1]);
   };
   it("ONE scroller with a symmetric scrollbar gutter — the centred column can't sit left-heavy", () => {
     // the page root clips + column-lays (follow-up P3: .spine-root took over tsh-body's contract);
     // the wrap is the sole scroller and reserves the gutter both sides
     expect(tRule(".spine-root")).toContain("overflow: hidden");
     expect(tRule(".spine-root")).toContain("display: flex");
-    expect(rule(".tdb-wrap")).toContain("overflow-y: auto");
-    expect(rule(".tdb-wrap")).toContain("scrollbar-gutter: stable both-edges");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P1): the wrap was the PAGE scroller and reserved a
+       symmetric scrollbar gutter so the centred column could not sit left-heavy. Under the
+       viewport lock the Tasks frame never scrolls — the wrap is `overflow: hidden` and the
+       `.tpl-zone`s below the fixed header own all scrolling — so there is no scrollbar here to
+       reserve a gutter for, and reserving one would inset the column against nothing. The
+       symmetry this test protects is now the zone's business; the column's own equal padding and
+       auto margins, asserted below, are untouched and still the thing that centres it. */
+    expect(rule(".tdb-wrap")).toContain("overflow: hidden");
+    expect(rule(".tdb-wrap")).not.toContain("scrollbar-gutter");
     // the column centres with equal side padding + auto margins (no one-sided inset)
     expect(rule(".tdb-col")).toContain("margin-inline: auto");
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
@@ -198,7 +209,7 @@ describe("alignment fixes P2 — the warm active fill (no green cast)", () => {
   const tRule = (sel: string): string => {
     const m = tshCss.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
     if (!m) throw new Error(`tsh rule not found: ${sel}`);
-    return m[1];
+    return decls(m[1]);
   };
   it("the panel active-fill law left with the panel (follow-up P3); the bench chips carry their own ink-fill selection", () => {
     expect(tshCss).not.toContain(".spine-ni"); // the panel rows are gone

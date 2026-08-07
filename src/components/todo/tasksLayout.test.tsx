@@ -161,11 +161,14 @@ describe("⚠️ the tool row is the ONLY home for page controls", () => {
     expect(afterTools).not.toContain("tdb-addb");
   });
 
-  it("the sidebar prop carries the ONE TodoSideContainer on both pages", () => {
-    for (const [name, src] of [["list", listPage], ["today", todayPage]] as const) {
-      expect(src.indexOf("sidebar={"), name).toBeGreaterThan(-1); // the anchor (the slice law)
-      const sidebar = src.slice(src.indexOf("sidebar={"), src.indexOf("sidebar={") + 900);
-      expect(sidebar, name).toContain("<TodoSideContainer");
-    }
+  it("the sidebar prop carries the ONE TodoSideContainer — on the ONE page that has one", () => {
+    /* ⚠️ NARROWED 7 Aug 2026 (tasks-viewport P1): this ran over the list AND Today. The sidebar
+       belongs to the To-do list alone now; the freed width is what lets Calendar's cells grow and
+       Today's two columns breathe. The contract being asserted is unchanged — where a sidebar
+       mounts it is the ONE shared container, never a second one grown per page. */
+    expect(listPage.indexOf("sidebar={")).toBeGreaterThan(-1); // the anchor (the slice law)
+    const sidebar = listPage.slice(listPage.indexOf("sidebar={"), listPage.indexOf("sidebar={") + 900);
+    expect(sidebar).toContain("<TodoSideContainer");
+    expect(todayPage, "Today runs full width").not.toContain("sidebar={");
   });
 });

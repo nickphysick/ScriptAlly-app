@@ -41,9 +41,59 @@
 }
 
 /* ── the columns: sidebar (optional) + body, BELOW the hairline, on the same line ── */
-.tpl-cols { display: flex; align-items: flex-start; gap: 26px; margin-top: 18px; }
-.tpl-side { flex: 0 0 auto; }
-.tpl-body { flex: 1; min-width: 0; }
+/* ⚠️ `align-items: stretch`, NOT `flex-start` — see the viewport lock below: under a window the
+   sidebar and body must take the frame's full height, or their scrollzones have no height to be
+   100% of. `flex-start` sized each to its content, which is right only for a scrolling page. */
+.tpl-cols { display: flex; align-items: stretch; gap: 26px; margin-top: 18px; flex: 1; min-height: 0; }
+.tpl-side { flex: 0 0 auto; overflow: auto; min-height: 0; }
+.tpl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+
+/* ══ THE VIEWPORT LOCK (tasks-viewport pack, Phase 1; ref design-refs/tasks-viewport.html) ══
+ *
+ * ⚠️ THE PAGE NEVER SCROLLS. The frame is the viewport; the header block is FIXED — title,
+ * subtitle, tool row and the hairline stay put — and every scroll happens inside a designated
+ * `.tpl-zone` below it. A Tasks page that scrolls as a document takes its own controls off
+ * screen, which is the fault this removes: you lose the tool row exactly when a long list is the
+ * reason you needed it.
+ *
+ * ⚠️ AND IT IS A CHAIN, NOT A RULE. `flex: 1; min-height: 0` has to hold on EVERY ancestor from
+ * the fill slot down to the zone — one link left at the default `min-height: auto` and the whole
+ * column grows to its content instead of the frame, which reads as "the lock did nothing" rather
+ * than as a broken link. The links are listed here so the chain can be read in one place:
+ *
+ *     StagePage layout="fill" clip  →  .spine-root  →  .tdb-wrap  →  .tdb-col.tpl
+ *       →  .tpl-cols  →  .tpl-body  →  .tpl-zone (the scroller)
+ *
+ * ⚠️ jsdom CANNOT VERIFY THIS. There is no layout engine in this repo's tests, so nothing here
+ * can prove the chain resolves — the locks assert that each link DECLARES its part, and the
+ * browser walk is what proves it. Flagged in reports/tasks-viewport.md for exactly that reason.
+ */
+.spine-root { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+
+.tdb-col.tpl { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+/* ⚠️ `.tdb-wrap`'s OWN rule is edited IN PLACE in todo.css (it is where `overflow-y: auto` was
+   declared). A second single-class rule here would have equal specificity and win or lose on
+   source order alone — the kind of pair that works until an import moves. */
+/* the header block never scrolls away — it is the page's fixed chrome */
+.tpl-head { flex: 0 0 auto; }
+/* ⚠️ THE SCROLLZONE IS THE ONLY THING THAT SCROLLS. `min-height: 0` is the load-bearing half —
+   without it a flex child refuses to shrink below its content and the zone pushes the frame
+   open instead of scrolling inside it. */
+.tpl-zone { flex: 1; min-height: 0; overflow: auto; position: relative; }
+
+/* ⚠️ THE FADE HEM (the board's `.tbd-fade`, generalised): it rides STICKY at the zone's foot and
+   is pulled back over the content by its own negative margin, so it costs no height and never
+   opens a gap under a short list. `pointer-events: none` — it is a signal that content
+   continues, never a target. */
+.tpl-hem {
+  position: sticky; bottom: 0; height: 28px; margin-top: -28px; display: block;
+  background: linear-gradient(rgba(255, 255, 255, 0), #ffffff);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpl-zone { scroll-behavior: auto; }
+}
 
 @media (max-width: 900px) {
   .tpl-cols { flex-wrap: wrap; }

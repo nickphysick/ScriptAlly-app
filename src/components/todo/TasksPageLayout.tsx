@@ -25,9 +25,16 @@
  *  3. ⚠️ THE TOOL ROW IS THE ONLY HOME FOR PAGE CONTROLS — nothing floats mid-page, and its
  *     right slot holds the page's pink creation action (callers order controls; `<TplGrow/>`
  *     is the spacer that pins the pink to the right).
- *  4. The sidebar is ONE component (TodoSideContainer — FILTERS · road-sign line · TAGS · Task
- *     settings) and it is OPTIONAL per page: the Noteboard renders none, so `sidebar` absent
- *     means no aside element at all — never an empty gutter.
+ *  4. ⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE (tasks-viewport P1). It was already OPTIONAL —
+ *     absent means no aside element at all, never an empty gutter — and now exactly ONE page
+ *     passes it. Today, Calendar and Noteboard are header block → hairline → full-width content.
+ *     The freed width is the point rather than a side effect: Calendar's cells grow taller before
+ *     they need to fold, and Today's two columns breathe. (Task settings therefore needs a second
+ *     door — Phase 5 — because the sidebar's foot is no longer reachable from three of the four.)
+ *  5. ⚠️ THE PAGE NEVER SCROLLS (tasks-viewport P1). The frame is the viewport, the header block
+ *     is fixed, and scrolling belongs to the `<TplZone>`s below it. The `min-height: 0` chain
+ *     this depends on is documented at the foot of tasksLayout.css — every link must declare its
+ *     part, and jsdom cannot check that the chain resolves.
  */
 import React from "react";
 import "./tasksLayout.css";
@@ -45,6 +52,40 @@ export interface TasksPageLayoutProps {
 
 /** The tool row's spacer — everything after it sits in the right slot. */
 export const TplGrow: React.FC = () => <span className="tpl-grow" aria-hidden />;
+
+export interface TplZoneProps {
+  children: React.ReactNode;
+  /** ⚠️ THE HEM RENDERS IFF CONTENT CONTINUES. A hem over a list that fits is a fade to nothing —
+   *  it says "there is more" when there is not. Callers pass the same predicate that decides
+   *  whether the zone can overflow at all. */
+  hem?: boolean;
+  className?: string;
+  /** For the scroll-restore contract: the zone is the scroller now, not the page. */
+  scrollRef?: React.Ref<HTMLDivElement>;
+  label?: string;
+}
+
+/**
+ * ⚠️ THE ONLY THING ON A TASKS PAGE THAT SCROLLS (tasks-viewport P1). One primitive, so the four
+ * pages cannot each invent their own overflow — which is how the board came to scroll its whole
+ * document while the others scrolled the stage, two behaviours for one page family.
+ *
+ * The hem is the LAST child so it sits at the zone's foot; it is sticky with a negative margin,
+ * so it costs no height and cannot open a gap beneath short content.
+ */
+export const TplZone: React.FC<TplZoneProps> = ({ children, hem = true, className, scrollRef, label }) => (
+  <div
+    ref={scrollRef}
+    className={`tpl-zone${className ? ` ${className}` : ""}`}
+    /* a scrollable region needs to be reachable by keyboard, and named when it is */
+    tabIndex={0}
+    role={label ? "region" : undefined}
+    aria-label={label}
+  >
+    {children}
+    {hem && <span className="tpl-hem" aria-hidden />}
+  </div>
+);
 
 export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({ title, subtitle, tools, sidebar, children }) => (
   /* `.tdb-col` is the SINGLE geometry owner (max-width, gutters, and the top token) — the layout

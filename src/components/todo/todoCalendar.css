@@ -4,7 +4,15 @@
  * the roll-forward whisper, "+N MORE" folds, and the legend row).
  */
 
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+/* ⚠️ THE MONTH IS ALWAYS ON SCREEN (tasks-viewport P1/P3) — the grid TAKES the remaining
+   viewport height rather than scrolling out of it, so a calendar is a calendar and not a
+   document. `grid-auto-rows: 1fr` divides that height evenly; the cells clip internally and fold
+   to "+N MORE" sooner on a short viewport. This is the one Tasks region that answers the lock by
+   COMPRESSING instead of scrolling. */
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  flex: 1; min-height: 0; grid-auto-rows: 1fr;
+}
 
 .cal-dow {
   font-family: "JetBrains Mono", ui-monospace, monospace;
