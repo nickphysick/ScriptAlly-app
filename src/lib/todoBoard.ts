@@ -114,6 +114,7 @@ export interface BoardCard {
   surfaced?: boolean; // DERIVED — reached its in-app surfacing window (today >= dueDate − lead) → on Today's list
   tags?: string[]; // tasks-pages P5 — applied tag ids (user cards only; the defs live on the user doc)
   returnedToday?: true; // tasks-audit P1 — the flag came back TODAY: the chip + the parchment pip, this day only
+  estimateMin?: number; // board-optimise P7 — the writer's own ladder value (user cards, Today)
 }
 
 /**
@@ -359,6 +360,7 @@ function userCard(t: UserTask, input: BoardInput): BoardCard {
     surfaceOffset: t.surfaceOffset,
     surfaced,
     tags: t.tags, // tasks-pages P5 — the luggage rides the card
+    estimateMin: t.estimateMin, // board-optimise P7
     userTaskId: t.id,
   };
 }

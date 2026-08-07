@@ -39,7 +39,8 @@ export type MenuItemId =
   | "edit-task"
   | "delete-task"
   | "give-date"    // the Noteboard's conversion door (tasks-pages P4)
-  | "tags";        // the tag sheet (tasks-pages P5 — arrives WITH its picker)
+  | "tags"        // the tag sheet (tasks-pages P5 — arrives WITH its picker)
+  | "est-5" | "est-10" | "est-25" | "est-45" | "est-60" | "est-none"; // the ladder (P7)
 
 export interface MenuLeaf {
   kind: "leaf";
@@ -57,7 +58,7 @@ export interface MenuLeaf {
 
 export interface MenuParent {
   kind: "sub";
-  id: "snooze" | "resnooze" | "dismiss";
+  id: "snooze" | "resnooze" | "dismiss" | "estimate";
   label: string;
   sub: MenuLeaf[];
 }
@@ -162,6 +163,20 @@ export function cardMenu(card: BoardCard, column: TodoColumnId): MenuGroup[] {
     { head: "PUT IT OFF", entries: putOff },
   ];
   if (elsewhere.length) groups.push({ head: "GO ELSEWHERE", entries: elsewhere });
+  /* ⚠️ THE ESTIMATE LADDER IS A TODAY-COLUMN AFFORDANCE (board-optimise P7). Planning is Today's
+     job: an estimate on a card you have not committed to is a plan for a day you have not
+     decided to have — so the rungs simply are not offered anywhere else. Fixed values only,
+     never free text (a typed "about an hour?" cannot be summed). */
+  if (column === "today") {
+    doIt.push({
+      kind: "sub", id: "estimate", label: "How long…",
+      sub: [
+        leaf("est-5", "5m"), leaf("est-10", "10m"), leaf("est-25", "25m"),
+        leaf("est-45", "45m"), leaf("est-60", "1h+"), leaf("est-none", "No estimate"),
+      ],
+    });
+  }
+
   if (isUserTask) {
     groups.push({
       head: null,

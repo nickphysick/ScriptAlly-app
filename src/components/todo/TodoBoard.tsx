@@ -32,6 +32,7 @@ import {
   isSweepCard, wipLine, BOARD_COL_CAP,
 } from "../../lib/todoColumns";
 import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
+import { estimateChip, estimateTotal, estimateHeadLabel } from "../../lib/todoEstimate";
 import {
   FoldState, readFold, writeFold, toggleFold, reflowPlan, splitLanes, reflowHeadLabel,
 } from "../../lib/todoFold";
@@ -238,6 +239,9 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, foldOver
         const visible = grownHere || cards.length <= cap ? cards : cards.slice(0, cap);
         const more = grownHere ? 0 : Math.max(0, cards.length - cap);
         const wip = col.id === "today" ? wipLine(cards.length, goodDay) : null;
+        const estLabel = col.id === "today"
+          ? estimateHeadLabel(estimateTotal(cards.map((c) => c.estimateMin)), cards.length, goodDay ?? 5)
+          : null;
         const headFigures = plan.columnId === col.id ? reflowHeadLabel(plan) : null;
 
         /* ⚠️ THE FOLDED RAIL (ref board-features.html): 44px, the Playfair name rotated, the
@@ -285,7 +289,10 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, foldOver
               {headFigures && <span className="tbd-showing">{headFigures}</span>}
               {/* ⚠️ THE WIP LINE IS ADVICE, NEVER A BLOCK (P6): it changes tone past five; the
                   cap itself lives in the commit primitive, not here. */}
-              {wip && <span className="tbd-wip">{wip}</span>}
+              {/* ⚠️ THE HEAD SUMS ONLY WHAT CARRIES AN ESTIMATE, AND NEVER GUESSES. Past the
+                  writer's good-day line it says so instead — the same advice the WIP line gives,
+                  in the same voice, so the head never states two opinions about one day. */}
+              {estLabel ? <span className="tbd-wip">{estLabel}</span> : wip && <span className="tbd-wip">{wip}</span>}
             </div>
 
             {/* ⚠️ THE GHOST DROP SLOT (P6, ref .ghost): a card-shaped hatched-paper target — the
@@ -368,6 +375,11 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, foldOver
                       expiry. ({snoozedOn} is NOT STORED on the flag, so the chip states the
                       return rather than inventing a date — flagged in the report.) */}
                   {c.returnedToday && <div className="tbd-ret">🕐 SNOOZED · BACK TODAY</div>}
+                  {/* ⚠️ THE ⏲ CHIP IS TODAY'S ALONE (board-optimise P7) — planning is Today's
+                      job, so a committed card wears its estimate and a board card never does. */}
+                  {col.id === "today" && estimateChip(c.estimateMin) && (
+                    <div className="tbd-est">⏲ {estimateChip(c.estimateMin)}</div>
+                  )}
 
                   {/* ⚠️ THE SWEEP'S PROGRESS RAIL (P6): n-of-m lives INSIDE the sweep card — the
                       one place the member unit is allowed to show (P5's law). The rail fills only

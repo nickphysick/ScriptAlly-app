@@ -1824,6 +1824,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         break;
       case "edit-task": openComposerEdit(card); break;
       case "tags": setTagsFor(card); break;                     // tasks-pages P5 — the tag sheet
+      /* board-optimise P7 — the ladder writes minutes (or clears with null) through the ONE
+         existing updateUserTask path; no new primitive, no new failure mode. */
+      case "est-5": case "est-10": case "est-25": case "est-45": case "est-60": case "est-none":
+        if (card.userTaskId) {
+          const mins = item.id === "est-none" ? null : Number(item.id.slice(4));
+          void updateUserTask(card.userTaskId, { estimateMin: mins })
+            .catch(() => flash("Couldn’t set that — try again?"));
+        }
+        break;
       case "delete-task": void deleteUserNote(card); break;     // the styled confirm + undo ride along
     }
   }

@@ -323,3 +323,11 @@
 /* ART · DONE-EMPTY inside its column (board-optimise P3) — above the line, centred, and capped
    at 260px by the component so it reads at the column measure. */
 .tbd-art { margin: 2px auto 10px; }
+
+/* the ⏲ estimate chip — Today's cards only (board-optimise P7) */
+.tbd-est {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6.5px; letter-spacing: 0.13em; color: #6b5a4e;
+  background: #f4efe7; border: 1px solid #e6dccc; border-radius: 5px;
+  display: inline-block; padding: 2px 7px; margin: 6px 9px 0;
+}

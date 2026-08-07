@@ -574,6 +574,10 @@ export interface UserTask {
   // tasks-pages P4/P5: applied tag IDS (the defs live on the user doc). Survive note↔task
   // conversion untouched — the date is the door, the tags are the luggage.
   tags?: string[];
+  /* board-optimise P7: minutes from the fixed ladder (lib/todoEstimate) — the pack's one
+     addition to user-facing task state, justified in that file's head. Optional; absent means
+     absent, and the Today head sums only what carries one. */
+  estimateMin?: number;
   // The day a reminder resurfaces — ISO date, NO time ("YYYY-MM-DD"). Every Stage-6 reminder (door
   // check-back, nudge remind-me, response-window) is a date-triggered task, so this is load-bearing,
   // not decoration: unset = a plain to-do; set = surfaces (and renders overdue) on that day. Dates

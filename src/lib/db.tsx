@@ -266,7 +266,7 @@ interface DbContextType {
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[] }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null }) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & { detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
 
   // Activity Actions
@@ -2188,11 +2188,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     id: string,
     fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">> & {
       detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
-      committedDate?: string | null; tags?: string[] | null;
+      committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null;
     },
   ) => {
     if (!currentUser) return;
-    const { committedDate, detail, dueDate, surfaceOffset, tags, ...rest } = fields;
+    const { committedDate, detail, dueDate, surfaceOffset, tags, estimateMin, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
     // `null` clears the Today's-list commitment (uncommit); a string sets it.
     if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
@@ -2204,6 +2204,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (surfaceOffset !== undefined) patch.surfaceOffset = surfaceOffset === null ? deleteField() : surfaceOffset;
     // tasks-pages P5: null (or an emptied list) detaches every tag — the field leaves the doc.
     if (tags !== undefined) patch.tags = tags === null || tags.length === 0 ? deleteField() : tags;
+    // board-optimise P7: null is the ladder's "none" rung — the field leaves the doc
+    if (estimateMin !== undefined) patch.estimateMin = estimateMin === null ? deleteField() : estimateMin;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {

@@ -17,6 +17,8 @@ import {
   FOLD_RAIL_PX, REFLOW_MS, MAX_LANES, FoldState,
 } from "../../lib/todoFold";
 import { TodoBoard } from "./TodoBoard";
+import { ESTIMATE_LADDER, isLadderValue, estimateTotal, estimateHeadLabel } from "../../lib/todoEstimate";
+import { cardMenu } from "../../lib/todoMenu";
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoBoard.css"), "utf8");
@@ -204,5 +206,74 @@ describe("⚠️ one head spanning both lanes, with its figures — and the fold
     expect(rm).toContain(".tbd-body2 > .tbd-lane { animation: none; }");
     // ONE reduced-motion block in the file — two would be two policies
     expect((css.match(/@media \(prefers-reduced-motion: reduce\)/g) ?? []).length).toBe(1);
+  });
+});
+
+/* ── P7: estimates on Today ────────────────────────────────────────────────────────────────── */
+
+describe("⚠️ time estimates live ONLY on Today, from a FIXED ladder", () => {
+  const est = readFileSync(join(here, "..", "..", "lib", "todoEstimate.ts"), "utf8");
+  const menu = readFileSync(join(here, "..", "..", "lib", "todoMenu.ts"), "utf8");
+
+  it("the ladder is the ref's rungs, plus the one that clears", () => {
+    expect(ESTIMATE_LADDER.map((r) => r.label)).toEqual(["5m", "10m", "25m", "45m", "1h+", "none"]);
+    expect(ESTIMATE_LADDER.find((r) => r.label === "none")!.minutes).toBeNull();
+    // a value from anywhere else is not an estimate at all
+    expect(isLadderValue(37)).toBe(false);
+    expect(isLadderValue(25)).toBe(true);
+    expect(isLadderValue(undefined)).toBe(false);
+  });
+
+  it("⚠️ NEVER FREE TEXT — the menu offers rungs, and no input reaches the field", () => {
+    expect(menu).toContain('leaf("est-25", "25m")');
+    expect(est).not.toContain("<input");
+    expect(est).not.toContain("parseFloat");
+  });
+
+  it("⚠️ the ladder is offered on TODAY only — planning is Today's job", () => {
+    expect(menu).toContain('if (column === "today") {');
+    const todayMenu = cardMenu(card({ userTaskId: "u1" }), "today").flatMap((g) => g.entries);
+    expect(todayMenu.some((e) => e.id === "estimate")).toBe(true);
+    for (const col of ["todo", "snoozed", "done"] as const) {
+      const m = cardMenu(card({ userTaskId: "u1" }), col).flatMap((g) => g.entries);
+      expect(m.some((e) => e.id === "estimate"), col).toBe(false);
+    }
+  });
+
+  it("the chip renders on a Today card and NOWHERE else", () => {
+    const withEst = card({ key: "e", userTaskId: "u1", estimateMin: 25, title: "Redraft" });
+    const onToday = renderToStaticMarkup(
+      <TodoBoard columns={cols({ today: [withEst] })} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,
+    );
+    expect(onToday).toContain("~25 MIN");
+    const onBoard = renderToStaticMarkup(
+      <TodoBoard columns={cols({ todo: [withEst] })} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,
+    );
+    expect(onBoard).not.toContain("~25 MIN");
+  });
+
+  it("⚠️ THE HEAD SUMS ONLY WHAT CARRIES ONE, AND NEVER GUESSES", () => {
+    expect(estimateTotal([25, undefined, 10, undefined])).toBe(35);
+    expect(estimateTotal([undefined, undefined])).toBe(0);
+    expect(estimateHeadLabel(35, 2, 5)).toBe("EST. 35 MIN");
+    expect(estimateHeadLabel(0, 3, 5)).toBeNull();   // three cards, none estimated → no figure
+    expect(estimateHeadLabel(90, 2, 5)).toBe("EST. 1H 30 MIN");
+  });
+
+  it("past the writer's good-day line the head says so instead — one opinion per head", () => {
+    expect(estimateHeadLabel(35, 6, 5)).toBe("THAT'S A FULL DAY");
+  });
+
+  it("the write rides the ONE existing path, and 'none' clears the field", () => {
+    const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(page).toContain('const mins = item.id === "est-none" ? null : Number(item.id.slice(4));');
+    expect(page).toContain("updateUserTask(card.userTaskId, { estimateMin: mins })");
+    const db = readFileSync(join(here, "..", "..", "lib", "db.tsx"), "utf8");
+    expect(db).toContain("patch.estimateMin = estimateMin === null ? deleteField() : estimateMin");
+  });
+
+  it("the rules allow it, bounded, on create and update", () => {
+    expect(rules).toContain("data.estimateMin is int && data.estimateMin > 0 && data.estimateMin <= 600");
+    expect(rules).toContain("'tags', 'estimateMin'");
   });
 });

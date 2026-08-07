@@ -367,7 +367,7 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
@@ -376,6 +376,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['detail']) || (data.detail is string && data.detail.size() <= 16384))
         // tasks-pages P5: applied tag IDS — a list when present (the safe hasAny pattern; never == null)
         && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 32))
+        // board-optimise P7: a ladder value in minutes — a number when present (the safe hasAny)
+        && (!data.keys().hasAny(['estimateMin']) || (data.estimateMin is int && data.estimateMin > 0 && data.estimateMin <= 600))
         && data.done is bool
         // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
         // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
@@ -630,7 +632,7 @@ service cloud.firestore {
         // locks pinned the old string; all three halves land together. The VALUE shape needs no
         // guard here — isValidUserTask already enforces it on every update.
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin'])
         );
       }
 
