@@ -22,9 +22,13 @@ describe("/dashboard renders", () => {
     expect(() => renderPage(page())).not.toThrow();
   });
 
-  it("…and produces the first-run chrome, so it is not an empty shell that merely did not crash", () => {
+  /* ⚠️ RETARGETED (one-screen dashboard): the guided "Welcome to ScriptAlly" panel is replaced
+     by §9's DAY ONE — Getting started kicker, the chart as an invitation, the ghost CTAs. */
+  it("…and produces the day-one chrome, so it is not an empty shell that merely did not crash", () => {
     const html = renderPage(page());
-    expect(html).toContain("Welcome to ScriptAlly");
+    expect(html).toContain("Getting started");
+    expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
+    expect(html).toContain("Send your first query");
   });
 
   /**
@@ -36,10 +40,11 @@ describe("/dashboard renders", () => {
     expect(() => renderPageSeeded(page())).not.toThrow();
   });
 
-  it("…and that render is the real dashboard — the stat row, not the first-run panel", () => {
+  it("…and that render is the real dashboard — the chart card, not the day-one panel", () => {
     const html = renderPageSeeded(page());
-    expect(html).toContain("Queries sent");     // the stat row, the page's spine
-    expect(html).toContain("Active queries");
-    expect(html).not.toContain("Welcome to ScriptAlly"); // the first-run panel has stood down
+    expect(html).toContain("Active queries");   // the chart card, the page's spine
+    expect(html).toContain("of querying");      // the kicker
+    expect(html).toContain("Querying goals");   // the rail
+    expect(html).not.toContain("Getting started"); // day one has stood down
   });
 });

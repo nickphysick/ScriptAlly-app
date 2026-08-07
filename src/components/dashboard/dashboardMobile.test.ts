@@ -54,15 +54,15 @@ describe("the <md dashboard stack", () => {
     expect(mobile).toContain("background: var(--burg)"); // the count roundel
   });
 
-  it("the dashboard renders the desk line + doorway off the board's own tallies", () => {
-    expect(dash).toContain("sidebarBoardTiles({");
-    expect(dash).toContain("deskNotice(mobileTiles)");
-    expect(dash).toContain("sa-mdeskline ${mobileNotice.tone}");
-    // both surfaces are doorways to /todo (baked decision 2 — To-do has no tab)
-    expect(dash).toContain('onClick={() => onNavigate("todo")}');
-    for (const lane of ['"Urgent", mobileTiles.urgent', '"Housekeeping", mobileTiles.housekeeping', '"Notes to self", mobileTiles.notes']) {
-      expect(dash).toContain(lane);
-    }
+  /* ⚠️ RETARGETED (one-screen dashboard §13): the desk line and the to-do doorway are GONE from
+     this page — the spec replaces the dashboard wholesale, and its tasks card + §11 mobile rules
+     carry the same jobs at every width. This case now pins the RETIREMENT so they cannot quietly
+     return alongside the new surfaces and double up. The CSS block they used stays in
+     dashboardV37.css for the git record; rules without consumers render nothing. */
+  it("the desk line and the mobile to-do doorway are retired from the dashboard", () => {
+    expect(dash).not.toContain("sa-mdeskline");
+    expect(dash).not.toContain("sa-mtodo");
+    expect(dash).toContain("OneScreenDashboard");
   });
 });
 

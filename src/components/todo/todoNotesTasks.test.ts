@@ -323,12 +323,17 @@ describe("notes-store convergence — one store owns \"Notes to self\"", () => {
      composer: a note there is a jotting you wrote, not a task the app is holding you to, so the
      onCompleteNote/onAddNote props this case used to name no longer exist. Asserting them would be
      pinning a prop rather than the rule. OverToYou itself is untouched and still serves /todo. */
-  it("the dashboard's Notes-to-self reads the USER-TASK store (what /todo writes), not the post-its", () => {
-    const card = readFileSync(join(here, "..", "dashboard", "DeskTodoCard.tsx"), "utf8");
-    expect(card).toContain("userNotes: UserTask[];");
-    expect(card).not.toContain("notes: Note[];"); // the post-it store never feeds this card
-    expect(card).toContain("const noteRows = [...userNotes].filter((t) => !t.done)");
-    expect(dash).toContain("userNotes={userTasks}");
+  /* ⚠️ RETARGETED AGAIN (one-screen dashboard): the page no longer renders notes AT ALL — its
+     tasks card is urgent + housekeeping only, and notes live on /todo. The rule survives as its
+     contrapositive: the dashboard passes the USER-TASK store down and never the post-its, so if
+     a notes surface returns here it starts from the right store. OverToYou is untouched and
+     still serves /todo, where ticking and composing belong. */
+  it("the dashboard passes the USER-TASK store down, never the post-its", () => {
+    expect(dash).toContain("userTasks={userTasks}");
+    expect(dash).not.toContain("userNotes={notes}");
+    const osd = readFileSync(join(here, "..", "dashboard", "OneScreenDashboard.tsx"), "utf8");
+    expect(osd).toContain("userTasks: UserTask[];");
+    expect(osd).not.toContain("notes: Note[];");
     // and OverToYou keeps the same store on the surface that DOES tick and compose
     expect(oty).toContain("userNotes: UserTask[];");
     expect(oty).toContain("const noteRows = [...userNotes].filter((t) => !t.done)");

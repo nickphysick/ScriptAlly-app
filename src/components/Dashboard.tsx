@@ -45,20 +45,16 @@ import {
 } from "../lib/designTokens";
 import { MountCard } from "./MountCard";
 import { buildOverToYouRows } from "./dashboard/OverToYou";
-import { DeskTodoCard } from "./dashboard/DeskTodoCard";
 // Mobile Pass 1 — the <md desk line + To-do doorway read the To-do board's OWN tallies (the
 // sidebar's recipe), so the doorway can never disagree with the page it opens.
 import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
-import { DashboardHero } from "./dashboard/DashboardHero";
-import { DiaryCard, PipelineCard, StoryCard } from "./dashboard/DeskBelow";
+import { OneScreenDashboard } from "./dashboard/OneScreenDashboard";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
-import { ActiveQueriesCard, AgentsCard, QueriesSentCard, ResponsesCard } from "./dashboard/DeskStats";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
-import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -498,7 +494,8 @@ export const Dashboard: React.FC<{
     userTasks,
     addUserTask,
     updateUserTask,
-    deleteUserTask
+    deleteUserTask,
+    updateUserProfile
   } = useScriptAllyDb();
 
   // Stat definitions (hook — must precede every conditional return).
@@ -1463,38 +1460,22 @@ export const Dashboard: React.FC<{
   });
   const mobileNotice = deskNotice(mobileTiles);
   /* ⚠️ THE SAME KEY THE SHELL WRITES — `scriptally_active_manuscript_id`. Packages, Comps and
-     Manuscripts all read it; resolving the scoped book any other way here would put a different
-     title in the query's subject line from the one the chrome says you are working on. */
-  const activeManuscriptTitle = (() => {
+     Manuscripts all read it; resolving the scoped book any other way would put a different title
+     in the kicker from the one the chrome says you are working on. */
+  const activeManuscriptForKicker = (() => {
     const stored = typeof window === "undefined" ? null : localStorage.getItem("scriptally_active_manuscript_id");
-    return (manuscripts.find((m) => m.id === stored) ?? manuscripts[0])?.title ?? "";
+    return manuscripts.find((m) => m.id === stored) ?? manuscripts[0] ?? null;
   })();
   const fortnightCount = mergedActivities.filter((a: any) => {
     const t = new Date(a.date).getTime();
     return Number.isFinite(t) && t >= Date.now() - 14 * 86400000;
   }).length;
-  /* The hero's to-do card — permanent furniture in the right column. Three tiers, strict
-     priority, at most three items, and never mixed. */
-  const todoPanel = (
-    <DeskTodoCard
-      tasks={tasks}
-      queries={queries}
-      agents={agents}
-      userNotes={userTasks}
-      onAction={(task) => task.taskType === "data_quality_poor"
-        ? openEditAgent(task.relatedRecordId, { fromTask: true })
-        : onNavigate(task.actionPath, task.title)}
-      onSeeAll={() => onNavigate("todo")}
-    />
-  );
+  /* The DeskTodoCard host is gone with the settled desk — the one-screen tasks card derives
+     its own rows from the same builders. */
 
-  // Data still loading → skeleton (after the ~180ms delay); never the empty/onboarding state and
-  // never a half-rendered dashboard. Both the skeleton and the pre-delay placeholder are full-height
-  // so the page footer (a sibling after AppShell) can't ride up and flash while content is empty.
-  if (!collectionsReady) {
-    return showSkeleton ? <DashboardSkeleton /> : <div className="min-h-screen" aria-hidden="true" />;
-  }
-
+  /* ⚠️ NO EARLY SKELETON RETURN ANY MORE — §8's per-card skeletons ARE the loading state, and
+     they need the page's layout mounted so nothing shifts when data lands. `loading` is passed
+     down instead. DashboardSkeleton survives on disk unmounted. */
   return (
     <div
       className="sa-dashroot min-h-screen pb-16 font-sans"
@@ -1504,231 +1485,27 @@ export const Dashboard: React.FC<{
       style={{ color: bodyInk }}
     >
 
-      {/* ── Guided empty state for brand-new users ── */}
-      {manuscripts.length === 0 && queries.length === 0 && agents.length === 0 && (
-        <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px" }}>
-          {/* Welcome card */}
-          <div style={{
-            background: parchment,
-            backgroundImage: PAPER_TEXTURE,
-            borderLeft: "4px solid #7c3a2a",
-            borderRadius: 14,
-            boxShadow: mountShadow,
-            padding: "24px 28px",
-            marginBottom: 24,
-          }}>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#c9a89e", marginBottom: 8 }}>
-              Welcome to ScriptAlly
-            </div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em", color: "#3a1c14", margin: "0 0 10px", lineHeight: 1.3 }}>
-              Your querying journey starts here.
-            </h2>
-            <p style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, fontWeight: 300, color: "#a08070", margin: 0, lineHeight: 1.65 }}>
-              You'll need a manuscript and at least one agent before you can log your first query. We'll guide you through it — no rush.
-            </p>
-          </div>
-
-          {/* Onboarding task card */}
-          <div style={{
-            background: parchment,
-            backgroundImage: PAPER_TEXTURE,
-            borderRadius: 14,
-            boxShadow: mountShadow,
-            padding: "18px 22px",
-            marginBottom: 20,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-          }}>
-            <div>
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", color: "#7c3a2a", marginBottom: 5 }}>
-                Urgent · Next step
-              </div>
-              <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 14, fontWeight: 500, color: "#3a1c14", marginBottom: 3 }}>
-                Add your manuscript
-              </div>
-              <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 12, fontWeight: 300, color: "#a08070" }}>
-                Everything in ScriptAlly starts here — just a title and genre to begin.
-              </div>
-            </div>
-            <button
-              onClick={() => onNavigate("manuscripts", "Add a manuscript")}
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 11,
-                letterSpacing: "0.06em",
-                background: "#7c3a2a",
-                color: "#f5ede8",
-                border: "none",
-                borderRadius: 10,
-                padding: "9px 18px",
-                cursor: "pointer",
-                flexShrink: 0,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Add now
-            </button>
-          </div>
-
-          {/* Ghost placeholder cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            {[
-              { label: "No agents yet", sub: "Add agents or import your spreadsheet", icon: "👥" },
-              { label: "No queries logged", sub: "Your pipeline will appear here", icon: "✉️" },
-            ].map((card, i) => (
-              <div key={i} style={{
-                background: "rgba(253,250,245,0.6)",
-                border: "1px dashed rgba(124,58,42,0.25)",
-                borderRadius: 12,
-                padding: "24px 20px",
-                opacity: 0.6,
-                textAlign: "center",
-              }}>
-                <div style={{ fontSize: 22, marginBottom: 8 }}>{card.icon}</div>
-                <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, fontWeight: 500, color: "#3a1c14", marginBottom: 4 }}>
-                  {card.label}
-                </div>
-                <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 11, fontWeight: 300, color: "#a08070" }}>
-                  {card.sub}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="sa-dash">
-        {/* DashTopBar retired (shell rollout Phase 7): the v2 shell's top bar carries the
-            search (and now owns dashboard ⌘K), the sidebar carries settings/account, and the
-            greeting header's kicker carries the date. */}
-        <DashboardHero
-          firstName={getUserFirstName()}
-          queries={queries}
-          todo={todoPanel}
-          onSendQuery={() => onNavigate("queries", "Send a query")}
-          onRecordResponse={() => setRecordResponseScreenOpen(true)}
-          onAddAgent={() => onNavigate("agents", "Add an agent")}
-          onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-        />
-
-        {/* THE DESK LINE (Mobile Pass 1, <md only — hidden at md+ by CSS; ref concept frame 01):
-            the panel's retired notification line, recovered WITH this surface. Hot = tinted card
-            + burgundy count roundel; calm = a quiet hairline row. It is the doorway to /todo
-            (baked decision 2 — To-do has no tab). It replaces the attention chip below md, whose
-            focus-slot target is already display:none there. */}
-        <button type="button" className={`sa-mdeskline ${mobileNotice.tone}`} onClick={() => onNavigate("todo")}>
-          {mobileNotice.tone === "hot" ? (
-            <span className="sa-mdesk-count" aria-hidden="true">{mobileNotice.count}</span>
-          ) : (
-            <span className="sa-mdesk-dot" aria-hidden="true" />
-          )}
-          <span className="sa-mdesk-tx">
-            <b>{mobileNotice.headline}</b>
-            {mobileNotice.sub && <span className="sa-mdesk-sub">{mobileNotice.sub}</span>}
-          </span>
-          <span className="sa-mdesk-go" aria-hidden="true">→</span>
-        </button>
-
-        {/* Full-width stat row — always on, always charts, and it never moves.
-            All four are the settled desk's now. */}
-        <div className="ds-row" style={{ marginTop: 28 }}>
-          <QueriesSentCard queries={queries} agents={agents} />
-          <ActiveQueriesCard queries={queries} />
-          <AgentsCard agents={agents} queries={queries} manuscriptTitle={activeManuscriptTitle} />
-          <ResponsesCard queries={queries} />
-        </div>
-
-        {/* Section spacing: 48px above the diary panel, 56px before "What's live". At <md the
-            diary carousel stands down (the concept's stack has no fortnight strip) and the
-            spacing tightens — sa-dash-panels carries the override. */}
-        {/* The settled desk's lower half: the story and the diary side by side, the pipeline
-            full-width beneath. ⚠️ THE TIMELINE IS INLINE — the right-edge drawer it lived in is
-            retired from this page. */}
-        <div className="db-below">
-          <StoryCard
-            queries={queries} agents={agents} manuscripts={manuscripts} activities={mergedActivities}
-            onOpenTimeline={() => onNavigate("queries")}
-          />
-          <DiaryCard
-            queries={queries} agents={agents} manuscripts={manuscripts} activities={mergedActivities}
-          />
-        </div>
-        <div className="db-pipe">
-          <PipelineCard queries={queries} agents={agents} manuscripts={manuscripts} />
-        </div>
-
-        <div className="sa-dash-panels">
-          {/* THE TO-DO DOORWAY (Mobile Pass 1, <md only — CSS-gated; concept frame 01): three
-              lane tallies in the live board's own vocabulary, opening /todo. A doorway, not the
-              working panel — OverToYou stays the desktop focus slot's. */}
-          <section className="sa-mtodo" aria-label="To-do">
-            <div className="sa-band">
-              <span className="sa-tick" aria-hidden="true" />
-              <h3>To-do</h3>
-            </div>
-            {([
-              ["Urgent", mobileTiles.urgent],
-              ["Housekeeping", mobileTiles.housekeeping],
-              ["Notes to self", mobileTiles.notes],
-            ] as const).map(([label, count]) => (
-              <button key={label} type="button" className="sa-mtodo-row" onClick={() => onNavigate("todo")}>
-                <span>{label}</span>
-                <span className="sa-mtodo-count">{count}</span>
-              </button>
-            ))}
-          </section>
-        </div>
-
-        {/* ⚠️ THE TIMELINE DRAWER IS UNMOUNTED (settled desk, Phase 6) — at EVERY width, not just
-            desktop. It was a right-edge pull tab holding the page's only narrative behind furniture
-            you had to discover; its <md variant went with it, because the story is now the inline
-            `StoryCard` above, which stacks at 1180px and reads better on a phone than a drawer did.
-            `TimelineDrawer.tsx` itself SURVIVES on disk — `focusSlot.test.ts` imports its pin
-            helpers — and deleting a module is a different decision from re-siting a section. */}
-
-      </div>
-
-      {/* Quiet Pro upsell (replaces the old three-format banner review arena) */}
-      {!isMagazineLayout && currentUser.plan !== UserPlan.PRO && (
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 mt-[14px]">
-          <MountCard>
-            <div
-              className="flex flex-col md:flex-row md:items-center justify-between gap-4"
-              style={{ position: "relative", zIndex: 4, padding: "18px 22px" }}
-            >
-              <div>
-                <div style={{ ...labelStyle, marginBottom: 6 }}>ScriptAlly Pro</div>
-                <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk }}>
-                  More room for the journey
-                </div>
-                <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: mutedInk, marginTop: 4, maxWidth: 560, lineHeight: 1.55 }}>
-                  Unlimited manuscripts, deeper querying analytics and live wishlist matching — when you're ready for them.
-                </p>
-              </div>
-              <button
-                onClick={() => onNavigate("pricing")}
-                className="cursor-pointer shrink-0"
-                style={{
-                  fontFamily: FONT_MONO,
-                  fontSize: 10.5,
-                  fontWeight: 500,
-                  letterSpacing: "0.07em",
-                  background: buttonPinkBg,
-                  color: burgundy,
-                  border: `0.5px solid ${buttonPinkBorder}`,
-                  borderRadius: 10,
-                  padding: "10px 20px",
-                  transition: "all 0.2s",
-                }}
-              >
-                See Pro plans →
-              </button>
-            </div>
-          </MountCard>
-        </div>
-      )}
+      {/* ══ THE ONE-SCREEN DASHBOARD (spec design-refs/dashboard-one-screen-spec.md) ══
+          Replaces the settled desk WHOLESALE (§13): the hero, the four stat cards, the story,
+          the diary, the pipeline, the to-do card, the guided empty state and the bottom Pro
+          banner all leave this page. Day one is §9's job now; loading is §8's per-card
+          skeletons, passed down rather than gated up here. */}
+      <OneScreenDashboard
+        loading={!collectionsReady}
+        queries={queries}
+        agents={agents}
+        manuscripts={manuscripts}
+        tasks={tasks}
+        userTasks={userTasks}
+        activities={mergedActivities}
+        currentUser={currentUser}
+        activeManuscript={activeManuscriptForKicker}
+        onNavigate={onNavigate}
+        onTaskAction={(task) => task.taskType === "data_quality_poor"
+          ? openEditAgent(task.relatedRecordId, { fromTask: true })
+          : onNavigate(task.actionPath, task.title)}
+        updateUserProfile={updateUserProfile}
+      />
 
       {/* Slide-In Tasks Panel (Part 3) */}
       <AnimatePresence>
