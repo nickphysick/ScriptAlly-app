@@ -20,6 +20,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { TasksPageLayout, TplZone } from "./TasksPageLayout";
+import { ArtSlot, ART_SLOTS, ArtSlotName } from "./ArtSlot";
 
 const here = __dirname;
 const css = readFileSync(join(here, "tasksLayout.css"), "utf8");
@@ -57,6 +58,13 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
     /* Listed in the order they nest. A missing link does not fail loudly — it simply restores
        the old behaviour, which is why each is named rather than spot-checked. */
     expect(rule(css, ".spine-root {")).toContain("min-height: 0");
+    /* ⚠️ AND IT ASKS FOR THE REMAINING SPACE, NEVER A PERCENTAGE OF AN ASSUMED ONE (7 Aug fix).
+       `height: 100%` needs a parent with a DEFINITE height, and this parent is a flex item inside
+       `.ws-cscroll` — the app's real scroll container, which is `overflow: auto`. Whether that
+       percentage resolves depends on every ancestor above it, which is not a thing a layout law
+       should rest on. */
+    expect(rule(css, ".spine-root {")).not.toContain("height: 100%");
+    expect(rule(css, ".spine-root {")).toMatch(/flex:\s*1/);
     expect(rule(pageCss, ".tdb-wrap {")).toContain("min-height: 0");
     expect(rule(css, ".tdb-col.tpl {")).toContain("min-height: 0");
     expect(rule(css, ".tpl-cols {")).toContain("min-height: 0");
@@ -65,6 +73,19 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
     /* and each of those must also GROW into the frame, or the chain is only half-stated */
     for (const sel of [".tdb-col.tpl {", ".tpl-cols {", ".tpl-body {", ".tpl-zone {"]) {
       expect(rule(css, sel), sel).toMatch(/flex:\s*1/);
+    }
+  });
+
+  it("⚠️ THE FOUR TASKS SLOTS ARE FLEX COLUMNS — so their child can be a flex ITEM", () => {
+    const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
+    const todoSlots = [...app.matchAll(/<StagePage active=\{routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
+    expect(todoSlots).toHaveLength(4);
+    for (const slot of todoSlots) {
+      /* `fill` renders the slot `display: block` (isFillCol is false without a contentVariant),
+         which leaves `.spine-root` resolving a percentage height. `fillColumn` makes it a flex
+         column, so the page asks for the remaining space instead. */
+      expect(slot, slot).toContain('layout="fillColumn"');
+      expect(slot, slot).toContain("clip");
     }
   });
 
@@ -333,5 +354,115 @@ describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the setting
     for (const [name, src] of [["Today", today], ["Calendar", cal], ["Noteboard", note]] as const) {
       expect(src, name).not.toContain("TODO_OPEN_TASK_SETTINGS");
     }
+  });
+});
+
+
+/* ── the four contained fixes (7 Aug) ──────────────────────────────────────────────────────── */
+
+describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () => {
+  const pageCssLocal = readFileSync(join(here, "todo.css"), "utf8");
+
+  it("the column is LEFT-ANCHORED — the surplus becomes right margin, never two margins", () => {
+    /* ⚠️ THE CENTRING WAS THE BUG. `margin-inline: auto` centres the column on its 1360px
+       measure, and a centred column's LEFT EDGE MOVES with the width available to it — so pages
+       that resolved to different widths started their titles at different offsets. Today and the
+       Noteboard sat inboard of the To-do list for exactly that reason. */
+    const col = pageCssLocal.slice(pageCssLocal.indexOf(".tdb-col {"));
+    expect(pageCssLocal.indexOf(".tdb-col {")).toBeGreaterThan(-1); // the anchor
+    const decl = col.slice(0, col.indexOf("}")).replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(decl).toContain("margin-inline: 0 auto");
+    expect(decl).not.toContain("margin-inline: auto");
+  });
+
+  it("⚠️ ALL FOUR PAGES WEAR THE SAME COLUMN — including the two with no sidebar", () => {
+    /* The old alignment test covered the sidebar pages only, which is precisely why this shipped:
+       the two that diverged were the two nobody was checking. */
+    for (const [name, src] of [
+      ["To-do list", board], ["Today", today], ["Calendar", cal], ["Noteboard", note],
+    ] as const) {
+      expect(src, name).toContain('className="t-f12 spine-root"');
+      expect(src, name).toContain("<TasksPageLayout");
+      // and none of them caps or centres a measure of its own
+      expect(src, name).not.toMatch(/margin(-inline)?:\s*(0 )?auto/);
+    }
+    // the ONE column class is the layout's, and it is written once
+    expect(layout).toContain('className="tdb-col tpl"');
+  });
+
+  it("the gutter itself is still the single token — the law is offset, not a new number", () => {
+    const col = pageCssLocal.slice(pageCssLocal.indexOf(".tdb-col {"));
+    expect(col.slice(0, col.indexOf("}"))).toContain("var(--tdb-col-gutter)");
+  });
+});
+
+describe("⚠️ AN ILLUSTRATOR'S BRIEF IS NEVER USER-FACING COPY", () => {
+  const art = readFileSync(join(here, "ArtSlot.tsx"), "utf8");
+  const artCss = readFileSync(join(here, "artSlot.css"), "utf8");
+
+  it("NO brief text reaches rendered output, for ANY slot", () => {
+    /* They rendered as body text under every placeholder, so a writer met "An empty letter tray,
+       a pen laid down." as though the app were telling them something. */
+    for (const name of Object.keys(ART_SLOTS) as ArtSlotName[]) {
+      const html = renderToStaticMarkup(<ArtSlot name={name} />);
+      const brief = ART_SLOTS[name].caption;
+      expect(html, name).not.toContain(brief);
+      // not even a fragment of it
+      expect(html, name).not.toContain(brief.slice(0, 18));
+    }
+    expect(art).not.toContain("figcaption");
+    expect(artCss).not.toContain(".art-cap {");
+  });
+
+  it("the placeholder shows the slot NAME in mono, and nothing else", () => {
+    const html = renderToStaticMarkup(<ArtSlot name="done-empty" />);
+    expect(html).toContain("ART · DONE-EMPTY");
+    expect(html).toContain("art-box"); // the ratio box still reserves the room
+  });
+
+  it("⚠️ AN ASSET STANDS ALONE — no ratio box, no dashed frame around finished artwork", () => {
+    const html = renderToStaticMarkup(<ArtSlot name="seize-the-day" />);
+    expect(html).toContain("<img");
+    expect(html).toContain("art-real");
+    expect(html).not.toContain("art-box");
+    expect(html).not.toContain("art-ph");
+  });
+});
+
+describe("⚠️ UP NEXT MUST NOT TRUNCATE A TITLE", () => {
+  const todayCss = readFileSync(join(here, "todoToday.css"), "utf8");
+  const r = (sel: string) => {
+    const i = todayCss.indexOf(sel);
+    expect(i, sel).toBeGreaterThan(-1);
+    return todayCss.slice(i, todayCss.indexOf("}", i)).replace(/\/\*[\s\S]*?\*\//g, "");
+  };
+
+  it("a long title renders IN FULL — nothing truncates it in the markup", () => {
+    const long = "Send your full manuscript to Jonathan Marsh at Willoughby and Crane Literary";
+    const html = renderToStaticMarkup(
+      <TplZone label="Up next"><div className="tdt-brow"><div className="tdt-bt">{long}</div></div></TplZone>,
+    );
+    expect(html).toContain(long); // the whole string, not an ellipsis
+  });
+
+  it("it wraps to TWO lines and never ellipsises on one", () => {
+    const bt = r(".tdt-brow .tdt-bt {");
+    expect(bt).toContain("-webkit-line-clamp: 2");
+    expect(bt).not.toContain("white-space: nowrap");
+    expect(bt).not.toContain("text-overflow: ellipsis");
+    // a long unbroken word must not force the rail wider than its track
+    expect(bt).toContain("overflow-wrap: anywhere");
+  });
+
+  it("⚠️ THE ROW STACKS — the why-line sits BENEATH the title, not beside it", () => {
+    /* Two pieces of text competing for one line's width means the title loses, and the title is
+       the only part of a suggestion that says what it IS. */
+    const row = r(".tdt-brow {");
+    expect(row).toContain("flex-direction: column");
+    expect(r(".tdt-brow .tdt-why {")).not.toContain("margin-left: auto");
+  });
+
+  it("the rail is widened to 360px to pay for it", () => {
+    expect(r(".tdt-split {")).toContain("360px");
   });
 });

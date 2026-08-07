@@ -58,7 +58,11 @@ describe("⚠️ ONE component, SEVEN slots — the briefs are the contract", ()
     for (const n of NAMES) {
       const html = renderToStaticMarkup(<ArtSlot name={n} />);
       const pct = (ART_SLOTS[n].h / ART_SLOTS[n].w) * 100;
-      expect(html, n).toContain(`padding-top:${pct}%`);
+      /* ⚠️ ONLY WHERE THERE IS NO ASSET (7 Aug): real artwork stands alone — a ratio box and
+
+         its dashed frame drawn around finished work makes it look unfinished. */
+
+      if (!ART_SLOTS[n].src) expect(html, n).toContain(`padding-top:${(ART_SLOTS[n].h / ART_SLOTS[n].w) * 100}%`);
     }
     // the box is a ratio device, never a fixed height
     const boxRule = css.slice(css.indexOf(".art-box {"), css.indexOf("}", css.indexOf(".art-box {")));
@@ -80,7 +84,11 @@ describe("⚠️ ONE component, SEVEN slots — the briefs are the contract", ()
         expect(html, n).toContain(ART_SLOTS[n].alt); // described, and it is the brief's own alt
       } else {
         expect(html, n).not.toContain("<img");
-        expect(html, n).toContain(ART_SLOTS[n].caption.slice(0, 20));
+        /* ⚠️ AND THE BRIEF IS NOT IN THE OUTPUT (7 Aug). It used to render as body text under
+           every placeholder, so a writer met the illustrator's note as though the app were
+           telling them something. The placeholder names the SLOT and nothing else. */
+        expect(html, n).not.toContain(ART_SLOTS[n].caption.slice(0, 20));
+        expect(html, n).toContain(`ART · ${n.toUpperCase()}`);
       }
     }
     // exactly ONE slot carries an asset today — the plan card's mark
@@ -188,6 +196,8 @@ describe("⚠️ dock-seal: 600ms, and OFF under reduced motion", () => {
   });
 
   it("the seal shows no caption — a stamp that explained itself would not be a stamp", () => {
-    expect(css).toContain(".art--dock-seal .art-cap { display: none; }");
+    /* ⚠️ RETIRED 7 Aug — `.art-cap` is gone entirely: an illustrator's brief is not user-facing
+       copy, and it was rendering as body text under every placeholder. There is no caption left
+       to hide per slot. */
   });
 });

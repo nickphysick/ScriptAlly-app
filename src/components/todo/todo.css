@@ -41,7 +41,14 @@
 /* THE SINGLE GEOMETRY OWNER (the pack's .page-col): the ONLY element in the content chain
    with a max-width, auto margins or horizontal padding. Everything (hero, panel) rides inside
    it; no ancestor or descendant in the chain adds a competing horizontal box. */
-.tdb-col { max-width: var(--tdb-col-max); margin-inline: auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
+/* ⚠️ THE LEFT GUTTER IS LAW (tasks-viewport fixes, 7 Aug). This carried `margin-inline: auto`,
+   which centred the column on its 1360px measure — and a CENTRED column's left edge moves with
+   the width available to it, so pages that resolved to different widths started their titles at
+   different offsets. The sidebar pages and the sidebar-less ones did exactly that, which is why
+   Today and the Noteboard sat inboard of the To-do list.
+   ⚠️ CONTENT IS LEFT-ANCHORED AND GROWS RIGHTWARD; the surplus past the cap becomes RIGHT margin.
+   Never reinstate the auto margins to "balance" the page — the balance was the bug. */
+.tdb-col { max-width: var(--tdb-col-max); margin-inline: 0 auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
 /* ONE OWNER PER GAP (briefing-slot fix). The space under the header rule was THREE stacked
    values — .svh's 26px, this element's 26px, and .tdb-ctrl's 44px — compounding to 96px of void
    whenever the briefing was absent. The legacy hero→panel padding goes (there is no panel), and

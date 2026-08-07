@@ -47,7 +47,12 @@ interface SlotBrief {
 }
 
 /**
- * ⚠️ THE SIX BRIEFS, VERBATIM FROM THE REF. This record is the illustrator's handover and the
+ * ⚠️ A BRIEF IS FOR THE ILLUSTRATOR, NEVER FOR THE READER (tasks-viewport fixes, 7 Aug). These
+ * captions used to render as body text under every placeholder, so a writer met "An empty letter
+ * tray, a pen laid down." as though it were something the app was telling them. They live HERE
+ * and in code comments only; the placeholder shows the slot's name in mono and nothing else.
+ *
+ * ⚠️ THE BRIEFS, VERBATIM FROM THE REF. This record is the illustrator's handover and the
  * component's contract at once: change a ratio here and the reserved space changes everywhere the
  * slot appears, which is exactly the coupling you want.
  */
@@ -116,18 +121,19 @@ export const ArtSlot: React.FC<ArtSlotProps> = ({ name, maxWidth, className }) =
       style={maxWidth ? { maxWidth } : undefined}
       data-art={name}
     >
-      {/* The ratio box: padding-top holds the space whether or not the asset exists, so the
-          placeholder and the artwork occupy exactly the same room. */}
-      <div className="art-box" style={{ paddingTop: `${(brief.h / brief.w) * 100}%` }}>
-        {showArt ? (
-          <img className="art-img" src={brief.src} alt={brief.alt} onError={() => setFailed(true)} />
-        ) : (
+      {/* ⚠️ WHEN THE ASSET EXISTS IT STANDS ALONE — no ratio box, no dashed frame, no caption.
+          A placeholder's chrome drawn around real artwork makes finished work look unfinished. */}
+      {showArt ? (
+        <img className="art-img art-real" src={brief.src} alt={brief.alt} onError={() => setFailed(true)} />
+      ) : (
+        /* The ratio box reserves exactly the room the artwork will take, so nothing shifts when
+           it lands. Its only content is the slot's NAME, in mono — see the brief note above. */
+        <div className="art-box" style={{ paddingTop: `${(brief.h / brief.w) * 100}%` }}>
           <span className="art-ph" aria-hidden>
             <span className="art-phk">ART · {name.toUpperCase()}</span>
           </span>
-        )}
-      </div>
-      <figcaption className="art-cap">{brief.caption}</figcaption>
+        </div>
+      )}
     </figure>
   );
 };

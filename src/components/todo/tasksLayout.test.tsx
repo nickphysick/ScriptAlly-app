@@ -75,7 +75,13 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
     const i = todoCss.indexOf(".tdb-col {");
     const rule = todoCss.slice(i, todoCss.indexOf("}", i));
     expect(rule).toContain("max-width: var(--tdb-col-max)");
-    expect(rule).toContain("margin-inline: auto");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
+       which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width
+       available to it, so pages that resolved to different widths started their titles at
+       different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+       LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
+       that no page adds a one-sided inset of its own — is unchanged and asserted below. */
+    expect(rule).toContain("margin-inline: 0 auto");
     expect(rule).toContain("var(--tdb-col-gutter)");
   });
 
@@ -90,7 +96,10 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
     expect(slots.length).toBe(4); // list · today · calendar · noteboard
     for (const slot of slots) {
       expect(slot, slot).not.toContain("contentVariant");
-      expect(slot, slot).toContain('layout="fill"');
+      /* ⚠️ `fillColumn` SINCE 7 Aug (was `fill`): `fill` renders the slot `display: block`, which
+         left `.spine-root` resolving a percentage height against a flex-derived one. The law is
+         unchanged — all four slots IDENTICAL — only the mode moved. */
+      expect(slot, slot).toContain('layout="fillColumn"');
       expect(slot, slot).toContain("clip");
     }
   });

@@ -643,7 +643,7 @@ function AppContent() {
         {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).
             The list page owns its internal scroll like the Queries desk and stays mounted so its
             mode/filter/selection survive; the other three are ordinary flow pages. */}
-        <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fill" clip>
+        <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fillColumn" clip>
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
@@ -655,17 +655,17 @@ function AppContent() {
             different scrollers and different available widths to centre in. One slot shape,
             one scroller, one column: the four pages cannot diverge on either axis because
             nothing about their mounting differs at all. */}
-        <StagePage active={routeKey === "todo" && todoPage === "today"} layout="fill" clip>
+        <StagePage active={routeKey === "todo" && todoPage === "today"} layout="fillColumn" clip>
           <TodoTodayPage onNavigate={handleNavigate} />
         </StagePage>
 
         {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
-        <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fill" clip>
+        <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fillColumn" clip>
           <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
-        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fill" clip>
+        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>
           <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 

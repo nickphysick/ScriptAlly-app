@@ -32,7 +32,13 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
     expect(page).toContain("<TasksPageLayout");
     const c = rule(".tdb-col");
     expect(c).toContain("max-width: var(--tdb-col-max)");
-    expect(c).toContain("margin-inline: auto"); // centred, equal gutters grow with the viewport
+    /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
+       which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width
+       available to it, so pages that resolved to different widths started their titles at
+       different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+       LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
+       that no page adds a one-sided inset of its own — is unchanged and asserted below. */
+    expect(c).toContain("margin-inline: 0 auto"); // centred, equal gutters grow with the viewport
   });
   it("the column max + gutter + chrome gap are tokens (~1360 / 40 / ≥44)", () => {
     const w = rule(".tdb-wrap");
@@ -183,7 +189,13 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
     expect(rule(".tdb-wrap")).toContain("overflow: hidden");
     expect(rule(".tdb-wrap")).not.toContain("scrollbar-gutter");
     // the column centres with equal side padding + auto margins (no one-sided inset)
-    expect(rule(".tdb-col")).toContain("margin-inline: auto");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
+       which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width
+       available to it, so pages that resolved to different widths started their titles at
+       different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+       LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
+       that no page adds a one-sided inset of its own — is unchanged and asserted below. */
+    expect(rule(".tdb-col")).toContain("margin-inline: 0 auto");
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).not.toMatch(/padding-left|padding-right/);
   });
@@ -268,7 +280,13 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
   it(".tdb-col is the SOLE geometry owner — max-width + auto margins + symmetric padding", () => {
     const col = rule(".tdb-col");
     expect(col).toContain("max-width: var(--tdb-col-max)");
-    expect(col).toContain("margin-inline: auto");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
+       which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width
+       available to it, so pages that resolved to different widths started their titles at
+       different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+       LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
+       that no page adds a one-sided inset of its own — is unchanged and asserted below. */
+    expect(col).toContain("margin-inline: 0 auto");
     expect(col).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px"); // equal L/R via one token
   });
   it("NO other chain element carries a max-width, an auto margin, or a one-sided horizontal pad", () => {

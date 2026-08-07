@@ -73,7 +73,10 @@
 
 .tdt-tick.on { background: #5a6e58; border-color: #5a6e58; }
 
-.tdt-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ⚠️ NO ELLIPSIS ON A TITLE (7 Aug). This truncated every committed item to one line — the same
+   fault reported on Up next, in a second home. A task's title is the only part of the row that
+   says what it IS; the chips beneath it are metadata and may be clipped, the title may not. */
+.tdt-t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 
 /* ⚠️ THE STRIKE IS ON THE TITLE, NOT THE ROW — striking the whole row would put a line through
    the time and the Undo control, which are the two things you might still need. */
@@ -181,26 +184,17 @@
   padding: 10px 18px 8px;
 }
 
-.tdt-brow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 18px;
-  font-size: 14px;
-  color: #2a1a13;
-}
+/* ⚠️ `.tdt-brow`'s ONE RULE IS THE REDESIGNED ONE, further down this file. This block was the
+   pre-redesign row (horizontal, centred, 9px/18px padding) and it survived P2 as a second rule
+   for the same selector — which is why the redesigned row read as half-applied. Deleted rather
+   than left inert: a stale rule for a live selector wins whatever the reader expects, depending
+   only on which one the parser meets last. */
 
-.tdt-bt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ⚠️ RETIRED 7 Aug — superseded by `.tdt-brow .tdt-bt` — two lines, no ellipsis. Deleted rather than left inert: a stale rule for a live
+   selector wins or loses on parse order, which is not a thing anyone should have to reason about. */
 
-/* The why-line — stated, never left for the reader to infer. */
-.tdt-why {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #7a6a5e;
-  white-space: nowrap;
-}
+/* ⚠️ RETIRED 7 Aug — superseded by `.tdt-brow .tdt-why` — it wraps beneath the title now. Deleted rather than left inert: a stale rule for a live
+   selector wins or loses on parse order, which is not a thing anyone should have to reason about. */
 
 .tdt-badd {
   font: inherit;
@@ -217,7 +211,8 @@
 .tdt-badd:hover { background: #f4f2ef; }
 
 @media (max-width: 767px) {
-  .tdt-meta, .tdt-why { display: none; }
+  /* the why-line stays — it is the reason the suggestion is there at all */
+  .tdt-meta { display: none; }
 }
 
 /* ⚠️ ART · DESK-CLEAR (board-optimise P3) — the hero, centred in the content column. The one
@@ -282,8 +277,12 @@
 /* ⚠️ THE RAIL IS ~320px BEHIND A LEFT HAIRLINE, and both regions are flex columns with
    `min-height: 0` so each can own its own scrollzone. Without the zero min the taller one
    dictates the page height and the lock has nothing to hold. */
+/* ⚠️ THE RAIL IS 360px, WIDENED FROM 320 (7 Aug). At 320 a real suggestion title — "Send your
+   full to Jonathan Marsh" — had nowhere to go once the ＋Add button took its share of the row,
+   so it truncated. The title is the only part of a suggestion that says what it IS; everything
+   else on the row is a reason or a verb, so the title is what gets the width. */
 .tdt-split {
-  display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 30px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 30px;
   flex: 1; min-height: 0;
 }
 .tdt-region { display: flex; flex-direction: column; min-height: 0; }
@@ -367,10 +366,27 @@
 .tdt-row:hover .tdt-dots { color: #6b5a4e; background: #faf6f0; }
 
 /* ── Up next ── */
-.tdt-brow { padding: 12px 2px; border-bottom: 1px solid #f4eee4; cursor: grab; }
-.tdt-brow .tdt-bt { font-size: 13px; font-weight: 600; color: #2b2118; line-height: 1.3; }
+/* ⚠️ THE ROW STACKS — title, then why-line, then the verb. It used to run the why-line beside
+   the title, so two pieces of text competed for one line's width and the title lost. Nothing on
+   this row is horizontal any more, which is what lets the title have the whole measure. */
+.tdt-brow {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  padding: 12px 2px; border-bottom: 1px solid #f4eee4; cursor: grab;
+}
+/* ⚠️ TWO LINES, AND NO ELLIPSIS. A truncated suggestion title is unreadable exactly where the
+   reader is deciding whether to commit to it. `-webkit-line-clamp` is the cap; `overflow-wrap`
+   is what stops a long unbroken word forcing the rail wider than its track. */
+.tdt-brow .tdt-bt {
+  font-size: 13px; font-weight: 600; color: #2b2118; line-height: 1.35;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; overflow-wrap: anywhere; width: 100%;
+}
 .tdt-brow .tdt-why {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 7px; letter-spacing: 0.1em; color: #9a8a6e; margin: 5px 0 8px;
+  font-size: 7px; letter-spacing: 0.1em; color: #9a8a6e; margin: 0;
+  /* the reason may wrap too rather than shove the row wider */
+  white-space: normal; overflow-wrap: anywhere;
 }
+/* the verb sits at the row's foot, out of the title's way entirely */
+.tdt-brow .tdt-ghost { margin-top: 3px; }
 .tdt-drag { font-size: 10.5px; color: #b3a394; margin: 10px 0 0; flex: 0 0 auto; }

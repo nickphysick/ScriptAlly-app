@@ -21,15 +21,16 @@
   font-size: 7px; letter-spacing: 0.16em; color: #b3a394;
 }
 
-.art-cap {
-  font-size: 11px; line-height: 1.5; color: #8a7a6c;
-  margin-top: 8px; text-align: center;
-}
+/* ⚠️ `.art-cap` IS GONE (7 Aug) — the illustrator's brief is not body text. The rule is removed
+   rather than emptied so nothing can quietly start rendering into it again. */
+.art-real { display: block; width: 100%; height: auto; }
 
 /* ⚠️ THE DOCK SEAL IS THE ONE MOVING SLOT — appear, settle, fade over 600ms. Its caption is
    suppressed: a stamp that explained itself would not be a stamp. */
 .art--dock-seal { position: absolute; inset: 0; margin: auto; width: 120px; height: 120px; z-index: 5; pointer-events: none; }
-.art--dock-seal .art-cap { display: none; }
+.art--dock-seal /* ⚠️ `.art-cap` IS GONE (7 Aug) — the illustrator's brief is not body text. The rule is removed
+   rather than emptied so nothing can quietly start rendering into it again. */
+.art-real { display: block; width: 100%; height: auto; }
 .art--dock-seal .art-box { animation: artSeal 600ms cubic-bezier(.2, .7, .3, 1) forwards; }
 @keyframes artSeal {
   0% { opacity: 0; transform: scale(1.25) rotate(-8deg); }

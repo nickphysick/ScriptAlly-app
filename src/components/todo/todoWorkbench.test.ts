@@ -442,7 +442,13 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
     // SHELL POLISH P1: the gutters moved to the centred column; the wrap is the bare scroller
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).toContain("max-width: var(--tdb-col-max)");
-    expect(rule(".tdb-col")).toContain("margin-inline: auto");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
+       which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width
+       available to it, so pages that resolved to different widths started their titles at
+       different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+       LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
+       that no page adds a one-sided inset of its own — is unchanged and asserted below. */
+    expect(rule(".tdb-col")).toContain("margin-inline: 0 auto");
   });
   it("the work row fills the column — no fixed width, no auto margin, no transition (centring fix)", () => {
     expect(rule(".tdb-asm")).toContain("width: 100%");
@@ -983,7 +989,13 @@ describe("Width v4 — SUPERSEDED: the .tdb-col is the single geometry owner (ce
     expect(rule(".tdb-asm")).toContain("width: 100%");
     expect(rule(".tdb-asm")).not.toContain("margin");
     expect(rule(".tdb-col")).toContain("max-width: var(--tdb-col-max)");
-    expect(rule(".tdb-col")).toContain("margin-inline: auto");
+    /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
+       which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width
+       available to it, so pages that resolved to different widths started their titles at
+       different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
+       LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
+       that no page adds a one-sided inset of its own — is unchanged and asserted below. */
+    expect(rule(".tdb-col")).toContain("margin-inline: 0 auto");
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {

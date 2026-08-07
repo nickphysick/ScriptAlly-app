@@ -68,7 +68,14 @@
  * can prove the chain resolves — the locks assert that each link DECLARES its part, and the
  * browser walk is what proves it. Flagged in reports/tasks-viewport.md for exactly that reason.
  */
-.spine-root { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+/* ⚠️ `flex: 1`, NOT `height: 100%` (7 Aug fix). A percentage height must resolve against a
+   parent with a DEFINITE height, and this parent is a flex item inside the app's real scroll
+   container (`.ws-cscroll`, which is `overflow: auto`) — a chain where "definite" depends on
+   every ancestor resolving in the right order. `flex: 1; min-height: 0` asks for the remaining
+   space instead of a percentage of an assumed one, which is the pattern StagePage's own comment
+   already recommends. The four Tasks slots are `layout="fillColumn"` so this has a flex parent
+   to be an item of. */
+.spine-root { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
 .tdb-col.tpl { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 /* ⚠️ `.tdb-wrap`'s OWN rule is edited IN PLACE in todo.css (it is where `overflow-y: auto` was

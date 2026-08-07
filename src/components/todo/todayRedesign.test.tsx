@@ -122,7 +122,10 @@ describe("⚠️ two named regions, each scrolling under its own hem", () => {
     expect(page).toContain('<TplZone label="Today’s list"');
     expect(page).toContain('<TplZone label="Up next"');
     const split = rule(".tdt-split {");
-    expect(split).toContain("320px");
+    /* ⚠️ 360px SINCE 7 Aug (was 320): at 320 a real suggestion title had nowhere to go once the
+       ＋Add took its share of the row, so it truncated. The rail's WIDTH is not the law — the law
+       is that the title is never truncated, and the width is what pays for it. */
+    expect(split).toContain("360px");
     expect(split).toContain("min-height: 0");
     expect(rule(".tdt-rail {")).toContain("border-left: 1px solid");
   });
