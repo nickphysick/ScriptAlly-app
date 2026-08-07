@@ -677,6 +677,8 @@
 }
 .os-goal-num:hover { color: #7c3a2a; }
 .os-goal-t { font-size: 12px; color: #4a3a2e; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ⚠️ THE GAP IS SET INLINE from the block count (goalBlockGap) — a fixed 3px gap leaves 1.8px of
+   block once there are 60 of them. The declaration here is the fallback for the ghost meter. */
 .os-blocks { display: flex; gap: 3px; margin: 9px 0 1px; }
 .os-blocks i { flex: 1; height: 9px; border-radius: 3px; background: #e9dfd1; transition: background 0.16s ease; }
 .os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) both; }

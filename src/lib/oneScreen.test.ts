@@ -7,7 +7,7 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
-  achievementPill, awaitingChip, chartEvents, GOAL_BLOCKS, goalBlocksFilled, goalPeriodStart,
+  achievementPill, awaitingChip, chartEvents, GOAL_BLOCK_CAP, goalBlockGap, goalMeter, goalPeriodStart,
   aggregateLedger, bindEvents, dailyLedger, defaultFreq, goalState, MIN_SPAN, monotonePath,
   nearestStop, RANGE_STOPS, rangeChip, rangeWindow, runStage, stopForDays, tenureLine,
   tourAutoRuns, tourChipShows, yScale,
@@ -361,6 +361,16 @@ describe("goalState + the 25-block meter", () => {
     expect(g.sentence).toBe("Query 25 agents this quarter");
   });
 
+  /* ⚠️ "Query 1 agents this quarter" was live on a real account. A count in a sentence needs its
+     noun to agree with it. */
+  it("⚠️ the noun agrees with the count", () => {
+    const one = goalState([], 1, "quarter", NOW)!;
+    expect(one.sentence).toBe("Query 1 agent this quarter");
+    expect(goalState([], 2, "quarter", NOW)!.sentence).toBe("Query 2 agents this quarter");
+    expect(goalState([], 1, "month", NOW)!.sentence).toBe("Query 1 agent this month");
+    expect(goalState([], 1, "year", NOW)!.sentence).toBe("Query 1 agent this year");
+  });
+
   it("no target → no goal state (the day-one CTA renders instead)", () => {
     expect(goalState([], undefined, undefined, NOW)).toBeNull();
     expect(goalState([], 0, "quarter", NOW)).toBeNull();
@@ -373,11 +383,34 @@ describe("goalState + the 25-block meter", () => {
   });
 
   it("⚠️ the meter rounds DOWN and never claims more than happened", () => {
-    expect(goalBlocksFilled(21, 25)).toBe(21); // the ref's own figure: 21/25 → 21 blocks
-    expect(goalBlocksFilled(1, 25)).toBe(1);
-    expect(goalBlocksFilled(2, 3)).toBe(16);   // 2/3 of 25 = 16.67 → 16, not 17
-    expect(goalBlocksFilled(30, 25)).toBe(GOAL_BLOCKS); // over-achievement caps at full
-    expect(goalBlocksFilled(0, 0)).toBe(0);    // never NaN
+    /* ⚠️ ONE BLOCK PER QUERY, so the meter and the ratio are the same two numbers. The old meter
+       was a fixed 25 blocks with done/target scaled onto them — at target 1 that drew 25 full
+       blocks beside a header reading "1/1", which is the bug this replaces. */
+    expect(goalMeter(21, 25)).toEqual({ blocks: 25, filled: 21, proportional: false });
+    expect(goalMeter(1, 1)).toEqual({ blocks: 1, filled: 1, proportional: false });
+    expect(goalMeter(0, 25)).toEqual({ blocks: 25, filled: 0, proportional: false });
+    // over-achievement fills the meter, never overflows it
+    expect(goalMeter(30, 25)).toEqual({ blocks: 25, filled: 25, proportional: false });
+    // never NaN, never negative blocks
+    expect(goalMeter(0, 0)).toEqual({ blocks: 0, filled: 0, proportional: false });
+    expect(goalMeter(5, -3)).toEqual({ blocks: 0, filled: 0, proportional: false });
+  });
+
+  /* ⚠️ a hundred 3px blocks is a texture, not a meter — past the cap a block stops meaning one
+     query and represents a share, and `proportional` is what lets the label say so */
+  it("⚠️ above the cap the meter goes proportional rather than drawing one block per query", () => {
+    expect(goalMeter(50, 100)).toEqual({ blocks: GOAL_BLOCK_CAP, filled: 30, proportional: true });
+    expect(goalMeter(0, 100)).toEqual({ blocks: GOAL_BLOCK_CAP, filled: 0, proportional: true });
+    expect(goalMeter(999, 100)).toEqual({ blocks: GOAL_BLOCK_CAP, filled: GOAL_BLOCK_CAP, proportional: true });
+    // exactly at the cap it is still one-per-query
+    expect(goalMeter(10, GOAL_BLOCK_CAP)).toEqual({ blocks: 60, filled: 10, proportional: false });
+    expect(goalMeter(10, GOAL_BLOCK_CAP + 1).proportional).toBe(true);
+  });
+
+  it("the gap gives way as the blocks multiply, or 60 of them are a dotted line", () => {
+    expect(goalBlockGap(10)).toBe(3);
+    expect(goalBlockGap(25)).toBe(2);
+    expect(goalBlockGap(60)).toBe(1);
   });
 });
 

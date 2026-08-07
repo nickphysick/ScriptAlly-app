@@ -509,16 +509,46 @@ export const goalState = (
     return t !== null && t >= from && t <= now.getTime();
   }).length;
   const word = p === "quarter" ? "this quarter" : p === "month" ? "this month" : "this year";
-  return { target, period: p, done, sentence: `Query ${target} agents ${word}` };
+  /* ⚠️ "Query 1 agents this quarter" was live. A count in a sentence needs its noun to agree. */
+  const noun = target === 1 ? "agent" : "agents";
+  return { target, period: p, done, sentence: `Query ${target} ${noun} ${word}` };
 };
 
-/** The meter is ALWAYS 25 blocks (§6) — done/target scales onto them, full blocks rounded down
- *  so the meter never claims more than has happened. */
-export const GOAL_BLOCKS = 25;
-export const goalBlocksFilled = (done: number, target: number): number => {
-  if (target <= 0) return 0;
-  return Math.min(GOAL_BLOCKS, Math.floor((done / target) * GOAL_BLOCKS));
+/**
+ * ⚠️ ONE BLOCK PER QUERY, so the meter and the ratio beside it are the SAME two numbers. The
+ * meter used to be a fixed 25 blocks with done/target scaled onto them, which at a target of 1
+ * drew twenty-five full blocks beside a header reading "1/1" — the count and the ratio saying
+ * different things about the same goal.
+ *
+ * ⚠️ ABOVE THE CAP IT BECOMES PROPORTIONAL, because a hundred 3px blocks is not a meter, it is a
+ * texture. Past `GOAL_BLOCK_CAP` the blocks stop being one-per-query and represent a share
+ * instead — `proportional` says which reading is on screen so the label can say so too.
+ */
+export const GOAL_BLOCK_CAP = 60;
+
+export interface GoalMeter {
+  /** How many blocks to draw. */
+  blocks: number;
+  /** How many of them are filled. */
+  filled: number;
+  /** True once a block no longer means exactly one query. */
+  proportional: boolean;
+}
+
+export const goalMeter = (done: number, target: number): GoalMeter => {
+  if (!Number.isFinite(target) || target <= 0) return { blocks: 0, filled: 0, proportional: false };
+  const d = Math.max(0, Math.floor(done));
+  if (target <= GOAL_BLOCK_CAP) {
+    // one block per query — over-achievement fills the meter, never overflows it
+    return { blocks: target, filled: Math.min(target, d), proportional: false };
+  }
+  const filled = Math.min(GOAL_BLOCK_CAP, Math.floor((d / target) * GOAL_BLOCK_CAP));
+  return { blocks: GOAL_BLOCK_CAP, filled, proportional: true };
 };
+
+/** ⚠️ The gap has to give way as the blocks multiply — 60 blocks at a 3px gap leaves 1.8px of
+ *  block on a 287px rail, which reads as a dotted line rather than a meter. */
+export const goalBlockGap = (blocks: number): number => (blocks > 30 ? 1 : blocks > 12 ? 2 : 3);
 
 /* ══════════════════════════ §9 · FIRST-RUN STATES ══════════════════════════ */
 

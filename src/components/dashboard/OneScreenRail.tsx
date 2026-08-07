@@ -17,7 +17,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
-import { GOAL_BLOCKS, goalBlocksFilled, GoalPeriod, goalState } from "../../lib/oneScreen";
+import { goalBlockGap, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
@@ -146,7 +146,9 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
     setEditingGoal(false);
   };
 
-  const filled = goal ? goalBlocksFilled(goal.done, goal.target) : 0;
+  /* ⚠️ ONE BLOCK PER QUERY — the meter and the {done}/{target} beside it are the same two
+     numbers, so they cannot disagree. Above the cap it turns proportional and says so. */
+  const meter = goalMeter(goal?.done ?? 0, goal?.target ?? 0);
 
   return (
     <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
@@ -186,8 +188,8 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             <>
               {/* §9: no goal yet — the ghost meter and the invitation, never fake progress */}
               <div className="os-goal-t">Set a target for the quarter</div>
-              <div className="os-blocks ghost" aria-hidden="true">
-                {Array.from({ length: GOAL_BLOCKS }, (_, i) => <i key={i} />)}
+              <div className="os-blocks ghost" aria-hidden="true" style={{ gap: goalBlockGap(24) }}>
+                {Array.from({ length: 24 }, (_, i) => <i key={i} />)}
               </div>
               <button type="button" className="os-btn-mini ghost" onClick={() => { setGoalDraft({ target: 25, period: "quarter" }); setEditingGoal(true); }}>
                 Set a goal
@@ -197,8 +199,17 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
         ) : (
           <>
             <div className="os-goal-t">{goal.sentence}</div>
-            <div className="os-blocks" role="img" aria-label={`${goal.done} of ${goal.target} — ${filled} of ${GOAL_BLOCKS} blocks filled`}>
-              {Array.from({ length: GOAL_BLOCKS }, (_, i) => <i key={i} className={i < filled ? "f" : undefined} style={i < filled ? { animationDelay: `${i * 0.02}s` } : undefined} />)}
+            <div
+              className="os-blocks"
+              role="img"
+              style={{ gap: goalBlockGap(meter.blocks) }}
+              aria-label={meter.proportional
+                ? `${goal.done} of ${goal.target} — the meter shows the share completed`
+                : `${goal.done} of ${goal.target} queries sent`}
+            >
+              {Array.from({ length: meter.blocks }, (_, i) => (
+                <i key={i} className={i < meter.filled ? "f" : undefined} style={i < meter.filled ? { animationDelay: `${i * 0.02}s` } : undefined} />
+              ))}
             </div>
           </>
         )}
