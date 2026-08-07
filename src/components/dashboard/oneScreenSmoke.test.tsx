@@ -172,7 +172,9 @@ describe("§9 · first-run states", () => {
     expect(html).not.toContain("agents on file");
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
-    expect(html).toContain("Nothing needs your attention yet");
+    /* ⚠️ the header's day-one line folded into the shared empty state (v16 §4) — the "yet" it
+       carried is said properly by the BODY copy below it, so nothing was lost but a duplicate */
+    expect(html).toContain("Nothing needs you");
     expect(html).toContain("Tasks appear here as your queries progress.");
     expect(html).toContain("Add your manuscript");
     expect(html).toContain("Add an agent");

@@ -211,6 +211,8 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             tasks={tasks}
             queries={queries}
             agents={agents}
+            userTasks={userTasks}
+            now={now}
             dayOne={stage === "day-one"}
             onAction={onTaskAction}
             onSeeAll={() => onNavigate("todo")}
