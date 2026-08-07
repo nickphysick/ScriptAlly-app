@@ -365,6 +365,33 @@ export const goalBlocksFilled = (done: number, target: number): number => {
   return Math.min(GOAL_BLOCKS, Math.floor((done / target) * GOAL_BLOCKS));
 };
 
+/* ══════════════════════════ §9 · FIRST-RUN STATES ══════════════════════════ */
+
+export type RunStage = "day-one" | "early-days" | "settled";
+
+/**
+ * §9: "day one" is nothing at all — no manuscript, no queries. "Early days" is the first
+ * fortnight from the first send. Everything else is the settled page.
+ *
+ * ⚠️ EARLY DAYS SUPPRESSES THE ACHIEVEMENT PILL even though §7's fallback is always true — §9 is
+ * explicit ("pills = tenure + agents only (no achievement until one is true)"), and a day-three
+ * account being told "2 queries awaiting a reply" as an achievement is the kind of padding the
+ * facts-only rule exists to stop. The two sections conflict; §9 is the specific one and wins.
+ */
+export const runStage = (queries: Query[], manuscripts: unknown[], now: Date): RunStage => {
+  const sends = queries.map((q) => parseWhen(q.dateSent)).filter((t): t is number => t !== null);
+  if (sends.length === 0 && manuscripts.length === 0) return "day-one";
+  if (sends.length === 0) return "early-days"; // a manuscript but no sends: still before the line
+  const first = Math.min(...sends);
+  return now.getTime() - first <= 14 * DAY_MS ? "early-days" : "settled";
+};
+
+/** The §9 chart chip for early days — "{n} awaiting a reply" instead of range movement. */
+export const awaitingChip = (queries: Query[]): string => {
+  const n = queries.filter((q) => !TERMINAL.has(q.status) && q.dateSent).length;
+  return `${n} awaiting a reply`;
+};
+
 /* ══════════════════════════ §12 · TOUR VISIBILITY ══════════════════════════ */
 
 /**

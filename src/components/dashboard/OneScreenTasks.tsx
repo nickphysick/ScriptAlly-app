@@ -37,9 +37,12 @@ export const OneScreenTasks: React.FC<{
   tasks: Task[];
   queries: Query[];
   agents: Agent[];
+  dayOne?: boolean;
   onAction: (task: Task) => void;
   onSeeAll: () => void;
-}> = ({ loading, tasks, queries, agents, onAction, onSeeAll }) => {
+  onAddManuscript?: () => void;
+  onAddAgent?: () => void;
+}> = ({ loading, tasks, queries, agents, dayOne = false, onAction, onSeeAll, onAddManuscript, onAddAgent }) => {
   const urgent = buildOverToYouRows(tasks, queries, agents);
   const house = buildHousekeepingRows(tasks, queries, agents);
   const empty = urgent.length === 0 && house.length === 0;
@@ -49,11 +52,20 @@ export const OneScreenTasks: React.FC<{
       {loading && <Skel bars={["h", "", "", ""]} />}
       <div className="os-th2">
         <h2>Tasks</h2>
-        <span className="os-tc">{tasksHeader(urgent.length, house.length)}</span>
+        <span className="os-tc">{dayOne ? "Nothing needs your attention yet" : tasksHeader(urgent.length, house.length)}</span>
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>
       <div className="os-tbody">
-        {empty && <div className="os-tempty"><span>Nothing needs you today.</span></div>}
+        {dayOne ? (
+          /* §9: day one explains where tasks come from and offers the two first moves */
+          <div className="os-tempty os-dayone-tasks">
+            <span>Tasks appear here as your queries progress.</span>
+            <div className="os-dayone-ctas">
+              <button type="button" className="os-btn-mini ghost" onClick={onAddManuscript}>Add your manuscript</button>
+              <button type="button" className="os-btn-mini ghost" onClick={onAddAgent}>Add an agent</button>
+            </div>
+          </div>
+        ) : empty && <div className="os-tempty"><span>Nothing needs you today.</span></div>}
 
         {/* urgent first, housekeeping beneath — one list, deadline order preserved per tier */}
         {urgent.map((r) => {

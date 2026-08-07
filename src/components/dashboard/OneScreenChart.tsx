@@ -24,8 +24,8 @@ import { StatusDot } from "../StatusDot";
 import { activeStageBreakdown } from "../../lib/dashboardStats";
 import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import {
-  chartEvents, ChartEvent, LedgerRange, LedgerWeek, ledgerView, monotonePath, rangeChip,
-  weeklyLedger, yScale,
+  awaitingChip, chartEvents, ChartEvent, LedgerRange, LedgerWeek, ledgerView, monotonePath,
+  rangeChip, weeklyLedger, yScale,
 } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
 
@@ -91,12 +91,36 @@ const ChartTip: React.FC<{ anchor: Rect | null; children: React.ReactNode }> = (
 
 /* ── the card ── */
 
+/** §10: the headline counts up once on first paint — instant under reduced motion. */
+const useCountUp = (to: number, ms = 700): number => {
+  const [shown, setShown] = useState(to);
+  const ran = useRef(false);
+  useEffect(() => {
+    if (ran.current) { setShown(to); return; } // later data changes land instantly
+    ran.current = true;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || to === 0) { setShown(to); return; }
+    let raf = 0;
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      setShown(Math.round(to * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [to, ms]);
+  return shown;
+};
+
 export const OneScreenChart: React.FC<{
   loading: boolean;
   queries: Query[];
   agents: Agent[];
   now: Date;
-}> = ({ loading, queries, agents, now }) => {
+  dayOne?: boolean;
+  earlyDays?: boolean;
+  onSendFirst?: () => void;
+}> = ({ loading, queries, agents, now, dayOne = false, earlyDays = false, onSendFirst }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const lineRef = useRef<SVGPathElement>(null);
@@ -114,6 +138,7 @@ export const OneScreenChart: React.FC<{
   const ledger = useMemo(() => weeklyLedger(queries, now), [queries, now]);
   const view = useMemo(() => ledgerView(ledger, range), [ledger, range]);
   const active = ledger.length ? ledger[ledger.length - 1].active : 0;
+  const shownActive = useCountUp(active);
   const stages = useMemo(() => activeStageBreakdown(queries), [queries]);
   const activeTotal = stages.reduce((a, r) => a + r.count, 0);
 
@@ -243,12 +268,28 @@ export const OneScreenChart: React.FC<{
         </button>
       </div>
       <div className="os-fig">
-        <span className="os-n">{active}</span>
-        {view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
+        <span className="os-n">{shownActive}</span>
+        {/* §9: in the first fortnight the chip states what is out, not a movement — a two-point
+            range delta is noise dressed as trend */}
+        {earlyDays
+          ? <span className="os-chip">{awaitingChip(queries)}</span>
+          : view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
       </div>
 
       <div className="os-chartwrap" ref={wrapRef}>
-        {sparse ? (
+        {dayOne ? (
+          /* §9: the day-one card is an invitation, not an empty chart */
+          <div className="os-dayone on">
+            <svg className="os-dayone-art" viewBox="0 0 120 90" aria-hidden="true">
+              <rect x="18" y="34" width="60" height="40" rx="4" />
+              <path d="M18 38l30 22 30-22" />
+              <path d="M70 30l14-14M84 16h-10M84 16v10" />
+              <path d="M90 44c6-2 10-8 10-14" />
+            </svg>
+            <span className="os-dayone-copy">Every query you send and every reply that comes back will be charted here.</span>
+            <button type="button" className="os-btn-mini" onClick={onSendFirst}>Send your first query</button>
+          </div>
+        ) : sparse ? (
           <div className="os-sparse on">
             <span>The line begins once you have queried in two separate weeks.</span>
           </div>

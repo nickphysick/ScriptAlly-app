@@ -152,7 +152,8 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
       {/* ══ author & manuscript (tile C — band & overlap) ══ */}
       <div className={`os-card os-lift os-aut stowable${loading ? " isload" : ""}`}>
         {loading && <Skel bars={["h", "", "grow"]} />}
-        <div className="os-aut-band"><span className="os-pill-o os-aut-wk">{weekOfQuerying(queries, now)} of querying</span></div>
+        {/* §9: before the first send the band says "Day one" — a week number would be a lie */}
+        <div className="os-aut-band"><span className="os-pill-o os-aut-wk">{queries.some((x) => x.dateSent) ? `${weekOfQuerying(queries, now)} of querying` : "Day one"}</span></div>
         <div className="os-aut-body">
           <div className="os-aut-pic">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
@@ -264,6 +265,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
         <div className="os-abody" id="os-actv-body">
           {rows.length === 0 ? (
             <div className="os-aempty">
+              <span className="os-aempty-thread" aria-hidden="true" />
               <span>The story starts with your first query.</span>
             </div>
           ) : (

@@ -18,7 +18,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
 import { longDate, weekOfQuerying } from "../../lib/dashboardStats";
-import { achievementPill, Achievement, tenureLine } from "../../lib/oneScreen";
+import { achievementPill, Achievement, runStage, tenureLine } from "../../lib/oneScreen";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
@@ -98,7 +98,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
 
   const tenure = tenureLine(queries);
   const ach = achievementPill(queries, now);
-  const kicker = `${weekOfQuerying(queries, now)} of querying${activeManuscript ? ` · ${activeManuscript.title}` : ""}`;
+  const stage = runStage(queries, manuscripts, now);
+  /* §9: day one's kicker is "Getting started" — there is no week to number yet. */
+  const kicker = stage === "day-one"
+    ? "Getting started"
+    : `${weekOfQuerying(queries, now)} of querying${activeManuscript ? ` · ${activeManuscript.title}` : ""}`;
 
   return (
     <div
@@ -124,25 +128,44 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             </div>
             <div className="os-pills">
               {/* §2: tenure · achievement · agents-on-file, in that order — the middle one is the
-                  one ≤1200px drops first, and the CSS indexes on that. */}
-              {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
-              <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
-                {ach.pre}<b>{ach.strong}</b>{ach.post}
-              </span>
-              {/* "on file", never "met" (§2) */}
-              <span className="os-pill pk"><b>{agents.length}</b> agents on file</span>
+                  one ≤1200px drops first, and the CSS indexes on that.
+                  §9: DAY ONE is a single "Day one" pill; EARLY DAYS drops the achievement slot —
+                  §7's fallback is technically always true, but a day-three account being told
+                  "2 queries awaiting a reply" as an achievement is the padding the facts-only
+                  rule exists to stop. §9 is the specific section and wins. */}
+              {stage === "day-one" ? (
+                <span className="os-pill">Day one</span>
+              ) : (
+                <>
+                  {tenure && <span className="os-pill">{tenure.replace(/ ([^ ]+ \d{4})$/, "")} <b>{tenure.match(/([^ ]+ \d{4})$/)?.[1]}</b></span>}
+                  {stage === "settled" && (
+                    <span className={`os-pill ach ${ACH_TONE[ach.key]}`.trim()}>
+                      {ach.pre}<b>{ach.strong}</b>{ach.post}
+                    </span>
+                  )}
+                  {/* "on file", never "met" (§2) */}
+                  <span className="os-pill pk"><b>{agents.length}</b> agents on file</span>
+                </>
+              )}
             </div>
           </div>
 
-          <OneScreenChart loading={loading} queries={queries} agents={agents} now={now} />
+          <OneScreenChart
+            loading={loading} queries={queries} agents={agents} now={now}
+            dayOne={stage === "day-one"} earlyDays={stage === "early-days"}
+            onSendFirst={() => onNavigate("queries", "Send a query")}
+          />
 
           <OneScreenTasks
             loading={loading}
             tasks={tasks}
             queries={queries}
             agents={agents}
+            dayOne={stage === "day-one"}
             onAction={onTaskAction}
             onSeeAll={() => onNavigate("todo")}
+            onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+            onAddAgent={() => onNavigate("agents", "Add an agent")}
           />
         </div>
 

@@ -7,9 +7,9 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
 import {
-  achievementPill, chartEvents, GOAL_BLOCKS, goalBlocksFilled, goalPeriodStart, goalState,
-  ledgerView, MIN_SPAN, monotonePath, rangeChip, tenureLine, tourAutoRuns, tourChipShows,
-  weeklyLedger, yScale,
+  achievementPill, awaitingChip, chartEvents, GOAL_BLOCKS, goalBlocksFilled, goalPeriodStart,
+  goalState, ledgerView, MIN_SPAN, monotonePath, rangeChip, runStage, tenureLine, tourAutoRuns,
+  tourChipShows, weeklyLedger, yScale,
 } from "./oneScreen";
 
 // Thursday 6 August 2026 — the ref's own day (ISO week starts Mon 3 Aug).
@@ -306,5 +306,25 @@ describe("tour visibility — derived, never a stored day-7 flag", () => {
 
   it("no creation time on record → no chip, never a guess", () => {
     expect(tourChipShows(undefined, NOW, true)).toBe(false);
+  });
+});
+
+/* ══ §9 · run stage ══ */
+
+describe("runStage — day one, early days, settled", () => {
+  it("nothing at all is day one; a manuscript alone is still before the line", () => {
+    expect(runStage([], [], NOW)).toBe("day-one");
+    expect(runStage([], [{ id: "m1" }], NOW)).toBe("early-days");
+  });
+
+  it("the first fortnight from the FIRST SEND is early days; beyond it, settled", () => {
+    expect(runStage([q({ dateSent: daysAgo(3) })], [{}], NOW)).toBe("early-days");
+    expect(runStage([q({ dateSent: daysAgo(14) })], [{}], NOW)).toBe("early-days");
+    expect(runStage([q({ dateSent: daysAgo(15) })], [{}], NOW)).toBe("settled");
+  });
+
+  it("the early-days chip states what is out, singular-safe by construction", () => {
+    expect(awaitingChip([q({ dateSent: daysAgo(1) })])).toBe("1 awaiting a reply");
+    expect(awaitingChip([])).toBe("0 awaiting a reply");
   });
 });

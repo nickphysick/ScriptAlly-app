@@ -141,3 +141,36 @@ describe("the sparse chart state and the tasks empty state (shells)", () => {
     expect(html).toContain("Nothing needs you today.");
   });
 });
+
+describe("§9 · first-run states", () => {
+  it("day one: Getting started kicker, the single Day one pill, the invitation chart, the two ghost CTAs", () => {
+    const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
+    expect(html).toContain("Getting started");
+    expect(html).toContain(">Day one<");
+    // the pill row holds ONLY Day one — no tenure, no achievement, no agents count
+    expect(html).not.toContain("agents on file");
+    expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
+    expect(html).toContain("Send your first query");
+    expect(html).toContain("Nothing needs your attention yet");
+    expect(html).toContain("Tasks appear here as your queries progress.");
+    expect(html).toContain("Add your manuscript");
+    expect(html).toContain("Add an agent");
+    expect(html).toContain("The story starts with your first query.");
+  });
+
+  /* ⚠️ EARLY DAYS SUPPRESSES THE ACHIEVEMENT PILL even though §7's fallback is always true — §9
+     is explicit, and a day-three account told "2 queries awaiting a reply" as an ACHIEVEMENT is
+     the padding the facts-only rule exists to stop. The chart's chip carries that fact instead. */
+  it("early days: tenure + agents pills only; the chart chip is the awaiting count", () => {
+    const html = render({ queries: [q({ dateSent: daysAgo(3) }), q({ dateSent: daysAgo(9) })] });
+    expect(html).toContain("Querying since");
+    expect(html).toContain("agents on file");
+    expect(html).not.toContain("os-pill ach");
+    expect(html).toContain("awaiting a reply");
+  });
+
+  it("settled: all three pills, achievement in the middle", () => {
+    const html = render(); // base fixture: first send 30 days ago
+    expect(html).toContain("os-pill ach");
+  });
+});
