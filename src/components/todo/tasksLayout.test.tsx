@@ -81,7 +81,14 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
        different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
        LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
        that no page adds a one-sided inset of its own — is unchanged and asserted below. */
-    expect(rule).toContain("margin-inline: 0 auto");
+    /* ⚠️ NO AUTO MARGIN AT ALL (7 Aug, second pass). `margin-inline: auto` centred the column;
+       `margin-inline: 0 auto` left-anchored it but ALSO disabled `align-items: stretch` — an auto
+       margin on a flex container's cross axis does that — so the column shrink-wrapped its
+       content. Measured collapsed: Calendar 295px with 26px cells, Today 557, Noteboard 477.
+       `margin-inline: 0` keeps the stretch: fills, caps, sits hard left, surplus on the right. */
+    expect(rule).toContain("margin-inline: 0;");
+    expect(rule).not.toContain("margin-inline: auto");
+    expect(rule).not.toContain("margin-inline: 0 auto");
     expect(rule).toContain("var(--tdb-col-gutter)");
   });
 

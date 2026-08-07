@@ -48,7 +48,15 @@
    Today and the Noteboard sat inboard of the To-do list.
    ⚠️ CONTENT IS LEFT-ANCHORED AND GROWS RIGHTWARD; the surplus past the cap becomes RIGHT margin.
    Never reinstate the auto margins to "balance" the page — the balance was the bug. */
-.tdb-col { max-width: var(--tdb-col-max); margin-inline: 0 auto; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
+/* ⚠️ NO `auto` MARGIN, AND THAT IS THE WHOLE POINT (7 Aug, second pass). Left-anchoring this was
+   right; doing it with `margin-inline: 0 auto` was not. AN AUTO MARGIN ON THE CROSS AXIS OF A
+   FLEX CONTAINER DISABLES `align-items: stretch` — so the column stopped filling and
+   shrink-wrapped its content instead. Measured: the Calendar came out 295px wide with 26px cells,
+   Today 557px, the Noteboard 477px. The board looked fine ONLY because its columns carry explicit
+   290px widths, which is exactly the kind of coincidence that hides a fault.
+   `margin-inline: 0` leaves the stretch intact: the column fills, caps at --tdb-col-max, sits
+   hard left, and the surplus becomes right margin — which was the requirement all along. */
+.tdb-col { max-width: var(--tdb-col-max); margin-inline: 0; padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px; box-sizing: border-box; }
 /* ONE OWNER PER GAP (briefing-slot fix). The space under the header rule was THREE stacked
    values — .svh's 26px, this element's 26px, and .tdb-ctrl's 44px — compounding to 96px of void
    whenever the briefing was absent. The legacy hero→panel padding goes (there is no panel), and

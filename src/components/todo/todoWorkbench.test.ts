@@ -448,7 +448,9 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
        different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
        LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
        that no page adds a one-sided inset of its own — is unchanged and asserted below. */
-    expect(rule(".tdb-col")).toContain("margin-inline: 0 auto");
+    /* ⚠️ `margin-inline: 0` — an auto margin on a flex cross axis disables the stretch and
+       collapsed three of four pages (7 Aug, second pass). */
+    expect(rule(".tdb-col")).toContain("margin-inline: 0;");
   });
   it("the work row fills the column — no fixed width, no auto margin, no transition (centring fix)", () => {
     expect(rule(".tdb-asm")).toContain("width: 100%");
@@ -995,7 +997,9 @@ describe("Width v4 — SUPERSEDED: the .tdb-col is the single geometry owner (ce
        different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
        LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
        that no page adds a one-sided inset of its own — is unchanged and asserted below. */
-    expect(rule(".tdb-col")).toContain("margin-inline: 0 auto");
+    /* ⚠️ `margin-inline: 0` — an auto margin on a flex cross axis disables the stretch and
+       collapsed three of four pages (7 Aug, second pass). */
+    expect(rule(".tdb-col")).toContain("margin-inline: 0;");
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {

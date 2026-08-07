@@ -38,7 +38,14 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
        different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
        LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
        that no page adds a one-sided inset of its own — is unchanged and asserted below. */
-    expect(c).toContain("margin-inline: 0 auto"); // centred, equal gutters grow with the viewport
+    /* ⚠️ NO AUTO MARGIN AT ALL (7 Aug, second pass). `margin-inline: auto` centred the column;
+       `margin-inline: 0 auto` left-anchored it but ALSO disabled `align-items: stretch` — an auto
+       margin on a flex container's cross axis does that — so the column shrink-wrapped its
+       content. Measured collapsed: Calendar 295px with 26px cells, Today 557, Noteboard 477.
+       `margin-inline: 0` keeps the stretch: fills, caps, sits hard left, surplus on the right. */
+    expect(c).toContain("margin-inline: 0;");
+    expect(c).not.toContain("margin-inline: auto");
+    expect(c).not.toContain("margin-inline: 0 auto"); // centred, equal gutters grow with the viewport
   });
   it("the column max + gutter + chrome gap are tokens (~1360 / 40 / ≥44)", () => {
     const w = rule(".tdb-wrap");
@@ -195,7 +202,9 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
        different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
        LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
        that no page adds a one-sided inset of its own — is unchanged and asserted below. */
-    expect(rule(".tdb-col")).toContain("margin-inline: 0 auto");
+    /* ⚠️ `margin-inline: 0` — an auto margin on a flex cross axis disables the stretch and
+       collapsed three of four pages (7 Aug, second pass). */
+    expect(rule(".tdb-col")).toContain("margin-inline: 0;");
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).not.toMatch(/padding-left|padding-right/);
   });
@@ -286,7 +295,14 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
        different offsets — Today and the Noteboard sat inboard of the To-do list. Content is
        LEFT-ANCHORED now and the surplus becomes RIGHT margin. What these tests were protecting —
        that no page adds a one-sided inset of its own — is unchanged and asserted below. */
-    expect(col).toContain("margin-inline: 0 auto");
+    /* ⚠️ NO AUTO MARGIN AT ALL (7 Aug, second pass). `margin-inline: auto` centred the column;
+       `margin-inline: 0 auto` left-anchored it but ALSO disabled `align-items: stretch` — an auto
+       margin on a flex container's cross axis does that — so the column shrink-wrapped its
+       content. Measured collapsed: Calendar 295px with 26px cells, Today 557, Noteboard 477.
+       `margin-inline: 0` keeps the stretch: fills, caps, sits hard left, surplus on the right. */
+    expect(col).toContain("margin-inline: 0;");
+    expect(col).not.toContain("margin-inline: auto");
+    expect(col).not.toContain("margin-inline: 0 auto");
     expect(col).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px"); // equal L/R via one token
   });
   it("NO other chain element carries a max-width, an auto margin, or a one-sided horizontal pad", () => {

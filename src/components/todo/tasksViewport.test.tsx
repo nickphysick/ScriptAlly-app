@@ -371,8 +371,14 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
     const col = pageCssLocal.slice(pageCssLocal.indexOf(".tdb-col {"));
     expect(pageCssLocal.indexOf(".tdb-col {")).toBeGreaterThan(-1); // the anchor
     const decl = col.slice(0, col.indexOf("}")).replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(decl).toContain("margin-inline: 0 auto");
+    /* ⚠️ NO AUTO MARGIN AT ALL (7 Aug, second pass). `margin-inline: auto` centred the column;
+       `margin-inline: 0 auto` left-anchored it but ALSO disabled `align-items: stretch` — an auto
+       margin on a flex container's cross axis does that — so the column shrink-wrapped its
+       content. Measured collapsed: Calendar 295px with 26px cells, Today 557, Noteboard 477.
+       `margin-inline: 0` keeps the stretch: fills, caps, sits hard left, surplus on the right. */
+    expect(decl).toContain("margin-inline: 0;");
     expect(decl).not.toContain("margin-inline: auto");
+    expect(decl).not.toContain("margin-inline: 0 auto");
   });
 
   it("⚠️ ALL FOUR PAGES WEAR THE SAME COLUMN — including the two with no sidebar", () => {
