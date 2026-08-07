@@ -70,8 +70,13 @@ describe("§1 · the lock", () => {
   it("⚠️ the route declares fill AND opts into the shrinkable work wrapper", () => {
     const app = readFileSync(resolve(__dirname, "../../App.tsx"), "utf8");
     expect(app).toContain('<StagePage active={routeKey === "dashboard"} layout="fill">');
-    const shell = readFileSync(resolve(__dirname, "../shell/AppShell.tsx"), "utf8");
-    expect(shell).toMatch(/fit=\{routeKey === "queries" \|\| routeKey === "dashboard"\}/);
+    /* ⚠️ MEMBERSHIP, not the whole expression. Other fixed-viewport routes legitimately join this
+       list — one did within the hour of this being written — and a lock that pins the exact list
+       fails on someone else's correct change. What matters here is that the dashboard is in it. */
+    const shellSrc = readFileSync(resolve(__dirname, "../shell/AppShell.tsx"), "utf8");
+    const fit = /fit=\{([^}]*)\}/.exec(shellSrc)?.[1] ?? "";
+    expect(fit, "the fit expression must exist").not.toBe("");
+    expect(fit).toContain('routeKey === "dashboard"');
   });
 
   it("both releases exist, and they outrank the inline height with !important", () => {

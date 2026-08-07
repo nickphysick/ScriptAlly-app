@@ -85,25 +85,19 @@ describe("the chart card's structure", () => {
     expect(html).toContain('aria-label="Chart range"');
     expect(html).toContain('aria-valuetext="Last 8 weeks"'); // the label is the value, spoken
     expect(html).toContain("Last 8 weeks");
-    expect(html).toContain('aria-pressed="false"');          // the numbers toggle
+    /* ⚠️ the numbers toggle's `aria-pressed` assertion lived here and the control is retired.
+       The cover did NOT go with it — the two surviving controls carry the labels asserted above,
+       so this component keeps its accessibility check. */
     /* ⚠️ anchor the class, not the stem — "os-rangeslider" contains "os-ranges" and a bare
        substring check passes for the wrong reason (it did, on the first run of this very case) */
     expect(html).not.toContain('class="os-ranges"');
   });
 
-  it("the ledger table exists with the spec's columns, zeroes as em dashes", () => {
-    const html = render(twoWeeks);
-    /* ⚠️ THE FIRST COLUMN NAMES THE GRAIN ON SHOW. This fixture is 11 days old, so the chart
-       opens DAILY and the column is "Day" — calling it "Week" would be the table disagreeing
-       with the rows underneath it. */
-    for (const h of ["Day", "Active", "Sent", "Closed", "Net"]) expect(html).toContain(`<th>${h}</th>`);
-    expect(html).toContain("—"); // a quiet cell is a dash, never a zero
-  });
-
-  it("a long record opens WEEKLY, and the column says so", () => {
-    const html = render([q({ dateSent: daysAgo(120) }), q({ dateSent: daysAgo(2) })]);
-    expect(html).toContain("<th>Week</th>");
-    expect(html).toContain('value="weekly"'); // the select agrees with the table
+  /* the grain the chart OPENS on was asserted through the ledger's first column; the ledger is
+     retired, so it is asserted on the select — the control that now states the grain */
+  it("a short record opens DAILY and a long one WEEKLY, and the select says which", () => {
+    expect(render(twoWeeks)).toContain('value="daily"');            // 11 days on the record
+    expect(render([q({ dateSent: daysAgo(120) }), q({ dateSent: daysAgo(2) })])).toContain('value="weekly"');
   });
 
   it("sparse (a single point) shows the line-begins message and no CHART svg", () => {
@@ -146,9 +140,16 @@ describe("the chart's stylesheet", () => {
     expect(cssRules).toContain(".os-tip .srow.dim { opacity: 0.4; }");
   });
 
-  it("the ledger reads as a ledger: Playfair tabular numerals, washed current row, warm hover", () => {
-    expect(cssRules).toContain("font-variant-numeric: tabular-nums");
-    expect(cssRules).toContain(".os-dtable tr.now td { background: #faf3ea; }");
-    expect(cssRules).toContain(".os-dtable tr:hover td { background: #fbf7f0; }");
+  /* ⚠️ THE NUMBERS VIEW IS RETIRED — button, state, markup and CSS. This pins the removal so no
+     orphan can drift back; the last removal of this kind left dead `.dtable` rules behind. */
+  it("⚠️ no numbers-view remnants: not in the markup, not in the stylesheet", () => {
+    const html = render([q({ dateSent: daysAgo(10) }), q({ dateSent: daysAgo(1) })]);
+    for (const gone of ["os-tbl", "os-dtable", "Show the numbers"]) {
+      expect(html, gone).not.toContain(gone);
+      expect(cssRules, gone).not.toContain(gone);
+    }
+    const src = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    expect(src).not.toContain("tableOn");
   });
 });

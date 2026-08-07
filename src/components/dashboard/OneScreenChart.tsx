@@ -134,7 +134,6 @@ export const OneScreenChart: React.FC<{
      history at two resolutions. `freq` is null until the record decides the opening grain. */
   const [freq, setFreq] = useState<Freq | null>(null);
   const [rangeDays, setRangeDays] = useState<number>(DEFAULT_RANGE_DAYS);
-  const [tableOn, setTableOn] = useState(false);
   const [reading, setReading] = useState(false);
   const [focusIdx, setFocusIdx] = useState(-1);
   const [pinIdx, setPinIdx] = useState<number | null>(null);
@@ -287,16 +286,6 @@ export const OneScreenChart: React.FC<{
           />
         </div>
         <span className="os-rangelbl">{stop.label}</span>
-        {/* §3: the WCAG text alternative — a ledger, not a spreadsheet */}
-        <button
-          type="button"
-          className={`os-tbl${tableOn ? " on" : ""}`}
-          aria-pressed={tableOn}
-          title={tableOn ? "Show the chart" : "Show the numbers"}
-          onClick={() => { setTableOn(!tableOn); blurPoint(); }}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M3 15h18M9 3v18" /></svg>
-        </button>
       </div>
       <div className="os-fig">
         <span className="os-n">{shownActive}</span>
@@ -402,33 +391,6 @@ export const OneScreenChart: React.FC<{
             )}
           </svg>
         )}
-
-        {/* §3: the ledger view — the numbers, in place of the chart */}
-        <div className={`os-dtable${tableOn ? " on" : ""}`}>
-          <table>
-            <thead>
-              <tr><th>{effFreq === "monthly" ? "Month" : effFreq === "weekly" ? "Week" : "Day"}</th><th>Active</th><th>Sent</th><th>Closed</th><th>Net</th><th aria-hidden="true" /></tr>
-            </thead>
-            <tbody>
-              {view.map((w, i) => {
-                const net = w.sent - w.closed;
-                const ev = events.get(i);
-                const num = (v: number) => <td className={`num${v === 0 ? " zero" : ""}`}>{v === 0 ? "—" : v}</td>;
-                return (
-                  <tr key={w.start.toISOString()} className={i === lastIdx ? "now" : undefined}>
-                    <td className="wk">{w.label}</td>
-                    <td className="num">{w.active}</td>
-                    {num(w.sent)}{num(w.closed)}
-                    {net === 0
-                      ? <td className="num zero">—</td>
-                      : <td className={`num ${net > 0 ? "net-up" : "net-dn"}`}>{net > 0 ? "+" : ""}{net}</td>}
-                    <td className="ev">{ev && <span className="evchip"><i aria-hidden="true" />{ev.kind}</span>}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
       </div>
 
       <div className="os-xlabels">
