@@ -424,3 +424,227 @@
 .os-tbody:hover::-webkit-scrollbar-thumb, .os-abody:hover::-webkit-scrollbar-thumb {
   background: #ddd0c0; background-clip: content-box;
 }
+
+/* ══ §6 · AUTHOR TILE (C — band & overlap) ══ */
+.os-aut { overflow: hidden; flex: none; }
+.os-aut-band {
+  height: 52px;
+  background: linear-gradient(120deg, #d7ddd5, #e4d9cd 70%, #f8ece4);
+  border-bottom: 1px solid #ece0d2;
+  position: relative;
+}
+.os-aut-band .os-aut-wk { position: absolute; right: 11px; top: 11px; font-size: 7px; padding: 3px 9px; }
+.os-aut-body { padding: 0 15px 13px; position: relative; }
+.os-aut-pic {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: #f8ece4; border: 3px solid #fffdf9;
+  box-shadow: 0 1px 4px rgba(58, 28, 20, 0.14);
+  display: grid; place-items: center;
+  margin-top: -27px; position: relative;
+  transition: transform 0.18s ease;
+}
+.os-aut-pic:hover { transform: scale(1.05); }
+.os-aut-pic svg { width: 23px; height: 23px; stroke: #7c3a2a; fill: none; stroke-width: 1.5; }
+.os-aut-add {
+  position: absolute; right: -3px; bottom: -1px; width: 16px; height: 16px; border-radius: 50%;
+  background: #ffffff; border: 1px solid #e3d9cc; color: #8a7a6c; font-size: 9px;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+.os-aut-pic:hover .os-aut-add { background: #7c3a2a; border-color: #7c3a2a; color: #fdf3ec; }
+.os-aut-nm {
+  font-family: var(--font-serif); font-size: 16.5px; font-weight: 600; color: #241811; margin-top: 7px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.os-aut-sub { font-size: 11px; color: #8a7a6c; margin-top: 2px; }
+.os-shelf {
+  display: flex; gap: 11px; margin-top: 11px; width: 100%;
+  background: #faf6ef; border: 1px solid #ece0d2; border-radius: 11px;
+  padding: 9px 11px; align-items: center; cursor: pointer; text-align: left; font: inherit;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.os-shelf:hover { background: #fffdf9; border-color: #ddd0c0; }
+.os-cover {
+  width: 42px; height: 64px; border-radius: 4px; flex: none; position: relative;
+  background: linear-gradient(155deg, #8a5240, #6b3023);
+  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.22);
+  display: flex; align-items: center; justify-content: center; padding: 5px 4px; text-align: center;
+  transition: transform 0.22s cubic-bezier(0.22, 0.68, 0.36, 1), box-shadow 0.22s ease;
+}
+.os-cover::after { content: ""; position: absolute; inset: 3px; border: 1px solid rgba(253, 250, 245, 0.35); border-radius: 2.5px; }
+/* §6: the cover tips −1.6° with a deeper shadow on shelf hover */
+.os-shelf:hover .os-cover { transform: translateY(-2px) rotate(-1.6deg); box-shadow: 0 6px 14px rgba(58, 28, 20, 0.24); }
+.os-cover .os-ct { font-family: var(--font-serif); font-size: 6.5px; line-height: 1.3; color: #fdf3ec; overflow: hidden; }
+.os-bi { min-width: 0; flex: 1; }
+.os-bt {
+  display: block; font-family: var(--font-serif); font-size: 13.5px; font-weight: 600; color: #241811;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.os-genres { display: flex; gap: 4px; margin: 5px 0 4px; flex-wrap: nowrap; overflow: hidden; }
+.os-g {
+  font-size: 8.5px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c;
+  border-radius: 99px; padding: 2.5px 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 112px;
+}
+.os-wc {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #9c8878;
+}
+.os-shelf-add {
+  justify-content: center; border-style: dashed; color: #8a7a6c;
+  font-size: 12px; font-weight: 500; min-height: 56px;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+.os-shelf-add:hover { border-color: #7c3a2a; color: #7c3a2a; }
+
+/* ══ §6 · QUERYING GOALS ══ */
+.os-goal { padding: 13px 16px 14px; flex: none; }
+.os-goal-r1 { display: flex; align-items: baseline; gap: 10px; }
+.os-goal-r1 h2 { font-family: var(--font-serif); font-size: 14.5px; font-weight: 600; color: #241811; flex: 1; margin: 0; }
+.os-goal-num {
+  font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: #8a7a6c;
+  background: none; border: none; padding: 0; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.os-goal-num:hover { color: #7c3a2a; }
+.os-goal-t { font-size: 12px; color: #4a3a2e; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.os-blocks { display: flex; gap: 3px; margin: 9px 0 1px; }
+.os-blocks i { flex: 1; height: 9px; border-radius: 3px; background: #e9dfd1; transition: background 0.16s ease; }
+.os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
+/* hover deepens the fill (§6) — no pace line, no nudge, ever */
+.os-blocks:hover i.f { background: #b98a76; }
+.os-blocks.ghost i { border: 1px dashed #ddd0c0; background: transparent; height: 8px; }
+@keyframes os-fillin { from { transform: scaleY(0.3); opacity: 0; } to { transform: none; opacity: 1; } }
+.os-goal-edit { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.os-goal-edit label { display: flex; align-items: center; gap: 8px; }
+.os-goal-edit input, .os-goal-edit select {
+  font: inherit; font-size: 12px; color: #3a1c14;
+  border: 1px solid #e3d9cc; border-radius: 8px; padding: 5px 8px; background: #ffffff; flex: 1; min-width: 0;
+}
+.os-goal-btns { display: flex; gap: 6px; margin-top: 2px; }
+
+/* ══ §6 · ACTIVITY ══ */
+.os-actv { display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 200px; }
+.os-ahead { display: flex; align-items: center; gap: 9px; padding: 11px 14px 9px; flex: none; }
+.os-ahead .os-aln { flex: 1; border-top: 1px solid #ece0d2; }
+.os-ahead h2 { font-family: var(--font-serif); font-size: 14.5px; font-weight: 600; color: #241811; margin: 0; }
+.os-exp {
+  width: 24px; height: 24px; border-radius: 7px; border: 1px solid #e3d9cc; background: #ffffff;
+  display: grid; place-items: center; cursor: pointer; flex: none; padding: 0;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.os-exp svg { width: 12px; height: 12px; stroke: #8a7a6c; fill: none; stroke-width: 1.8; transition: stroke 0.14s ease; }
+.os-exp:hover { background: #faf6ef; border-color: #cdbfae; }
+.os-exp:hover svg { stroke: #7c3a2a; }
+.os-abody { flex: 1; overflow-y: auto; padding: 0 14px 12px; }
+.os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
+.os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
+.os-tlday { margin: 8px 0 6px; }
+.os-tlev { display: flex; gap: 9px; }
+.os-tlthread { width: 14px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.os-tlthread .os-tlln { width: 1.5px; flex: 1; background: #e8dcd0; }
+.os-tldot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #cfc6bb; background: #efeae2; flex: none; }
+.os-cardlet {
+  flex: 1; background: #fdfbf6; border: 1px solid #ece0d2; border-radius: 9px;
+  padding: 8px 10px; margin-bottom: 7px; min-width: 0;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.os-cardlet:hover { border-color: #ddd0c0; background: #fffdf9; }
+.os-cardlet .os-r1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
+.os-st {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 6.5px; letter-spacing: 0.11em; text-transform: uppercase;
+  background: #f3e0d6; color: #7c3a2a; border-radius: 99px; padding: 2.5px 7px; white-space: nowrap;
+}
+.os-st.sg { background: #e9ede6; color: #5a6e58; }
+.os-tm { font-family: "JetBrains Mono", monospace; font-size: 7.5px; color: #b3a596; }
+.os-who {
+  font-family: var(--font-serif); font-size: 13px; color: #2c1a12;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: color 0.14s ease;
+}
+.os-cardlet:hover .os-who { color: #6b3023; }
+.os-cap {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 6.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #9c8878; margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.os-afoot { flex: none; border-top: 1px solid #ece0d2; margin: 0 14px; padding: 9px 0 10px; display: flex; align-items: center; }
+.os-afoot .os-ac {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #9c8878; flex: 1;
+}
+.os-esc {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #c4b6a7; text-align: center; padding: 7px 0 9px;
+  border-top: 1px solid #ece0d2; margin: 0 14px; display: none;
+}
+
+/* ══ §6 · THE EXPAND — flex does the easing; the panel's own height is never animated ══ */
+.stowable {
+  overflow: hidden;
+  max-height: 420px; opacity: 1;
+  transition: max-height 0.44s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.22s ease,
+              margin-bottom 0.44s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.44s cubic-bezier(0.4, 0, 0.2, 1),
+              border-width 0.44s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0.44s;
+}
+/* collapse EVERYTHING, not just the content box — padding, borders and the margin the rail
+   spaces with, then visibility once the motion is done */
+.os-rail-expanded .stowable {
+  max-height: 0; opacity: 0; margin-bottom: 0; transform: translateY(-6px);
+  padding-top: 0; padding-bottom: 0;
+  border-top-width: 0; border-bottom-width: 0;
+  box-shadow: none;
+  pointer-events: none; visibility: hidden;
+  transition-delay: 0s, 0s, 0s, 0s, 0s, 0s, 0.3s;
+}
+.os-rail-expanded .os-actv {
+  box-shadow: 0 3px 8px rgba(58, 28, 20, 0.07), 0 16px 40px rgba(58, 28, 20, 0.13);
+  border-color: #dbd0c1;
+}
+.os-rail-expanded .os-esc { display: block; }
+.os-rail-expanded .os-afoot { display: none; }
+
+/* §11: nothing to expand into on a one-column layout */
+@media (max-width: 1024px) {
+  .os-exp { display: none; }
+  .os-colR .os-actv { flex: none; height: 420px; }
+}
+@media (max-height: 680px) and (min-width: 1025px) {
+  .os-exp { display: none; }
+  .os-colR .os-actv { flex: none; min-height: 300px; }
+}
+
+/* ══ §6 · PRO MINI-CARD ══ */
+.os-promini {
+  display: flex; align-items: center; gap: 12px; padding: 11px 13px; flex: none;
+  border-top: 2px solid #c2cfda;
+  cursor: pointer; text-align: left; font: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.os-promini:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(58, 28, 20, 0.05), 0 9px 22px rgba(58, 28, 20, 0.09);
+}
+.os-pimg {
+  width: 44px; height: 44px; border-radius: 11px;
+  background: #e3eaf1; border: 1px solid #c9d6e2;
+  display: grid; place-items: center; flex: none;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.os-promini:hover .os-pimg { background: #dae4ee; border-color: #b6c7d8; }
+.os-pimg svg { width: 20px; height: 20px; stroke: #7590b4; fill: none; stroke-width: 1.5; }
+.os-pt2 { flex: 1; min-width: 0; }
+.os-plab {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #46608a;
+  display: flex; align-items: center; gap: 6px;
+}
+.os-plab::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #c2cfda; }
+.os-plink { font-size: 11.5px; color: #46608a; font-weight: 500; margin-top: 5px; display: inline-block; }
+.os-promini:hover .os-plink { text-decoration: underline; }
+.os-promini:hover .os-arr { transform: translateX(3px); }
