@@ -20,6 +20,12 @@ import { TodoBoard } from "./TodoBoard";
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const dockSrc = readFileSync(join(here, "TodoDock.tsx"), "utf8");
+const dockCssRule = (sel: string): string => {
+  const css = readFileSync(join(here, "todoDock.css"), "utf8");
+  const i = css.indexOf(sel);
+  expect(i, `${sel} has no rule`).toBeGreaterThan(-1);
+  return css.slice(i, css.indexOf("}", i));
+};
 
 const card = (over: Partial<BoardCard>): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
@@ -237,5 +243,84 @@ describe("⚠️ the card is the door — click, Enter, and the menu's Action no
     // the reveal is opacity in the stylesheet — never conditional render
     expect(css).toMatch(/\.tbd-hint\s*\{[^}]*opacity:\s*0/);
     expect(css).toContain(".tbd-card:hover .tbd-hint");
+  });
+});
+
+/* ── the two-column work surface (board-optimise pack, Phase 4) ────────────────────────────── */
+
+describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the work, not above it", () => {
+  const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
+
+  it("the 30/70 outer split STANDS — a slide-over would hide the queue", () => {
+    expect(dockCss).toMatch(/\.tdk\s*\{[^}]*grid-template-columns:\s*30%/);
+    expect(dockSrc).toContain('aria-label="Queue"');
+  });
+
+  it("the sheet is a flex row: the story at ~230px, the work taking the rest", () => {
+    const body = dockCss.slice(dockCss.indexOf(".tdk-body {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-body {")));
+    expect(body).toContain("display: flex");
+    expect(dockCss).toContain(".tdk-story { flex: 0 0 230px;");
+    expect(dockCss).toContain(".tdk-work { flex: 1; min-width: 0; }");
+  });
+
+  it('the story column is headed "THE STORY SO FAR" and holds the timeline', () => {
+    const html = render();
+    expect(html).toContain("THE STORY SO FAR");
+    const story = html.slice(html.indexOf("tdk-story"), html.indexOf("tdk-work"));
+    expect(story).toContain("tdk-tl");        // the timeline lives inside it
+    expect(story).not.toContain("tdk-t\"");   // …and the title does NOT
+  });
+
+  it("the title, the record line and the flow sit in the WORK column, in that order", () => {
+    const html = render();
+    const work = html.slice(html.indexOf("tdk-work"));
+    expect(work.indexOf("tdk-t")).toBeLessThan(work.indexOf("tdk-rec"));
+    expect(work.indexOf("tdk-rec")).toBeLessThan(work.indexOf("tdk-flow"));
+  });
+
+  it("an empty history says so rather than leaving a frame implying something is missing", () => {
+    const html = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="c" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} onPrimary={() => {}} onSnoozeDays={() => {}} onMore={() => {}} />,
+    );
+    expect(html).toContain("Nothing logged yet.");
+  });
+
+  it("the footer keeps its contract — the ink act, snooze, ⋯ and the NEXT line", () => {
+    const html = render();
+    const foot = html.slice(html.indexOf("tdk-foot"));
+    expect(foot).toContain("tdk-prime");
+    expect(foot).toContain('aria-label="Snooze"');
+    expect(foot).toContain('aria-label="More"');
+    expect(foot).toContain("tdk-next");
+  });
+});
+
+describe("⚠️ the DOCK-SEAL fires on completion, and never under reduced motion", () => {
+  it("the primary strikes the seal and performs the act — the flourish rides over, never delays", () => {
+    expect(dockSrc).toContain("setSealing(true)");
+    expect(dockSrc).toContain("onPrimary(card, spec);");
+    expect(dockSrc.indexOf("setSealing(true)")).toBeLessThan(dockSrc.indexOf("onPrimary(card, spec);"));
+  });
+
+  it("the mount is GATED on reduced motion — the CSS stop is the belt to this brace", () => {
+    expect(dockSrc).toContain("if (!reducedMotion()) {");
+    expect(dockSrc).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)")');
+  });
+
+  it("the timer and the keyframe agree at 600ms", () => {
+    expect(dockSrc).toContain("const SEAL_MS = 600;");
+    const artCss = readFileSync(join(here, "artSlot.css"), "utf8");
+    expect(artCss).toContain("animation: artSeal 600ms");
+  });
+
+  it("it is absent at rest, and the sheet is its containing block", () => {
+    expect(render()).not.toContain("dock-seal");
+    const w = dockCssRule(".tdk-w {");
+    expect(w).toContain("position: relative");
+  });
+
+  it("a new docked item clears any seal in flight", () => {
+    expect(dockSrc).toContain("setSealing(false); }, [activeKey]);");
   });
 });

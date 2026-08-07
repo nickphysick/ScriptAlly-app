@@ -21,6 +21,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
+import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, SendSpec } from "../../lib/todoDock";
 import "./todoDock.css";
@@ -52,6 +53,12 @@ export interface TodoDockProps {
   tagsSlot?: (card: BoardCard) => React.ReactNode;
 }
 
+/** The seal's own duration — the ref's 600ms, restated here because the mount owns the timer
+ *  and the stylesheet owns the keyframe; artSlots.test.ts holds them equal. */
+const SEAL_MS = 600;
+const reducedMotion = () =>
+  typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
 /** The ink primary's words per flow — the act, never a bare "Done". */
 function primaryLabel(card: BoardCard): string {
   const spec = sendSpecFor(card);
@@ -72,10 +79,14 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [confirmSend, setConfirmSend] = useState(false);
   const [snoozeOpen, setSnoozeOpen] = useState(false);
+  /* ⚠️ ART · DOCK-SEAL (board-optimise P3/P4) — the wax-seal moment: struck the instant a flow
+     completes, BEFORE the card animates to Done. It is a flourish over a finished act, so it is
+     never mounted under reduced motion at all — the CSS stop is the belt to this brace. */
+  const [sealing, setSealing] = useState(false);
 
   /* A new item arrives with its own decisions unmade — a confirmation carried over from the last
      one would be the surface agreeing to something on your behalf. */
-  useEffect(() => { setConfirmSend(false); setSnoozeOpen(false); }, [activeKey]);
+  useEffect(() => { setConfirmSend(false); setSnoozeOpen(false); setSealing(false); }, [activeKey]);
 
   /* ⚠️ KEYBOARD. Esc closes, ↑↓ walk the queue, Enter is the primary. Bound on the surface rather
      than the document so it cannot reach past an open popover or a field the flow owns. */
@@ -122,6 +133,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
       {/* ── RIGHT · THE WORK SURFACE ─────────────────────────────────────── */}
       <section className="tdk-w">
+        {sealing && <ArtSlot name="dock-seal" />}
         <div className={`tdk-band fam-${bandFamily(card)}`}>
           <i>{[card.kind, card.due].filter(Boolean).join(" · ")}</i>
           <button type="button" className="tdk-x" aria-label="Back to the board" onClick={onClose}>
@@ -129,19 +141,30 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           </button>
         </div>
 
+        {/* ⚠️ THE WORK SURFACE IS A TWO-COLUMN SHEET (board-optimise P4; ref board-optimised.html
+            §2). The story ran ABOVE the work before, so the flow began below the fold on a long
+            history and the two things you need at once — what happened, and what to do — could
+            not be read together. The 30/70 outer split STANDS: a slide-over would hide the
+            queue, and the queue is half the point. */}
         <div className="tdk-body">
+          <aside className="tdk-story" aria-label="The story so far">
+            <div className="tdk-storyk">THE STORY SO FAR</div>
+            {/* Derived from the activity log, never stored. Absent when the record has no history
+                yet, rather than an empty frame implying something is missing. */}
+            {events.length > 0 ? (
+              <ol className="tdk-tl">
+                {events.map((e) => (
+                  <li key={e.key}><span className="tdk-tlw">{e.when}</span><span>{e.label}</span></li>
+                ))}
+              </ol>
+            ) : (
+              <div className="tdk-storynone">Nothing logged yet.</div>
+            )}
+          </aside>
+
+          <div className="tdk-work">
           <h2 className="tdk-t">{card.title}</h2>
           {card.record && <div className="tdk-rec">{card.record}</div>}
-
-          {/* THE TIMELINE — derived from the activity log, never stored. Absent when the record
-              has no history yet, rather than an empty frame implying something is missing. */}
-          {events.length > 0 && (
-            <ol className="tdk-tl">
-              {events.map((e) => (
-                <li key={e.key}><span className="tdk-tlw">{e.when}</span><span>{e.label}</span></li>
-              ))}
-            </ol>
-          )}
 
           {/* ── THE REAL FLOW, INLINE ────────────────────────────────────── */}
           <div className="tdk-flow">
@@ -180,6 +203,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               <div className="tdk-note">A gap on the agent's record. Filling it opens their profile at the field.</div>
             )}
           </div>
+          </div>{/* .tdk-work */}
         </div>
 
         {/* ── THE FOOT ─────────────────────────────────────────────────────
@@ -196,7 +220,15 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             type="button"
             className="tdk-prime"
             disabled={flow === "agent-waiting" && !!spec && !confirmSend}
-            onClick={() => onPrimary(card, spec)}
+            onClick={() => {
+              /* The seal is struck first and the act follows immediately — the flourish rides
+                 over the completion rather than delaying it. */
+              if (!reducedMotion()) {
+                setSealing(true);
+                window.setTimeout(() => setSealing(false), SEAL_MS);
+              }
+              onPrimary(card, spec);
+            }}
           >
             {primaryLabel(card)}
           </button>
