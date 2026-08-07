@@ -55,7 +55,7 @@ import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
 import { TodoBoard } from "./TodoBoard";
-import { TasksPageLayout, TplGrow, TplPin } from "./TasksPageLayout";
+import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { TodoSideContainer } from "./TodoSideContainer";
@@ -337,13 +337,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       /* ⚠️ THE ZONE IS THE SCROLLER NOW, NOT THE WRAP (tasks-viewport P1). Under the viewport
          lock the wrap is `overflow: hidden`, so its scrollTop is permanently 0 — reading it here
          would have restored every collapse to the top of the board, silently. */
-      /* ⚠️ EACH COLUMN IS ITS OWN SCROLLER NOW (7 Aug), so the restore contract reads the one
-         the batch rows live in — the To do column. Reading a page-level scroller would return a
-         permanent 0 and jump every collapse to the top, silently, which is the exact fault this
-         contract had to be moved for once already. */
-      const col = zoneRef.current?.querySelector<HTMLElement>('[data-col="todo"]');
-      if (open) batchScroll.current[rule] = col?.scrollTop ?? 0;
-      else if (col) col.scrollTop = batchScroll.current[rule] ?? col.scrollTop;
+      if (open) batchScroll.current[rule] = zoneRef.current?.scrollTop ?? 0;
+      else if (zoneRef.current) zoneRef.current.scrollTop = batchScroll.current[rule] ?? zoneRef.current.scrollTop;
       return { ...s, [rule]: open };
     });
   };
@@ -1950,7 +1945,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        INSIDE this zone. The sticky column heads keep working because they stick to the zone's
        top rather than the page's. */
     return (
-      <TplPin>
+      <TplZone scrollRef={zoneRef} label="Board columns" hem={false}>
         <TodoBoard
           columns={columns}
           goodDay={todoPrefs(currentUser?.todoPrefs).goodDay}
@@ -1958,7 +1953,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onPlan={(c, plan) => performBoardPlan(c, plan)}
           onVerb={(c, v, column) => performCardVerb(c, v, column)}
         />
-      </TplPin>
+      </TplZone>
     );
   }
 

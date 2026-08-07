@@ -26,22 +26,12 @@
   grid-template-columns: repeat(4, minmax(0, var(--tbd-col-w)));
   justify-content: start;
   gap: 20px; margin-top: 20px;
-  /* ⚠️ THE GRID FILLS THE PIN AND EACH COLUMN SCROLLS ITSELF (7 Aug). `align-items: start` sized
-     every column to its own content, so the tallest one set the page height and the PAGE
-     scrolled. `stretch` gives each column the pin's full height to scroll INSIDE. */
-  align-items: stretch;
-  flex: 1; min-height: 0;
+  align-items: start;
   font-variant-numeric: tabular-nums;
 }
 
-/* ⚠️ THE COLUMN IS THE SCROLLER, not the board. Its sticky Playfair head holds still at the top
-   of ITS OWN column while its cards move under it — which is only possible because the scroll
-   happens here rather than one level up. `min-height: 0` is what lets it shrink inside the
-   stretched track instead of pushing the grid open. */
-.tbd-col {
-  position: relative; min-width: 0;
-  display: flex; flex-direction: column; min-height: 0;
-}
+.tbd-col { position: relative; min-width: 0; }
+
 /* ⚠️ THE EDITORIAL HEAD (ref .fh): Playfair 17 over the 2px ink rule — SAGE on Done — sticky,
    with a short ground gradient beneath so cards slide under it instead of colliding. */
 .tbd-fh {
@@ -74,11 +64,7 @@
   font-size: 6.5px; letter-spacing: 0.15em; color: #b3a394; padding: 0 10px;
 }
 
-/* ⚠️ THE BODY IS THE COLUMN'S SCROLLER (7 Aug). Merged into this rule rather than added as a
-   second `.tbd-body` block — and note a descendant selector would ALSO have been wrong here: a
-   rule-text helper doing `indexOf(".tbd-body {")` matches inside `.tbd-col > .tbd-body {` and
-   reads the wrong rule entirely. One rule, one selector, no prefix. */
-.tbd-body { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+.tbd-body { display: flex; flex-direction: column; }
 /* ⚠️ THE CARD GAP IS A DIRECT-CHILD SELECTOR, AND IT BREAKS SILENTLY. `>` means any wrapper put
    between the body and its cards drops this rule with no error, no build failure and no failing
    test — every card on every column simply goes flush. That is exactly what P6's lane div did
