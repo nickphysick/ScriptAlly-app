@@ -28,6 +28,7 @@ import { flagSleeps, flagReturnedToday, flagMatchesTask } from "./taskFlags";
 import { USER_TASK_FLAG_TYPE } from "./todoBoard";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 import { cardFamily } from "./todoFamily";
+import { TODO_PREFS_DEFAULT } from "./todoPrefs";
 
 export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
 
@@ -302,9 +303,13 @@ export function boardColumns(input: ColumnInput): BoardColumns {
 
 /** Today's WIP line — ADVICE, NEVER A BLOCK. Present from the first committed card; past five it
  *  changes tone rather than tightening a gate (the cap itself lives in the commit primitive). */
-export function wipLine(committedCount: number): string | null {
+export function wipLine(committedCount: number, goodDay = TODO_PREFS_DEFAULT.goodDay): string | null {
+  /* ⚠️ THE LINE READS THE WRITER'S OWN NUMBER (board-optimise P5). It was hardcoded 3–5, which
+     made the Task-settings row a control over nothing. The default is the same 5 it always was,
+     so nobody who never opens the sheet sees a change. Advice, never a block — past the number
+     it changes TONE, and the commit primitive's cap is a separate thing entirely. */
   if (committedCount === 0) return null;
-  return committedCount > 5 ? "THAT'S A FULL DAY" : "A GOOD DAY IS 3–5";
+  return committedCount > goodDay ? "THAT'S A FULL DAY" : `A GOOD DAY IS ${goodDay}`;
 }
 
 /** A column shows this many cards before the fade hem and "+ N MORE" take over. */

@@ -11,9 +11,8 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
-import { TAG_PALETTE } from "../../lib/todoFamily";
-import { TAG_COLOURS, normaliseTagLabel, tagUsageCounts } from "../../lib/todoTags";
-import { TagColour } from "../../types";
+import { todoPrefs, STALE_MONTHS_CHOICES, GOOD_DAY_MIN, GOOD_DAY_MAX, staleLabel } from "../../lib/todoPrefs";
+import { TagsSheet } from "./TagsSheet";
 import { lockStageScroll } from "../../lib/stageScroll";
 import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
 
@@ -66,37 +65,19 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
 
   const hidden = hiddenItems(muted, taskFlags, agents, queries, Date.now());
 
-  /* ⚠️ TAGS CRUD (tasks-pages P5). Rename and recolour edit the DEFINITION (one user-doc write);
-     ⚠️ DELETE DETACHES, NEVER DELETES ITEMS: the def leaves the user doc and the id is removed
-     from every task carrying it — the tasks themselves are untouched. Arm-then-confirm inline
-     (no native dialogs). Usage counts are derived live. */
+  /* ⚠️ THE TAG CRUD MOVED TO ITS OWN SHEET (board-optimise P5 — TagsSheet). What stays here is
+     the DOOR and the figure on it; rename/recolour/delete are a different kind of work from the
+     four fixed behaviours above, and a list that grows with the writer was pushing them off the
+     first screen. Only the count is read here. */
   const tags = currentUser?.tags ?? [];
-  const tagCounts = tagUsageCounts(userTasks);
-  const [renaming, setRenaming] = useState<string | null>(null);
-  const [renameDraft, setRenameDraft] = useState("");
-  const [armedDelete, setArmedDelete] = useState<string | null>(null);
-
-  const renameTag = async (id: string) => {
-    const label = normaliseTagLabel(renameDraft);
-    if (!label || tags.some((t) => t.id !== id && t.label === label)) return;
-    await updateUserProfile({ tags: tags.map((t) => (t.id === id ? { ...t, label } : t)) });
-    setRenaming(null);
+  /* board-optimise P5 — the four behaviours, read through the TOTAL reader (absent map, absent
+     field and nonsense all resolve to the stated default) and written as one merged map. */
+  const prefs = todoPrefs(currentUser?.todoPrefs);
+  const setPref = async (patch: Partial<typeof prefs>) => {
+    await updateUserProfile({ todoPrefs: { ...prefs, ...patch } });
   };
-  const recolourTag = async (id: string, colour: TagColour) => {
-    await updateUserProfile({ tags: tags.map((t) => (t.id === id ? { ...t, colour } : t)) });
-  };
-  const deleteTag = async (id: string) => {
-    setArmedDelete(null);
-    // detach from every item first, then drop the definition — the items survive whole
-    for (const t of userTasks) {
-      if (t.tags?.includes(id)) {
-        const rest = t.tags.filter((x) => x !== id);
-        await updateUserTask(t.id, { tags: rest.length ? rest : null });
-      }
-    }
-    await updateUserProfile({ tags: tags.filter((t) => t.id !== id) });
-  };
-
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const [ledgerOpen, setLedgerOpen] = useState(false);
   return (
     <div className="tdb-ff" role="dialog" aria-modal="true" aria-labelledby="tdb-tset-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
       <div className="tdb-ffstage">
@@ -114,6 +95,59 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
             </div>
           </div>
           <div className="tdb-ffbody">
+
+            {/* ⚠️ THE FOUR DESK BEHAVIOURS (board-optimise P5; ref board-optimised.html §3) —
+                each with its plain-spoken subtitle, each persisted on the user doc through the
+                ONE todoPrefs map, each actually driving something (the good-day row feeds the
+                Today column's WIP line; a setting that changed nothing would be furniture). */}
+            <div className="tdb-tsetgroup">
+              <div className="tdb-tsetgl"><span className="tdb-tsetgd" aria-hidden />HOW THE DESK BEHAVES</div>
+
+              <div className="tdb-tsetrow">
+                <div className="tdb-tsettx"><div className="tdb-tsett">Stale threshold</div><div className="tdb-tsets">When a silent query becomes housekeeping</div></div>
+                <select
+                  className="tdb-tsetsel"
+                  aria-label="Stale threshold"
+                  value={prefs.staleMonths}
+                  onChange={(e) => void setPref({ staleMonths: Number(e.target.value) })}
+                >
+                  {STALE_MONTHS_CHOICES.map((m) => (
+                    <option key={m} value={m}>{staleLabel(m)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="tdb-tsetrow">
+                <div className="tdb-tsettx"><div className="tdb-tsett">A good day is</div><div className="tdb-tsets">The Today column’s gentle line</div></div>
+                <input
+                  className="tdb-tsetnum"
+                  type="number"
+                  aria-label="A good day is"
+                  min={GOOD_DAY_MIN}
+                  max={GOOD_DAY_MAX}
+                  value={prefs.goodDay}
+                  onChange={(e) => void setPref({ goodDay: Number(e.target.value) })}
+                />
+              </div>
+
+              <div className="tdb-tsetrow">
+                <div className="tdb-tsettx"><div className="tdb-tsett">Roll unfinished work forward</div><div className="tdb-tsets">At midnight, undone moves to today</div></div>
+                <button
+                  type="button" role="switch" aria-checked={prefs.rollForward} aria-label="Roll unfinished work forward"
+                  className={`tdb-tsetsw${prefs.rollForward ? " on" : ""}`}
+                  onClick={() => void setPref({ rollForward: !prefs.rollForward })}
+                />
+              </div>
+
+              <div className="tdb-tsetrow">
+                <div className="tdb-tsettx"><div className="tdb-tsett">Weekly review briefing</div><div className="tdb-tsets">Mondays, above the list</div></div>
+                <button
+                  type="button" role="switch" aria-checked={prefs.weeklyBriefing} aria-label="Weekly review briefing"
+                  className={`tdb-tsetsw${prefs.weeklyBriefing ? " on" : ""}`}
+                  onClick={() => void setPref({ weeklyBriefing: !prefs.weeklyBriefing })}
+                />
+              </div>
+            </div>
 
             {GROUPS.map((g) => (
               <div key={g} className="tdb-tsetgroup">
@@ -143,60 +177,37 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
 
             <div className="tdb-tsetgroup">
               <div className="tdb-tsetgl"><span className="tdb-tsetgd" aria-hidden />TAGS</div>
-              {tags.length === 0 ? (
-                <div className="tdb-tsetempty">No tags yet — create them where you tag: the composer, an item’s sheet, or a card’s ⋯ menu.</div>
-              ) : (
-                tags.map((t) => (
-                  <div key={t.id} className="tdb-tsetrow tdb-tsettag">
-                    <span className="tdb-tsettagsw" style={{ background: TAG_PALETTE[t.colour].bg, borderColor: TAG_PALETTE[t.colour].tx }} aria-hidden />
-                    {renaming === t.id ? (
-                      <input
-                        className="tdb-tsettagin"
-                        value={renameDraft}
-                        autoFocus
-                        aria-label={`Rename #${t.label}`}
-                        onChange={(e) => setRenameDraft(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") void renameTag(t.id);
-                          if (e.key === "Escape") setRenaming(null);
-                        }}
-                        onBlur={() => void renameTag(t.id)}
-                      />
-                    ) : (
-                      <button type="button" className="tdb-tsettagl" title="Rename" onClick={() => { setRenaming(t.id); setRenameDraft(t.label); }}>
-                        #{t.label}
-                      </button>
-                    )}
-                    <span className="tdb-tsettagct">{tagCounts.get(t.id) ?? 0}</span>
-                    <span className="tdb-tsettagpal" role="group" aria-label={`Colour for #${t.label}`}>
-                      {TAG_COLOURS.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          className={`tdb-tsettagc${t.colour === c ? " on" : ""}`}
-                          style={{ background: TAG_PALETTE[c].bg, borderColor: TAG_PALETTE[c].tx }}
-                          aria-label={c}
-                          aria-pressed={t.colour === c}
-                          onClick={() => void recolourTag(t.id, c)}
-                        />
-                      ))}
-                    </span>
-                    {armedDelete === t.id ? (
-                      <button type="button" className="tdb-tsettagdel armed" onClick={() => void deleteTag(t.id)}>Sure?</button>
-                    ) : (
-                      <button type="button" className="tdb-tsettagdel" onClick={() => setArmedDelete(t.id)}>Delete</button>
-                    )}
-                  </div>
-                ))
-              )}
-              <div className="tdb-tsetfoot">Deleting a tag detaches it from notes and tasks — it never deletes them.</div>
+              {/* ⚠️ TAGS MANAGE IN THEIR OWN SHEET (board-optimise P5; the ref gives them their
+                  own frame). Rename/recolour/delete are a different KIND of work from "how the
+                  desk behaves" — inlining them made this sheet two sheets wearing one heading,
+                  and the tag rows grew with the writer while the behaviours never do. The door
+                  states the count, exactly as the ledger's does. */}
+              <button type="button" className="tdb-tsetdoor" onClick={() => setTagsOpen(true)}>
+                <span className="tdb-tsettx">
+                  <span className="tdb-tsett">Your tags</span>
+                  <span className="tdb-tsets">{tags.length === 0 ? "None yet — created where you tag" : `${tags.length} tag${tags.length === 1 ? "" : "s"} · rename, recolour, retire`}</span>
+                </span>
+                <span className="tdb-tsetgo">Manage →</span>
+              </button>
             </div>
 
             <div className="tdb-tsetgroup">
-              <div className="tdb-tsetgl"><span className="tdb-tsetgd hidden" aria-hidden />HIDDEN RIGHT NOW</div>
-              {hidden.length === 0 ? (
-                <div className="tdb-tsetempty">Nothing set aside.</div>
-              ) : (
+              <div className="tdb-tsetgl"><span className="tdb-tsetgd hidden" aria-hidden />DISMISSED ITEMS</div>
+              {/* ⚠️ THE LEDGER'S DOOR STATES ITS COUNT (board-optimise P5; ref §3 "14 in the
+                  ledger — restorable · Review →"). The list itself opens beneath it: the figure
+                  is the thing a reader wants at a glance, and a sheet that unrolled every hidden
+                  item before its four behaviours had been read was answering a question nobody
+                  had asked yet. Nothing here is deleted — only set aside. */}
+              <button type="button" className="tdb-tsetdoor" onClick={() => setLedgerOpen((v) => !v)} aria-expanded={ledgerOpen}>
+                <span className="tdb-tsettx">
+                  <span className="tdb-tsett">Dismissed items</span>
+                  <span className="tdb-tsets">
+                    {hidden.length === 0 ? "Nothing set aside" : `${hidden.length} in the ledger — restorable`}
+                  </span>
+                </span>
+                {hidden.length > 0 && <span className="tdb-tsetgo">{ledgerOpen ? "Hide" : "Review →"}</span>}
+              </button>
+              {ledgerOpen && hidden.length > 0 && (
                 <div className="tdb-tsethid">
                   {hidden.map((h) => (
                     <div key={h.id} className="tdb-tsethrow">
@@ -210,7 +221,8 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
             </div>
           </div>
           </div>
-          <button type="button" className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}>
+          {tagsOpen && <TagsSheet onClose={() => setTagsOpen(false)} />}
+      <button type="button" className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
           </button>
         </div>

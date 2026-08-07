@@ -31,8 +31,11 @@ describe("TaskSettingsSheet — source locks", () => {
     expect(sheet).not.toContain("Save"); // no save button
   });
   it("Phase 3 — the hidden list renders + restores via existing primitives only", () => {
-    expect(sheet).toContain("HIDDEN RIGHT NOW");
-    expect(sheet).toContain("Nothing set aside.");
+    /* board-optimise P5: the section is "DISMISSED ITEMS" behind a counting DOOR now — the list
+       still renders (beneath it) through the same derivation and the same restore primitives. */
+    expect(sheet).toContain("DISMISSED ITEMS");
+    expect(sheet).toContain("Nothing set aside");
+    expect(sheet).toContain("in the ledger — restorable");
     expect(sheet).toContain("Nothing here is deleted — only set aside.");
     expect(sheet).toContain("hiddenItems(muted, taskFlags, agents, queries");
     // restore = rule removal OR flag unset — no novel write

@@ -64,11 +64,16 @@ describe("⚠️ the editorial column heads — Playfair over a 2px ink rule, st
 });
 
 describe("⚠️ the WIP line on Today's head — advice, never a block", () => {
-  it("wipLine: silent at zero, gentle to five, honest past it", () => {
+  it("wipLine: silent at zero, gentle to the writer's number, honest past it", () => {
+    /* board-optimise P5: the number is the writer's own (todoPrefs.goodDay), defaulting to the
+       5 this line always used — so a writer who never opens the sheet sees no change. */
     expect(wipLine(0)).toBeNull();
-    expect(wipLine(1)).toBe("A GOOD DAY IS 3–5");
-    expect(wipLine(5)).toBe("A GOOD DAY IS 3–5");
+    expect(wipLine(1)).toBe("A GOOD DAY IS 5");
+    expect(wipLine(5)).toBe("A GOOD DAY IS 5");
     expect(wipLine(6)).toBe("THAT'S A FULL DAY");
+    // …and it FOLLOWS the setting
+    expect(wipLine(3, 3)).toBe("A GOOD DAY IS 3");
+    expect(wipLine(4, 3)).toBe("THAT'S A FULL DAY");
   });
 
   it("renders on Today's head only, and blocks nothing (no disabled, no guard)", () => {

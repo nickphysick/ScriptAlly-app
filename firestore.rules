@@ -60,6 +60,8 @@ service cloud.firestore {
         && data.trialStartDate is string && data.trialStartDate.size() <= 64
         // tasks-pages P5: the user's tag definitions — a list when present (safe hasAny pattern)
         && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 64))
+        // board-optimise P5: the four desk behaviours as one map (the safe hasAny pattern)
+        && (!data.keys().hasAny(['todoPrefs']) || data.todoPrefs is map)
         && data.subscriptionStatus is string && (
           data.subscriptionStatus == 'active' ||
           data.subscriptionStatus == 'trialing' ||
@@ -480,7 +482,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed', 'todoPrefs'])
       );
 
       // ROUTE: Manuscripts

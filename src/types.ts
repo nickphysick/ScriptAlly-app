@@ -48,6 +48,9 @@ export interface User {
   mutedTaskRules?: string[];
   // tasks-pages P4/P5: the user's tag definitions (see TagDef).
   tags?: TagDef[];
+  /* board-optimise P5: the four desk behaviours as ONE map (see lib/todoPrefs) — one allowlist
+     entry, one write path, one place to look. Readers go through todoPrefs(), which is total. */
+  todoPrefs?: { staleMonths?: number; goodDay?: number; rollForward?: boolean; weeklyBriefing?: boolean };
   // Querying goals (one-screen dashboard §6): ONLY the target is stored — progress derives from
   // dateSent at read time (lib/oneScreen.goalState). Absent === no goal set (the day-one CTA).
   // NOTE: rules-gated — writes are silently denied until the firestore.rules revision carrying

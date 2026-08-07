@@ -22,6 +22,9 @@ const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
 const picker = readFileSync(join(here, "TagPicker.tsx"), "utf8");
 const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+/* board-optimise P5: the tag CRUD moved to its OWN sheet — these locks follow it there, and the
+   settings sheet is asserted to keep only the DOOR. */
+const tagsSheet = readFileSync(join(here, "TagsSheet.tsx"), "utf8");
 const side = readFileSync(join(here, "TodoSideContainer.tsx"), "utf8");
 const rules = readFileSync(join(here, "..", "..", "..", "firestore.rules"), "utf8");
 
@@ -123,20 +126,23 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
 
 /* ── the settings CRUD + delete-detaches ───────────────────────────────────────────────────── */
 
-describe("⚠️ Task settings: rename, recolour, delete — with usage counts", () => {
+describe("⚠️ The tags sheet: rename, recolour, delete — with usage counts", () => {
   it("rename normalises and keeps uniqueness; recolour stays inside the palette", () => {
-    expect(settings).toContain("normaliseTagLabel(renameDraft)");
-    expect(settings).toContain("tags.some((t) => t.id !== id && t.label === label)");
-    expect(settings).toContain("TAG_COLOURS.map((c) =>");
-    expect(settings).toContain("tagUsageCounts(userTasks)");
+    expect(tagsSheet).toContain("normaliseTagLabel(renameDraft)");
+    expect(tagsSheet).toContain("tags.some((t) => t.id !== id && t.label === label)");
+    expect(tagsSheet).toContain("TAG_COLOURS.map((c) =>");
+    expect(tagsSheet).toContain("tagUsageCounts(userTasks)");
+    // and the settings sheet keeps only the door
+    expect(settings).toContain("setTagsOpen(true)");
+    expect(settings).not.toContain("recolourTag");
   });
 
   it("⚠️ deleting DETACHES from items and never deletes them", () => {
-    const del = settings.slice(settings.indexOf("const deleteTag"), settings.indexOf("const deleteTag") + 700);
+    const del = tagsSheet.slice(tagsSheet.indexOf("const deleteTag"), tagsSheet.indexOf("const deleteTag") + 700);
     expect(del).toContain("updateUserTask(t.id, { tags: rest.length ? rest : null })");
     expect(del).toContain("tags.filter((t) => t.id !== id)");
     expect(del).not.toContain("deleteUserTask");
-    expect(settings).toContain("never deletes them");
+    expect(tagsSheet).toContain("never deletes them");
   });
 });
 

@@ -63,6 +63,7 @@ import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, bo
 import { MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { useTagWrites } from "./useTagWrites";
+import { todoPrefs } from "../../lib/todoPrefs";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
@@ -1927,6 +1928,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <TodoBoard
         columns={columns}
+        goodDay={todoPrefs(currentUser?.todoPrefs).goodDay}
         onOpen={(c) => openDock(dockAllCards(), c.key)}
         onPlan={(c, plan) => performBoardPlan(c, plan)}
         onVerb={(c, v, column) => performCardVerb(c, v, column)}

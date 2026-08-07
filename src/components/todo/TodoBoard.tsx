@@ -38,6 +38,9 @@ import "./todoBoard.css";
 
 export interface TodoBoardProps {
   columns: BoardColumns;
+  /** The writer's own "a good day is" (board-optimise P5) — the WIP line's number. Defaulted so
+   *  every existing caller and fixture keeps the behaviour it had. */
+  goodDay?: number;
   /** The board asks; the page performs. Every one of these is an EXISTING verb. */
   onPlan: (card: BoardCard, plan: DropPlan, from: TodoColumnId, to: TodoColumnId) => void;
   /** Opening a card — the dock's door (board fixes II, P2). */
@@ -89,7 +92,7 @@ const BoardCardMenu: React.FC<{
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, onVerb }) => {
+export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, onOpen, onVerb }) => {
   const [dragging, setDragging] = useState<{ card: BoardCard; from: TodoColumnId } | null>(null);
   const [over, setOver] = useState<TodoColumnId | null>(null);
   const [menu, setMenu] = useState<OpenMenu | null>(null);
@@ -211,7 +214,7 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
         const cards = columns[col.id];
         const isOver = over === col.id && dragging !== null && dragging.from !== col.id;
         const { visible, more } = columnSlice(cards, !!grown[col.id]);
-        const wip = col.id === "today" ? wipLine(cards.length) : null;
+        const wip = col.id === "today" ? wipLine(cards.length, goodDay) : null;
         return (
           <section
             key={col.id}
