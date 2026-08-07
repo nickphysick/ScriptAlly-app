@@ -39,6 +39,7 @@ import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { invokeCapture } from "./railNav";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import "./primitives.css";
+import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 import "./workspaceShell.css";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
@@ -388,15 +389,17 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   aria-expanded={manyMs ? msOpen : undefined}
                   onClick={() => { if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); } }}
                 >
-                  {/* ⚠️ THE PLACEHOLDER'S ARTWORK IS HALTED, NOT SUBSTITUTED (polish §5). The
-                      illustrated manuscript mark (`Manuscript_Icon.png`) is not in the repo — it
-                      was not supplied — and the pass forbids standing a glyph in for a supplied
-                      asset. So the slot keeps its FRAMED interim state until the PNG lands, at
-                      which point this becomes `<span className="ws-mcov illus"><img …/></span>`
-                      and nothing else changes: the `.illus` rule is already written and locked.
-                      TODO(cover-upload) — `.framed img` renders a real cover the moment one
-                      exists, which is the other half of the two-state slot. */}
-                  <span className="ws-mcov framed"><Book aria-hidden="true" /></span>
+                  {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
+                      FRAMED — parchment, hairline, soft shadow — because it is an object with an
+                      edge. The illustrated mark is UNFRAMED, an illustration sitting on the panel;
+                      framing it would make the artwork claim to be the book.
+                      TODO(cover-upload): `coverUrl` does not exist on Manuscript yet — when it
+                      does, this ternary is the only thing that changes. */}
+                  {activeMs.coverUrl ? (
+                    <span className="ws-mcov framed"><img src={activeMs.coverUrl} alt="" /></span>
+                  ) : (
+                    <span className="ws-mcov illus"><img src={manuscriptMark} alt="" aria-hidden="true" /></span>
+                  )}
                   <span className="ws-mstt">
                     <span className="ws-mst">{activeMs.title}</span>
                     {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}

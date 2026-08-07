@@ -14,7 +14,7 @@
  */
 import { createPortal } from "react-dom";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Search, Plus, Reply, UserPlus, BookPlus, Send, LayoutGrid, Settings, HelpCircle, Book } from "lucide-react";
+import { Plus, Reply, UserPlus, BookPlus, Send, LayoutGrid, Settings, HelpCircle, Book } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { invokeCapture } from "./railNav";
@@ -22,6 +22,7 @@ import {
   GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, emptyStateItems, highlightParts,
 } from "../../lib/searchPalette";
 import { PaletteBox, palettePosition } from "../../lib/palettePosition";
+import searchMark from "../../assets/shell/search-icon.png";
 import "./searchPalette.css";
 
 /** Row glyphs by kind — lucide, as everywhere else in the shell (TypeGlyph stays locked to
@@ -211,7 +212,10 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
         style={box ? { left: box.left, top: box.top, width: box.width } : { visibility: "hidden" }}
       >
         <div className="sp-in">
-          <Search aria-hidden="true" />
+          {/* ⚠️ ILLUSTRATED, NOT MONOLINE (polish §2). The search is an OBJECT here — the thing
+              you pick up to look with — which is the boundary the icon families draw: illustrated
+              for objects and surfaces, monoline for navigation, state and controls. */}
+          <img className="sp-in-mark" src={searchMark} alt="" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"

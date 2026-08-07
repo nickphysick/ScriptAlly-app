@@ -144,6 +144,12 @@ export interface Manuscript {
   ageCategory: string;
   wordCount: number;
   logline: string;
+  // The manuscript's cover image (the panel selector's 30x40 slot renders it framed; absent shows
+  // the illustrated mark, unframed). ⚠️ NOTHING WRITES THIS YET — the slot was built to accept an
+  // image ahead of upload landing, so the field is a forward declaration only. TODO(cover-upload):
+  // the manuscript-update allowlist in firestore.rules needs this key BEFORE any write is wired,
+  // or the write is silently denied (the affectedKeys gotcha).
+  coverUrl?: string;
   // Structured comps — the comp shelf is the single editing home. Stray dev docs may still carry
   // the legacy string `comparableTitles`; read through manuscriptComps() (src/lib/comps.ts), which
   // parses it at read time. The legacy field is never written back.

@@ -211,3 +211,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sv2-searchopen { transition: none; }
 }
+
+/* ⚠️ THE ILLUSTRATED SEARCH MARK (polish §2) — an OBJECT, so it is illustrated rather than
+   monoline; 26px on `contain` so the artwork's own margins are respected rather than cropped. */
+.sp-in-mark { width: 26px; height: 26px; object-fit: contain; flex: none; display: block; }

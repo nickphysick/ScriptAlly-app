@@ -328,6 +328,12 @@ describe("Baked 9 — the manuscript selector heads the PANEL", () => {
     expect(illus).toContain("border: 0");
     expect(illus).toContain("box-shadow: none");
     expect(css).toContain(".ws-mcov.illus img { width: 30px; height: 30px; object-fit: contain;");
+    /* ⚠️ THE PLACEHOLDER IS THE ILLUSTRATED MARK, NOT A GLYPH. The asset is supplied now, so the
+       component renders it — and the framed branch is reserved for a REAL cover, which is what
+       makes the frame mean "this is the book" rather than "this is a box". */
+    expect(src).toContain('from "../../assets/shell/manuscript-icon.png"');
+    expect(src).toContain('<span className="ws-mcov illus"><img src={manuscriptMark}');
+    expect(src).toContain('activeMs.coverUrl ? (');
     // and the second line is the genre/word-count meta
     expect(rule(".ws-msg")).toContain("font-size: 10.5px");
   });
@@ -882,6 +888,26 @@ describe("Polish §2 — the palette dropdown's presentation", () => {
   /* ⚠️ ONE CHIP STYLE, THREE PLACES: the ESC chip, a result's shortcut and the footer's hint keys
      are the same object saying the same kind of thing — a key you can press. Three near-identical
      chips is how they drift apart, so they share a selector rather than matching values by hand. */
+  /* ⚠️ ILLUSTRATED FOR OBJECTS, MONOLINE FOR CONTROLS — the boundary the icon families draw.
+     The search is a thing you pick up to look with, so it is illustrated; every rail rib, nav row
+     and chevron stays monoline. Settings in particular was explored as an illustration and
+     REJECTED, so an illustrated Settings asset must never appear in the shell. */
+  it("the search row takes the ILLUSTRATED mark at 26px, not a monoline glyph", () => {
+    const tsx = readFileSync(resolve(__dirname, "./SearchPalette.tsx"), "utf8");
+    expect(tsx).toContain('from "../../assets/shell/search-icon.png"');
+    expect(tsx).toContain('className="sp-in-mark"');
+    expect(prule(".sp-in-mark")).toContain("object-fit: contain");
+    expect(prule(".sp-in-mark")).toContain("width: 26px");
+    // the monoline Search glyph is gone from the row it used to fill
+    expect(tsx).not.toMatch(/^import \{ Search,/m);
+  });
+
+  it("⚠️ no illustrated SETTINGS anywhere in the shell — explored and rejected", () => {
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    const shellDir = readFileSync(resolve(__dirname, "./SearchPalette.tsx"), "utf8");
+    for (const src of [ws, shellDir]) expect(src).not.toMatch(/settings-icon\.png|Settings[_ ]Icon/i);
+  });
+
   it("the ESC chip, row shortcuts and footer hint keys are ONE rule", () => {
     const chip = prule(".sp-esc, .sp-kb, .sp-foot i");
     expect(chip).toContain("font-size: 9.5px");

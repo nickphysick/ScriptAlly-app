@@ -173,28 +173,34 @@ The pack was re-issued with three genuinely new things: an **assets** section, a
 spec for the palette dropdown** (§2), and a **two-state cover slot** (§5). Six of its eight items
 were already satisfied by the earlier passes; this run built the new parts and verified the rest.
 
-## ⚠️ BOTH SUPPLIED IMAGE ASSETS ARE ABSENT — two items HALTED
+## The assets — halted, then landed the same session
 
-| Asset | For | Status |
+They were not in the repo, `~/Downloads` or `~/Desktop` on the first search; **nothing was
+substituted** and both items were halted and reported. Nick then named the location — `~/Desktop/
+ScriptAlly/Refreshed Designs/Icons`, with **spaces** in the filenames rather than the underscores
+the pack used — and both were wired in the same commit.
+
+| Asset | For | Landed as |
 |---|---|---|
-| `Manuscript_Icon.png` | the cover slot's placeholder (§5) | **absent — item halted** |
-| `Search_Icon.png` | the palette's search row (§2) | **absent — item halted** |
-| ScriptAlly logotype | breadcrumb brand mark (§6) | present (`public/scriptally-title-v2.png`), already mounted |
+| `Manuscript Icon.png` | cover-slot placeholder (§5) | `src/assets/shell/manuscript-icon.png` |
+| `Search Icon.png` | palette search row (§2) | `src/assets/shell/search-icon.png` |
+| ScriptAlly logotype | breadcrumb brand mark (§6) | already mounted (`public/scriptally-title-v2.png`) |
 
-Searched: the whole repo (excluding `node_modules`/`dist`), `~/Downloads`, `~/Desktop`, and every
-path under `~` to depth 4. Neither file exists under those names or any case variant. Per the
-pack's own rule **nothing was substituted** — no glyph, no styled text, no lookalike.
+Both verified 100×100 with alpha, as specified. They live in `src/assets/shell/` so Vite hashes and
+bundles them (the convention `src/assets/todo/focus-art.png` already set), not `public/`.
 
-**What that leaves, and why it is not a gap:**
+⚠️ **A third file sat beside them — `Settings Icon.png` — and was deliberately NOT taken.** The
+pack rejects an illustrated Settings outright: nav items stay monoline. A lock now asserts no
+`settings-icon` asset appears in the shell, so a future pass cannot quietly adopt it.
 
-- **§5** — the whole two-state STRUCTURE is built and locked. `.ws-mcov.framed` (parchment,
-  hairline, soft shadow) and `.ws-mcov.framed img` (a real cover at `object-fit:cover`) are live;
-  `.ws-mcov.illus` (30×30 `object-fit:contain`, **no border, no background, no shadow**) is
-  written and asserted, waiting for its PNG. The slot keeps its FRAMED interim state meanwhile.
-  **When the asset lands it is one line in `WorkspaceShell.tsx`** — `ws-mcov framed` becomes
-  `ws-mcov illus` with an `<img>` — and nothing else moves.
-- **§2** — everything except the 26px illustrated icon is built; the search row keeps its monoline
-  glyph until the PNG arrives.
+**Both states are now live and measured** (browser, against the built CSS): the slot is 30×40, the
+illustrated mark inside it is **30×30 `object-fit:contain` and unframed** — background
+`rgba(0,0,0,0)`, border `0px`, shadow `none`. The framed branch is reserved for a real cover, which
+is what makes a frame mean *this is the book* rather than *this is a box*.
+
+`Manuscript.coverUrl` is a **forward declaration only** — nothing writes it. ⚠️ **TODO(cover-upload):
+the manuscript-update allowlist in `firestore.rules` needs that key BEFORE any write is wired**, or
+the write is silently denied (the affectedKeys gotcha).
 
 ## The style rule, recorded
 
