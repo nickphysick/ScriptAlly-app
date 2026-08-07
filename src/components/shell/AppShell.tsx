@@ -379,7 +379,12 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
            can never be smaller than its content and the card scrolls. `--fit` swaps in a definite
            basis (`flex: 1 1 0`); its own rule records that min-height:0 alone does NOT work here,
            measured. Query Centre and the dashboard both fill the viewport exactly. */
-        fit={routeKey === "queries" || routeKey === "dashboard"}
+        /* ⚠️ AND THE TASKS ROUTES (7 Aug). Their pages carried a full `flex:1; min-height:0`
+           chain from the slot down and STILL scrolled — twice — because the break was HERE,
+           above everything that chain covers: `.ws-work` refuses to shrink, so no number of
+           correct links below it can make the card smaller than its content. All four Tasks
+           pages are fixed-viewport surfaces; `todo` covers the four of them. */
+        fit={routeKey === "queries" || routeKey === "dashboard" || routeKey === "todo"}
         sections={sections}
         icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}

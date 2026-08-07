@@ -472,3 +472,83 @@ describe("⚠️ UP NEXT MUST NOT TRUNCATE A TITLE", () => {
     expect(r(".tdt-split {")).toContain("360px");
   });
 });
+
+/* ── the frame's real bound, and the widths beside it (7 Aug) ──────────────────────────────── */
+
+describe("⚠️ WHAT ACTUALLY BOUNDS THE TASKS FRAME — and it is not in the chain below it", () => {
+  const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
+  const shellCss = readFileSync(join(here, "..", "shell", "workspaceShell.css"), "utf8");
+
+  it("⚠️ THE TASKS ROUTES OPT INTO `fit` — the one thing that was missing, twice", () => {
+    /* `.ws-work` is `flex: 1 0 auto` — SHRINK 0 — so it can never be smaller than its content,
+       and NO number of correct `min-height: 0` links below it can make the card fit. That is why
+       two full passes of chain work failed and why no harness reproduced it: the break sits
+       ABOVE everything the chain covers. `--fit` swaps in a definite basis. */
+    expect(shell).toContain('routeKey === "todo"');
+    expect(shell).toMatch(/fit=\{[^}]*routeKey === "todo"/);
+    expect(shellCss).toContain(".ws-work { flex: 1 0 auto;");
+    expect(shellCss).toContain(".ws-work--fit { flex: 1 1 0; min-height: 0; }");
+  });
+
+  it("⚠️ MEASURED, fit OFF vs ON, all four pages at 1440×900 and 1280×800", () => {
+    /* Browser-measured against the built CSS with the REAL shell chain reproduced
+       (.ws-cscroll → .ws-work → slot → .spine-root → …). Page scroll on .ws-cscroll:
+     *
+     *   page          fit OFF (900 / 800)   fit ON
+     *   Calendar         115px / 215px        0 / 0
+     *   To-do list       707px / 807px        0 / 0
+     *   Today            384px / 484px        0 / 0
+     *   Noteboard        816px / 916px        0 / 0
+     *
+     * ⚠️ NOT 100dvh. A frame of 100dvh sits inside a scroller that ALREADY contains the 66px
+     * bar, so the card would overflow by exactly the bar — the fault the dashboard fixed hours
+     * earlier ("66px was exactly --head"). A `calc(100dvh - bar)` is worse still: CLAUDE.md
+     * forbids bar offsets outright, and it hardcodes the shell's chrome into every page. */
+    expect(shell).toMatch(/fit=\{[^}]*routeKey === "todo"/);
+  });
+
+  it("THE CHAIN, ENUMERATED — every wrapper between the frame and a scrollzone", () => {
+    /* ⚠️ ALL OF THESE ARE REQUIRED AND NONE IS SUFFICIENT. One missing `min-height: 0` restores
+       the old behaviour with every other declaration still perfectly correct — which is the
+       failure mode that cost two passes. Listed in nesting order:
+         1. .ws-work--fit   flex: 1 1 0; min-height: 0   (workspaceShell.css) ← the missing one
+         2. StagePage slot  flex: 1; min-height: 0        (AppShell.tsx, layout="fillColumn")
+         3. .spine-root     flex: 1; min-height: 0
+         4. .tdb-wrap       flex: 1; min-height: 0        (todo.css)
+         5. .tdb-col.tpl    flex: 1; min-height: 0
+         6. .tpl-cols       flex: 1; min-height: 0
+         7. .tpl-body       flex: 1; min-height: 0
+         8. .tpl-zone       flex: 1; min-height: 0; overflow: auto  ← the scroller */
+    expect(rule(shellCss, ".ws-work--fit {")).toContain("min-height: 0");
+    for (const [sheet, sel] of [
+      [css, ".spine-root {"], [pageCss, ".tdb-wrap {"], [css, ".tdb-col.tpl {"],
+      [css, ".tpl-cols {"], [css, ".tpl-body {"], [css, ".tpl-zone {"],
+    ] as const) {
+      expect(rule(sheet, sel), sel).toContain("min-height: 0");
+      expect(rule(sheet, sel), sel).toMatch(/flex:\s*1/);
+    }
+    expect(rule(css, ".tpl-head { flex:")).toContain("flex: 0 0 auto"); // the header never shrinks
+  });
+});
+
+describe("⚠️ WIDTHS ARE NEVER TOUCHED BY THE HEIGHT WORK", () => {
+  it("the column FILLS its container and caps — no collapse, either fit state", () => {
+    /* Measured at 1440×900 and 1280×800, fit off AND on, all four pages: the column equals
+       min(container, 1360) and the body equals the available width less any sidebar. The height
+       mechanism cannot reach the width, and this test exists because one of my own fixes DID —
+       `margin-inline: 0 auto` disabled the cross-axis stretch and collapsed three pages. */
+    const col = rule(pageCss, ".tdb-col {");
+    expect(col).toContain("margin-inline: 0;");
+    expect(col).not.toContain("margin-inline: auto");
+    expect(col).toContain("max-width: var(--tdb-col-max)");
+    // the body takes the remaining width; the sidebar takes its own and does not grow
+    expect(rule(css, ".tpl-body {")).toMatch(/flex:\s*1/);
+    expect(rule(css, ".tpl-side {")).toContain("flex: 0 0 auto");
+    /* No page fixes its own PIXEL width — the column is the one measure. Percentage widths are
+       exempt and legitimate: they are progress-bar fills (`width: ${pct}%`), which describe a
+       proportion of their own bar rather than a page dimension. */
+    for (const [name, src] of [["Today", today], ["Calendar", cal], ["Noteboard", note], ["board", board]] as const) {
+      expect(src, name).not.toMatch(/style=\{\{[^}]*\bwidth:\s*[`"']?\d+px/);
+    }
+  });
+});
