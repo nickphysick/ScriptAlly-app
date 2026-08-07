@@ -305,3 +305,122 @@
 .os-tip .srow.dim { opacity: 0.4; }
 .os-tip .pintext { font-size: 11.5px; color: #4a3a2e; line-height: 1.5; }
 .os-tip .pintext b { font-weight: 600; color: #241811; }
+
+/* ══ §5 · THE TASKS CARD ══ */
+.os-tasks { display: flex; flex-direction: column; overflow: hidden; }
+.os-th2 { display: flex; align-items: baseline; gap: 12px; padding: 13px 16px 6px; flex: none; }
+.os-th2 h2 { font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: #241811; margin: 0; }
+.os-tc { font-size: 11.5px; color: #8a7a6c; }
+.os-see {
+  margin-left: auto; font-size: 11.5px; color: #7c3a2a; font-weight: 500;
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+.os-see:hover { text-decoration: underline; }
+/* §10: every → slides on hover */
+.os-arr { display: inline-block; transition: transform 0.16s ease; }
+.os-see:hover .os-arr { transform: translateX(3px); }
+.os-tbody { flex: 1; overflow-y: auto; padding: 0 16px 10px; }
+.os-tempty { min-height: 80px; display: grid; place-items: center; padding: 16px; }
+.os-tempty span { font-family: var(--font-serif); font-style: italic; font-size: 13.5px; color: #b3a596; }
+
+/* ⚠️ THE FIXED GRID (§5): 56px | text | 104px | 18px — every pill lines up, and the end cell's
+   two occupants are ABSOLUTE in the same cell so hover can never reflow the row. */
+.os-trow {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 104px 18px;
+  align-items: center;
+  column-gap: 11px;
+  padding: 9px 8px;
+  border-bottom: 1px solid #ece0d2;
+  border-radius: 9px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.os-trow:last-child { border-bottom: none; }
+.os-trow:hover { background: #faf6ef; }
+.os-knd {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase;
+  border-radius: 99px; background: #f8ece4; border: 1px solid #f0dccd; color: #7c3a2a;
+  display: flex; align-items: center; justify-content: center;
+  height: 20px; padding: 0 6px; box-sizing: border-box;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+.os-knd.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
+.os-trow:hover .os-knd { background: #ffffff; border-color: #d9c9bb; }
+.os-tt { min-width: 0; }
+.os-tn {
+  display: block; font-size: 12.5px; font-weight: 600; color: #241811;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color 0.14s ease;
+}
+.os-trow:hover .os-tn { color: #6b3023; }
+.os-tm2 {
+  display: block; font-size: 10.5px; color: #8a7a6c; margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.os-endcell { position: relative; height: 24px; display: flex; align-items: center; justify-content: flex-end; }
+.os-stp {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; height: 20px; padding: 0 10px;
+  font-size: 10px; border-radius: 99px; white-space: nowrap;
+  opacity: 1; transition: opacity 0.14s ease;
+}
+.os-stp.u { background: #f3e0d6; color: #6b3023; }
+.os-stp.t { background: #e9ede6; color: #5a6e58; }
+.os-act {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%) translateX(4px);
+  display: flex; align-items: center; opacity: 0;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.os-trow:hover .os-stp, .os-trow:focus-within .os-stp { opacity: 0; }
+.os-trow:hover .os-act, .os-trow:focus-within .os-act { opacity: 1; transform: translateY(-50%) translateX(0); }
+.os-btn-mini {
+  font-size: 10.5px; font-weight: 500; border-radius: 99px; padding: 0 12px; height: 24px;
+  display: flex; align-items: center; white-space: nowrap; cursor: pointer;
+  background: #2b2118; border: 1px solid #2b2118; color: #ffffff;
+}
+.os-btn-mini:hover { background: #3a2d22; }
+.os-btn-mini.ghost { background: #ffffff; border-color: #d5c8b8; color: #5c4d42; }
+.os-btn-mini.ghost:hover { border-color: #b9a893; color: #3a1c14; }
+.os-dots {
+  background: none; border: none; padding: 0;
+  color: #b9a893; letter-spacing: 2px; cursor: pointer;
+  opacity: 0; text-align: center; line-height: 1; transition: opacity 0.16s ease;
+}
+.os-trow:hover .os-dots, .os-trow:focus-within .os-dots { opacity: 1; }
+
+/* touch: no hover, so the action shows outright (§5) */
+@media (hover: none) {
+  .os-trow .os-stp { opacity: 0; }
+  .os-trow .os-act { opacity: 1; transform: translateY(-50%); }
+  .os-trow .os-dots { opacity: 1; }
+  .os-chartwrap svg { cursor: default; }
+}
+
+/* §11: the task grid tightens, then stacks */
+@media (max-width: 1200px) {
+  .os-trow { grid-template-columns: 52px minmax(0, 1fr) 96px 16px; column-gap: 9px; }
+}
+@media (max-width: 640px) {
+  .os-trow { grid-template-columns: 1fr; row-gap: 6px; padding: 11px 8px; }
+  .os-trow .os-knd { justify-self: start; }
+  .os-trow .os-endcell { justify-content: flex-start; height: auto; }
+  .os-trow .os-stp { position: static; transform: none; }
+  .os-trow .os-act { position: static; transform: none; opacity: 1; }
+  .os-trow:hover .os-stp { opacity: 1; }
+  .os-trow .os-dots { display: none; }
+}
+
+/* §10: slim warm scrollbars, appearing on container hover */
+.os-tbody, .os-abody { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.os-tbody:hover, .os-abody:hover { scrollbar-color: #ddd0c0 transparent; }
+.os-tbody::-webkit-scrollbar, .os-abody::-webkit-scrollbar { width: 7px; }
+.os-tbody::-webkit-scrollbar-thumb, .os-abody::-webkit-scrollbar-thumb {
+  background: transparent; border-radius: 99px; border: 2px solid transparent;
+  background-clip: content-box; transition: background 0.2s;
+}
+.os-tbody:hover::-webkit-scrollbar-thumb, .os-abody:hover::-webkit-scrollbar-thumb {
+  background: #ddd0c0; background-clip: content-box;
+}

@@ -2,8 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * OneScreenTasks — the tasks card (§5). P2 SHELL: frame, header ladder and the empty state; the
- * grid rows, endcell crossfade and actions land in P4.
+ * OneScreenTasks — the tasks card (spec §5; ref dashboard-one-screen.html).
+ *
+ * ⚠️ THE END CELL IS ONE CELL, TWO OCCUPANTS: the status pill and the action button are BOTH
+ * absolutely positioned in the same 104px cell, crossfading on hover/focus-within — so revealing
+ * the action can never reflow the row. On touch (`hover:none`) the action is simply always on.
+ *
+ * ⚠️ ROWS COME FROM THE LIVE CTA BUILDERS — buildOverToYouRows and buildHousekeepingRows, the
+ * same derivations the To-do board runs. This card lists and links; it never re-decides what a
+ * task's action is.
  */
 import React from "react";
 import { Agent, Query, Task } from "../../types";
@@ -18,6 +25,13 @@ export const tasksHeader = (urgent: number, housekeeping: number): string => {
   return "Nothing needs you";
 };
 
+/** The kind pill's word (§5): Pages / Offer / Tidy — a scan column, not a sentence. */
+export const kindWord = (urgentType: string | null): { word: string; sage: boolean } => {
+  if (urgentType === null) return { word: "Tidy", sage: true };
+  if (urgentType === "offer_received") return { word: "Offer", sage: true };
+  return { word: "Pages", sage: false };
+};
+
 export const OneScreenTasks: React.FC<{
   loading: boolean;
   tasks: Task[];
@@ -25,9 +39,10 @@ export const OneScreenTasks: React.FC<{
   agents: Agent[];
   onAction: (task: Task) => void;
   onSeeAll: () => void;
-}> = ({ loading, tasks, queries, agents, onSeeAll }) => {
+}> = ({ loading, tasks, queries, agents, onAction, onSeeAll }) => {
   const urgent = buildOverToYouRows(tasks, queries, agents);
   const house = buildHousekeepingRows(tasks, queries, agents);
+  const empty = urgent.length === 0 && house.length === 0;
 
   return (
     <div className={`os-card os-lift os-tasks${loading ? " isload" : ""}`}>
@@ -38,9 +53,46 @@ export const OneScreenTasks: React.FC<{
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>
       <div className="os-tbody">
-        {urgent.length === 0 && house.length === 0 && (
-          <div className="os-tempty"><span>Nothing needs you today.</span></div>
-        )}
+        {empty && <div className="os-tempty"><span>Nothing needs you today.</span></div>}
+
+        {/* urgent first, housekeeping beneath — one list, deadline order preserved per tier */}
+        {urgent.map((r) => {
+          const k = kindWord(r.type);
+          return (
+            <div className="os-trow" tabIndex={0} key={r.task.id}>
+              <span className={`os-knd${k.sage ? " sg" : ""}`}>{k.word}</span>
+              <span className="os-tt">
+                <span className="os-tn">{r.description}</span>
+                <span className="os-tm2">{r.agentName}</span>
+              </span>
+              <span className="os-endcell">
+                <span className="os-stp u">Urgent</span>
+                <span className="os-act">
+                  <button type="button" className="os-btn-mini" onClick={() => onAction(r.task)}>{r.actionLabel}</button>
+                </span>
+              </span>
+              {/* the ⋯ opens the board, where a task's full menu lives — never a dead control */}
+              <button type="button" className="os-dots" title="Open on the To-do board" aria-label="Open on the To-do board" onClick={onSeeAll}>⋯</button>
+            </div>
+          );
+        })}
+
+        {house.map((r) => (
+          <div className="os-trow" tabIndex={0} key={r.task.id}>
+            <span className="os-knd sg">Tidy</span>
+            <span className="os-tt">
+              <span className="os-tn">{r.description}</span>
+              <span className="os-tm2">{r.subject}</span>
+            </span>
+            <span className="os-endcell">
+              <span className="os-stp t">Housekeeping</span>
+              <span className="os-act">
+                <button type="button" className="os-btn-mini ghost" onClick={() => onAction(r.task)}>{r.actionLabel}</button>
+              </span>
+            </span>
+            <button type="button" className="os-dots" title="Open on the To-do board" aria-label="Open on the To-do board" onClick={onSeeAll}>⋯</button>
+          </div>
+        ))}
       </div>
     </div>
   );
