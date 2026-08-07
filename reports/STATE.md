@@ -22,7 +22,8 @@ Today · Calendar · Noteboard — with the urgency dot + count riding the To-do
 Locks: `workspaceTasksNav.test.tsx` (rendered rows/order, the one chip, both crumbs, the
 palette) + supersessions in workspaceNav/todoWorkspace/shellV2Nav suites. The mobile you-menu's
 "To-do" row is deliberately untouched (a demoted page link, not the sidebar; mobile pass 1 is
-locked). Undeployed — rides the next dev deploy.
+locked). **DEV-DEPLOYED at `daca7ce`** (hosting-only, 6 Aug — the same deploy carries board
+fixes II and the parallel stream's dashboard work, i.e. everything on `main`).
 
 ## Board fixes II + the editorial board — COMPLETE (`678e733` ref → `05fa643`→`c3b26d4`→`7b9eeea`→`ee0b0d6`→`7f2546f`→`58cb2c9`)
 
