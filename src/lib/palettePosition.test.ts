@@ -30,27 +30,27 @@ describe("the ordinary case — right-aligned under the pill", () => {
     expect(b.left + b.width).toBe(pill.right);
   });
 
-  it("caps the list at 340 when the window is tall", () => {
+  it("caps the list at 400 when the window is tall", () => {
     expect(palettePosition(pill, 1440, 900).maxListHeight).toBe(PALETTE_MAX_LIST);
   });
 });
 
 describe("narrow viewports — the case this function exists for", () => {
-  /* ⚠️ THE FIXTURE. At 360px a 560-wide dropdown right-aligned to a pill at x=340 would start at
+  /* ⚠️ THE FIXTURE. At 360px a 580-wide dropdown right-aligned to a pill at x=400 would start at
      −220: the input, the first result and the whole left half of every row would be off screen. */
   it("never starts left of the 12px edge", () => {
-    const b = palettePosition({ left: 150, right: 340, bottom: 56 }, 360, 640);
+    const b = palettePosition({ left: 150, right: 400, bottom: 56 }, 360, 640);
     expect(b.left).toBe(PALETTE_EDGE);
   });
 
   it("shrinks to fit rather than overflowing", () => {
-    const b = palettePosition({ left: 150, right: 340, bottom: 56 }, 360, 640);
+    const b = palettePosition({ left: 150, right: 400, bottom: 56 }, 360, 640);
     expect(b.width).toBe(360 - PALETTE_EDGE * 2);
     expect(b.left + b.width).toBeLessThanOrEqual(360 - PALETTE_EDGE);
   });
 
   it("stays inside both edges at a range of widths", () => {
-    for (const vw of [320, 360, 480, 600, 768, 1024, 1440, 2560]) {
+    for (const vw of [320, 360, 480, 600, 768, 1024, 1440, 2580]) {
       const b = palettePosition({ left: vw - 210, right: vw - 20, bottom: 60 }, vw, 900);
       expect(b.left, `left at ${vw}`).toBeGreaterThanOrEqual(PALETTE_EDGE);
       expect(b.left + b.width, `right at ${vw}`).toBeLessThanOrEqual(vw - PALETTE_EDGE);

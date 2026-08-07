@@ -25,6 +25,8 @@
 }
 
 /* the input row */
+/* ⚠️ THE SEARCH ROW HAS ITS OWN GROUND (polish §2): #fdfcfa against the list's white, so the
+   row the cursor lands in reads as a distinct surface rather than the top of the results. */
 .sp-in {
   display: flex;
   align-items: center;
@@ -32,6 +34,7 @@
   padding: 0 18px;
   height: 60px;
   flex: none;
+  background: #fdfcfa;
   border-bottom: 1px solid var(--shell-line-soft);
 }
 .sp-in > svg { width: 18px; height: 18px; color: var(--shell-muted); flex: none; }
@@ -42,14 +45,23 @@
   outline: 0;
   background: none;
   font: inherit;
-  font-size: 16px;
+  font-size: 14.5px;
   color: var(--shell-ink);
 }
+/* ⚠️ 16px BELOW md, AND NOT AS A STYLE CHOICE. iOS Safari zooms the page when a focused input is
+   under 16px, which would throw the palette off screen on the one device that cannot recover from
+   it. The polish pass's 14.5px is the desktop figure; the phone keeps the size that behaves. */
+@media (max-width: 767.98px) { .sp-in input { font-size: 16px; } }
 .sp-in input::placeholder { color: #bcb0a3; }
-.sp-esc {
+/* ⚠️ ONE CHIP STYLE, THREE PLACES (polish §2): the search row's ESC, a result's shortcut, and the
+   footer's hint keys are the same object saying the same kind of thing — a key you can press.
+   Three near-identical chips is how they drift apart. */
+.sp-esc, .sp-kb, .sp-foot i {
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px;
-  border: 1px solid var(--shell-line);
+  font-size: 9.5px;
+  font-style: normal;
+  background: #f2ede7;
+  border: 1px solid var(--shell-edge);
   border-radius: 5px;
   padding: 3px 7px;
   color: #bcb0a3;
@@ -66,7 +78,7 @@
 
 .sp-grp {
   font-family: "JetBrains Mono", monospace;
-  font-size: 7.5px;
+  font-size: 9px;
   letter-spacing: 0.17em;
   text-transform: uppercase;
   color: var(--shell-quiet);
@@ -77,8 +89,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 12px;
-  border-radius: 11px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 9px;
   cursor: pointer;
 }
 /* ONE state, not two: hover moves the selection, so there is no separate hover treatment to
@@ -100,6 +113,8 @@
 .sp-t1 {
   display: block;
   font-size: 13.5px;
+  font-weight: 600;
+  color: var(--shell-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -123,15 +138,7 @@
   color: var(--shell-muted);
   flex: none;
 }
-.sp-kb {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 8.5px;
-  border: 1px solid var(--shell-line-soft);
-  border-radius: 5px;
-  padding: 2px 6px;
-  color: #bcb0a3;
-  flex: none;
-}
+
 
 .sp-empty {
   padding: 26px 18px 30px;
@@ -148,7 +155,7 @@
   padding: 10px 18px;
   flex: none;
   border-top: 1px solid var(--shell-line-soft);
-  background: var(--shell-rail);
+  background: #fdfcfa;
 }
 .sp-foot span {
   display: inline-flex;

@@ -163,3 +163,99 @@ Still needing eyes on the real signed-in app:
   off-white rather than the pack's Greige
 
 **Not deployed**, per the pack.
+
+
+---
+
+# Polish pass — the re-issue with assets (7 Aug)
+
+The pack was re-issued with three genuinely new things: an **assets** section, a full **visual
+spec for the palette dropdown** (§2), and a **two-state cover slot** (§5). Six of its eight items
+were already satisfied by the earlier passes; this run built the new parts and verified the rest.
+
+## ⚠️ BOTH SUPPLIED IMAGE ASSETS ARE ABSENT — two items HALTED
+
+| Asset | For | Status |
+|---|---|---|
+| `Manuscript_Icon.png` | the cover slot's placeholder (§5) | **absent — item halted** |
+| `Search_Icon.png` | the palette's search row (§2) | **absent — item halted** |
+| ScriptAlly logotype | breadcrumb brand mark (§6) | present (`public/scriptally-title-v2.png`), already mounted |
+
+Searched: the whole repo (excluding `node_modules`/`dist`), `~/Downloads`, `~/Desktop`, and every
+path under `~` to depth 4. Neither file exists under those names or any case variant. Per the
+pack's own rule **nothing was substituted** — no glyph, no styled text, no lookalike.
+
+**What that leaves, and why it is not a gap:**
+
+- **§5** — the whole two-state STRUCTURE is built and locked. `.ws-mcov.framed` (parchment,
+  hairline, soft shadow) and `.ws-mcov.framed img` (a real cover at `object-fit:cover`) are live;
+  `.ws-mcov.illus` (30×30 `object-fit:contain`, **no border, no background, no shadow**) is
+  written and asserted, waiting for its PNG. The slot keeps its FRAMED interim state meanwhile.
+  **When the asset lands it is one line in `WorkspaceShell.tsx`** — `ws-mcov framed` becomes
+  `ws-mcov illus` with an `<img>` — and nothing else moves.
+- **§2** — everything except the 26px illustrated icon is built; the search row keeps its monoline
+  glyph until the PNG arrives.
+
+## The style rule, recorded
+
+Written into `workspaceShell.css` at the icon boundary, where it governs:
+
+> **ILLUSTRATED** marks are for **objects and surfaces** (the manuscript, the search).
+> **MONOLINE** stroke icons are for **navigation, state and controls** — every rail rib, nav row,
+> chevron, collapse arrow. **Settings stays monoline in both rail and panel**, standard nav-row
+> size and weight, left-aligned, no border; an illustrated Settings was explored and **rejected**.
+> Do not extend the illustrated set to nav items: the moment a control is illustrated it reads as
+> a *thing* rather than an *action*, and the two families stop meaning anything.
+
+## What this pass actually changed
+
+**§2 · the palette's presentation.** Its position maths already portalled and clamped correctly
+from the earlier pass; the constants moved to the re-issue's figures — `PALETTE_MAX_W` 560 → **580**,
+`PALETTE_GAP` 8 → **10**, `PALETTE_MAX_LIST` 340 → **400** (edge clamp already 12). Presentation:
+
+- the search row and the footer take their own `#fdfcfa` ground, distinct from the list's white
+- **ONE chip style, three places** — the ESC chip, a result's shortcut and the footer's hint keys
+  now share a single selector (`9.5px`, `#f2ede7`, `--shell-edge`, radius 5). They are the same
+  object saying the same kind of thing; three near-identical chips is how they drift apart. The
+  old standalone `.sp-kb` block is gone, and the lock asserts its absence
+- result rows 44px on a 9px radius; titles `w600` ink; group labels mono 9px at `.17em`
+- the footer's key reads `ESC`, matching the search row's chip
+
+**§5 · the cover slot** — the two states above. Panel width (214), pill (56/radius 10), the head-zone
+alignment and the 30px nav offset were already correct from the final-ref build and were verified,
+not rebuilt.
+
+**Already satisfied, verified not rebuilt:** §1 ink `+ New`, §3 collapse row, §4 toggle grammar,
+§6 account block, §7 greige tint and its four contrast adjustments.
+
+## Judgement calls
+
+- **The palette's per-kind icon tints stay.** §2 describes "a 30px parchment icon tile with
+  burgundy 15px glyph", which is exactly what an *Action* row looks like. The palette's own
+  committed ref (`design-refs/scriptally-search-palette.html`) defines five tints — act/agent/
+  query/page/manuscript — and the glyph is already 15px. Flattening them to one colour would
+  delete the only thing distinguishing a kind at a glance in a mixed result list, so the tints
+  were kept and this is recorded rather than resolved silently.
+- **The input is 14.5px on desktop and 16px below md.** iOS Safari zooms the page when a focused
+  input is under 16px — on the one device that cannot recover from it, that throws the palette off
+  screen. The pass's 14.5px is the desktop figure; the phone keeps the size that behaves. Locked
+  with the reason.
+
+## Superseded, recorded
+
+Soft-pink `+ New` · the head's `«` ghost button · the old name/plan text rows · `--shell-panelw`
+232px · the palette's viewport-anchored top-left panel · the palette's separate `.sp-kb` chip.
+
+## Browser-verify list (refreshed)
+
+Not testable in this repo (node env, no jsdom, no layout engine):
+
+1. **The palette's clipping and z-order over the frosted bar** — open ⌘K and confirm it draws
+   above the greige bar and is not clipped by the card; then at a narrow window confirm the left
+   clamp holds and the list scrolls internally rather than running off the bottom.
+2. **Reposition on scroll and resize** while the palette is open.
+3. **214px truncation review** — longest realistic section label + count, the account name, and
+   the manuscript title/meta, all without wrapping or a clipped ellipsis.
+4. **The seam** — the pill's centre against the breadcrumb's (measured 48.0/48.0 against the built
+   CSS in the previous pass; re-eyeball after the cover-slot change).
+5. **The cover slot's framed interim** — that it still reads as a book cover at 30×40.

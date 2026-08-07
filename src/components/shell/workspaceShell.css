@@ -25,6 +25,16 @@
 }
 
 /* ══ THE RAIL ══ */
+/* ⚠️ TWO ICON FAMILIES, AND THE LINE BETWEEN THEM IS A RULE, NOT A TASTE (polish pass).
+   ILLUSTRATED marks (hand-drawn, full-colour PNG) are for OBJECTS AND SURFACES — the manuscript,
+   the search. MONOLINE stroke icons are for NAVIGATION, STATE AND CONTROLS — every rail rib,
+   every nav row, the chevrons, the collapse arrows.
+
+   In particular SETTINGS stays monoline in both rail and panel, at standard nav-row size and
+   weight, left-aligned, no border: an illustrated Settings was explored and REJECTED. Do not
+   extend the illustrated set to nav items — the moment a control is illustrated it reads as a
+   thing rather than an action, and the two families stop meaning anything. */
+
 /* ⚠️ THE SHELL CHROME IS INTER (final ref: `body{font-family:Inter}`), SCOPED TO THE CHROME.
    The app's body font is Source Sans Pro and every page depends on it, so this cannot go on
    `.ws-app` — it would cascade into page content the ref says nothing about.
@@ -248,24 +258,36 @@
 }
 
 /* ⚠️ THE COVER SLOT ANCHORS THE LEFT EDGE, which is why the row is left-aligned and not centred.
-   It renders the manuscript's cover when there is one and the parchment book glyph when there is
-   not — built to take an image now, though upload lands later. TODO(cover-upload). */
+
+   ⚠️ TWO STATES, STYLED DIFFERENTLY ON PURPOSE (polish §5):
+     .framed  — a real cover, or the interim glyph: parchment ground, hairline, soft shadow. It
+                reads as a BOOK COVER, an object with an edge.
+     .illus   — the illustrated manuscript mark: 30x30, object-fit:contain, and NO frame at all.
+                It is an illustration sitting on the panel, not a stand-in for a cover, and
+                framing it would claim the artwork is the book.
+   The distinction is the point: a frame says "this is the cover"; the illustration says "there
+   isn't one yet". Do not unify them. */
 .ws-mcov {
   width: 30px;
   height: 40px;
   border-radius: 4px;
   flex: none;
-  background: var(--shell-parch);
-  border: 1px solid var(--shell-edge);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--shell-burgundy);
   overflow: hidden;
+}
+.ws-mcov.framed {
+  background: var(--shell-parch);
+  border: 1px solid var(--shell-edge);
   box-shadow: 0 1px 2px rgba(46, 39, 35, 0.1);
 }
+/* the uploaded cover fills the slot; TODO(cover-upload) — the slot accepts one already */
+.ws-mcov.framed img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ws-mcov.illus { background: none; border: 0; box-shadow: none; }
+.ws-mcov.illus img { width: 30px; height: 30px; object-fit: contain; display: block; }
 .ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
-.ws-mcov img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
 .ws-msg {
   font-size: 10.5px;

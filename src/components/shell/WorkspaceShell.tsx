@@ -388,9 +388,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   aria-expanded={manyMs ? msOpen : undefined}
                   onClick={() => { if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); } }}
                 >
-                  {/* TODO(cover-upload): renders `activeMs.coverUrl` once uploads land; the
-                      parchment glyph is the fallback, not a placeholder for a missing feature. */}
-                  <span className="ws-mcov"><Book aria-hidden="true" /></span>
+                  {/* ⚠️ THE PLACEHOLDER'S ARTWORK IS HALTED, NOT SUBSTITUTED (polish §5). The
+                      illustrated manuscript mark (`Manuscript_Icon.png`) is not in the repo — it
+                      was not supplied — and the pass forbids standing a glyph in for a supplied
+                      asset. So the slot keeps its FRAMED interim state until the PNG lands, at
+                      which point this becomes `<span className="ws-mcov illus"><img …/></span>`
+                      and nothing else changes: the `.illus` rule is already written and locked.
+                      TODO(cover-upload) — `.framed img` renders a real cover the moment one
+                      exists, which is the other half of the two-state slot. */}
+                  <span className="ws-mcov framed"><Book aria-hidden="true" /></span>
                   <span className="ws-mstt">
                     <span className="ws-mst">{activeMs.title}</span>
                     {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}

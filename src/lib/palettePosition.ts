@@ -30,10 +30,10 @@ export interface PaletteBox {
 }
 
 /** The gap between the pill and the dropdown, and the minimum breathing room at every edge. */
-export const PALETTE_GAP = 8;
+export const PALETTE_GAP = 10;
 export const PALETTE_EDGE = 12;
-export const PALETTE_MAX_W = 560;
-export const PALETTE_MAX_LIST = 340;
+export const PALETTE_MAX_W = 580;
+export const PALETTE_MAX_LIST = 400;
 /** Room kept below the list so it never runs to the exact bottom of the window. */
 export const PALETTE_FOOT = 16;
 

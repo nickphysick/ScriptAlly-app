@@ -315,9 +315,19 @@ describe("Baked 9 — the manuscript selector heads the PANEL", () => {
     expect(r).toContain("border-radius: 10px");
     expect(rule(".ws-mcov")).toContain("width: 30px");
     expect(rule(".ws-mcov")).toContain("height: 40px");
-    // it takes a real cover when there is one — built now, uploads later
-    expect(css).toContain(".ws-mcov img");
-    expect(css).toContain("object-fit: cover");
+    /* ⚠️ TWO STATES, STYLED APART ON PURPOSE (polish §5). A frame says "this is the cover"; the
+       unframed illustration says "there isn't one yet". Unifying them would make the artwork
+       claim to be the book. The `.illus` half is written and locked NOW even though its PNG has
+       not been supplied — so when the asset lands, one line in the component flips and nothing
+       else moves. */
+    expect(rule(".ws-mcov.framed")).toContain("border: 1px solid var(--shell-edge)");
+    expect(rule(".ws-mcov.framed")).toContain("box-shadow: 0 1px 2px rgba(46, 39, 35, 0.1)");
+    expect(css).toContain(".ws-mcov.framed img { width: 100%; height: 100%; object-fit: cover;");
+    const illus = rule(".ws-mcov.illus");
+    expect(illus).toContain("background: none");
+    expect(illus).toContain("border: 0");
+    expect(illus).toContain("box-shadow: none");
+    expect(css).toContain(".ws-mcov.illus img { width: 30px; height: 30px; object-fit: contain;");
     // and the second line is the genre/word-count meta
     expect(rule(".ws-msg")).toContain("font-size: 10.5px");
   });
@@ -852,6 +862,63 @@ describe("Refinement §2 — the bar's right cluster", () => {
     for (const word of ["Log a query", "Record a response", "Add agent"]) {
       expect(sidebar, word).not.toContain(word);
     }
+  });
+});
+
+/* ── polish §2: the palette's presentation (its POSITION maths is lib/palettePosition.test.ts) ── */
+describe("Polish §2 — the palette dropdown's presentation", () => {
+  const pcss = readFileSync(resolve(__dirname, "./searchPalette.css"), "utf8");
+  const prule = (sel: string) => {
+    expect(pcss, `searchPalette.css must define ${sel}`).toContain(sel + " {");
+    const i = pcss.indexOf(sel + " {");
+    return pcss.slice(i, pcss.indexOf("}", i));
+  };
+
+  it("the search row carries its own ground, distinct from the list's white", () => {
+    expect(prule(".sp-in")).toContain("background: #fdfcfa");
+    expect(prule(".sp-foot")).toContain("background: #fdfcfa");
+  });
+
+  /* ⚠️ ONE CHIP STYLE, THREE PLACES: the ESC chip, a result's shortcut and the footer's hint keys
+     are the same object saying the same kind of thing — a key you can press. Three near-identical
+     chips is how they drift apart, so they share a selector rather than matching values by hand. */
+  it("the ESC chip, row shortcuts and footer hint keys are ONE rule", () => {
+    const chip = prule(".sp-esc, .sp-kb, .sp-foot i");
+    expect(chip).toContain("font-size: 9.5px");
+    expect(chip).toContain("background: #f2ede7");
+    expect(chip).toContain("border: 1px solid var(--shell-edge)");
+    expect(chip).toContain("border-radius: 5px");
+    // and the old standalone .sp-kb block is gone, not left to drift
+    expect(pcss.match(/^\.sp-kb \{/m)).toBeNull();
+  });
+
+  it("result rows are 44px on a 9px radius; the title is w600 ink", () => {
+    const res = prule(".sp-res");
+    expect(res).toContain("height: 44px");
+    expect(res).toContain("border-radius: 9px");
+    const t1 = prule(".sp-t1");
+    expect(t1).toContain("font-weight: 600");
+    expect(t1).toContain("color: var(--shell-ink)");
+  });
+
+  it("group labels are mono 9px at .17em", () => {
+    const grp = prule(".sp-grp");
+    expect(grp).toContain("font-size: 9px");
+    expect(grp).toContain("letter-spacing: 0.17em");
+  });
+
+  /* ⚠️ 16px BELOW md IS NOT A STYLE CHOICE. iOS Safari zooms the page when a focused input is
+     under 16px — on the one device that cannot recover from it, that throws the palette off
+     screen. 14.5px is the desktop figure the pass names; the phone keeps the size that behaves. */
+  it("the input is 14.5px on desktop and 16px below md, so iOS cannot zoom it away", () => {
+    expect(prule(".sp-in input")).toContain("font-size: 14.5px");
+    expect(pcss).toContain("@media (max-width: 767.98px) { .sp-in input { font-size: 16px; } }");
+  });
+
+  it("the footer's keys read ESC, matching the chip in the search row", () => {
+    const tsx = readFileSync(resolve(__dirname, "./SearchPalette.tsx"), "utf8");
+    expect(tsx).toContain("<i>ESC</i> Close");
+    for (const hint of ["Navigate", "Open", "Open in new"]) expect(tsx).toContain(hint);
   });
 });
 

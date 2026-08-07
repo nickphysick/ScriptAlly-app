@@ -284,7 +284,7 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
           <span><i>↑</i><i>↓</i> Navigate</span>
           <span><i>↵</i> Open</span>
           <span><i>⌘↵</i> Open in new</span>
-          <span className="sp-foot-end"><i>esc</i> Close</span>
+          <span className="sp-foot-end"><i>ESC</i> Close</span>
         </div>
       </div>
     </>,
