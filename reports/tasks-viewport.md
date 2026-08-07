@@ -227,3 +227,67 @@ written myself.
 Tasks suites **1048 passed | 2 skipped, 58 files**; tsc green. Seven locks superseded in place,
 dated. The four reds elsewhere in the tree are the dashboard stream's own specs against their
 live WIP — verified not to involve any file in this commit.
+
+
+---
+
+# The pin — replacing the chain (`f844a3a`)
+
+## Why the mechanism changed
+
+The lock **derived** each region's height through a seven-link `flex: 1; min-height: 0` chain.
+That chain **cannot be proven in this repo's tests** (no jsdom, no layout engine), and it **failed
+twice in the browser** for reasons no harness could reproduce. A law that cannot be verified and
+keeps breaking is the wrong mechanism however correct each link looks — so the region is **pinned**
+instead.
+
+`.tpl-body` is the positioning context; every region is `.tpl-pin` — **`position: absolute;
+inset: 0`**. An absolutely-positioned box with all four insets takes its containing block's
+dimensions **outright**: no `height: 100%`, no `min-height: 0` chain, nothing to inherit and
+nothing to break two ancestors up. One mechanism, four pages.
+
+## ⚠️ WHAT BOUNDS EACH REGION, PER PAGE — browser-measured
+
+Against the built CSS (`dist/assets/index-*.css`), four page harnesses reproducing the real
+nesting, both viewports. The figure is `scrollHeight − clientHeight` on the app's real scroll
+container:
+
+| page | 1440×900 | 1280×800 | pin height | **what bounds it** | what actually scrolls |
+|---|---|---|---|---|---|
+| **Calendar** | **0** | **0** | 590 / 490 | the pin; grid `minmax(0, 1fr)` rows | **nothing — it compresses** |
+| **To-do list** | **0** | **0** | 590 / 490 | the pin; `.tbd` `align-items: stretch` | **3–4 × `.tbd-body`**, one per full column |
+| **Today** | **0** | **0** | 567 / 467 | the pin; two flex regions | **2 × `.tpl-zone`** |
+| **Noteboard** | **0** | **0** | 590 / 490 | the pin | **1 × `.tpl-zone`** |
+
+**⚠️ jsdom still cannot prove this.** The suite asserts the declarations and carries these
+measured numbers as a comment so a future reader can re-run the same check rather than re-deriving
+what *should* happen. **The browser check on dev remains the proof.**
+
+## The board's columns
+
+`align-items: start` sized each column to its own content, so the tallest set the page height and
+the **page** scrolled. `stretch` gives each column the pin's height to scroll **inside** — which is
+also the only way a sticky Playfair head can hold still at the top of **its** column rather than
+over the whole board. The FILTERS sidebar is a sibling of the pinned region and does not scroll
+with it.
+
+**The card gap survives:** browser-measured **12px**, cards still direct children of `.tbd-body`,
+sticky head held still while its column scrolled 200px. The scrollzone went **onto `.tbd-body`
+itself** rather than into a wrapper, precisely so the direct-child selector keeps matching — P6's
+lane div is the precedent, and the pack's own instruction was that the scrollzone is what gets
+fixed.
+
+**The restore contract followed the scroller again**, to the To do column's own body. A page-level
+scroller would return a permanent 0 and jump every collapse to the top — the exact fault it had to
+be moved for once already.
+
+## ArtSlot
+
+The asset rendered at **natural size, unbounded**, and spilled out of the card behind the page
+content. A slot **declares** a box now — real `width`/`height` numbers computed from the brief's
+ratio and any cap — and the artwork lives inside it: `object-fit: contain`, `max-width`/
+`max-height: 100%`, `display: block`. **Never a background-image** (unmeasurable, and it takes the
+alt text with it) and never a bare `<img>`. The Seize the day slot is **62×62, inline in the card's
+flex row**, left of the title; the card is an ordinary row of icon, text, button.
+
+Suite **3385 passed | 2 skipped, 212 files**; tsc green.
