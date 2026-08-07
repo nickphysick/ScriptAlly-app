@@ -29,8 +29,15 @@ describe("the fit modifier is opt-in and every other page is untouched", () => {
     expect(shell).toContain('className={`ws-work${fit ? " ws-work--fit" : ""}`}');
   });
 
-  it("only the Query Centre route asks for it", () => {
-    expect(appShell).toContain('fit={routeKey === "queries"}');
+  /* ⚠️ TWO ROUTES NOW — Query Centre and the dashboard. Both are FIXED-VIEWPORT pages that fill
+     their slot exactly and scroll internally; the dashboard joined when its own JS height-lock
+     was deleted in favour of the flex chain. It stays an OPT-IN list, not a default: every other
+     page needs the growing wrapper the sticky frosted bar depends on. */
+  it("only fixed-viewport routes ask for it — Query Centre and the dashboard", () => {
+    expect(appShell).toMatch(/fit=\{routeKey === "queries" \|\| routeKey === "dashboard"\}/);
+    // still a list, never `true` — the growing wrapper is the default for good reason
+    expect(appShell).not.toContain("fit={true}");
+    expect(appShell).not.toContain("fit\n");
   });
 
   it("the base .ws-work rule is unchanged — the modifier is additive", () => {

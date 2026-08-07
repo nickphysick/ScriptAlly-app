@@ -5,12 +5,19 @@
  * OneScreenDashboard — the one-screen dashboard (refs design-refs/dashboard-one-screen.html +
  * dashboard-one-screen-spec.md; §-references below are the spec's).
  *
- * ⚠️ THE ONE-SCREEN PROMISE (§1): the page fits the stage exactly and never scrolls; only tasks
- * and activity scroll, internally. The lock's height is MEASURED from #app-stage-scroll — the
- * dashboard sits in a FLOW StagePage slot, whose % chain breaks at the slot div, so a measured
- * pixel height is the stage-relative way to fill it (never a 100vh, never a bar offset; the house
- * stage law). The ≤1024px and ≤680px releases live in the CSS with !important, which is what
- * outranks an inline height.
+ * ⚠️ THE ONE-SCREEN PROMISE (§1): the page fits its slot exactly and never scrolls; only tasks
+ * and activity scroll, internally.
+ *
+ * ⚠️ THE HEIGHT IS PURE CSS NOW — `height:100%` of a slot the shell gives a definite height. The
+ * JS lock that used to measure #app-stage-scroll is DELETED, not disabled: it stamped the whole
+ * scroller's height, which INCLUDES the 66px sticky bar's band, so the card scrolled by exactly
+ * `--head`. The fix is two route declarations — `layout="fill"` on the slot (App.tsx) and `fit`
+ * on the work wrapper (AppShell) — which together hand this page the space REMAINING under the
+ * bar. Both are required: `.ws-work` is `flex: 1 0 auto` without `fit` and can never shrink below
+ * its content, and its own rule records that `min-height: 0` alone does NOT fix that, measured.
+ *
+ * ⚠️ NEVER 100vh AND NEVER A BAR OFFSET (the house stage law) — `height:100%` inherits whatever
+ * the shell decided, so a chrome change cannot silently strand this page.
  *
  * ⚠️ `min-height` IS FORBIDDEN on the lock elements (§1) — it grows past the fold with no
  * scrollbar. Locked in the smoke test against the stylesheet.
@@ -20,7 +27,6 @@ import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../
 import { longDate } from "../../lib/dashboardStats";
 import { achievementPill, Achievement, runStage, tenureLine, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
-import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { OneScreenAuthor } from "./OneScreenAuthor";
 import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
@@ -53,24 +59,6 @@ const ACH_TONE: Record<Achievement["key"], string> = {
   record: "sg", streak: "sg", fastest: "sg", milestone: "", awaiting: "",
 };
 
-/**
- * The stage-measured lock. Returns null until measured — the root renders unlocked for that
- * first frame, which is invisible (the CSS releases handle every no-lock case identically).
- */
-const useStageLock = (): number | null => {
-  const [h, setH] = useState<number | null>(null);
-  useEffect(() => {
-    const stage = document.getElementById(STAGE_SCROLL_ID);
-    if (!stage) return;
-    const measure = () => setH(stage.clientHeight);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(stage);
-    return () => ro.disconnect();
-  }, []);
-  return h;
-};
-
 /** §8: the per-card shimmer, shaped roughly like the card it stands in for. */
 export const Skel: React.FC<{ bars: ("h" | "grow" | "")[] }> = ({ bars }) => (
   <div className="os-skel" aria-hidden="true">
@@ -82,7 +70,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, currentUser,
   activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
 }) => {
-  const lockH = useStageLock();
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
   /* ── §12 · the tour ── */
@@ -156,8 +143,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     <div
       ref={rootRef}
       className="os-root"
-      /* the lock: measured stage height. min-height is FORBIDDEN here (§1). */
-      style={lockH !== null ? { height: lockH } : undefined}
     >
       <div className="os-content">
         {/* ⚠️ THE HEADER IS ITS OWN GRID ROW, spanning both columns — not the first thing in the

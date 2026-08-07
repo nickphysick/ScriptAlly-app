@@ -44,8 +44,34 @@ const render = (over: Partial<typeof base> & { loading?: boolean } = {}) =>
 describe("§1 · the lock", () => {
   it("⚠️ min-height is FORBIDDEN on the lock elements", () => {
     expect(rule(".os-root")).not.toContain("min-height");
-    // and no 100vh anywhere — the height is measured from the stage, never the viewport
+    // and no 100vh anywhere — the height comes from the slot, never the viewport
     expect(cssRules).not.toContain("100vh");
+  });
+
+  /* ⚠️ THE HEIGHT IS CSS NOW, AND THE JS LOCK IS DELETED. It measured #app-stage-scroll and
+     stamped that as a pixel height — but the scroller CONTAINS the 66px sticky bar, so the card
+     scrolled by exactly `--head`. Browser-measured before and after: 66 → 0. */
+  it("⚠️ height:100% of the slot, and no measuring hook left behind", () => {
+    expect(rule(".os-root")).toContain("height: 100%");
+    const src = readFileSync(resolve(__dirname, "./OneScreenDashboard.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    for (const gone of ["useStageLock", "STAGE_SCROLL_ID", "lockH", "ResizeObserver"]) {
+      expect(src, gone).not.toContain(gone);
+    }
+    /* target the ROOT's own attributes — the skeleton bars carry a legitimate inline width, so a
+       bare search for "style={" fails for the wrong reason (it did, first run) */
+    expect(src).not.toMatch(/className="os-root"[^>]*style=/);
+  });
+
+  /* ⚠️ BOTH ROUTE DECLARATIONS ARE REQUIRED. `layout="fill"` alone leaves `.ws-work` at
+     `flex: 1 0 auto` — shrink 0, so it can never be smaller than its content and the card scrolls
+     regardless; `.ws-work--fit`'s own rule records that `min-height: 0` does NOT substitute for a
+     definite basis, measured. Asserted at source because no render test can see the shell. */
+  it("⚠️ the route declares fill AND opts into the shrinkable work wrapper", () => {
+    const app = readFileSync(resolve(__dirname, "../../App.tsx"), "utf8");
+    expect(app).toContain('<StagePage active={routeKey === "dashboard"} layout="fill">');
+    const shell = readFileSync(resolve(__dirname, "../shell/AppShell.tsx"), "utf8");
+    expect(shell).toMatch(/fit=\{routeKey === "queries" \|\| routeKey === "dashboard"\}/);
   });
 
   it("both releases exist, and they outrank the inline height with !important", () => {

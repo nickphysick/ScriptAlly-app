@@ -616,7 +616,12 @@ function AppContent() {
       >
         {/* The four main pages stay MOUNTED across navigation (display toggling) so page-local
             state — Queries filters/sort/selection above all — survives leaving and returning. */}
-        <StagePage active={routeKey === "dashboard"}>
+        {/* ⚠️ `fill`, NOT `flow`. A flow slot is a plain block that sizes to its content, so the
+            page had to measure the scroller in JS and stamp a pixel height — which included the
+            66px sticky bar's band and scrolled the card by exactly that. `fill` gives the slot
+            `flex:1; min-height:0`, i.e. the space REMAINING under the bar. Pairs with `fit` on the
+            work wrapper (AppShell) — both are needed; see .ws-work--fit. */}
+        <StagePage active={routeKey === "dashboard"} layout="fill">
           <Dashboard
             onNavigate={handleNavigate}
             searchQuery={searchQuery}
