@@ -1,6 +1,34 @@
 # STATE — where the repo stands
 
-**Last updated: 7 August 2026 (eleventh pass — the Tasks workspace COMPLETE).**
+**Last updated: 7 August 2026 (twelfth pass — the Tasks audit fixes).**
+
+## The Tasks audit fixes are IN (tasks-audit pack; report: `reports/tasks-audit-fixes.md`)
+
+`9091b30` (the return boundary) → `64f1d7d` (band + count grammar) → `17d2f30` (control laws)
+→ `9c134ad` (legend + butter retired) → `77f9de9` (teachings + Today's filter scope). Suite
+**3054 | 2 skipped, 194 files**.
+
+- ⚠️ **THE RETURN BOUNDARY has ONE choke now** — `taskFlags.flagSleeps` / `flagReturnedToday`,
+  DAY-level on the calendar's local clock; isFlagSuppressing + todoListPage's isSnoozed/
+  returnedToday all delegate. Sleeping = Snoozed column only; returned = the lanes only, chipped
+  "🕐 SNOOZED · BACK TODAY" that day, parchment calendar pip. **An offer's flag NEVER enters the
+  Snoozed column** (it is the "I need time" quiet reminder; an offer cannot be put away) — the
+  column-side pickup was the audit's double render. THE ADMISSION: the partition tests passed
+  through the bug because no fixture sat ON the boundary; the today-row fixture now exists and
+  fails on the old code.
+- **Band grammar**: a sleeping card reads "{KIND} · 🕐 | BACK {date}" — kind from the same
+  derivedCopy rebuild as the title, never bare SNOOZED. The bench header counts CARDS
+  (cols.todo.length, the column head's own figure) — it was summing member lanes (24 vs a
+  16-card world). Why-lines locked per reason with the distinctness law.
+- **Control laws**: Work-the-list disabled = paper/hairline/faint/not-allowed (the .tpl-tools
+  attribute selector outweighs the ink fill); one 34px control height per tool row; TAGS
+  swatches are SOLID dots (the FILTERS grammar — the outlined ring is extinct).
+- **The butter "dated notes" calendar family is RETIRED** (structurally empty under two-natures;
+  type + tone + legend row + placement branch all gone; themes.md carries the return condition).
+  The legend is locked to exactly the live families.
+- **Done teaches** ("Tick anything and it settles here until midnight."); **FILTERS on Today
+  reach BOTH regions** — the bench narrows through the same facet ∧ tags and its header says
+  "…OF THE {n} MATCHING" while narrowed (no bench exemption; argued in the report).
 
 ## The Tasks workspace is COMPLETE (tasks-pages pack; report: `reports/tasks-pages.md`)
 
