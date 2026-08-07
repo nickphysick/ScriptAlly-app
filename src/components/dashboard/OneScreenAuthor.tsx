@@ -27,38 +27,53 @@ export const OneScreenAuthor: React.FC<{
   return (
     <div className={`os-card os-lift os-aut${loading ? " isload" : ""}`}>
       {loading && <Skel bars={["h", "", "grow"]} />}
+      {/* ⚠️ A REAL CLIPPING CONTAINER, not an overlay ::before border (MountCard canon). The
+          parchment rim is the OUTER card's 6px padding; this child carries the burgundy line and
+          the `overflow:hidden` that makes the sage band meet it edge to edge. */}
+      <div className="os-aut-frame">
       {/* ⚠️ NO WEEK NUMBER (v16 §2). The band pill says what is being QUERIED. The week count
           was a second tenure reading beside the header's own, and the two measure from
           different anchors — one of them was always going to look wrong. */}
-      <div className="os-aut-band"><span className="os-pill-o os-aut-wk">{authorBandLine(manuscripts.length)}</span></div>
-      <div className="os-aut-body">
-        <div className="os-aut-pic">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-          {/* TODO(avatar-upload): the + opens Settings, where the profile lives — never inert */}
-          <button type="button" className="os-aut-add" title="Add a photo" aria-label="Add a photo" onClick={() => onNavigate("account")}>+</button>
+        {/* the band holds the AUTHOR — portrait, name, and what they are querying */}
+        <div className="os-aut-band">
+          <span className="os-aut-pic">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+            {/* TODO(avatar-upload): the + opens Settings, where the profile lives — never inert */}
+            <button type="button" className="os-aut-add" title="Add a photo" aria-label="Add a photo" onClick={() => onNavigate("account")}>+</button>
+          </span>
+          <span className="os-aut-who">
+            <span className="os-aut-nm">{currentUser?.name ?? ""}</span>
+            {/* ⚠️ NO WEEK NUMBER (v16 §2) — a second tenure reading beside the header's own, and
+                the two measure from different anchors. */}
+            <span className="os-aut-sub">{authorBandLine(manuscripts.length)}</span>
+          </span>
         </div>
-        <div className="os-aut-nm">{currentUser?.name ?? ""}</div>
+      <div className="os-aut-body">
         {ms ? (
+          /* ⚠️ CENTRED AND EVENLY GAPPED, which is the whole fix: the body is a centred column
+              with `justify-content:center`, so at ANY tile height the content sits together
+              rather than leaving a hole in the middle. */
           <button type="button" className="os-shelf" onClick={() => onNavigate("manuscripts")}>
-            {/* ⚠️ THE HOUSE MANUSCRIPT MARK ON A WHITE PLATE — not a drawn cover. The old spine
-                set the title in 6.5px type, which is decoration pretending to be a book. The
-                mark is honest about being an icon, and it needs no upload to look right. */}
             <span className="os-msicon"><img src={manuscriptIcon} alt="" /></span>
-            <span className="os-bi">
-              <span className="os-bt">{ms.title}</span>
-              <span className="os-genres">
-                {[ms.ageCategory, ms.genre].filter(Boolean).map((g) => <span key={String(g)} className="os-g">{g}</span>)}
-              </span>
-              {typeof ms.wordCount === "number" && ms.wordCount > 0 && (
-                <span className="os-wc">{ms.wordCount.toLocaleString("en-GB")} words</span>
-              )}
+            {/* ⚠️ THE WRAPPER IS LOAD-BEARING. `-webkit-line-clamp` needs `display:-webkit-box`,
+                and a FLEX ITEM's display is blockified — as a direct child of the shelf the title
+                computed to `flow-root`, the clamp died and it collapsed to ZERO HEIGHT (measured:
+                the title simply was not on screen). The ref wraps it for the same reason. */}
+            <span className="os-btw"><span className="os-bt">{ms.title}</span></span>
+            <span className="os-genres">
+              {[ms.ageCategory, ms.genre].filter(Boolean).map((g) => <span key={String(g)} className="os-g">{g}</span>)}
             </span>
+            {typeof ms.wordCount === "number" && ms.wordCount > 0 && (
+              <span className="os-wc">{ms.wordCount.toLocaleString("en-GB")} words</span>
+            )}
           </button>
         ) : (
           <button type="button" className="os-shelf os-shelf-add" onClick={() => onNavigate("manuscripts", "Add a manuscript")}>
-            + Add your manuscript
+            <span className="os-msicon ghost" aria-hidden="true"><img src={manuscriptIcon} alt="" /></span>
+            <span className="os-btw"><span className="os-bt">+ Add your manuscript</span></span>
           </button>
         )}
+      </div>
       </div>
     </div>
   );

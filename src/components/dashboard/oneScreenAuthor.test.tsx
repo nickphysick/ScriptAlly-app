@@ -72,26 +72,38 @@ describe("§2 · the tile", () => {
     expect(html).toContain("50,000 words");
   });
 
-  it("no manuscript → the ghost add shelf, never an empty plate", () => {
+  /* the empty state keeps the CENTRED COMPOSITION — a ghosted plate above the invitation, not a
+     bare dashed box, so the tile reads the same shape whether or not there is a manuscript */
+  it("no manuscript → the invitation over a ghosted plate", () => {
     const html = render([]);
     expect(html).toContain("os-shelf-add");
     expect(html).toContain("+ Add your manuscript");
     expect(html).toContain("No manuscript yet");
-    expect(html).not.toContain("os-msicon");
+    expect(html).toContain("os-msicon ghost");
   });
 });
 
 describe("§2 · the CSS the tile rests on", () => {
-  /* ⚠️ the tile is a FIXED 302px, so the shelf must take the leftover height. Without flex:1 the
-     shelf sizes to its content and the tile ends on a blank gap. */
-  it("the shelf FILLS: body is a column, shelf is flex 1", () => {
-    expect(rule(".os-aut")).toContain("flex-direction: column");
+  /* ⚠️ THE BODY CENTRES ITS CONTENT — this is the dead-space fix, and it replaces the old
+     "the shelf fills" rule. Filling made the shelf as tall as the leftover space and pushed its
+     contents apart; centring keeps them together at ANY tile height. */
+  it("⚠️ the body CENTRES rather than fills — no gap can open at any height", () => {
     const body = rule(".os-aut-body");
     expect(body).toContain("flex: 1");
     expect(body).toContain("min-height: 0");
-    const shelf = rule(".os-shelf");
-    expect(shelf).toContain("flex: 1");
-    expect(shelf).toContain("min-height: 0");
+    expect(body).toContain("justify-content: center");
+    expect(body).toContain("align-items: center");
+    expect(rule(".os-shelf")).toContain("justify-content: center");
+  });
+
+  /* ⚠️ A REAL CLIPPING CONTAINER, never an overlay ::before border (MountCard canon) — it is
+     what lets the sage band meet the burgundy line with no seam. */
+  it("⚠️ the frame CLIPS: a child element with overflow:hidden, not a pseudo-element border", () => {
+    const f = rule(".os-aut-frame");
+    expect(f).toContain("overflow: hidden");
+    expect(f).toContain("border: 1px solid #7c3a2a");
+    expect(rule(".os-aut")).toContain("padding: 6px"); // the parchment rim
+    expect(cssRules).not.toMatch(/\.os-aut(-frame)?::before/);
   });
 
   it("the band is FLAT sage — no gradient", () => {
@@ -110,6 +122,25 @@ describe("§2 · the CSS the tile rests on", () => {
     const g = rule(".os-g");
     expect(g).toContain("max-width: none");
     expect(g).not.toContain("text-overflow");
+  });
+
+  /* ⚠️ THE WRAPPER IS LOAD-BEARING, and its absence is silent. `-webkit-line-clamp` requires
+     `display:-webkit-box`, and a FLEX ITEM's display is blockified — as a direct child of the
+     shelf the title computed to `flow-root`, the clamp died and it collapsed to ZERO HEIGHT with
+     the title simply absent from the tile. Browser-measured. The ref wraps it for this reason. */
+  it("⚠️ the title is wrapped so it is not a flex item — the clamp dies otherwise", () => {
+    expect(render()).toContain('class="os-btw"');
+    expect(rule(".os-bt")).toContain("-webkit-box");
+    expect(rule(".os-bt")).toContain("-webkit-line-clamp: 2");
+  });
+
+  /* ⚠️ the ref's tile is 436px square and this one is 302 — its 96px plate and 20px gaps overflow
+     here, measured, with the word count pushed clean out of the tile */
+  it("⚠️ the plate is scaled AND yields further when a long title needs the room", () => {
+    const p = rule(".os-msicon");
+    expect(p).toContain("flex: 0 1 72px");   // scaled from the ref's 96 for a 302px tile
+    expect(p).toContain("aspect-ratio: 1");  // stays square as it shrinks
+    expect(p).toContain("min-height: 50px"); // below this the mark stops reading
   });
 
   it("hovering the shelf tips the mark", () => {
