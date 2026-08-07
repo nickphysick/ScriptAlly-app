@@ -29,6 +29,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
+import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountCard } from "./MountCard";
 import { PageHeader } from "./shell/PageHeader";
@@ -59,6 +60,7 @@ import {
   Sparkles,
   Bell,
   SlidersHorizontal,
+  ListChecks,
   Database,
   Trash2,
   Check,
@@ -79,13 +81,17 @@ const SUCCESS_GREEN = "#3B6D11";
 const ERROR_RED = "#A32D2D";
 
 /* ── The six rail sections (Danger zone lives at the foot of "Your data") ── */
-type SectionId = "profile" | "security" | "plan" | "notifications" | "preferences" | "data";
+type SectionId = "profile" | "security" | "plan" | "notifications" | "preferences" | "tasks" | "data";
 const SECTIONS: { id: SectionId; label: string; Icon: React.ComponentType<any> }[] = [
   { id: "profile", label: "Profile", Icon: UserIcon },
   { id: "security", label: "Sign-in & security", Icon: Shield },
   { id: "plan", label: "Plan & billing", Icon: Sparkles },
   { id: "notifications", label: "Notifications", Icon: Bell },
   { id: "preferences", label: "Preferences", Icon: SlidersHorizontal },
+  /* ⚠️ TASKS — the settings sheet's SECOND DOOR (tasks-viewport P5). The sheet used to be
+     reachable only from the To-do sidebar's foot, and since P1 that sidebar mounts on one page of
+     four; a writer on Today or the Calendar had no route to their own task settings. */
+  { id: "tasks", label: "Tasks", Icon: ListChecks },
   { id: "data", label: "Your data", Icon: Database },
 ];
 
@@ -910,12 +916,45 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
     </>
   );
 
+  /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).
+     This section does NOT re-render the four behaviours; it navigates to the board and opens the
+     ONE TaskSettingsSheet, which is where they are defined, written and persisted. Building a
+     second form here would mean two places to change a default and two chances to disagree about
+     it — and the sheet writes `User.todoPrefs` through one path precisely so that cannot happen.
+     The navigate-then-dispatch pattern is the account menu's own, already proven: the sheet is
+     hosted by the To-do page, so the route has to land before the event can find a listener. */
+  const tasksSection = (
+    <SectionCard title="Tasks" Icon={ListChecks} headingId="acct-h-tasks">
+      <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", padding: "14px 0" }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Task settings</p>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.5 }}>
+            How long before something counts as stale, what a good day looks like, whether
+            unfinished work rolls forward, and your weekly review. Opens on your to-do board.
+          </p>
+        </div>
+        <button
+          type="button"
+          style={primaryBtn}
+          onClick={() => {
+            /* the route first — the sheet lives on the board, so the event needs a listener */
+            onNavigate("todo");
+            window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));
+          }}
+        >
+          Open task settings
+        </button>
+      </div>
+    </SectionCard>
+  );
+
   const sectionContent: Record<SectionId, React.ReactNode> = {
     profile: profileSection,
     security: securitySection,
     plan: planSection,
     notifications: notificationsSection,
     preferences: preferencesSection,
+    tasks: tasksSection,
     data: dataSection,
   };
 

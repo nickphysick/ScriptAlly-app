@@ -287,3 +287,51 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
     expect(nav.slice(0, nav.indexOf("}"))).toContain("height: 32px");
   });
 });
+
+/* ── Phase 5: Task settings, two doors ─────────────────────────────────────────────────────── */
+
+describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the settings UI", () => {
+  const acct = readFileSync(join(here, "..", "AccountSettings.tsx"), "utf8");
+  const sidebar = readFileSync(join(here, "TodoSideContainer.tsx"), "utf8");
+  const sheet = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+
+  it("door one: the board sidebar's foot, unchanged", () => {
+    expect(sidebar).toContain("onOpenTaskSettings");
+    expect(board).toContain("TODO_OPEN_TASK_SETTINGS");
+  });
+
+  it("door two: a Tasks section on the app Settings page", () => {
+    expect(acct).toContain('{ id: "tasks", label: "Tasks"');
+    expect(acct).toContain("tasks: tasksSection");
+    expect(acct).toContain("TODO_OPEN_TASK_SETTINGS");
+  });
+
+  it("⚠️ BOTH DOORS OPEN THE SAME COMPONENT — the settings UI is written ONCE", () => {
+    /* The Settings page must NOT re-render the four behaviours. Two forms would mean two places
+       to change a default and two chances to disagree; the sheet writes `User.todoPrefs` through
+       one path precisely so that cannot happen. */
+    for (const behaviour of ["staleMonths", "goodDay", "rollForward", "weeklyBriefing"]) {
+      expect(acct, behaviour).not.toContain(behaviour);
+    }
+    expect(acct).not.toContain("TODO_PREF_ROWS");
+    expect(acct).not.toContain("todoPrefs(");
+    // the sheet remains the one home for all four
+    for (const behaviour of ["staleMonths", "goodDay", "rollForward", "weeklyBriefing"]) {
+      expect(sheet, behaviour).toContain(behaviour);
+    }
+  });
+
+  it("⚠️ THE ROUTE LANDS BEFORE THE EVENT — the sheet is hosted by the board", () => {
+    /* Dispatching first would fire into a page that is not mounted, and the door would silently
+       do nothing from /account. The account menu's existing door already works this way. */
+    const sec = acct.slice(acct.indexOf("const tasksSection"));
+    expect(acct.indexOf("const tasksSection")).toBeGreaterThan(-1); // the anchor
+    expect(sec.indexOf('onNavigate("todo")')).toBeLessThan(sec.indexOf("TODO_OPEN_TASK_SETTINGS"));
+  });
+
+  it("no gear in any tool row — the doors are the two named places", () => {
+    for (const [name, src] of [["Today", today], ["Calendar", cal], ["Noteboard", note]] as const) {
+      expect(src, name).not.toContain("TODO_OPEN_TASK_SETTINGS");
+    }
+  });
+});

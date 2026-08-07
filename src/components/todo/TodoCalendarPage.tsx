@@ -19,13 +19,12 @@
 import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
-import { TodoSideContainer } from "./TodoSideContainer";
 import { useTagWrites } from "./useTagWrites";
 import { useTodoToast } from "./useTodoToast";
 import { FocusFlow } from "./FocusFlow";
 import { useScriptAllyDb } from "../../lib/db";
 import { localYMD } from "../../lib/shellSidebar";
-import { TODO_OPEN_TASK_SETTINGS, TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
+import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet, TODO_FACETS } from "../../lib/todoBoardSort";
 import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
@@ -35,7 +34,6 @@ import {
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
-import "./todoSide.css";
 import "./tasksLayout.css";
 import "./todoCalendar.css";
 
