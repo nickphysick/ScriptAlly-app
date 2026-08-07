@@ -172,12 +172,36 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     expect(cal).not.toContain("<TplZone");
   });
 
-  it("⚠️ THE CALENDAR COMPRESSES: the grid takes the remaining height with 1fr rows", () => {
+  it("⚠️ THE CALENDAR COMPRESSES: the grid takes the remaining height with ZERO-MIN 1fr rows", () => {
     const grid = rule(calCss, ".cal-grid {");
-    expect(grid).toContain("grid-auto-rows: 1fr");
     expect(grid).toMatch(/flex:\s*1/);
     expect(grid).toContain("min-height: 0");
     expect(grid).not.toContain("overflow: auto");
+
+    /* ⚠️ minmax(0, 1fr), NEVER a bare `1fr` — THIS IS THE WHOLE FIX and it shipped wrong once.
+       A bare `1fr` grid row is `minmax(auto, 1fr)`: its floor is the content's min-content
+       height, so the rows could not shrink and the month overflowed instead of compressing.
+       Browser-measured at 1440×900 with the bare version: rows resolved to
+       `12.75px 104px 104px 104px 104px 104px 104px` and the grid ran 17px past its frame.
+       Same law as the board's column measure — a capped track needs a zero minimum, or the cap
+       is the only thing that ever applies. */
+    expect(grid).toContain("grid-auto-rows: minmax(0, 1fr)");
+    expect(grid).not.toMatch(/grid-auto-rows:\s*1fr/);
+
+    /* row 1 is the day-name strip and must stay `auto` — the DOW labels share this grid, so
+       without it they take a week row's share and you get a 100px-tall "MON TUE WED" */
+    expect(grid).toContain("grid-template-rows: auto");
+  });
+
+  it("⚠️ AND THE CELL CARRIES NO HEIGHT FLOOR — a floor on the cell is a floor on its row", () => {
+    /* `.cal-cell` had `min-height: 104px`. Six of those plus the header block cannot fit a
+       laptop, so the month scrolled however the grid was declared. Measured after removing it:
+       zero overflow at every height from 900px down to 560px, week rows compressing 101 → 44px. */
+    const cell = rule(calCss, ".cal-cell {");
+    expect(cell).not.toMatch(/min-height:\s*\d+px/);
+    expect(cell).toContain("min-height: 0");
+    // and it clips tidily rather than spilling into its neighbour
+    expect(cell).toContain("overflow: hidden");
   });
 });
 

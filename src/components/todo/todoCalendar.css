@@ -11,7 +11,18 @@
    COMPRESSING instead of scrolling. */
 .cal-grid {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
-  flex: 1; min-height: 0; grid-auto-rows: 1fr;
+  flex: 1; min-height: 0;
+  /* ⚠️ ROW 1 IS THE DAY-NAME STRIP AND IT IS `auto`, NOT A WEEK. The DOW labels share this grid
+     with the cells, so without this they take a week row's share of the height — a 100px-tall
+     "MON TUE WED". One explicit `auto` row, then the weeks. */
+  grid-template-rows: auto;
+  /* ⚠️ minmax(0, 1fr) — AND THE ZERO MIN IS THE WHOLE FIX. A bare `1fr` row is `minmax(auto,
+     1fr)`: its floor is the content's min-content height, so with a 104px floor on the cells the
+     rows COULD NOT SHRINK and the month overflowed instead of compressing. Browser-measured at
+     1440×900 before the fix: rows resolved to `12.75px 104px ×6` and the grid ran 17px past its
+     frame. Same law as the board's column measure — a capped track needs a zero minimum or the
+     cap is the only thing that ever applies. */
+  grid-auto-rows: minmax(0, 1fr);
 }
 
 .cal-dow {
@@ -22,8 +33,13 @@
 
 .cal-cell {
   background: #fff; border: 1px solid #efe8dc; border-radius: 9px;
-  min-height: 104px; padding: 6px 7px; cursor: pointer;
-  overflow: hidden;
+  padding: 6px 7px; cursor: pointer;
+  /* ⚠️ NO `min-height` — it was 104px, and a floor on the cell is a floor on its row: six of
+     them plus the header block cannot fit a laptop, so the month scrolled. The cell takes the
+     row's share and CLIPS; `min-height: 0` is what lets it shrink at all inside the track, and
+     `overflow: hidden` is what makes the clipping tidy rather than a spill. */
+  min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column;
 }
 .cal-cell.today { border: 1.5px solid #2a1a13; }
 .cal-cell.past { background: #faf7f2; }
