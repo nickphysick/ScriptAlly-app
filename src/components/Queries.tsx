@@ -2651,7 +2651,7 @@ export const Queries: React.FC<{
           <div className="f12-body f12-body-empty" style={{ paddingTop: "var(--gut)" }}>
 
             {/* List pane — search + centred placeholder + disabled CSV foot */}
-            <div className="f12-pane f12-list">
+            <div className="f12-list">
               <div className="f12-lsearch">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
                 <input type="text" placeholder="Search queries…" value={listSearch} onChange={(e) => setListSearch(e.target.value)} aria-label="Search queries" />
@@ -2887,7 +2887,14 @@ export const Queries: React.FC<{
           {/* ── List pane (F12, ref queries-hub-v14.html .list): search field only at the top,
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
-          <div className="f12-pane f12-list">
+          <div className="f12-list">
+            {/* Editorial head — To-do's grammar, reused verbatim (Playfair 17/700 + mono count
+                over a 1px #ece5d9 hairline). The search and the Filter/Sort pills keep their own
+                row beneath it, wiring untouched. */}
+            <div className="f12-lhtitle">
+              <h2>Your queries</h2>
+              <span className="f12-lhcount">{sortedList.length === queries.length ? `${queries.length}` : `${sortedList.length} of ${queries.length}`}</span>
+            </div>
             <div className="f12-lhead">
               <div className="f12-lsearch">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>

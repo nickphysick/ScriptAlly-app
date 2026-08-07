@@ -154,7 +154,11 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
 
   it("the panes are the f12 pair (list --listw / detail flex:1), never grid-cell-anchored", () => {
     // No stale gridColumn/gridRow cell styles remain on the panes — the flex column owns layout.
-    expect(src.includes('className="f12-pane f12-list"')).toBe(true);
+    // AMENDED (Query Centre P2): the LIST is de-carded — it is no longer a .f12-pane, because
+    // inside the workspace frame a bordered card would be a card inside a card. It is still the
+    // --listw half of the pair, which is what this guard is actually about.
+    expect(src.includes('className="f12-list"')).toBe(true);
+    expect(src, "the list was re-carded").not.toContain('className="f12-pane f12-list"');
     // v5 P2 appended the crossfade class, so the pane's className is a template literal now —
     // match the CLASS LIST (in order), which is what this guard is actually about.
     expect(src).toMatch(/className=\{`qp-pane f12-pane f12-detail /);
