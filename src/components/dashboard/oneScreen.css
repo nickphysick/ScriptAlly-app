@@ -1,0 +1,175 @@
+/* ── THE ONE-SCREEN DASHBOARD (refs design-refs/dashboard-one-screen.html + -spec.md) ──
+   Prefix os-. Values are the ref's, literal — this page draws its own chrome once. */
+
+/* ══ §1 · THE LOCK ══
+   ⚠️ HEIGHT COMES FROM THE STAGE, MEASURED — an inline pixel height set from #app-stage-scroll's
+   clientHeight (ResizeObserver), because the dashboard sits in a FLOW StagePage slot whose % chain
+   breaks at the slot div. Stage-relative by construction: never a 100vh, never a bar offset.
+   ⚠️ min-height IS FORBIDDEN on the lock elements (§1) — it grows past the fold with no scrollbar.
+   The releases below use !important deliberately: author-important beats the inline height. */
+.os-root {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #3a1c14;
+}
+.os-content {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 308px;
+  gap: 16px;
+  padding: 18px 26px 26px;
+  max-width: 1560px;
+  margin: 0 auto;
+  width: 100%;
+}
+.os-colM, .os-colR { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.os-colM { gap: 13px; }
+/* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
+   it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
+.os-colR { gap: 0; }
+.os-colR > * { margin-bottom: 13px; }
+.os-colR > *:last-child { margin-bottom: 0; }
+
+/* the vertical budget (§1): the chart flexes, tasks are content-driven */
+.os-colM .os-lead { flex: 1 1 auto; min-height: 0; }
+.os-colM .os-tasks { flex: 0 1 auto; min-height: 118px; max-height: 318px; }
+
+/* ══ CARD CHROME ══ */
+.os-card {
+  background: #fffdf9;
+  border: 1px solid #e3d9cc;
+  border-radius: 15px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
+  min-height: 0;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+/* §10: hover lift is shadow/border ONLY — no movement */
+.os-card.os-lift:hover {
+  box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 10px 26px rgba(58, 28, 20, 0.1);
+  border-color: #dbd0c1;
+}
+
+/* one-time entrance, scoped to .enter and REMOVED after it runs.
+   ⚠️ THE §6 TRAP: never a persistent fill-mode on these — an animation's final keyframe outranks
+   class declarations, which is exactly the pinned-opacity "squashed header" bug. */
+.os-card.enter, .os-greet.enter { animation: os-rise 0.42s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
+@keyframes os-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.os-colM .os-greet.enter { animation-delay: 0s; }
+.os-colM .os-lead.enter { animation-delay: 0.05s; }
+.os-colM .os-tasks.enter { animation-delay: 0.1s; }
+.os-colR .os-aut.enter { animation-delay: 0.07s; }
+.os-colR .os-goal.enter { animation-delay: 0.12s; }
+.os-colR .os-actv.enter { animation-delay: 0.17s; }
+.os-colR .os-promini.enter { animation-delay: 0.22s; }
+
+/* §10: keyboard parity with hover */
+.os-root a:focus-visible, .os-root button:focus-visible, .os-root [tabindex]:focus-visible {
+  outline: 2px solid #b98a76;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* shared type */
+.os-lbl {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.17em; text-transform: uppercase;
+  font-weight: 500; color: #9c8878;
+}
+.os-pill-o {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  background: #fffdf9; border: 1px solid #b9aa97; border-radius: 99px;
+  padding: 5px 12px; color: #4a3a2e; white-space: nowrap;
+}
+
+/* ══ §2 · GREETING (header F) ══ */
+.os-greet { padding: 2px 2px; flex: none; }
+.os-greet .os-kicker {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #9c8878;
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; margin-top: 7px; }
+.os-greet h1 {
+  font-family: var(--font-serif); font-weight: 500; font-size: 29px;
+  letter-spacing: -0.015em; color: #241811; line-height: 1.05; margin: 0;
+}
+.os-greet .os-spacer { flex: 1; }
+.os-datechip {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: #6a5a50; background: #ffffff;
+  border: 1px solid #e3d9cc; border-radius: 10px; padding: 7px 12px; white-space: nowrap;
+}
+.os-datechip svg { width: 13px; height: 13px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; flex: none; }
+.os-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+.os-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #ffffff; border: 1px solid #e3d9cc; border-radius: 99px;
+  padding: 5px 12px; font-size: 11.5px; color: #5c5148; white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.os-pill:hover { border-color: #cdbfae; background: #fffdf9; }
+.os-pill b { font-family: var(--font-serif); font-size: 13px; color: #241811; font-weight: 500; }
+.os-pill.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
+.os-pill.sg b { color: #3f5a3c; }
+.os-pill.pk { background: #f8ece4; border-color: #e8c8bc; color: #6b3023; }
+.os-pill.pk b { color: #6b3023; }
+
+/* ══ §8 · SKELETONS ══
+   Overlay per card; content goes opacity:0 so the layout cannot shift when data lands.
+   Skeleton = "don't know yet"; the empty states are "know it's nothing" — never conflate. */
+.os-card.isload, .os-greet.isload { position: relative; }
+.os-card.isload > *:not(.os-skel), .os-greet.isload > *:not(.os-skel) { opacity: 0; pointer-events: none; }
+.os-skel { position: absolute; inset: 14px 16px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.os-skel i {
+  display: block; border-radius: 8px; min-height: 12px;
+  background: linear-gradient(90deg, #efe7db 25%, #f8f2e9 45%, #efe7db 65%);
+  background-size: 200% 100%;
+  animation: os-skpulse 1.5s ease-in-out infinite;
+}
+@keyframes os-skpulse { 0% { background-position: 120% 0; } 100% { background-position: -80% 0; } }
+.os-skel i.h { height: 16px; min-height: 16px; }
+.os-skel i.grow { flex: 1; min-height: 34px; }
+
+/* ══ §11 · RESPONSIVE FRAME ══ */
+@media (max-width: 1360px) {
+  .os-content { grid-template-columns: minmax(0, 1fr) 282px; gap: 14px; padding: 16px 22px 22px; }
+  .os-greet h1 { font-size: 26px; }
+  .os-pills { gap: 6px; }
+}
+@media (max-width: 1200px) {
+  .os-content { grid-template-columns: minmax(0, 1fr) 262px; }
+  /* the achievement slot is the softest fact — it gives ground first (§11) */
+  .os-pills .os-pill:nth-child(2) { display: none; }
+}
+/* ⚠️ THE LOCK RELEASES (§11) — one column, the page scrolls. !important because the lock is an
+   inline measured height, and author-important is what outranks it. */
+@media (max-width: 1024px) {
+  .os-root { height: auto !important; overflow: visible; }
+  .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
+  .os-colM, .os-colR { gap: 14px; }
+  .os-colR > * { margin-bottom: 0; }
+  .os-colM .os-lead { flex: none; height: 280px; }
+  .os-colM .os-tasks { flex: none; max-height: none; }
+  .os-pills .os-pill:nth-child(2) { display: inline-flex; }
+}
+/* short desktop viewports: the promise cannot be kept, so stop pretending (§11) */
+@media (max-height: 680px) and (min-width: 1025px) {
+  .os-root { height: auto !important; overflow: visible; }
+  .os-colM .os-lead { flex: none; height: 230px; }
+}
+@media (max-width: 640px) {
+  .os-content { padding: 14px 14px 24px; }
+  .os-greet .os-grow2 { flex-wrap: wrap; }
+  .os-greet h1 { font-size: 23px; }
+  .os-datechip { order: -1; }
+  .os-colM .os-lead { height: 220px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .os-root *, .os-card.enter, .os-greet.enter { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .os-skel i { animation: none; background: #efe7db; }
+}
