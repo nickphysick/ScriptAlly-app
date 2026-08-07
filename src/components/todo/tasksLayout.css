@@ -46,7 +46,19 @@
    100% of. `flex-start` sized each to its content, which is right only for a scrolling page. */
 .tpl-cols { display: flex; align-items: stretch; gap: 26px; margin-top: 18px; flex: 1; min-height: 0; }
 .tpl-side { flex: 0 0 auto; overflow: auto; min-height: 0; }
-.tpl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+/* ⚠️ THE POSITIONING CONTEXT FOR THE PIN (7 Aug). Everything the page draws below the hairline
+   lives inside a `.tpl-pin`, which resolves against THIS box. */
+.tpl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; position: relative; }
+
+/* ⚠️ ABSOLUTE, ALL FOUR INSETS — the region's height is DEFINITE and inherited from nothing. This
+   replaces a seven-link flex chain that could not be proven in tests and failed twice in the
+   browser. An absolutely-positioned box with `inset: 0` takes its containing block's dimensions
+   outright: no `height: 100%`, no `min-height: 0` chain, nothing to inherit and nothing to break
+   two ancestors up. */
+.tpl-pin {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; min-height: 0; min-width: 0;
+}
 
 /* ══ THE VIEWPORT LOCK (tasks-viewport pack, Phase 1; ref design-refs/tasks-viewport.html) ══
  *

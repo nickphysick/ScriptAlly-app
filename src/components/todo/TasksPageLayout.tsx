@@ -84,6 +84,28 @@ export interface TplZoneProps {
  * The hem is the LAST child so it sits at the zone's foot; it is sticky with a negative margin,
  * so it costs no height and cannot open a gap beneath short content.
  */
+/**
+ * ⚠️ THE PIN — A DEFINITE BOX, NOT AN INHERITED ONE (7 Aug fix).
+ *
+ * The viewport lock originally DERIVED each region's height through a `flex: 1; min-height: 0`
+ * chain running from the route slot down. That chain is seven links long, it cannot be proven in
+ * this repo's tests (no jsdom, no layout engine), and it failed twice in the browser for reasons
+ * no harness could reproduce. A law that cannot be verified and keeps breaking is the wrong
+ * mechanism however correct each link looks.
+ *
+ * So the region is PINNED instead: `.tpl-body` is the positioning context and this is
+ * `position: absolute; inset: 0` inside it. An absolutely-positioned box with all four insets set
+ * takes its containing block's dimensions OUTRIGHT — it resolves against a definite box whatever
+ * any ancestor does, needs no `height: 100%`, and inherits nothing. One mechanism, four pages.
+ *
+ * The trade is real and worth stating: the pinned region no longer contributes its height to the
+ * page, so the content region must be the thing that has a height. That is exactly what
+ * `.tpl-cols`'s `flex: 1` already gives it — ONE link instead of seven.
+ */
+export const TplPin: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
+  <div className={`tpl-pin${className ? ` ${className}` : ""}`}>{children}</div>
+);
+
 export const TplZone: React.FC<TplZoneProps> = ({ children, hem = true, className, scrollRef, label }) => (
   <div
     ref={scrollRef}

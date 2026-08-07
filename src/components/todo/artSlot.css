@@ -5,7 +5,8 @@
  * the board's ghost drop slot. It is scaffolding, and scaffolding that tries to look finished is
  * how a placeholder ends up shipping.
  */
-.art { margin: 0; display: block; }
+/* the figure is the box — it never grows to its content, and it never sits on a baseline */
+.art { margin: 0; display: block; flex: 0 0 auto; }
 
 /* the ratio box — padding-top holds the space; the child fills it absolutely */
 .art-box {
@@ -23,14 +24,22 @@
 
 /* ⚠️ `.art-cap` IS GONE (7 Aug) — the illustrator's brief is not body text. The rule is removed
    rather than emptied so nothing can quietly start rendering into it again. */
-.art-real { display: block; width: 100%; height: auto; }
+/* ⚠️ THE ASSET CAN NEVER EXCEED ITS BOX. The dimensions come from the component as real numbers;
+   these four declarations are what make exceeding them impossible even if one is wrong. */
+.art-real {
+  display: block; object-fit: contain; max-width: 100%; max-height: 100%;
+}
 
 /* ⚠️ THE DOCK SEAL IS THE ONE MOVING SLOT — appear, settle, fade over 600ms. Its caption is
    suppressed: a stamp that explained itself would not be a stamp. */
 .art--dock-seal { position: absolute; inset: 0; margin: auto; width: 120px; height: 120px; z-index: 5; pointer-events: none; }
 .art--dock-seal /* ⚠️ `.art-cap` IS GONE (7 Aug) — the illustrator's brief is not body text. The rule is removed
    rather than emptied so nothing can quietly start rendering into it again. */
-.art-real { display: block; width: 100%; height: auto; }
+/* ⚠️ THE ASSET CAN NEVER EXCEED ITS BOX. The dimensions come from the component as real numbers;
+   these four declarations are what make exceeding them impossible even if one is wrong. */
+.art-real {
+  display: block; object-fit: contain; max-width: 100%; max-height: 100%;
+}
 .art--dock-seal .art-box { animation: artSeal 600ms cubic-bezier(.2, .7, .3, 1) forwards; }
 @keyframes artSeal {
   0% { opacity: 0; transform: scale(1.25) rotate(-8deg); }

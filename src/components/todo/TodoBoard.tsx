@@ -224,6 +224,7 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
           <section
             key={col.id}
             className="tbd-col"
+            data-col={col.id}
             aria-label={col.label}
             onDragOver={(e) => { e.preventDefault(); setOver(col.id); }}
             onDragLeave={() => setOver((c) => (c === col.id ? null : c))}

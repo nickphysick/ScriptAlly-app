@@ -325,7 +325,9 @@
   border: 1px solid #ece4d6; background: #fff; border-radius: 13px;
   padding: 14px 18px; margin-bottom: 18px; flex: 0 0 auto;
 }
-.tdt-planart { flex: 0 0 auto; margin: 0; }
+/* ⚠️ 62×62, INLINE IN THE CARD'S FLEX ROW, left of the title — the card is an ordinary row of
+   icon, text, button. The slot sizes itself (see ArtSlot); this only places it. */
+.tdt-planart { flex: 0 0 auto; margin: 0; width: 62px; height: 62px; }
 .tdt-plantx { flex: 1; min-width: 0; }
 .tdt-plantx b {
   font-family: "Playfair Display", Georgia, serif;

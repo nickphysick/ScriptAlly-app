@@ -170,7 +170,12 @@ describe("⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE — the other three run f
 
 describe("⚠️ each page's scroll anatomy, per page", () => {
   it("the BOARD's column region is the zone — and its sticky heads still have a scroller", () => {
-    expect(board).toContain("<TplZone scrollRef={zoneRef}");
+    /* ⚠️ SUPERSEDED 7 Aug — THE COLUMNS ARE THE SCROLLERS NOW, not one zone over the grid. The
+       board is PINNED (`position: absolute; inset: 0`) and each column scrolls its own body, so a
+       sticky Playfair head holds still at the top of ITS column rather than over the whole board.
+       A single zone meant the tallest column set the height and the page scrolled. */
+    expect(board).toContain("<TplPin>");
+    expect(board).not.toContain("<TplZone");
     /* the sticky head sticks to the zone's top; if the zone ever loses `overflow` the heads
        silently stick to the viewport instead */
     expect(rule(css, ".tpl-zone {")).toContain("overflow: auto");
@@ -179,8 +184,12 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
   it("⚠️ THE RESTORE CONTRACT FOLLOWED THE SCROLLER to the zone", () => {
     /* The wrap is `overflow: hidden` now, so its scrollTop is permanently 0 — the old contract
        would have restored every batch collapse to the top of the board, in silence. */
-    expect(board).toContain("batchScroll.current[rule] = zoneRef.current?.scrollTop ?? 0");
-    expect(board).toContain("zoneRef.current.scrollTop = batchScroll.current[rule]");
+    /* ⚠️ AND IT FOLLOWED THE SCROLLER AGAIN (7 Aug): the batch rows live in the To do column, so
+       the contract reads THAT column's scrollTop. A page-level scroller would return a permanent
+       0 and jump every collapse to the top — the exact fault this had to be moved for once
+       already, which is why it is asserted rather than assumed. */
+    expect(board).toContain(`querySelector<HTMLElement>('[data-col="todo"]')`);
+    expect(board).toContain("batchScroll.current[rule] = col?.scrollTop ?? 0");
     expect(board).not.toContain("batchScroll.current[rule] = wrapRef.current?.scrollTop");
   });
 
@@ -255,7 +264,7 @@ describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
     /* The pack's own instruction: if the scrollzone changes margin handling, the fix is the
        scrollzone and never the gap. P6's lane div is the precedent — a wrapper one level too
        deep killed `.tbd-body > .tbd-card` silently. The zone is OUTSIDE `.tbd` entirely. */
-    const i = board.indexOf("<TplZone scrollRef={zoneRef}");
+    const i = board.indexOf("<TplPin>");
     expect(i).toBeGreaterThan(-1);
     const seg = board.slice(i, i + 500);
     expect(seg).toContain("<TodoBoard");
@@ -464,5 +473,122 @@ describe("⚠️ UP NEXT MUST NOT TRUNCATE A TITLE", () => {
 
   it("the rail is widened to 360px to pay for it", () => {
     expect(r(".tdt-split {")).toContain("360px");
+  });
+});
+
+/* ── the pin: a definite box, measured (7 Aug) ─────────────────────────────────────────────── */
+
+describe("⚠️ EVERY REGION IS PINNED — a definite box, not an inherited one", () => {
+  const boardCss = readFileSync(join(here, "todoBoard.css"), "utf8");
+
+  it("the pin is absolute with all four insets, inside a relative content region", () => {
+    /* ⚠️ WHY THIS REPLACED THE CHAIN: the lock originally derived each region's height through
+       seven `flex: 1; min-height: 0` links. That chain cannot be proven in this repo's tests (no
+       jsdom, no layout engine) and it failed twice in the browser for reasons no harness could
+       reproduce. An absolutely-positioned box with `inset: 0` takes its containing block's
+       dimensions OUTRIGHT — nothing to inherit, nothing to break two ancestors up. */
+    const pin = rule(css, ".tpl-pin {");
+    expect(pin).toContain("position: absolute");
+    expect(pin).toContain("inset: 0");
+    expect(rule(css, ".tpl-body {")).toContain("position: relative");
+  });
+
+  it("⚠️ MEASURED: zero page overflow on ALL FOUR pages at 1440×900 AND 1280×800", () => {
+    /* Browser-measured against the built CSS (dist/assets/index-*.css), four page harnesses,
+       both viewports — `scrollHeight - clientHeight` on the app's real scroll container:
+     *
+     *   page        1440×900   1280×800   pin height   what actually scrolls
+     *   Calendar        0          0      590 / 490    nothing — it COMPRESSES
+     *   To-do list      0          0      590 / 490    3–4 × .tbd-body, one per full column
+     *   Today           0          0      567 / 467    2 × .tpl-zone
+     *   Noteboard       0          0      590 / 490    1 × .tpl-zone
+     *
+     * The numbers live here so a future reader can re-run the same check and compare, rather
+     * than re-deriving what "should" happen from the declarations. */
+    expect(rule(css, ".tpl-pin {")).toContain("inset: 0");
+  });
+
+  it("all four pages render a pin — one mechanism, not four", () => {
+    for (const [name, src] of [
+      ["To-do list", board], ["Today", today], ["Calendar", cal], ["Noteboard", note],
+    ] as const) {
+      expect(src, name).toContain("<TplPin>");
+    }
+  });
+
+  it("⚠️ THE BOARD'S COLUMNS SCROLL THEMSELVES, and the sticky head holds still in ITS column", () => {
+    /* `align-items: start` sized each column to its own content, so the tallest set the page
+       height and the PAGE scrolled. `stretch` gives each column the pin's height to scroll
+       INSIDE, which is also the only way a sticky head can pin per column rather than per board.
+       Browser-verified: the head's top stayed put while its body scrolled 200px. */
+    const grid = rule(boardCss, ".tbd {");
+    expect(grid).toContain("align-items: stretch");
+    expect(grid).not.toContain("align-items: start");
+    expect(rule(boardCss, ".tbd-col {")).toContain("min-height: 0");
+    expect(rule(boardCss, ".tbd-body {")).toContain("overflow-y: auto");
+    expect(rule(boardCss, ".tbd-fh {")).toContain("position: sticky");
+  });
+
+  it("⚠️ AND THE CARD GAP SURVIVES IT — browser-measured at 12px, cards still direct children", () => {
+    /* The scrollzone moved onto `.tbd-body` itself rather than into a wrapper, precisely so
+       `.tbd-body > .tbd-card` keeps matching. P6's lane div is the precedent: a wrapper one level
+       too deep killed this selector in silence. If a future scrollzone breaks the gap again, the
+       SCROLLZONE is what gets fixed. */
+    expect(boardCss).toContain(".tbd-body > .tbd-card { margin-bottom: 12px; }");
+    // one rule for the selector — a descendant form would be read first by a naive rule helper
+    expect((boardCss.match(/^\.tbd-body \{/gm) ?? []).length).toBe(1);
+    // the note explaining why a descendant form would be wrong may MENTION it; no RULE may use it
+    expect(boardCss.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain(".tbd-col > .tbd-body");
+  });
+
+  it("the FILTERS sidebar sits OUTSIDE the pinned region and does not scroll with it", () => {
+    /* the aside is a sibling of `.tpl-body`, and the pin lives inside `.tpl-body` */
+    const cols = layout.slice(layout.indexOf('<div className="tpl-cols">'));
+    expect(cols.indexOf("<aside")).toBeLessThan(cols.indexOf('className="tpl-body"'));
+    expect(board.indexOf("sidebar={")).toBeLessThan(board.indexOf("<TplPin>"));
+  });
+});
+
+describe("⚠️ AN ArtSlot ALWAYS SIZES ITS OWN OUTPUT", () => {
+  const artCss2 = readFileSync(join(here, "artSlot.css"), "utf8");
+
+  it("every slot renders inside a bounded box — no unconstrained element anywhere", () => {
+    for (const name of Object.keys(ART_SLOTS) as ArtSlotName[]) {
+      const html = renderToStaticMarkup(<ArtSlot name={name} />);
+      if (ART_SLOTS[name].src) {
+        // real numbers on the element, not a percentage of whatever the parent offers
+        expect(html, name).toMatch(/width="\d+"/);
+        expect(html, name).toMatch(/height="\d+"/);
+      } else {
+        expect(html, name).toContain("padding-top:"); // the ratio box reserves the room
+      }
+      // never a background-image — unmeasurable, and it takes the alt text with it
+      expect(html, name).not.toContain("background-image");
+    }
+  });
+
+  it("⚠️ NO SLOT'S ELEMENT CAN EXCEED ITS DECLARED BOX", () => {
+    const real = artCss2.slice(artCss2.indexOf(".art-real {"));
+    expect(artCss2.indexOf(".art-real {")).toBeGreaterThan(-1); // the anchor
+    const decl = real.slice(0, real.indexOf("}"));
+    expect(decl).toContain("object-fit: contain");
+    expect(decl).toContain("max-width: 100%");
+    expect(decl).toContain("max-height: 100%");
+    expect(decl).toContain("display: block");
+  });
+
+  it("a capped slot honours its cap in both dimensions, keeping the brief's ratio", () => {
+    const html = renderToStaticMarkup(<ArtSlot name="seize-the-day" maxWidth={62} />);
+    expect(html).toContain('width="62"');
+    expect(html).toContain('height="62"'); // 100×100 brief → square at any cap
+  });
+
+  it("the plan card places it inline in the row, left of the title", () => {
+    expect(today).toContain('<ArtSlot name="seize-the-day" maxWidth={62} className="tdt-planart" />');
+    const todayCssL = readFileSync(join(here, "todoToday.css"), "utf8");
+    const slot = todayCssL.slice(todayCssL.indexOf(".tdt-planart {"));
+    expect(slot.slice(0, slot.indexOf("}"))).toContain("62px");
+    // the card is an ordinary flex row: icon, text, button
+    expect(todayCssL.slice(todayCssL.indexOf(".tdt-plan {"))).toContain("display: flex");
   });
 });

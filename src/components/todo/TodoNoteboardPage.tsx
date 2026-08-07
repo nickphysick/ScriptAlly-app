@@ -22,7 +22,7 @@
  */
 import React, { useMemo, useState } from "react";
 import { Plus, Search, AlignLeft, MoreHorizontal } from "lucide-react";
-import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
+import { TasksPageLayout, TplGrow, TplZone, TplPin } from "./TasksPageLayout";
 import { PortalMenu } from "./PortalMenu";
 import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { useConfirmAsk } from "./ConfirmAsk";
@@ -198,6 +198,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
         >
           {/* ⚠️ THE MASONRY IS THE SCROLLZONE (tasks-viewport P4): the header and tool row are
               fixed above it, and the notes scroll beneath under their own hem. */}
+          <TplPin>
           <TplZone label="Notes" hem={notes.length > 0}>
           {notes.length === 0 && !compose ? (
             /* the empty state TEACHES rather than apologises */
@@ -292,6 +293,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
             </div>
           )}
           </TplZone>
+          </TplPin>
         </TasksPageLayout>
       </div>
 

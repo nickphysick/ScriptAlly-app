@@ -20,7 +20,7 @@ import React, { useMemo, useState } from "react";
 import { Play, Plus, Undo2, ListChecks, LoaderCircle, MoreHorizontal } from "lucide-react";
 import { useTagWrites } from "./useTagWrites";
 import { ArtSlot } from "./ArtSlot";
-import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
+import { TasksPageLayout, TplGrow, TplZone, TplPin } from "./TasksPageLayout";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
 import { useScriptAllyDb } from "../../lib/db";
 import { todaySplit, BoardCard } from "../../lib/todoBoard";
@@ -197,6 +197,9 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             Today's list takes the measure; Up next sits in a ~320px right rail behind a left
             hairline. EACH SCROLLS INDEPENDENTLY under its own hem, so a long list never pushes
             the suggestions off the page and neither region can take the header with it. */}
+        {/* ⚠️ PINNED (7 Aug): both regions resolve against a DEFINITE box rather than a flex
+            chain — see TplPin. Each still owns its own zone and hem inside it. */}
+        <TplPin>
         <div className="tdt-split">
 
           {/* ── TODAY'S LIST ──────────────────────────────────────────────── */}
@@ -375,6 +378,7 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             <p className="tdt-drag">Drag an item across to add it.</p>
           </aside>
         </div>
+        </TplPin>
       </TasksPageLayout>
       </div>
 

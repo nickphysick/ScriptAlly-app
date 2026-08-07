@@ -18,7 +18,7 @@
  */
 import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
+import { TasksPageLayout, TplGrow, TplPin } from "./TasksPageLayout";
 import { useTagWrites } from "./useTagWrites";
 import { useTodoToast } from "./useTodoToast";
 import { FocusFlow } from "./FocusFlow";
@@ -196,6 +196,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
             </>
           }
         >
+          {/* ⚠️ PINNED (7 Aug): the month's height is DEFINITE — `position: absolute; inset: 0`
+              against `.tpl-body` — rather than derived through a flex chain that failed twice.
+              The grid fills the pin and the legend closes it. */}
+          <TplPin>
           <div className="cal-grid" role="grid" ref={gridRef} aria-label={view === "month" ? monthLabel(anchor) : weekLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
@@ -246,6 +250,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
               </span>
             ))}
           </div>
+          </TplPin>
         </TasksPageLayout>
       </div>
 

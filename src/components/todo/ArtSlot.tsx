@@ -114,6 +114,11 @@ export const ArtSlot: React.FC<ArtSlotProps> = ({ name, maxWidth, className }) =
      empty state would be the app looking broken exactly where it is trying to be gracious. */
   const [failed, setFailed] = useState(false);
   const showArt = !!brief.src && !failed;
+  /* ⚠️ THE BOX IS ALWAYS EXPLICIT. `maxWidth` caps the slot; without one the brief's own width is
+     the box. Both dimensions are computed here so the rendered element carries real numbers
+     rather than inheriting whatever the parent happens to offer. */
+  const boxW = maxWidth ?? brief.w;
+  const boxH = Math.round((brief.h / brief.w) * boxW);
 
   return (
     <figure
@@ -121,10 +126,22 @@ export const ArtSlot: React.FC<ArtSlotProps> = ({ name, maxWidth, className }) =
       style={maxWidth ? { maxWidth } : undefined}
       data-art={name}
     >
-      {/* ⚠️ WHEN THE ASSET EXISTS IT STANDS ALONE — no ratio box, no dashed frame, no caption.
-          A placeholder's chrome drawn around real artwork makes finished work look unfinished. */}
+      {/* ⚠️ THE SLOT ALWAYS SIZES ITS OWN OUTPUT (7 Aug fix). The asset used to render at its
+          natural size, unbounded, and spilled out of the card behind the page content. A slot
+          DECLARES a box and the artwork lives inside it — `object-fit: contain` so it is never
+          distorted, `max-width/height: 100%` so it can never exceed the box, `display: block` so
+          it is not sitting on a text baseline. NEVER a background-image (unmeasurable, and it
+          takes the alt text with it) and never a bare <img>. */}
       {showArt ? (
-        <img className="art-img art-real" src={brief.src} alt={brief.alt} onError={() => setFailed(true)} />
+        <img
+          className="art-img art-real"
+          src={brief.src}
+          alt={brief.alt}
+          width={boxW}
+          height={boxH}
+          style={{ width: boxW, height: boxH }}
+          onError={() => setFailed(true)}
+        />
       ) : (
         /* The ratio box reserves exactly the room the artwork will take, so nothing shifts when
            it lands. Its only content is the slot's NAME, in mono — see the brief note above. */
