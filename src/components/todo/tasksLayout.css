@@ -1,10 +1,12 @@
 /**
- * TasksPageLayout — the one page grid (tasks-pages pack, Phase 1; ref design-refs/tasks-pages.html).
+ * TasksPageLayout — the one page grid (tasks-pages pack, Phase 1; horizontal half tasks-audit
+ * addendum; ref design-refs/tasks-pages.html).
  *
- * ⚠️ THE TOP TOKEN IS `--tdb-chrome-gap`, worn via `.tdb-col` — this file must NOT restate a top
- * padding of its own. Every Tasks page title sits at the same offset because every page renders
- * the same component wearing the same class; a second number here would be the Today squash
- * waiting to happen again.
+ * ⚠️ BOTH AXES ARE `.tdb-col`'s TOKENS: top `--tdb-chrome-gap`, gutter `--tdb-col-gutter`, plus
+ * its max width + auto-centring — this file must NOT restate a top OR horizontal padding of its
+ * own, and no route slot may add a second cap (contentVariant stays OFF the Tasks slots). Every
+ * Tasks page title sits at the same offset on both axes because every page renders the same
+ * component wearing the same class; a second number on either axis is the same drift twice.
  */
 
 /* ── the header block: title → subtitle → tool row, full content width ── */

@@ -22,6 +22,9 @@ const layoutSrc = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const todayPage = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
+const calendarPage = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
+const noteboardPage = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
+const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
 
 const render = (sidebar?: React.ReactNode) =>
   renderToStaticMarkup(
@@ -46,14 +49,52 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
     expect(layoutCss).toContain("--tdb-chrome-gap"); // named in the warning, so the tie is stated
   });
 
-  it("both live pages stand on the SAME component", () => {
-    expect(listPage).toContain("<TasksPageLayout");
-    expect(listPage).toContain('from "./TasksPageLayout"');
-    expect(todayPage).toContain("<TasksPageLayout");
-    expect(todayPage).toContain('from "./TasksPageLayout"');
+  it("ALL FOUR pages stand on the SAME component", () => {
+    for (const [name, src] of [["list", listPage], ["today", todayPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+      expect(src, name).toContain("<TasksPageLayout");
+      expect(src, name).toContain('from "./TasksPageLayout"');
+    }
     // and neither IMPORTS the retired header any more (supersession comments may still name it)
     expect(listPage).not.toContain('from "../shell/PageHeader"');
     expect(todayPage).not.toContain('from "../shell/PageHeader"');
+  });
+});
+
+/* ── the HORIZONTAL half (tasks-audit addendum) ────────────────────────────────────────────── */
+
+describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", () => {
+  it("⚠️ the layout's stylesheet restates NO horizontal padding — the gutter is .tdb-col's token", () => {
+    expect(layoutCss).not.toMatch(/\.tpl[^{]*\{[^}]*padding-left/);
+    expect(layoutCss).not.toMatch(/\.tpl[^{]*\{[^}]*padding-right/);
+    expect(layoutCss).not.toMatch(/\.tpl[^{]*\{[^}]*padding-inline/);
+    expect(layoutCss).toContain("--tdb-col-gutter"); // named in the contract, so the tie is stated
+  });
+
+  it("…and .tdb-col carries the gutter token + the one cap, auto-centred", () => {
+    const todoCss = readFileSync(join(here, "todo.css"), "utf8");
+    const i = todoCss.indexOf(".tdb-col {");
+    const rule = todoCss.slice(i, todoCss.indexOf("}", i));
+    expect(rule).toContain("max-width: var(--tdb-col-max)");
+    expect(rule).toContain("margin-inline: auto");
+    expect(rule).toContain("var(--tdb-col-gutter)");
+  });
+
+  it("⚠️ NO Tasks route slot adds a second horizontal owner — contentVariant stays OFF all four", () => {
+    /* THE CAUSE, pinned: three slots carried the ultrawide read cap (a placeholder-era leftover)
+       while the board slot was bare — below the cap-bite width the capped pages gained centring
+       margin the board lacked, and its title started further LEFT. Two owners on one axis. */
+    const slots = [...app.matchAll(/<StagePage[^>]*routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
+    expect(slots.length).toBe(4); // list · today · calendar · noteboard
+    for (const slot of slots) expect(slot, slot).not.toContain("contentVariant");
+  });
+
+  it("no page wraps the layout in a capped or padded container of its own", () => {
+    for (const [name, src] of [["list", listPage], ["today", todayPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+      // the mount sits directly inside the page wrap — never inside a max-width/pad wrapper
+      const before = src.slice(src.indexOf("return ("), src.indexOf("<TasksPageLayout"));
+      expect(before, name).not.toContain("maxWidth");
+      expect(before, name).not.toContain("sa-content-col");
+    }
   });
 });
 

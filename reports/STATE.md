@@ -29,6 +29,12 @@
 - **Done teaches** ("Tick anything and it settles here until midnight."); **FILTERS on Today
   reach BOTH regions** — the bench narrows through the same facet ∧ tags and its header says
   "…OF THE {n} MATCHING" while narrowed (no bench exemption; argued in the report).
+- **ADDENDUM — the horizontal half**: the board's header started further LEFT because THREE
+  Tasks slots still carried the placeholder-era `contentVariant="read"` cap while the board slot
+  was bare (two owners on one axis — the inverse of the pack's guess). The slot caps are gone;
+  TasksPageLayout/.tdb-col owns both axes (`--tdb-chrome-gap` + `--tdb-col-gutter`, one 1360
+  cap, auto-centred) — a stated carve-out from the ultrawide opt-in law. Left-offset equality
+  locked beside the top-offset locks; the three pages widen 1200 → 1360 (one max width).
 
 ## The Tasks workspace is COMPLETE (tasks-pages pack; report: `reports/tasks-pages.md`)
 

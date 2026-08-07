@@ -108,6 +108,30 @@ Then:
 6. The calendar legend shows four families — no DATED NOTES.
 7. Done's empty column reads the teaching line.
 
+## Addendum — the horizontal half of the alignment contract
+
+**The audit's follow-up:** the To-do list's header started further LEFT than the other three
+Tasks pages. **The cause — the INVERSE of the pack's guess:** the board page did not wrap its
+header in an extra container; the OTHER THREE did. Their route slots still carried
+`contentVariant="read"` — the ultrawide 1200px slot cap, a leftover from their placeholder era —
+while the board slot was bare. Below the cap-bite width the capped pages gained centring margin
+the board lacked, so its title sat further left. Two owners on one horizontal axis: the slot's
+cap on three pages, the layout's `.tdb-col` on all four.
+
+**The fix, per the pack's own prescription (consume the layout's gutter, never restate a
+padding):** the slot caps are REMOVED — `contentVariant` stays off all four Tasks slots — and
+TasksPageLayout is the axis's only owner: `.tdb-col`'s `--tdb-col-gutter` (40px), its max width
+(1360) and its auto-centring. This is a deliberate carve-out from the ultrawide opt-in law
+(mirroring the Dashboard's exemption), stated at the slots. Today/Calendar/Noteboard therefore
+widen from the 1200 cap to the board's 1360 — one max width on every Tasks page, as the
+contract demands.
+
+**Locks:** the alignment suite gained its horizontal describe — no `padding-left/right/inline`
+in the layout's stylesheet, `.tdb-col` carries the gutter token + cap + auto-centre, all FOUR
+slots asserted `contentVariant`-free (the cause pinned in the test's own comment), and no page
+wraps the layout in a capped container. Neither axis can drift silently again. Commit: see the
+addendum SHA in git (`fix(todo): tasks-audit addendum`).
+
 ## Deploy
 
 Dev hosting: `main` at the pack's tip → https://scriptally-dev.web.app. Prod untouched.

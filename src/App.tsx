@@ -647,17 +647,24 @@ function AppContent() {
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
-        <StagePage active={routeKey === "todo" && todoPage === "today"} contentVariant="read">
+        {/* ⚠️ NO contentVariant ON ANY TASKS SLOT (tasks-audit addendum): TasksPageLayout owns
+            the horizontal axis — .tdb-col's max width + --tdb-col-gutter — on all four pages.
+            Three of them carried the slot's read cap (a placeholder-era leftover) while the
+            board slot was bare, so BELOW the cap-bite width the board's title started further
+            left: two owners on one axis. One owner now; a deliberate carve-out from the
+            ultrawide opt-in law, mirroring the Dashboard's own exemption — the layout caps and
+            centres instead of the slot. */}
+        <StagePage active={routeKey === "todo" && todoPage === "today"}>
           <TodoTodayPage onNavigate={handleNavigate} />
         </StagePage>
 
         {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
-        <StagePage active={routeKey === "todo" && todoPage === "calendar"} contentVariant="read">
+        <StagePage active={routeKey === "todo" && todoPage === "calendar"}>
           <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
-        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} contentVariant="read">
+        <StagePage active={routeKey === "todo" && todoPage === "noteboard"}>
           <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 

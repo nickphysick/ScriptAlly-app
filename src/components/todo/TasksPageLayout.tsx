@@ -10,10 +10,14 @@
  * title and its header squashed against the top bar — because each page hand-assembled the same
  * geometry and one of them missed the column. The contract, once, here:
  *
- *  1. The content region's TOP PADDING IS A SINGLE TOKEN — `--tdb-chrome-gap` (44px), carried by
- *     the `.tdb-col` geometry this component now owns. Every page title's baseline sits at the
- *     same offset because every page renders THIS component; Today's squash was this token (and
- *     the whole column) simply missing from that page.
+ *  1. The content region's TOP PADDING IS A SINGLE TOKEN — `--tdb-chrome-gap` (44px) — AND SO IS
+ *     ITS GUTTER — `--tdb-col-gutter` (40px) — both carried by the `.tdb-col` geometry this
+ *     component owns, with `.tdb-col`'s max width and auto-centring as the one horizontal cap.
+ *     Every page title sits at the same offset on BOTH axes because every page renders THIS
+ *     component and NOTHING ELSE caps or pads the column: the route slots carry no
+ *     contentVariant (tasks-audit addendum — three slots' leftover read caps made the board's
+ *     title start further left below the cap-bite width), and this file's own stylesheet
+ *     restates neither padding. Today's squash was the top half of the same fault.
  *  2. Order: header block (Playfair title → one-line subtitle → tool row) spanning the FULL
  *     content width → hairline (the tool row's own bottom rule) → beneath it, the page sidebar
  *     and the page body starting on the same line. The sidebar begins BELOW the hairline,
