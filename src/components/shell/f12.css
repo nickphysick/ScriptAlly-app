@@ -508,7 +508,7 @@
 .f12-body {
   flex: 1; display: flex; gap: var(--gut); min-height: 0;
   width: 100%; max-width: var(--maxw); margin: 22px auto 26px;
-  padding: 20px 22px 22px;
+  padding: 20px 22px;
   border: 1px solid var(--line); border-radius: 18px;
 }
 .f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
@@ -534,6 +534,20 @@
 .f12-lsearch input::placeholder { color: var(--muted); }
 .f12-lsearch .f12-kbd { margin-left: auto; }
 .f12-rows { flex: 1; overflow-y: auto; min-height: 0; }
+
+/* ── QUIET SCROLLBARS — the To-do pattern, reused (todo.css .tdb-tmid2): invisible at rest,
+   a hairline thumb on hover or keyboard focus, so a grey system bar never sits against the
+   workspace hairline. Applied to the list rows and all three column bodies.
+   ⚠️ To-do's rule has NO ::-webkit-scrollbar fallback, so its `scrollbar-color` half does
+   nothing in Safari. The webkit pair below closes that; it is an ADDITION to the house
+   pattern, and worth backporting to .tdb-tmid2 rather than leaving the two to diverge. ── */
+.f12-rows, .f12-quiet-scroll { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.f12-rows:hover, .f12-rows:focus-within,
+.f12-quiet-scroll:hover, .f12-quiet-scroll:focus-within { scrollbar-color: var(--hairline) transparent; }
+.f12-rows::-webkit-scrollbar, .f12-quiet-scroll::-webkit-scrollbar { width: 6px; }
+.f12-rows::-webkit-scrollbar-thumb, .f12-quiet-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+.f12-rows:hover::-webkit-scrollbar-thumb, .f12-rows:focus-within::-webkit-scrollbar-thumb,
+.f12-quiet-scroll:hover::-webkit-scrollbar-thumb, .f12-quiet-scroll:focus-within::-webkit-scrollbar-thumb { background: var(--hairline); }
 .f12-row { position: relative; display: flex; align-items: center; gap: 11px; width: 100%; height: 56px; padding: 0 14px; border-bottom: 1px solid var(--hairline); cursor: pointer; transition: background 0.1s; }
 .f12-row:hover { background: var(--paper); }
 /* Selected: the tint stays; the full-height inset edge becomes a BOOKMARK — 3px of ink inset

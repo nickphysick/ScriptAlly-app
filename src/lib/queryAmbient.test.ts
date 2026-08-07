@@ -161,7 +161,9 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
     expect(src, "the list was re-carded").not.toContain('className="f12-pane f12-list"');
     // v5 P2 appended the crossfade class, so the pane's className is a template literal now —
     // match the CLASS LIST (in order), which is what this guard is actually about.
-    expect(src).toMatch(/className=\{`qp-pane f12-pane f12-detail /);
+    // AMENDED (frame corrections): the wrapper is DE-CARDED — no .f12-pane skin, since the ref
+    // has no wrapper card around hero + columns. Still the flex:1 half of the pair.
+    expect(src).toMatch(/className=\{`qp-pane f12-detail /);
     expect(src.includes("gridColumn: 2, gridRow:")).toBe(false);
     expect(src.includes("gridColumn: 1, gridRow:")).toBe(false);
   });

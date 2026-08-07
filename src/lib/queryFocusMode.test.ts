@@ -96,6 +96,7 @@ describe("exactly the right things are raised", () => {
   });
 
   it("the reading pane is raised", () => {
-    expect(code).toContain("qp-pane f12-pane f12-detail qh-lit");
+    // the wrapper lost its card skin (frame corrections); the RAISE is what this guards
+    expect(code).toContain("qp-pane f12-detail qh-lit");
   });
 });

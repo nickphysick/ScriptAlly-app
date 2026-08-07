@@ -156,7 +156,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
             <span>When you sent it</span>
           </div>
-          <div style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+          <div className="f12-quiet-scroll" style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
                 at ordinary laptop heights, so the one field that needs a decision was the one you
                 had to scroll to find. */}
@@ -242,7 +242,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
             <span>What you sent</span>
           </div>
-          <div style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+          <div className="f12-quiet-scroll" style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
             <div style={{ marginBottom: 0 }}>
               <div style={LABEL}>Manuscript</div>
               {onlyManuscript ? (

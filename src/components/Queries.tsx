@@ -2939,9 +2939,12 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className={`qp-pane f12-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* No background: the pane inherits .f12-pane's --panel like every other card on the page.
-               It used to override to --paper (#faf6f0), a cream that made this one surface warmer
-               than the rest of the app — REMOVED rather than painted over. */
+          <div className={`qp-pane f12-detail qh-lit ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
+               hero and the three columns are siblings directly inside the workspace frame, and the
+               only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
+               here put a bordered, shadowed card around all of them — a card inside the frame,
+               inside the sheet. The SKIN is gone; the layout it provided lives on the inline style
+               below (flex column, min-height 0, overflow hidden). */
             style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {/* ── THE TOOLBAR NOW LIVES IN THE PANE (ref query-centre-final.html) — first row of
                 the pane column, flush with the cards beneath it, no longer a page-wide bar
@@ -3131,7 +3134,7 @@ export const Queries: React.FC<{
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
                         <span>Tracking</span>
                       </div>
-                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
+                      <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
                         {(() => {
                           // Pass the same open-state fact the command bar uses, so the trailing block
                           // switches agent's-turn / writer's-turn / closed identically.
@@ -3174,7 +3177,7 @@ export const Queries: React.FC<{
                         <span>What you sent</span>
                       </div>
                       {/* spec sheet */}
-                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
+                      <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
                         {(() => {
                           // Phase 6 — the query's own materialsWanted is the record of what was sent; when
                           // empty we display the agent's expected set (the first edit promotes it onto the
@@ -3353,7 +3356,7 @@ export const Queries: React.FC<{
                           const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
                           return (
                             <>
-                              <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--panel, #fffdfb)">
+                              <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--panel, #fffdfb)">
                                 {notes.length === 0 ? (
                                   /* ghost first entry — DOTTED outline, no fill (a placeholder that looks
                                      like one; ref .note); replaced on first save */

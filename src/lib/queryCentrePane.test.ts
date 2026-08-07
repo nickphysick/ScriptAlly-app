@@ -25,7 +25,7 @@ const rule = (selector: string): string => {
 
 describe("the toolbar is a pane row now", () => {
   it("it renders INSIDE the reading pane, not in the page column", () => {
-    const pane = code.indexOf("qp-pane f12-pane f12-detail qh-lit");
+    const pane = code.indexOf("qp-pane f12-detail qh-lit");
     const bar = code.indexOf('className="f12-ctl', pane);
     const body = code.indexOf('className="f12-body"');
     expect(pane, "the pane is missing").toBeGreaterThan(-1);
