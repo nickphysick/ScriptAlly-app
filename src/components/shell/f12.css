@@ -505,7 +505,7 @@
 /* ── THE EDITORIAL LIST (ref query-centre-final.html) — DE-CARDED. It is no longer a .f12-pane:
    inside the workspace frame a bordered card would be a card inside a card, so the list is now
    just a column of rows separated by hairlines. ── */
-.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; }
+.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; transition: width 0.34s cubic-bezier(0.22, 0.9, 0.3, 1); }
 
 /* The head reuses TO-DO'S values verbatim (todo.css .tdb-sec / .tdb-cn / .tdb-secrule) rather
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.
@@ -532,6 +532,65 @@
 .f12-lsearch input::placeholder { color: var(--muted); }
 .f12-lsearch .f12-kbd { margin-left: auto; }
 .f12-rows { flex: 1; overflow-y: auto; min-height: 0; }
+
+/* ══ CREATE MODE: FOCUS THROUGH SPACE (ref design-refs/qc-create-v2.html) ══════════════════
+   SUPERSEDES the scrim outright (deleted in P1 — no dimming, tinting or overlay survives).
+   Focus is now a LAYOUT change: the list collapses to a monogram rail and the pane takes the
+   freed width, so the thing you are doing is simply the biggest thing on the page.
+
+   ⚠️ WIDTH IS THE ONLY GEOMETRY THAT MOVES, and that is what keeps the viewport-fit chain
+   intact. The chain is entirely VERTICAL — .ws-work--fit (flex: 1 1 0; min-height: 0) →
+   .f12-body → .f12-list (min-height: 0) → .f12-rows scrolls — and none of it reads width.
+   The list stays `flex: none` with a definite width throughout, so no height basis is
+   recomputed and the rows keep their own scroll container the whole way across.
+
+   ⚠️ THE FURNITURE COLLAPSES ITS BOX, it does not merely fade. Fading alone would leave a
+   48px head, a 36px control row and a footer holding space in a 62px rail — invisible, and
+   still pushing the rows down. Height/margin/padding go to 0 alongside the opacity.
+
+   CSS only: every transition below is driven by the .qh-create class toggling. No JS timer
+   drives a frame. ── */
+.qh-create .f12-list { width: var(--f12-railw); }
+
+/* Head · search+pills · footer — out, and out of the flow. */
+.qh-create .f12-lhtitle,
+.qh-create .f12-lhead,
+.qh-create .f12-lfoot {
+  opacity: 0; pointer-events: none;
+  height: 0; min-height: 0; margin: 0; padding: 0;
+  border-width: 0; overflow: hidden;
+}
+.f12-lhtitle, .f12-lhead, .f12-lfoot {
+  transition: opacity 0.18s ease, height 0.28s cubic-bezier(0.22, 0.9, 0.3, 1),
+    margin 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), padding 0.28s cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+
+/* The rows keep their monogram and lose everything else. The row box itself is untouched —
+   same 56px height, same seat — so the rail is the list with its text withdrawn, not a
+   different list. */
+.f12-row .f12-mid, .f12-row .f12-end { transition: opacity 0.18s ease, width 0.28s cubic-bezier(0.22, 0.9, 0.3, 1); }
+/* ⚠️ THEY MUST LEAVE THE FLEX LINE, NOT JUST FADE — opacity hides from the eye, not from
+   layout. Browser-measured with fade alone: .f12-end still held 34.2px, so monogram (32) +
+   end (34.2) overflowed the 51px rail row, and `justify-content: center` centred the OVERFLOW
+   — putting the monogram at -7.6px, clipped outside its own row. Collapsing the width is what
+   actually centres the monogram; the opacity is only so it goes quietly. */
+.qh-create .f12-row .f12-mid,
+.qh-create .f12-row .f12-end {
+  opacity: 0; pointer-events: none;
+  flex: 0 0 0; width: 0; min-width: 0; overflow: hidden;
+}
+.qh-create .f12-row { gap: 0; padding: 0; justify-content: center; border-bottom-color: transparent; }
+/* Selection is stashed while a draft is open, so marking a row would point at something the
+   page is not currently showing you. The draft is the only thing worth marking here. */
+.qh-create .f12-row.f12-sel { background: transparent; }
+.qh-create .f12-row.f12-sel::before { opacity: 0; }
+/* ...except the draft, which keeps its dashed tile and its fill-on-resolve. */
+.qh-create .f12-row.f12-draft { justify-content: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .f12-list, .f12-lhtitle, .f12-lhead, .f12-lfoot,
+  .f12-row .f12-mid, .f12-row .f12-end { transition: none !important; }
+}
 
 /* ── QUIET SCROLLBARS — the To-do pattern, reused (todo.css .tdb-tmid2): invisible at rest,
    a hairline thumb on hover or keyboard focus, so a grey system bar never sits against the

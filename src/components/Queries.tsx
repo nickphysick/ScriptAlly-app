@@ -2119,7 +2119,7 @@ export const Queries: React.FC<{
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-create" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -2895,6 +2895,12 @@ export const Queries: React.FC<{
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
+                    /* In the rail the name is withdrawn to opacity 0 — still in the
+                       accessibility tree (opacity hides from the eye, not from a reader), so the
+                       button keeps its accessible name either way. The title is for the POINTER,
+                       which has no such fallback; it is create-mode only so full-width rows
+                       don't grow a tooltip they don't need. */
+                    title={creating ? agentPrimary(agent) : undefined}
                     className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
