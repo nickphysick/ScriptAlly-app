@@ -22,7 +22,7 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 383px;
+  grid-template-columns: minmax(0, 1fr) 287px;
   grid-template-rows: auto auto;
   align-content: start;
   column-gap: 16px;
@@ -43,10 +43,15 @@
 .os-colR > * { margin-bottom: 13px; }
 .os-colR > *:last-child { margin-bottom: 0; }
 
-/* ⚠️ A FIXED 302px ROW (v16 §1). The author tile's natural size sets it and the chart fills
-   beside it; the row never stretches with the viewport, which is what keeps the columns level. */
+/* ⚠️ A FIXED 302px ROW (v16 §1). The row never stretches with the viewport, which is what keeps
+   the columns level.
+
+   ⚠️ THE AUTHOR TILE IS A SQUARE, and it is square because BOTH numbers are 302 — the same value
+   twice, not two that happen to match. If the row's height ever moves, this width moves with it
+   or the tile silently stops being square. (Squareness is a desktop property: below 1024px the
+   row releases to `height: auto` and the tile takes the width it is given.) */
 .os-midrow {
-  display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 13px;
+  display: grid; grid-template-columns: 302px minmax(0, 1fr); gap: 13px;
   flex: 0 0 auto; height: 302px;
 }
 .os-midrow .os-aut, .os-midrow .os-lead { height: 302px; min-height: 0; }
@@ -151,7 +156,7 @@
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
 @media (max-width: 1360px) {
-  .os-content { grid-template-columns: minmax(0, 1fr) 350px; column-gap: 14px; padding: 16px 22px 22px; }
+  .os-content { grid-template-columns: minmax(0, 1fr) 262px; column-gap: 14px; padding: 16px 22px 22px; }
   .os-greet h1 { font-size: 40px; }
   .os-pills { gap: 6px; }
 }
@@ -159,7 +164,7 @@
   .os-greet h1 { font-size: 34px; }
 }
 @media (max-width: 1200px) {
-  .os-content { grid-template-columns: minmax(0, 1fr) 320px; }
+  .os-content { grid-template-columns: minmax(0, 1fr) 240px; }
   /* the achievement slot is the softest fact — it gives ground first (§11) */
   .os-pills .os-pill:nth-child(2) { display: none; }
 }

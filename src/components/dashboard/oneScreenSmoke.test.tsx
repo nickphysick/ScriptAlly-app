@@ -55,9 +55,9 @@ describe("§1 · the lock", () => {
     expect(releases.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("the grid is v16's: minmax(0,1fr) 383px, capped 1660 and centred", () => {
+  it("the grid is v16's: minmax(0,1fr) 287px, capped 1660 and centred", () => {
     const c = rule(".os-content");
-    expect(c).toContain("grid-template-columns: minmax(0, 1fr) 383px");
+    expect(c).toContain("grid-template-columns: minmax(0, 1fr) 287px");
     expect(c).toContain("max-width: 1660px");
     expect(c).toContain("margin: 0 auto");
   });
@@ -74,11 +74,28 @@ describe("§1 · the lock", () => {
     expect(cssRules).toContain(".os-colM { grid-column: 1; grid-row: 2; }");
   });
 
-  it("the midrow is a FIXED 302px: author 252 beside the chart", () => {
+  /* ⚠️ THE TILE IS SQUARE BECAUSE BOTH NUMBERS ARE THE SAME ONE. Asserted as an identity, not
+     as two literals that happen to agree — if the row height moves and the width does not, this
+     is what says so. */
+  it("the midrow is a FIXED 302px, and the author tile is SQUARE", () => {
     const m = rule(".os-midrow");
-    expect(m).toContain("grid-template-columns: 252px minmax(0, 1fr)");
-    expect(m).toContain("height: 302px");
+    const w = /grid-template-columns: (\d+)px minmax\(0, 1fr\)/.exec(m)?.[1];
+    const h = /height: (\d+)px/.exec(m)?.[1];
+    expect(w, "the midrow must declare an explicit author width").toBeDefined();
+    expect(h, "the midrow must declare an explicit height").toBeDefined();
+    expect(w).toBe(h);
     expect(m).toContain("flex: 0 0 auto");
+  });
+
+  /* the rail narrowed 25% at every step so the chart gets the width; the proportion is the point,
+     so all three steps move together or the page reads differently at each breakpoint */
+  it("the rail's three widths are one 25% reduction, not one hand-tuned number", () => {
+    for (const px of ["287px", "262px", "240px"]) {
+      expect(cssRules, px).toContain(`grid-template-columns: minmax(0, 1fr) ${px}`);
+    }
+    for (const old of ["383px", "350px", "320px"]) {
+      expect(cssRules, old).not.toContain(`minmax(0, 1fr) ${old}`);
+    }
   });
 
   it("⚠️ the rail spaces with MARGINS, not gap — a collapsing panel takes its spacing with it", () => {
