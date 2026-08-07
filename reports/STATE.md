@@ -1,16 +1,29 @@
 # STATE — where the repo stands
 
-**Last updated: 7 August 2026 (fifteenth pass — the Tasks viewport lock, Phase 1 of 5).**
+**Last updated: 7 August 2026 (fifteenth pass — the Tasks viewport pack, COMPLETE).**
 
-## The viewport lock is IN — ⚠️ PHASE 1 ONLY (tasks-viewport pack; report: `reports/tasks-viewport.md`)
+## The Tasks viewport pack is COMPLETE (report: `reports/tasks-viewport.md`)
 
-`c8e6e79`. Suite **3290 | 2 skipped, 209 files**. Refs `design-refs/tasks-viewport.html` +
-`today-redesign.html` (the latter normative for Today, and unused so far).
+`c8e6e79` (P1 lock) → `04e15aa` (the calendar fit) → `12c18ba` (P2 Today) → `d558b49` (P3
+Calendar) → `5cdd71b` (P4 Noteboard) → `5aa51a3` (P5 two doors). Suite **3349 | 2 skipped, 211
+files**, verified in an isolated worktree at the tip.
 
-- **⚠️ PHASES 2–5 ARE NOT BUILT** — Today's redesign, Calendar to standard, Noteboard to standard,
-  and Task settings' second door. Stopped at a phase boundary on budget rather than half-building
-  Today; the report's foot lists what is ready for the next run (the ref's measurements, the
-  base64 illustration to extract, the two derivations to consume, the copy laws).
+- **⚠️ THE CALENDAR FIT NEEDED A SECOND PASS, and the cause was a lesson written that morning.** A
+  bare `1fr` grid row is `minmax(auto, 1fr)` — its floor is min-content, so rows could not shrink
+  — and `.cal-cell` carried `min-height: 104px`. Measured before: rows `12.75px 104px ×6`, 17px
+  past the frame at 1440×900. After: zero overflow from 900px down to 560px. Same law as the
+  board's column measure: **a capped track needs a zero minimum**.
+- **Today reads as a Dashboard sibling** — eyebrow + 32px Playfair + pill stat row (both
+  derivations IMPORTED from dashboardStats), two named regions each with its own zone, no sidebar
+  and no filter control. The plan card stores the DAY, not a boolean, in localStorage.
+- **⚠️ TWO COPY LAWS, ENFORCED IN THE SUITE:** the app reports and never appraises; no private
+  metaphors for functional elements ("the bench" is dead — it is "Up next"). Both in themes.md.
+  Corollary: a suggestion region carries **no count**.
+- **The Calendar's fold derives from the resolved row height** (ResizeObserver; `CAL_CELL_CAP` is
+  the ceiling, one pip always shows) and its facet moved to the tool row — it had no control at
+  all between P1 and P3.
+- **Task settings has two doors, ONE sheet.** The Settings page does not re-render the four
+  behaviours, and the route lands before the event (the sheet is hosted by the To-do page).
 - **⚠️ THE PAGE NEVER SCROLLS.** `.tdb-wrap` was `overflow-y: auto` — inverted AT ITS OWN RULE in
   todo.css (a second single-class rule elsewhere resolves on import order). Designated
   `.tpl-zone`s below the fixed header own all scrolling, hem iff overflow.

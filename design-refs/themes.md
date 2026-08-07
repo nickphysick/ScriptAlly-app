@@ -1399,3 +1399,63 @@ parchment · completed muted. **The butter "dated notes" family is RETIRED**: un
 two-natures law a dated user card IS a task, so the set was structurally empty — a legend entry
 for a thing that cannot exist. It returns only if the model ever records note-ORIGIN on tasks;
 until then no render path, tone or legend row exists for it.
+
+## The Tasks viewport lock, Today's redesign, and two copy laws (tasks-viewport pack, 7 Aug 2026)
+
+### ⚠️ THE PAGE NEVER SCROLLS — the frame is a window
+Every Tasks page is viewport-height. The header block (eyebrow → title → subtitle/stats → tool
+row → hairline) is FIXED; scrolling belongs to designated `.tpl-zone`s below it, each with a fade
+hem at its foot. **A Tasks page that scrolls as a document takes its own controls off screen,
+which is the fault this removes** — you lose the tool row exactly when a long list is the reason
+you needed it.
+
+**It is a CHAIN, not a rule.** `flex: 1; min-height: 0` must hold on every ancestor — fill slot →
+`.spine-root` → `.tdb-wrap` → `.tdb-col.tpl` → `.tpl-cols` → `.tpl-body` → `.tpl-zone`. One link
+at the default `min-height: auto` and the column grows to its content instead of the frame: the
+page scrolls exactly as before and every declaration below it is still correct. jsdom cannot
+verify this; the locks assert each link declares its part, and the browser proves it.
+
+**The hem renders IFF content continues.** A hem over a list that fits fades to nothing and says
+"there is more" when there is not.
+
+**The Calendar answers the lock by COMPRESSING, not scrolling** — the whole month stays on screen.
+Two things make that work and both are load-bearing: `grid-auto-rows: minmax(0, 1fr)` (a bare
+`1fr` is `minmax(auto, 1fr)`, whose floor is the content's min-content height — the rows cannot
+shrink) and NO `min-height` on the cell (a floor on the cell is a floor on its row). **The fold
+threshold derives from the resolved row height**, so a short viewport folds sooner rather than
+shearing a pip in half — and at least one pip always shows, because "+3 MORE" alone tells you a
+day is busy but not what it holds.
+
+**The sidebar is the To-do list's alone.** The other three run full width; the freed width is the
+point (Calendar's cells grow taller before folding, Today's two columns breathe).
+
+### Today reads as a sibling of the Dashboard
+Mono eyebrow (`{DAY DATE} · WEEK {n} OF QUERYING`) over a Playfair title at the **greeting's 32px**
+over a **pill stat row** — rounded hairline pills with Playfair figures, the Dashboard's chip
+grammar. Both eyebrow derivations are the Dashboard's own, **imported rather than reimplemented**:
+a second date format is how two pages come to disagree about what day it is. The stat row
+**replaces the prose subtitle entirely**, and the estimate pill is absent when nothing carries an
+estimate — "Estimated 0 min" states an absence as a figure.
+
+Two named regions — **Today's list** and **Up next** — each with its own zone and hem. Section
+heads are an 18px line icon at 1.8 stroke **on the cap-height** (baseline alignment hangs it below
+the letters), a Playfair title, and a plain sentence beneath, indented to the title's text and
+**never italic**. The action corner is reserved on every row so rows do not shuffle as you read
+down them. **No sidebar and no filter control: a committed list of a few items needs no sifting,
+and the absence is the design.**
+
+### ⚠️ TWO COPY LAWS — enforced in the suites, not just written here
+
+**1. THE APP REPORTS, IT NEVER APPRAISES.** No verdict on a writer's workload — no "well within
+the day", no encouragement, no judgement of how much is on the list. State the figures and stop.
+*(The retired subtitle "One of three cleared — est. 35 min remaining" is the shape to avoid: it
+reads as commentary on how the day is going.)*
+
+**2. NO PRIVATE METAPHORS FOR FUNCTIONAL ELEMENTS.** "The bench" meant something to whoever named
+it and nothing to a writer meeting it for the first time. It is **"Up next"**. The law governs the
+RENDERED LABEL — an internal identifier may keep the old name, because renaming a variable is not
+what stops a reader meeting a metaphor.
+
+**A corollary that keeps catching things:** a suggestion region carries **no count**. A number
+invites you to work through a pile; these are the most pressing few, and the list you committed
+to is the only one with a length worth stating.

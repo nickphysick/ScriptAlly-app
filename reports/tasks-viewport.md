@@ -2,12 +2,9 @@
 
 **Refs committed:** `design-refs/tasks-viewport.html` (todo-fix99) · `design-refs/today-redesign.html`
 (todo-fix107, normative for Today).
-**Phase 1: `c8e6e79`.** Gates green — tsc, production build, **3290 passed | 2 skipped, 209 files**.
-
-**⚠️ PHASES 2–5 ARE NOT BUILT.** I stopped at the phase boundary rather than half-build Today.
-The pack named the clean split as after Phase 2; this is one phase earlier, and the reason is
-budget rather than a problem with the work — see *Where this stopped* at the foot, which lists
-what is ready for the next run.
+**All five phases + one fix:** `c8e6e79` (P1 lock) → `04e15aa` (the calendar fit) → `12c18ba`
+(P2 Today) → `d558b49` (P3 Calendar) → `5cdd71b` (P4 Noteboard) → `5aa51a3` (P5 two doors).
+Verified in an isolated worktree at the tip: tsc green, **3349 passed | 2 skipped, 211 files**.
 
 ---
 
@@ -99,25 +96,57 @@ taller for it); the board's sticky column heads still pin as you scroll; expand 
 housekeeping batch and confirm the scroll position returns where it was; a short Noteboard shows
 **no hem**, a long one does; and the board's card spacing is unchanged from this morning's fix.
 
-## Where this stopped, and what is ready
+## ⚠️ THE CALENDAR FIT — a fix, and a lesson I had already written (`04e15aa`)
 
-**Phase 2 (Today, redesigned)** is the next piece and the largest. Recon done, nothing written:
-- `today-redesign.html` is committed and is normative; its section-head, stat-pill, `.plan` card
-  and two-region measurements are all in its stylesheet.
-- **The illustration is embedded in the ref as a base64 PNG (100×100, 17KB)** and needs extracting
-  to `public/` and rendering through the existing `ArtSlot` — not a new component.
-- Today currently renders its old interior inside one `TplZone`; Phase 2 splits that into the two
-  named regions, each with its own zone.
-- The eyebrow's two derivations (`{DAY DATE}` and `WEEK {n} OF QUERYING`) already exist on the
-  Dashboard — Phase 2 must consume those, not recompute them.
-- The copy laws to enforce in review: **the app reports, never appraises** (no "well within the
-  day", no verdicts on the workload) and **no private metaphors for functional elements** ("the
-  bench" is dead; it is "Up next").
+P1 declared the month should take the remaining height and never scroll. It still scrolled on a
+laptop. Browser measurement against the built CSS found **two** causes:
 
-**Phases 3–5** are unchanged from the pack: Calendar to standard (incl. the tool-row filter that
-closes consequence 1 above), Noteboard to standard, and Task settings' second door (consequence
-2). **themes.md is not yet updated** — the viewport-lock law and Today's grammar go in with
-Phase 2.
+1. **A bare `1fr` grid row is `minmax(auto, 1fr)`.** Its floor is the content's min-content
+   height, so the rows could not shrink whatever the frame did. It is `minmax(0, 1fr)` now — the
+   same law as the board's column measure, which I wrote that morning: *a capped track needs a
+   zero minimum or the cap is the only thing that ever applies.* I used the bare form five hours
+   after stating why not to.
+2. **`.cal-cell` carried `min-height: 104px`.** A floor on the cell is a floor on its row.
+
+| | rows resolved at 1440×900 | overflow |
+|---|---|---|
+| before | `12.75px 104px ×6` | **17px past the frame** |
+| after | `12.75px 101px ×6` | **0** |
+
+Swept downward: zero overflow at every height from **900px to 560px**, week rows compressing
+101px → 44px. The locks carry those numbers and assert the bare `1fr` form is *absent*.
+
+## Phases 2–5
+
+**P2 — Today, redesigned (`12c18ba`).** The Dashboard's grammar, both eyebrow derivations
+imported rather than reimplemented, the stat row replacing the prose subtitle, two named regions
+each with its own zone, no sidebar and no filter control. The plan card stores the **day** rather
+than a boolean — a flag would need an owner to clear it — and carries the one real asset,
+extracted from the ref's base64. **Eight existing locks superseded in place**, each keeping the
+rule it was really protecting.
+
+**P3 — Calendar (`d558b49`).** The fold threshold now derives from the resolved row height via a
+ResizeObserver, with `CAL_CELL_CAP` surviving as the ceiling and at least one pip always showing.
+The facet moved into the tool row — it had no control at all between P1 and here — reading
+`TODO_FACETS` and `facetCounts(liveBoardCards(...))`, so it cannot state a different number from
+the board's. It reaches pips, day lists and the day sheet because all three read `byDay`, derived
+*under* the facet.
+
+**P4 — Noteboard (`5cdd71b`).** Mostly landed with P1; this centred "Read as a column" (a 620px
+column pinned left reads as a masonry that failed) and locked one zone per page so the toggle
+cannot grow a second scroller.
+
+**P5 — Task settings, two doors (`5aa51a3`).** A Tasks section on the Settings page. It does
+**not** re-render the four behaviours — two forms would mean two places to change a default. The
+route lands **before** the event, because the sheet is hosted by the To-do page and dispatching
+first would fire into an unmounted page.
+
+## The copy laws, now enforced
+
+Both are asserted in the suite rather than left as prose: **the app reports, never appraises**
+(the lock sweeps nine appraising phrases) and **no private metaphors for functional elements**
+(the lock scans rendered labels, not identifiers — renaming a variable is not what stops a reader
+meeting a metaphor). Both are written into `design-refs/themes.md`.
 
 ## Deploy
 
