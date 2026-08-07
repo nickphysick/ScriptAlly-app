@@ -304,6 +304,10 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, o
                   <span className="tbd-hint" aria-hidden>OPEN ▸</span>
                   <div className="tbd-t">{c.title}</div>
                   {c.record && <div className="tbd-meta">{c.record}</div>}
+                  {/* ⚠️ THE RETURN CHIP (tasks-audit P1) — one day only, derived from the flag's
+                      expiry. ({snoozedOn} is NOT STORED on the flag, so the chip states the
+                      return rather than inventing a date — flagged in the report.) */}
+                  {c.returnedToday && <div className="tbd-ret">🕐 SNOOZED · BACK TODAY</div>}
 
                   {/* ⚠️ THE SWEEP'S PROGRESS RAIL (P6): n-of-m lives INSIDE the sweep card — the
                       one place the member unit is allowed to show (P5's law). The rail fills only

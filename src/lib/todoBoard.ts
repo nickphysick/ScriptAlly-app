@@ -113,6 +113,7 @@ export interface BoardCard {
   surfaceOffset?: SurfaceOffset;
   surfaced?: boolean; // DERIVED — reached its in-app surfacing window (today >= dueDate − lead) → on Today's list
   tags?: string[]; // tasks-pages P5 — applied tag ids (user cards only; the defs live on the user doc)
+  returnedToday?: true; // tasks-audit P1 — the flag came back TODAY: the chip + the parchment pip, this day only
 }
 
 /**

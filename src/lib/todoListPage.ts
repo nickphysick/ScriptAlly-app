@@ -9,6 +9,7 @@
  * page renders them, it never recomputes them.
  */
 
+import { flagSleeps, flagReturnedToday } from "./taskFlags";
 import { TaskFlag } from "../types";
 import { TodoListId } from "./todoRoutes";
 
@@ -55,10 +56,11 @@ export function foldRows<T>(rows: T[], expanded: boolean, limit = HOUSEKEEPING_F
 }
 
 /** A flag is snoozed when its `snoozedUntil` is still in the future. */
+/** ⚠️ DELEGATES to the return boundary (tasks-audit P1; the choke lives in taskFlags). This
+ *  copy compared INSTANTS while the engine and the chip compared their own ways — nothing owned
+ *  the boundary, and an item due back today could render in two columns at once. */
 export function isSnoozed(flag: Pick<TaskFlag, "snoozedUntil">, nowMs: number): boolean {
-  if (!flag.snoozedUntil) return false;
-  const ms = Date.parse(flag.snoozedUntil);
-  return !Number.isNaN(ms) && ms > nowMs;
+  return flagSleeps(flag, nowMs);
 }
 
 /** The snoozed count for the foot band and the LISTS row — one derivation, both surfaces. */
@@ -82,16 +84,10 @@ export function returnedToday(
   flag: Pick<TaskFlag, "snoozedUntil"> | undefined,
   nowMs: number
 ): boolean {
-  if (!flag?.snoozedUntil) return false;
-  const ms = Date.parse(flag.snoozedUntil);
-  if (Number.isNaN(ms) || ms > nowMs) return false; // still asleep
-  const back = new Date(ms);
-  const now = new Date(nowMs);
-  return (
-    back.getFullYear() === now.getFullYear() &&
-    back.getMonth() === now.getMonth() &&
-    back.getDate() === now.getDate()
-  );
+  /* ⚠️ DELEGATES (tasks-audit P1): this copy held `ms > nowMs → still asleep`, so an item due
+     back at 23:00 was "asleep" all day and "back today" for one hour — while the day-level law
+     says a return DAY that has arrived is a return. One boundary, in taskFlags. */
+  return !!flag && flagReturnedToday(flag, nowMs);
 }
 
 /** "SNOOZED 4 AUG · BACK TODAY" — the chip's text, en-GB, uppercased by the caller's CSS. */

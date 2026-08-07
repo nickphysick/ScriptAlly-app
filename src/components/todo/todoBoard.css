@@ -134,6 +134,15 @@
 .tbd-t { font-size: 13px; color: #2a1a13; padding: 9px 42px 0 9px; line-height: 1.35; }
 .tbd-meta { font-size: 11px; color: #9a8e80; padding: 3px 42px 0 9px; }
 
+/* THE RETURN CHIP (tasks-audit P1) — one quiet mono line in the parchment family, under the
+   meta, for the day the item came back. */
+.tbd-ret {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6.5px; letter-spacing: 0.13em; color: #6b5a4e;
+  background: #f4efe7; border: 1px solid #e6dccc; border-radius: 5px;
+  display: inline-block; padding: 2px 7px; margin: 6px 9px 0;
+}
+
 /* ⚠️ THE SWEEP STACK (P6, ref .stack): two paper edges behind the card — a pile reads as a pile —
    plus the slim progress rail. The edges sit OUTSIDE the card box at negative z, which is exactly
    why the card must not clip. */

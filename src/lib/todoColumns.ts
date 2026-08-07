@@ -24,7 +24,8 @@
 import { BoardCard, AssembledBoard, derivedCopy, assembleBoard, BoardInput } from "./todoBoard";
 import { groupHousekeeping, HkGroup } from "./todoHousekeeping";
 import { TaskFlag, Query, Agent, Manuscript, UserTask, Task } from "../types";
-import { isSnoozed } from "./todoListPage";
+import { flagSleeps, flagReturnedToday, flagMatchesTask } from "./taskFlags";
+import { USER_TASK_FLAG_TYPE } from "./todoBoard";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 import { cardFamily } from "./todoFamily";
 
@@ -133,7 +134,12 @@ export function backOnLabel(snoozedUntilIso: string): string {
 
 export function snoozedCards(input: SnoozedInput): BoardCard[] {
   return input.flags
-    .filter((f) => isSnoozed(f, input.nowMs))
+    /* ⚠️ SLEEPING ONLY — the return boundary's choke (tasks-audit P1): a flag due back today is
+       RETURNED and renders in the lanes, never here. AND NEVER OFFERS: an offer cannot be put
+       away (the standing law offerGuard already enforces on drag) — its snooze flag is the
+       "I need time" QUIET reminder, and the engine deliberately keeps the card on the board.
+       This column picking those flags up is exactly how one offer rendered in two columns. */
+    .filter((f) => flagSleeps(f, input.nowMs) && f.taskType !== "offer_received")
     .map((f) => {
       const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
       const ag = input.agents.find((a) => a.id === (f.agentId ?? q?.agentId));
@@ -255,7 +261,18 @@ export function boardColumns(input: ColumnInput): BoardColumns {
   const today: BoardCard[] = [];
   const todo: BoardCard[] = [];
 
-  for (const c of lanes) {
+  /* ⚠️ THE RETURN CHIP (tasks-audit P1): a lane card whose flag came back TODAY says so, for
+     this one day — a row that reappears with no explanation reads as a bug in a list you
+     thought you had cleared. Derived from the flag's own expiry against the same clock. */
+  const withReturn = (c: BoardCard): BoardCard => {
+    const flag = input.flags.find((f) =>
+      (c.userTaskId && flagMatchesTask(f, USER_TASK_FLAG_TYPE, c.userTaskId))
+      || (!c.userTaskId && c.taskType && c.relatedRecordId && flagMatchesTask(f, c.taskType, c.relatedRecordId)));
+    return flag && flagReturnedToday(flag, input.nowMs) ? { ...c, returnedToday: true } : c;
+  };
+
+  for (const raw of lanes) {
+    const c = withReturn(raw);
     if (c.committedDate === input.today || c.surfaced) { today.push(c); continue; }
     todo.push(c);
   }

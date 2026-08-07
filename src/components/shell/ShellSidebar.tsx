@@ -32,7 +32,6 @@ import {
 } from "../../lib/shellSidebar";
 import { assembleBoard } from "../../lib/todoBoard";
 import { groupHousekeeping, hkGapCount } from "../../lib/todoHousekeeping";
-import { isFlagSuppressing } from "../../lib/taskFlags";
 import { assembleBoardColumns, boardFigures } from "../../lib/todoColumns";
 
 /** The shared active-manuscript key (the Package Workshop / Comps / Manuscripts convention). */

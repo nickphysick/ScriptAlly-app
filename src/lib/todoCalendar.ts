@@ -31,7 +31,7 @@ import { BoardCard, terseDoneLabel } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
 import { agentPrimary } from "./agentDisplay";
 import { CLEARING_ACTIVITY_TYPES } from "./clearedToday";
-import { isSnoozed } from "./todoListPage";
+import { flagSleeps } from "./taskFlags";
 
 export type CalFamily = "agent" | "task" | "snoozed" | "note" | "done";
 
@@ -168,7 +168,9 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
   for (const c of [...input.cols.todo, ...input.cols.today]) {
     const action = cardActionYmd(c, input.queries);
     if (!action) continue;
-    const family = liveFamilyOf(c);
+    /* ⚠️ ON ITS RETURN DAY the pip wears the parchment RETURNED family, not its urgent pink
+       (audit item 6) — today's cell says "this came back", not "this just landed". */
+    const family = c.returnedToday ? "snoozed" as const : liveFamilyOf(c);
     if (action < input.today) {
       /* ⚠️ ROLL-FORWARD: the item renders TODAY; the origin day keeps one marker. */
       day(action).rolled += 1;
@@ -180,7 +182,10 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
 
   // snoozed returns — on the flag's own date (future by construction; expired flags left the set)
   for (const f of input.flags) {
-    if (!isSnoozed(f, input.nowMs) || !f.snoozedUntil) continue;
+    /* sleeping only, never offers — the same two laws the Snoozed column obeys (tasks-audit P1):
+       a returned flag's item is already a lane card (one pip), and an offer's flag is its quiet
+       reminder, not a put-away. */
+    if (!flagSleeps(f, input.nowMs) || !f.snoozedUntil || f.taskType === "offer_received") continue;
     const ymd = isoToYmd(f.snoozedUntil);
     if (!ymd) continue;
     const card = input.cols.snoozed.find((c) => c.key === `snz-${f.id}`);
