@@ -10,8 +10,8 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { QueryStatus, UserPlan } from "../../types";
-import { feedRows, OneScreenRail } from "./OneScreenRail";
+import { ActivityType, QueryStatus, UserPlan } from "../../types";
+import { feedLabel, feedRows, OneScreenRail } from "./OneScreenRail";
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -21,7 +21,9 @@ const daysAgo = (n: number) => new Date(NOW.getTime() - n * 86400000).toISOStrin
 
 const act = (over: Record<string, unknown>) => ({
   id: String(Math.random()), userId: "u", queryId: "q1", manuscriptId: "m1",
-  activityType: "STATUS_CHANGE", description: "", date: daysAgo(1), details: "", ...over,
+  /* ⚠️ the real enum value. This fixture said "STATUS_CHANGE" — not an ActivityType at all — and
+     nothing noticed, because the old feed never read the type. It does now. */
+  activityType: ActivityType.STATUS_CHANGED, description: "", date: daysAgo(1), details: "", ...over,
 }) as any;
 
 const queries = [{ id: "q1", agentId: "a1", status: QueryStatus.QUERIED }] as any[];
@@ -39,7 +41,7 @@ describe("§6 · the 30-day feed", () => {
     expect(rows[0].dayLabel).toMatch(/^\w{3} \d{1,2} \w{3}$/);
   });
 
-  it("agent motion is sage; writer motion is pink; no resultingStatus reads Status changed", () => {
+  it("agent motion is sage; writer motion is pink; the status wins over the type", () => {
     const rows = feedRows([
       act({ id: "a", resultingStatus: QueryStatus.FULL_REQUESTED }),
       act({ id: "b", resultingStatus: QueryStatus.QUERIED, date: daysAgo(2) }),
@@ -47,15 +49,46 @@ describe("§6 · the 30-day feed", () => {
     ], queries, agents, manuscripts, NOW);
     expect(rows[0]).toMatchObject({ pill: "Full requested", sage: true });
     expect(rows[1]).toMatchObject({ pill: "Query sent", sage: false });
+    // no resultingStatus → the TYPE's own label, which for this one really is "Status changed"
     expect(rows[2]).toMatchObject({ pill: "Status changed", sage: false });
   });
 
-  it("the caption is agency · manuscript, and who falls back honestly", () => {
+  /* ⚠️ EVERY EVENT TYPE HAS ITS OWN LABEL. "Status changed" on an agent-added event was the
+     generic fallback covering for a map that only knew query statuses. This enumerates the WHOLE
+     enum, so adding a type without a label fails the suite instead of shipping a wrong pill. */
+  it("⚠️ every ActivityType maps to a label — an unmapped one is a bug, not a fallback", () => {
+    for (const t of Object.values(ActivityType)) {
+      const got = feedLabel({ activityType: t as ActivityType, resultingStatus: undefined });
+      expect(got, `no label for ${t}`).not.toBeNull();
+      expect(got!.label).not.toBe("");
+    }
+    expect(feedLabel({ activityType: "Not A Real Type" as ActivityType, resultingStatus: undefined })).toBeNull();
+  });
+
+  /* ⚠️ THE SUBJECT IS FOUND PER TYPE. Agent and manuscript events are written with queryId: ""
+     DELIBERATELY, so the old single query→agent path sent every one of them to an em dash. */
+  it("⚠️ agent and manuscript events name their own subject, never an em dash", () => {
+    const rows = feedRows([
+      act({ id: "ag", activityType: ActivityType.AGENT_ADDED, queryId: "", resultingStatus: undefined,
+        description: "Added Sophie Dunn at Curtis Vane" }),
+      act({ id: "ms", activityType: ActivityType.MANUSCRIPT_ADDED, queryId: "", manuscriptId: "m1",
+        resultingStatus: undefined, date: daysAgo(2) }),
+    ], queries, agents, manuscripts, NOW);
+    expect(rows[0]).toMatchObject({ pill: "Agent added", who: "Added Sophie Dunn at Curtis Vane" });
+    expect(rows[1]).toMatchObject({ pill: "Manuscript added", who: "Murphy's Day Out" });
+    for (const r of rows) expect(r.who).not.toBe("—");
+  });
+
+  it("the caption is agency · manuscript for query events", () => {
     const rows = feedRows([act({})], queries, agents, manuscripts, NOW);
     expect(rows[0].who).toBe("Sophie Dunn");
     expect(rows[0].caption).toBe("Curtis Vane · Murphy's Day Out");
-    const orphan = feedRows([act({ queryId: "missing" })], queries, agents, manuscripts, NOW);
-    expect(orphan[0].who).toBe("—");
+  });
+
+  /* ⚠️ NO ROW MAY RENDER AN EM DASH WHERE A NAME BELONGS. A query event whose query is gone
+     (deleted) cannot name anyone, so it is DROPPED rather than blanked. */
+  it("⚠️ an unresolvable subject drops the row — it is never rendered blank", () => {
+    expect(feedRows([act({ queryId: "missing" })], queries, agents, manuscripts, NOW)).toEqual([]);
   });
 });
 

@@ -15,7 +15,7 @@
  * or the viewport dropping below the two-column breakpoint. No timer, no mouse-leave.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
+import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { goalBlockGap, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
@@ -52,7 +52,50 @@ const PILL_FOR: Partial<Record<QueryStatus, { label: string; sage: boolean }>> =
   [QueryStatus.NO_RESPONSE]: { label: "Closed", sage: false },
 };
 
-/** §6: the last 30 days of the activity log, newest first, shaped for the cardlet timeline. */
+/**
+ * ⚠️ EVERY EVENT TYPE GETS ITS OWN LABEL. "Status changed" was being shown for an agent being
+ * ADDED — the generic fallback covering for a map that only knew about query statuses. An
+ * unmapped type is a BUG, not something to paper over: `feedLabel` returns null for one and the
+ * row is dropped, and a test enumerates the whole enum so adding a type without a label fails
+ * the suite rather than shipping a mislabelled row.
+ */
+const TYPE_PILL: Record<string, { label: string; sage: boolean }> = {
+  [ActivityType.STATUS_CHANGED]: { label: "Status changed", sage: false },
+  [ActivityType.QUERY_SENT]: { label: "Query sent", sage: false },
+  [ActivityType.MATERIALS_SENT]: { label: "Materials sent", sage: false },
+  [ActivityType.NUDGE_SENT]: { label: "Nudge sent", sage: false },
+  [ActivityType.OFFER_ACCEPTED]: { label: "Offer accepted", sage: true },
+  [ActivityType.OFFER_DECLINED]: { label: "Offer declined", sage: false },
+  [ActivityType.AGENT_ADDED]: { label: "Agent added", sage: false },
+  [ActivityType.AGENT_UPDATED]: { label: "Agent updated", sage: false },
+  [ActivityType.AGENT_DELETED]: { label: "Agent removed", sage: false },
+  [ActivityType.MANUSCRIPT_ADDED]: { label: "Manuscript added", sage: false },
+  [ActivityType.MANUSCRIPT_UPDATED]: { label: "Manuscript updated", sage: false },
+  [ActivityType.MANUSCRIPT_DELETED]: { label: "Manuscript removed", sage: false },
+};
+
+/** Which family an event belongs to decides HOW its subject is found. */
+const AGENT_TYPES = new Set<string>([ActivityType.AGENT_ADDED, ActivityType.AGENT_UPDATED, ActivityType.AGENT_DELETED]);
+const MS_TYPES = new Set<string>([ActivityType.MANUSCRIPT_ADDED, ActivityType.MANUSCRIPT_UPDATED, ActivityType.MANUSCRIPT_DELETED]);
+
+/** The pill for an event: its resulting STATUS where it has one (more specific), else its type. */
+export const feedLabel = (a: Pick<Activity, "activityType" | "resultingStatus">): { label: string; sage: boolean } | null =>
+  (a.resultingStatus ? PILL_FOR[a.resultingStatus] : undefined) ?? TYPE_PILL[a.activityType] ?? null;
+
+/**
+ * ⚠️ THE SUBJECT IS FOUND PER TYPE, not down one universal path. The single
+ * `queryId → query → agent` lookup was the root cause: agent and manuscript events are written
+ * with `queryId: ""` DELIBERATELY (they are not query-scoped), so every one of them fell through
+ * to an em dash and a "Status changed" label.
+ *
+ * ⚠️ NO ROW MAY RENDER AN EM DASH WHERE A NAME BELONGS. A row whose subject cannot be resolved is
+ * DROPPED, not blanked — and `feedLabel` returning null drops it too.
+ *
+ * ⚠️ Agent events resolve through their DESCRIPTION, used whole and never parsed: `Activity`
+ * carries no `agentId`, and the description is the sentence the writer's own action produced
+ * ("Added Sophie Dunn at Curtis Vane"). Using it entire is honest; picking a name out of it with
+ * a regex would be the string-parsing this codebase forbids elsewhere.
+ */
 export const feedRows = (
   activities: Activity[],
   queries: Query[],
@@ -61,27 +104,44 @@ export const feedRows = (
   now: Date,
 ): FeedRow[] => {
   const from = now.getTime() - 30 * 86400000;
-  return activities
-    .map((a) => ({ a, t: new Date(a.date).getTime() }))
+  const rows: FeedRow[] = [];
+
+  for (const { a, t } of activities
+    .map((x) => ({ a: x, t: new Date(x.date).getTime() }))
     .filter((x) => Number.isFinite(x.t) && x.t >= from && x.t <= now.getTime())
-    .sort((x, y) => y.t - x.t)
-    .map(({ a, t }) => {
-      const d = new Date(t);
+    .sort((x, y) => y.t - x.t)) {
+    const pill = feedLabel(a);
+    if (!pill) continue; // an unmapped type is a bug — never a generic row
+
+    let who = "";
+    let caption = "";
+    if (AGENT_TYPES.has(a.activityType)) {
+      who = a.description.trim();
+    } else if (MS_TYPES.has(a.activityType)) {
+      who = manuscripts.find((m) => m.id === a.manuscriptId)?.title?.trim() || a.description.trim();
+    } else {
       const q = queries.find((x) => x.id === a.queryId);
       const agent = q ? agents.find((x) => x.id === q.agentId) : undefined;
-      const ms = manuscripts.find((x) => x.id === a.manuscriptId);
-      const pill = a.resultingStatus ? PILL_FOR[a.resultingStatus] : undefined;
-      return {
-        id: a.id,
-        dayLabel: `${WD[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`,
-        pill: pill?.label ?? "Status changed",
-        sage: pill?.sage ?? false,
-        time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
-        who: agent?.name || agent?.agency || "—",
-        caption: [agent?.agency, ms?.title].filter(Boolean).join(" · "),
-        dotStatus: a.resultingStatus ?? null,
-      };
+      who = (agent?.name || agent?.agency || "").trim();
+      const msTitle = manuscripts.find((m) => m.id === a.manuscriptId)?.title;
+      caption = [agent?.agency, msTitle].filter(Boolean).join(" · ");
+    }
+    /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
+    if (!who) continue;
+
+    const d = new Date(t);
+    rows.push({
+      id: a.id,
+      dayLabel: `${WD[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`,
+      pill: pill.label,
+      sage: pill.sage,
+      time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
+      who,
+      caption,
+      dotStatus: a.resultingStatus ?? null,
     });
+  }
+  return rows;
 };
 
 /* ── the rail ── */
