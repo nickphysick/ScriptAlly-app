@@ -803,6 +803,12 @@
   --sh-postit: 0 2px 3px rgba(58, 42, 26, 0.10), 0 7px 14px -4px rgba(58, 42, 26, 0.18);
 
   --listw: 334px; --gut: 12px; --maxw: 1520px;
+  /* THE TWO COLUMNS' HEAD BAND. The list head and the pane's toolbar row are different
+     components that must close on ONE hairline, and the row beneath each must start on one
+     line — so both read these, and neither restates the number. --f12-headgap is also the
+     hero card's top margin (set from the token in Queries.tsx), which is what makes the
+     search field and the hero align rather than merely happen to. */
+  --f12-headh: 48px; --f12-headgap: 20px;
   --r-sm: 6px; --r-md: 9px; --r-lg: 12px; --r-xl: 16px;
   --f12-mono: 'JetBrains Mono', monospace; --f12-serif: 'Playfair Display', serif; --f12-body: 'Inter', sans-serif;
 

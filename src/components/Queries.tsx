@@ -31,7 +31,7 @@ import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, listHeadLabel } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -1404,6 +1404,10 @@ export const Queries: React.FC<{
     ...(needsTasks ? [{ key: "tasks", label: "HAS OPEN TASKS", remove: () => setNeedsTasks(false) }] : []),
   ];
   const activeFilterCount = activeFilterChips.length;
+  /* Is the list narrowed? Both doors count — the filter popovers AND either search (the list's
+     own field or the shell's global one), since matchesFilters reads both. Declared here, well
+     above the return, deliberately: the render reads it. */
+  const listNarrowed = activeFilterCount > 0 || (listSearch || searchQuery || "").trim() !== "";
 
   const OPEN_STATUSES_F12 = STATUS_SORT_ORDER.slice(0, 7);
   const CLOSED_STATUSES_F12 = STATUS_SORT_ORDER.slice(7);
@@ -2795,8 +2799,11 @@ export const Queries: React.FC<{
                 over a 1px #ece5d9 hairline). The search and the Filter/Sort pills keep their own
                 row beneath it, wiring untouched. */}
             <div className="f12-lhtitle">
-              <h2>Your queries</h2>
-              <span className="f12-lhcount">{sortedList.length === queries.length ? `${queries.length}` : `${sortedList.length} of ${queries.length}`}</span>
+              {/* ONE sentence, not a label beside a figure: the count IS the label. The
+                  "Showing" form is keyed on the CONTROLS being active, never on the two counts
+                  differing — a filter that happens to match everything still says it is
+                  filtering. See listHeadLabel. */}
+              <h2>{listHeadLabel(sortedList.length, queries.length, listNarrowed)}</h2>
             </div>
             <div className="f12-lhead">
               <div className="f12-lsearch">
@@ -3100,7 +3107,7 @@ export const Queries: React.FC<{
                     : heroAction.kind === "mark-sent" ? (heroAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
                     : "Record response";
                   return (
-                    <div className="f12-hero" style={{ margin: "20px 20px 0", flexShrink: 0 }}>
+                    <div className="f12-hero" style={{ margin: "var(--f12-headgap) 20px 0", flexShrink: 0 }}>
                       <span className="f12-bigav" aria-hidden="true">{initials}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>

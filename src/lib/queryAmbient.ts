@@ -274,3 +274,20 @@ export function commandBarStatus(a: AmbientStatus): { bold?: string; text: strin
   }
   return null; // closed / Offer — no ambient status
 }
+
+/**
+ * The query list's head. ONE sentence carrying its own count — "21 queries" at rest, "Showing
+ * 12 of 21 queries" while the list is narrowed.
+ *
+ * ⚠️ `narrowed` is the state of the CONTROLS, not `shown !== total`. A filter that happens to
+ * match every query still reads "Showing 21 of 21 queries": the sentence describes what the
+ * list is doing, and a control silently reading as "off" because its result was total is how
+ * you end up staring at a filtered list that says it isn't one.
+ *
+ * The noun agrees with the TOTAL, which is the only number present in both forms — so a lone
+ * query reads "1 query" and "Showing 1 of 1 query", never "1 queries".
+ */
+export function listHeadLabel(shown: number, total: number, narrowed: boolean): string {
+  const noun = total === 1 ? "query" : "queries";
+  return narrowed ? `Showing ${shown} of ${total} ${noun}` : `${total} ${noun}`;
+}

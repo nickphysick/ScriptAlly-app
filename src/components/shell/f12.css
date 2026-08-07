@@ -83,7 +83,7 @@
 /* ⚠️ THE TOOLBAR IS A PANE ROW NOW (Query Centre P3), not a page-width band. It no longer
    centres itself in the content column or carries the page gutters — it sits inside the pane,
    its left edge flush with the cards below, and closes with a hairline. */
-.f12-ctl { flex: none; display: flex; align-items: center; height: 48px; width: 100%; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
+.f12-ctl { flex: none; display: flex; align-items: center; height: var(--f12-headh); width: 100%; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
 .f12-zone-read { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
 .f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
 .f12-ctl .f12-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
@@ -534,12 +534,20 @@
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.
    ⚠️ The ref draws a 2px ink rule — that is the AGENT LIST's grouping treatment, and the live
    To-do grammar wins here (reuse, don't approximate). */
-.f12-lhtitle { flex: none; display: flex; align-items: baseline; gap: 9px; padding-bottom: 8px; border-bottom: 1px solid #ece5d9; margin-bottom: 10px; }
+/* ⚠️ THE HAIRLINE IS SHARED WITH THE PANE'S TOOLBAR — height, not padding, is what holds it.
+   The head used to be content-height + 8px of padding, so its rule sat wherever the type
+   happened to land (~31px) while the toolbar's sat at 47px: two rules, one frame, 16px apart.
+   Both now take --f12-headh, so the rule lands at the same y whatever the label says. */
+.f12-lhtitle { flex: none; display: flex; align-items: center; height: var(--f12-headh); border-bottom: 1px solid #ece5d9; margin-bottom: var(--f12-headgap); }
 .f12-lhtitle h2 { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
-.f12-lhtitle .f12-lhcount { font-family: var(--f12-mono); font-size: 10px; color: var(--muted); }
 /* list head — search takes the remaining width; Filter/Sort(/Group) triggers sit to its right */
 .f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
-.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; }
+/* ⚠️ THE ROW'S CONTROLS ARE ONE HEIGHT — the field matches the pills (36px), it is not merely
+   centred against them. At its own 34px, `align-items: center` set it 1px BELOW the Filter/Sort
+   pills and the hero card opposite (104 vs 103, browser-measured): a difference too small to
+   look deliberate and too real to be nothing. Equal heights align the tops AND the bottoms,
+   which no amount of margin arithmetic can do while the heights differ. */
+.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: 36px; }
 .f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
 .f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
 .f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
