@@ -61,6 +61,7 @@ import { TodoSideContainer } from "./TodoSideContainer";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
 import { MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
+import { useTagWrites } from "./useTagWrites";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
@@ -1049,7 +1050,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             tagCounts={tagCounts}
             selectedTags={tagSel}
             onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
-            onClearTags={() => setTagSel([])}
+            /* board-optimise P2: ONE clear resets both narrowings — a half-reset that did not
+               say so was the fault. */
+            onClearAll={() => { setFacet("all"); setTagSel([]); }}
+            onCreateTag={(tag) => void createTagDef(tag)}
           />
           }
         >
@@ -1762,18 +1766,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return sortBoardCards(applyFacet(raw, facet), sort);
   }
 
-  /* tasks-pages P5 — THE TAG WRITES, shared by every mount (the ⋯ sheet, the dock's item
-     surface, the composer's save). Toggling writes the task; creating writes the user doc's
-     definitions AND applies to the item in hand. An emptied list detaches the field. */
-  async function applyTagToggle(taskId: string, current: string[] | undefined, id: string) {
-    const next = toggleTagSel(current ?? [], id);
-    try { await updateUserTask(taskId, { tags: next.length ? next : null }); }
-    catch { flash("Couldn’t change the tags — try again?"); }
-  }
-  async function createTagDef(tag: TagDef) {
-    try { await updateUserProfile({ tags: [...userTags, tag] }); }
-    catch { flash("Couldn’t create the tag — try again?"); }
-  }
+  /* tasks-pages P5 — the tag writes; board-optimise P2 moved the pair into useTagWrites so the
+     four Tasks pages share ONE copy (see the hook's head note). */
+  const { createTagDef, applyTagToggle } = useTagWrites(flash);
 
   /* ⚠️ THE ⋯ VERBS, PERFORMED — every one an EXISTING primitive, exactly as the drags are (board
      fixes II P1: the menu grew its per-kind and per-column shapes in `cardMenu`; this switch just

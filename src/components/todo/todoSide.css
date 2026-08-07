@@ -47,8 +47,14 @@
 .tds-row:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
 /* The same parchment fill the app sidebar uses for a selected row — one active grammar, so a
    filter selection and a nav selection are recognisably the same kind of state. */
-.tds-row.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
+/* ⚠️ THE ACTIVE ROW CARRIES AN INK INSET BAR BESIDE ITS FILL (board-optimise P2; ref
+   board-optimised.html `.pi.on`). The parchment fill alone reads as a hover that stuck — a
+   temperature, not a state. The 2px ink edge is the app sidebar's own selected grammar, so a
+   filter selection and a nav selection are recognisably the same KIND of thing. */
+.tds-row.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; box-shadow: inset 2px 0 0 var(--shell-ink); }
 .tds-row:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+/* an active row keeps its bar while focused — the ring stacks, it does not replace */
+.tds-row.on:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus), inset 2px 0 0 var(--shell-ink); }
 
 .tds-sw { width: 9px; height: 9px; border-radius: 3px; flex: none; }
 .tds-lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -75,15 +81,20 @@
 
 .tds-grow { flex: 1; min-height: 0; }
 
+/* ⚠️ PINNED AT THE FOOT ABOVE A HAIRLINE (board-optimise P2; ref `.tset`). The rule line is what
+   makes it read as the panel's FLOOR rather than one more row that happened to sort last, and
+   `margin-top:auto` is what holds it there whatever the tag list's length. Square, deliberately:
+   a rounded pill riding a full-width rule reads as a button that missed its row. */
 .tds-foot {
   display: flex;
   align-items: center;
   gap: 9px;
-  height: 34px;
-  margin-top: 8px;
+  height: 36px;
+  margin-top: auto;
   padding: 0 10px;
   border: 0;
-  border-radius: 8px;
+  border-top: 1px solid var(--shell-hair);
+  border-radius: 0;
   background: transparent;
   font: inherit;
   font-size: 12.5px;
@@ -151,3 +162,17 @@
   color: #7c3a2a; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; padding: 0;
 }
 .tds-tagnone { font-size: 11px; color: #a5988c; line-height: 1.55; padding: 2px 9px 6px; }
+
+/* ── the inline ＋ New tag row + its picker (board-optimise P2) ── */
+.tds-newrow { color: var(--shell-ink-faint, #a5988c); font-size: 12px; }
+.tds-newrow:hover { color: var(--shell-ink); }
+.tds-newsw {
+  background: none !important; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; line-height: 1; color: inherit;
+}
+.tds-newtag { padding: 4px 6px 2px; }
+.tds-newtagx {
+  margin-top: 6px; background: transparent; border: 0; font: inherit; font-size: 10px;
+  color: var(--burg, #7c3a2a); text-decoration: underline; text-underline-offset: 2px;
+  cursor: pointer; padding: 0 4px;
+}

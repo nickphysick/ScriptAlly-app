@@ -22,11 +22,12 @@
  * flex:none column beside a flex:1 main) — a pattern, not a shared component: there is no in-page
  * sidebar component in the repo to reuse.
  */
-import React from "react";
+import React, { useState } from "react";
 import { Settings2 } from "lucide-react";
 import { TODO_FACETS, TodoFacetId } from "../../lib/todoBoardSort";
 import { TAG_PALETTE } from "../../lib/todoFamily";
 import { TagDef } from "../../types";
+import { TagPicker } from "./TagPicker";
 import "./todoSide.css";
 
 export interface TodoSideContainerProps {
@@ -45,18 +46,35 @@ export interface TodoSideContainerProps {
   tagCounts?: Map<string, number>;
   selectedTags?: string[];
   onToggleTag?: (id: string) => void;
-  onClearTags?: () => void;
+  /* ⚠️ ONE CLEAR FOR BOTH NARROWINGS (board-optimise P2). It used to sit on the TAGS cap and
+     reset tags alone — so a page narrowed by Urgent AND #synopsis needed two different gestures
+     in two different places to get back, and neither said it was only half a reset. It sits
+     beside FILTERS now (the first narrowing you meet), renders only while SOMETHING is active,
+     and resets the facet and the tags together. */
+  onClearAll?: () => void;
+  /** The inline ＋ New tag row's create path — the SAME TagPicker create the composer uses. */
+  onCreateTag?: (tag: TagDef) => void;
 }
 
 export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
   counts, active, onSelect, onOpenTaskSettings, onNoteboard,
-  tags = [], tagCounts, selectedTags = [], onToggleTag, onClearTags,
-}) => (
+  tags = [], tagCounts, selectedTags = [], onToggleTag, onClearAll, onCreateTag,
+}) => {
+  /* The inline create row opens the ONE picker rather than a second create field — creation
+     happens where tagging happens (tasks-pages P5), and this is simply another door to it. */
+  const [creating, setCreating] = useState(false);
+  const narrowed = active !== "all" || selectedTags.length > 0;
+  return (
   <aside className="tds" aria-label="Filters">
     {/* ⚠️ FILTERS, NOT LISTS (board+dock P2) — renamed because the rows now DO what the heading
         says. "Lists" named five things you could look at; these four narrow what the board shows,
         all four columns at once, one active at a time. */}
-    <div className="tds-cap">Filters</div>
+    <div className="tds-cap tds-tagcap">
+      Filters
+      {narrowed && onClearAll && (
+        <button type="button" className="tds-tagclear" onClick={onClearAll}>Clear</button>
+      )}
+    </div>
     <div className="tds-group" role="group" aria-label="Filters">
       {TODO_FACETS.map((l) => {
         const on = active === l.id;
@@ -92,12 +110,7 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
     {/* ⚠️ THE REAL TAGS LIST (tasks-pages P5) — the "Coming soon" box is retired. Multi-select
         rows (additive with FILTERS above), usage counts derived live, and a clear control the
         moment any are active. No tags yet = one quiet line pointing at where creation lives. */}
-    <div className="tds-cap tds-tagcap">
-      Tags
-      {selectedTags.length > 0 && onClearTags && (
-        <button type="button" className="tds-tagclear" onClick={onClearTags}>Clear</button>
-      )}
-    </div>
+    <div className="tds-cap">Tags</div>
     {tags.length === 0 ? (
       <div className="tds-tagnone">Tag notes and tasks as you write them — they gather here.</div>
     ) : (
@@ -123,6 +136,30 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
       </div>
     )}
 
+    {/* ⚠️ THE INLINE ＋ New tag ROW (board-optimise P2) — creation reachable from the place the
+        tags are READ, not only from an item you happen to be tagging. It opens the ONE
+        TagPicker's create path; a second create field here would be a second set of rules about
+        what a label may be. */}
+    {onCreateTag && (
+      creating ? (
+        <div className="tds-newtag">
+          <TagPicker
+            compact
+            tags={tags}
+            selected={[]}
+            onToggle={(id) => { onToggleTag?.(id); setCreating(false); }}
+            onCreate={(tag) => { onCreateTag(tag); setCreating(false); }}
+          />
+          <button type="button" className="tds-newtagx" onClick={() => setCreating(false)}>Done</button>
+        </div>
+      ) : (
+        <button type="button" className="tds-row tds-newrow" onClick={() => setCreating(true)}>
+          <span className="tds-sw tds-newsw" aria-hidden="true">＋</span>
+          <span className="tds-lbl">New tag</span>
+        </button>
+      )
+    )}
+
     <div className="tds-grow" />
 
     <button type="button" className="tds-foot" onClick={onOpenTaskSettings}>
@@ -130,4 +167,5 @@ export const TodoSideContainer: React.FC<TodoSideContainerProps> = ({
       Task settings
     </button>
   </aside>
-);
+  );
+};

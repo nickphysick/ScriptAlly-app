@@ -19,6 +19,7 @@
 import React, { useMemo, useState } from "react";
 import { Play, Plus, Undo2 } from "lucide-react";
 import { TodoSideContainer } from "./TodoSideContainer";
+import { useTagWrites } from "./useTagWrites";
 import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import { TodoFacetId, facetCounts, applyFacet } from "../../lib/todoBoardSort";
@@ -51,6 +52,8 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
     addUserTask, updateUserTask,
   } = useScriptAllyDb();
   const { toast, flash, dismiss, pause, resume } = useTodoToast();
+  // board-optimise P2 — the shared tag-write pair
+  const { createTagDef } = useTagWrites(flash);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -171,7 +174,10 @@ export const TodoTodayPage: React.FC<TodoTodayPageProps & { onNavigatePath?: (p:
             tagCounts={tagUsageCounts(userTasks)}
             selectedTags={tagSel}
             onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
-            onClearTags={() => setTagSel([])}
+            /* board-optimise P2: ONE clear resets both narrowings — a half-reset that did not
+               say so was the fault. */
+            onClearAll={() => { setFacet("all"); setTagSel([]); }}
+            onCreateTag={(tag) => void createTagDef(tag)}
           />
         }
       >

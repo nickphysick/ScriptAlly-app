@@ -20,6 +20,8 @@ import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TasksPageLayout, TplGrow } from "./TasksPageLayout";
 import { TodoSideContainer } from "./TodoSideContainer";
+import { useTagWrites } from "./useTagWrites";
+import { useTodoToast } from "./useTodoToast";
 import { FocusFlow } from "./FocusFlow";
 import { useScriptAllyDb } from "../../lib/db";
 import { localYMD } from "../../lib/shellSidebar";
@@ -50,6 +52,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   } = useScriptAllyDb();
   const now = Date.now();
   const today = localYMD(now);
+  /* board-optimise P2 — the page gained tag CREATION (the sidebar's ＋ New tag row), so it needs
+     a failure surface: the same toast every other Tasks page uses, never a silent catch. */
+  const { toast, flash, dismiss, pause, resume } = useTodoToast();
+  const { createTagDef } = useTagWrites(flash);
   const [facet, setFacet] = useState<TodoFacetId>("all");
   const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   const [view, setView] = useState<"month" | "week">("month");
@@ -147,7 +153,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
               tagCounts={tagUsageCounts(userTasks)}
               selectedTags={tagSel}
               onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
-              onClearTags={() => setTagSel([])}
+              /* board-optimise P2: ONE clear resets both narrowings — a half-reset that did not
+                 say so was the fault. */
+              onClearAll={() => { setFacet("all"); setTagSel([]); }}
+              onCreateTag={(tag) => void createTagDef(tag)}
             />
           }
         >
@@ -216,6 +225,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="tdb-toast" role="status" onMouseEnter={pause} onMouseLeave={resume}>
+          {toast.msg}
+          {toast.action && (
+            <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismiss(); }}>
+              {toast.action.label}
+            </button>
+          )}
         </div>
       )}
 

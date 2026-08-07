@@ -30,6 +30,7 @@ import { useTodoToast } from "./useTodoToast";
 import { useScriptAllyDb } from "../../lib/db";
 import { noteMenu, MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
+import { useTagWrites } from "./useTagWrites";
 import { toggleTagSel } from "../../lib/todoTags";
 import { TAG_PALETTE } from "../../lib/todoFamily";
 import { spellNumber } from "../../lib/todoColumns";
@@ -136,15 +137,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
     }, 8000);
   };
 
-  const applyTagToggle = async (taskId: string, current: string[] | undefined, id: string) => {
-    const next = toggleTagSel(current ?? [], id);
-    try { await updateUserTask(taskId, { tags: next.length ? next : null }); }
-    catch { flash("Couldn’t change the tags — try again?"); }
-  };
-  const createTagDef = async (tag: TagDef) => {
-    try { await updateUserProfile({ tags: [...userTags, tag] }); }
-    catch { flash("Couldn’t create the tag — try again?"); }
-  };
+  // board-optimise P2 — the shared pair (one copy for all four Tasks pages)
+  const { createTagDef, applyTagToggle } = useTagWrites(flash);
 
   const onMenuPick = (item: MenuLeaf) => {
     if (!menu) return;
