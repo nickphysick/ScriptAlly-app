@@ -82,7 +82,14 @@ service cloud.firestore {
         // Muted housekeeping rules — optional list of rule keys, bounded.
         && (!data.keys().hasAny(['mutedTaskRules']) || (data.mutedTaskRules is list && data.mutedTaskRules.size() <= 64))
         // The To-do board tour's seen-stamp (ISO timestamp; the hasSeenTour pattern).
-        && (!data.keys().hasAny(['tourSeenAt']) || (data.tourSeenAt is string && data.tourSeenAt.size() <= 64));
+        && (!data.keys().hasAny(['tourSeenAt']) || (data.tourSeenAt is string && data.tourSeenAt.size() <= 64))
+        // Querying goals (one-screen dashboard §6) — ONLY the target is stored; progress derives.
+        // Absent-or-valid: an int target 1–999, a period from the closed set.
+        && (!data.keys().hasAny(['goalTarget']) || (data.goalTarget is int && data.goalTarget >= 1 && data.goalTarget <= 999))
+        && (!data.keys().hasAny(['goalPeriod']) || (data.goalPeriod is string && (data.goalPeriod == 'quarter' || data.goalPeriod == 'month' || data.goalPeriod == 'year')))
+        // One-screen dashboard tour (§12): completion stamp + dismissal (the hasSeenTour pattern).
+        && (!data.keys().hasAny(['tourCompletedAt']) || (data.tourCompletedAt is string && data.tourCompletedAt.size() <= 64))
+        && (!data.keys().hasAny(['tourDismissed']) || data.tourDismissed is bool);
     }
 
     function isValidManuscript(data, userId) {
@@ -473,7 +480,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed'])
       );
 
       // ROUTE: Manuscripts

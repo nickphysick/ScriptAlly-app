@@ -48,6 +48,17 @@ export interface User {
   mutedTaskRules?: string[];
   // tasks-pages P4/P5: the user's tag definitions (see TagDef).
   tags?: TagDef[];
+  // Querying goals (one-screen dashboard §6): ONLY the target is stored — progress derives from
+  // dateSent at read time (lib/oneScreen.goalState). Absent === no goal set (the day-one CTA).
+  // NOTE: rules-gated — writes are silently denied until the firestore.rules revision carrying
+  // these keys is deployed (the affectedKeys gotcha).
+  goalTarget?: number;
+  goalPeriod?: "quarter" | "month" | "year";
+  // One-screen dashboard tour (§12): completion stamp (set on Finish OR Skip — skipping counts)
+  // and the explicit dismissal. Day-7 chip visibility is DERIVED from the auth account's creation
+  // time, never stored. Rules-gated like the goal fields.
+  tourCompletedAt?: string;
+  tourDismissed?: boolean;
   // The To-do board's first-visit spotlight tour has run (ISO timestamp; set on Done OR skip — the
   // hasSeenTour pattern). Absent === never seen; the ? popover's "Replay the tour" ignores it.
   // NOTE: in the committed user-update allowlist (firestore.rules); live behaviour tracks the
