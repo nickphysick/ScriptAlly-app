@@ -29,9 +29,12 @@ import { MoreHorizontal } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily,
-  isSweepCard, wipLine, columnSlice,
+  isSweepCard, wipLine, BOARD_COL_CAP,
 } from "../../lib/todoColumns";
 import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
+import {
+  FoldState, readFold, writeFold, toggleFold, reflowPlan, splitLanes, reflowHeadLabel,
+} from "../../lib/todoFold";
 import { PortalMenu } from "./PortalMenu";
 import { ArtSlot } from "./ArtSlot";
 import "./todoBoard.css";
@@ -41,6 +44,10 @@ export interface TodoBoardProps {
   /** The writer's own "a good day is" (board-optimise P5) — the WIP line's number. Defaulted so
    *  every existing caller and fixture keeps the behaviour it had. */
   goodDay?: number;
+  /** ⚠️ A STARTING fold, for a caller that has one (and for tests to state a board's shape
+   *  directly). The component still OWNS the preference from here — it reads localStorage when
+   *  this is absent and writes every flip — so there is exactly one persistence path, not two. */
+  foldOverride?: FoldState;
   /** The board asks; the page performs. Every one of these is an EXISTING verb. */
   onPlan: (card: BoardCard, plan: DropPlan, from: TodoColumnId, to: TodoColumnId) => void;
   /** Opening a card — the dock's door (board fixes II, P2). */
@@ -92,12 +99,21 @@ const BoardCardMenu: React.FC<{
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, onOpen, onVerb }) => {
+export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, foldOverride, onPlan, onOpen, onVerb }) => {
   const [dragging, setDragging] = useState<{ card: BoardCard; from: TodoColumnId } | null>(null);
   const [over, setOver] = useState<TodoColumnId | null>(null);
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   /* P6 — "+ N MORE" expansion, per column. Session view memory only. */
   const [grown, setGrown] = useState<Partial<Record<TodoColumnId, true>>>({});
+  /* ⚠️ THE FOLD IS A UI PREFERENCE (board-optimise P6) — persisted in localStorage beside the
+     rail pin, never on the user doc and never near the board's own schema. It says nothing about
+     any card; only about what this reader wants to look at. */
+  const [fold, setFold] = useState<FoldState>(() => foldOverride ?? readFold());
+  const flip = (id: TodoColumnId) => setFold((f) => { const n = toggleFold(f, id); writeFold(n); return n; });
+  /* ⚠️ THE REFLOW PLAN — freed width claimed by ONE column (the leftmost that is actually
+     overflowing), at most two lanes. Derived from the same columns the board renders, so a
+     folded rail and a reflowed neighbour cannot disagree about what is on the board. */
+  const plan = reflowPlan(columns as Record<TodoColumnId, BoardCard[]>, fold, TODO_COLUMNS.map((c) => c.id));
   /* P6 — the completion ring: keys newly arrived in Done wear the sage ring for ~600ms. */
   const [rung, setRung] = useState<Set<string>>(new Set());
   const prevDone = useRef<Set<string> | null>(null);
@@ -213,12 +229,40 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
       {TODO_COLUMNS.map((col) => {
         const cards = columns[col.id];
         const isOver = over === col.id && dragging !== null && dragging.from !== col.id;
-        const { visible, more } = columnSlice(cards, !!grown[col.id]);
+        const folded = !!fold[col.id];
+        const reflowed = plan.columnId === col.id ? plan.lanes : 1;
+        /* the cap RISES with the lanes — two lanes hold two capfuls before the fold returns.
+           "+N more" survives after both fill: lanes halve the scroll, they do not abolish it. */
+        const cap = BOARD_COL_CAP * reflowed;
+        const grownHere = !!grown[col.id];
+        const visible = grownHere || cards.length <= cap ? cards : cards.slice(0, cap);
+        const more = grownHere ? 0 : Math.max(0, cards.length - cap);
         const wip = col.id === "today" ? wipLine(cards.length, goodDay) : null;
+        const headFigures = plan.columnId === col.id ? reflowHeadLabel(plan) : null;
+
+        /* ⚠️ THE FOLDED RAIL (ref board-features.html): 44px, the Playfair name rotated, the
+            count in a pill, ▸ restores. It stays a real button with the column's own label, so
+            the keyboard and a screen reader meet a named control rather than a decoration. */
+        if (folded) {
+          return (
+            <section key={col.id} className="tbd-col tbd-folded" aria-label={col.label}>
+              <button type="button" className="tbd-railbtn" aria-expanded={false} onClick={() => flip(col.id)}>
+                <span className="tbd-railchev" aria-hidden>▸</span>
+                <span className="tbd-railn">{cards.length}</span>
+                <span className="tbd-railname">{col.label}</span>
+              </button>
+            </section>
+          );
+        }
+
         return (
           <section
             key={col.id}
-            className="tbd-col"
+            /* ⚠️ THE SPAN IS THE REFLOW (board-optimise P6): the column claims the freed grid
+               track, and ONE head with ONE ink rule stretches across both lanes — the newspaper
+               section spanning its columns, which is this board's own editorial grammar. */
+            className={`tbd-col${reflowed === 2 ? " tbd-span" : ""}`}
+            style={reflowed === 2 ? { gridColumn: "span 2" } : undefined}
             aria-label={col.label}
             onDragOver={(e) => { e.preventDefault(); setOver(col.id); }}
             onDragLeave={() => setOver((c) => (c === col.id ? null : c))}
@@ -233,8 +277,12 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
                 sticky, with a short ground gradient beneath so cards slide under it rather than
                 colliding with it. The tinted column wells are GONE; the rule is the column. */}
             <div className={`tbd-fh${col.id === "done" ? " done" : ""}`}>
+              {/* the fold control sits in the head, where the column names itself */}
+              <button type="button" className="tbd-foldb" aria-expanded aria-label={`Fold ${col.label}`} onClick={() => flip(col.id)}>▾</button>
               <h3>{col.label}</h3>
               <span className="tbd-cn">{col.id === "done" ? `${cards.length} TODAY` : cards.length}</span>
+              {/* the gain, stated: "SHOWING 8 · WAS 4" */}
+              {headFigures && <span className="tbd-showing">{headFigures}</span>}
               {/* ⚠️ THE WIP LINE IS ADVICE, NEVER A BLOCK (P6): it changes tone past five; the
                   cap itself lives in the commit primitive, not here. */}
               {wip && <span className="tbd-wip">{wip}</span>}
@@ -245,7 +293,7 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
                 (the copy register): for Snoozed the answer is "ask you for a date". */}
             {isOver && <div className="tbd-ghost">{col.dropLabel}</div>}
 
-            <div className="tbd-body">
+            <div className={`tbd-body${reflowed === 2 ? " tbd-body2" : ""}`}>
               {cards.length === 0 && (
                 <div className="tbd-empty">
                   {/* ⚠️ ART · DONE-EMPTY (board-optimise P3) — the Done column before the first
@@ -265,7 +313,9 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
                 </div>
               )}
 
-              {visible.map((c) => {
+              {splitLanes(visible, reflowed).map((lane, li) => (
+              <div key={li} className="tbd-lane">
+              {lane.map((c) => {
                 const sweep = isSweepCard(c);
                 const fig = sweep ? sweepFigure(c) : null;
                 return (
@@ -356,6 +406,8 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
                 </article>
                 );
               })}
+              </div>
+              ))}
 
               {/* ⚠️ THE FADE HEM (P6, ref .fade): where more cards remain, the column foot fades
                   into the ground above "+ N MORE" — the fold says there is more, and the button

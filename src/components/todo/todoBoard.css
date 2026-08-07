@@ -32,6 +32,56 @@
 
 .tbd-col { position: relative; min-width: 0; }
 
+/* ── COLLAPSIBLE COLUMNS + REFLOW (board-optimise P6; refs board-features + board-reflow) ── */
+
+/* ⚠️ THE FOLDED RAIL: 44px, the name rotated up the rail, the count in a pill, ▸ to restore. The
+   ref's own measure — narrow enough to be plainly "put away", wide enough to stay a target. */
+.tbd-folded { width: 44px; }
+.tbd-railbtn {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 44px; min-height: 190px; padding: 10px 0 14px;
+  background: #fbf8f3; border: 1px solid #efe8dc; border-radius: 10px;
+  cursor: pointer; font: inherit; color: #8a7a6c;
+}
+.tbd-railbtn:hover { background: #f7f2e9; color: #2a1a13; }
+.tbd-railchev { font-size: 10px; line-height: 1; }
+.tbd-railn {
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px;
+  background: #f2ede7; border-radius: 99px; padding: 2px 6px; color: #6b5a4e;
+}
+/* the name reads UP the rail — Playfair, as the head it stands in for */
+.tbd-railname {
+  font-family: "Playfair Display", Georgia, serif; font-size: 14px; font-weight: 700; color: #2a1a13;
+  writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
+}
+
+/* the fold control in an open column's head */
+.tbd-foldb {
+  background: transparent; border: 0; padding: 0 2px 0 0; margin-right: 2px;
+  font-size: 9px; color: #c4b6a6; cursor: pointer; line-height: 1;
+}
+.tbd-fh:hover .tbd-foldb { color: #6b5a4e; }
+
+/* the head's own figures — the gain, stated */
+.tbd-showing {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px; letter-spacing: 0.1em; color: #b3a394; font-weight: 400;
+}
+
+/* ⚠️ TWO LANES UNDER ONE HEAD. The body becomes a two-track grid; the head above it is NOT in
+   this grid, so its ink rule stretches the full span — the newspaper section spanning its
+   columns. Reading order is top-to-bottom then the next lane (splitLanes), so the derived sort
+   survives; a row-major split would interleave the ranking and quietly lie about it. */
+.tbd-body2 { display: grid; grid-template-columns: repeat(2, minmax(0, var(--tbd-col-w))); gap: 20px; align-items: start; }
+.tbd-lane { display: flex; flex-direction: column; min-width: 0; }
+
+/* the collapse back, on the shared curve at the shared duration */
+.tbd-span { transition: none; }
+.tbd-body2 > .tbd-lane { animation: tbdLaneIn 220ms cubic-bezier(.2, .7, .3, 1); }
+@keyframes tbdLaneIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+
+
 /* ⚠️ THE EDITORIAL HEAD (ref .fh): Playfair 17 over the 2px ink rule — SAGE on Done — sticky,
    with a short ground gradient beneath so cards slide under it instead of colliding. */
 .tbd-fh {
@@ -260,6 +310,8 @@
   .tbd-card, .tbd-hint, .tbd-more { transition: none; }
   .tbd-card:hover { transform: none; border-color: #c9bba9; }
   .tbd-ring { animation: none; opacity: 0; }
+  /* P6: the lanes appear without the slide — the fold still works, it simply does not travel */
+  .tbd-body2 > .tbd-lane { animation: none; }
 }
 
 /* ⚠️ THE NARROW STEPS KEEP THE CAP AND LOSE NOTHING: minmax(0, …) means a column may still
