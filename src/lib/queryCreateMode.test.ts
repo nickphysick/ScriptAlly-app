@@ -101,7 +101,7 @@ describe("the create pane follows the live idiom, not the ref's espresso", () =>
   /* Save MOVED to the command bar with the takeover (see createCommandBar.test.ts) — so the
      treatment is asserted where the button now lives, not where it used to. */
   it("Save is the soft-pink house primary; there is no dark-pill CTA", () => {
-    expect(queries, "the Save primary lost its house treatment").toMatch(/f12-btn-pri qh-lit[\s\S]{0,300}Save query/);
+    expect(queries, "the Save primary lost its house treatment").toMatch(/f12-btn-pri"[\s\S]{0,300}Save query/);
     expect(pane, "the pane must not grow a second Save").not.toContain("f12-btn-pri");
     expect(pane).not.toContain("#3a2d1f");
     expect(queries).not.toContain("#3a2d1f");

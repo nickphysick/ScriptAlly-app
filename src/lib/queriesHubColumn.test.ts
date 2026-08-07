@@ -26,8 +26,19 @@ const block = (selector: string): string => {
 };
 
 describe("Queries hub · the header block sits in the SHARED content column", () => {
-  // The header block = the page-header seat, the action row, and the active-filter chips.
-  for (const sel of [".f12-hd2", ".f12-ctl", ".f12-chips"]) {
+  it("the toolbar is a PANE row, deliberately outside the shared column (P3)", () => {
+    const ctl = block(".f12-ctl");
+    expect(ctl, ".f12-ctl is missing").not.toBe("");
+    expect(ctl, "the toolbar went back to being a page-width band").not.toContain("var(--sa-col-max)");
+    expect(ctl, "it should close with a hairline inside the pane").toContain("border-bottom");
+  });
+
+  /* The header block = the page-header seat and the active-filter chips.
+     ⚠️ .f12-ctl LEFT THIS SET in Query Centre P3, deliberately: the toolbar is a row inside the
+     reading pane now — flush with the cards beneath it — not a page-width band straddling the
+     list, so binding it to the shared column would be wrong. The header seat still reads the
+     column, and that is what keeps Query Centre lining up with the agent list. */
+  for (const sel of [".f12-hd2", ".f12-chips"]) {
     it(`${sel} reads the shared column tokens, not the workspace cap`, () => {
       const rule = block(sel);
       expect(rule, `${sel} is missing from f12.css`).not.toBe("");

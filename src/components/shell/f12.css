@@ -80,7 +80,10 @@
    than centring them mid-bar — they were reading closer to the breadcrumb than the panes.
    v4 P1: the --listw left zone is retired (it locked the bar to the list pane, which now lives
    in a different, wider column) — the verbs simply right-align in the header column, per the ref. */
-.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 15px var(--sa-col-gut) 3px; }
+/* ⚠️ THE TOOLBAR IS A PANE ROW NOW (Query Centre P3), not a page-width band. It no longer
+   centres itself in the content column or carries the page gutters — it sits inside the pane,
+   its left edge flush with the cards below, and closes with a hairline. */
+.f12-ctl { flex: none; display: flex; align-items: center; height: 48px; width: 100%; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
 .f12-zone-read { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 2px; min-width: 0; }
 .f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
 .f12-ctl .f12-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
@@ -232,7 +235,7 @@
 /* ── CREATE-MODE COMMAND BAR (ref qdb-focus-spotlight.html) — the record actions are replaced
    by this while a draft is open. Same .f12-ctl seat, so the bar neither moves nor changes height
    as it swaps. The two buttons carry qh-lit and stay above the scrim. */
-.f12-ctl-create { align-items: center; gap: 12px; }
+.f12-ctl-create { align-items: center; gap: 12px; }  /* same pane seat — the takeover swaps the row's contents, not its box */
 .qcb-ctx { display: inline-flex; align-items: center; gap: 9px; flex: none; font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); }
 .qcb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; }
 /* Advisory copy, so it yields first: it truncates rather than pushing the buttons, and below

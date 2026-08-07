@@ -2708,111 +2708,6 @@ export const Queries: React.FC<{
         ) : (
         <>
 
-        {/* ── F12 CONTROL BAR (ref queries-hub-v14.html .ctl): two zones locked by --listw —
-            left = FILTER + SORT pill triggers (nothing else); right = the query actions as
-            QUIET buttons (no filled button in this bar), PDF + Delete right-aligned. The old
-            masthead + hub-grammar filter bar and the foot control-row cards are retired. ── */}
-        {(() => {
-          const sel = !!(activeQuery && activeAgent && activeMs);
-          const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
-          const ctrlAction = status ? getPrimaryAction(status) : null;
-          const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
-          const waitingOnAgent = ctrlAction?.ballHolder === "agent";
-          const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
-
-          /* CREATE MODE TAKES THE BAR (ref qdb-focus-spotlight.html). The record actions are
-             REPLACED, not disabled: none of them applies to a query that doesn't exist yet, and
-             a row of dead buttons reads as breakage. Save and Cancel keep the very handlers the
-             retired pane footer called — this is a relocation, not a rewire. */
-          if (creating) {
-            const ready = createDraft ? draftReady(createDraft) : false;
-            return (
-              <div className="f12-ctl f12-ctl-create">
-                <span className="qcb-ctx"><span className="qcb-dot" aria-hidden="true" />New query</span>
-                {/* The requirement line doubles as the error slot — the same job it did in the
-                    footer, so a failed save still explains itself rather than vanishing. */}
-                <span className={`qcb-req${createError ? " qcb-err" : ""}`}>
-                  {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
-                </span>
-                <span style={{ flex: 1 }} />
-                <span className="qcb-esc">Esc to cancel</span>
-                <button type="button" className="f12-btn-sec qh-lit" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
-                <button type="button" className="f12-btn-pri qh-lit" onClick={saveCreate} disabled={!ready || createSaving}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                  {createSaving ? "Saving…" : "Save query"}
-                </button>
-              </div>
-            );
-          }
-
-          return (
-            <div className="f12-ctl">
-              {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
-                  column: it existed to lock the bar to the list pane, which now sits in the wider
-                  workspace column below. The verbs simply right-align in the header column (ref). */}
-
-              {/* Verbs, then the link group, then danger. The contextual primary lives on the
-                  reading pane's record header. */}
-              <div className="f12-zone-read">
-                <span className="f12-popwrap" style={{ display: "inline-flex" }}>
-                  <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
-                    View tasks
-                    {taskCount > 0 && <span className="f12-cnt">{taskCount}</span>}
-                  </button>
-                  {isTasksOpen && activeQuery && (
-                    <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
-                  )}
-                </span>
-                <button type="button" className="f12-act" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                  Edit
-                </button>
-                <button type="button" className="f12-act" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
-                  Nudge
-                </button>
-                <button ref={closeTriggerRef} type="button" className="f12-act" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M9 12h6" /></svg>
-                  Mark closed
-                </button>
-                {/* link group — pushed right by margin-left:auto */}
-                <div className="f12-grp-links">
-                  <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>
-                    Agent
-                  </button>
-                  <button type="button" className="f12-act" disabled title="Coming soon — jump to the manuscript">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>
-                    Manuscript
-                  </button>
-                </div>
-                <span className="f12-divv2" aria-hidden="true" />
-                <div className="f12-popwrap">
-                  <button ref={moreTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="menu" aria-expanded={isMoreOpen} onClick={() => setIsMoreOpen(o => !o)} title="More actions">⋯</button>
-                  <F12Menu
-                    open={isMoreOpen}
-                    onClose={() => setIsMoreOpen(false)}
-                    style={moreMenuStyle}
-                    ariaLabel="More query actions"
-                    items={[
-                      {
-                        label: isGeneratingPDF ? "Generating…" : "Download as PDF",
-                        disabled: isGeneratingPDF,
-                        icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
-                        onClick: () => handleDownloadPDF(),
-                      },
-                    ]}
-                  />
-                </div>
-                <button type="button" className="f12-act f12-del" disabled={!sel} onClick={askDeleteQuery} title="Delete this query">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
-                  Delete
-                </button>
-              </div>
-            </div>
-          );
-        })()}
 
         {/* Active filters — removable pink chips on the oat beneath the bar (panes never resize). */}
         {activeFilterChips.length > 0 && (
@@ -3048,6 +2943,117 @@ export const Queries: React.FC<{
                It used to override to --paper (#faf6f0), a cream that made this one surface warmer
                than the rest of the app — REMOVED rather than painted over. */
             style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            {/* ── THE TOOLBAR NOW LIVES IN THE PANE (ref query-centre-final.html) — first row of
+                the pane column, flush with the cards beneath it, no longer a page-wide bar
+                straddling the list. Create mode replaces it IN PLACE (its own branch inside the
+                same IIFE), so the takeover swaps one pane row rather than a page bar. ── */}
+            {/* ── F12 CONTROL BAR (ref queries-hub-v14.html .ctl): two zones locked by --listw —
+                left = FILTER + SORT pill triggers (nothing else); right = the query actions as
+                QUIET buttons (no filled button in this bar), PDF + Delete right-aligned. The old
+                masthead + hub-grammar filter bar and the foot control-row cards are retired. ── */}
+            {(() => {
+              const sel = !!(activeQuery && activeAgent && activeMs);
+              const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
+              const ctrlAction = status ? getPrimaryAction(status) : null;
+              const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
+              const waitingOnAgent = ctrlAction?.ballHolder === "agent";
+              const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
+
+              /* CREATE MODE TAKES THE BAR (ref qdb-focus-spotlight.html). The record actions are
+                 REPLACED, not disabled: none of them applies to a query that doesn't exist yet, and
+                 a row of dead buttons reads as breakage. Save and Cancel keep the very handlers the
+                 retired pane footer called — this is a relocation, not a rewire. */
+              if (creating) {
+                const ready = createDraft ? draftReady(createDraft) : false;
+                return (
+                  <div className="f12-ctl f12-ctl-create">
+                    <span className="qcb-ctx"><span className="qcb-dot" aria-hidden="true" />New query</span>
+                    {/* The requirement line doubles as the error slot — the same job it did in the
+                        footer, so a failed save still explains itself rather than vanishing. */}
+                    <span className={`qcb-req${createError ? " qcb-err" : ""}`}>
+                      {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
+                    </span>
+                    <span style={{ flex: 1 }} />
+                    <span className="qcb-esc">Esc to cancel</span>
+                    {/* No qh-lit: these sit INSIDE the pane, which is itself lit, so a second raise was dead
+                    weight the moment the toolbar moved in here. */}
+                <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
+                    <button type="button" className="f12-btn-pri" onClick={saveCreate} disabled={!ready || createSaving}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                      {createSaving ? "Saving…" : "Save query"}
+                    </button>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="f12-ctl">
+                  {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
+                      column: it existed to lock the bar to the list pane, which now sits in the wider
+                      workspace column below. The verbs simply right-align in the header column (ref). */}
+
+                  {/* Verbs, then the link group, then danger. The contextual primary lives on the
+                      reading pane's record header. */}
+                  <div className="f12-zone-read">
+                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                      <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
+                        View tasks
+                        {taskCount > 0 && <span className="f12-cnt">{taskCount}</span>}
+                      </button>
+                      {isTasksOpen && activeQuery && (
+                        <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
+                      )}
+                    </span>
+                    <button type="button" className="f12-act" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                      Edit
+                    </button>
+                    <button type="button" className="f12-act" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                      Nudge
+                    </button>
+                    <button ref={closeTriggerRef} type="button" className="f12-act" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M9 12h6" /></svg>
+                      Mark closed
+                    </button>
+                    {/* link group — pushed right by margin-left:auto */}
+                    <div className="f12-grp-links">
+                      <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>
+                        Agent
+                      </button>
+                      <button type="button" className="f12-act" disabled title="Coming soon — jump to the manuscript">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>
+                        Manuscript
+                      </button>
+                    </div>
+                    <span className="f12-divv2" aria-hidden="true" />
+                    <div className="f12-popwrap">
+                      <button ref={moreTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="menu" aria-expanded={isMoreOpen} onClick={() => setIsMoreOpen(o => !o)} title="More actions">⋯</button>
+                      <F12Menu
+                        open={isMoreOpen}
+                        onClose={() => setIsMoreOpen(false)}
+                        style={moreMenuStyle}
+                        ariaLabel="More query actions"
+                        items={[
+                          {
+                            label: isGeneratingPDF ? "Generating…" : "Download as PDF",
+                            disabled: isGeneratingPDF,
+                            icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
+                            onClick: () => handleDownloadPDF(),
+                          },
+                        ]}
+                      />
+                    </div>
+                    <button type="button" className="f12-act f12-del" disabled={!sel} onClick={askDeleteQuery} title="Delete this query">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
             {createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>

@@ -23,8 +23,14 @@ const rule = (selector: string): string => {
 };
 /** The create branch of the command bar. */
 const bar = (): string => {
+  // Re-anchored (Query Centre P3): the bar moved INTO the pane, so it is indented deeper and the
+  // old closing anchor over-ran into the normal toolbar. End at the branch's own return instead.
   const at = queries.indexOf('className="f12-ctl f12-ctl-create"');
-  return at < 0 ? "" : queries.slice(at, queries.indexOf("</div>\n            );", at));
+  if (at < 0) return "";
+  // Bounded by the NORMAL toolbar that follows it — indentation moved when the bar went into
+  // the pane, so an indentation-based anchor over-ran into the rest of the page.
+  const end = queries.indexOf('className="f12-ctl"', at);
+  return queries.slice(at, end > at ? end : at + 4000);
 };
 
 describe("the pane footer is GONE — one home per action", () => {
@@ -82,8 +88,16 @@ describe("the handlers are the SAME ones — relocation, not rewire", () => {
     expect(queries).toContain("const ready = createDraft ? draftReady(createDraft) : false;");
   });
 
-  it("both buttons sit above the scrim", () => {
-    expect(bar().match(/qh-lit/g)?.length ?? 0).toBe(2);
+  /* SUPERSEDED (Query Centre P3): the bar moved inside the reading pane, and the pane is itself
+     lit — so the buttons' own z-raise became dead weight and was REMOVED rather than left in
+     place. Verified in the browser: both render above the scrim at zIndex:auto, carried by the
+     pane's lift. What matters now is that no dead raising crept back. */
+  it("the buttons no longer carry their own raise — the lit pane carries them", () => {
+    // Comments stripped: the bar carries a comment SAYING "No qh-lit", and an assertion about
+    // the code must not be able to match prose about the code.
+    const code = bar().replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(code).not.toContain("qh-lit");
+    expect(queries, "a dead raise came back").not.toContain("f12-btn-pri qh-lit");
   });
 });
 
