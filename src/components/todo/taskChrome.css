@@ -1,0 +1,49 @@
+/**
+ * taskChrome — the tool-row controls SHARED by more than one Tasks page (tasks-consolidation P2
+ * follow-up, 9 Aug).
+ *
+ * ⚠️ WHY THIS FILE EXISTS. `.cal-nav` / `.cal-viewmenu` / `.nb-tagwrap` were declared in
+ * `todoCalendar.css` and `todoNoteboard.css` — the stylesheets of the two pages that happened to
+ * use them first. When the tag filter returned to the To-do list's tool row, that page imported
+ * neither: in a production build every sheet is bundled into one file, so it would have LOOKED
+ * fine; in dev, where Vite injects a module's CSS only when the module is loaded, the control
+ * would render unstyled on the one page that had not mounted a sibling first. A rule that works
+ * only because some other page happened to be visited is not a rule.
+ *
+ * ⚠️ THE CLASS NAMES KEEP THEIR ORIGINAL PREFIXES ON PURPOSE. Renaming `.cal-nav` to something
+ * neutral would touch the Calendar's and the Noteboard's markup and their locks for a cosmetic
+ * gain. The rules moved; the vocabulary did not.
+ *
+ * ⚠️ ONE CONTROL, ONE GRAMMAR. The tag filter is single-select `#All ▾` on both pages it appears
+ * on — same trigger, same menu, same wording — because two tag filters that looked different
+ * would be two things for a writer to learn about one idea.
+ */
+
+/* the tool row's neutral control: the Calendar's month/view nav, the Noteboard's read-as-column
+   toggle, and both tag filters */
+.cal-nav {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px;
+  border: 1px solid #e8dfd1; border-radius: 8px; padding: 0 11px;
+  color: #4d4238; font-size: 11.5px; background: #fff; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+}
+.cal-nav:hover { background: #faf6f0; }
+
+/* set away from its default — the shared active treatment (the agent list's toolbar law) */
+.cal-nav.on { background: #f2ede7; color: #2b2118; }
+
+.cal-viewwrap { position: relative; display: inline-flex; }
+.nb-tagwrap { position: relative; display: inline-flex; }
+
+.cal-viewmenu {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(58, 28, 20, 0.16); padding: 5px; min-width: 130px;
+}
+.cal-viewmenu button {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 12px;
+  background: transparent; border: 0; padding: 8px 10px; border-radius: 7px;
+  color: #4d4238; cursor: pointer;
+}
+.cal-viewmenu button:hover { background: #f7f2e9; }
+.cal-viewmenu button[aria-current="true"] { font-weight: 700; color: #2b2118; }

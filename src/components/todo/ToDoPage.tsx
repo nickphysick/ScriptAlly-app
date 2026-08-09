@@ -71,7 +71,7 @@ import { useTagWrites } from "./useTagWrites";
 import { todoPrefs } from "../../lib/todoPrefs";
 /* `toggleTagSel` still serves the COMPOSER's draft (tags are untouched by the sidebar's
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
-import { tagUsageCounts, toggleTagSel } from "../../lib/todoTags";
+import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
@@ -93,6 +93,8 @@ import {
 import { ToastAction, useTodoToast } from "./useTodoToast";
 import "./todo.css";
 import "./todoGroups.css";
+/* the tag filter’s trigger + menu — the SHARED control, one home (see taskChrome.css) */
+import "./taskChrome.css";
 // The relocated control surfaces' styles + tokens (the chip bench + the Pro sticker) — the
 // hardback-spine SHELL itself retired in the shell follow-up; its stylesheet survives trimmed.
 import "../shell/todoShell.css";
@@ -302,12 +304,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      you a third of itself is the worst way to learn you had set one. */
   const [sort, setSort] = useState<TodoSortId>(DEFAULT_TODO_SORT);
   const [sortOpen, setSortOpen] = useState(false);
-  /* ⚠️ THE FILTERS FACET AND THE TAG SELECTION ARE RETIRED WITH THE SIDEBAR (tasks-consolidation
-     P2). The facet asked "what KIND of thing is this" — which is the question the five groups now
-     answer permanently and in the open, so a control that narrowed to one kind was a way of
-     hiding four of them. The tag NARROWING went with it and is a real loss, flagged in
-     reports/STATE.md rather than quietly absorbed: tags themselves are untouched (the composer,
-     the ⋯ sheet and the Noteboard's own filter all still write and read them). */
+  /* ⚠️ THE FILTERS FACET IS RETIRED WITH THE SIDEBAR (tasks-consolidation P2), AND THE TAG
+     NARROWING CAME BACK (P2 follow-up, Nick's call). The facet asked "what KIND of thing is
+     this" — the question the five groups now answer permanently and in the open, so a control
+     that narrowed to one kind was a way of hiding four. A TAG is a different question entirely:
+     it is the writer's own axis, it exists app-wide, and a page that cannot filter by one is a
+     dead end. It returns as the Noteboard's OWN control — `#All ▾`, single-select, the same
+     `.cal-nav` + `.cal-viewmenu` grammar — because two tag filters that looked different would
+     be two things to learn. */
+  const [tagSel, setTagSel] = useState<string | null>(null);
+  const [tagOpen, setTagOpen] = useState(false);
   const [tagsFor, setTagsFor] = useState<BoardCard | null>(null);
   // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
   // animation to the just-collapsed batch (never a page-load flash). P3: the expansion
@@ -1352,6 +1358,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               )}
             </span>
 
+            {/* ⚠️ THE TAG NARROWING — THE NOTEBOARD'S OWN CONTROL, NOT A LOOKALIKE (P2 follow-up).
+                Same markup, same `.cal-nav` trigger and `.cal-viewmenu` menu, same single-select
+                `#All ▾` vocabulary; only the set it narrows differs. Rendered ONLY where there is
+                something to pick — a filter over an empty vocabulary is a control over nothing,
+                which is the fault this same pass retired `goodDay` for. */}
+            {userTags.length > 0 && (
+              <span className="nb-tagwrap">
+                <button type="button" className={`cal-nav${tagSel ? " on" : ""}`} aria-haspopup="menu" aria-expanded={tagOpen}
+                  onClick={() => setTagOpen((v) => !v)}>
+                  #{tagSel ? (userTags.find((t) => t.id === tagSel)?.label ?? tagSel) : "All"} ▾
+                </button>
+                {tagOpen && (
+                  <div className="cal-viewmenu" role="menu">
+                    <button type="button" role="menuitem" aria-current={tagSel === null}
+                      onClick={() => { setTagSel(null); setTagOpen(false); }}>#All</button>
+                    {userTags.map((t) => (
+                      <button key={t.id} type="button" role="menuitem" aria-current={tagSel === t.id}
+                        onClick={() => { setTagSel(t.id); setTagOpen(false); }}>
+                        #{t.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </span>
+            )}
+
             {/* The Add was orphaned mid-page; it belongs with the page's other instruments. */}
             <TplGrow />
             <button type="button" className="tdb-addb" onClick={() => openComposer("task")}>
@@ -1808,8 +1840,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.)
    */
   function narrowCards(cards: BoardCard[]): BoardCard[] {
-    const hit = search.trim() ? cards.filter((c) => matchesSearch(c, search, sctx)) : cards;
-    return sortBoardCards(hit, sort);
+    const searched = search.trim() ? cards.filter((c) => matchesSearch(c, search, sctx)) : cards;
+    /* ⚠️ ONE TAG PREDICATE, SHARED WITH THE CALENDAR AND THE NOTEBOARD — `matchesTags` takes a
+       SET, so the single selection is passed as a set of one rather than growing a second
+       comparison. Derived cards carry no tags, so any selection narrows to the writer's own
+       content: the honest answer, since only user content can be tagged. */
+    const tagged = tagSel ? searched.filter((c) => matchesTags(c.tags, [tagSel])) : searched;
+    return sortBoardCards(tagged, sort);
   }
 
   /** The queue the dock walks — the list's own order, narrowing respected. */

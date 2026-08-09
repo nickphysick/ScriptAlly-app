@@ -310,9 +310,17 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
        the tool row's single exception and is asserted in tasksLayout.test.tsx */
     const search = nbCss.slice(nbCss.indexOf(".nb-search {"));
     expect(search.slice(0, search.indexOf("}"))).toContain("height: 32px");
-    const calCssNav = readFileSync(join(here, "todoCalendar.css"), "utf8");
-    const nav = calCssNav.slice(calCssNav.indexOf(".cal-nav {"));
+    /* ⚠️ RE-ANCHORED (P2 follow-up, 9 Aug): `.cal-nav` moved to `taskChrome.css`. It is the tool
+       row's SHARED control — the Calendar's nav, the Noteboard's toggle and both tag filters —
+       and it was declared in one consumer's stylesheet only because that consumer used it first,
+       which would have left the To-do list's tag filter unstyled in dev. */
+    const chrome = readFileSync(join(here, "taskChrome.css"), "utf8");
+    const nav = chrome.slice(chrome.indexOf(".cal-nav {"));
     expect(nav.slice(0, nav.indexOf("}"))).toContain("height: 32px");
+    for (const sheet of ["todoCalendar.css", "todoNoteboard.css"]) {
+      const s = readFileSync(join(here, sheet), "utf8");
+      expect(s.includes(".cal-nav {"), `${sheet} must not re-declare the shared control`).toBe(false);
+    }
   });
 });
 

@@ -38,6 +38,7 @@ import { spellNumber } from "../../lib/todoColumns";
 import { isNoteTask as isNote } from "../../lib/todoBoard";
 import { UserTask, TagDef } from "../../types";
 import "./tasksLayout.css";
+import "./taskChrome.css";
 import "./todoNoteboard.css";
 
 export interface TodoNoteboardPageProps {

@@ -72,26 +72,10 @@
 }
 
 /* the tool row's stepper set — the ref's .sortb grammar */
-.cal-nav {
-  display: inline-flex; align-items: center; gap: 6px; height: 32px;
-  border: 1px solid #e8dfd1; border-radius: 8px; padding: 0 11px;
-  color: #4d4238; font-size: 11.5px; background: #fff; font-weight: 600;
-  font-family: inherit; cursor: pointer;
-}
-.cal-nav:hover { background: #faf6f0; }
-.cal-viewwrap { position: relative; display: inline-flex; }
-.cal-viewmenu {
-  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
-  background: #fff; border: 1px solid #e2d8c8; border-radius: 10px;
-  box-shadow: 0 12px 32px rgba(58, 28, 20, 0.16); padding: 5px; min-width: 130px;
-}
-.cal-viewmenu button {
-  display: block; width: 100%; text-align: left; font: inherit; font-size: 12px;
-  background: transparent; border: 0; padding: 8px 10px; border-radius: 7px;
-  color: #4d4238; cursor: pointer;
-}
-.cal-viewmenu button:hover { background: #f7f2e9; }
-.cal-viewmenu button[aria-current="true"] { font-weight: 700; color: #2b2118; }
+/* ⚠️ `.cal-nav` / `.cal-viewwrap` / `.cal-viewmenu` MOVED TO `taskChrome.css` (P2 follow-up).
+   They are the tool row's shared controls, and they were declared here only because the Calendar
+   used them first — so the To-do list, which imports neither page sheet, would have rendered its
+   tag filter unstyled in dev while looking correct in a bundled build. One home, three importers. */
 
 .cal-legend {
   display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px;

@@ -106,18 +106,30 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
     expect(toggleTagSel(["a", "b"], "a")).toEqual(["b"]);
   });
 
-  it("the Calendar composes its narrowing in ONE place — never a per-region second copy", () => {
-    /* ⚠️ THE TO-DO LIST'S CLAUSE WENT WITH ITS SIDEBAR (tasks-consolidation P2, 9 Aug): the tag
-       NARROWING is retired on that page, so it has no composition to assert. The tags themselves
-       are untouched — the composer writes them, the ⋯ sheet edits them, the Calendar and the
-       Noteboard still filter by them — and the pure `matchesTags` above is still the ONE
-       predicate, which is what stops two surfaces disagreeing about what a selection means.
-       ⚠️ THE LOSS IS REAL AND IS FLAGGED, NOT ABSORBED: reports/STATE.md carries it as a carried
-       consequence for Nick's call, because the consolidated page's tool row has no tag control. */
+  it("every narrowing surface composes through the SAME predicate — never a per-page second copy", () => {
+    /* ⚠️ THE TO-DO LIST'S TAG FILTER LEFT WITH THE SIDEBAR AND CAME BACK TO THE TOOL ROW
+       (tasks-consolidation P2 and its follow-up, 9 Aug). What did NOT change either time is this:
+       one pure `matchesTags`, which is what stops two surfaces disagreeing about what a selection
+       means. The list's selection is SINGLE (the Noteboard's `#All ▾` vocabulary), so it is passed
+       as a set of one rather than growing a second comparison for one-versus-many. */
     const listPage2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    expect(listPage2).not.toContain("matchesTags(");
+    expect(listPage2).toContain("matchesTags(c.tags, [tagSel])");
     const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
     expect(cal).toContain("matchesTags(c.tags, tagSel)");
+  });
+
+  it("⚠️ THE LIST'S TAG CONTROL IS THE NOTEBOARD'S OWN, not a lookalike", () => {
+    /* Same trigger class, same menu class, same `#All ▾` wording and the same single-select
+       shape. Two tag filters that looked different would be two things to learn about one idea. */
+    const listPage2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    const nb = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
+    for (const token of ['className="nb-tagwrap"', 'className="cal-viewmenu"', '#All']) {
+      expect(listPage2, `list: ${token}`).toContain(token);
+      expect(nb, `noteboard: ${token}`).toContain(token);
+    }
+    /* and it renders only where there is something to pick — a filter over an empty vocabulary
+       is a control over nothing, the same fault this pass retired `goodDay` for */
+    expect(listPage2).toContain("{userTags.length > 0 && (");
   });
 
   it("the sidebar's TAGS section is REAL: rows with counts, multi-select, a clear control", () => {

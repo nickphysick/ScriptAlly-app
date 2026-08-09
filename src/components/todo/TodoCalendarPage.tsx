@@ -35,6 +35,7 @@ import {
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import "./tasksLayout.css";
+import "./taskChrome.css";
 import "./todoCalendar.css";
 
 export interface TodoCalendarPageProps {

@@ -122,10 +122,14 @@ describe("ONE narrowing, applied in ONE place — it cannot reach some of the pa
     }
   });
 
-  it("the helper carries BOTH the search and the sort, so neither can diverge per group", () => {
-    const helper = page.slice(page.indexOf("function narrowCards"), page.indexOf("function narrowCards") + 400);
+  it("the helper carries the search, the TAG and the sort, so none can diverge per group", () => {
+    /* The tag filter rejoined the tool row after P2 (Nick's call): it composes here, in the ONE
+       helper, rather than at a render site — which is what makes it impossible for the list, the
+       dock's queue and the no-match branch to be looking at different sets. */
+    const helper = page.slice(page.indexOf("function narrowCards"), page.indexOf("function narrowCards") + 900);
     expect(helper).toContain("matchesSearch(c, search, sctx)");
-    expect(helper).toContain("sortBoardCards(hit, sort)");
+    expect(helper).toContain("matchesTags(c.tags, [tagSel])");
+    expect(helper).toContain("sortBoardCards(tagged, sort)");
   });
 
   it("the DOCK walks exactly what you were looking at — the same helper, never a second order", () => {
