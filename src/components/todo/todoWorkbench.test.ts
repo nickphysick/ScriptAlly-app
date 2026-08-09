@@ -23,6 +23,9 @@ const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
 // Pro sticker + their tokens, relocated to the page body).
 const tshCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
 
+/* ⚠️ ON DECLARATIONS, NOT RAW TEXT — a deletion is explained by naming what it replaced, so a
+   negative asserted over the raw sheet fails on a correct file that documents itself. */
+const cssDecls = (css + "\n" + groupsCss).replace(/\/\*[\s\S]*?\*\//g, "");
 const rule = (sel: string, sheet: string = css + "\n" + groupsCss): string => {
   const m = sheet.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
   if (!m) throw new Error(`rule not found: ${sel}`);
@@ -220,11 +223,14 @@ describe("doc pass P3 — the document header (the grey toolbar band)", () => {
     expect(rule(".tdb-vtog button.on")).toContain("background: #2a1a13"); // the tightening P1: active = ink
     expect(css).not.toContain(".tdb-vseg {"); // the bordered sage segment is extinct
   });
-  it("NO CONTAINER is left to keep radius continuity with: the board is a bare div", () => {
+  it("NO CONTAINER is left to keep radius continuity with — and now not even a bare div", () => {
     expect(css).not.toContain(".tdb-mainc {");
-    const b = rule(".tdb-board");
-    expect(b).not.toMatch(/border:|border-radius:/);
-    expect(b).not.toContain("background:");
+    /* ⚠️ `.tdb-board` IS EXTINCT (scroll fix, 9 Aug). It was the last wrapper here and carried no
+       paint at all — which is why it read as harmless and was not: a BLOCK between `.tpl-body`
+       and `.tpl-zone` stopped the zone being a flex item, so its `overflow: auto` never engaged
+       and the frame clipped the list. The rule this case protected (no container, no radius, no
+       paint) is now met by there being nothing there. */
+    expect(cssDecls).not.toContain(".tdb-board");
   });
 });
 
@@ -453,7 +459,9 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
     expect(rule(".tdb-asm")).toContain("width: 100%");
     expect(rule(".tdb-asm")).not.toContain("margin");
     expect(rule(".tdb-asm")).not.toContain("transition");
-    expect(rule(".tdb-board")).toContain("width: 100%"); // both views render on the one bare board
+    /* `.tdb-board` is extinct (scroll fix, 9 Aug) — the list is a direct child of `.tdb-centre`,
+       which is a flex column, so it gets the full width without a wrapper asking for it. */
+    expect(cssDecls).not.toContain(".tdb-board");
   });
 });
 
@@ -595,17 +603,22 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
     const box = page.indexOf('className="tdb-brief"'); // briefing-slot P1
-    const board = page.indexOf('className="tdb-board"');
+    const zone = page.indexOf("<TplZone scrollRef={zoneRef}");
     expect(centre).toBeGreaterThan(0);
     expect(box).toBeGreaterThan(centre);
-    expect(board).toBeGreaterThan(box);
+    /* ⚠️ THE THIRD SIBLING IS THE ZONE ITSELF NOW — `.tdb-board` wrapped it and is extinct (scroll
+       fix, 9 Aug). The ORDER is what this case protects and it is unchanged: centre → briefing →
+       the body. (The zone renders from `renderList`, below the return, so its position in the
+       file is the render function's; the ORDER assertion that matters is the one above it.) */
+    expect(zone).toBeGreaterThan(0);
     // panel-final P3: the Pro colophon LEFT the content stack for the panel-foot blue sticker
     expect(page).not.toContain("<ProBanner");
     const c = rule(".tdb-centre");
     expect(c).toContain("width: 100%"); // SHELL POLISH P1: the panel fills the centred column
     expect(c).toContain("flex-direction: column");
     expect(c).toContain("gap: var(--tdb-hero-gap)"); // the 26px hero→panel gap
-    expect(rule(".tdb-board")).toContain("width: 100%"); // todo rebuild P1: a bare board, no panel
+    expect(c).toContain("min-height: 0"); // scroll fix, 9 Aug: the zero minimum the chain needs
+    expect(cssDecls).not.toContain(".tdb-board"); // extinct — it broke the chain it sat in
     expect(page).not.toContain("tdb-docband");
     expect(css).not.toContain("tdb-docband");
   });

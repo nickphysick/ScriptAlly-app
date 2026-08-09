@@ -184,8 +184,15 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
   it("ONE scroller with a symmetric scrollbar gutter — the centred column can't sit left-heavy", () => {
     // the page root clips + column-lays (follow-up P3: .spine-root took over tsh-body's contract);
     // the wrap is the sole scroller and reserves the gutter both sides
-    expect(tRule(".spine-root")).toContain("overflow: hidden");
-    expect(tRule(".spine-root")).toContain("display: flex");
+    /* ⚠️ `.spine-root`'s LAYOUT MOVED TO tasksLayout.css (scroll fix, 9 Aug). It was declared in
+       BOTH sheets, single-class in each, so which one won any shared property came down to
+       bundler order — the hazard tasksLayout.css warns about six lines above its own instance,
+       and the two had already drifted (`flex: 1` there against `height: 100%` here). todoShell.css
+       is the token carrier now; the clip and the column live with the rest of the chain. */
+    expect(tRule(".spine-root")).not.toContain("height: 100%");
+    const layoutCss = readFileSync(join(here, "..", "todo", "tasksLayout.css"), "utf8");
+    expect(layoutCss).toContain(".spine-root { flex: 1; min-height: 0; display: flex; flex-direction: column; }");
+    expect(rule(".tdb-wrap")).toContain("overflow: hidden"); // the viewport lock's own clip, unmoved
     /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P1): the wrap was the PAGE scroller and reserved a
        symmetric scrollbar gutter so the centred column could not sit left-heavy. Under the
        viewport lock the Tasks frame never scrolls — the wrap is `overflow: hidden` and the
@@ -277,7 +284,9 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
   // content chain carries a max-width, an auto margin, or a one-sided horizontal padding. The
   // pixel symmetry is the report's manual devtools step (1440/1920).
   // todo rebuild P1: the panel + sheet body are deleted; the chain is now col → ws → centre → board → grid
-  const CHAIN = [".tdb-ws", ".tdb-centre", ".tdb-board", ".tdb-grid"]; // grid ← … ← col
+  /* ⚠️ `.tdb-board` LEFT THIS CHAIN BY BEING DELETED (scroll fix, 9 Aug) — it was a block between
+     `.tpl-body` and `.tpl-zone` and stopped the zone being a flex item at all. */
+  const CHAIN = [".tdb-ws", ".tdb-centre", ".tdb-grid"]; // grid ← … ← col
   it("the NAMED CULPRIT is removed: .tdb-asm no longer owns width/margin (it competed with .tdb-col)", () => {
     const asm = rule(".tdb-asm");
     expect(asm).toContain("width: 100%");

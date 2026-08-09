@@ -1,4 +1,48 @@
-**Last updated: 9 August 2026 (eighteenth pass — the Tasks consolidation, Phases 3 and 4).**
+**Last updated: 9 August 2026 (nineteenth pass — the To-do list scroll fix).**
+
+## ⚠️ THE TO-DO LIST'S SCROLLER WAS DEAD, AND THE LOCK MEASURED THE WRONG THING
+
+Fixed 9 Aug (`<this>`). The page rendered clamped to one viewport with **2,099px of list
+unreachable** — no scrollbar anywhere. Report + the manual browser checklist:
+`reports/tasks-consolidation-p3-p4.md`.
+
+- **⚠️ TWO WRAPPERS SAT IN THE CHAIN AND NEITHER WAS EVER ENUMERATED.** `.tdb-centre` carried
+  `flex: 1 1 auto` with the default `min-height: auto`, so it floored at min-content and grew to
+  2805px inside a 658px parent; `.tdb-board` was a plain BLOCK between `.tpl-body` and
+  `.tpl-zone`, which stopped the zone being a flex item at all — its `flex: 1; min-height: 0` did
+  nothing, it resolved to content height, and `overflow: auto` never engaged. `.tdb-wrap`'s
+  viewport lock then clipped the surplus in silence. Browser-measured at 1440×900 before and
+  after: zone 2576px with `scrollHeight === clientHeight` → **430px over 2576px, 2,146px
+  scrollable, wrap clipping 0**.
+- **⚠️ THE FIX IS `.tdb-board` DELETED OUTRIGHT — RULE AND DIV — plus `min-height: 0` on
+  `.tdb-centre`.** No new heights, no overrides, no absolute positioning. A wrapper whose only job
+  is to be a link in a chain is a link that can break; the list is a direct child of the flex
+  column now. **The viewport lock stands** — it is deliberate, browser-measured and locked, and
+  the alternative (a document-scrolling Tasks page) would retire it across all three pages.
+- **⚠️ THE LOCK MEASURED THE ABSENCE OF THE WRONG THING, AND THAT IS WHY THIS SHIPPED.** It
+  asserted PAGE SCROLL = 0 — which **clipping satisfies exactly as well as a working scroller
+  does**. The board masked the rest by capping each column at eight cards, so its content fitted
+  the frame; the consolidated list renders every group in full and hit the ceiling at once. **A
+  test that measures the absence of the wrong thing is worse than no test, because it is
+  believed.**
+- **⚠️ THE NEW LOCK WALKS THE RENDERED DOM, NOT THE STYLESHEET** (`tasksChain.test.tsx`): every
+  element between `.tpl-body` and `.tpl-zone` must be an enumerated chain link. The CSS lock beside
+  it asks "does each NAMED link declare its part" and was blind to a wrapper nobody named; this one
+  asks "is there anything in the chain nobody named". **Verified RED against the reinstated
+  `.tdb-board` before being kept**, and it carries a fixture self-test so the tripwire is not a
+  guess.
+- **⚠️ THE MEASURED ASSERTION IS NOT POSSIBLE HERE AND jsdom WOULD NOT HELP** — jsdom has no
+  layout engine and returns 0 for every scroll/client dimension; a real browser is a tooling
+  decision across 217 test files. `scrollHeight > clientHeight` is therefore item 1 of the manual
+  browser checklist in the report, with the snippet to paste.
+- **⚠️ `.spine-root` WAS DEFINED TWICE, single-class in each sheet**, so which won any shared
+  property came down to bundler order — the hazard `tasksLayout.css` warns about six lines above
+  its own instance — and the two had already drifted (`flex: 1` there, `height: 100%` in
+  todoShell.css). ONE definition now: the flex one, with its comment; todoShell.css is the token
+  carrier. (It was a live hazard, **not** the cause — measured, the resolved height agreed.)
+- The chain is enumerated in `tasksLayout.css` and now names `.tdb-centre`. Blast radius was the
+  To-do list alone: the Noteboard puts its zone directly in `.tpl-body`, and the Calendar has no
+  zone by design.
 
 ## Tasks consolidation — P3 + P4 ARE IN, and BOTH P2 flags are resolved
 

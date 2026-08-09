@@ -61,8 +61,17 @@
  * column grows to its content instead of the frame, which reads as "the lock did nothing" rather
  * than as a broken link. The links are listed here so the chain can be read in one place:
  *
- *     StagePage layout="fill" clip  →  .spine-root  →  .tdb-wrap  →  .tdb-col.tpl
- *       →  .tpl-cols  →  .tpl-body  →  .tpl-zone (the scroller)
+ *     StagePage layout="fillColumn" clip  →  .spine-root  →  .tdb-wrap  →  .tdb-col.tpl
+ *       →  .tpl-cols  →  .tpl-body  →  .tdb-centre  →  .tpl-zone (the scroller)
+ *
+ * ⚠️ `.tdb-centre` JOINED THE LIST ON 9 AUGUST, AND ITS ABSENCE WAS THE BUG. It had sat between
+ * `.tpl-body` and the zone since before the lock was written, unenumerated and at the default
+ * `min-height: auto`; a sibling block (`.tdb-board`, now deleted) sat below it and stopped the
+ * zone being a flex item at all. Browser-measured at 1440×900: the zone resolved to 2576px with
+ * `scrollHeight === clientHeight` — a scroller that could not scroll — and the frame clipped
+ * 2,099px of list in silence. THE LESSON IS THE LIST ITSELF: a chain enumerated from the CSS
+ * rather than from the rendered DOM will miss any wrapper nobody thought to write down, which is
+ * why the lock now walks the real markup (tasksViewport.test.tsx).
  *
  * ⚠️ jsdom CANNOT VERIFY THIS. There is no layout engine in this repo's tests, so nothing here
  * can prove the chain resolves — the locks assert that each link DECLARES its part, and the

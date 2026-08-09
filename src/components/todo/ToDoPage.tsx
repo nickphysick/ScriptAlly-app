@@ -1142,7 +1142,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 ))}
             </div>
           )}
-          <div className="tdb-board">
+          {/* ⚠️ `.tdb-board` IS DELETED, DIV AND RULE (scroll fix, 9 Aug) — and it was HALF THE BUG.
+              It contributed `width: 100%; box-sizing: border-box` and nothing else, but it was a
+              BLOCK sitting between `.tpl-body` and `.tpl-zone`. `.tpl-zone`'s `flex: 1;
+              min-height: 0` therefore acted on nothing: the zone became a plain block at content
+              height, its `overflow: auto` never engaged, and `.tdb-wrap`'s viewport lock clipped
+              2,099px of list with no scrollbar anywhere (browser-measured, 1440×900).
+              ⚠️ THE CHILDREN ARE NOW DIRECT CHILDREN OF `.tdb-centre`, which is a flex column —
+              so the zone is a flex item again and the chain reaches it. */}
         {/* ⚠️ THE COMPOSER'S MOUNT (board fixes II, P3). "＋ Add task or note" set composerAt and
             NOTHING RENDERED IT — the mount lived in the retired lane/grid views, so the button
             did nothing a reader could see. It sits here, above whichever body state renders,
@@ -1181,7 +1188,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             onMore={(c) => openFlowCards([c])}
           />
         ) : renderList()}
-          </div>{/* .tdb-board */}
 
           {/* THE ASSISTANT BAND — the page's closing note, and the ONE Pro surface here.
               (It sits below the board, at full column width, as it always has.) */}

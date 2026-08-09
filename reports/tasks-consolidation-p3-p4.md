@@ -152,6 +152,31 @@ The dial's shell was hand-mirrored in the harness because `renderToStaticMarkup`
 portal — the component's own markup is asserted in `tasksList.test.tsx` instead. The real
 `BrandDatePicker` was mounted for the measurement that mattered.
 
+## ⚠️ THE MANUAL BROWSER CHECKLIST — the scroll behaviour jsdom cannot see
+
+**This list exists because the automated lock cannot measure layout.** There is no jsdom in this
+repo, and adding it would not help: jsdom has no layout engine and returns 0 for every scroll and
+client dimension. A real browser is a tooling decision across 217 test files, not a bug fix. So
+these are checks a person runs, and the first one is the one that shipped broken.
+
+Open `/todo` on a viewport short enough that the list overflows (1440×900 with a dozen tasks does
+it), and paste into the console:
+
+```js
+const z = document.querySelector('.tpl-zone');
+({ scrolls: z.scrollHeight > z.clientHeight, overflow: z.scrollHeight - z.clientHeight,
+   wrapClipped: (w => w.scrollHeight - w.clientHeight)(document.querySelector('.tdb-wrap')) })
+```
+
+1. **`scrolls` must be `true` and `wrapClipped` must be `0`.** Anything else means the designated
+   scroller is dead and the frame is clipping — the exact fault of 9 August. Measured after the
+   fix at 1440×900: zone 430px tall over 2576px of content (2,146px scrollable), wrap clipped 0.
+2. **The zone actually moves.** `z.scrollTop = 99999` then read it back — a non-zero value. A zone
+   can report an overflow and still refuse to scroll if an ancestor is doing something odd.
+3. **The header block does not move with it.** Eyebrow, title, stat chips and tool row stay put.
+4. **The group headings pin and release** at their section boundaries as you scroll.
+5. **The page itself never scrolls** — `document.querySelector('.ws-wbody').scrollTop` stays 0.
+
 ## Deviations from the ref, carried forward
 
 - **A user task's ✕ is absent** (the ref's sheet-1 row draws one). The ref's own prose says your own

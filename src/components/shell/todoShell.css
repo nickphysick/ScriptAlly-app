@@ -17,13 +17,14 @@
      .tdb-asst in todo.css — the assistant band at the content's foot.) */
   /* the search pill's own hairline */
   --tsh-active-border: #e0d6c6;
-  /* the page root itself — a fill-slot column; NO bespoke ground (canvas scheme 1) */
+  /* ⚠️ THE LAYOUT HALF OF `.spine-root` LIVES IN `tasksLayout.css` AND ONLY THERE (scroll fix,
+     9 Aug). This file used to declare a SECOND single-class `.spine-root` — same specificity, so
+     which one won any shared property came down to bundler order alone. That is the exact hazard
+     tasksLayout.css warns about six lines above its own instance of this selector, and the two
+     had already drifted: it says `flex: 1` with a written reason for NOT using a percentage, and
+     this said `height: 100%`. This rule is the token carrier now; the chain link is over there.
+     `position: relative` stays because the tokens' consumers anchor to it. */
   position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
 }
 
 /* ── THE FILTER CHIPS — bare on the control line (the .spine-bench slab and its funnel/FILTER

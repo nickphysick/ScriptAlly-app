@@ -69,14 +69,22 @@
 /* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),
    812 wide, 16 apart. The stack owns the width token + the 220ms Today transition; each
    container fills it. */
-.tdb-centre { width: 100%; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); }
+/* ⚠️ `min-height: 0` IS LOAD-BEARING AND WAS MISSING (scroll fix, 9 Aug). `flex: 1 1 auto` with
+   the default `min-height: auto` floors this at MIN-CONTENT, so it refused to shrink and grew to
+   2805px inside a 658px parent — the frame then clipped the overflow, silently. It is a link in
+   the viewport-lock chain and is enumerated with the others in tasksLayout.css. */
+.tdb-centre { width: 100%; flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--tdb-hero-gap); }
 /* ── THE REBUILD (todo rebuild P1 — ref design-refs/scriptally-todo-sectioned.html) ─────────
    NO GROUP CONTAINERS. The board panel (.tdb-mainc), the filter slab (.spine-bench) and the
    lane header bars (.tdb-lh2 / .tdb-lsech) are DELETED: this page predates the capsule shell
    and was built as a self-contained world with its own containers and ground. Nesting now ends
    at content capsule → cards, with nothing in between. Sectioning is TYPOGRAPHIC — a heading,
    a rule, and air. ── */
-.tdb-board { width: 100%; box-sizing: border-box; }
+/* ⚠️ `.tdb-board` IS DELETED (scroll fix, 9 Aug). A block between `.tpl-body` and `.tpl-zone`
+   broke the flex chain: the zone stopped being a flex item, so `flex: 1; min-height: 0` did
+   nothing and its `overflow: auto` never engaged. It carried `width: 100%` and nothing else,
+   which a flex column child gets for free. Deleted rather than converted to a flex link — a
+   wrapper that exists only to be a link in a chain is a link that can break. */
 
 /* THE SECTION HEADING: Playfair 27 with the count beside it in mono; 46px of air above, the
    rule 22px clear of the items below. */
