@@ -14,6 +14,16 @@ import { kindWord, OneScreenTasks, taskTrio, yourTasksToday } from "./OneScreenT
 
 const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
 const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+/* ⚠️ ALL blocks for a selector, joined — a selector is legitimately declared more than once in
+   this sheet, and taking the first match tests half the rule. */
+const rule = (sel: string) => {
+  const out: string[] = [];
+  for (let i = cssRules.indexOf(sel + " {"); i > -1; i = cssRules.indexOf(sel + " {", i + 1)) {
+    out.push(cssRules.slice(i, cssRules.indexOf("}", i)));
+  }
+  expect(out.length, `${sel} must exist`).toBeGreaterThan(0);
+  return out.join("\n");
+};
 
 /* ⚠️ THE HEADER SENTENCE IS RETIRED (v16 §4) — the title states the job, the pills state the
    split. The sentence had to lead on one number and said nothing about the rest. */
@@ -125,6 +135,32 @@ describe("the rendered rows", () => {
     expect(pills).toBe(2);                                    // urgent + yours; no housekeeping
     const rows = (html.match(/class="os-trow"/g) ?? []).length;
     expect(rows).toBe(3);                                     // 2 urgent + 1 yours
+  });
+});
+
+describe("the pink band (app-shell-v2)", () => {
+  /* ⚠️ PINK IS THE RULE, NOT THE PREFERENCE: sage heads a dashboard container, PINK marks the
+     surface asking something of you — and this is the one that does. Swapping them would make
+     the to-do card read like any other panel. */
+  it("⚠️ the tasks header is a PINK gradient band with its hairline", () => {
+    const h = rule(".os-th2");
+    expect(h).toContain("linear-gradient(180deg, #f5e3d8, #f2ddd2)");
+    expect(h).toContain("border-bottom: 1px solid #ebd2c4");
+    expect(rule(".os-th2 h2")).toContain("color: #3a241a");
+  });
+
+  /* the band is edge-to-edge, so the card has to clip or it overhangs the radius */
+  it("the card clips its band", () => {
+    expect(rule(".os-tasks")).toContain("overflow: hidden");
+  });
+
+  /* ⚠️ the pills sit ON the band now — a tinted pill on a tinted band loses its edge */
+  it("the trio's pills are WHITE on the band, keeping their dots", () => {
+    for (const k of [".os-p.u", ".os-p.h", ".os-p.m"]) {
+      expect(rule(k), k).toContain("background: #ffffff");
+    }
+    expect(rule(".os-p.u .os-pdot")).toContain("background: #7c3a2a");
+    expect(rule(".os-p.h .os-pdot")).toContain("background: #8a9e88");
   });
 });
 
