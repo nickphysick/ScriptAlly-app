@@ -9,6 +9,7 @@ import { readFileSync } from "fs";
 import {
   STEP_ORDER, STEP_TITLE, STEP_SHORT, STEP_OPTIONAL,
   stepStates, nextStep, advance, jumpTo, enterHint, requirements, stepIndex,
+  stackAvailable, dateRequirementLabel,
 } from "./createSteps";
 import { draftReady, emptyDraft } from "./queryDraft";
 
@@ -90,21 +91,104 @@ describe("the requirement pips read the draft, never the steps", () => {
      writer sees, and the module would have been blamed for the fixture's shortcut. */
   it("two are already met on arrival — only the agent is open", () => {
     const d = emptyDraft({ manuscriptId: "m1" });
-    expect(requirements(d)).toEqual([
-      { key: "agent", label: "Agent", met: false },
-      { key: "manuscript", label: "Manuscript", met: true },
-      { key: "date", label: "Date", met: true },
-    ]);
+    expect(requirements(d, d, { manuscript: "Murphy's Day Out" }).map((r) => [r.key, r.state, r.met]))
+      .toEqual([["agent", "empty", false], ["manuscript", "prefilled", true], ["date", "prefilled", true]]);
   });
 
   it("choosing an agent completes the set", () => {
-    const d = { ...emptyDraft({ manuscriptId: "m1" }), agentId: "a1" };
-    expect(requirements(d).every((r) => r.met)).toBe(true);
+    const base = emptyDraft({ manuscriptId: "m1" });
+    const d = { ...base, agentId: "a1" };
+    expect(requirements(d, base).every((r) => r.met)).toBe(true);
   });
 
   it("a manuscript-less account leaves that pip open rather than lying", () => {
     const d = { ...emptyDraft({ manuscriptId: "m1" }), manuscriptId: "" };
-    expect(requirements(d).find((r) => r.key === "manuscript")?.met).toBe(false);
+    expect(requirements(d, d).find((r) => r.key === "manuscript")?.met).toBe(false);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ A BARE TICK BESIDE "MANUSCRIPT" IS A LIE OF OMISSION. The manuscript and the date are
+   PRE-FILLED by openCreate, so a solid green tick beside them claims the writer completed
+   something they never looked at — and the one item that genuinely needs them reads as one open
+   thing among three settled ones.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the checklist states its values, and its ticks are not all the same tick", () => {
+  const now = Date.parse("2026-08-09T09:00:00Z");
+  const base = emptyDraft({ manuscriptId: "m1" }, now);
+
+  it("each row states what is actually recorded", () => {
+    const rs = requirements(base, base, { manuscript: "Murphy's Day Out" }, now);
+    expect(rs.find((r) => r.key === "manuscript")?.value).toBe("Murphy's Day Out");
+    expect(rs.find((r) => r.key === "date")?.value, "today is a word, not a date to decode").toBe("today");
+  });
+
+  /* An empty row must say what to DO. "Agent" beside an empty ring states a category, not a task. */
+  it("and an empty row states the instruction, never a blank", () => {
+    expect(requirements(base, base, {}, now).find((r) => r.key === "agent"))
+      .toMatchObject({ state: "empty", value: "choose one" });
+  });
+
+  it("pre-filled is a different mark from answered — the baseline is what tells them apart", () => {
+    const moved = { ...base, dateSent: "2026-08-01" };
+    expect(requirements(base, base, {}, now).find((r) => r.key === "date")?.state).toBe("prefilled");
+    expect(requirements(moved, base, {}, now).find((r) => r.key === "date")?.state).toBe("answered");
+  });
+
+  /* The agent list's "Send query" seeds the agent, so it arrives pre-filled exactly as the
+     manuscript does — it is the baseline that decides, never which field it is. */
+  it("a SEEDED agent is pre-filled too, and a chosen one is answered", () => {
+    const seeded = emptyDraft({ agentId: "a1", manuscriptId: "m1" }, now);
+    expect(requirements(seeded, seeded, { agent: "Elinor Hale" }, now).find((r) => r.key === "agent"))
+      .toMatchObject({ state: "prefilled", value: "Elinor Hale" });
+    expect(requirements({ ...base, agentId: "a1" }, base, { agent: "Elinor Hale" }, now)
+      .find((r) => r.key === "agent")?.state).toBe("answered");
+  });
+
+  /* ⚠️ NEVER CLAIM THE WRITER DID SOMETHING WHEN YOU CANNOT TELL. With no baseline every present
+     value reads as pre-filled — the quieter of the two mistakes by a wide margin. */
+  it("with no baseline, everything present reads as pre-filled", () => {
+    const d = { ...base, agentId: "a1", dateSent: "2026-08-01" };
+    expect(requirements(d, null, { agent: "X", manuscript: "Y" }, now).map((r) => r.state))
+      .toEqual(["prefilled", "prefilled", "prefilled"]);
+  });
+
+  it("a date that is not today is stated as a date", () => {
+    expect(dateRequirementLabel("2026-08-09", now)).toBe("today");
+    expect(dateRequirementLabel("2026-08-01", now)).toBe("1 Aug");
+    expect(dateRequirementLabel("", now)).toBe("");
+  });
+});
+
+/* ══ THE ONE EXCEPTION TO REQUIRED ≠ SEQUENTIAL ═════════════════════════════════════════════ */
+describe("the stack is unavailable until an agent is chosen", () => {
+  it("and the rule has a name, so it is not an inline fork nobody can find", () => {
+    expect(stackAvailable(null)).toBe(false);
+    expect(stackAvailable(undefined)).toBe(false);
+    expect(stackAvailable({ id: "a1" })).toBe(true);
+  });
+
+  /* ⚠️ IT ASKS FOR THE AGENT, NOT THE id. An id pointing at an agent no longer on file passes an
+     `!!agentId` check and fails at everything the gate protects — no materials to seed, no reply
+     time to suggest a nudge from, no record for the panel. */
+  it("a dangling id is not an agent", () => {
+    const agents = [{ id: "a1" }];
+    expect(stackAvailable(agents.find((a) => a.id === "gone") ?? null)).toBe(false);
+  });
+
+  /* ⚠️ AND IT IS NOT SEQUENCING COMING BACK. Once an agent exists all three sections are
+     reachable in both directions, in any order — the gate is about CONTENT (every section
+     derives from the agent), not about order. */
+  it("but it does not sequence the stack behind it", () => {
+    expect(jumpTo("notes", "when")).toEqual({ active: "notes", reached: "notes" });
+    expect(stepStates("notes", "notes").when).toBe("done");
+    expect(stackAvailable({ id: "a1" }) && true).toBe(true);
+  });
+
+  it("and the exception is argued where the rule lives", () => {
+    const src = readFileSync(new URL("./createSteps.ts", import.meta.url), "utf8");
+    expect(src).toContain("THE ONE EXCEPTION: THE AGENT");
+    expect(src, "the reason must be content, not order").toMatch(/about ORDER, it is about CONTENT/);
   });
 });
 

@@ -23,7 +23,7 @@ import { Agent, Manuscript, Query } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
 import {
   STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL,
-  stepStates, stepIndex, advance, jumpTo, nextStep, enterHint, type StepId,
+  stepStates, stepIndex, advance, jumpTo, nextStep, enterHint, stackAvailable, type StepId,
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
@@ -176,7 +176,11 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           ⚠️ The picker is REUSED, never rebuilt: AgentSearchField already owns the typeahead,
           the highlighted-Enter selection and the "Agent not listed? Add a new agent now"
           quick-add. Rebuilding any of that here would fork three behaviours at once. ── */}
-      {!agent ? (
+      {/* ⚠️ THE FORK IS `stackAvailable`, NOT `!agent`. Choosing the agent is a STAGE, and the
+          stack is unavailable until it is answered — the one exception to required ≠ sequential,
+          argued where the rule lives (lib/createSteps). Spelling the condition out here instead
+          would leave the app's only sequencing rule stated nowhere anybody would look for it. */}
+      {!stackAvailable(agent) ? (
         /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-create-steps + qc-stage1 option 2) ══
            ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately: 52% left, the rest right. Choosing an
            agent REPLACES the right column's content rather than introducing a column, so
@@ -241,8 +245,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               </div>
             </aside>
           ) : (
-            <aside className="qc-ctx qc-ctx-name-only" aria-label="No quick picks">
-              <div className="qc-ctxbody"><ArtSlot name="no-quick-picks" maxWidth={200} /></div>
+            /* ⚠️ NO PANEL CHROME HERE — this is art holding a column, not a record.
+               It used to borrow `.qc-ctx qc-ctx-name-only`, the agent panel's own classes, which
+               was harmless while that panel was a plain hairline box and is not now: it would
+               hand an art placeholder the reference card's dotted edge and its 0.6° tilt, so an
+               empty column would read as a card with nothing on it. And the ArtSlot draws its own
+               dashed commissioning box (no-quick-picks has no artwork yet), so a frame around it
+               makes two nested empty boxes — the "stray empty dashed element" this pass removes. */
+            <aside className="qc-qpart" aria-label="No quick picks">
+              <ArtSlot name="no-quick-picks" maxWidth={200} />
             </aside>
           )}
         </div>

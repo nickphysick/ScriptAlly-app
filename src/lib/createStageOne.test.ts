@@ -95,14 +95,29 @@ describe("the ghost rows show anatomy without asking anything", () => {
 
 describe("the requirement pips", () => {
   it("live in the header and read the draft, not the steps", () => {
-    expect(queries).toContain("requirements(createDraft).map");
+    expect(queries).toContain("requirements(");
     expect(queries, "the pips must come from the shared derivation")
       .toContain('import { requirements } from "../lib/createSteps"');
+    expect(queries, "the baseline is what tells pre-filled from answered").toContain("createBase,");
   });
 
-  it("a met requirement is sage; an open one is a hollow ring", () => {
-    expect(rule(".qch-rq.qch-on .qch-c")).toContain("#7e9178");
+  /* ⚠️ THREE MARKS, NOT TWO. A solid green tick beside Manuscript and Date claimed the writer had
+     completed what openCreate merely pre-filled — so the one item that genuinely needed them read
+     as one open thing among three settled ones. Outlined = answered FOR you and still editable;
+     solid = answered BY you; an open ring = nothing recorded. */
+  it("pre-filled is outlined, answered is solid, and empty is a hollow ring", () => {
+    const pre = rule(".qch-rq.qch-prefilled .qch-c");
+    expect(pre, "pre-filled must not be a filled tick").toContain("background: transparent");
+    expect(pre, "but it is still sage — it IS answered").toContain("#7e9178");
+    expect(rule(".qch-rq.qch-answered .qch-c")).toContain("background: #7e9178");
     expect(rule(".qch-c"), "the unmet pip must read as empty").toContain("border: 1.5px solid #cfc3b1");
+    expect(rule(".qch-rq.qch-on .qch-c"), "the old one-tick rule must be gone").toBe("");
+  });
+
+  /* A tick with no value says a category is settled without saying what settled it. */
+  it("and every row states its value", () => {
+    expect(queries).toContain('<b className="qch-v">{r.value}</b>');
+    expect(rule(".qch-v")).toContain("font-weight: 600");
   });
 
   /* ⚠️ The tick is the BAND sage. index.css locks --sage / --sageC / --sageD to StatusDots, and
@@ -138,6 +153,16 @@ describe("quick picks", () => {
     expect(pane).toContain("onClick={() => pickAgent(a)}");
   });
 
+  /* ⚠️ ENTER WITH NOTHING HIGHLIGHTED DOES NOTHING — no silent advance. The picker only acts on
+     a real selection, so an Enter on an empty or unmatched field cannot walk the writer into the
+     stack with no agent. The guard lives in the shared field, which is why it is asserted there. */
+  it("Enter with no match selected does nothing", () => {
+    const field = read("../components/AgentSearchField.tsx");
+    expect(field).toContain("if (open && flatRows[hl]) {");
+    expect(field, "an unguarded Enter would advance with nobody chosen")
+      .not.toMatch(/e\.key === "Enter"\)\s*\{\s*e\.preventDefault\(\);\s*pick/);
+  });
+
   it("monogram, Playfair name, mono agency, mono added-date", () => {
     for (const cls of ["qc-qmg", "qc-qwho", "qc-qag", "qc-qadded"]) {
       expect(pane, `${cls} is missing from the row`).toContain(cls);
@@ -148,9 +173,21 @@ describe("quick picks", () => {
 
   /* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are ordinary — a new
      account, or a writer who has queried everyone — and one of them is an achievement. */
+  /* ⚠️ ART, NOT A PANEL. The empty column used to borrow `.qc-ctx qc-ctx-name-only` — the agent
+     panel's own classes — which was harmless while that panel was a plain hairline box and is not
+     now: it would hand an art placeholder the reference card's dotted edge and 0.6° tilt. And the
+     ArtSlot draws its own dashed commissioning box, so a frame around it is two nested empty
+     boxes, which is exactly the stray dashed element this pass removed. */
   it("empty falls back to art, holding the column so the geometry survives", () => {
     expect(pane).toContain("picks.length > 0 ? (");
     expect(pane).toContain('<ArtSlot name="no-quick-picks"');
+    /* Comments stripped: this file EXPLAINS which classes were dropped, and an assertion about
+       the code must not be satisfiable by prose about the code. */
+    const code = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
+    expect(code, "the empty column must not wear the agent panel's chrome")
+      .not.toContain("qc-ctx-name-only");
+    expect(pane).toContain('className="qc-qpart"');
+    expect(rule(".qc-qpart"), "a frame here would nest two empty boxes").not.toContain("border");
     // Comments stripped: this file EXPLAINS why there is no such message, and an assertion
     // about the code must not be able to match prose about the code.
     const bare = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/\/\/[^\n]*/g, "");

@@ -18,6 +18,7 @@ import {
   freshnessStamp, panelState, PARTIAL_TAIL, NAME_ONLY_NOTE,
 } from "../../lib/agentContext";
 import { ArtSlot } from "../todo/ArtSlot";
+import { agentPrimary } from "../../lib/agentDisplay";
 
 export interface AgentContextPanelProps {
   agent: Agent;
@@ -26,11 +27,32 @@ export interface AgentContextPanelProps {
   onOpenQuery?: (id: string) => void;
 }
 
-const InfoIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
-    <circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" />
+const PersonIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" aria-hidden="true">
+    <circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c0-3.8 3.5-5.6 7.5-5.6s7.5 1.8 7.5 5.6" />
   </svg>
 );
+
+/**
+ * The stat glyphs, keyed by the cell `statCells` emits.
+ *
+ * ⚠️ KEYED, NOT POSITIONAL. Either cell omits itself when the agent has not stated that fact, so
+ * "the first one is the clock" is true only until an agent with no reply time arrives — and then
+ * the envelope would sit under "Expected response time". A missing key draws no glyph, which is
+ * the right failure: a cell with no icon still reads, a cell with the wrong icon misinforms.
+ */
+const STAT_GLYPH: Record<string, React.ReactNode> = {
+  reply: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" />
+    </svg>
+  ),
+  submit: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="m3.5 7 8.5 6 8.5-6" />
+    </svg>
+  ),
+};
 
 export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, queries, onOpenQuery }) => {
   /* The wish list is clamped to four lines and this opens it. ⚠️ THE CLAMP IS WHAT KEEPS THE
@@ -54,14 +76,19 @@ export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, que
        no fields at all. Its only focusable things are three real controls: the wish-list
        disclosure, the history link and the agency link. */
     <aside className={`qc-ctx qc-ctx-${state}`} aria-label="About this agent, for reference">
-      {/* ⚠️ THE CAPTION BAR IS WHAT MAKES THE WHOLE COLUMN LEGIBLE AS REFERENCE. It replaces an
-          identity block carrying a monogram, the agency in Playfair 18 and the agent's name —
-          all three of which already sit in the agent row on the left at twice the size. Two
-          subjects competing was the problem; "For reference" plus the one fact the left column
-          does not carry (their door) is the answer. */}
-      <div className="qc-ctxhead">
-        <InfoIcon />
-        <span className="qc-ctxfor">For reference</span>
+      {/* ⚠️ "THIS AGENT AT A GLANCE" REPLACES THE "FOR REFERENCE" CAPTION BAR (ref qc-tilt).
+          That bar named the column's FUNCTION and nothing else, on the reasoning that an
+          identity block would compete with the agent row on the left. It named the panel where
+          it could have named the agent — so the one line of a reference card that tells you
+          whose card it is was the line it did not have. The name sits UNDER the title in 7.5px
+          mono, which is a caption, not a second headline: the hierarchy the old bar protected
+          survives, and the card now says who it is about. */}
+      <div className="qc-glance">
+        <span className="qc-glancemk" aria-hidden="true"><PersonIcon /></span>
+        <div className="qc-glancet">
+          <div className="qc-glanceh">This agent at a glance</div>
+          <div className="qc-glancew">{agentPrimary(agent)}</div>
+        </div>
         {head.status && (
           <span className={`qc-ctxpill${head.status.open ? "" : " qc-ctxpill-shut"}`}>{head.status.label}</span>
         )}
@@ -71,8 +98,14 @@ export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, que
         <div className="qc-ctxstats">
           {cells.map((c) => (
             <div className="qc-ctxstat" key={c.key}>
-              <div className="qc-ctxv">{c.value}{c.unit && <small> {c.unit}</small>}</div>
-              <div className="qc-ctxk">{c.caption}</div>
+              {STAT_GLYPH[c.key] && <span className="qc-ctxsi" aria-hidden="true">{STAT_GLYPH[c.key]}</span>}
+              {/* ⚠️ THE CAPTIONS WRAP RATHER THAN TRUNCATE. "Preferred submission method" is long
+                  on purpose — an abbreviated caption on a reference panel is the one thing worse
+                  than a long one — so the text column is allowed two lines beside the glyph. */}
+              <div className="qc-ctxstatt">
+                <div className="qc-ctxv">{c.value}{c.unit && <small> {c.unit}</small>}</div>
+                <div className="qc-ctxk">{c.caption}</div>
+              </div>
             </div>
           ))}
         </div>

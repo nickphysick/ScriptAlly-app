@@ -23,8 +23,28 @@
  *
  * There is a test asserting Save is enabled while later steps are un-visited. If you find
  * yourself changing it, you are changing the product, not the test.
+ *
+ * ── THE ONE EXCEPTION: THE AGENT ──────────────────────────────────────────────────────────
+ *
+ * The stack does not open at all until an agent is chosen (`stackAvailable`). This is NOT
+ * sequencing creeping back in, and the distinction matters enough to write down:
+ *
+ * · Sequencing would mean "you may not do step 3 before step 2". Nothing here says that — once
+ *   an agent exists, all three sections are reachable in both directions, in any order, and the
+ *   rule above governs them completely.
+ * · The agent gate is not about ORDER, it is about CONTENT. Every section derives from the
+ *   agent: the materials checklist is seeded from what they ask for, the nudge suggestion from
+ *   their stated reply time, and the reference panel is their record. Opened without one, all
+ *   three would present defaults as if they were that agent's — and the writer would then have
+ *   to notice, and undo, a set of answers nobody gave.
+ *
+ * So it is a prerequisite of the stack, not a first step within it — which is why choosing the
+ * agent is a STAGE, and why `StepId` has three members rather than four.
  * ═══════════════════════════════════════════════════════════════════════════════════════════
  */
+
+import { shortDate } from "./createSummary";
+import { todayInputDate } from "./queryDraft";
 
 export type StepId = "when" | "what" | "notes";
 
@@ -55,6 +75,25 @@ export const STEP_HINT: Record<StepId, string> = {
 export const STEP_OPTIONAL: Record<StepId, boolean> = { when: false, what: false, notes: true };
 
 export const stepIndex = (id: StepId): number => STEP_ORDER.indexOf(id);
+
+/**
+ * ⚠️ THE STACK IS UNAVAILABLE UNTIL AN AGENT IS CHOSEN — the single exception to required ≠
+ * sequential, argued in the module header above. It is a prerequisite of the stack rather than
+ * a step inside it, because every section's CONTENT comes from the agent, not because the steps
+ * have an order.
+ *
+ * It is a named predicate rather than an inline `!agent ?` in the pane so the rule has one home,
+ * one explanation and one test. A fork spelled out at the call site is a rule nobody can find.
+ *
+ * ⚠️ IT TAKES THE RESOLVED AGENT, NOT THE DRAFT'S id. An id pointing at an agent that is no
+ * longer on file — deleted, or not yet arrived from the listener — passes an `!!agentId` check
+ * and fails at everything the gate exists to protect: there are no materials to seed, no reply
+ * time to suggest a nudge from, and no record for the panel to show. The gate asks for the
+ * thing the sections need, which is the agent.
+ */
+export function stackAvailable(agent: { id: string } | null | undefined): boolean {
+  return !!agent;
+}
 
 /**
  * The state of every section, given which one is open and how far the writer has got.
@@ -102,13 +141,77 @@ export function enterHint(id: StepId): string {
   return id === "notes" ? "⌘↵ TO FINISH" : "ENTER TO ACCEPT ↵";
 }
 
-/** The three requirement pips in the header. Derived from the draft, never from step progress. */
-export interface Requirement { key: "agent" | "manuscript" | "date"; label: string; met: boolean }
+/* ══ THE REQUIREMENT CHECKLIST (header) ═════════════════════════════════════════════════════
+   Derived from the draft, never from step progress.
 
-export function requirements(d: { agentId: string | null; manuscriptId: string; dateSent: string }): Requirement[] {
+   ⚠️ A BARE TICK BESIDE "MANUSCRIPT" IS A LIE OF OMISSION. The manuscript and the date are
+   PRE-FILLED by openCreate — the only book you have, and today — so a solid green tick beside
+   them claims the writer completed something they have not looked at, and the one item that
+   genuinely needs them (the agent) reads as one open thing among three settled ones.
+
+   So each item states its VALUE and wears one of three marks:
+     · empty      — an open ring. Nothing recorded; the row says what to do ("choose one").
+     · prefilled  — a sage-OUTLINED tick. Answered FOR you, and still editable.
+     · answered   — the solid tick. You did this.
+
+   ⚠️ AND THE DIFFERENCE IS THE BASELINE, NOT THE FIELD. "Pre-filled" is not a property of the
+   date — it is the draft still holding what `openCreate` put there. Change the date and it
+   becomes yours; a seeded agent (the agent list's "Send query") arrives pre-filled exactly as
+   the manuscript does. With no baseline to compare, everything present reads as PRE-FILLED:
+   never claim the writer did something when you cannot tell. */
+export type RequirementState = "empty" | "prefilled" | "answered";
+export interface Requirement {
+  key: "agent" | "manuscript" | "date";
+  label: string;
+  /** What is actually recorded — "Murphy's Day Out", "today", or the prompt when nothing is. */
+  value: string;
+  state: RequirementState;
+  /** Kept for the callers that only ask whether the query can be saved. */
+  met: boolean;
+}
+
+interface ReqDraft { agentId: string | null; manuscriptId: string; dateSent: string }
+
+/** "today" earns its own word — a date you can read as a date beats one you have to decode. */
+export function dateRequirementLabel(iso: string, now: number = Date.now()): string {
+  if (!iso) return "";
+  return iso === todayInputDate(now) ? "today" : shortDate(iso, now);
+}
+
+export function requirements(
+  d: ReqDraft,
+  base: ReqDraft | null = null,
+  names: { agent?: string; manuscript?: string } = {},
+  now: number = Date.now(),
+): Requirement[] {
+  /* ⚠️ `unchanged` DEFAULTS TO TRUE WITH NO BASELINE, and the direction matters: `!!base && …`
+     would report every value as ANSWERED the moment the baseline went missing — claiming the
+     writer did three things they had not done. Pre-filled is the quieter mistake by a distance. */
+  const mark = (value: string, unchanged: boolean): RequirementState =>
+    !value ? "empty" : unchanged ? "prefilled" : "answered";
+
+  const agentValue = d.agentId ? (names.agent ?? "").trim() || "Chosen" : "";
+  const msValue = d.manuscriptId ? (names.manuscript ?? "").trim() || "Chosen" : "";
+  const dateValue = dateRequirementLabel(d.dateSent, now);
+
   return [
-    { key: "agent", label: "Agent", met: !!d.agentId },
-    { key: "manuscript", label: "Manuscript", met: !!d.manuscriptId },
-    { key: "date", label: "Date", met: !!d.dateSent },
+    {
+      key: "agent", label: "Agent",
+      value: agentValue || "choose one",
+      state: mark(agentValue, !base || base.agentId === d.agentId),
+      met: !!d.agentId,
+    },
+    {
+      key: "manuscript", label: "Manuscript",
+      value: msValue || "choose one",
+      state: mark(msValue, !base || base.manuscriptId === d.manuscriptId),
+      met: !!d.manuscriptId,
+    },
+    {
+      key: "date", label: "Date",
+      value: dateValue || "pick one",
+      state: mark(dateValue, !base || base.dateSent === d.dateSent),
+      met: !!d.dateSent,
+    },
   ];
 }

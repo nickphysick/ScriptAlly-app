@@ -48,14 +48,81 @@ const rule = (sel: string): string => {
   return open < 0 ? "" : css.slice(m.index, css.indexOf("}", open) + 1);
 };
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ A MALFORMED CSS COMMENT SWALLOWS THE RULE AFTER IT, IN SILENCE. Closing a block early with
+   a stray terminator leaves the remaining prose as CSS garbage, and the browser drops it with
+   whatever declaration follows — no error, a green build, and a panel that has simply lost its
+   border and its tilt. It happened in this pass: the `.qc-ctx` rule vanished from `dist/` while
+   every source-string assertion below still passed, because they read the SOURCE, where the rule
+   is plainly there.
+
+   The tell is cheap. Every ⚠️ in this sheet lives inside a comment, so if one survives
+   comment-stripping, a block was closed early.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("f12.css is a valid sheet, not just a file containing the right words", () => {
+  it("no comment block is closed early", () => {
+    const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(stripped, "a stray terminator left prose outside a comment — the next rule is dropped")
+      .not.toContain("*" + "/");
+    expect(stripped, "a ⚠️ outside a comment means a block closed early").not.toContain("⚠");
+  });
+});
+
 /* ══ QUIET REFERENCE — an aside, not a second subject ══════════════════════════════════════ */
 describe("the panel reads as quieter than the form", () => {
-  it("flat ground, hairline, no shadow — a shadow would imply floating", () => {
+  it("flat ground, no shadow — a shadow would imply floating", () => {
     const r = rule(".qc-ctx");
     expect(r, "the panel rule is missing").not.toBe("");
     expect(r).toContain("background: #fbf9f5");
-    expect(r).toContain("border: 1px solid var(--hairline)");
     expect(r, "a shadow makes it float; this sits back").not.toContain("box-shadow");
+  });
+
+  /* ══ A CARD LAID ON THE DESK (ref qc-tilt.html, b2 + t1) ══════════════════════════════════ */
+  it("a dotted edge and six-tenths of a degree — not a hairline UI box", () => {
+    const r = rule(".qc-ctx");
+    expect(r).toContain("border: 1.5px dotted #cdbfa9");
+    expect(r).toContain("transform: rotate(-0.6deg)");
+  });
+
+  /* ⚠️ DOTTED, NOT DASHED. Dashed already means draft/placeholder in this app — the create draft
+     row and every un-commissioned ArtSlot wear it — so a dashed panel would say "this content is
+     provisional" about a record that is anything but. */
+  it("dotted, because dashed already means provisional here", () => {
+    expect(rule(".qc-ctx"), "dashed collides with the app's placeholder grammar")
+      .not.toContain("dashed");
+    expect(read("../components/todo/artSlot.css"), "the grammar this must stay distinct from")
+      .toContain("dashed");
+  });
+
+  /* ⚠️ `transform` CREATES A CONTAINING BLOCK. A `position: fixed` descendant would anchor to the
+     panel instead of the viewport and land wherever the rotation put it. The panel is
+     reference-only — links and the wish-list toggle — and must stay that way while it is tilted. */
+  it("nothing inside is position:fixed, and the reason is written down", () => {
+    expect(panel, "a fixed child would anchor to the panel, not the viewport")
+      .not.toContain("position: \"fixed\"");
+    expect(css).toContain("NO `position: fixed` DESCENDANT MAY LIVE IN HERE");
+    expect(css, "the instruction must be to drop the rotation, not to hack the popover")
+      .toContain("REMOVE THE ROTATION");
+  });
+
+  /* ⚠️ ROTATION NEEDS CLEARANCE — a rotated box's corners extend past its layout box by about
+     (height · sin θ)/2 horizontally, ~4px at this panel's tallest. */
+  /* ⚠️ THE OVERHANG IS DRIVEN BY HEIGHT, NOT WIDTH: (h · sin θ)/2 sideways, which at θ = 0.6° is
+     h / 191. 6px was measured as sufficient at 1440×900 (h = 558 → 2.89px) and would have clipped
+     on a portrait display, where the row runs ~1400px tall. 10px holds to h = 1910px. */
+  it("and it has margin to rotate into, sized off the tallest it can get", () => {
+    expect(rule(".qc-ctx")).toContain("margin: 10px");
+    const HEIGHT_LIMIT = 10 / (Math.sin((0.6 * Math.PI) / 180) / 2);
+    expect(HEIGHT_LIMIT, "10px must clear any real display's row height").toBeGreaterThan(1800);
+  });
+
+  /* ⚠️ NOT GATED ON prefers-reduced-motion. This is a static transform, not motion: nothing
+     animates and there is no vestibular effect to spare anyone. Gating it would hand those users
+     a different design rather than a calmer one. */
+  it("reduced motion does not straighten it — there is no motion to reduce", () => {
+    const at = css.indexOf("prefers-reduced-motion");
+    const reduced = css.slice(at);
+    expect(reduced, "the tilt was gated on reduced motion").not.toContain("rotate(0");
   });
 
   it("values are Inter, not Playfair — serif numerals read as a second headline", () => {
@@ -63,14 +130,38 @@ describe("the panel reads as quieter than the form", () => {
     expect(rule(".qc-ctxv"), "the serif came back").not.toContain("var(--f12-serif)");
   });
 
-  /* All three of monogram, agency and agent name already sit in the agent row on the left at
-     twice the size. The LOCATION went with the block and has no other home in this structure —
-     flagged, not smuggled into another section. */
-  it("the identity block is gone; a caption bar names the column's job instead", () => {
+  /* ⚠️ "THIS AGENT AT A GLANCE" REPLACES THE "FOR REFERENCE" CAPTION BAR. That bar named the
+     column's FUNCTION and nothing else, on the reasoning that an identity block would compete
+     with the agent row on the left — so the one line of a reference card that tells you whose
+     card it is was the line it did not have. The name is a 7.5px mono CAPTION under the title,
+     not a second headline, so the hierarchy the old bar protected survives. */
+  it("the header names the agent, and the full identity block stays gone", () => {
     expect(panel, "the monogram came back").not.toContain("qc-ctxmg");
     expect(panel, "the agency heading came back").not.toContain("<h3>");
-    expect(panel).toContain("For reference");
-    expect(rule(".qc-ctxhead"), "the caption bar rule is missing").not.toBe("");
+    expect(panel, "the caption bar was not replaced").not.toContain("For reference");
+    expect(panel).toContain("This agent at a glance");
+    expect(panel, "the name must come from the shared display helper").toContain("{agentPrimary(agent)}");
+    expect(rule(".qc-glancew"), "the name is a caption, never a headline")
+      .toContain("var(--f12-mono)");
+    expect(rule(".qc-glanceh")).toContain("font-size: 15px");
+  });
+
+  /* The disc is a wash bleeding off the top-right corner — it is what stops the gradient reading
+     as a flat tinted strip. The pill must sit ABOVE it or the wash tints it a different green
+     from every other pill in the app. */
+  it("a soft gradient ground with a burgundy disc bleeding off the corner", () => {
+    expect(rule(".qc-glance")).toContain("linear-gradient(135deg, #f4efe6, #faf7f2)");
+    const disc = rule(".qc-glance::after");
+    expect(disc).toContain("border-radius: 50%");
+    expect(disc).toContain("rgba(180, 90, 64, 0.05)");
+    expect(rule(".qc-ctxpill"), "the disc would tint the pill").toContain("z-index: 1");
+  });
+
+  it("the person mark is bordered, not a bare glyph", () => {
+    const mk = rule(".qc-glancemk");
+    expect(mk).toContain("width: 30px");
+    expect(mk).toContain("var(--pink-b)");
+    expect(mk).toContain("var(--pink-i)");
   });
 
   it("but the one fact the left column does not carry survives — their door", () => {
@@ -96,7 +187,7 @@ describe("the panel ends where its content ends", () => {
   it("only the body scrolls; head, strip and footer stay put", () => {
     expect(rule(".qc-ctxbody")).toContain("overflow-y: auto");
     expect(rule(".qc-ctxbody")).toContain("min-height: 0");
-    for (const fixed of [".qc-ctxhead", ".qc-ctxstats", ".qc-ctxfoot"]) {
+    for (const fixed of [".qc-glance", ".qc-ctxstats", ".qc-ctxfoot"]) {
       expect(rule(fixed), `${fixed} must not flex`).toContain("flex: none");
     }
   });
@@ -105,6 +196,28 @@ describe("the panel ends where its content ends", () => {
     expect(rule(".qc-ctxclamp")).toContain("-webkit-line-clamp: 4");
     expect(panel).toContain('className={showAll ? undefined : "qc-ctxclamp"}');
     expect(panel).toContain("aria-expanded={showAll}");
+  });
+});
+
+/* ⚠️ THE GLYPHS ARE KEYED, NOT POSITIONAL. Either cell omits itself when the agent has not
+   stated that fact, so "the first one is the clock" holds only until an agent with no reply time
+   arrives — and then the envelope would sit under "Expected response time". */
+describe("the stat cells carry a glyph apiece", () => {
+  it("a pink-tinted rounded square, keyed to the cell", () => {
+    expect(panel).toContain("const STAT_GLYPH: Record<string, React.ReactNode>");
+    expect(panel).toContain("{STAT_GLYPH[c.key] && <span className=\"qc-ctxsi\"");
+    expect(panel, "a positional lookup would mislabel a one-cell strip").not.toContain("STAT_GLYPH[0]");
+    const si = rule(".qc-ctxsi");
+    expect(si).toContain("var(--pink-t)");
+    expect(si).toContain("var(--pink-i)");
+    expect(si).toContain("border-radius: 7px");
+  });
+
+  it("and the long captions still wrap rather than truncate", () => {
+    expect(statCells(bare({ submissionMethod: SubmissionMethod.EMAIL })).map((c) => c.caption))
+      .toContain("Preferred submission method");
+    expect(rule(".qc-ctxk"), "an ellipsis here would abbreviate a reference panel")
+      .not.toContain("text-overflow");
   });
 });
 

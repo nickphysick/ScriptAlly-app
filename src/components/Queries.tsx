@@ -3068,11 +3068,27 @@ export const Queries: React.FC<{
                         date; only the agent is genuinely open. They are deliberately NOT a live
                         region: the subtitle above already is one, and two announcers on one line
                         of chrome would talk over each other on every keystroke. */}
+                    {/* ⚠️ THE CHECKLIST STATES VALUES, AND ITS TICKS ARE NOT ALL THE SAME TICK.
+                        A bare green tick beside Manuscript and Date claimed the writer had
+                        completed them when openCreate had merely pre-filled them — so the one
+                        item that genuinely needs them read as one open thing among three
+                        settled ones. Outlined = answered for you; solid = answered by you.
+                        `createBase` is the baseline that tells them apart (see requirements). */}
                     <div className="qch-reqs">
-                      {requirements(createDraft).map((r) => (
-                        <span key={r.key} className={`qch-rq${r.met ? " qch-on" : ""}`}>
-                          <span className="qch-c" aria-hidden="true">{r.met ? "✓" : ""}</span>
+                      {requirements(
+                        createDraft,
+                        createBase,
+                        {
+                          agent: createDraft.agentId
+                            ? agentPrimary(agents.find((a) => a.id === createDraft.agentId) ?? ({} as never))
+                            : "",
+                          manuscript: manuscripts.find((m) => m.id === createDraft.manuscriptId)?.title ?? "",
+                        },
+                      ).map((r) => (
+                        <span key={r.key} className={`qch-rq qch-${r.state}`}>
+                          <span className="qch-c" aria-hidden="true">{r.state === "empty" ? "" : "✓"}</span>
                           {r.label}
+                          <b className="qch-v">{r.value}</b>
                         </span>
                       ))}
                     </div>

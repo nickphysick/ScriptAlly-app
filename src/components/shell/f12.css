@@ -162,10 +162,25 @@
    sage — index.css locks --sage/--sageC/--sageD to StatusDots, and a requirement pip is not a
    query status. ── */
 .qch-reqs { display: flex; gap: 13px; margin-top: 6px; }
+/* ══ THE REQUIREMENT CHECKLIST — THREE MARKS, NOT TWO ═══════════════════════════════════════
+   ⚠️ THE OUTLINED TICK IS THE WHOLE POINT. The manuscript and the date are pre-filled by
+   openCreate, and a solid green tick beside them claimed the writer had completed something they
+   had not looked at. Outlined = answered FOR you and still editable; solid = answered BY you;
+   an open ring = nothing recorded yet. Each row also states its VALUE — "Manuscript ✓ Murphy's
+   Day Out" is checkable in a way that "Manuscript ✓" is not.
+   ⚠️ The sage is the BAND sage #7e9178. index.css locks --sage / --sageC / --sageD to
+   StatusDots, and a requirement mark is not a query status. */
 .qch-rq { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
-.qch-c { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #cfc3b1; display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; }
-.qch-rq.qch-on { color: var(--ink); }
-.qch-rq.qch-on .qch-c { background: #7e9178; border-color: #7e9178; }
+.qch-c { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #cfc3b1; display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; flex: none; }
+.qch-v { font-weight: 600; color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* empty — an open ring, and the value is the instruction */
+.qch-rq.qch-empty .qch-v { font-weight: 500; color: var(--muted); }
+/* pre-filled — outlined: the tick is sage, the disc is not filled */
+.qch-rq.qch-prefilled { color: var(--ink); }
+.qch-rq.qch-prefilled .qch-c { background: transparent; border-color: #7e9178; color: #7e9178; }
+/* answered — the solid tick, reserved for what the writer actively did */
+.qch-rq.qch-answered { color: var(--ink); }
+.qch-rq.qch-answered .qch-c { background: #7e9178; border-color: #7e9178; color: #fff; }
 
 /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-stage1.html option 2) ══════════════════════
    ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately. Choosing an agent REPLACES the right column's
@@ -179,6 +194,13 @@
 .qc-askfield .f12-lsearch { height: 44px; border-color: var(--line); background: var(--panel); box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
 /* The ghosts sit at the FOOT of the column, where the real stack will be. */
 .qc-ghosts { margin-top: auto; padding-top: 18px; opacity: 0.5; }
+
+/* ⚠️ STAGE 1'S EMPTY RIGHT COLUMN IS ART, NOT A PANEL. Both cases it covers are ordinary — a new
+   account with no contacts, and a writer who has queried everyone — and neither is a failure
+   worth framing. It holds the column so the two-column geometry survives and nothing jumps when
+   an agent is chosen, and it has NO border of its own: the ArtSlot already draws a dashed
+   commissioning box, and a frame around that is two nested empty boxes. */
+.qc-qpart { flex: 1 1 0; min-width: 0; align-self: center; display: grid; place-items: center; padding: 12px; }
 
 /* Quick picks — the agents you have never queried, newest first. */
 .qc-qp { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: var(--panel); }
@@ -264,25 +286,66 @@
    flex child. A thin record stretched to the column's full height is a frame around dead space,
    and dead space reads as something that failed to load. `align-self: flex-start` is what stops
    the row's default `stretch` overriding the auto height. */
-.qc-ctx { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; display: flex; flex-direction: column; border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; background: #fbf9f5; }
+/* ══ THE PANEL IS A CARD LAID ON THE DESK (ref qc-tilt.html, b2 + t1) ═══════════════════════
+   A dotted edge and six-tenths of a degree, which together stop it reading as a UI element
+   beside the form. Four constraints, all binding:
+
+   ⚠️ DOTTED, NOT DASHED. Dashed already means draft/placeholder in this app — the create draft
+   row and every un-commissioned ArtSlot wear it — so a dashed panel would say "this content is
+   provisional" about a record that is anything but.
+
+   ⚠️ NO `position: fixed` DESCENDANT MAY LIVE IN HERE. `transform` creates a containing block,
+   so a fixed child would anchor to the panel instead of the viewport and land wherever the
+   rotation put it. The panel is reference-only today — its focusables are two links and the
+   wish-list "Read all" toggle, none of which escape their box. If a popover is ever needed
+   inside it, REMOVE THE ROTATION; do not hack the popover.
+
+   ⚠️ ROTATION NEEDS CLEARANCE, AND THE OVERHANG IS DRIVEN BY HEIGHT, NOT WIDTH. A rotated box's
+   corners extend past its layout box by (h · sin θ)/2 sideways and (w · sin θ)/2 vertically. With
+   θ = 0.6°, sin θ = 0.010472, so the SIDEWAYS overhang is h / 191 — which means the number to
+   size the margin against is how tall the panel can get, and the panel's max-height is the
+   workspace row. Measured at 1440×900: h = 558 → 2.89px, and 6px left only 3.09px of slack;
+   a portrait or 4K display makes the row ~1400px tall and 6px clips.
+   `margin: 10px` holds until h = 1910px, which is past any display this runs on. Vertical is
+   never the binding case — w tops out near 700px inside the 1600px content cap, so 3.7px.
+
+   ⚠️ AND IT IS NOT GATED ON `prefers-reduced-motion`. This is a static transform, not motion:
+   nothing animates, nothing moves, and there is no vestibular effect to spare anyone. Gating it
+   would leave those users with a different design, not a calmer one. */
+.qc-ctx { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; margin: 10px; display: flex; flex-direction: column; border: 1.5px dotted #cdbfa9; border-radius: 16px; overflow: hidden; background: #fbf9f5; transform: rotate(-0.6deg); }
 
 /* ⚠️ QUIET REFERENCE (qc-focus.html panel 2). Ground #fbf9f5, hairline border, NO SHADOW — a
    shadow implies floating, and this sits back. Values inside are Inter, not Playfair: serif
    numerals here read as a second headline and pull the eye off the form.
    The identity block is GONE — monogram, agency and agent name all already sit in the agent row
    on the left at twice the size, and repeating them made the panel a second subject. */
-.qc-ctxhead { flex: none; display: flex; align-items: center; gap: 7px; padding: 12px 15px 10px; border-bottom: 1px solid var(--hairline); }
-.qc-ctxhead svg { width: 13px; height: 13px; flex: none; color: var(--faint); }
-.qc-ctxfor { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
-.qc-ctxpill { margin-left: auto; flex: none; display: inline-flex; align-items: center; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
+/* ── "THIS AGENT AT A GLANCE" (ref qc-tilt.html .hglance) ──────────────────────────────────
+   ⚠️ THIS REPLACES THE "FOR REFERENCE" CAPTION BAR, and it names the agent where that bar named
+   only its own function. The disc is a wash bleeding off the top-right corner — it is what stops
+   the gradient reading as a flat tinted strip — and it is `overflow: hidden`'s job to crop it,
+   which is why the header clips rather than the panel doing it for both. */
+.qc-glance { flex: none; position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: linear-gradient(135deg, #f4efe6, #faf7f2); border-bottom: 1px solid var(--hairline); }
+.qc-glance::after { content: ""; position: absolute; right: -18px; top: -18px; width: 76px; height: 76px; border-radius: 50%; background: rgba(180, 90, 64, 0.05); }
+.qc-glancemk { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--panel); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; position: relative; z-index: 1; }
+.qc-glancemk svg { width: 15px; height: 15px; }
+.qc-glancet { min-width: 0; position: relative; z-index: 1; }
+.qc-glanceh { font-family: var(--f12-serif); font-weight: 700; font-size: 15px; line-height: 1.1; color: var(--ink); }
+.qc-glancew { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* the pill must sit ABOVE the disc, or the wash tints it a different green from every other pill */
+.qc-ctxpill { margin-left: auto; flex: none; position: relative; z-index: 1; display: inline-flex; align-items: center; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
 .qc-ctxpill-shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
 
 /* stat strip — cells omit themselves; the strip omits when none survive */
 .qc-ctxstats { flex: none; display: flex; border-bottom: 1px solid var(--hairline); }
 /* ⚠️ EQUAL WIDTH, AND THE CAPTIONS WRAP. "Preferred submission method" is long on purpose —
    an abbreviated caption on a reference panel is the one thing worse than a long one. */
-.qc-ctxstat { flex: 1 1 0; padding: 11px 14px; border-right: 1px solid var(--hairline); min-width: 0; }
+.qc-ctxstat { flex: 1 1 0; padding: 11px 14px; border-right: 1px solid var(--hairline); min-width: 0; display: flex; gap: 9px; }
 .qc-ctxstat:last-child { border-right: none; }
+/* the glyph — a pink-tinted rounded square, so the two facts read as two KINDS of fact before
+   they are read as values. Never a bare icon: at 12px an unbacked glyph is a smudge. */
+.qc-ctxsi { width: 24px; height: 24px; flex: none; border-radius: 7px; background: var(--pink-t); color: var(--pink-i); display: grid; place-items: center; }
+.qc-ctxsi svg { width: 12px; height: 12px; }
+.qc-ctxstatt { min-width: 0; }
 .qc-ctxv { font-family: inherit; font-weight: 600; font-size: 14px; line-height: 1.2; color: var(--ink-2); }
 .qc-ctxv small { font-family: inherit; font-weight: 500; font-size: 11px; color: var(--muted); }
 .qc-ctxk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-top: 3px; line-height: 1.4; }
