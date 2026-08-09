@@ -32,7 +32,8 @@ export type ArtSlotName =
   | "dock-seal"         // 600ms flourish as a flow completes, before the card animates to Done
   | "review-masthead"   // the weekly briefing card, while fresh
   | "first-run-board"   // the To-do list before the first query — "not yet", not "well done"
-  | "seize-the-day";    // Today's plan card — the ONE slot with a real asset committed
+  | "seize-the-day"     // Today's plan card — the ONE slot with a real asset committed
+  | "agent-unknown";    // Query Centre: the agent context panel with nothing on file to report
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -97,6 +98,15 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     w: 100, h: 100,
     src: "/todo-seize-the-day.png",
     alt: "A mark for planning the day ahead",
+  },
+  /* Query Centre · stage 2's right column when the agent record is a name and nothing else.
+     BRIEF: a closed reference book on a desk, seen from above, with the reader's chair empty —
+     the record exists but has not been filled in yet. Quiet, no question mark, no shrug: this is
+     an invitation to go and find out, not a fault being reported. */
+  "agent-unknown": {
+    caption: "A closed reference book, waiting to be opened",
+    w: 220, h: 150,
+    alt: "A closed reference book on an empty desk",
   },
 };
 

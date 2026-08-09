@@ -26,6 +26,7 @@ import {
   stepStates, stepIndex, advance, jumpTo, nextStep, enterHint, type StepId,
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
+import { AgentContextPanel } from "./AgentContextPanel";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { BrandDatePicker } from "../forms";
@@ -171,7 +172,17 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
         </>
       ) : (
         <>
-      {/* ── The agent, confirmed. (P4 turns the columns below into the focused stack.) ── */}
+      {/* ══ STAGE 2 — TWO COLUMNS (ref qc-create-fullscreen.html) ═════════════════════════
+          Left 52%: the agent, the stack, the whisper — everything you DO. Right: what is on
+          file about the agent — everything you might need to KNOW while doing it. Both scroll
+          independently so the page itself never does.
+
+          ⚠️ THE RIGHT COLUMN IS NOT RENDERED BELOW 1100px (see .qc-two in f12.css). A squeezed
+          context table is worse than none: the rows wrap to three lines each and the form loses
+          the comfortable measure that is the whole reason for the 52%. Below the breakpoint the
+          form simply has the width to itself. ── */}
+      <div className="qc-two">
+        <div className="qc-form f12-quiet-scroll">
       <div className="f12-hero qc-hero" style={{ flex: "none", alignItems: "center" }}>
         <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
         <div style={{ minWidth: 0 }}>
@@ -499,6 +510,13 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
       {whisperDate && (
         <p className="qc-whisper">We&rsquo;ll nudge you on {shortDate(whisperDate)} if it&rsquo;s gone quiet.</p>
       )}
+        </div>
+        <AgentContextPanel
+          agent={agent}
+          queries={queries}
+          manuscript={manuscripts.find((m) => m.id === draft.manuscriptId) ?? null}
+        />
+      </div>
         </>
       )}
     </div>

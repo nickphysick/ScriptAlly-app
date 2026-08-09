@@ -31,9 +31,11 @@ const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const NAMES: ArtSlotName[] = [
   "desk-clear", "noteboard-empty", "done-empty", "dock-seal", "review-masthead", "first-run-board",
   "seize-the-day",
+  // Query Centre's agent context panel with nothing on file — the first slot outside /todo.
+  "agent-unknown",
 ];
 
-describe("⚠️ ONE component, SEVEN slots — the briefs are the contract", () => {
+describe("⚠️ ONE component, EIGHT slots — the briefs are the contract", () => {
   it("every briefed slot exists, with its ratio and its caption", () => {
     expect(Object.keys(ART_SLOTS).sort()).toEqual([...NAMES].sort());
     for (const n of NAMES) {
