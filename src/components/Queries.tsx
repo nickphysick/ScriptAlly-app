@@ -930,11 +930,28 @@ export const Queries: React.FC<{
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
 
+  /* The shortcut reads these through refs rather than closing over them: the listener is bound
+     once per create session, and a stale closure would keep answering with the readiness the
+     draft had when it opened. */
+  const createReadyRef = useRef(false);
+  const createSavingRef = useRef(false);
+  const saveCreateRef = useRef<() => void>(() => {});
+
   // v4 P2 — Esc leaves create mode. Declared here (not with the other create handlers) because it
   // reads the popover state above: an open Filter/Sort popover owns Escape first.
   useEffect(() => {
     if (!creating) return;
     const onKey = (e: KeyboardEvent) => {
+      /* ⌘/Ctrl+Enter SAVES FROM ANYWHERE in create mode — including inside the notes textarea,
+         where plain Enter is a newline and therefore cannot be the finish key. Gated on the same
+         readiness the buttons read, so the shortcut can never do what a disabled button would
+         not. */
+      if ((e.key === "Enter") && (e.metaKey || e.ctrlKey)) {
+        if (!createReadyRef.current || createSavingRef.current) return;
+        e.preventDefault();
+        saveCreateRef.current();
+        return;
+      }
       if (e.key !== "Escape" || filterPopOpen || sortPopOpen) return;
       e.preventDefault();
       closeCreate();
@@ -1425,6 +1442,14 @@ export const Queries: React.FC<{
   /* The save gate, in ONE place: the header's two save buttons must agree, and a second copy of
      draftReady(createDraft) is how they would stop agreeing. */
   const createReady = createDraft ? draftReady(createDraft) : false;
+  /* ⚠️ ASSIGNED HERE, NOT WHERE THE REFS ARE DECLARED. The ⌘↵ listener is bound ~470 lines
+     above, before `createReady` exists — writing `createReadyRef.current = createReady` up there
+     is a same-scope use-before-declaration, and tsc rejected it. The refs are declared early so
+     the listener can close over them and assigned here so they carry the live value. */
+  createReadyRef.current = createReady;
+  createSavingRef.current = createSaving;
+  saveCreateRef.current = () => { void saveCreate(); };
+
   const listNarrowed = activeFilterCount > 0 || (listSearch || searchQuery || "").trim() !== "";
 
   const OPEN_STATUSES_F12 = STATUS_SORT_ORDER.slice(0, 7);
@@ -3078,6 +3103,11 @@ export const Queries: React.FC<{
                   agents={agents}
                   manuscripts={pickableManuscripts(manuscripts)}
                   onCreateAgent={handleCreateAgentInline}
+                  queries={queries}
+                  /* The duplicate link discards the draft through the normal door — closeCreate
+                     owns the dirty-confirm, so "go and look at that one" can never lose typing
+                     silently. */
+                  onOpenQuery={(id) => closeCreate(() => setSelectedQueryId(id))}
                 />
               </div>
             ) : activeQuery && activeAgent && activeMs ? (

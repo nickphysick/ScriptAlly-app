@@ -188,6 +188,28 @@
 .qc-sec.qc-up { opacity: 0.45; }
 .qc-sec.qc-up .qc-tick { background: transparent; border: 1.5px solid #cfc3b1; color: transparent; }
 
+/* ── STAGE 2: the three treatments (ref qc-create-steps.html) ────────────────────────────── */
+/* active — lifted, warm border, numbered head with the Enter hint */
+.qc-sec.qc-active { border-color: #d8c4b2; box-shadow: 0 10px 30px rgba(60, 45, 30, 0.09); }
+.qc-shead { display: flex; align-items: center; gap: 9px; padding: 13px 16px 0; }
+.qc-n { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 9px; flex: none; }
+.qc-shead h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 16px; color: var(--ink); margin: 0; }
+.qc-opt { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.05em; font-weight: 400; color: var(--muted); }
+.qc-enter { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--faint); flex: none; }
+.qc-body { padding: 12px 16px 15px; }
+
+/* done — the summary IS the receipt, so it states values, not that values exist */
+.qc-sum { width: 100%; text-align: left; background: none; border: none; font-family: inherit; cursor: pointer; }
+.qc-sec.qc-done .qc-tick { background: #7e9178; color: #fff; }
+.qc-ed { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--muted); flex: none; }
+.qc-sum:hover .qc-ed { color: var(--burg); }
+
+/* The duplicate notice — a statement beside the agent, never a barrier in front of the save. */
+.qc-dupe { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin: 5px 0 0; font-size: 12px; color: var(--burg); }
+.qc-dupelink { background: none; border: none; padding: 0; font: inherit; font-weight: 600; color: var(--burg); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+/* The reminder whisper — quiet, near Save, and purely presentational. */
+.qc-whisper { flex: none; margin: 10px 2px 0; font-size: 12px; font-style: italic; color: var(--muted); }
+
 @media (prefers-reduced-motion: reduce) { .qc-sec { transition: none; } }
 
 /* ══ INLINE QUERY CREATION — the create pane's chips / checklist ═══════════════════════════

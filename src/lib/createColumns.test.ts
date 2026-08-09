@@ -9,6 +9,7 @@
  * in BOTH modes, because the same data under two names is how two names start disagreeing.
  */
 import { describe, it, expect } from "vitest";
+import { STEP_TITLE } from "./createSteps";
 import { readFileSync } from "fs";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -22,48 +23,45 @@ const column = (from: string, to: string): string => {
   return a < 0 || b < 0 || b < a ? "" : pane.slice(a, b);
 };
 
-describe("the three create-mode columns", () => {
-  it("are named When you sent it · What you sent · Notes", () => {
-    expect(pane).toContain("<span>When you sent it</span>");
-    expect(pane).toContain("<span>What you sent</span>");
-    expect(pane).toContain("<span>Notes</span>");
-    expect(pane, "the old name survives").not.toContain("<span>The send</span>");
-    expect(pane, "the old name survives").not.toContain("<span>Journal</span>");
+/* ⚠️ THE COLUMNS ARE NOW A STACK (create mode v3). Three side-by-side cards became three
+   sections met one at a time — same fields, same order, same manuscript placement. What this
+   suite proved survives as facts about the SECTIONS, so the arguments it settled are not lost:
+
+   · The three are named When you sent it · What you sent · Notes. Still true — and now
+     single-sourced in STEP_TITLE rather than typed into three card heads.
+   · The manuscript sits with the MATERIALS it went out with, not with the send facts. Still
+     true, and now structural: it is inside the "what" section's body.
+
+   What did NOT survive is everything about a GRID: the flexing columns, their min-height:0, and
+   the per-column internal scroll. A stack has one column and the page scrolls; there is no
+   fallback overflow to assert. */
+describe("the three sections keep the columns' vocabulary and their split", () => {
+  it("named from one source, not typed into three heads", () => {
+    expect(STEP_TITLE.when).toBe("When you sent it");
+    expect(STEP_TITLE.what).toBe("What you sent");
+    expect(STEP_TITLE.notes).toBe("Notes");
+    expect(pane, "the heads must render from the shared vocabulary").toContain("STEP_TITLE.when");
+  });
+
+  it("the manuscript stayed with the materials, not with the send facts", () => {
+    const whatAt = pane.indexOf('aria-labelledby="qc-h-what"');
+    const notesAt = pane.indexOf('aria-labelledby="qc-h-notes"');
+    expect(whatAt, "the what section is missing").toBeGreaterThan(-1);
+    expect(notesAt).toBeGreaterThan(whatAt);
+    const what = pane.slice(whatAt, notesAt);
+    expect(what, "the manuscript left the section it belongs to").toContain("Manuscript");
+    expect(what, "both manuscript states came with it").toContain("onlyManuscript");
+  });
+
+  it("and the send facts did not follow it", () => {
+    const whenAt = pane.indexOf('aria-labelledby="qc-h-when"');
+    const when = pane.slice(whenAt, pane.indexOf('aria-labelledby="qc-h-what"'));
+    expect(when).toContain("Date sent");
+    expect(when).toContain("Sent by");
+    expect(when, "the manuscript came back to the send facts").not.toContain(">Manuscript<");
   });
 });
 
-describe("the manuscript moved", () => {
-  const sendCol = column("When you sent it", "What you sent");
-  const sentCol = column("What you sent", "Notes");
-
-  it("the slices are anchored (a missing heading would make every check below vacuous)", () => {
-    expect(sendCol).not.toBe("");
-    expect(sentCol).not.toBe("");
-  });
-
-  it("'When you sent it' holds send facts ONLY", () => {
-    expect(sendCol, "the manuscript is still in the send column").not.toContain("Manuscript");
-    for (const field of ["Date sent", "Sent by", "Nudge reminder"]) {
-      expect(sendCol, `${field} left the send column`).toContain(field);
-    }
-  });
-
-  it("'What you sent' opens with the manuscript, above a hairline, then the materials", () => {
-    expect(sentCol).toContain("<div style={LABEL}>Manuscript</div>");
-    const ms = sentCol.indexOf("<div style={LABEL}>Manuscript</div>");
-    const rule = sentCol.indexOf('height: 1, background: "var(--line)"');
-    const mats = sentCol.indexOf("draft.materials.map");
-    expect(rule, "the divider is missing").toBeGreaterThan(-1);
-    expect(ms).toBeLessThan(rule);
-    expect(rule, "the divider must separate WHICH book from WHAT went with it").toBeLessThan(mats);
-  });
-
-  it("both manuscript states came with it — locked single, and the app's own menu", () => {
-    expect(sentCol).toContain("Only manuscript");
-    expect(sentCol).toContain("F12Menu");
-    expect(sentCol, "a native select must never reappear").not.toContain("<select");
-  });
-});
 
 describe("one name for one thing, across modes", () => {
   it("the reading pane's column is Notes too", () => {
