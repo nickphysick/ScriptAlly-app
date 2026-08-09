@@ -1,6 +1,36 @@
-# STATE — where the repo stands
+**Last updated: 9 August 2026 (sixteenth pass — the Tasks consolidation, Phase 1).**
 
-**Last updated: 7 August 2026 (fifteenth pass — the Tasks viewport pack, COMPLETE).**
+## Tasks consolidation — ⚠️ PHASE 1 ONLY (pack: tasks-consolidation-prompt.md)
+
+`440a652` (the extraction) → `f8ea950` (the constants move) → `3c51b1e` (P1). Suite **3287 | 2
+skipped, 213 files**; tsc + production build green. **NOT DEPLOYED** — dev still runs the
+pre-consolidation build.
+
+- **⚠️ TODAY IS RETIRED.** Three nav rows: To-do list · Calendar · Noteboard, all read from
+  `TODO_ROUTES` so the sidebar, the palette and the router cannot drift. Seven files deleted
+  (page, css, `lib/todoToday` + its test, three Today-only suites); everything shared was kept.
+- **⚠️ THE CONSTANTS MOVED FIRST, IN THEIR OWN COMMIT.** `TODO_WORK_THE_LIST` /
+  `TODO_ADD_TO_TODAY` were declared in the page being deleted and imported by the page that
+  survives — an inverted dependency whose failure is SILENT (an unresolved event name is a
+  listener that never fires). They live in `lib/todoRoutes` now.
+- **NO REDIRECT CODE.** `todoPageForPath` already falls back to `list` for any unmatched
+  `/todo*`, so `/todo/today` lands on the page that absorbed the job. Asserted against the
+  retired path — a behaviour relied on by accident is now pinned on purpose.
+- **⚠️ `public/todo-seize-the-day.png` IS AN UNUSED ASSET, DELIBERATELY KEPT.** Still registered
+  in `ArtSlot` (`seize-the-day`, 100×100, the only slot with a real src). It has no mount until
+  the consolidated page gives it one. **Do not delete it in a cleanup sweep** — Nick's call: an
+  illustration is worth more than the page it happened to sit on.
+- **⚠️ THE CHOKE POINTS WERE EXTRACTED BEFORE ANY OF THIS** (`440a652`): `clampSnooze`,
+  `snoozeVia`, `completionVia`/`isTickable` and `cardLane` live in `lib/todoActions`, unit-tested
+  away from any component, because a choke point inside the 2,247-line page about to be rebuilt
+  is a coincidence rather than a guarantee. The offer cap turned out to live in THREE places
+  (the page, FocusFlow's sweep snooze, its staged runner); all three call the one ceiling now.
+- **Sixteen suites hand-edited**, one at a time. **⚠️ NEVER CODEMOD THIS CLEANUP** — two scripted
+  attempts damaged the tree (one matched the word `today` and gutted 39 unrelated files, one
+  miscounted braces inside strings). Every removed spec leaves its RULE written where it stood,
+  so Phase 2 rebuilds against them rather than rediscovering them.
+- **Phases 2–7 remain**: the page body, task types and verbs, the snooze dial, states/loading/
+  empty, toasts/motion/keyboard/batch, narrow and touch.
 
 ## The Tasks viewport pack is COMPLETE (report: `reports/tasks-viewport.md`)
 
