@@ -1,10 +1,70 @@
-**Last updated: 9 August 2026 (seventeenth pass — the Tasks consolidation, Phase 2).**
+**Last updated: 9 August 2026 (eighteenth pass — the Tasks consolidation, Phases 3 and 4).**
+
+## Tasks consolidation — P3 + P4 ARE IN, and BOTH P2 flags are resolved
+
+Report: **`reports/tasks-consolidation-p3-p4.md`**. `a353434` (tags) → `9582c87` (goodDay) →
+`02e4a7f` (P3) → `<P4>`. Suite **3387 | 2 skipped, 216 files**; tsc + production build green.
+**Phases 5–7 remain** (row states/loading/empty · toasts/motion/keyboard/batch · narrow and touch).
+
+- **⚠️ `lib/taskRow.ts` ANSWERS "WHAT IS THIS", `cardMenu` ANSWERS "WHAT MAY I DO WITH IT".** That
+  split is the P3 contract: the menu says WHETHER a verb slot fills, taskRow says WHAT IT IS
+  CALLED (Action · Start · Close · Return · Undo). The row and the ⋯ menu therefore cannot
+  disagree about what a card allows — the property P2 bought and P3 had to keep.
+- **⚠️ NINE PILL TONES, ONE PER LIVE KIND, SUPERSEDING P2's FOUR FAMILY TONES.** The families
+  answer "how urgent is this", which the group headings already answer in words, so the pill was
+  saying one thing twice while the thing a pill is FOR went unsaid. **THE WORDS ARE `card.kind`** —
+  the vocabulary the facet chips, the snoozed band and the counting law already speak; a per-kind
+  label table would be a second one. The CSS restatement is locked to the `PillTone` union in BOTH
+  directions (every tone has a rule, no rule lacks a tone).
+- **⚠️ AN R&R IS ITS OWN KIND**, changed at the SOURCE in `derivedCopy` so the pill, the snoozed
+  band ("R&R · 🕐") and every future reader speak one vocabulary. The lane is untouched, so the
+  counting law, the families and the groups are unaffected (`liveFamily` keys on the stream).
+- **⚠️ STATE BEATS KIND, BUT A SNOOZED CARD KEEPS ITS OWN WORDS.** Done and snoozed are consulted
+  before the task type; only the TONE sleeps. The ref draws a bare `SNOOZED` pill and
+  `tasksAuditGrammar` locks the opposite with its reason — a row that forgets what it is while it
+  sleeps tells you nothing about what returns.
+- **⚠️ THE JOURNEY IS A FUNCTION OF THE TASK TYPE, NOT OF THE QUERY.** The engine only raises a
+  `full_requested` task for a query at full-requested, so re-reading the status would be a second
+  derivation of a fact the first already carries. A pile and a journey never appear together.
+- **⚠️ TWO OF THE REF'S THIRTEEN ROWS ARE NOT BUILT AND THAT IS THE LAW:** DEADLINE (no task type
+  raises an expiring exclusive) and DISMISSED (the settings ledger's, not a group here). Their
+  verbs — Review, Restore — are locked OUT of `taskRow`. **`nudge_overdue` is the one LIVE kind the
+  ref does not draw**: `wait` tone, no journey (its card is about a duration, which the age lane
+  states, not a position on a path). Its kind string is still "AGENT WAITING", which is arguably
+  backwards — a copy call for Nick, flagged in the report.
+- **⚠️ THE DIAL NAMES THE DATE BEFORE YOU COMMIT (P4)** — Playfair, as the headline. **THE CEILING
+  IS THE TRACK'S OWN LENGTH**: `reachableStops` applies `snoozeCeilingDays`, so an offer's dial has
+  ONE stop and a deadline's ends at the deadline; the knob cannot reach a tier it may not write.
+  `clampSnooze` is STILL called on the way out — a guard you rely on being unnecessary is a guard
+  you have stopped having. It replaced the ⋯ snooze submenu at ONE call site, which is exactly why
+  P2 routed the clock through a pre-opened submenu.
+- **⚠️ THE DIAL IS A RANGE INPUT UNDER A PAINTED TRACK.** Dragging, track clicks, arrow keys,
+  Home/End and assistive technology all come from the platform; a bespoke `pointermove` gives the
+  first two and reimplements the rest badly. Focus is painted on our own knob.
+- **BROWSER-WALKED, NO NEW FAULTS** (the P2 walk found two the suite could not). Every live row
+  renders its right tone, stage, age and verb set; the dial is 290px with the REAL date picker at
+  170px beside Snooze, no overflow; five tick labels clear by 25px.
+
+### The two P2 flags, resolved (Nick's calls)
+
+- **TAGS ARE BACK IN THE TOOL ROW** as the Noteboard's own `#All ▾` — same trigger, same menu, same
+  single-select vocabulary; it composes inside `narrowCards`, the page's ONE narrowing, through the
+  shared pure `matchesTags`. **⚠️ A LATENT BUG CAME OUT WITH IT:** `.cal-nav`/`.cal-viewmenu`/
+  `.nb-tagwrap` lived in the Calendar's and the Noteboard's stylesheets, which the To-do list does
+  not import — correct in a bundled build, unstyled in dev on the one page that had not visited a
+  sibling. They live in **`taskChrome.css`** now, imported by all three.
+- **`goodDay` IS RETIRED WHOLE** — control, reader (`wipLine`, `estimateHeadLabel`'s appraisal
+  branch) and stored field. It advised on the size of the day's COMMITMENT, which the consolidation
+  removed; the copy law agrees independently. `todoPrefs` stays a TOTAL reader, so a pre-existing
+  stored key is ignored rather than carried. **⚠️ THE PROD RULES QUEUE DOES NOT SHORTEN — the
+  allowlist entry is `todoPrefs`, the whole map, never `goodDay`, and three other settings still
+  write it.** Locked so the correction cannot be lost.
 
 ## Tasks consolidation — PHASE 2 IS IN: the board is gone, the grouped list is the page
 
 Report: **`reports/tasks-consolidation-p2.md`**. Suite **3361 | 2 skipped, 217 files**; tsc +
-production build green. **NOT DEPLOYED** — dev still runs the pre-consolidation build; prod
-untouched. **Phases 3–7 remain** (kinds/verbs · the dial · states/loading/empty · toasts/motion/
+production build green. (Deploy state has moved on — see the P3/P4 section above.) **Phases 3–7
+remained at the time** (kinds/verbs · the dial · states/loading/empty · toasts/motion/
 keyboard/batch · narrow and touch).
 
 - **⚠️ THE FOUR COLUMNS, THE FILTERS SIDEBAR AND THE LEDGER TOGGLE ARE ALL RETIRED.** The page body
@@ -565,7 +625,8 @@ first cannot catch a promotion that silently stops.
 
 ## Deploy state
 
-- **dev** — hosting + rules at the board-optimise tip (7 Aug, both databases).
+- **dev** — hosting at the **tasks-consolidation P4 tip (9 Aug)**; rules unchanged since the
+  board-optimise tip (7 Aug, both databases) — the consolidation added no new stored field.
 - **prod** — untouched, and still behind. ⚠️ The sequencing constraint stands and has GROWN
   AGAIN: the prod `firestore.rules` deploy must land **before or with** any prod hosting deploy of
   this code, and it now carries `rejectedDate` (queries allowlist), `detail`/`surfaceOffset`
@@ -573,6 +634,10 @@ first cannot catch a promotion that silently stops.
   **`estimateMin`** (tasks, both allowlists). Until it lands, a prod user's Today's-list commit,
   their tags, their task settings and their estimates are all denied in silence. Prod deploys are
   Nick's alone.
+  ⚠️ **THE QUEUE DID NOT SHORTEN WHEN `goodDay` WAS RETIRED (9 Aug), and the expectation that it
+  would rested on a wrong premise.** The allowlist entry is **`todoPrefs`** — the whole map — never
+  a per-key one; three other settings still write it, so it still has to be sequenced. Retiring a
+  key inside a map changes no rule. Locked in `boardSettings.test.tsx`.
 
 ## The queue
 

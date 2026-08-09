@@ -92,13 +92,17 @@ measure and are untouched; the 10px clearance is padding **inside** the cell.
   rail is present because it is live today and dropping it in transit would be a regression rather
   than a phase boundary; the ref draws an empty meter for six of its thirteen kinds anyway.
 
-## Carried consequences — Nick's calls, not absorbed
+## Carried consequences — ⚠️ BOTH RESOLVED, 9 Aug (Nick's calls; see reports/tasks-consolidation-p3-p4.md)
 
-1. **The tag NARROWING is gone from this page.** Tags themselves are untouched: the composer writes
-   them, the ⋯ sheet edits them, the Calendar and the Noteboard still filter by them. But the
-   consolidated tool row has no tag control, and the ref draws none. If tag filtering matters here
-   it needs a home — the tool row is the only legal one.
-2. **`todoPrefs.goodDay` has no live reader.** "A GOOD DAY IS 3–5" advised on the size of the day's
+1. ~~**The tag NARROWING is gone from this page.**~~ **RESOLVED:** it returned to the tool row as
+   the Noteboard's own `#All ▾` control (`a353434`). Tags themselves were never touched: the
+   composer writes them, the ⋯ sheet edits them, the Calendar and the Noteboard still filter by
+   them.
+2. ~~**`todoPrefs.goodDay` has no live reader.**~~ **RESOLVED:** retired whole — control, reader
+   and stored field (`9582c87`). The prod rules queue did NOT shorten: the allowlist entry is
+   `todoPrefs`, the whole map, and three other settings still write it.
+
+   *(the original finding, kept because the reasoning is the record)* **`todoPrefs.goodDay` has no live reader.** "A GOOD DAY IS 3–5" advised on the size of the day's
    *commitment*, and committing work to a day is precisely what the consolidation removed. The ref
    draws no such line, and the copy law agrees ("the app reports and never appraises" — "THAT'S A
    FULL DAY" is an appraisal). `wipLine` and the Task-settings control both stand; a stored setting
