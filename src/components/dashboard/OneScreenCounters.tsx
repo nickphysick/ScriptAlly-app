@@ -15,6 +15,7 @@ import React from "react";
 import { Agent, Query } from "../../types";
 import { headerCounters, HeaderCounter } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
+import { useCountUp } from "../../lib/useCountUp";
 
 /** The ref's three marks: send · people · reply-arrow. */
 const ICON: Record<HeaderCounter["key"], React.ReactNode> = {
@@ -22,6 +23,12 @@ const ICON: Record<HeaderCounter["key"], React.ReactNode> = {
   agents: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></>,
   responses: <><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></>,
 };
+
+/** ⚠️ ITS OWN COMPONENT SO THE HOOK IS NOT CALLED IN A LOOP — hooks cannot run inside `.map`
+ *  with a varying count without breaking the rules of hooks the moment a counter drops out. */
+const CountFigure: React.FC<{ n: number }> = ({ n }) => (
+  <span className="os-cn">{useCountUp(n, 400).toLocaleString("en-GB")}</span>
+);
 
 export const OneScreenCounters: React.FC<{
   loading: boolean;
@@ -39,7 +46,7 @@ export const OneScreenCounters: React.FC<{
         <div className="os-cw">
           <div className="os-cl">{c.label}</div>
           <div className="os-cv">
-            <span className="os-cn">{c.n.toLocaleString("en-GB")}</span>
+            <CountFigure n={c.n} />
             {/* absent, not zero — see headerCounters */}
             {c.chip && <span className="os-cd">{c.chip}</span>}
           </div>

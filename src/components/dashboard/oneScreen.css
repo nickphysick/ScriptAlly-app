@@ -19,6 +19,14 @@
    JS-measured pixel height (that measured the scroller INCLUDING the 66px bar and overflowed by
    exactly `--head`). Requires `layout="fill"` on the slot AND `fit` on the work wrapper. */
 .os-root {
+  /* ⚠️ ONE INTER-CARD GAP, AS A TOKEN (audit P4). The counters card sat 26px above the row
+     beneath it while every other pair of cards sat 15px apart — a bespoke `padding-bottom` on
+     `.os-greet` unrelated to the cards it was spacing. Both read this now, so they cannot drift.
+     (The rail's 13px is DELIBERATELY its own — it spaces with margins; see `.os-colR`.)
+     ⚠️ DECLARED HERE, NOT IN A SECOND `.os-root` BLOCK: a separate rule became the FIRST match
+     for the smoke test's `rule(".os-root")` slice and took the lock's `height:100%` out of view.
+     One element, one rule — the same fault P2 fixed in the sidebar foot. */
+  --os-cardgap: 15px;
   height: 100%;
   overflow: hidden;
   display: flex;
@@ -59,7 +67,7 @@
 /* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
    escapes them. Without the overflow, a tall card pushes past its column silently. */
 .os-colM, .os-colR { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
-.os-colM { gap: 15px; }
+.os-colM { gap: var(--os-cardgap); }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
 .os-colR { gap: 0; }
@@ -134,7 +142,9 @@
 /* ══ THE HEADER (v16 §1) ══ */
 /* ⚠️ align-items: CENTER — the counters card is centred against the greeting, not top-aligned;
    a top-aligned card beside a 46px name reads as two unrelated blocks. */
-.os-greet { display: flex; align-items: center; gap: 32px; padding: 14px 2px 26px; flex: none; }
+/* ⚠️ THE BOTTOM PADDING IS THE INTER-CARD GAP — see --os-cardgap. It was 26px, nearly
+   double the gap between every other pair of cards, for no reason the card could state. */
+.os-greet { display: flex; align-items: center; gap: 32px; padding: 14px 2px var(--os-cardgap); flex: none; }
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
@@ -266,7 +276,10 @@
 .os-cw { min-width: 0; }
 .os-cl { font-size: 12px; color: #5c5148; white-space: nowrap; }
 .os-cv { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+/* ⚠️ TABULAR NUMERALS — a counting figure whose glyph widths change re-lays-out the row on
+   every frame. */
 .os-cn {
+  font-variant-numeric: tabular-nums;
   font-family: var(--font-serif); font-size: 24px; font-weight: 500; color: #241811;
   line-height: 1; font-variant-numeric: tabular-nums;
 }
@@ -311,7 +324,8 @@
 /* ⚠️ TWO CONTROLS, TWO SHAPES — a select for the grain (a small closed set you pick from) and a
    slider for the span (an ordered scale you move along). The retired three-pill group could say
    neither: it had to spend a pill on each range and had no room to say anything about grain. */
-.os-freqsel { position: relative; display: flex; align-items: center; margin-left: auto; }
+/* ⚠️ NO `margin-left:auto` HERE — the CLUSTER right-aligns, not each control. */
+.os-freqsel { position: relative; display: flex; align-items: center; }
 .os-freqsel select {
   appearance: none; -webkit-appearance: none;
   font-family: inherit; font-size: 11.5px; color: #4a3a2e;
@@ -343,11 +357,21 @@
 .os-rangeslider input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
 .os-rangeslider input[type="range"]:focus-visible { outline: none; }
 .os-rangeslider input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(185, 138, 118, 0.4); }
-/* the slider has no scale marks, so the label IS its value — never decoration */
+/**
+ * The slider has no scale marks, so the label IS its value — never decoration.
+ *
+ * ⚠️ IT SITS SNUG AGAINST THE SLIDER, LEFT-ALIGNED (audit P5). It used to be `text-align: right`
+ * inside a 96px box at the end of a `margin-left: auto` row, which justified it to the card's far
+ * edge — a value stranded from the control it reports. The min-width stays: the words change
+ * length ("Last 14 days" → "All time"), and without it the slider shifts as you drag.
+ */
 .os-rangelbl {
   font-size: 11px; color: #7c3a2a; font-weight: 500; white-space: nowrap;
-  min-width: 96px; text-align: right; flex: none;
+  min-width: 88px; text-align: left; flex: none;
 }
+/* ⚠️ ONE CLUSTER, RIGHT-ALIGNED AS A UNIT — frequency · slider · label. Pushing each control
+   right on its own is what let the label drift away from the slider. */
+.os-ctrls { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
 .os-fig { display: flex; align-items: center; gap: 11px; margin: 4px 0 2px; flex: none; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
 .os-fig .os-n { font-family: var(--font-serif); font-weight: 500; font-size: 28px; color: #241811; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -662,7 +686,12 @@
    block once there are 60 of them. The declaration here is the fallback for the ghost meter. */
 .os-blocks { display: flex; gap: 3px; margin: 9px 0 1px; }
 .os-blocks i { flex: 1; height: 9px; border-radius: 3px; background: #e9dfd1; transition: background 0.16s ease; }
-.os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
+/* ⚠️ `backwards`, NEVER `both` (audit P6 · the §6 trap). This animation is NOT scoped to a class
+   that gets removed — it lives on `.f` for the element's whole life — so `both` would PIN
+   transform and opacity permanently and outrank any later declaration on these blocks. The final
+   keyframe is the resting state anyway, so nothing about the finished look changes.
+   ⚠️ AND IT IS DELAYED past the cards (§6): the meter reads after they land, never with them. */
+.os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) 0.18s backwards; }
 /* hover deepens the fill (§6) — no pace line, no nudge, ever */
 .os-blocks:hover i.f { background: #b98a76; }
 .os-blocks.ghost i { border: 1px dashed #ddd0c0; background: transparent; height: 8px; }
@@ -704,7 +733,20 @@
 .os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
 .os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
 .os-tlday { margin: 8px 0 6px; }
+/* ⚠️ THE CASCADE IS CAPPED AT THE FIRST EIGHT — beyond that a stagger is a queue you wait
+   through, and the feed scrolls. Later cardlets simply appear. Scoped to `.enter`, which the page
+   removes once, so no fill-mode survives the entrance. */
 .os-tlev { display: flex; gap: 9px; }
+.os-actv.enter .os-tlev { animation: os-rise 0.34s cubic-bezier(0.22, 0.68, 0.36, 1) backwards; }
+.os-actv.enter .os-tlev:nth-child(1) { animation-delay: 0.20s; }
+.os-actv.enter .os-tlev:nth-child(2) { animation-delay: 0.25s; }
+.os-actv.enter .os-tlev:nth-child(3) { animation-delay: 0.30s; }
+.os-actv.enter .os-tlev:nth-child(4) { animation-delay: 0.35s; }
+.os-actv.enter .os-tlev:nth-child(5) { animation-delay: 0.40s; }
+.os-actv.enter .os-tlev:nth-child(6) { animation-delay: 0.45s; }
+.os-actv.enter .os-tlev:nth-child(7) { animation-delay: 0.50s; }
+.os-actv.enter .os-tlev:nth-child(8) { animation-delay: 0.55s; }
+.os-actv.enter .os-tlev:nth-child(n+9) { animation: none; }
 .os-tlthread { width: 14px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .os-tlthread .os-tlln { width: 1.5px; flex: 1; background: #e8dcd0; }
 .os-tldot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #cfc6bb; background: #efeae2; flex: none; }

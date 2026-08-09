@@ -29,6 +29,7 @@ import {
   rangeWindow, stopForDays, yScale,
 } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
+import { useCountUp } from "../../lib/useCountUp";
 
 /* ── pure geometry (exported for the node-env tests — there is no layout engine to ask) ── */
 
@@ -94,26 +95,8 @@ const ChartTip: React.FC<{ anchor: Rect | null; children: React.ReactNode }> = (
 
 /* ── the card ── */
 
-/** §10: the headline counts up once on first paint — instant under reduced motion. */
-const useCountUp = (to: number, ms = 700): number => {
-  const [shown, setShown] = useState(to);
-  const ran = useRef(false);
-  useEffect(() => {
-    if (ran.current) { setShown(to); return; } // later data changes land instantly
-    ran.current = true;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || to === 0) { setShown(to); return; }
-    let raf = 0;
-    const t0 = performance.now();
-    const step = (t: number) => {
-      const p = Math.min(1, (t - t0) / ms);
-      setShown(Math.round(to * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [to, ms]);
-  return shown;
-};
+/* ⚠️ THE COUNT-UP MOVED TO `lib/useCountUp` (audit P6) — the header counters need the same
+   behaviour, and one screen must not hold two of it. */
 
 export const OneScreenChart: React.FC<{
   loading: boolean;
@@ -263,6 +246,8 @@ export const OneScreenChart: React.FC<{
       {loading && <Skel bars={["h", "grow", ""]} />}
       <div className="os-lh">
         <span className="os-ll">Active queries</span>
+        {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
+        <div className="os-ctrls">
         <div className="os-freqsel">
           <select
             aria-label="Chart frequency"
@@ -286,6 +271,7 @@ export const OneScreenChart: React.FC<{
           />
         </div>
         <span className="os-rangelbl">{stop.label}</span>
+        </div>
       </div>
       <div className="os-fig">
         <span className="os-n">{shownActive}</span>
@@ -370,16 +356,20 @@ export const OneScreenChart: React.FC<{
                     </g>
                   );
                 })}
-                {/* ⚠️ A NODE AT EVERY POINT — the line alone hides how many readings it is drawn
-                    from, and at daily grain that is the difference between a trend and a guess.
-                    The latest sits bigger, as the resting mark. */}
-                {pts.map(([x, y], i) => (
+                {/* ⚠️ ONE RESTING NODE — THE LATEST (audit P5). A node at every point was
+                    defended as showing how many readings the line is drawn from; at daily grain
+                    over a long range that is hundreds of rings, and the LINE stops being readable
+                    — the thing they were meant to support. The latest point keeps its mark
+                    because it anchors "where we are now"; hover and the crosshair carry the rest.
+
+                    ⚠️ THE KEYBOARD NODE IS NOT A HOVER NODE. Arrow-key stepping renders its own
+                    focus mark just below, so the chart stays fully operable with no pointer. */}
+                {lastIdx >= 0 && pts[lastIdx] && (
                   <circle
-                    key={i} cx={x.toFixed(1)} cy={y.toFixed(1)}
-                    r={i === lastIdx ? 4 : 2.6} fill="#fdfaf5" stroke="#8a9e88"
-                    strokeWidth={i === lastIdx ? 2 : 1.6}
+                    cx={pts[lastIdx][0].toFixed(1)} cy={pts[lastIdx][1].toFixed(1)}
+                    r={4} fill="#fdfaf5" stroke="#8a9e88" strokeWidth={2}
                   />
-                ))}
+                )}
                 {/* crosshair + black node while a week is focused */}
                 {focusIdx >= 0 && (
                   <>
