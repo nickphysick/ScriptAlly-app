@@ -1,0 +1,163 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent panel — best in class</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--line:#e8e2d8;--line2:#f0ebe2;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--pinkTint:#fdf4ef;--rose:#b45a40;--burg:#8d3f2d;--sage:#dde3d8;--sageBd:#ccd5c5;--sageDeep:#5a6e58;--parch:#faf7f2;--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#efeae2;font-family:var(--in);color:var(--ink);padding:24px 28px 60px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:20px;margin-bottom:3px}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:14px;max-width:900px}
+.mono{font-family:var(--mo);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+svg{fill:none;stroke:currentColor;stroke-width:1.7}
+.pick{display:flex;gap:6px;margin-bottom:18px}
+.pick button{background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 13px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--in);color:var(--ink2)}
+.pick button.on{background:#241c15;color:#f4ebdd;border-color:#241c15}
+/* stage sim */
+.stage{display:flex;gap:22px;align-items:flex-start;max-width:1060px;height:640px}
+.formcol{flex:0 0 52%;border:1px dashed #ddd3c4;border-radius:14px;background:#fbf9f5;display:grid;place-items:center;color:#bdb2a2;font-size:12px;height:100%}
+.sidecol{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column}
+/* ============ THE PANEL ============ */
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;
+  /* the height rule */
+  height:auto;max-height:100%;min-height:200px;
+  box-shadow:0 1px 2px rgba(43,33,24,.04),0 10px 26px rgba(43,33,24,.05)}
+/* identity header */
+.ident{background:linear-gradient(180deg,#fdfbf8,var(--parch));border-bottom:1px solid var(--line);padding:16px 17px 14px;flex-shrink:0;position:relative}
+.ident .top{display:flex;gap:12px;align-items:flex-start}
+.mg{width:46px;height:46px;border-radius:50%;background:var(--pink);color:#a4634c;display:grid;place-items:center;font-family:var(--pl);font-weight:600;font-size:16px;flex-shrink:0;border:2px solid #fff;box-shadow:0 2px 8px rgba(60,45,30,.12)}
+.ident h3{font-family:var(--pl);font-weight:700;font-size:18px;line-height:1.15}
+.ident .role{font-family:var(--pl);font-style:italic;font-size:12.5px;color:var(--ink2);margin-top:1px}
+.loc{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);margin-top:5px}
+.loc svg{width:11px;height:11px}
+.pill{position:absolute;top:15px;right:16px;display:inline-flex;align-items:center;gap:5px;background:#e9ede6;border:1px solid #b9c6b4;color:var(--sageDeep);border-radius:999px;padding:3px 9px;font-family:var(--mo);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:500}
+.pill.shut{background:#f6ece7;border-color:#e0bda9;color:#9a4a30}
+/* stat strip */
+.stats{display:flex;border-bottom:1px solid var(--line2);flex-shrink:0}
+.stat{flex:1;padding:11px 14px;border-right:1px solid var(--line2)}
+.stat:last-child{border-right:none}
+.stat .v{font-family:var(--pl);font-weight:700;font-size:17px;line-height:1.1}
+.stat .v small{font-family:var(--in);font-weight:500;font-size:11px;color:var(--muted)}
+.stat .k{font-family:var(--mo);font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+/* body */
+.body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 17px 4px;scrollbar-width:thin}
+.body::-webkit-scrollbar{width:5px}
+.body::-webkit-scrollbar-thumb{background:#e2d9cb;border-radius:3px}
+.sec{margin-bottom:15px}
+.sech{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.sech .mono{color:#8a7c6b}
+.sech .rule{flex:1;height:1px;background:var(--line2)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.g{border:1px solid var(--line);background:#fdfbf8;border-radius:999px;padding:4px 10px;font-size:11px;color:var(--ink2)}
+.ask{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:12.5px;border-bottom:1px solid var(--line2)}
+.ask:last-child{border-bottom:none}
+.ask .tk{width:16px;height:16px;border-radius:4px;background:#e9ede6;border:1px solid #b9c6b4;color:var(--sageDeep);display:grid;place-items:center;font-size:9px;flex-shrink:0}
+.ask .q{margin-left:auto;font-family:var(--mo);font-size:8px;color:var(--muted)}
+.wc{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.wc b{font-family:var(--pl);font-size:15px}
+.wc span{color:var(--muted);font-size:11.5px}
+/* MSWL quote card */
+.quote{background:var(--parch);border:1px solid var(--line);border-left:2.5px solid var(--pinkDeep);border-radius:0 11px 11px 0;padding:12px 13px 12px 14px;position:relative}
+.quote p{font-family:var(--pl);font-style:italic;font-size:12.5px;line-height:1.65;color:var(--ink2)}
+.quote p+p{margin-top:8px}
+.clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.more{font-size:11px;font-weight:600;color:var(--rose);cursor:pointer;margin-top:7px;display:inline-block}
+.more:hover{text-decoration:underline}
+/* history line */
+.hist{display:flex;align-items:center;gap:9px;background:#fdfbf8;border:1px solid var(--line2);border-radius:10px;padding:9px 11px;font-size:12px}
+.hist .d{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--rose);background:#fbeae1;flex-shrink:0}
+.hist a{margin-left:auto;color:var(--rose);font-weight:600;font-size:11px;text-decoration:underline;cursor:pointer}
+/* footer */
+.foot{display:flex;align-items:center;gap:8px;padding:10px 17px;border-top:1px solid var(--line2);background:#fdfcfa;flex-shrink:0}
+.foot a{margin-left:auto;font-size:11px;color:var(--rose);font-weight:600;text-decoration:underline;cursor:pointer}
+/* art fallback */
+.art{border:1px dashed #d9cdba;border-radius:12px;background:var(--parch);padding:22px;text-align:center;margin:14px 17px 16px}
+.art .mono{display:block;margin-bottom:5px}
+.art p{font-size:11.5px;color:var(--muted);line-height:1.55}
+.thin{font-size:12px;color:var(--muted);padding:2px 0 12px;line-height:1.55}
+/* modes */
+.v2,.v3{display:none}
+body.m2 .v1,body.m2 .v3{display:none}body.m2 .v2{display:block}
+body.m3 .v1,body.m3 .v2{display:none}body.m3 .v3{display:block}
+body.m2 .stats .s3,body.m3 .stats{display:none}
+.note{font-size:12px;color:var(--ink2);line-height:1.6;max-width:1060px;margin-top:16px}
+.note b{font-family:var(--pl)}
+</style></head>
+<body class="m1" id="bd">
+<h1>Agent panel — flexes to its content</h1>
+<div class="sub">Height is <b>auto</b>, capped at the column and floored at ~200px: it ends where the content ends, and only scrolls when it genuinely overflows.</div>
+<div class="pick">
+  <button class="on" onclick="M(this,'m1')">Rich agent</button>
+  <button onclick="M(this,'m2')">Partial data</button>
+  <button onclick="M(this,'m3')">Name only</button>
+</div>
+
+<div class="stage">
+  <div class="formcol">the form stack (52%)</div>
+  <div class="sidecol">
+
+    <div class="panel">
+      <div class="ident">
+        <div class="top"><span class="mg">PL</span>
+          <div><h3>Penhallow Literary</h3><div class="role">No named agent &middot; general submissions</div>
+          <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>London, United Kingdom</div></div>
+        </div>
+        <span class="pill">Open to submissions</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="v">~6 <small>weeks</small></div><div class="k">Typical reply</div></div>
+        <div class="stat"><div class="v">8 <small>weeks</small></div><div class="k">No reply = pass</div></div>
+        <div class="stat s3"><div class="v">Email</div><div class="k">Submit by</div></div>
+      </div>
+
+      <div class="body">
+        <!-- RICH -->
+        <div class="v1">
+          <div class="sec"><div class="sech"><span class="mono">Your history</span><span class="rule"></span></div>
+            <div class="hist"><span class="d"></span>1 open query &middot; sent 14 Mar 2024<a>Open it</a></div></div>
+
+          <div class="sec"><div class="sech"><span class="mono">Seeking</span><span class="rule"></span></div>
+            <div class="chips"><span class="g">Thriller</span><span class="g">Crime</span><span class="g">Literary</span><span class="g">Historical</span></div>
+            <div class="wc" style="margin-top:10px"><b>80,000&ndash;110,000</b><span>words &middot; yours is 50,000</span></div></div>
+
+          <div class="sec"><div class="sech"><span class="mono">What they ask for</span><span class="rule"></span></div>
+            <div class="ask"><span class="tk">&#10003;</span>Query letter</div>
+            <div class="ask"><span class="tk">&#10003;</span>Synopsis<span class="q">1 page</span></div>
+            <div class="ask"><span class="tk">&#10003;</span>Opening sample<span class="q">3 chapters</span></div></div>
+
+          <div class="sec"><div class="sech"><span class="mono">Manuscript wish list</span><span class="rule"></span></div>
+            <div class="quote"><div class="clamp" id="cl">
+              <p>Looking for upmarket crime with a strong sense of place &mdash; particularly rural or coastal settings outside London. I love a morally compromised investigator, and I&rsquo;m tired of serial-killer procedurals.</p>
+              <p>Also open to literary fiction with a propulsive hook, and historical crime set post-1900. Not for me: cosy mystery, military or espionage thrillers, YA.</p>
+            </div><span class="more" onclick="document.getElementById('cl').classList.toggle('clamp');this.textContent=this.textContent==='Read all'?'Show less':'Read all'">Read all</span></div></div>
+        </div>
+
+        <!-- PARTIAL -->
+        <div class="v2">
+          <div class="sec"><div class="sech"><span class="mono">Your history</span><span class="rule"></span></div>
+            <div class="hist"><span class="d"></span>No queries yet &middot; this is your first</div></div>
+          <div class="sec"><div class="sech"><span class="mono">Seeking</span><span class="rule"></span></div>
+            <div class="chips"><span class="g">Thriller</span><span class="g">Crime</span></div></div>
+          <div class="sec"><div class="sech"><span class="mono">What they ask for</span><span class="rule"></span></div>
+            <div class="ask"><span class="tk">&#10003;</span>Query letter</div>
+            <div class="ask"><span class="tk">&#10003;</span>Synopsis</div></div>
+          <div class="thin">Nothing else recorded for this agent yet.</div>
+        </div>
+
+        <!-- MINIMAL -->
+        <div class="v3">
+          <div class="thin" style="padding-top:0">We don&rsquo;t have submission details for this agent yet. You can still log the query &mdash; add what they ask for on their contact card any time.</div>
+          <div class="art" style="margin:0 0 14px"><span class="mono">ArtSlot &middot; agent-unknown</span><p>Small line illustration &mdash; an unopened letter on a desk.</p></div>
+        </div>
+      </div>
+
+      <div class="foot"><span class="mono">Updated 10 Jul 2026</span><a>Agency page &rarr;</a></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="note"><b>What changed.</b> An identity header with the monogram, the agency in Playfair, an italic role line, a located pin and a status pill &mdash; so the panel opens with a face rather than a table. Three key numbers become a stat strip in Playfair (reply time, no-reply policy, method) instead of buried rows. Sections gain mono captions with a trailing hairline rule &mdash; the app&rsquo;s own editorial grammar. The wish list becomes a pull-quote in italic serif with a burgundy edge, clamped to four lines with <i>Read all</i>, which is what keeps the panel short. Your history is a live line with a status dot and a link straight to the existing query. The freshness stamp and agency link sit on a quiet footer bar.</div>
+<script>function M(el,c){document.getElementById('bd').className=c;
+document.querySelectorAll('.pick button').forEach(function(b){b.classList.remove('on')});el.classList.add('on');}</script>
+</body></html>

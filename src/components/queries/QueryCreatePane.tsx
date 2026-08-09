@@ -511,11 +511,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
         <p className="qc-whisper">We&rsquo;ll nudge you on {shortDate(whisperDate)} if it&rsquo;s gone quiet.</p>
       )}
         </div>
-        <AgentContextPanel
-          agent={agent}
-          queries={queries}
-          manuscript={manuscripts.find((m) => m.id === draft.manuscriptId) ?? null}
-        />
+        <AgentContextPanel agent={agent} queries={queries} onOpenQuery={onOpenQuery} />
       </div>
         </>
       )}
