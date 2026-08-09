@@ -363,9 +363,10 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
      real asset, leaving the rail's "S" tile as the sidebar's only mark. So the brand still
      appears exactly once in each place — one tile, one logotype.
 
-     ⚠️ AND THE MEASURED-ASSET PROBLEM WENT WITH THE ASSET. The crumb's PNG carried the 51.7%-ink
-     trap (a ~17px cap needing a 33px element); the v2 brand is TYPE — a Playfair "S" in an ink
-     square — so there is no ink ratio to compensate for and no LOGOTYPE_PX to keep in step. */
+     ⚠️ AND THE MEASURED-ASSET PROBLEM IS BACK, because the ASSET is back. The v2 brand was
+     briefly TYPE — a Playfair "S" beside a re-set wordmark — which is a lookalike, not the mark.
+     It is the real artwork again, so the ~51.7%-ink trap returns with it: the title element is
+     33px for a ~17px cap, and raising the number is not the same as raising the apparent size. */
   it("THE BRAND APPEARS ONCE per surface — mark and wordmark, in the sidebar", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     expect(ws.match(/ws-bmark/g)?.length, "one mark").toBe(1);
@@ -374,7 +375,11 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
        recording the retirement: the guard caught its own note. */
     expect(ws.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("LOGOTYPE_PX");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*var\(--font-serif\)/s);
+    /* ⚠️ ASSETS, NOT TYPE — the wordmark is artwork and must not be re-set in a typeface that
+       merely resembles it. Asserted on the files, and on the 33px the ink ratio demands. */
+    expect(ws).toContain('src="/scriptally-logo-v2.png"');
+    expect(ws).toContain('src="/scriptally-title-v2.png"');
+    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*height: 33px/s);
   });
 });
 

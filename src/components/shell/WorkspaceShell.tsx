@@ -202,9 +202,18 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               rail's ink tile; with the rail gone the sidebar is the leftmost chrome, so this is
               where the mark belongs — and it is the ONLY place it appears, per the one-brand
               rule. The mark doubles as the route home, as the rail's tile did. */}
-          <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="Dashboard">
-            <span className="ws-bmark" aria-hidden="true">S</span>
-            <span className="ws-bwm">ScriptAlly</span>
+          {/* ⚠️ THE WORDMARK IS AN ASSET, NOT TYPE. It was re-set in Playfair when the brand moved
+              into the sidebar, which is a lookalike rather than the mark — the real artwork is
+              `/scriptally-title-v2.png` beside the illustrated `/scriptally-logo-v2.png`, the same
+              pair SidebarNav has always used.
+
+              ⚠️ AND THE TITLE ASSET IS ONLY ~51.7% INK — its letterforms occupy a little over half
+              the file's height, the rest being baked-in ascender and descender clearance. So the
+              element height is NOT the cap height: sizing it to "look 17px" means setting ~33px.
+              Raising the number is not the same as raising the apparent size. */}
+          <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="ScriptAlly — go to dashboard">
+            <img className="ws-bmark" src="/scriptally-logo-v2.png" alt="" aria-hidden="true" />
+            <img className="ws-bwm" src="/scriptally-title-v2.png" alt="ScriptAlly" />
           </button>
 
           <div className="ws-phead">
@@ -376,12 +385,18 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   </>
                 )}
               </nav>
+              {/* ⚠️ THE SAVE STATE BELONGS TO THE LEFT GROUP, after the page name and its hairline
+                  — it is a statement ABOUT this page, not a tool. Right-aligned it sat among the
+                  controls and read as one. Specced there and missed.
+                  ⚠️ IT IS A PAGEBAR CHILD, NOT A CRUMB CHILD. Inside the crumb it inherits
+                  `align-items: baseline`, and an 8.5px mono cap baselined against 17px Playfair
+                  sits 3.7px low — measured. The pagebar centres it instead.
+                  ⚠️ WIRED TO REAL WRITE STATE, never a constant — a bar that always says "saved"
+                  is worse than one that says nothing. See lib/saveSignal. */}
+              <span className="ws-vdiv" aria-hidden="true" />
+              <span className="ws-sync">{saveWhisper(save)}</span>
 
               <div className="ws-bright">
-                {/* ⚠️ WIRED TO REAL WRITE STATE, never a constant — a bar that always says
-                    "saved" is worse than one that says nothing. See lib/saveSignal. */}
-                <span className="ws-sync">{saveWhisper(save)}</span>
-                <span className="ws-vdiv" aria-hidden="true" />
                 <SearchPill onOpen={onOpenSearch} anchorRef={searchAnchorRef} />
                 <HelpButton onOpen={onOpenHelp} />
                 <div className="ws-newwrap" ref={newRef}>

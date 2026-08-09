@@ -477,18 +477,25 @@
 }
 
 /* ── brand: ink square + wordmark, above the manuscript selector ── */
+/* ⚠️ THE BRAND ROW SHARES THE PAGEBAR'S BASELINE, and the two live in DIFFERENT containers — the
+   sidebar and the page column — so nothing aligns them by construction. The row's padding is
+   therefore set FROM the pagebar's (`16px 6px 14px`): equal top padding puts the mark and the
+   `/ Dashboard` crumb on one line across the divide. If either padding moves, the other must.
+   ⚠️ AND IT IS `align-items: center`, NOT `baseline`, BECAUSE THESE ARE IMAGES. An image has no
+   baseline: `baseline` resolves to its bottom MARGIN EDGE, which dropped the 33px wordmark 7.6px
+   below the crumb it was meant to sit level with. The mark and the wordmark share an optical
+   CENTRE instead, and the row's top padding (19px, against the pagebar's 16px) is the 3px that
+   levels that centre with the crumb's — the title asset carries ~48% dead space, so its box sits
+   lower than its letterforms. Measured: both centres at 35.1px. */
 .ws-brand {
-  display: flex; align-items: center; gap: 10px;
-  padding: 2px 6px 16px; min-height: 46px; width: 100%;
+  display: flex; align-items: center; gap: 9px;
+  padding: 19px 6px 11px; width: 100%;
   background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
 }
-.ws-bmark {
-  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-  background: #1c130e; color: #fdfaf5;
-  font-family: var(--font-serif); font-weight: 600; font-size: 17px;
-  display: grid; place-items: center;
-}
-.ws-bwm { font-family: var(--font-serif); font-weight: 600; font-size: 20px; color: #1c130e; letter-spacing: -0.01em; }
+/* the illustrated mark — sized to the wordmark's cap, not to its box */
+.ws-bmark { height: 22px; width: auto; flex-shrink: 0; display: block; }
+/* ⚠️ 33px FOR A ~17px CAP — see the note at the markup: the asset is ~51.7% ink. */
+.ws-bwm { height: 33px; width: auto; display: block; }
 
 /* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER COMES FROM `--head`. It was
    `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on the same continuous
@@ -519,12 +526,13 @@
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
 .ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
+/* the whole left group — crumb, hairline, save state — on ONE baseline */
 .ws-crumb { display: flex; align-items: baseline; gap: 9px; }
 .ws-sep { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; }
 .ws-cur { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #241811; }
 .ws-seg { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; background: none; border: 0; padding: 0; cursor: pointer; }
 .ws-seg:hover { color: #241811; }
-.ws-vdiv { width: 1px; height: 18px; background: #e2dacd; margin: 0 2px; flex: none; }
+.ws-vdiv { width: 1px; height: 18px; background: #e2dacd; margin: 0 2px; flex: none; align-self: center; }
 .ws-sync { font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: #b3a598; }
 .ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 /* ⚠️ THE MENU ANCHOR CAME BACK WITH THE BUTTON. `.ws-newwrap` was swept out with the bar's rules
