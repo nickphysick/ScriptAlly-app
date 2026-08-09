@@ -191,6 +191,21 @@
 /* ── STAGE 2: the three treatments (ref qc-create-steps.html) ────────────────────────────── */
 /* active — lifted, warm border, numbered head with the Enter hint */
 .qc-sec.qc-active { border-color: #d8c4b2; box-shadow: 0 10px 30px rgba(60, 45, 30, 0.09); }
+
+/* ⚠️ THE PULSE IS AN INVITATION, NOT A STATUS — cue D (qc-focus.html). A burgundy halo breathing
+   on the active step tells the eye where to act; the moment the writer engages with that step it
+   has done its job and STOPS, and it does not come back for that step. A pulse that kept going
+   while you typed would read as an unresolved alert about the thing you are already doing.
+   Engagement is tracked in the pane (any focus or input inside the section) — CSS cannot know
+   it, so the class is removed, not overridden. */
+@keyframes qc-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(180, 90, 64, 0.26), 0 10px 30px rgba(60, 45, 30, 0.09); }
+  50% { box-shadow: 0 0 0 8px rgba(180, 90, 64, 0), 0 10px 30px rgba(60, 45, 30, 0.09); }
+}
+.qc-sec.qc-active.qc-pulse { animation: qc-pulse 2.1s ease-in-out infinite; }
+/* Reduced motion drops it entirely; the lifted border is then the only active treatment, which
+   is what it was before the pulse existed. The DOM focus below is the real "you are here". */
+@media (prefers-reduced-motion: reduce) { .qc-sec.qc-active.qc-pulse { animation: none; } }
 .qc-shead { display: flex; align-items: center; gap: 9px; padding: 13px 16px 0; }
 .qc-n { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 9px; flex: none; }
 .qc-shead h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 16px; color: var(--ink); margin: 0; }
@@ -216,33 +231,36 @@
    flex child. A thin record stretched to the column's full height is a frame around dead space,
    and dead space reads as something that failed to load. `align-self: flex-start` is what stops
    the row's default `stretch` overriding the auto height. */
-.qc-ctx { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel); box-shadow: 0 1px 2px rgba(43, 33, 24, 0.04), 0 10px 26px rgba(43, 33, 24, 0.05); }
+.qc-ctx { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; display: flex; flex-direction: column; border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; background: #fbf9f5; }
 
-/* identity — the only part that is always present */
-.qc-ctxid { flex: none; position: relative; padding: 16px 17px 14px; background: linear-gradient(180deg, #fdfbf8, var(--paper)); border-bottom: 1px solid var(--line); }
-.qc-ctxidtop { display: flex; gap: 12px; align-items: flex-start; }
-.qc-ctxmg { width: 46px; height: 46px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-serif); font-weight: 600; font-size: 16px; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.12); }
-.qc-ctxwho { min-width: 0; padding-right: 92px; }
-.qc-ctxwho h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 18px; line-height: 1.15; color: var(--ink); margin: 0; }
-.qc-ctxrole { font-family: var(--f12-serif); font-style: italic; font-size: 12.5px; color: var(--ink-2); margin-top: 1px; }
-.qc-ctxloc { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--muted); margin-top: 5px; }
-.qc-ctxloc svg { width: 11px; height: 11px; flex: none; }
-.qc-ctxpill { position: absolute; top: 15px; right: 16px; display: inline-flex; align-items: center; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
+/* ⚠️ QUIET REFERENCE (qc-focus.html panel 2). Ground #fbf9f5, hairline border, NO SHADOW — a
+   shadow implies floating, and this sits back. Values inside are Inter, not Playfair: serif
+   numerals here read as a second headline and pull the eye off the form.
+   The identity block is GONE — monogram, agency and agent name all already sit in the agent row
+   on the left at twice the size, and repeating them made the panel a second subject. */
+.qc-ctxhead { flex: none; display: flex; align-items: center; gap: 7px; padding: 12px 15px 10px; border-bottom: 1px solid var(--hairline); }
+.qc-ctxhead svg { width: 13px; height: 13px; flex: none; color: var(--faint); }
+.qc-ctxfor { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+.qc-ctxpill { margin-left: auto; flex: none; display: inline-flex; align-items: center; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
 .qc-ctxpill-shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
 
 /* stat strip — cells omit themselves; the strip omits when none survive */
 .qc-ctxstats { flex: none; display: flex; border-bottom: 1px solid var(--hairline); }
-.qc-ctxstat { flex: 1; padding: 11px 14px; border-right: 1px solid var(--hairline); min-width: 0; }
+/* ⚠️ EQUAL WIDTH, AND THE CAPTIONS WRAP. "Preferred submission method" is long on purpose —
+   an abbreviated caption on a reference panel is the one thing worse than a long one. */
+.qc-ctxstat { flex: 1 1 0; padding: 11px 14px; border-right: 1px solid var(--hairline); min-width: 0; }
 .qc-ctxstat:last-child { border-right: none; }
-.qc-ctxv { font-family: var(--f12-serif); font-weight: 700; font-size: 17px; line-height: 1.1; color: var(--ink); }
+.qc-ctxv { font-family: inherit; font-weight: 600; font-size: 14px; line-height: 1.2; color: var(--ink-2); }
 .qc-ctxv small { font-family: inherit; font-weight: 500; font-size: 11px; color: var(--muted); }
-.qc-ctxk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.qc-ctxk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-top: 3px; line-height: 1.4; }
 
 /* body — the ONLY scrolling part, and only when it genuinely overflows */
-.qc-ctxbody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px 17px 8px; }
+.qc-ctxbody { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 14px 17px 8px; color: var(--ink-2); }
+/* the no-reply policy — prose, directly under the strip */
+.qc-ctxpolicy { flex: none; margin: 0; padding: 11px 15px 0; font-size: 12px; line-height: 1.5; color: var(--ink-2); }
 .qc-ctxsec { margin-bottom: 15px; }
 .qc-ctxsech { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
-.qc-ctxcap { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: #8a7c6b; flex: none; }
+.qc-ctxcap { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: #a2947f; flex: none; }
 .qc-ctxrule { flex: 1; height: 1px; background: var(--hairline); }
 .qc-ctxchips { display: flex; gap: 5px; flex-wrap: wrap; }
 .qc-ctxg { border: 1px solid var(--line); background: #fdfbf8; border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--ink-2); }
@@ -265,7 +283,7 @@
 /* the partial state's closing line, and the name-only explanation */
 .qc-ctxthin { font-size: 12px; color: var(--muted); line-height: 1.55; margin: 2px 0 12px; }
 
-.qc-ctxfoot { flex: none; display: flex; align-items: center; gap: 8px; padding: 10px 17px; border-top: 1px solid var(--hairline); background: #fdfcfa; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.qc-ctxfoot { flex: none; display: flex; align-items: center; gap: 8px; padding: 10px 17px; border-top: 1px solid var(--hairline); background: transparent; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
 .qc-ctxlink { margin-left: auto; font-family: inherit; font-size: 8px; color: var(--burg); text-decoration: underline; }
 .qc-ctx-name-only .qc-ctxbody { text-align: center; }
 

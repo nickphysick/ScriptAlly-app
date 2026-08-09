@@ -14,7 +14,7 @@
 import React, { useState } from "react";
 import type { Agent, Query } from "../../types";
 import {
-  panelIdentity, statCells, agentHistory, historyLine, seekingChips, agentAsks,
+  panelHeader, statCells, noReplyPolicy, agentHistory, historyLine, seekingChips, agentAsks,
   freshnessStamp, panelState, PARTIAL_TAIL, NAME_ONLY_NOTE,
 } from "../../lib/agentContext";
 import { ArtSlot } from "../todo/ArtSlot";
@@ -26,9 +26,9 @@ export interface AgentContextPanelProps {
   onOpenQuery?: (id: string) => void;
 }
 
-const PinIcon = () => (
+const InfoIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
-    <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" />
+    <circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" />
   </svg>
 );
 
@@ -39,8 +39,9 @@ export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, que
   const [showAll, setShowAll] = useState(false);
 
   const state = panelState(agent, queries);
-  const id = panelIdentity(agent);
+  const head = panelHeader(agent);
   const cells = statCells(agent);
+  const policy = noReplyPolicy(agent);
   const hist = agentHistory(agent.id, queries);
   const chips = seekingChips(agent);
   const asks = agentAsks(agent);
@@ -52,20 +53,17 @@ export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, que
     /* ⚠️ REFERENCE, NOT INPUT. Tab must walk the form stack and reach Save, so the panel carries
        no fields at all. Its only focusable things are three real controls: the wish-list
        disclosure, the history link and the agency link. */
-    <aside className={`qc-ctx qc-ctx-${state}`} aria-label={`About ${id.heading}`}>
-      <div className="qc-ctxid">
-        <div className="qc-ctxidtop">
-          <span className="qc-ctxmg" aria-hidden="true">{id.initials}</span>
-          <div className="qc-ctxwho">
-            <h3>{id.heading}</h3>
-            {id.role && <div className="qc-ctxrole">{id.role}</div>}
-            {id.location && (
-              <div className="qc-ctxloc"><PinIcon />{id.location}</div>
-            )}
-          </div>
-        </div>
-        {id.status && (
-          <span className={`qc-ctxpill${id.status.open ? "" : " qc-ctxpill-shut"}`}>{id.status.label}</span>
+    <aside className={`qc-ctx qc-ctx-${state}`} aria-label="About this agent, for reference">
+      {/* ⚠️ THE CAPTION BAR IS WHAT MAKES THE WHOLE COLUMN LEGIBLE AS REFERENCE. It replaces an
+          identity block carrying a monogram, the agency in Playfair 18 and the agent's name —
+          all three of which already sit in the agent row on the left at twice the size. Two
+          subjects competing was the problem; "For reference" plus the one fact the left column
+          does not carry (their door) is the answer. */}
+      <div className="qc-ctxhead">
+        <InfoIcon />
+        <span className="qc-ctxfor">For reference</span>
+        {head.status && (
+          <span className={`qc-ctxpill${head.status.open ? "" : " qc-ctxpill-shut"}`}>{head.status.label}</span>
         )}
       </div>
 
@@ -79,6 +77,10 @@ export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, que
           ))}
         </div>
       )}
+
+      {/* A sentence, not a statistic — "Yes" under "No reply = pass" says the shape of a fact
+          without saying the fact. */}
+      {policy && <p className="qc-ctxpolicy">{policy}</p>}
 
       {state === "name-only" ? (
         <div className="qc-ctxbody">
