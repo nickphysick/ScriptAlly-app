@@ -1,0 +1,159 @@
+/**
+ * snoozeDial — putting something off (tasks-consolidation P4; ref design-refs/tasks-page.html's
+ * `.snzmenu` block, values verbatim).
+ *
+ * ⚠️ THE PAINTED TRACK AND THE OPERABLE ONE ARE TWO LAYERS. Everything visible here is ours; the
+ * thing you actually drag is a transparent `input[type=range]` laid exactly over it, so dragging,
+ * clicking the track, arrow keys, Home/End and assistive technology all come from the platform
+ * rather than from a `pointermove` handler that would reimplement half of them.
+ */
+
+.snz-dial {
+  position: fixed;
+  z-index: 80;
+  width: 290px;
+  padding: 18px 20px 16px;
+  background: #fff;
+  border: 1px solid #e2d8c8;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(58, 28, 20, 0.2);
+}
+
+.snz-k {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px;
+  letter-spacing: 0.16em;
+  color: #b3a394;
+}
+
+/* ⚠️ THE DATE IS THE HEADLINE, not a caption — it is the one thing you need before you decide. */
+.snz-v {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #2b2118;
+  margin: 8px 0 18px;
+}
+
+.snz-track {
+  position: relative;
+  height: 4px;
+  border-radius: 3px;
+  background: #f1eade;
+  margin: 0 6px;
+}
+
+.snz-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: #7c3a2a;
+  border-radius: 3px;
+}
+
+.snz-stop {
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e4dacb;
+  transform: translate(-50%, -50%);
+}
+
+.snz-stop.past { background: #d3a894; }
+
+.snz-knob {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid #7c3a2a;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 7px rgba(58, 28, 20, 0.22);
+  pointer-events: none;
+}
+
+/* the operable layer — transparent, but a real control with a real hit area */
+.snz-range {
+  position: absolute;
+  left: -9px;
+  right: -9px;
+  top: 50%;
+  width: calc(100% + 18px);
+  height: 26px;
+  margin: 0;
+  transform: translateY(-50%);
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.snz-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.snz-range::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+}
+
+/* ⚠️ FOCUS IS SHOWN ON THE KNOB WE PAINTED, since the control itself is invisible. Without this
+   the dial is keyboard-operable and gives no sign of it, which is worse than not being. */
+.snz-range:focus-visible ~ .snz-knob,
+.snz-range:focus-visible + .snz-knob {
+  box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.22), 0 2px 7px rgba(58, 28, 20, 0.22);
+}
+
+.snz-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 4px 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6px;
+  letter-spacing: 0.09em;
+  color: #b3a394;
+}
+
+.snz-ticks .on { color: #7c3a2a; font-weight: 600; }
+
+.snz-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 17px;
+}
+
+.snz-go {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid #2a1a13;
+  background: #2a1a13;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.snz-go:hover { background: #3a2a20; }
+
+.snz-pick { min-width: 0; flex: 1; }
+
+.snz-cap {
+  margin: 12px 0 0;
+  font-size: 10.5px;
+  color: #a0958a;
+  line-height: 1.5;
+}

@@ -54,14 +54,37 @@ export function snoozeCeilingDays(card: BoardCard, daysUntilDeadline?: number): 
   return SNOOZE_MAX_DAYS;
 }
 
-/** The dial's stops, and the only day-counts that get a name of their own. */
-export const SNOOZE_STOPS: { days: number; label: string }[] = [
-  { days: 1, label: "tomorrow" },
-  { days: 3, label: "in a few days" },
-  { days: 7, label: "next week" },
-  { days: 14, label: "in two weeks" },
-  { days: 30, label: "in a month" },
+/**
+ * The dial's stops, and the only day-counts that get a name of their own.
+ *
+ * ⚠️ TWO REGISTERS OF ONE FACT, PAIRED HERE ON PURPOSE (tasks-consolidation P4). `label` is the
+ * PROSE the toast speaks ("Snoozed until next week"); `tick` is the terse form the dial prints
+ * under its track, where four words would collide with their neighbours. They are declared on the
+ * same row so a stop cannot gain one and lose the other — the alternative was a second table in
+ * the component, which is how a tier ends up named two different things on two surfaces.
+ */
+export const SNOOZE_STOPS: { days: number; label: string; tick: string }[] = [
+  { days: 1, label: "tomorrow", tick: "TOMORROW" },
+  { days: 3, label: "in a few days", tick: "3 DAYS" },
+  { days: 7, label: "next week", tick: "1 WEEK" },
+  { days: 14, label: "in two weeks", tick: "2 WEEKS" },
+  { days: 30, label: "in a month", tick: "1 MONTH" },
 ];
+
+/**
+ * ⚠️ WHICH STOPS THE DIAL MAY REACH — the ceiling applied to the TIERS, so the knob physically
+ * stops rather than sliding past a limit and being silently pulled back. An offer's ceiling is
+ * one day, so its dial has a single stop and says why; a deadline's is whatever days remain.
+ *
+ * ALWAYS AT LEAST ONE STOP WHERE ANY SNOOZE IS POSSIBLE AT ALL: a ceiling between two tiers (a
+ * deadline four days out) keeps every tier below it, and the caller may still write the exact
+ * ceiling through the date picker. A ceiling of 0 — a deadline already past — returns none, which
+ * the caller must read as "this cannot be put off", never as "put it off by nothing".
+ */
+export function reachableStops(card: BoardCard, daysUntilDeadline?: number): { days: number; label: string; tick: string }[] {
+  const ceiling = snoozeCeilingDays(card, daysUntilDeadline);
+  return SNOOZE_STOPS.filter((s) => s.days <= ceiling);
+}
 
 /**
  * ⚠️ A NAME ONLY WHERE THE NUMBER EARNS IT. An exact stop gets the stop's words; anything else —

@@ -22,12 +22,21 @@ import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
 import { rowPill, rowPrimaryLabel, rowJourney, PillTone } from "../../lib/taskRow";
+import { SNOOZE_STOPS, reachableStops } from "../../lib/todoActions";
+import { dialDateLine } from "./SnoozeDial";
 import { TaskList, groupColumn } from "./TaskList";
 
 const here = __dirname;
 const css = readFileSync(join(here, "todoGroups.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const list = readFileSync(join(here, "TaskList.tsx"), "utf8");
+const dialSrc = readFileSync(join(here, "SnoozeDial.tsx"), "utf8");
+const dialCss = readFileSync(join(here, "snoozeDial.css"), "utf8");
+const rule2 = (sel: string): string => {
+  const i = dialCss.indexOf(sel);
+  expect(i, `${sel} has no rule`).toBeGreaterThan(-1);
+  return dialCss.slice(i, dialCss.indexOf("}", i));
+};
 
 const rule = (sel: string): string => {
   const i = css.indexOf(sel);
@@ -71,6 +80,7 @@ const render = (c: BoardColumns) =>
       onOpen={() => {}}
       onTick={() => {}}
       onVerb={() => {}}
+      onSnooze={() => {}}
     />,
   );
 
@@ -157,7 +167,7 @@ describe("⚠️ FOUR FIXED SLOTS, AND AN ABSENT VERB LEAVES ITS SLOT STANDING",
     // …while an ordinary agent-waiting card DOES get one
     const ok = renderToStaticMarkup(
       <TaskList groups={taskGroups(cols({ todo: [card()] }))} hkExpanded={false}
-        onToggleHk={() => {}} onOpen={() => {}} onTick={() => {}} onVerb={() => {}} />,
+        onToggleHk={() => {}} onOpen={() => {}} onTick={() => {}} onVerb={() => {}} onSnooze={() => {}} />,
     );
     expect(ok).toContain("Dismiss “Send your full to Jonathan Marsh”");
   });
@@ -419,11 +429,15 @@ describe("the page wires the list to its EXISTING primitives, and to nothing new
     expect(groupColumn("done")).toBe("done");
   });
 
-  it("the clock and the ✕ are DOORS INTO THE ONE MENU — never a second chooser", () => {
-    /* Phase 4 swaps the snooze submenu for the dial at ONE call site, which is the point of
-       routing both through `openMenu` with a pre-opened sub rather than growing two popovers. */
-    expect(list).toContain('openMenu(e, c, column, "snooze")');
+  it("the ✕ is a DOOR INTO THE ONE MENU, and the clock is the dial's (P4)", () => {
+    /* P2 routed both through `openMenu` with a pre-opened submenu precisely so that Phase 4 could
+       swap the snooze one for the dial at a SINGLE call site — which is what happened. The ⋯
+       menu keeps its tiers for the keyboard path and for Snoozed's "Change the date…", and both
+       resolve through the same `clampSnooze`, so there is still one ceiling. */
     expect(list).toContain('openMenu(e, c, column, "dismiss")');
+    expect(list).not.toContain('openMenu(e, c, column, "snooze")');
+    expect(list).toContain("<SnoozeDial");
+    expect((list.match(/setDial\(/g) ?? []).length).toBeGreaterThan(0);
   });
 });
 
@@ -457,5 +471,92 @@ describe("⚠️ THE DESK STATES READ UNFILTERED — a search can never fake a c
     const cleared = page.slice(page.indexOf("function renderDeskCleared"), page.indexOf("function renderDeskCleared") + 1400);
     expect(cleared).toContain('<ArtSlot name="desk-clear"');
     expect(cleared).not.toContain("first-run-board");
+  });
+});
+
+/* ── 6. the snooze dial (Phase 4) ───────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE DIAL NAMES THE DATE BEFORE YOU COMMIT TO IT", () => {
+  /* That is the whole reason it replaced a tier menu: "Give it a week" is a promise about a date
+     you then have to work out yourself, and the one thing a writer wants to know before putting
+     an agent's request away is exactly which morning it comes back. */
+  it("the resulting day is spelled, weekday first", () => {
+    const monday = new Date(2026, 7, 10); // Monday 10 August 2026
+    expect(dialDateLine(1, monday)).toBe("Tuesday 11 August");
+    expect(dialDateLine(7, monday)).toBe("Monday 17 August");
+  });
+
+  it("it is the HEADLINE, in Playfair, above the track — not a caption under it", () => {
+    const v = rule2(".snz-v {");
+    expect(v).toContain('font-family: "Playfair Display"');
+    expect(v).toContain("font-size: 19px");
+    expect(dialSrc.indexOf('className="snz-v"')).toBeLessThan(dialSrc.indexOf('className="snz-track"'));
+  });
+});
+
+describe("⚠️ THE CEILING IS THE TRACK'S OWN LENGTH — the knob cannot reach what it may not write", () => {
+  const offer = card({ taskType: "offer_received" });
+
+  it("an offer's dial has ONE stop, and says why", () => {
+    expect(reachableStops(offer).map((s) => s.days)).toEqual([1]);
+    expect(dialSrc).toContain("Offers stop at tomorrow — an offer left waiting is an offer at risk.");
+  });
+
+  it("a deadline stops at the deadline; every tier below it survives", () => {
+    expect(reachableStops(card({}), 10).map((s) => s.days)).toEqual([1, 3, 7]);
+    expect(reachableStops(card({}), 0)).toEqual([]);   // already past — nothing honest to offer
+  });
+
+  it("an ordinary card gets the whole ladder", () => {
+    expect(reachableStops(card({})).map((s) => s.days)).toEqual(SNOOZE_STOPS.map((s) => s.days));
+  });
+
+  it("⚠️ AND THE CLAMP IS STILL CALLED ON THE WAY OUT — a guard you rely on being unnecessary", () => {
+    expect(dialSrc).toContain("clampSnooze(card, days,");
+  });
+
+  it("a dial with nothing to choose says so rather than drawing an unusable track", () => {
+    expect(dialSrc).toContain("This one cannot be put off — its date has already passed.");
+  });
+});
+
+describe("⚠️ TWO REGISTERS OF ONE FACT, PAIRED AT THE SOURCE", () => {
+  it("every stop carries BOTH its prose and its terse tick — never a second table in the view", () => {
+    for (const s of SNOOZE_STOPS) {
+      expect(s.label.length, s.label).toBeGreaterThan(0);
+      expect(s.tick, s.label).toMatch(/^[A-Z0-9 ]+$/);
+    }
+    expect(SNOOZE_STOPS.find((s) => s.days === 1)).toMatchObject({ label: "tomorrow", tick: "TOMORROW" });
+  });
+});
+
+describe("⚠️ THE OPERABLE LAYER IS A REAL RANGE INPUT UNDER A PAINTED TRACK", () => {
+  /* Dragging, clicking the track, arrow keys, Home/End and assistive technology all come from the
+     platform. A bespoke `pointermove` gives the first two and reimplements the rest badly. */
+  it("the control is a range input, transparent, over the painted track", () => {
+    expect(dialSrc).toContain('type="range"');
+    expect(rule2(".snz-range {")).toContain("opacity: 0");
+    expect(rule2(".snz-range {")).toContain("position: absolute");
+    expect(code(dialSrc)).not.toContain("pointermove"); // on declarations — the head note names it
+  });
+
+  it("it announces the value in words, since the thing you operate is invisible", () => {
+    expect(dialSrc).toContain("aria-valuetext=");
+    expect(dialSrc).toContain('aria-label="How long to put it off"');
+  });
+
+  it("⚠️ AND FOCUS IS PAINTED ON THE KNOB — a keyboard-operable dial that shows nothing is worse", () => {
+    expect(dialCss).toContain(".snz-range:focus-visible + .snz-knob");
+  });
+});
+
+describe("the dial writes through the page's ONE snooze primitive", () => {
+  it("it hands over an already-clamped value; the page performs it", () => {
+    expect(page).toContain("onSnooze={(c, days, when) => snoozeCard(c, days, when)}");
+  });
+
+  it("ONE PICKER app-wide for the exact date, with the ceiling as its max", () => {
+    expect(dialSrc).toContain("<BrandDatePicker");
+    expect(dialSrc).toContain("max={ymd(new Date(Date.now() + ceiling * 86400000))}");
   });
 });

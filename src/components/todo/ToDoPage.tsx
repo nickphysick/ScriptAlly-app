@@ -2023,6 +2023,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onOpen={(c) => openDock(dockAllCards(), c.key)}
           onTick={(c) => void quickDone(c)}
           onVerb={(c, v, column) => performCardVerb(c, v, column)}
+          /* ⚠️ THE DIAL DECIDES NOTHING — it hands over an ALREADY-CLAMPED value and the page
+             performs it through `snoozeCard`, the same primitive the ⋯ tiers and the dock use.
+             One choke point, three entrances. */
+          onSnooze={(c, days, when) => snoozeCard(c, days, when)}
         />
       </TplZone>
     );

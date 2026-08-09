@@ -40,6 +40,7 @@ import { isTickable, completionVia } from "../../lib/todoActions";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId } from "../../lib/todoMenu";
 import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
 import { PortalMenu } from "./PortalMenu";
+import { SnoozeDial } from "./SnoozeDial";
 import "./todoGroups.css";
 
 export interface TaskListProps {
@@ -53,6 +54,9 @@ export interface TaskListProps {
   onTick: (card: BoardCard) => void;
   /** A menu leaf, performed by the page with its existing primitives (as the board's ⋯ was). */
   onVerb: (card: BoardCard, item: MenuLeaf, column: TodoColumnId) => void;
+  /** ⚠️ THE DIAL'S ONE WRITE — already clamped and re-labelled by `clampSnooze` on its way out,
+   *  so the page performs rather than decides, exactly as it does for every ⋯ verb. */
+  onSnooze: (card: BoardCard, days: number, when: string) => void;
 }
 
 /**
@@ -91,8 +95,13 @@ interface OpenMenu {
   openSub?: "snooze" | "resnooze" | "dismiss";
 }
 
-export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb }) => {
+export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze }) => {
   const [menu, setMenu] = useState<OpenMenu | null>(null);
+  /* ⚠️ THE DIAL IS THE CLOCK'S SURFACE NOW (P4) — it replaced the ⋯ menu's snooze submenu at THIS
+     one call site, which is exactly why the clock was routed through a pre-opened submenu in P2
+     rather than growing a chooser of its own. The ⋯ menu keeps its tiers for the keyboard path
+     and for Snoozed's "Change the date…"; they resolve through the same `clampSnooze`. */
+  const [dial, setDial] = useState<{ card: BoardCard; anchor: HTMLElement } | null>(null);
   /* Snoozed opens in place. Session-only and deliberately so: a band that remembered being open
      would greet you with the things you had put away. */
   const [snzOpen, setSnzOpen] = useState(false);
@@ -260,7 +269,11 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
               aria-haspopup="menu"
               aria-label={`Snooze “${c.title}”`}
               title="Snooze"
-              onClick={(e) => openMenu(e, c, column, "snooze")}
+              onClick={(e) => {
+                e.stopPropagation();
+                const anchor = e.currentTarget;
+                setDial((d) => (d?.card.key === c.key ? null : { card: c, anchor }));
+              }}
             >
               <Clock size={13} aria-hidden />
             </button>
@@ -296,6 +309,14 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
 
   return (
     <div className="tdg">
+      {dial && (
+        <SnoozeDial
+          card={dial.card}
+          anchor={dial.anchor}
+          onSnooze={(days, when) => { setDial(null); onSnooze(dial.card, days, when); }}
+          onClose={(returnFocus) => { if (returnFocus) dial.anchor.focus(); setDial(null); }}
+        />
+      )}
       {menu && (
         <PortalMenu
           anchor={menu.anchor}
