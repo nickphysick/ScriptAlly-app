@@ -189,5 +189,5 @@ const z = document.querySelector('.tpl-zone');
 
 ## What remains
 
-Phase 5 (row states, the loading shell, the empty states) · Phase 6 (toasts, motion, keyboard,
-many-at-once) · Phase 7 (narrow and touch). **Phase 5 was not started, per the brief.**
+Phases 5 and 6 landed on 9 August — see `reports/tasks-consolidation-p5-p6.md`. **Phase 7 (narrow
+and touch) stands alone**, with its recon written up at the foot of that report.

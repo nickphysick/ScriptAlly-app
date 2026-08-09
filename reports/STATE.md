@@ -1,4 +1,61 @@
-**Last updated: 9 August 2026 (nineteenth pass — the To-do list scroll fix).**
+**Last updated: 9 August 2026 (twentieth pass — the Tasks consolidation, Phases 5 and 6).**
+
+## Tasks consolidation — P5 + P6 ARE IN; ⚠️ P7 STANDS ALONE AND IS NOT STARTED
+
+Report: **`reports/tasks-consolidation-p5-p6.md`** (it carries the manual browser checklist and
+P7's recon). `7c82d07` (P5) → `1fb0f0e` (P6). To-do scope **62 files, 1175 passed | 2 skipped**;
+tsc + production build green. **Dev-deployed.**
+
+- **⚠️ THE OPTIMISTIC WRITE CLEARS ON SETTLE, NOT ON A DATA CHANGE.** A REFUSED write changes no
+  data, so clearing the pending dim on the next render would leave a denied row dimmed for ever —
+  which is how a silent permission failure becomes a page that looks broken. `onTick` returns its
+  write for that reason alone.
+- **⚠️ THE COMPLETION RING IS DERIVED FROM ARRIVAL, NOT FROM THE CLICK** (keys newly in Done,
+  600ms; the first render rings nothing). It SURVIVES reduced motion where the shimmer and spinner
+  stop — the ring carries a fact, the rest is decoration.
+- **⚠️ "NO TASKS" AND "WE DO NOT KNOW YET" ARE DIFFERENT SENTENCES.** The skeleton is the REAL row
+  wearing placeholders (same six tracks, same four verb slots), triggered by `collectionsReady`.
+  **SHARP EDGE: any db mock omitting `collectionsReady` now renders the skeleton** and every
+  content assertion under it fails for the wrong reason.
+- **⚠️ TWO OF THE REF'S FIVE EMPTY STATES CANNOT EXIST, AND THE LAW IS RIGHT RATHER THAN THE REF.**
+  "Nothing cleared yet today" and "Housekeeping is empty" both need a group that renders while
+  empty; `taskGroups` filters those out, locked, with its reason — and the ref's own housekeeping
+  copy admits it. `done-empty` joins `seize-the-day` as a briefed, unmounted art slot.
+- **⚠️ EVERY LIST KEY IS A BARE KEY**, so the typing guard is the whole point (j, k, s, e and a
+  space are characters a writer types). Decisions are pure in `lib/taskShortcuts`; the `?` map
+  renders FROM `KEY_MAP` and a lock walks it, so the sheet cannot advertise a key that does
+  nothing. **The focused row is the BROWSER'S OWN FOCUS** — j/k move real focus, so Tab, a click
+  and a shortcut all agree about where you are.
+- **⚠️ SELECTION IS NOT BUILT AND `X` IS NOT BOUND — the same false premise as board-optimise P8.**
+  Sheet 7 says selection "borrows the batch model wholesale"; there is no batch model. Nick's call
+  is still open. The row's `.sel` state is not shipped either: a state with no producer is dormant
+  code. **Nothing is half-built.**
+- **Toasts:** 8s, bottom-left, never stacked (a second act replaces the first), plus a pink `warn`
+  shape for refusals only — carrying no Undo, because nothing happened to reverse.
+
+### ⚠️ TWO FAULTS THE BROWSER WALK FOUND, AND THE SUITE COULD NOT
+
+1. **The keyboard was unreachable from a standing start.** The keys sat on the list container, so
+   they fired only once focus was already INSIDE it — `j` did nothing on a freshly loaded page, and
+   keydown bubbles UP so focus on the scrollzone never reached them. It listens on the window now,
+   with the visibility guard `/` uses (the Tasks slots stay mounted under `display: none`).
+2. **⚠️ AN ENTRANCE ANIMATION MUST NEVER CARRY VISIBILITY.** The fold's staggered rows sat at
+   `opacity: 0` INDEFINITELY — under `fill-mode: both` and again under `backwards` — because the
+   animation clock never advanced. Chrome throttles animations in background tabs for the same
+   reason. The rows RISE and never fade now; reduced motion STOPS the rise rather than swapping in
+   a fade, which would reintroduce the fault for the readers least able to afford it. Locked: no
+   keyframe in this sheet may start content at `opacity: 0`.
+
+A third measurement was the DOCUMENTED TRAP rather than a fault: the focus background read
+transparent because `background` is transitioned and this pane does not advance transitions.
+Suppressed, re-read, correct. CLAUDE.md's note is right.
+
+### ⚠️ P7 (narrow and touch) — not started, and its collision is known
+
+At 800px the six fixed tracks take 670px and the title breaks one letter per line — measured. The
+ref breaks at 900px, but **mobile pass 1 is locked and owns below 768px with its own chassis**, so
+the reflow lands in the 768–900 band and what happens below 768 — the swipe layer especially — is
+a decision rather than a detail. Full recon at the foot of the report.
 
 ## ⚠️ THE TO-DO LIST'S SCROLLER WAS DEAD, AND THE LOCK MEASURED THE WRONG THING
 
