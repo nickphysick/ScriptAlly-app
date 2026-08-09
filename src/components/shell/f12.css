@@ -156,6 +156,40 @@
   .qh-enter .f12-rows .f12-row { animation: none !important; }
 }
 
+/* ══ CREATE v3 · THE REQUIREMENT PIPS + STAGE 1 (ref design-refs/qc-create-steps.html) ══════
+   The pips live in the header under the subtitle: three facts, ticked as they land, so "what
+   does this still need" is answered without reading the form. Sage tick, and it is the BAND
+   sage — index.css locks --sage/--sageC/--sageD to StatusDots, and a requirement pip is not a
+   query status. ── */
+.qch-reqs { display: flex; gap: 13px; margin-top: 6px; }
+.qch-rq { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.qch-c { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #cfc3b1; display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; }
+.qch-rq.qch-on { color: var(--ink); }
+.qch-rq.qch-on .qch-c { background: #7e9178; border-color: #7e9178; }
+
+/* STAGE 1 — one question, centred, with nothing competing for the answer. */
+.qc-ask { flex: none; display: flex; flex-direction: column; align-items: center; gap: 13px; padding: 26px 0 22px; }
+.qc-askav { width: 54px; height: 54px; border-radius: 50%; border: 1.5px dashed #d8ccbb; }
+.qc-askq { font-family: var(--f12-serif); font-weight: 700; font-size: 24px; color: var(--ink); margin: 0; }
+.qc-askfield { width: 100%; max-width: 420px; }
+
+/* The stack — one column of sections. On stage 1 all three are ghosts.
+   ⚠️ `.qc-sec`, NOT `.qc-step`. `.qc-step` was the sample stepper's bare +/− button, retired in
+   corrections round 2 for one bordered control — and there is a live assertion keeping it
+   retired. Reusing the name would have given one class two unrelated meanings in one sheet and
+   quietly resurrected a rule someone deliberately removed. */
+.qc-stack { display: flex; flex-direction: column; gap: 10px; }
+.qc-sec { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: border-color 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), box-shadow 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.28s ease; }
+.qc-sum { display: flex; align-items: center; gap: 10px; padding: 11px 15px; font-size: 13px; }
+.qc-sum b { font-family: var(--f12-serif); font-weight: 700; }
+.qc-stxt { color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qc-tick { width: 19px; height: 19px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9px; line-height: 1; }
+/* upcoming: the shape of an answer, not an answer — hollow tick, no Change, dimmed whole. */
+.qc-sec.qc-up { opacity: 0.45; }
+.qc-sec.qc-up .qc-tick { background: transparent; border: 1.5px solid #cfc3b1; color: transparent; }
+
+@media (prefers-reduced-motion: reduce) { .qc-sec { transition: none; } }
+
 /* ══ INLINE QUERY CREATION — the create pane's chips / checklist ═══════════════════════════
    Colours come from the existing token set — note the checkbox tick uses the BAND sage
    (--sage-edge), never the StatusDot trio (--sage/--sageC/--sageD), which index.css locks to

@@ -27,14 +27,17 @@ describe("the two sources of reclaimed height", () => {
     expect(pane).not.toContain("qc-foot");
   });
 
-  it("the hero is compact (~90px): 54px mark, tighter padding, text BESIDE the field", () => {
-    expect(rule(".f12-hero.qc-hero")).toContain("padding: 16px 20px");
-    expect(rule(".qc-mark")).toContain("width: 54px");
-    // beside, not above: the text block is its own flex sibling of the picker
-    expect(pane).toContain('<div className="qc-htxt">');
-    // (window wide enough to span the comment that sits between the two blocks)
-    expect(pane).toMatch(/qc-htxt[\s\S]{0,800}<div className="qc-picker"/);
-    expect(pane, "the old 76px mark survives").not.toContain("width: 76, height: 76");
+  /* ⚠️ SUPERSEDED BY STAGE 1 (create mode v3). This measured a COMPACT HERO — a 54px mark with
+     the title, subtitle and picker side by side — built to claw ~90px back for the three
+     columns. Stage 1 deletes that hero: before an agent is chosen the pane holds one centred
+     question and three ghost rows, and there are no columns to make room for yet. The height
+     pressure this suite was written under does not exist in that state. */
+  it("the pre-agent state has no hero to be compact — it is one centred question", () => {
+    expect(pane, "the compact hero came back").not.toContain('className="qc-htxt"');
+    expect(pane, "the compact hero came back").not.toContain('className="qc-mark"');
+    expect(pane).toContain('<div className="qc-ask">');
+    expect(rule(".qc-ask"), "the question must be centred, not beside the field")
+      .toContain("flex-direction: column");
   });
 
   it("the hero/columns gap tightened", () => {

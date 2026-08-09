@@ -41,6 +41,16 @@ export const STEP_TITLE: Record<StepId, string> = {
 };
 export const STEP_SHORT: Record<StepId, string> = { when: "When", what: "What", notes: "Notes" };
 
+/**
+ * What a section says about itself BEFORE it has been answered — the ghost rows on stage 1.
+ * Anatomy without interrogation: you can see what will be asked without being asked it yet.
+ */
+export const STEP_HINT: Record<StepId, string> = {
+  when: "Date, how you sent it, and a nudge",
+  what: "Manuscript and materials",
+  notes: "Optional — first impressions, personalisation",
+};
+
 /** Notes is openly optional, and says so in its own head rather than in a footnote. */
 export const STEP_OPTIONAL: Record<StepId, boolean> = { when: false, what: false, notes: true };
 

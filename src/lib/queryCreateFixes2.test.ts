@@ -46,25 +46,20 @@ const block = (selector: string): string => {
 const ruleCount = (selector: string): number =>
   css.split("\n" + selector + " {").length - 1;
 
-describe("P1 · the pane names its job", () => {
-  /* AMENDED (polish round): the question is no longer forbidden — format B brings it back as an
-     italic SUBTITLE. What must never come back is the question standing in for a heading, i.e.
-     wearing the mono LABEL style. Asserting the phrase's absence was too blunt a lock. */
-  it("a Playfair heading replaces the mono question", () => {
-    expect(pane, "the question is back as a mono eyebrow").not.toContain("<div style={LABEL}>Who are you querying?</div>");
-    expect(pane).toContain('<h2 className="qc-head">New query</h2>');
-    const head = block(".qc-head");
-    expect(head, "the .qc-head rule is missing").not.toBe("");
-    expect(head, "the heading must be the serif, not the body face").toContain("var(--f12-serif)");
-  });
+/* ⚠️ P1 SUPERSEDED BY STAGE 1 (create mode v3). It settled a real argument twice over: the
+   question must not wear the mono LABEL style (a question is not an eyebrow), and it must not be
+   duplicated by an "Agent" field label above a box that already says "Search by name or
+   agency…". Both were fixes to a COMPACT hero that put a title, a subtitle and the picker on one
+   line beside each other.
 
-  /* AMENDED (polish round, ref qdb-create-polish §2 format B): the standalone "Agent" label is
-     gone — the question came back as an italic subtitle, and the search placeholder labels the
-     field. A label saying "Agent" above a box saying "Search by name or agency…" was one of the
-     two saying the same thing. */
-  it("the question returns as a subtitle, not as a duplicate field label", () => {
-    expect(pane).toContain('<p className="qc-sub">Who are you querying?</p>');
-    expect(pane, "the duplicate label came back").not.toContain("<div style={LABEL}>Agent</div>");
+   Stage 1 removes the argument's subject: the pane now asks ONE question, centred, as its whole
+   content — Playfair, no eyebrow, no field label, nothing beside it. The two rules survive in
+   createStageOne.test.ts as the order of the centred stack and the absence of a second label. */
+describe("P1 · the question is the page, not a label on it", () => {
+  it("it is a Playfair heading and there is nothing else competing with it", () => {
+    expect(pane, "the question is back as a mono eyebrow").not.toContain("<div style={LABEL}>Who are you querying?</div>");
+    expect(pane, "the duplicate field label came back").not.toContain("<div style={LABEL}>Agent</div>");
+    expect(pane).toContain('<h2 className="qc-askq">Who are you querying?</h2>');
     expect(pane, "the picker itself must not be rebuilt").toContain("AgentSearchField");
     expect(pane).toContain("onCreateAgent");
   });

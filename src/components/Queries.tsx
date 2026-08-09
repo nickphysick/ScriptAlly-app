@@ -27,6 +27,7 @@ import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
+import { requirements } from "../lib/createSteps";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
@@ -3037,6 +3038,19 @@ export const Queries: React.FC<{
                     <p className={`qch-sub${createError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
                       {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
                     </p>
+                    {/* ⚠️ THE PIPS READ THE DRAFT, NEVER THE STEPS — required ≠ sequential. Two
+                        are green on arrival because openCreate seeds the manuscript and today's
+                        date; only the agent is genuinely open. They are deliberately NOT a live
+                        region: the subtitle above already is one, and two announcers on one line
+                        of chrome would talk over each other on every keystroke. */}
+                    <div className="qch-reqs">
+                      {requirements(createDraft).map((r) => (
+                        <span key={r.key} className={`qch-rq${r.met ? " qch-on" : ""}`}>
+                          <span className="qch-c" aria-hidden="true">{r.met ? "✓" : ""}</span>
+                          {r.label}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <div className="qch-acts">
                     <span className="qch-esc" aria-hidden="true">Esc</span>
