@@ -647,7 +647,12 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   });
   it("the ⌘K advert is gone and the shortcut still focuses the (relocated) search", () => {
     expect(page).not.toContain("<kbd aria-hidden>⌘K</kbd>");
-    expect(page).toContain('e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)');
+    /* ⚠️ THE CONDITION MOVED OUT OF THE PAGE (9 Aug, sticky-headings pass): it is
+       `focusesSearch` in `lib/taskShortcuts` now, exercised directly in tasksList.test.tsx
+       alongside the new bare-`/` form. This lock keeps the half that is this file's — the page
+       ASKS rather than deciding, and it still focuses the field. */
+    expect(page).toContain("focusesSearch(e, isTypingTarget(e.target))");
+    expect(page).toContain("searchRef.current?.focus()");
     expect(page).toContain("const searchActive = search.trim().length > 0;");
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes); Esc chain: search then filters", () => {

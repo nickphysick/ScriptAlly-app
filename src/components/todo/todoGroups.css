@@ -52,6 +52,13 @@
    The zone scrolls; the sections stack inside it. */
 .tdg {
   display: block;
+
+  /* ⚠️ THE GROUND THE STICKY HEADING PAINTS ITSELF WITH, and it is NOT free-floating: it must
+     equal the shell's content capsule (`.ws-work { background: #ffffff }` in workspaceShell.css),
+     or a heading that looks correct at rest grows a pale slab the moment a row passes under it.
+     CSS cannot read another sheet, so the pair is asserted in `tasksList.test.tsx` — the same
+     treatment the family tones get, for the same reason. */
+  --tdg-ground: #ffffff;
 }
 
 .tdg-sect {
@@ -65,11 +72,31 @@
 /* THE HEADING SITS OUTSIDE AND ABOVE ITS PANEL — Playfair name, mono count, then the plain
    description on the right. Outside, because a heading inside the white panel would make the
    panel the object and the group its contents; the group is the object. */
+/* ⚠️ THE HEADING STICKS, AND IT STICKS INSIDE ITS OWN SECTION. `position: sticky` resolves against
+   the nearest scrolling ancestor — `.tpl-zone`, the only declared scroller on a Tasks page — but
+   it is BOUNDED by its parent, `.tdg-sect`. So the name, the count and the description hold while
+   their own rows pass beneath, and the section's foot pushes them out exactly as the next group's
+   heading arrives. That release is the parent's doing, not a scroll listener's: there is no JS
+   here, no observer, and nothing to keep in step.
+
+   ⚠️ NO LAYOUT CHANGES WITH IT. A sticky box stays in flow — it is not `fixed` — so the resting
+   page is byte-for-byte what it was; the only additions are a paint and a stacking order. In
+   particular there is NO top padding: the ref's rhythm is what it is, and adding room for the
+   stuck state would move every heading down in the state you spend most of your time in.
+
+   ⚠️ IT MUST PAINT ITS OWN GROUND, or rows read straight through the words as they pass. The
+   gradient fades out over the bottom quarter so a row slides UNDER the heading rather than
+   colliding with a hard edge — the treatment the retired board's column heads used, kept because
+   it was right there and not because it was there. */
 .tdg-shd {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 4px 13px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(var(--tdg-ground) 74%, rgba(255, 255, 255, 0));
 }
 
 .tdg-shd h3 {

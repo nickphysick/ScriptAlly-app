@@ -77,6 +77,7 @@ import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDo
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia } from "../../lib/todoActions";
+import { focusesSearch, isTypingTarget } from "../../lib/taskShortcuts";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import {
@@ -374,10 +375,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   /* the board's scrollzone — the scroll-restore contract's element under the viewport lock */
   const zoneRef = useRef<HTMLDivElement>(null);
+  /* ⚠️ SEARCH IS REACHABLE FROM ANYWHERE ON THE PAGE, AND THAT MATTERS MORE SINCE THE HEADINGS
+     STARTED STICKING. The listener is on `window`, not on the field or the tool row, so it fires
+     wherever focus happens to be — deep in the list, on a verb button, on nothing at all.
+     (The tool row itself does NOT scroll away: it lives in `TasksPageLayout`'s fixed header block
+     and only `.tpl-zone` scrolls. The shortcuts are for reach, not for rescue.)
+     `offsetParent === null` is the visibility guard — the Tasks slots stay MOUNTED under
+     `display: none`, so without it a hidden page would steal the key from the visible one. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey))) return;
-      if (!wrapRef.current || wrapRef.current.offsetParent === null) return; // board not visible
+      /* ⚠️ `/` IS NEW (9 Aug) — it was never bound on this page, or anywhere in live code. The
+         DECISION lives in `lib/taskShortcuts` because its two easy mistakes (firing while you
+         type, firing under a modifier that means something else) are invisible to a source-string
+         test; the page performs, it does not decide. */
+      if (!focusesSearch(e, isTypingTarget(e.target))) return;
+      if (!wrapRef.current || wrapRef.current.offsetParent === null) return; // page not visible
       e.preventDefault();
       searchRef.current?.focus();
     };

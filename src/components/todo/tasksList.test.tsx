@@ -23,6 +23,7 @@ import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
 import { rowPill, rowPrimaryLabel, rowJourney, PillTone } from "../../lib/taskRow";
 import { SNOOZE_STOPS, reachableStops } from "../../lib/todoActions";
+import { focusesSearch, isTypingTarget, ShortcutKey } from "../../lib/taskShortcuts";
 import { dialDateLine } from "./SnoozeDial";
 import { TaskList, groupColumn } from "./TaskList";
 
@@ -38,10 +39,18 @@ const rule2 = (sel: string): string => {
   return dialCss.slice(i, dialCss.indexOf("}", i));
 };
 
+/* ⚠️ STRIP THE COMMENTS BEFORE SLICING, NOT AFTER — and this bit me writing the sticky lock.
+   The house style explains a rule by QUOTING the one it depends on ("must equal `.ws-work {
+   background: #ffffff }`"), so a slicer that walks to the next `}` stops inside the prose and
+   returns half a rule. It fails loudly here; the dangerous version is the `not.toContain` that
+   silently passes because the declaration it was looking for fell outside the truncated slice.
+   (tasksViewport's helper strips AFTER slicing and has the same latent flaw — flagged, not
+   touched, because it is another pack's file and its rules carry no quoted braces today.) */
+const cssDecls = css.replace(/\/\*[\s\S]*?\*\//g, "");
 const rule = (sel: string): string => {
-  const i = css.indexOf(sel);
+  const i = cssDecls.indexOf(sel);
   expect(i, `${sel} has no rule`).toBeGreaterThan(-1);
-  return css.slice(i, css.indexOf("}", i));
+  return cssDecls.slice(i, cssDecls.indexOf("}", i));
 };
 
 /* ⚠️ ASSERT ON DECLARATIONS, NOT ON RAW FILE TEXT — the house style explains a rule by naming
@@ -558,5 +567,122 @@ describe("the dial writes through the page's ONE snooze primitive", () => {
   it("ONE PICKER app-wide for the exact date, with the ceiling as its max", () => {
     expect(dialSrc).toContain("<BrandDatePicker");
     expect(dialSrc).toContain("max={ymd(new Date(Date.now() + ceiling * 86400000))}");
+  });
+});
+
+/* ── 7. the sticky group headings ───────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE GROUP HEADING STICKS, BOUNDED BY ITS OWN SECTION", () => {
+  const shd = () => rule(".tdg-shd {");
+
+  it("it is sticky to the zone's top, above the panel", () => {
+    expect(shd()).toContain("position: sticky");
+    expect(shd()).toContain("top: 0");
+    expect(shd()).toContain("z-index: 2");
+    /* `fixed` would take it out of flow and leave a hole where the heading was — and it would
+       never release, because a fixed box has no parent to be bounded by. */
+    expect(shd()).not.toContain("position: fixed");
+  });
+
+  it("⚠️ THE RELEASE IS THE PARENT'S DOING — no listener, no observer, nothing to keep in step", () => {
+    /* Sticky is bounded by its containing block, so `.tdg-sect` is what pushes the heading out as
+       its own rows run out — which is exactly "release when the next group's heading arrives".
+       The heading must therefore be a CHILD of the section, not a sibling of it. */
+    const html = render(cols({ todo: [card()] }));
+    const sect = html.slice(html.indexOf('class="tdg-sect"'));
+    expect(sect.indexOf("tdg-shd")).toBeLessThan(sect.indexOf("tdg-panel"));
+    expect(decls(list)).not.toContain("IntersectionObserver");
+    expect(decls(list)).not.toContain("scrollTop");
+  });
+
+  it("⚠️ NOTHING BETWEEN THE HEADING AND THE ZONE MAY DECLARE OVERFLOW", () => {
+    /* THE SILENT FAILURE THIS FORBIDS: `position: sticky` resolves against the nearest ancestor
+       with a scroll mechanism. An `overflow: hidden` on `.tdg` or `.tdg-sect` — added for any
+       innocent reason — makes THAT box the reference instead of `.tpl-zone`. It never scrolls, so
+       the heading simply stops sticking: no error, no warning, and the page looks correct at rest.
+       `.tpl-zone` is the one declared scroller (locked in tasksViewport). */
+    for (const sel of [".tdg {", ".tdg-sect {"]) {
+      expect(rule(sel), sel).not.toContain("overflow");
+    }
+  });
+
+  it("⚠️ IT PAINTS ITS OWN GROUND, fading out so rows slide UNDER rather than collide", () => {
+    expect(shd()).toContain("background: linear-gradient(var(--tdg-ground) 74%");
+    expect(shd()).toContain("rgba(255, 255, 255, 0)");
+  });
+
+  it("⚠️ AND THAT GROUND MUST EQUAL THE SHELL'S CONTENT CAPSULE — a cross-file pair", () => {
+    /* CSS cannot read another sheet. If the capsule stops being white, a heading that looks right
+       at rest grows a pale slab the moment a row passes under it — visible only while scrolling,
+       which is the hardest state to notice in a screenshot. */
+    const shell = readFileSync(join(here, "..", "shell", "workspaceShell.css"), "utf8");
+    const ground = rule(".tdg {").match(/--tdg-ground:\s*([^;]+)/)?.[1].trim();
+    expect(ground).toBe("#ffffff");
+    expect(shell).toContain(".ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: #ffffff; }");
+  });
+
+  it("⚠️ NO LAYOUT CHANGE CAME WITH IT — the resting rhythm is untouched", () => {
+    /* A sticky box stays in flow, so the resting page is what it was. The temptation is to add top
+       padding for the stuck state; that would move every heading down in the state you spend most
+       of your time in. The ref's own rhythm stands. */
+    expect(shd()).toContain("padding: 0 4px 13px");
+    expect(rule(".tdg-sect {")).toContain("margin-bottom: 26px");
+  });
+
+  /* ⚠️ SNOOZED IS DELIBERATELY NOT STICKY. Its fold row is not a heading over rows — it IS the
+     group while closed, and it sits OUTSIDE any `.tdg-sect`, so it has no section to be bounded
+     by and would stick to the whole zone until the page ended. */
+  it("the snoozed fold is not sticky", () => {
+    expect(rule(".tdg-fold {")).not.toContain("position: sticky");
+  });
+});
+
+describe("⚠️ SEARCH STAYS REACHABLE FROM ANYWHERE ON THE PAGE", () => {
+  const K = (key: string, mods: Partial<ShortcutKey> = {}): ShortcutKey => ({ key, ...mods });
+
+  it("⌘K and ^K focus the field, typing or not — a modifier cannot collide with text entry", () => {
+    expect(focusesSearch(K("k", { metaKey: true }), false)).toBe(true);
+    expect(focusesSearch(K("K", { ctrlKey: true }), true)).toBe(true);
+    expect(focusesSearch(K("k"), false)).toBe(false); // bare k is a letter
+  });
+
+  it("⚠️ `/` STANDS DOWN WHILE YOU ARE TYPING — else it is the one key you cannot enter", () => {
+    expect(focusesSearch(K("/"), false)).toBe(true);
+    expect(focusesSearch(K("/"), true)).toBe(false);
+  });
+
+  it("⚠️ AND UNDER ANY MODIFIER — ⇧/ is `?` on a UK layout, and ⌘/ belongs to the browser", () => {
+    for (const mod of ["metaKey", "ctrlKey", "altKey", "shiftKey"] as const) {
+      expect(focusesSearch(K("/", { [mod]: true }), false), mod).toBe(false);
+    }
+  });
+
+  it("the typing test names the surfaces that own a keystroke", () => {
+    for (const tagName of ["INPUT", "TEXTAREA", "SELECT"]) {
+      expect(isTypingTarget({ tagName } as unknown as EventTarget), tagName).toBe(true);
+    }
+    expect(isTypingTarget({ tagName: "DIV", isContentEditable: true } as unknown as EventTarget)).toBe(true);
+    expect(isTypingTarget({ tagName: "BUTTON" } as unknown as EventTarget)).toBe(false);
+    expect(isTypingTarget(null)).toBe(false);
+  });
+
+  it("the page ASKS the predicate and listens on the WINDOW — not on the field or the tool row", () => {
+    expect(page).toContain("focusesSearch(e, isTypingTarget(e.target))");
+    expect(page).toContain('window.addEventListener("keydown", onKey)');
+    expect(page).toContain("searchRef.current?.focus()");
+  });
+
+  it("⚠️ AND IT NO-OPS WHILE THE PAGE IS HIDDEN — the Tasks slots stay MOUNTED", () => {
+    /* `display: none` keeps the component alive, so without this guard a hidden Tasks page would
+       steal the key from whichever page is actually on screen. */
+    expect(page).toContain("wrapRef.current.offsetParent === null");
+  });
+
+  it("the tool row does not scroll away in the first place — only the zone scrolls", () => {
+    /* Stated so the shortcuts read as REACH rather than as rescue: the header block is fixed by
+       the alignment contract, and `.tpl-zone` is the one declared scroller. */
+    const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
+    expect(layoutCss).toContain(".tpl-head { flex: 0 0 auto");
+    expect(page).toContain("tools={renderTools()}");
   });
 });
