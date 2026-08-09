@@ -44,8 +44,13 @@ const render = (over: Partial<typeof base> & { loading?: boolean } = {}) =>
 describe("§1 · the lock", () => {
   it("⚠️ min-height is FORBIDDEN on the lock elements", () => {
     expect(rule(".os-root")).not.toContain("min-height");
-    // and no 100vh anywhere — the height comes from the slot, never the viewport
-    expect(cssRules).not.toContain("100vh");
+    /* ⚠️ NO 100vh IN THE LOCKED RULES — while the lock holds, the height comes from the slot and
+       never from the viewport. The RELEASES are the exception and must stay one: once the page is
+       allowed to scroll it is an ordinary page again, and `min-height: 100dvh` on the wrapper is
+       the correct reference there. So this checks the base stylesheet, not the media queries. */
+    const locked = cssRules.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "");
+    expect(locked).not.toContain("100vh");
+    expect(locked).not.toContain("100dvh");
   });
 
   /* ⚠️ THE HEIGHT IS CSS NOW, AND THE JS LOCK IS DELETED. It measured #app-stage-scroll and
@@ -61,6 +66,27 @@ describe("§1 · the lock", () => {
     /* target the ROOT's own attributes — the skeleton bars carry a legitimate inline width, so a
        bare search for "style={" fails for the wrong reason (it did, first run) */
     expect(src).not.toMatch(/className="os-root"[^>]*style=/);
+  });
+
+  /* ⚠️ THE DASHBOARD'S OWN WRAPPER IS PART OF THE CHAIN — and it is the link that broke, twice
+     unnoticed, because it is invisible from inside OneScreenDashboard. `.sa-dashroot` carried
+     `min-h-screen` (100vh) and `pb-16` from the era when this page scrolled: 100vh inside a slot
+     that is the viewport MINUS the 66px bar can never fit, and `min-height` leaves `height: auto`,
+     so the `height:100%` below it had nothing to resolve against. Measured at 1155x870: slot
+     774px, wrapper 6,499px, scroller overflowing by 5,725px. */
+  it("⚠️ the Dashboard wrapper carries no min-h-screen and no bottom padding", () => {
+    const src = readFileSync(resolve(__dirname, "../Dashboard.tsx"), "utf8");
+    const cls = /className="(sa-dashroot[^"]*)"/.exec(src)?.[1] ?? "";
+    expect(cls, "the sa-dashroot wrapper must exist").not.toBe("");
+    expect(cls).not.toContain("min-h-screen");
+    expect(cls).not.toContain("pb-16");
+  });
+
+  it("⚠️ and it takes a DEFINITE height, so height:100% below it can resolve", () => {
+    expect(rule(".sa-dashroot")).toContain("height: 100%");
+    expect(rule(".sa-dashroot")).toContain("min-height: 0");
+    // the releases hand it back to a scrolling page
+    expect(cssRules).toContain(".sa-dashroot { height: auto; min-height: 100vh; min-height: 100dvh; padding-bottom: 4rem; }");
   });
 
   /* ⚠️ BOTH ROUTE DECLARATIONS ARE REQUIRED. `layout="fill"` alone leaves `.ws-work` at

@@ -7,6 +7,14 @@
    breaks at the slot div. Stage-relative by construction: never a 100vh, never a bar offset.
    ⚠️ min-height IS FORBIDDEN on the lock elements (§1) — it grows past the fold with no scrollbar.
    The releases below use !important deliberately: author-important beats the inline height. */
+/* ⚠️ THE DASHBOARD'S OWN WRAPPER IS PART OF THIS CHAIN, and it is the link that broke. `Dashboard`
+   renders `.sa-dashroot` between the StagePage slot and `.os-root`; it carried `min-h-screen`
+   (100vh) and `pb-16` from the era when this page scrolled. Inside a slot that is the viewport
+   minus the 66px bar, 100vh can never fit — and `min-height` leaves `height: auto`, so the
+   `height: 100%` below it had nothing to resolve against. Measured: slot 774px, wrapper 6,499px.
+   ⚠️ IT IS STYLED HERE, NOT IN dashboardV37.css, so the whole lock reads in one file. */
+.sa-dashroot { height: 100%; min-height: 0; }
+
 /* ⚠️ `height: 100%` OF A SLOT THE SHELL SIZES — never 100vh, never a bar offset, and no longer a
    JS-measured pixel height (that measured the scroller INCLUDING the 66px bar and overflowed by
    exactly `--head`). Requires `layout="fill"` on the slot AND `fit` on the work wrapper. */
@@ -192,6 +200,8 @@
    rule is only `height:100%` now, but the release must also beat any future inline or shell-side
    height, and this is the rule that guarantees the page can scroll when it must. */
 @media (max-width: 1024px) {
+  /* the wrapper goes back to being a scrolling page, bottom padding and all */
+  .sa-dashroot { height: auto; min-height: 100vh; min-height: 100dvh; padding-bottom: 4rem; }
   .os-root { height: auto !important; overflow: visible; }
   .os-content { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 28px; }
   /* the grid placements go with the grid, or the flex order is wrong */
@@ -207,6 +217,7 @@
 }
 /* short desktop viewports: the promise cannot be kept, so stop pretending (§11) */
 @media (max-height: 680px) and (min-width: 1025px) {
+  .sa-dashroot { height: auto; min-height: 0; padding-bottom: 2rem; }
   .os-root { height: auto !important; overflow: visible; }
   .os-colM .os-lead { flex: none; height: 230px; }
 }

@@ -1478,10 +1478,19 @@ export const Dashboard: React.FC<{
      down instead. DashboardSkeleton survives on disk unmounted. */
   return (
     <div
-      className="sa-dashroot min-h-screen pb-16 font-sans"
-      // No bespoke ground (canvas scheme 1) — the taupe desk inverted the depth model; the page
-      // inherits the stage's canvas like every other page. sa-dashroot swaps the min-height to
-      // dvh below md (viewport law) — unlayered CSS beats the layered Tailwind utility.
+      className="sa-dashroot font-sans"
+      /* ⚠️ `min-h-screen pb-16` REMOVED — they were what broke the one-screen lock, and they are
+         invisible from inside OneScreenDashboard, which is why this wrapper went unmeasured
+         through two rounds of "fixing" the scroll.
+
+         `min-height: 100vh` sits INSIDE a slot that is already the viewport MINUS the 66px bar,
+         so it could never fit by construction; and `min-height` does not make a box definite, so
+         `.os-root`'s `height: 100%` had nothing to resolve against and fell back to content
+         height — 6,499px of wrapper in an 840px scroller, measured.
+
+         The height now comes from `.sa-dashroot` in oneScreen.css, which keeps it `height:100%`
+         where the page is locked and hands back `auto` + the dvh min-height + the bottom padding
+         in the releases, where the page is SUPPOSED to scroll. */
       style={{ color: bodyInk }}
     >
 
