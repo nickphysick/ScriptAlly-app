@@ -67,6 +67,9 @@ import { todoPrefs } from "../../lib/todoPrefs";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
+/* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
+   page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
+import { clampSnooze, cardLane, snoozeVia, completionVia } from "../../lib/todoActions";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import {
@@ -467,22 +470,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, [laterKey]);
   // the Later snoozes — the EXISTING primitives, day-parameterised (undo everywhere)
   function snoozeCard(c: BoardCard, days: number, when: string) {
-    /* ⚠️ AN OFFER'S SNOOZE IS CAPPED AT TOMORROW — AT THE CHOKE POINT (tasks-pages P2, walk fix
-       2). The menu's tiers already cap it, but a cap that lives only in one menu's options is a
-       cap every OTHER path walks past — which is how an offer surfaced reading "BACK 7 AUG". */
-    if (c.taskType === "offer_received" && days > 1) { days = 1; when = "tomorrow"; }
-    const lane = (c.stream === "nt" ? "nt" : c.stream === "hk" ? "hk" : "do") as "do" | "hk" | "nt";
+    /* ⚠️ THE CEILING IS APPLIED IN lib/todoActions, NOT HERE (tasks-consolidation, extraction).
+       It was an inline `if` in this function — which made this function the choke point, and a
+       choke point inside a 2,000-line component about to be rebuilt is a coincidence rather than
+       a guarantee. `clampSnooze` is the single clamp now; every path reaches it, and its ceilings
+       are unit-tested away from this file. */
+    ({ days, when } = clampSnooze(c, days, when));
+    const lane = cardLane(c);
     const text = `Snoozed — back ${when}.`;
-    if (c.userTaskId) {
-      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId };
+    if (snoozeVia(c) === "user-task-flag") {
+      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId! };
       upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });
       const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
       setOverlay(c.key, { kind: "dismissed", lane, text, undo });
       flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
-    if (!c.taskType || !c.relatedRecordId) return;
-    dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", days);
+    if (snoozeVia(c) !== "dismiss-task") return;
+    dismissTask(c.taskType!, c.relatedRecordId!, "fixed snooze", days);
     const key = flagKeyForTask(c.taskType, c.relatedRecordId);
     const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
     setOverlay(c.key, { kind: "dismissed", lane, text, undo });
@@ -769,7 +774,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      behaviour survives without a second piece of state to keep in step.) */
   async function quickDone(c: BoardCard) {
     const nowIso = new Date().toISOString();
-    if (c.userTaskId) {
+    /* ⚠️ WHICH WRITE PATH A KIND TAKES IS `completionVia` (tasks-consolidation, extraction). It
+       was an if-ladder here, so "which kinds can be ticked at all" was answerable only by reading
+       this function to its end — and the row needs that answer BEFORE it draws a tick. */
+    const via = completionVia(c);
+    if (via === "none") return;
+    if (via === "user-task") {
       // save-and-today P1 — ticking is a write like any other: it must not silently no-op. On a
       // denied/dropped write, surface a Try-again toast rather than the old unhandled throw.
       try {
@@ -785,7 +795,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
     if (!q) return;
-    if (c.taskType === "no_response_close") {
+    if (via === "close-query") {
       const prev = q.status as QueryStatus;
       await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from the quick rail");
       const undo = () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE);
@@ -793,7 +803,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       doneToast(c, async () => { await undo(); clearOverlay(c.key); flash("Restored"); });
       return;
     }
-    if (c.taskType === "nudge_overdue") {
+    if (via === "log-nudge") {
       const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
       const r = await logNudge(...nudgeWriteArgs(p, new Date().toISOString()));
       if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return; }

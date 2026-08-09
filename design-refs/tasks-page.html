@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tasks — redesigned</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+:root{--ink:#3a1c14;--white:#ffffff;--paper:#fdfaf5;--oat:#f2ede7;--hair:#e2d8ca;--hair2:#efe6da;
+--pink-band:#f6d8cc;--pink-band2:#f2cec1;--pink-b:#e8c8bc;--pink-t:#f8e7dc;
+--sage-1:#d7ddd5;--sage-2:#d5dbd3;--sage-bd:#b9c9b4;--sage-i:#5a6e58}
+
+:root{--ink:#2a1a13;--soft:#4d4238;--muted:#8a7a6c;--label:#b3a394;--hair:#f0e9dd;--pink:#f5e2da;--pinkbd:#e8c8bc;--burg:#7c3a2a}
+*{font-variant-numeric:tabular-nums}
+body{background:#3a332c;padding:30px 0 80px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;color:#2b2118}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#b3a695;margin:34px 0 11px;width:1500px}
+.lbl:first-child{margin-top:0}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12px;color:#cfc2b0;margin-left:10px;line-height:1.6}
+.frame{width:1500px;background:#fdfcfa;border-radius:14px;overflow:hidden;display:flex;box-shadow:0 16px 44px rgba(20,15,10,.45);border:1px solid #2a2019}
+.rail{width:78px;flex:0 0 auto;background:#261c15;display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:2px}
+.rlogo{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#f3e7da;margin-bottom:14px}
+.rli{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#9c8878;position:relative}
+.rli.on{background:#3d2e22;color:#f3e7da}
+.rli.on::after{content:'';position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%;background:#c96f52}
+.rfoot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:10px}
+.avi{width:34px;height:34px;border-radius:50%;background:#f3e7da;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#7c3a2a}
+.sb{width:252px;flex:0 0 auto;border-right:1px solid #ede5d8;display:flex;flex-direction:column;padding:14px 14px 16px;box-sizing:border-box}
+.mspill{display:flex;align-items:center;gap:9px;height:42px;border:1px solid #e2d8c8;border-radius:11px;padding:0 13px;font-size:13px;font-weight:600;margin-bottom:16px}
+.si{display:flex;align-items:center;gap:11px;height:40px;border-radius:9px;padding:0 10px;font-size:13.5px;color:var(--soft);font-weight:500}
+.si .ic{width:18px;text-align:center;color:var(--muted);font-size:13px}
+.si .chev{margin-left:auto;color:var(--label);font-size:9px}
+.si.grp{font-weight:700;color:#2b2118}
+.si .dotn{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+.si .dotn::before{content:'';width:6px;height:6px;border-radius:50%;background:#c96f52}
+.kid2{display:flex;align-items:center;height:34px;border-radius:8px;padding:0 10px;margin-left:30px;font-size:12.5px;color:#5d5047}
+.kid2.on{background:#f2ede7;color:#2b2118;font-weight:700}
+.collapse{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;color:var(--muted);font-size:12px;margin-top:10px}
+.sbfoot{margin-top:auto;border-top:1px solid var(--hair);padding-top:12px}
+.upg{border:1px solid #e2b9a8;color:var(--burg);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600}
+.mainwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{height:64px;display:flex;align-items:center;gap:16px;padding:0 26px;border-bottom:1px solid var(--hair)}
+.wm{font-family:'Playfair Display',serif;font-size:21px;font-weight:800}
+.crumb{font-size:13px;color:var(--muted)}
+.crumb b{color:#2b2118;font-weight:600}
+.saved{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--label)}
+.srch{display:flex;align-items:center;gap:9px;width:240px;height:36px;border:1px solid #e8dfd1;border-radius:9px;padding:0 12px;color:#a5988c;font-size:12px}
+.srch .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;background:#f2ede7;border-radius:5px;padding:2px 6px;color:var(--muted)}
+.newb{display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border-radius:9px;height:38px;padding:0 15px;font-size:12.5px;font-weight:600}
+.inner{display:flex;flex:1;min-height:0}
+.pside{width:216px;flex:0 0 auto;border-right:1px solid var(--hair);padding:22px 16px 16px;display:flex;flex-direction:column;box-sizing:border-box}
+.pk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:0 6px 8px}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--label);padding:18px 6px 8px}
+.pi{display:flex;align-items:center;gap:10px;height:34px;border-radius:8px;padding:0 9px;font-size:13px;color:var(--soft)}
+.pi.on{background:#f2ede7;font-weight:700;color:#2b2118}
+.pi .swd{width:9px;height:9px;border-radius:50%}
+.pi .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.linkrow{display:flex;align-items:center;font-size:11.5px;color:var(--muted);border-top:1px solid var(--hair);margin-top:10px;padding:11px 9px 0;line-height:1.5}
+.linkrow b{color:var(--burg);font-weight:600;border-bottom:1px solid #e2c6ba;margin-left:4px}
+.tagbox{border:1px dashed #d9cbb8;border-radius:10px;padding:11px 12px;margin:2px 4px}
+.tagbox b{font-size:12px;display:block}
+.tagbox span{font-size:10.5px;color:var(--muted);line-height:1.5;display:block;margin-top:3px}
+.tset{display:flex;align-items:center;gap:9px;height:34px;padding:0 9px;color:var(--soft);font-size:12.5px;margin-top:auto}
+.pbody{flex:1;min-width:0;padding:26px 30px 30px;overflow:auto}
+.ph h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:700}
+.ph .sub{font-size:13px;color:var(--muted);margin-top:5px}
+.tools{display:flex;align-items:center;gap:8px;margin-top:16px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.tsrch{display:flex;align-items:center;gap:7px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:#a5988c;font-size:11.5px;width:190px;background:#fff}
+.sortb{display:inline-flex;align-items:center;gap:6px;height:32px;border:1px solid #e8dfd1;border-radius:8px;padding:0 11px;color:var(--soft);font-size:11.5px;background:#fff;font-weight:600}
+.pkb{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pinkbd);color:#5c2f22;border-radius:9px;height:33px;padding:0 14px;font-size:12px;font-weight:700}
+/* board */
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start;margin-top:18px}
+.fh{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px;display:flex;align-items:baseline;gap:9px;position:sticky;top:0;background:linear-gradient(#fdfcfa 74%,rgba(253,252,250,0));z-index:2}
+.fh .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.fh.done{border-bottom-color:#b9c9b4}
+.fh .wip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--label);font-weight:400;letter-spacing:.1em}
+.kc{background:#fff;border:1px solid #efe8dc;border-radius:10px;box-shadow:0 2px 8px rgba(58,28,20,.06);margin-bottom:12px;position:relative;transition:transform .14s cubic-bezier(.2,.7,.3,1),box-shadow .14s}
+.kc.u{border:1px solid var(--ink)}
+.kc .b{height:24px;display:flex;align-items:center;padding:0 11px;border-bottom:1px solid var(--bd);border-radius:10px 10px 0 0;overflow:hidden}
+.kc.u .b{background:linear-gradient(180deg,#f8e2d9,#f4d5c9);--bd:#e8c8bc}
+.kc.h .b{background:linear-gradient(180deg,#f6f0e4,#f0e8d8);--bd:#ddd0bc}
+.kc.t .b{background:linear-gradient(180deg,#dee4dc,#d5dbd3);--bd:#b9c9b4}
+.kc .b i{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;font-style:normal;color:#3a1c14}
+.kc .b .w{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#8a6a58}
+.kc .in{padding:12px 13px 13px}
+.kc h4{font-size:13px;font-weight:600;line-height:1.35}
+.kc .ms{font-size:11px;color:#a0958a;margin-top:4px}
+.kc.lift{transform:translateY(-2px);box-shadow:0 8px 20px rgba(58,28,20,.13)}
+.hint{position:absolute;right:11px;top:31px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:#8a6a58}
+.dots{position:absolute;right:8px;bottom:8px;width:26px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#c4b6a6;letter-spacing:1px}
+.kc:hover .dots,.kc.lift .dots{color:#6b5a4e;background:#faf6f0;border:1px solid #ece4d6}
+.kc .in{padding-right:42px}
+.kc .ms{padding-right:0}
+/* B: band-mounted */
+.bdots{margin-left:8px;color:#8a6a58;font-size:10px;letter-spacing:1px}
+/* C: right gutter */
+.gut{position:absolute;top:24px;right:0;bottom:0;width:32px;border-left:1px solid #f4eee4;display:flex;align-items:center;justify-content:center;color:#c4b6a6;font-size:11px;letter-spacing:1px;background:#fdfbf7;border-radius:0 0 10px 0}
+.kc.gutc .in{padding-right:44px}
+.tick{position:absolute;inset:-1px;border-radius:10px;border:1.5px solid #8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,.16)}
+.stack::before,.stack::after{content:'';position:absolute;left:5px;right:5px;height:10px;border:1px solid #efe8dc;border-top:none;border-radius:0 0 9px 9px;background:#fdfbf7;z-index:-1}
+.stack::before{bottom:-5px}
+.stack::after{bottom:-9px;left:10px;right:10px;background:#fbf8f3;z-index:-2}
+.prog{height:3px;border-radius:2px;background:#efe7d9;overflow:hidden;margin:9px 0 0}
+.prog i{display:block;height:100%;background:#b9a98e;width:31%}
+.ghost{border:1.5px dashed #d8ccbc;border-radius:10px;height:78px;background:repeating-linear-gradient(135deg,#fdfbf7,#fdfbf7 6px,#faf6ef 6px,#faf6ef 12px);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.15em;color:var(--label)}
+.fade{height:30px;background:linear-gradient(rgba(253,252,250,0),#fdfcfa);margin-top:-30px;position:relative;z-index:1}
+.more{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;color:var(--label);text-align:center;padding:2px}
+.empty{font-size:11.5px;color:var(--muted);line-height:1.6;padding:4px 2px}
+.empty b{color:var(--burg);border-bottom:1px solid #e2c6ba}
+
+/* calendar */
+.calbar{display:flex;align-items:center;gap:8px;margin-top:18px}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.dow{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.17em;color:var(--label);text-align:center;padding-bottom:3px}
+.cell{background:#fff;border:1px solid #efe8dc;border-radius:9px;min-height:104px;padding:6px 7px}
+.cell.today{border:1.5px solid var(--ink)}
+.cell.past{background:#faf7f2}
+.cell .d{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--label);display:flex}
+.cell.today .d{color:#2b2118;font-weight:700}
+.cell .d .c2{margin-left:auto;font-size:6.5px;color:#c3b6a6}
+.pip{display:block;border-radius:5px;font-size:8.5px;padding:3px 6px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pip.u{background:#f8e2d9;color:#7a3a28;border:1px solid #eecfc2}
+.pip.t{background:#e9ede6;color:#3f5a3d;border:1px solid #c9d6c5}
+.pip.s{background:#f4efe7;color:#6b5a4e;border:1px solid #e6dccc}
+.pip.n{background:#f8f0d9;color:#6f5a2a;border:1px solid #e6d9ae}
+.pip.done{background:#f2f4f1;color:#7a8878;border:1px solid #dfe5dd;text-decoration:line-through}
+.rolled{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;color:#b3a394;margin-top:4px;display:block}
+.more2{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--label);padding:3px 2px 0}
+.legend{display:flex;gap:12px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.13em;color:var(--label)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:3px;display:inline-block}
+/* noteboard */
+.nbg{columns:3;column-gap:16px;margin-top:18px}
+.note{break-inside:avoid;background:#fdf6e3;border:1px solid #e6d9ae;border-radius:11px;box-shadow:0 3px 10px rgba(58,28,20,.08);padding:14px 16px 15px;margin-bottom:16px;position:relative}
+.note .nt{font-family:'Caveat',cursive;font-size:21px;line-height:1.22;color:#4a3a1e}
+.note .nb{font-family:'Caveat',cursive;font-size:16px;color:#6f5f42;margin-top:6px;line-height:1.3}
+.note .nf{display:flex;align-items:center;gap:6px;margin-top:11px;padding-right:30px}
+.note .when{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#b3a279;margin-left:auto}
+.note .dots{color:#c9b98c}
+.note:hover .dots{color:#6b5a4e;background:#fbf3dd;border-color:#e6d9ae}
+.mtag{display:inline-flex;align-items:center;font-size:9px;font-weight:600;border-radius:5px;padding:2px 8px}
+.addnote{break-inside:avoid;border:1.5px dashed #d9cbb8;border-radius:11px;min-height:88px;display:flex;align-items:center;justify-content:center;color:var(--label);font-size:11.5px;margin-bottom:16px}
+/* menu M2 */
+.menu{position:absolute;background:#fff;border:1px solid #e2d8c8;border-radius:12px;box-shadow:0 18px 44px rgba(58,28,20,.2);padding:6px;width:228px;z-index:20}
+.mhead{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.17em;color:var(--label);padding:8px 10px 4px}
+.mi{display:flex;align-items:center;gap:10px;height:32px;border-radius:8px;padding:0 10px;font-size:11.5px;color:var(--soft);font-weight:500}
+.mi b{font-weight:700;color:#2b2118}
+.mi.hot{background:#f7f2e9}
+.mi.dim{color:#c1b4a5}
+.kbd{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 5px;border:1px solid #e2d8c8;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:'JetBrains Mono',monospace;font-size:8px;color:#6b5a4e}
+
+.frame{height:760px}
+.pbody{display:flex;flex-direction:column;overflow:hidden;padding-bottom:20px}
+.scrollzone{flex:1;min-height:0;overflow:auto;position:relative;padding-right:4px}
+.hem{position:sticky;bottom:0;height:30px;background:linear-gradient(rgba(253,252,250,0),#fdfcfa);pointer-events:none;margin-top:-30px;display:block}
+.fh2{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;border-bottom:2px solid #2a1a13;padding-bottom:7px;margin-bottom:11px;display:flex;align-items:baseline;gap:9px}
+.fh2 .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a5988c;font-weight:400}
+.fh2 .wip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:#b3a394;font-weight:400;letter-spacing:.1em}
+.trow2{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid #f6f1e8}
+.cc2{width:18px;height:18px;border-radius:50%;border:1.6px solid #cdbfae;background:#fff;flex:0 0 auto}
+.cc2.done{background:linear-gradient(180deg,#dee4dc,#d5dbd3);border-color:#8a9e88;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#4a5f48}
+.tt2{font-size:13px;font-weight:600;color:#2b2118}
+.meta3{display:flex;gap:7px;margin-top:4px;align-items:center}
+.mc2{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;color:#8a7d6e;border:1px solid #efe8dc;border-radius:5px;padding:2px 8px}
+.est2{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#5a6e58;background:#e9ede6;border:1px solid #c9d6c5;border-radius:5px;padding:2px 7px}
+.why2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#8a7a5e;white-space:nowrap}
+.addg2{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 12px;border-radius:8px;border:1px solid #e2d8c8;background:#fff;font-size:11px;font-weight:600;color:#4d4238;margin-left:12px;flex:0 0 auto}
+.dots2{margin-left:10px;width:24px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#c4b6a6;flex:0 0 auto}
+.qadd2{display:flex;align-items:center;gap:10px;height:38px;border:1px solid #efe8dc;border-radius:10px;padding:0 13px;color:#a5988c;font-size:12px;margin:2px 0 8px;background:#fff;flex:0 0 auto}
+.calgrid2{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;gap:6px}
+.cell2{background:#fff;border:1px solid #efe8dc;border-radius:9px;padding:6px 7px;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.cell2.today{border:1.5px solid #2a1a13}
+.cell2.past{background:#faf7f2}
+.cell2 .d{font-family:'JetBrains Mono',monospace;font-size:8px;color:#b3a394;display:flex}
+.cell2.today .d{color:#2b2118;font-weight:700}
+.pip2{display:block;border-radius:5px;font-size:8px;padding:2px 6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.legend2{display:flex;gap:12px;padding-top:10px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;color:#b3a394;flex:0 0 auto}
+.legend2 i{width:8px;height:8px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.nbg2{flex:1;min-height:0;overflow:auto;columns:4;column-gap:16px;margin-top:14px}
+.note2{break-inside:avoid;background:#fdf6e3;border:1px solid #e6d9ae;border-radius:11px;box-shadow:0 3px 10px rgba(58,28,20,.07);padding:13px 15px 14px;margin-bottom:15px}
+.note2 .nt{font-family:'Caveat',cursive;font-size:20px;line-height:1.22;color:#4a3a1e}
+.note2 .nb{font-family:'Caveat',cursive;font-size:15px;color:#6f5f42;margin-top:5px;line-height:1.3}
+.note2 .nf{display:flex;align-items:center;gap:6px;margin-top:10px}
+.note2 .when{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#b3a279;margin-left:auto}
+
+.frame{height:900px}
+.pbody{display:flex;flex-direction:column;overflow:hidden;padding:34px 40px 26px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:#a5988c}
+h1.pt{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;line-height:1.1;margin-top:12px}
+.headrow{display:flex;align-items:center;gap:12px}
+.statrow{display:flex;gap:12px;margin-top:22px}
+.statchip{display:inline-flex;align-items:center;gap:9px;border:1px solid #e6ddcd;border-radius:99px;height:38px;padding:0 19px;font-size:12.5px;color:#6b5a4e;background:#fff}
+.statchip b{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:#2b2118}
+.inkb2{display:inline-flex;align-items:center;gap:8px;background:#2a1a13;color:#fff;border-radius:10px;height:38px;padding:0 17px;font-size:12.5px;font-weight:600}
+.gh2{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #e6ddcd;color:#4d4238;border-radius:10px;height:38px;padding:0 15px;font-size:12.5px;font-weight:600}
+.pkb2{display:inline-flex;align-items:center;gap:8px;background:#f5e2da;border:1px solid #e8c8bc;color:#5c2f22;border-radius:10px;height:38px;padding:0 16px;font-size:12.5px;font-weight:700}
+.tsr{display:flex;align-items:center;gap:9px;height:38px;border:1px solid #e6ddcd;border-radius:10px;padding:0 14px;color:#a5988c;font-size:12.5px;background:#fff;width:230px}
+svg.ic{display:block;flex:0 0 auto}
+/* ---- the scroll body: cards, not rules ---- */
+.zone{flex:1;min-height:0;overflow:auto;margin-top:26px;padding-right:8px}
+.hem{position:sticky;bottom:0;height:34px;background:linear-gradient(rgba(253,252,250,0),#fdfcfa);pointer-events:none;margin-top:-34px;display:block}
+.sect{margin-bottom:26px}
+.sect:last-of-type{margin-bottom:8px}
+.shd{display:flex;align-items:center;gap:12px;padding:0 4px 13px}
+.shd h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#2b2118;display:flex;align-items:center;gap:10px}
+.shd .n{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.shd .r{margin-left:auto;font-size:11.5px;color:#a0958a}
+.panel2{background:#fff;border:1px solid #ece4d6;border-radius:16px;box-shadow:0 2px 12px rgba(58,28,20,.045);padding:6px 16px}
+.grid{display:block}
+/* the row is ONE element carrying its own grid — never display:contents */
+.trw{display:grid;grid-template-columns:34px minmax(0,1fr) 144px 172px 104px 216px;align-items:center;padding:16px 14px;border-radius:11px;position:relative;transition:background .12s cubic-bezier(.2,.7,.3,1)}
+.trw::after{content:'';position:absolute;left:14px;right:14px;bottom:-1px;height:1px;background:#f6f1e9}
+.trw:last-child::after{display:none}
+.trw:hover{background:#fbf7f1}
+.trw:hover::after{background:transparent}
+.cellc{display:flex;align-items:center;justify-content:center}
+.cellr{display:flex;align-items:center;justify-content:flex-end}
+.cc{width:20px;height:20px;border-radius:50%;border:1.6px solid #d7cabb;background:#fff;display:inline-flex;align-items:center;justify-content:center;color:transparent}
+.trw:hover .cc{border-color:#8a9e88;color:#cfdccb}
+.cc.dn{background:#e6ece4;border-color:#8a9e88;color:#4a5f48}
+.tit{font-size:14px;font-weight:600;color:#2b2118;line-height:1.35}
+.sub3{font-size:11.5px;color:#a0958a;margin-top:5px}
+.sp{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.11em;border-radius:7px;height:25px;font-weight:600;width:124px;box-sizing:border-box}
+.sp.offer{background:#f8ded2;color:#8a4a36;border:1px solid #eecabb}
+.sp.wait{background:#fbeae3;color:#96604c;border:1px solid #f0dad0}
+.sp.stale{background:#f6efe0;color:#7a6844;border:1px solid #e8dcc4}
+.sp.sweep{background:#f4eee4;color:#6b5a4e;border:1px solid #e6ddcd}
+.sp.yours{background:#eef2ec;color:#4a5f48;border:1px solid #d7e0d4}
+.sp.done2{background:#f0f3ef;color:#6b7a68;border:1px solid #dfe5dd}
+.jrny{width:152px}
+.steps{display:flex;align-items:center;gap:5px}
+.stp{height:5px;border-radius:3px;flex:1;background:#f1eade}
+.stp.on{background:#d3a894}
+.stp.now{background:#7c3a2a}
+.stlab{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#a0958a;letter-spacing:.09em;text-align:center;margin-top:7px;white-space:nowrap}
+.pbar{height:5px;border-radius:3px;background:#f1eade;overflow:hidden}
+.pbar i{display:block;height:100%;background:#c3b295;width:31%}
+.age3{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.07em;color:#a5988c;white-space:nowrap}
+.verbs{display:grid;grid-template-columns:68px 30px 30px 30px;gap:7px;align-items:center}
+.vslot{height:30px}
+.vb{width:100%;height:30px;border-radius:8px;border:1px solid #ece4d6;background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#6b5a4e}
+.vb:hover{border-color:#cdbfae;color:#2b2118}
+.vb.go{padding:0;background:#2a1a13;border-color:#2a1a13;color:#fff;font-size:11px;font-weight:600}
+.foldrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #ece4d6;border-radius:14px;padding:15px 22px;margin-bottom:14px}
+.foldrow h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#6b5a4e;display:flex;align-items:center;gap:10px}
+.foldrow .n{font-family:'JetBrains Mono',monospace;font-size:10px;color:#a5988c}
+.foldrow .r{margin-left:auto;font-size:11.5px;color:#a0958a}
+.more3{text-align:center;padding:15px 0 6px}
+.moreb{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#8a7a6c;border:1px solid #e6ddcd;background:#fff;border-radius:99px;height:30px;padding:0 16px}
+/* snooze dial */
+.snzmenu{position:absolute;background:#fff;border:1px solid #e2d8c8;border-radius:14px;box-shadow:0 20px 50px rgba(58,28,20,.2);padding:18px 20px 16px;width:290px;z-index:9}
+.snzt{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;color:#b3a394}
+.snzv{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:#2b2118;margin:8px 0 18px}
+.track{position:relative;height:4px;border-radius:3px;background:#f1eade;margin:0 6px}
+.track .fill{position:absolute;left:0;top:0;bottom:0;background:#7c3a2a;border-radius:3px}
+.track .stop{position:absolute;top:50%;width:7px;height:7px;border-radius:50%;background:#e4dacb;transform:translate(-50%,-50%)}
+.track .stop.past{background:#d3a894}
+.track .knob{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid #7c3a2a;transform:translate(-50%,-50%);box-shadow:0 2px 7px rgba(58,28,20,.22)}
+.tlab{display:flex;justify-content:space-between;margin:15px 4px 0;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.09em;color:#b3a394}
+.tlab span.on{color:#7c3a2a;font-weight:600}
+.snzf{display:flex;align-items:center;gap:10px;margin-top:17px}
+.snzf .pick{font-size:11.5px;color:#7c3a2a;border-bottom:1px solid #e2c6ba}
+.cap{margin-top:12px;font-size:10.5px;color:#a0958a;line-height:1.5}
+</style></head><body><div class="lbl">TASKS &mdash; REDESIGNED FOR AIR <em>&mdash; each group is now its own WHITE PANEL on the cream page, with its Playfair name and a plain description sitting OUTSIDE and above it. The hairlines are gone: sections are separated by space (26px), rows by a single faint inset line inside their panel, and nothing else. Rows breathe at 17px vertical padding, controls stand at a uniform 38px in the header and 30px in the rows, and the six grid tracks still hold every pill, meter, figure and button in exact column. Snoozed collapses to a slim card; Done today keeps its panel with the Undo. The snooze dial names its date in Playfair before you commit to it.</em></div><div class="frame"><div class="rail"><div class="rlogo">S</div><span class="rli">&#9638;</span><span class="rli on"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f3e7da" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span><span class="rli">&#10148;</span><span class="rli">&#9823;</span><span class="rli">&#9639;</span><div class="rfoot"><span class="avi">ML</span><span class="rli">&#9881;</span></div></div><div class="sb"><div class="mspill">&#9639; Murphy&rsquo;s Day Out<span style="margin-left:auto;color:#b3a394;font-size:9px">&#9662;</span></div><div class="si"><span class="ic">&#9638;</span>Dashboard</div><div class="pk" style="padding:16px 10px 6px">TASKS</div><div class="kid2 on" style="margin-left:0;padding-left:10px;display:flex;align-items:center">Tasks<span style="margin-left:auto;display:flex;align-items:center;gap:6px;font-family:JetBrains Mono,monospace;font-size:10px;color:#8a7a6c"><span style="width:6px;height:6px;border-radius:50%;background:#c96f52"></span>15</span></div><div class="kid2" style="margin-left:0;padding-left:10px">Calendar</div><div class="kid2" style="margin-left:0;padding-left:10px">Noteboard</div><div class="si" style="margin-top:8px"><span class="ic">&#10148;</span>Queries<span class="chev">&#9662;</span></div><div class="si"><span class="ic">&#9823;</span>Agents<span class="chev">&#9662;</span></div><div class="si"><span class="ic">&#9639;</span>Materials</div><div class="collapse">&#171; Collapse sidebar</div><div class="sbfoot"><div style="font-size:13px;font-weight:700">Michael Li</div><div style="display:flex;align-items:center;gap:9px;font-size:11.5px;color:#8a7a6c;margin-top:3px">Free plan <span class="upg">Upgrade</span></div><div class="si" style="margin-top:8px"><span class="ic">&#9881;</span>Settings</div></div></div><div class="mainwrap"><div class="topbar"><span class="wm">ScriptAlly</span><span class="crumb">/ Tasks / <b>Tasks</b></span><span class="saved">ALL CHANGES SAVED</span><span class="srch"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8L20 20"/></svg> Search<span class="k">&#8984;K</span></span><span style="color:#8a7a6d">?</span><span class="newb"><svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg> New</span></div><div class="inner"><div class="pbody" style="position:relative"><div class="eyebrow">FRIDAY 7 AUGUST &middot; WEEK 140 OF QUERYING</div><div class="headrow"><h1 class="pt">Tasks</h1><span style="flex:1"></span><span class="tsr"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8L20 20"/></svg> Search your tasks&hellip;</span><span class="gh2"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14M8 5L5 8.2M8 5l3 3.2M16 19V5M16 19l-3-3.2M16 19l3-3.2"/></svg> Most pressing</span><span class="pkb2"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg> Add a task</span><span class="inkb2"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.8v12.4l10-6.2z"/></svg> Work the list</span></div><div class="statrow"><span class="statchip">Outstanding <b>15</b></span><span class="statchip">Needs you now <b>3</b></span><span class="statchip">Done today <b>1</b></span><span class="statchip">Snoozed <b>1</b></span></div><div class="zone"><div class="sect"><div class="shd"><h3><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d98b74"></span>Needs you now</h3><span class="n">3</span><span class="r">Offers and open requests</span></div><div class="panel2"><div class="grid"><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Tom Ellery has made an offer</div><div class="sub3">Tom Ellery &middot; Ellery &amp; Frost &middot; offered 19 July</div></div><div class="cellc"><span class="sp offer"><svg class="ic" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.6l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 9.9l5-.7z"/></svg>OFFER</span></div><div class="cellc"><div class="jrny"><div class="steps"><span class="stp on"></span><span class="stp on"></span><span class="stp on"></span></div><div class="stlab">OFFER ON THE TABLE</div></div></div><div class="cellr"><span class="age3">19 DAYS</span></div><div class="verbs"><span class="vb go">Action</span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vslot"></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Send your full to Jonathan Marsh</div><div class="sub3">Jonathan Marsh &middot; The Marsh Agency &middot; requested 12 July</div></div><div class="cellc"><span class="sp wait">AGENT WAITING</span></div><div class="cellc"><div class="jrny"><div class="steps"><span class="stp on"></span><span class="stp on"></span><span class="stp now"></span></div><div class="stlab">FULL REQUESTED</div></div></div><div class="cellr"><span class="age3">26 DAYS</span></div><div class="verbs"><span class="vb go">Action</span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Send your partial to Daniel O&rsquo;Rourke</div><div class="sub3">Daniel O&rsquo;Rourke &middot; Inkwell &amp; Stone &middot; requested 15 July</div></div><div class="cellc"><span class="sp wait">AGENT WAITING</span></div><div class="cellc"><div class="jrny"><div class="steps"><span class="stp on"></span><span class="stp now"></span><span class="stp "></span></div><div class="stlab">PARTIAL REQUESTED</div></div></div><div class="cellr"><span class="age3">23 DAYS</span></div><div class="verbs"><span class="vb go">Action</span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div></div></div></div><div class="sect"><div class="shd"><h3>Housekeeping</h3><span class="n">10</span><span class="r">Sweeps and long silences</span></div><div class="panel2"><div class="grid"><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Materials sweep</div><div class="sub3">16 agents &middot; one sitting each</div></div><div class="cellc"><span class="sp sweep">MATERIALS</span></div><div class="cellc"><div class="jrny"><div class="pbar"><i></i></div><div class="stlab">5 OF 16 DONE</div></div></div><div class="cellr"><span class="age3">&mdash;</span></div><div class="verbs"><span class="vb go">Start</span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vslot"></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Jonathan Marsh silent for 850 days</div><div class="sub3">Jonathan Marsh &middot; The Marsh Agency</div></div><div class="cellc"><span class="sp stale">STALE</span></div><div class="cellc"><div class="jrny"></div></div><div class="cellr"><span class="age3">850 DAYS</span></div><div class="verbs"><span class="vb go">Close</span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Marcus Reed silent for 787 days</div><div class="sub3">Marcus Reed &middot; Bloomsbury Quill</div></div><div class="cellc"><span class="sp stale">STALE</span></div><div class="cellc"><div class="jrny"></div></div><div class="cellr"><span class="age3">787 DAYS</span></div><div class="verbs"><span class="vb go">Close</span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div></div></div></div><div class="more3"><span class="moreb"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>SHOW 7 MORE</span></div><div class="sect"><div class="shd"><h3>Your tasks</h3><span class="n">2</span><span class="r">Yours alone &mdash; edit or delete freely</span></div><div class="panel2"><div class="grid"><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Redraft the opening chapter</div><div class="sub3">Due today</div></div><div class="cellc"><span class="sp yours">YOUR TASK</span></div><div class="cellc"><div class="jrny"></div></div><div class="cellr"><span class="age3">DUE TODAY</span></div><div class="verbs"><span class="vslot"></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div><div class="trw"><div><span class="cc"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="">Chase Curtis Vane&rsquo;s reader report</div></div><div class="cellc"><span class="sp yours">YOUR TASK</span></div><div class="cellc"><div class="jrny"></div></div><div class="cellr"><span class="age3">&mdash;</span></div><div class="verbs"><span class="vslot"></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div></div></div></div><div class="foldrow"><h3><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5988c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>Snoozed</h3><span class="n">1</span><span class="r">Back Monday 11 August</span></div><div class="sect"><div class="shd"><h3><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a5988c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>Done today</h3><span class="n">1</span><span class="r">Clears at midnight &middot; kept in the log</span></div><div class="panel2"><div class="grid"><div class="trw"><div><span class="cc dn"><svg class="ic" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg></span></div><div style="min-width:0"><div class="tit" style="text-decoration:line-through;color:#9aa197">Reply to Curtis Vane</div><div class="sub3">Cleared 09:15</div></div><div class="cellc"><span class="sp done2"><svg class="ic" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4L19 7"/></svg>DONE</span></div><div class="cellc"><div class="jrny"></div></div><div class="cellr"><span class="age3">09:15</span></div><div class="verbs"><span class="vb go" style="background:#fff;border-color:#e6ddcd;color:#4d4238">Undo</span><span class="vslot"></span><span class="vslot"></span><span class="vb"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.15" fill="currentColor" stroke="none"/></svg></span></div></div></div></div></div><span class="hem"></span></div><div class="snzmenu" style="right:132px;top:296px"><div class="snzt">PUT IT OFF UNTIL</div><div class="snzv">Tuesday 11 August</div><div class="track"><span class="fill" style="width:36%"></span><span class="stop past" style="left:0"></span><span class="stop past" style="left:18%"></span><span class="knob" style="left:36%"></span><span class="stop" style="left:54%"></span><span class="stop" style="left:72%"></span><span class="stop" style="left:90%"></span><span class="stop" style="left:100%"></span></div><div class="tlab"><span>TOMORROW</span><span class="on">4 DAYS</span><span>2 WEEKS</span><span>1 MONTH</span></div><div class="snzf"><span class="vb go" style="width:auto;padding:0 16px;height:32px">Snooze</span><span class="pick">Pick a date&hellip;</span></div><div class="cap">Drag to choose. Offers stop at tomorrow &mdash; an offer left waiting is an offer at risk.</div></div></div></div></div></div></body></html>

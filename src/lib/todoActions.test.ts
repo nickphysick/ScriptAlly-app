@@ -1,0 +1,163 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * todoActions — THE SINGLE PATH for completion, snooze and dock entry (tasks-consolidation,
+ * extraction commit).
+ *
+ * ⚠️ WHAT THIS SUITE IS FOR. The three decisions lived as closures inside `ToDoPage.tsx`, a
+ * 2,247-line component that the consolidation is about to replace. A choke point inside the file
+ * being rewritten is a coincidence, not a guarantee — so these tests do two jobs:
+ *   1. pin the decisions themselves, away from any component; and
+ *   2. assert the PAGE routes through them rather than re-deciding inline.
+ * The second half is the one that survives the rebuild, because it fails the moment a new page
+ * grows its own copy of a rule that already exists here.
+ */
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  clampSnooze, snoozeCeilingDays, snoozeWhenLabel, snoozeVia, cardLane,
+  completionVia, isTickable, dockQueue,
+  SNOOZE_MAX_DAYS, OFFER_SNOOZE_MAX_DAYS,
+} from "./todoActions";
+import { BoardCard } from "./todoBoard";
+
+const page = readFileSync(join(__dirname, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
+
+const card = (over: Partial<BoardCard> = {}): BoardCard => ({
+  key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
+  hk: false, initials: "•", record: "", committed: false, done: false, ...over,
+});
+
+describe("⚠️ THE SNOOZE CEILING — one clamp, and every path reaches it", () => {
+  it("an offer cannot be put off past tomorrow", () => {
+    /* Someone is waiting on an answer; a week's silence is not a decision. This shipped wrong
+       once — the cap lived in one menu's tier list, so every other path walked past it and an
+       offer surfaced reading "BACK 7 AUG". */
+    const offer = card({ taskType: "offer_received" });
+    expect(snoozeCeilingDays(offer)).toBe(OFFER_SNOOZE_MAX_DAYS);
+    expect(clampSnooze(offer, 7, "next week")).toEqual({ days: 1, when: "tomorrow", clamped: true });
+    expect(clampSnooze(offer, 365, "in a year").days).toBe(1);
+  });
+
+  it("⚠️ A CLAMPED SNOOZE IS RE-LABELLED — the toast must not keep saying what it did not write", () => {
+    expect(clampSnooze(card({ taskType: "offer_received" }), 7, "next week").when).toBe("tomorrow");
+  });
+
+  it("a deadline never snoozes past the deadline itself", () => {
+    /* Snoozing an expiring exclusive past its expiry is the app helping you miss it. */
+    const c = card({ taskType: "exclusive_expiring" });
+    /* ⚠️ 4 days is NOT a stop, so it is named as itself. The first draft rounded it up to
+       "next week" — a clamp that wrote 4 days and announced 7. */
+    expect(clampSnooze(c, 30, "in a month", 4)).toEqual({ days: 4, when: "in 4 days", clamped: true });
+    // an exact stop keeps the stop's own words
+    expect(clampSnooze(c, 30, "in a month", 7).when).toBe("next week");
+    // a deadline already past clamps to nothing at all — the caller reads 0 as "cannot snooze"
+    expect(snoozeCeilingDays(c, 0)).toBe(0);
+    expect(snoozeCeilingDays(c, -3)).toBe(0);
+  });
+
+  it("everything else gets a year, and a request within the ceiling passes through untouched", () => {
+    const c = card({ taskType: "data_quality_poor" });
+    expect(snoozeCeilingDays(c)).toBe(SNOOZE_MAX_DAYS);
+    expect(clampSnooze(c, 7, "next week")).toEqual({ days: 7, when: "next week", clamped: false });
+    expect(clampSnooze(c, 9999, "never").days).toBe(SNOOZE_MAX_DAYS);
+  });
+
+  it("the stop labels read as English at every tier", () => {
+    expect(snoozeWhenLabel(1)).toBe("tomorrow");
+    expect(snoozeWhenLabel(3)).toBe("in a few days");
+    expect(snoozeWhenLabel(4)).toBe("in 4 days"); // between stops — stated, never rounded
+    expect(snoozeWhenLabel(7)).toBe("next week");
+    expect(snoozeWhenLabel(14)).toBe("in two weeks");
+    expect(snoozeWhenLabel(30)).toBe("in a month");
+    expect(snoozeWhenLabel(0)).toBe("not at all");
+  });
+
+  it("⚠️ THE PAGE CALLS THE CLAMP — it no longer carries the rule itself", () => {
+    expect(page).toContain("({ days, when } = clampSnooze(c, days, when))");
+    // the old inline cap is GONE — a second copy is a second answer
+    expect(page).not.toContain('c.taskType === "offer_received" && days > 1');
+  });
+});
+
+describe("⚠️ WHICH WRITE PATH A SNOOZE TAKES — decided once", () => {
+  it("a writer's own item goes through its task flag; an engine item through dismissTask", () => {
+    expect(snoozeVia(card({ userTaskId: "u1" }))).toBe("user-task-flag");
+    expect(snoozeVia(card({ taskType: "data_quality_poor", relatedRecordId: "a1" }))).toBe("dismiss-task");
+  });
+
+  it("a card with neither cannot be snoozed, and says so rather than writing a half key", () => {
+    expect(snoozeVia(card())).toBe("none");
+    expect(snoozeVia(card({ taskType: "data_quality_poor" }))).toBe("none"); // no record id
+  });
+
+  it("the lane is the card's own stream, defaulted rather than assumed", () => {
+    expect(cardLane(card({ stream: "nt" }))).toBe("nt");
+    expect(cardLane(card({ stream: "hk" }))).toBe("hk");
+    expect(cardLane(card({ stream: "do" }))).toBe("do");
+  });
+
+  it("the page routes both branches through it", () => {
+    expect(page).toContain('snoozeVia(c) === "user-task-flag"');
+    expect(page).toContain('snoozeVia(c) !== "dismiss-task"');
+    expect(page).toContain("cardLane(c)");
+  });
+});
+
+describe("⚠️ WHICH WRITE PATH A COMPLETION TAKES — one map, not an if-ladder in a component", () => {
+  it("each kind resolves to exactly one path", () => {
+    expect(completionVia(card({ userTaskId: "u1" }))).toBe("user-task");
+    expect(completionVia(card({ taskType: "no_response_close", relatedRecordId: "q1" }))).toBe("close-query");
+    expect(completionVia(card({ taskType: "nudge_overdue", relatedRecordId: "q1" }))).toBe("log-nudge");
+    expect(completionVia(card({ taskType: "full_requested", relatedRecordId: "q1" }))).toBe("mark-sent");
+  });
+
+  it("⚠️ A CARD WITH NOTHING TO COMPLETE RESOLVES TO `none` — and the row can ask BEFORE it draws", () => {
+    /* A tick that does nothing is worse than no tick: it invites a press and then ignores it.
+       The if-ladder answered this only by running to its end, which a row cannot do. */
+    expect(completionVia(card())).toBe("none");
+    expect(isTickable(card())).toBe(false);
+    expect(isTickable(card({ userTaskId: "u1" }))).toBe(true);
+    expect(isTickable(card({ taskType: "no_response_close", relatedRecordId: "q1" }))).toBe(true);
+  });
+
+  it("the writer's own item wins over any task type it also carries", () => {
+    expect(completionVia(card({ userTaskId: "u1", taskType: "no_response_close" }))).toBe("user-task");
+  });
+
+  it("the page routes through the map and keeps no per-kind branch of its own", () => {
+    expect(page).toContain("const via = completionVia(c)");
+    expect(page).toContain('if (via === "none") return');
+    expect(page).toContain('via === "close-query"');
+    expect(page).toContain('via === "log-nudge"');
+    // the old kind tests inside quickDone are gone
+    const fn = page.slice(page.indexOf("async function quickDone"));
+    expect(page.indexOf("async function quickDone")).toBeGreaterThan(-1); // the anchor
+    const body = fn.slice(0, fn.indexOf("\n  }"));
+    expect(body).not.toContain('c.taskType === "no_response_close"');
+    expect(body).not.toContain('c.taskType === "nudge_overdue"');
+  });
+});
+
+describe("⚠️ DOCK ENTRY IS ONE FILTER, and it was already a seam", () => {
+  it("notes and finished cards never enter the queue", () => {
+    const q = dockQueue([
+      card({ key: "a" }),
+      card({ key: "b", nature: "note" }),
+      card({ key: "c", done: true }),
+    ]);
+    expect(q.map((c) => c.key)).toEqual(["a"]);
+  });
+
+  it("⚠️ NOT DUPLICATED HERE — todoActions re-exports lib/todoDock's filter, it does not restate it", () => {
+    const src = readFileSync(join(__dirname, "todoActions.ts"), "utf8");
+    expect(src).toContain('export { dockQueue } from "./todoDock"');
+    expect(src).not.toContain("function dockQueue");
+  });
+
+  it("the page's dock entrance goes through it", () => {
+    expect(page).toContain("const q = dockQueue(queue)");
+  });
+});

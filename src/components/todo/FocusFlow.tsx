@@ -37,6 +37,7 @@ import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
 import { lockStageScroll } from "../../lib/stageScroll";
 import { reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, SeedCandidate } from "../../lib/todoBoard";
+import { clampSnoozeDays } from "../../lib/todoActions";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
@@ -221,7 +222,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     markSent: (p: Extract<StagedPayload, { kind: "mark-sent" }>) => recordMaterialsSent(markSentWriteArgs(p)),
     nudge: (p: Extract<StagedPayload, { kind: "nudge" }>) => logNudge(...nudgeWriteArgs(p, new Date().toISOString())).then((r) => { if (!r.success) throw new Error(r.error || "nudge failed"); }),
     // the same offer cap at the staged-write choke point (tasks-pages P2, walk fix 2)
-    snooze: (p: Extract<StagedPayload, { kind: "snooze" }>) => dismissTask(p.taskType, p.relatedRecordId, "fixed snooze", p.taskType === "offer_received" ? Math.min(p.days, 1) : p.days),
+    snooze: (p: Extract<StagedPayload, { kind: "snooze" }>) => dismissTask(p.taskType, p.relatedRecordId, "fixed snooze", clampSnoozeDays(p.taskType, p.days)),
     muteItem: (p: Extract<StagedPayload, { kind: "mute-item" }>) => upsertTaskFlag(flagKeyForTask(p.taskType, p.relatedRecordId), { snoozedUntil: MUTED_UNTIL }),
     muteRule: (p: Extract<StagedPayload, { kind: "mute-rule" }>) => updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), p.rule])) }),
     // the Sunday review's staged stale-close — the EXISTING close path, applied only at Save
@@ -879,7 +880,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
          snooze wrote a flat 7 days for every derived card — an offer walked through the dock's
          More → this sheet and came back reading "BACK 7 AUG", past the tomorrow cap the menu
          enforces. An offer's reply-by is not ours to move: one day, and the toast says so. */
-      const days = c.taskType === "offer_received" ? 1 : 7;
+      /* ⚠️ THE CEILING COMES FROM lib/todoActions, not from a number written here
+         (tasks-consolidation, extraction). This was the THIRD copy of the offer cap — the page
+         had one, the staged runner below had another, and this had its own. Three copies of one
+         rule is three chances to disagree, and the rule already shipped wrong once. */
+      const days = clampSnoozeDays(c.taskType, 7);
       dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", days);
       const key = flagKeyForTask(c.taskType, c.relatedRecordId);
       onToast(days === 1 ? `Snoozed until tomorrow` : `Snoozed until next week`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); onToast("Restored"); } });

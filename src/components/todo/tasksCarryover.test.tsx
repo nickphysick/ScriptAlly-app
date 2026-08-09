@@ -81,16 +81,27 @@ describe("⚠️ every count walks assembleBoardColumns — badge, page, FILTERS
 
 describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () => {
   it("the choke point: snoozeCard clamps offers regardless of the caller's tier", () => {
+    /* ⚠️ MOVED 9 Aug (tasks-consolidation, extraction) — THE RULE SURVIVES, ITS HOME CHANGED.
+       The clamp was an inline `if` here, which made this 2,247-line component the choke point;
+       a choke point inside the file about to be rebuilt is a coincidence, not a guarantee. It
+       is `clampSnooze` in lib/todoActions now, unit-tested away from any component, and this
+       asserts the page reaches it. */
     const fn = listPage.slice(listPage.indexOf("function snoozeCard"), listPage.indexOf("function snoozeGroup"));
-    expect(fn).toContain('if (c.taskType === "offer_received" && days > 1) { days = 1; when = "tomorrow"; }');
+    expect(fn).toContain("({ days, when } = clampSnooze(c, days, when))");
+    expect(fn).not.toContain('c.taskType === "offer_received" && days > 1');
   });
 
   it("⚠️ THE PATH THAT BYPASSED IT — FocusFlow's generic snooze — is clamped, and says so", () => {
+    /* ⚠️ AND THESE WERE COPIES TWO AND THREE. FocusFlow carried the offer cap twice more — once
+       in the sweep snooze, once in the staged runner — so one rule lived in three places and
+       each was free to drift. Both call the ONE ceiling now. */
     const sn = flow.slice(flow.indexOf("function sweepSnooze"), flow.indexOf("function sweepSnooze") + 2600);
-    expect(sn).toContain('const days = c.taskType === "offer_received" ? 1 : 7;');
+    expect(sn).toContain("clampSnoozeDays(c.taskType, 7)");
     expect(sn).toContain("Snoozed until tomorrow");
-    // and the staged-payload runner clamps at the write
-    expect(flow).toContain('p.taskType === "offer_received" ? Math.min(p.days, 1) : p.days');
+    expect(flow).toContain("clampSnoozeDays(p.taskType, p.days)");
+    // no hand-written cap survives anywhere in the flow
+    expect(flow).not.toContain('taskType === "offer_received" ? 1 : 7');
+    expect(flow).not.toContain("Math.min(p.days, 1)");
   });
 
   it("the dock's clock is a REAL menu now (it pointed at a popover that never mounted) — offers see only tomorrow", () => {
