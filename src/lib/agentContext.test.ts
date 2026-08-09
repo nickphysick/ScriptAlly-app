@@ -254,11 +254,7 @@ describe("it reports; the writer judges", () => {
 describe("the pulse is an invitation, not a status", () => {
   it("a burgundy halo on the active step, CSS keyframes only", () => {
     expect(css).toContain("@keyframes qc-pulse");
-    /* ⚠️ THE PULSE MOVED ONTO THE OPEN CARD. It used to ride `.qc-sec`, which was both the
-       collapsed row and the open block; now the section is a bare layout wrapper with no border
-       or radius of its own, and a ring animated on that would have drawn a rectangular halo
-       around a rounded card. */
-    expect(rule(".qc-sopen.qc-pulse")).toContain("animation: qc-pulse 2.1s ease-in-out infinite");
+    expect(rule(".qc-sec.qc-active.qc-pulse")).toContain("animation: qc-pulse 2.1s ease-in-out infinite");
     expect(css, "the ref's own bloom").toContain("rgba(180, 90, 64, 0.26)");
   });
 
@@ -266,7 +262,7 @@ describe("the pulse is an invitation, not a status", () => {
      you type reads as an unresolved alert about the thing you are already doing. CSS cannot know
      about engagement, so the class is REMOVED rather than overridden. */
   it("it stops the moment the writer engages with that step", () => {
-    expect(pane).toContain('`qc-sopen${engaged ? "" : " qc-pulse"}`');
+    expect(pane).toContain('states.when === "active" && !engaged ? " qc-pulse" : ""');
     expect(pane).toContain("onFocusCapture={() => setEngaged(true)}");
     expect(pane).toContain("onInput={() => setEngaged(true)}");
   });
@@ -277,11 +273,11 @@ describe("the pulse is an invitation, not a status", () => {
   });
 
   it("reduced motion drops it entirely, leaving the lifted border", () => {
-    const at = css.indexOf("@media (prefers-reduced-motion: reduce) { .qc-sopen.qc-pulse");
+    const at = css.indexOf("@media (prefers-reduced-motion: reduce) { .qc-sec.qc-active.qc-pulse");
     expect(at, "the pulse's reduced-motion rule is missing").toBeGreaterThan(-1);
     expect(css.slice(at, css.indexOf("}", at) + 1)).toContain("animation: none");
-    expect(rule(".qc-sopen"), "the lift must survive as the fallback treatment")
-      .toContain("box-shadow");
+    expect(rule(".qc-sec.qc-active"), "the border must survive as the fallback treatment")
+      .toContain("border-color");
   });
 
   /* ⚠️ THE REAL "YOU ARE HERE" IS DOM FOCUS — a focus ring and caret beat any animation, and

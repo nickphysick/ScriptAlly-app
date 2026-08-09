@@ -64,9 +64,7 @@ describe("the espresso command bar (concept frame 03)", () => {
     expect(hub).toContain("ref={heroIsMark && !isMobile ? markSentTriggerRef : undefined}");
     // and the popover opens UPWARD from the foot-pinned bar
     expect(hub).toContain('isMobile ? { placement: "up" } : undefined');
-    /* The rule once excluded `.qc-hero`, create mode's own hero. That hero is retired with the
-       four-step stack, so the exclusion matched nothing and went with it. */
-    expect(css).toContain(".f12-root .f12-hero > .f12-btn-pri { display: none; }");
+    expect(css).toContain(".f12-root .f12-hero:not(.qc-hero) > .f12-btn-pri { display: none; }");
   });
 
   it("the ⋯ sheet re-homes the bar's actions with the same handlers", () => {

@@ -2,14 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Create mode · THE FOUR-STEP STACK, the keyboard, and the two notices.
- * (ref design-refs/63-qc-create-stepper.html)
- *
- * ⚠️ THE CHROME IS WRITTEN ONCE — `renderStep` draws every block, collapsed or open, and the four
- * bodies are thunks in a map keyed by step. So the assertions here are about ONE renderer rather
- * than counts of three or four near-identical copies. That is the stronger shape: a count going
- * from 3 to 4 is arithmetic a rename can satisfy, whereas "the open branch is the only branch
- * that calls a body" is the property the stack actually depends on.
+ * Create mode v3 · P4–P6 — STAGE 2: the focused stack, the keyboard, and the two notices.
+ * (ref design-refs/qc-create-steps.html)
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
@@ -34,61 +28,32 @@ const AGENT = { id: "a1", name: "William Tan", agency: "Foxglove Literary", resp
 const MS = [{ id: "m1", title: "Murphy's Day Out" }] as never[];
 
 describe("the three treatments", () => {
-  it("active is a lifted white card, numbered `Step n of 4`, with the Enter hint in its foot", () => {
-    expect(rule(".qc-sopen")).toContain("box-shadow");
-    /* The numbered pip is retired: it stated the step's position, which its position already
-       stated, and said nothing about whether it had been answered. The head carries a state dot
-       and the count sits right, as the ref draws it. */
-    expect(pane, "the numbered pip came back").not.toContain('className="qc-n"');
-    expect(pane).toContain("Step {stepIndex(id) + 1} of {STEP_ORDER.length}");
+  it("active is lifted and numbered, with the Enter hint in its head", () => {
+    expect(rule(".qc-sec.qc-active")).toContain("box-shadow");
+    expect(pane).toContain('<span className="qc-n"');
     expect(pane).toContain("enterHint(");
-    expect(pane, "the hint belongs to the footer now, beside Continue").toContain('className="qc-sfoot"');
   });
 
-  it("done shows a sage dot, the values, and an EDIT", () => {
-    expect(rule(".qc-dot-done")).toContain("#7e9178");
-    expect(pane).toContain('<span className="qc-sedit">EDIT</span>');
-    expect(pane, "the summary must state the values, not that values exist")
-      .toContain('{st === "done" ? summaries[id] : ""}');
+  it("done shows a sage tick, the values, and a Change", () => {
+    expect(rule(".qc-sec.qc-done .qc-tick")).toContain("#7e9178");
+    expect(pane).toContain('<span className="qc-ed">Change</span>');
+    expect(pane, "the summary must state the values, not that values exist").toContain("summaries.when");
   });
 
-  /* ⚠️ THE HINT AND THE VALUE ARE NOT ALTERNATIVES. They were: the row showed the hint until the
-     step was answered and the summary instead of it afterwards, so a completed row stopped
-     saying what it was for. The ref puts the hint left and the value right, both at once. */
-  it("upcoming shows the hint with no value, and done shows the hint AND the value", () => {
-    expect(pane).toContain("<span className=\"qc-shint\">{STEP_HINT[id]}</span>");
-    expect(pane).toContain('<span className="qc-sval">{st === "done" ? summaries[id] : ""}</span>');
-    /* ⚠️ THE SLOT IS ALWAYS RENDERED, empty when there is nothing to state. It carries the
-       `margin-left: auto` that pins EDIT and the chevron to the right edge, so omitting it on an
-       unanswered step slides them in behind the hint and the four rows stop lining up. */
-    expect(rule(".qc-sval")).toContain("margin-left: auto");
+  it("upcoming shows the hint, not a summary, and offers no Change", () => {
+    expect(pane).toContain('states.when === "done" ? summaries.when : STEP_HINT.when');
+    expect(pane).toContain('states.when === "done" && <span className="qc-ed">Change</span>');
   });
 
-  /* ⚠️ UNMOUNTED, NOT HIDDEN — and now not even BUILT. A hidden date picker or textarea still
-     takes tab stops, and the whole point of the stack is that Tab walks the section you are
-     actually in. The bodies are thunks, so the closed ones are never called at all. */
+  /* ⚠️ UNMOUNTED, NOT HIDDEN. A hidden date picker or textarea still takes tab stops, and the
+     whole point of the stack is that Tab walks the section you are actually in. */
   it("only the active section's body is in the document", () => {
-    expect(pane, "the bodies must be thunks, not elements")
-      .toContain("const BODIES: Record<StepId, () => React.ReactNode>");
-    expect(pane.match(/BODIES\[id\]\(\)/g)?.length ?? 0, "exactly one call site").toBe(1);
-    expect(pane, "the collapsed branch must return before any body is built")
-      .toMatch(/if \(st !== "active"\) \{[\s\S]*?return \(/);
+    expect(pane.match(/states\.\w+ === "active" && \(/g)?.length ?? 0).toBe(3);
     expect(pane, "a hidden body would still take tab stops").not.toContain("hidden={states.");
   });
 
-  it("every collapsed row is a real button — jumping back is a control, not a click handler on a div", () => {
-    expect(pane).toContain('<button type="button" className={`qc-srow qc-${st}`} onClick={() => jump(id)}>');
-  });
-
-  /* ⚠️ ONE RENDERER, FOUR STEPS, AND THE ORDER COMES FROM STEP_ORDER. Four hand-written blocks is
-     how the Notes head ends up a pixel out from the What head, and how source order and
-     STEP_ORDER quietly disagree about which step is number three. */
-  it("the blocks are mapped from STEP_ORDER, not written out four times", () => {
-    expect(pane).toContain("STEP_ORDER.map((id) => (");
-    expect(pane.match(/<section key=\{id\}/g)?.length ?? 0).toBe(1);
-    for (const id of ["agent", "when", "what", "notes"]) {
-      expect(pane, `${id} has no body`).toContain(`    ${id}: () => (`);
-    }
+  it("every summary is a real button — jumping back is a control, not a click handler on a div", () => {
+    expect(pane.match(/<button type="button" className="qc-sum"/g)?.length ?? 0).toBe(3);
   });
 });
 
@@ -163,7 +128,7 @@ describe("Enter accepts and advances; ⌘↵ saves", () => {
 
   /* ⚠️ ONE DOOR. Typing a name, creating one inline and clicking a quick pick must do exactly
      the same thing, or the three routes into stage 2 drift apart. They all call pickAgent. */
-  it("every route out of the agent step goes through one function", () => {
+  it("every route into stage 2 goes through one function", () => {
     expect(pane).toContain("const pickAgent = (a: Agent) => {");
     expect(pane).toContain('setActive("when");');
     expect(pane).toContain("materials: materialRowsForDraft(a)");

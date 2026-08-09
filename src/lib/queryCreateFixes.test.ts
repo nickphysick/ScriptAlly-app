@@ -44,24 +44,15 @@ describe("there is NO query-count limit on the free tier", () => {
   });
 });
 
-/* ⚠️ THE HERO IS RETIRED, and the Change pill with it. Both existed only because choosing the
-   agent happened OUTSIDE the stack: something had to name who you had picked, and something had
-   to let you pick again. Agent is step one now, so the collapsed row does the naming and EDIT on
-   that row does the changing. What this suite actually settled — that swapping agent must
-   re-derive everything seeded from the old one — is not about the hero at all, and survives
-   below as a fact about `pickAgent`, the one door all three routes go through. */
-describe("changing the agent", () => {
-  it("the hero and its Change pill are gone, not merely unmounted", () => {
-    expect(pane, "the create hero came back").not.toContain('className="qc-change"');
-    expect(pane).not.toContain("f12-bigav");
-    expect(css, "the retired pill's rule is still in the sheet").not.toContain(".qc-change {");
-    expect(pane, "EDIT on the collapsed Agent row is the way back to the picker")
-      .toContain('<span className="qc-sedit">EDIT</span>');
+describe("the agent hero", () => {
+  it("offers a Change affordance once an agent is chosen", () => {
+    expect(pane).toContain('className="qc-change"');
+    expect(css).toContain(".qc-change {");
   });
 
   it("changing agent RE-DERIVES what was seeded from the old one", () => {
-    // Picking a new agent alone would strand the previous agent's materials pre-fill on the draft.
-    expect(pane).toContain("set({ agentId: a.id, materials: materialRowsForDraft(a) })");
+    // Clearing the id alone would strand the previous agent's materials pre-fill on the draft.
+    expect(pane).toContain("set({ agentId: null, materials: materialRowsForDraft(null) })");
   });
 });
 

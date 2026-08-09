@@ -2,18 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * QueryCreatePane — inline query creation in the reading pane (ref design-refs/63-qc-create-stepper.html).
- * It REPLACES the Log-a-query popup: one flow column of four steps, beside the agent's record.
- *
- * ⚠️ ONE STACK, FOUR STEPS — THERE IS NO LONGER A STAGE BEFORE THE STEPS. Choosing the agent was
- * its own screen: a centred question with three ghost rows beneath it, swapped out wholesale the
- * moment you picked someone. Three things were wrong with that. The first thing you did was the
- * one thing the stack never showed you having done; changing your mind meant leaving the stack by
- * a separate "Change" button in a hero that existed only to hold it; and the layout the writer
- * learned in the first five seconds was replaced by a different one in the sixth.
- *
- * Agent is now step one of four. It collapses to a row like the others, states who you picked,
- * and reopens with EDIT. The hero went with it — the collapsed row carries the name and agency.
+ * QueryCreatePane — inline query creation in the reading pane (Queries Hub v4 P2; ref
+ * design-refs/create-mode-ref.html). It REPLACES the Log-a-query popup: the same three columns
+ * the reading pane already uses, filled with the fields you need to start a query.
  *
  * The draft is LOCAL STATE, owned by Queries.tsx (which also paints the pinned draft row in the
  * list). NOTHING here writes to Firestore — the parent's Save calls the existing `addQuery` path
@@ -31,8 +22,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Agent, Manuscript, Query } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
 import {
-  STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL, STEP_LEDE,
-  stepStates, stepIndex, advance, jumpTo, nextStep, prevStep, enterHint, type StepId,
+  STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL,
+  stepStates, stepIndex, advance, jumpTo, nextStep, enterHint, type StepId,
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
@@ -109,14 +100,8 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   /* ── THE STACK'S POSITION. Local to the pane: it is presentation, not draft data — a
      half-walked stack must not make the draft dirty, and reopening create mode starts the walk
      again. `reached` never retreats (see createSteps). ── */
-  /* ⚠️ THE STACK OPENS WHERE THE DRAFT ALREADY IS. `openCreate({ agentId })` is a live seam — the
-     agent list's "Send query" and the reading pane both arrive with an agent already chosen — and
-     under the old two-stage shape that simply meant stage 1 never rendered. As a step it does
-     render, so without this the writer would be asked who they are querying while the answer sits
-     in the draft. Lazy, and mount-only: the seed is a starting position, not a binding, so
-     reopening the Agent step by hand must not be undone on the next render. */
-  const [active, setActive] = useState<StepId>(() => (draft.agentId ? "when" : "agent"));
-  const [reached, setReached] = useState<StepId>(() => (draft.agentId ? "when" : "agent"));
+  const [active, setActive] = useState<StepId>("when");
+  const [reached, setReached] = useState<StepId>("when");
   const states = stepStates(active, reached);
   const summaries = stepSummaries(draft, agent, manuscripts);
 
@@ -173,11 +158,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      rather than being swallowed and looking broken. */
   const onStackKeyDown = (e: React.KeyboardEvent) => {
     if (e.key !== "Enter" || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
-    /* ⚠️ THE AGENT STEP KEEPS ITS OWN ENTER, ALWAYS. Inside the typeahead Enter means "take the
-       highlighted agent", and the field only reports aria-expanded while its list is open — so
-       the generic guard below would let Enter through on an empty field and walk the writer to
-       step 2 with no agent chosen. The only way out of this step is to pick someone. */
-    if (active === "agent") return;
     const el = e.target as HTMLElement;
     if (el.tagName === "TEXTAREA" || el.isContentEditable) return;
     if (el.getAttribute("aria-haspopup") || el.getAttribute("aria-expanded") === "true") return;
@@ -186,68 +166,155 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
     step();
   };
 
-  /* ══ THE FOUR BODIES ═══════════════════════════════════════════════════════════════════════
-     Keyed by step, and THUNKS rather than elements: only the active step's body is ever built,
-     which is the same rule as "only the active body is mounted" enforced one layer earlier. */
-  const BODIES: Record<StepId, () => React.ReactNode> = {
+  return (
+    <div className="f12-detail" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
+      {/* ══ STAGE 1 — ONE QUESTION (ref qc-create-steps.html) ══════════════════════════════
+          Before an agent is chosen the pane asks exactly one thing, centred, with nothing
+          competing for the answer. The three sections wait beneath as GHOST ROWS: their
+          anatomy is visible — you can see what will be asked — but nothing is asked yet.
 
-    /* 1 · AGENT — the picker and the quick picks, which used to be a stage of their own.
-       ⚠️ The picker is REUSED, never rebuilt: AgentSearchField already owns the typeahead, the
-       highlighted-Enter selection and the "Agent not listed? Add a new agent now" quick-add.
-       Rebuilding any of that here would fork three behaviours at once. */
-    agent: () => (
-      <>
-        {/* Bordered and lifted: it is the one thing this step asks, and the stack's focus effect
-            puts the caret in it on arrival. */}
-        <div className="qc-askfield">
-          <AgentSearchField
-            autoFocus
-            agents={agents}
-            value=""
-            queriedAgentIds={new Set<string>()}
-            onSelect={pickAgent}
-            onCreateAgent={async (d) => {
-              const res = await onCreateAgent(d);
-              if (res.ok && res.agent) pickAgent(res.agent);
-              return res;
-            }}
-          />
-        </div>
-
-        {/* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are ordinary —
-            a new account, or a writer who has queried everyone — and one of them is an
-            achievement. Art holds the block so the step does not collapse to a bare field. */}
-        {picks.length > 0 ? (
-          <div className="qc-qp qc-qp-in" aria-label="Quick picks from your contact list">
-            <div className="qc-qph">
-              <span className="qc-qpcap">From your contact list</span>
-              <span className="qc-qpcap qc-qpnever">Never queried</span>
+          ⚠️ The picker is REUSED, never rebuilt: AgentSearchField already owns the typeahead,
+          the highlighted-Enter selection and the "Agent not listed? Add a new agent now"
+          quick-add. Rebuilding any of that here would fork three behaviours at once. ── */}
+      {!agent ? (
+        /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-create-steps + qc-stage1 option 2) ══
+           ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately: 52% left, the rest right. Choosing an
+           agent REPLACES the right column's content rather than introducing a column, so
+           nothing jumps under the pointer at the moment of choosing. The centred single-column
+           question — and its dashed empty avatar — are retired for exactly that reason. ── */
+        <div className="qc-two">
+          <div className="qc-form qc-form-ask f12-quiet-scroll">
+            <h2 className="qc-askq">Who are you querying?</h2>
+            {/* Bordered, lifted and autofocused: it is the only thing being asked, so it should
+                already have the caret. AgentSearchField is REUSED — it owns the typeahead, the
+                highlighted-Enter selection and the "Agent not listed? Add a new agent now"
+                quick-add, and rebuilding any of those would fork three behaviours at once. */}
+            <div className="qc-askfield">
+              <AgentSearchField
+                autoFocus
+                agents={agents}
+                value=""
+                queriedAgentIds={new Set<string>()}
+                onSelect={pickAgent}
+                onCreateAgent={async (d) => {
+                  const res = await onCreateAgent(d);
+                  if (res.ok && res.agent) pickAgent(res.agent);
+                  return res;
+                }}
+              />
             </div>
-            <div className="qc-qpb">
-              {picks.map((a) => (
-                <button type="button" className="qc-qrow" key={a.id} onClick={() => pickAgent(a)}>
-                  <span className="qc-qmg" aria-hidden="true">{agentInitials(a)}</span>
-                  <span className="qc-qwho">
-                    <b>{agentPrimary(a)}</b>
-                    <span className="qc-qag">{agentAgencyLine(a)}</span>
-                  </span>
-                  <span className="qc-qadded">Added {shortDate(a.dateAdded)}</span>
-                </button>
+            {/* Pushed to the FOOT of the column (margin-top:auto): anatomy you can see without
+                being asked for it. They sit where the real stack will sit. */}
+            <div className="qc-stack qc-ghosts" aria-hidden="true">
+              {STEP_ORDER.map((id) => (
+                <div key={id} className="qc-sec qc-up">
+                  <div className="qc-sum">
+                    <span className="qc-tick" />
+                    <b>{STEP_SHORT[id]}</b>
+                    <span className="qc-stxt">{STEP_HINT[id]}</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
-        ) : (
-          <div className="qc-qp qc-qp-in qc-qp-art">
-            <div className="qc-qpb"><ArtSlot name="no-quick-picks" maxWidth={200} /></div>
-          </div>
-        )}
-      </>
-    ),
 
-    /* 2 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript sits in
-       "What you sent", with the materials it went out with. */
-    when: () => (
-      <>
+          {/* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are
+              ordinary — a new account, or a writer who has queried everyone — and one of them is
+              an achievement. Art holds the column so the geometry survives. */}
+          {picks.length > 0 ? (
+            <aside className="qc-qp" aria-label="Quick picks from your contact list">
+              <div className="qc-qph">
+                <span className="qc-qpcap">From your contact list</span>
+                <span className="qc-qpcap qc-qpnever">Never queried</span>
+              </div>
+              <div className="qc-qpb">
+                {picks.map((a) => (
+                  <button type="button" className="qc-qrow" key={a.id} onClick={() => pickAgent(a)}>
+                    <span className="qc-qmg" aria-hidden="true">{agentInitials(a)}</span>
+                    <span className="qc-qwho">
+                      <b>{agentPrimary(a)}</b>
+                      <span className="qc-qag">{agentAgencyLine(a)}</span>
+                    </span>
+                    <span className="qc-qadded">Added {shortDate(a.dateAdded)}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          ) : (
+            <aside className="qc-ctx qc-ctx-name-only" aria-label="No quick picks">
+              <div className="qc-ctxbody"><ArtSlot name="no-quick-picks" maxWidth={200} /></div>
+            </aside>
+          )}
+        </div>
+      ) : (
+        <>
+      {/* ══ STAGE 2 — TWO COLUMNS (ref qc-create-fullscreen.html) ═════════════════════════
+          Left 52%: the agent, the stack, the whisper — everything you DO. Right: what is on
+          file about the agent — everything you might need to KNOW while doing it. Both scroll
+          independently so the page itself never does.
+
+          ⚠️ THE RIGHT COLUMN IS NOT RENDERED BELOW 1100px (see .qc-two in f12.css). A squeezed
+          context table is worse than none: the rows wrap to three lines each and the form loses
+          the comfortable measure that is the whole reason for the 52%. Below the breakpoint the
+          form simply has the width to itself. ── */}
+      <div className="qc-two">
+        <div className="qc-form f12-quiet-scroll">
+      <div className="f12-hero qc-hero" style={{ flex: "none", alignItems: "center" }}>
+        <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <span className="f12-hn">{agentPrimary(agent)}</span>
+            {/* Changing your mind is one click, and it re-derives everything seeded from the
+                agent — the materials checklist and the nudge suggestion both follow the new
+                pick rather than silently keeping the old one's. */}
+            <button type="button" className="qc-change" onClick={() => set({ agentId: null, materials: materialRowsForDraft(null) })}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+              Change
+            </button>
+          </div>
+          <div className="f12-ha">{agentAgencyLine(agent)}</div>
+          {dupe && (
+            <p className="qc-dupe">
+              {duplicateLine(dupe, agentPrimary(agent))}
+              {onOpenQuery && (
+                <button type="button" className="qc-dupelink" onClick={() => onOpenQuery(dupe.latest.id)}>
+                  {dupe.count === 1 ? "Open it" : "Open the most recent"}
+                </button>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── The three columns, in the reading pane's own chrome (qc-cols stacks them <md —
+          Mobile Pass 1) ── */}
+      <div
+        className="qc-stack"
+        ref={stackRef}
+        onKeyDown={onStackKeyDown}
+        onFocusCapture={() => setEngaged(true)}
+        onInput={() => setEngaged(true)}
+      >
+
+        {/* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
+            to "What you sent", where it sits with the materials it went out with. */}
+        <section className={`qc-sec qc-${states.when}${states.when === "active" && !engaged ? " qc-pulse" : ""}`} data-step="when" aria-labelledby="qc-h-when">
+          {states.when !== "active" && (
+            <button type="button" className="qc-sum" onClick={() => jump("when")}>
+              <span className="qc-tick" aria-hidden="true">{states.when === "done" ? "✓" : ""}</span>
+              <b>{STEP_SHORT.when}</b>
+              <span className="qc-stxt">{states.when === "done" ? summaries.when : STEP_HINT.when}</span>
+              {states.when === "done" && <span className="qc-ed">Change</span>}
+            </button>
+          )}
+          {states.when === "active" && (
+            <>
+              <div className="qc-shead">
+                <span className="qc-n" aria-hidden="true">{stepIndex("when") + 1}</span>
+                <h3 id="qc-h-when">{STEP_TITLE.when}{STEP_OPTIONAL.when && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                <span className="qc-enter">{enterHint("when")}</span>
+              </div>
+              <div className="qc-body">
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
                 at ordinary laptop heights, so the one field that needs a decision was the one you
                 had to scroll to find. */}
@@ -324,12 +391,29 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 </div>
               )}
             </div>
-      </>
-    ),
+          </div>
+            </>
+          )}
+        </section>
 
-    /* 3 · WHAT YOU SENT — the checklist, pre-filled from the agent's materials-wanted */
-    what: () => (
-      <>
+        {/* 2 · WHAT YOU SENT — the checklist, pre-filled from the agent's materials-wanted */}
+        <section className={`qc-sec qc-${states.what}${states.what === "active" && !engaged ? " qc-pulse" : ""}`} data-step="what" aria-labelledby="qc-h-what">
+          {states.what !== "active" && (
+            <button type="button" className="qc-sum" onClick={() => jump("what")}>
+              <span className="qc-tick" aria-hidden="true">{states.what === "done" ? "✓" : ""}</span>
+              <b>{STEP_SHORT.what}</b>
+              <span className="qc-stxt">{states.what === "done" ? summaries.what : STEP_HINT.what}</span>
+              {states.what === "done" && <span className="qc-ed">Change</span>}
+            </button>
+          )}
+          {states.what === "active" && (
+            <>
+              <div className="qc-shead">
+                <span className="qc-n" aria-hidden="true">{stepIndex("what") + 1}</span>
+                <h3 id="qc-h-what">{STEP_TITLE.what}{STEP_OPTIONAL.what && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                <span className="qc-enter">{enterHint("what")}</span>
+              </div>
+              <div className="qc-body">
             <div style={{ marginBottom: 0 }}>
               <div style={LABEL}>Manuscript</div>
               {onlyManuscript ? (
@@ -466,12 +550,29 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 Pick an agent and this fills in from what they ask for
               </div>
             )}
-      </>
-    ),
+          </div>
+            </>
+          )}
+        </section>
 
-    /* 4 · JOURNAL — the optional first note */
-    notes: () => (
-      <>
+        {/* 3 · JOURNAL — the optional first note */}
+        <section className={`qc-sec qc-${states.notes}${states.notes === "active" && !engaged ? " qc-pulse" : ""}`} data-step="notes" aria-labelledby="qc-h-notes">
+          {states.notes !== "active" && (
+            <button type="button" className="qc-sum" onClick={() => jump("notes")}>
+              <span className="qc-tick" aria-hidden="true">{states.notes === "done" ? "✓" : ""}</span>
+              <b>{STEP_SHORT.notes}</b>
+              <span className="qc-stxt">{states.notes === "done" ? summaries.notes : STEP_HINT.notes}</span>
+              {states.notes === "done" && <span className="qc-ed">Change</span>}
+            </button>
+          )}
+          {states.notes === "active" && (
+            <>
+              <div className="qc-shead">
+                <span className="qc-n" aria-hidden="true">{stepIndex("notes") + 1}</span>
+                <h3 id="qc-h-notes">{STEP_TITLE.notes}{STEP_OPTIONAL.notes && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                <span className="qc-enter">{enterHint("notes")}</span>
+              </div>
+              <div className="qc-body">
             {/* ⚠️ THE NOTE FILLS ITS STEP (ref qc-stage1.html, variant A). It was a small inset
                 box in a three-column layout — a field you could not think in. Full width of the
                 body, 104px to start, and resizable DOWNWARD as well as up because a writer who
@@ -487,111 +588,19 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             />
             {/* One line, beneath — what happens to it and who sees it. */}
             <p className="qc-notecap">Saved with this query · only you see it</p>
-      </>
-    ),
-  };
-
-  /* ══ ONE BLOCK, FOUR TIMES ══════════════════════════════════════════════════════════════════
-     Collapsed it is a row; open it is a card. The chrome is written ONCE — four copies of it is
-     how the Notes head ends up a pixel out from the What head, and how a treatment added to
-     three of them silently misses the fourth.
-
-     ⚠️ THE COLLAPSED ROW STATES BOTH THE HINT AND THE VALUE (ref .srow). They were alternatives
-     before — the hint until you answered, then the summary instead — so the moment a step was
-     done it stopped saying what it was for, and a column of four bare values is unreadable at a
-     glance. Hint left, value right. */
-  const renderStep = (id: StepId) => {
-    const st = states[id];
-    const back = prevStep(id);
-    const hint = enterHint(id);
-
-    if (st !== "active") {
-      return (
-        <button type="button" className={`qc-srow qc-${st}`} onClick={() => jump(id)}>
-          <i className={`qc-dot${st === "done" ? " qc-dot-done" : ""}`} aria-hidden="true" />
-          <b>{STEP_SHORT[id]}</b>
-          <span className="qc-shint">{STEP_HINT[id]}</span>
-          <span className="qc-sval">{st === "done" ? summaries[id] : ""}</span>
-          <span className="qc-sedit">EDIT</span>
-          <span className="qc-schev" aria-hidden="true">›</span>
-        </button>
-      );
-    }
-
-    return (
-      <div className={`qc-sopen${engaged ? "" : " qc-pulse"}`}>
-        <div className="qc-soh">
-          <i className="qc-dot qc-dot-now" aria-hidden="true" />
-          <h3 id={`qc-h-${id}`}>
-            {STEP_TITLE[id]}{STEP_OPTIONAL[id] && <span className="qc-opt"> · OPTIONAL</span>}
-          </h3>
-          <span className="qc-sof">Step {stepIndex(id) + 1} of {STEP_ORDER.length}</span>
-        </div>
-        <p className="qc-lede">{STEP_LEDE[id]}</p>
-        <div className="qc-body">{BODIES[id]()}</div>
-        {/* ⚠️ CONTINUE AND BACK ONLY — NEVER SAVE. Save, Cancel and the requirement line live in
-            the page's command bar, and a Save here would give one action two homes. The agent
-            step has no Continue either: picking someone IS the advance (see pickAgent), so a
-            button that did the same thing a moment later would imply the choice had not landed. */}
-        <div className="qc-sfoot">
-          {nextStep(id) && id !== "agent" && (
-            <button type="button" className="qc-cont" onClick={step}>Continue →</button>
-          )}
-          {back && <button type="button" className="qc-back" onClick={() => jump(back)}>← Back</button>}
-          {hint && <span className="qc-enter">{hint}</span>}
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="f12-detail" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
-      {/* ══ THE FLOW AND THE RECORD ════════════════════════════════════════════════════════
-          Left: the four steps — everything you DO. Right: what is on file about the agent —
-          everything you might need to KNOW while doing it. Both scroll independently so the
-          page itself never does.
-
-          ⚠️ THE PANEL IS NOT RENDERED UNTIL AN AGENT EXISTS, and the column closes up behind it
-          (.qc-two-solo). An empty reference panel beside the picker would be a frame around
-          nothing at the exact moment the writer has nothing to look up.
-
-          ⚠️ AND IT IS NOT RENDERED BELOW 1100px (see .qc-two in f12.css). A squeezed context
-          table is worse than none: the rows wrap to three lines each and the form loses the
-          comfortable measure that is the whole reason for the 52%. ── */}
-      <div className={`qc-two${agent ? "" : " qc-two-solo"}`}>
-        <div className="qc-form f12-quiet-scroll">
-          <div
-            className="qc-stack"
-            ref={stackRef}
-            onKeyDown={onStackKeyDown}
-            onFocusCapture={() => setEngaged(true)}
-            onInput={() => setEngaged(true)}
-          >
-            {STEP_ORDER.map((id) => (
-              <section key={id} className={`qc-sec qc-${states[id]}`} data-step={id}>
-                {renderStep(id)}
-                {/* ⚠️ THE DUPLICATE NOTICE BELONGS TO THE AGENT STEP, and it stays visible once
-                    that step collapses — it is a fact about the choice, not about the moment of
-                    choosing. A statement beside the agent, never a barrier in front of Save. */}
-                {id === "agent" && dupe && agent && (
-                  <p className="qc-dupe">
-                    {duplicateLine(dupe, agentPrimary(agent))}
-                    {onOpenQuery && (
-                      <button type="button" className="qc-dupelink" onClick={() => onOpenQuery(dupe.latest.id)}>
-                        {dupe.count === 1 ? "Open it" : "Open the most recent"}
-                      </button>
-                    )}
-                  </p>
-                )}
-              </section>
-            ))}
           </div>
-          {whisperDate && (
-            <p className="qc-whisper">We&rsquo;ll nudge you on {shortDate(whisperDate)} if it&rsquo;s gone quiet.</p>
+            </>
           )}
-        </div>
-        {agent && <AgentContextPanel agent={agent} queries={queries} onOpenQuery={onOpenQuery} />}
+        </section>
       </div>
+      {whisperDate && (
+        <p className="qc-whisper">We&rsquo;ll nudge you on {shortDate(whisperDate)} if it&rsquo;s gone quiet.</p>
+      )}
+        </div>
+        <AgentContextPanel agent={agent} queries={queries} onOpenQuery={onOpenQuery} />
+      </div>
+        </>
+      )}
     </div>
   );
 };
