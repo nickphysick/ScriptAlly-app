@@ -167,11 +167,44 @@
 .qch-rq.qch-on { color: var(--ink); }
 .qch-rq.qch-on .qch-c { background: #7e9178; border-color: #7e9178; }
 
-/* STAGE 1 — one question, centred, with nothing competing for the answer. */
-.qc-ask { flex: none; display: flex; flex-direction: column; align-items: center; gap: 13px; padding: 26px 0 22px; }
-.qc-askav { width: 54px; height: 54px; border-radius: 50%; border: 1.5px dashed #d8ccbb; }
-.qc-askq { font-family: var(--f12-serif); font-weight: 700; font-size: 24px; color: var(--ink); margin: 0; }
-.qc-askfield { width: 100%; max-width: 420px; }
+/* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-stage1.html option 2) ══════════════════════
+   ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately. Choosing an agent REPLACES the right column's
+   content rather than introducing a column, so nothing jumps under the pointer at the moment of
+   choosing. The centred single-column question — and its dashed empty avatar — are retired for
+   exactly that reason. */
+.qc-form-ask { justify-content: flex-start; }
+.qc-askq { font-family: var(--f12-serif); font-weight: 700; font-size: 24px; color: var(--ink); margin: 8px 0 0; }
+/* Bordered and lifted: it is the only thing being asked. */
+.qc-askfield { width: 100%; }
+.qc-askfield .f12-lsearch { height: 44px; border-color: var(--line); background: var(--panel); box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
+/* The ghosts sit at the FOOT of the column, where the real stack will be. */
+.qc-ghosts { margin-top: auto; padding-top: 18px; opacity: 0.5; }
+
+/* Quick picks — the agents you have never queried, newest first. */
+.qc-qp { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: var(--panel); }
+.qc-qph { flex: none; display: flex; align-items: center; gap: 7px; padding: 9px 13px; background: var(--paper); border-bottom: 1px solid var(--hairline); }
+.qc-qpcap { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
+.qc-qpnever { margin-left: auto; }
+.qc-qpb { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 6px 13px 10px; }
+.qc-qrow { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 0; border: none; border-bottom: 1px solid var(--hairline); background: none; font: inherit; font-size: 12.5px; text-align: left; cursor: pointer; }
+.qc-qrow:last-child { border-bottom: none; }
+.qc-qrow:hover .qc-qwho b { color: var(--burg); }
+.qc-qmg { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 8.5px; }
+.qc-qwho { min-width: 0; display: flex; flex-direction: column; }
+.qc-qwho b { font-family: var(--f12-serif); font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc-qag { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc-qadded { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+
+/* ══ THE NOTE (ref qc-stage1.html variant A) ═══════════════════════════════════════════════
+   ⚠️ IT FILLS ITS STEP. It was a small inset box in a three-column layout — a field you could
+   not think in. Full width, 104px to start, and RESIZABLE: a writer who wants two lines should
+   be able to have two. No ruled lines and no caption bar above it — the step head already says
+   "Notes · OPTIONAL", and a second label would be a third thing saying the same. */
+.qc-note { display: block; width: 100%; min-height: 104px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); font-family: inherit; font-size: 12.5px; line-height: 1.6; color: var(--ink); resize: vertical; outline: none; transition: border-color 0.14s, box-shadow 0.14s; }
+.qc-note::placeholder { color: var(--muted); }
+/* The house focus ring — the same pair the active step wears, so focus reads as one language. */
+.qc-note:focus { border-color: #d8c4b2; box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
+.qc-notecap { margin: 8px 0 0; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
 
 /* The stack — one column of sections. On stage 1 all three are ghosts.
    ⚠️ `.qc-sec`, NOT `.qc-step`. `.qc-step` was the sample stepper's bare +/− button, retired in

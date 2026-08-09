@@ -27,6 +27,8 @@ import {
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
+import { ArtSlot } from "../todo/ArtSlot";
+import { quickPicks } from "../../lib/quickPicks";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { BrandDatePicker } from "../forms";
@@ -135,6 +137,17 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
     first?.focus();
   }, [active]);
 
+  /* ⚠️ ONE DOOR. Typing a name, creating one inline and clicking a quick pick must do exactly
+     the same thing — seed the materials from that agent and start the walk at the top — or the
+     three routes into stage 2 will drift apart. */
+  const pickAgent = (a: Agent) => {
+    setActive("when");
+    setReached("when");
+    set({ agentId: a.id, materials: materialRowsForDraft(a) });
+  };
+
+  const picks = quickPicks(agents, queries);
+
   const jump = (id: StepId) => { const n = jumpTo(id, reached); setActive(n.active); setReached(n.reached); };
   const step = () => { const n = advance(active, reached); setActive(n.active); setReached(n.reached); };
 
@@ -164,36 +177,75 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           the highlighted-Enter selection and the "Agent not listed? Add a new agent now"
           quick-add. Rebuilding any of that here would fork three behaviours at once. ── */}
       {!agent ? (
-        <>
-          <div className="qc-ask">
-            <span className="qc-askav" aria-hidden="true" />
+        /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-create-steps + qc-stage1 option 2) ══
+           ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately: 52% left, the rest right. Choosing an
+           agent REPLACES the right column's content rather than introducing a column, so
+           nothing jumps under the pointer at the moment of choosing. The centred single-column
+           question — and its dashed empty avatar — are retired for exactly that reason. ── */
+        <div className="qc-two">
+          <div className="qc-form qc-form-ask f12-quiet-scroll">
             <h2 className="qc-askq">Who are you querying?</h2>
+            {/* Bordered, lifted and autofocused: it is the only thing being asked, so it should
+                already have the caret. AgentSearchField is REUSED — it owns the typeahead, the
+                highlighted-Enter selection and the "Agent not listed? Add a new agent now"
+                quick-add, and rebuilding any of those would fork three behaviours at once. */}
             <div className="qc-askfield">
               <AgentSearchField
+                autoFocus
                 agents={agents}
                 value=""
                 queriedAgentIds={new Set<string>()}
-                onSelect={(a) => { setActive("when"); setReached("when"); set({ agentId: a.id, materials: materialRowsForDraft(a) }); }}
+                onSelect={pickAgent}
                 onCreateAgent={async (d) => {
                   const res = await onCreateAgent(d);
-                  if (res.ok && res.agent) set({ agentId: res.agent.id, materials: materialRowsForDraft(res.agent) });
+                  if (res.ok && res.agent) pickAgent(res.agent);
                   return res;
                 }}
               />
             </div>
-          </div>
-          <div className="qc-stack" aria-hidden="true">
-            {STEP_ORDER.map((id) => (
-              <div key={id} className="qc-sec qc-up">
-                <div className="qc-sum">
-                  <span className="qc-tick" />
-                  <b>{STEP_SHORT[id]}</b>
-                  <span className="qc-stxt">{STEP_HINT[id]}</span>
+            {/* Pushed to the FOOT of the column (margin-top:auto): anatomy you can see without
+                being asked for it. They sit where the real stack will sit. */}
+            <div className="qc-stack qc-ghosts" aria-hidden="true">
+              {STEP_ORDER.map((id) => (
+                <div key={id} className="qc-sec qc-up">
+                  <div className="qc-sum">
+                    <span className="qc-tick" />
+                    <b>{STEP_SHORT[id]}</b>
+                    <span className="qc-stxt">{STEP_HINT[id]}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </>
+
+          {/* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are
+              ordinary — a new account, or a writer who has queried everyone — and one of them is
+              an achievement. Art holds the column so the geometry survives. */}
+          {picks.length > 0 ? (
+            <aside className="qc-qp" aria-label="Quick picks from your contact list">
+              <div className="qc-qph">
+                <span className="qc-qpcap">From your contact list</span>
+                <span className="qc-qpcap qc-qpnever">Never queried</span>
+              </div>
+              <div className="qc-qpb">
+                {picks.map((a) => (
+                  <button type="button" className="qc-qrow" key={a.id} onClick={() => pickAgent(a)}>
+                    <span className="qc-qmg" aria-hidden="true">{agentInitials(a)}</span>
+                    <span className="qc-qwho">
+                      <b>{agentPrimary(a)}</b>
+                      <span className="qc-qag">{agentAgencyLine(a)}</span>
+                    </span>
+                    <span className="qc-qadded">Added {shortDate(a.dateAdded)}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          ) : (
+            <aside className="qc-ctx qc-ctx-name-only" aria-label="No quick picks">
+              <div className="qc-ctxbody"><ArtSlot name="no-quick-picks" maxWidth={200} /></div>
+            </aside>
+          )}
+        </div>
       ) : (
         <>
       {/* ══ STAGE 2 — TWO COLUMNS (ref qc-create-fullscreen.html) ═════════════════════════
@@ -521,17 +573,21 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 <span className="qc-enter">{enterHint("notes")}</span>
               </div>
               <div className="qc-body">
+            {/* ⚠️ THE NOTE FILLS ITS STEP (ref qc-stage1.html, variant A). It was a small inset
+                box in a three-column layout — a field you could not think in. Full width of the
+                body, 104px to start, and resizable DOWNWARD as well as up because a writer who
+                wants two lines should be able to have two lines.
+                No ruled lines and no caption bar above it: the head already says "Notes ·
+                OPTIONAL", and a second label would be the third thing on screen saying the same. */}
             <textarea
+              className="qc-note"
               value={draft.journal}
               onChange={(e) => set({ journal: e.target.value })}
-              placeholder="First impressions, personalisation notes, anything worth remembering… (optional)"
+              placeholder="First impressions, personalisation notes, anything worth remembering…"
               aria-label="First journal note"
-              style={{
-                flex: 1, minHeight: 90, resize: "none", border: "1px solid var(--line)", borderRadius: 12,
-                padding: 13, fontFamily: "inherit", fontSize: 13, color: "var(--ink)",
-                background: "var(--panel)", outline: "none",
-              }}
             />
+            {/* One line, beneath — what happens to it and who sees it. */}
+            <p className="qc-notecap">Saved with this query · only you see it</p>
           </div>
             </>
           )}

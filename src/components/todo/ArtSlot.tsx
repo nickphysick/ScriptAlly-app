@@ -33,7 +33,8 @@ export type ArtSlotName =
   | "review-masthead"   // the weekly briefing card, while fresh
   | "first-run-board"   // the To-do list before the first query — "not yet", not "well done"
   | "seize-the-day"     // Today's plan card — the ONE slot with a real asset committed
-  | "agent-unknown";    // Query Centre: the agent context panel with nothing on file to report
+  | "agent-unknown"     // Query Centre: the agent context panel with nothing on file to report
+  | "no-quick-picks";   // Query Centre stage 1: no unqueried contacts to suggest
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -103,6 +104,15 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
      BRIEF: a closed reference book on a desk, seen from above, with the reader's chair empty —
      the record exists but has not been filled in yet. Quiet, no question mark, no shrug: this is
      an invitation to go and find out, not a fault being reported. */
+  /* Query Centre · stage 1's right column when there is nobody to suggest — either the contact
+     list is empty or every agent on it has been queried. BRIEF: an open address book with its
+     ribbon marker laid flat across a blank spread. Not a shrug and not an error: both states
+     are ordinary, and one of them (you have queried everyone) is an achievement. */
+  "no-quick-picks": {
+    caption: "An open address book, its ribbon across a blank page",
+    w: 220, h: 150,
+    alt: "An open address book with a ribbon marker on a blank page",
+  },
   "agent-unknown": {
     caption: "A closed reference book, waiting to be opened",
     w: 220, h: 150,

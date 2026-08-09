@@ -126,8 +126,18 @@ describe("Enter accepts and advances; ⌘↵ saves", () => {
     expect(queries).toContain("saveCreateRef.current();");
   });
 
-  it("choosing an agent puts the walk back at the top", () => {
-    expect(pane).toContain('setActive("when"); setReached("when");');
+  /* ⚠️ ONE DOOR. Typing a name, creating one inline and clicking a quick pick must do exactly
+     the same thing, or the three routes into stage 2 drift apart. They all call pickAgent. */
+  it("every route into stage 2 goes through one function", () => {
+    expect(pane).toContain("const pickAgent = (a: Agent) => {");
+    expect(pane).toContain('setActive("when");');
+    expect(pane).toContain("materials: materialRowsForDraft(a)");
+    /* The three routes, each named: the typeahead passes the function itself, the inline
+       quick-add calls it with the agent it just created, and a quick pick calls it with its row.
+       Counting bare `pickAgent(` would have missed the first — it is passed, not called. */
+    expect(pane, "the typeahead route").toContain("onSelect={pickAgent}");
+    expect(pane, "the inline quick-add route").toContain("pickAgent(res.agent)");
+    expect(pane, "the quick-picks route").toContain("onClick={() => pickAgent(a)}");
   });
 });
 

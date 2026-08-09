@@ -32,12 +32,15 @@ describe("the two sources of reclaimed height", () => {
      columns. Stage 1 deletes that hero: before an agent is chosen the pane holds one centred
      question and three ghost rows, and there are no columns to make room for yet. The height
      pressure this suite was written under does not exist in that state. */
-  it("the pre-agent state has no hero to be compact — it is one centred question", () => {
+  /* ⚠️ AMENDED AGAIN: the centred single-column question is retired too. Stage 1 now uses the
+     SAME two-column geometry as stage 2, so choosing an agent replaces the right column's
+     content rather than introducing a column — nothing jumps under the pointer. */
+  it("the pre-agent state is two columns, like the state it leads to", () => {
     expect(pane, "the compact hero came back").not.toContain('className="qc-htxt"');
     expect(pane, "the compact hero came back").not.toContain('className="qc-mark"');
-    expect(pane).toContain('<div className="qc-ask">');
-    expect(rule(".qc-ask"), "the question must be centred, not beside the field")
-      .toContain("flex-direction: column");
+    expect(pane, "the centred single-column ask came back").not.toContain('className="qc-ask"');
+    expect(pane.match(/<div className="qc-two">/g)?.length ?? 0, "both stages use the same row")
+      .toBe(2);
   });
 
   it("the hero/columns gap tightened", () => {
