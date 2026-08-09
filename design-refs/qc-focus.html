@@ -1,0 +1,186 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel hierarchy + focus cue</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--line:#e8e2d8;--line2:#f0ebe2;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--pinkTint:#fdf4ef;--rose:#b45a40;--burg:#8d3f2d;--sage:#dde3d8;--sageBd:#ccd5c5;--sageDeep:#5a6e58;--parch:#faf7f2;--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#efeae2;font-family:var(--in);color:var(--ink);padding:22px 26px 60px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:19px;margin-bottom:3px}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:12px;max-width:880px}
+.mono{font-family:var(--mo);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+svg{fill:none;stroke:currentColor;stroke-width:1.7}
+.bar{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.grp{display:flex;gap:5px;align-items:center}
+.grp .lb{font-family:var(--mo);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:3px}
+.bar button{background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--in);color:var(--ink2)}
+.bar button.on{background:#241c15;color:#f4ebdd;border-color:#241c15}
+.sheet{background:#fff;border:1px solid var(--line);border-radius:17px;padding:20px 24px;max-width:1080px}
+.chead{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+.chead h2{font-family:var(--pl);font-weight:700;font-size:21px}
+.chead .sl{font-family:var(--pl);font-style:italic;font-size:12.5px;color:var(--ink2);margin-top:2px}
+.acts{margin-left:auto;display:flex;gap:7px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:600;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
+.btn.pink{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.btn.quiet{border-color:transparent;background:none;color:var(--muted)}
+.stage{display:flex;gap:22px;align-items:flex-start}
+.formcol{flex:0 0 54%;min-width:0}
+.sidecol{flex:1 1 0;min-width:0}
+/* agent hero (left) */
+.agrow{display:flex;align-items:center;gap:12px;background:var(--pinkTint);border:1px solid #f2ddd2;border-radius:13px;padding:13px 15px;margin-bottom:11px}
+.agrow .mg{width:46px;height:46px;border-radius:50%;background:var(--pink);color:#a4634c;display:grid;place-items:center;font-family:var(--pl);font-size:15px}
+.agrow b{font-family:var(--pl);font-size:19px}
+.agrow .ag{font-family:var(--pl);font-style:italic;font-size:13px;color:var(--ink2)}
+.dupe{font-size:11px;color:var(--burg);margin-top:3px}
+/* steps */
+.step{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden;background:#fff}
+.sh{display:flex;align-items:center;gap:8px;padding:11px 14px 0}
+.sh .n{width:19px;height:19px;border-radius:50%;background:var(--pinkTint);border:1px solid var(--pinkDeep);color:#a4634c;display:grid;place-items:center;font-family:var(--mo);font-size:8px}
+.sh h3{font-family:var(--pl);font-weight:700;font-size:15px}
+.sh .en{margin-left:auto;font-family:var(--mo);font-size:7.5px;color:var(--muted);letter-spacing:.08em}
+.sb{padding:11px 14px 13px}
+.flab{font-family:var(--mo);font-size:7.5px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.fin{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:0 11px;background:#fff;font-size:12px;height:36px}
+.seg{display:flex;background:#f3ede4;border-radius:9px;padding:3px;gap:2px;height:36px;max-width:220px}
+.seg span{flex:1;border-radius:7px;font-size:11px;color:var(--muted);display:grid;place-items:center}
+.seg span.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(60,45,30,.12)}
+.two{display:flex;gap:9px}.two>div{flex:1}
+.sum{display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:12px;color:var(--muted)}
+.sum b{font-family:var(--pl);font-size:13.5px;color:var(--ink)}
+.sum .tk{width:17px;height:17px;border-radius:50%;border:1.5px solid #cfc3b1}
+/* ===== FOCUS CUES ===== */
+.step.active{border-color:#d8c4b2}
+body.f1 .step.active{box-shadow:0 6px 18px rgba(60,45,30,.07)}
+/* f2 static accent bar */
+body.f2 .step.active{box-shadow:0 6px 18px rgba(60,45,30,.07);position:relative}
+body.f2 .step.active::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--rose)}
+body.f2 .step.active .sb,body.f2 .step.active .sh{padding-left:18px}
+/* f3 one-shot glow */
+@keyframes once{0%{box-shadow:0 0 0 0 rgba(180,90,64,.30),0 6px 18px rgba(60,45,30,.07)}
+70%{box-shadow:0 0 0 9px rgba(180,90,64,0),0 6px 18px rgba(60,45,30,.07)}
+100%{box-shadow:0 0 0 0 rgba(180,90,64,0),0 6px 18px rgba(60,45,30,.07)}}
+body.f3 .step.active{animation:once 1.5s ease-out 1}
+/* f4 looping pulse */
+@keyframes loop{0%,100%{box-shadow:0 0 0 0 rgba(180,90,64,.26),0 6px 18px rgba(60,45,30,.07)}50%{box-shadow:0 0 0 8px rgba(180,90,64,0),0 6px 18px rgba(60,45,30,.07)}}
+body.f4 .step.active{animation:loop 2.1s ease-in-out infinite}
+/* ===== PANEL VARIANTS ===== */
+.panel{border-radius:15px;overflow:hidden;display:flex;flex-direction:column;height:auto;max-height:520px}
+/* P1 current: white card, identity hero */
+body.p1 .panel{background:#fff;border:1px solid var(--line);box-shadow:0 1px 2px rgba(43,33,24,.04),0 10px 26px rgba(43,33,24,.05)}
+body.p1 .ident{display:flex}
+body.p1 .qhead{display:none}
+/* P2 quiet reference: no identity hero, mono caption header, flat */
+body.p2 .panel{background:#fbf9f5;border:1px solid var(--line2);box-shadow:none}
+body.p2 .ident{display:none}
+body.p2 .qhead{display:flex}
+body.p2 .stat .v{font-family:var(--in);font-weight:600;font-size:14px;color:var(--ink2)}
+body.p2 .sec .mono{color:#a2947f}
+body.p2 .body{color:var(--ink2)}
+/* P3 recessed: no border at all, sits on the sheet like a margin note */
+body.p3 .panel{background:transparent;border:none;box-shadow:none;border-left:1px solid var(--line);border-radius:0;padding-left:18px}
+body.p3 .ident{display:none}
+body.p3 .qhead{display:flex;padding-left:0}
+body.p3 .stats{background:none;border:none;padding-left:0}
+body.p3 .stat{border:none;padding-left:0}
+body.p3 .stat .v{font-family:var(--in);font-weight:600;font-size:14px;color:var(--ink2)}
+body.p3 .body{padding-left:0}
+body.p3 .foot{background:none;padding-left:0}
+/* panel innards */
+.ident{background:linear-gradient(180deg,#fdfbf8,var(--parch));border-bottom:1px solid var(--line);padding:14px 15px;gap:11px;align-items:flex-start;position:relative}
+.ident .mg{width:42px;height:42px;border-radius:50%;background:var(--pink);color:#a4634c;display:grid;place-items:center;font-family:var(--pl);font-size:14px;border:2px solid #fff}
+.ident h3{font-family:var(--pl);font-weight:700;font-size:17px}
+.ident .r{font-family:var(--pl);font-style:italic;font-size:12px;color:var(--ink2)}
+.qhead{display:none;align-items:center;gap:7px;padding:12px 15px 10px;border-bottom:1px solid var(--line2)}
+.qhead svg{width:13px;height:13px;color:#a2947f}
+.qhead .t{font-family:var(--mo);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:#8a7c6b}
+.qhead .pill{margin-left:auto;display:inline-flex;align-items:center;gap:4px;background:#e9ede6;border:1px solid #b9c6b4;color:var(--sageDeep);border-radius:999px;padding:2px 8px;font-family:var(--mo);font-size:7px;letter-spacing:.09em;text-transform:uppercase}
+.stats{display:flex;border-bottom:1px solid var(--line2)}
+.stat{flex:1;padding:10px 14px;border-right:1px solid var(--line2)}
+.stat:last-child{border-right:none}
+.stat .v{font-family:var(--pl);font-weight:700;font-size:16px;line-height:1.1}
+.stat .v small{font-family:var(--in);font-weight:500;font-size:10.5px;color:var(--muted)}
+.stat .k{font-family:var(--mo);font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.body{padding:13px 15px 6px;overflow-y:auto;min-height:0}
+.sec{margin-bottom:13px}
+.sech{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.sech .rule{flex:1;height:1px;background:var(--line2)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.g{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;font-size:10.5px;color:var(--ink2)}
+.hist{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line2);border-radius:9px;padding:8px 10px;font-size:11.5px}
+.hist .d{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--rose);background:#fbeae1;flex-shrink:0}
+.hist a{margin-left:auto;color:var(--rose);font-weight:600;font-size:10.5px;text-decoration:underline}
+.thin{font-size:11.5px;color:var(--muted);line-height:1.5;padding-bottom:10px}
+.foot{display:flex;align-items:center;padding:9px 15px;border-top:1px solid var(--line2);background:#fdfcfa}
+.foot a{margin-left:auto;font-size:10.5px;color:var(--rose);font-weight:600;text-decoration:underline}
+.note{font-size:12px;color:var(--ink2);line-height:1.6;max-width:1080px;margin-top:14px}
+.note b{font-family:var(--pl)}
+</style></head>
+<body class="p2 f3" id="bd">
+<h1>Where should the eye go?</h1>
+<div class="sub">Two dials: how quiet the reference panel is, and how the active step announces itself. Re-click a focus button to replay its animation.</div>
+<div class="bar">
+  <div class="grp"><span class="lb">Panel</span>
+    <button onclick="P(this,'p1')">1 · As built</button>
+    <button class="on" onclick="P(this,'p2')">2 · Quiet reference</button>
+    <button onclick="P(this,'p3')">3 · Margin note</button></div>
+  <div class="grp"><span class="lb">Focus cue</span>
+    <button onclick="F(this,'f1')">A · None</button>
+    <button onclick="F(this,'f2')">B · Accent bar</button>
+    <button class="on" onclick="F(this,'f3')">C · One-shot glow</button>
+    <button onclick="F(this,'f4')">D · Looping pulse</button></div>
+</div>
+
+<div class="sheet">
+  <div class="chead"><div><h2>Logging new query</h2><div class="sl">Needs an agent, a manuscript and a date &mdash; everything else can wait.</div></div>
+  <div class="acts"><span class="mono">Esc</span><span class="btn quiet">Cancel</span><span class="btn">Save &amp; log another</span><span class="btn pink">Save query</span></div></div>
+  <div class="stage">
+    <div class="formcol">
+      <div class="agrow"><span class="mg">EW</span><div><b>Eleanor Whitfield</b> <span class="btn" style="padding:2px 8px;font-size:10px;margin-left:6px">Change</span>
+        <div class="ag">Greenfield Literary</div>
+        <div class="dupe">You have 2 open queries with Eleanor <u>Open the most recent</u></div></div></div>
+      <div class="step active" id="stp">
+        <div class="sh"><span class="n">1</span><h3>When you sent it</h3><span class="en">ENTER TO ACCEPT</span></div>
+        <div class="sb"><div class="two"><div><div class="flab">Date sent</div><div class="fin">9 August 2026</div></div>
+          <div><div class="flab">Sent by</div><div class="seg"><span class="on">Email</span><span>Form</span><span>Post</span></div></div></div></div>
+      </div>
+      <div class="step"><div class="sum"><span class="tk"></span><b>What</b>Manuscript and materials</div></div>
+      <div class="step"><div class="sum"><span class="tk"></span><b>Notes</b>Optional</div></div>
+    </div>
+
+    <div class="sidecol"><div class="panel">
+      <div class="ident"><span class="mg">EW</span><div><h3>Greenfield Literary</h3><div class="r">Eleanor Whitfield</div></div></div>
+      <div class="qhead"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg><span class="t">For reference</span><span class="pill">Open to submissions</span></div>
+      <div class="stats">
+        <div class="stat"><div class="v">4 <small>weeks</small></div><div class="k">Expected response time</div></div>
+        <div class="stat"><div class="v">Email</div><div class="k">Preferred submission method</div></div>
+      </div>
+      <div class="body">
+        <div class="sec"><div class="sech"><span class="mono">Your history</span><span class="rule"></span></div>
+          <div class="hist"><span class="d"></span>2 open &middot; last sent 14 Mar 2024<a>Open it</a></div></div>
+        <div class="sec"><div class="sech"><span class="mono">Seeking</span><span class="rule"></span></div>
+          <div class="chips"><span class="g">Thriller</span><span class="g">Crime</span><span class="g">Literary</span></div></div>
+        <div class="thin">Nothing else recorded for this agent yet.</div>
+      </div>
+      <div class="foot"><span class="mono">Updated 10 Jul</span><a>Agency page &rarr;</a></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="note" id="nn"></div>
+<script>
+var pn={'p1':"Panel 1 \u2014 as built. A white card with its own identity hero: monogram, name in Playfair. It reads as a second subject, competing with the agent hero on the left, and repeats what's already there.",
+'p2':"Panel 2 \u2014 quiet reference. The identity block goes (the name is already on the left); the header becomes a mono \u201cFOR REFERENCE\u201d caption with an info glyph and the status pill. Flat parchment ground, hairline border, no shadow, values in Inter rather than Playfair. It stops competing and becomes an aside.",
+'p3':"Panel 3 \u2014 margin note. No card at all: a single hairline rule separates it from the form, like a printed marginal note. The quietest option; risks looking unfinished next to the sheet's other framed elements."};
+var fn={'f1':"Cue A \u2014 none. The lifted border alone. Clean, but on arrival nothing says \u201cstart here\u201d.",
+'f2':"Cue B \u2014 accent bar. A burgundy bar on the active step's left edge, permanent while it's active. Static, readable at a glance, works for someone who looks away and comes back. My pick alongside C.",
+'f3':"Cue C \u2014 one-shot glow. A soft burgundy halo blooms once over 1.5s when the step becomes active, then settles. Draws the eye at the moment of transition without ever nagging. Pairs perfectly with B.",
+'f4':"Cue D \u2014 looping pulse. Reads as an alert. Within a day it's either invisible or irritating, and with a caret already blinking in the date field it's visual noise. Not recommended."};
+function P(el,c){var b=document.getElementById('bd');b.className=b.className.replace(/p\d/,c);
+document.querySelectorAll('.grp')[0].querySelectorAll('button').forEach(function(x){x.classList.remove('on')});el.classList.add('on');nn();}
+function F(el,c){var b=document.getElementById('bd');b.className=b.className.replace(/f\d/,c);
+document.querySelectorAll('.grp')[1].querySelectorAll('button').forEach(function(x){x.classList.remove('on')});el.classList.add('on');
+var s=document.getElementById('stp'),p=s.parentNode,n=s.nextSibling;p.removeChild(s);p.insertBefore(s,n);nn();}
+function nn(){var c=document.getElementById('bd').className.split(' ');
+document.getElementById('nn').innerHTML=pn[c[0]]+"<br><br>"+fn[c[1]];}
+nn();
+</script>
+</body></html>

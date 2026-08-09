@@ -31,6 +31,8 @@ interface AgentSearchFieldProps {
    * Creates a schema-compatible agent from the quick-add panel and returns it for selection.
    * The caller fills the defaults for every omitted required field. When absent, quick-add is hidden.
    */
+  /** Take the caret on mount. Stage 1 asks exactly one thing, so it should already be focused. */
+  autoFocus?: boolean;
   onCreateAgent?: (draft: {
     name: string;
     agency: string;
@@ -48,6 +50,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   queriedAgentIds,
   onSelect,
   manuscriptLabel,
+  autoFocus,
   onCreateAgent,
 }) => {
   const [open, setOpen] = useState(false);
@@ -263,6 +266,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
               setQueryText(e.target.value);
               setOpen(true);
             }}
+            autoFocus={autoFocus}
             onKeyDown={onKeyDown}
             // Closes on blur (e.g. Tab away). Result rows preventDefault on mousedown so a click on a
             // result keeps focus and isn't swallowed by this blur.

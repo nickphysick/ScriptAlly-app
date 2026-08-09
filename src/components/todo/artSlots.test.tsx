@@ -32,9 +32,11 @@ const NAMES: ArtSlotName[] = [
   "seize-the-day",
   // Query Centre's agent context panel with nothing on file — the first slot outside /todo.
   "agent-unknown",
+  // Query Centre stage 1 with nobody left to suggest.
+  "no-quick-picks",
 ];
 
-describe("⚠️ ONE component, EIGHT slots — the briefs are the contract", () => {
+describe("⚠️ ONE component, NINE slots — the briefs are the contract", () => {
   it("every briefed slot exists, with its ratio and its caption", () => {
     expect(Object.keys(ART_SLOTS).sort()).toEqual([...NAMES].sort());
     for (const n of NAMES) {
