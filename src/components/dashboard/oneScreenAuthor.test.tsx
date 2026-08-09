@@ -2,8 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Locks for the author tile (v16 §2). The tile MOVED out of the rail into the main column's
- * fixed 302px row, so its locks moved here with it.
+ * Locks for the author tile — option D, the icon hero (ref author-tile-round2.html).
  */
 import { describe, it, expect } from "vitest";
 import React from "react";
@@ -11,19 +10,17 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { UserPlan } from "../../types";
-import { authorBandLine, OneScreenAuthor } from "./OneScreenAuthor";
+import { OneScreenAuthor } from "./OneScreenAuthor";
 
-const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
-const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
-/* ⚠️ the source is read COMMENT-STRIPPED for every absence check — the tombstone trap: a guard
-   that greps for a word passes or fails on the comment recording the retirement. */
-const src = readFileSync(resolve(__dirname, "./OneScreenAuthor.tsx"), "utf8")
-  .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-
+const cssRules = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+const baseCss = cssRules.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "");
 const rule = (sel: string) => {
-  const i = cssRules.indexOf(`${sel} {`);
-  expect(i, `${sel} must exist`).toBeGreaterThan(-1);
-  return cssRules.slice(i, cssRules.indexOf("}", i));
+  const out: string[] = [];
+  for (let i = baseCss.indexOf(`${sel} {`); i > -1; i = baseCss.indexOf(`${sel} {`, i + 1)) {
+    out.push(baseCss.slice(i, baseCss.indexOf("}", i)));
+  }
+  expect(out.length, `${sel} must exist as a BASE rule`).toBeGreaterThan(0);
+  return out.join("\n");
 };
 
 const ms = (over: Record<string, unknown> = {}) => ({
@@ -34,116 +31,90 @@ const render = (manuscripts: any[] = [ms()]) => renderToStaticMarkup(
   <OneScreenAuthor
     loading={false} manuscripts={manuscripts}
     currentUser={{ id: "u", name: "Michael Li", plan: UserPlan.FREE } as any}
-    activeManuscript={manuscripts[0] ?? null} onNavigate={() => {}}
-  />,
+    activeManuscript={manuscripts[0] ?? null} onNavigate={() => {}} />,
 );
 
-describe("§2 · the band line", () => {
-  it("counts manuscripts, and says so in words — never a bare number at one", () => {
-    expect(authorBandLine(0)).toBe("No manuscript yet");
-    expect(authorBandLine(1)).toBe("Querying one manuscript");
-    expect(authorBandLine(4)).toBe("Querying 4 manuscripts");
-  });
-
-  /* ⚠️ THE WEEK NUMBER IS RETIRED FROM THIS TILE. It was a second tenure reading beside the
-     header's own, measured from a different anchor — the two could disagree on screen. */
-  it("no week count, and none reachable: the derivation is not even imported", () => {
-    expect(render()).toContain("Querying one manuscript");
-    expect(src).not.toContain("weekOfQuerying");
-    expect(src).not.toContain("of querying");
-    expect(src).not.toContain("Day one");
-  });
-});
-
-describe("§2 · the tile", () => {
-  it("the shelf carries the house mark on a plate — not a drawn spine with 6.5px type", () => {
+describe("option D · the icon hero", () => {
+  it("the manuscript is the hero: plate, title, genres, word count", () => {
     const html = render();
     expect(html).toContain("os-msicon");
     expect(html).toContain("manuscript-icon");
-    expect(html).not.toContain("os-cover");
-    expect(cssRules).not.toContain(".os-ct");
-  });
-
-  it("renders the manuscript, both genre pills and the word count", () => {
-    const html = render();
     expect(html).toContain("Murphy&#x27;s Day Out");
     expect(html).toContain("Young Adult");
     expect(html).toContain("Thriller");
     expect(html).toContain("50,000 words");
   });
 
-  /* the empty state keeps the CENTRED COMPOSITION — a ghosted plate above the invitation, not a
-     bare dashed box, so the tile reads the same shape whether or not there is a manuscript */
-  it("no manuscript → the invitation over a ghosted plate", () => {
+  it("the byline sits under a rule: 'by' above the name", () => {
+    const html = render();
+    expect(html).toContain("os-authrule");
+    expect(html).toContain("os-by");
+    expect(html).toContain(">by<b>Michael Li</b>");
+  });
+
+  /* ⚠️ A REAL AFFORDANCE, never a dead badge — it goes where the profile lives. */
+  it("⚠️ the + badge is a real button with an accessible name", () => {
+    const html = render();
+    expect(html).toContain('aria-label="Add a photo"');
+    expect(html).toMatch(/<button[^>]*class="os-aut-add"/);
+  });
+
+  /* ⚠️ OPTION A IS GONE — frame, band and the header arrangement with it. */
+  it("⚠️ no frame, no sage band, no header — and no orphaned CSS for them", () => {
+    const html = render();
+    for (const gone of ["os-aut-frame", "os-aut-band", "os-aut-who", "os-aut-sub", "os-aut-nm", "os-shelf"]) {
+      expect(html, gone).not.toContain(gone);
+      expect(cssRules, gone).not.toContain(gone);
+    }
+  });
+
+  /* the count is already stated by the header counters — it has no home in option D */
+  it("the 'Querying n manuscripts' line is dropped, not relocated", () => {
+    expect(render()).not.toContain("Querying");
+    const src = readFileSync(resolve(__dirname, "./OneScreenAuthor.tsx"), "utf8");
+    expect(src).not.toContain("authorBandLine");
+  });
+
+  it("no manuscript → the invitation over a ghosted plate, byline intact", () => {
     const html = render([]);
-    expect(html).toContain("os-shelf-add");
+    expect(html).toContain("os-hero-add");
     expect(html).toContain("+ Add your manuscript");
-    expect(html).toContain("No manuscript yet");
     expect(html).toContain("os-msicon ghost");
+    expect(html).toContain("os-by"); // the byline survives a missing manuscript
   });
 });
 
-describe("§2 · the CSS the tile rests on", () => {
-  /* ⚠️ THE BODY CENTRES ITS CONTENT — this is the dead-space fix, and it replaces the old
-     "the shelf fills" rule. Filling made the shelf as tall as the leftover space and pushed its
-     contents apart; centring keeps them together at ANY tile height. */
-  it("⚠️ the body CENTRES rather than fills — no gap can open at any height", () => {
-    const body = rule(".os-aut-body");
-    expect(body).toContain("flex: 1");
-    expect(body).toContain("min-height: 0");
-    expect(body).toContain("justify-content: center");
-    expect(body).toContain("align-items: center");
-    expect(rule(".os-shelf")).toContain("justify-content: center");
+describe("option D · the CSS it rests on", () => {
+  /* ⚠️ CENTRED AS A WHOLE — this is the dead-space fix. */
+  it("⚠️ the tile centres its single column, vertically and horizontally", () => {
+    const a = rule(".os-aut");
+    expect(a).toContain("flex-direction: column");
+    expect(a).toContain("align-items: center");
+    expect(a).toContain("justify-content: center");
+    expect(a).toContain("text-align: center");
   });
 
-  /* ⚠️ A REAL CLIPPING CONTAINER, never an overlay ::before border (MountCard canon) — it is
-     what lets the sage band meet the burgundy line with no seam. */
-  it("⚠️ the frame CLIPS: a child element with overflow:hidden, not a pseudo-element border", () => {
-    const f = rule(".os-aut-frame");
-    expect(f).toContain("overflow: hidden");
-    expect(f).toContain("border: 1px solid #7c3a2a");
-    expect(rule(".os-aut")).toContain("padding: 6px"); // the parchment rim
-    expect(cssRules).not.toMatch(/\.os-aut(-frame)?::before/);
-  });
-
-  it("the band is FLAT sage — no gradient", () => {
-    const band = rule(".os-aut-band");
-    expect(band).toContain("background: #d7ddd5");
-    expect(band).not.toContain("gradient");
-  });
-
-  /* ⚠️ these undo THIS FILE'S OWN long-content guards, written when the tile was in the rail. */
-  it("the title wraps to two lines and the pills stack — the nowrap guards are lifted", () => {
-    const bt = rule(".os-bt");
-    expect(bt).toContain("-webkit-line-clamp: 2");
-    expect(bt).toContain("white-space: normal");
-    expect(bt).not.toContain("white-space: nowrap");
-    expect(rule(".os-genres")).toContain("flex-wrap: wrap");
-    const g = rule(".os-g");
-    expect(g).toContain("max-width: none");
-    expect(g).not.toContain("text-overflow");
-  });
-
-  /* ⚠️ THE WRAPPER IS LOAD-BEARING, and its absence is silent. `-webkit-line-clamp` requires
-     `display:-webkit-box`, and a FLEX ITEM's display is blockified — as a direct child of the
-     shelf the title computed to `flow-root`, the clamp died and it collapsed to ZERO HEIGHT with
-     the title simply absent from the tile. Browser-measured. The ref wraps it for this reason. */
-  it("⚠️ the title is wrapped so it is not a flex item — the clamp dies otherwise", () => {
-    expect(render()).toContain('class="os-btw"');
-    expect(rule(".os-bt")).toContain("-webkit-box");
-    expect(rule(".os-bt")).toContain("-webkit-line-clamp: 2");
-  });
-
-  /* ⚠️ the ref's tile is 436px square and this one is 302 — its 96px plate and 20px gaps overflow
-     here, measured, with the word count pushed clean out of the tile */
-  it("⚠️ the plate is scaled AND yields further when a long title needs the room", () => {
+  it("the hero plate: ~96px square, 18px radius, the ref's soft shadow", () => {
     const p = rule(".os-msicon");
-    expect(p).toContain("flex: 0 1 72px");   // scaled from the ref's 96 for a 302px tile
-    expect(p).toContain("aspect-ratio: 1");  // stays square as it shrinks
-    expect(p).toContain("min-height: 50px"); // below this the mark stops reading
+    expect(p).toContain("flex: 0 1 96px");     // scaled from the ref's 136 for a 302px tile
+    expect(p).toContain("aspect-ratio: 1");
+    expect(p).toContain("border-radius: 18px");
+    expect(p).toContain("box-shadow: 0 6px 18px rgba(58, 28, 20, 0.10)");
   });
 
-  it("hovering the shelf tips the mark", () => {
-    expect(cssRules).toMatch(/\.os-shelf:hover \.os-msicon \{[^}]*rotate\(-2deg\)/);
+  it("the title is Playfair 26 with the ref's tracking, clamping at two lines", () => {
+    const t = rule(".os-bt");
+    expect(t).toContain("font-size: 26px");
+    expect(t).toContain("letter-spacing: -0.01em");
+    expect(t).toContain("-webkit-line-clamp: 2");
+    expect(t).toContain("white-space: normal");
+    expect(rule(".os-btw")).toContain("display: block"); // not a flex item — the clamp needs that
+  });
+
+  it("the pills wrap; the rule is 56px; the photo is 52px with a 19px badge", () => {
+    expect(rule(".os-genres")).toContain("flex-wrap: wrap");
+    expect(rule(".os-authrule")).toContain("width: 56px");
+    expect(rule(".os-aut-pic")).toContain("width: 52px");
+    expect(rule(".os-aut-add")).toContain("width: 19px");
   });
 });
