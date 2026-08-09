@@ -29,14 +29,21 @@ const rule = (selector: string): string => {
 };
 
 describe("stage 1 asks one question", () => {
-  it("the question, the empty avatar and the field — centred, in that order", () => {
-    const at = pane.indexOf('<div className="qc-ask">');
-    expect(at, "the stage-1 block is missing").toBeGreaterThan(-1);
-    const ask = pane.slice(at, pane.indexOf("</div>", pane.indexOf("qc-askfield")));
-    expect(ask.indexOf("qc-askav")).toBeLessThan(ask.indexOf("Who are you querying?"));
-    expect(ask.indexOf("Who are you querying?")).toBeLessThan(ask.indexOf("qc-askfield"));
-    expect(rule(".qc-ask")).toContain("align-items: center");
-    expect(rule(".qc-askav"), "the empty avatar must read as unfilled").toContain("dashed");
+  /* ⚠️ SUPERSEDED: a centred single column with a dashed empty avatar above the question. Stage
+     1 now uses the SAME two-column geometry as stage 2, so choosing an agent replaces the right
+     column's content rather than introducing a column — nothing jumps under the pointer at the
+     moment of choosing. The avatar went with the centring; it was decoration for a layout that
+     no longer exists. */
+  it("the question and the field, in a left column the same width as stage 2's", () => {
+    expect(pane, "the dashed empty avatar came back").not.toContain("qc-askav");
+    expect(pane).toContain('<div className="qc-form qc-form-ask');
+    expect(pane.indexOf("Who are you querying?")).toBeLessThan(pane.indexOf("qc-askfield"));
+    expect(rule(".qc-form"), "both stages share the 52% column").toContain("flex: 0 0 52%");
+  });
+
+  it("the field is bordered, lifted and takes the caret on arrival", () => {
+    expect(pane, "the only thing being asked should already be focused").toContain("autoFocus");
+    expect(rule(".qc-askfield .f12-lsearch")).toContain("box-shadow");
   });
 
   /* ⚠️ REUSED, NEVER REBUILT. AgentSearchField already owns the typeahead, the highlighted-Enter
@@ -75,9 +82,14 @@ describe("the ghost rows show anatomy without asking anything", () => {
   /* They are decoration at this point — a screen reader announcing three sections that ask
      nothing yet would be describing furniture, not offering a choice. */
   it("and they are hidden from assistive tech until they can be answered", () => {
-    const at = pane.indexOf('<div className="qc-stack"');
-    expect(at).toBeGreaterThan(-1);
-    expect(pane.slice(at, at + 60)).toContain('aria-hidden="true"');
+    const at = pane.indexOf('<div className="qc-stack qc-ghosts"');
+    expect(at, "the ghost stack is missing").toBeGreaterThan(-1);
+    expect(pane.slice(at, at + 80)).toContain('aria-hidden="true"');
+  });
+
+  /* They sit where the real stack will sit, so the eye does not have to relearn the column. */
+  it("and they sit at the foot of the column, where the real stack will be", () => {
+    expect(rule(".qc-ghosts")).toContain("margin-top: auto");
   });
 });
 
@@ -111,5 +123,38 @@ describe("the requirement pips", () => {
     const pips = queries.slice(at, queries.indexOf("</div>", queries.indexOf("qch-rq")));
     expect(pips).not.toContain("aria-live");
     expect(pips).not.toContain('role="status"');
+  });
+});
+
+/* ══ QUICK PICKS — stage 1's right column ══════════════════════════════════════════════════ */
+describe("quick picks", () => {
+  it("the panel names what it is and what it filtered by", () => {
+    expect(pane).toContain("From your contact list");
+    expect(pane).toContain("Never queried");
+  });
+
+  it("each row is a real button — clicking one is the same door as typing a name", () => {
+    expect(pane).toContain('className="qc-qrow"');
+    expect(pane).toContain("onClick={() => pickAgent(a)}");
+  });
+
+  it("monogram, Playfair name, mono agency, mono added-date", () => {
+    for (const cls of ["qc-qmg", "qc-qwho", "qc-qag", "qc-qadded"]) {
+      expect(pane, `${cls} is missing from the row`).toContain(cls);
+    }
+    expect(rule(".qc-qwho b")).toContain("var(--f12-serif)");
+    expect(rule(".qc-qag")).toContain("var(--f12-mono)");
+  });
+
+  /* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are ordinary — a new
+     account, or a writer who has queried everyone — and one of them is an achievement. */
+  it("empty falls back to art, holding the column so the geometry survives", () => {
+    expect(pane).toContain("picks.length > 0 ? (");
+    expect(pane).toContain('<ArtSlot name="no-quick-picks"');
+    // Comments stripped: this file EXPLAINS why there is no such message, and an assertion
+    // about the code must not be able to match prose about the code.
+    const bare = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/\/\/[^\n]*/g, "");
+    expect(bare, "a no-results message would report an ordinary state as a failure")
+      .not.toMatch(/no results|nothing found|no agents/i);
   });
 });

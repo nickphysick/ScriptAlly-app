@@ -18,7 +18,7 @@
  * which create mode takes over (ref qdb-focus-spotlight.html). Rendering them in both places
  * would give one action two homes — and the reclaimed ~95px is what lets the columns fit.
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Agent, Manuscript, Query } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
 import {
@@ -27,6 +27,8 @@ import {
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
+import { ArtSlot } from "../todo/ArtSlot";
+import { quickPicks } from "../../lib/quickPicks";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { BrandDatePicker } from "../forms";
@@ -111,6 +113,41 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      writer opening it. Flagged, not hidden. */
   const whisperDate = resolveReminder(draft, agent);
 
+  /* ── THE ACTIVE-STEP CUE (cue D, qc-focus.html) ────────────────────────────────────────
+     ⚠️ THE PULSE IS AN INVITATION, NOT A STATUS. It says "act here"; the moment the writer does,
+     it has been answered and stops — and it does not return for that step. A halo still
+     breathing while you type reads as an unresolved alert about the thing you are already doing.
+     CSS cannot know about engagement, so the class is REMOVED rather than overridden.
+
+     ⚠️ AND THE REAL "YOU ARE HERE" IS DOM FOCUS. The focus ring and caret are a stronger signal
+     than any animation, and they are what makes Enter-through work at all: without focus inside
+     the section, Enter has nothing to accept from. The pulse is the decoration; this is the
+     mechanism. It is also why reduced motion loses nothing that matters. */
+  const [engaged, setEngaged] = useState(false);
+  const stackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setEngaged(false);
+    const host = stackRef.current?.querySelector<HTMLElement>(`[data-step="${active}"] .qc-body`);
+    /* The first thing a writer can actually type into or press. `disabled` and negative
+       tabindex are excluded so focus never lands somewhere inert. */
+    const first = host?.querySelector<HTMLElement>(
+      'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])',
+    );
+    first?.focus();
+  }, [active]);
+
+  /* ⚠️ ONE DOOR. Typing a name, creating one inline and clicking a quick pick must do exactly
+     the same thing — seed the materials from that agent and start the walk at the top — or the
+     three routes into stage 2 will drift apart. */
+  const pickAgent = (a: Agent) => {
+    setActive("when");
+    setReached("when");
+    set({ agentId: a.id, materials: materialRowsForDraft(a) });
+  };
+
+  const picks = quickPicks(agents, queries);
+
   const jump = (id: StepId) => { const n = jumpTo(id, reached); setActive(n.active); setReached(n.reached); };
   const step = () => { const n = advance(active, reached); setActive(n.active); setReached(n.reached); };
 
@@ -140,36 +177,75 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           the highlighted-Enter selection and the "Agent not listed? Add a new agent now"
           quick-add. Rebuilding any of that here would fork three behaviours at once. ── */}
       {!agent ? (
-        <>
-          <div className="qc-ask">
-            <span className="qc-askav" aria-hidden="true" />
+        /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-create-steps + qc-stage1 option 2) ══
+           ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately: 52% left, the rest right. Choosing an
+           agent REPLACES the right column's content rather than introducing a column, so
+           nothing jumps under the pointer at the moment of choosing. The centred single-column
+           question — and its dashed empty avatar — are retired for exactly that reason. ── */
+        <div className="qc-two">
+          <div className="qc-form qc-form-ask f12-quiet-scroll">
             <h2 className="qc-askq">Who are you querying?</h2>
+            {/* Bordered, lifted and autofocused: it is the only thing being asked, so it should
+                already have the caret. AgentSearchField is REUSED — it owns the typeahead, the
+                highlighted-Enter selection and the "Agent not listed? Add a new agent now"
+                quick-add, and rebuilding any of those would fork three behaviours at once. */}
             <div className="qc-askfield">
               <AgentSearchField
+                autoFocus
                 agents={agents}
                 value=""
                 queriedAgentIds={new Set<string>()}
-                onSelect={(a) => { setActive("when"); setReached("when"); set({ agentId: a.id, materials: materialRowsForDraft(a) }); }}
+                onSelect={pickAgent}
                 onCreateAgent={async (d) => {
                   const res = await onCreateAgent(d);
-                  if (res.ok && res.agent) set({ agentId: res.agent.id, materials: materialRowsForDraft(res.agent) });
+                  if (res.ok && res.agent) pickAgent(res.agent);
                   return res;
                 }}
               />
             </div>
-          </div>
-          <div className="qc-stack" aria-hidden="true">
-            {STEP_ORDER.map((id) => (
-              <div key={id} className="qc-sec qc-up">
-                <div className="qc-sum">
-                  <span className="qc-tick" />
-                  <b>{STEP_SHORT[id]}</b>
-                  <span className="qc-stxt">{STEP_HINT[id]}</span>
+            {/* Pushed to the FOOT of the column (margin-top:auto): anatomy you can see without
+                being asked for it. They sit where the real stack will sit. */}
+            <div className="qc-stack qc-ghosts" aria-hidden="true">
+              {STEP_ORDER.map((id) => (
+                <div key={id} className="qc-sec qc-up">
+                  <div className="qc-sum">
+                    <span className="qc-tick" />
+                    <b>{STEP_SHORT[id]}</b>
+                    <span className="qc-stxt">{STEP_HINT[id]}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </>
+
+          {/* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are
+              ordinary — a new account, or a writer who has queried everyone — and one of them is
+              an achievement. Art holds the column so the geometry survives. */}
+          {picks.length > 0 ? (
+            <aside className="qc-qp" aria-label="Quick picks from your contact list">
+              <div className="qc-qph">
+                <span className="qc-qpcap">From your contact list</span>
+                <span className="qc-qpcap qc-qpnever">Never queried</span>
+              </div>
+              <div className="qc-qpb">
+                {picks.map((a) => (
+                  <button type="button" className="qc-qrow" key={a.id} onClick={() => pickAgent(a)}>
+                    <span className="qc-qmg" aria-hidden="true">{agentInitials(a)}</span>
+                    <span className="qc-qwho">
+                      <b>{agentPrimary(a)}</b>
+                      <span className="qc-qag">{agentAgencyLine(a)}</span>
+                    </span>
+                    <span className="qc-qadded">Added {shortDate(a.dateAdded)}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          ) : (
+            <aside className="qc-ctx qc-ctx-name-only" aria-label="No quick picks">
+              <div className="qc-ctxbody"><ArtSlot name="no-quick-picks" maxWidth={200} /></div>
+            </aside>
+          )}
+        </div>
       ) : (
         <>
       {/* ══ STAGE 2 — TWO COLUMNS (ref qc-create-fullscreen.html) ═════════════════════════
@@ -212,11 +288,17 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
 
       {/* ── The three columns, in the reading pane's own chrome (qc-cols stacks them <md —
           Mobile Pass 1) ── */}
-      <div className="qc-stack" onKeyDown={onStackKeyDown}>
+      <div
+        className="qc-stack"
+        ref={stackRef}
+        onKeyDown={onStackKeyDown}
+        onFocusCapture={() => setEngaged(true)}
+        onInput={() => setEngaged(true)}
+      >
 
         {/* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
             to "What you sent", where it sits with the materials it went out with. */}
-        <section className={`qc-sec qc-${states.when}`} aria-labelledby="qc-h-when">
+        <section className={`qc-sec qc-${states.when}${states.when === "active" && !engaged ? " qc-pulse" : ""}`} data-step="when" aria-labelledby="qc-h-when">
           {states.when !== "active" && (
             <button type="button" className="qc-sum" onClick={() => jump("when")}>
               <span className="qc-tick" aria-hidden="true">{states.when === "done" ? "✓" : ""}</span>
@@ -315,7 +397,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
         </section>
 
         {/* 2 · WHAT YOU SENT — the checklist, pre-filled from the agent's materials-wanted */}
-        <section className={`qc-sec qc-${states.what}`} aria-labelledby="qc-h-what">
+        <section className={`qc-sec qc-${states.what}${states.what === "active" && !engaged ? " qc-pulse" : ""}`} data-step="what" aria-labelledby="qc-h-what">
           {states.what !== "active" && (
             <button type="button" className="qc-sum" onClick={() => jump("what")}>
               <span className="qc-tick" aria-hidden="true">{states.what === "done" ? "✓" : ""}</span>
@@ -474,7 +556,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
         </section>
 
         {/* 3 · JOURNAL — the optional first note */}
-        <section className={`qc-sec qc-${states.notes}`} aria-labelledby="qc-h-notes">
+        <section className={`qc-sec qc-${states.notes}${states.notes === "active" && !engaged ? " qc-pulse" : ""}`} data-step="notes" aria-labelledby="qc-h-notes">
           {states.notes !== "active" && (
             <button type="button" className="qc-sum" onClick={() => jump("notes")}>
               <span className="qc-tick" aria-hidden="true">{states.notes === "done" ? "✓" : ""}</span>
@@ -491,17 +573,21 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 <span className="qc-enter">{enterHint("notes")}</span>
               </div>
               <div className="qc-body">
+            {/* ⚠️ THE NOTE FILLS ITS STEP (ref qc-stage1.html, variant A). It was a small inset
+                box in a three-column layout — a field you could not think in. Full width of the
+                body, 104px to start, and resizable DOWNWARD as well as up because a writer who
+                wants two lines should be able to have two lines.
+                No ruled lines and no caption bar above it: the head already says "Notes ·
+                OPTIONAL", and a second label would be the third thing on screen saying the same. */}
             <textarea
+              className="qc-note"
               value={draft.journal}
               onChange={(e) => set({ journal: e.target.value })}
-              placeholder="First impressions, personalisation notes, anything worth remembering… (optional)"
+              placeholder="First impressions, personalisation notes, anything worth remembering…"
               aria-label="First journal note"
-              style={{
-                flex: 1, minHeight: 90, resize: "none", border: "1px solid var(--line)", borderRadius: 12,
-                padding: 13, fontFamily: "inherit", fontSize: 13, color: "var(--ink)",
-                background: "var(--panel)", outline: "none",
-              }}
             />
+            {/* One line, beneath — what happens to it and who sees it. */}
+            <p className="qc-notecap">Saved with this query · only you see it</p>
           </div>
             </>
           )}
