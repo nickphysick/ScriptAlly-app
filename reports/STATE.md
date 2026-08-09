@@ -1,6 +1,32 @@
 **Last updated: 9 August 2026 (sixteenth pass — the Tasks consolidation, Phase 1).**
 
-## Tasks consolidation — ⚠️ PHASE 1 ONLY (pack: tasks-consolidation-prompt.md)
+## Tasks consolidation — ⚠️ PHASE 1 + P2's FOUNDATION ONLY (pack: tasks-consolidation-prompt.md)
+
+**⚠️ PHASE 2's COMPONENT IS NOT BUILT, AND PHASES 3–7 ARE UNTOUCHED.** The page still renders the
+board. `1e920c6` lands P2's grouping DERIVATION only — pure, 13 locks, nothing wired — because a
+half-rebuilt page body is a broken page, which is worse than an unstarted one. What the next
+session needs is listed at the foot of this section.
+
+- **`lib/todoGroups.ts` is the seam P2's component builds against**: `taskGroups(cols)` →
+  five groups from the ONE `assembleBoardColumns`; `taskStats(cols, estMin)` → the header chips;
+  `groupSlice`/`showMoreLabel` → the housekeeping fold. Laws locked: a card lands in exactly one
+  group · **an empty group does not render** · **only Housekeeping folds, never the urgent group**
+  · **`Outstanding` is deliberately NOT the sum of the visible panels** (Snoozed is live work
+  merely asleep; Done is not outstanding at all) · the estimate chip is absent at zero · a sweep
+  counts once · nothing about a group is stored.
+- **The board's To-do/Today split is retired in the model, not reproduced** — both columns flatten
+  into the kinds, because placement is what the consolidation removes.
+
+**For the next session, in order:** the row component (six tracks
+`34px minmax(0,1fr) 144px 172px 104px 216px`, ONE element — never `display: contents`, which
+fractures hover/focus/selected into per-cell rectangles), the four-slot action grid
+(`68px 30px 30px 30px`, empty slots preserved so every primary starts at the same x), the white
+panels (`#fff`, `1px #ece4d6`, radius 16, `padding: 6px 16px`, 26px between sections), the header
+block (mono eyebrow → Playfair title → tool row at 38px), and the stat chips (`height: 38px`,
+radius 99, Playfair figures). All measures are in `design-refs/tasks-page.html`; the pills come
+from the existing `todoFamily` map — import it, never restate it.
+
+## Tasks consolidation — Phase 1 (landed)
 
 `440a652` (the extraction) → `f8ea950` (the constants move) → `3c51b1e` (P1). Suite **3287 | 2
 skipped, 213 files**; tsc + production build green. **NOT DEPLOYED** — dev still runs the
