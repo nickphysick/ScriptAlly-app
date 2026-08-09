@@ -36,8 +36,10 @@ export interface FeedRow {
   dotStatus: QueryStatus | null;
   /** What the event is ABOUT. The collapse law keys on it — query events never fold. */
   scope: "query" | "agent" | "manuscript";
-  /** How many identical consecutive events this line stands for. 1 = an ordinary row. */
+  /** How many consecutive events this line stands for. 1 = an ordinary row. */
   count: number;
+  /** DISTINCT subjects inside the run — six edits to one agent is not "six agents". */
+  subjects: number;
   /** The EARLIEST time in a folded run, so a run reads as a span rather than one instant. */
   fromTime: string;
 }
@@ -150,6 +152,7 @@ export const feedRows = (
       dotStatus: a.resultingStatus ?? null,
       scope,
       count: 1,
+      subjects: 1,
       fromTime: "",
     });
   }
@@ -183,6 +186,7 @@ export const feedRows = (
  */
 export const collapseFeedRuns = (rows: FeedRow[]): FeedRow[] => {
   const out: FeedRow[] = [];
+  const subjectsSeen: Set<string>[] = [];
   for (const r of rows) {
     const prev = out[out.length - 1];
     const foldable =
@@ -190,16 +194,34 @@ export const collapseFeedRuns = (rows: FeedRow[]): FeedRow[] => {
       && prev.scope !== "query" && r.scope !== "query"
       && prev.scope === r.scope
       && prev.dayLabel === r.dayLabel
-      && prev.pill === r.pill
-      && prev.who === r.who;
+      && prev.pill === r.pill;
     if (foldable) {
+      const seen = subjectsSeen[subjectsSeen.length - 1];
+      seen.add(r.who);
       // `prev` is the newer row; `r` is older, so it supplies the run's start time.
-      out[out.length - 1] = { ...prev, count: prev.count + 1, fromTime: r.time };
+      out[out.length - 1] = { ...prev, count: prev.count + 1, subjects: seen.size, fromTime: r.time };
       continue;
     }
     out.push(r);
+    subjectsSeen.push(new Set([r.who]));
   }
   return out;
+};
+
+/**
+ * The words a folded run says. **Six edits to ONE agent is not "six agents"** — the run counts
+ * events, the sentence counts SUBJECTS, and where those differ the sentence must follow the
+ * subjects or it states something that did not happen. A single-subject run keeps the original
+ * line and carries its repetition as a count instead.
+ */
+export const runSentence = (r: FeedRow): string | null => {
+  if (r.count < 2) return null;
+  if (r.subjects < 2) return null; // one subject, many edits — the row keeps its own name
+  const noun = r.scope === "manuscript" ? "manuscripts" : "agents";
+  const p = r.pill.toLowerCase();
+  if (p.includes("added")) return `You added ${r.subjects} ${noun}`;
+  if (p.includes("removed") || p.includes("deleted")) return `You removed ${r.subjects} ${noun}`;
+  return `You updated details for ${r.subjects} ${noun}`;
 };
 
 /* ── the rail ── */
@@ -384,7 +406,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                       </span>
                       <span className="os-tm">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
                     </div>
-                    <div className="os-who">{r.who}</div>
+                    <div className="os-who">{runSentence(r) ?? r.who}</div>
                     {r.caption && <div className="os-cap">{r.caption}</div>}
                   </div>
                 </div>

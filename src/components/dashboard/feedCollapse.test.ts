@@ -9,7 +9,7 @@
  * information if the corresponding rule were dropped — not a restatement of the implementation.
  */
 import { describe, it, expect } from "vitest";
-import { collapseFeedRuns, FeedRow } from "./OneScreenRail";
+import { collapseFeedRuns, runSentence, FeedRow } from "./OneScreenRail";
 
 const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   dayLabel: "Wed 29 Jul",
@@ -21,6 +21,7 @@ const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   dotStatus: null,
   scope: "agent",
   count: 1,
+  subjects: 1,
   fromTime: "",
   ...over,
 });
@@ -70,13 +71,27 @@ describe("activity feed — run collapse", () => {
     expect(out).toHaveLength(2);
   });
 
-  it("does not fold different subjects, or the same subject under a different event", () => {
-    const differentWho = collapseFeedRuns([
-      row({ id: "a", who: "Updated Sophie Dunn at Curtis Vane" }),
-      row({ id: "b", who: "Updated Anya Rell at Hale & Co" }),
-    ]);
-    expect(differentWho).toHaveLength(2);
+  it("⚠️ folds SIX edits of six different agents into one sentence — the pack's headline case", () => {
+    const names = ["Sophie Dunn", "Anya Rell", "Mira Vance", "Tom Ellery", "Kit Rowe", "Jo Bell"];
+    const out = collapseFeedRuns(names.map((n, i) => row({ id: `a${i}`, who: `Updated ${n}` })));
+    expect(out).toHaveLength(1);
+    expect(out[0].count).toBe(6);
+    expect(out[0].subjects).toBe(6);
+    expect(runSentence(out[0])).toBe("You updated details for 6 agents");
+  });
 
+  it("⚠️ six edits to ONE agent is NOT 'six agents' — the sentence counts subjects, not events", () => {
+    const out = collapseFeedRuns([
+      row({ id: "a", who: "Updated Sophie Dunn" }),
+      row({ id: "b", who: "Updated Sophie Dunn" }),
+    ]);
+    expect(out[0].count).toBe(2);
+    expect(out[0].subjects).toBe(1);
+    // no sentence — the row keeps its own name and shows the repetition as a count
+    expect(runSentence(out[0])).toBeNull();
+  });
+
+  it("does not fold the same subject under a different event", () => {
     const differentPill = collapseFeedRuns([
       row({ id: "a", pill: "Agent updated" }),
       row({ id: "b", pill: "Agent added" }),
