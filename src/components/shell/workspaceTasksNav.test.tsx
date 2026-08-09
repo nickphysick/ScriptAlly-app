@@ -52,9 +52,16 @@ const renderShell = (path: string, todo = 0) =>
 describe("⚠️ the TASKS section renders — same grammar, four rows, in order", () => {
   const html = renderShell("/todo");
 
-  it("the group label renders between WORKSPACE and QUERIES", () => {
+  /* ⚠️ RETARGETED (app-shell-v2). The rule is the ORDER of the groups, and it survives untouched;
+     what changed is the landmark it was written against. "Workspace" no longer renders a heading —
+     it holds Dashboard alone, and a section header over a group of one labels nothing — so Tasks
+     is now the FIRST label. Asserted as the full sequence, so a group appearing, vanishing or
+     moving still fails here. */
+  it("TASKS leads the group labels, ahead of QUERIES", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(labels).toEqual(["Workspace", "Tasks", "Queries", "Agents", "Materials"]);
+    expect(labels).toEqual(["Tasks", "Queries", "Agents", "Materials"]);
+    // and Dashboard is still there, simply without a heading over it
+    expect(html).toContain(">Dashboard<");
   });
 
   it("the four rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {

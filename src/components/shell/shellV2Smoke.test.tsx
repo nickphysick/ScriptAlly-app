@@ -48,15 +48,16 @@ const at = (path: string, node: React.ReactNode) =>
   renderToStaticMarkup(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
 
 describe("v2 shell — smoke renders", () => {
-  /* ⚠️ REWRITTEN TWICE, and the second time moved it out of the sidebar entirely. Phase 3 made
-     the brand TYPE rather than the artwork; Amendment 1 (C) then took the wordmark OFF the
-     sidebar and put it at the head of the breadcrumb, as the real asset — leaving the rail's "S"
-     tile as the only mark in the sidebar. Dashboard is a real nav row throughout. */
-  it("THE BRAND leads the crumb; the sidebar keeps only the S tile", () => {
+  /* ⚠️ REWRITTEN A THIRD TIME, and it has now come full circle. Phase 3 made the brand TYPE;
+     Amendment 1 (C) moved the wordmark OFF the sidebar into the crumb, leaving the rail's "S" as
+     the sidebar's only mark. app-shell-v2 retires the rail, which makes the SIDEBAR the leftmost
+     chrome again — so the brand returns to it, mark and wordmark together, and the crumb carries
+     none. THE RULE NEVER CHANGED: the brand appears exactly once. Only its address has. */
+  it("THE BRAND leads the SIDEBAR; the crumb carries no mark", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
-    expect(ws).toContain("ws-tile");                       // the one sidebar mark
-    expect(ws).toContain("ws-logotype");                   // the crumb's asset
-    expect(ws).toContain('src="/scriptally-title-v2.png"');
+    expect(ws).toContain("ws-bmark");                      // the ink square
+    expect(ws).toContain("ws-bwm");                        // the wordmark beside it
+    expect(ws).not.toContain("ws-logotype");               // and NOT in the crumb
     const nav = readFileSync(resolve(__dirname, "../../lib/workspaceNav.ts"), "utf8");
     expect(nav).toContain('path: "/dashboard"');
     // the retired panel's brand slot and its Navigate label are gone from the source entirely

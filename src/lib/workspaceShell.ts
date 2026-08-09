@@ -246,109 +246,22 @@ export function sectionClick(
   return { open: sec.id, go, expand: false };
 }
 
-/**
- * A RAIL click. (Amendment 1, B.)
- *
- * ⚠️ THE RAIL NEVER TOGGLES A SECTION SHUT, which is the one way it differs from the panel row.
- * The rail is a set of destinations, not a set of disclosure controls: an icon that sometimes
- * navigated and sometimes closed the thing you were looking at would be two controls wearing one
- * glyph. Clicking a rail icon always lands you in the section and syncs the panel's accordion.
- */
-export function railClick(
-  sec: ShellSection,
-  hit: ShellHit | null,
-  collapsed: boolean,
-): SectionClick {
-  const hasKids = !!sec.children?.length;
 
-  /* ⚠️ POLISH §4 — CLICKING THE ACTIVE SECTION'S ICON COLLAPSES, and it is the natural extension
-     of hover-peeks/click-commits rather than a new idea. Expanded and already in the section,
-     the click has no navigation left to perform: the only thing it could still mean is "give me
-     the room". No navigation occurs — you are already there.
 
-     ⚠️ COLLAPSED IS NOT THE MIRROR OF THIS. A collapsed click ALWAYS restores, including on the
-     active section: collapse is a temporary focus mode, and a click that both failed to navigate
-     and failed to restore would be a control that did nothing at all. */
-  if (!collapsed && hit?.section === sec.id) {
-    return { open: null, go: null, expand: false, collapse: true };
-  }
 
-  if (!hasKids) return { open: null, go: sec.path ?? null, expand: collapsed };
-  const keeps = hit?.section === sec.id && !!hit?.child
-    && sec.children!.some((c) => c.id === hit.child);
-  const def = sec.children!.find((c) => c.id === sec.def) ?? sec.children![0];
-  return { open: sec.id, go: keeps ? null : def.path, expand: collapsed };
-}
 
-/**
- * Does this rail icon carry the attention badge? (Amendment 1, B.)
- *
- * ⚠️ A DOT, NOT A NUMBER, and only where attention actually lives. A 52px rail has no room for a
- * legible figure, and a badge on every section that merely has *items* would make the rail a
- * count display rather than an alert. Under Amendment 1 (H) that is To-do alone — the Queries
- * filter children that used to carry a count are gone from the nav.
- */
-export function railBadge(sec: ShellSection): boolean {
-  if (typeof sec.count === "number" && sec.count > 0 && sec.urgent) return true;
-  return (sec.children ?? []).some((c) => typeof c.count === "number" && c.count > 0 && !!c.urgent);
-}
-
-/**
- * Should hovering this rail row peek its children? (Amendment 1, E1.)
- *
- * ⚠️ ONLY WHEN COLLAPSED, AND ONLY WITH CHILDREN. Expanded, the children are already on screen;
- * childless rows have nothing to show and get a tooltip instead. Peeking is a POINTER-ONLY
- * accelerator — E6: taps follow the click rule, so nothing is unreachable by touch.
- */
-export function peeksOnHover(sec: ShellSection, collapsed: boolean): boolean {
-  return collapsed && !!sec.children?.length;
-}
-
-/** Amendment 1 (E1) — hover-peek timings, named once so the shell and its locks agree. */
-export const PEEK_INTENT_MS = 120;
-export const PEEK_GRACE_MS = 160;
-
-/**
- * Should `[` act? (Amendment 1, E5.)
- *
- * ⚠️ SUPPRESSED WHILE TYPING, because `[` is a character. A bare letter-key shortcut that fires
- * inside a field eats the keystroke and reads as the app dropping input. The palette is excluded
- * for the same reason — it is a text field wearing a dialog.
- */
-export function collapseKeyAllowed(
-  tag: string | null | undefined,
-  isContentEditable: boolean,
-  paletteOpen: boolean,
-): boolean {
-  if (paletteOpen || isContentEditable) return false;
-  const t = (tag ?? "").toUpperCase();
-  return t !== "INPUT" && t !== "TEXTAREA" && t !== "SELECT";
-}
 
 /** The section that should be open when the route decides for you (arriving, or navigating in). */
 export function openForHit(hit: ShellHit | null): string | null {
   return hit?.child ? hit.section : null;
 }
 
-/** Baked 8 — the persisted collapse key. Named once so the shell and its locks cannot disagree. */
-export const SHELL_COLLAPSED_KEY = "scriptally.shell.collapsed";
-
-export function readCollapsed(store: Pick<Storage, "getItem"> | null | undefined): boolean {
-  try {
-    return store?.getItem(SHELL_COLLAPSED_KEY) === "1";
-  } catch {
-    // A locked-down browser must not cost the user their shell.
-    return false;
-  }
-}
-
-export function writeCollapsed(
-  store: Pick<Storage, "setItem"> | null | undefined,
-  collapsed: boolean,
-): void {
-  try {
-    store?.setItem(SHELL_COLLAPSED_KEY, collapsed ? "1" : "0");
-  } catch {
-    /* Persistence is a convenience; failing to save it is not worth an error. */
-  }
-}
+/* ⚠️ RETIRED WITH THE RAIL (app-shell-v2): `railClick`, `railBadge`, `peeksOnHover`,
+   `collapseKeyAllowed`, `readCollapsed`, `writeCollapsed`, `PEEK_INTENT_MS`, `PEEK_GRACE_MS` and
+   `SHELL_COLLAPSED_KEY`. They modelled a sidebar that could shut, and the rail was the only UI
+   that state ever had — remove the rail and collapsing left you with no navigation at all. The
+   ACCORDION is a different thing and survives: `sectionClick` and `sectionRowState` still drive
+   which section is open. Recoverable at 02356ba.
+   ⚠️ `sectionClick`'s `expand`/`collapse` limbs now name nothing; its callers pass `false` and
+   read only `open`/`go`. Left in place rather than reshaped so the pure function keeps its own
+   table-driven tests — but it is dead weight, and a later pass may narrow it. */

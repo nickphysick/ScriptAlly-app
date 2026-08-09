@@ -363,16 +363,18 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
      real asset, leaving the rail's "S" tile as the sidebar's only mark. So the brand still
      appears exactly once in each place — one tile, one logotype.
 
-     ⚠️ AND THE 68.4%-INK PROBLEM CAME BACK WITH THE ASSET, so the height is MEASURED: the
-     cap-"S" spans y 190→577 of a 750px file — 51.7% — meaning a ~17px cap needs a 33px element.
-     `heightPx` is not cap-height, and 17 here would render a 9px cap. */
-  it("THE BRAND APPEARS ONCE per surface — the S tile in the rail, the asset in the crumb", () => {
+     ⚠️ AND THE MEASURED-ASSET PROBLEM WENT WITH THE ASSET. The crumb's PNG carried the 51.7%-ink
+     trap (a ~17px cap needing a 33px element); the v2 brand is TYPE — a Playfair "S" in an ink
+     square — so there is no ink ratio to compensate for and no LOGOTYPE_PX to keep in step. */
+  it("THE BRAND APPEARS ONCE per surface — mark and wordmark, in the sidebar", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
-    expect(ws.match(/ws-tile/g)?.length, "one tile in the rail").toBeGreaterThan(0);
-    expect(ws.match(/ws-logotype/g)?.length, "one logotype in the crumb").toBeGreaterThan(0);
-    expect(ws).toContain("const LOGOTYPE_PX = 33");
+    expect(ws.match(/ws-bmark/g)?.length, "one mark").toBe(1);
+    expect(ws.match(/ws-bwm/g)?.length, "one wordmark").toBe(1);
+    /* ⚠️ COMMENT-STRIPPED — the tombstone trap. The first run of this line failed on the comment
+       recording the retirement: the guard caught its own note. */
+    expect(ws.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("LOGOTYPE_PX");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-tile \{[^}]*Playfair/s);
+    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*var\(--font-serif\)/s);
   });
 });
 
@@ -412,12 +414,13 @@ describe("the foot fade", () => {
     expect(fade).toContain("height: 56px");
   });
 
-  /* ⚠️ REWRITTEN (refinement §4). The positioning WRAPPER is gone — the card's `.ws-cscroll` is
-     the app's scroll container now, so the fade is sticky inside it rather than absolute inside a
-     wrapper. What must still hold, and what this asserts, is that the STAGE'S IDENTITY TRAVELLED
-     INTACT: the same id, the same ref, the same per-route memory. stageScroll.ts and scroll
-     restoration address that id, and they would fail silently if it moved without following. */
-  it("the STAGE's identity travelled to the card's scroller — id, ref and memory intact", () => {
+  /* ⚠️ REWRITTEN AGAIN (app-shell-v2), and this is the lock that mattered most in that move: the
+     scroller went from the whole card (`.ws-cscroll`) to the WINDOW'S BODY (`.ws-wbody`), so the
+     window's frame can stay put while its contents scroll. FOUR consumers address that element by
+     id — stageScroll's overlay locks, per-route scroll memory, the To-do board's saved position
+     and MobileSheet — and every one of them would fail SILENTLY if the id had not travelled with
+     it. It is a constant, so they needed no edit; this asserts it actually moved. */
+  it("the STAGE's identity travelled to the WINDOW's body — id, ref and memory intact", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     expect(ws).toContain("id={scrollId}");
     expect(ws).toContain("ref={scrollRef}");
@@ -427,7 +430,7 @@ describe("the foot fade", () => {
     expect(app).toContain("scrollMemo.current[routeKey] = el.scrollTop");
     // exactly one scroller: the work area must not have taken its overflow back
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-cscroll \{[^}]*overflow: auto/s);
+    expect(wsCss).toMatch(/\.ws-wbody \{[^}]*overflow: auto/s);
     expect(wsCss).not.toMatch(/\.ws-work \{[^}]*overflow/s);
   });
 

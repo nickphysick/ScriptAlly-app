@@ -71,6 +71,14 @@
   --shell-desk: #aebdb0;              /* THE DESK — the sage-grey ground. NOTHING else reads this. */
   --shell-active-fill: #ffffff;       /* the selector + every .on state (app-shell pack) */
   --shell-ground: #e7e0d5;            /* ⚠️ LEGACY cream ground — being retired with the old shell */
+  /* ── app shell v2 (ref design-refs/app-shell-v2.html) ──
+     ⚠️ ONE GROUND FOR SIDEBAR AND PAGE. The only white surface in the shell is the content
+     window; a second ground behind the nav is what made the old dark rail read as a separate
+     application. `--ws-edge` is the single hairline between the two — it is LIGHTER than
+     `--shell-edge` (the control border) on purpose: a divider that matches a card's border
+     competes with every card sitting near it. */
+  --ws-ground: #f7f4ee;
+  --ws-edge: #e9e2d7;
   /* THE TWO CAPSULES (app-shell pack, Baked 3). There are two now, not three — the panel folded
      into the column — and both fills come from the sage-desk mockup. The old cream trio was
      tuned against a cream ground; against sage it read as three washed-out greys. */

@@ -9,9 +9,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  PEEK_GRACE_MS, PEEK_INTENT_MS, SHELL_COLLAPSED_KEY, ShellSection, collapseKeyAllowed, openForHit,
-  peeksOnHover, railBadge, railClick, readCollapsed, sectionClick, sectionRowState, shellCrumb,
-  shellHitFor, writeCollapsed,
+  ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "./workspaceShell";
 
 const SECTIONS: ShellSection[] = [
@@ -205,45 +203,6 @@ describe("Amendment 1 — every click expands, and none opens a flyout", () => {
   });
 });
 
-describe("Amendment 1 (E1) — hover peeks, pointer only", () => {
-  it("peeks only when collapsed AND the section has children", () => {
-    expect(peeksOnHover(sec("queries"), true)).toBe(true);
-    expect(peeksOnHover(sec("queries"), false)).toBe(false);
-    expect(peeksOnHover(sec("todo"), true)).toBe(false);
-  });
-
-  it("carries the specced timings", () => {
-    expect(PEEK_INTENT_MS).toBe(120);
-    expect(PEEK_GRACE_MS).toBe(160);
-  });
-});
-
-/* ⚠️ `[` IS A CHARACTER. A bare-key shortcut that fires inside a field eats the keystroke and
-   reads as the app dropping input — so it is suppressed while typing, and the palette counts as
-   typing because it is a text field wearing a dialog. */
-describe("Amendment 1 (E5) — `[` toggles, except while typing", () => {
-  it("acts on ordinary focus", () => {
-    expect(collapseKeyAllowed("BUTTON", false, false)).toBe(true);
-    expect(collapseKeyAllowed("DIV", false, false)).toBe(true);
-    expect(collapseKeyAllowed(null, false, false)).toBe(true);
-  });
-
-  it("is suppressed in every editable target", () => {
-    expect(collapseKeyAllowed("INPUT", false, false)).toBe(false);
-    expect(collapseKeyAllowed("TEXTAREA", false, false)).toBe(false);
-    expect(collapseKeyAllowed("SELECT", false, false)).toBe(false);
-    expect(collapseKeyAllowed("DIV", true, false)).toBe(false);
-  });
-
-  it("is suppressed while the palette is open", () => {
-    expect(collapseKeyAllowed("BUTTON", false, true)).toBe(false);
-  });
-
-  it("is case-insensitive about the tag name", () => {
-    expect(collapseKeyAllowed("input", false, false)).toBe(false);
-  });
-});
-
 describe("shellCrumb — Section · Child, and never the manuscript", () => {
   it("reads Section · Child", () => {
     expect(shellCrumb(SECTIONS, { section: "queries", child: "q-att" }))
@@ -269,127 +228,6 @@ describe("openForHit — arriving by route expands the section you land in", () 
   });
 });
 
-describe("Baked 8 — collapse persists, and a locked-down browser never costs the shell", () => {
-  it("the key is the baked one", () => {
-    expect(SHELL_COLLAPSED_KEY).toBe("scriptally.shell.collapsed");
-  });
-
-  it("round-trips", () => {
-    const bag: Record<string, string> = {};
-    const store = {
-      getItem: (k: string) => bag[k] ?? null,
-      setItem: (k: string, v: string) => { bag[k] = v; },
-    };
-    expect(readCollapsed(store)).toBe(false);
-    writeCollapsed(store, true);
-    expect(readCollapsed(store)).toBe(true);
-    writeCollapsed(store, false);
-    expect(readCollapsed(store)).toBe(false);
-  });
-
-  /* Safari in private mode throws on setItem. The shell must open anyway. */
-  it("survives a storage that throws, in both directions", () => {
-    const hostile = {
-      getItem: () => { throw new Error("denied"); },
-      setItem: () => { throw new Error("denied"); },
-    };
-    expect(readCollapsed(hostile)).toBe(false);
-    expect(() => writeCollapsed(hostile, true)).not.toThrow();
-  });
-
-  it("survives no storage at all (SSR)", () => {
-    expect(readCollapsed(null)).toBe(false);
-    expect(() => writeCollapsed(null, true)).not.toThrow();
-  });
-});
-
-/**
- * ⚠️ AMENDMENT 1 (B) — THE RAIL IS A SET OF DESTINATIONS, NOT DISCLOSURE CONTROLS. It never
- * toggles a section shut: an icon that sometimes navigated and sometimes closed the thing you
- * were looking at would be two controls wearing one glyph. That is the ONE way rail and panel
- * clicks differ, and it is what these fixtures hold.
- */
-describe("railClick — always lands, never toggles shut", () => {
-  it("expanded, it opens the section and goes to the default child", () => {
-    expect(railClick(sec("queries"), null, false))
-      .toEqual({ open: "queries", go: "/queries", expand: false });
-  });
-
-  /* ⚠️ SUPERSEDED BY POLISH §4, and rewritten rather than deleted. The rail used to be purely a
-     set of destinations — it never toggled. It now COLLAPSES when you click the section you are
-     already in, which is the natural extension of click-commits: there is no navigation left for
-     that click to perform, so the only thing it can still mean is "give me the room". The rail
-     and the panel row still differ — the panel shuts the ACCORDION, the rail shuts the PANEL. */
-  it("expanded, clicking the ACTIVE section's icon collapses instead of navigating", () => {
-    const hit = { section: "queries", child: "q-att" };
-    const p = railClick(sec("queries"), hit, false);
-    expect(p.collapse).toBe(true);
-    expect(p.go, "no navigation — you are already there").toBeNull();
-    expect(p.expand).toBe(false);
-  });
-
-  it("the panel row shuts the ACCORDION where the rail shuts the PANEL", () => {
-    const hit = { section: "queries", child: "q-att" };
-    expect(sectionClick(sec("queries"), hit, "queries", false).open).toBeNull();
-    expect(sectionClick(sec("queries"), hit, "queries", false).collapse).toBeUndefined();
-    expect(railClick(sec("queries"), hit, false).collapse).toBe(true);
-  });
-
-  it("an INACTIVE section's icon never collapses — it navigates", () => {
-    const hit = { section: "queries", child: "q-att" };
-    const p = railClick(sec("agents"), hit, false);
-    expect(p.collapse).toBeFalsy();
-    expect(p.go).toBe("/agents");
-  });
-
-  /* ⚠️ COLLAPSED IS NOT THE MIRROR OF THIS. A collapsed click ALWAYS restores, including on the
-     active section — a click that neither navigated nor restored would do nothing at all. */
-  it("collapsed, the ACTIVE section's icon expands rather than staying shut", () => {
-    const hit = { section: "queries", child: "q-att" };
-    const p = railClick(sec("queries"), hit, true);
-    expect(p.expand).toBe(true);
-    expect(p.collapse).toBeFalsy();
-  });
-
-  it("keeps the child you are on when it belongs to the section", () => {
-    const p = railClick(sec("queries"), { section: "queries", child: "q-att" }, false);
-    expect(p.go).toBeNull();
-  });
-
-  it("collapsed, it also expands", () => {
-    expect(railClick(sec("queries"), null, true).expand).toBe(true);
-    expect(railClick(sec("todo"), null, true))
-      .toEqual({ open: null, go: "/todo", expand: true });
-  });
-
-  it("a childless section navigates and opens nothing", () => {
-    expect(railClick(sec("todo"), null, false))
-      .toEqual({ open: null, go: "/todo", expand: false });
-  });
-});
-
-/* ⚠️ A DOT, NOT A NUMBER — 52px has no room for a legible figure, and a badge on every section
-   that merely HAS items would make the rail a count display rather than an alert. */
-describe("railBadge — attention only", () => {
-  it("badges a section with its own urgent count", () => {
-    expect(railBadge(sec("todo"))).toBe(true);
-  });
-
-  it("badges a section whose child carries an urgent count", () => {
-    expect(railBadge(sec("queries"))).toBe(true); // this fixture still has one
-  });
-
-  it("does not badge a section with no counts at all", () => {
-    expect(railBadge(sec("agents"))).toBe(false);
-    expect(railBadge(sec("dashboard"))).toBe(false);
-  });
-
-  it("does not badge a ZERO count", () => {
-    expect(railBadge({ id: "x", label: "X", count: 0, urgent: true })).toBe(false);
-  });
-
-  /* A count without urgency is a quantity, not a demand. */
-  it("does not badge a count that is not urgent", () => {
-    expect(railBadge({ id: "x", label: "X", count: 9 })).toBe(false);
-  });
-});
+/* ⚠️ THE COLLAPSE SUITES ARE RETIRED WITH THE MODEL (app-shell-v2) — rail clicks, hover peeks,
+   the `[` key guard and the persisted collapsed flag. Deleted rather than skipped: a suite for a
+   function that no longer exists is a suite nobody can run. Recoverable at 02356ba. */

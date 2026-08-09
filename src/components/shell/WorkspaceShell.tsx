@@ -30,9 +30,7 @@ import {
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveActiveManuscript } from "../../lib/shellSidebar";
 import {
-  PEEK_GRACE_MS, PEEK_INTENT_MS, ShellSection, collapseKeyAllowed, openForHit, peeksOnHover,
-  railBadge, railClick, readCollapsed, sectionClick, sectionRowState, shellCrumb, shellHitFor,
-  writeCollapsed,
+  ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
@@ -46,17 +44,10 @@ import "./workspaceShell.css";
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
-/**
- * ⚠️ 33px, AND THAT NUMBER IS MEASURED, NOT CHOSEN. `/scriptally-title-v2.png` is 2400×750 with
- * the cap-"S" spanning y 190→577 — **51.7% of the asset height**, the rest being ascender and
- * descender clearance baked into the artwork.
- *
- * So `heightPx` is NOT cap-height. The refinement pass asks for a ~17px cap beside 13px crumb
- * text: 17 ÷ 0.517 = 32.9 → 33. (Amendment 1 asked for ~16px and this was 31px; the target moved,
- * so the measurement was retaken rather than the number nudged.) Setting 17 here would render a
- * 9px cap and look like the logo had simply been made too small, with nothing to point at.
- */
-const LOGOTYPE_PX = 33;
+/* ⚠️ `LOGOTYPE_PX` IS RETIRED WITH THE CRUMB'S ARTWORK. It was 33 because the PNG is only 51.7%
+   ink and a ~17px cap therefore needed a 33px element — a measured compensation for a specific
+   asset. The v2 brand is TYPE (a Playfair "S" in an ink square), so there is no ink ratio to
+   compensate for and nothing to keep the number in step with. */
 
 export interface WorkspaceShellProps {
   /** The IA — owned by the caller, never by this component. */
@@ -106,6 +97,10 @@ export function msMeta(ms: { genre?: string; wordCount?: number }): string {
   return bits.join(" · ");
 }
 
+/** Up to two initials for the foot avatar — a name is not guaranteed to have a surname. */
+const initials = (n: string): string =>
+  n.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "—";
+
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenAccount, onUpgrade,
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
@@ -115,72 +110,32 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
-  const [collapsed, setCollapsed] = useState(
-    () => readCollapsed(typeof window === "undefined" ? null : window.localStorage)
-  );
+  /* ⚠️ THE COLLAPSE MODEL IS RETIRED WITH THE RAIL (app-shell-v2). The rail was not chrome beside
+     the sidebar — it WAS the sidebar's collapsed form, and it owned the only expand control. Keep
+     `collapsed` without it and the state has no UI: collapse, and there is no navigation at all.
+     The ref carries no collapse affordance of any kind, so the sidebar is one width, always open. */
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
-  const [flyoutFor, setFlyoutFor] = useState<string | null>(null);
   const [msOpen, setMsOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
 
-  const railRef = useRef<HTMLElement>(null);
   const newRef = useRef<HTMLDivElement>(null);
-  const riRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const peekIn = useRef<number | null>(null);
-  const peekOut = useRef<number | null>(null);
 
   useEffect(() => { setOpenId(openForHit(hit)); }, [hit?.section, hit?.child]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const setShut = useCallback((next: boolean) => {
-    setCollapsed(next);
-    writeCollapsed(typeof window === "undefined" ? null : window.localStorage, next);
-    setFlyoutFor(null);
-  }, []);
 
-  const toggleCollapsed = useCallback(() => {
-    setCollapsed((c) => {
-      const next = !c;
-      writeCollapsed(typeof window === "undefined" ? null : window.localStorage, next);
-      return next;
-    });
-    setFlyoutFor(null);
-  }, []);
-
-  /* ⚠️ `[` TOGGLES BOTH WAYS, suppressed while typing, because `[` is a character: a bare key
-     firing inside a field eats the keystroke and reads as the app dropping input. The palette
-     counts as typing — it is a text field wearing a dialog. */
+  /* ⚠️ THE `[` SHORTCUT IS RETIRED with the sidebar state it toggled. A key bound to nothing is
+     worse than no key: it eats the character in any field that is not caught by the guard. */
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      const paletteOpen = !!document.querySelector(".sp-pal");
-      if (!collapseKeyAllowed(el?.tagName, !!el?.isContentEditable, paletteOpen)) return;
-      e.preventDefault();
-      toggleCollapsed();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [toggleCollapsed]);
-
-  useEffect(() => {
-    if (!flyoutFor && !msOpen) return;
-    const onDown = (e: PointerEvent) => {
-      if (railRef.current?.contains(e.target as Node)) return;
-      setFlyoutFor(null);
-      setMsOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      setFlyoutFor(null);
-      setMsOpen(false);
-    };
+    if (!msOpen) return;
+    const onDown = () => setMsOpen(false);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMsOpen(false); };
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("keydown", onKey);
     };
-  }, [flyoutFor, msOpen]);
+  }, [msOpen]);
 
   useEffect(() => {
     if (!newOpen) return;
@@ -200,53 +155,21 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   useEffect(() => { setNewOpen(false); }, [pathname]);
 
   const go = useCallback((path: string) => {
-    setFlyoutFor(null);
     setMsOpen(false);
     onNavigatePath(path);
   }, [onNavigatePath]);
 
-  const runPlan = useCallback((plan: {
-    open: string | null; go: string | null; expand: boolean; collapse?: boolean;
-  }) => {
-    setFlyoutFor(null);
-    // §4: the active section's rail icon collapses. Nothing else in the plan applies — there is
-    // no navigation to perform and no accordion to change, because you are already there.
-    if (plan.collapse) { setShut(true); return; }
-    if (plan.expand) setShut(false);
+  /** ⚠️ THE ACCORDION SURVIVES, THE COLLAPSE DOES NOT. A section row is still a destination AND a
+      disclosure, so `sectionClick`'s open/go limbs are read; its `expand`/`collapse` limbs named
+      the retired sidebar state and are now inert. */
+  const runPlan = useCallback((plan: { open: string | null; go: string | null }) => {
     setOpenId(plan.open);
     if (plan.go) go(plan.go);
-  }, [go, setShut]);
+  }, [go]);
 
-  /** The PANEL row — a destination AND a disclosure control, so it can toggle shut. */
   const onPanelClick = useCallback((sec: ShellSection) => {
-    runPlan(sectionClick(sec, hit, openId, collapsed));
-  }, [hit, openId, collapsed, runPlan]);
-
-  /** The RAIL icon — a destination only; it never toggles a section shut. */
-  const onRailClick = useCallback((sec: ShellSection) => {
-    runPlan(railClick(sec, hit, collapsed));
-  }, [hit, collapsed, runPlan]);
-
-  /* Hover peeks, pointer only. Sliding along the rail while one is open switches instantly;
-     opening cold waits out the intent delay so a cursor merely crossing does not fire one. */
-  const clearPeek = useCallback(() => {
-    if (peekIn.current) { window.clearTimeout(peekIn.current); peekIn.current = null; }
-    if (peekOut.current) { window.clearTimeout(peekOut.current); peekOut.current = null; }
-  }, []);
-
-  const onRailEnter = useCallback((sec: ShellSection) => {
-    if (!peeksOnHover(sec, collapsed)) return;
-    clearPeek();
-    if (flyoutFor) { setFlyoutFor(sec.id); return; }
-    peekIn.current = window.setTimeout(() => setFlyoutFor(sec.id), PEEK_INTENT_MS);
-  }, [collapsed, flyoutFor, clearPeek]);
-
-  const schedulePeekClose = useCallback(() => {
-    clearPeek();
-    peekOut.current = window.setTimeout(() => setFlyoutFor(null), PEEK_GRACE_MS);
-  }, [clearPeek]);
-
-  useEffect(() => () => clearPeek(), [clearPeek]);
+    runPlan(sectionClick(sec, hit, openId, false));
+  }, [hit, openId, runPlan]);
 
   /* ── the manuscript selector ── */
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
@@ -269,117 +192,20 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const plan = planLine(currentUser?.plan);
   const name = currentUser?.name ?? "";
 
-  const flySection = sections.find((s) => s.id === flyoutFor);
-  const flyTop = flyoutFor ? riRefs.current[flyoutFor]?.offsetTop ?? 0 : 0;
-
   return (
     <div className="ws-app">
 
-      {/* ══ THE RAIL — static. Identical in both states bar the » control and the active square. ══ */}
-      <aside ref={railRef} className={`ws-rail${flyoutFor ? " flyopen" : ""}`} aria-label="Sections">
-        <button
-          type="button"
-          className="ws-tile"
-          data-tip="Dashboard"
-          aria-label="Dashboard"
-          onClick={() => { if (collapsed) setShut(false); go("/dashboard"); }}
-        >
-          S
-        </button>
-
-        <div className="ws-railnav">
-          {sections.map((sec) => {
-            const st = sectionRowState(sec, hit, openId, collapsed);
-            return (
-              <button
-                type="button"
-                key={sec.id}
-                ref={(el) => { riRefs.current[sec.id] = el; }}
-                className={`ws-ri${st.railOn ? " on" : ""}`}
-                data-tip={st.tip}
-                aria-label={sec.label}
-                aria-current={st.railOn ? "true" : undefined}
-                onClick={() => onRailClick(sec)}
-                onMouseEnter={() => onRailEnter(sec)}
-                onMouseLeave={schedulePeekClose}
-              >
-                {icons[sec.id]}
-                {/* A DOT, NOT A NUMBER — 52px has no room for a legible figure. */}
-                {railBadge(sec) && <span className="ws-bdg" aria-hidden="true" />}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="ws-grow" />
-
-        {/* The expand-without-navigating path. Collapsed only. */}
-        {collapsed && (
-          <button
-            type="button"
-            className="ws-ri ws-xtog"
-            data-tip="Expand"
-            aria-label="Expand the navigation"
-            onClick={() => setShut(false)}
-          >
-            <ChevronsRight aria-hidden="true" />
-          </button>
-        )}
-
-        {/* ⚠️ AVATAR ABOVE SETTINGS — the foot order was flipped to match the PANEL's foot, which
-            reads name-then-Settings. The rail and the panel are two views of one foot, and having
-            them in opposite orders made the pair read as unrelated columns. */}
-        <button
-          type="button"
-          className="ws-avabtn"
-          data-tip={`${name} · ${plan.label}`}
-          aria-label="Account"
-          aria-haspopup="menu"
-          onClick={onOpenAccount}
-        >
-          <AvatarChip name={name} size={30} />
-        </button>
-
-        <button
-          type="button"
-          className="ws-ri"
-          data-tip="Settings"
-          aria-label="Settings"
-          onClick={() => { if (collapsed) { setShut(false); return; } go("/account"); }}
-        >
-          <Settings aria-hidden="true" />
-        </button>
-
-        {/* ⚠️ ANCHORED TO THE RAIL, and selecting COMMITS FULLY (E3) — navigate, close, expand,
-            open that accordion, so it appears where the flyout was. A peek resolving into a
-            still-collapsed rail would leave you where you started.
-            ⚠️ NO FOOT ACTION (E4): "Expand sidebar" was superseded the moment every click did it. */}
-        {flySection && (
-          <MenuCard
-            heading={flySection.label}
-            className="ws-fly"
-            style={{ top: flyTop }}
-            role="menu"
-          >
-            <div onMouseEnter={clearPeek} onMouseLeave={schedulePeekClose}>
-              {(flySection.children ?? []).map((ch) => (
-                <MenuCardItem
-                  key={ch.id}
-                  label={ch.label}
-                  on={hit?.section === flySection.id && hit?.child === ch.id}
-                  count={ch.count}
-                  urgent={ch.urgent}
-                  onSelect={() => { setOpenId(flySection.id); setShut(false); go(ch.path); }}
-                />
-              ))}
-            </div>
-          </MenuCard>
-        )}
-      </aside>
-
-      {/* ══ THE PANEL — its own tighter rhythm; collapses to zero width. ══ */}
-      <div className={`ws-panel${collapsed ? " shut" : ""}`}>
+      <div className="ws-panel">
         <div className="ws-pin">
+
+          {/* ⚠️ THE BRAND SITS ABOVE THE MANUSCRIPT SELECTOR (app-shell-v2). It used to be the
+              rail's ink tile; with the rail gone the sidebar is the leftmost chrome, so this is
+              where the mark belongs — and it is the ONLY place it appears, per the one-brand
+              rule. The mark doubles as the route home, as the rail's tile did. */}
+          <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="Dashboard">
+            <span className="ws-bmark" aria-hidden="true">S</span>
+            <span className="ws-bwm">ScriptAlly</span>
+          </button>
 
           <div className="ws-phead">
             {activeMs ? (
@@ -389,7 +215,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   className={`ws-mspill${manyMs ? "" : " static"}`}
                   aria-haspopup={manyMs ? "menu" : undefined}
                   aria-expanded={manyMs ? msOpen : undefined}
-                  onClick={() => { if (manyMs) { setFlyoutFor(null); setMsOpen((o) => !o); } }}
+                  onClick={() => { if (manyMs) setMsOpen((o) => !o); }}
                 >
                   {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
                       FRAMED — parchment, hairline, soft shadow — because it is an object with an
@@ -433,7 +259,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <nav className="ws-nav">
             {sections.map((sec, gi) => (
               <React.Fragment key={sec.id}>
-                <div className={`ws-glabel${gi === 0 ? " first" : ""}`}>{sec.label}</div>
+                {/* ⚠️ THE FIRST GROUP GETS NO HEADING (app-shell-v2). "WORKSPACE" sat above a
+                    group of one — Dashboard — and a section header over a single item labels
+                    nothing; it just adds a rung to the ladder. Dashboard stands alone. */}
+                {gi > 0 && <div className="ws-glabel">{sec.label}</div>}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
                   return (
@@ -458,24 +287,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               the manuscript pill, where it competed with the pill for the head's attention and
               read as an action ON the manuscript. At the foot of the nav it reads as what it is:
               a thing you do to the sidebar. Same handler, same persistence key. */}
-          {/* ⚠️ NO SPACER HERE — THE NAV IS THE GROWER (final ref: `.nav{flex:1;min-height:0;
-              overflow:auto}` and nothing between it and the collapse row). The row still has to
-              sit at the panel foot rather than under the last item, but a `ws-grow` BESIDE a
-              flex:1 nav is two claimants on the same slack: the browser splits it, so the nav
-              gets half the column, scrolls internally, and the app's last two groups sit below a
-              fold with empty panel underneath them. Let the nav take all of it and the foot is
-              pushed down for free. */}
-          <button
-            type="button"
-            className="ws-crow2"
-            onClick={() => setShut(true)}
-            aria-label="Collapse the navigation"
-          >
-            <ChevronsLeft aria-hidden="true" />
-            Collapse sidebar
-          </button>
+          {/* ⚠️ THE COLLAPSE ROW IS GONE with the state it set. The nav is still the grower —
+              `.ws-nav{flex:1;min-height:0}` and nothing between it and the foot — because a
+              spacer BESIDE a flex:1 nav is two claimants on the same slack and the browser
+              splits it, leaving the last groups below a fold with empty panel beneath. */}
 
-          {/* ── foot: hairline → account block → Settings. NO avatar (the rail carries the face). ── */}
+          {/* ── foot, in the ref's order: hairline → user row → Settings ──
+              ⚠️ THE AVATAR IS BACK. It said "NO avatar (the rail carries the face)" — and the rail
+              no longer exists, so nothing carried it. */}
           <div className="ws-pfoot">
             <div className="ws-pdiv" />
             {/* ⚠️ POLISH §6 — ONE INTERACTIVE ROW, not two text lines. The name gets the full row
@@ -489,6 +308,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               onClick={() => go("/account")}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("/account"); } }}
             >
+              <span className="ws-av" aria-hidden="true">{initials(name)}</span>
+              <span className="ws-utext">
               <span className="ws-n">{name}</span>
               <span className="ws-acctline">
                 <span className="ws-pl">{plan.label}</span>
@@ -505,6 +326,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   </button>
                 )}
               </span>
+              </span>
             </div>
             <button type="button" className="ws-ni ws-setrow" onClick={() => go("/account")}>
               <span className="ws-ic"><Settings aria-hidden="true" /></span>
@@ -515,41 +337,24 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       </div>
       {accountMenu}
 
-      {/* ══ MAIN — the chrome ground frames a white content card. ══
-          ⚠️ ONE SCROLL CONTAINER, AND THE BAR IS STICKY INSIDE IT (§4). The frosted effect only
-          exists because content passes BENEATH the bar; a fixed header above a scrolling body
-          would have nothing to frost. `.ws-work` is therefore `flex:none` and does not scroll —
-          do not "simplify" this back. */}
+      {/* ══ MAIN — one ground, and a single white window resting on it (app-shell-v2). ══
+          ⚠️ THE GREIGE BAR IS GONE. The breadcrumb row now sits DIRECTLY ON THE GROUND above the
+          window, so it is chrome rather than page content — it does not scroll, and no page may
+          render its own (see CLAUDE.md).
+          ⚠️ AND THE SCROLLER MOVED. It was `.ws-cscroll`, the whole card; it is `.ws-wbody` now,
+          inside the window. That is the window's defining behaviour: the frame — its radius,
+          border and inset — stays put while only the contents move. Keep `#app-stage-scroll` ON
+          the scroller: stageScroll's overlay locks, per-route scroll memory, the To-do board's
+          saved position and MobileSheet all address it by id. */}
       <div className="ws-main">
-        <div className="ws-card">
-          {/* ⚠️ `sv2-stagepad` RIDES ALONG, and it is not decoration: below md it adds the floating
-              tab bar's clearance. It belonged to the stage element, and the stage element is this
-              one now — dropping the class silently put the tab bar over the last 100px of every
-              mobile page. */}
-          <div
-            className="ws-cscroll sv2-stagepad"
-            id={scrollId}
-            ref={scrollRef}
-            onScroll={onScroll}
-          >
-            <header className="ws-bar">
+          <header className="ws-pagebar">
               {/* ⚠️ EVERY CRUMB SEGMENT IS INTERACTIVE (§5), and the separator is `/` throughout —
                   the live mix of `/` and `·` made the brand look like a different KIND of step
                   from the section. Only the current page is ink; ancestors are muted links. */}
               <nav className="ws-crumb" aria-label="Breadcrumb">
-                <button
-                  type="button"
-                  className="ws-logobtn"
-                  aria-label="Dashboard"
-                  onClick={() => go("/dashboard")}
-                >
-                  <img
-                    className="ws-logotype"
-                    src="/scriptally-title-v2.png"
-                    alt="ScriptAlly"
-                    style={{ height: LOGOTYPE_PX }}
-                  />
-                </button>
+                {/* ⚠️ NO BRAND HERE. The wordmark used to lead the crumb because the sidebar had
+                    only the rail's S tile; the sidebar carries the full brand now, and two mounts
+                    would break the one-brand rule. The crumb opens on its own slash. */}
                 {crumb && (
                   <>
                     <span className="ws-sep" aria-hidden="true">/</span>
@@ -624,11 +429,21 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   )}
                 </div>
               </div>
-            </header>
-            <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>{children}</div>
-            {footFade}
+          </header>
+
+          <div className="ws-window">
+            {/* ⚠️ `sv2-stagepad` RIDES WITH THE SCROLLER, and it is not decoration: below md it
+                adds the floating tab bar's clearance. It followed the stage element here. */}
+            <div
+              className="ws-wbody sv2-stagepad"
+              id={scrollId}
+              ref={scrollRef}
+              onScroll={onScroll}
+            >
+              <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>{children}</div>
+              {footFade}
+            </div>
           </div>
-        </div>
       </div>
 
     </div>

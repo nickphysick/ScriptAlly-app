@@ -44,121 +44,23 @@
    panel and bar. Source Sans Pro simply has a markedly smaller x-height than Inter, so the same
    number renders visibly smaller. Bumping the size would have made the numbers disagree with the
    ref in order to make the picture agree with it — the typeface was the difference. */
-.ws-rail, .ws-panel, .ws-bar, .ws-fly, .sp-card {
-  font-family: Inter, system-ui, -apple-system, sans-serif;
-}
 
-.ws-rail {
-  flex: none;
-  width: var(--shell-railw);
-  background: var(--shell-ink);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12px 0 10px;
-  position: relative;
-  z-index: 6;
-}
 
-.ws-tile {
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Playfair Display", serif;
-  font-size: 17px;
-  color: var(--shell-rail-hi);
-  cursor: pointer;
-  margin-bottom: 8px;
-  flex: none;
-}
-.ws-tile:hover { background: rgba(255, 255, 255, 0.08); }
 
-.ws-railnav { display: flex; flex-direction: column; align-items: center; flex: none; }
 
-.ws-ri {
-  width: 38px;
-  height: 38px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--shell-rail-tx);
-  cursor: pointer;
-  margin: 2px 0;
-  position: relative;
-  transition: background 0.15s, color 0.15s;
-  outline: none;
-  flex: none;
-}
-.ws-ri svg { width: 20px; height: 20px; stroke-width: 1.7; }
-.ws-ri:hover { color: var(--shell-rail-hi); }
-.ws-ri.on { background: rgba(255, 255, 255, 0.12); color: var(--shell-rail-hi); }
-.ws-ri:focus-visible { box-shadow: inset 0 0 0 2px rgba(244, 239, 231, 0.5); }
 
 /* ⚠️ A DOT, NOT A NUMBER. 52px has no room for a legible figure, and a badge on every section
    with items would make the rail a count display rather than an alert. The ink ring is what
    keeps it legible against the rail. */
-.ws-bdg {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #c96f52;
-  border: 2px solid var(--shell-ink);
-}
 
-.ws-grow { flex: 1; min-height: 0; }
 
-.ws-avabtn {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  margin-top: 6px;
-  display: flex;
-  flex: none;
-  border-radius: 50%;
-}
-.ws-avabtn:focus-visible { box-shadow: 0 0 0 2px rgba(244, 239, 231, 0.5); }
 
 /* Rail tooltips — composed `Section · Child`. */
 .ws-ri::after,
 .ws-tile::after,
-.ws-avabtn::after {
-  content: attr(data-tip);
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--shell-ink);
-  color: var(--shell-rail-hi);
-  font-size: 11px;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.12s;
-  z-index: 30;
-  box-shadow: 0 2px 8px rgba(46, 39, 35, 0.25);
-}
-.ws-tile, .ws-avabtn { position: relative; }
 .ws-ri:hover::after,
 .ws-tile:hover::after,
-.ws-avabtn:hover::after { opacity: 1; visibility: visible; transition-delay: 0.3s; }
 /* A tooltip behind an open flyout is noise pointing at the thing you already opened. */
-.ws-rail.flyopen .ws-ri::after { display: none; }
 
 /* ══ THE PANEL ══ */
 .ws-panel {
@@ -171,20 +73,8 @@
   transition: width 0.22s var(--shell-ease), opacity 0.18s;
   overflow: hidden;
 }
-/* ⚠️ THE RAIL'S SHADOW BELONGS TO THE PANEL'S LEFT EDGE, as a ::before. It is not a box-shadow
-   on the rail: a shadow cast by the rail would need the rail to own it, and the rail is the one
-   element in this shell that must stay unconditionally static. */
-.ws-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 18px;
-  background: linear-gradient(90deg, rgba(46, 39, 35, 0.1), transparent);
-  pointer-events: none;
-  z-index: 5;
-}
+/* ⚠️ THE PANEL'S LEFT SHADOW IS GONE — it was cast BY the rail, for the rail's edge, and there
+   is no rail. On one continuous ground a shadow there would draw an edge where none exists. */
 .ws-panel.shut { width: 0; opacity: 0; }
 
 /* The inner block keeps its full width while the panel animates to zero, so the contents slide
@@ -225,16 +115,17 @@
    version overshot to 56.0 — so the wrong one shipped, verified, with a lock written around it.
    Measured against the BUILT css: padding-only leaves the pill at 41.0 against the bar's 48.0.
    A harness must load `dist/assets/index-*.css`, never a hand-picked list of sources. */
+/* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER DERIVES FROM `--head`, and the box-sizing note moves with
+   it. The old rule was `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on
+   the same continuous line as the greige breadcrumb bar. That bar is retired, so the alignment it
+   served does not exist — the selector is sized by ITS OWN CONTENTS, sitting beneath the brand
+   block. `box-sizing` is still DECLARED rather than inherited, because the padding here is the
+   kind that double-counts under content-box, and a harness that inlines only the shell sheets
+   does not get Tailwind's preflight — that difference shipped a wrong fix once already. */
 .ws-phead {
-  /* ⚠️ DECLARED, NOT INHERITED — this rule's maths depends on the box model, so it states it.
-     The app gets border-box from Tailwind's preflight; a harness that inlines only index.css and
-     the shell sheets does NOT, and that difference is what shipped the wrong fix. */
   box-sizing: border-box;
-  height: calc(var(--head) + var(--shell-frame) + 1px);
-  padding-top: calc(var(--shell-frame) + 1px);
-  flex: none;
-  display: flex;
-  align-items: center;
+  height: auto;
+  padding: 0;
 }
 /* ⚠️ LEFT-ALIGNED, AND THE COVER IS WHY. An earlier build centred the title+chevron pair, because
    at 186px with nothing on the left a left-aligned row left a gap in the middle that read as a
@@ -314,30 +205,7 @@
 .ws-msmenu { position: absolute; top: 46px; left: 0; right: 0; z-index: 20; }
 
 /* ⚠️ THE HEAD'S « GHOST IS GONE (polish §3) — it competed with the manuscript pill for the head's
-   attention and read as an action ON the manuscript. It is a nav-foot row now: see .ws-crow2. */
-.ws-crow2 {
-  margin-top: 6px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  flex: none;
-  color: var(--shell-muted);
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.13s, color 0.13s;
-  outline: none;
-}
-.ws-crow2 svg { width: 14px; height: 14px; stroke-width: 1.7; flex: none; }
-.ws-crow2:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink-soft); }
-.ws-crow2:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+   attention and read as an action ON the manuscript. */
 
 .ws-pdiv { height: 1px; background: var(--shell-hair); margin: 8px 4px 6px; flex: none; }
 
@@ -494,7 +362,6 @@
 .ws-setrow { margin-top: 4px; height: 36px; font-size: 13px; }
 
 /* flyout — anchored to the RAIL */
-.ws-fly { position: absolute; left: calc(var(--shell-railw) + 10px); min-width: 196px; z-index: 40; }
 
 /* ══ MAIN — the chrome ground frames a white content card ══ */
 .ws-main {
@@ -506,146 +373,40 @@
      reads as separation on that edge. */
   padding: var(--shell-frame) var(--shell-frame) var(--shell-frame) 12px;
 }
-.ws-card {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
-  border-radius: var(--shell-card-radius);
-  border: 1px solid rgba(46, 39, 35, 0.06);
-  box-shadow: 0 1px 2px rgba(46, 39, 35, 0.05), 0 8px 24px rgba(46, 39, 35, 0.08);
-  overflow: hidden;
-}
 
 /* ⚠️ THE CARD'S SINGLE SCROLL CONTAINER (§4). The bar is sticky INSIDE it, so page content
    passes beneath the frosted band — that is the whole effect. A fixed header above a separately
    scrolling body would have nothing to frost, and `.ws-work` scrolling again would put two
    scrollers in one card. It is a flex COLUMN so viewport-locked pages can take the remaining
    height with `flex:1` rather than `height:100%`, which would have measured past the bar. */
-.ws-cscroll {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
 
 /* THE BAR IS THE CARD'S HEADER — there is no bar outside the card.
    ⚠️ ALWAYS FROSTED — there is no scroll-triggered state and no transition between states. A
    header that changed on scroll would announce the scroll; this one simply is what it is.
    ⚠️ NO BOTTOM HAIRLINE. The constant shadow does the separating; a hairline under a translucent
    band reads as a seam where the blur already implies depth. */
-.ws-bar {
-  height: var(--head);
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 0 22px;
-  position: sticky;
-  top: 0;
-  z-index: 8;
-  background: var(--shell-bar-tint);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 18px -10px rgba(46, 39, 35, 0.22);
-}
 /* ⚠️ A FEATURE QUERY, NOT JS DETECTION. Where the blur is unsupported the translucency would
    just be a washed-out band over moving text, so the fallback is opaque white. */
 @supports not (backdrop-filter: blur(10px)) {
-  .ws-bar { background: var(--shell-bar-tint-solid); }
-}
-.ws-crumb {
-  font-size: 13px;
-  color: var(--shell-muted);
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
 }
 /* ⚠️ `/` THROUGHOUT (§5). The live mix of `/` after the brand and `·` before the child made the
    brand look like a different KIND of step from the section. One separator, one hierarchy. */
-.ws-sep { color: #cfc4b4; flex: none; font-weight: 400; }
 /* Ancestors are muted and clickable; only the current page is ink. */
-.ws-seg {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font: inherit;
-  color: var(--shell-muted);
-  cursor: pointer;
-  transition: color 0.13s;
-  border-radius: 4px;
-}
-.ws-seg:hover { color: var(--shell-ink); }
-.ws-seg:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
-.ws-cur { color: var(--shell-ink); font-weight: 600; }
-.ws-logobtn {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  flex: none;
-  border-radius: 4px;
-  transition: opacity 0.15s;
-}
-.ws-logobtn:hover { opacity: 0.72; }
-.ws-logobtn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
 
 /* THE STATUS WHISPER — wired to real write state (lib/saveSignal), never a constant. */
-.ws-sync {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  /* ⚠️ DARKENED FOR THE OAT BAR (polish §7). #b3a698 was a whisper against white; against the
-     tint it was very nearly the ground itself, and a status you cannot read is not a status. */
-  color: #a2947f;
-  white-space: nowrap;
-  flex: none;
-}
 /* likewise the divider — --shell-hair was drawn for a white bar and vanished into the tint */
-.ws-vdiv { width: 1px; height: 18px; background: #d9cec0; flex: none; }
 
 /* + NEW — the ONE creation door in the chrome. ⚠️ The sidebar carries no quick actions: creation
    lives here, and a second set of create buttons in the panel would be two homes for one job. */
-.ws-newwrap { position: relative; display: flex; flex: none; }
 /* ⚠️ INK (polish §1). The soft-pink treatment is SUPERSEDED: pink is the app's upsell and
    attention colour, and the one button that creates things should not borrow it. */
-.ws-nbtn {
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 9px;
-  background: var(--shell-ink);
-  border: 1px solid var(--shell-ink);
-  color: var(--shell-rail-hi);
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.ws-nbtn:hover { background: #3f372f; }
-.ws-nbtn:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--shell-focus); }
-.ws-nbtn svg { width: 14px; height: 14px; stroke-width: 2; }
-.ws-newmenu { position: absolute; top: calc(100% + 6px); right: 0; min-width: 196px; z-index: 40; }
 /* ⚠️ THE HEIGHT IS MEASURED, NOT CHOSEN — see LOGOTYPE_PX in WorkspaceShell.tsx. The asset is
    only 51.7% cap-height, so this element is ~2× the cap it renders. */
-.ws-logotype { width: auto; flex: none; display: block; }
-.ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 
 /* ⚠️ THE WORK AREA DOES NOT SCROLL — THE STAGE INSIDE IT DOES. `#app-stage-scroll` is the app's
    scroll container, and everything from stageScroll.ts to per-route scroll restoration addresses
    it directly. An `overflow:auto` here would make a second scroller wrapping the first. */
-/* ⚠️ THE WORK AREA NO LONGER SCROLLS (§4); `.ws-cscroll` above it does. Giving this back its own
-   overflow is how the sticky bar stops working.
+/* ⚠️ THE WORK AREA DOES NOT SCROLL — `.ws-wbody` (the window's body) does.
 
    ⚠️ `flex: 1 0 auto` IS EXACT, AND EACH OF THE THREE PARTS EARNS ITS PLACE. `grow:1` lets a
    short page (or a viewport-locked one) claim the space left under the bar, so a `fill` StagePage
@@ -664,14 +425,10 @@
 
 /* ══ BELOW md — MOBILE PASS 1 IS LEFT EXACTLY AS IT IS ══
    Both mockups are desktop-only and the phone has a shipped, locked chrome, so this shell is a
-   ≥768px replacement: below it the rail, panel and bar are hidden, the card loses its frame and
-   becomes the page, and the existing mobile bar renders in their place. */
+   ≥768px replacement: below it the panel is hidden, the window loses its frame and becomes the
+   page, and the existing mobile bar renders in its place. */
 @media (max-width: 767px) {
-  .ws-main { padding: 0; }
-  .ws-card { border-radius: 0; border: 0; box-shadow: none; }
-  .ws-rail,
-  .ws-panel,
-  .ws-bar { display: none; }
+  .ws-panel { display: none; }
 }
 .ws-mobilebar { display: block; flex: none; }
 @media (min-width: 768px) {
@@ -691,7 +448,6 @@
   .ws-ic,
   .ws-srow,
   .ws-pch,
-  .ws-crow2,
   .ws-mspill {
     transition: none;
   }
@@ -707,3 +463,99 @@
   margin: 0 0 8px;
 }
 .qa-note { font-size: 13.5px; color: var(--shell-muted); margin: 0; }
+
+
+/* ══════════════════ APP SHELL v2 — one ground, one window ══════════════════
+   ⚠️ ONE GROUND. Sidebar and page share `--shell-ground`; the ONLY white surface is the content
+   window. A dark rail beside a pale page read as two applications bolted together. */
+.ws-app { background: var(--ws-ground); }
+.ws-panel { background: transparent; border-right: 0; }
+/* the single hairline that separates sidebar from page — nothing else divides them */
+.ws-panel::after {
+  content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 1px;
+  background: var(--ws-edge); pointer-events: none;
+}
+
+/* ── brand: ink square + wordmark, above the manuscript selector ── */
+.ws-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 2px 6px 16px; min-height: 46px; width: 100%;
+  background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
+}
+.ws-bmark {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  background: #1c130e; color: #fdfaf5;
+  font-family: var(--font-serif); font-weight: 600; font-size: 17px;
+  display: grid; place-items: center;
+}
+.ws-bwm { font-family: var(--font-serif); font-weight: 600; font-size: 20px; color: #1c130e; letter-spacing: -0.01em; }
+
+/* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER COMES FROM `--head`. It was
+   `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on the same continuous
+   line as the greige bar. That bar is gone, so the alignment it served is gone with it — the
+   selector is now sized by its own contents beneath the brand block, and `--head` is not read
+   here at all. (`--head` itself survives for .sv2-topbar and .tn-mast, which are other shells.) */
+/* ── nav: white active tile, never a burgundy fill ── */
+.ws-ni.on, .ws-nav .on {
+  background: #ffffff; color: #241811; font-weight: 500;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06);
+}
+.ws-ni:hover { background: #efeae1; color: #241811; }
+
+/* ── foot: the avatar returned with the rail's departure ── */
+.ws-uacct { display: flex; align-items: center; gap: 10px; }
+.ws-av {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: #ffffff; border: 1px solid var(--shell-edge);
+  font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #8a7a6c;
+  display: grid; place-items: center;
+}
+.ws-utext { min-width: 0; flex: 1; }
+
+/* ══ the page area ══ */
+.ws-main {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  height: 100vh; overflow: hidden; padding: 0 22px 20px; background: var(--ws-ground);
+}
+/* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
+.ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
+.ws-crumb { display: flex; align-items: baseline; gap: 9px; }
+.ws-sep { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; }
+.ws-cur { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #241811; }
+.ws-seg { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; background: none; border: 0; padding: 0; cursor: pointer; }
+.ws-seg:hover { color: #241811; }
+.ws-vdiv { width: 1px; height: 18px; background: #e2dacd; margin: 0 2px; flex: none; }
+.ws-sync { font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: #b3a598; }
+.ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+/* ⚠️ THE MENU ANCHOR CAME BACK WITH THE BUTTON. `.ws-newwrap` was swept out with the bar's rules
+   and its absence was invisible in every measurement — the + New menu had nothing to anchor to. */
+.ws-newwrap { position: relative; flex: none; }
+/* ⚠️ AND `display:flex` IS LOAD-BEARING: the button holds an icon AND a label, and without it
+   they stack — the pill rendered as a tall black circle. Caught by the screenshot, not the tests. */
+.ws-nbtn {
+  display: flex; align-items: center; gap: 7px;
+  background: #1c130e; color: #ffffff; border: none; border-radius: 99px;
+  padding: 9px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.ws-nbtn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+/* ⚠️ THE WINDOW IS THE SHEET OF PAPER, AND ITS FRAME MUST NOT MOVE. It is `overflow:hidden` and
+   its BODY scrolls — put the scroll on the window itself and the radius, border and inset slide
+   off screen on the first wheel, at which point it is just a border. */
+.ws-window {
+  flex: 1; min-height: 0; background: #ffffff;
+  border: 1px solid var(--ws-edge); border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 8px 26px rgba(58, 28, 20, 0.07);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+/* ⚠️ NO PADDING HERE, deliberately. The ref pads its own demo content; every page in this app
+   brings its own (the dashboard's `.os-content` is 16px 26px 24px), so padding here would inset
+   every page twice. */
+.ws-wbody { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+
+@media (max-width: 767px) {
+  /* below md the window IS the page — the frame would only steal width */
+  .ws-main { padding: 0; }
+  .ws-window { border-radius: 0; border: 0; box-shadow: none; }
+  .ws-pagebar { display: none; }
+}
