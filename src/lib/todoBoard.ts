@@ -212,8 +212,14 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
       return { kind: "AGENT WAITING", title: `Send your partial to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
     case "full_requested":
       return { kind: "AGENT WAITING", title: `Send your full to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: true, status: q?.status, hk: false };
+    /* ⚠️ AN R&R IS ITS OWN KIND (tasks-consolidation P3, 9 Aug; ref tasks-states.html sheet 1
+       draws it as a distinct pill). It read "AGENT WAITING" — true, but so does every request,
+       and a resubmission is a different ACT from a send: you are rewriting, not posting. Changed
+       at the SOURCE rather than mapped at the row, so the pill, the snoozed band ("R&R · 🕐") and
+       every future reader speak one vocabulary. The lane is unchanged, so the counting law, the
+       families and the groups are all untouched — `liveFamily` keys on the stream, not the kind. */
     case "revise_resubmit":
-      return { kind: "AGENT WAITING", title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
+      return { kind: "R&R", title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: requestedFigures(q), warn: false, status: q?.status, hk: false };
     case "nudge_overdue": {
       const days = silentDays(q, now);
       return { kind: "AGENT WAITING", title: `Nudge ${name}`, who: name, subtitle: msTitle, due: days != null ? `${days} DAYS · NO REPLY` : "NO REPLY YET", warn: days != null && days > 84, status: q?.status, hk: false };

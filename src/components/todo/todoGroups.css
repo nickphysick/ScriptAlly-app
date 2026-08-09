@@ -212,18 +212,38 @@
   letter-spacing: 0.11em;
 }
 
-/* ⚠️ THE FOUR FAMILY TONES ARE todoFamily's, RESTATED HERE UNDER LOCK — CSS cannot read TS, and
-   `tasksList.test.tsx` fails the moment these and FAMILY_BAND disagree. The band's `bd` is the
-   pill's border; its darker stop is the fill. */
-.tdg-pill.fam-urgent { background: #f4d5c9; color: #8a4a36; border: 1px solid #e8c8bc; }
-.tdg-pill.fam-housekeeping { background: #f0e8d8; color: #7a6844; border: 1px solid #ddd0bc; }
-.tdg-pill.fam-yours { background: #d5dbd3; color: #4a5f48; border: 1px solid #b9c9b4; }
-.tdg-pill.fam-done { background: #e7ebe5; color: #6b7a68; border: 1px solid #cfd8cc; }
+/* ⚠️ NINE TONES, ONE PER LIVE KIND (P3; ref tasks-states.html sheet 1) — SUPERSEDING the four
+   family tones this file shipped with in P2. The families answer "how urgent is this"; the page
+   already answers that with its group headings, so a pill repeating it said one thing twice while
+   the thing a pill is FOR — which kind of work this is — went unsaid. The values are the ref's own
+   `.sp.*` hexes verbatim; `tasksList.test.tsx` pins each against `lib/taskRow`'s tone union, so a
+   tone can never exist in one place and not the other. */
+.tdg-pill.tone-offer { background: #f8ded2; color: #8a4a36; border: 1px solid #eecabb; }
+.tdg-pill.tone-wait { background: #fbeae3; color: #96604c; border: 1px solid #f0dad0; }
+.tdg-pill.tone-rr { background: #f3e8f0; color: #75496a; border: 1px solid #e5d3e0; }
+.tdg-pill.tone-sweep { background: #f4eee4; color: #6b5a4e; border: 1px solid #e6ddcd; }
+.tdg-pill.tone-stale { background: #f6efe0; color: #7a6844; border: 1px solid #e8dcc4; }
+.tdg-pill.tone-yours { background: #eef2ec; color: #4a5f48; border: 1px solid #d7e0d4; }
+.tdg-pill.tone-note { background: #f9f1dc; color: #7a6530; border: 1px solid #ecdfba; }
+.tdg-pill.tone-snoozed { background: #f2ede7; color: #6b5a4e; border: 1px solid #e2d8c8; }
+.tdg-pill.tone-done { background: #f0f3ef; color: #6b7a68; border: 1px solid #dfe5dd; }
 
-/* the journey column. ⚠️ RESERVED, AND MOSTLY EMPTY UNTIL PHASE 3 — the per-kind stage meter is
-   the kinds-and-verbs phase's work. The sweep rail is here because it is LIVE today (it rode the
-   board's sweep card) and dropping it in transit would be a regression, not a phase boundary. */
+/* the journey column — the meter NAMES THE STAGE rather than counting a percentage, because
+   "60% of a submission" is not a thing anybody can act on. */
 .tdg-jrny { width: 152px; }
+
+/* the three-stage journey: query out · partial in hand · full in hand */
+.tdg-steps { display: flex; align-items: center; gap: 5px; }
+
+.tdg-stp {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: #f1eade;
+}
+
+.tdg-stp.done { background: #d3a894; }
+.tdg-stp.now { background: #7c3a2a; }
 
 .tdg-bar {
   height: 5px;

@@ -12,10 +12,10 @@
  * it", which it could not.
  *
  * ⚠️ THE LIST OWNS NO STATE THAT MATTERS AND WRITES NOTHING. Its groups are `taskGroups(cols)`,
- * its fold is `groupSlice`, its pills are `todoFamily`, its ticks are `isTickable`, and every
- * verb resolves through the SAME `cardMenu` model the board's ⋯ used. Two pieces of local state
- * are view memory only (the snoozed fold, a sweep's session-high member count) — losing either
- * changes nothing true.
+ * its fold is `groupSlice`, its pills and journeys are `taskRow`, its ticks are `isTickable`, and
+ * every verb resolves through the SAME `cardMenu` model the board's ⋯ used. Two pieces of local
+ * state are view memory only (the snoozed fold, a sweep's session-high member count) — losing
+ * either changes nothing true.
  *
  * ⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID. Never `display: contents` on the row with the
  * cells promoted to grid items: `contents` deletes the row's box, so hover, focus and any future
@@ -24,15 +24,18 @@
  *
  * ⚠️ WHICH VERB SLOTS FILL IS ASKED OF THE MENU MODEL, NEVER OF A SECOND PER-KIND TABLE. The four
  * slots are fixed tracks and an absent verb leaves its slot standing, so every primary in a panel
- * starts at the same x and an absence is legible. Phase 3 refines the LABELS per kind (Close,
- * Review, Restore); this phase settles the geometry and the permissions, and takes both from
- * `cardMenu` so the row and the menu cannot disagree about what a card allows.
+ * starts at the same x and an absence is legible. Phase 3 added the per-kind NAMES (Start, Close,
+ * Return, Undo) and the pill tones and journeys in `lib/taskRow` — presentation the menu has no
+ * opinion about. The split is the point: the menu says WHETHER, taskRow says WHAT IT IS CALLED,
+ * so the row and the menu cannot disagree about what a card allows.
  */
 import React, { useRef, useState } from "react";
 import { ChevronRight, ChevronDown, Clock, MoreHorizontal, X, Check } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
-import { cardFamily } from "../../lib/todoFamily";
+/* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
+   (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
+import { rowPill, rowPrimaryLabel, rowJourney } from "../../lib/taskRow";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId } from "../../lib/todoMenu";
 import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
@@ -132,14 +135,17 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
     const menuModel = cardMenu(c, column);
     const sweep = isSweepCard(c);
     const fig = sweep ? sweepFigure(c) : null;
+    const pill = rowPill(c, column);
+    const journey = rowJourney(c, column);
 
-    /* SLOT 1 — the primary. Absent where the TICK IS THE ACT: a writer's own item is finished by
-       ticking it, so a second "Action" beside the circle would be two names for one verb. */
+    /* SLOT 1 — the primary. ⚠️ THE MENU SAYS WHETHER, `taskRow` SAYS WHAT IT IS CALLED. Absent
+       where the TICK IS THE ACT: a writer's own item is finished by ticking it, so a second verb
+       beside the circle would be two names for one act. */
     const primary: { id: MenuItemId; label: string; ghost?: true } | null =
-      column === "done" ? (offers(menuModel, "undo-done") ? { id: "undo-done", label: "Undo", ghost: true } : null)
-      : column === "snoozed" ? { id: "unsnooze", label: "Return" }
+      column === "done" ? (offers(menuModel, "undo-done") ? { id: "undo-done", label: rowPrimaryLabel(c, column), ghost: true } : null)
+      : column === "snoozed" ? { id: "unsnooze", label: rowPrimaryLabel(c, column) }
       : completionVia(c) === "user-task" ? null
-      : { id: "action", label: sweep ? "Start" : "Action" };
+      : { id: "action", label: rowPrimaryLabel(c, column) };
 
     /* SLOT 2 — the clock. It opens the ⋯ menu AT its date tiers rather than owning a second
        chooser; Phase 4 swaps that submenu for the dial, at this one call site. Absent on a
@@ -193,20 +199,29 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
         </div>
 
         <div className="tdg-cc">
-          {/* ⚠️ GUARDED: `kind` is "" for a writer's own task, and an unguarded pill draws chrome
-              with nothing in it — which reads as a load failure rather than an absence. */}
-          {c.kind && <span className={`tdg-pill fam-${cardFamily(c)}`}>{c.kind}</span>}
+          {/* ⚠️ GUARDED AT THE DERIVATION: `rowPill` returns null where a card has no kind, so an
+              empty pill — chrome with nothing in it, which reads as a load failure rather than an
+              absence — cannot be drawn from here. The WORDS are the card's own derived `kind`;
+              only the tone is per-kind. */}
+          {pill && <span className={`tdg-pill tone-${pill.tone}`}>{pill.label}</span>}
         </div>
 
         <div className="tdg-cc">
-          {/* ⚠️ THE JOURNEY METER IS PHASE 3's, and the track is reserved for it. The sweep rail
-              is here because it is LIVE today — it rode the board's sweep card, and losing it in
-              transit would be a regression rather than a phase boundary. */}
+          {/* ⚠️ THE METER NAMES THE STAGE, NOT A PERCENTAGE — except for a sweep, where the count
+              IS the fact ("5 OF 16 DONE"). The two never appear together: a pile has no journey
+              and a journey has no pile. */}
           <div className="tdg-jrny">
-            {sweep && (
+            {sweep ? (
               <>
                 <div className="tdg-bar" aria-hidden><i style={{ width: `${fig!.pct}%` }} /></div>
                 <div className="tdg-stlab">{fig!.label}</div>
+              </>
+            ) : journey && (
+              <>
+                <div className="tdg-steps" aria-hidden>
+                  {journey.stages.map((s, i) => <span key={i} className={`tdg-stp ${s}`} />)}
+                </div>
+                <div className="tdg-stlab">{journey.label}</div>
               </>
             )}
           </div>

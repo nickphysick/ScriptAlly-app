@@ -21,7 +21,7 @@ import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
-import { FAMILY_BAND } from "../../lib/todoFamily";
+import { rowPill, rowPrimaryLabel, rowJourney, PillTone } from "../../lib/taskRow";
 import { TaskList, groupColumn } from "./TaskList";
 
 const here = __dirname;
@@ -39,6 +39,7 @@ const rule = (sel: string): string => {
    what it forbids, so a naive `not.toContain` fails on a correct file that documents itself.
    (The lesson is written into tasksViewport's rule-text helper; this is the same one.) */
 const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+const code = decls;
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   key: "k1", stream: "do", title: "Send your full to Jonathan Marsh", who: "", subtitle: "The Marsh Agency",
@@ -187,9 +188,10 @@ describe("⚠️ FOUR FIXED SLOTS, AND AN ABSENT VERB LEAVES ITS SLOT STANDING",
     const done = render(cols({ done: [card({ key: "d1", done: true, userTaskId: "t9", title: "Reply to Curtis Vane" })] }));
     expect(done).toContain("Undo");
     expect(done).toContain("tdg-vb go ghost");
-    /* Snoozed renders collapsed by default (asserted below), so its primary is pinned at source —
-       the ONE place the per-state primary is chosen, rather than at a second render path. */
-    expect(list).toContain('{ id: "unsnooze", label: "Return" }');
+    /* Snoozed renders collapsed by default (asserted below), so its primary is pinned through the
+       pure model — the ONE place the per-state verb is named, rather than at a second render. */
+    expect(list).toContain('{ id: "unsnooze", label: rowPrimaryLabel(c, column) }');
+    expect(rowPrimaryLabel(card({}), "snoozed")).toBe("Return");
   });
 });
 
@@ -223,25 +225,114 @@ describe("the panels: white sheets separated by SPACE, with the heading outside 
   });
 });
 
-describe("⚠️ THE FAMILY TONES ARE todoFamily's, AND THE CSS COPY IS LOCKED TO THEM", () => {
-  /* This map has shipped wrong twice in this repo, both times through a SECOND COPY. CSS cannot
-     read TypeScript, so the pill fills have to be restated in the stylesheet — and the moment
-     they are restated they are a second copy. This is what stops it being a silent one. */
-  it("each pill's fill and border are the family band's own darker stop and hairline", () => {
-    for (const [fam, band] of Object.entries(FAMILY_BAND)) {
-      const r = rule(`.tdg-pill.fam-${fam} {`);
-      expect(r, `${fam} fill`).toContain(`background: ${band.to}`);
-      expect(r, `${fam} border`).toContain(`border: 1px solid ${band.bd}`);
-    }
+describe("⚠️ ONE TONE PER LIVE KIND, AND THE CSS COPY IS LOCKED TO THE TONE UNION", () => {
+  /* ⚠️ SUPERSEDES P2's FOUR FAMILY TONES (9 Aug, P3). The families answer "how urgent is this" —
+     which the group headings already answer, permanently and in words — so a pill repeating it
+     said one thing twice while the thing a pill is FOR went unsaid. The values are the ref's own.
+
+     CSS cannot read TypeScript, so the tones have to be restated in the stylesheet, and the
+     moment they are restated they are a second copy. This is what stops it being a silent one:
+     every member of the `PillTone` union must have a rule, and no rule may exist without a
+     member. That map has shipped wrong twice in this repo, both times through a second copy. */
+  const TONES: PillTone[] = ["offer", "wait", "rr", "sweep", "stale", "yours", "note", "snoozed", "done"];
+
+  it("every tone has a rule, and every rule has a tone", () => {
+    for (const t of TONES) expect(rule(`.tdg-pill.tone-${t} {`), t).toContain("background:");
+    const declared = [...css.matchAll(/\.tdg-pill\.tone-([a-z]+) \{/g)].map((m) => m[1]);
+    expect(declared.sort()).toEqual([...TONES].sort());
   });
 
   it("the pill takes ONE width, so the meters beside them line up down the panel", () => {
     expect(rule(".tdg-pill {")).toContain("width: 124px");
   });
 
+  it("⚠️ THE WORDS ARE THE CARD'S OWN `kind` — only the tone is per-kind", () => {
+    /* A per-kind label table here would be a SECOND vocabulary beside the one the facet chips,
+       the snoozed band and the counting law all already speak. */
+    expect(rowPill(card({ kind: "AGENT WAITING" }), "todo")).toEqual({ label: "AGENT WAITING", tone: "wait" });
+    expect(rowPill(card({ kind: "OFFER", taskType: "offer_received" }), "todo")?.tone).toBe("offer");
+    expect(rowPill(card({ kind: "R&R", taskType: "revise_resubmit" }), "todo")?.tone).toBe("rr");
+    expect(rowPill(card({ kind: "STALE", taskType: "no_response_close" }), "todo")?.tone).toBe("stale");
+    expect(rowPill(sweepCard(), "todo")?.tone).toBe("sweep");
+    expect(rowPill(card({ kind: "YOUR TASK", userTaskId: "t" }), "todo")?.tone).toBe("yours");
+    expect(rowPill(card({ kind: "NOTE", nature: "note" }), "todo")?.tone).toBe("note");
+  });
+
+  it("⚠️ STATE BEATS KIND — done and snoozed are consulted before the task type", () => {
+    /* A finished thing is finished whatever it was; a sleeping one reads as sleeping. Same
+       precedence `cardFamily` uses for the band families, restated for the finer set. */
+    expect(rowPill(card({ kind: "OFFER", taskType: "offer_received", done: true }), "done")?.tone).toBe("done");
+    expect(rowPill(card({ kind: "AGENT WAITING · 🕐" }), "snoozed")?.tone).toBe("snoozed");
+  });
+
+  it("⚠️ A SNOOZED CARD KEEPS ITS OWN KIND IN THE WORDS — only its tone sleeps", () => {
+    /* The ref draws a bare "SNOOZED" pill. tasksAuditGrammar locks the opposite WITH ITS REASON:
+       a row that forgets what it is while it sleeps tells you nothing about what will return. */
+    expect(rowPill(card({ kind: "AGENT WAITING · 🕐" }), "snoozed")?.label).toBe("AGENT WAITING · 🕐");
+  });
+
   it("an empty kind draws NO pill — chrome with nothing in it reads as a load failure", () => {
-    const mine = card({ key: "u2", userTaskId: "t2", kind: "" });
-    expect(render(cols({ todo: [mine] }))).not.toContain("tdg-pill");
+    expect(rowPill(card({ kind: "" }), "todo")).toBeNull();
+    expect(render(cols({ todo: [card({ key: "u2", userTaskId: "t2", kind: "" })] }))).not.toContain("tdg-pill");
+  });
+});
+
+describe("⚠️ THE METER NAMES THE STAGE, and it is a function of the TASK TYPE", () => {
+  /* The engine only raises a `full_requested` task for a query that IS at full-requested — the
+     status is what produced the task — so reading the query again to place the marker would be a
+     second derivation of a fact the first already carries. Same argument todoGroups is built on. */
+  it("the three stages are the submission's own, and an offer lights all of them", () => {
+    expect(rowJourney(card({ taskType: "offer_received" }), "todo"))
+      .toEqual({ stages: ["done", "done", "done"], label: "OFFER ON THE TABLE" });
+    expect(rowJourney(card({ taskType: "partial_requested" }), "todo"))
+      .toEqual({ stages: ["done", "now", "todo"], label: "PARTIAL REQUESTED" });
+    expect(rowJourney(card({ taskType: "full_requested" }), "todo"))
+      .toEqual({ stages: ["done", "done", "now"], label: "FULL REQUESTED" });
+    expect(rowJourney(card({ taskType: "revise_resubmit" }), "todo"))
+      .toEqual({ stages: ["done", "done", "now"], label: "REVISION IN HAND" });
+  });
+
+  it("a pile, a writer's own task and a silence have NO journey — the track simply stays empty", () => {
+    for (const c of [sweepCard(), card({ taskType: "no_response_close" }), card({ userTaskId: "t", taskType: undefined }), card({ taskType: "nudge_overdue" })]) {
+      expect(rowJourney(c, "todo"), c.taskType ?? "user").toBeNull();
+    }
+    expect(rowJourney(card({ taskType: "full_requested" }), "done")).toBeNull();
+    expect(rowJourney(card({ taskType: "full_requested" }), "snoozed")).toBeNull();
+  });
+
+  it("⚠️ A JOURNEY AND A PILE NEVER APPEAR TOGETHER — a pile has no path", () => {
+    const html = render(cols({ todo: [sweepCard({ key: "s9" })] }));
+    expect(html).toContain("tdg-bar");
+    expect(html).not.toContain("tdg-steps");
+    const wait = render(cols({ todo: [card({ key: "w9", taskType: "full_requested" })] }));
+    expect(wait).toContain("tdg-steps");
+    expect(wait).not.toContain("tdg-bar");
+    expect(wait).toContain("FULL REQUESTED");
+  });
+});
+
+describe("⚠️ THE PRIMARY'S NAME IS PER KIND; WHETHER IT EXISTS IS THE MENU'S ANSWER", () => {
+  it("the ref's verbs, each on its own kind", () => {
+    expect(rowPrimaryLabel(sweepCard(), "todo")).toBe("Start");
+    expect(rowPrimaryLabel(card({ taskType: "no_response_close" }), "todo")).toBe("Close");
+    expect(rowPrimaryLabel(card({ taskType: "full_requested" }), "todo")).toBe("Action");
+    expect(rowPrimaryLabel(card({}), "snoozed")).toBe("Return");
+    expect(rowPrimaryLabel(card({ done: true }), "done")).toBe("Undo");
+  });
+
+  it("rendered: a stale row says Close, a sweep says Start", () => {
+    expect(render(cols({ todo: [card({ key: "st", stream: "hk", kind: "STALE", taskType: "no_response_close" })] }))).toContain(">Close<");
+    expect(render(cols({ todo: [sweepCard({ key: "sw" })] }))).toContain(">Start<");
+  });
+
+  /* ⚠️ TWO OF THE REF'S THIRTEEN ROWS ARE NOT BUILT, AND THAT IS THE LAW RATHER THAN AN OMISSION.
+     DEADLINE ("Review") has no task type — nothing in the engine raises an expiring exclusive —
+     and DISMISSED ("Restore") belongs to the Task-settings ledger, not to a group on this page.
+     The shell renders what exists, never what is planned. */
+  it("no verb exists for a kind nothing can raise", () => {
+    const lib = readFileSync(join(here, "..", "..", "lib", "taskRow.ts"), "utf8");
+    expect(code(lib)).not.toContain("Review");
+    expect(code(lib)).not.toContain("Restore");
   });
 });
 
