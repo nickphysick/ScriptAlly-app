@@ -279,7 +279,10 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
       <div className={`os-card os-lift os-actv${loading ? " isload" : ""}`} ref={actvRef}>
         {loading && <Skel bars={["h", "", "", "grow"]} />}
         <div className="os-ahead">
-          <span className="os-aln" /><h2>Activity</h2><span className="os-aln" />
+          {/* ⚠️ THE FLANKING RULES ARE GONE. They existed to centre the title on a plain card
+              head; on a filled band they draw two lines across a colour that is already doing
+              the separating. The title sits left, as the ref has it. */}
+          <h2>Activity</h2>
           <button
             ref={expBtnRef}
             type="button"
@@ -307,7 +310,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                 <div className="os-tlev">
                   <div className="os-tlthread">
                     {r.dotStatus
-                      ? <StatusDot status={r.dotStatus} overrideSize={12} decorative />
+                      ? <StatusDot status={r.dotStatus} overrideSize={9} decorative />
                       : <span className="os-tldot" aria-hidden="true" />}
                     <span className="os-tlln" aria-hidden="true" />
                   </div>

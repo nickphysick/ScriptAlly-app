@@ -153,6 +153,36 @@ describe("the rendered rail", () => {
   });
 });
 
+describe("the sage band and the timeline (app-shell-v2)", () => {
+  /* ⚠️ SAGE HEADS A CONTAINER; pink is reserved for the surface that wants something (tasks). */
+  it("⚠️ the activity header is a SAGE gradient band with its hairline", () => {
+    const h = cssRules.slice(cssRules.indexOf(".os-ahead {"));
+    const block = h.slice(0, h.indexOf("}"));
+    expect(block).toContain("linear-gradient(180deg, #dde3da, #d6dcd3)");
+    expect(block).toContain("border-bottom: 1px solid #cbd3c8");
+    const t = cssRules.slice(cssRules.indexOf(".os-ahead h2 {"));
+    expect(t.slice(0, t.indexOf("}"))).toContain("color: #2b3a29");
+  });
+
+  /* ⚠️ THE DOTS ARE THE LOCKED COMPONENT. The mockup draws simplified circles; those are a
+     stand-in, and a local circle would lose the direction colouring the real dot carries.
+     Asserted on the COMPONENT, never on a colour. */
+  it("⚠️ the feed's dots are StatusDot instances at 9px, never local circles", () => {
+    const src = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
+    expect(src).toContain("<StatusDot status={r.dotStatus} overrideSize={9} decorative />");
+    expect(src).toContain('import { StatusDot }');
+  });
+
+  it("the cardlet is parchment with a hairline and a 9px radius; the foot caption centres", () => {
+    const c = cssRules.slice(cssRules.indexOf(".os-cardlet {"));
+    const block = c.slice(0, c.indexOf("}"));
+    expect(block).toContain("background: #fffdf9");
+    expect(block).toContain("border-radius: 9px");
+    const f = cssRules.slice(cssRules.indexOf(".os-afoot {"));
+    expect(f.slice(0, f.indexOf("}"))).toContain("justify-content: center");
+  });
+});
+
 describe("§6 · the collapse mechanics in CSS", () => {
   it("⚠️ the stowables collapse padding, borders AND the margin the rail spaces with", () => {
     const collapsed = cssRules.slice(cssRules.indexOf(".os-rail-expanded .stowable {"));
