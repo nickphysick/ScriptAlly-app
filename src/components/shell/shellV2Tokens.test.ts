@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, join } from "node:path";
 import * as dt from "../../lib/designTokens";
 
 const css = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
@@ -445,5 +445,33 @@ describe("the foot fade", () => {
     expect(shell).toContain("scrollHeight - el.scrollTop - el.clientHeight > 8");
     expect(shell).toContain("new ResizeObserver(updateFade)");
     expect(shell).toMatch(/useEffect\(\(\) => \{\s*updateFade\(\);/);
+  });
+});
+
+/**
+ * ⚠️ ONE ELEMENT, ONE RULE — the duplicate-declaration trap (audit P2).
+ *
+ * Two `.ws-uacct` blocks at equal specificity produced the sidebar foot's reported fault: the
+ * later one set `align-items` and never reset `flex-direction`, so `column` from the earlier rule
+ * stood and the avatar stacked above the name. Neither rule was wrong to read. This asserts the
+ * foot's row selectors are declared ONCE, because a second declaration is how the fault returns.
+ */
+describe("sidebar foot — the composed row is declared once", () => {
+  const css = readFileSync(join(__dirname, "workspaceShell.css"), "utf8");
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, ""); // comments name these selectors; don't count those
+
+  for (const sel of [".ws-uacct", ".ws-n", ".ws-pl", ".ws-utext"]) {
+    it(`${sel} has exactly one rule block`, () => {
+      const hits = bare.match(new RegExp(`(^|[},])\\s*\\${sel}\\s*\\{`, "g")) ?? [];
+      expect(hits).toHaveLength(1);
+    });
+  }
+
+  it("the row runs left-to-right and stacks its text as blocks", () => {
+    const block = bare.slice(bare.indexOf(".ws-uacct {"));
+    expect(block.slice(0, block.indexOf("}"))).toContain("flex-direction: row");
+    // the name and plan must be blocks or they run together on one line
+    expect(bare).toMatch(/\.ws-n\s*\{[^}]*display:\s*block/);
+    expect(bare).toMatch(/\.ws-pl\s*\{[^}]*display:\s*block/);
   });
 });

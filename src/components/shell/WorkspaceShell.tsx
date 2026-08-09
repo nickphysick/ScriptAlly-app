@@ -318,24 +318,25 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("/account"); } }}
             >
               <span className="ws-av" aria-hidden="true">{initials(name)}</span>
+              {/* ⚠️ NAME OVER PLAN AS BLOCKS, AND THE PILL OUTSIDE THE TEXT COLUMN (audit P2).
+                  The pill used to sit inside the plan line, which made it a word in a sentence
+                  rather than a control at the end of the row. */}
               <span className="ws-utext">
-              <span className="ws-n">{name}</span>
-              <span className="ws-acctline">
-                <span className="ws-pl">{plan.label}</span>
-                {plan.upgrade && (
-                  /* ⚠️ THE PILL STOPS PROPAGATION. Without it the row's own handler would fire
-                     too and the click would land on Settings — the upsell would open the one
-                     page that is not the upgrade flow. */
-                  <button
-                    type="button"
-                    className="ws-upg"
-                    onClick={(e) => { e.stopPropagation(); onUpgrade?.(); }}
-                  >
-                    Upgrade
-                  </button>
-                )}
+                <span className="ws-n">{name}</span>
+                <span className="ws-acctline"><span className="ws-pl">{plan.label}</span></span>
               </span>
-              </span>
+              {plan.upgrade && (
+                /* ⚠️ THE PILL STOPS PROPAGATION. Without it the row's own handler would fire too
+                   and the click would land on Settings — the upsell would open the one page that
+                   is not the upgrade flow. */
+                <button
+                  type="button"
+                  className="ws-upg"
+                  onClick={(e) => { e.stopPropagation(); onUpgrade?.(); }}
+                >
+                  Upgrade
+                </button>
+              )}
             </div>
             <button type="button" className="ws-ni ws-setrow" onClick={() => go("/account")}>
               <span className="ws-ic"><Settings aria-hidden="true" /></span>
