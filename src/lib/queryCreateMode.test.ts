@@ -63,21 +63,20 @@ describe("every launch point still reaches creation", () => {
 });
 
 describe("the draft is LOCAL until Save", () => {
-  it("create mode owns the reading pane, and the draft row pins to the list", () => {
+  /* ⚠️ AMENDED (v3): the draft row is gone. It pinned to the top of the list so the thing you
+     were making had a place in the thing you were making it for — but the list is now HIDDEN
+     while creating, so the row had nowhere to pin and nothing to be seen against. */
+  it("create mode owns the reading pane, and nothing is left in the list", () => {
     expect(queries).toContain("createDraft ? (");
     expect(queries).toContain("<QueryCreatePane");
-    expect(queries).toContain("f12-draft");
+    expect(queries, "the draft row outlived the list it pinned to").not.toContain("f12-draft");
   });
 
-  it("the draft row renders OUTSIDE the filtered map — a draft matches no filter", () => {
-    // It is emitted before sortedList.map, inside the rows container.
-    const rows = queries.indexOf('className="f12-rows" role="listbox"');
-    const draft = queries.indexOf("f12-drafttag", rows);
-    const map = queries.indexOf("renderList.map", rows); // v5: the list renders through renderList
-    expect(rows).toBeGreaterThan(-1);
-    expect(draft).toBeGreaterThan(rows);
-    expect(draft, "the draft row fell inside the filtered list").toBeLessThan(map);
-  });
+  /* ⚠️ RETIRED WITH THE ROW (v3). It asserted the draft was emitted BEFORE the filtered map, so
+     no active filter could hide the thing you were currently making — a real trap, and the right
+     fix while the row existed. The list is hidden in create mode now, so nothing can hide it
+     because nothing renders it. The lesson survives for anything else added to that container:
+     a filter applies to records, and a draft is not one yet. */
 
   it("the pane writes nothing itself — no db CALLS live in the create component", () => {
     // Match invocation, not prose: the file's header legitimately names the addQuery path it feeds.

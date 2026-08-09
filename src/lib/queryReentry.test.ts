@@ -34,7 +34,8 @@ describe("re-entry is a no-op, from every entry point", () => {
   it("nothing is re-initialised — the draft, its baseline and the stash all survive", () => {
     const body = openCreateBody();
     const guardEnd = body.indexOf("return;");
-    for (const write of ["setCreateDraft", "setCreateBase", "setStashedSelection", "setSelectedQueryId", "setDraftIn"]) {
+    // setDraftIn dropped from this list with the draft row (v3) — the state no longer exists.
+    for (const write of ["setCreateDraft", "setCreateBase", "setStashedSelection", "setSelectedQueryId"]) {
       expect(body.indexOf(write), `${write} runs before the guard`).toBeGreaterThan(guardEnd);
     }
   });

@@ -59,11 +59,12 @@ describe("quiet scrollbars — the To-do pattern, reused", () => {
     expect(css).toContain(":focus-within { scrollbar-color: var(--hairline) transparent; }");
   });
 
-  it("applied to the list rows and all three column bodies, both modes", () => {
-    // reading pane: the three EdgeFadeScroll columns
+  /* Create mode's two scrolling column bodies went with the grid (v3): the stack shows one
+     section at a time and the pane scrolls as a whole, so there is nothing left inside it that
+     scrolls on its own. The READING pane's three columns are untouched and still the point. */
+  it("applied to the list rows and the reading pane's three columns", () => {
     expect(queries.match(/scrollClassName="f12-quiet-scroll"/g)?.length ?? 0).toBe(3);
-    // create mode: the two scrolling column bodies (Notes is a flex textarea, not a scroller)
-    expect(pane.match(/className="f12-quiet-scroll"/g)?.length ?? 0).toBe(2);
+    expect(pane, "a create-mode inner scroller came back").not.toContain('className="f12-quiet-scroll"');
   });
 
   it("the webkit half is present — To-do's rule lacks it, so Safari would show a system bar", () => {

@@ -27,6 +27,7 @@ import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
+import { requirements } from "../lib/createSteps";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
@@ -298,32 +299,23 @@ export const Queries: React.FC<{
   const [createError, setCreateError] = useState<string | null>(null);
   const creating = createDraft !== null;
 
-  /* ── v5 P2 · CHOREOGRAPHY STATE (ref qdb-create-motion.html) ──────────────────────────────
-     `draftIn` drives the row's grow/collapse — set on the frame AFTER the row mounts, so the
-     height transition has a real 0 to animate from. `stashedSelection` is whatever was open when
-     create mode started: entry clears the selected state, discard puts it back. `pendingSave`
-     carries the saved id plus the draft row's last top, so the REAL row can FLIP from where the
-     draft sat. `graceRow` force-shows a saved query the filters would hide, long enough to settle
-     before it collapses out behind the toast. */
-  const [draftIn, setDraftIn] = useState(false);
-  const [draftSaved, setDraftSaved] = useState(false);
+  /* ── CHOREOGRAPHY STATE ────────────────────────────────────────────────────────────────────
+     `stashedSelection` is whatever was open when create mode started: entry clears the selected
+     state, discard puts it back. `pendingSave` carries the saved id until the listener delivers
+     the row. `graceRow` force-shows a saved query the filters would hide, long enough to settle
+     before it collapses out behind the toast.
+
+     ⚠️ THE DRAFT ROW AND ITS FLIP ARE GONE (v3). The list is hidden entirely while creating, so
+     there was nothing for a draft row to sit in and nothing for the saved row to fly FROM — a
+     hidden element measures 0, so the FLIP would have animated every save from the top of the
+     window. The confirmation is now the list RETURNING with the new row in it, wearing the
+     settle the list already draws. `draftIn` / `draftSaved` / `draftRowRef` went with it. */
   const [stashedSelection, setStashedSelection] = useState<string | null>(null);
   const [pendingSave, setPendingSave] = useState<
-    { id: string; fromTop: number; again?: { dateSent: string; sendMethod: SubmissionMethod; reminder: ReminderChoice; manuscriptId: string } } | null
+    { id: string; again?: { dateSent: string; sendMethod: SubmissionMethod; reminder: ReminderChoice; manuscriptId: string } } | null
   >(null);
   const [settleId, setSettleId] = useState<string | null>(null);
   const [graceRow, setGraceRow] = useState<{ id: string; leaving: boolean } | null>(null);
-  const draftRowRef = useRef<HTMLDivElement>(null);
-  /** Runs when the draft row has finished collapsing (its transitionend), not on a timer. */
-  const pendingDiscardRef = useRef<(() => void) | null>(null);
-
-  /** Grow the draft row in on the frame after it mounts (a transition needs a from-state that has
-   *  actually been painted). rAF, not a timer — it schedules the class flip, it doesn't animate. */
-  useEffect(() => {
-    if (!creating) return;
-    const id = requestAnimationFrame(() => setDraftIn(true));
-    return () => cancelAnimationFrame(id);
-  }, [creating]);
 
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
    *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
@@ -348,8 +340,6 @@ export const Queries: React.FC<{
     // else is "the query you're looking at". Discard puts it back.
     setStashedSelection(selectedQueryId);
     setSelectedQueryId(null);
-    setDraftIn(false);
-    setDraftSaved(false);
     setCreateBase(base);
     setCreateDraft(base);
     setCreateError(null);
@@ -390,24 +380,23 @@ export const Queries: React.FC<{
   /** Leave create mode. Untouched → silent; dirty → confirm. `then` runs once it's actually shut
    *  (so clicking another row selects it only after the draft is resolved). */
   const closeCreate = (then?: () => void) => {
-    /* v5 P2 — collapse FIRST, unmount after. The draft row's height transition ending is what
-       clears the draft (see onTransitionEnd on the row), so the contents are reset only once the
-       row has actually gone — no visible flash of emptied text. The selection is restored here:
-       the stashed query if it still exists, else the first row of the current sort. */
+    /* ⚠️ THE DISCARD RUNS DIRECTLY NOW. It used to be deferred into a ref and fired by the draft
+       row's height transitionend — "collapse first, unmount after", so the contents were never
+       seen blanking in place. With the row deleted that transition never fires, and leaving the
+       closure parked in a ref would have made Cancel do NOTHING AT ALL: create mode would simply
+       refuse to close. There is no longer anything to wait for, so the reset is the whole of it.
+       The selection is restored here: the stashed query if it still exists, else the first row of
+       the current sort. */
     const shut = () => {
-      setDraftIn(false);
-      pendingDiscardRef.current = () => {
-        setCreateDraft(null);
-        setCreateBase(null);
-        setCreateError(null);
-        setDraftSaved(false);
-        const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
-          ? stashedSelection
-          : (sortedListRef.current[0]?.id ?? null);
-        setSelectedQueryId(restore);
-        setStashedSelection(null);
-        then?.();
-      };
+      setCreateDraft(null);
+      setCreateBase(null);
+      setCreateError(null);
+      const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
+        ? stashedSelection
+        : (sortedListRef.current[0]?.id ?? null);
+      setSelectedQueryId(restore);
+      setStashedSelection(null);
+      then?.();
     };
     if (createDraft && createBase && draftDirty(createDraft, createBase)) {
       showConfirm({
@@ -465,15 +454,11 @@ export const Queries: React.FC<{
       }
       if (createDraft.journal.trim()) await addJournalEntry(res.id, createDraft.journal.trim());
       const newId = res.id;
-      /* v5 P2 — beat 1: the row sheds its draft skin IN PLACE (dashed → none, tag out, ground →
-         selected tint) before anything moves. We hold the draft row mounted and remember its top;
-         the effect below waits for the real row to arrive, then FLIPs it from exactly here, so
-         the two elements read as one row transforming rather than one vanishing and another
-         appearing. */
-      const fromTop = draftRowRef.current?.getBoundingClientRect().top ?? 0;
-      setDraftSaved(true);
+      /* The list is hidden while creating, so there is no draft row to shed a skin or to fly
+         from. The effect below waits for the real row to arrive; the list returning WITH it —
+         settling — is the confirmation. */
       setPendingSave({
-        id: newId, fromTop,
+        id: newId,
         /* The facts that outlive the agent. Captured HERE, at the write, not read back off the
            draft in the effect — by then it may already have been replaced. */
         again: logAnother ? {
@@ -496,7 +481,6 @@ export const Queries: React.FC<{
     if (!pendingSave) return;
     const saved = queries.find((q) => q.id === pendingSave.id);
     if (!saved) return; // the listener hasn't caught up yet
-    setDraftSaved(false);
     /* ⚠️ BATCH FORK. "Save & log another" keeps create mode open: the rail grows the saved row
        exactly as a normal save does, and the draft tile RESETS rather than leaving. The agent is
        cleared because it is the one thing that must differ; the manuscript, date, send method and
@@ -946,11 +930,28 @@ export const Queries: React.FC<{
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
 
+  /* The shortcut reads these through refs rather than closing over them: the listener is bound
+     once per create session, and a stale closure would keep answering with the readiness the
+     draft had when it opened. */
+  const createReadyRef = useRef(false);
+  const createSavingRef = useRef(false);
+  const saveCreateRef = useRef<() => void>(() => {});
+
   // v4 P2 — Esc leaves create mode. Declared here (not with the other create handlers) because it
   // reads the popover state above: an open Filter/Sort popover owns Escape first.
   useEffect(() => {
     if (!creating) return;
     const onKey = (e: KeyboardEvent) => {
+      /* ⌘/Ctrl+Enter SAVES FROM ANYWHERE in create mode — including inside the notes textarea,
+         where plain Enter is a newline and therefore cannot be the finish key. Gated on the same
+         readiness the buttons read, so the shortcut can never do what a disabled button would
+         not. */
+      if ((e.key === "Enter") && (e.metaKey || e.ctrlKey)) {
+        if (!createReadyRef.current || createSavingRef.current) return;
+        e.preventDefault();
+        saveCreateRef.current();
+        return;
+      }
       if (e.key !== "Escape" || filterPopOpen || sortPopOpen) return;
       e.preventDefault();
       closeCreate();
@@ -1441,6 +1442,14 @@ export const Queries: React.FC<{
   /* The save gate, in ONE place: the header's two save buttons must agree, and a second copy of
      draftReady(createDraft) is how they would stop agreeing. */
   const createReady = createDraft ? draftReady(createDraft) : false;
+  /* ⚠️ ASSIGNED HERE, NOT WHERE THE REFS ARE DECLARED. The ⌘↵ listener is bound ~470 lines
+     above, before `createReady` exists — writing `createReadyRef.current = createReady` up there
+     is a same-scope use-before-declaration, and tsc rejected it. The refs are declared early so
+     the listener can close over them and assigned here so they carry the live value. */
+  createReadyRef.current = createReady;
+  createSavingRef.current = createSaving;
+  saveCreateRef.current = () => { void saveCreate(); };
+
   const listNarrowed = activeFilterCount > 0 || (listSearch || searchQuery || "").trim() !== "";
 
   const OPEN_STATUSES_F12 = STATUS_SORT_ORDER.slice(0, 7);
@@ -2092,29 +2101,18 @@ export const Queries: React.FC<{
 
   selectedQueryIdRef.current = selectedQueryId;
 
-  /* The FLIP. Measured after React has placed the row at its sorted index (the real comparator
-     did that, not us), so the travel always ends where the list actually wants it. */
+  /* ⚠️ THE FLIP IS GONE, and removing it was not optional. It inverted the saved row from the
+     draft row's last position so the two read as one row transforming. The list is now hidden
+     while creating: a hidden element's getBoundingClientRect() is all zeros, so the "from" would
+     have been the top of the WINDOW and every save would have flown the new row up the page.
+     What remains is the settle — the list comes back and the arriving row pulses. One beat, in
+     the place the eye is already going. */
   useLayoutEffect(() => {
     if (!pendingSave) return;
     const el = document.getElementById(`query-row-${pendingSave.id}`);
     if (!el) return; // not rendered yet (or hidden by a filter with no grace row)
-    // ⚠️ motion.css's trap: a filled animation outranks an inline transform. Clear any before
-    // measuring, or the invert is silently ignored.
-    el.style.animation = "none";
-    const last = el.getBoundingClientRect();
-    const delta = pendingSave.fromTop - last.top;
     setPendingSave(null);
-    if (Math.abs(delta) > 1) {
-      el.style.transition = "none";
-      el.style.transform = `translateY(${delta}px)`;
-      void el.offsetWidth; // force reflow so the inverted position is the starting frame
-      el.style.transition = "transform 0.32s cubic-bezier(0.22, 0.9, 0.3, 1)";
-      el.style.transform = "";
-      const clear = () => { el.style.transition = ""; el.removeEventListener("transitionend", clear); };
-      el.addEventListener("transitionend", clear);
-    }
-    el.style.animation = "";
-    setSettleId(pendingSave.id); // beat 4 — the settle pulse rides on top
+    setSettleId(pendingSave.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingSave, sortedList]);
 
@@ -2875,42 +2873,6 @@ export const Queries: React.FC<{
               </div>
             </div>
             <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
-              {/* v4 P2 — the DRAFT row pins to the top and shows regardless of the active filters
-                  (it isn't a query yet, so no filter could match it). It fills in live as the
-                  agent is chosen: dashed and italic until then, solid once resolved. */}
-              {createDraft && (() => {
-                const draftAgent = createDraft.agentId ? agents.find((a) => a.id === createDraft.agentId) ?? null : null;
-                return (
-                  <div
-                    ref={draftRowRef}
-                    className={`f12-row f12-draft${draftIn ? " f12-draft-in" : ""}${draftAgent ? " f12-filled" : ""}${draftSaved ? " f12-draft-saved" : ""}`}
-                    aria-label="New query draft"
-                    // The collapse finishing is what clears the draft — so its contents are reset
-                    // only once the row has gone, never visibly blanked in place.
-                    onTransitionEnd={(e) => {
-                      if (e.propertyName !== "height" || draftIn) return;
-                      const run = pendingDiscardRef.current;
-                      pendingDiscardRef.current = null;
-                      run?.();
-                    }}
-                  >
-                    {/* EXACTLY a normal row's parts, in the same order (ref qdb-draft-row.html):
-                        monogram · name/agency · right-hand column. The "Draft" chip takes the slot
-                        a normal row gives its status dot, with the date beneath it — so nothing
-                        stacks above the content and nothing sits outside the box, which is what
-                        the row's overflow:hidden was clipping. */}
-                    <span className="f12-av f12-av--sm" aria-hidden="true">{draftAgent ? agentInitials(draftAgent) : "—"}</span>
-                    <span className="f12-mid">
-                      <span className="f12-nm">{draftAgent ? agentPrimary(draftAgent) : "Choose an agent…"}</span>
-                      <span className="f12-ag">{draftAgent ? agentAgencyLine(draftAgent) : "New query"}</span>
-                    </span>
-                    <span className="f12-end">
-                      <span className="f12-drafttag">Draft</span>
-                      <span className="f12-d2">Today</span>
-                    </span>
-                  </div>
-                );
-              })()}
               {renderList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);
                 const ms = manuscripts.find(m => m.id === q.manuscriptId);
@@ -2929,12 +2891,6 @@ export const Queries: React.FC<{
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
-                    /* In the rail the name is withdrawn to opacity 0 — still in the
-                       accessibility tree (opacity hides from the eye, not from a reader), so the
-                       button keeps its accessible name either way. The title is for the POINTER,
-                       which has no such fallback; it is create-mode only so full-width rows
-                       don't grow a tooltip they don't need. */
-                    title={creating ? agentPrimary(agent) : undefined}
                     className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
@@ -3107,6 +3063,19 @@ export const Queries: React.FC<{
                     <p className={`qch-sub${createError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
                       {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
                     </p>
+                    {/* ⚠️ THE PIPS READ THE DRAFT, NEVER THE STEPS — required ≠ sequential. Two
+                        are green on arrival because openCreate seeds the manuscript and today's
+                        date; only the agent is genuinely open. They are deliberately NOT a live
+                        region: the subtitle above already is one, and two announcers on one line
+                        of chrome would talk over each other on every keystroke. */}
+                    <div className="qch-reqs">
+                      {requirements(createDraft).map((r) => (
+                        <span key={r.key} className={`qch-rq${r.met ? " qch-on" : ""}`}>
+                          <span className="qch-c" aria-hidden="true">{r.met ? "✓" : ""}</span>
+                          {r.label}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   <div className="qch-acts">
                     <span className="qch-esc" aria-hidden="true">Esc</span>
@@ -3134,6 +3103,11 @@ export const Queries: React.FC<{
                   agents={agents}
                   manuscripts={pickableManuscripts(manuscripts)}
                   onCreateAgent={handleCreateAgentInline}
+                  queries={queries}
+                  /* The duplicate link discards the draft through the normal door — closeCreate
+                     owns the dirty-confirm, so "go and look at that one" can never lose typing
+                     silently. */
+                  onOpenQuery={(id) => closeCreate(() => setSelectedQueryId(id))}
                 />
               </div>
             ) : activeQuery && activeAgent && activeMs ? (

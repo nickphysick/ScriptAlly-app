@@ -19,8 +19,13 @@
  * would give one action two homes — and the reclaimed ~95px is what lets the columns fit.
  */
 import React, { useMemo, useState } from "react";
-import { Agent, Manuscript } from "../../types";
+import { Agent, Manuscript, Query } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
+import {
+  STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL,
+  stepStates, stepIndex, advance, jumpTo, nextStep, enterHint, type StepId,
+} from "../../lib/createSteps";
+import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { BrandDatePicker } from "../forms";
@@ -37,8 +42,7 @@ import {
   reminderChipLabel,
   suggestedReminderDate,
   todayInputDate,
-  type QueryDraft,
-} from "../../lib/queryDraft";
+  type QueryDraft, resolveReminder } from "../../lib/queryDraft";
 
 export interface QueryCreatePaneProps {
   draft: QueryDraft;
@@ -47,6 +51,10 @@ export interface QueryCreatePaneProps {
   manuscripts: Manuscript[];
   /** The picker's inline quick-add — the same contract LogQueryFocusForm used. */
   onCreateAgent: (d: { name: string; agency: string; email: string; responseTimeWeeks?: number; starRating?: number }) => Promise<{ ok: boolean; error?: string; agent?: Agent }>;
+  /** Every query on file — for the duplicate notice. An in-memory filter; no new read. */
+  queries?: Query[];
+  /** Discard the draft (with the usual confirm if dirty) and open that query instead. */
+  onOpenQuery?: (id: string) => void;
 }
 
 const LABEL: React.CSSProperties = {
@@ -61,6 +69,8 @@ const FIELD: React.CSSProperties = {
 
 export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   draft, onChange, agents, manuscripts, onCreateAgent,
+  queries = [],
+  onOpenQuery,
 }) => {
   const agent = useMemo(() => agents.find((a) => a.id === draft.agentId) ?? null, [agents, draft.agentId]);
   const set = (patch: Partial<QueryDraft>) => onChange({ ...draft, ...patch });
@@ -84,48 +94,61 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const sample = draft.materials.find((r) => r.key === "sample") as Extract<MaterialRow, { key: "sample" }> | undefined;
   const other = draft.materials.find((r) => r.key === "other") as Extract<MaterialRow, { key: "other" }> | undefined;
 
+  /* ── THE STACK'S POSITION. Local to the pane: it is presentation, not draft data — a
+     half-walked stack must not make the draft dirty, and reopening create mode starts the walk
+     again. `reached` never retreats (see createSteps). ── */
+  const [active, setActive] = useState<StepId>("when");
+  const [reached, setReached] = useState<StepId>("when");
+  const states = stepStates(active, reached);
+  const summaries = stepSummaries(draft, agent, manuscripts);
+
+  /* Non-blocking by design — see openQueriesWith. */
+  const dupe = openQueriesWith(draft.agentId, queries);
+  /* The reminder whisper: presentational only. ⚠️ REMINDER PERSISTENCE IS STILL STUBBED — the
+     nudge date is stored on the query, but nothing schedules a notification from it. The line
+     says "we'll nudge you", and until that flag lands it is a promise the app keeps only by the
+     writer opening it. Flagged, not hidden. */
+  const whisperDate = resolveReminder(draft, agent);
+
+  const jump = (id: StepId) => { const n = jumpTo(id, reached); setActive(n.active); setReached(n.reached); };
+  const step = () => { const n = advance(active, reached); setActive(n.active); setReached(n.reached); };
+
+  /* ⚠️ ENTER ACCEPTS AND ADVANCES — except where Enter already means something. A textarea needs
+     it for newlines (Notes), and an open menu needs it to choose the highlighted row (the
+     manuscript picker, the unit menu), so those keep it and the stack does not steal it. On the
+     LAST section there is nothing to advance to, so Enter falls through to the page's ⌘↵ save
+     rather than being swallowed and looking broken. */
+  const onStackKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Enter" || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+    const el = e.target as HTMLElement;
+    if (el.tagName === "TEXTAREA" || el.isContentEditable) return;
+    if (el.getAttribute("aria-haspopup") || el.getAttribute("aria-expanded") === "true") return;
+    if (!nextStep(active)) return;
+    e.preventDefault();
+    step();
+  };
+
   return (
     <div className="f12-detail" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
-      {/* ── HERO: the agent picker, resolving to the normal agent header once chosen ── */}
-      <div className="f12-hero qc-hero" style={{ flex: "none", alignItems: "center" }}>
-        {agent ? (
-          <>
-            <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                <span className="f12-hn">{agentPrimary(agent)}</span>
-                {/* Changing your mind is one click, and it re-derives everything seeded from the
-                    agent — the materials checklist and the nudge suggestion both follow the new
-                    pick rather than silently keeping the old one's. */}
-                <button type="button" className="qc-change" onClick={() => set({ agentId: null, materials: materialRowsForDraft(null) })}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                  Change
-                </button>
-              </div>
-              <div className="f12-ha">{agentAgencyLine(agent)}</div>
-              <span className="f12-hs">New query</span>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* COMPACT (ref qdb-focus-spotlight.html): title and subtitle sit BESIDE the search
-                field rather than stacked above it, and the mark drops 76 → 54px. Roughly 90px of
-                the height the columns need — the other ~95px came from the retired footer. */}
-            <span className="qc-mark" aria-hidden="true">✎</span>
-            <div className="qc-htxt">
-              {/* Format B (ref qdb-create-polish §2): the title names the job, the italic serif
-                  keeps the human phrasing as a subtitle. There is NO "Agent" field label — the
-                  search placeholder ("Search by name or agency…") already does that work, and a
-                  label above it would say the same thing twice. */}
-              <h2 className="qc-head">New query</h2>
-              <p className="qc-sub">Who are you querying?</p>
-            </div>
-            <div className="qc-picker" style={{ flex: 1, minWidth: 0, maxWidth: 460 }}>
+      {/* ══ STAGE 1 — ONE QUESTION (ref qc-create-steps.html) ══════════════════════════════
+          Before an agent is chosen the pane asks exactly one thing, centred, with nothing
+          competing for the answer. The three sections wait beneath as GHOST ROWS: their
+          anatomy is visible — you can see what will be asked — but nothing is asked yet.
+
+          ⚠️ The picker is REUSED, never rebuilt: AgentSearchField already owns the typeahead,
+          the highlighted-Enter selection and the "Agent not listed? Add a new agent now"
+          quick-add. Rebuilding any of that here would fork three behaviours at once. ── */}
+      {!agent ? (
+        <>
+          <div className="qc-ask">
+            <span className="qc-askav" aria-hidden="true" />
+            <h2 className="qc-askq">Who are you querying?</h2>
+            <div className="qc-askfield">
               <AgentSearchField
                 agents={agents}
                 value=""
                 queriedAgentIds={new Set<string>()}
-                onSelect={(a) => set({ agentId: a.id, materials: materialRowsForDraft(a) })}
+                onSelect={(a) => { setActive("when"); setReached("when"); set({ agentId: a.id, materials: materialRowsForDraft(a) }); }}
                 onCreateAgent={async (d) => {
                   const res = await onCreateAgent(d);
                   if (res.ok && res.agent) set({ agentId: res.agent.id, materials: materialRowsForDraft(res.agent) });
@@ -133,30 +156,72 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 }}
               />
             </div>
-          </>
-        )}
-        <span
-          style={{
-            marginLeft: "auto", alignSelf: "flex-start", flex: "none",
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: "var(--faint)",
-          }}
-        >Esc to cancel</span>
+          </div>
+          <div className="qc-stack" aria-hidden="true">
+            {STEP_ORDER.map((id) => (
+              <div key={id} className="qc-sec qc-up">
+                <div className="qc-sum">
+                  <span className="qc-tick" />
+                  <b>{STEP_SHORT[id]}</b>
+                  <span className="qc-stxt">{STEP_HINT[id]}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+      {/* ── The agent, confirmed. (P4 turns the columns below into the focused stack.) ── */}
+      <div className="f12-hero qc-hero" style={{ flex: "none", alignItems: "center" }}>
+        <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+            <span className="f12-hn">{agentPrimary(agent)}</span>
+            {/* Changing your mind is one click, and it re-derives everything seeded from the
+                agent — the materials checklist and the nudge suggestion both follow the new
+                pick rather than silently keeping the old one's. */}
+            <button type="button" className="qc-change" onClick={() => set({ agentId: null, materials: materialRowsForDraft(null) })}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+              Change
+            </button>
+          </div>
+          <div className="f12-ha">{agentAgencyLine(agent)}</div>
+          {dupe && (
+            <p className="qc-dupe">
+              {duplicateLine(dupe, agentPrimary(agent))}
+              {onOpenQuery && (
+                <button type="button" className="qc-dupelink" onClick={() => onOpenQuery(dupe.latest.id)}>
+                  {dupe.count === 1 ? "Open it" : "Open the most recent"}
+                </button>
+              )}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* ── The three columns, in the reading pane's own chrome (qc-cols stacks them <md —
           Mobile Pass 1) ── */}
-      <div className="qc-cols" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+      <div className="qc-stack" onKeyDown={onStackKeyDown}>
 
         {/* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
             to "What you sent", where it sits with the materials it went out with. */}
-        <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
-          <div className="f12-chh">
-            {/* a clock, not the old pulse line — the column is about WHEN now (ref §2) */}
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-            <span>When you sent it</span>
-          </div>
-          <div className="f12-quiet-scroll" style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+        <section className={`qc-sec qc-${states.when}`} aria-labelledby="qc-h-when">
+          {states.when !== "active" && (
+            <button type="button" className="qc-sum" onClick={() => jump("when")}>
+              <span className="qc-tick" aria-hidden="true">{states.when === "done" ? "✓" : ""}</span>
+              <b>{STEP_SHORT.when}</b>
+              <span className="qc-stxt">{states.when === "done" ? summaries.when : STEP_HINT.when}</span>
+              {states.when === "done" && <span className="qc-ed">Change</span>}
+            </button>
+          )}
+          {states.when === "active" && (
+            <>
+              <div className="qc-shead">
+                <span className="qc-n" aria-hidden="true">{stepIndex("when") + 1}</span>
+                <h3 id="qc-h-when">{STEP_TITLE.when}{STEP_OPTIONAL.when && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                <span className="qc-enter">{enterHint("when")}</span>
+              </div>
+              <div className="qc-body">
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
                 at ordinary laptop heights, so the one field that needs a decision was the one you
                 had to scroll to find. */}
@@ -234,15 +299,28 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               )}
             </div>
           </div>
-        </div>
+            </>
+          )}
+        </section>
 
         {/* 2 · WHAT YOU SENT — the checklist, pre-filled from the agent's materials-wanted */}
-        <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
-          <div className="f12-chh">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-            <span>What you sent</span>
-          </div>
-          <div className="f12-quiet-scroll" style={{ padding: "18px 16px", overflowY: "auto", flex: 1, minHeight: 0 }}>
+        <section className={`qc-sec qc-${states.what}`} aria-labelledby="qc-h-what">
+          {states.what !== "active" && (
+            <button type="button" className="qc-sum" onClick={() => jump("what")}>
+              <span className="qc-tick" aria-hidden="true">{states.what === "done" ? "✓" : ""}</span>
+              <b>{STEP_SHORT.what}</b>
+              <span className="qc-stxt">{states.what === "done" ? summaries.what : STEP_HINT.what}</span>
+              {states.what === "done" && <span className="qc-ed">Change</span>}
+            </button>
+          )}
+          {states.what === "active" && (
+            <>
+              <div className="qc-shead">
+                <span className="qc-n" aria-hidden="true">{stepIndex("what") + 1}</span>
+                <h3 id="qc-h-what">{STEP_TITLE.what}{STEP_OPTIONAL.what && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                <span className="qc-enter">{enterHint("what")}</span>
+              </div>
+              <div className="qc-body">
             <div style={{ marginBottom: 0 }}>
               <div style={LABEL}>Manuscript</div>
               {onlyManuscript ? (
@@ -380,15 +458,28 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               </div>
             )}
           </div>
-        </div>
+            </>
+          )}
+        </section>
 
         {/* 3 · JOURNAL — the optional first note */}
-        <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
-          <div className="f12-chh">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H8l-4 4z" /></svg>
-            <span>Notes</span>
-          </div>
-          <div style={{ padding: "18px 16px", display: "flex", flex: 1, minHeight: 0 }}>
+        <section className={`qc-sec qc-${states.notes}`} aria-labelledby="qc-h-notes">
+          {states.notes !== "active" && (
+            <button type="button" className="qc-sum" onClick={() => jump("notes")}>
+              <span className="qc-tick" aria-hidden="true">{states.notes === "done" ? "✓" : ""}</span>
+              <b>{STEP_SHORT.notes}</b>
+              <span className="qc-stxt">{states.notes === "done" ? summaries.notes : STEP_HINT.notes}</span>
+              {states.notes === "done" && <span className="qc-ed">Change</span>}
+            </button>
+          )}
+          {states.notes === "active" && (
+            <>
+              <div className="qc-shead">
+                <span className="qc-n" aria-hidden="true">{stepIndex("notes") + 1}</span>
+                <h3 id="qc-h-notes">{STEP_TITLE.notes}{STEP_OPTIONAL.notes && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                <span className="qc-enter">{enterHint("notes")}</span>
+              </div>
+              <div className="qc-body">
             <textarea
               value={draft.journal}
               onChange={(e) => set({ journal: e.target.value })}
@@ -401,8 +492,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               }}
             />
           </div>
-        </div>
+            </>
+          )}
+        </section>
       </div>
+      {whisperDate && (
+        <p className="qc-whisper">We&rsquo;ll nudge you on {shortDate(whisperDate)} if it&rsquo;s gone quiet.</p>
+      )}
+        </>
+      )}
     </div>
   );
 };

@@ -1,0 +1,109 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create v3 — sequential focus</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--line:#e8e2d8;--line2:#f0ebe2;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--pinkTint:#fdf4ef;--rose:#b45a40;--sage:#dde3d8;--sageBd:#ccd5c5;--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#efeae2;font-family:var(--in);color:var(--ink);padding:26px 30px 90px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:21px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:16px;max-width:920px}
+.mono{font-family:var(--mo);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.demo{display:flex;gap:8px;margin-bottom:16px}
+.dbtn{background:#241c15;color:#f4ebdd;border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--in)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:22px 26px;max-width:860px;box-shadow:0 1px 2px rgba(43,33,24,.04)}
+.chead{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.chead h2{font-family:var(--pl);font-weight:700;font-size:23px}
+.reqs{display:flex;gap:13px;margin-top:5px}
+.rq{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.rq .c{width:15px;height:15px;border-radius:50%;border:1.5px solid #cfc3b1;display:grid;place-items:center;font-size:8px;color:#fff}
+.rq.done{color:var(--ink)}
+.rq.done .c{background:#7e9178;border-color:#7e9178}
+.acts{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink2)}
+.btn.pink{background:var(--pink);border-color:var(--pinkDeep);color:#6b3321}
+.btn.dis{opacity:.45;pointer-events:none}
+/* steps */
+.step{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:all .28s cubic-bezier(.22,.9,.3,1)}
+/* done: compact summary */
+.step.done .body{display:none}
+.step.done .sum{display:flex}
+.sum{display:none;align-items:center;gap:10px;padding:11px 15px;font-size:13px;cursor:pointer}
+.sum .tick{width:19px;height:19px;border-radius:50%;background:#7e9178;color:#fff;display:grid;place-items:center;font-size:9px;flex-shrink:0}
+.sum b{font-family:var(--pl)}
+.sum .txt{color:var(--ink2)}
+.sum .ed{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted)}
+.sum:hover .ed{color:var(--rose)}
+/* active */
+.step.active{border-color:#d8c4b2;box-shadow:0 10px 30px rgba(60,45,30,.09)}
+.step.active .shead{display:flex}
+.shead{display:none;align-items:center;gap:9px;padding:13px 16px 0}
+.shead .n{width:20px;height:20px;border-radius:50%;background:var(--pinkTint);border:1px solid var(--pinkDeep);color:#a4634c;display:grid;place-items:center;font-family:var(--mo);font-size:9px}
+.shead h3{font-family:var(--pl);font-weight:700;font-size:16px}
+.shead .enter{margin-left:auto;font-family:var(--mo);font-size:8.5px;color:var(--muted);letter-spacing:.08em}
+.body{padding:12px 16px 15px}
+/* upcoming */
+.step.up{opacity:.45}
+.step.up .body{display:none}
+.step.up .sum{display:flex}
+.step.up .sum .tick{background:transparent;border:1.5px solid #cfc3b1;color:transparent}
+.step.up .sum .ed{display:none}
+/* fields */
+.fin{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:#fff;font-size:12.5px;height:38px}
+.flab{font-family:var(--mo);font-size:8px;letter-spacing:.11em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+.two{display:flex;gap:10px}.two>div{flex:1}
+.seg{display:flex;background:#f3ede4;border-radius:10px;padding:3px;gap:2px;height:38px}
+.seg span{flex:1;border-radius:8px;font-size:11.5px;color:var(--muted);display:grid;place-items:center}
+.seg span.on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(60,45,30,.12)}
+.mat{font-size:12.5px;line-height:2.1}
+.note{font-size:12px;color:var(--muted);max-width:860px;line-height:1.55;margin-top:10px}
+.agrow{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.agrow .mg{width:40px;height:40px;border-radius:50%;background:var(--pink);color:#a4634c;display:grid;place-items:center;font-family:var(--pl);font-size:14px}
+</style></head>
+<body>
+<h1>Create — sequential focus, Enter-through</h1>
+<div class="sub">After the agent is chosen, the three sections arrive as a focused stack: one active, done ones collapse to summary lines, upcoming wait dim. <b>Enter accepts the pre-filled answer and advances.</b> Click through:</div>
+<div class="demo"><button class="dbtn" onclick="setStep(1)">1 · When (active)</button><button class="dbtn" onclick="setStep(2)">2 · What (active)</button><button class="dbtn" onclick="setStep(3)">3 · Notes → ready</button></div>
+
+<div class="panel">
+  <div class="chead"><div><h2>Logging new query</h2>
+    <div class="reqs"><span class="rq done"><span class="c">✓</span>Agent</span><span class="rq done" id="rqM"><span class="c">✓</span>Manuscript</span><span class="rq done" id="rqD"><span class="c">✓</span>Date</span></div>
+  </div><div class="acts"><span class="mono">Esc</span><span class="btn" style="border-color:transparent;color:var(--muted)">Cancel</span><span class="btn">Save &amp; log another</span><span class="btn pink" id="saveB">✈ Save query</span></div></div>
+
+  <div class="agrow"><span class="mg">WT</span><div><b style="font-family:var(--pl);font-size:16px">William Tan</b> <span class="btn" style="padding:3px 9px;font-size:10.5px;margin-left:6px">✎ Change</span><div class="mono" style="margin-top:2px">Foxglove Literary · replies in ~6 weeks</div></div></div>
+
+  <div class="step" id="s1">
+    <div class="sum" onclick="setStep(1)"><span class="tick">✓</span><b>When</b><span class="txt">9 Aug · email · nudge 20 Sep</span><span class="ed">Change</span></div>
+    <div class="shead"><span class="n">1</span><h3>When you sent it</h3><span class="enter">ENTER TO ACCEPT ↵</span></div>
+    <div class="body">
+      <div class="two"><div><div class="flab">Date sent</div><div class="fin">9 August 2026</div></div><div><div class="flab">Sent by</div><div class="seg"><span class="on">Email</span><span>Form</span><span>Post</span></div></div></div>
+      <div style="margin-top:11px"><div class="flab">Nudge reminder · optional</div><div class="fin" style="background:var(--pinkTint);border-color:#e3b8a2;width:fit-content;padding-right:16px">20 Sep · in 6 weeks ✓</div></div>
+    </div>
+  </div>
+
+  <div class="step up" id="s2">
+    <div class="sum" onclick="setStep(2)"><span class="tick">✓</span><b>What</b><span class="txt" id="s2txt">Murphy's Day Out · letter, synopsis, 5 chapters</span><span class="ed">Change</span></div>
+    <div class="shead"><span class="n">2</span><h3>What you sent</h3><span class="enter">ENTER TO ACCEPT ↵</span></div>
+    <div class="body">
+      <div style="margin-bottom:11px"><div class="flab">Manuscript</div><div class="fin" style="background:#f7f3eb;width:fit-content;padding-right:18px">▤ &nbsp;Murphy's Day Out</div></div>
+      <div class="flab">Materials · from what William asks for</div>
+      <div class="mat">☑ Query letter<br>☑ Synopsis<br>☑ Sample materials — 5 chapters<br>☐ Other…</div>
+    </div>
+  </div>
+
+  <div class="step up" id="s3">
+    <div class="sum" onclick="setStep(3)"><span class="tick">✓</span><b>Notes</b><span class="txt">Optional — first impressions, personalisation</span><span class="ed">Change</span></div>
+    <div class="shead"><span class="n">3</span><h3>Notes <span style="font-family:var(--mo);font-size:9px;color:var(--muted);letter-spacing:.05em;font-weight:400">· OPTIONAL</span></h3><span class="enter">ENTER TO FINISH ↵</span></div>
+    <div class="body"><div style="border:1px solid var(--line);border-radius:10px;padding:11px;color:#b0a494;font-size:12.5px;min-height:64px">First impressions, personalisation notes, anything worth remembering…</div></div>
+  </div>
+</div>
+<div class="note" id="nn"></div>
+<script>
+var notes={1:"Step 1 active: date, method and the suggested nudge are already filled — Enter accepts all three and advances. The two later sections wait dim beneath; the agent sits confirmed above.",
+2:"Step 2 active: When has collapsed to a one-line summary with a tick and a Change affordance — nothing is locked away. Materials arrived pre-ticked from William's asks.",
+3:"Step 3: Notes is openly optional — Enter (or Save) finishes without typing a word. All requirement ticks are green; Save has been enabled since step 1, because required ≠ sequential: the steps guide attention, they never gate saving."};
+function setStep(n){[1,2,3].forEach(function(i){var el=document.getElementById('s'+i);el.classList.remove('active','done','up');
+ if(i<n)el.classList.add('done'); else if(i===n)el.classList.add('active'); else el.classList.add('up');});
+ document.getElementById('nn').textContent=notes[n];}
+setStep(1);
+</script>
+</body></html>

@@ -46,25 +46,20 @@ const block = (selector: string): string => {
 const ruleCount = (selector: string): number =>
   css.split("\n" + selector + " {").length - 1;
 
-describe("P1 · the pane names its job", () => {
-  /* AMENDED (polish round): the question is no longer forbidden — format B brings it back as an
-     italic SUBTITLE. What must never come back is the question standing in for a heading, i.e.
-     wearing the mono LABEL style. Asserting the phrase's absence was too blunt a lock. */
-  it("a Playfair heading replaces the mono question", () => {
-    expect(pane, "the question is back as a mono eyebrow").not.toContain("<div style={LABEL}>Who are you querying?</div>");
-    expect(pane).toContain('<h2 className="qc-head">New query</h2>');
-    const head = block(".qc-head");
-    expect(head, "the .qc-head rule is missing").not.toBe("");
-    expect(head, "the heading must be the serif, not the body face").toContain("var(--f12-serif)");
-  });
+/* ⚠️ P1 SUPERSEDED BY STAGE 1 (create mode v3). It settled a real argument twice over: the
+   question must not wear the mono LABEL style (a question is not an eyebrow), and it must not be
+   duplicated by an "Agent" field label above a box that already says "Search by name or
+   agency…". Both were fixes to a COMPACT hero that put a title, a subtitle and the picker on one
+   line beside each other.
 
-  /* AMENDED (polish round, ref qdb-create-polish §2 format B): the standalone "Agent" label is
-     gone — the question came back as an italic subtitle, and the search placeholder labels the
-     field. A label saying "Agent" above a box saying "Search by name or agency…" was one of the
-     two saying the same thing. */
-  it("the question returns as a subtitle, not as a duplicate field label", () => {
-    expect(pane).toContain('<p className="qc-sub">Who are you querying?</p>');
-    expect(pane, "the duplicate label came back").not.toContain("<div style={LABEL}>Agent</div>");
+   Stage 1 removes the argument's subject: the pane now asks ONE question, centred, as its whole
+   content — Playfair, no eyebrow, no field label, nothing beside it. The two rules survive in
+   createStageOne.test.ts as the order of the centred stack and the absence of a second label. */
+describe("P1 · the question is the page, not a label on it", () => {
+  it("it is a Playfair heading and there is nothing else competing with it", () => {
+    expect(pane, "the question is back as a mono eyebrow").not.toContain("<div style={LABEL}>Who are you querying?</div>");
+    expect(pane, "the duplicate field label came back").not.toContain("<div style={LABEL}>Agent</div>");
+    expect(pane).toContain('<h2 className="qc-askq">Who are you querying?</h2>');
     expect(pane, "the picker itself must not be rebuilt").toContain("AgentSearchField");
     expect(pane).toContain("onCreateAgent");
   });
@@ -117,81 +112,20 @@ describe("P2 · the sample quantity is ONE control over the SHARED physics", () 
   });
 });
 
-describe("P3 · the draft row is the same box as every other row", () => {
-  /** The row height both must share. Read from the sheet so the test can't drift from it. */
-  const rowHeight = (block(".f12-row").match(/height: (\d+)px/) ?? [])[1];
+/* ⚠️ P3 RETIRED WITH THE DRAFT ROW (create mode v3) — four assertions, and two of the lessons
+   in them outlive the row and are worth carrying:
 
-  it("the list row still declares a fixed height (the number both rows are pinned to)", () => {
-    expect(rowHeight, "the .f12-row height is gone — the whole comparison rests on it").toBeTruthy();
-    expect(rowHeight).toBe("56");
-  });
+   · EVERY SELECTOR DECLARED EXACTLY ONCE. This suite was written after `.f12-drafttag` was
+     declared twice, four lines apart, the second silently winning — so a "fix" landed that did
+     nothing. Assert a rule appears once, not merely that it appears. Still true of every rule
+     in f12.css.
+   · A BORDER IS ABSORBED BY THE PADDING, not added to the box, when a bordered variant must
+     match an unbordered neighbour's height. The draft row needed it against `.f12-row`; the
+     next bordered-variant-of-a-plain-thing will need it too.
 
-  it("the open draft row is EXACTLY that height — no growth to fit a tag", () => {
-    const open = block(".f12-row.f12-draft.f12-draft-in");
-    expect(open, "the open-state rule is missing or not compound").not.toBe("");
-    expect(open).toContain(`height: ${rowHeight}px`);
-    // the breathing room is BELOW the row, not inside it
-    expect(open, "the gap must be margin-bottom only — top margin would offset the row").toContain("margin: 0 0 8px");
-  });
+   The two that died with the row — the row's exact height, and the chip sitting where a normal
+   row shows its StatusDot — described a thing that no longer renders. */
 
-  it("the 1.5px border is absorbed by the padding, not added to the box", () => {
-    const base = block(".f12-row.f12-draft");
-    expect(base, "the draft base rule is missing").not.toBe("");
-    const rowPad = (block(".f12-row").match(/padding: 0 (\d+)px/) ?? [])[1];
-    expect(rowPad, "the .f12-row padding is gone").toBe("14");
-    // 14 − 1.5 = 12.5, so the monogram column lines up with the rows beneath
-    expect(base).toContain("padding: 0 12.5px");
-    expect(base).toContain("border: 0 dashed");
-  });
-
-  it("the chip sits in the right-hand column, where a normal row shows its status dot", () => {
-    const row = queries.slice(queries.indexOf("New query draft"), queries.indexOf("renderList.map"));
-    expect(row, "the draft row markup moved — this slice is anchored on its aria-label").not.toBe("");
-    expect(row).toContain('<span className="f12-end">');
-    // chip first, date beneath — the same two slots, the same order as a real row
-    expect(row).toMatch(/f12-drafttag">Draft<\/span>\s*<span className="f12-d2">Today<\/span>/);
-    expect(row, "the parts must be the row's own, not a nested block").toContain('<span className="f12-mid">');
-  });
-
-  it("name and agency truncate rather than wrap — they are the row's own elements", () => {
-    for (const sel of [".f12-row .f12-nm", ".f12-row .f12-ag"]) {
-      expect(block(sel), `${sel} lost its ellipsis`).toContain("text-overflow: ellipsis");
-    }
-    expect(block(".f12-row .f12-mid"), "min-width:0 is what lets the middle actually shrink").toContain("min-width: 0");
-  });
-
-  /**
-   * THE METHOD FIX. Round 1 asserted `.f12-drafttag { position: static; ...}` was present. It was
-   * — and a second rule four lines later set it back to absolute. Presence is not effect; a
-   * duplicated rule is decided by file order, which no string search can see. So: exactly one.
-   */
-  it("every draft selector is declared EXACTLY ONCE", () => {
-    for (const sel of [".f12-drafttag", ".f12-row.f12-draft", ".f12-row.f12-draft.f12-draft-in"]) {
-      expect(ruleCount(sel), `${sel} is declared more than once — the later one silently wins`).toBe(1);
-    }
-  });
-
-  /**
-   * ...and the other half of the same lesson: `.f12-row` is declared ~270 lines BELOW the draft
-   * block, so a bare `.f12-draft` loses every property they share regardless of what it says.
-   * Every draft rule must therefore be a compound modifier of the row.
-   */
-  /* Scope: TOP-LEVEL rules. The reduced-motion block still names `.f12-row.f12-draft` for
-     consistency, but it wins on `!important` regardless of specificity, so ordering can't bite
-     there — this regex is anchored at column 0 and deliberately doesn't reach inside @media. */
-  it("no top-level draft rule is a bare .f12-draft, which the row would outrank by order", () => {
-    const bare = css.match(/\n\.f12-draft[ .{]/g) ?? [];
-    expect(bare, `bare .f12-draft rules found: ${bare.join(", ")}`).toHaveLength(0);
-    expect(css.indexOf("\n.f12-row {"), "the ordering this guards against is still real")
-      .toBeGreaterThan(css.indexOf("\n.f12-row.f12-draft {"));
-  });
-});
-
-/**
- * The cheap round-trip check: create mode speaks SampleUnit ("Chapters"), the stored query speaks
- * QueryMaterial.type ("chapters"). Casing between two vocabularies is a recurring regression here,
- * so it is asserted rather than assumed.
- */
 describe("unit round-trip · create mode → stored query → post-save editor", () => {
   const POST_SAVE_UNITS = ["pages", "chapters", "words"] as const; // the editor's own state type
 
