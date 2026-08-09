@@ -1,0 +1,121 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>At a glance — dotted + tilt</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2118;--ink2:#4a3d30;--muted:#988b7b;--line:#e8e2d8;--line2:#f0ebe2;--pink:#f7dfd5;--pinkDeep:#f0cdbd;--pinkTint:#fdf4ef;--rose:#b45a40;--sage:#dde3d8;--sageBd:#ccd5c5;--sageDeep:#5a6e58;--parch:#faf7f2;--in:'Inter',sans-serif;--mo:'JetBrains Mono',monospace;--pl:'Playfair Display',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#efeae2;font-family:var(--in);color:var(--ink);padding:22px 26px 80px;-webkit-font-smoothing:antialiased}
+h1{font-family:var(--pl);font-weight:700;font-size:19px;margin-bottom:3px}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:16px;max-width:900px}
+.mono{font-family:var(--mo);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+svg{fill:none;stroke:currentColor;stroke-width:1.7}
+.bar{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.bar .lb{font-family:var(--mo);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.bar button{background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--in);color:var(--ink2)}
+.bar button.on{background:#241c15;color:#f4ebdd;border-color:#241c15}
+.sheet{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px;max-width:1000px;display:flex;gap:34px}
+.formcol{flex:0 0 52%}
+.fake{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:9px;background:#fff}
+.fake b{font-family:var(--pl);font-size:15px}
+.fake .m{font-size:12px;color:var(--muted);margin-top:3px}
+.fake.active{border-color:#d8c4b2;box-shadow:0 6px 18px rgba(60,45,30,.07)}
+.sidecol{flex:1;padding-top:4px}
+/* PANEL */
+.panel{border-radius:15px;overflow:hidden;background:#fbf9f5;transition:transform .2s ease}
+body.b1 .panel{border:1px solid var(--line2)}
+body.b2 .panel{border:1.5px dotted #cdbfa9}
+body.b3 .panel{border:1.5px dashed #cdbfa9}
+body.t0 .panel{transform:rotate(0deg)}
+body.t1 .panel{transform:rotate(-0.6deg)}
+body.t2 .panel{transform:rotate(-1.4deg)}
+body.t3 .panel{transform:rotate(-3deg)}
+/* tape */
+.tape{display:none;position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-1.5deg);width:74px;height:18px;background:rgba(247,223,213,.75);border:1px solid rgba(240,205,189,.9);border-radius:2px;z-index:2}
+body.tp .tape{display:block}
+.wrap{position:relative}
+.hglance{background:linear-gradient(135deg,#f4efe6,#faf7f2);border-bottom:1px solid var(--line);padding:13px 15px;display:flex;align-items:center;gap:10px;position:relative;overflow:hidden}
+.hglance::after{content:"";position:absolute;right:-18px;top:-18px;width:76px;height:76px;border-radius:50%;background:rgba(180,90,64,.05)}
+.hglance .ic{width:30px;height:30px;border-radius:9px;background:#fff;border:1px solid var(--pinkDeep);color:var(--rose);display:grid;place-items:center;flex-shrink:0}
+.hglance .ic svg{width:15px;height:15px}
+.hglance h4{font-family:var(--pl);font-weight:700;font-size:15px;line-height:1.1}
+.hglance .s{font-family:var(--mo);font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.pill{margin-left:auto;position:relative;z-index:1;display:inline-flex;background:#e9ede6;border:1px solid #b9c6b4;color:var(--sageDeep);border-radius:999px;padding:2px 8px;font-family:var(--mo);font-size:7px;letter-spacing:.09em;text-transform:uppercase}
+.stats{display:flex;border-bottom:1px solid var(--line2);background:#fff}
+.stat{flex:1;padding:12px 14px;border-right:1px solid var(--line2);display:flex;gap:9px}
+.stat:last-child{border-right:none}
+.stat .si{width:24px;height:24px;border-radius:7px;background:var(--pinkTint);color:var(--rose);display:grid;place-items:center;flex-shrink:0}
+.stat .si svg{width:12px;height:12px}
+.stat .v{font-weight:600;font-size:14px;line-height:1.15}
+.stat .v small{font-weight:500;font-size:10.5px;color:var(--muted)}
+.stat .k{font-family:var(--mo);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px;line-height:1.35}
+.policy{padding:9px 15px;border-bottom:1px solid var(--line2);font-size:11.5px;color:var(--ink2);background:#fff}
+.body{padding:13px 15px 6px}
+.sec{margin-bottom:12px}
+.sech{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.sech .rule{flex:1;height:1px;background:var(--line2)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.g{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 9px;font-size:10.5px;color:var(--ink2)}
+.hist{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line2);border-radius:9px;padding:8px 10px;font-size:11.5px}
+.hist .d{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--rose);background:#fbeae1;flex-shrink:0}
+.hist a{margin-left:auto;color:var(--rose);font-weight:600;font-size:10.5px;text-decoration:underline}
+.quote{background:var(--parch);border:1px solid var(--line);border-left:2.5px solid var(--pinkDeep);border-radius:0 10px 10px 0;padding:11px 12px}
+.quote p{font-family:var(--pl);font-style:italic;font-size:12px;line-height:1.6;color:var(--ink2)}
+.foot{display:flex;align-items:center;padding:9px 15px;border-top:1px solid var(--line2);background:#fdfcfa}
+.foot a{margin-left:auto;font-size:10.5px;color:var(--rose);font-weight:600;text-decoration:underline}
+.note{font-size:12px;color:var(--ink2);line-height:1.6;max-width:1000px;margin-top:16px}
+.note b{font-family:var(--pl)}
+</style></head>
+<body class="b2 t1" id="bd">
+<h1>Dotted edge and a tilt</h1>
+<div class="sub">The panel against the form&rsquo;s straight edges &mdash; try the angles in sequence and watch the 1&nbsp;of them stop feeling deliberate.</div>
+<div class="bar">
+  <span class="lb">Edge</span>
+  <button onclick="S(this,'b',1)">Hairline</button><button class="on" onclick="S(this,'b',2)">Dotted</button><button onclick="S(this,'b',3)">Dashed</button>
+  <span class="lb" style="margin-left:12px">Tilt</span>
+  <button onclick="S(this,'t',0)">0&deg;</button><button class="on" onclick="S(this,'t',1)">0.6&deg;</button><button onclick="S(this,'t',2)">1.4&deg;</button><button onclick="S(this,'t',3)">3&deg;</button>
+  <button style="margin-left:12px" onclick="T(this)">Tape corner</button>
+</div>
+
+<div class="sheet">
+  <div class="formcol">
+    <div class="fake active"><b>When you sent it</b><div class="m">9 August 2026 &middot; email &middot; nudge 20 Sept</div></div>
+    <div class="fake"><b>What</b><div class="m">Manuscript and materials</div></div>
+    <div class="fake"><b>Notes</b><div class="m">Optional</div></div>
+  </div>
+  <div class="sidecol"><div class="wrap"><span class="tape"></span>
+    <div class="panel">
+      <div class="hglance"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-3.8 3.5-5.6 7.5-5.6s7.5 1.8 7.5 5.6"/></svg></span>
+        <div><h4>This agent at a glance</h4><div class="s">Eleanor Whitfield</div></div><span class="pill">Open</span></div>
+      <div class="stats">
+        <div class="stat"><span class="si"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+          <div><div class="v">6 <small>weeks</small></div><div class="k">Expected<br>response time</div></div></div>
+        <div class="stat"><span class="si"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
+          <div><div class="v">Email</div><div class="k">Preferred<br>submission method</div></div></div>
+      </div>
+      <div class="policy">No reply after 8 weeks means a pass.</div>
+      <div class="body">
+        <div class="sec"><div class="sech"><span class="mono">Your history</span><span class="rule"></span></div>
+          <div class="hist"><span class="d"></span>2 open &middot; last sent 14 Mar 2024<a>Open it</a></div></div>
+        <div class="sec"><div class="sech"><span class="mono">Seeking</span><span class="rule"></span></div>
+          <div class="chips"><span class="g">Thriller</span><span class="g">Crime</span><span class="g">Literary</span></div>
+          <div style="font-size:12px;margin-top:9px">80,000&ndash;110,000 words <span style="color:var(--muted)">&middot; yours is 50,000</span></div></div>
+        <div class="sec"><div class="sech"><span class="mono">Wish list</span><span class="rule"></span></div>
+          <div class="quote"><p>Upmarket crime with a strong sense of place &mdash; rural or coastal, outside London&hellip;</p></div></div>
+      </div>
+      <div class="foot"><span class="mono">Updated 10 Jul</span><a>Agency page &rarr;</a></div>
+    </div></div>
+  </div>
+</div>
+<div class="note" id="nn"></div>
+<script>
+var msg={0:"0&deg; &mdash; straight. Clean, but the dotted edge alone already reads as \u201cnote\u201d.",
+1:"0.6&deg; &mdash; barely perceptible; you feel it before you see it. The panel reads as a card laid down rather than a UI element, and nothing looks misaligned. <b>My pick.</b>",
+2:"1.4&deg; &mdash; clearly deliberate, still charming. Watch the top-right corner against the sheet edge; at narrow widths it needs a few px of margin to avoid clipping.",
+3:"3&deg; &mdash; reads as broken rather than styled next to a strict grid, and the rotated text edges soften noticeably. Not recommended."};
+function S(el,k,v){var b=document.getElementById('bd');b.className=b.className.replace(new RegExp(k+'\\d'),k+v);
+ el.parentNode.querySelectorAll('button').forEach(function(x){if(x.textContent.match(k==='t'?/\u00b0/:/line|Dotted|Dashed/))x.classList.remove('on')});
+ el.classList.add('on'); if(k==='t')document.getElementById('nn').innerHTML=msg[v];}
+function T(el){document.getElementById('bd').classList.toggle('tp');el.classList.toggle('on');}
+document.getElementById('nn').innerHTML=msg[1];
+</script>
+</body></html>
