@@ -721,6 +721,11 @@
   background: #f3e0d6; color: #7c3a2a; border-radius: 99px; padding: 2.5px 7px; white-space: nowrap;
 }
 .os-st.sg { background: #e9ede6; color: #5a6e58; }
+/* the pill and its run count travel together — see the two-children note in OneScreenRail */
+.os-r1l { display: flex; align-items: center; gap: 5px; min-width: 0; }
+/* ⚠️ QUIETER THAN THE PILL. The count is a footnote ON the event, not a second label competing
+   with it — a filled chip here would read as a status of its own. */
+.os-runx { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: 0.06em; color: #a89a8a; white-space: nowrap; }
 .os-tm { font-family: "JetBrains Mono", monospace; font-size: 7.5px; color: #b3a596; }
 .os-who {
   font-family: var(--font-serif); font-size: 14px; color: #2c1a12;

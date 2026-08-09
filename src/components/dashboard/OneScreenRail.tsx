@@ -34,6 +34,12 @@ export interface FeedRow {
   who: string;
   caption: string;
   dotStatus: QueryStatus | null;
+  /** What the event is ABOUT. The collapse law keys on it — query events never fold. */
+  scope: "query" | "agent" | "manuscript";
+  /** How many identical consecutive events this line stands for. 1 = an ordinary row. */
+  count: number;
+  /** The EARLIEST time in a folded run, so a run reads as a span rather than one instant. */
+  fromTime: string;
 }
 
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -115,9 +121,12 @@ export const feedRows = (
 
     let who = "";
     let caption = "";
+    let scope: FeedRow["scope"] = "query";
     if (AGENT_TYPES.has(a.activityType)) {
+      scope = "agent";
       who = a.description.trim();
     } else if (MS_TYPES.has(a.activityType)) {
+      scope = "manuscript";
       who = manuscripts.find((m) => m.id === a.manuscriptId)?.title?.trim() || a.description.trim();
     } else {
       const q = queries.find((x) => x.id === a.queryId);
@@ -139,9 +148,58 @@ export const feedRows = (
       who,
       caption,
       dotStatus: a.resultingStatus ?? null,
+      scope,
+      count: 1,
+      fromTime: "",
     });
   }
-  return rows;
+  return collapseFeedRuns(rows);
+};
+
+/**
+ * ⚠️ A RUN IS FOLDED, NOT FILTERED (audit P7). Editing one agent six times in an afternoon wrote
+ * six identical lines and pushed a week of real querying off the card. The six are still all
+ * there — they are one line that says so — because a feed that silently drops events is worse
+ * than a noisy one.
+ *
+ * THREE RULES, and each exists because breaking it loses information:
+ *
+ * 1. **QUERY-SCOPED EVENTS NEVER FOLD.** Two "Query sent" rows naming the same agent on the same
+ *    day are two different queries. Folding them would report one submission where two happened —
+ *    the one kind of error this feed must never make. Only agent and manuscript housekeeping
+ *    folds, because there the repetition genuinely is one record being worked on.
+ *
+ * 2. **ONLY CONSECUTIVE ROWS FOLD — a run never merges across an interruption.** If an agent edit
+ *    is followed by a query sent and then another edit of the same agent, that is TWO runs of one,
+ *    not one run of two: the events did not happen together, and the order is the story the feed
+ *    is telling. (This is why the fold walks the sorted list rather than grouping by key — a
+ *    `groupBy` would silently merge the two ends around the interruption.)
+ *
+ * 3. **THE DAY IS PART OF THE KEY.** Rows are already day-grouped in the render, so a run
+ *    crossing midnight would render under one day heading while containing another day's events.
+ *
+ * The fold keeps the FIRST row of the run (newest, since the list is newest-first) so the line
+ * carries the most recent state, and records the run's earliest time so it reads as a span.
+ */
+export const collapseFeedRuns = (rows: FeedRow[]): FeedRow[] => {
+  const out: FeedRow[] = [];
+  for (const r of rows) {
+    const prev = out[out.length - 1];
+    const foldable =
+      prev
+      && prev.scope !== "query" && r.scope !== "query"
+      && prev.scope === r.scope
+      && prev.dayLabel === r.dayLabel
+      && prev.pill === r.pill
+      && prev.who === r.who;
+    if (foldable) {
+      // `prev` is the newer row; `r` is older, so it supplies the run's start time.
+      out[out.length - 1] = { ...prev, count: prev.count + 1, fromTime: r.time };
+      continue;
+    }
+    out.push(r);
+  }
+  return out;
 };
 
 /* ── the rail ── */
@@ -315,7 +373,17 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                     <span className="os-tlln" aria-hidden="true" />
                   </div>
                   <div className="os-cardlet">
-                    <div className="os-r1"><span className={`os-st${r.sage ? " sg" : ""}`}>{r.pill}</span><span className="os-tm">{r.time}</span></div>
+                    {/* ⚠️ TWO CHILDREN, ALWAYS. `.os-r1` is space-between, so a bare third child
+                        would be pushed to the middle of the row rather than sitting with the pill. */}
+                    <div className="os-r1">
+                      <span className="os-r1l">
+                        <span className={`os-st${r.sage ? " sg" : ""}`}>{r.pill}</span>
+                        {/* ⚠️ A FOLDED RUN STATES ITS SIZE AND ITS SPAN — without the count, the
+                            fold is indistinguishable from events having gone missing. */}
+                        {r.count > 1 && <span className="os-runx">×{r.count}</span>}
+                      </span>
+                      <span className="os-tm">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
+                    </div>
                     <div className="os-who">{r.who}</div>
                     {r.caption && <div className="os-cap">{r.caption}</div>}
                   </div>
