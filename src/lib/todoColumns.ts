@@ -28,7 +28,6 @@ import { flagSleeps, flagReturnedToday, flagMatchesTask } from "./taskFlags";
 import { USER_TASK_FLAG_TYPE } from "./todoBoard";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 import { cardFamily } from "./todoFamily";
-import { TODO_PREFS_DEFAULT } from "./todoPrefs";
 
 export type TodoColumnId = "todo" | "today" | "snoozed" | "done";
 
@@ -301,16 +300,12 @@ export function boardColumns(input: ColumnInput): BoardColumns {
 
 /* ── the editorial board's pure fittings (board fixes II, P6) ─────────────────────────────── */
 
-/** Today's WIP line — ADVICE, NEVER A BLOCK. Present from the first committed card; past five it
- *  changes tone rather than tightening a gate (the cap itself lives in the commit primitive). */
-export function wipLine(committedCount: number, goodDay = TODO_PREFS_DEFAULT.goodDay): string | null {
-  /* ⚠️ THE LINE READS THE WRITER'S OWN NUMBER (board-optimise P5). It was hardcoded 3–5, which
-     made the Task-settings row a control over nothing. The default is the same 5 it always was,
-     so nobody who never opens the sheet sees a change. Advice, never a block — past the number
-     it changes TONE, and the commit primitive's cap is a separate thing entirely. */
-  if (committedCount === 0) return null;
-  return committedCount > goodDay ? "THAT'S A FULL DAY" : `A GOOD DAY IS ${goodDay}`;
-}
+/* ⚠️ `wipLine` IS RETIRED (tasks-consolidation P2 follow-up, 9 Aug). It headed the board's TODAY
+   column with "A GOOD DAY IS {n}" / "THAT'S A FULL DAY" — advice about the size of the day's
+   COMMITMENT. Committing work to a day is what the consolidation removed: the ranked order of the
+   one list is the plan, so the line had no subject left. The copy law agrees independently — this
+   app reports and never appraises, and "THAT'S A FULL DAY" is an appraisal. Deleted rather than
+   left dormant, together with the `goodDay` setting that fed it. */
 
 /** A column shows this many cards before the fade hem and "+ N MORE" take over. */
 export const BOARD_COL_CAP = 8;

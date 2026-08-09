@@ -14,7 +14,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
-import { sweepCardFor, wipLine, columnSlice, BOARD_COL_CAP } from "../../lib/todoColumns";
+import { sweepCardFor, columnSlice, BOARD_COL_CAP } from "../../lib/todoColumns";
 import { TodoBoard } from "./TodoBoard";
 
 const here = __dirname;
@@ -63,26 +63,23 @@ describe("⚠️ the editorial column heads — Playfair over a 2px ink rule, st
   });
 });
 
-describe("⚠️ the WIP line on Today's head — advice, never a block", () => {
-  it("wipLine: silent at zero, gentle to the writer's number, honest past it", () => {
-    /* board-optimise P5: the number is the writer's own (todoPrefs.goodDay), defaulting to the
-       5 this line always used — so a writer who never opens the sheet sees no change. */
-    expect(wipLine(0)).toBeNull();
-    expect(wipLine(1)).toBe("A GOOD DAY IS 5");
-    expect(wipLine(5)).toBe("A GOOD DAY IS 5");
-    expect(wipLine(6)).toBe("THAT'S A FULL DAY");
-    // …and it FOLLOWS the setting
-    expect(wipLine(3, 3)).toBe("A GOOD DAY IS 3");
-    expect(wipLine(4, 3)).toBe("THAT'S A FULL DAY");
-  });
-
-  it("renders on Today's head only, and blocks nothing (no disabled, no guard)", () => {
+/**
+ * ⚠️ THE WIP LINE IS RETIRED (tasks-consolidation P2 follow-up, 9 Aug), TOGETHER WITH THE
+ * `goodDay` SETTING THAT FED IT AND THE COLUMN IT HEADED.
+ *
+ * It advised on the size of the day's COMMITMENT — and committing work to a day is exactly what
+ * the consolidation removed. The copy law reaches the same answer on its own: this app reports
+ * and never appraises, and "THAT'S A FULL DAY" is an appraisal. The retirement is asserted at its
+ * source in `boardSettings.test.tsx`; what stays here is the NEGATIVE, so the line cannot creep
+ * back onto this component's heads.
+ */
+describe("⚠️ the WIP line is extinct — no head appraises the day", () => {
+  it("no column head carries the good-day advice, populated or not", () => {
     const six = Array.from({ length: 6 }, (_, i) => card({ key: `c${i}` }));
-    const html = render({ today: six });
-    expect(html).toContain("THAT&#x27;S A FULL DAY");
-    const todoOnly = render({ todo: six });
-    expect(todoOnly).not.toContain("FULL DAY");
-    expect(todoOnly).not.toContain("GOOD DAY");
+    for (const html of [render({ today: six }), render({ todo: six })]) {
+      expect(html).not.toContain("FULL DAY");
+      expect(html).not.toContain("GOOD DAY");
+    }
   });
 });
 

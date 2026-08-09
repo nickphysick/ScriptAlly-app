@@ -11,7 +11,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
-import { todoPrefs, STALE_MONTHS_CHOICES, GOOD_DAY_MIN, GOOD_DAY_MAX, staleLabel } from "../../lib/todoPrefs";
+import { todoPrefs, STALE_MONTHS_CHOICES, staleLabel } from "../../lib/todoPrefs";
 import { TagsSheet } from "./TagsSheet";
 import { lockStageScroll } from "../../lib/stageScroll";
 import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
@@ -117,18 +117,13 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
                 </select>
               </div>
 
-              <div className="tdb-tsetrow">
-                <div className="tdb-tsettx"><div className="tdb-tsett">A good day is</div><div className="tdb-tsets">The Today column’s gentle line</div></div>
-                <input
-                  className="tdb-tsetnum"
-                  type="number"
-                  aria-label="A good day is"
-                  min={GOOD_DAY_MIN}
-                  max={GOOD_DAY_MAX}
-                  value={prefs.goodDay}
-                  onChange={(e) => void setPref({ goodDay: Number(e.target.value) })}
-                />
-              </div>
+              {/* ⚠️ "A GOOD DAY IS {n}" IS RETIRED (tasks-consolidation P2 follow-up, 9 Aug).
+                  It advised on the size of the day's COMMITMENT, and committing work to a day is
+                  exactly what the consolidation removed — the ranked order of the one list is the
+                  plan. Its reader went with the board's Today column; a control with no reader is
+                  the fault board-optimise P5 fixed when it gave the line the writer's number, so
+                  the control goes rather than standing over nothing. The stored `todoPrefs` map
+                  keeps its rules entry: three other settings still write it. */}
 
               <div className="tdb-tsetrow">
                 <div className="tdb-tsettx"><div className="tdb-tsett">Roll unfinished work forward</div><div className="tdb-tsets">At midnight, undone moves to today</div></div>

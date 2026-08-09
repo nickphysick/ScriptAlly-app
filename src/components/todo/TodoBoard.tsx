@@ -29,7 +29,7 @@ import { MoreHorizontal } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   TODO_COLUMNS, TodoColumnId, BoardColumns, dropPlan, DropPlan, bandFamily,
-  isSweepCard, wipLine, columnSlice,
+  isSweepCard, columnSlice,
 } from "../../lib/todoColumns";
 import { cardMenu, MenuLeaf } from "../../lib/todoMenu";
 import { estimateChip, estimateTotal, estimateHeadLabel } from "../../lib/todoEstimate";
@@ -39,9 +39,10 @@ import "./todoBoard.css";
 
 export interface TodoBoardProps {
   columns: BoardColumns;
-  /** The writer's own "a good day is" (board-optimise P5) — the WIP line's number. Defaulted so
-   *  every existing caller and fixture keeps the behaviour it had. */
-  goodDay?: number;
+  /* ⚠️ `goodDay` AND THE WIP LINE ARE RETIRED (tasks-consolidation P2 follow-up, 9 Aug) — they
+     advised on the size of the day's COMMITMENT, which the consolidation removed along with this
+     component's mount. The estimate head keeps its FIGURE, which is a report rather than an
+     appraisal. */
   /** The board asks; the page performs. Every one of these is an EXISTING verb. */
   onPlan: (card: BoardCard, plan: DropPlan, from: TodoColumnId, to: TodoColumnId) => void;
   /** Opening a card — the dock's door (board fixes II, P2). */
@@ -93,7 +94,7 @@ const BoardCardMenu: React.FC<{
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, onOpen, onVerb }) => {
+export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, onPlan, onOpen, onVerb }) => {
   const [dragging, setDragging] = useState<{ card: BoardCard; from: TodoColumnId } | null>(null);
   const [over, setOver] = useState<TodoColumnId | null>(null);
   const [menu, setMenu] = useState<OpenMenu | null>(null);
@@ -215,9 +216,8 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
         const cards = columns[col.id];
         const isOver = over === col.id && dragging !== null && dragging.from !== col.id;
         const { visible, more } = columnSlice(cards, !!grown[col.id]);
-        const wip = col.id === "today" ? wipLine(cards.length, goodDay) : null;
         const estLabel = col.id === "today"
-          ? estimateHeadLabel(estimateTotal(cards.map((c) => c.estimateMin)), cards.length, goodDay ?? 5)
+          ? estimateHeadLabel(estimateTotal(cards.map((c) => c.estimateMin)), cards.length)
           : null;
 
         return (
@@ -245,7 +245,7 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
               {/* ⚠️ THE HEAD SUMS ONLY WHAT CARRIES AN ESTIMATE, AND NEVER GUESSES. Past the
                   writer's good-day line it says so instead — the same advice the WIP line gives,
                   in the same voice, so the head never states two opinions about one day. */}
-              {estLabel ? <span className="tbd-wip">{estLabel}</span> : wip && <span className="tbd-wip">{wip}</span>}
+              {estLabel && <span className="tbd-wip">{estLabel}</span>}
             </div>
 
             {/* ⚠️ THE GHOST DROP SLOT (P6, ref .ghost): a card-shaped hatched-paper target — the

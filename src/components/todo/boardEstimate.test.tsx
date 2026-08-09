@@ -74,13 +74,19 @@ describe("⚠️ time estimates live ONLY on Today, from a FIXED ladder", () => 
   it("⚠️ THE HEAD SUMS ONLY WHAT CARRIES ONE, AND NEVER GUESSES", () => {
     expect(estimateTotal([25, undefined, 10, undefined])).toBe(35);
     expect(estimateTotal([undefined, undefined])).toBe(0);
-    expect(estimateHeadLabel(35, 2, 5)).toBe("EST. 35 MIN");
-    expect(estimateHeadLabel(0, 3, 5)).toBeNull();   // three cards, none estimated → no figure
-    expect(estimateHeadLabel(90, 2, 5)).toBe("EST. 1H 30 MIN");
+    expect(estimateHeadLabel(35, 2)).toBe("EST. 35 MIN");
+    expect(estimateHeadLabel(0, 3)).toBeNull();   // three cards, none estimated → no figure
+    expect(estimateHeadLabel(90, 2)).toBe("EST. 1H 30 MIN");
   });
 
-  it("past the writer's good-day line the head says so instead — one opinion per head", () => {
-    expect(estimateHeadLabel(35, 6, 5)).toBe("THAT'S A FULL DAY");
+  /* ⚠️ THE "THAT'S A FULL DAY" BRANCH IS RETIRED WITH `goodDay` (tasks-consolidation P2 follow-up,
+     9 Aug). It advised on the size of the day's COMMITMENT, and committing work to a day is what
+     the consolidation removed — plus the copy law independently: this app reports and never
+     appraises. What the head does now is state a figure, which the case above covers. */
+  it("the head states a FIGURE and never a verdict — the appraisal branch is extinct", () => {
+    expect(estimateHeadLabel(35, 6)).toBe("EST. 35 MIN");
+    const lib = readFileSync(join(here, "..", "..", "lib", "todoEstimate.ts"), "utf8");
+    expect(lib).not.toContain("count > goodDay");
   });
 
   it("the write rides the ONE existing path, and 'none' clears the field", () => {

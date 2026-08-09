@@ -60,11 +60,13 @@ export function estimateTotal(minutes: (number | undefined)[]): number {
   return minutes.filter(isLadderValue).reduce((a, b) => a + b, 0);
 }
 
-export function estimateHeadLabel(total: number, count: number, goodDay: number): string | null {
+/* ⚠️ THE "THAT'S A FULL DAY" BRANCH IS RETIRED WITH `goodDay` (tasks-consolidation P2 follow-up,
+   9 Aug). It was the WIP line's appraisal wearing the estimate's clothes — the same judgement
+   about the same day, and the same reason it went: this app reports and never appraises, and the
+   day's commitment is not a thing the consolidated list asks you to declare. What remains is the
+   figure, which is a report. */
+export function estimateHeadLabel(total: number, count: number): string | null {
   if (count === 0 || total === 0) return null;
-  /* Past the writer's own good-day line the head says so — the same advice the WIP line gives,
-     in the same voice, because they are the same judgement about the same day. */
-  if (count > goodDay) return "THAT'S A FULL DAY";
   return total >= 60
     ? `EST. ${Math.floor(total / 60)}H ${total % 60 ? `${total % 60} MIN` : ""}`.trim()
     : `EST. ${total} MIN`;

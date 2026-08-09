@@ -346,13 +346,17 @@ describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the setting
     /* The Settings page must NOT re-render the four behaviours. Two forms would mean two places
        to change a default and two chances to disagree; the sheet writes `User.todoPrefs` through
        one path precisely so that cannot happen. */
-    for (const behaviour of ["staleMonths", "goodDay", "rollForward", "weeklyBriefing"]) {
+    /* ⚠️ THREE BEHAVIOURS NOW — `goodDay` is retired (tasks-consolidation P2 follow-up, 9 Aug):
+       it advised on the size of the day's commitment, which the consolidation removed. The rule
+       here is untouched and is about DUPLICATION, not about the count. */
+    const behaviours = ["staleMonths", "rollForward", "weeklyBriefing"];
+    for (const behaviour of [...behaviours, "goodDay"]) {
       expect(acct, behaviour).not.toContain(behaviour);
     }
     expect(acct).not.toContain("TODO_PREF_ROWS");
     expect(acct).not.toContain("todoPrefs(");
-    // the sheet remains the one home for all four
-    for (const behaviour of ["staleMonths", "goodDay", "rollForward", "weeklyBriefing"]) {
+    // the sheet remains the one home for every behaviour that still exists
+    for (const behaviour of behaviours) {
       expect(sheet, behaviour).toContain(behaviour);
     }
   });
