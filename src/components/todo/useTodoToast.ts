@@ -32,12 +32,18 @@ export interface ToastAction {
 export interface TodoToast {
   msg: string;
   action?: ToastAction;
+  /** ⚠️ PINK IS FOR A REFUSAL, AND ONLY FOR A REFUSAL (sheet 5). The warning toast is the only one
+   *  that ever appears in pink, and only when an act was declined for a reason worth learning —
+   *  a colour spent on ordinary confirmations is a colour that stops meaning anything. */
+  tone?: "warn";
 }
 
 export interface TodoToastApi {
   toast: TodoToast | null;
   /** Show a message, optionally with a takeback. */
   flash: (msg: string, action?: ToastAction, ms?: number) => void;
+  /** A refusal — the pink shape, with no takeback because nothing happened to take back. */
+  warn: (msg: string, ms?: number) => void;
   /** Dismiss now — which COMMITS, because the write already happened. */
   dismiss: () => void;
   /** Hover handlers for the pill: the timer holds while the cursor is on it. */
@@ -52,7 +58,12 @@ export interface TodoToastApi {
   recall: (key: string) => (() => Promise<void>) | undefined;
 }
 
-const WITH_UNDO_MS = 6000;
+/* ⚠️ EIGHT SECONDS, PER THE REF (P6; sheet 5) — and the takeback window is the one duration on
+   this page that is about a PERSON rather than about a frame. Six was a guess; eight is the
+   ref's, and hover still pauses it, so a toast you are reaching for cannot expire under the
+   cursor. A plain notice with nothing to undo keeps its shorter life: there is nothing to reach
+   for, and holding it for eight seconds would be the page talking over you. */
+const WITH_UNDO_MS = 8000;
 const PLAIN_MS = 2600;
 
 export function useTodoToast(): TodoToastApi {
@@ -76,6 +87,13 @@ export function useTodoToast(): TodoToastApi {
     // tasks-pages P4: an explicit window may override the defaults (the Noteboard's delete undo
     // holds 8s — user content deserves the longest way back).
     arm(ms ?? (action ? WITH_UNDO_MS : PLAIN_MS));
+  }, [arm]);
+
+  /* ⚠️ A WARNING CARRIES NO UNDO, BY CONSTRUCTION. It reports an act that was REFUSED — there is
+     nothing to reverse, and offering an Undo beside a refusal would suggest the write landed. */
+  const warn = useCallback((msg: string, ms?: number) => {
+    setToast({ msg, tone: "warn" });
+    arm(ms ?? PLAIN_MS);
   }, [arm]);
 
   const dismiss = useCallback(() => { clear(); setToast(null); }, [clear]);
@@ -104,5 +122,5 @@ export function useTodoToast(): TodoToastApi {
   // A page that unmounts mid-window must not leave a timer to fire into nothing.
   useEffect(() => clear, [clear]);
 
-  return { toast, flash, dismiss, pause, resume, remember, recall };
+  return { toast, flash, warn, dismiss, pause, resume, remember, recall };
 }

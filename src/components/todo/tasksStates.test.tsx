@@ -195,4 +195,30 @@ describe("⚠️ ONE CURVE AND TWO DURATIONS — anything past 300ms on this pag
     for (const l of loops) expect(l, l).toMatch(/infinite/);
     expect(RING_MS).toBe(600); // the hold lives in TS: it is a timer, not a transition
   });
+
+  /**
+   * ⚠️ AN ENTRANCE ANIMATION MUST NEVER CARRY VISIBILITY — and this was browser-measured, twice.
+   *
+   * The ref asks the fold's new rows to "fade up". A fade starts at `opacity: 0`, so the rows are
+   * INVISIBLE until the animation advances — and in the in-app browser pane they sat at zero
+   * indefinitely, under `fill-mode: both` AND under `backwards`, because the clock never moved.
+   * Chrome throttles animations in background tabs for the same reason. The rows RISE and never
+   * fade now: the stagger's failure mode is a stagger you do not get, rather than work you cannot
+   * see, which on this page is not a close call.
+   */
+  it("no keyframe in this sheet starts content at opacity 0", () => {
+    const frames = [...cssDecls.matchAll(/@keyframes\s+\w+\s*\{([\s\S]*?)\n\}/g)].map((m) => m[1]);
+    expect(frames.length, "there must BE keyframes to check").toBeGreaterThan(0);
+    for (const f of frames) {
+      expect(f, `a keyframe starts at opacity 0: ${f.trim().slice(0, 60)}`).not.toMatch(/from\s*\{[^}]*opacity:\s*0\b/);
+    }
+  });
+
+  it("…and reduced motion STOPS the rise rather than swapping in a fade", () => {
+    /* An opacity swap under reduced motion would reintroduce the exact fade whose failure mode is
+       invisible content — for the readers least able to afford it. */
+    const rm = cssDecls.slice(cssDecls.lastIndexOf("@media (prefers-reduced-motion: reduce)"));
+    expect(rm).toContain(".tdg-panel.grown > .tdg-row:nth-child(n + 5) { animation: none; }");
+    expect(cssDecls).not.toContain("tdgFade");
+  });
 });

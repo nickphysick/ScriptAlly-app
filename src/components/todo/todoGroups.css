@@ -539,3 +539,72 @@
      completion ring carries a fact, so it survives (sheet 6). */
   .tdg-sk, .tdg-spin { animation: none; }
 }
+
+/* ══ PHASE 6 — MOTION AND THE KEY MAP ═════════════════════════════════════════════════════════
+   (ref sheets 6–7) */
+
+/* ⚠️ NEW ROWS ANNOUNCE THEMSELVES WITH A STAGGER, NOT A BANNER (sheet 6, "Show 7 more") — AND
+   THE STAGGER NEVER CARRIES THEIR VISIBILITY.
+
+   The ref asks for a fade-up. A fade starts at `opacity: 0`, and an entrance that starts at zero
+   means the rows are INVISIBLE until the animation advances — so any environment where it does
+   not advance shows the writer an empty panel. Browser-measured in the in-app pane: rows five and
+   six sat at `opacity: 0` indefinitely, under `fill-mode: both` AND under `backwards`, because
+   the clock never moved. Chrome throttles animations in background tabs for the same reason, and
+   this repo has been bitten by `fill-mode` before (the FLIP note in CLAUDE.md).
+
+   So the rows RISE and never fade: `transform` only, opacity untouched at 1. The stagger still
+   says "these are new" — that was always the transform's job — and its failure mode is now a
+   stagger you do not get rather than work you cannot see. On a page whose whole purpose is
+   showing you what needs doing, that is not a close call. */
+.tdg-panel.grown > .tdg-row:nth-child(n + 5) {
+  animation: tdgRise var(--tdg-move) var(--tdg-ease) backwards;
+}
+.tdg-panel.grown > .tdg-row:nth-child(5) { animation-delay: 0ms; }
+.tdg-panel.grown > .tdg-row:nth-child(6) { animation-delay: 30ms; }
+.tdg-panel.grown > .tdg-row:nth-child(7) { animation-delay: 60ms; }
+.tdg-panel.grown > .tdg-row:nth-child(8) { animation-delay: 90ms; }
+.tdg-panel.grown > .tdg-row:nth-child(n + 9) { animation-delay: 120ms; }
+
+@keyframes tdgRise { from { transform: translateY(8px); } to { transform: none; } }
+
+/* ⚠️ THE ROW'S VERBS DARKEN ON HOVER AND NOTHING MOVES (sheet 6's first moment). A column of rows
+   must stay still as the cursor travels — a lift or a slide turns a scan into a ripple. */
+.tdg-row:hover .tdg-vb { border-color: #ded3c2; }
+
+/* ── the key map ────────────────────────────────────────────────────────────────────────────── */
+.tdg-keyscrim {
+  position: fixed; inset: 0; z-index: 85;
+  background: rgba(42, 26, 19, 0.18);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.tdg-keys {
+  width: min(430px, calc(100vw - 40px));
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(58, 28, 20, 0.2);
+  padding: 20px 22px 18px;
+}
+
+.tdg-keysk {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px; letter-spacing: 0.16em; color: #b3a394; margin-bottom: 12px;
+}
+
+.tdg-keys table { width: 100%; border-collapse: collapse; }
+.tdg-keys th { text-align: left; padding: 5px 12px 5px 0; vertical-align: top; width: 76px; }
+.tdg-keys td { padding: 5px 0; font-size: 12px; color: #4d4238; line-height: 1.5; }
+
+.tdg-kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  border: 1px solid #e2d8c8; border-bottom-width: 2px; border-radius: 5px; background: #fff;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 9px; color: #4d4238;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠️ THE RISE STOPS AND NOTHING REPLACES IT (sheet 6's last row: "every transform becomes an
+     opacity change OR NOTHING"). An opacity swap here would reintroduce the very fade whose
+     failure mode is invisible content — so under reduced motion the rows simply arrive. */
+  .tdg-panel.grown > .tdg-row:nth-child(n + 5) { animation: none; }
+}

@@ -54,10 +54,16 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
     const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
     expect((page.match(/flash\("Restored"\)/g) ?? []).length).toBeGreaterThanOrEqual(8);
     expect((flow.match(/onToast\("Restored"\)/g) ?? []).length).toBeGreaterThanOrEqual(7);
-    // ⚠️ THE WINDOW MOVED INTO useTodoToast (extraction E1) — same 6s/2.6s, one owner, four pages.
-    expect(hook).toContain("const WITH_UNDO_MS = 6000;");
+    /* ⚠️ THE WINDOW MOVED INTO useTodoToast (extraction E1) — one owner, four pages — and it is
+       EIGHT seconds now (tasks-consolidation P6; sheet 5). Six was a guess; the takeback window is
+       the one duration on this page that is about a person rather than a frame, and hover still
+       pauses it. A plain notice with nothing to reach for keeps its shorter life. */
+    expect(hook).toContain("const WITH_UNDO_MS = 8000;");
     expect(hook).toContain("const PLAIN_MS = 2600;");
-    expect(page).toContain('className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}');
+    /* the pill gained a TONE (pink, refusals only), so the className is composed rather than
+       literal — what this case protects is the hover pair, and that is unchanged */
+    expect(page).toContain("onMouseEnter={pauseToast} onMouseLeave={resumeToast}");
+    expect(page).toContain('toast.tone === "warn"');
   });
 });
 
@@ -69,7 +75,7 @@ describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)"
   const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
   const css = readFileSync(join(here, "todo.css"), "utf8");
 
-  it("6s timer with hover PAUSE (remaining-time model); a new toast replaces (= commits) the current one", () => {
+  it("8s timer with hover PAUSE (remaining-time model); a new toast replaces (= commits) the current one", () => {
     expect(hook).toContain("const arm = useCallback((ms: number) => {");
     expect(hook).toContain("timer.current = window.setTimeout(() => setToast(null), ms);");
     // the remaining-time model: pausing banks what is LEFT rather than restarting the window

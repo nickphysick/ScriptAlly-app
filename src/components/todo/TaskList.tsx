@@ -37,6 +37,7 @@ import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
 import { rowPill, rowPrimaryLabel, rowJourney } from "../../lib/taskRow";
 import { isTickable, completionVia } from "../../lib/todoActions";
+import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId } from "../../lib/todoMenu";
 import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
 import { PortalMenu } from "./PortalMenu";
@@ -151,6 +152,14 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
      rail rather than re-derived: with a baseline the meter can say "5 OF 16" as the pile shrinks,
      and a pile you have not started is a pile rather than a 0% failure. */
   const sweepBase = useRef(new Map<string, number>());
+  /* ⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS, not a second index kept in state (P6). The rows
+     are already `tabIndex={0}`, so j/k simply MOVE focus — which means Tab, a click and a
+     shortcut all agree about where you are, and `:focus-visible` paints it for free. A parallel
+     `focusIndex` would be a second answer to "where am I" and would drift the moment anything
+     else moved focus. */
+  const rowEls = useRef(new Map<string, HTMLElement>());
+  const rootEl = useRef<HTMLDivElement>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   /* ⚠️ THE OPTIMISTIC SET (P5). A key enters on commit and leaves when the write settles — not
      when the data changes, because a REFUSED write changes nothing and the row would dim for
      ever. The act is believed immediately; only failure interrupts. */
@@ -216,6 +225,87 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       : { label: c.due, pct: 0 };
   };
 
+  /* The rows in the order they are DRAWN — the walker reads the DOM rather than re-deriving the
+     order, so j/k can never disagree with what is on screen. */
+  const orderedKeys = (): string[] =>
+    [...(rowEls.current.entries())]
+      .filter(([, el]) => el.isConnected)
+      .sort((a, b) => (a[1].compareDocumentPosition(b[1]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+      .map(([k]) => k);
+
+  const moveFocus = (delta: number) => {
+    const keys = orderedKeys();
+    if (!keys.length) return;
+    const active = document.activeElement as HTMLElement | null;
+    const cur = keys.findIndex((k) => rowEls.current.get(k) === active);
+    const next = cur === -1 ? (delta > 0 ? 0 : keys.length - 1) : Math.min(keys.length - 1, Math.max(0, cur + delta));
+    rowEls.current.get(keys[next])?.focus();
+  };
+
+  const focusedCard = (): { card: BoardCard; column: TodoColumnId } | null => {
+    const active = document.activeElement as HTMLElement | null;
+    if (!active) return null;
+    for (const g of groups) {
+      const col = groupColumn(g.id);
+      const hit = g.cards.find((c) => rowEls.current.get(c.key) === active);
+      if (hit) return { card: hit, column: col };
+    }
+    return null;
+  };
+
+  /* ⚠️ THE LIST LISTENS ON THE WINDOW, NOT ON ITS OWN CONTAINER — and the browser walk is what
+     found it. A container handler only fires once focus is already INSIDE the list, so `j` did
+     nothing at all from a standing start: you had to click a row before the keyboard would work,
+     which is precisely the mouse dependency "drivable without a mouse" exists to remove. Keydown
+     bubbles UP, so focus on the scrollzone (itself `tabIndex={0}`) never reached us either.
+     ⚠️ AND IT CARRIES THE VISIBILITY GUARD, because the Tasks slots stay MOUNTED under
+     `display: none` — without it a hidden page's list would answer keys meant for a visible one. */
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (!rootEl.current || rootEl.current.offsetParent === null) return;
+    const action = listKey(e, isTypingTarget(e.target));
+    if (!action) return;
+    if (action === "help") { e.preventDefault(); setHelpOpen((v) => !v); return; }
+    if (action === "dismiss") {
+      /* ⚠️ THE ORDER IS DIAL, THEN MENU, THEN THE MAP — innermost first, so Escape never closes
+         two things at once. It is NOT stopped: the page beyond has its own Escape business. */
+      if (dial) { setDial(null); e.preventDefault(); }
+      else if (menu) { closeMenu(true); e.preventDefault(); }
+      else if (helpOpen) { setHelpOpen(false); e.preventDefault(); }
+      return;
+    }
+    if (action === "down" || action === "up") { e.preventDefault(); moveFocus(action === "down" ? 1 : -1); return; }
+    const hit = focusedCard();
+    if (!hit) return;
+    const { card: c, column } = hit;
+    e.preventDefault();
+    if (action === "tick") {
+      /* ⚠️ SPACE TICKS, OR OPENS THE FLOW WHERE THE TICK IS NOT THE ACT (sheet 7's own wording).
+         `isTickable` is the same question the row asks before drawing a circle, so the key and
+         the control can never offer different things. */
+      if (isTickable(c)) tick(c); else onOpen(c);
+      return;
+    }
+    if (action === "primary") { onOpen(c); return; }
+    if (action === "snooze") {
+      const el = rowEls.current.get(c.key);
+      if (el && offers(cardMenu(c, column), "snooze-1")) setDial({ card: c, anchor: el });
+      return;
+    }
+    if (action === "edit") {
+      /* the row does not decide who may be edited — the menu does, as it does for every verb */
+      const leaf = cardMenu(c, column).flatMap((g) => g.entries)
+        .find((x) => x.kind === "leaf" && x.id === "edit-task");
+      if (leaf && leaf.kind === "leaf") onVerb(c, leaf, column);
+    }
+  };
+
+  /* The handler closes over `groups`, `dial`, `menu` and `helpOpen`, so it re-registers when any
+     of them changes — cheap, and the alternative is a ref-shaped copy of the whole render. */
+  useEffect(() => {
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   const renderRow = (c: BoardCard, column: TodoColumnId) => {
     const menuModel = cardMenu(c, column);
     const sweep = isSweepCard(c);
@@ -252,6 +342,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       <div
         key={c.key}
         data-tdgkey={c.key}
+        ref={(el) => { if (el) rowEls.current.set(c.key, el); else rowEls.current.delete(c.key); }}
         className={`tdg-row${c.done ? " done" : ""}${pending.has(c.key) ? " pend" : ""}${rung.has(c.key) ? " rung" : ""}`}
         aria-busy={pending.has(c.key) || undefined}
         role="button"
@@ -392,7 +483,21 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
   if (loading) return <TaskListSkeleton />;
 
   return (
-    <div className="tdg">
+    <div className="tdg" ref={rootEl}>
+      {helpOpen && (
+        /* ⚠️ THE MAP IS BUILT FROM `KEY_MAP`, so the overlay and the handler cannot list different
+           keys — the classic way a shortcut sheet comes to advertise something that does nothing. */
+        <div className="tdg-keyscrim" onClick={() => setHelpOpen(false)}>
+          <div className="tdg-keys" role="dialog" aria-label="Keyboard shortcuts" onClick={(e) => e.stopPropagation()}>
+            <div className="tdg-keysk">KEYBOARD</div>
+            <table><tbody>
+              {KEY_MAP.map((k) => (
+                <tr key={k.key}><th><span className="tdg-kbd">{k.key}</span></th><td>{k.does}</td></tr>
+              ))}
+            </tbody></table>
+          </div>
+        </div>
+      )}
       {dial && (
         <SnoozeDial
           card={dial.card}
@@ -459,7 +564,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
               <span className="tdg-n">{g.cards.length}</span>
               <span className="tdg-desc">{g.description}</span>
             </div>
-            <div className="tdg-panel">{visible.map((c) => renderRow(c, column))}</div>
+            {/* `grown` is what the stagger keys off — the fold's revealed rows, and only after a
+                real expansion, so nothing animates on first paint (sheet 6: one entrance, then
+                never again on filter or sort). */}
+            <div className={`tdg-panel${g.id === "housekeeping" && hkExpanded ? " grown" : ""}`}>
+              {visible.map((c) => renderRow(c, column))}
+            </div>
             {more > 0 && (
               <div className="tdg-more">
                 <button type="button" className="tdg-moreb" onClick={onToggleHk}>

@@ -958,6 +958,15 @@ button.tdb-ldot { cursor: pointer; }
    FAB's line, paper Undo; slides up (fade-only under reduced motion). ── */
 .tdb-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--paper); font-size: 12px; padding: 10px 12px 10px 20px; border-radius: 99px; box-shadow: 0 12px 30px rgba(26, 13, 9, 0.35); display: flex; align-items: center; gap: 14px; max-width: min(560px, 90vw); animation: tdbToastUp 240ms cubic-bezier(0.2, 0.9, 0.3, 1.1); }
 @keyframes tdbToastUp { from { opacity: 0; transform: translateX(-50%) translateY(14px); } }
+/* ⚠️ ONE POSITION, BOTTOM-LEFT, AND NEVER STACKED (P6; sheet 5). It was centred; the ref puts it
+   bottom-left, above the fold, where it sits clear of the list's own right-hand verb column
+   instead of over the middle of the work. A second act REPLACES the first rather than queueing
+   beneath it — the hook has always enforced that, and it is why one position is enough. */
+.tdb-toast { left: 26px; transform: none; }
+@media (max-width: 767px) { .tdb-toast { left: 50%; transform: translateX(-50%); } }
+/* ⚠️ PINK IS FOR A REFUSAL AND ONLY FOR A REFUSAL. It is the one toast that is not ink, and it
+   carries no Undo — there is nothing to reverse, because nothing happened. */
+.tdb-toast.warn { background: var(--pink, #f5e2da); border: 1px solid var(--pink-b, #e8c8bc); color: var(--burg, #7c3a2a); }
 .tdb-toast-act { background: var(--paper); color: var(--ink); border: none; border-radius: 99px; padding: 7px 15px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .tdb-toast-act:hover { filter: brightness(0.96); }
 @media (prefers-reduced-motion: reduce) { .tdb-toast { animation: tdbToastFade 160ms ease; } }

@@ -1252,7 +1252,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       )}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
-        <div className="tdb-toast" role="status" onMouseEnter={pauseToast} onMouseLeave={resumeToast}>
+        <div className={`tdb-toast${toast.tone === "warn" ? " warn" : ""}`}
+          role={toast.tone === "warn" ? "alert" : "status"}
+          onMouseEnter={pauseToast} onMouseLeave={resumeToast}>
           {toast.msg}
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { void toast.action!.fn(); dismissToast(); }}>{toast.action.label}</button>}
         </div>
