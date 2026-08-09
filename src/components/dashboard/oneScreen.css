@@ -753,7 +753,11 @@
 }
 @media (max-height: 680px) and (min-width: 1025px) {
   .os-exp { display: none; }
-  .os-colR .os-actv { flex: none; min-height: 300px; }
+  /* ⚠️ A DEFINITE HEIGHT, NOT A MIN. `flex: none` is basis AUTO, so with only a min-height the
+     feed rendered every entry at full height once the lock released — a 6,446px dashboard on a
+     short window, measured with 70 entries. Releasing the lock permits SCROLLING; it does not
+     mean abandoning the internal scrollers. (Pre-existing: the base rule's basis-0 masked it.) */
+  .os-colR .os-actv { flex: none; height: 360px; }
 }
 
 /* ══ §5 · THE PRO BANNER (v16 — supersedes the rail's mini) ══ */
