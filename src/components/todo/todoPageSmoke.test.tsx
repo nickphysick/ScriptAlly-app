@@ -26,10 +26,14 @@ import { UserPlan } from "../../types";
 /* The seedable mock (tasks-pages P3): the Calendar's populated smoke needs a dated task in the
    db, and vi.mock is hoisted — so the factory reads this holder, and a test mutates it. Reset in
    afterEach so no file order matters. */
-const seed: { userTasks: unknown[] } = { userTasks: [] };
+/* ⚠️ `agents` IS SEEDABLE TOO (tasks-consolidation P2): the consolidated page's first-run panel
+   beats everything when there are no queries AND no agents, so a smoke that seeds only a task
+   still renders the first-run state and executes none of the grouping. One agent is the smallest
+   thing that gets the page past its own door. */
+const seed: { userTasks: unknown[]; agents: unknown[] } = { userTasks: [], agents: [] };
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
-    tasks: [], userTasks: seed.userTasks, queries: [], agents: [], manuscripts: [], packages: [],
+    tasks: [], userTasks: seed.userTasks, queries: [], agents: seed.agents, manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], dismissedTasks: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },
     addUserTask: async () => undefined,
@@ -56,18 +60,44 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     const html = render(<ToDoPage onNavigate={() => {}} />);
     expect(html).toContain("To-do list");        // the page header
     expect(html).toContain("tdb-tools");          // the tool row
-    expect(html).toContain("Filters");            // the side container
+    /* ⚠️ THE SIDE CONTAINER'S "Filters" WENT WITH THE SIDEBAR (tasks-consolidation P2, 9 Aug).
+       The point of this smoke is that the page is not an empty shell that merely did not crash,
+       so it anchors on chrome the CONSOLIDATED page produces in EVERY state — the mono eyebrow
+       and the tool row's returned ink verb. (The stat chips and the groups are the populated
+       state's, and they are smoked below: with no data at all this page renders its first-run
+       panel, and smoking only that leaves every derivation unexecuted.) */
+    expect(html).toContain("tpl-eyebrow");
+    expect(html).toContain("Work the list");
   });
 
-  /* ⚠️ TODAY'S TWO SMOKES WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug). The app-smoke law
-     is unchanged and still met: every ROUTED page has a smoke here, and Today is no longer one.
-     The To-do list's smoke above covers the job it absorbed — and when the consolidated page
-     lands, its populated state is the one to extend, not a second page's. */
+  /* ⚠️ TODAY'S TWO SMOKES WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug), AND THIS IS THE
+     POPULATED CASE THAT ABSORBED THEIR JOB (P2). The app-smoke law: a page that only smokes its
+     first-run panel leaves every derivation unexecuted — and on this page the grouping, the stat
+     chips, the family pills and the four-slot verb grid are ALL in that unexecuted half. */
+  it("…and with real work on it, the GROUPS, the chips and a row all render (the populated smoke)", () => {
+    /* ⚠️ THE TASK IS DATED ON PURPOSE. Under the two-natures law a DATELESS user card is a NOTE,
+       and `boardEligible` keeps notes off this page entirely (they live on the Noteboard) — so a
+       dateless seed renders an empty list and proves nothing. */
+    const today = new Date();
+    const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    seed.agents = [{ id: "a1", userId: "u1", name: "Tom Ellery", agency: "Ellery & Frost" }];
+    seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening chapter", done: false, dueDate: ymd, createdAt: "2026-08-01T09:00:00Z", updatedAt: "" }];
+    const html = render(<ToDoPage onNavigate={() => {}} />);
+    expect(html).toContain("tdg-stats");                 // the header's stat chips
+    expect(html).toContain("Outstanding");               // …stating a figure from the one derivation
+    expect(html).toContain("Your tasks");                // the group heading, outside its panel
+    expect(html).toContain("tdg-panel");                 // the white panel
+    expect(html).toContain("Redraft the opening chapter");
+    expect(html).toContain("tdg-verbs");                 // the four-slot action grid
+    /* ⚠️ THE ROW IS ONE ELEMENT — never `display: contents`, which fractures hover, focus and any
+       selected band into per-cell rectangles. Asserted against RENDERED output, not source. */
+    expect(html).toContain('class="tdg-row"');
+  });
 
   /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,
      empty AND populated (a page that only smokes its first-run panel leaves every derivation
      unexecuted — the app-smoke law). */
-  afterEach(() => { seed.userTasks = []; });
+  afterEach(() => { seed.userTasks = []; seed.agents = []; });
 
   it("the Calendar page renders without throwing", () => {
     expect(() => render(<TodoCalendarPage onNavigate={() => {}} />)).not.toThrow();

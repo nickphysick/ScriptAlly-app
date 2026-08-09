@@ -107,6 +107,18 @@ export function showMoreLabel(more: number): string {
   return `SHOW ${more} MORE`;
 }
 
+/* ── the header block ──────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ THE MONO EYEBROW IS THE DASHBOARD'S GRAMMAR, AND BOTH HALVES ARE THE DASHBOARD'S OWN
+ * DERIVATIONS (`longDate` / `weekOfQuerying`) — imported by the caller rather than reimplemented,
+ * so the two pages cannot disagree about the date or the week. It travelled here from the retired
+ * Today page's `todoToday.ts`, unchanged: the page it sat on is gone, the line is not.
+ */
+export function tasksEyebrow(dateLine: string, weekLine: string): string {
+  return `${dateLine} · ${weekLine} of querying`.toUpperCase();
+}
+
 /* ── the header's stat chips ───────────────────────────────────────────────────────────────── */
 
 export interface TaskStat {

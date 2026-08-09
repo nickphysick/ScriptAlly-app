@@ -1,167 +1,371 @@
 /**
- * The To-do list page's TYPE GROUPS (workspace pack, Phase 2; ref
- * design-refs/todo-workspace-pages.html).
+ * todoGroups — THE CONSOLIDATED TASKS PAGE'S BODY (tasks-consolidation, Phase 2; ref
+ * design-refs/tasks-page.html, the third frame).
  *
- * Each group is a white card headed by its LIST swatch, a Playfair label and a mono count. The
- * rows inside keep the ledger's existing grid grammar untouched — the card is a container, not a
- * new row system, so `--lg-tracks` and every `.tdb-lrow` rule still govern what is in it.
+ * ⚠️ THIS FILE WAS THE RETIRED WORKSPACE-P2 GROUP CARDS AND IS NOW THE CONSOLIDATED LIST. Same
+ * name, same import, a different grammar: the old `.tdg-card` wrapped ledger rows and was
+ * superseded by the board months ago, leaving a stylesheet imported for nothing. Rewritten rather
+ * than added beside, because two group grammars in one file is how a page comes to draw both.
+ *
+ * ⚠️ SECTIONS ARE SEPARATED BY SPACE, NOT RULES. 26px between one panel and the next heading, and
+ * no hairline anywhere except the single faint inset line BETWEEN rows inside a panel. The board's
+ * 2px ink column rules and tinted wells are gone with the columns; what replaces them is air.
+ *
+ * ⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display: contents` on a wrapper with
+ * the cells as grid items. `contents` removes the row's own box, so hover, focus and any selected
+ * band fracture into six separate rectangles with the grid gaps showing through between them, and
+ * a `::after` divider has nothing to hang off. Locked in `tasksList.test.tsx`.
  */
 
-.tdg {
+/* ── the header block's stat chips ──────────────────────────────────────────────────────────
+   Beneath the title, above the body. Each states one figure and its name — the row REPORTS and
+   never appraises (the copy law), so there is no "good"/"behind" chip and no bar. */
+.tdg-stats {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
 }
 
-/* THE GROUP CARD. White on the page ground, one hairline, the same radius as the app's other
-   cards — it is a container for rows, so it carries no shadow of its own; a raised card inside a
-   scrolling list makes every group look like a dialogue. */
-.tdg-card {
-  background: #fffefb;
-  border: 1px solid var(--bd, #e7ddd2);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* The head: swatch · Playfair label · mono count. The rule fills the rest of the line so the
-   count never floats in the middle of nowhere on a wide viewport. */
-.tdg-head {
-  display: flex;
+.tdg-stat {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 18px 12px;
-}
-
-.tdg-sw {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  flex: none;
-}
-
-.tdg-head h2 {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 19px;
-  font-weight: 600;
-  color: #2a1a13;
-  margin: 0;
-  line-height: 1.1;
-}
-
-.tdg-cn {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: #9a8e80;
-}
-
-.tdg-rule {
-  flex: 1;
-  height: 1px;
-  background: var(--bd, #e7ddd2);
-  margin-left: 4px;
-}
-
-.tdg-rows {
-  border-top: 1px solid #f0e9e0;
-}
-
-/* ── THE FOLD ─────────────────────────────────────────────────────────────
-   One control, stating the number it is holding back. It is a row of the group, not a floating
-   button, so the group still reads as one object. */
-.tdg-fold {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #7a6a5e;
-  background: #fbf8f3;
-  border: 0;
-  border-top: 1px solid #f0e9e0;
-  padding: 11px 18px;
-  cursor: pointer;
-}
-
-.tdg-fold:hover { background: #f5efe6; color: #2a1a13; }
-
-/* The quick-add row — ONLY in the Your group (audit item 7: one verb per control). */
-.tdg-add {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font: inherit;
-  font-size: 13px;
-  color: #7a6a5e;
-  background: transparent;
-  border: 0;
-  border-top: 1px dashed #ddd2c2;
-  padding: 12px 18px;
-  cursor: pointer;
-}
-
-.tdg-add:hover { background: #fbf8f3; color: #2a1a13; }
-
-/* ── THE RETURNED-FROM-SNOOZE CHIP ────────────────────────────────────────
-   A row reappearing with no explanation reads as a bug. This says why, for one day. */
-.tdg-back {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #7a6a5e;
-  background: #f3ece1;
-  border: 1px solid #e3d8c8;
-  border-radius: 5px;
-  padding: 2px 6px;
+  gap: 9px;
+  height: 38px;
+  padding: 0 19px;
+  border: 1px solid #e6ddcd;
+  border-radius: 99px;
+  background: #fff;
+  font-size: 12.5px;
+  color: #6b5a4e;
   white-space: nowrap;
 }
 
-/* ── THE SNOOZED BAND ─────────────────────────────────────────────────────
-   Collapsed at the page foot (audit item 4). Snoozed items had no home in list view at all —
-   findable only on the board — and this is that home. It is quiet by construction: you put these
-   away on purpose, so the band states they exist and does not argue for them. */
-.tdg-snz {
-  margin-top: 4px;
-  border: 1px solid var(--bd, #e7ddd2);
-  border-radius: 12px;
-  background: #fbf8f3;
-  overflow: hidden;
+.tdg-stat b {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2b2118;
 }
 
-.tdg-snzhead {
+/* ── the body ───────────────────────────────────────────────────────────────────────────────
+   The zone scrolls; the sections stack inside it. */
+.tdg {
+  display: block;
+}
+
+.tdg-sect {
+  margin-bottom: 26px;
+}
+
+.tdg-sect:last-child {
+  margin-bottom: 8px;
+}
+
+/* THE HEADING SITS OUTSIDE AND ABOVE ITS PANEL — Playfair name, mono count, then the plain
+   description on the right. Outside, because a heading inside the white panel would make the
+   panel the object and the group its contents; the group is the object. */
+.tdg-shd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px 13px;
+}
+
+.tdg-shd h3 {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2b2118;
+}
+
+.tdg-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.tdg-n {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  color: #a5988c;
+}
+
+.tdg-desc {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: #a0958a;
+}
+
+/* THE PANEL. White, one hairline, generous radius, the faintest lift — it is a sheet of paper on
+   the cream page. The 6px block padding is what lets the first and last rows breathe without a
+   divider above or below them. */
+.tdg-panel {
+  background: #fff;
+  border: 1px solid #ece4d6;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(58, 28, 20, 0.045);
+  padding: 6px 16px;
+}
+
+/* ── THE ROW ────────────────────────────────────────────────────────────────────────────────
+   Six tracks: tick · title (the only flexible one) · status pill · journey · age · verbs. */
+.tdg-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 216px;
+  align-items: center;
+  padding: 16px 14px;
+  border-radius: 11px;
+  position: relative;
+  transition: background 120ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/* the divider is the ROW's own inset line, so it inherits the row's radius treatment and
+   disappears under hover rather than cutting across it */
+.tdg-row::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -1px;
+  height: 1px;
+  background: #f6f1e9;
+}
+
+.tdg-row:last-child::after { display: none; }
+.tdg-row:hover { background: #fbf7f1; }
+.tdg-row:hover::after { background: transparent; }
+
+.tdg-cc { display: flex; align-items: center; justify-content: center; }
+
+/* ⚠️ THE AGE'S INSET IS INSIDE ITS TRACK, NEVER A SEVENTH TRACK OR A COLUMN GAP. Browser-measured
+   at 1360: the age ends at exactly the x the primary button begins, so a right-aligned figure sat
+   flush against an ink fill and read as a collision. The six tracks are the measure and they are
+   untouched; the 10px is padding within the cell. */
+.tdg-cr { display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; }
+
+/* the tick. A row that cannot be completed draws no circle at all — `isTickable` decides, and a
+   tick that does nothing is worse than no tick. */
+.tdg-tick {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.6px solid #d7cabb;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  cursor: pointer;
+}
+
+.tdg-row:hover .tdg-tick { border-color: #8a9e88; color: #cfdccb; }
+
+.tdg-tick.dn {
+  background: #e6ece4;
+  border-color: #8a9e88;
+  color: #4a5f48;
+}
+
+/* ⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED — it is the only part of a row that says what the
+   row IS. The subtitle sits BENEATH it rather than competing for the same line's width, and the
+   measure is paid for out of the flexible track. (Carried from the retired Up-next rail's law.) */
+.tdg-t {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2b2118;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* ⚠️ THE STRIKE GOES ON THE TITLE, NEVER THE ROW — the time and the Undo must stay legible. */
+.tdg-row.done .tdg-t {
+  text-decoration: line-through;
+  color: #9aa197;
+}
+
+.tdg-sub {
+  font-size: 11.5px;
+  color: #a0958a;
+  margin-top: 5px;
+}
+
+/* the status pill — one width, so the meters beside them line up down the panel */
+.tdg-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 124px;
+  box-sizing: border-box;
+  height: 25px;
+  border-radius: 7px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+}
+
+/* ⚠️ THE FOUR FAMILY TONES ARE todoFamily's, RESTATED HERE UNDER LOCK — CSS cannot read TS, and
+   `tasksList.test.tsx` fails the moment these and FAMILY_BAND disagree. The band's `bd` is the
+   pill's border; its darker stop is the fill. */
+.tdg-pill.fam-urgent { background: #f4d5c9; color: #8a4a36; border: 1px solid #e8c8bc; }
+.tdg-pill.fam-housekeeping { background: #f0e8d8; color: #7a6844; border: 1px solid #ddd0bc; }
+.tdg-pill.fam-yours { background: #d5dbd3; color: #4a5f48; border: 1px solid #b9c9b4; }
+.tdg-pill.fam-done { background: #e7ebe5; color: #6b7a68; border: 1px solid #cfd8cc; }
+
+/* the journey column. ⚠️ RESERVED, AND MOSTLY EMPTY UNTIL PHASE 3 — the per-kind stage meter is
+   the kinds-and-verbs phase's work. The sweep rail is here because it is LIVE today (it rode the
+   board's sweep card) and dropping it in transit would be a regression, not a phase boundary. */
+.tdg-jrny { width: 152px; }
+
+.tdg-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: #f1eade;
+  overflow: hidden;
+}
+
+.tdg-bar i {
+  display: block;
+  height: 100%;
+  background: #c3b295;
+}
+
+.tdg-stlab {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.09em;
+  color: #a0958a;
+  text-align: center;
+  margin-top: 7px;
+  white-space: nowrap;
+}
+
+.tdg-age {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  color: #a5988c;
+  white-space: nowrap;
+}
+
+/* ── THE FOUR-SLOT ACTION GRID ──────────────────────────────────────────────────────────────
+   ⚠️ FIXED TRACKS, AND AN ABSENT VERB LEAVES ITS SLOT STANDING. Every primary in the panel
+   therefore starts at the same x, and a missing verb reads as a considered absence rather than a
+   row that shifted. (The ref's words: "where a verb is forbidden the slot stays empty so the
+   absence is legible rather than mysterious".) */
+.tdg-verbs {
+  display: grid;
+  grid-template-columns: 68px 30px 30px 30px;
+  gap: 7px;
+  align-items: center;
+}
+
+.tdg-slot { height: 30px; }
+
+.tdg-vb {
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #ece4d6;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b5a4e;
+  cursor: pointer;
+}
+
+.tdg-vb:hover { border-color: #cdbfae; color: #2b2118; }
+
+.tdg-vb.go {
+  background: #2a1a13;
+  border-color: #2a1a13;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tdg-vb.go:hover { color: #fff; }
+
+/* the ghost primary — Undo on a finished row is a way back, not an act */
+.tdg-vb.ghost {
+  background: #fff;
+  border-color: #e6ddcd;
+  color: #4d4238;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── THE HOUSEKEEPING FOLD ──────────────────────────────────────────────────────────────────
+   One control, stating the number it holds back, centred beneath its panel. ⚠️ ONLY
+   HOUSEKEEPING FOLDS — `groupSlice` is what decides, and it refuses every other group. */
+.tdg-more {
+  text-align: center;
+  padding: 15px 0 6px;
+}
+
+.tdg-moreb {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 16px;
+  border: 1px solid #e6ddcd;
+  border-radius: 99px;
+  background: #fff;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  color: #8a7a6c;
+  cursor: pointer;
+}
+
+.tdg-moreb:hover { color: #2b2118; border-color: #cdbfae; }
+
+/* ── THE SNOOZED FOLD ROW ───────────────────────────────────────────────────────────────────
+   Snoozed collapses to a slim card rather than a panel of rows: you put these away on purpose,
+   so the page states that they exist and does not argue for them. Opening it is in place. */
+.tdg-fold {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   text-align: left;
-  font: inherit;
-  background: transparent;
-  border: 0;
-  padding: 12px 18px;
+  background: #fff;
+  border: 1px solid #ece4d6;
+  border-radius: 14px;
+  padding: 15px 22px;
+  margin-bottom: 14px;
   cursor: pointer;
-  color: #7a6a5e;
 }
 
-.tdg-snzhead:hover { color: #2a1a13; }
-
-.tdg-snzt {
+.tdg-fold h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 15px;
-  color: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: #6b5a4e;
 }
 
-.tdg-snzchev {
-  margin-left: auto;
-  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+.tdg-foldchev {
+  transition: transform 160ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-.tdg-snz.open .tdg-snzchev { transform: rotate(90deg); }
-
-.tdg-snzbody { border-top: 1px solid #f0e9e0; }
+.tdg-fold[aria-expanded="true"] .tdg-foldchev { transform: rotate(90deg); }
 
 @media (prefers-reduced-motion: reduce) {
-  .tdg-snzchev { transition: none; }
+  .tdg-foldchev { transition: none; }
+  .tdg-row { transition: none; }
 }

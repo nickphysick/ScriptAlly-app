@@ -95,18 +95,15 @@ describe("⚠️ CLEAR sits beside FILTERS, appears only when something narrows,
     expect(tagsCap).not.toContain("tds-tagclear");
   });
 
-  it("⚠️ it resets BOTH narrowings — every page hands it a facet reset AND a tag reset", () => {
+  it("⚠️ it resets BOTH narrowings — a half-reset that did not say so was the fault", () => {
     expect(src).toContain("const narrowed = active !== \"all\" || selectedTags.length > 0;");
-    /* ⚠️ NARROWED 7 Aug 2026 (tasks-viewport P1): this ran over three pages, because three
-       mounted the sidebar. The sidebar is the To-do list's alone now — the others run full
-       width — so ONE page hands CLEAR its resets. The rule itself is unchanged and is the
-       point: wherever the sidebar mounts, CLEAR resets BOTH narrowings, never half of them.
-       (9 Aug, tasks-consolidation P1: Today left the list of full-width pages by being
-       retired outright.) */
-    const p = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    expect(p).toContain('onClearAll={() => { setFacet("all"); setTagSel([]); }}');
-    expect(p).not.toContain("onClearTags=");
-    for (const page of ["TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+    /* ⚠️ NARROWED THREE TIMES, AND THE RULE IS UNCHANGED. 7 Aug (tasks-viewport P1): three pages
+       mounted the sidebar, then one. 9 Aug (tasks-consolidation P1): Today left the list by being
+       retired outright. 9 Aug (P2): the To-do list's mount goes too, so NO page mounts it — the
+       component and its CLEAR contract stand, unmounted, and the rule they carry is asserted
+       against the component itself above rather than against a caller that no longer exists.
+       Wherever this ever mounts again, CLEAR resets BOTH narrowings, never half of them. */
+    for (const page of ["ToDoPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
       const q = readFileSync(join(here, page), "utf8");
       expect(q, `${page} runs full width — no sidebar to clear`).not.toContain("onClearAll=");
     }

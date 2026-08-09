@@ -47,7 +47,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("the card is the nt lane's empty node ONLY (gone the moment a note exists) with an honest count — RETIRED SURFACE (board+dock P1) — RETIRED SURFACE (board+dock P1)", () => {
@@ -56,7 +56,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("the dashed card's tokens + treatment: butter ground, dashed border, the ink button", () => {
@@ -82,7 +82,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 });
 
@@ -122,7 +122,7 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("the type segment: ✎ Note / ✓ Task, the selected one deep-ink filled", () => {
@@ -289,7 +289,7 @@ describe("notes gaps — adding another, and removing one (found in live use)", 
        pieces they carried survive on the board. Page chrome: todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("a note can be DELETED — removal is its completion (it is never ticked)", () => {

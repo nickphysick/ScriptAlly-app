@@ -31,12 +31,13 @@ import { join } from "node:path";
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 
-/** Everything before the board renders — the page's chrome.
- *  ⚠️ The anchor moved with the view switch (board+dock P1): the page is cards-only now, so the
- *  slice ends at the board's own render call rather than at a branch that no longer exists. */
+/** Everything before the body renders — the page's chrome.
+ *  ⚠️ The anchor has moved twice: with the view switch (board+dock P1) and again with the board
+ *  itself (tasks-consolidation P2, 9 Aug). The slice ends at the body's render call, whatever the
+ *  body currently is — that is the whole point of anchoring on it rather than on a view. */
 const chrome = (() => {
-  const i = page.indexOf(") : renderBoard()}");
-  expect(i, "the board's render call must exist for this slice to mean anything").toBeGreaterThan(-1);
+  const i = page.indexOf(") : renderList()}");
+  expect(i, "the list's render call must exist for this slice to mean anything").toBeGreaterThan(-1);
   return page.slice(0, i);
 })();
 
@@ -46,30 +47,44 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
        it the title/subtitle and renderTools feeds its tool row. Same law, new home. */
     expect(chrome).toContain("<TasksPageLayout");
     expect(chrome).toContain('title="To-do list"');
-    expect(chrome).toContain("subtitle={boardSubtitle()}");
+    /* ⚠️ THE PROSE SUBTITLE IS RETIRED (tasks-consolidation P2) AND THE STAT CHIPS SAY IT NOW.
+       `boardSubtitleCopy(boardFigures(boardCols))` and `taskStats(boardCols, …)` state the same
+       facts over the same object; two statements of one derivation is the fault the counting law
+       exists to prevent, so the header keeps ONE. The mono eyebrow arrives in its place — the
+       Dashboard's grammar, both halves imported from the Dashboard's own derivations. */
+    expect(chrome).not.toContain("subtitle={boardSubtitle()}");
+    expect(chrome).toContain("eyebrow={tasksEyebrow(longDate(new Date(now)), weekOfQuerying(queries, new Date(now)))}");
     /* Scoped to the LIVE chrome: `renderHero` is the dormant bespoke hero, kept whole behind its
        red gate, and it legitimately still carries the old wording. Asserting over the whole file
        would fail on a thing that is deliberately preserved. */
     expect(chrome.slice(chrome.indexOf("<TasksPageLayout"))).not.toContain("What’s on your desk?");
   });
 
-  it("⚠️ THE SIDE CONTAINER IS MOUNTED, and OUTSIDE the view switch", () => {
-    // This is the assertion Phase 2 needed and did not have: not "the component exists" but
-    // "this page mounts it, before the branch that chooses a view".
-    expect(chrome).toContain("<TodoSideContainer");
-    // tasks-pages P1: the sidebar rides the layout's `sidebar` prop — below the hairline by construction
-    expect(chrome).toContain("sidebar={");
+  /* ⚠️ THE SIDE CONTAINER'S MOUNT IS RETIRED (tasks-consolidation P2, 9 Aug), AND THE TRIPWIRE
+     THIS FILE EXISTS FOR IS NOT. Its FILTERS facets asked "what KIND of thing is this" — the
+     question the five groups now answer permanently and in the open — so a control that narrowed
+     to one kind was a way of hiding four. Its other two jobs both kept their doors: Task settings
+     via the Settings page (tasks-viewport P5) and the Noteboard via its own nav row.
+     ⚠️ ONE THING GENUINELY WENT: the TAG narrowing. Flagged in reports/STATE.md, not absorbed. */
+  it("⚠️ NO PAGE CARRIES A SIDEBAR NOW — and the two doors it held are still open", () => {
+    expect(chrome).not.toContain("<TodoSideContainer");
+    expect(chrome).not.toContain("sidebar={");
+    // the settings sheet is still HOSTED here — the Settings page's route lands before the event
+    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
+    expect(page).toContain("<TaskSettingsSheet");
   });
 
-  it("the tool row carries the local search and the view toggle, and NOT the retired chip strip — RETIRED SURFACE (board+dock P1)", () => {
-    /* ⚠️ RETIRED SURFACE (board+dock P1). The To-do list page is the BOARD now — cards only.
-       The Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
-       pieces they carried survive on the board (the fold is a column's "+ n more", the snoozed
-       band is the Snoozed column, the kind facet is the card's band). The page's chrome is
-       locked in todoListChrome.test.ts. */
+  it("the body is the GROUPED LIST — the four columns, the ledger and the view toggle are all gone", () => {
+    /* ⚠️ RETIRED SURFACE, TWICE OVER. board+dock P1 retired the Lane/ledger grammar and the view
+       toggle for the board; tasks-consolidation P2 retires the board itself. The pieces each
+       carried survive: the housekeeping FOLD is `groupSlice`, the SNOOZED BAND is the snoozed
+       fold row, and the KIND facet is the group heading it was always approximating. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderBoard");
+    expect(page).not.toContain("function renderBoard");
+    expect(page).toContain("function renderList");
+    // the slice above already proves the call is reached from the chrome, not from a view branch
+    expect(page).toContain("<TaskList");
   });
 
   it("the Add is PINK (creation); the session launcher is RETIRED (board fixes II P3)", () => {
@@ -89,31 +104,40 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
   });
 });
 
-describe("FILTERS is the ONE narrowing surface, and it reaches all four columns (P2)", () => {
-  it("the facet is applied to EVERY column, not to one", () => {
-    const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
-    // tasks-pages P5: facet ∧ tags compose in ONE narrow helper applied to every column.
-    expect(fn).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
+describe("ONE narrowing, applied in ONE place — it cannot reach some of the page and not the rest", () => {
+  /* ⚠️ THE SURFACE CHANGED AND THE LAW DID NOT. FILTERS was the one narrowing surface and it had
+     to reach all four columns; the facet retired with the sidebar, so the search is what is left
+     — and it still has to reach every source set alike, or the page shows differently-scoped
+     views of one list and you have to remember which. `narrowCards` is where it is applied, and
+     the list, the dock's queue and the "nothing matches" branch all read THAT. */
+  const fn = (() => {
+    const i = page.indexOf("function renderList");
+    expect(i, "renderList must exist for this slice to mean anything").toBeGreaterThan(-1);
+    return page.slice(i, i + 1400);
+  })();
+
+  it("every source set walks through the same narrow helper", () => {
     for (const col of ["todo", "today", "snoozed", "done"]) {
-      expect(fn, `${col} must be narrowed`).toContain(`${col}: narrow(boardCols.${col})`);
+      expect(fn, `${col} must be narrowed`).toContain(`${col}: narrowCards(boardCols.${col})`);
     }
   });
 
-  it("the sort likewise reaches all four — a per-column sort would be four views of one set", () => {
-    /* P5: the ONE narrow helper carries the sort (and the facet ∧ tag filter), and every column
-       walks through it — sorting still cannot diverge per column, now by construction. */
-    const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 1400);
-    expect(fn).toContain("sortBoardCards(applyFacet(cards, facet)");
-    for (const col of ["todo", "today", "snoozed", "done"]) {
-      expect(fn, col).toContain(`${col}: narrow(boardCols.${col})`);
-    }
+  it("the helper carries BOTH the search and the sort, so neither can diverge per group", () => {
+    const helper = page.slice(page.indexOf("function narrowCards"), page.indexOf("function narrowCards") + 400);
+    expect(helper).toContain("matchesSearch(c, search, sctx)");
+    expect(helper).toContain("sortBoardCards(hit, sort)");
   });
 
-  it("its counts come from the cards the columns RENDER, never a second tally", () => {
-    /* ⚠️ SUPERSEDED FEED (P5): the raw lanes this lock used to pin counted every sweep member
-       loose and could not see the flags-built Snoozed — which is exactly how "Everything 27" sat
-       beside columns showing fourteen. The feed is now the hoisted columns' own live set. */
-    expect(page).toContain("counts={facetCounts(liveBoardCards(boardCols))}");
-    expect(page).not.toContain("facetCounts([...board.do");
+  it("the DOCK walks exactly what you were looking at — the same helper, never a second order", () => {
+    const dock = page.slice(page.indexOf("function dockAllCards"), page.indexOf("function dockAllCards") + 300);
+    expect(dock).toContain("narrowCards([...board.do, ...board.hk, ...board.nt])");
+  });
+
+  it("the header's figures come from the cards the page RENDERS, never a second tally", () => {
+    /* ⚠️ SUPERSEDED FEED, TWICE. P5 moved it off the raw lanes (which held every sweep member
+       loose and could not see the flags-built Snoozed — "Everything 27" beside fourteen); P2
+       moves it off the FILTERS rows onto the stat chips. Same object both times: `boardCols`. */
+    expect(page).toContain("taskStats(boardCols,");
+    expect(page).not.toContain("facetCounts(");
   });
 });

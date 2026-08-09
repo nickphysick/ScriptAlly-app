@@ -152,9 +152,14 @@ describe("⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE — the other three run f
     expect(withSide).toContain("<aside");
   });
 
-  it("⚠️ EXACTLY ONE PAGE PASSES A SIDEBAR, and it is the board", () => {
-    expect(board).toContain("sidebar={");
-    for (const [name, src] of [["Calendar", cal], ["Noteboard", note]] as const) {
+  /* ⚠️ NOW NO PAGE PASSES ONE (tasks-consolidation P2, 9 Aug). The count went three → one → zero,
+     and each step was the same argument: the sidebar's FILTERS facets asked "what KIND of thing
+     is this", and the consolidated page's five groups answer that permanently and in the open, so
+     a control that narrowed to one kind was a way of hiding four. The CONTRACT is unchanged and
+     is what this describe protects — `sidebar` is optional, and absent means no aside at all,
+     never an empty gutter (asserted against the rendered output above). */
+  it("⚠️ NO PAGE PASSES A SIDEBAR — all four Tasks pages run full width", () => {
+    for (const [name, src] of [["To-do list", board], ["Calendar", cal], ["Noteboard", note]] as const) {
       expect(src, `${name} must run full width`).not.toContain("sidebar={");
     }
   });
@@ -257,9 +262,12 @@ describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
     const i = board.indexOf("<TplZone scrollRef={zoneRef}");
     expect(i).toBeGreaterThan(-1);
     const seg = board.slice(i, i + 500);
-    expect(seg).toContain("<TodoBoard");
-    // nothing is introduced between the board's body and its cards
-    expect(seg).not.toContain("tbd-body");
+    /* ⚠️ THE BODY CHANGED, THE LAW DID NOT (tasks-consolidation P2, 9 Aug). The zone wraps
+       whatever the body is and introduces nothing inside it — P6's lane div is the precedent: a
+       wrapper one level too deep killed `.tbd-body > .tbd-card` in perfect silence. The list's
+       own equivalent is `.tdg-panel > .tdg-row`, locked in tasksList.test.tsx. */
+    expect(seg).toContain("<TaskList");
+    expect(seg).not.toContain("tdg-panel");
   });
 });
 

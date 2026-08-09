@@ -55,17 +55,23 @@ import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import {
   TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY,
 } from "../../lib/todoRoutes";
-import { TodoBoard } from "./TodoBoard";
+/* ⚠️ THE FOUR-COLUMN BOARD IS RETIRED AS THIS PAGE'S BODY (tasks-consolidation P2). `TodoBoard`
+   and `TodoSideContainer` are no longer mounted here — the ranked order of ONE list is the plan,
+   so a column asking where a card belongs, and a FILTERS facet asking what kind it is, are both
+   answered by the groups themselves. Neither component is deleted in this phase (the house rule
+   on orphans: flag, then sweep in a commit of its own). */
+import { TaskList } from "./TaskList";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
-import { TodoSideContainer } from "./TodoSideContainer";
-import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, boardFigures, boardSubtitleCopy, liveBoardCards } from "../../lib/todoColumns";
+import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId } from "../../lib/todoColumns";
 import { MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { useTagWrites } from "./useTagWrites";
 import { todoPrefs } from "../../lib/todoPrefs";
-import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
+/* `toggleTagSel` still serves the COMPOSER's draft (tags are untouched by the sidebar's
+   retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
+import { tagUsageCounts, toggleTagSel } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
@@ -75,8 +81,12 @@ import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import {
   TODO_SORTS, DEFAULT_TODO_SORT, TodoSortId, sortBoardCards,
-  TodoFacetId, applyFacet, facetCounts,
 } from "../../lib/todoBoardSort";
+/* THE CONSOLIDATED PAGE'S OWN DERIVATIONS — groups, stat chips and the eyebrow, all pure and
+   locked away from this component (tasks-consolidation P2). */
+import { taskGroups, taskStats, tasksEyebrow } from "../../lib/todoGroups";
+import { estimateTotal } from "../../lib/todoEstimate";
+import { longDate } from "../../lib/dashboardStats";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
 } from "../../lib/todoListPage";
@@ -292,16 +302,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      you a third of itself is the worst way to learn you had set one. */
   const [sort, setSort] = useState<TodoSortId>(DEFAULT_TODO_SORT);
   const [sortOpen, setSortOpen] = useState(false);
-  const [facet, setFacet] = useState<TodoFacetId>("all");
-  /* tasks-pages P5 — the TAGS multi-selection (additive with FILTERS: Urgent AND #synopsis) +
-     the tag sheet the ⋯ menu and the dock's item surface open. */
-  const [tagSel, setTagSel] = useState<string[]>([]);
+  /* ⚠️ THE FILTERS FACET AND THE TAG SELECTION ARE RETIRED WITH THE SIDEBAR (tasks-consolidation
+     P2). The facet asked "what KIND of thing is this" — which is the question the five groups now
+     answer permanently and in the open, so a control that narrowed to one kind was a way of
+     hiding four of them. The tag NARROWING went with it and is a real loss, flagged in
+     reports/STATE.md rather than quietly absorbed: tags themselves are untouched (the composer,
+     the ⋯ sheet and the Noteboard's own filter all still write and read them). */
   const [tagsFor, setTagsFor] = useState<BoardCard | null>(null);
-  /* ⚠️ THE FILTERS COUNTS COME FROM THE CARDS THE COLUMNS RENDER (P2), not from a second tally.
-     `facetCounts` reads the same assembled lanes the board draws, which is what makes a row's
-     number and the board's contents incapable of disagreeing — the exact split that put Snoozed
-     at 1 in the list and 0 on the board. */
-  const [snzOpen, setSnzOpen] = useState(false);
   // grouping P1 — per-batch expansion + the "+n more" reveal; recentG scopes the restore
   // animation to the just-collapsed batch (never a page-load flash). P3: the expansion
   // persists per-batch (sa. prefs) and is ONE state — expand in cards, arrive expanded in
@@ -696,9 +703,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      unmount), so a sibling Tasks route has this page alive beside it. That is a real dependency,
      so it is stated here rather than left to be discovered. */
   useEffect(() => {
-    /* ⚠️ "Work the list" opens THE SAME DOCK (P4) — walking today's committed queue instead of
-       the board's. One engine, two entrances; the queue is the only thing that differs. */
-    const onWork = () => openDock([...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate === today || c.surfaced));
+    /* ⚠️ "Work the list" opens THE SAME DOCK, AND NOW ON THE SAME QUEUE (tasks-consolidation P2).
+       It used to walk Today's committed subset; Today is retired, so "the list" means the one
+       ranked list — `dockAllCards`, the narrowing respected. The listener survives as the
+       cross-surface contract and the tool row's button is what calls it, so there is exactly one
+       definition of what gets walked. */
+    const onWork = () => openDock(dockAllCards());
     const onAdd = (e: Event) => {
       const key = (e as CustomEvent<{ key?: string }>).detail?.key;
       const card = [...board.do, ...board.hk, ...board.nt].find((c) => c.key === key);
@@ -1045,35 +1055,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             hairline is the tool row's own bottom edge, and the sidebar + body start together
             BELOW it. This page's hand-assembled column (tdb-col → PageHeader → tdb-ws → tdw)
             is superseded by the shared grid. */}
+        {/* ⚠️ THE MONO EYEBROW ARRIVES WITH THE CONSOLIDATION (P2) and the PROSE SUBTITLE LEAVES.
+            The stat chips beneath the tool row state the same facts the subtitle used to — how
+            much is outstanding and how much of it will not wait — so keeping both would be two
+            statements of one derivation, which is precisely the fault the counting law exists to
+            prevent. `boardFigures`/`boardSubtitleCopy` survive in `todoColumns`, unmounted.
+
+            ⚠️ THE SIDEBAR IS GONE FROM THIS PAGE, so no Tasks page carries one. Task settings is
+            still reachable (the Settings page's second door, tasks-viewport P5) and so is the
+            Noteboard (its own nav row) — the sidebar's other two jobs. */}
         <TasksPageLayout
           title="To-do list"
-          subtitle={boardSubtitle()}
+          eyebrow={tasksEyebrow(longDate(new Date(now)), weekOfQuerying(queries, new Date(now)))}
           tools={renderTools()}
-          sidebar={
-          /* ⚠️ THE PAGE SIDE CONTAINER, IN BOTH VIEWS (corrections fix 3). It was built in
-              Phase 1 and mounted only on Today — this page never received it, so the LISTS
-              facets had nowhere to live and the retired chip strip stayed on as their stand-in.
-              It belongs to the page rather than to one of its two renderings. */
-          <TodoSideContainer
-            /* ⚠️ THE FILTERS COUNT THE RENDERED CARDS (P5): the live columns' own set — sweeps as
-               ONE card, the flags-built Snoozed included, Done outside. The raw lanes it used to
-               count held every sweep member loose and could not see Snoozed at all, which is how
-               "Everything 27" sat beside columns showing fourteen. */
-            counts={facetCounts(liveBoardCards(boardCols))}
-            active={facet}
-            onSelect={setFacet}
-            onOpenTaskSettings={() => setSettingsOpen(true)}
-            onNoteboard={() => onNavigate("todo", "Noteboard")}
-            tags={userTags}
-            tagCounts={tagCounts}
-            selectedTags={tagSel}
-            onToggleTag={(id) => setTagSel((sel) => toggleTagSel(sel, id))}
-            /* board-optimise P2: ONE clear resets both narrowings — a half-reset that did not
-               say so was the fault. */
-            onClearAll={() => { setFacet("all"); setTagSel([]); }}
-            onCreateTag={(tag) => void createTagDef(tag)}
-          />
-          }
         >
           <div className="tdb-centre">
           {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
@@ -1111,24 +1105,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <button type="button" className="tdb-briefx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
             </div>
           )}
-          {/* THE CONTROL LINE (todo rebuild P1) — the filter chips and the list controls are ONE
-              row, not two stacked bands: chips left, a flexible spacer, then the list search and
-              the view toggle. No container, no label slab — the filter slab's funnel/FILTER head
-              and the board panel both went with it. The "{n} items" line went too: the All chip's
-              struck total already carries the narrowed count. */}
           {/* ⚠️ THE STANDALONE CONTROL BAR IS GONE (board+dock P1). Its search and the retired
               view toggle fold into the header's tool row, which is now the page's single
-              instrument — one place to look for anything that changes what the board shows. Two
+              instrument — one place to look for anything that changes what the list shows. Two
               instrument rows, one under the other, is how the chip strip and the LISTS rows came
               to disagree; this is the same mistake in a different arrangement. */}
+          {/* ⚠️ THE STAT CHIPS ARE THE HEADER'S STATEMENT (P2) — four figures from the ONE
+              derivation, each counting CARDS, which is the unit the groups and the sidebar badge
+              both speak. They REPORT and never appraise: no "good day" verdict, no bar, and the
+              estimate chip is simply absent when nothing carries an estimate rather than reading
+              "0 min". "Outstanding" is deliberately not the sum of the panels below it — Snoozed
+              is live work merely asleep, and Done is not outstanding at all. */}
+          {!desk && (
+            <div className="tdg-stats">
+              {taskStats(boardCols, estimateTotal([...boardCols.todo, ...boardCols.today].map((c) => c.estimateMin)))
+                .map((s) => (
+                  <span key={s.label} className="tdg-stat">{s.label} <b>{s.value}</b></span>
+                ))}
+            </div>
+          )}
           <div className="tdb-board">
         {/* ⚠️ THE COMPOSER'S MOUNT (board fixes II, P3). "＋ Add task or note" set composerAt and
             NOTHING RENDERED IT — the mount lived in the retired lane/grid views, so the button
             did nothing a reader could see. It sits here, above whichever body state renders,
             because the add must work from every one of them (a new desk included). */}
         {composerAt && renderComposer()}
-        {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
-            desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
+        {/* ── the grouped list; the desk states (new-desk / desk-cleared) replace it wholesale.
+            ⚠️ BOTH DESK STATES READ UNFILTERED — `deskState` takes the raw lanes, never the
+            searched ones, so a search that happens to match nothing can never fake a clear desk.
+            Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
           <div className="tdb-nomatch">
             Nothing matches — <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters</button>
@@ -1157,7 +1162,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ) : null}
             onMore={(c) => openFlowCards([c])}
           />
-        ) : renderBoard()}
+        ) : renderList()}
           </div>{/* .tdb-board */}
 
           {/* THE ASSISTANT BAND — the page's closing note, and the ONE Pro surface here.
@@ -1261,6 +1266,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const { visible, more } = clearedListCap(doneCards);
     return (
       <div className="tdb-walked">
+        {/* ⚠️ ART · DESK-CLEAR — RE-EARNED (tasks-consolidation P2). Its mount went with the Today
+            page in P1; the slot itself never left the census. It belongs HERE, and only here,
+            because this state is WELL DONE where the new desk's slot is NOT YET — same page,
+            opposite meanings, so they stay two briefs and never one asset reused.
+            ⚠️ THE TRIGGER READS UNFILTERED: `deskState` takes the raw lanes (nothing urgent ∧ no
+            housekeeping ∧ no notes) plus a non-empty cleared log, so a search can never fake it. */}
+        <ArtSlot name="desk-clear" className="tdb-clrart" />
         <div className="tdb-clric big" aria-hidden>✓</div>
         <h2>Desk cleared.</h2>
         <p>Nothing needs you, the records are spotless, and today you cleared:</p>
@@ -1291,26 +1303,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    *  the UI. Per the pack, nothing further is deleted: `session`, `heroSession`, `HeroSession`,
    *  `FocusedSession`, `renderHero` below and all their CSS stay in place, dormant, awaiting a
    *  new entry point. */
-  /* The header's one line, derived: what the board holds and how much of it will not wait.
-     Numbers ≤ twelve read as words (the dashboard eyebrow's convention).
-
-     ⚠️ A HOISTED FUNCTION, NOT A post-return CONST — this file's own standing warning, which I
-     walked into anyway. Everything below the `return` is in the temporal dead zone while the
-     return's JSX evaluates, so a `const` here throws a ReferenceError on every render and the
-     page loads as "something went wrong". A function declaration hoists; a const does not. */
-  function boardSubtitle(): string {
-    /* ⚠️ CARDS, FROM THE COLUMNS' OWN OBJECT (P5). This used to sum the tiles — a MEMBER count,
-       every sweep uncollapsed — so the header said 42 over columns showing fourteen. It now reads
-       boardFigures(boardCols): the exact cards the four columns render, sweeps as one, Done
-       outside, urgency by the consolidated family. Copy lives in boardSubtitleCopy (locked). */
-    return boardSubtitleCopy(boardFigures(boardCols));
-  }
+  /* ⚠️ THE PROSE SUBTITLE IS RETIRED (tasks-consolidation P2), AND ITS DERIVATION IS NOT.
+     `boardSubtitle` composed the copy helper over the figures helper — the cards the four
+     columns rendered, sweeps as one, urgency by the consolidated family. The STAT CHIPS state
+     those same facts from `taskStats`, over the same `boardCols`; keeping both would be two
+     statements of one derivation, which is the exact fault the counting law exists to prevent.
+     `boardFigures` and `boardSubtitleCopy` stay in `todoColumns`, pure and locked, unmounted. */
 
   /* ⚠️ THE TOOL ROW IS THE PAGE'S SINGLE INSTRUMENT (board+dock P1; re-homed by tasks-pages P1
-     into TasksPageLayout's tool row — the shared PageHeader mount is superseded, the contract's
-     header block owns the title and subtitle now). Search, sort and the Add all live here — one
-     place to look for anything that changes what the board shows, with the pink creation action
-     pinned to the RIGHT SLOT per the contract.
+     into TasksPageLayout's tool row). Search, sort, the Add and — since Today's retirement —
+     "Work the list" all live here: one place to look for anything that changes what the list
+     shows or walks it, with the pink creation action pinned to the RIGHT SLOT per the contract.
      (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.) */
   function renderTools() {
     return (
@@ -1330,8 +1333,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               />
             </span>
 
-            {/* SORT — it reorders all four columns at once, which is why it sits with the page's
-                instruments and not on a column. */}
+            {/* SORT — it reorders every group at once, which is why it sits with the page's
+                instruments and never inside a panel. */}
             <span className="tdb-sortwrap">
               <button type="button" className="tdb-sortb" aria-haspopup="menu" aria-expanded={sortOpen}
                 onClick={() => setSortOpen((v) => !v)}>
@@ -1349,16 +1352,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               )}
             </span>
 
-            {/* ⚠️ THE ▶ SESSION LAUNCHER IS RETIRED (board fixes II, P3). The dock has real
-                doors now — every card opens it, and so does the menu's Action now — so a separate
-                launch button was a second name for a thing you were already touching. What it
-                launched SURVIVES WHOLE: openDock, dockAllCards, the FocusFlow engine and Today's
-                "Work the list" listener are all untouched; only the button and its orphaned
-                opener function are gone. */}
             {/* The Add was orphaned mid-page; it belongs with the page's other instruments. */}
             <TplGrow />
             <button type="button" className="tdb-addb" onClick={() => openComposer("task")}>
               ＋ Add task or note
+            </button>
+            {/* ⚠️ "WORK THE LIST" COMES BACK HERE (tasks-consolidation P2) — it was Today's ink
+                button, and Today is retired. It DISPATCHES rather than calling openDock, so the
+                page's own listener stays the single definition of what gets walked (one queue,
+                one entrance). DISABLED AT ZERO in the house grammar: an enabled button with
+                nothing to walk offers to walk an empty list. */}
+            <button
+              type="button"
+              className="tdb-workb"
+              disabled={boardCols.todo.length + boardCols.today.length === 0}
+              onClick={() => window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST))}
+            >
+              ▶ Work the list
             </button>
       </>
     );
@@ -1789,11 +1799,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      entrances are now the cards themselves, the menu's Action now, the bounce toast's Open, and
      Today's "Work the list".) */
 
-  /** The queue the dock walks — the board's own order, filtered view respected, so what you work
-   *  through is exactly what you were looking at. */
+  /**
+   * ⚠️ ONE NARROWING, APPLIED IN ONE PLACE (tasks-consolidation P2). The list, the dock's queue
+   * and the "nothing matches" branch all read THIS — so what you work through is exactly what you
+   * were looking at. It used to compose the FILTERS facet and the tag selection too; both retired
+   * with the sidebar, and the search is what is left.
+   *
+   * (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.)
+   */
+  function narrowCards(cards: BoardCard[]): BoardCard[] {
+    const hit = search.trim() ? cards.filter((c) => matchesSearch(c, search, sctx)) : cards;
+    return sortBoardCards(hit, sort);
+  }
+
+  /** The queue the dock walks — the list's own order, narrowing respected. */
   function dockAllCards(): BoardCard[] {
-    const raw = [...board.do, ...board.hk, ...board.nt];
-    return sortBoardCards(applyFacet(raw, facet), sort);
+    return narrowCards([...board.do, ...board.hk, ...board.nt]);
   }
 
   /* tasks-pages P5 — the tag writes; board-optimise P2 moved the pair into useTagWrites so the
@@ -1935,49 +1956,45 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     });
   }
 
-  function renderBoard() {
-    /* ⚠️ THE COLUMNS ARE THE HOISTED `boardCols` (P5) — the same object the subtitle and the
-       FILTERS counts read, so the three figures cannot diverge again. */
-    /* THE PAGE-LEVEL NARROWINGS, applied to ALL FOUR COLUMNS (P1 sort · P2 facet). Applying
-       either to one column would leave the board showing four differently-ordered views of one
-       set, and you would have to remember which. */
-    /* tasks-pages P5: the tag selection composes ADDITIVELY with the facet — Urgent AND
-       #synopsis. Derived cards carry no tags, so any selection narrows to user content: the
-       honest answer, since only user content can be tagged. */
-    const narrow = (cards: BoardCard[]) =>
-      sortBoardCards(applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel)), sort);
-    const columns = {
-      todo: narrow(boardCols.todo),
-      today: narrow(boardCols.today),
-      snoozed: narrow(boardCols.snoozed),
-      done: narrow(boardCols.done),
+  /**
+   * ⚠️ THE FOUR COLUMNS ARE RETIRED; THIS IS THE GROUPED LIST (tasks-consolidation P2).
+   *
+   * The columns asked WHERE a card belonged and then had to keep four of them agreeing about one
+   * set. `taskGroups` asks what KIND of thing it is — a question the app can already answer from
+   * the same `boardCols` the badge and every count read — and the ranked order inside each group
+   * IS the plan. Nothing about a group is stored, so this rebuild needed no migration.
+   *
+   * THE ONE NARROWING LEFT IS THE SEARCH, and it is applied to every group alike before the
+   * grouping runs: narrowing one group would leave the page showing differently-scoped views of
+   * one set, and you would have to remember which.
+   */
+  function renderList() {
+    const narrowed = {
+      todo: narrowCards(boardCols.todo),
+      today: narrowCards(boardCols.today),
+      snoozed: narrowCards(boardCols.snoozed),
+      done: narrowCards(boardCols.done),
     };
-    /* ⚠️ THE COLUMN REGION IS THE SCROLLZONE (tasks-viewport P1). The board used to scroll its
-       whole document — header, tool row and all — while the other three Tasks pages scrolled the
-       stage: two behaviours for one page family. Now all four are windows, and the columns scroll
-       INSIDE this zone. The sticky column heads keep working because they stick to the zone's
-       top rather than the page's. */
+    /* ⚠️ THE LIST REGION IS THE SCROLLZONE (tasks-viewport P1). The page never scrolls; the
+       header block is fixed and the groups scroll inside this zone. */
     return (
-      <TplZone scrollRef={zoneRef} label="Board columns" hem={false}>
-        <TodoBoard
-          columns={columns}
-          goodDay={todoPrefs(currentUser?.todoPrefs).goodDay}
+      <TplZone scrollRef={zoneRef} label="Your tasks" hem={false}>
+        <TaskList
+          groups={taskGroups(narrowed)}
+          hkExpanded={hkExpanded}
+          onToggleHk={() => setHkExpanded(true)}
           onOpen={(c) => openDock(dockAllCards(), c.key)}
-          onPlan={(c, plan) => performBoardPlan(c, plan)}
+          onTick={(c) => void quickDone(c)}
           onVerb={(c, v, column) => performCardVerb(c, v, column)}
         />
       </TplZone>
     );
   }
 
-  /* ⚠️ THE THREE GROUP CARDS, renderLedger AND snoozedRows ARE RETIRED (board+dock P1).
-     They were the ROWS view, and this page is the board now: the four columns say where each
-     thing stands, which is what the groups were approximating by kind. Keeping both would leave
-     two renderings of one set — and the rows view was already the one nobody saw, because it was
-     never the default.
-
-     The pieces they carried all survive on the board: the housekeeping FOLD is the column's
-     "+ n more", the SNOOZED BAND is the Snoozed column, and the KIND facet is the card's band. */
+  /* ⚠️ `performBoardPlan` AND `dropPlan` SURVIVE UNMOUNTED — drag was the board's, and the list
+     has no drop targets. They are left whole rather than deleted because every verb a drag
+     performed is also on the ⋯ menu, which is what the list uses; the sweep is a commit of its
+     own (the house rule on orphans). */
   // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,
   // the ledger's head checkbox + "Snooze or dismiss" menu, and the undo toast are the quick surfaces.)
 

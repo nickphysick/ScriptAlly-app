@@ -1336,6 +1336,18 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-addb { background: var(--pink, #f5e2da); border: 1px solid var(--pink-b, #e8c8bc); color: var(--burg, #7c3a2a); }
 .tdb-addb:hover { background: var(--pink-h, #f7e8e1); }
 
+/* ⚠️ "WORK THE LIST" — the ink verb, back from the retired Today page (tasks-consolidation P2).
+   It takes the tool row's OWN 34px step rather than the ref's 38px: the ref draws no shared tool
+   row, and one control height across the row is a standing lock (tasks-audit P3). Its disabled
+   state comes from `.tpl-tools button[disabled]`, which outweighs this rule by specificity —
+   paper, hairline, faint, not-allowed, never opacity. */
+.tdb-workb {
+  font: inherit; font-size: 12.5px; height: 34px; padding: 0 13px; border-radius: 9px;
+  cursor: pointer; white-space: nowrap;
+  background: #2a1a13; border: 1px solid #2a1a13; color: #fff;
+}
+.tdb-workb:hover:not([disabled]) { background: #3a2a20; }
+
 @media (max-width: 900px) {
   .tdb-tools { flex-wrap: wrap; justify-content: flex-end; }
   .tdb-tools .tdb-bsearch { width: 100%; order: -1; }

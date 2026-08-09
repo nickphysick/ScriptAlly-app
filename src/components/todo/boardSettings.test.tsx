@@ -104,9 +104,24 @@ describe("⚠️ the good-day setting TAKES EFFECT — the Today line reads it",
     expect(wipLine(3, 2)).toBe("THAT'S A FULL DAY");
   });
 
-  it("the board takes it as a prop and the page feeds it from the stored pref", () => {
-    expect(board).toContain("wipLine(cards.length, goodDay)");
-    expect(listPage).toContain("goodDay={todoPrefs(currentUser?.todoPrefs).goodDay}");
+  /**
+   * ⚠️ THE WIP LINE HAS LOST ITS SUBJECT (tasks-consolidation P2, 9 Aug) — FLAGGED, NOT PATCHED.
+   *
+   * "A GOOD DAY IS 3–5" advised on the size of the day's COMMITMENT, and committing work to a day
+   * is precisely what the consolidation removed: the ranked order of the one list is the plan, so
+   * there is no Today column to head. The ref draws no such line either, and the copy law is the
+   * reason ("the app reports and never appraises" — "THAT'S A FULL DAY" is an appraisal).
+   *
+   * SO `goodDay` NOW HAS NO LIVE READER, and a stored setting over nothing is the exact fault
+   * board-optimise P5 fixed when it gave `wipLine` the writer's number. The pure function and the
+   * settings control are both left standing — deleting a user's stored preference is not a
+   * rendering decision — and the choice (retire the control, or give the advice a new home) is
+   * carried in reports/STATE.md for Nick. This spec states the position so it cannot be lost.
+   */
+  it("⚠️ the good-day pref is STORED and READ, and has no surface until that call is made", () => {
+    expect(board).toContain("wipLine(cards.length, goodDay)");     // the retired board still holds it
+    expect(listPage).not.toContain("goodDay={todoPrefs(currentUser?.todoPrefs).goodDay}");
+    expect(settings).toContain("goodDay");                          // the control that writes it stands
   });
 
   it("it stays ADVICE — the line changes tone past the number, and blocks nothing", () => {

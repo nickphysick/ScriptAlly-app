@@ -1,30 +1,75 @@
-**Last updated: 9 August 2026 (sixteenth pass — the Tasks consolidation, Phase 1).**
+**Last updated: 9 August 2026 (seventeenth pass — the Tasks consolidation, Phase 2).**
 
-## Tasks consolidation — ⚠️ PHASE 1 + P2's FOUNDATION ONLY (pack: tasks-consolidation-prompt.md)
+## Tasks consolidation — PHASE 2 IS IN: the board is gone, the grouped list is the page
 
-**⚠️ PHASE 2's COMPONENT IS NOT BUILT, AND PHASES 3–7 ARE UNTOUCHED.** The page still renders the
-board. `1e920c6` lands P2's grouping DERIVATION only — pure, 13 locks, nothing wired — because a
-half-rebuilt page body is a broken page, which is worse than an unstarted one. What the next
-session needs is listed at the foot of this section.
+Report: **`reports/tasks-consolidation-p2.md`**. Suite **3361 | 2 skipped, 217 files**; tsc +
+production build green. **NOT DEPLOYED** — dev still runs the pre-consolidation build; prod
+untouched. **Phases 3–7 remain** (kinds/verbs · the dial · states/loading/empty · toasts/motion/
+keyboard/batch · narrow and touch).
 
-- **`lib/todoGroups.ts` is the seam P2's component builds against**: `taskGroups(cols)` →
+- **⚠️ THE FOUR COLUMNS, THE FILTERS SIDEBAR AND THE LEDGER TOGGLE ARE ALL RETIRED.** The page body
+  is `TaskList` over `taskGroups(boardCols)` — five white panels separated by 26px of space, no
+  hairlines. `TodoBoard` and `TodoSideContainer` are unmounted but NOT deleted (flag-then-sweep);
+  so is `performBoardPlan`/`dropPlan`'s mount, because the list has no drop targets.
+- **⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display: contents`.** Six tracks
+  `34px minmax(0,1fr) 144px 172px 104px 216px`, one flexible, its min zero. `contents` lays out
+  identically at rest and then deletes the row's box: hover, focus and any selected band fracture
+  into six rectangles and the divider has nothing to hang off. Locked twice in
+  `tasksList.test.tsx` — against the stylesheet AND against rendered markup.
+- **⚠️ WHICH VERB SLOTS FILL IS ASKED OF `cardMenu`, NEVER OF A SECOND PER-KIND TABLE.** Four fixed
+  slots `68px 30px 30px 30px`; an absent verb leaves its slot standing, so every primary in a panel
+  starts at the same x. An offer's dismiss line is in the menu DISABLED with its reason, so the
+  row's ✕ slot stands empty by construction. The clock and the ✕ are doors into that ONE menu at a
+  pre-expanded submenu — **Phase 4 swaps the snooze submenu for the dial at one call site.**
+- **⚠️ TWO FAULTS THE BROWSER WALK FOUND, AND THE SUITE COULD NOT.** (1) A sweep nobody has started
+  takes `c.due` as its METER label, and the age lane read the same field — one figure printed twice,
+  side by side; the board's band grammar already forbids the right lane mirroring its neighbour, and
+  the list inherited the fault. A sweep's age is `—` now. (2) The clock was gated on `snoozeVia`,
+  which answers *which write path* a snooze takes — a sweep has no `relatedRecordId` because it
+  stands for many, so it answered "none" while the ⋯ menu offered a Snooze. Two answers to one
+  question on one card; that is what moved all three permissions onto the menu.
+- **The header block: mono eyebrow → Playfair title → tool row → stat chips.** The PROSE SUBTITLE
+  is retired — the chips state the same facts over the same `boardCols`, and two statements of one
+  derivation is the fault the counting law exists to prevent. `boardFigures`/`boardSubtitleCopy`
+  survive pure and locked, unmounted. **"Work the list" returns to the tool row** (Today's ink
+  button), dispatching the existing event so there is ONE definition of what gets walked;
+  `dockAllCards` and the list read the same `narrowCards` helper, so the dock walks exactly what
+  you were looking at.
+- **`desk-clear` IS RE-EARNED**, mounted on the desk-cleared state and nowhere else — WELL DONE
+  against the new desk's NOT YET, two briefs, never one asset reused. Its three-way AND still reads
+  UNFILTERED (`deskState` takes the raw lanes), so a search can never fake a clear desk.
+- **⚠️ `public/todo-seize-the-day.png` IS STILL UNMOUNTED AND STILL DELIBERATELY KEPT.** It was
+  Today's plan card; the consolidated page has not earned it. Do not delete it in a cleanup sweep.
+- **Deviations from the ref, each with its reason** (full list in the report): the title stays
+  "To-do list" (renaming it is an IA change across the sidebar, both crumbs and the palette — chrome,
+  not page body); the tool row keeps its locked 34px step (the stat chips ARE 38px); a user task's
+  ✕ is absent, following the ref's own prose over its drawing; the journey meter's per-kind stages
+  are Phase 3's and the track is reserved for them.
+
+### ⚠️ TWO CARRIED CONSEQUENCES — Nick's calls, flagged rather than absorbed
+
+1. **The TAG NARROWING is gone from this page.** Tags themselves are untouched — the composer
+   writes them, the ⋯ sheet edits them, the Calendar and the Noteboard still filter by them — but
+   the consolidated tool row has no tag control and the ref draws none. If it matters here, the
+   tool row is the only legal home.
+2. **`todoPrefs.goodDay` HAS NO LIVE READER.** "A GOOD DAY IS 3–5" advised on the size of the day's
+   *commitment*, and committing work to a day is exactly what the consolidation removed. The ref
+   draws no such line and the copy law agrees ("the app reports and never appraises"). `wipLine` and
+   the Task-settings control both stand — **a stored setting over nothing is the fault
+   board-optimise P5 fixed**, so this needs deciding rather than leaving.
+
+## Tasks consolidation — Phase 2's foundation (landed `1e920c6`, now consumed)
+
+- **`lib/todoGroups.ts` is the seam the component builds against**: `taskGroups(cols)` →
   five groups from the ONE `assembleBoardColumns`; `taskStats(cols, estMin)` → the header chips;
-  `groupSlice`/`showMoreLabel` → the housekeeping fold. Laws locked: a card lands in exactly one
+  `groupSlice`/`showMoreLabel` → the housekeeping fold; `tasksEyebrow` (added by P2) → the mono
+  line, both halves the Dashboard's own derivations. Laws locked: a card lands in exactly one
   group · **an empty group does not render** · **only Housekeeping folds, never the urgent group**
   · **`Outstanding` is deliberately NOT the sum of the visible panels** (Snoozed is live work
   merely asleep; Done is not outstanding at all) · the estimate chip is absent at zero · a sweep
   counts once · nothing about a group is stored.
 - **The board's To-do/Today split is retired in the model, not reproduced** — both columns flatten
   into the kinds, because placement is what the consolidation removes.
-
-**For the next session, in order:** the row component (six tracks
-`34px minmax(0,1fr) 144px 172px 104px 216px`, ONE element — never `display: contents`, which
-fractures hover/focus/selected into per-cell rectangles), the four-slot action grid
-(`68px 30px 30px 30px`, empty slots preserved so every primary starts at the same x), the white
-panels (`#fff`, `1px #ece4d6`, radius 16, `padding: 6px 16px`, 26px between sections), the header
-block (mono eyebrow → Playfair title → tool row at 38px), and the stat chips (`height: 38px`,
-radius 99, Playfair figures). All measures are in `design-refs/tasks-page.html`; the pills come
-from the existing `todoFamily` map — import it, never restate it.
 
 ## Tasks consolidation — Phase 1 (landed)
 

@@ -171,15 +171,14 @@ describe("⚠️ the tool row is the ONLY home for page controls", () => {
      layout owns, and the three-slot tool-row rule (grow → pink right) still governs every page
      that HAS a tool row, asserted above. "Work the list" moves to the To-do list's tool row. */
 
-  it("the sidebar prop carries the ONE TodoSideContainer — on the ONE page that has one", () => {
-    /* ⚠️ NARROWED 7 Aug (tasks-viewport P1) and again 9 Aug (tasks-consolidation P1): it ran over
-       the list AND Today; Today is retired. The sidebar belongs to the To-do list alone, and the
-       freed width is what lets the Calendar's cells grow. The contract is unchanged — where a
-       sidebar mounts it is the ONE shared container, never a second grown per page. */
-    expect(listPage.indexOf("sidebar={")).toBeGreaterThan(-1); // the anchor (the slice law)
-    const sidebar = listPage.slice(listPage.indexOf("sidebar={"), listPage.indexOf("sidebar={") + 900);
-    expect(sidebar).toContain("<TodoSideContainer");
-    for (const [name, src] of [["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+  it("the sidebar prop is OPTIONAL, and no Tasks page passes it any more", () => {
+    /* ⚠️ NARROWED THREE TIMES: 7 Aug (tasks-viewport P1) from three pages to one; 9 Aug
+       (tasks-consolidation P1) Today retired outright; 9 Aug (P2) the To-do list's mount goes
+       too, because the FILTERS facets asked "what KIND is this" and the consolidated page's five
+       groups answer that permanently and in the open. The CONTRACT is what this file owns and it
+       is untouched — absent means no aside at all, never an empty gutter (asserted against the
+       rendered output above). `TodoSideContainer` survives unmounted with its own locks. */
+    for (const [name, src] of [["list", listPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
       expect(src, `${name} runs full width`).not.toContain("sidebar={");
     }
   });

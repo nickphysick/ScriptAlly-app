@@ -61,7 +61,11 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
        list". A page whose title and crumb differ makes you check which one is lying. */
     expect(hero).toContain('title="To-do list"');
     expect(hero).not.toContain("What’s on your desk?");
-    expect(hero).toContain("subtitle={boardSubtitle()}"); // one line saying what the page is
+    /* ⚠️ THE ONE LINE IS THE STAT CHIPS NOW (tasks-consolidation P2, 9 Aug) — same facts, same
+       `boardCols`, one statement rather than two. The eyebrow above the title is the Dashboard's
+       grammar arriving with the consolidation. */
+    expect(hero).toContain("eyebrow={tasksEyebrow(");
+    expect(page).toContain("taskStats(boardCols,");
   });
 
   it("its actions are a TOOL ROW now (board+dock P1) — pink Add, ghost session launcher", () => {

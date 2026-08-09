@@ -27,9 +27,16 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
     // tasks-pages P1: the header block is TasksPageLayout's — title + subtitle ride its props
     const hero = page.slice(page.indexOf("<TasksPageLayout"), page.indexOf("function renderHero"));
     /* The no-subtitle rule was written for a hero that named nothing. The page is titled for its
-       crumb now, and a bare title with no line under it leaves the page unexplained. */
+       crumb now, and a bare title with no line under it leaves the page unexplained.
+
+       ⚠️ AMENDED AGAIN (tasks-consolidation P2, 9 Aug): the page is no longer unexplained by a
+       missing subtitle — the MONO EYEBROW sits above the title and the STAT CHIPS sit below the
+       tool row, and the chips state exactly what the prose line stated. Two statements of one
+       derivation is the fault the counting law exists to prevent, so the header keeps one. */
     expect(hero).toContain('title="To-do list"');
-    expect(hero).toContain("subtitle={boardSubtitle()}");
+    expect(hero).not.toContain("subtitle={boardSubtitle()}");
+    expect(hero).toContain("eyebrow={tasksEyebrow(");
+    expect(page).toContain("taskStats(boardCols,");
   });
 
   it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {
@@ -40,7 +47,7 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("SECTION ANATOMY: label · mono count · a hairline rule filling the remaining width — one line", () => {
@@ -86,7 +93,7 @@ describe("tightening P2 — the ledger as a REAL column grid (system A)", () => 
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("the cells: family dot · ellipsised Playfair title over the italic line · squared kind chip · TABULAR figures", () => {
@@ -229,6 +236,6 @@ describe("tightening P4 — the sweep + the record", () => {
        locked in todoListChrome.test.ts. */
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("function groupCard");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 });

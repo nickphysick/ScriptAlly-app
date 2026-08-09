@@ -67,13 +67,13 @@ describe("THE COLLAPSE LAW — the empty case contributes NO height", () => {
   it("the slot is rendered ONLY inside the fresh-and-undismissed condition — no wrapper survives it — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
     expect(page).not.toContain("function renderLedger");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("ONE OWNER PER GAP — the space under the header rule cannot stack (the reported bug) — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1) — cards only; the Lane/ledger grammar is gone. */
     expect(page).not.toContain("function renderLedger");
-    expect(page).toContain("function renderBoard");
+    expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
   it("the spacing lives on the SLOT itself — no min-height, no fixed height, no wrapper margin", () => {

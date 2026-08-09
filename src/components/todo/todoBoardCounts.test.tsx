@@ -129,19 +129,25 @@ describe("the copy, at its edges", () => {
     expect(boardSubtitleCopy({ cards: 13, urgent: 13 })).toBe("Everything waiting on you — 13 cards, 13 urgent.");
   });
 
-  it("⚠️ the page reads THESE helpers — three figures, one derivation", () => {
-    expect(page).toContain("boardSubtitleCopy(boardFigures(boardCols))");
-    expect(page).toContain("counts={facetCounts(liveBoardCards(boardCols))}");
-    // renderBoard renders the SAME hoisted object
-    const fn = page.slice(page.indexOf("function renderBoard"), page.indexOf("function renderBoard") + 900);
-    // P5: the facet composes with tags in one narrow helper — same object, same law
-    expect(fn).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
-    expect(fn).toContain("todo: narrow(boardCols.todo)");
-    /* the old member-unit SUBTITLE is extinct. (`tiles` itself survives, deliberately, for the
+  /**
+   * ⚠️ THE LAW IS "ONE DERIVATION, ONE OBJECT", AND ONLY THE SURFACES HAVE MOVED.
+   *
+   * P5 wrote this against three figures — the subtitle, the FILTERS counts and the rendered
+   * columns — all reading the hoisted `boardCols`. tasks-consolidation P2 retires two of the
+   * three surfaces (the prose subtitle and the FILTERS rows) and replaces them with ONE: the stat
+   * chips. `boardSubtitleCopy`/`boardFigures` stay pure, locked and unmounted — the copy edges
+   * above still cover them — and what this case now pins is that the chips and the rendered
+   * groups read the SAME object, which is the whole content of the law.
+   */
+  it("⚠️ the header's figures and the rendered groups read the SAME hoisted object", () => {
+    expect(page).toContain("taskStats(boardCols,");
+    expect(page).not.toContain("boardSubtitleCopy(boardFigures(boardCols))");
+    const fn = page.slice(page.indexOf("function renderList"), page.indexOf("function renderList") + 900);
+    for (const col of ["todo", "today", "snoozed", "done"]) {
+      expect(fn, col).toContain(`${col}: narrowCards(boardCols.${col})`);
+    }
+    /* the old member-unit SUBTITLE stays extinct. (`tiles` itself survives, deliberately, for the
        desk state and the assistant band — surfaces whose subject genuinely is items, not cards.) */
-    // tasks-pages P1 renamed the neighbour: anchor restated per the slice law
-    expect(page).toContain("function renderTools");
-    const sub = page.slice(page.indexOf("function boardSubtitle"), page.indexOf("function renderTools"));
-    expect(sub).not.toContain("tiles.");
+    expect(fn).not.toContain("tiles.");
   });
 });

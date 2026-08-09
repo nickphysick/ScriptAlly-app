@@ -106,11 +106,16 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
     expect(toggleTagSel(["a", "b"], "a")).toEqual(["b"]);
   });
 
-  it("the board composes facet ∧ tags in ONE narrow; the Calendar filters the same way", () => {
-    /* Today's clause went with the page (tasks-consolidation P1, 9 Aug). The rule is unchanged
-       and is what matters: every surface that narrows uses the SAME composition, so two pages
-       cannot come to disagree about what a tag selection means. */
-    expect(listPage).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
+  it("the Calendar composes its narrowing in ONE place — never a per-region second copy", () => {
+    /* ⚠️ THE TO-DO LIST'S CLAUSE WENT WITH ITS SIDEBAR (tasks-consolidation P2, 9 Aug): the tag
+       NARROWING is retired on that page, so it has no composition to assert. The tags themselves
+       are untouched — the composer writes them, the ⋯ sheet edits them, the Calendar and the
+       Noteboard still filter by them — and the pure `matchesTags` above is still the ONE
+       predicate, which is what stops two surfaces disagreeing about what a selection means.
+       ⚠️ THE LOSS IS REAL AND IS FLAGGED, NOT ABSORBED: reports/STATE.md carries it as a carried
+       consequence for Nick's call, because the consolidated page's tool row has no tag control. */
+    const listPage2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(listPage2).not.toContain("matchesTags(");
     const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
     expect(cal).toContain("matchesTags(c.tags, tagSel)");
   });
