@@ -156,57 +156,21 @@
   .qh-enter .f12-rows .f12-row { animation: none !important; }
 }
 
-/* ══ INLINE QUERY CREATION (v4 P2; ref create-mode-ref.html) ═══════════════════════════════
-   The draft row in the list, plus the create pane's chips / checklist / footer. Colours come
-   from the existing token set — note the checkbox tick uses the BAND sage (--sage-edge), never
-   the StatusDot trio (--sage/--sageC/--sageD), which index.css locks to StatusDots. */
+/* ══ INLINE QUERY CREATION — the create pane's chips / checklist ═══════════════════════════
+   Colours come from the existing token set — note the checkbox tick uses the BAND sage
+   (--sage-edge), never the StatusDot trio (--sage/--sageC/--sageD), which index.css locks to
+   StatusDots.
 
-/* ══ CREATE-FLOW CHOREOGRAPHY (v5 P2; ref qdb-create-motion.html) ═══════════════════════════
-   One motion language: the entrances reuse the SHARED `rise` (src/styles/motion.css); the row's
-   own growth and skin-shed are transitions, because they interpolate between two real states
-   rather than playing a canned gesture.
+   ⚠️ THE DRAFT ROW IS GONE (v3), and with it a page of hard-won notes that no longer describe
+   anything: the row's grow-from-zero, its skin-shed on save, the compound-selector rule that
+   kept `.f12-row.f12-draft` from losing the cascade to a `.f12-row` declared 270 lines below,
+   and the FLIP trap (a filled animation outranking an inline transform). They are deleted
+   rather than left as orientation for a thing that is not there. Two of them survive elsewhere
+   and are worth knowing: the FLIP/animation trap is still documented in motion.css, and the
+   compound-selector lesson still applies to every modifier in this sheet.
 
-   THE ROW GROWS, THE LIST DOESN'T JUMP. Because `.f12-row` has an explicit height, the draft can
-   animate height + margin + border-width from zero — and that growth is what pushes the rows
-   below down. No per-row transforms, so nothing has to be un-transformed afterwards.
-
-   ⚠️ FLIP TRAP (documented in motion.css): a filled animation outranks an inline transform. The
-   save FLIP therefore clears `style.animation` before measuring — see runSaveFlip in Queries.tsx. */
-/* ⚠️ EVERY draft rule is written as a MODIFIER OF THE ROW (`.f12-row.f12-draft`), never as a bare
-   `.f12-draft`. `.f12-row` is declared ~270 lines below this block, so at equal specificity it won
-   the cascade on every property the two shared — display, padding, height, the bottom border, even
-   the monogram's dashed ring. The draft row was silently rendering as a normal row wearing a few
-   leftovers. Compound selectors make the outcome independent of file order; keep them. */
-.f12-row.f12-draft {
-  /* appearance + collapsed state in ONE rule: a separate base rule below would re-assert the
-     `border` and `margin` shorthands at equal specificity and silently undo the collapse. */
-  border: 0 dashed var(--pink-b); background: var(--pink-t); border-radius: var(--r-md);
-  height: 0; margin: 0; opacity: 0; overflow: hidden;
-  /* the 1.5px border is ABSORBED, not added: vertically by border-box against the fixed 56px, and
-     horizontally by taking the row's 14px padding down by the same 1.5px — so the monogram column
-     lines up with every row beneath it and the outer box is the same size. */
-  padding: 0 12.5px;
-  transition:
-    height 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
-    margin 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
-    border-width 0.26s cubic-bezier(0.22, 0.9, 0.3, 1),
-    opacity 0.22s ease 0.05s,
-    border-color 0.3s ease,
-    background 0.4s ease;
-}
-/* open = EXACTLY a row's height (ref qdb-draft-row.html). The 8px is margin BELOW — spacing
-   between rows so the dashed edge never touches its neighbour — never height inside the row. */
-.f12-row.f12-draft.f12-draft-in { height: 56px; margin: 0 0 8px; border-width: 1.5px; opacity: 1; }
-
-/* live fill — the monogram and name resolve as the picker lands, rather than snapping */
-.f12-row.f12-draft .f12-av { transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
-.f12-row.f12-draft .f12-nm { transition: color 0.3s ease; }
-
-/* SAVE beat 1 — the row sheds its draft skin IN PLACE: dashed → none, tag out, ground → selected.
-   The border-WIDTH stays 1.5px while the colour goes transparent, so the absorbed padding still
-   adds up and nothing shifts sideways as it becomes an ordinary row. */
-.f12-row.f12-draft.f12-draft-saved { border-color: transparent; border-style: solid; background: var(--blue-t); margin: 0; border-radius: 0; }
-.f12-row.f12-draft.f12-draft-saved .f12-drafttag { opacity: 0; }
+   What remains below is the SETTLE — the list returns after a save and the arriving row pulses.
+   That is now the only confirmation beat, and it was always the one that landed. ── */
 
 /* SAVE beat 4 — the settle: a soft pink flash easing down to the selected tint */
 @keyframes f12-settle { from { background: var(--pink-t); } to { background: var(--blue-t); } }
@@ -269,26 +233,16 @@
 .f12-pane-enter-read { animation: rise 0.18s ease-out backwards; }
 
 @media (prefers-reduced-motion: reduce) {
-  .f12-row.f12-draft, .f12-row.f12-draft .f12-av, .f12-row.f12-draft .f12-nm, .f12-drafttag { transition: none !important; }
   .f12-row.f12-settle, .f12-row.f12-row-leaving,
   .f12-pane-enter-create, .f12-pane-enter-read { animation: none !important; }
 }
 
 /* the pinned draft row — dashed and tagged, shown regardless of the active filters (see above),
    but otherwise the SAME BOX as every other row: monogram · name/agency · right-hand column. */
-.f12-row.f12-draft .f12-av { background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); }
-.f12-row.f12-draft.f12-filled .f12-av { border-style: solid; background: var(--pink-av); color: var(--ink); }
-.f12-row.f12-draft .f12-nm { color: var(--pink-i); font-style: italic; font-weight: 500; }
-.f12-row.f12-draft.f12-filled .f12-nm { color: var(--ink); font-style: normal; font-weight: 600; }
 /* ONE rule for the chip — it previously had three, two of which disagreed about `position`, and
    the last one in the file won. It sits IN FLOW in the row's right-hand column, in the slot a
    normal row gives its status dot, with the date beneath it. Nothing is positioned outside the
    row box: the row's own overflow:hidden (which the height animation needs) would clip it. */
-.f12-drafttag {
-  flex: none; background: var(--pink-b); color: var(--pink-i); font-family: var(--f12-mono);
-  font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 6px; white-space: nowrap; transition: opacity 0.3s ease;
-}
 
 /* the hero's "Change" affordance — an outlined pill beside the agent's name, so swapping agent
    is one click rather than a discard-and-start-again. */
@@ -518,7 +472,7 @@
 /* ── THE EDITORIAL LIST (ref query-centre-final.html) — DE-CARDED. It is no longer a .f12-pane:
    inside the workspace frame a bordered card would be a card inside a card, so the list is now
    just a column of rows separated by hairlines. ── */
-.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; transition: width 0.34s cubic-bezier(0.22, 0.9, 0.3, 1); }
+.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; }
 
 /* The head reuses TO-DO'S values verbatim (todo.css .tdb-sec / .tdb-cn / .tdb-secrule) rather
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.
@@ -546,70 +500,25 @@
 .f12-lsearch .f12-kbd { margin-left: auto; }
 .f12-rows { flex: 1; overflow-y: auto; min-height: 0; }
 
-/* ══ CREATE MODE: FOCUS THROUGH SPACE (ref design-refs/qc-create-v2.html) ══════════════════
-   SUPERSEDES the scrim outright (deleted in P1 — no dimming, tinting or overlay survives).
-   Focus is now a LAYOUT change: the list collapses to a monogram rail and the pane takes the
-   freed width, so the thing you are doing is simply the biggest thing on the page.
+/* ══ CREATE MODE: THE LIST STANDS DOWN (v3 — supersedes the monogram rail) ══════════════════
+   The scrim was deleted first (v2 P1); the rail that replaced it is deleted now. A 62px column
+   of monograms kept the list PRESENT without keeping it USEFUL: you could not read a name, the
+   selection marker had to stand down, and the one thing worth seeing there — the draft — was a
+   32px circle. It was a smaller version of a thing whose whole value was being readable.
 
-   ⚠️ WIDTH IS THE ONLY GEOMETRY THAT MOVES, and that is what keeps the viewport-fit chain
-   intact. The chain is entirely VERTICAL — .ws-work--fit (flex: 1 1 0; min-height: 0) →
-   .f12-body → .f12-list (min-height: 0) → .f12-rows scrolls — and none of it reads width.
-   The list stays `flex: none` with a definite width throughout, so no height basis is
-   recomputed and the rows keep their own scroll container the whole way across.
+   So the list HIDES, and the pane takes the full width. What confirms the save is not a tile
+   growing in a rail: it is the list coming back with your new row in it, wearing the settle the
+   list already draws for an arriving row. One confirmation, in the place you will look.
 
-   ⚠️ THE FURNITURE COLLAPSES ITS BOX, it does not merely fade. Fading alone would leave a
-   48px head, a 36px control row and a footer holding space in a 62px rail — invisible, and
-   still pushing the rows down. Height/margin/padding go to 0 alongside the opacity.
+   ⚠️ DESKTOP ONLY, and that is a design statement rather than a guard. Below md the two panes
+   are two SCREENS and create mode already pushes to the detail one — that is the small
+   breakpoint's version of this, built and unchanged.
 
-   CSS only: every transition below is driven by the .qh-create class toggling. No JS timer
-   drives a frame. ── */
-/* ⚠️ DESKTOP ONLY, and that is a design statement rather than a guard. Below md the two panes
-   are two SCREENS and create mode already pushes to the detail one — the pusher IS this
-   breakpoint's focus-through-space. Collapsing the (off-screen) list to 62px there would buy
-   nothing and would leave the way back looking broken. Built once, for the case it serves,
-   rather than built globally and undone in the mobile block. */
+   CSS only: .qh-create toggling is the whole mechanism; no JS timer drives a frame. ── */
 @media (min-width: 768px) {
-  .qh-create .f12-list { width: var(--f12-railw); }
-
-  /* Head · search+pills · footer — out, and out of the flow. */
-  .qh-create .f12-lhtitle,
-  .qh-create .f12-lhead,
-  .qh-create .f12-lfoot {
-    opacity: 0; pointer-events: none;
-    height: 0; min-height: 0; margin: 0; padding: 0;
-    border-width: 0; overflow: hidden;
-  }
-  .f12-lhtitle, .f12-lhead, .f12-lfoot {
-    transition: opacity 0.18s ease, height 0.28s cubic-bezier(0.22, 0.9, 0.3, 1),
-      margin 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), padding 0.28s cubic-bezier(0.22, 0.9, 0.3, 1);
-  }
-
-  /* The rows keep their monogram and lose everything else. The row box itself is untouched —
-     same 56px height, same seat — so the rail is the list with its text withdrawn, not a
-     different list. */
-  .f12-row .f12-mid, .f12-row .f12-end { transition: opacity 0.18s ease, width 0.28s cubic-bezier(0.22, 0.9, 0.3, 1); }
-  /* ⚠️ THEY MUST LEAVE THE FLEX LINE, NOT JUST FADE — opacity hides from the eye, not from
-     layout. Browser-measured with fade alone: .f12-end still held 34.2px, so monogram (32) +
-     end (34.2) overflowed the 51px rail row, and `justify-content: center` centred the OVERFLOW
-     — putting the monogram at -7.6px, clipped outside its own row. Collapsing the width is what
-     actually centres the monogram; the opacity is only so it goes quietly. */
-  .qh-create .f12-row .f12-mid,
-  .qh-create .f12-row .f12-end {
-    opacity: 0; pointer-events: none;
-    flex: 0 0 0; width: 0; min-width: 0; overflow: hidden;
-  }
-  .qh-create .f12-row { gap: 0; padding: 0; justify-content: center; border-bottom-color: transparent; }
-  /* Selection is stashed while a draft is open, so marking a row would point at something the
-     page is not currently showing you. The draft is the only thing worth marking here. */
-  .qh-create .f12-row.f12-sel { background: transparent; }
-  .qh-create .f12-row.f12-sel::before { opacity: 0; }
-  /* ...except the draft, which keeps its dashed tile and its fill-on-resolve. */
-  .qh-create .f12-row.f12-draft { justify-content: center; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .f12-list, .f12-lhtitle, .f12-lhead, .f12-lfoot,
-    .f12-row .f12-mid, .f12-row .f12-end { transition: none !important; }
-  }
+  /* `display: none` and not a width collapse: a 0px flex item still takes part in layout, and
+     the point here is that the list has no part to play. */
+  .qh-create .f12-list { display: none; }
 }
 
 /* ── QUIET SCROLLBARS — the To-do pattern, reused (todo.css .tdb-tmid2): invisible at rest,
