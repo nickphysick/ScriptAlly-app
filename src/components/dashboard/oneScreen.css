@@ -22,13 +22,22 @@
    start level. ⚠️ AND THE ROWS ARE `auto auto`, NEVER `1fr`: with `1fr` the RAIL would drive the
    row height, and the page would grow past the fold with nothing to scroll it. The LEFT column
    owns the height. */
+/* ⚠️ ROW 2 IS `minmax(0, 1fr)`, NOT `auto`. An `auto` row is CONTENT-DRIVEN — whichever column
+   is naturally taller wins, so a long activity feed can drive the row past the viewport. It has
+   not done so in measurement, but only because `.os-actv` is `flex: 1` (basis 0) and therefore
+   contributes nothing to the row's max-content size. That is a coincidence of one shorthand, not
+   a design: change it to `flex: 1 1 auto` and the feed's full height becomes the row's height.
+   `minmax(0, 1fr)` states the intent — the row is bounded by the VIEWPORT, and the columns scroll
+   inside it.
+
+   ⚠️ `align-content: start` IS GONE. It stops the second row filling, which is the whole point. */
 .os-content {
   flex: 1;
+  height: 100%;
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 287px;
-  grid-template-rows: auto auto;
-  align-content: start;
+  grid-template-rows: auto minmax(0, 1fr);
   column-gap: 16px;
   row-gap: 0;
   padding: 16px 26px 24px;
@@ -39,7 +48,9 @@
 .os-greet { grid-column: 1 / -1; grid-row: 1; }
 .os-colM { grid-column: 1; grid-row: 2; }
 .os-colR { grid-column: 2; grid-row: 2; }
-.os-colM, .os-colR { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+/* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
+   escapes them. Without the overflow, a tall card pushes past its column silently. */
+.os-colM, .os-colR { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
 .os-colM { gap: 15px; }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
@@ -660,7 +671,9 @@
 .os-goal-btns { display: flex; gap: 6px; margin-top: 2px; }
 
 /* ══ §6 · ACTIVITY ══ */
-.os-actv { display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 200px; }
+/* ⚠️ THE MIN-HEIGHT IS SMALL ON PURPOSE. Its job is to stop the card collapsing, NOT to reserve
+   space — a large value makes the card refuse to shrink and pushes the row taller again. */
+.os-actv { display: flex; flex-direction: column; overflow: hidden; flex: 1 1 auto; min-height: 120px; }
 .os-ahead { display: flex; align-items: center; gap: 9px; padding: 11px 14px 9px; flex: none; }
 .os-ahead .os-aln { flex: 1; border-top: 1px solid #ece0d2; }
 .os-ahead h2 { font-family: var(--font-serif); font-size: 14.5px; font-weight: 600; color: #241811; margin: 0; }

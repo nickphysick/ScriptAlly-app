@@ -96,13 +96,35 @@ describe("§1 · the lock", () => {
   /* ⚠️ THE HEADER IS ITS OWN ROW, AND THE ROWS ARE `auto auto`. With `1fr` the RAIL would drive
      the row height and the page would grow past the fold with nothing to scroll it — the left
      column owns the height, which is the whole reason the two columns end level. */
-  it("the header spans both columns; the rows are auto, never 1fr", () => {
+  /* ⚠️ ROW 2 IS BOUNDED BY THE VIEWPORT, NOT BY CONTENT. An `auto` row is content-driven, so a
+     long activity feed can drive it past the fold; it has not, only because `.os-actv` is
+     `flex: 1` (basis 0) and contributes nothing to max-content — a coincidence of one shorthand,
+     not a design. `minmax(0, 1fr)` says it outright, and `align-content: start` had to go because
+     it stops the second row filling. */
+  it("⚠️ the header spans both columns; row 2 is minmax(0,1fr), never auto", () => {
     const c = rule(".os-content");
-    expect(c).toContain("grid-template-rows: auto auto");
-    /* target the ROWS — the columns legitimately carry minmax(0, 1fr) */
-    expect(c).not.toMatch(/grid-template-rows:[^;]*1fr/);
+    expect(c).toContain("grid-template-rows: auto minmax(0, 1fr)");
+    expect(c).not.toContain("align-content: start");
+    expect(c).toContain("height: 100%");
     expect(cssRules).toContain(".os-greet { grid-column: 1 / -1; grid-row: 1; }");
     expect(cssRules).toContain(".os-colM { grid-column: 1; grid-row: 2; }");
+  });
+
+  /* the columns take the row they are given and nothing escapes them */
+  it("both columns are height:100% with overflow hidden", () => {
+    const c = rule(".os-colM, .os-colR");
+    expect(c).toContain("height: 100%");
+    expect(c).toContain("min-height: 0");
+    expect(c).toContain("overflow: hidden");
+  });
+
+  /* ⚠️ SMALL ON PURPOSE — its job is to stop the card collapsing, not to reserve space. A large
+     min-height makes the card refuse to shrink and pushes the row taller again. */
+  it("⚠️ the activity card can SHRINK: flex 1 1 auto behind a small min-height", () => {
+    const a = rule(".os-actv");
+    expect(a).toContain("flex: 1 1 auto");
+    expect(a).toContain("min-height: 120px");
+    expect(a).not.toContain("min-height: 200px");
   });
 
   /* ⚠️ THE TILE IS SQUARE BECAUSE BOTH NUMBERS ARE THE SAME ONE. Asserted as an identity, not
