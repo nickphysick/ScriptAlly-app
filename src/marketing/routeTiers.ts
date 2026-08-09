@@ -17,7 +17,7 @@ export const MARKETING_PATHS = new Set(["/", "/pricing"]);
 export const WORKSPACE_PATHS = new Set([
   "/dashboard", "/queries",
   // The To-do WORKSPACE — four pages, one section (workspace pack P1).
-  "/todo", "/todo/today", "/todo/calendar", "/todo/noteboard",
+  "/todo", "/todo/calendar", "/todo/noteboard",
   "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
   "/account", "/plans", "/help",

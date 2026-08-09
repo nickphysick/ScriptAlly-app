@@ -92,22 +92,19 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     expect(css).not.toContain(".tdb-setbtn");
     expect(css).not.toMatch(/\.tdb-pop\s*\{/);
   });
-  /* ⚠️ RETARGETED (workspace P3): the corner pop-up and its panel are RETIRED. Today is a route —
-     /todo/today — and a floating copy of it on this page would be a second surface owning the
-     same commitment; the two would disagree the first time one of them was wrong. The anatomy
-     this case used to guard moved to TodoTodayPage, which renders the day's list from the SAME
-     `todaySplit` derivation, so the behaviour travelled and only the markup died. */
-  it("the corner pop-up and its panel are RETIRED — Today is a page, not a floater", () => {
+  /* ⚠️ RETARGETED TWICE, AND THE ARGUMENT ONLY GOT STRONGER. Workspace P3 retired the corner
+     pop-up because Today was a route, and a floating copy of it here would be a second surface
+     owning the same commitment — the two would disagree the first time one of them was wrong.
+     Tasks-consolidation P1 (9 Aug) retires the ROUTE for the same reason at one level up: two
+     PAGES over overlapping subsets of the same tasks is the same duplication, spread wider. One
+     ranked list, one surface, one place a commitment can be true. */
+  it("the corner pop-up and its panel are RETIRED — the list is the one surface", () => {
     expect(page).not.toContain('<div className="tdb-today2">');
     expect(page).not.toContain("function renderTodayCorner");
     expect(page).not.toContain("function renderTodayPanel");
     for (const inner of ["tdb-tprog", "tdb-tcommit", "tdb-ghostbox", "tdb-donerow", "tdb-pbtn", "tdb-sbtn"]) {
       expect(page).not.toContain(inner);
     }
-    // …and the successor renders the day from the one derivation, not a second copy of it
-    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
-    expect(today).toContain("todaySplit(board, today)");
-    expect(today).toContain("Today’s list");
   });
   it.skip("SUPERSEDED (top-bar rebuild): the FAB is retired — help is a bar button, its /todo menu re-anchored", () => {
     expect(shell).not.toContain('{routeKey !== "todo" && (');

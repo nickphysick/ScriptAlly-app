@@ -41,7 +41,6 @@ vi.mock("../../lib/db", () => ({
 }));
 
 import { ToDoPage } from "./ToDoPage";
-import { TodoTodayPage } from "./TodoTodayPage";
 import { TodoCalendarPage } from "./TodoCalendarPage";
 import { TodoNoteboardPage } from "./TodoNoteboardPage";
 
@@ -60,15 +59,10 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("Filters");            // the side container
   });
 
-  it("the Today page renders without throwing", () => {
-    expect(() => render(<TodoTodayPage onNavigate={() => {}} />)).not.toThrow();
-  });
-
-  it("…and carries its own header", () => {
-    const html = render(<TodoTodayPage onNavigate={() => {}} />);
-    expect(html).toContain("Today");
-    expect(html).toContain("Today’s list");
-  });
+  /* ⚠️ TODAY'S TWO SMOKES WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug). The app-smoke law
+     is unchanged and still met: every ROUTED page has a smoke here, and Today is no longer one.
+     The To-do list's smoke above covers the job it absorbed — and when the consolidated page
+     lands, its populated state is the one to extend, not a second page's. */
 
   /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,
      empty AND populated (a page that only smokes its first-run panel leaves every derivation

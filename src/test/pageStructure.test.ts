@@ -40,7 +40,7 @@ export const PAGE_SOURCES = [
   "components/Auth.tsx",
   "components/Onboarding.tsx",
   "components/todo/ToDoPage.tsx",
-  "components/todo/TodoTodayPage.tsx",
+  // tasks-consolidation P1 (9 Aug): TodoTodayPage left this census by being deleted
   // tasks-pages P3/P4: the placeholder retired with its last consumer; the real pages join
   "components/todo/TodoCalendarPage.tsx",
   "components/todo/TodoNoteboardPage.tsx",

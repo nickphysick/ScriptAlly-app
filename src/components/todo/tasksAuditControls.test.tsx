@@ -11,7 +11,6 @@ import { join } from "node:path";
 
 const here = __dirname;
 const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
-const todayPage = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
 const side = readFileSync(join(here, "TodoSideContainer.tsx"), "utf8");
 
 describe("⚠️ 'Work the list' — disabled grammar at zero, ink primary with one committed", () => {
@@ -27,10 +26,12 @@ describe("⚠️ 'Work the list' — disabled grammar at zero, ink primary with 
     expect(rule).not.toContain("opacity");
   });
 
-  it("the ENABLED state is the ink primary — and disabling is the zero-committed condition", () => {
-    expect(todayPage).toContain('className="tdt-ink"');
-    expect(todayPage).toContain("disabled={committed.length === 0}");
-  });
+  /* ⚠️ THE ENABLED-STATE SPEC WENT WITH TODAY (tasks-consolidation P1, 9 Aug). It asserted the
+     ink primary and its zero-committed disabled condition on `TodoTodayPage.tsx`, which is
+     retired. THE DISABLED GRAMMAR ITSELF IS UNTOUCHED and still asserted above and below — paper
+     fill, hairline, faint text, not-allowed cursor, never opacity — so the law survives losing
+     one of its consumers. "Work the list" moves to the To-do list's tool row and re-earns the
+     enabled/disabled pair there. */
 
   it("the attribute selector outweighs the ink fill — the grammar wins on a disabled primary", () => {
     /* Specificity, stated: .tpl-tools button[disabled] = (0,2,1) beats .tdb-btnp = (0,1,0),

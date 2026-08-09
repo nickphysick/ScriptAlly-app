@@ -29,21 +29,17 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
      which is retired. The day's cleared work is now a permanent band on the Today PAGE — not
      collapsed, because a page has the room a 250px corner did not, and hiding the only evidence
      the day went anywhere behind a toggle was a concession to that corner's size. */
-  it("the day's cleared work is a band on the Today page now, not a toggle in a corner", () => {
+  it("the day's cleared work is not a toggle in a corner", () => {
     expect(page).not.toContain("tdb-donerow");
     expect(page).not.toContain("const [showDone, setShowDone] = useState(false);");
     expect(page).not.toContain("tdb-cdone"); // the header badge stays extinct
-    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
-    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P2): the cleared work used to sit under its own
-       "{n} cleared today" band. It settles IN PLACE among the rows now, struck through with its
-       time and an Undo, and the count moved into the section head's "{n} open · {n} done" — one
-       figure per region rather than a count band and a head that both speak. What this test
-       protects is unchanged: the day's cleared work lives on the Today PAGE, visible, not in a
-       corner toggle. */
-    expect(today).toContain("tdt-row done");
-    expect(today).toContain("clearedAtLabel(c.whenMs)");
-    expect(today).toContain("todayListCount(committed.length, done.length)");
-    expect(today).toContain('className="tdt-row done"');
+    /* ⚠️ SUPERSEDED TWICE, AND THE RULE OUTLIVED BOTH HOMES. 7 Aug (tasks-viewport P2): the
+       cleared work stopped being a "{n} cleared today" band and settled IN PLACE among the rows,
+       struck through with its time and an Undo. 9 Aug (tasks-consolidation P1): the page it
+       settled on is retired. What this test has always protected is the NEGATIVE above — the
+       day's cleared work is never hidden behind a corner toggle, because hiding the only evidence
+       the day went anywhere was a concession to a 250px panel that no longer exists. The
+       consolidated page carries a Done-today group, where it re-earns the positive half. */
   });
 
   it("the done row is the sage-family mono divider (border-top carries the old tdiv's job)", () => {

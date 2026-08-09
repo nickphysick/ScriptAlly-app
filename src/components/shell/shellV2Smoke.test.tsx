@@ -144,7 +144,9 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("the crumb is on EVERY workspace page", () => {
-    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do list"], ["/todo/today", "Today"], ["/import", "Import"]] as const) {
+    /* /todo/today left this list with the page (tasks-consolidation P1, 9 Aug); /todo/calendar
+       takes its place so a Tasks SUB-page is still covered, which is what the case is really for. */
+    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Agent list"], ["/todo", "To-do list"], ["/todo/calendar", "Calendar"], ["/import", "Import"]] as const) {
       const html = bar(path);
       expect(html, path).toContain("sv2-crumb");
       expect(html, path).toContain(`<b>${page}</b>`);

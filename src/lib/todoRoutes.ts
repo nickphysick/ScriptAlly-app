@@ -15,7 +15,16 @@
  */
 import { FAMILY_SWATCH, EXTRA_SWATCH } from "./todoFamily";
 
-export type TodoPageId = "list" | "today" | "calendar" | "noteboard";
+/* ⚠️ THREE PAGES SINCE 9 Aug — Today is retired (tasks-consolidation P1). The ranked order of the
+   one list IS the plan, so a second page over an overlapping subset of the same tasks was the
+   over-complication; "Work the list" moved to the survivor's tool row.
+
+   ⚠️ NO REDIRECT CODE WAS ADDED, DELIBERATELY. `todoPageForPath` already answers `list` for any
+   unmatched `/todo*`, so `/todo/today` lands on the page that absorbed the job — an old link or
+   bookmark keeps working without a redirect table anyone has to maintain. The fallback was
+   written for a different reason and happens to be exactly right here; `todoWorkspace.test.ts`
+   asserts it against the retired path so it cannot quietly stop being true. */
+export type TodoPageId = "list" | "calendar" | "noteboard";
 
 export interface TodoRoute {
   id: TodoPageId;
@@ -27,8 +36,7 @@ export interface TodoRoute {
 
 /** The default is the bare `/todo`, so an existing link or bookmark still lands somewhere real. */
 export const TODO_ROUTES: TodoRoute[] = [
-  { id: "list", label: "To-do list", path: "/todo", blurb: "Everything waiting on you, grouped by kind" },
-  { id: "today", label: "Today", path: "/todo/today", blurb: "The list you built for today" },
+  { id: "list", label: "To-do list", path: "/todo", blurb: "Everything waiting on you, most pressing first" },
   { id: "calendar", label: "Calendar", path: "/todo/calendar", blurb: "Your work by date" },
   { id: "noteboard", label: "Noteboard", path: "/todo/noteboard", blurb: "Notes to self, undated" },
 ];

@@ -267,13 +267,11 @@ export const TodoBoard: React.FC<TodoBoardProps> = ({ columns, goodDay, onPlan, 
                       the emptiness itself — nothing to store, nothing to reset at midnight. */}
                   {col.id === "done" && <ArtSlot name="done-empty" maxWidth={260} className="tbd-art" />}
                   {COL_EMPTY[col.id]}
-                  {/* ⚠️ ONE QUIET LINE, NOT A CARD (corrections fix 8). An empty Today is the one
-                      column where the reader can act immediately, and the bench is where the
-                      answer is — so it points there. A card here would look like work; this is a
-                      sentence. */}
-                  {col.id === "today" && (
-                    <> <a className="tbd-lift" href="/todo/today">— lift something from the bench</a></>
-                  )}
+                  {/* ⚠️ THE LIFT-FROM-THE-BENCH LINE WENT WITH TODAY (tasks-consolidation P1).
+                      It pointed at /todo/today, and a link to a retired route teaches the wrong
+                      shape of the app — worse than no link. There is nowhere to lift FROM now:
+                      the ranked order of the one list IS the plan, so an empty Today column is
+                      answered by the list above it rather than by another page. */}
                 </div>
               )}
 

@@ -28,7 +28,6 @@ const pageCss = readFileSync(join(here, "todo.css"), "utf8");
 const calCss = readFileSync(join(here, "todoCalendar.css"), "utf8");
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const board = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
 const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
 const note = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 
@@ -76,10 +75,10 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
     }
   });
 
-  it("⚠️ THE FOUR TASKS SLOTS ARE FLEX COLUMNS — so their child can be a flex ITEM", () => {
+  it("⚠️ THE TASKS SLOTS ARE FLEX COLUMNS — so their child can be a flex ITEM", () => {
     const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
     const todoSlots = [...app.matchAll(/<StagePage active=\{routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
-    expect(todoSlots).toHaveLength(4);
+    expect(todoSlots).toHaveLength(3); // list · calendar · noteboard (Today retired, P1 9 Aug)
     for (const slot of todoSlots) {
       /* `fill` renders the slot `display: block` (isFillCol is false without a contentVariant),
          which leaves `.spine-root` resolving a percentage height. `fillColumn` makes it a flex
@@ -155,7 +154,7 @@ describe("⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE — the other three run f
 
   it("⚠️ EXACTLY ONE PAGE PASSES A SIDEBAR, and it is the board", () => {
     expect(board).toContain("sidebar={");
-    for (const [name, src] of [["Today", today], ["Calendar", cal], ["Noteboard", note]] as const) {
+    for (const [name, src] of [["Calendar", cal], ["Noteboard", note]] as const) {
       expect(src, `${name} must run full width`).not.toContain("sidebar={");
     }
   });
@@ -184,8 +183,8 @@ describe("⚠️ each page's scroll anatomy, per page", () => {
     expect(board).not.toContain("batchScroll.current[rule] = wrapRef.current?.scrollTop");
   });
 
-  it("Today, Calendar and Noteboard each declare their own region", () => {
-    expect(today).toContain("<TplZone");
+  it("the Calendar and the Noteboard each declare their own region", () => {
+    /* Today's clause went with the page (tasks-consolidation P1, 9 Aug). */
     expect(note).toContain("<TplZone");
     /* ⚠️ THE CALENDAR IS THE EXCEPTION AND IT IS DELIBERATE: it answers the lock by COMPRESSING,
        not scrolling — the whole month stays on screen. So it has no zone, and that is the
@@ -351,7 +350,7 @@ describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the setting
   });
 
   it("no gear in any tool row — the doors are the two named places", () => {
-    for (const [name, src] of [["Today", today], ["Calendar", cal], ["Noteboard", note]] as const) {
+    for (const [name, src] of [["Calendar", cal], ["Noteboard", note]] as const) {
       expect(src, name).not.toContain("TODO_OPEN_TASK_SETTINGS");
     }
   });
@@ -385,7 +384,7 @@ describe("⚠️ THE LEFT GUTTER IS LAW — all four pages, sidebar or not", () 
     /* The old alignment test covered the sidebar pages only, which is precisely why this shipped:
        the two that diverged were the two nobody was checking. */
     for (const [name, src] of [
-      ["To-do list", board], ["Today", today], ["Calendar", cal], ["Noteboard", note],
+      ["To-do list", board], ["Calendar", cal], ["Noteboard", note],
     ] as const) {
       expect(src, name).toContain('className="t-f12 spine-root"');
       expect(src, name).toContain("<TasksPageLayout");
@@ -435,45 +434,15 @@ describe("⚠️ AN ILLUSTRATOR'S BRIEF IS NEVER USER-FACING COPY", () => {
   });
 });
 
-describe("⚠️ UP NEXT MUST NOT TRUNCATE A TITLE", () => {
-  const todayCss = readFileSync(join(here, "todoToday.css"), "utf8");
-  const r = (sel: string) => {
-    const i = todayCss.indexOf(sel);
-    expect(i, sel).toBeGreaterThan(-1);
-    return todayCss.slice(i, todayCss.indexOf("}", i)).replace(/\/\*[\s\S]*?\*\//g, "");
-  };
+/* ⚠️ THE "UP NEXT MUST NOT TRUNCATE" DESCRIBE WENT WITH TODAY (tasks-consolidation P1, 9 Aug).
+   It read `todoToday.css` and asserted the suggestion rail's two-line clamp, its stacked row and
+   its 360px measure. The page is retired, so the rail is too.
 
-  it("a long title renders IN FULL — nothing truncates it in the markup", () => {
-    const long = "Send your full manuscript to Jonathan Marsh at Willoughby and Crane Literary";
-    const html = renderToStaticMarkup(
-      <TplZone label="Up next"><div className="tdt-brow"><div className="tdt-bt">{long}</div></div></TplZone>,
-    );
-    expect(html).toContain(long); // the whole string, not an ellipsis
-  });
-
-  it("it wraps to TWO lines and never ellipsises on one", () => {
-    const bt = r(".tdt-brow .tdt-bt {");
-    expect(bt).toContain("-webkit-line-clamp: 2");
-    expect(bt).not.toContain("white-space: nowrap");
-    expect(bt).not.toContain("text-overflow: ellipsis");
-    // a long unbroken word must not force the rail wider than its track
-    expect(bt).toContain("overflow-wrap: anywhere");
-  });
-
-  it("⚠️ THE ROW STACKS — the why-line sits BENEATH the title, not beside it", () => {
-    /* Two pieces of text competing for one line's width means the title loses, and the title is
-       the only part of a suggestion that says what it IS. */
-    const row = r(".tdt-brow {");
-    expect(row).toContain("flex-direction: column");
-    expect(r(".tdt-brow .tdt-why {")).not.toContain("margin-left: auto");
-  });
-
-  it("the rail is widened to 360px to pay for it", () => {
-    expect(r(".tdt-split {")).toContain("360px");
-  });
-});
-
-/* ── the frame's real bound, and the widths beside it (7 Aug) ──────────────────────────────── */
+   ⚠️ THE LAW ITSELF IS WORTH CARRYING FORWARD AND IS NOT WRITTEN DOWN ANYWHERE ELSE: a title is
+   the only part of a row that says what it IS, so it wraps and is never ellipsised; a why-line
+   sits BENEATH it rather than competing for the same line's width; and the measure is widened to
+   pay for that rather than the title being shortened to fit. The consolidated list's rows inherit
+   the same problem and should inherit the same answer. */
 
 describe("⚠️ WHAT ACTUALLY BOUNDS THE TASKS FRAME — and it is not in the chain below it", () => {
   const shell = readFileSync(join(here, "..", "shell", "AppShell.tsx"), "utf8");
@@ -547,7 +516,7 @@ describe("⚠️ WIDTHS ARE NEVER TOUCHED BY THE HEIGHT WORK", () => {
     /* No page fixes its own PIXEL width — the column is the one measure. Percentage widths are
        exempt and legitimate: they are progress-bar fills (`width: ${pct}%`), which describe a
        proportion of their own bar rather than a page dimension. */
-    for (const [name, src] of [["Today", today], ["Calendar", cal], ["Noteboard", note], ["board", board]] as const) {
+    for (const [name, src] of [["Calendar", cal], ["Noteboard", note], ["board", board]] as const) {
       expect(src, name).not.toMatch(/style=\{\{[^}]*\bwidth:\s*[`"']?\d+px/);
     }
   });

@@ -19,7 +19,6 @@ import { ArtSlot, ART_SLOTS, ArtSlotName } from "./ArtSlot";
 const here = __dirname;
 const css = readFileSync(join(here, "artSlot.css"), "utf8");
 const board = readFileSync(join(here, "TodoBoard.tsx"), "utf8");
-const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
@@ -149,23 +148,14 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     expect(noteboard.indexOf('name="noteboard-empty"')).toBeLessThan(noteboard.indexOf("Nothing pinned yet"));
   });
 
-  it("⚠️ desk-clear: the THREE-WAY AND — nothing committed ∧ nothing urgent ∧ bench exhausted", () => {
-    expect(today).toContain("const deskClear = committed.length === 0 && board.do.length === 0 && bench.length === 0;");
-    /* Read UNFILTERED (board.do, not the narrowed set): a desk that looked clear because a filter
-       was hiding the rest would be the app congratulating you for narrowing a view. */
-    expect(today).not.toContain("deskClear = committed.length === 0 && vDo");
-    expect(today).toContain('{deskClear && (');
-    // and the ordinary empty line stands down when the hero shows — never both
-    expect(today).toContain("{committed.length === 0 && !deskClear && (");
-  });
+  /* ⚠️ THE TWO desk-clear SPECS WENT WITH TODAY (tasks-consolidation P1, 9 Aug). Both asserted
+     against `TodoTodayPage.tsx`, which is retired — the ranked order of the one list IS the plan,
+     so a second page over a subset of the same tasks was the over-complication.
 
-  it("…and it carries its Playfair line, the ink way out and the pink way back in", () => {
-    expect(today).toContain("The desk is clear.");
-    expect(today).toContain("Go and write →");
-    expect(today).toContain("＋ Add a task");
-    const cssToday = readFileSync(join(here, "todoToday.css"), "utf8");
-    expect(cssToday).toMatch(/\.tdt-deskclear h3\s*\{[^}]*Playfair/);
-  });
+     THE SLOT ITSELF SURVIVES and is still in the census above: `desk-clear` is briefed, ratio'd
+     and rendered by ArtSlot exactly as before. What is gone is its MOUNT — the consolidated page
+     re-earns it, and its three-way AND (nothing committed ∧ nothing urgent ∧ nothing suggested,
+     read UNFILTERED so a filter cannot fake a clear desk) is the rule to rebuild against. */
 
   it("first-run-board is DISTINCT from desk-clear — not yet versus well done", () => {
     expect(listPage).toContain('<ArtSlot name="first-run-board"');

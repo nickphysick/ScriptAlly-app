@@ -151,7 +151,13 @@ describe("⚠️ speaking empty states — a sentence in the column's voice", ()
     expect(html).toContain("Nothing committed to today.");
     expect(html).toContain("Snoozed work waits here until its day.");
     expect(html).toContain("Tick anything and it settles here until midnight."); // tasks-audit P5 — Done teaches
-    expect(html).toContain("lift something from the bench"); // Today's pointer survives
+    /* ⚠️ THE "lift something from the bench" POINTER WENT WITH TODAY (tasks-consolidation P1,
+       9 Aug). It linked to /todo/today, and a link to a retired route teaches the wrong shape of
+       the app — worse than no link. There is nowhere to lift FROM now: the ranked order of the
+       one list IS the plan, so an empty Today column is answered by the list itself. The RULE
+       this case protects is untouched and asserted above — every column speaks a sentence in its
+       own voice, never a bare "empty". */
+    expect(html).not.toContain("/todo/today");
   });
 });
 

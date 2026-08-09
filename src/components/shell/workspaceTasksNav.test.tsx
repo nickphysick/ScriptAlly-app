@@ -49,7 +49,7 @@ const renderShell = (path: string, todo = 0) =>
     </MemoryRouter>,
   );
 
-describe("⚠️ the TASKS section renders — same grammar, four rows, in order", () => {
+describe("⚠️ the TASKS section renders — same grammar, three rows, in order", () => {
   const html = renderShell("/todo");
 
   /* ⚠️ RETARGETED (app-shell-v2). The rule is the ORDER of the groups, and it survives untouched;
@@ -64,10 +64,12 @@ describe("⚠️ the TASKS section renders — same grammar, four rows, in order
     expect(html).toContain(">Dashboard<");
   });
 
-  it("the four rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {
+  it("the three rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {
+    /* Three since 9 Aug (tasks-consolidation P1): To-do list · Calendar · Noteboard. The rows
+       ARE the routes, so the section cannot drift from the router or the palette. */
     for (const r of TODO_ROUTES) expect(html).toContain(r.label);
     const order = TODO_ROUTES.map((r) => html.indexOf(`>${r.label}<`)).filter((i) => i >= 0);
-    expect(order).toHaveLength(4);
+    expect(order).toHaveLength(3);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Workspace holds Dashboard alone
     const workspace = workspaceSections({ todo: 3 }).find((s) => s.id === "workspace")!;
@@ -80,7 +82,7 @@ describe("⚠️ the TASKS section renders — same grammar, four rows, in order
     expect(withCount.match(/class="sp-ct"/g)?.length).toBe(1);
     expect(withCount.match(/sp-ct-dot/g)?.length).toBe(1);
     const listAt = withCount.indexOf(">To-do list<");
-    const nextRowAt = withCount.indexOf(">Today<");
+    const nextRowAt = withCount.indexOf(">Calendar<"); // the row after the list, since P1
     const chipAt = withCount.indexOf("sp-ct");
     expect(chipAt).toBeGreaterThan(listAt);   // after the list row's label…
     expect(chipAt).toBeLessThan(nextRowAt);   // …and before the next row begins
@@ -114,14 +116,14 @@ describe("⚠️ the breadcrumb reads Tasks / {page} — from the same definitio
   });
 
   it("the rendered shell carries the crumb strings at each route", () => {
-    const today = renderShell("/todo/today");
-    expect(today).toContain("Tasks");
-    expect(today).toContain("Today");
+    const cal = renderShell("/todo/calendar");
+    expect(cal).toContain("Tasks");
+    expect(cal).toContain("Calendar");
   });
 });
 
-describe("⚠️ the palette indexes all four — derived from TODO_ROUTES", () => {
-  it("four page entries, titles and paths verbatim from the routes", () => {
+describe("⚠️ the palette indexes all three — derived from TODO_ROUTES", () => {
+  it("three page entries, titles and paths verbatim from the routes", () => {
     for (const r of TODO_ROUTES) {
       const entry = PALETTE_PAGES.find(
         (p) => (p.run as { path?: string }).path === r.path && p.kind === "page",
@@ -132,7 +134,7 @@ describe("⚠️ the palette indexes all four — derived from TODO_ROUTES", () 
     }
     // the established ids survive the derivation (an id is an identifier, not a caption)
     expect(PALETTE_PAGES.map((p) => p.id)).toEqual(
-      expect.arrayContaining(["page:todo", "page:todo-today", "page:todo-calendar", "page:todo-noteboard"]),
+      expect.arrayContaining(["page:todo", "page:todo-calendar", "page:todo-noteboard"]),
     );
   });
 });

@@ -18,9 +18,13 @@ import { WORKSPACE_SHELL_PATHS } from "./shellForRoute";
 import { PALETTE_PAGES } from "./searchPalette";
 import { workspaceSections } from "./workspaceNav";
 
-describe("the four routes", () => {
-  it("are four, in the pack's order", () => {
-    expect(TODO_ROUTES.map((r) => r.id)).toEqual(["list", "today", "calendar", "noteboard"]);
+describe("the three routes", () => {
+  it("are three, in the pack's order", () => {
+    /* ⚠️ THREE SINCE 9 Aug (tasks-consolidation P1) — Today is retired. The ranked order of the
+       one list IS the plan, so a second page over an overlapping subset of the same tasks was
+       the over-complication. The ORDER is still the assertion that matters: these three are one
+       definition serving the nav, the palette and the route table alike. */
+    expect(TODO_ROUTES.map((r) => r.id)).toEqual(["list", "calendar", "noteboard"]);
   });
 
   it("every route is a real workspace path", () => {
@@ -31,9 +35,24 @@ describe("the four routes", () => {
      the same class of bug as the shell's /agents vs /agents/discover. */
   it("resolves the longest path first", () => {
     expect(todoPageForPath("/todo")).toBe("list");
-    expect(todoPageForPath("/todo/today")).toBe("today");
     expect(todoPageForPath("/todo/calendar")).toBe("calendar");
     expect(todoPageForPath("/todo/noteboard")).toBe("noteboard");
+  });
+
+  it("⚠️ THE RETIRED /todo/today LANDS ON THE LIST — no redirect code, and none needed", () => {
+    /* Today is retired (tasks-consolidation P1). `todoPageForPath` already answers `list` for any
+       unmatched `/todo*`, so an old link or bookmark reaches the page that ABSORBED the job
+       rather than a 404 — no redirect table for anyone to maintain. The fallback was written for
+       a different reason and happens to be exactly right here, which is precisely why it is
+       asserted against the retired path: a behaviour relied on by accident should be pinned on
+       purpose. */
+    expect(todoPageForPath("/todo/today")).toBe("list");
+    // and it is the FALLBACK doing the work — the route is genuinely gone from the table
+    expect(TODO_ROUTES.some((r) => r.path === "/todo/today")).toBe(false);
+    // any other stale To-do link lands the same way
+    expect(todoPageForPath("/todo/anything-retired")).toBe("list");
+    // but it does not swallow paths outside the workspace
+    expect(todoPageForPath("/queries")).toBeNull();
   });
 
   it("an unknown /todo sub-path falls back to the list rather than nothing", () => {
@@ -67,8 +86,8 @@ describe("the app sidebar's TASKS section", () => {
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 
-  it("its four rows ARE the routes, in order, with the list as the default", () => {
-    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Today", "Calendar", "Noteboard"]);
+  it("its three rows ARE the routes, in order, with the list as the default", () => {
+    expect(tasks.children!.map((c) => c.label)).toEqual(["To-do list", "Calendar", "Noteboard"]);
     expect(tasks.children!.map((c) => c.path)).toEqual(TODO_ROUTES.map((r) => r.path));
     expect(tasks.def).toBe("list");
     expect(tasks.children![0].path).toBe("/todo");
@@ -90,10 +109,10 @@ describe("the app sidebar's TASKS section", () => {
     expect(r.count).toBeUndefined();
   });
 
-  /* The four ROUTES still exist and are still individually reachable — one definition serves
+  /* The three ROUTES still exist and are still individually reachable — one definition serves
      the nav, the palette and the route table alike. */
-  it("all four To-do routes remain real, and remain in the palette", () => {
-    expect(TODO_ROUTES).toHaveLength(4);
+  it("all three To-do routes remain real, and remain in the palette", () => {
+    expect(TODO_ROUTES).toHaveLength(3);
     for (const r of TODO_ROUTES) expect([...WORKSPACE_SHELL_PATHS], r.label).toContain(r.path);
   });
 });
@@ -194,7 +213,6 @@ describe("the window contracts are named once", () => {
     for (const f of [
       "../components/shell/AccountMenu.tsx",
       "../components/todo/ToDoPage.tsx",
-      "../components/todo/TodoTodayPage.tsx",
       "../components/shell/WorkspaceShell.tsx",
     ]) {
       const src = readFileSync(resolve(__dirname, f), "utf8");

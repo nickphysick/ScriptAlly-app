@@ -107,16 +107,17 @@ describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)"
      went with it and `strikeIds` was left write-only, which is why it went too.
      The behaviour survives on the Today PAGE, and better: it strikes from the DERIVED done set
      rather than from a second piece of state that had to be kept in step with it. */
-  it("the strike-in-place moved to the Today page, and its duplicate state died with the corner", () => {
+  it("the corner's duplicate strike state is dead, and the completion primitive is not", () => {
     expect(page).not.toContain('className="tdb-cc"');
     expect(page).not.toContain("strikeThenDone(c)");
     expect(page).not.toContain("setStrikeIds(");
     expect(page).toContain("quickDone(c)"); // the completion + undo toast, unchanged and still here
-    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
-    expect(today).toContain('className="tdt-row done"');
-    const tcss = readFileSync(join(here, "todoToday.css"), "utf8");
-    // the strike is on the TITLE, so the time and the Undo control stay legible
-    expect(tcss).toContain(".tdt-row.done .tdt-t { text-decoration: line-through;");
+    /* ⚠️ THE STRIKE'S HOST CHANGED TWICE; THE PRIMITIVE NEVER DID. The strike-in-place moved from
+       the retired corner panel to the Today page (workspace P3), and Today is retired in turn
+       (tasks-consolidation P1, 9 Aug). What this test protects is the half above — no second
+       piece of strike state anywhere, one completion path — and that is untouched. The rule the
+       host carried is worth restating for the consolidated page: THE STRIKE GOES ON THE TITLE,
+       never the row, so the time and the Undo control stay legible. */
   });
 });
 

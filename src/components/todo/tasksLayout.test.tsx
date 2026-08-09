@@ -21,7 +21,6 @@ const here = __dirname;
 const layoutSrc = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-const todayPage = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
 const calendarPage = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
 const noteboardPage = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
 const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
@@ -49,14 +48,15 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
     expect(layoutCss).toContain("--tdb-chrome-gap"); // named in the warning, so the tie is stated
   });
 
-  it("ALL FOUR pages stand on the SAME component", () => {
-    for (const [name, src] of [["list", listPage], ["today", todayPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+  it("ALL THREE pages stand on the SAME component", () => {
+    /* Three since 9 Aug (tasks-consolidation P1) — Today is retired. The contract is unchanged:
+       every Tasks page wears the one layout, which is what makes their top edges agree. */
+    for (const [name, src] of [["list", listPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
       expect(src, name).toContain("<TasksPageLayout");
       expect(src, name).toContain('from "./TasksPageLayout"');
     }
-    // and neither IMPORTS the retired header any more (supersession comments may still name it)
+    // and it does not IMPORT the retired header any more (supersession comments may still name it)
     expect(listPage).not.toContain('from "../shell/PageHeader"');
-    expect(todayPage).not.toContain('from "../shell/PageHeader"');
   });
 });
 
@@ -92,7 +92,7 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
     expect(rule).toContain("var(--tdb-col-gutter)");
   });
 
-  it("⚠️ the four Tasks slots are IDENTICAL in shape — fill+clip, no contentVariant, no exceptions", () => {
+  it("⚠️ the Tasks slots are IDENTICAL in shape — fill+clip, no contentVariant, no exceptions", () => {
     /* THE CAUSE, pinned in two layers: three slots carried the ultrawide read cap (a
        placeholder-era leftover) while the board slot was bare — AND the board scrolled inside
        its own .tdb-wrap (a fill slot) while the other three scrolled the stage (flow slots),
@@ -100,7 +100,7 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
        Nick's call (align the three to the BOARD): every slot is the board's own shape, so
        nothing about the mounting can differ at all. */
     const slots = [...app.matchAll(/<StagePage[^>]*routeKey === "todo"[^>]*>/g)].map((m) => m[0]);
-    expect(slots.length).toBe(4); // list · today · calendar · noteboard
+    expect(slots.length).toBe(3); // list · calendar · noteboard (Today retired, P1 9 Aug)
     for (const slot of slots) {
       expect(slot, slot).not.toContain("contentVariant");
       /* ⚠️ `fillColumn` SINCE 7 Aug (was `fill`): `fill` renders the slot `display: block`, which
@@ -112,7 +112,7 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
   });
 
   it("no page wraps the layout in a capped or padded container of its own", () => {
-    for (const [name, src] of [["list", listPage], ["today", todayPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+    for (const [name, src] of [["list", listPage], ["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
       // the mount sits directly inside the page wrap — never inside a max-width/pad wrapper
       const before = src.slice(src.indexOf("return ("), src.indexOf("<TasksPageLayout"));
       expect(before, name).not.toContain("maxWidth");
@@ -165,30 +165,22 @@ describe("⚠️ the tool row is the ONLY home for page controls", () => {
     expect(listPage).toContain("tools={renderTools()}");
   });
 
-  it("⚠️ Today's two controls live on the TITLE ROW — it has no tool row at all", () => {
-    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P2): Today used to put its pair in the tool row
-       like every other page. Redesigned to the Dashboard's grammar, the ghost + ink pair sit on
-       the title's own line and the page has NO tool row and NO filter control — a committed list
-       of a few items needs no sifting, and the absence is the design. The header block is still
-       ONE fixed unit owned by the layout, which is the contract this file exists to hold; the
-       three-slot rule (grow → pink right) still governs every page that HAS a tool row. */
-    const head = todayPage.slice(todayPage.indexOf("titleActions={"), todayPage.indexOf("beneath={"));
-    expect(todayPage.indexOf("titleActions={")).toBeGreaterThan(-1); // the anchor, per the slice law
-    expect(head).toContain("Work the list");
-    expect(head).toContain("Add to today");
-    // no tool row, and no filter control anywhere on the page
-    expect(todayPage).not.toContain("tools={");
-    expect(todayPage).not.toContain("TodoSideContainer");
-  });
+  /* ⚠️ TODAY'S TITLE-ROW SPEC WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug). It asserted
+     the ghost + ink pair on Today's own title line and the absence of a tool row there. The
+     layout contract it sat inside is untouched — the header block is still ONE fixed unit the
+     layout owns, and the three-slot tool-row rule (grow → pink right) still governs every page
+     that HAS a tool row, asserted above. "Work the list" moves to the To-do list's tool row. */
 
   it("the sidebar prop carries the ONE TodoSideContainer — on the ONE page that has one", () => {
-    /* ⚠️ NARROWED 7 Aug 2026 (tasks-viewport P1): this ran over the list AND Today. The sidebar
-       belongs to the To-do list alone now; the freed width is what lets Calendar's cells grow and
-       Today's two columns breathe. The contract being asserted is unchanged — where a sidebar
-       mounts it is the ONE shared container, never a second one grown per page. */
+    /* ⚠️ NARROWED 7 Aug (tasks-viewport P1) and again 9 Aug (tasks-consolidation P1): it ran over
+       the list AND Today; Today is retired. The sidebar belongs to the To-do list alone, and the
+       freed width is what lets the Calendar's cells grow. The contract is unchanged — where a
+       sidebar mounts it is the ONE shared container, never a second grown per page. */
     expect(listPage.indexOf("sidebar={")).toBeGreaterThan(-1); // the anchor (the slice law)
     const sidebar = listPage.slice(listPage.indexOf("sidebar={"), listPage.indexOf("sidebar={") + 900);
     expect(sidebar).toContain("<TodoSideContainer");
-    expect(todayPage, "Today runs full width").not.toContain("sidebar={");
+    for (const [name, src] of [["calendar", calendarPage], ["noteboard", noteboardPage]] as const) {
+      expect(src, `${name} runs full width`).not.toContain("sidebar={");
+    }
   });
 });

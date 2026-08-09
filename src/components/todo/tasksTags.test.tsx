@@ -106,10 +106,11 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
     expect(toggleTagSel(["a", "b"], "a")).toEqual(["b"]);
   });
 
-  it("the board composes facet ∧ tags in ONE narrow; Today and the Calendar filter the same way", () => {
+  it("the board composes facet ∧ tags in ONE narrow; the Calendar filters the same way", () => {
+    /* Today's clause went with the page (tasks-consolidation P1, 9 Aug). The rule is unchanged
+       and is what matters: every surface that narrows uses the SAME composition, so two pages
+       cannot come to disagree about what a tag selection means. */
     expect(listPage).toContain("applyFacet(cards, facet).filter((c) => matchesTags(c.tags, tagSel))");
-    const today = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
-    expect(today).toContain("matchesTags(c.tags, tagSel)");
     const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
     expect(cal).toContain("matchesTags(c.tags, tagSel)");
   });

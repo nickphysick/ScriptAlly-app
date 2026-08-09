@@ -693,8 +693,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      what is on today's list. Both listeners call the EXISTING functions, unchanged.
 
      This works because the To-do slots stay mounted (StagePage toggles display, it does not
-     unmount), so /todo/today has this page alive beside it. That is a real dependency, so it is
-     stated here rather than left to be discovered. */
+     unmount), so a sibling Tasks route has this page alive beside it. That is a real dependency,
+     so it is stated here rather than left to be discovered. */
   useEffect(() => {
     /* ⚠️ "Work the list" opens THE SAME DOCK (P4) — walking today's committed queue instead of
        the board's. One engine, two entrances; the queue is the only thing that differs. */
@@ -1169,9 +1169,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </TasksPageLayout>
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card
             bottom-right of the workspace, minimising to a pill; absent when the list is empty. */}
-        {/* ⚠️ THE CORNER POP-UP IS RETIRED (workspace P3). Today is a PAGE now — /todo/today —
-            and a floating duplicate of it on this page would be a second surface that has to
-            agree with the first about what you committed to. One home. */}
+        {/* ⚠️ THE CORNER POP-UP IS RETIRED (workspace P3), AND SO IS THE PAGE THAT REPLACED IT
+            (tasks-consolidation P1, 9 Aug). Both retirements are the same argument at different
+            scales: a floating duplicate of the day's list, and then a second PAGE over an
+            overlapping subset of the same tasks, are each a surface that has to agree with the
+            first about what you committed to. One ranked list. One home. */}
       </div>
 
       {assistantOpen && (

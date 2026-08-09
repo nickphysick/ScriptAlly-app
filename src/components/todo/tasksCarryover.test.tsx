@@ -25,7 +25,6 @@ import { facetCounts } from "../../lib/todoBoardSort";
 
 const here = __dirname;
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-const todayPage = readFileSync(join(here, "TodoTodayPage.tsx"), "utf8");
 const sidebar = readFileSync(join(here, "..", "shell", "ShellSidebar.tsx"), "utf8");
 const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
 const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
@@ -61,19 +60,18 @@ describe("⚠️ every count walks assembleBoardColumns — badge, page, FILTERS
     expect(everything).toBeGreaterThan(0); // the fixture is not vacuous (the snoozed card counts)
   });
 
-  it("⚠️ the three consumers all CALL the one derivation — no hand pipelines left", () => {
+  it("⚠️ the consumers all CALL the one derivation — no hand pipelines left", () => {
+    /* ⚠️ TWO CONSUMERS SINCE 9 Aug, WAS THREE (tasks-consolidation P1) — Today is retired. The
+       law is untouched and is the whole point: the badge, the page and every FILTERS count read
+       ONE `assembleBoardColumns`, so no two surfaces can state different numbers for the same
+       cards. Losing a consumer narrows the test's reach, not the rule. */
     expect(sidebar).toContain("assembleBoardColumns({");
     expect(sidebar).toContain("boardFigures(cols).cards");
     expect(sidebar).not.toContain("todoBadgeCount"); // the member-unit badge law is off the path
     expect(listPage).toContain("assembleBoardColumns({");
     expect(listPage).toContain("hiddenUserTaskId: pendingSaveId");
-    expect(todayPage).toContain("assembleBoardColumns({");
-    /* ⚠️ SUPERSEDED 7 Aug 2026 (tasks-viewport P1): Today fed `facetCounts` to its sidebar's
-       FILTERS. It has no sidebar and no filter control now — a committed list of a few items
-       needs no sifting, and the absence is the design. What this test actually guards survives
-       intact: Today still derives from the ONE `assembleBoardColumns`, asserted above, so it
-       cannot disagree with the badge or the board about what is on the list. */
-    expect(todayPage).not.toContain("facetCounts([...board.do"); // the raw-lane feed is extinct
+    // and the raw-lane feed stays extinct wherever a count is taken
+    expect(listPage).not.toContain("facetCounts([...board.do");
   });
 });
 

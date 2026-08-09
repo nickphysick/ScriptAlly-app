@@ -98,14 +98,15 @@ describe("⚠️ CLEAR sits beside FILTERS, appears only when something narrows,
   it("⚠️ it resets BOTH narrowings — every page hands it a facet reset AND a tag reset", () => {
     expect(src).toContain("const narrowed = active !== \"all\" || selectedTags.length > 0;");
     /* ⚠️ NARROWED 7 Aug 2026 (tasks-viewport P1): this ran over three pages, because three
-       mounted the sidebar. The sidebar is the To-do list's alone now — Today, Calendar and the
-       Noteboard run full width — so ONE page hands CLEAR its resets. The rule itself is
-       unchanged and is the point: wherever the sidebar mounts, CLEAR resets BOTH narrowings,
-       never half of them. */
+       mounted the sidebar. The sidebar is the To-do list's alone now — the others run full
+       width — so ONE page hands CLEAR its resets. The rule itself is unchanged and is the
+       point: wherever the sidebar mounts, CLEAR resets BOTH narrowings, never half of them.
+       (9 Aug, tasks-consolidation P1: Today left the list of full-width pages by being
+       retired outright.) */
     const p = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
     expect(p).toContain('onClearAll={() => { setFacet("all"); setTagSel([]); }}');
     expect(p).not.toContain("onClearTags=");
-    for (const page of ["TodoTodayPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+    for (const page of ["TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
       const q = readFileSync(join(here, page), "utf8");
       expect(q, `${page} runs full width — no sidebar to clear`).not.toContain("onClearAll=");
     }
@@ -128,9 +129,11 @@ describe("⚠️ TAGS: the live list, plus an inline ＋ New tag opening the PIC
     expect(src).not.toContain("normaliseTagLabel");
   });
 
-  it("⚠️ the create WRITE has one home — useTagWrites, shared by all four Tasks pages", () => {
+  it("⚠️ the create WRITE has one home — useTagWrites, shared by every Tasks page", () => {
+    /* Three pages since 9 Aug (tasks-consolidation P1) — Today is retired. The rule is unchanged:
+       the write lives in the hook, and no page grows a copy of it. */
     expect(hook).toContain("updateUserProfile({ tags: [...(currentUser?.tags ?? []), tag] })");
-    for (const page of ["ToDoPage.tsx", "TodoTodayPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
+    for (const page of ["ToDoPage.tsx", "TodoCalendarPage.tsx", "TodoNoteboardPage.tsx"]) {
       const p = readFileSync(join(here, page), "utf8");
       expect(p, page).toContain("useTagWrites(flash)");
       // the per-page copies are gone

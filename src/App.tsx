@@ -43,7 +43,6 @@ import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath } from "./lib/todoRoutes";
-import { TodoTodayPage } from "./components/todo/TodoTodayPage";
 import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
 import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
@@ -652,17 +651,14 @@ function AppContent() {
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
-        {/* ⚠️ ALL FOUR TASKS SLOTS ARE IDENTICAL — `layout="fill" clip`, no contentVariant
-            (tasks-audit addendum, hardened on Nick's call: align the three to the BOARD's
-            width). The first fix removed the three slots' leftover read caps; this one removes
-            the LAST slot-level difference — the board scrolled inside its own .tdb-wrap (fill)
-            while the other three scrolled the stage (flow), leaving the two chassis with
-            different scrollers and different available widths to centre in. One slot shape,
-            one scroller, one column: the four pages cannot diverge on either axis because
-            nothing about their mounting differs at all. */}
-        <StagePage active={routeKey === "todo" && todoPage === "today"} layout="fillColumn" clip>
-          <TodoTodayPage onNavigate={handleNavigate} />
-        </StagePage>
+        {/* ⚠️ THE TASKS SLOTS ARE IDENTICAL — `layout="fillColumn" clip`, no contentVariant
+            (tasks-audit addendum, hardened on Nick's call: align the rest to the BOARD's width).
+            The first fix removed the leftover read caps; the second removed the LAST slot-level
+            difference — the board scrolled inside its own .tdb-wrap (fill) while the others
+            scrolled the stage (flow), leaving the chassis with different scrollers and different
+            available widths to centre in. One slot shape, one scroller, one column: the pages
+            cannot diverge on either axis because nothing about their mounting differs at all.
+            (Today's slot went with its page — tasks-consolidation P1.) */}
 
         {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
         <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fillColumn" clip>
