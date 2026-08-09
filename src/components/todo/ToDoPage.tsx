@@ -64,7 +64,7 @@ import { TaskList } from "./TaskList";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
-import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId } from "../../lib/todoColumns";
+import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, liveBoardCards } from "../../lib/todoColumns";
 import { MenuLeaf } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { useTagWrites } from "./useTagWrites";
@@ -239,7 +239,7 @@ export interface ToDoPageProps {
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, collectionsReady,
     addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
@@ -1160,8 +1160,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             searched ones, so a search that happens to match nothing can never fake a clear desk.
             Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
-          <div className="tdb-nomatch">
-            Nothing matches — <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters</button>
+          /* ⚠️ A FILTERED-EMPTY RESULT IS A DEAD END TO ESCAPE, NOT A MOMENT TO DECORATE (P5;
+             sheet 4). It is the one empty state the ref gives no art: you are mid-search and want
+             out, not a picture. It names WHAT you searched for — a bare "nothing matches" leaves
+             you wondering whether the page heard you — and it states the size of the set you
+             would get back, which is what makes clearing an informed choice rather than a guess. */
+          <div className="tdg-empty">
+            <h3>No tasks match “{search.trim()}”</h3>
+            <p>Try a shorter search, or clear it to see all {liveBoardCards(boardCols).length}.</p>
+            <button type="button" className="tdg-emptyact" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>
+              Clear search
+            </button>
           </div>
         ) : dock ? (
           /* ⚠️ THE DOCK TAKES THE BOARD'S PLACE rather than floating over it. A modal would leave
@@ -2045,6 +2054,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
              performs it through `snoozeCard`, the same primitive the ⋯ tiers and the dock use.
              One choke point, three entrances. */
           onSnooze={(c, days, when) => snoozeCard(c, days, when)}
+          /* ⚠️ "NO TASKS" AND "WE DO NOT KNOW YET" ARE DIFFERENT SENTENCES (P5). `collectionsReady`
+             is the db's own first-snapshot flag — the same one the Dashboard's skeleton reads — so
+             the page cannot tell the second as the first and flash an empty desk on boot. */
+          loading={!collectionsReady}
         />
       </TplZone>
     );

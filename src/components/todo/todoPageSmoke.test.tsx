@@ -33,6 +33,10 @@ import { UserPlan } from "../../types";
 const seed: { userTasks: unknown[]; agents: unknown[] } = { userTasks: [], agents: [] };
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
+    /* ⚠️ THE READINESS FLAG IS PART OF THE CONTRACT NOW (P5): the page renders its loading
+       shell until the db's first snapshot lands, so a mock that omits this renders a
+       skeleton and every content assertion below it fails for the wrong reason. */
+    collectionsReady: true,
     tasks: [], userTasks: seed.userTasks, queries: [], agents: seed.agents, manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], dismissedTasks: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },

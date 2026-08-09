@@ -1,0 +1,198 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE ROW'S STATES, THE LOADING SHELL AND THE EMPTY PANELS (tasks-consolidation, Phase 5; ref
+ * design-refs/tasks-states.html, sheets 2–4) — and Phase 6's motion contract, which is the same
+ * question asked of movement rather than of state.
+ */
+import React from "react";
+import { describe, it, expect, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { BoardCard } from "../../lib/todoBoard";
+import { BoardColumns } from "../../lib/todoColumns";
+import { taskGroups } from "../../lib/todoGroups";
+import { TaskList, TaskListSkeleton, RING_MS } from "./TaskList";
+
+const here = __dirname;
+const css = readFileSync(join(here, "todoGroups.css"), "utf8");
+const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+const list = readFileSync(join(here, "TaskList.tsx"), "utf8");
+const cssDecls = css.replace(/\/\*[\s\S]*?\*\//g, "");
+const rule = (sel: string): string => {
+  const i = cssDecls.indexOf(sel);
+  expect(i, `${sel} has no rule`).toBeGreaterThan(-1);
+  return cssDecls.slice(i, cssDecls.indexOf("}", i));
+};
+
+const card = (o: Partial<BoardCard> = {}): BoardCard => ({
+  key: "k1", stream: "do", title: "Send your full", who: "", subtitle: "The Marsh Agency",
+  due: "26 DAYS", kind: "AGENT WAITING", warn: false, snoozes: 0, hk: false, initials: "JM",
+  record: "", committed: false, done: false, taskType: "full_requested", relatedRecordId: "q1", ...o,
+});
+const cols = (o: Partial<BoardColumns> = {}): BoardColumns => ({ todo: [], today: [], snoozed: [], done: [], ...o });
+const render = (c: BoardColumns, loading = false) => renderToStaticMarkup(
+  <TaskList groups={taskGroups(c)} hkExpanded={false} loading={loading}
+    onToggleHk={() => {}} onOpen={() => {}} onTick={() => {}} onVerb={() => {}} onSnooze={() => {}} />,
+);
+
+/* ── sheet 2: the row's states ──────────────────────────────────────────────────────────────── */
+
+describe("⚠️ FOCUS IS AN INK BAR, NEVER A BROWSER OUTLINE", () => {
+  it("the outline is suppressed and replaced by an inset rule", () => {
+    expect(rule(".tdg-row:focus {")).toContain("outline: none");
+    const f = rule(".tdg-row:focus-visible {");
+    expect(f).toContain("box-shadow: inset 3px 0 0 #2a1a13");
+    expect(f).toContain("background: #fdfaf3");
+  });
+
+  it("⚠️ `:focus-visible`, NOT `:focus` — a pointer press must not leave a row looking picked", () => {
+    /* The row is a `role="button"`, so clicking it to open the dock focuses it for real. Painting
+       every focus would make the last row you touched look selected for the rest of the session. */
+    expect(cssDecls).toContain(".tdg-row:focus-visible {");
+    expect(cssDecls).not.toContain(".tdg-row:focus {\n  background");
+  });
+});
+
+describe("⚠️ THE OPTIMISTIC WRITE IS BELIEVED IMMEDIATELY, AND ONLY FAILURE INTERRUPTS", () => {
+  it("the dim and the lockout are one state", () => {
+    const p = rule(".tdg-row.pend {");
+    expect(p).toContain("opacity: 0.55");
+    /* a second click on a row already writing is not a second act */
+    expect(p).toContain("pointer-events: none");
+  });
+
+  it("⚠️ THE PENDING KEY CLEARS ON SETTLE, NOT ON A DATA CHANGE", () => {
+    /* A REFUSED write changes no data. Clearing on the next render would leave a denied row dimmed
+       for ever — which is how a silent permission failure becomes a page that looks broken. */
+    expect(list).toContain("void Promise.resolve(onTick(c)).finally(");
+    expect(list).toContain("onTick: (card: BoardCard) => void | Promise<void>;");
+  });
+
+  it("the spinner takes the TICK'S place rather than sitting beside it", () => {
+    expect(list).toContain('{pending.has(c.key) ? <span className="tdg-spin" aria-hidden /> : tickable && (');
+    expect(rule(".tdg-spin {")).toContain("border-radius: 50%");
+  });
+});
+
+describe("⚠️ THE COMPLETION RING IS A RECEIPT, AND IT IS DERIVED FROM ARRIVAL", () => {
+  it("it triggers on a key newly present in Done — the fact, not the click that caused it", () => {
+    expect(list).toContain("const fresh = [...now].filter((k) => !before.has(k));");
+    expect(list).toContain("if (!before) return;"); // arriving at a page is not an achievement
+    expect(RING_MS).toBe(600);
+  });
+
+  it("⚠️ AND IT SURVIVES REDUCED MOTION, where everything else stops", () => {
+    /* Sheet 6's last row: every transform becomes an opacity change or nothing — but the ring
+       carries a FACT, so it is information rather than decoration and it stays. */
+    const rm = cssDecls.slice(cssDecls.indexOf("@media (prefers-reduced-motion: reduce)", cssDecls.indexOf(".tdg-sk")));
+    expect(rm).toContain(".tdg-sk, .tdg-spin { animation: none; }");
+    expect(rm).not.toContain("tdg-row.rung");
+    expect(rule(".tdg-row.rung {")).toContain("box-shadow: 0 0 0 2px #8a9e88");
+  });
+});
+
+/* ── sheet 3: the loading shell ─────────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE SKELETON IS THE REAL ROW WEARING PLACEHOLDERS", () => {
+  const html = renderToStaticMarkup(<TaskListSkeleton />);
+
+  it("it reuses the row's own class, so the six tracks are the SAME six tracks", () => {
+    expect(html).toContain('class="tdg-row"');
+    expect(html).toContain('class="tdg-verbs"');
+    /* nothing shifts by a pixel when the data lands, because there is no second layout to drift */
+    expect(cssDecls).not.toContain(".tdg-skrow {");
+  });
+
+  it("it keeps the four verb slots per row, empties and all", () => {
+    const rows = (html.match(/class="tdg-row"/g) ?? []).length;
+    expect(rows).toBe(6); // two groups × three rows — the ref's "the first two render"
+    /* two painted verbs and two standing empties in every row, so the four-slot grid is the same
+       four-slot grid and the primary lands at the same x the moment data arrives */
+    expect((html.match(/tdg-sk vb/g) ?? []).length).toBe(rows * 2);
+    expect((html.match(/tdg-slot/g) ?? []).length).toBe(rows * 2);
+  });
+
+  it("it announces itself rather than miming content silently", () => {
+    expect(html).toContain('role="status"');
+    expect(html).toContain('aria-label="Loading your tasks"');
+  });
+
+  it("⚠️ 'NO TASKS' AND 'WE DO NOT KNOW YET' ARE DIFFERENT SENTENCES", () => {
+    /* The shell replaces the list wholesale; it is not an empty state and must never be told as
+       one. The trigger is the db's OWN first-snapshot flag — the same one the Dashboard reads. */
+    expect(list).toContain("if (loading) return <TaskListSkeleton />;");
+    expect(page).toContain("loading={!collectionsReady}");
+  });
+
+  it("the shimmer stops under reduced motion; the shell still reads as a shell", () => {
+    expect(rule(".tdg-sk {")).toContain("animation: tdgShim");
+  });
+});
+
+/* ── sheet 4: the empty states ──────────────────────────────────────────────────────────────── */
+
+describe("⚠️ A FILTERED-EMPTY RESULT IS A DEAD END TO ESCAPE, NOT A MOMENT TO DECORATE", () => {
+  it("it names what you searched for, states the way back, and carries NO art", () => {
+    expect(page).toContain("No tasks match “{search.trim()}”");
+    expect(page).toContain("or clear it to see all {liveBoardCards(boardCols).length}");
+    expect(page).toContain("Clear search");
+    const panel = page.slice(page.indexOf('className="tdg-empty"'), page.indexOf('className="tdg-empty"') + 900);
+    expect(panel).not.toContain("ArtSlot");
+  });
+
+  it("the two states that DO carry art keep it, and they are the two that earn it", () => {
+    expect(page).toContain('<ArtSlot name="first-run-board"');
+    expect(page).toContain('<ArtSlot name="desk-clear"');
+  });
+
+  /**
+   * ⚠️ TWO OF THE REF'S FIVE EMPTY STATES CANNOT EXIST, AND THE LAW IS RIGHT RATHER THAN THE REF.
+   *
+   * Sheet 4 draws "Nothing cleared yet today" (Done) and "Housekeeping is empty". Neither can
+   * render: `taskGroups` filters an empty group out entirely, and that law is locked with its
+   * reason — an empty section states a category the writer has no business in today, and five of
+   * them stack into a page that looks full of nothing. The ref's own housekeeping copy admits it
+   * ("This group hides itself when it has nothing to say"), which reads as a DEMONSTRATION of the
+   * rule rather than a state to build.
+   *
+   * So they are deliberately absent. The `done-empty` ART SLOT survives in the census, unmounted,
+   * exactly as `seize-the-day` does — flagged in the report rather than deleted.
+   */
+  it("an empty group renders nothing at all — no panel, no heading, no teaching line", () => {
+    const html = render(cols({ todo: [card()] }));
+    expect(html).not.toContain("Housekeeping");
+    expect(html).not.toContain("Done today");
+    expect(html).not.toContain("Nothing cleared yet today");
+  });
+});
+
+/* ── sheet 6: the motion contract ───────────────────────────────────────────────────────────── */
+
+describe("⚠️ ONE CURVE AND TWO DURATIONS — anything past 300ms on this page is a bug", () => {
+  it("the curve and the two durations are tokens, so no rule picks its own", () => {
+    const t = rule(".tdg {");
+    expect(t).toContain("--tdg-ease: cubic-bezier(0.2, 0.7, 0.3, 1)");
+    expect(t).toContain("--tdg-emph: 120ms");
+    expect(t).toContain("--tdg-move: 240ms");
+  });
+
+  it("⚠️ NO TRANSITION IN THIS SHEET EXCEEDS 300ms", () => {
+    /* ⚠️ TRANSITIONS ONLY, AND THE DISTINCTION IS THE RULE RATHER THAN A LOOPHOLE. The budget is
+       about how long the page takes to ANSWER you. An ambient loop — the skeleton's 1.4s shimmer,
+       the spinner's 640ms turn — answers nothing and repeats until the data lands; capping those
+       at 300ms would make them frantic. Both are named here so the exception is a decision. */
+    const durations = [...cssDecls.matchAll(/transition:[^;]*?(\d+(?:\.\d+)?)(ms|s)/g)]
+      .map((m) => (m[2] === "s" ? parseFloat(m[1]) * 1000 : parseFloat(m[1])));
+    expect(durations.length, "there must BE transitions to bound").toBeGreaterThan(0);
+    for (const d of durations) expect(d, `${d}ms transition`).toBeLessThanOrEqual(300);
+    /* every animation in this sheet is an ambient LOOP; a one-shot animation past the budget
+       would be movement wearing a different keyword */
+    const loops = [...cssDecls.matchAll(/animation:\s*[^;]*?(\d+(?:\.\d+)?)(ms|s)[^;]*/g)].map((m) => m[0]);
+    expect(loops.length, "there must BE loops to exempt").toBeGreaterThan(0);
+    for (const l of loops) expect(l, l).toMatch(/infinite/);
+    expect(RING_MS).toBe(600); // the hold lives in TS: it is a timer, not a transition
+  });
+});

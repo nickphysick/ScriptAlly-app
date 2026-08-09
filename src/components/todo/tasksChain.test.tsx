@@ -49,6 +49,10 @@ const today = new Date();
 const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
+    /* ⚠️ THE READINESS FLAG IS PART OF THE CONTRACT NOW (P5): the page renders its loading
+       shell until the db's first snapshot lands, so a mock that omits this renders a
+       skeleton and every content assertion below it fails for the wrong reason. */
+    collectionsReady: true,
     tasks: [], queries: [], manuscripts: [], packages: [], versions: [], activities: [],
     taskFlags: [], notes: [], dismissedTasks: [],
     agents: [{ id: "a1", userId: "u1", name: "Tom Ellery", agency: "Ellery & Frost" }],

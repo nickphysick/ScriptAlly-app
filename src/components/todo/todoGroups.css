@@ -59,6 +59,14 @@
      CSS cannot read another sheet, so the pair is asserted in `tasksList.test.tsx` — the same
      treatment the family tones get, for the same reason. */
   --tdg-ground: #ffffff;
+
+  /* ⚠️ ONE EASING AND TWO DURATIONS, PAGE-WIDE (P6; sheet 6). 120–160ms for EMPHASIS — a state
+     change where nothing moves — and 220–260ms for MOVEMENT. Anything past 300ms is a bug, and
+     ambient loops (the skeleton's shimmer, the spinner) are the stated exception because they are
+     not transitions. Tokens, so no rule below picks its own. */
+  --tdg-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --tdg-emph: 120ms;
+  --tdg-move: 240ms;
 }
 
 .tdg-sect {
@@ -149,7 +157,7 @@
   padding: 16px 14px;
   border-radius: 11px;
   position: relative;
-  transition: background 120ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  transition: background var(--tdg-emph) var(--tdg-ease);
 }
 
 /* the divider is the ROW's own inset line, so it inherits the row's radius treatment and
@@ -415,4 +423,119 @@
 @media (prefers-reduced-motion: reduce) {
   .tdg-foldchev { transition: none; }
   .tdg-row { transition: none; }
+}
+
+/* ══ PHASE 5 — THE ROW'S STATES, THE LOADING SHELL, THE EMPTY PANELS ═══════════════════════════
+   (ref design-refs/tasks-states.html, sheets 2–4)
+
+   ⚠️ THE MOTION TOKENS LIVE WITH `.tdg` AT THE HEAD OF THIS FILE — one rule per selector, which is
+   the discipline this pack has spent two sessions enforcing on other people's stylesheets. */
+
+/* ⚠️ FOCUS IS AN INK BAR, NEVER A BROWSER OUTLINE (sheet 2). The row is a `role="button"`, so it
+   takes focus for real — and a default outline traces the row's full rounded box, which at this
+   density reads as a selection rather than a cursor. `:focus-visible`, so a POINTER press never
+   paints it: clicking a row to open the dock should not leave it looking picked. */
+.tdg-row:focus { outline: none; }
+
+.tdg-row:focus-visible {
+  background: #fdfaf3;
+  box-shadow: inset 3px 0 0 #2a1a13;
+}
+
+/* ⚠️ THE OPTIMISTIC WRITE IS BELIEVED IMMEDIATELY, AND ONLY FAILURE INTERRUPTS (sheet 6). The row
+   dims and its tick becomes a spinner the moment you commit — no confirm, no block. It is
+   `pointer-events: none` because a second click on a row already writing is not a second act. */
+.tdg-row.pend {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.tdg-spin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.6px solid #e2d8c8;
+  border-top-color: #8a7a6c;
+  animation: tdgSpin 640ms linear infinite;
+}
+
+@keyframes tdgSpin { to { transform: rotate(360deg); } }
+
+/* ⚠️ THE RING IS THE RECEIPT, AND IT SURVIVES REDUCED MOTION (sheet 6's last row). The pause is
+   the point: you see the act land before the row moves on. Everything else here degrades to an
+   opacity change or to nothing; this one is INFORMATION rather than decoration, so it stays. */
+.tdg-row.rung {
+  box-shadow: 0 0 0 2px #8a9e88, 0 0 0 6px rgba(138, 158, 136, 0.16);
+  border-radius: 10px;
+}
+
+/* ── the loading shell ──────────────────────────────────────────────────────────────────────
+   ⚠️ IT IS THE REAL GRID WITH THE REAL TRACK WIDTHS — the row rule itself, wearing placeholders.
+   A bespoke skeleton with its own measurements is a second layout to keep in step, and the whole
+   point is that NOTHING SHIFTS when the data lands. */
+.tdg-sk {
+  background: linear-gradient(90deg, #f4efe6 25%, #faf6ef 50%, #f4efe6 75%);
+  background-size: 200% 100%;
+  animation: tdgShim 1.4s linear infinite;
+  border-radius: 6px;
+  height: 11px;
+}
+
+.tdg-sk.pill { height: 25px; width: 124px; border-radius: 7px; }
+.tdg-sk.tick { height: 20px; width: 20px; border-radius: 50%; }
+.tdg-sk.vb { height: 30px; border-radius: 8px; }
+.tdg-sk.t { height: 13px; width: 62%; }
+.tdg-sk.sub { height: 10px; width: 38%; margin-top: 7px; }
+.tdg-sk.age { height: 9px; width: 54px; }
+
+@keyframes tdgShim { to { background-position: -200% 0; } }
+
+/* ── the empty panels ───────────────────────────────────────────────────────────────────────
+   ⚠️ A FILTERED-EMPTY RESULT IS A DEAD END TO ESCAPE, NOT A MOMENT TO DECORATE (sheet 4). It is
+   the one empty state with no art: the writer is mid-search and wants out, not a picture. */
+.tdg-empty {
+  background: #fff;
+  border: 1px solid #ece4d6;
+  border-radius: 16px;
+  padding: 34px 30px;
+  text-align: center;
+}
+
+.tdg-empty h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2b2118;
+  margin: 0 0 8px;
+}
+
+.tdg-empty p {
+  font-size: 12.5px;
+  color: #8a7d6e;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 420px;
+}
+
+.tdg-emptyact {
+  margin-top: 15px;
+  height: 30px;
+  padding: 0 15px;
+  border: 1px solid #e6ddcd;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #4d4238;
+  cursor: pointer;
+}
+
+.tdg-emptyact:hover { border-color: #cdbfae; color: #2b2118; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠️ THE SHIMMER AND THE SPINNER STOP; THE RING DOES NOT. A skeleton still reads as a skeleton
+     without travelling, and a spinner that does not spin still holds the tick's place — but the
+     completion ring carries a fact, so it survives (sheet 6). */
+  .tdg-sk, .tdg-spin { animation: none; }
 }

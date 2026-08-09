@@ -898,13 +898,16 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     /* The lane-skip half of this case retired with the lanes (board+dock P1); the BRANCH ORDER
        it was really protecting is unchanged and still asserted: the no-match line beats the
        board, so a narrowing that finds nothing never renders as "nothing needs you". */
-    const i = page.indexOf('className="tdb-nomatch"');
+    /* ⚠️ THE PANEL REPLACED THE ONE-LINER (P5, 9 Aug; sheet 4) — it names what you searched for
+       and states the size of the set you get back, which is what makes clearing an informed
+       choice. The BRANCH ORDER is what this case has always protected and it is unchanged. */
+    const i = page.indexOf('className="tdg-empty"');
     const j = page.indexOf(") : renderList()}");
     expect(i).toBeGreaterThan(-1);
     expect(j, "the body's render call must exist").toBeGreaterThan(-1);
     expect(i, "the no-match branch must come BEFORE the body").toBeLessThan(j);
-    expect(page).toContain("Nothing matches —");
-    expect(page).toContain(">clear filters</button>");
+    expect(page).toContain("No tasks match");
+    expect(page).toContain(">\n              Clear search\n            </button>");
   });
   it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move

@@ -29,7 +29,7 @@
  * opinion about. The split is the point: the menu says WHETHER, taskRow says WHAT IT IS CALLED,
  * so the row and the menu cannot disagree about what a card allows.
  */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronRight, ChevronDown, Clock, MoreHorizontal, X, Check } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
@@ -50,8 +50,13 @@ export interface TaskListProps {
   onToggleHk: () => void;
   /** The row's door: the dock, on this card. */
   onOpen: (card: BoardCard) => void;
-  /** The tick — the page's one completion path. Only offered where `isTickable` says so. */
-  onTick: (card: BoardCard) => void;
+  /** ⚠️ THE TICK RETURNS ITS WRITE (P5). The row believes the act immediately — it dims and its
+   *  circle becomes a spinner — and only FAILURE interrupts, so the row needs to know when the
+   *  write settles. A void return would leave the dim on until the data happened to change. */
+  onTick: (card: BoardCard) => void | Promise<void>;
+  /** The db's first snapshot has not landed — render the shell rather than an honest-looking
+   *  empty page. Absent means loaded, so every existing caller keeps the behaviour it had. */
+  loading?: boolean;
   /** A menu leaf, performed by the page with its existing primitives (as the board's ⋯ was). */
   onVerb: (card: BoardCard, item: MenuLeaf, column: TodoColumnId) => void;
   /** ⚠️ THE DIAL'S ONE WRITE — already clamped and re-labelled by `clampSnooze` on its way out,
@@ -87,6 +92,43 @@ function offers(groups: ReturnType<typeof cardMenu>, id: MenuItemId): boolean {
   return groups.some((g) => g.entries.some(hit));
 }
 
+/** ⚠️ THE PAUSE IS THE RECEIPT (sheet 6) — you see the act land before the row moves on. 600ms is
+ *  the ref's own hold, and it is the one duration on this page allowed past 300ms because it is a
+ *  DWELL rather than a movement. */
+export const RING_MS = 600;
+
+/**
+ * ⚠️ THE SKELETON IS THE REAL ROW, WEARING PLACEHOLDERS (sheet 3). It reuses `.tdg-row` and its
+ * six tracks, `.tdg-verbs` and its four slots — so nothing shifts by a pixel when the data lands.
+ * A bespoke skeleton with its own measurements would be a second layout to keep in step with the
+ * first, and the day they drift is the day the page jumps on load.
+ *
+ * Two groups, as the ref says: in practice the first arrive and the rest follow without a spinner.
+ */
+const SkeletonRow: React.FC = () => (
+  <div className="tdg-row" aria-hidden>
+    <div className="tdg-cc"><span className="tdg-sk tick" /></div>
+    <div style={{ minWidth: 0 }}><div className="tdg-sk t" /><div className="tdg-sk sub" /></div>
+    <div className="tdg-cc"><span className="tdg-sk pill" /></div>
+    <div className="tdg-cc"><div className="tdg-jrny" /></div>
+    <div className="tdg-cr"><span className="tdg-sk age" /></div>
+    <div className="tdg-verbs">
+      <span className="tdg-sk vb" /><span className="tdg-slot" /><span className="tdg-slot" /><span className="tdg-sk vb" />
+    </div>
+  </div>
+);
+
+export const TaskListSkeleton: React.FC = () => (
+  <div className="tdg" role="status" aria-label="Loading your tasks">
+    {[0, 1].map((s) => (
+      <div key={s} className="tdg-sect">
+        <div className="tdg-shd"><h3><span className="tdg-sk" style={{ width: 132 }} /></h3></div>
+        <div className="tdg-panel">{[0, 1, 2].map((r) => <SkeletonRow key={r} />)}</div>
+      </div>
+    ))}
+  </div>
+);
+
 interface OpenMenu {
   key: string;
   card: BoardCard;
@@ -95,7 +137,7 @@ interface OpenMenu {
   openSub?: "snooze" | "resnooze" | "dismiss";
 }
 
-export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze }) => {
+export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze, loading = false }) => {
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   /* ⚠️ THE DIAL IS THE CLOCK'S SURFACE NOW (P4) — it replaced the ⋯ menu's snooze submenu at THIS
      one call site, which is exactly why the clock was routed through a pre-opened submenu in P2
@@ -109,6 +151,40 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
      rail rather than re-derived: with a baseline the meter can say "5 OF 16" as the pile shrinks,
      and a pile you have not started is a pile rather than a 0% failure. */
   const sweepBase = useRef(new Map<string, number>());
+  /* ⚠️ THE OPTIMISTIC SET (P5). A key enters on commit and leaves when the write settles — not
+     when the data changes, because a REFUSED write changes nothing and the row would dim for
+     ever. The act is believed immediately; only failure interrupts. */
+  const [pending, setPending] = useState<Set<string>>(new Set());
+  /* ⚠️ THE COMPLETION RING, DERIVED FROM ARRIVAL (P5) — keys that have just appeared in the Done
+     group wear it for 600ms. Carried from the retired board's own rail rather than reinvented:
+     the ring is a receipt for a fact the derivation already states, so it is triggered by the
+     fact rather than by the click that caused it. */
+  const [rung, setRung] = useState<Set<string>>(new Set());
+  const prevDone = useRef<Set<string> | null>(null);
+
+  const doneKeys = groups.find((g) => g.id === "done")?.cards.map((c) => c.key) ?? [];
+  const doneSig = doneKeys.join("|");
+  useEffect(() => {
+    const now = new Set(doneKeys);
+    const before = prevDone.current;
+    prevDone.current = now;
+    if (!before) return; // first render rings nothing — arriving at a page is not an achievement
+    const fresh = [...now].filter((k) => !before.has(k));
+    if (!fresh.length) return;
+    setRung((r) => new Set([...r, ...fresh]));
+    const id = window.setTimeout(
+      () => setRung((r) => { const n = new Set(r); fresh.forEach((k) => n.delete(k)); return n; }),
+      RING_MS,
+    );
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doneSig]);
+
+  const tick = (c: BoardCard) => {
+    setPending((p) => new Set(p).add(c.key));
+    void Promise.resolve(onTick(c)).finally(() =>
+      setPending((p) => { const n = new Set(p); n.delete(c.key); return n; }));
+  };
 
   const closeMenu = (returnFocus: boolean) => {
     setMenu((m) => {
@@ -176,7 +252,8 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       <div
         key={c.key}
         data-tdgkey={c.key}
-        className={`tdg-row${c.done ? " done" : ""}`}
+        className={`tdg-row${c.done ? " done" : ""}${pending.has(c.key) ? " pend" : ""}${rung.has(c.key) ? " rung" : ""}`}
+        aria-busy={pending.has(c.key) || undefined}
         role="button"
         tabIndex={0}
         aria-label={c.title}
@@ -189,12 +266,15 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
         }}
       >
         <div className="tdg-cc">
-          {tickable && (
+          {/* ⚠️ THE SPINNER TAKES THE TICK'S PLACE rather than sitting beside it — the circle is
+              where your eye already is, and a spinner elsewhere would leave a tick that looks
+              clickable during a write it cannot join. */}
+          {pending.has(c.key) ? <span className="tdg-spin" aria-hidden /> : tickable && (
             <button
               type="button"
               className={`tdg-tick${c.done ? " dn" : ""}`}
               aria-label={c.done ? `Undo “${c.title}”` : `Mark “${c.title}” done`}
-              onClick={(e) => { e.stopPropagation(); onTick(c); }}
+              onClick={(e) => { e.stopPropagation(); tick(c); }}
             >
               <Check size={11} aria-hidden />
             </button>
@@ -306,6 +386,10 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       </div>
     );
   };
+
+  /* ⚠️ THE SHELL REPLACES THE LIST WHOLESALE, and it is not an empty state. "No tasks" and "we do
+     not know yet" are different sentences, and the second one must never be told as the first. */
+  if (loading) return <TaskListSkeleton />;
 
   return (
     <div className="tdg">
