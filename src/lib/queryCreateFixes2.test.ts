@@ -17,6 +17,7 @@
  * below asserts the rule appears exactly ONCE rather than merely appearing.
  */
 import { describe, it, expect } from "vitest";
+import { STEP_TITLE } from "./createSteps";
 import { readFileSync } from "fs";
 import { SAMPLE_UNITS, UNIT_CFG, snapToUnit, stepAmount } from "./agentMaterials";
 import { draftMaterialsToQuery } from "./queryDraft";
@@ -52,14 +53,17 @@ const ruleCount = (selector: string): number =>
    agency…". Both were fixes to a COMPACT hero that put a title, a subtitle and the picker on one
    line beside each other.
 
-   Stage 1 removes the argument's subject: the pane now asks ONE question, centred, as its whole
-   content — Playfair, no eyebrow, no field label, nothing beside it. The two rules survive in
-   createStageOne.test.ts as the order of the centred stack and the absence of a second label. */
+   The four-step stack removes the argument's subject twice over: the question is now the AGENT
+   STEP's head, drawn by the one block renderer from STEP_TITLE — Playfair, no eyebrow, no field
+   label. It cannot be a mono eyebrow or gain a duplicate label without every step gaining one.
+   The rest survives in createAgentStep.test.ts. */
 describe("P1 · the question is the page, not a label on it", () => {
   it("it is a Playfair heading and there is nothing else competing with it", () => {
     expect(pane, "the question is back as a mono eyebrow").not.toContain("<div style={LABEL}>Who are you querying?</div>");
     expect(pane, "the duplicate field label came back").not.toContain("<div style={LABEL}>Agent</div>");
-    expect(pane).toContain('<h2 className="qc-askq">Who are you querying?</h2>');
+    expect(STEP_TITLE.agent, "the question is the step's own head now").toBe("Who are you querying?");
+    expect(pane, "the head must render from the shared vocabulary, not a literal")
+      .toContain("{STEP_TITLE[id]}");
     expect(pane, "the picker itself must not be rebuilt").toContain("AgentSearchField");
     expect(pane).toContain("onCreateAgent");
   });

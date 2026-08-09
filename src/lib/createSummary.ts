@@ -15,6 +15,7 @@
 import type { QueryDraft } from "./queryDraft";
 import { resolveReminder } from "./queryDraft";
 import type { MaterialRow } from "./agentMaterials";
+import { agentPrimary, agentAgencyLine } from "./agentDisplay";
 import type { Agent, Manuscript } from "../types";
 
 /** "9 Aug" / "9 Aug 2025" — the year only when it is not the current one, as the list rows do. */
@@ -51,7 +52,7 @@ export function materialsPhrase(rows: MaterialRow[]): string {
   return parts.join(", ");
 }
 
-export interface StepSummaries { when: string; what: string; notes: string }
+export interface StepSummaries { agent: string; when: string; what: string; notes: string }
 
 /**
  * One line per section. Each falls back to a plain statement of ABSENCE rather than an empty
@@ -78,7 +79,14 @@ export function stepSummaries(
   const body = draft.journal.trim();
   const notes = body ? (body.length > 60 ? `${body.slice(0, 57)}…` : body) : "No note";
 
-  return { when: when.join(" · "), what, notes };
+  /* ⚠️ THE AGENT ROW CARRIES THE AGENCY TOO, and it is the only place that does now. The compact
+     hero — 54px monogram, name, agency — was retired when choosing the agent became step one, so
+     with the step collapsed this line is the whole of "who am I querying". Name alone would make
+     two agents at different agencies read identically. `agentPrimary`/`agentAgencyLine` are the
+     shared display helpers, so it says exactly what every other surface says. */
+  const who = agent ? [agentPrimary(agent), agentAgencyLine(agent)].filter(Boolean).join(" · ") : "";
+
+  return { agent: who || "No agent chosen", when: when.join(" · "), what, notes };
 }
 
 

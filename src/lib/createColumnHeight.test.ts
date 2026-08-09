@@ -27,20 +27,21 @@ describe("the two sources of reclaimed height", () => {
     expect(pane).not.toContain("qc-foot");
   });
 
-  /* ⚠️ SUPERSEDED BY STAGE 1 (create mode v3). This measured a COMPACT HERO — a 54px mark with
-     the title, subtitle and picker side by side — built to claw ~90px back for the three
-     columns. Stage 1 deletes that hero: before an agent is chosen the pane holds one centred
-     question and three ghost rows, and there are no columns to make room for yet. The height
-     pressure this suite was written under does not exist in that state. */
-  /* ⚠️ AMENDED AGAIN: the centred single-column question is retired too. Stage 1 now uses the
-     SAME two-column geometry as stage 2, so choosing an agent replaces the right column's
-     content rather than introducing a column — nothing jumps under the pointer. */
-  it("the pre-agent state is two columns, like the state it leads to", () => {
+  /* ⚠️ SUPERSEDED THREE TIMES, and the third supersession removes the subject entirely.
+     · It measured a COMPACT HERO — a 54px mark with title, subtitle and picker side by side —
+       built to claw ~90px back for the three columns.
+     · Stage 1 deleted that hero in favour of a centred question with three ghost rows.
+     · Stage 1 then adopted stage 2's two-column geometry, so nothing jumped when you picked.
+     There is now no pre-agent STATE to compare, because there is no stage: the agent is step one
+     inside the same stack as the other three, and the only thing that changes when you pick
+     someone is that the reference panel arrives beside a column that was already there. */
+  it("there is one row for every state, and the hero is gone from all of them", () => {
     expect(pane, "the compact hero came back").not.toContain('className="qc-htxt"');
     expect(pane, "the compact hero came back").not.toContain('className="qc-mark"');
     expect(pane, "the centred single-column ask came back").not.toContain('className="qc-ask"');
-    expect(pane.match(/<div className="qc-two">/g)?.length ?? 0, "both stages use the same row")
-      .toBe(2);
+    expect(pane, "the agent hero came back").not.toContain("qc-hero");
+    expect(pane.match(/className=\{`qc-two/g)?.length ?? 0, "one row, both states")
+      .toBe(1);
   });
 
   it("the hero/columns gap tightened", () => {
@@ -62,7 +63,10 @@ describe("the columns take the height, and scroll only as a fallback", () => {
     expect(pane).toContain('className="qc-stack"');
   });
 
-  it("only the active section's body is mounted, so height is never the sum of three", () => {
-    expect(pane.match(/states\.\w+ === "active" && \(/g)?.length ?? 0).toBe(3);
+  it("only the active section's body is mounted, so height is never the sum of four", () => {
+    /* Stronger than counting branches: the bodies are thunks and the single call site sits in
+       the open branch, so a closed step's content is not merely unmounted — it is never built. */
+    expect(pane).toContain("const BODIES: Record<StepId, () => React.ReactNode>");
+    expect(pane.match(/BODIES\[id\]\(\)/g)?.length ?? 0).toBe(1);
   });
 });

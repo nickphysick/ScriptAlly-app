@@ -7,22 +7,28 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import {
-  STEP_ORDER, STEP_TITLE, STEP_SHORT, STEP_OPTIONAL,
-  stepStates, nextStep, advance, jumpTo, enterHint, requirements, stepIndex,
+  STEP_ORDER, STEP_TITLE, STEP_SHORT, STEP_OPTIONAL, STEP_HINT, STEP_LEDE,
+  stepStates, nextStep, prevStep, advance, jumpTo, enterHint, requirements, stepIndex,
 } from "./createSteps";
 import { draftReady, emptyDraft } from "./queryDraft";
 
 describe("one section is open at a time", () => {
-  it("the first frame: When is active, the other two wait", () => {
-    expect(stepStates("when", "when")).toEqual({ when: "active", what: "upcoming", notes: "upcoming" });
+  /* ⚠️ THE STACK NOW OPENS ON THE AGENT. Choosing who you are querying used to be a stage BEFORE
+     the steps — a screen the stack never showed you having completed, left by a button that
+     existed nowhere else. It is step one of four, and the first frame is its open state. */
+  it("the first frame: Agent is active, the other three wait", () => {
+    expect(stepStates("agent", "agent"))
+      .toEqual({ agent: "active", when: "upcoming", what: "upcoming", notes: "upcoming" });
   });
 
   it("mid-stack: what is behind is done, what is ahead is upcoming", () => {
-    expect(stepStates("what", "what")).toEqual({ when: "done", what: "active", notes: "upcoming" });
+    expect(stepStates("what", "what"))
+      .toEqual({ agent: "done", when: "done", what: "active", notes: "upcoming" });
   });
 
   it("the last section: everything behind it is a summary", () => {
-    expect(stepStates("notes", "notes")).toEqual({ when: "done", what: "done", notes: "active" });
+    expect(stepStates("notes", "notes"))
+      .toEqual({ agent: "done", when: "done", what: "done", notes: "active" });
   });
 
   it("exactly one is ever active", () => {
@@ -38,7 +44,16 @@ describe("one section is open at a time", () => {
    materials you already confirmed. */
 describe("going back does not un-complete what you have already passed", () => {
   it("jumping back to When leaves What and Notes done, not upcoming", () => {
-    expect(stepStates("when", "notes")).toEqual({ when: "active", what: "done", notes: "done" });
+    expect(stepStates("when", "notes"))
+      .toEqual({ agent: "done", when: "active", what: "done", notes: "done" });
+  });
+
+  /* Reopening the picker must not un-answer everything after it: a writer correcting the agent
+     has still chosen a date and ticked their materials, and the seeded materials that DO change
+     are re-derived by pickAgent rather than by the stack forgetting where it had been. */
+  it("and reopening the Agent step leaves the whole stack behind it intact", () => {
+    expect(stepStates("agent", "notes"))
+      .toEqual({ agent: "active", when: "done", what: "done", notes: "done" });
   });
 
   it("jumping back does not retreat `reached`", () => {
@@ -57,8 +72,17 @@ describe("going back does not un-complete what you have already passed", () => {
 
 describe("Enter advances, and knows where it stops", () => {
   it("walks the stack in order", () => {
+    expect(nextStep("agent")).toBe("when");
     expect(nextStep("when")).toBe("what");
     expect(nextStep("what")).toBe("notes");
+  });
+
+  /* Back is the footer's second control, and the first step has nothing behind it — the button
+     is absent there rather than present and inert. */
+  it("and Back walks it the other way, stopping at the first step", () => {
+    expect(prevStep("agent")).toBeNull();
+    expect(prevStep("when")).toBe("agent");
+    expect(prevStep("notes")).toBe("what");
   });
 
   it("the last section has nowhere to advance to — there Enter saves instead", () => {
@@ -80,6 +104,14 @@ describe("Enter advances, and knows where it stops", () => {
     expect(enterHint("when")).toBe("ENTER TO ACCEPT ↵");
     expect(enterHint("what")).toBe("ENTER TO ACCEPT ↵");
     expect(enterHint("notes")).toBe("⌘↵ TO FINISH");
+  });
+
+  /* ⚠️ AND THE AGENT STEP STATES NO RULE, because it follows a different one. Enter inside the
+     typeahead takes the highlighted agent; an Enter that advanced the stack would walk you to
+     step 2 with nobody chosen. An empty hint is the honest answer — advertising "ENTER TO
+     ACCEPT" on the one step where Enter does something else is worse than saying nothing. */
+  it("the agent step advertises no Enter rule, because the stack does not own that key there", () => {
+    expect(enterHint("agent")).toBe("");
   });
 });
 
@@ -123,9 +155,9 @@ describe("the steps guide attention; they never gate saving", () => {
 
   it("and readiness is indifferent to how far the stack has been walked", () => {
     const d = { ...emptyDraft({ manuscriptId: "m1" }), agentId: "a1" };
-    for (const [active, reached] of [["when", "when"], ["what", "what"], ["notes", "notes"]] as const) {
-      expect(draftReady(d), `readiness changed at ${active}`).toBe(true);
-      expect(Object.keys(stepStates(active, reached))).toHaveLength(3);
+    for (const id of STEP_ORDER) {
+      expect(draftReady(d), `readiness changed at ${id}`).toBe(true);
+      expect(Object.keys(stepStates(id, id))).toHaveLength(STEP_ORDER.length);
     }
   });
 
@@ -145,19 +177,33 @@ describe("the steps guide attention; they never gate saving", () => {
 });
 
 describe("the vocabulary is single-sourced", () => {
-  it("every step has a full title, a short name and an optional flag", () => {
+  /* ⚠️ EVERY MAP COVERS EVERY STEP. A step added to STEP_ORDER without a lede renders an empty
+     line under its head, and without a hint renders a collapsed row that names nothing — both
+     are silent, because a missing Record key is `undefined`, not an error. */
+  it("every step has a title, a short name, a hint, a lede and an optional flag", () => {
     for (const id of STEP_ORDER) {
       expect(STEP_TITLE[id], `${id} has no title`).toBeTruthy();
       expect(STEP_SHORT[id], `${id} has no short name`).toBeTruthy();
+      expect(STEP_HINT[id], `${id} has no collapsed-row hint`).toBeTruthy();
+      expect(STEP_LEDE[id], `${id} has no lede`).toBeTruthy();
       expect(typeof STEP_OPTIONAL[id]).toBe("boolean");
     }
   });
 
   it("Notes is the only optional one — and it says so in its own head", () => {
-    expect(STEP_OPTIONAL).toEqual({ when: false, what: false, notes: true });
+    expect(STEP_OPTIONAL).toEqual({ agent: false, when: false, what: false, notes: true });
   });
 
-  it("the order is the numbering", () => {
-    expect(STEP_ORDER.map(stepIndex)).toEqual([0, 1, 2]);
+  it("the order is the numbering, and the agent comes first", () => {
+    expect(STEP_ORDER).toEqual(["agent", "when", "what", "notes"]);
+    expect(STEP_ORDER.map(stepIndex)).toEqual([0, 1, 2, 3]);
+  });
+
+  /* The lede is written once here, not derived at render — but it must not restate a fact the
+     step's own controls already carry, or the two will disagree. The "when" lede is the case
+     the ref got wrong: it names the agent's reply time, which the nudge chip's caption already
+     states from the agent record. */
+  it("the when lede does not restate the agent's reply time", () => {
+    expect(STEP_LEDE.when).not.toMatch(/weeks?/i);
   });
 });

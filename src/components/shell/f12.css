@@ -167,21 +167,27 @@
 .qch-rq.qch-on { color: var(--ink); }
 .qch-rq.qch-on .qch-c { background: #7e9178; border-color: #7e9178; }
 
-/* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-stage1.html option 2) ══════════════════════
-   ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately. Choosing an agent REPLACES the right column's
-   content rather than introducing a column, so nothing jumps under the pointer at the moment of
-   choosing. The centred single-column question — and its dashed empty avatar — are retired for
-   exactly that reason. */
-.qc-form-ask { justify-content: flex-start; }
-.qc-askq { font-family: var(--f12-serif); font-weight: 700; font-size: 24px; color: var(--ink); margin: 8px 0 0; }
-/* Bordered and lifted: it is the only thing being asked. */
+/* ══ THE AGENT STEP'S FIELD (ref 63-qc-create-stepper.html) ═════════════════════════════════
+   ⚠️ THE STAGE IS GONE — choosing an agent is STEP ONE, not a screen before the steps. What was
+   a centred question with three ghost rows beneath it (`.qc-askq`, `.qc-form-ask`, `.qc-ghosts`)
+   is now the open state of the first block, and the ghosts are the real collapsed rows of the
+   three steps that follow. All three classes are retired; the lifted field is all that survives,
+   because it was never about the stage — it is about the field being the one thing this step
+   asks. */
 .qc-askfield { width: 100%; }
 .qc-askfield .f12-lsearch { height: 44px; border-color: var(--line); background: var(--panel); box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
-/* The ghosts sit at the FOOT of the column, where the real stack will be. */
-.qc-ghosts { margin-top: auto; padding-top: 18px; opacity: 0.5; }
 
-/* Quick picks — the agents you have never queried, newest first. */
+/* Quick picks — the agents you have never queried, newest first.
+   ⚠️ TWO HOMES, ONE ROW SET. `.qc-qp` was a right-hand column of its own; inside the agent step
+   it is a block in the body (`.qc-qp-in`), which is the only mount now. The base rule keeps the
+   column geometry rather than being rewritten around the modifier, so the rows themselves — the
+   part with the hard-won detail in it — are untouched. */
 .qc-qp { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: var(--panel); }
+/* In the body: full width, and capped rather than stretched — the step's footer must stay in
+   view, so a long contact list scrolls inside the block instead of pushing Continue off. */
+.qc-qp-in { flex: none; align-self: stretch; max-height: 268px; margin-top: 15px; }
+.qc-qp-art { border-style: dashed; background: transparent; }
+.qc-qp-art .qc-qpb { display: grid; place-items: center; padding: 14px 13px; }
 .qc-qph { flex: none; display: flex; align-items: center; gap: 7px; padding: 9px 13px; background: var(--paper); border-bottom: 1px solid var(--hairline); }
 .qc-qpcap { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); }
 .qc-qpnever { margin-left: auto; }
@@ -211,19 +217,54 @@
    corrections round 2 for one bordered control — and there is a live assertion keeping it
    retired. Reusing the name would have given one class two unrelated meanings in one sheet and
    quietly resurrected a rule someone deliberately removed. */
-.qc-stack { display: flex; flex-direction: column; gap: 10px; }
-.qc-sec { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: border-color 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), box-shadow 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.28s ease; }
-.qc-sum { display: flex; align-items: center; gap: 10px; padding: 11px 15px; font-size: 13px; }
-.qc-sum b { font-family: var(--f12-serif); font-weight: 700; }
-.qc-stxt { color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qc-tick { width: 19px; height: 19px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9px; line-height: 1; }
-/* upcoming: the shape of an answer, not an answer — hollow tick, no Change, dimmed whole. */
-.qc-sec.qc-up { opacity: 0.45; }
-.qc-sec.qc-up .qc-tick { background: transparent; border: 1.5px solid #cfc3b1; color: transparent; }
+.qc-stack { display: flex; flex-direction: column; gap: 9px; }
+/* ⚠️ THE SECTION IS A LAYOUT WRAPPER AND NOTHING ELSE. It used to carry the border, the radius
+   and the overflow for both states at once, which is why the collapsed row and the open card
+   could not have different shapes. The chrome now lives on the two children — `.qc-srow` and
+   `.qc-sopen` — and the wrapper only holds them together with the duplicate notice. */
+.qc-sec { display: flex; flex-direction: column; gap: 6px; }
 
-/* ── STAGE 2: the three treatments (ref qc-create-steps.html) ────────────────────────────── */
-/* active — lifted, warm border, numbered head with the Enter hint */
-.qc-sec.qc-active { border-color: #d8c4b2; box-shadow: 0 10px 30px rgba(60, 45, 30, 0.09); }
+/* ── THE COLLAPSED ROW (ref .srow) ─────────────────────────────────────────────────────────
+   ⚠️ HINT AND VALUE TOGETHER, never one instead of the other. The hint names what the step is
+   for; the value states what you chose. Showing only the value the moment a step was answered
+   left a column of four bare phrases with nothing saying which was which. */
+.qc-srow { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 1px solid #ece0d2; background: #fbf6ef; border-radius: 10px; padding: 12px 16px; font: inherit; font-size: 13px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.qc-srow:hover { border-color: #dcc9bb; background: var(--panel); }
+.qc-srow b { font-family: var(--f12-serif); font-weight: 500; font-size: 15px; color: var(--ink-2); flex: none; }
+.qc-shint { font-size: 12.5px; color: #a89686; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ⚠️ THE VALUE SLOT IS ALWAYS PRESENT, empty on a step you have not answered. It carries the
+   `margin-left: auto` that pushes EDIT and the chevron to the right edge — drop the span when
+   there is no value and the chevron slides in behind the hint, so the rows stop lining up with
+   each other the moment one of them is answered. */
+.qc-sval { margin-left: auto; padding-left: 12px; font-size: 12.5px; color: var(--ink-2); text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* done reads as SETTLED, not as dimmed — the row is a receipt, and a receipt is not a lesser
+   version of the thing you are doing now. */
+.qc-srow.qc-done { background: #fbf8f3; }
+.qc-srow.qc-done b { color: var(--ink); }
+/* upcoming has no value yet, so the edit affordance must not claim there is something to edit;
+   the row still opens on click, because the steps guide attention and never gate it.
+   ⚠️ THE CLASS IS `qc-upcoming`, NOT `qc-up`. `stepStates` returns the word "upcoming" and the
+   row is classed straight off it. `.qc-up` was the retired GHOST row's literal class — it never
+   matched a real section, so a rule written against it here fails silently and looks correct in
+   source. Caught in the browser, not by a test. */
+.qc-srow.qc-upcoming .qc-sedit { visibility: hidden; }
+.qc-sedit { margin-left: 12px; flex: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; color: var(--burg); opacity: 0; transition: opacity 0.15s; }
+.qc-srow:hover .qc-sedit { opacity: 1; }
+.qc-schev { margin-left: 4px; flex: none; color: #c8b8a8; font-size: 14px; line-height: 1; }
+
+/* ── THE STATE DOT (ref .dot) ──────────────────────────────────────────────────────────────
+   One mark, three states, drawn in CSS rather than a glyph so the tick can sit inside a filled
+   disc without a font deciding its weight. It replaces the 19px `.qc-tick` and the numbered
+   `.qc-n` pip: a number in the row said which step it was, which the row's position already
+   said, and said nothing about whether it was answered. */
+.qc-dot { width: 15px; height: 15px; flex: 0 0 15px; border-radius: 50%; border: 1.5px solid #d3c6b8; }
+.qc-dot-done { position: relative; background: #7e9178; border-color: #7e9178; }
+.qc-dot-done::after { content: ""; position: absolute; left: 4.5px; top: 2px; width: 4px; height: 7.5px; border: 1.5px solid #fff; border-top: 0; border-left: 0; transform: rotate(42deg); }
+.qc-dot-now { border-color: var(--burg); box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.1); }
+
+/* ── THE OPEN BLOCK (ref .sopen) ───────────────────────────────────────────────────────────
+   White against the rows' warm ground, lifted, and the only thing on the column with a shadow. */
+.qc-sopen { border: 1px solid #e0d5c8; background: var(--panel); border-radius: 11px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 6px 18px rgba(58, 28, 20, 0.06); }
 
 /* ⚠️ THE PULSE IS AN INVITATION, NOT A STATUS — cue D (qc-focus.html). A burgundy halo breathing
    on the active step tells the eye where to act; the moment the writer engages with that step it
@@ -235,22 +276,35 @@
   0%, 100% { box-shadow: 0 0 0 0 rgba(180, 90, 64, 0.26), 0 10px 30px rgba(60, 45, 30, 0.09); }
   50% { box-shadow: 0 0 0 8px rgba(180, 90, 64, 0), 0 10px 30px rgba(60, 45, 30, 0.09); }
 }
-.qc-sec.qc-active.qc-pulse { animation: qc-pulse 2.1s ease-in-out infinite; }
-/* Reduced motion drops it entirely; the lifted border is then the only active treatment, which
-   is what it was before the pulse existed. The DOM focus below is the real "you are here". */
-@media (prefers-reduced-motion: reduce) { .qc-sec.qc-active.qc-pulse { animation: none; } }
-.qc-shead { display: flex; align-items: center; gap: 9px; padding: 13px 16px 0; }
-.qc-n { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 9px; flex: none; }
-.qc-shead h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 16px; color: var(--ink); margin: 0; }
-.qc-opt { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.05em; font-weight: 400; color: var(--muted); }
-.qc-enter { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--faint); flex: none; }
-.qc-body { padding: 12px 16px 15px; }
+.qc-sopen.qc-pulse { animation: qc-pulse 2.1s ease-in-out infinite; }
+/* Reduced motion drops it entirely; the lift and the burgundy dot are then the only active
+   treatment, which is what it was before the pulse existed. DOM focus is the real "you are
+   here" — see the pane. */
+@media (prefers-reduced-motion: reduce) { .qc-sopen.qc-pulse { animation: none; } }
 
-/* done — the summary IS the receipt, so it states values, not that values exist */
-.qc-sum { width: 100%; text-align: left; background: none; border: none; font-family: inherit; cursor: pointer; }
-.qc-sec.qc-done .qc-tick { background: #7e9178; color: #fff; }
-.qc-ed { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--muted); flex: none; }
-.qc-sum:hover .qc-ed { color: var(--burg); }
+/* head · lede · body · footer — the ref's four parts, in that order.
+   ⚠️ THE BODY AND THE LEDE HANG OFF THE DOT'S COLUMN (26px), not off the card's padding. That
+   indent is what makes the head read as a heading over its content rather than as the first of
+   five equally-weighted things in a box. */
+.qc-soh { display: flex; align-items: baseline; gap: 11px; margin-bottom: 3px; }
+.qc-soh .qc-dot { align-self: center; }
+.qc-soh h3 { font-family: var(--f12-serif); font-weight: 500; font-size: 20px; color: var(--ink); margin: 0; }
+.qc-sof { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.13em; color: #c0b0a2; }
+.qc-lede { font-size: 12.5px; color: var(--muted); margin: 0 0 15px 26px; }
+.qc-opt { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.05em; font-weight: 400; color: var(--muted); }
+.qc-body { margin-left: 26px; }
+
+/* ── THE STEP FOOTER ───────────────────────────────────────────────────────────────────────
+   ⚠️ CONTINUE AND BACK ONLY. Save lives in the page's command bar and appears here in no state
+   at all — a second Save is the two-homes bug the footer was deleted to fix in the first place.
+   The Enter hint sits right, where the ref puts its status line: the keyboard does the same job
+   as the button, so the two belong on one line. */
+.qc-sfoot { display: flex; align-items: center; gap: 10px; margin: 18px 0 0 26px; }
+.qc-cont { font-family: var(--f12-mono); font-size: 10.5px; letter-spacing: 0.07em; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--burg); border-radius: 9px; padding: 10px 18px; cursor: pointer; transition: background 0.15s; }
+.qc-cont:hover { background: var(--pink-b); }
+.qc-back { font-family: var(--f12-mono); font-size: 10.5px; letter-spacing: 0.07em; background: var(--panel); border: 1px solid #e0d5c8; color: var(--ink-2); border-radius: 9px; padding: 9px 16px; cursor: pointer; transition: border-color 0.15s; }
+.qc-back:hover { border-color: var(--muted); }
+.qc-enter { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--faint); }
 
 /* ══ STAGE 2 · TWO COLUMNS (ref qc-create-fullscreen.html) ══════════════════════════════════
    ⚠️ THE PAGE MUST NOT SCROLL. Both columns are `flex: 1 1 0; min-height: 0; overflow-y: auto`,
@@ -260,6 +314,11 @@
    1440×800: document scrollHeight === clientHeight, both columns scrolling. */
 .qc-two { display: flex; gap: 18px; flex: 1 1 0; min-height: 0; }
 .qc-form { flex: 0 0 52%; min-width: 0; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; }
+/* ⚠️ NO AGENT, NO PANEL — AND THE COLUMN CLOSES UP BEHIND IT. The reference panel is a record of
+   the agent you picked, so before you have picked one there is nothing for it to hold; leaving a
+   52% column beside an empty frame would put the picker in half the width for no gain. The flow
+   takes the whole row until the agent step is answered. */
+.qc-two-solo > .qc-form { flex: 1 1 0; }
 /* ⚠️ THE PANEL ENDS WHERE ITS CONTENT ENDS — `height: auto; max-height: 100%`, NOT a stretched
    flex child. A thin record stretched to the column's full height is a frame around dead space,
    and dead space reads as something that failed to load. `align-self: flex-start` is what stops
@@ -364,17 +423,12 @@
    not additive), so the settle would be cancelled the moment the row started leaving. */
 .f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
 
-/* ── COMPACT CREATE HERO (ref qdb-focus-spotlight.html) — the height the columns needed came
-   from two places: the retired footer bar (~95px) and this (~90px). Padding tightens, the mark
-   drops to 54px, and the title/subtitle move BESIDE the search field instead of above it. Scoped
-   to .qc-hero so the reading pane's own record hero is untouched. */
-.f12-hero.qc-hero { padding: 16px 20px; gap: 16px; }
-.qc-mark { flex: none; width: 54px; height: 54px; border-radius: 50%; background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); display: flex; align-items: center; justify-content: center; font-size: 19px; }
-.qc-htxt { flex: none; min-width: 0; }
-.qc-hero .qc-head { font-size: 20px; line-height: 1.1; }
-.qc-hero .qc-sub { font-size: 13px; margin: 0; }
-/* Below the two-up width the text block would squeeze the field, so it stacks back. */
-@media (max-width: 980px) { .f12-hero.qc-hero { flex-wrap: wrap; } .qc-htxt { flex: 1 0 100%; } }
+/* ── THE CREATE HERO IS RETIRED (`.qc-hero` / `.qc-mark` / `.qc-htxt`, and the `.qc-change` pill
+   that lived in it). It existed to name the agent above the stack and to hold the one control
+   that swapped them. Both jobs moved into the stack itself when choosing the agent became step
+   one: the collapsed Agent row states the name and agency, and EDIT on that row reopens the
+   picker. A hero repeating the row directly beneath it would have been two subjects again — the
+   exact fault that emptied the reference panel's identity block. */
 
 /* ══ THE ILLUSTRATED CREATE HEADER (ref design-refs/qc-create-v2.html) ══════════════════════
    RETIRES the create-mode command bar (.f12-ctl-create / .qcb-*) outright. That bar squeezed
@@ -423,12 +477,6 @@
    the last one in the file won. It sits IN FLOW in the row's right-hand column, in the slot a
    normal row gives its status dot, with the date beneath it. Nothing is positioned outside the
    row box: the row's own overflow:hidden (which the height animation needs) would clip it. */
-
-/* the hero's "Change" affordance — an outlined pill beside the agent's name, so swapping agent
-   is one click rather than a discard-and-start-again. */
-.qc-change { display: inline-flex; align-items: center; gap: 6px; flex: none; margin-left: 10px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-family: inherit; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
-.qc-change:hover { background: var(--paper); border-color: var(--muted); }
-.qc-change svg { width: 13px; height: 13px; flex: none; color: var(--faint); }
 
 /* the create pane's own heading (ref qdb-create-fixes2 §1) — Playfair, replacing the mono
    "Who are you querying?" eyebrow. The pane is a page in its own right while it is open, so it
@@ -876,8 +924,10 @@
   .f12-root .qp-cols > .f12-card,
   .f12-root .qc-cols > .f12-card { margin-bottom: 12px; min-height: 0; }
   .f12-root .f12-hero { margin: 14px 14px 0 !important; }
-  /* the command bar takes the hero's primary (the create hero keeps its own controls) */
-  .f12-root .f12-hero:not(.qc-hero) > .f12-btn-pri { display: none; }
+  /* the command bar takes the hero's primary. (This once excluded `.qc-hero`, the create-mode
+     hero that kept its own controls; that hero is retired, so the exclusion matched nothing and
+     was removed rather than left pointing at a class that no longer exists.) */
+  .f12-root .f12-hero > .f12-btn-pri { display: none; }
 
   /* touch rule: the note actions are hover-revealed on desktop and unreachable by tap — always
      visible below md (out-specifies the pane's inline <style> rule) */
