@@ -92,3 +92,19 @@ export const TODO_OPEN_TASK_SETTINGS = "sa:open-task-settings";
  * produced a dateless note would be a different promise.
  */
 export const TODO_OPEN_COMPOSER = "sa:open-todo-composer";
+
+/**
+ * ⚠️ THESE TWO WERE DEFINED IN THE TODAY PAGE AND CONSUMED BY THE TO-DO LIST — an inverted
+ * dependency, and a load-bearing one (tasks-consolidation P1). `ToDoPage` imported them from
+ * `TodoTodayPage`, so deleting Today would have taken the SURVIVING page's dock entrance with
+ * it. That failure is silent by construction: an event name that no longer resolves is a
+ * listener that simply never fires, and "Work the list" would have quietly stopped working with
+ * nothing red anywhere.
+ *
+ * They live here, beside the app's other To-do events, so the deletion cannot reach them.
+ *
+ * `Work the list` is the dock's queue entrance — the To-do list's tool row announces it, the
+ * page answers by launching the dock over its ranked order.
+ */
+export const TODO_WORK_THE_LIST = "sa:todo-work-the-list";
+export const TODO_ADD_TO_TODAY = "sa:todo-add-to-today";

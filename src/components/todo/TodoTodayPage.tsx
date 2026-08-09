@@ -36,10 +36,10 @@ import { estimateTotal, estimateChip } from "../../lib/todoEstimate";
 import { useTodoToast } from "./useTodoToast";
 import "./todoToday.css";
 
-/** The Today page announces these; ToDoPage owns the surfaces that answer them. One event each,
- *  named once, because a literal typed in two places is a listener that silently never fires. */
-export const TODO_WORK_THE_LIST = "sa:todo-work-the-list";
-export const TODO_ADD_TO_TODAY = "sa:todo-add-to-today";
+/* ⚠️ THE TWO EVENT NAMES MOVED TO lib/todoRoutes (tasks-consolidation P1). They were declared
+   here and imported by ToDoPage — so the page being deleted owned the surviving page's dock
+   entrance. See the note at their new home for why that fails silently. */
+import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "../../lib/todoRoutes";
 
 export interface TodoTodayPageProps {
   onNavigate: (tab: string, subPageName?: string) => void;

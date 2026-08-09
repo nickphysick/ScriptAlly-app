@@ -52,8 +52,9 @@ import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
-import { TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
-import { TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY } from "./TodoTodayPage";
+import {
+  TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY,
+} from "../../lib/todoRoutes";
 import { TodoBoard } from "./TodoBoard";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
