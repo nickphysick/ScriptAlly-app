@@ -233,3 +233,108 @@ Verified during the run, at 1440×900 and 1240×860, against the **built** `dist
 - [ ] Materials pre-tick for a query-letter-only agent, and for an agent stating **more than the
       create bound** (500 pages) — her figure must survive un-clamped
 - [ ] The three-state chips on a seeded agent (outlined, not solid)
+
+---
+
+# Fix pack 1
+
+Four items from Nick's browser walkthrough. **Commits** — ref `1d17ecb` · §1 `46f516b` · §2
+`c0be0ed` · §3 `48628b2` · §4 `d095bf9`. Gates green before each. **Not deployed.**
+
+## §1c — what it turned out to be, and which selector was wrong
+
+The panel was right and **the rows were wrong**, and the cause was neither component: the pane
+passed `queriedAgentIds={new Set<string>()}` to `AgentSearchField`. An empty set, so no row could
+ever look queried, while `queriedCount` read the real `queries` array beside it. Two components
+answering one question from two sources — one of them a literal that could never be right.
+
+Fixed at the source rather than at the call site: `queriedAgentIds(queries)` is now exported from
+`lib/agentPicker.ts` and is the single derivation behind the panel's count, the grid's un-queried
+filter, the dropdown's history label, and the legacy field's rows. The lock asserts the panel count
+against **the selector's own size** rather than against a literal, so the two cannot drift apart
+again by anyone editing one of them.
+
+Two more defects fell out of the same area. **§1a**: the pane mounted the whole of
+`AgentSearchField` to reach its quick-add form, which put a second search input on stage 1 whose
+popup opens on focus — the reason "Add a new agent" appeared to open a list of existing agents.
+`startInQuickAdd` now mounts the form and nothing else. **§1b**: the result row's stars are gone,
+and so is the rating-descending sort behind them — a search result ordered by how highly you rated
+someone is a recommendation wearing a search's clothes, and the writer typed a name. The rating
+input survives in the quick-add *form*, where the writer is recording a judgement rather than the
+app making one.
+
+## §2 — the two picker configurations, and where the bounds live
+
+Both live in `QueryCreatePane`, beside the fields they govern, because they are facts about *those
+two fields* rather than about dates in general.
+
+| | Date sent | Nudge |
+|---|---|---|
+| bound | `max={todayInputDate()}` | `min={nudgeFloor}` = **sent date + 1 day** |
+| shortcuts | Today · Yesterday · Last Monday (the picker's default) | In 4 / 8 / 12 weeks, from `nudgeChips` |
+| anchored to | today | **the sent date**, not today |
+
+The floor is the send **plus one day**, not the send: a reminder to chase something you have this
+moment sent is not a reminder. `quickChips` is additive on `BrandDatePicker` — absent, the
+backward-looking chips render exactly as the twenty Form 11 call sites and the sent field expect.
+`isoPlusDays` parses as **local** midnight; `new Date("2026-08-10")` is UTC midnight, so west of
+Greenwich every derived bound would land a day early.
+
+Moving the sent date past a chosen nudge date **clears that choice back to the preset**. Keeping it
+would leave a reminder scheduled before the query existed; silently correcting it would move a day
+the writer picked on purpose without saying so. The derived line — which always states the
+resulting task date — is what tells them.
+
+## §3 — the provenance rule, and where the "untouched" bit is held
+
+The clause explains where a **default** came from. It was flagged off *"the selected preset differs
+from the agent's figure"*, so a writer who picked 12 weeks for an agent stating 6 was told no
+response time was listed while the panel beside it showed six.
+
+It now requires two facts, neither of them a comparison: the agent has **no** figure
+(`responseTimeWeeks` absent, not merely different), **and** the interval is still the one we seeded.
+
+**The "untouched" bit lives on the choice** — `{ kind: "preset", weeks, seeded?: true }` — so it
+cannot drift from the value it describes. Every chip in the pane omits it, which means choosing 8
+weeks by hand is a different *value* from arriving at 8 weeks by default even though both resolve
+to the same date. Holding that bit in separate state would have let the two disagree.
+
+| situation | line |
+|---|---|
+| agent states a figure, untouched | "A task appears on {date}." |
+| agent states nothing, untouched | "… — a default, as no response time is listed for them." |
+| writer chose anything | "A task appears on {date}." (custom adds "— 9 weeks after sending") |
+
+## §4 — raised, not decided
+
+The trailing whisper beneath the stack was to be deleted **only if** it duplicates the derived
+line. It does not, quite:
+
+> "We'll nudge you on 5 Oct if it's gone quiet." · "A task appears on 5 October 2026."
+
+Same date, different claim — and the whisper is the **less honest** of the two: reminder
+persistence is still stubbed (CLAUDE.md), nothing schedules a notification from that date, and the
+derived line describes what actually happens. They also differ in reach: the whisper shows on every
+step, the derived line only while `When` is open. **Left in place pending Nick's call.**
+
+## Still deferred, carried forward
+
+Unchanged from the main run, and not in fix pack 1's scope:
+
+- **Other's `Enter` → removable chip.** Today `Enter` blurs the field.
+- **The materials summary line + the collapsed row's item count.** Today the collapsed `What` row
+  carries `materialsPhrase` with no count.
+
+## Browser checklist — fix pack 1
+
+- [ ] **One** search field on stage 1; "Add a new agent" opens the add *form*, not a list of agents
+- [ ] Dropdown opens on the first keystroke — not on mount, not on focus; closes on clear, Esc, outside click, selection
+- [ ] The grid does **not** reshuffle while typing
+- [ ] Dropdown rows include already-queried contacts and state their history
+- [ ] No stars on any row, in the dropdown or on a card
+- [ ] The all-queried count and the rows agree
+- [ ] Sent picker refuses tomorrow; its chips still read Today · Yesterday · Last Monday
+- [ ] Nudge picker refuses the sending day and everything before it; its chips read In 4 / 8 / 12 weeks **from the send**
+- [ ] Move the sent date past a chosen nudge date — the choice clears back to the preset
+- [ ] Provenance line across all three cases, especially: agent stating 6 weeks + writer picks 12 → **no** default clause
+- [ ] `Next: …` / `← Back` through every step, values intact on the way back, and Enter still advancing
