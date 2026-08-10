@@ -3124,6 +3124,12 @@ export const Queries: React.FC<{
                      owns the dirty-confirm, so "go and look at that one" can never lose typing
                      silently. */
                   onOpenQuery={(id) => closeCreate(() => setSelectedQueryId(id))}
+                  /* ⚠️ ROUTES OUT OF CREATE MODE DISCARD THROUGH closeCreate, which owns the
+                     dirty-confirm — leaving the pane by any other door could lose typing in
+                     silence. Both are omitted when the page has no navigation bridge, because a
+                     route card that goes nowhere teaches the wrong shape of the app. */
+                  onSeeAllAgents={onNavigate ? () => closeCreate(() => onNavigate("agents")) : undefined}
+                  onDiscover={onNavigate ? () => closeCreate(() => onNavigate("agents", "Discover")) : undefined}
                 />
               </div>
             ) : activeQuery && activeAgent && activeMs ? (

@@ -39,8 +39,12 @@ describe("the two sources of reclaimed height", () => {
     expect(pane, "the compact hero came back").not.toContain('className="qc-htxt"');
     expect(pane, "the compact hero came back").not.toContain('className="qc-mark"');
     expect(pane, "the centred single-column ask came back").not.toContain('className="qc-ask"');
-    expect(pane.match(/<div className="qc-two">/g)?.length ?? 0, "both stages use the same row")
-      .toBe(2);
+    /* ⚠️ AMENDED AGAIN: stage 1 is now a SINGLE column. It has no reference panel — no agent is
+       chosen, so there is nothing to describe — and the picker grid takes the width the panel
+       would have held. Matching stage 2's geometry was the old reason for a second column, and
+       it was never worth a column of suggestions nobody had asked for. */
+    expect(pane).toContain('className="qc-two qc-two-solo"');
+    expect(pane.match(/className="qc-two/g)?.length ?? 0, "one row per stage, no more").toBe(2);
   });
 
   it("the hero/columns gap tightened", () => {

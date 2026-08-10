@@ -38,9 +38,10 @@ describe("stage 1 asks one question", () => {
     expect(pane, "the dashed empty avatar came back").not.toContain("qc-askav");
     expect(pane).toContain('<div className="qc-form qc-form-ask');
     expect(pane.indexOf("Who are you querying?")).toBeLessThan(pane.indexOf("qc-askfield"));
-    /* ⚠️ THE BASIS MOVED TO `.qc-form-ask`. Stage 2's flow now takes the REMAINDER beside a fixed
-       322px panel; stage 1 has no panel, so it keeps the 52% column it was designed around. */
-    expect(rule(".qc-form-ask"), "stage 1 lost its column width").toContain("flex: 0 0 52%");
+    /* ⚠️ STAGE 1 TAKES THE WHOLE WIDTH — it has no panel beside it, and the grid needs the room.
+       Stage 2's flow takes the remainder beside a fixed 322px panel. */
+    expect(rule(".qc-two-solo > .qc-form"), "stage 1 must not be held at half width")
+      .toContain("flex: 1 1 0");
     expect(rule(".qc-form"), "stage 2's flow must take the remainder").toContain("flex: 1 1 0");
   });
 
@@ -144,57 +145,26 @@ describe("the requirement pips", () => {
   });
 });
 
-/* ══ QUICK PICKS — stage 1's right column ══════════════════════════════════════════════════ */
-describe("quick picks", () => {
-  it("the panel names what it is and what it filtered by", () => {
-    expect(pane).toContain("From your contact list");
-    expect(pane).toContain("Never queried");
+/* ══ STAGE 1'S RIGHT-HAND QUICK PICKS ARE RETIRED ═══════════════════════════════════════════
+   They were a five-row list in a second column, kept there so stage 1 and stage 2 shared a
+   geometry. The picker grid supersedes them at full width — matching geometry was never worth a
+   column of suggestions nobody asked for — and everything those rows proved (derivation, the
+   one-door rule, the two ordinary empty states) now lives in agentPicker.test.ts.
+
+   What must NOT come back is the second column: stage 1 has no reference panel, so a right-hand
+   column would be a frame around whichever spare thing was put in it. */
+describe("stage 1 is one column", () => {
+  it("no second column, and no quick-picks list", () => {
+    expect(pane).toContain('className="qc-two qc-two-solo"');
+    expect(pane, "the quick-picks list came back").not.toContain("qc-qrow");
+    expect(pane, "the art column came back").not.toContain("qc-qpart");
   });
 
-  it("each row is a real button — clicking one is the same door as typing a name", () => {
-    expect(pane).toContain('className="qc-qrow"');
-    expect(pane).toContain("onClick={() => pickAgent(a)}");
-  });
-
-  /* ⚠️ ENTER WITH NOTHING HIGHLIGHTED DOES NOTHING — no silent advance. The picker only acts on
-     a real selection, so an Enter on an empty or unmatched field cannot walk the writer into the
-     stack with no agent. The guard lives in the shared field, which is why it is asserted there. */
-  it("Enter with no match selected does nothing", () => {
-    const field = read("../components/AgentSearchField.tsx");
-    expect(field).toContain("if (open && flatRows[hl]) {");
-    expect(field, "an unguarded Enter would advance with nobody chosen")
-      .not.toMatch(/e\.key === "Enter"\)\s*\{\s*e\.preventDefault\(\);\s*pick/);
-  });
-
-  it("monogram, Playfair name, mono agency, mono added-date", () => {
-    for (const cls of ["qc-qmg", "qc-qwho", "qc-qag", "qc-qadded"]) {
-      expect(pane, `${cls} is missing from the row`).toContain(cls);
-    }
-    expect(rule(".qc-qwho b")).toContain("var(--f12-serif)");
-    expect(rule(".qc-qag")).toContain("var(--f12-mono)");
-  });
-
-  /* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are ordinary — a new
-     account, or a writer who has queried everyone — and one of them is an achievement. */
-  /* ⚠️ ART, NOT A PANEL. The empty column used to borrow `.qc-ctx qc-ctx-name-only` — the agent
-     panel's own classes — which was harmless while that panel was a plain hairline box and is not
-     now: it would hand an art placeholder the reference card's dotted edge and 0.6° tilt. And the
-     ArtSlot draws its own dashed commissioning box, so a frame around it is two nested empty
-     boxes, which is exactly the stray dashed element this pass removed. */
-  it("empty falls back to art, holding the column so the geometry survives", () => {
-    expect(pane).toContain("picks.length > 0 ? (");
-    expect(pane).toContain('<ArtSlot name="no-quick-picks"');
-    /* Comments stripped: this file EXPLAINS which classes were dropped, and an assertion about
-       the code must not be satisfiable by prose about the code. */
-    const code = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
-    expect(code, "the empty column must not wear the agent panel's chrome")
-      .not.toContain("qc-ctx-name-only");
-    expect(pane).toContain('className="qc-qpart"');
-    expect(rule(".qc-qpart"), "a frame here would nest two empty boxes").not.toContain("border");
-    // Comments stripped: this file EXPLAINS why there is no such message, and an assertion
-    // about the code must not be able to match prose about the code.
-    const bare = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/\/\/[^\n]*/g, "");
-    expect(bare, "a no-results message would report an ordinary state as a failure")
-      .not.toMatch(/no results|nothing found|no agents/i);
+  /* ⚠️ ART BELONGS TO AN EMPTY ADDRESS BOOK AND NOWHERE ELSE. In the un-queried or all-queried
+     states it would decorate a space the grid is meant to fill, and it would stop meaning "there
+     is nothing here yet" — the one thing it is for. */
+  it("and the pane itself renders no art at all — the picker owns that decision", () => {
+    expect(pane, "art in the pane cannot know which of the three states it is in")
+      .not.toContain("<ArtSlot");
   });
 });

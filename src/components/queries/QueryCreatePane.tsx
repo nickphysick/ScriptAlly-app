@@ -27,8 +27,7 @@ import {
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
-import { ArtSlot } from "../todo/ArtSlot";
-import { quickPicks } from "../../lib/quickPicks";
+import { AgentPicker } from "./AgentPicker";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { BrandDatePicker } from "../forms";
@@ -58,6 +57,9 @@ export interface QueryCreatePaneProps {
   queries?: Query[];
   /** Discard the draft (with the usual confirm if dirty) and open that query instead. */
   onOpenQuery?: (id: string) => void;
+  /** Stage 1's "See all" / Discover routes. OMITTED rather than rendered dead when absent. */
+  onSeeAllAgents?: () => void;
+  onDiscover?: () => void;
 }
 
 const LABEL: React.CSSProperties = {
@@ -74,6 +76,8 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   draft, onChange, agents, manuscripts, onCreateAgent,
   queries = [],
   onOpenQuery,
+  onSeeAllAgents,
+  onDiscover,
 }) => {
   const agent = useMemo(() => agents.find((a) => a.id === draft.agentId) ?? null, [agents, draft.agentId]);
   const set = (patch: Partial<QueryDraft>) => onChange({ ...draft, ...patch });
@@ -123,6 +127,8 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      than any animation, and they are what makes Enter-through work at all: without focus inside
      the section, Enter has nothing to accept from. The pulse is the decoration; this is the
      mechanism. It is also why reduced motion loses nothing that matters. */
+  /* Stage 1's quick-add is mounted on demand — see the picker below. */
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [engaged, setEngaged] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);
 
@@ -146,7 +152,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
     set({ agentId: a.id, materials: materialRowsForDraft(a) });
   };
 
-  const picks = quickPicks(agents, queries);
 
   const jump = (id: StepId) => { const n = jumpTo(id, reached); setActive(n.active); setReached(n.reached); };
   const step = () => { const n = advance(active, reached); setActive(n.active); setReached(n.reached); };
@@ -181,32 +186,44 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           argued where the rule lives (lib/createSteps). Spelling the condition out here instead
           would leave the app's only sequencing rule stated nowhere anybody would look for it. */}
       {!stackAvailable(agent) ? (
-        /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-create-steps + qc-stage1 option 2) ══
-           ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately: 52% left, the rest right. Choosing an
-           agent REPLACES the right column's content rather than introducing a column, so
-           nothing jumps under the pointer at the moment of choosing. The centred single-column
-           question — and its dashed empty avatar — are retired for exactly that reason. ── */
-        <div className="qc-two">
+        /* ══ STAGE 1 — ONE QUESTION, ONE COLUMN (ref 63-qc-create-stepper.html, step 1) ══
+           ⚠️ SINGLE COLUMN, AND NO REFERENCE PANEL. No agent is chosen, so the panel has nothing
+           to describe — and the picker grid is what fills the width the panel would have taken.
+           The old shape put a five-row quick-picks list in a right-hand column to keep stage 1
+           and stage 2 the same geometry; the grid does that job better by being the whole width,
+           and matching geometry was never worth a column of suggestions nobody had asked for. ── */
+        <div className="qc-two qc-two-solo">
           <div className="qc-form qc-form-ask f12-quiet-scroll">
             <h2 className="qc-askq">Who are you querying?</h2>
-            {/* Bordered, lifted and autofocused: it is the only thing being asked, so it should
-                already have the caret. AgentSearchField is REUSED — it owns the typeahead, the
-                highlighted-Enter selection and the "Agent not listed? Add a new agent now"
-                quick-add, and rebuilding any of those would fork three behaviours at once. */}
-            <div className="qc-askfield">
-              <AgentSearchField
-                autoFocus
-                agents={agents}
-                value=""
-                queriedAgentIds={new Set<string>()}
-                onSelect={pickAgent}
-                onCreateAgent={async (d) => {
-                  const res = await onCreateAgent(d);
-                  if (res.ok && res.agent) pickAgent(res.agent);
-                  return res;
-                }}
-              />
-            </div>
+            <AgentPicker
+              agents={agents}
+              queries={queries}
+              manuscriptTitle={manuscripts.find((m) => m.id === draft.manuscriptId)?.title}
+              onSelect={pickAgent}
+              onAddAgent={() => setQuickAddOpen(true)}
+              onSeeAll={onSeeAllAgents}
+              onDiscover={onDiscover}
+            />
+            {/* ⚠️ THE QUICK-ADD IS AgentSearchField'S, MOUNTED ON DEMAND — never rebuilt. It is a
+                form with its own validation and write path, and a second copy would fork both.
+                The picker's "Add a new agent" opens it; it is absent until then, so nothing
+                expands on mount. */}
+            {quickAddOpen && (
+              <div className="qc-askfield">
+                <AgentSearchField
+                  autoFocus
+                  agents={agents}
+                  value=""
+                  queriedAgentIds={new Set<string>()}
+                  onSelect={pickAgent}
+                  onCreateAgent={async (d) => {
+                    const res = await onCreateAgent(d);
+                    if (res.ok && res.agent) pickAgent(res.agent);
+                    return res;
+                  }}
+                />
+              </div>
+            )}
             {/* Pushed to the FOOT of the column (margin-top:auto): anatomy you can see without
                 being asked for it. They sit where the real stack will sit. */}
             <div className="qc-stack qc-ghosts" aria-hidden="true">
@@ -221,41 +238,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               ))}
             </div>
           </div>
-
-          {/* ⚠️ NEVER AN EMPTY PANEL AND NEVER A "NO RESULTS" LINE. Both empty cases are
-              ordinary — a new account, or a writer who has queried everyone — and one of them is
-              an achievement. Art holds the column so the geometry survives. */}
-          {picks.length > 0 ? (
-            <aside className="qc-qp" aria-label="Quick picks from your contact list">
-              <div className="qc-qph">
-                <span className="qc-qpcap">From your contact list</span>
-                <span className="qc-qpcap qc-qpnever">Never queried</span>
-              </div>
-              <div className="qc-qpb">
-                {picks.map((a) => (
-                  <button type="button" className="qc-qrow" key={a.id} onClick={() => pickAgent(a)}>
-                    <span className="qc-qmg" aria-hidden="true">{agentInitials(a)}</span>
-                    <span className="qc-qwho">
-                      <b>{agentPrimary(a)}</b>
-                      <span className="qc-qag">{agentAgencyLine(a)}</span>
-                    </span>
-                    <span className="qc-qadded">Added {shortDate(a.dateAdded)}</span>
-                  </button>
-                ))}
-              </div>
-            </aside>
-          ) : (
-            /* ⚠️ NO PANEL CHROME HERE — this is art holding a column, not a record.
-               It used to borrow `.qc-ctx qc-ctx-name-only`, the agent panel's own classes, which
-               was harmless while that panel was a plain hairline box and is not now: it would
-               hand an art placeholder the reference card's dotted edge and its 0.6° tilt, so an
-               empty column would read as a card with nothing on it. And the ArtSlot draws its own
-               dashed commissioning box (no-quick-picks has no artwork yet), so a frame around it
-               makes two nested empty boxes — the "stray empty dashed element" this pass removes. */
-            <aside className="qc-qpart" aria-label="No quick picks">
-              <ArtSlot name="no-quick-picks" maxWidth={200} />
-            </aside>
-          )}
         </div>
       ) : (
         <>

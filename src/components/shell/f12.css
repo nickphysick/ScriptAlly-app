@@ -187,13 +187,75 @@
    content rather than introducing a column, so nothing jumps under the pointer at the moment of
    choosing. The centred single-column question — and its dashed empty avatar — are retired for
    exactly that reason. */
-.qc-form-ask { flex: 0 0 52%; justify-content: flex-start; }
+.qc-form-ask { justify-content: flex-start; }
 .qc-askq { font-family: var(--f12-serif); font-weight: 700; font-size: 24px; color: var(--ink); margin: 8px 0 0; }
 /* Bordered and lifted: it is the only thing being asked. */
 .qc-askfield { width: 100%; }
 .qc-askfield .f12-lsearch { height: 44px; border-color: var(--line); background: var(--panel); box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
 /* The ghosts sit at the FOOT of the column, where the real stack will be. */
 .qc-ghosts { margin-top: auto; padding-top: 18px; opacity: 0.5; }
+
+/* ══ STAGE 1 · THE PICKER (ref 63-qc-create-stepper.html, step 1) ═══════════════════════════
+   ⚠️ THE GRID IS THE RESULT SET — there is no overlay and no open/close state. The field filters
+   in place, so a writer never has to make results appear, and the pane cannot arrive with an
+   expanded empty popup under the field (which is what it used to do, because stage 1 autofocuses
+   and the combobox opened on focus). */
+.qc-pick { display: flex; flex-direction: column; gap: 0; }
+/* helper BESIDE the field, not beneath: it is an alternative to searching, not a footnote */
+.qc-pickhead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.qc-pickfield { flex: 1 1 auto; max-width: 400px; min-width: 0; border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; background: var(--panel); font-family: inherit; font-size: 13.5px; color: var(--ink); outline: none; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
+.qc-pickfield::placeholder { color: var(--muted); }
+.qc-pickfield:focus { border-color: #d8c4b2; box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
+.qc-pickadd { font-size: 12px; color: var(--ink-2); }
+.qc-pickadd button { background: none; border: 0; padding: 0; font: inherit; color: var(--burg); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+.qc-pickcap { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 9px; }
+.qc-pickcap b { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.qc-pickcap span { font-size: 11.5px; color: var(--faint); }
+.qc-pickall { margin-left: auto; background: none; border: 0; padding: 0; font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--burg); cursor: pointer; }
+.qc-picknone { font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; }
+.qc-picknone button { background: none; border: 0; padding: 0; font: inherit; color: var(--burg); text-decoration: underline; cursor: pointer; }
+
+/* ⚠️ `auto-fill`, NOT a fixed column count. The flow column is 52% at stage 1 and the full width
+   below the panel breakpoint, so any fixed count would be wrong at one of them. */
+.qc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 9px; }
+.qc-acard { border: 1px solid var(--hairline); background: var(--paper); border-radius: 10px; padding: 12px 13px; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s; outline: none; }
+.qc-acard:hover { background: var(--panel); border-color: var(--line); box-shadow: 0 2px 8px rgba(58, 28, 20, 0.07); transform: translateY(-1px); }
+/* the keyboard highlight IS the selection marker — same treatment for hover and focus, or the
+   two ways of using this grid would look like two different controls */
+.qc-acard.on, .qc-acard:focus-visible { background: var(--panel); border-color: var(--pink-b); box-shadow: 0 0 0 2px rgba(124, 58, 42, 0.12); }
+.qc-actop { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.qc-acav { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 8.5px; }
+.qc-acwho { min-width: 0; display: flex; flex-direction: column; }
+.qc-acwho b { font-family: var(--f12-serif); font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc-acwho i { font-style: normal; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc-acmeta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
+.qc-actag { display: inline-flex; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; }
+.qc-actag.shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
+.qc-acrt { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+@media (prefers-reduced-motion: reduce) { .qc-acard { transition: none; } .qc-acard:hover { transform: none; } }
+
+/* ── 2 · ALL QUERIED ──────────────────────────────────────────────────────────────────────
+   ⚠️ THE RING IS MUTED GREY, NEVER SAGE. Sage means "done well" everywhere else in this app, and
+   a writer who has queried their whole list has not finished anything — they have run out of
+   people, which is neutral and often uncomfortable. */
+.qc-allq { margin-top: 18px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--paper); padding: 16px 18px; }
+.qc-allqtop { display: flex; gap: 14px; align-items: flex-start; }
+.qc-allqring { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 2px solid #cfc7bb; color: var(--muted); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 12px; }
+.qc-allqn { font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+.qc-allq p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+.qc-allqsm { margin-top: 6px !important; color: var(--muted) !important; font-size: 11.5px !important; }
+.qc-routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 14px; }
+.qc-route { display: flex; flex-direction: column; gap: 2px; text-align: left; border: 1px solid var(--hairline); background: var(--panel); border-radius: 10px; padding: 10px 12px; font: inherit; cursor: pointer; transition: border-color 0.15s; }
+.qc-route:hover { border-color: var(--line); }
+.qc-route b { font-size: 12.5px; color: var(--ink); font-weight: 600; }
+.qc-route i { font-style: normal; font-size: 11px; color: var(--muted); }
+
+/* ── 3 · COLD START — the only state with art ─────────────────────────────────────────────── */
+.qc-pick-cold { flex-direction: row; align-items: center; gap: 22px; flex-wrap: wrap; }
+.qc-coldtx { flex: 1 1 240px; min-width: 0; }
+.qc-coldtx h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 17px; color: var(--ink); margin: 0 0 5px; }
+.qc-coldtx p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); margin: 0 0 12px; }
 
 /* ⚠️ STAGE 1'S EMPTY RIGHT COLUMN IS ART, NOT A PANEL. Both cases it covers are ordinary — a new
    account with no contacts, and a writer who has queried everyone — and neither is a failure
@@ -294,6 +356,11 @@
    the scroll lands on the document instead of inside the columns. Verified in the browser at
    1440×800: document scrollHeight === clientHeight, both columns scrolling. */
 .qc-two { display: flex; gap: 18px; flex: 1 1 0; min-height: 0; }
+/* ⚠️ STAGE 1 IS ONE COLUMN. No agent is chosen, so the reference panel has nothing to describe,
+   and the picker grid takes the width it would have held. The old shape kept a second column so
+   stage 1 and stage 2 shared a geometry — but matching geometry was never worth a column of
+   suggestions nobody had asked for, and the grid needs the width more than the symmetry did. */
+.qc-two-solo > .qc-form { flex: 1 1 0; }
 /* ⚠️ THE FLOW TAKES THE REMAINDER; THE PANEL IS A FIXED 322px. It was 52% / rest, which made the
    reference column grow with the viewport — a record of two stats and four short rows does not get
    more useful at 620px than at 322px, it just gets emptier, while the form loses width it can use.

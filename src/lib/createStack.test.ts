@@ -152,9 +152,9 @@ describe("Enter accepts and advances; ⌘↵ saves", () => {
     /* The three routes, each named: the typeahead passes the function itself, the inline
        quick-add calls it with the agent it just created, and a quick pick calls it with its row.
        Counting bare `pickAgent(` would have missed the first — it is passed, not called. */
-    expect(pane, "the typeahead route").toContain("onSelect={pickAgent}");
+    expect(pane, "the quick-add's typeahead route").toContain("onSelect={pickAgent}");
     expect(pane, "the inline quick-add route").toContain("pickAgent(res.agent)");
-    expect(pane, "the quick-picks route").toContain("onClick={() => pickAgent(a)}");
+    expect(pane, "the picker route").toContain("onSelect={pickAgent}");
   });
 });
 
