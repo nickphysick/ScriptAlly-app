@@ -19,13 +19,14 @@
  * own validation and write path; a second copy would fork it. The helper beside the field hands
  * over to the same flow through `onAddAgent`.
  */
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { Agent, Query } from "../../types";
 import { agentInitials, agentPrimary, agentAgencyLine } from "../../lib/agentDisplay";
 import { SubmissionStatus } from "../../types";
 import { ArtSlot } from "../todo/ArtSlot";
 import {
   pickerState, pickerCards, queriedCount, replyLine, moveInGrid,
+  dropdownResults, queryHistoryLabel,
 } from "../../lib/agentPicker";
 
 export interface AgentPickerProps {
@@ -42,28 +43,61 @@ export interface AgentPickerProps {
 }
 
 const GRID_ID = "qc-agent-grid";
+const LIST_ID = "qc-agent-list";
 
 export const AgentPicker: React.FC<AgentPickerProps> = ({
   agents, queries, manuscriptTitle, onSelect, onAddAgent, onSeeAll, onDiscover,
 }) => {
   const [query, setQuery] = useState("");
   const [hl, setHl] = useState(-1);
+  /* ⚠️ THE DROPDOWN OPENS ON THE FIRST KEYSTROKE — never on mount, never on focus. `dismissed` is
+     what lets Esc and an outside click close it while the text stays in the field: without it,
+     "open" would be a pure function of the query and the writer could not put it away. */
+  const [dismissed, setDismissed] = useState(false);
+  const [dhl, setDhl] = useState(-1);
   const fieldRef = useRef<HTMLInputElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const state = pickerState(agents, queries);
-  const res = useMemo(() => pickerCards(agents, queries, query), [agents, queries, query]);
+  /* ⚠️ THE GRID IS COMPUTED WITHOUT THE QUERY. It is a standing set of suggestions, not a result
+     set — filtering it as you type made the page reshuffle under the writer mid-keystroke. */
+  const res = useMemo(() => pickerCards(agents, queries), [agents, queries]);
+  const hits = useMemo(() => dropdownResults(agents, query), [agents, query]);
+  const open = query.trim().length > 0 && !dismissed;
   const counts = queriedCount(agents, queries);
+
+  /* Outside click closes it. Bound only while it is open, so the picker adds no listener to a
+     page that has no dropdown on it. */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setDismissed(true);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
 
   /* ⚠️ THE HIGHLIGHT IS CLAMPED ON EVERY RENDER, NOT RESET ON EVERY KEYSTROKE. Typing shrinks the
      result set, so an index that pointed at card 6 can suddenly point past the end — and an
      `aria-activedescendant` naming an element that is not in the document is worse than none. */
   const active = hl >= 0 && hl < res.cards.length ? hl : -1;
+  const dActive = dhl >= 0 && dhl < hits.length ? dhl : -1;
 
-  const choose = (a: Agent) => { setHl(-1); onSelect(a); };
+  const choose = (a: Agent) => { setHl(-1); setDhl(-1); setDismissed(true); onSelect(a); };
 
   const onFieldKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape" && open) { e.preventDefault(); setDismissed(true); setDhl(-1); return; }
+    /* ⚠️ ↓ MEANS TWO DIFFERENT THINGS, AND WHICH ONE DEPENDS ON WHETHER THE DROPDOWN IS OPEN.
+       Open, it walks the results the writer is looking at; closed, it enters the standing grid.
+       Sending it to the grid while a list of matches is on screen would step past the answer. */
+    if (open) {
+      if (e.key === "ArrowDown") { e.preventDefault(); setDhl((h) => Math.min(h + 1, hits.length - 1)); return; }
+      if (e.key === "ArrowUp") { e.preventDefault(); setDhl((h) => Math.max(h - 1, 0)); return; }
+      /* Enter with nothing highlighted does NOTHING — no silent selection of a row nobody chose. */
+      if (e.key === "Enter" && dActive >= 0) { e.preventDefault(); choose(hits[dActive]); return; }
+      return;
+    }
     if (e.key === "ArrowDown" && res.cards.length > 0) { e.preventDefault(); setHl(0); return; }
-    /* Enter with nothing highlighted does NOTHING — no silent advance to a step with no agent. */
     if (e.key === "Enter" && active >= 0) { e.preventDefault(); choose(res.cards[active]); }
   };
 
@@ -98,23 +132,59 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
   }
 
   const field = (
-    <div className="qc-pickhead">
+    <div className="qc-pickhead" ref={wrapRef}>
+      <span className="qc-pickwrap">
       <input
         ref={fieldRef}
         className="qc-pickfield"
         type="text"
         autoFocus
         role="combobox"
-        aria-expanded="true"
-        aria-controls={GRID_ID}
+        aria-expanded={open}
+        aria-controls={open ? LIST_ID : GRID_ID}
         aria-autocomplete="list"
-        aria-activedescendant={active >= 0 ? `qc-ac-${active}` : undefined}
+        aria-activedescendant={open ? (dActive >= 0 ? `qc-dr-${dActive}` : undefined) : (active >= 0 ? `qc-ac-${active}` : undefined)}
         aria-label="Search your contacts by name or agency"
         placeholder="Search by name or agency…"
         value={query}
-        onChange={(e) => { setQuery(e.target.value); setHl(-1); }}
+        /* Typing re-opens it — `dismissed` survives only until the writer asks again. */
+        onChange={(e) => { setQuery(e.target.value); setHl(-1); setDhl(-1); setDismissed(false); }}
         onKeyDown={onFieldKey}
       />
+      {open && (
+        <div className="qc-drop" id={LIST_ID} role="listbox" aria-label="Matching contacts">
+          {hits.length === 0 ? (
+            /* Not an empty box — the writer asked a question and this is the answer, with the
+               only useful thing to do about it beside it. */
+            <p className="qc-dropnone">
+              No contact matches that —{" "}
+              <button type="button" onClick={onAddAgent}>Add a new agent</button>
+            </p>
+          ) : hits.map((a, i) => (
+            <button
+              key={a.id}
+              id={`qc-dr-${i}`}
+              type="button"
+              role="option"
+              aria-selected={dActive === i}
+              className={`qc-drow${dActive === i ? " on" : ""}`}
+              onMouseEnter={() => setDhl(i)}
+              onClick={() => choose(a)}
+            >
+              <span className="qc-dmg" aria-hidden="true">{agentInitials(a)}</span>
+              <span className="qc-dwho">
+                <b>{agentPrimary(a)}</b>
+                <i>{agentAgencyLine(a)}</i>
+              </span>
+              {/* ⚠️ QUERIED CONTACTS ARE SHOWN, NOT HIDDEN — a resubmission is a real thing, and in
+                  the all-queried state it is the only thing left to do. The row states the history
+                  so the writer is told rather than prevented. */}
+              <span className="qc-dhist">{queryHistoryLabel(a, queries)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      </span>
       {/* Beside the field, not beneath it: it is an alternative to searching, not a footnote. */}
       <span className="qc-pickadd">
         Not listed? <button type="button" onClick={onAddAgent}>Add a new agent</button>
@@ -128,7 +198,7 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
      of people, which is a neutral fact and often an uncomfortable one.
      ⚠️ AND THE FIELD STAYS LIVE. A resubmission, or a second manuscript to the same agent, is a
      real thing; this is a state with nothing to SUGGEST, not a state with nothing to do. */
-  if (state === "all-queried" && !res.searching) {
+  if (state === "all-queried") {
     return (
       <div className="qc-pick">
         {field}
@@ -172,25 +242,16 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
     <div className="qc-pick">
       {field}
       <div className="qc-pickcap">
-        <b>{res.searching ? "Matching contacts" : "Not yet queried"}</b>
+        <b>Not yet queried</b>
         <span>
-          {res.searching
-            ? `${res.matched} of ${res.total} contacts`
-            : <>{manuscriptTitle ? <>for <i>{manuscriptTitle}</i> · </> : null}{res.total} contacts</>}
+          {manuscriptTitle ? <>for <i>{manuscriptTitle}</i> · </> : null}{res.total} contacts
         </span>
         {res.truncated && onSeeAll && (
           <button type="button" className="qc-pickall" onClick={onSeeAll}>See all →</button>
         )}
       </div>
 
-      {res.cards.length === 0 ? (
-        /* A typed search with no match is the one place a plain sentence is right: the writer
-           asked a question and this is the answer. No art — nothing is empty, the query is. */
-        <p className="qc-picknone">
-          No contact matches “{query.trim()}”.{" "}
-          <button type="button" onClick={onAddAgent}>Add them as a new agent</button>
-        </p>
-      ) : (
+      {(
         <div className="qc-grid" id={GRID_ID} role="listbox" aria-label="Your contacts" onKeyDown={onGridKey}>
           {res.cards.map((a, i) => {
             const shut = a.submissionStatus === SubmissionStatus.CLOSED;

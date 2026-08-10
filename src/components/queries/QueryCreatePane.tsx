@@ -28,6 +28,7 @@ import {
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
 import { AgentPicker } from "./AgentPicker";
+import { queriedAgentIds } from "../../lib/agentPicker";
 import { F12Menu } from "../shell/F12Shell";
 import { useFixedMenu } from "../forms/useFixedMenu";
 import { BrandDatePicker } from "../forms";
@@ -101,6 +102,10 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0
     ? agent.responseTimeWeeks : null;
   const derivedNudge = nudgeDerivedLine(draft, agent);
+  /* ⚠️ ONE SELECTOR FOR "HAS THIS AGENT BEEN QUERIED". This used to be handed an EMPTY set, so the
+     field's rows all read "Not queried" while the all-queried panel counted the same agents as
+     queried — two components disagreeing about one fact because they read two sources. */
+  const queriedIds = useMemo(() => queriedAgentIds(queries), [queries]);
   /* The stepper's field is raw while it holds the caret and formatted the rest of the time. */
   const [qtyFocused, setQtyFocused] = useState(false);
   /* ⚠️ WHAT THE AGENT ASKED FOR, READ FROM THE SEEDED ROWS — never a second parse of their record.
@@ -242,17 +247,19 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               onSeeAll={onSeeAllAgents}
               onDiscover={onDiscover}
             />
-            {/* ⚠️ THE QUICK-ADD IS AgentSearchField'S, MOUNTED ON DEMAND — never rebuilt. It is a
-                form with its own validation and write path, and a second copy would fork both.
-                The picker's "Add a new agent" opens it; it is absent until then, so nothing
-                expands on mount. */}
+            {/* ⚠️ ONE SEARCH INPUT ON STAGE 1, and this is not a second one. `startInQuickAdd`
+                mounts AgentSearchField straight into its ADD form with no field and no popup —
+                the form has its own validation and write path and must not be forked, but
+                mounting the whole component to reach it put a second "Search by name or agency…"
+                on the page whose popup opened on focus. That is why "Add a new agent" appeared to
+                open a list of existing agents: it was scrolling to the legacy field. */}
             {quickAddOpen && (
               <div className="qc-askfield">
                 <AgentSearchField
-                  autoFocus
+                  startInQuickAdd
                   agents={agents}
                   value=""
-                  queriedAgentIds={new Set<string>()}
+                  queriedAgentIds={queriedIds}
                   onSelect={pickAgent}
                   onCreateAgent={async (d) => {
                     const res = await onCreateAgent(d);
@@ -262,6 +269,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 />
               </div>
             )}
+
             {/* Pushed to the FOOT of the column (margin-top:auto): anatomy you can see without
                 being asked for it. They sit where the real stack will sit. */}
             <div className="qc-stack qc-ghosts" aria-hidden="true">

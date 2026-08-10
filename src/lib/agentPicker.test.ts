@@ -15,12 +15,14 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import {
   PICKER_LIMIT, pickerState, pickerCards, queriedCount, replyLine, moveInGrid, matchesQuery,
+  dropdownResults, queryHistoryLabel, queriedAgentIds,
 } from "./agentPicker";
 import { SubmissionStatus, QueryStatus, type Agent, type Query } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const picker = read("../components/queries/AgentPicker.tsx");
 const pane = read("../components/queries/QueryCreatePane.tsx");
+const field = read("../components/AgentSearchField.tsx");
 const css = read("../components/shell/f12.css");
 
 const rule = (selector: string): string => {
@@ -61,21 +63,37 @@ describe("stage 1 has three states, and they are different situations", () => {
   it("set-aside agents are outside the count and outside the grid", () => {
     const list = [agent("a1"), agent("a2", { setAside: true })];
     expect(queriedCount(list, [q("a1")])).toEqual({ done: 1, total: 1 });
-    expect(pickerCards(list, [], "").cards.map((a) => a.id)).toEqual(["a1"]);
+    expect(pickerCards(list, []).cards.map((a) => a.id)).toEqual(["a1"]);
   });
 });
 
 /* ══ THE GRID IS THE RESULT SET ════════════════════════════════════════════════════════════ */
-describe("the field filters in place; there is no open/close state", () => {
-  /* ⚠️ AN EMPTY FIELD AND A TYPED ONE ASK DIFFERENT QUESTIONS. Blank, the grid SUGGESTS the
-     agents you have never queried. Typed, it SEARCHES — and hiding already-queried agents there
-     would be a lie: a second query to the same agent is a real thing, and in the all-queried
-     state it is the only thing left to do. */
-  it("blank suggests the un-queried; typing widens the pool to everyone", () => {
+describe("the grid suggests and the dropdown searches — two jobs, two surfaces", () => {
+  /* ⚠️ THE GRID DOES NOT FILTER AS YOU TYPE. It used to, and the page reshuffled under the writer
+     on every keystroke — the card they were reaching for moved while they reached. */
+  it("the grid is a STANDING set: un-queried only, and untouched by the query", () => {
     const list = [agent("a1", { name: "Elinor Hale" }), agent("a2", { name: "Joseph Okafor" })];
-    expect(pickerCards(list, [q("a1")], "").cards.map((a) => a.id)).toEqual(["a2"]);
-    expect(pickerCards(list, [q("a1")], "elinor").cards.map((a) => a.id), "a queried agent must stay findable")
+    const before = pickerCards(list, [q("a1")]).cards.map((a) => a.id);
+    expect(before).toEqual(["a2"]);
+    expect(pickerCards.length, "the grid signature must not take a query at all").toBeLessThan(4);
+  });
+
+  /* ⚠️ THE DROPDOWN MUST NOT HIDE THE AGENTS YOU HAVE ALREADY QUERIED. A resubmission is real, and
+     in the all-queried state it is the only thing left to do. The row states the history instead,
+     so the writer is told rather than prevented. */
+  it("the dropdown searches everyone, queried or not, and states the history", () => {
+    const list = [agent("a1", { name: "Elinor Hale" }), agent("a2", { name: "Joseph Okafor" })];
+    expect(dropdownResults(list, "elinor").map((a) => a.id), "a queried agent must stay findable")
       .toEqual(["a1"]);
+    const now = Date.parse("2026-08-10");
+    expect(queryHistoryLabel(list[0], [q("a1")], now)).toBe("Queried 1 Jan");
+    expect(queryHistoryLabel(list[1], [q("a1")], now)).toBe("Not queried");
+  });
+
+  /* ⚠️ NEVER ON MOUNT, NEVER ON FOCUS — the first keystroke is the whole trigger. */
+  it("an empty query yields no dropdown at all", () => {
+    expect(dropdownResults([agent("a1")], "")).toEqual([]);
+    expect(dropdownResults([agent("a1")], "   ")).toEqual([]);
   });
 
   it("matching reads name and agency, and nothing else", () => {
@@ -89,7 +107,7 @@ describe("the field filters in place; there is no open/close state", () => {
   it("newest first, capped, and it says when it capped", () => {
     const many = Array.from({ length: PICKER_LIMIT + 3 }, (_, i) =>
       agent("x" + i, { dateAdded: `2026-01-${String(i + 1).padStart(2, "0")}` }));
-    const r = pickerCards(many, [], "");
+    const r = pickerCards(many, []);
     expect(r.cards).toHaveLength(PICKER_LIMIT);
     expect(r.truncated).toBe(true);
     expect(r.cards[0].dateAdded, "newest first").toBe("2026-01-11");
@@ -104,26 +122,82 @@ describe("the field filters in place; there is no open/close state", () => {
     expect(code, "the grid is always rendered, never toggled").toContain('role="listbox"');
   });
 
-  it("the field is autofocused, and the pane no longer mounts the combobox", () => {
-    expect(picker).toContain("autoFocus");
+  /* ⚠️ EXACTLY ONE SEARCH INPUT ON STAGE 1. The pane used to mount the whole of
+     AgentSearchField to reach its ADD form, which put a second "Search by name or agency…" on the
+     page whose popup opened on focus — which is why "Add a new agent" appeared to open a list of
+     existing agents. `startInQuickAdd` mounts the form and nothing else. */
+  it("one search input on stage 1, and the legacy popup cannot mount", () => {
     const stage1 = pane.slice(pane.indexOf("!stackAvailable(agent)"), pane.indexOf("STAGE 2"));
-    expect(stage1, "the stage-1 combobox is what opened on mount").toContain("quickAddOpen && (");
     expect(stage1).toContain("<AgentPicker");
+    expect(stage1, "the legacy field must open straight into its add form")
+      .toContain("startInQuickAdd");
+    expect(stage1, "and must never render its own search field").not.toContain("autoFocus\n");
+    expect(field).toContain("const [showQuickAdd, setShowQuickAdd] = useState(startInQuickAdd);");
+    expect(picker.match(/placeholder="Search by name or agency/g)?.length ?? 0).toBe(1);
+  });
+
+  /* ⚠️ ONE SELECTOR FOR "HAS THIS AGENT BEEN QUERIED". The panel said "16 of 16 contacts queried"
+     while every row beneath read "Not queried" — the rows were handed an EMPTY set by their
+     caller, so nothing could ever look queried. Both now read the same derivation. */
+  it("the panel count and the rows' query state come from one selector", () => {
+    const list = [agent("a1"), agent("a2")];
+    const ids = queriedAgentIds([q("a1")]);
+    expect(ids.has("a1")).toBe(true);
+    expect(ids.has("a2")).toBe(false);
+    expect(queriedCount(list, [q("a1")]), "the panel counts what the rows mark")
+      .toEqual({ done: ids.size, total: 2 });
+    expect(pane, "the empty set is what made them disagree").not.toContain("queriedAgentIds={new Set<string>()}");
+    expect(pane).toContain("queriedAgentIds={queriedIds}");
+    expect(pane).toContain("const queriedIds = useMemo(() => queriedAgentIds(queries), [queries]);");
+  });
+
+  /* ⚠️ NO FIT SCORE, STAR RATING OR "RECOMMENDED" ORDERING ANYWHERE IN THE PICKER — a baked
+     decision. A search result sorted by how highly you rated someone is a recommendation wearing
+     a search's clothes, and the writer typed a name. The rating survives only where the writer
+     SETS it, in the quick-add form: that is them recording a judgement, not the app making one. */
+  it("no stars on any agent row, and no rating-led ordering", () => {
+    expect(picker, "the grid card must not rate anyone").not.toContain("starRating");
+    expect(field, "the result row's stars came back").not.toContain("sa-ag-stars");
+    expect(field, "rating-led ordering is a recommendation").not.toContain("byRatingDesc");
+    expect(field, "but the writer's own rating input stays in the add form")
+      .toContain('className="sa-qa-rating"');
   });
 
   /* ⚠️ THE ARIA MOVED WITH THE BEHAVIOUR. Leaving combobox roles pointing at a popup that no
      longer renders would describe a component that does not exist. */
-  it("the ARIA points at the grid, not at the retired popup", () => {
-    expect(picker).toContain('aria-controls={GRID_ID}');
-    expect(picker).toContain('id={GRID_ID}');
-    expect(picker, "the list genuinely is always expanded").toContain('aria-expanded="true"');
-    expect(picker).toContain("aria-activedescendant={active >= 0");
-    expect(picker, "the highlight must name an element that exists").toContain("`qc-ac-${active}`");
+  /* ⚠️ THE FIELD CONTROLS WHICHEVER LIST IS IN FRONT OF THE WRITER. With the dropdown open that is
+     the dropdown; with it closed, the standing grid. Pointing `aria-controls` at a fixed id would
+     describe one of the two lists as the answer at a moment when the other is on screen. */
+  it("the ARIA follows whichever list is live", () => {
+    expect(picker).toContain("aria-controls={open ? LIST_ID : GRID_ID}");
+    expect(picker).toContain("aria-expanded={open}");
+    expect(picker).toContain("id={LIST_ID}");
+    expect(picker).toContain("id={GRID_ID}");
+    expect(picker, "the highlight must name an element that exists")
+      .toContain("aria-activedescendant={open ? (dActive >= 0 ? `qc-dr-${dActive}` : undefined)");
   });
 });
 
 /* ══ KEYBOARD ══════════════════════════════════════════════════════════════════════════════ */
 describe("the keyboard model lives on the grid", () => {
+  /* ⚠️ ↓ MEANS TWO DIFFERENT THINGS, AND WHICH DEPENDS ON WHETHER THE DROPDOWN IS OPEN. Open, it
+     walks the results the writer is looking at; closed, it enters the standing grid. Sending it to
+     the grid while a list of matches is on screen would step past the answer. */
+  it("↓ walks the dropdown when open, and enters the grid when closed", () => {
+    expect(picker).toContain("if (open) {");
+    expect(picker).toContain('if (e.key === "ArrowDown") { e.preventDefault(); setDhl((h) => Math.min(h + 1, hits.length - 1)); return; }');
+    expect(picker).toContain('if (e.key === "ArrowDown" && res.cards.length > 0)');
+  });
+
+  /* Esc and an outside click must close it while the TEXT stays in the field — without a
+     `dismissed` bit, "open" would be a pure function of the query and could not be put away. */
+  it("Esc and an outside click close it; typing re-opens it", () => {
+    expect(picker).toContain('if (e.key === "Escape" && open)');
+    expect(picker).toContain('document.addEventListener("pointerdown", onDown)');
+    expect(picker).toContain("const open = query.trim().length > 0 && !dismissed;");
+    expect(picker).toContain("setDismissed(false)");
+  });
+
   it("↓ enters the grid; Enter selects; Esc returns to the field", () => {
     expect(picker).toContain('if (e.key === "ArrowDown" && res.cards.length > 0)');
     expect(picker).toContain('if (e.key === "Escape")');

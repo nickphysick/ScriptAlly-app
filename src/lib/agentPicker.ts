@@ -46,8 +46,19 @@ export function pickerState(agents: Agent[], queries: Query[]): PickerState {
  * mode opened.
  */
 function unqueried(agents: Agent[], queries: Query[]): Agent[] {
-  const queried = new Set(queries.map((q) => q.agentId).filter(Boolean));
+  const queried = queriedAgentIds(queries);
   return agents.filter((a) => !queried.has(a.id) && a.setAside !== true);
+}
+
+/**
+ * ⚠️ ONE SELECTOR FOR "HAS THIS AGENT BEEN QUERIED", and everything that answers that question
+ * reads it. The all-queried panel said "16 of 16 contacts queried" while every row beneath it was
+ * marked "Not queried" — two components reading different sources for one fact. The rows were
+ * wrong: they were handed an EMPTY set by their caller, so nothing could ever look queried. A
+ * shared derivation is what makes that disagreement impossible rather than merely fixed.
+ */
+export function queriedAgentIds(queries: Query[]): Set<string> {
+  return new Set(queries.map((q) => q.agentId).filter(Boolean));
 }
 
 /** Name and agency, the two things a card shows. Never the id, never notes. */
@@ -64,28 +75,23 @@ export interface PickerResult {
   /** Every contact on file, which is what the heading counts. */
   total: number;
   truncated: boolean;
-  /** True while typing, when the grid stops being "not yet queried" and becomes a search result. */
-  searching: boolean;
 }
 
 /**
- * ⚠️ AN EMPTY FIELD AND A TYPED ONE ASK DIFFERENT QUESTIONS. With nothing typed the grid is a
- * SUGGESTION — the agents you have never queried, newest first, because the one you meant is
- * usually someone you added last week and never got round to. The moment you type it becomes a
- * SEARCH, and a search that hid the agents you have already queried would be lying: querying an
- * agent a second time is a real thing writers do, and in the all-queried state it is the only
- * thing left to do. So typing widens the pool rather than narrowing the same one.
+ * THE GRID — a STANDING set of suggestions: the agents you have never queried, newest first,
+ * because the one you meant is usually someone you added last week and never got round to.
+ *
+ * ⚠️ IT DOES NOT FILTER AS YOU TYPE. It used to, and that made the page reshuffle under the
+ * writer on every keystroke — the thing they were reaching for moved while they reached. Typing is
+ * the DROPDOWN's job; the grid stays where it was put, so a writer who types two letters and
+ * changes their mind still sees the same cards in the same places.
  */
 export function pickerCards(
   agents: Agent[],
   queries: Query[],
-  query: string,
   limit: number = PICKER_LIMIT,
 ): PickerResult {
-  const searching = query.trim().length > 0;
-  const pool = searching ? agents.filter((a) => a.setAside !== true) : unqueried(agents, queries);
-  const matched = pool.filter((a) => matchesQuery(a, query));
-  const sorted = matched
+  const sorted = unqueried(agents, queries)
     .slice()
     .sort((a, b) => Date.parse(b.dateAdded || "0") - Date.parse(a.dateAdded || "0"));
   return {
@@ -93,13 +99,50 @@ export function pickerCards(
     matched: sorted.length,
     total: agents.length,
     truncated: sorted.length > limit,
-    searching,
   };
+}
+
+/** "Queried 12 Jun" / "Not queried" — read from the ONE selector, never from a caller's guess. */
+export function queryHistoryLabel(a: Agent, queries: Query[], now: number = Date.now()): string {
+  const mine = queries.filter((q) => q.agentId === a.id);
+  if (mine.length === 0) return "Not queried";
+  const latest = mine
+    .map((q) => String(q.dateSent ?? ""))
+    .filter(Boolean)
+    .sort()
+    .pop();
+  if (!latest) return "Queried";
+  const d = new Date(latest + "T00:00:00");
+  const day = d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return d.getFullYear() === new Date(now).getFullYear()
+    ? `Queried ${day}`
+    : `Queried ${day} ${d.getFullYear()}`;
+}
+
+/**
+ * THE DROPDOWN — a typeahead over EVERY contact, queried or not.
+ *
+ * ⚠️ IT MUST NOT HIDE THE AGENTS YOU HAVE ALREADY QUERIED. A second query to the same agent is a
+ * real thing writers do — a resubmission, a different book — and in the all-queried state it is
+ * the only thing left to do. Each row states its history instead, so the writer is told rather
+ * than prevented.
+ */
+export function dropdownResults(
+  agents: Agent[],
+  query: string,
+  limit: number = PICKER_LIMIT,
+): Agent[] {
+  if (!query.trim()) return [];
+  return agents
+    .filter((a) => a.setAside !== true && matchesQuery(a, query))
+    .slice()
+    .sort((a, b) => Date.parse(b.dateAdded || "0") - Date.parse(a.dateAdded || "0"))
+    .slice(0, limit);
 }
 
 /** "12 of 12" — the all-queried state's count, stated rather than implied. */
 export function queriedCount(agents: Agent[], queries: Query[]): { done: number; total: number } {
-  const queried = new Set(queries.map((q) => q.agentId).filter(Boolean));
+  const queried = queriedAgentIds(queries);
   const live = agents.filter((a) => a.setAside !== true);
   return { done: live.filter((a) => queried.has(a.id)).length, total: live.length };
 }

@@ -33,6 +33,16 @@ interface AgentSearchFieldProps {
    */
   /** Take the caret on mount. Stage 1 asks exactly one thing, so it should already be focused. */
   autoFocus?: boolean;
+  /**
+   * Mount straight into the quick-add form, with no search field and no popup.
+   *
+   * ⚠️ THIS EXISTS SO STAGE 1 CAN HAVE EXACTLY ONE SEARCH INPUT. The picker owns the searching
+   * now; what it still needs from this component is the ADD form — which has its own validation
+   * and write path and must not be forked. Mounting the whole component to reach that form put a
+   * second "Search by name or agency…" on the page whose popup opened on focus, which is why
+   * "Add a new agent" appeared to open a list of existing agents.
+   */
+  startInQuickAdd?: boolean;
   onCreateAgent?: (draft: {
     name: string;
     agency: string;
@@ -51,13 +61,14 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   onSelect,
   manuscriptLabel,
   autoFocus,
+  startInQuickAdd = false,
   onCreateAgent,
 }) => {
   const [open, setOpen] = useState(false);
   const [queryText, setQueryText] = useState("");
   const [hl, setHl] = useState(0); // highlighted result index (keyboard nav)
   // ── Inline quick-add ──
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(startInQuickAdd);
   const [qaName, setQaName] = useState("");
   const [qaAgency, setQaAgency] = useState("");
   const [qaEmail, setQaEmail] = useState("");
@@ -92,11 +103,13 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   );
 
   const groups: AgentGroup[] = useMemo(() => {
-    const byRatingDesc = (a: Agent, b: Agent) => (b.starRating || 0) - (a.starRating || 0);
-
-
-    const notQueried = filtered.filter((a) => !isQueried(a)).sort(byRatingDesc);
-    const queried = filtered.filter((a) => isQueried(a)).sort(byRatingDesc);
+    /* ⚠️ NO RATING-LED ORDERING, AND NO STARS ON A ROW. "No fit score, star rating, or
+       'recommended' ordering anywhere in the picker" is a baked decision: a search result sorted
+       by how highly you rated someone is a recommendation wearing a search's clothes, and the
+       writer typed a name. The rating survives where the writer SETS it (the quick-add form
+       below) — that is them recording a judgement, not the app making one. */
+    const notQueried = filtered.filter((a) => !isQueried(a));
+    const queried = filtered.filter((a) => isQueried(a));
     const out: AgentGroup[] = [];
     if (notQueried.length) out.push({ header: null, rows: notQueried });
     if (queried.length) out.push({ header: "Already queried", dim: true, rows: queried });
@@ -322,7 +335,6 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
                         <span className="sa-ag-name">{agentPrimary(a)}</span>
                         <span className="sa-ag-agency">{agentSecondary(a) || "Independent"}</span>
                       </span>
-                      {a.starRating ? <span className="sa-ag-stars">{"★".repeat(a.starRating)}</span> : null}
                       <span className={`sa-ag-tag ${queried ? "q" : "nq"}`}>{queried ? "Queried" : "Not queried"}</span>
                     </div>
                   );
