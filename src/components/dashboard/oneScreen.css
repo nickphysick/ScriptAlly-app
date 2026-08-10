@@ -440,10 +440,21 @@
 /* ⚠️ ONE CLUSTER, RIGHT-ALIGNED AS A UNIT — frequency · slider · label. Pushing each control
    right on its own is what let the label drift away from the slider. */
 .os-ctrls { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
-.os-fig { display: flex; align-items: center; gap: 11px; margin: 4px 0 2px; flex: none; }
+/* ⚠️ `.os-fig` IS RETIRED — the figure sits IN the band now (option A), so a wrapper whose only
+   job was to hold it beneath the header has nothing left to do. */
+/* the headline, in the band: smaller than the old 28px body figure, and the chip rides beside it */
+.os-ahead .os-n {
+  font-family: var(--font-serif); font-weight: 500; font-size: 21px; color: #241811;
+  line-height: 1; font-variant-numeric: tabular-nums; flex: none; margin-left: 2px;
+}
+.os-ahead .os-chip { flex: none; }
+/* the cluster takes the slack, and gives it back first */
+.os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
-.os-fig .os-n { font-family: var(--font-serif); font-weight: 500; font-size: 28px; color: #241811; line-height: 1; font-variant-numeric: tabular-nums; }
+
 .os-chip { font-size: 10px; border-radius: 99px; padding: 2.5px 9px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c; }
+/* the band runs edge to edge, so the padding belongs to the body */
+.os-lbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 10px 16px 12px; }
 .os-chartwrap { flex: 1; min-height: 120px; position: relative; }
 .os-chartwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; outline: none; }
 /* the cursor flips across the reading-zone boundary — felt, not guessed (§3) */
@@ -526,8 +537,7 @@
    two bands sat side by side at the same height; measured 51 vs 49 across the four. The colours
    differ by purpose, the GEOMETRY does not. */
 .os-th2 {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px; margin: 0; flex: none;
+  display: flex; align-items: center; gap: 12px; margin: 0;
   background: linear-gradient(180deg, #f5e3d8, #f2ddd2);
   border-bottom: 1px solid #ebd2c4;
 }
@@ -792,14 +802,25 @@
    surface that is asking something of you (the tasks card). The band runs edge to edge, so the
    card clips. */
 .os-actv { overflow: hidden; }
+/**
+ * ⚠️ THE BAND'S HEIGHT IS STATED, NOT DERIVED (headers P3). All three bands used to be sized by
+ * their contents and agreed only by COINCIDENCE — Tasks at 11/18 padding, the sage band at 10/16,
+ * measured 51 against 49. Any control, any longer title, any font fallback moved one and not the
+ * others. A fixed height with `box-sizing: border-box` makes the agreement structural: the band is
+ * 51px because it says so, and its contents centre inside whatever room that leaves.
+ */
+.os-ahead, .os-th2 { height: 51px; padding: 0 16px; box-sizing: border-box; flex: none; }
 .os-ahead {
-  display: flex; align-items: center; gap: 12px; padding: 10px 16px; flex: none;
+  display: flex; align-items: center; gap: 12px;
   background: linear-gradient(180deg, #dde3da, #d6dcd3);
   border-bottom: 1px solid #cbd3c8;
 }
+/* ⚠️ NOWRAP, AND THE CONTROLS SHRINK FIRST. A title wrapping to two lines was what broke the band
+   height at narrower widths — with a stated height it would now clip instead, which is worse. */
+.os-ahead h2, .os-th2 h2 { white-space: nowrap; flex: none; }
 .os-ahead h2 {
   font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: #2b3a29;
-  margin: 0; flex: 1;
+  margin: 0;
 }
 .os-exp {
   width: 24px; height: 24px; border-radius: 7px; border: 1px solid #e3d9cc; background: #ffffff;
@@ -1080,6 +1101,47 @@
   font-family: "JetBrains Mono", monospace; font-style: normal;
   font-size: 6px; letter-spacing: 0.06em; text-transform: uppercase; color: #b09b8c;
 }
+
+
+
+/* ══ P3 · THE BAND'S CONTROLS ════════════════════════════════════════════════════════════════
+   ⚠️ THEY HAVE TO READ AGAINST SAGE, and that is the specific complaint this answers. Both
+   controls were drawn for a parchment card and put on a sage band, where a pale track on a pale
+   green ground simply disappears. They take a PARCHMENT FILL with a #bcc7b9 edge so they read as
+   objects laid ON the band rather than as areas of it — and both take the same treatment, so the
+   select and the slider read as a pair rather than two unrelated widgets sharing a row. */
+.os-ahead .os-freqsel select {
+  background: #fffdf9;
+  border: 1px solid #bcc7b9;
+  color: #2b3a29;
+}
+.os-ahead .os-freqsel select:hover { border-color: #a8b5a5; }
+.os-ahead .os-cv { color: #6f8069; }
+
+/* ⚠️ THE TRACK IS A SURFACE, NOT A LINE. A 4px rule on a gradient band reads as a scratch; the
+   inset shadow gives it a floor so it reads as a channel the thumb runs in. */
+.os-ahead .os-rangeslider input[type="range"]::-webkit-slider-runnable-track,
+.os-ahead .os-rangeslider input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 99px;
+  background: #fffdf9;
+  border: 1px solid #bcc7b9;
+  box-shadow: inset 0 1px 2px rgba(58, 28, 20, 0.10);
+}
+/* ⚠️ THE THUMB CARRIES A WHITE RING — burgundy alone on sage is legible but sits IN the band; the
+   ring lifts it off, and it is the one element here that must never be hunted for. */
+.os-ahead .os-rangeslider input[type="range"]::-webkit-slider-thumb {
+  background: #7c3a2a;
+  border: 2px solid #fffdf9;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.28);
+}
+.os-ahead .os-rangeslider input[type="range"]::-moz-range-thumb {
+  background: #7c3a2a;
+  border: 2px solid #fffdf9;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.28);
+}
+/* the range label is mono on the band, not on parchment — it is a readout, not a control */
+.os-ahead .os-rangelbl { color: #4a5a45; }
 
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
    ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule

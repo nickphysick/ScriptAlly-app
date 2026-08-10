@@ -260,6 +260,15 @@ export const OneScreenChart: React.FC<{
       <div className="os-ahead">
         <OneScreenMark name="active-queries" />
         <h2>Active queries</h2>
+        {/* ⚠️ THE FIGURE LIVES IN THE BAND (option A). Nothing floats loose beneath the header any
+            more: the headline number and its chip are part of the label, so the body below is the
+            chart and only the chart. */}
+        <span className="os-n">{shownActive}</span>
+        {/* §9: in the first fortnight the chip states what is out, not a movement — a two-point
+            range delta is noise dressed as trend */}
+        {earlyDays
+          ? <span className="os-chip">{awaitingChip(queries)}</span>
+          : view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
         {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
         <div className="os-ctrls">
         <div className="os-freqsel">
@@ -287,15 +296,9 @@ export const OneScreenChart: React.FC<{
         <span className="os-rangelbl">{stop.label}</span>
         </div>
       </div>
-      <div className="os-fig">
-        <span className="os-n">{shownActive}</span>
-        {/* §9: in the first fortnight the chip states what is out, not a movement — a two-point
-            range delta is noise dressed as trend */}
-        {earlyDays
-          ? <span className="os-chip">{awaitingChip(queries)}</span>
-          : view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
-      </div>
-
+      {/* ⚠️ THE PADDING IS THE BODY'S, NOT THE CARD'S — the band must run edge to edge, so the
+          card carries none and the chart wrapper supplies its own. */}
+      <div className="os-lbody">
       <div className="os-chartwrap" ref={wrapRef}>
         {dayOne ? (
           /* §9: the day-one card is an invitation, not an empty chart */
@@ -447,6 +450,7 @@ export const OneScreenChart: React.FC<{
           </div>
         ) : null}
       </ChartTip>
+      </div>
     </OneScreenPanel>
   );
 };

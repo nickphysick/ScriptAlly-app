@@ -196,3 +196,55 @@ describe("Querying goals keeps its bare header", () => {
     expect(lib).toContain('"Goal met"');
   });
 });
+
+/**
+ * ⚠️ THE BAND'S HEIGHT IS STATED, NOT DERIVED (headers P3). All three bands used to be sized by
+ * their contents and agreed only by coincidence — measured 51 against 49 before the padding was
+ * unified, and any control, longer title or font fallback would have parted them again.
+ * Browser-measured after the fix: 51.00 on all three, spread 0, at 1280 / 1440 / 1920.
+ */
+describe("one band geometry, declared", () => {
+  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("⚠️ the height is DECLARED and border-box — not left to the contents", () => {
+    const m = /\.os-ahead,\s*\.os-th2\s*\{([^}]*)\}/.exec(bare);
+    expect(m, "the two bands must share ONE geometry rule").not.toBeNull();
+    expect(m![1]).toContain("height: 51px");
+    expect(m![1]).toContain("box-sizing: border-box");
+    expect(m![1]).toContain("padding: 0 16px");
+  });
+
+  it("⚠️ neither band re-declares its own padding — that is how they drifted apart before", () => {
+    for (const sel of [".os-ahead {", ".os-th2 {"]) {
+      const i = bare.indexOf(sel);
+      expect(bare.slice(i, bare.indexOf("}", i)), sel).not.toMatch(/padding:/);
+    }
+  });
+
+  it("titles never wrap; the controls give instead", () => {
+    expect(bare).toMatch(/\.os-ahead h2,\s*\.os-th2 h2\s*\{[^}]*white-space:\s*nowrap/);
+  });
+
+  it("⚠️ the figure is IN the band, and the loose wrapper beneath is gone", () => {
+    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
+    const bandOpen = chart.indexOf('<div className="os-ahead">');
+    const band = chart.slice(bandOpen, chart.indexOf("</div>", chart.indexOf("os-rangelbl", bandOpen)));
+    expect(band).toContain("os-n");
+    expect(chart).not.toContain('className="os-fig"'); // nothing floats beneath the header
+    expect(bare).not.toMatch(/\.os-fig\s*\{/);
+  });
+
+  it("⚠️ the card has no padding — the band runs edge to edge and the BODY is padded", () => {
+    expect(bare).toMatch(/\.os-lbody\s*\{[^}]*padding:/);
+    const i = bare.indexOf(".os-card {");
+    expect(bare.slice(i, bare.indexOf("}", i))).not.toMatch(/padding:/);
+  });
+
+  it("⚠️ the controls read AGAINST sage — parchment fill and a green edge, as a pair", () => {
+    expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#fffdf9/);
+    expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#bcc7b9/);
+    expect(bare).toMatch(/slider-runnable-track[\s\S]{0,200}#bcc7b9/);
+    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#7c3a2a/); // burgundy thumb…
+    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#fffdf9/); // …with its white ring
+  });
+});
