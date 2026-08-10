@@ -17,7 +17,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
-import { goalBlockGap, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
+import { goalBlockGap, goalFigure, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { Skel } from "./OneScreenDashboard";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
@@ -361,7 +361,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
           <h2>Querying goals</h2>
           {goal && !editingGoal && (
             <button type="button" className="os-goal-num" title="Adjust the goal" onClick={() => { setGoalDraft({ target: goal.target, period: goal.period }); setEditingGoal(true); }}>
-              {goal.done}/{goal.target}
+              {goalFigure(goal.done, goal.target)}
             </button>
           )}
         </div>

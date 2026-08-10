@@ -211,7 +211,10 @@ describe("§2 · the greeting", () => {
     const pills = html.indexOf("os-pills");
     expect(pills).toBeGreaterThan(-1);
     const tenure = html.indexOf("Querying since", pills);
-    const ach = html.indexOf("awaiting a reply", pills);
+    /* ⚠️ RETARGETED (polish P7): the header pill reads "out with agents" now — same number,
+       and the writer is the subject of it. The CHART chip below still says "awaiting a reply";
+       that string was not in the pack's scope and is flagged in reports/dashboard-polish.md. */
+    const ach = html.indexOf("out with agents", pills);
     expect(tenure).toBeGreaterThan(-1);
     expect(ach).toBeGreaterThan(tenure);
     // the phrase survives ONLY as the counter's label, never as a pill

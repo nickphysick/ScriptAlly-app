@@ -154,10 +154,18 @@ describe("the pink band (app-shell-v2)", () => {
     expect(rule(".os-tasks")).toContain("overflow: hidden");
   });
 
-  /* ⚠️ the pills sit ON the band now — a tinted pill on a tinted band loses its edge */
-  it("the trio's pills are WHITE on the band, keeping their dots", () => {
-    for (const k of [".os-p.u", ".os-p.h", ".os-p.m"]) {
-      expect(rule(k), k).toContain("background: #ffffff");
+  /* ⚠️ RETARGETED (polish P7), not deleted. This pinned three WHITE pills — the state where the
+     trio read as three separate objects, told apart only by their text colour. They now share one
+     faint pastille-blue fill and the DOT carries the kind, which is the job it always had. The
+     dots' own hues are unchanged, and that half of the lock stands. */
+  it("the trio's pills share ONE pastille fill, and the dots still carry the kind", () => {
+    expect(rule(".os-p")).toContain("background: #f4f7fa");
+    expect(rule(".os-p")).toContain("border: 1px solid #dde6ee");
+    /* ⚠️ THE PER-KIND FILL RULES ARE GONE ENTIRELY — asserted as ABSENT, not asserted through a
+       helper that requires them to exist. One fill, declared once; a `.os-p.u { background }`
+       reappearing is the trio splintering back into three objects. */
+    for (const k of [".os-p.u {", ".os-p.h {", ".os-p.m {"]) {
+      expect(cssRules, `${k} must not re-declare a fill`).not.toContain(k);
     }
     expect(rule(".os-p.u .os-pdot")).toContain("background: #7c3a2a");
     expect(rule(".os-p.h .os-pdot")).toContain("background: #8a9e88");
