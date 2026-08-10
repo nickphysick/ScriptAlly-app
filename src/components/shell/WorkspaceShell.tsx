@@ -257,18 +257,27 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               rail's ink tile; with the rail gone the sidebar is the leftmost chrome, so this is
               where the mark belongs — and it is the ONLY place it appears, per the one-brand
               rule. The mark doubles as the route home, as the rail's tile did. */}
-          {/* ⚠️ THE WORDMARK IS AN ASSET, NOT TYPE. It was re-set in Playfair when the brand moved
-              into the sidebar, which is a lookalike rather than the mark — the real artwork is
-              `/scriptally-title-v2.png` beside the illustrated `/scriptally-logo-v2.png`, the same
-              pair SidebarNav has always used.
+          {/* ⚠️ THE MARK IS ARTWORK; THE WORDMARK IS TYPE (audit pack P4). This is the third swing
+              of that pendulum — type, then the asset, now type again — so it is worth stating what
+              actually decided it rather than leaving the next pass to swing it back.
 
-              ⚠️ AND THE TITLE ASSET IS ONLY ~51.7% INK — its letterforms occupy a little over half
-              the file's height, the rest being baked-in ascender and descender clearance. So the
-              element height is NOT the cap height: sizing it to "look 17px" means setting ~33px.
-              Raising the number is not the same as raising the apparent size. */}
+              The MARK is `/scriptally-logo-new.png`, the plane-and-S, sitting bare on the ground:
+              no plate, no border, no fill. It is transparent artwork, so a plate would be a box
+              drawn around a shape that does not need one.
+
+              The WORDMARK is set in Playfair at 22px. The previous pass used
+              `/scriptally-title-v2.png` on the grounds that re-setting it is "a lookalike rather
+              than the mark" — a fair argument that came with a real cost: that asset is only
+              ~51.7% ink, so its element height was never its cap height and 33px bought a ~17px
+              cap. Every future size change had to carry that compensation with it. Type has no
+              dead space to compensate for, and 22px is 22px.
+
+              ⚠️ SO THE ~51.7%-INK TRAP LEAVES THIS FILE WITH THE ASSET. It still applies wherever
+              the title PNG is used (SmartImportReview, SidebarNav, ScriptAllyLogo) — this mount
+              simply no longer has an ink ratio to keep in step. */}
           <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="ScriptAlly — go to dashboard">
-            <img className="ws-bmark" src="/scriptally-logo-v2.png" alt="" aria-hidden="true" />
-            <img className="ws-bwm" src="/scriptally-title-v2.png" alt="ScriptAlly" />
+            <img className="ws-bmark" src="/scriptally-logo-new.png" alt="" aria-hidden="true" />
+            <span className="ws-bwm">ScriptAlly</span>
           </button>
 
           <div className="ws-phead">
@@ -449,11 +458,26 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   the live mix of `/` and `·` made the brand look like a different KIND of step
                   from the section. Only the current page is ink; ancestors are muted links. */}
               <nav className="ws-crumb" aria-label="Breadcrumb">
-                {/* ⚠️ NO BRAND HERE. The wordmark used to lead the crumb because the sidebar had
-                    only the rail's S tile; the sidebar carries the full brand now, and two mounts
-                    would break the one-brand rule. The crumb opens on its own slash. */}
+                {/* ⚠️ THE CRUMB'S ROOT IS BACK — AS WORDS, NEVER AS THE MARK (audit pack P4).
+                    Removing the logotype from here was right and stays right; removing the ROOT
+                    with it was not, and it left the bar opening on a bare `/ Dashboard`, a
+                    separator with nothing on its left. It reads `ScriptAlly / Dashboard` again.
+
+                    ⚠️ THE ONE-BRAND RULE IS ABOUT THE MARK, and the mark still appears exactly
+                    once, in the sidebar. A breadcrumb root is the name of the place you are in;
+                    that it happens to be the product's name does not make it a second logo.
+
+                    It navigates, because every other segment here does — the law this file already
+                    holds — and because home is where a breadcrumb root goes. */}
                 {crumb && (
                   <>
+                    <button
+                      type="button"
+                      className="ws-seg ws-croot"
+                      onClick={() => go("/dashboard")}
+                    >
+                      ScriptAlly
+                    </button>
                     <span className="ws-sep" aria-hidden="true">/</span>
                     {crumb.child ? (
                       <>

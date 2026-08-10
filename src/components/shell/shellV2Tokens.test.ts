@@ -358,15 +358,17 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex still lives ONLY on the token
   });
 
-  /* ⚠️ REWRITTEN TWICE, NEVER DELETED. Phase 3 made the brand type rather than the PNG;
+  /* ⚠️ REWRITTEN THREE TIMES, NEVER DELETED. Phase 3 made the brand type rather than the PNG;
      Amendment 1 (C) moved the wordmark OUT of the sidebar to the head of the breadcrumb, as the
-     real asset, leaving the rail's "S" tile as the sidebar's only mark. So the brand still
-     appears exactly once in each place — one tile, one logotype.
+     real asset; app-shell-v2 brought both back to the sidebar, still as assets.
 
-     ⚠️ AND THE MEASURED-ASSET PROBLEM IS BACK, because the ASSET is back. The v2 brand was
-     briefly TYPE — a Playfair "S" beside a re-set wordmark — which is a lookalike, not the mark.
-     It is the real artwork again, so the ~51.7%-ink trap returns with it: the title element is
-     33px for a ~17px cap, and raising the number is not the same as raising the apparent size. */
+     ⚠️ AND THE AUDIT PACK (P4) HAS SWUNG IT BACK TO TYPE — deliberately, with the cost named.
+     "The asset is the mark, type is a lookalike" is a fair argument, and it lost to a plainer
+     one: `/scriptally-title-v2.png` is only ~51.7% ink, so its element height was never its cap
+     height and every future size change had to carry that compensation with it. Type has no dead
+     space, and 22px is 22px. The ~51.7%-ink trap still holds wherever that PNG is still used
+     (ScriptAllyLogo, SidebarNav, SmartImportReview) — it simply no longer applies HERE, which is
+     the whole gain. The MARK stays artwork, and changed file: the plane-and-S logo-new. */
   it("THE BRAND APPEARS ONCE per surface — mark and wordmark, in the sidebar", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     expect(ws.match(/ws-bmark/g)?.length, "one mark").toBe(1);
@@ -375,11 +377,36 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
        recording the retirement: the guard caught its own note. */
     expect(ws.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("LOGOTYPE_PX");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    /* ⚠️ ASSETS, NOT TYPE — the wordmark is artwork and must not be re-set in a typeface that
-       merely resembles it. Asserted on the files, and on the 33px the ink ratio demands. */
-    expect(ws).toContain('src="/scriptally-logo-v2.png"');
-    expect(ws).toContain('src="/scriptally-title-v2.png"');
-    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*height: 33px/s);
+    expect(ws).toContain('src="/scriptally-logo-new.png"');
+    expect(ws).toContain('<span className="ws-bwm">ScriptAlly</span>');
+    expect(ws).not.toContain('src="/scriptally-title-v2.png"');
+    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 38px/s);
+    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*font-size: 22px/s);
+  });
+
+  /* ⚠️ BARE ARTWORK. The mark is transparent, so a plate would draw a box round a shape that does
+     not want one — and a plate is exactly what a future pass adds to "tidy" a floating logo. */
+  it("⚠️ the mark sits on the ground — no plate, no border, no fill", () => {
+    const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
+    const at = wsCss.indexOf(".ws-bmark {");
+    expect(at).toBeGreaterThan(-1);
+    const decl = wsCss.slice(at, wsCss.indexOf("}", at));
+    expect(decl).not.toMatch(/background|border(?!-)|box-shadow/);
+  });
+
+  /* ⚠️ THE ONE-BRAND RULE IS ABOUT THE MARK. The crumb's root is the word "ScriptAlly" — the name
+     of a place, not a second logo — so this asserts that no IMAGE rides the pagebar, rather than
+     that the string is absent. */
+  it("⚠️ the crumb carries the root as WORDS; no image rides the pagebar", () => {
+    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
+    const from = ws.indexOf('<header className="ws-pagebar">');
+    const to = ws.indexOf("</header>", from);
+    expect(from).toBeGreaterThan(-1);
+    expect(to).toBeGreaterThan(from);
+    const bar = ws.slice(from, to);
+    expect(bar).not.toContain("<img");
+    expect(bar).toContain("ws-croot");
+    expect(bar).toContain("ScriptAlly");
   });
 });
 

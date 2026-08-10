@@ -503,26 +503,40 @@
   background: var(--ws-edge); pointer-events: none;
 }
 
-/* ── brand: ink square + wordmark, above the manuscript selector ── */
-/* ⚠️ THE BRAND ROW SHARES THE PAGEBAR'S BASELINE, and the two live in DIFFERENT containers — the
-   sidebar and the page column — so nothing aligns them by construction. The row's padding is
-   therefore set FROM the pagebar's (`16px 6px 14px`): equal top padding puts the mark and the
-   `/ Dashboard` crumb on one line across the divide. If either padding moves, the other must.
-   ⚠️ AND IT IS `align-items: center`, NOT `baseline`, BECAUSE THESE ARE IMAGES. An image has no
-   baseline: `baseline` resolves to its bottom MARGIN EDGE, which dropped the 33px wordmark 7.6px
-   below the crumb it was meant to sit level with. The mark and the wordmark share an optical
-   CENTRE instead, and the row's top padding (19px, against the pagebar's 16px) is the 3px that
-   levels that centre with the crumb's — the title asset carries ~48% dead space, so its box sits
-   lower than its letterforms. Measured: both centres at 35.1px. */
+/* ── brand: the plane-and-S mark beside the wordmark, the pair centred ── */
+/* ⚠️ THE BRAND ROW SHARES THE PAGEBAR'S LINE, and the two live in DIFFERENT containers — the
+   sidebar and the page column — so nothing aligns them by construction. The row's padding is set
+   FROM the pagebar's (`16px 6px 14px`) and the two optical centres are then MEASURED, never
+   assumed. If either padding moves, the other must.
+
+   ⚠️ IT IS `align-items: center`, NOT `baseline`, BECAUSE THE MARK IS AN IMAGE. An image has no
+   baseline — it resolves to its bottom MARGIN EDGE — so a row mixing an image with text cannot be
+   baselined at all: the text aligns on its baseline, the image on its bottom, and the taller one
+   drags. The mark and the wordmark share an optical CENTRE instead.
+
+   ⚠️ AND THE PAIR IS CENTRED IN THE SIDEBAR (audit pack P4), not ranged left. It is a masthead
+   sitting over the manuscript selector, not the first row of the navigation.
+
+   ⚠️ THE 3px COMPENSATION LEFT WITH THE ASSET IT COMPENSATED FOR. Top padding was 19px against the
+   pagebar's 16px because the title PNG carries ~48% dead space, so its box sat lower than its
+   letterforms. The wordmark is TYPE now — its box IS its letterforms — so the padding returns to
+   the pagebar's own 16px and the alignment simply falls out: 16 + half of the 38px mark = 35.0,
+   against the crumb's 35.1. Browser-measured at 1440×900, both panel states. The number to keep
+   level is the MARK's centre, not the row box's — the row is 16/14 asymmetric and its box centre
+   sits at 34, which is not the thing anyone sees. */
 .ws-brand {
-  display: flex; align-items: center; gap: 9px;
-  padding: 19px 6px 11px; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 16px 6px 14px; width: 100%;
   background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
 }
-/* the illustrated mark — sized to the wordmark's cap, not to its box */
-.ws-bmark { height: 22px; width: auto; flex-shrink: 0; display: block; }
-/* ⚠️ 33px FOR A ~17px CAP — see the note at the markup: the asset is ~51.7% ink. */
-.ws-bwm { height: 33px; width: auto; display: block; }
+/* ⚠️ BARE ARTWORK — no plate, no border, no fill. The mark is transparent, so a plate would be a
+   box drawn round a shape that does not want one. */
+.ws-bmark { height: 38px; width: auto; flex-shrink: 0; display: block; }
+/* ⚠️ TYPE, NOT AN ASSET — 22px is the cap it looks like, with no ink ratio to keep in step. */
+.ws-bwm {
+  font-family: var(--font-serif); font-weight: 600; font-size: 22px;
+  color: #1c130e; letter-spacing: -0.01em; line-height: 1; white-space: nowrap;
+}
 
 /* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER COMES FROM `--head`. It was
    `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on the same continuous
