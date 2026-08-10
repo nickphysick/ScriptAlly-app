@@ -161,6 +161,20 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
    */
   const ach = achievementPill(queries, now);
   const stage = runStage(queries, manuscripts, now);
+  /**
+   * ⚠️ TWO STAGES, BECAUSE THE PAGE AND THE BOOK ARE AT DIFFERENT POINTS (B3).
+   *
+   * The GREETING's stage is the ACCOUNT's — an established writer adding a fourth manuscript has
+   * not gone back to day one, and telling them so would be absurd. But the CHART and the TASKS
+   * card are scoped, and a fresh book with no sends must show its own first-run state rather than
+   * a populated layout full of zeros: a zero-filled chart claims a reading that was never taken.
+   *
+   * `runStage` already models exactly this — "a manuscript but no sends: still before the line" —
+   * so the scoped stage is the same function over the scoped set, not a fourth state invented
+   * here. With no manuscripts at all both stages agree on day-one, which is why that case needs
+   * nothing extra.
+   */
+  const scopedStage = runStage(scopedQueries, manuscripts, now);
 
   return (
     <div
@@ -228,7 +242,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             />
             <OneScreenChart
               loading={loading} queries={scopedQueries} agents={agents} now={now}
-              dayOne={stage === "day-one"} earlyDays={stage === "early-days"}
+              dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
               onSendFirst={() => onNavigate("queries", "Send a query")}
             />
           </div>
@@ -240,7 +254,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
             agents={agents}
             userTasks={userTasks}
             now={now}
-            dayOne={stage === "day-one"}
+            dayOne={scopedStage === "day-one"}
             onAction={onTaskAction}
             onSeeAll={() => onNavigate("todo")}
             onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
