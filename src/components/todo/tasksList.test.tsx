@@ -237,12 +237,22 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
     expect(rule(".tdg-ic.off")).toBeTruthy();
   });
 
-  it("THE TICK IS THE ACT on a writer's own item — so its first icon is dim, not absent", () => {
+  it("⚠️ A WRITER'S OWN ITEM COMPLETES FROM ICON 1 — and yes, that duplicates its tick", () => {
+    /* ⚠️ STATED AS A DECISION, because it breaks a rule this page held for two packs: `cardMenu`
+       offers a user task NO primary, on the grounds that the tick is the act and a second verb
+       beside the circle is two names for one thing. That held while the control was a BUTTON
+       PRINTING A WORD. The cluster's first slot is fixed and always drawn, so the alternative is
+       a permanently dead icon down the whole of "Your tasks" — and a dim control that could have
+       worked teaches less than a duplicate that does. The ref draws the tick here too. */
     const mine = card({ key: "u1", userTaskId: "t1", kind: "", taskType: undefined, relatedRecordId: undefined, stream: "do", nature: "task" });
     const html = render(cols({ todo: [mine] }));
-    expect(html).toContain("tdg-tick");                        // the circle IS the verb
-    expect(html).toContain("tdg-ic prim off");                 // …so the deed icon states that
+    expect(html).toContain("tdg-tick");                        // the circle
+    expect(html).toContain('class="tdg-ic prim"');             // …and the deed, live, not dim
+    expect(html).toContain('aria-label="Complete"');           // named for what it does
     expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
+    /* the word is `rowPrimaryLabel`'s, in the same branch position as the glyph's */
+    expect(rowPrimaryLabel(mine, "todo")).toBe("Complete");
+    expect(rowPrimaryIcon(mine, "todo")).toBe("task");
   });
 
   it("⚠️ NOTHING AT REST, AND IT ARRIVES FOR A KEYBOARD TOO", () => {
@@ -360,50 +370,62 @@ describe("⚠️ EVERY ICON CARRIES A TOOLTIP, ON FOCUS AS WELL AS HOVER", () =>
 describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
   const sections = (c: BoardCard, col: TodoColumnId = "todo") => splitMenu(c, col, laterHideKey(c.taskType));
 
-  it("the ref's shape, in the ref's order — and SNOOZE is a control, not two rows", () => {
+  it("the ref's shape, in the ref's order — THIS QUERY, THIS ROW, then danger", () => {
     const secs = sections(card({}));
-    expect(secs.map((x) => x.head)).toEqual(["SNOOZE UNTIL", "THIS QUERY", null]);
-    /* ⚠️ THE PRESET ROWS ARE GONE, AND THE EMPTY `items` IS THE POINT. Tomorrow and Next week
-       asked the writer to round their intention to the nearer of two dates, and the day they
-       wanted was usually neither. */
-    expect(secs[0].items).toEqual([]);
-    expect(secs[0].dial).toEqual({ enabled: true, why: undefined });
-    expect(secs[1].items.map((i) => i.label)).toEqual(["Open the query", "Edit last entry"]);
+    expect(secs.map((x) => x.head)).toEqual(["THIS QUERY", "THIS ROW", null]);
+    expect(secs[0].items.map((i) => i.label)).toEqual(["Open the query", "Edit last entry"]);
+    expect(secs[1].items.map((i) => i.label)).toEqual(["Snooze…"]);
     expect(secs[2].items.map((i) => i.label)).toEqual(["Dismiss", "Stop showing this kind"]);
     expect(secs[2].danger).toBe(true);
   });
 
-  it("⚠️ IN SNOOZED THE HEAD CHANGES SHAPE — a sleeping card is MOVED, not snoozed", () => {
-    /* `cardMenu` already made this decision, swapping "Snooze…" for "Change the date…" there;
-       "Snooze until" over a card that is already asleep reads as a no-op. */
-    expect(sections(card({}), "snoozed")[0].head).toBe("MOVE IT TO");
-    expect(sections(card({}), "snoozed")[0].dial!.enabled).toBe(true);
+  it("⚠️ IT DUPLICATES SNOOZE AND DISMISS IN PLAIN LANGUAGE, WITH THEIR KEYS — deliberately", () => {
+    /* That duplication is the safety net rather than a redundancy. The cluster asks the writer to
+       learn a clock and a cross; anyone who never does reaches the same two deeds here, in words.
+       And the keys are PRINTED, because the menu is where the glyphs are taught — a shortcut
+       nobody is told about is a shortcut nobody has. */
+    const flat = sections(card({})).flatMap((x) => x.items);
+    expect(flat.find((i) => i.label === "Snooze…")!.hint).toBe("S");
+    expect(flat.find((i) => i.label === "Dismiss")!.hint).toBe("X");
+    expect(flat.find((i) => i.label === "Open the query")!.hint).toBe("O");
+    expect(flat.find((i) => i.label === "Edit last entry")!.hint).toBe("E");
+    /* the sheet prints them — the rule came BACK for this reason, having gone with the presets */
+    expect(cssDecls).toContain(".tdg-mkey");
+    expect(list).toContain('{it.hint && <span className="tdg-mkey" aria-hidden>{it.hint}</span>}');
   });
 
-  it("⚠️ A FINISHED CARD HAS NO DIAL, and says so rather than drawing a dead track", () => {
+  it("⚠️ `Snooze…` OPENS THE DIAL — it does not snooze, and the MODEL says so", () => {
+    /* `snooze-1` is only what the PERMISSION is asked about. Deciding "which id opens the dial" in
+       the renderer would put that knowledge in a second place. */
+    const snooze = sections(card({})).flatMap((x) => x.items).find((i) => i.label === "Snooze…")!;
+    expect(snooze.opens).toBe("dial");
+    expect(snooze.id).toBe("snooze-1");
+    expect(list).toContain('onClick={() => (it.opens === "dial" ? onOpenDial() : onPick(it.id))}');
+  });
+
+  it("⚠️ A FINISHED CARD CANNOT BE SNOOZED, and the row says why rather than vanishing", () => {
     /* Planning verbs on a finished thing imply it is not finished — `cardMenu` collapses Done to
-       its way back, and the dial takes its answer from there rather than deciding again. */
-    const done = sections(card({ done: true }), "done")[0];
-    expect(done.dial!.enabled).toBe(false);
-    expect(done.dial!.why).toMatch(/nothing left to put off/);
+       its way back, and this takes its answer from there rather than deciding again. */
+    const snooze = sections(card({ done: true }), "done").flatMap((x) => x.items).find((i) => i.label === "Snooze…")!;
+    expect(snooze.enabled).toBe(false);
+    expect(snooze.why).toMatch(/nothing left to put off/);
   });
 
-  it("⚠️ THE 12px DEAD ZONE TAKES NO CLICK — Dismiss is never one slip from the caret", () => {
+  it("⚠️ THE 12px DEAD ZONE TAKES NO CLICK — Dismiss is never one slip from the row above it", () => {
     const dz = rule(".tdg-deadzone {");
     expect(dz).toContain("height: 12px");
     expect(dz).toContain("pointer-events: none");
     expect(dz).toContain("border-bottom: 1px solid");
   });
 
-  it("⚠️ AN OFFER STILL GETS A DIAL — its CEILING is what says one day, not a greyed row", () => {
-    /* The greyed `Next week` row used to carry this; the dial carries it better, because the
-       limit is visible ON the control (one stop, and a caption saying why) rather than stated
-       beside a row you cannot press. The dismiss line keeps the greyed-not-absent treatment. */
+  it("⚠️ AN OFFER KEEPS ITS SNOOZE AND LOSES ITS DISMISS — greyed, never absent", () => {
+    /* The ceiling still lives in `clampSnooze` and the dial still shows it; what the menu carries
+       is the permission, and dismiss is the one an offer genuinely does not have. */
     const secs = sections(card({ taskType: "offer_received" }));
-    expect(secs[0].dial!.enabled).toBe(true);
-    expect(reachableStops(card({ taskType: "offer_received" }))).toHaveLength(1);
     const flat = secs.flatMap((x) => x.items);
-    expect(flat.map((i) => i.label)).toHaveLength(4);             // nothing is hidden
+    expect(flat.map((i) => i.label)).toHaveLength(5);             // nothing is hidden
+    expect(flat.find((i) => i.label === "Snooze…")!.enabled).toBe(true);
+    expect(reachableStops(card({ taskType: "offer_received" }))).toHaveLength(1);
     expect(flat.find((i) => i.label === "Dismiss")!.enabled).toBe(false);
     expect(flat.find((i) => i.label === "Dismiss")!.why).toMatch(/not yours to move/);
   });
@@ -419,45 +441,36 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
   });
 
   /**
-   * ⚠️ "NOTHING IS PRE-FOCUSED" IS SUPERSEDED, DELIBERATELY — and it is restated rather than
-   * deleted so the change reads as a decision.
+   * ⚠️ "NOTHING IS PRE-FOCUSED" IS BACK, AND THAT IS A RETURN RATHER THAN A NEW RULE.
    *
-   * That rule was written when this menu was a column of VERBS, where a pre-focused item meant
-   * Enter could fire something a slip away from Dismiss. The snooze section is a CONTROL now: it
-   * opens on tomorrow, Enter commits, and open-then-Enter is the commonest move on the page. What
-   * makes a one-key commit honest is that it is reversible from its own receipt — which it is.
-   *
-   * Where the dial is greyed there is nothing to drive, so focus falls back to the box and Enter
-   * still does nothing. No verb is ever pre-focused, in either case.
+   * It was suspended for exactly one pack, while this menu WORE the snooze dial: a control that
+   * opens on tomorrow and commits on Enter earns its focus, and the act was reversible from its
+   * own receipt. The menu is a column of VERBS again, so a pre-focused item would put Enter a slip
+   * from Dismiss. Focus goes to the box, which answers Escape and fires nothing.
    */
-  it("⚠️ THE SLIDER TAKES FOCUS WHERE THERE IS ONE — and no VERB ever does", () => {
-    expect(list).toContain("if (!sections.some((sec) => sec.dial?.enabled)) el.focus({ preventScroll: true });");
+  it("⚠️ NOTHING IS PRE-FOCUSED — Enter straight after opening does nothing", () => {
+    expect(list).toContain("el.focus({ preventScroll: true });");
     expect(list).not.toContain("items[0]?.focus()");
-    /* the child's autoFocus lands in the commit phase, BEFORE the parent's layout effect — so the
-       guard is what stops the box taking focus straight back off the slider */
-    expect(list).toContain("autoFocus />");
-    expect(dialSrc).toContain("autoFocus={autoFocus}");
+    expect(code(list)).not.toContain("sec.dial");
   });
 
   /**
-   * ⚠️ THE NUMBER KEYS ARE EXTINCT, IN ALL FOUR PLACES THEY LIVED (Phase 4).
+   * ⚠️ THE NUMBER KEYS STAY EXTINCT — `.tdg-mkey` DOES NOT, AND THE DISTINCTION MATTERS.
    *
-   * `1` and `2` fired the two preset snooze rows. A continuous twelve-stop scale has no two stops
-   * worth a shortcut — picking tomorrow is open-then-Enter now, which is FEWER keys than it was —
-   * so the binding has nothing left to select. Deleted rather than left unreferenced: a binding
-   * kept past the thing it selected is the next reader's puzzle, and worse, an invitation to
-   * re-point it at something arbitrary.
+   * `1` and `2` fired two preset snooze rows and went when the presets did. The CLASS that printed
+   * them is back, for a different reason: the cluster made this menu the place the glyphs are
+   * taught, so rows print the key they answer to. What must not come back is a binding to a row
+   * that no longer exists.
    */
-  it("the constant, the hint field, the handler and the CSS are all GONE, not merely unused", () => {
-    /* on DECLARATIONS, not raw text — this sheet's house style explains a rule by naming what it
-       forbids, so a naive whole-file search fails on a correct file that documents itself */
+  it("the number-key constant and its handler are still gone", () => {
     expect(code(rowSrc)).not.toContain("SPLIT_NUMBER_KEYS");
-    expect(code(rowSrc)).not.toContain("hint");        // the field the two rows carried
     expect(code(list)).not.toContain("SPLIT_NUMBER_KEYS");
-    expect(code(list)).not.toContain("tdg-mkey");
-    expect(cssDecls).not.toContain(".tdg-mkey");       // its rule AND its dim-state override
     /* the menu's keydown answers Escape and nothing else */
     expect(list).toContain('if (e.key === "Escape") { e.stopPropagation(); onClose(true); }');
+    /* …and no hint anywhere is a bare digit: the keys printed are the CLUSTER's letters */
+    for (const it of sections(card({})).flatMap((x) => x.items)) {
+      if (it.hint) expect(it.hint).not.toMatch(/^[0-9]$/);
+    }
   });
 
   /**
@@ -485,35 +498,38 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
 });
 
 /**
- * ⚠️ THE DIAL, WORN INLINE (Fix 4 revision, Phase 2; ref todo-weight-slider-v1.html panels 2–3).
+ * ⚠️ ONE SNOOZE SURFACE, FOUR DOORS ONTO IT (icon-cluster P2).
  *
- * The two preset rows are replaced by the snooze dial itself. The rule that made this safe to do
- * is that there is still exactly ONE dial: `SnoozeDialBody` was extracted from the popover so the
- * menu could wear the same control, rather than a second slider being built for the menu — which
- * is the thing the pack forbade in as many words.
+ * The dial was worn INLINE in this menu for exactly one pack. That was the right shape while the
+ * menu was the row's only control; with the cluster it would have been a SECOND snooze surface
+ * beside icon 2 — and two surfaces for one act is how they come to disagree about a ceiling. The
+ * body extraction survives (the popover still uses it), but only the popover mounts it.
  */
-describe("⚠️ ONE DIAL, TWO SURFACES — the menu wears the control, it does not copy it", () => {
-  it("the menu renders `SnoozeDialBody`, and the popover renders the very same component", () => {
-    expect(list).toContain("<SnoozeDialBody card={card} onSnooze={onSnooze} autoFocus />");
+describe("⚠️ ONE SNOOZE SURFACE, AND FOUR WAYS IN", () => {
+  it("the inline mount is RETIRED — the menu hands off, it does not wear a dial", () => {
+    expect(code(list)).not.toContain("SnoozeDialBody");
+    expect(code(list)).not.toContain("tdg-mdial");
+    expect(cssDecls).not.toContain(".tdg-mdial");        // deleted, not left unreferenced
+    /* the extraction itself stays: the popover is a wrapper around the body, and the body owns
+       no popover machinery of its own */
     expect(dialSrc).toContain("export const SnoozeDialBody");
-    /* the popover is now a wrapper around it — portal, placement and closers, nothing more */
-    expect(dialSrc).toContain("<SnoozeDialBody card={card} daysUntilDeadline={daysUntilDeadline} onSnooze={onSnooze} autoFocus />");
-    /* …and the body itself owns no popover machinery, or the inline copy would fight the menu's */
     const body = dialSrc.slice(dialSrc.indexOf("export const SnoozeDialBody"), dialSrc.indexOf("export const SnoozeDial:"));
     expect(body).not.toContain("createPortal");
     expect(body).not.toContain("addEventListener");
   });
 
-  it("⚠️ BOTH ENTRY POINTS SURVIVE — the dial gained a surface, it did not lose one", () => {
-    /* `s` on the focused row, and Snoozed's "Change the date…". A refactor that quietly cost an
-       entry point would be a regression wearing a tidy-up's clothes. */
+  it("⚠️ ALL FOUR DOORS REACH THE SAME POPOVER — none was lost in the swap", () => {
+    /* icon 2, the menu's `Snooze…` row, the `S` key, and Snoozed's "Change the date…". A refactor
+       that quietly cost an entry point would be a regression wearing a tidy-up's clothes. */
     expect(list).toContain("<SnoozeDial");
-    expect(list).toContain('setDial({ card: c, anchor: el })');
-    expect(dialSrc).toContain("<BrandDatePicker");        // the exact-date route, kept
+    expect(list).toContain('onFire={(el) => setDial({ card: c, anchor: el })}');            // icon 2
+    expect(list).toContain("onOpenDial={() => { setSplit(null); setDial({ card: split.card, anchor: split.anchor }); }}");
+    expect(list).toContain('setDial({ card: c, anchor: el })');                             // the S key
+    expect(dialSrc).toContain("<BrandDatePicker");                                          // the exact date
   });
 
-  it("the write is the page's own `onSnooze`, already clamped inside the body", () => {
-    expect(list).toContain("onSnooze={(days, when) => { setSplit(null); onSnooze(split.card, days, when); }}");
+  it("the write is still the page's own `onSnooze`, clamped inside the body", () => {
+    expect(list).toContain("onSnooze={(days, when) => { setDial(null); onSnooze(dial.card, days, when); }}");
     expect(dialSrc).toContain("clampSnooze(card, days,");
   });
 
@@ -523,14 +539,9 @@ describe("⚠️ ONE DIAL, TWO SURFACES — the menu wears the control, it does 
     expect(boardCss).toContain("width: 228px");           // the shell's own, untouched
   });
 
-  it("⚠️ THE GREYED DIAL REUSES THE EXISTING `.tbd-mi.dim` GRAMMAR — no fourth state rule", () => {
-    expect(list).toContain('className="tbd-mi dim" role="menuitem" aria-disabled');
-    /* the state rules that already existed, still the only ones */
+  it("⚠️ AN INAPPLICABLE ROW STILL REUSES `.tbd-mi.dim` — no state rule of its own", () => {
     expect(cssDecls).toContain(".tbd-mi.dim, .tbd-mi:disabled");
-    expect(cssDecls).not.toContain(".tdg-mdial.dim");
-    /* and it is not a <button disabled>: a button takes the shape of something pressable and
-       then refuses, where a plain row with `aria-disabled` never offered */
-    expect(list).not.toContain('className="tbd-mi dim" disabled');
+    expect(list).toContain('className={`tbd-mi${it.enabled ? "" : " dim"}`}');
   });
 });
 

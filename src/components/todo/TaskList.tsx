@@ -48,7 +48,7 @@ import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/
 import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { PortalMenu } from "./PortalMenu";
-import { SnoozeDial, SnoozeDialBody } from "./SnoozeDial";
+import { SnoozeDial } from "./SnoozeDial";
 import "./todoGroups.css";
 
 export interface TaskListProps {
@@ -229,10 +229,10 @@ const SplitMenu: React.FC<{
   column: TodoColumnId;
   anchor: HTMLElement;
   onPick: (id: MenuItemId) => void;
-  /** The dial's write, straight through — the menu decides nothing about it. */
-  onSnooze: (days: number, when: string) => void;
+  /** ⚠️ THE MENU HANDS THE DIAL OFF; IT NO LONGER WEARS ONE. See the `Snooze…` row below. */
+  onOpenDial: () => void;
   onClose: (returnFocus: boolean) => void;
-}> = ({ card, column, anchor, onPick, onSnooze, onClose }) => {
+}> = ({ card, column, anchor, onPick, onOpenDial, onClose }) => {
   const elRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const sections = splitMenu(card, column, laterHideKey(card.taskType));
@@ -244,16 +244,11 @@ const SplitMenu: React.FC<{
     const b = el.getBoundingClientRect();
     const p = placeMenu(r, { w: b.width, h: b.height }, { w: window.innerWidth, h: window.innerHeight });
     setPos({ left: p.left, top: p.top });
-    /* ⚠️ THE SLIDER TAKES FOCUS WHERE THERE IS ONE, AND THIS SUPERSEDES "NOTHING IS PRE-FOCUSED".
-       That rule was written when the menu was a column of VERBS, where a pre-focused item made
-       Enter fire something destructive-adjacent by accident. The snooze section is a control now:
-       it opens on tomorrow, Enter commits, and open-then-Enter is the commonest move on the page —
-       so the slider is focused deliberately, and the act it commits is reversible from its own
-       receipt, which is what makes a one-key commit honest. Where the dial is greyed there is
-       nothing to drive, so focus falls back to the BOX and Enter still does nothing. The child's
-       `autoFocus` lands in the commit phase, i.e. BEFORE this effect — so this must not take it
-       back, and the guard is what stops it. */
-    if (!sections.some((sec) => sec.dial?.enabled)) el.focus({ preventScroll: true });
+    /* ⚠️ NOTHING IS PRE-FOCUSED, AND THAT RULE IS BACK RATHER THAN NEW. It was suspended for one
+       pack while this menu WORE the snooze dial — a control that opens on tomorrow and commits on
+       Enter earns its focus. The menu is a column of VERBS again, so a pre-focused item would put
+       Enter a slip from Dismiss. Focus goes to the box, which answers Escape and fires nothing. */
+    el.focus({ preventScroll: true });
   }, [anchor]);
 
   useEffect(() => {
@@ -292,21 +287,6 @@ const SplitMenu: React.FC<{
         <React.Fragment key={si}>
           {sec.danger && <div className="tdg-deadzone" aria-hidden />}
           {sec.head && <div className="tbd-mhead">{sec.head}</div>}
-          {/* ⚠️ THE SAME DIAL THE `s` KEY OPENS, worn inline — `SnoozeDialBody`, not a copy of it.
-              ⚠️ AND WHERE IT CANNOT ACT IT IS GREY, NEVER ABSENT, wearing `.tbd-mi.dim` — the
-              greyed grammar that already exists in this sheet rather than a fourth state rule.
-              `aria-disabled` with no handler, because a `<button disabled>` would take the shape
-              of something pressable and then refuse. */}
-          {sec.dial && (sec.dial.enabled ? (
-            <div className="tdg-mdial">
-              <SnoozeDialBody card={card} onSnooze={onSnooze} autoFocus />
-            </div>
-          ) : (
-            <div className="tbd-mi dim" role="menuitem" aria-disabled title={sec.dial.why}>
-              <span className="tdg-mglyph" aria-hidden>◷</span>
-              {sec.dial.why}
-            </div>
-          ))}
           {sec.items.map((it) => (
             <button
               key={it.id}
@@ -315,10 +295,15 @@ const SplitMenu: React.FC<{
               className={`tbd-mi${it.enabled ? "" : " dim"}`}
               disabled={!it.enabled}
               title={it.why}
-              onClick={() => onPick(it.id)}
+              /* ⚠️ A ROW THAT OPENS A SURFACE IS NOT A ROW THAT PERFORMS A VERB, and the MODEL says
+                 which it is. `Snooze…` hands off to the one dial; everything else resolves through
+                 `cardMenu` as it always did. Deciding this here by matching on the id would put
+                 "which id opens the dial" in a second place. */
+              onClick={() => (it.opens === "dial" ? onOpenDial() : onPick(it.id))}
             >
               <span className="tdg-mglyph" aria-hidden>{it.glyph}</span>
               {it.label}
+              {it.hint && <span className="tdg-mkey" aria-hidden>{it.hint}</span>}
             </button>
           ))}
         </React.Fragment>
@@ -630,14 +615,22 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
             sixteen times over. An inapplicable icon DIMS IN PLACE and is inert; it is never
             removed, so the column cannot reflow between one row and the next. */}
         <div className="tdg-acts" onClick={(e) => e.stopPropagation()}>
+          {/* ⚠️ ICON 1 IS THE ONE THAT TAKES OVER THE SURFACE, and that is a decision rather than
+              an inconsistency. Its deed is the DOCK — `openDock` is the app's one entrance, and
+              its own note says two work surfaces would have to agree about what "done" means. An
+              anchored popover here would have been that second surface. So "nothing opens a modal,
+              the list stays visible" holds for icons 2, 3 and 4; icon 1 is the exception, stated.
+              ⚠️ A WRITER'S OWN ITEM COMPLETES DIRECTLY — no dock, no popover. It is the one row
+              where the deed duplicates the tick beside it; the ref draws it that way, and a
+              permanently dead first slot down the whole of "Your tasks" is the worse reading. */}
           <RowIcon
             kind="prim"
             Glyph={PRIMARY_GLYPH[rowPrimaryIcon(c, column)]}
             label={primary ? primary.label : rowPrimaryLabel(c, column)}
             hint="↵"
-            enabled={!!primary}
-            why="The tick is the act on this one."
-            onFire={() => primary && fire(c, column, primary.id)}
+            enabled={!!primary || (tickable && !c.done)}
+            why="There is nothing to do on this one."
+            onFire={() => (primary ? fire(c, column, primary.id) : tick(c))}
           />
           <RowIcon
             Glyph={Clock}
@@ -697,10 +690,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           column={split.column}
           anchor={split.anchor}
           onPick={(id) => { setSplit(null); fire(split.card, split.column, id); }}
-          /* ⚠️ THE DIAL'S WRITE IS THE PAGE'S OWN `onSnooze` — the same one the popover dial has
-             always called, already clamped and re-labelled by `clampSnooze` inside the body. The
-             menu closes because the act is done, exactly as picking a verb closes it. */
-          onSnooze={(days, when) => { setSplit(null); onSnooze(split.card, days, when); }}
+          /* ⚠️ ONE SNOOZE SURFACE, FOUR DOORS ONTO IT. The menu closes and the DIAL opens, anchored
+             to the icon that opened the menu — so the `Snooze…` row, icon 2, the `S` key and
+             Snoozed's "Change the date…" all arrive at the same control in the same place. The
+             menu wore its own inline copy for one pack; two surfaces for one act is how they come
+             to disagree about a ceiling. */
+          onOpenDial={() => { setSplit(null); setDial({ card: split.card, anchor: split.anchor }); }}
           onClose={(returnFocus) => {
             /* ⚠️ FOCUS RETURNS TO THE ICON THAT OPENED IT — the anchor IS that button now. It used
                to hunt for `.tdg-split-p` INSIDE the anchor, because the anchor was the split's

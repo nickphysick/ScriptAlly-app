@@ -445,7 +445,18 @@
 
 /* The dial, worn inline. Its own popover supplies 18/20 padding; here the menu's 6px does most of
    the work, so this adds only what the rows already get and a little air beneath the head. */
-.tdg-mdial { padding: 2px 10px 6px; }
+/* ⚠️ `.tdg-mkey` IS BACK, FOR A DIFFERENT REASON THAN IT LEFT. It printed the `1` and `2` beside
+   two preset snooze rows and went when the presets did. The cluster made this menu the place the
+   GLYPHS are taught — a row naming the deed in words with its key beside it is what rescues anyone
+   who never learns the clock — so the key is printed again, on rows that have one. */
+.tdg-mkey {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  color: #a5988c;
+}
+
+.tbd-mi.dim .tdg-mkey { color: #d5ccc1; }
 
 .tdg-mglyph { width: 14px; text-align: center; flex: none; opacity: 0.75; }
 

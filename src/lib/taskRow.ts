@@ -84,6 +84,12 @@ export function rowPrimaryLabel(c: BoardCard, column: TodoColumnId): string {
   if (column === "snoozed") return "Return";
   if (isSweepCard(c)) return "Start";
   if (c.taskType === "no_response_close") return "Close";
+  /* ⚠️ A WRITER'S OWN ITEM IS COMPLETED, NOT "ACTIONED" (icon-cluster P2). The split button never
+     drew this branch — `cardMenu` offers a user task no primary, so the button simply did not
+     render and the word was never needed. The cluster has a FIXED first slot, so the deed is
+     always named; "Action" there would promise a flow that does not exist. Kept in the same
+     position as `rowPrimaryIcon`'s `task` branch so the two stay line for line. */
+  if (completionVia(c) === "user-task") return "Complete";
   return "Action";
 }
 
@@ -173,6 +179,19 @@ export interface SplitItem {
   id: MenuItemId;
   glyph: string;
   label: string;
+  /**
+   * ⚠️ THE KEY, PRINTED — AND THIS FIELD IS BACK FOR A DIFFERENT REASON THAN IT LEFT. It once
+   * carried `1` and `2` beside two preset snooze rows, and went when the presets did. It returns
+   * because the cluster made the menu the place the GLYPHS are taught: a row that names the deed
+   * in words and shows its key is what rescues anyone who never learns the clock.
+   */
+  hint?: string;
+  /**
+   * ⚠️ SOME ROWS OPEN A SURFACE RATHER THAN PERFORMING A VERB. Stated on the model instead of
+   * pattern-matched on the id in the renderer, because "which id means open the dial" is exactly
+   * the kind of knowledge that ends up in two places and then disagrees.
+   */
+  opens?: "dial";
   /** ⚠️ A VERB THAT DOES NOT APPLY IS GREYED, NEVER ABSENT — an absent row is a puzzle, a greyed
    *  one is an answer. `why` becomes the control's title so the answer is readable. */
   enabled: boolean;
@@ -180,21 +199,10 @@ export interface SplitItem {
 }
 
 export interface SplitSection {
-  head: "SNOOZE UNTIL" | "MOVE IT TO" | "THIS QUERY" | null;
+  head: "THIS QUERY" | "THIS ROW" | null;
   /** The last section sits below a dead zone and a rule; nothing destructive is within a
-   *  pointer's drift of the caret. */
+   *  pointer's drift of the row above it. */
   danger?: true;
-  /**
-   * ⚠️ THE SNOOZE SECTION IS A CONTROL, NOT A LIST OF ROWS. Two prescribed stops asked the writer
-   * to round their own intention to the nearer of Tomorrow and Next week, and the day they wanted
-   * was usually neither; the dial names the resulting date before they commit to it, which is the
-   * one thing they actually want to know. Empty `items` here is the point, not an oversight.
-   *
-   * `enabled` is `cardMenu`'s answer, never a second permission table: a finished card has no
-   * snooze at all (planning verbs on a finished thing imply it is not finished), so the section
-   * states that rather than drawing a track that can write nothing.
-   */
-  dial?: { enabled: boolean; why?: string };
   items: SplitItem[];
 }
 
@@ -228,28 +236,30 @@ export function splitMenu(
 
   return [
     {
-      /* ⚠️ THE HEAD CHANGES SHAPE IN SNOOZED, because `cardMenu` already decided it does: a card
-         that is asleep is not being snoozed, it is being MOVED. "Snooze until" over a sleeping
-         card reads as a no-op, which is the exact confusion the menu model avoided when it
-         swapped "Snooze…" for "Change the date…" there. */
-      head: column === "snoozed" ? "MOVE IT TO" : "SNOOZE UNTIL",
-      /* ⚠️ ONE STOP IS STILL A DIAL. An offer's ceiling is a day, so its track has a single stop
-         and a caption saying why — the dial answers "why can't I" itself, which is what the greyed
-         `Next week` row used to do and does better, because the limit is visible on the control
-         rather than stated beside a row you cannot press. */
-      dial: {
-        enabled: live("snooze-1"),
-        why: live("snooze-1") ? undefined : "A finished task has nothing left to put off.",
-      },
-      items: [],
-    },
-    {
       head: "THIS QUERY",
       items: [
-        { id: "open-query", glyph: "↗", label: "Open the query", enabled: live("open-query") },
+        { id: "open-query", glyph: "↗", label: "Open the query", hint: "O", enabled: live("open-query") },
         {
-          id: "edit-task", glyph: "✎", label: "Edit last entry", enabled: live("edit-task"),
+          id: "edit-task", glyph: "✎", label: "Edit last entry", hint: "E", enabled: live("edit-task"),
           why: live("edit-task") ? undefined : "There is no entry of yours on this one to edit.",
+        },
+      ],
+    },
+    {
+      /* ⚠️ THE MENU DELIBERATELY DUPLICATES SNOOZE AND DISMISS IN PLAIN LANGUAGE, and that is the
+         safety net rather than a redundancy. The cluster asks the writer to learn a clock and a
+         cross; anyone who never does can reach the same two deeds here, in words, with their keys
+         beside them. That is also why the keys are printed: the menu is where the glyphs are
+         taught, and a shortcut nobody is told about is a shortcut nobody has. */
+      head: "THIS ROW",
+      items: [
+        {
+          /* ⚠️ IT OPENS THE DIAL — it does not snooze. `snooze-1` is only what the PERMISSION is
+             asked about; `opens` is what actually happens, so there is exactly one snooze surface
+             in the app and this row is a fourth door onto it rather than a second control. */
+          id: "snooze-1", glyph: "◷", label: "Snooze…", hint: "S", opens: "dial",
+          enabled: live("snooze-1"),
+          why: live("snooze-1") ? undefined : "A finished task has nothing left to put off.",
         },
       ],
     },
@@ -258,7 +268,7 @@ export function splitMenu(
       danger: true,
       items: [
         {
-          id: "dismiss-week", glyph: "×", label: "Dismiss", enabled: live("dismiss-week"),
+          id: "dismiss-week", glyph: "×", label: "Dismiss", hint: "X", enabled: live("dismiss-week"),
           why: isOffer ? "An offer has a reply-by date that is not yours to move." : undefined,
         },
         {
