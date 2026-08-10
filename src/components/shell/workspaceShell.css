@@ -641,6 +641,33 @@
   border-radius: 8px;
 }
 
+
+
+/* ══ POLISH P6 — the manuscript selector ═════════════════════════════════════════════════════ */
+/* ⚠️ THE HEAD IS A COLUMN NOW: card, then arrows/dots beneath it. The pill was the only child and
+   sat in a row; the arrows are a sibling, so the container has to say which way things stack. */
+.ws-phead { display: flex; flex-direction: column; }
+/* full width, matching the nav rows below — the card no longer shares its line with a chevron */
+.ws-phead .ws-mspill { width: 100%; flex: none; }
+.ws-msnav { display: flex; justify-content: flex-end; gap: 2px; margin-top: 4px; }
+/* 20x24 hit areas, per the ref */
+.ws-msarrow {
+  width: 20px; height: 24px; padding: 0;
+  display: grid; place-items: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--shell-muted);
+  border-radius: 6px;
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+.ws-msarrow svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.9; }
+.ws-msarrow:hover:not(:disabled) { background: #efeae1; color: #241811; }
+.ws-msarrow:active:not(:disabled) { transform: scale(0.97); }
+/* ⚠️ GREYED AND ACTUALLY DISABLED — a control that looks off but still fires is worse than either */
+.ws-msarrow:disabled { opacity: 0.4; cursor: default; }
+.ws-msdots { display: flex; justify-content: center; gap: 4px; margin-top: 5px; }
+.ws-msdot { width: 4px; height: 4px; border-radius: 50%; background: #d6cdbf; transition: background-color 0.14s ease; }
+.ws-msdot.on { background: #8a7a6c; }
+
 /* ⚠️ LAST IN THE FILE, DELIBERATELY — equal specificity means source order decides, so a rule
    added below this block would be exempt from it without anyone noticing. */
 @media (prefers-reduced-motion: reduce) {

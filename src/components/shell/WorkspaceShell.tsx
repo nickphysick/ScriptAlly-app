@@ -28,7 +28,7 @@ import {
   Book, ChevronDown, ChevronsUpDown, ChevronsLeft, ChevronsRight, Plus, Settings,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { planLine, resolveActiveManuscript } from "../../lib/shellSidebar";
+import { planLine, resolveActiveManuscript, stepManuscript } from "../../lib/shellSidebar";
 import {
   ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
@@ -202,14 +202,30 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   }, [hit, openId, runPlan]);
 
   /* ── the manuscript selector ── */
-  const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
-  const activeMs = resolveActiveManuscript(manuscripts, storedMs);
+  /* ⚠️ THE SELECTION IS STATE, NOT A localStorage READ PER RENDER (polish P6). The arrows have to
+     change what is on screen, and a value read straight from storage during render never triggers
+     one. Storage is still the source of truth ACROSS mounts — Packages, Comps and Manuscripts all
+     read the same key — so the state is seeded from it and written back on every change. */
+  const [msId, setMsId] = useState<string | null>(
+    () => (typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY))
+  );
+  const activeMs = resolveActiveManuscript(manuscripts, msId);
   const manyMs = manuscripts.length > 1;
   const pickMs = useCallback((id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* not worth an error */ }
+    setMsId(id);
     setMsOpen(false);
     onNavigatePath(`${pathname}${search}`);
   }, [onNavigatePath, pathname, search]);
+  /* ⚠️ STEPPING DOES NOT RE-ROUTE. Wiring the whole dashboard to the active manuscript is later
+     work; this delivers the control and the selection only, so it must not fire a navigation the
+     picker fires for its own reasons. */
+  const stepMs = useCallback((dir: 1 | -1) => {
+    const next = stepManuscript(manuscripts, activeMs?.id ?? null, dir);
+    if (!next || next === activeMs?.id) return;
+    try { localStorage.setItem(ACTIVE_MS_KEY, next); } catch { /* not worth an error */ }
+    setMsId(next);
+  }, [manuscripts, activeMs?.id]);
 
   const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
@@ -271,8 +287,31 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     <span className="ws-mst">{activeMs.title}</span>
                     {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}
                   </span>
-                  {manyMs && <span className="ws-chev"><ChevronsUpDown aria-hidden="true" /></span>}
                 </button>
+                {/* ⚠️ THE ARROWS ARE A SHORTCUT, NOT THE ONLY ROUTE — the card still opens the
+                    full picker. They sit OUTSIDE that button because a button inside a button is
+                    invalid and the inner one never receives its own click. */}
+                <div className="ws-msnav">
+                  <button
+                    type="button" className="ws-msarrow" disabled={!manyMs}
+                    aria-label="Previous manuscript"
+                    onClick={() => stepMs(-1)}
+                  ><ChevronsLeft aria-hidden="true" /></button>
+                  <button
+                    type="button" className="ws-msarrow" disabled={!manyMs}
+                    aria-label="Next manuscript"
+                    onClick={() => stepMs(1)}
+                  ><ChevronsRight aria-hidden="true" /></button>
+                </div>
+                {/* ⚠️ DOTS ONLY WHEN THERE IS SOMETHING TO STEP THROUGH — one dot beneath one
+                    manuscript is a control describing nothing. */}
+                {manyMs && (
+                  <div className="ws-msdots" aria-hidden="true">
+                    {manuscripts.map((m) => (
+                      <span key={m.id} className={`ws-msdot${m.id === activeMs?.id ? " on" : ""}`} />
+                    ))}
+                  </div>
+                )}
                 {msOpen && manyMs && (
                   <MenuCard heading="Manuscript" className="ws-msmenu" role="menu">
                     {manuscripts.map((m) => (
