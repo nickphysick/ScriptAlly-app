@@ -62,6 +62,10 @@ service cloud.firestore {
         && (!data.keys().hasAny(['tags']) || (data.tags is list && data.tags.size() <= 64))
         // board-optimise P5: the four desk behaviours as one map (the safe hasAny pattern)
         && (!data.keys().hasAny(['todoPrefs']) || data.todoPrefs is map)
+        // manuscript-scope B1: the workspace's selected book — a string when present. The safe
+        // hasAny pattern, so existing user docs without the key stay valid.
+        && (!data.keys().hasAny(['selectedManuscriptId'])
+            || (data.selectedManuscriptId is string && data.selectedManuscriptId.size() <= 128))
         && data.subscriptionStatus is string && (
           data.subscriptionStatus == 'active' ||
           data.subscriptionStatus == 'trialing' ||
@@ -484,7 +488,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed', 'todoPrefs'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'selectedManuscriptId'])
       );
 
       // ROUTE: Manuscripts

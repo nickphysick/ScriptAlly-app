@@ -57,6 +57,21 @@ export interface User {
   // these keys is deployed (the affectedKeys gotcha).
   goalTarget?: number;
   goalPeriod?: "quarter" | "month" | "year";
+  /**
+   * The manuscript the workspace is scoped to.
+   *
+   * ⚠️ THE ONLY STORED VALUE IN THE MANUSCRIPT-SCOPE PACK, and it is stored because it is a
+   * PREFERENCE — nothing about the data says which book you want to look at, so it cannot be
+   * derived. Everything the dashboard shows for it is still derived at read time from the
+   * filtered set; there are no per-manuscript counters.
+   *
+   * ⚠️ ABSENT means "not chosen", never null — and an id pointing at a deleted manuscript resolves
+   * to the default rather than throwing (see resolveScopedManuscript).
+   *
+   * NOTE: rules-gated — writes are silently denied until the firestore.rules revision carrying
+   * this key is deployed (the affectedKeys gotcha).
+   */
+  selectedManuscriptId?: string;
   // One-screen dashboard tour (§12): completion stamp (set on Finish OR Skip — skipping counts)
   // and the explicit dismissal. Day-7 chip visibility is DERIVED from the auth account's creation
   // time, never stored. Rules-gated like the goal fields.

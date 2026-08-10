@@ -166,3 +166,41 @@ export function stepManuscript(
   const next = (from + dir + manuscripts.length) % manuscripts.length;
   return manuscripts[next].id;
 }
+
+/**
+ * The manuscript the workspace is scoped to (manuscript-scope B1).
+ *
+ * ⚠️ IDENTITY IS BY ID, NEVER BY TITLE. Two manuscripts may share a title, a title may be edited,
+ * and a display string is not a key — the whole pack forbids matching on one.
+ *
+ * ⚠️ A STORED ID THAT NO LONGER RESOLVES FALLS BACK, IT DOES NOT THROW. Deleting the selected
+ * manuscript is an ordinary thing to do, and the shell must not be the thing that breaks when it
+ * happens. Same path covers "never chosen".
+ *
+ * The default is the most recently CREATED manuscript. `Manuscript` carries no `updatedAt`, and
+ * adding one is a schema change with migration implications for a default — noted as possible
+ * future work rather than done here. `createdDate` is optional and legacy rows lack it, so those
+ * sort last and the array order decides between them, which is stable.
+ */
+export function resolveScopedManuscript<T extends { id: string; createdDate?: string }>(
+  manuscripts: T[],
+  storedId: string | null | undefined,
+): T | null {
+  if (manuscripts.length === 0) return null;
+  const stored = storedId ? manuscripts.find((m) => m.id === storedId) : undefined;
+  if (stored) return stored;
+  return mostRecentlyCreated(manuscripts);
+}
+
+/** Newest by `createdDate`; undated rows sort last and keep their given order. */
+export function mostRecentlyCreated<T extends { createdDate?: string }>(manuscripts: T[]): T | null {
+  if (manuscripts.length === 0) return null;
+  let best = manuscripts[0];
+  let bestMs = Date.parse(best.createdDate ?? "");
+  for (const m of manuscripts.slice(1)) {
+    const ms = Date.parse(m.createdDate ?? "");
+    // ⚠️ NaN comparisons are always false, so an undated row never displaces a dated one.
+    if (Number.isNaN(bestMs) ? !Number.isNaN(ms) : ms > bestMs) { best = m; bestMs = ms; }
+  }
+  return best;
+}

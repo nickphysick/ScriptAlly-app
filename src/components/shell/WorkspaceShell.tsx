@@ -28,7 +28,7 @@ import {
   Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Plus, Settings,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { planLine, resolveActiveManuscript, stepManuscript } from "../../lib/shellSidebar";
+import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
 import {
   ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
@@ -106,7 +106,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
-  const { manuscripts, currentUser } = useScriptAllyDb();
+  const { manuscripts, currentUser, updateUserProfile } = useScriptAllyDb();
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
@@ -202,30 +202,39 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   }, [hit, openId, runPlan]);
 
   /* ── the manuscript selector ── */
-  /* ⚠️ THE SELECTION IS STATE, NOT A localStorage READ PER RENDER (polish P6). The arrows have to
-     change what is on screen, and a value read straight from storage during render never triggers
-     one. Storage is still the source of truth ACROSS mounts — Packages, Comps and Manuscripts all
-     read the same key — so the state is seeded from it and written back on every change. */
-  const [msId, setMsId] = useState<string | null>(
-    () => (typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY))
-  );
-  const activeMs = resolveActiveManuscript(manuscripts, msId);
+  /**
+   * ⚠️ THE SELECTION LIVES ON THE USER DOCUMENT (manuscript-scope B1) — it is a PREFERENCE, so it
+   * cannot be derived, and it must follow the writer between devices rather than sitting in one
+   * browser's localStorage.
+   *
+   * ⚠️ THE localStorage KEY IS STILL WRITTEN, and that is deliberate, not a leftover. Packages,
+   * Comps, Manuscripts and the page-smoke harness all read `scriptally_active_manuscript_id`
+   * directly; dropping it here would leave them on a different book from the chrome, silently.
+   * The user doc is the source of truth, the key is a mirror, and this is the one writer that
+   * keeps them in step. Converting those pages is separate work.
+   *
+   * ⚠️ AND THE WRITE IS RULES-GATED. Until the firestore.rules revision carrying
+   * `selectedManuscriptId` is deployed, the field is silently denied by the hasOnly() allowlist —
+   * the selection would appear to work and never persist.
+   */
+  const activeMs = resolveScopedManuscript(manuscripts, currentUser?.selectedManuscriptId);
   const manyMs = manuscripts.length > 1;
-  const pickMs = useCallback((id: string) => {
+  const chooseMs = useCallback((id: string) => {
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* not worth an error */ }
-    setMsId(id);
+    void updateUserProfile({ selectedManuscriptId: id });
+  }, [updateUserProfile]);
+  const pickMs = useCallback((id: string) => {
+    chooseMs(id);
     setMsOpen(false);
     onNavigatePath(`${pathname}${search}`);
-  }, [onNavigatePath, pathname, search]);
-  /* ⚠️ STEPPING DOES NOT RE-ROUTE. Wiring the whole dashboard to the active manuscript is later
-     work; this delivers the control and the selection only, so it must not fire a navigation the
-     picker fires for its own reasons. */
+  }, [chooseMs, onNavigatePath, pathname, search]);
+  /* ⚠️ STEPPING DOES NOT RE-ROUTE — the picker navigates for its own reasons; an arrow is a
+     change of scope, not of page. */
   const stepMs = useCallback((dir: 1 | -1) => {
     const next = stepManuscript(manuscripts, activeMs?.id ?? null, dir);
     if (!next || next === activeMs?.id) return;
-    try { localStorage.setItem(ACTIVE_MS_KEY, next); } catch { /* not worth an error */ }
-    setMsId(next);
-  }, [manuscripts, activeMs?.id]);
+    chooseMs(next);
+  }, [manuscripts, activeMs?.id, chooseMs]);
 
   const save = useSaveState();
   const crumb = shellCrumb(sections, hit);
