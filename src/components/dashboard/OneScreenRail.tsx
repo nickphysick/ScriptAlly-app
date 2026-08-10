@@ -86,6 +86,30 @@ const TYPE_PILL: Record<string, { label: string; sage: boolean }> = {
   [ActivityType.MANUSCRIPT_DELETED]: { label: "Manuscript removed", sage: false },
 };
 
+/**
+ * ⚠️ A CAPTION ADDS WHAT THE SUBJECT LINE DOES NOT ALREADY SAY (fixes-2 A3).
+ *
+ * THE FAULT: `agentPrimary` correctly falls back to the AGENCY for a nameless agent — and the
+ * caption then led with the agency too, so the row read
+ *
+ *     Penhallow Literary
+ *     PENHALLOW LITERARY · DETAILS UPDATED
+ *
+ * ⚠️ THIS IS A GENERAL RULE, NOT AN AGENT-UPDATED PATCH. The same fallback fires on every agent
+ * event and on query rows whose agent has no name, so the rule lives in one function both paths
+ * call rather than in a condition at one call site.
+ *
+ * The comparison is case- and space-insensitive because the caption is uppercased by CSS and the
+ * two strings come from different fields of the same record.
+ */
+export const captionFor = (subject: string, ...parts: (string | undefined)[]): string => {
+  const norm = (v: string) => v.trim().toLowerCase();
+  return parts
+    .map((p) => (p ?? "").trim())
+    .filter((p) => p && norm(p) !== norm(subject))
+    .join(" · ");
+};
+
 /** The caption's tail for an agent event — what was done, in words, since the pill is the verb. */
 const agentEventContext = (t: string): string =>
   t === ActivityType.AGENT_ADDED ? "added to your list"
@@ -162,7 +186,7 @@ export const feedRows = (
       }
       if (best) {
         who = agentPrimary(best);
-        caption = [best.agency, agentEventContext(a.activityType)].filter(Boolean).join(" · ");
+        caption = captionFor(who, best.agency, agentEventContext(a.activityType));
       } else {
         /* No match — a deleted agent, or a description naming nobody we hold. The whole sentence
            is the honest fallback: it is what we know, and the row is not dropped. */
@@ -176,7 +200,7 @@ export const feedRows = (
       const agent = q ? agents.find((x) => x.id === q.agentId) : undefined;
       who = (agent?.name || agent?.agency || "").trim();
       const msTitle = manuscripts.find((m) => m.id === a.manuscriptId)?.title;
-      caption = [agent?.agency, msTitle].filter(Boolean).join(" · ");
+      caption = captionFor(who, agent?.agency, msTitle);
     }
     /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
     if (!who) continue;

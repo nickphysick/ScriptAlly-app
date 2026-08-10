@@ -9,7 +9,7 @@
  * information if the corresponding rule were dropped — not a restatement of the implementation.
  */
 import { describe, it, expect } from "vitest";
-import { collapseFeedRuns, runLines, nameList, runPill, FeedRow } from "./OneScreenRail";
+import { captionFor, collapseFeedRuns, runLines, nameList, runPill, FeedRow } from "./OneScreenRail";
 
 const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   dayLabel: "Wed 29 Jul",
@@ -130,5 +130,41 @@ describe("activity feed — run collapse", () => {
     expect(nameList(["Ada", "Bo"])).toBe("Ada & Bo");
     expect(nameList(["Ada", "Bo", "Cy", "Di", "Ed", "Fi"])).toBe("Ada, Bo & 4 more");
     expect(nameList(["Ada"])).toBe("Ada");
+  });
+});
+
+/**
+ * ⚠️ A CAPTION ADDS WHAT THE SUBJECT DOES NOT ALREADY SAY (fixes-2 A3).
+ *
+ * `agentPrimary` falls back to the agency for a nameless agent — correctly — and the caption then
+ * led with the agency too, so the row read "Penhallow Literary" over "PENHALLOW LITERARY · DETAILS
+ * UPDATED". The rule is general: it fires wherever that fallback can, not on agent-updated rows
+ * alone.
+ */
+describe("captionFor — never repeats the subject", () => {
+  it("drops the agency when the subject IS the agency", () => {
+    expect(captionFor("Penhallow Literary", "Penhallow Literary", "details updated"))
+      .toBe("details updated");
+  });
+
+  it("keeps the agency when subject and agency differ", () => {
+    expect(captionFor("Harriet Vane-Coe", "Penhallow Literary", "details updated"))
+      .toBe("Penhallow Literary · details updated");
+  });
+
+  it("⚠️ compares case- and space-insensitively — the caption is uppercased by CSS", () => {
+    expect(captionFor("Penhallow Literary", " penhallow literary ", "details updated"))
+      .toBe("details updated");
+  });
+
+  it("drops empties without leaving a stray separator", () => {
+    expect(captionFor("Ada", undefined, "added to your list")).toBe("added to your list");
+    expect(captionFor("Ada", "", "")).toBe("");
+    expect(captionFor("Ada", "Bell Lit", undefined)).toBe("Bell Lit");
+  });
+
+  it("⚠️ applies to query rows too — the same fallback produces the same repetition there", () => {
+    // subject resolved from agency (nameless agent), manuscript still worth saying
+    expect(captionFor("Bell Lit", "Bell Lit", "Tidewrack")).toBe("Tidewrack");
   });
 });
