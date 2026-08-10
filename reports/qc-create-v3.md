@@ -566,3 +566,79 @@ start is exactly the case where content stops covering it.
 - [ ] Chips show **dash, not tick**, on arrival; the tick appears only after that step is opened
 - [ ] Chips carry **no value strings**
 - [ ] **No dead space** beneath the panel in any stage-1 condition — especially the cold start, where no grid covers it
+
+---
+
+# Fix pack 3 (revised)
+
+**Commits** — ref `0c86e47` · §1 `1ce2d3d` · §2 `ae63b09`. §3 and §4 were **already built** and needed no
+work (below). Gates green before each.
+
+## §1 — which selector supplies the two states
+
+**`isTerminalStatus` (`lib/agentList.ts`)** — the app's existing split, not a second one. Active =
+not terminal; previously queried = terminal. **Offer counts as ACTIVE**, per the agent-list law
+already in `CLAUDE.md`: a live offer is the most open a conversation gets, and calling it concluded
+would be plainly wrong. `foldedLine` counts off the same list the plates render from, so the
+sentence and the set cannot disagree.
+
+This **withdraws `64c511d`**, the grid of already-queried cards. A grid is the shape this component
+uses to *recommend*, and nothing in this set is being recommended.
+
+## §2 — what the date failures turned out to be
+
+**The rendering fault is found and fixed; the data fault I cannot see from here.**
+
+`new Date(junk)` returns an Invalid Date whose `toLocaleDateString` is the literal string
+`"Invalid Date"` and whose `getFullYear()` is `NaN` — so an unparseable value walks through an
+unguarded formatter and lands on screen as an error message aimed at the writer. That is exactly
+the string reported.
+
+**A second instance existed.** `queryHistoryLabel` — the dropdown's row label — had the same
+unguarded parse and would have printed `Queried Invalid Date NaN` on the same records. Found by
+looking for siblings rather than fixing only what was reported. `shortDate` in `createSummary` was
+already guarded.
+
+The missing year was **not a bug** but the same rule applied in the wrong context: the app drops the
+year for the current year, which is right for a list you work through this week and wrong here,
+where the point is how long ago something went.
+
+**What I could not determine, and how to check it.** The underlying values need your dev account —
+I have no read path to that data. The suspects, in order:
+
+1. **CSV import.** `dateSent` arriving as `14/03/2024` (UK order) rather than ISO. `new Date()`
+   rejects that outright, which matches the symptom exactly.
+2. **A missing value written as `""` or `null`** rather than the key being omitted.
+3. **A pre-`isoPlusDays` record** written before local-midnight parsing landed.
+
+To identify it: open the two entries in the reading pane and check their `dateSent` in the record,
+or query the collection for `dateSent` values failing `/^\d{4}-\d{2}-\d{2}$/`.
+
+**Marcus Reed — reported, not merged.** I have no way to tell two people from one duplicated record
+without the data. If it is a duplicate, you are right that it is a data fix and not a display one:
+the contact count is inflated by one and the **all-queried condition itself** could be wrong, since
+it is derived from that count. Worth checking before trusting either.
+
+## §3 and §4 — already built, no commit
+
+Both landed before this revision arrived and match its wording:
+
+- **§3** is `5d01ced`. Chips are labels only, `.qch-v` retired; pre-filled renders a **dash in a
+  muted ring**, sage reserved for confirmed; the tick gates on the step having been **opened**, not
+  on the value having moved. The save-with-unticked-chips assertion is intact.
+- **§4** is `152a2b9`. Not a viewport chain — **`.qc-ghosts { margin-top: auto }`**, a spacer whose
+  reasoning expired when the column gained a picker, a panel and a grid. Proved by toggling that
+  one declaration at a 1400px column: **514.3px with it, 12px without**. Measured after: a constant
+  **12px** across all three conditions at 1440 and 1024. A lock bans `vh` from the whole height
+  chain.
+
+## Browser checklist — revised pack
+
+- [ ] The folded block **closed on arrival**, one line stating the counts; "Show them" opens the nameplates
+- [ ] **Select a plate** and confirm the flow proceeds into the stack normally
+- [ ] The dimmed set **legible at rest** at 100% and 125% zoom — if it reads as unreadable rather than quiet, lift the opacity rather than adding weight
+- [ ] Tab into the set and confirm it **comes forward on keyboard focus**, not only on hover
+- [ ] The two states differ **by dot only** — no size, weight or colour difference
+- [ ] Chips show **dash, not tick**, on arrival; no value strings
+- [ ] **No dead space** in any stage-1 condition, especially the cold start
+- [ ] The two bad-date entries now show **no date at all** rather than "Invalid Date NaN"
