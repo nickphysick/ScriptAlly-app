@@ -506,3 +506,63 @@ choice is recorded so it does not drift into an accidental mixture.
 - [ ] Footer buttons **aligned with the field labels above them, on every step** — open When, What and Notes in turn
 - [ ] The sage status pill on the sage band — legible enough, or does it need its own call?
 - [ ] Bold Pastille and Editorial panels unchanged
+
+---
+
+# Fix pack 3
+
+**Commits** — ref `d3b0c5c` · §1 `64c511d` · §2 `5d01ced` · §3 `152a2b9`. Gates green before each.
+**Not deployed.**
+
+## Which selector supplies the already-queried outcomes
+
+**`queryBucket` (`lib/queryAmbient.ts`)**, wrapped as `queryOutcome` — derived from it, not beside
+it. That is the app's one split of a status into whose turn it is, and the Queries filter bar, the
+command bar and the agent list all read it; a second opinion here would eventually disagree with
+all three. The lock asserts `queryOutcome` against `queryBucket` itself rather than against
+literals.
+
+The single thing it adds is **OFFER**, which `queryBucket` deliberately folds into `closed` because
+the CTA engine has nothing further to ask of it. On a card reporting *what happened*, calling an
+offer closed would be plainly wrong — it is the best outcome there is and the one a writer scanning
+this list is looking for.
+
+Ordering is **date sent, descending** — never outcome, never rating. The test puts a five-star offer
+behind a one-star rejection and requires the rejection first.
+
+## What §3 turned out to be
+
+**`.qc-ghosts { margin-top: auto }`** — a spacer, not a viewport-height chain.
+
+The ghost rows were pinned to the foot of the column so they sat where the real stack would appear.
+That was sound when stage 1 held one question and nothing else; the column now holds a picker, a
+panel and a grid, so an auto margin opens a hole exactly as large as whatever is left over — which
+is why it showed in one state and not another.
+
+**Proved rather than assumed:** at a 1400px column, toggling only that declaration moved the gap
+between **514.3px** and **12px**. There is no `vh` anywhere in this height chain and no bar-offset
+arithmetic; a lock now asserts that across `.qc-two`, `.qc-form`, `.qc-pick`, `.qc-stack` and
+`.qc-ghosts`. Measured after the fix, all three conditions at 1440 and 1024: a constant **12px**,
+the column's own flex gap. Six measurements, one value.
+
+Fixed even though §1's grid now fills that space in the state where it was reported — the cold
+start is exactly the case where content stops covering it.
+
+## ⚠️ Two process faults in this pack, both mine
+
+1. **A duplicate search field, reintroduced by copy-paste.** Folding the all-queried panel in from
+   its early-return form carried a second `{field}` with it — the exact fault fix pack 2 §1a
+   existed to remove. Caught by a screenshot, not by a test; there is now a lock requiring the field
+   to be mounted exactly once.
+2. **`git commit --amend` without `--only <paths>` amends from the whole index.** Rewriting a
+   commit message that way swept another stream's 49 staged files into my commit. Recovered with
+   `reset --soft` and re-committed by path. In this checkout, **never amend without restricting
+   paths** — the same hazard as `git add .`, in a command that looks like it only touches a message.
+
+## Browser checklist — fix pack 3
+
+- [ ] The all-queried grid at **1440 and 1024** — every contact, with outcome and date, most recent first
+- [ ] **Select a previously-queried agent** and confirm the flow proceeds normally into the stack
+- [ ] Chips show **dash, not tick**, on arrival; the tick appears only after that step is opened
+- [ ] Chips carry **no value strings**
+- [ ] **No dead space** beneath the panel in any stage-1 condition — especially the cold start, where no grid covers it
