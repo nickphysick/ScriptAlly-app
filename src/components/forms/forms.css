@@ -295,7 +295,6 @@
   font-family: 'Source Sans Pro', sans-serif; font-size: 10.5px; color: #a08070;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.sa-ag-stars { flex-shrink: 0; font-size: 10px; color: #c99a4e; letter-spacing: -1px; }
 .sa-ag-tag {
   flex-shrink: 0;
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.03em;

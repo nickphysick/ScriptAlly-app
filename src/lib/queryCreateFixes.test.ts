@@ -13,7 +13,7 @@ import { readFileSync } from "fs";
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const db = read("../lib/db.tsx");
 const pane = read("../components/queries/QueryCreatePane.tsx");
-const picker = read("../components/AgentSearchField.tsx");
+const picker = read("../components/queries/AgentPicker.tsx");
 const queries = read("../components/Queries.tsx");
 const css = read("../components/shell/f12.css");
 const formsCss = read("../components/forms/forms.css");
@@ -56,16 +56,22 @@ describe("the agent hero", () => {
   });
 });
 
+/* ⚠️ RE-POINTED, NOT DELETED. These locked `AgentSearchField`, which is now deleted — create mode
+   was its only consumer and the picker replaced it. What the suite actually settled survives, and
+   it survives about the component that does the job now:
+     · no rating-led anything, because it means nothing when picking one agent (and by fix pack 1
+       §1b, an ordering by your own rating is a recommendation wearing a search's clothes),
+     · the search and the add-an-agent route both stay reachable. */
 describe("the agent picker", () => {
-  it("has no group-by-rating toggle — it means nothing when picking one agent", () => {
+  it("has no rating-led toggle or ordering — it means nothing when picking one agent", () => {
     expect(picker, "the toggle's state came back").not.toContain("groupByRating");
-    // (the file's header still explains WHY it went — that's documentation, not the control)
     expect(picker, "the toggle's markup came back").not.toContain("sa-ag-toggle");
+    expect(picker, "a rating sort is a recommendation").not.toContain("starRating");
   });
 
   it("keeps the search and the add-an-agent route", () => {
-    expect(picker).toContain('className="sa-ag"');
-    expect(picker, "the add-an-agent route went with it").toContain("sa-ag-addlink");
+    expect(picker).toContain('className="qc-pickfield"');
+    expect(picker, "the add-an-agent route went with it").toContain("Add a new agent");
   });
 });
 

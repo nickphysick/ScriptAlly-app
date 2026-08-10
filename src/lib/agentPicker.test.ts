@@ -24,7 +24,6 @@ import { SubmissionStatus, QueryStatus, type Agent, type Query } from "../types"
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const picker = read("../components/queries/AgentPicker.tsx");
 const pane = read("../components/queries/QueryCreatePane.tsx");
-const field = read("../components/AgentSearchField.tsx");
 const quickAdd = read("../components/queries/AgentQuickAdd.tsx");
 const css = read("../components/shell/f12.css");
 
@@ -382,10 +381,12 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
      SETS it, in the quick-add form: that is them recording a judgement, not the app making one. */
   it("no stars on any agent row, and no rating-led ordering", () => {
     expect(picker, "the grid card must not rate anyone").not.toContain("starRating");
-    expect(field, "the result row's stars came back").not.toContain("sa-ag-stars");
-    expect(field, "rating-led ordering is a recommendation").not.toContain("byRatingDesc");
-    expect(field, "but the writer's own rating input stays in the add form")
-      .toContain('className="sa-qa-rating"');
+    /* ⚠️ AMENDED: the component those assertions guarded is DELETED — create mode was its only
+       consumer. The rules survive about the components that do the job now: the picker never
+       rates, and the writer's own rating input lives in the extracted add form. */
+    expect(quickAdd, "the writer's own rating stays where they SET it")
+      .toContain('className="qc-qastars"');
+    expect(quickAdd, "but nothing here orders by it").not.toContain("byRatingDesc");
   });
 
   /* ⚠️ THE ARIA MOVED WITH THE BEHAVIOUR. Leaving combobox roles pointing at a popup that no
