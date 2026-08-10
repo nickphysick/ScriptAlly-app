@@ -20,6 +20,7 @@ import { StatusDot } from "../StatusDot";
 import { goalBlockGap, goalFigure, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { OneScreenPanel } from "./OneScreenPanel";
+import { OneScreenMark } from "./OneScreenMark";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
@@ -381,6 +382,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
       {/* ══ querying goals ══ */}
       <OneScreenPanel variant="os-goal stowable" loading={loading} skel={["h", "", ""]}>
         <div className="os-goal-r1">
+          <OneScreenMark name="goals" />
           <h2>Querying goals</h2>
           {goal && !editingGoal && (
             <button type="button" className="os-goal-num" title="Adjust the goal" onClick={() => { setGoalDraft({ target: goal.target, period: goal.period }); setEditingGoal(true); }}>
@@ -446,6 +448,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
           {/* ⚠️ THE FLANKING RULES ARE GONE. They existed to centre the title on a plain card
               head; on a filled band they draw two lines across a colour that is already doing
               the separating. The title sits left, as the ref has it. */}
+          <OneScreenMark name="activity" />
           <h2>Activity</h2>
           <button
             ref={expBtnRef}

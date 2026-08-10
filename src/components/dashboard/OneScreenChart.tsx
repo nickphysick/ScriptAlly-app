@@ -29,6 +29,7 @@ import {
   rangeWindow, stopForDays, yScale,
 } from "../../lib/oneScreen";
 import { OneScreenPanel } from "./OneScreenPanel";
+import { OneScreenMark } from "./OneScreenMark";
 import { useCountUp } from "../../lib/useCountUp";
 
 /* ── pure geometry (exported for the node-env tests — there is no layout engine to ask) ── */
@@ -244,6 +245,7 @@ export const OneScreenChart: React.FC<{
   return (
     <OneScreenPanel variant="os-lead" loading={loading} skel={["h", "grow", ""]}>
       <div className="os-lh">
+        <OneScreenMark name="active-queries" />
         <span className="os-ll">Active queries</span>
         {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
         <div className="os-ctrls">

@@ -17,6 +17,7 @@ import { Agent, Query, Task, UserTask } from "../../types";
 import { taskSurfaced } from "../../lib/todoBoard";
 import { buildHousekeepingRows, buildOverToYouRows } from "./OverToYou";
 import { OneScreenPanel } from "./OneScreenPanel";
+import { OneScreenMark } from "./OneScreenMark";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /** "Due today" / "Due Friday" / "Overdue" — the row's second line when it has no detail of its own. */
@@ -85,6 +86,7 @@ export const OneScreenTasks: React.FC<{
   return (
     <OneScreenPanel variant="os-tasks" loading={loading} skel={["h", "", "", ""]}>
       <div className="os-th2">
+        <OneScreenMark name="tasks" />
         <h2>Tasks requiring your attention</h2>
         {/* ⚠️ ONE TYPEFACE THROUGHOUT THE PILL. Playfair digits beside Inter labels sit below the
             baseline — the numerals are the thing being read, so they set the face. */}
