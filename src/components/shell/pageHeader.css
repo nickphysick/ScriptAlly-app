@@ -159,12 +159,23 @@
    ⚠️ LAYOUT IS ON `.wsh-row`, NEVER ON `.wsh`. The outer element owns show/hide and the hairline;
    a single-class layout rule sharing an element with a multi-class visibility rule is how the last
    two mockups broke. */
+/**
+ * ⚠️ HEIGHT FOLLOWS CONTENT — 78px with a description, 60px without.
+ *
+ * ⚠️ AND THIS IS NOT THE SIZE-VARIANT QUESTION RE-OPENED. `compact` and `greeting` were KNOBS: any
+ * caller could shrink any header for any reason, so the header's height was a caller's opinion,
+ * and that is why they were retired. This is a RULE. Height is derived from whether the page
+ * passes a description; no caller can request a height and no prop controls one. A page changes
+ * the header's height only by changing what it has to say.
+ */
 .wsh {
   flex: 0 0 78px;
   height: 78px;
   box-sizing: border-box;
   border-bottom: 1px solid var(--ws-edge);
 }
+/* the derived short state — set by the absence of a description, never by a prop */
+.wsh--solo { flex-basis: 60px; height: 60px; }
 .wsh-row { display: flex; align-items: center; gap: 14px; height: 100%; padding: 0 18px; }
 
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: description first, then count. Title and

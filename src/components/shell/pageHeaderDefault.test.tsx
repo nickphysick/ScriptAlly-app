@@ -72,7 +72,7 @@ describe("the workspace variant", () => {
         actions={[{ label: "Export", onClick: () => {} }, { label: "Log query", onClick: () => {}, primary: true }]}
       />
     );
-    expect(out).toContain('class="wsh"');
+    expect(out).toMatch(/class="wsh( wsh--solo)?"/);
     expect(out).toContain("Query Centre");
     expect(out).toContain("22 ACTIVE · 3 AWAITING");
     expect(out).toContain('data-mark="queries"');
@@ -88,17 +88,19 @@ describe("the workspace variant", () => {
 
   it("⚠️ LAYOUT IS ON THE INNER ROW — `.wsh` carries the hairline, `.wsh-row` the flex", () => {
     const out = render(<PageHeader variant="workspace" title="T" mark="todo" />);
-    expect(out).toContain('<header class="wsh"><div class="wsh-row">');
+    expect(out).toMatch(/<header class="wsh( wsh--solo)?"><div class="wsh-row">/);
   });
 
-  it("⚠️ NO DESCRIPTION → no sub element, and the title steps up — height unchanged", () => {
+  it("⚠️ NO DESCRIPTION → no sub element, the title steps up, and the header is 60px", () => {
     const solo = render(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
     expect(solo).not.toContain("wsh-sub");
     expect(solo).toContain("wsh-title--solo"); // the 25px step
+    expect(solo).toContain("wsh--solo");        // …and the 60px height
     const withSub = render(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
     expect(withSub).toContain("wsh-sub");
     expect(withSub).not.toContain("wsh-title--solo");
-    /* the 78px height is CSS, not markup — asserted in the browser, not here (see the report) */
+    expect(withSub).not.toContain("wsh--solo"); // 78px, because it has something to put there
+    /* the pixel values are CSS; the CLASSES are the contract, and they are asserted here */
   });
 
   it("every mark key renders", () => {
@@ -118,5 +120,39 @@ describe("⚠️ the shell never mounts PageHeader", () => {
       expect(readFileSync(join(__dirname, f), "utf8"), `${f} must not mount PageHeader`)
         .not.toMatch(/<PageHeader/);
     }
+  });
+});
+
+/**
+ * ⚠️ HEIGHT IS A RULE, NOT A KNOB. `compact` and `greeting` were retired because any caller could
+ * shrink any header for any reason — the height was a caller's opinion. These assert that no prop
+ * can produce a height other than the two DERIVED ones, which is what makes this different from
+ * the variants that were removed.
+ */
+describe("no prop can choose the header's height", () => {
+  const heightClass = (el: React.ReactElement) =>
+    /class="wsh( wsh--solo)?"/.exec(renderToStaticMarkup(el))?.[0];
+
+  it("only `description` moves it — everything else is inert", () => {
+    const tall = 'class="wsh"', short = 'class="wsh wsh--solo"';
+    expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" />)).toBe(short);
+    expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" description="D" />)).toBe(tall);
+
+    // every other prop, with and without a description — none may change the height class
+    for (const extra of [
+      { count: "9 THINGS" },
+      { actions: [{ label: "A", onClick: () => {} }] as const },
+      { titleAdornment: <span>Pro</span> },
+      { compact: true },          // ⚠️ the retired knob must NOT reach this variant
+      { overflow: [{ label: "X", onClick: () => {} }] as const },
+    ]) {
+      expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" {...(extra as object)} />), JSON.stringify(Object.keys(extra))).toBe(short);
+      expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" description="D" {...(extra as object)} />)).toBe(tall);
+    }
+  });
+
+  it("⚠️ an EMPTY description is not a description — it must not buy 18px of nothing", () => {
+    expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" description="" />))
+      .toBe('class="wsh wsh--solo"');
   });
 });

@@ -193,7 +193,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    */
   if (variant === "workspace") {
     return (
-      <header className="wsh">
+      /* ⚠️ THE CLASS IS DERIVED FROM `description`, NOT FROM A PROP. There is no height prop and
+         must never be one — see the knob-versus-rule note in pageHeader.css. */
+      <header className={`wsh${description ? "" : " wsh--solo"}`}>
         <div className="wsh-row">
           {mark && <span className="wsh-mark"><OneScreenMark name={mark} /></span>}
           {/* ⚠️ TITLE OVER DESCRIPTION IN ONE COLUMN, with the count to its RIGHT — the count is
