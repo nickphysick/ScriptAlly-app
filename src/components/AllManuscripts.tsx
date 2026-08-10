@@ -144,9 +144,10 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   // manuscript's scoped queries (the same pipeline predicate the field roster uses).
   return (
     <div className="msv1">
-      {/* The standard page header (shell rollout Phase 5) — full variant. The grand slab's
-          "N manuscripts · M in submission" pulse line is dropped with it (no meta slot under
-          the header law) — see the rollout report. */}
+      {/* ⚠️ THE HEADER IS INSIDE `.msv-wrap`, the capped content column — a PLATE's edges must meet
+          the first and last plate below it, and past the cap the column centres, so that is the only
+          place they agree. (It sat outside while it was a window-spanning band.) */}
+      <div className="msv-wrap">
       <PageHeader
         variant="workspace"
         mark="manuscripts"
@@ -165,7 +166,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           primary: true,
         }]}
       />
-      <div className="msv-wrap">
         {ordered.length === 0 ? (
           /* ── zero-manuscript state: minimal, in the plate grammar ── */
           <div className="msv-panel">

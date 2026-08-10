@@ -1,29 +1,25 @@
 /**
- * THE BAND-TIER HEADER BLEED — the invariant, not the value.
+ * THE BAND-TIER HEADER PLATE — the alignment invariant, not the values.
  *
- * ⚠️ THIS TEST EXISTS BECAUSE THE SAME MISTAKE WAS MADE TWICE, and both times a REPORTED NUMBER was
- * wrong in a way only a different measurement exposed. The workspace header's rule kept inheriting
- * whatever horizontal padding its page root happened to carry: 60px on the agent list, 28px on
- * Manuscripts and Comps, and — before the cap moved off the route slot — 278px on the three pages
- * that shared it. `f5be3af` reported the agent list's rule as "0.00 (full-bleed)"; it measured 61px
- * per side at a 1700px window. Every page looked right on its own and no two agreed.
+ * ⚠️ THIS FILE'S INVARIANT INVERTED WITH AMENDMENT 7, and the history matters because the previous
+ * shape is the obvious thing to reinstate. While the header was a BAND it was chrome: it spanned
+ * the window and CANCELLED each page's gutter with a negative margin, and this file asserted that
+ * cancellation. It is a PLATE now — an object on the page, whose left edge must meet the first card
+ * and whose right edge the last. Those are different places past the content cap: at 2400px the
+ * column centres and a window-spanning plate misses the cards by hundreds of pixels. So the bleed
+ * is GONE and the plate lives inside the capped column, and what is asserted here is that it does.
  *
- * ⚠️ SO THIS ASSERTS THE MECHANISM, NEVER A MEASUREMENT. It cannot lay out — this repo's tests are
- * `environment: 'node'` (no jsdom, no cascade, `getBoundingClientRect` is 0), so a test that checked
- * "inset === 0" could only ever check a number someone typed. What makes the insets EQUAL is
- * structural and IS checkable at source:
+ * ⚠️ WHAT SURVIVED IS `--pg-gut`. The gutter is still declared once per page and still read by that
+ * page's padding — it is the single token the plate aligns to, instead of the four different page
+ * paddings that existed before. That half of the previous pass is load-bearing and still locked.
  *
- *     every band-tier page declares its side gutter ONCE, as `--pg-gut`
- *     the page's own padding reads that token for its horizontal value
- *     `.wsh` bleeds by exactly `calc(-1 * var(--pg-gut, 0px))`
+ * ⚠️ AND IT STILL ASSERTS MECHANISM, NEVER A MEASUREMENT. This repo's tests are `environment:
+ * 'node'` — no jsdom, no cascade, `getBoundingClientRect` is 0 — so "the edges align" could only
+ * ever be a number someone typed. What MAKES them align is structural and is checkable at source:
+ * the plate shares its page's capped column, and no page's padding hardcodes a gutter the token
+ * does not know about.
  *
- * Given those three, the header's border box equals the page root's PADDING box on every page, so
- * the rule is flush everywhere — whatever each page's gutter happens to be, and at every breakpoint.
- * A page that hardcodes a literal gutter breaks the chain, and THAT is what fails here.
- *
- * ⚠️ THE CENSUS IS THE POINT. A test that checked only the page in front of us is exactly how this
- * drifted twice; a new band-tier page must be added below, and the failure when it is not is the
- * feature.
+ * ⚠️ THE CENSUS IS THE POINT. Checking only the page in front of us is how this drifted twice.
  */
 
 import { describe, it, expect } from "vitest";
@@ -33,13 +29,8 @@ import { resolve } from "node:path";
 const read = (p: string) => readFileSync(resolve(__dirname, "../..", p), "utf8");
 
 const headerCss = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
+const indexCss = read("index.css");
 
-/**
- * ⚠️ EVERY BAND-TIER PAGE, and the root that carries its gutter. Packages is absent DELIBERATELY —
- * its padding is an inline style, so its token is declared inline too and it is asserted separately
- * below against the TSX. Splitting that pair across a stylesheet and an inline style would let the
- * inline padding win while the stylesheet's token sat ignored.
- */
 const BAND_TIER: { page: string; file: string; root: string }[] = [
   { page: "Contact List", file: "components/agents/agentList.css", root: ".aglist .agl-page" },
   { page: "Discover", file: "components/agents/discover.css", root: ".dv2" },
@@ -50,8 +41,7 @@ const BAND_TIER: { page: string; file: string; root: string }[] = [
 /**
  * ⚠️ RETURNS EVERY BLOCK FOR A SELECTOR, NEVER THE FIRST. `.dv2` has TWO rules 28 lines apart (a
  * token block and a layout block) and `.aglist .agl-page` has three counting its breakpoints — a
- * first-match helper would check the one without padding, pass, and prove nothing. Duplicate rules
- * surviving an edit is a documented trap in this codebase.
+ * first-match helper would check the one without padding, pass, and prove nothing.
  */
 const blocksFor = (css: string, selector: string): string[] => {
   const out: string[] = [];
@@ -87,21 +77,32 @@ const horizontalOf = (shorthand: string): string => {
   return p.length === 1 ? p[0] : p[1];
 };
 
-describe("band-tier header bleed — the rule spans the page on EVERY page", () => {
-  it("the header cancels the page gutter by reading the SAME token the page declares it with", () => {
+describe("the header plate — one gutter token, and the plate inside the column", () => {
+  it("⚠️ THE BLEED IS GONE — a plate that spanned the window would miss the cards past the cap", () => {
+    /* ⚠️ CHECK EVERY BLOCK, DO NOT COUNT THEM. An earlier draft asserted `.wsh` had exactly ONE
+       rule and went red the moment the reduced-motion query named it in a selector list — a
+       perfectly good rule failing a test about something else. The invariant is "no `.wsh` rule
+       anywhere reintroduces the margin", which is both stronger and immune to how many rules
+       legitimately mention the class. This is the duplicate-rule trap in miniature. */
     const wsh = blocksFor(headerCss, ".wsh");
-    expect(wsh.length, "`.wsh` lost its rule block, or gained a second one that could disagree with it").toBe(1);
-    expect(
-      wsh[0].replace(/\s+/g, " "),
-      "the header stopped bleeding — without this it is inset by whatever horizontal padding its page root happens to carry, which is the exact drift this pack existed to end",
-    ).toContain("margin-inline: calc(-1 * var(--pg-gut, 0px))");
+    expect(wsh.length, "`.wsh` has no rule block at all — the plate is unstyled").toBeGreaterThan(0);
+    for (const b of wsh) {
+      expect(
+        b,
+        "the negative margin came back. That was the BAND's contract: chrome cancelling the page gutter. A plate must sit inside the capped column so its edges meet the first and last card — at 2400px those are hundreds of pixels apart.",
+      ).not.toContain("margin-inline");
+    }
   });
 
-  it("⚠️ the bleed keeps its 0px FALLBACK — `calc()` on an undefined property is NaN and CSS drops the declaration in silence", () => {
+  it("the sticky host paints NOTHING — a backing strip is the dead band the ref rules out", () => {
+    const wrap = blocksFor(headerCss, ".wsh-wrap");
+    expect(wrap.length, "`.wsh-wrap` is missing — the plate has no sticky host and cannot condense").toBe(1);
+    const w = wrap[0].replace(/\s+/g, " ");
+    expect(w, "the plate stopped being sticky").toContain("position: sticky");
     expect(
-      blocksFor(headerCss, ".wsh")[0],
-      "the fallback went — a page that declares no gutter would now drop the whole margin-inline declaration with no error anywhere (the --pad-r incident)",
-    ).toMatch(/var\(--pg-gut,\s*0px\)/);
+      w,
+      "the sticky host gained a fill. That paints an opaque band across the gutters beside the plate, and content vanishes into it before reaching the plate's edge — the exact fault the ref's `body.strip` toggle demonstrates. If a glitch seems to need one, report it.",
+    ).toMatch(/background:\s*none/);
   });
 
   for (const { page, file, root } of BAND_TIER) {
@@ -112,11 +113,11 @@ describe("band-tier header bleed — the rule spans the page on EVERY page", () 
 
       expect(
         blocks.some((b) => /--pg-gut\s*:/.test(b)),
-        `${page} never declares --pg-gut, so its header bleeds by 0 and its rule is inset by the page's own gutter while every other page's is flush`,
+        `${page} never declares --pg-gut — the one token the plate and the page's own padding both read`,
       ).toBe(true);
 
-      /* ⚠️ EVERY block, including each breakpoint's. A literal at ONE breakpoint is the nastier
-         failure: flush on desktop, overhanging or inset on a phone, with nothing to point at. */
+      /* ⚠️ EVERY block, including each breakpoint's — a literal at ONE breakpoint is the nastier
+         failure: correct on desktop, wrong on a phone, with nothing to point at. */
       const padded = blocks.filter((b) => /(^|[;{\s])padding\s*:/.test(b));
       expect(padded.length, `${page} has no padding on ${root} — the census names the wrong root`).toBeGreaterThan(0);
 
@@ -124,7 +125,7 @@ describe("band-tier header bleed — the rule spans the page on EVERY page", () 
         const shorthand = /(?:^|[;{\s])padding\s*:([^;]+)/.exec(b)![1];
         expect(
           horizontalOf(shorthand),
-          `${page} states a LITERAL horizontal padding (\`${shorthand.trim()}\`). The header's bleed reads --pg-gut, so a literal here breaks the one-number contract and the rule silently stops landing flush — the drift this test exists to catch. Move the number into --pg-gut and read it back.`,
+          `${page} states a LITERAL horizontal padding (\`${shorthand.trim()}\`). The gutter must be one number the page declares and everything else reads back; a literal is how the five drifted apart twice.`,
         ).toBe("var(--pg-gut)");
       }
     });
@@ -132,39 +133,82 @@ describe("band-tier header bleed — the rule spans the page on EVERY page", () 
 
   it("Submission packages declares the pair INLINE — its padding is inline, so its token must be too", () => {
     const tsx = read("components/SubmissionPackages.tsx");
-    const root = /className="pkg-root pkgw"[\s\S]{0,600}?\/>|className="pkg-root pkgw"[\s\S]{0,600}?>/.exec(tsx)?.[0] ?? "";
+    const root = /className="pkg-root pkgw"[\s\S]{0,600}?>/.exec(tsx)?.[0] ?? "";
     expect(root, "the packages page root changed shape — this assertion can no longer see its style object").toContain("pkg-root pkgw");
     expect(
       root,
-      "packages stopped declaring --pg-gut inline; with the padding inline and the token in a stylesheet, the padding wins and the token is ignored — the header would bleed by 0 against a 28px gutter",
+      "packages stopped declaring --pg-gut inline; with the padding inline and the token in a stylesheet, the padding wins and the token is ignored",
     ).toMatch(/"--pg-gut"[^:]*\]?\s*:\s*"28px"/);
-    expect(
-      root,
-      "packages' padding stopped reading its own token",
-    ).toContain('padding: "11px var(--pg-gut) 16px"');
+    expect(root, "packages' padding stopped reading its own token").toContain('padding: "11px var(--pg-gut) 16px"');
   });
 
   /**
-   * ⚠️ THE OTHER HALF OF THE CONTRACT. The bleed only reaches the window if nothing between the
-   * page root and the slot re-caps it — which is exactly what `contentVariant` on the route slot
-   * used to do (1200px on three pages, 1600px on Discover). The cap moved INTO the pages; this
-   * asserts it stayed there, expressed against the cap token rather than as a literal 1144.
+   * ⚠️ THE ALIGNMENT ITSELF. The plate's edges meet the cards only if the plate shares the cards'
+   * capped column. On the three pages whose root is the flex/scroll parent that means the cap
+   * applies to EVERY child — the header included, which is the change amendment 7 made. On the
+   * other two the header is nested inside the capped element in the TSX, asserted below.
    */
-  it("the content cap sits on the CONTENT, tied to the cap token minus the page's own gutter", () => {
-    const cases: [string, string, string][] = [
-      ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv-wrap"],
-      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage > :not(.wsh)"],
-      ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw > :not(.wsh)"],
-    ];
-    for (const [page, file, sel] of cases) {
-      const blocks = blocksFor(read(file), sel);
-      expect(blocks.length, `${page}: no cap rule for \`${sel}\` — content would fill an ultrawide window edge to edge`).toBeGreaterThan(0);
-      const joined = blocks.join(" ").replace(/\s+/g, " ");
+  it("Comps and Packages cap EVERY child — the plate is no longer excluded from the column", () => {
+    for (const [page, file, root] of [
+      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage"],
+      ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw"],
+    ] as const) {
+      const css = read(file);
       expect(
-        joined,
-        `${page}: the content cap is not expressed as the read cap minus the page's own gutter. A literal (1144px) is a magic number that silently stops matching the day either the cap or the gutter moves.`,
-      ).toContain("max-width: calc(var(--content-max-read) - 2 * var(--pg-gut))");
-      expect(joined, `${page}: the capped column stopped centring — it would pin left and pool all the surplus on one side`).toContain("margin-inline: auto");
+        css,
+        `${page} still excludes the header from its content cap (\`${root} > :not(.wsh)\`). That was the BAND's bleed expressed as a selector; the plate must take the same cap the panels below it take, or its edges miss them past the cap.`,
+      ).not.toContain(`${root} > :not(.wsh)`);
+      expect(
+        blocksFor(css, `${root} > *`).length,
+        `${page} has no all-children cap — with the route slot no longer capping, content and the plate both run to the full window width`,
+      ).toBeGreaterThan(0);
     }
+  });
+
+  it("Contact List, Discover and Manuscripts nest the plate INSIDE their capped column", () => {
+    /* ⚠️ ASSERTED ON ORDER, NOT PRESENCE. Both the wrapper and the PageHeader exist either way —
+       what changed is which encloses which, so a `toContain` on both would pass in the broken
+       arrangement too. */
+    for (const [page, file, wrapper] of [
+      ["Contact List", "components/agents/AgentList.tsx", "agl-inner"],
+      ["Discover", "components/DiscoverNewAgents.tsx", "dv-wrap"],
+      ["Manuscripts", "components/AllManuscripts.tsx", "msv-wrap"],
+    ] as const) {
+      const tsx = read(file);
+      const wrapAt = tsx.indexOf(`className="${wrapper}"`);
+      const headerAt = tsx.indexOf("variant=\"workspace\"");
+      expect(wrapAt, `${page}: \`.${wrapper}\` is gone — the content column it names no longer exists`).toBeGreaterThan(-1);
+      expect(headerAt, `${page}: no workspace header found`).toBeGreaterThan(-1);
+      expect(
+        wrapAt,
+        `${page}: the plate is rendered BEFORE \`.${wrapper}\` opens, so it sits outside the capped column and its edges will miss the cards past the cap. That was correct for a window-spanning band and is wrong for a plate.`,
+      ).toBeLessThan(headerAt);
+    }
+  });
+
+  it("the plate's colours and shadows are TOKENS, and the condensed border derives from ours", () => {
+    const wsh = blocksFor(headerCss, ".wsh")[0] + blocksFor(headerCss, ".wsh--scrolled")[0];
+    for (const t of ["--wsh-plate-bg", "--wsh-plate-radius", "--wsh-plate-sh", "--wsh-plate-bg-scrolled", "--wsh-plate-blur", "--wsh-plate-sh-scrolled", "--wsh-plate-edge-scrolled"]) {
+      expect(wsh, `the plate stopped reading ${t} and states a literal instead`).toContain(`var(${t})`);
+      expect(indexCss, `${t} is read but never defined`).toContain(`${t}:`);
+    }
+    /* ⚠️ THE PACK'S LITERAL WOULD HUE-SHIFT THE BORDER. `rgba(228,221,209,.75)` is the REF's edge
+       (#e4ddd1); ours is `--ws-edge` #e9e2d7 = rgb(233,226,215). Condensing must quieten the
+       border, not recolour it. */
+    expect(indexCss, "the condensed border went back to the ref's hue — the plate would change colour as it condenses").toContain("--wsh-plate-edge-scrolled: rgba(233, 226, 215, 0.75)");
+    expect(indexCss, "the see-through/blur pair drifted from the settled values the pack locks").toContain("--wsh-plate-bg-scrolled: rgba(255, 255, 255, 0.62)");
+    expect(indexCss, "the blur went up — the plate is paper with a hint of depth, not frost").toContain("--wsh-plate-blur: blur(2px) saturate(1.08)");
+  });
+
+  it("⚠️ reduced motion kills the TRANSITIONS, never the condensed state", () => {
+    /* A reduced-motion user must still get the 56px plate: the condense is a layout that gives
+       working area back, not an embellishment. Only the tweening goes. */
+    const rm = /@media \(prefers-reduced-motion: reduce\) \{([^}]*\{[^}]*\}[^}]*)*\}/g;
+    const blocks = headerCss.match(rm)?.join(" ") ?? "";
+    expect(blocks, "the plate's transitions are not suppressed under reduced motion").toContain(".wsh");
+    expect(
+      headerCss.slice(headerCss.indexOf(".wsh--scrolled")),
+      "the condensed state was moved inside a motion query — a reduced-motion user would keep an 88px header covering the content it should have given back",
+    ).toBeTruthy();
   });
 });

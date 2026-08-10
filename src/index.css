@@ -79,6 +79,36 @@
      competes with every card sitting near it. */
   --ws-ground: #f7f4ee;
   --ws-edge: #e9e2d7;
+  /**
+   * THE HEADER PLATE (amendment 7; ref design-refs/header-plate-frosted-v1.html). The band with a
+   * closing rule is retired — the header is now an OBJECT sitting on the window, with its own
+   * fill, border and shadow, condensing on first scroll.
+   *
+   * ⚠️ THE SCROLLED BORDER IS `--ws-edge` AT 75%, NOT THE PACK'S LITERAL. The pack quotes
+   * `rgba(228,221,209,.75)` — that is the REF's `--edge` (#e4ddd1), a different hue from this
+   * app's `--ws-edge` (#e9e2d7). Taken literally the plate's border would CHANGE COLOUR as it
+   * condensed, which is not what "the same plate, quieter" can mean. Pre-computed from our own
+   * token rather than `color-mix()`, per the standing no-runtime-mix rule.
+   *
+   * ⚠️ 62% IS MORE OPAQUE THAN THE REF'S DEFAULT (.42), AND 2px IS FAR LESS BLUR THAN ITS 14px.
+   * The ref is a TUNER — those are slider start positions, not the design. These are the settled
+   * values and the pack is explicit: paper picking up a faint sense of depth, not frost. Raising
+   * either is the one "improvement" specifically ruled out.
+   *
+   * ⚠️ THE TWO HEIGHTS AND THE GAP ARE TOKENS because the sticky wrapper must RESERVE the rest
+   * height — otherwise condensing pulls every following element up by 32px (measured: scrollHeight
+   * 952 → 920). Three numbers agreeing by hand is how that reservation silently stops matching.
+   */
+  --wsh-plate-h: 88px;
+  --wsh-plate-h-scrolled: 56px;
+  --wsh-plate-gap: 18px;
+  --wsh-plate-bg: #ffffff;
+  --wsh-plate-bg-scrolled: rgba(255, 255, 255, 0.62);
+  --wsh-plate-edge-scrolled: rgba(233, 226, 215, 0.75);
+  --wsh-plate-radius: 2px;
+  --wsh-plate-blur: blur(2px) saturate(1.08);
+  --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
+  --wsh-plate-sh-scrolled: 0 2px 5px rgba(58, 28, 20, 0.07), 0 12px 30px rgba(58, 28, 20, 0.13);
   /* THE TWO CAPSULES (app-shell pack, Baked 3). There are two now, not three — the panel folded
      into the column — and both fills come from the sage-desk mockup. The old cream trio was
      tuned against a cream ground; against sage it read as three washed-out greys. */

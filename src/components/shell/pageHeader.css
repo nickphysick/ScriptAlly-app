@@ -175,66 +175,114 @@
    a single-class layout rule sharing an element with a multi-class visibility rule is how the last
    two mockups broke. */
 /**
- * ⚠️ HEIGHT FOLLOWS CONTENT — 78px with a description, 60px without.
+ * ⚠️ THE HEADER IS A PLATE, NOT A BAND (amendment 7). It has its own fill, border, 2px corners and
+ * shadow, it sits INSET to the content column, and it condenses on first scroll. This supersedes
+ * the fill, the closing rule, the two heights and the count slot of every earlier amendment —
+ * `.wsh-count` and the 78/60 pair are DELETED, not disabled.
  *
- * ⚠️ AND THIS IS NOT THE SIZE-VARIANT QUESTION RE-OPENED. `compact` and `greeting` were KNOBS: any
- * caller could shrink any header for any reason, so the header's height was a caller's opinion,
- * and that is why they were retired. This is a RULE. Height is derived from whether the page
- * passes a description; no caller can request a height and no prop controls one. A page changes
- * the header's height only by changing what it has to say.
- */
-/**
- * ⚠️ THE HEADER IS CHROME, SO ITS RULE SPANS THE PAGE — it is not inset by the page's CONTENT
- * gutter. `--pg-gut` is the ONE number a band-tier page declares for that gutter: the page's own
- * padding reads it, and this bleed reads the same token back. So the rule lands flush on every
- * page BECAUSE both sides read one declaration, not because two numbers were matched by hand.
- * If a page ever hardcodes a literal gutter in its padding, this bleed stops agreeing with it —
- * which is exactly what `pageBandBleed.test.ts` fails on. Do not "fix" a mismatch by editing the
- * number here; put the page's padding back on its token.
+ * ⚠️ AND THE BLEED IS GONE WITH THEM — deliberately, and it reverses the pass immediately before
+ * this one. A band was CHROME, so it spanned the window and cancelled the page gutter with a
+ * negative margin. A plate is an OBJECT ON the page: its left edge must meet the first card and
+ * its right edge the last, which means living inside the same capped column the cards do. Past
+ * the content cap those are different places — at 2400px the column centres and a window-spanning
+ * plate would miss the cards by hundreds of pixels, which is exactly the alignment check the pack
+ * sets. `--pg-gut` SURVIVES and still does the work the last pass gave it: it is the one gutter
+ * token the plate aligns to, instead of four different page paddings.
  *
- * ⚠️ AND THE FALLBACK IS `0px`, NOT NOTHING. `calc()` on an undefined custom property yields NaN
- * and CSS drops the whole declaration silently (the `--pad-r` incident in CLAUDE.md). With the
- * fallback, a page that declares no gutter simply does not bleed — the safe direction.
- *
- * ⚠️ THE BLEED EXACTLY EQUALS THE PADDING, which is what keeps it from overflowing: the header's
- * border box comes out equal to the page root's PADDING box, never wider. That matters on the two
- * roots that scroll (`.pkgw`, `.msv1`) — one pixel over and `overflow-y:auto` computes `overflow-x`
- * to auto too, and the page grows a horizontal scrollbar.
+ * ⚠️ THE HEIGHT IS ONE NUMBER NOW, and the knob-versus-rule note it replaces still applies: no
+ * caller may request a height. The plate is 88px, or 56px once the scroller has moved. A page
+ * without a description keeps the full height — only the type steps up.
  */
 .wsh {
-  flex: 0 0 78px;
-  height: 78px;
+  flex: 0 0 auto;
+  height: var(--wsh-plate-h);
   box-sizing: border-box;
-  border-bottom: 1px solid var(--ws-edge);
-  margin-inline: calc(-1 * var(--pg-gut, 0px));
+  background: var(--wsh-plate-bg);
+  border: 1px solid var(--ws-edge);
+  border-radius: var(--wsh-plate-radius);
+  box-shadow: var(--wsh-plate-sh);
+  transition: height .2s ease, background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
-/* the derived short state — set by the absence of a description, never by a prop */
-.wsh--solo { flex-basis: 60px; height: 60px; }
-.wsh-row { display: flex; align-items: center; gap: 14px; height: 100%; padding: 0 18px; }
+/**
+ * ⚠️ THE STICKY WRAPPER PAINTS NOTHING. Giving it a fill would put an opaque strip across the
+ * gutters beside the plate, and content would vanish into that dead band before it ever reached
+ * the plate's edge — the exact fault the ref was built to demonstrate (its `body.strip` toggle).
+ * Content runs UNDER the plate and continues past both edges. If a glitch ever seems to want a
+ * backing strip here, that is a report, not a fix.
+ *
+ * The vertical padding is the plate's breathing room and doubles as its stuck offset: at rest it
+ * separates plate from content, and once stuck it is transparent space that content scrolls
+ * through above the plate.
+ *
+ * ⚠️ THE WRAPPER RESERVES THE PLATE'S REST HEIGHT, and this is not tidiness — it is the fix for a
+ * MEASURED fault. The plate is in flow, so without the reservation the 88 → 56 condense pulled
+ * every following element up by 32px: `scrollHeight` measured 952 at rest and 920 condensed, which
+ * is precisely the "condensing must not shift the content below it" check. Worse than the jump, it
+ * invites a loop — shrinking moves content up, which can move the scroll position back under the
+ * trigger, which expands it again.
+ *
+ * So the wrapper's height is fixed at the REST height and the plate shrinks INSIDE it. Condensed,
+ * the leftover 32px is transparent wrapper that content scrolls through — invisible, because
+ * content already runs under the plate by design.
+ */
+/* ⚠️ `flex: none` BECAUSE TWO OF THE HOSTS ARE FLEX COLUMNS. `.ctpage` and `.pkgw` are
+   `display:flex; flex-direction:column`, so the wrapper is a flex ITEM there and would otherwise
+   shrink under the default `flex-shrink:1` — taking the reserved height with it and reintroducing
+   the very reflow the reservation exists to stop, but only on those two pages. */
+.wsh-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  flex: none;
+  padding: var(--wsh-plate-gap) 0;
+  height: calc(var(--wsh-plate-h) + 2 * var(--wsh-plate-gap));
+  box-sizing: border-box;
+  background: none;
+}
+/* ⚠️ CONDENSED. `backdrop-filter` is what makes the plate read as glass over moving content — and
+   it CREATES A STACKING CONTEXT, which is why the illustrated mark's `mix-blend-mode` has to be
+   verified in this state rather than assumed (see the mark rules below). */
+.wsh--scrolled {
+  height: var(--wsh-plate-h-scrolled);
+  background: var(--wsh-plate-bg-scrolled);
+  -webkit-backdrop-filter: var(--wsh-plate-blur);
+          backdrop-filter: var(--wsh-plate-blur);
+  border-color: var(--wsh-plate-edge-scrolled);
+  box-shadow: var(--wsh-plate-sh-scrolled);
+}
+.wsh-row { display: flex; align-items: center; gap: 16px; height: 100%; padding: 0 30px; }
 
-/* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: description first, then count. Title and
-   actions never shrink — a clipped action is unusable and a clipped title is a lie. */
-.wsh-mark { flex: 0 0 38px; }
+/* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: the description truncates first. Title and
+   actions never shrink — a clipped action is unusable and a clipped title is a lie.
+   ⚠️ `.wsh-count` IS DELETED, not commented out. The slot is gone from the variant (amendment 7)
+   and no page passes a count; leaving the rule would let a future caller half-render a strip the
+   markup no longer has. What it used to carry on two pages was REHOMED, not dropped — see the
+   notes in AllManuscripts.tsx and ComparableTitlesPage.tsx. */
+.wsh-mark { flex: 0 0 38px; transition: flex-basis .2s ease; }
 .wsh-mark--xl { flex: 0 0 64px; }
 .wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
 .wsh-title {
-  font-family: var(--font-serif); font-size: 26px; font-weight: 600;
-  color: var(--shell-ink); margin: 0; white-space: nowrap;
+  font-family: var(--font-serif); font-size: 25px; font-weight: 500;
+  color: var(--shell-ink); margin: 0; white-space: nowrap; line-height: 1.12;
+  transition: font-size .2s ease;
 }
-/* ⚠️ NO DESCRIPTION → THE TITLE STEPS UP. The header height does not change; the two states must
-   read as deliberate side by side, not as one page missing something. */
-.wsh-title--solo { font-size: 28px; }
+/* ⚠️ NO DESCRIPTION → THE TITLE STEPS UP. The plate's HEIGHT does not change with it — the two
+   states must read as deliberate side by side, not as one page missing something. */
+.wsh-title--solo { font-size: 27px; }
 .wsh-sub {
-  margin: 0; font-size: 13.5px; color: #6b5a51;
+  margin: 0; font-size: 13px; color: #6b5a51;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  max-height: 20px;
+  transition: opacity .15s ease, max-height .2s ease, margin .2s ease;
 }
-.wsh-count {
-  flex: 0 1 auto; min-width: 0;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: #3a1c14;
-  padding-left: 14px; border-left: 1px solid rgba(49, 30, 25, 0.28);
-}
+/* ⚠️ THE DESCRIPTION FADES AND COLLAPSES TOGETHER. Opacity alone would leave its box holding the
+   title off-centre in a 56px plate; `max-height:0` is what actually gives the space back. */
+.wsh--scrolled .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
+.wsh--scrolled .wsh-title { font-size: 18px; }
+.wsh--scrolled .wsh-mark { flex-basis: 34px; }
+.wsh--scrolled .wsh-mark .os-mark,
+.wsh--scrolled .wsh-mark--xl .os-mark { width: 34px; height: 34px; flex-basis: 34px; }
+.wsh--scrolled .svh-btn { padding: 8px 15px; font-size: 12.5px; }
 .wsh-grow { flex: 1 1 auto; min-width: 10px; }
 .wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 
@@ -273,3 +321,14 @@
 }
 .wsh-mark--xl .os-mark svg { width: 34px; height: 34px; }  /* the degrade path, still centred */
 .agl-anim .agl-head-slot .wsh-mark--xl .os-mark img { opacity: 0; }
+/* the plate's own size transition, so the mark condenses WITH it rather than snapping */
+.wsh-mark .os-mark { transition: width .2s ease, height .2s ease, flex-basis .2s ease; }
+
+/**
+ * ⚠️ REDUCED MOTION KILLS THE TRANSITIONS, NEVER THE STATES. The plate must still condense — the
+ * scrolled state is a layout, not an embellishment, and a header that stayed 88px would eat the
+ * working area it was condensing to give back. Only the tweening goes.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .wsh, .wsh-title, .wsh-sub, .wsh-mark, .wsh-mark .os-mark, .wsh .svh-btn { transition: none; }
+}

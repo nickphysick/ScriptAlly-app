@@ -51,8 +51,10 @@ describe("⚠️ the default variant is frozen", () => {
   });
 
   it("⚠️ the workspace props are INERT on the default — passing them changes nothing", () => {
-    // a page that adds a count before flipping its variant must not half-render the band
-    expect(render(<PageHeader title="T" count="9 THINGS" mark="queries" />))
+    /* a page that adds a mark before flipping its variant must not half-render the plate.
+       ⚠️ `count` LEFT THIS CASE because the prop is DELETED (amendment 7). It cannot be passed
+       inertly when it cannot be passed at all — tsc is the guard now, and it is a stronger one. */
+    expect(render(<PageHeader title="T" mark="queries" />))
       .toBe(render(<PageHeader title="T" />));
   });
 
@@ -62,44 +64,54 @@ describe("⚠️ the default variant is frozen", () => {
 });
 
 describe("the workspace variant", () => {
-  it("renders title, count, mark and actions", () => {
+  it("renders title, mark and actions", () => {
     const out = render(
       <PageHeader
         variant="workspace"
         title="Query Centre"
         mark="queries"
-        count="22 ACTIVE · 3 AWAITING"
         actions={[{ label: "Export", onClick: () => {} }, { label: "Log query", onClick: () => {}, primary: true }]}
       />
     );
     expect(out).toMatch(/class="wsh( wsh--solo)?"/);
     expect(out).toContain("Query Centre");
-    expect(out).toContain("22 ACTIVE · 3 AWAITING");
     expect(out).toContain('data-mark="queries"');
     /* ⚠️ THE EXISTING INK BUTTON, REUSED — not a new class of this variant's own. */
     expect(out).toContain("svh-btn-ink");
   });
 
-  it("⚠️ NO count element at all when count is absent — not an empty strip", () => {
-    // an empty `.wsh-count` would draw its 1px divider against the title with nothing after it
+  it("⚠️ THE COUNT SLOT IS GONE FROM THE MARKUP, not merely unused (amendment 7)", () => {
+    /* The prop is deleted, so nothing CAN pass one; this guards the other half — that no residue
+       of the strip survives in the rendered plate for a future caller to half-render. */
     const out = render(<PageHeader variant="workspace" title="Settings" mark="settings" />);
     expect(out).not.toContain("wsh-count");
   });
 
-  it("⚠️ LAYOUT IS ON THE INNER ROW — `.wsh` carries the hairline, `.wsh-row` the flex", () => {
+  it("⚠️ THE PLATE IS WRAPPED BY ITS STICKY HOST, and that host paints nothing", () => {
+    /* The wrapper is what sticks; the plate is what condenses. A backing fill here would put an
+       opaque band across the gutters beside the plate — the dead margin the ref exists to rule out. */
     const out = render(<PageHeader variant="workspace" title="T" mark="todo" />);
-    expect(out).toMatch(/<header class="wsh( wsh--solo)?"><div class="wsh-row">/);
+    expect(out).toMatch(/<div class="wsh-wrap"><header class="wsh( wsh--solo)?"><div class="wsh-row">/);
   });
 
-  it("⚠️ NO DESCRIPTION → no sub element, the title steps up, and the header is 60px", () => {
+  it("⚠️ AT REST THE PLATE IS NOT CONDENSED — the scrolled class is never server-rendered", () => {
+    /* `wsh--scrolled` is driven by a scroll listener, so the first paint must be the rest state.
+       If it ever rendered condensed, every page would flash 88 → 56 → 88 on mount. */
+    expect(render(<PageHeader variant="workspace" title="T" mark="todo" />)).not.toContain("wsh--scrolled");
+  });
+
+  it("⚠️ NO DESCRIPTION → no sub element and the title steps up — but the PLATE KEEPS ITS HEIGHT", () => {
+    /* ⚠️ AMENDED (amendment 7): the height half of this is gone. The plate is one height, 88px, and
+       56px once scrolled — the 78/60 pair went with the band. `wsh--solo` now governs the TYPE
+       only, which is why it is still asserted while no height claim is. */
     const solo = render(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
     expect(solo).not.toContain("wsh-sub");
-    expect(solo).toContain("wsh-title--solo"); // the 25px step
-    expect(solo).toContain("wsh--solo");        // …and the 60px height
+    expect(solo).toContain("wsh-title--solo"); // the type step, not a height
+    expect(solo).toContain("wsh--solo");
     const withSub = render(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
     expect(withSub).toContain("wsh-sub");
     expect(withSub).not.toContain("wsh-title--solo");
-    expect(withSub).not.toContain("wsh--solo"); // 78px, because it has something to put there
+    expect(withSub).not.toContain("wsh--solo");
     /* the pixel values are CSS; the CLASSES are the contract, and they are asserted here */
   });
 

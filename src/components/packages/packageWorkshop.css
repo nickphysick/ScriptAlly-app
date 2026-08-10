@@ -64,9 +64,11 @@
    (SubmissionPackages.tsx) because its padding is inline — see the note there.
    ⚠️ AND IT IS A CHILD SELECTOR, NOT A WRAPPER DIV, because `.pkgw` is a flex column with `gap:14`:
    wrapping the content would collapse those three gaps into one and change every vertical rhythm on
-   the page. `.wsh` is the one child excluded — that is the bleed. `<style>` is `display:none`, so it
-   is not a flex item and takes no gap. */
-.pkgw > :not(.wsh) {
+   the page. `<style>` is `display:none`, so it is not a flex item and takes no gap.
+   ⚠️ THE HEADER IS NO LONGER EXCLUDED (amendment 7). It used to be `> :not(.wsh)`, because a band
+   was chrome and bled past this cap. A PLATE is an object whose edges must meet the cards below it,
+   so its sticky host takes the same cap they do. */
+.pkgw > * {
   width: 100%;
   max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
   margin-inline: auto;

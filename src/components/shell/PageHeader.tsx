@@ -20,6 +20,46 @@ import { MoreHorizontal } from "lucide-react";
 import { OneScreenMark, MarkName, markHasArt } from "../dashboard/OneScreenMark";
 import "./pageHeader.css";
 
+/**
+ * ⚠️ THE PLATE FINDS ITS OWN SCROLLER, because there is no single one to assume. `.aglist`,
+ * `.msv1` and `.pkgw` scroll THEMSELVES; Discover scrolls in the shell's `.ws-wbody` two levels
+ * up; `.ctpage` is `overflow:hidden` and never scrolls at all. Hard-coding any one of those would
+ * leave the plate stuck at rest on the other pages — silently, since a header that never condenses
+ * looks exactly like a header that has not been scrolled yet.
+ *
+ * ⚠️ IT MATCHES ON THE COMPUTED `overflow`, NOT ON WHETHER CONTENT CURRENTLY OVERFLOWS. At mount
+ * a list may be empty or still loading, so `scrollHeight > clientHeight` is false and the real
+ * scroller would be walked straight past — the plate would then never condense on that page for
+ * the rest of the session.
+ *
+ * A page whose root cannot scroll (`.ctpage`) simply keeps the rest state, which is correct: the
+ * plate is not covering anything, so it has nothing to condense out of the way for.
+ */
+const nearestScroller = (from: HTMLElement): HTMLElement | null => {
+  let p: HTMLElement | null = from.parentElement;
+  while (p) {
+    const oy = window.getComputedStyle(p).overflowY;
+    if (oy === "auto" || oy === "scroll") return p;
+    p = p.parentElement;
+  }
+  return null;
+};
+
+/** Condensed once the scroller has moved at all — the pack's `scrollTop > 4`. */
+const useCondensed = (ref: React.RefObject<HTMLElement | null>, enabled: boolean): boolean => {
+  const [condensed, setCondensed] = React.useState(false);
+  React.useEffect(() => {
+    if (!enabled || !ref.current) return;
+    const sc = nearestScroller(ref.current);
+    if (!sc) return;
+    const read = () => setCondensed(sc.scrollTop > 4);
+    read(); // a remounting page (the stage keeps pages alive) can arrive already scrolled
+    sc.addEventListener("scroll", read, { passive: true });
+    return () => sc.removeEventListener("scroll", read);
+  }, [ref, enabled]);
+  return condensed;
+};
+
 export interface PageHeaderAction {
   label: string;
   onClick: () => void;
@@ -72,8 +112,11 @@ export interface PageHeaderProps {
   variant?: "full" | "workspace";
   title: string;
   description?: string;
-  /** The workspace header's mono count strip — DATA, never prose. Ignored by the default. */
-  count?: React.ReactNode;
+  /* ⚠️ THERE IS NO `count` PROP — the slot is DELETED from the variant (amendment 7), not merely
+     unused. The plate is mark + title + description + actions. The two pages that had one had
+     their figure REHOMED rather than dropped; see the notes at those call sites. Deleting the prop
+     rather than leaving it inert is deliberate: an accepted-but-unrendered prop is how a page ends
+     up passing data that silently goes nowhere. */
   /** The workspace header's 38px mark. Required when `variant="workspace"`; ignored otherwise. */
   mark?: MarkName;
   /* ⚠️ THERE IS NO `markSize` PROP, and its removal was the point. It was a KNOB — any page could
@@ -108,7 +151,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   variant = "full",
   title,
   description,
-  count,
   mark,
   actions,
   titleAdornment,
@@ -120,6 +162,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   const wsActs = (actions ?? []).slice(0, 2);
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
+  /* ⚠️ THE HOOK RUNS FOR EVERY VARIANT, and it must — hooks cannot sit behind the `workspace`
+     early return without breaking the rules of hooks the moment a caller changes variant. It is
+     GATED instead: the default variant passes `false` and never attaches a listener. */
+  const plateRef = React.useRef<HTMLElement>(null);
+  const condensed = useCondensed(plateRef, variant === "workspace");
   React.useEffect(() => {
     if (!moreOpen) return;
     const onDown = (e: PointerEvent) => {
@@ -197,9 +244,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    */
   if (variant === "workspace") {
     return (
-      /* ⚠️ THE CLASS IS DERIVED FROM `description`, NOT FROM A PROP. There is no height prop and
-         must never be one — see the knob-versus-rule note in pageHeader.css. */
-      <header className={`wsh${description ? "" : " wsh--solo"}`}>
+      /* ⚠️ THE STICKY WRAPPER PAINTS NOTHING — no backing strip, ever. See pageHeader.css: an
+         opaque band across the gutters is the dead margin this design exists to avoid, and content
+         is meant to run under the plate and out past both its edges. */
+      <div className="wsh-wrap">
+        {/* ⚠️ BOTH CLASSES ARE DERIVED — one from `description`, one from the scroller's position.
+            There is no height prop and must never be one; see the knob-versus-rule note in the
+            stylesheet. */}
+        <header ref={plateRef} className={`wsh${description ? "" : " wsh--solo"}${condensed ? " wsh--scrolled" : ""}`}>
         <div className="wsh-row">
           {/* ⚠️ DERIVED FROM THE ARTWORK, NEVER PASSED IN — see the `markHasArt` note. */}
           {mark && (
@@ -207,18 +259,17 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
               <OneScreenMark name={mark} />
             </span>
           )}
-          {/* ⚠️ TITLE OVER DESCRIPTION IN ONE COLUMN, with the count to its RIGHT — the count is
-              not sacrificed to make room for prose. The page would lose data to gain a sentence. */}
+          {/* ⚠️ TITLE OVER DESCRIPTION IN ONE COLUMN. The count that used to sit to their right is
+              GONE (amendment 7) — the plate is mark + title + description + actions. */}
           <div className="wsh-txt">
             <h1 className={`wsh-title${description ? "" : " wsh-title--solo"}`}>
               {title}{titleAdornment}
             </h1>
-            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING and the title steps up to 25px. The header
-                stays 78px either way — it must not shrink, or two pages side by side read as one
-                being broken rather than one being different. */}
+            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING and the title steps up. The plate keeps its
+                full height either way — two pages side by side must read as deliberate, not as one
+                being broken. */}
             {description && <p className="wsh-sub">{description}</p>}
           </div>
-          {count != null && count !== false && <div className="wsh-count">{count}</div>}
           <span className="wsh-grow" aria-hidden="true" />
           {(wsActs.length > 0 || actionsSlot) && (
             <div className="wsh-acts">
@@ -240,7 +291,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             </div>
           )}
         </div>
-      </header>
+        </header>
+      </div>
     );
   }
 

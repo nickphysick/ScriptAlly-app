@@ -72,10 +72,13 @@
    ⚠️ EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal 1144: the slot cap was an
    OUTER width that the page's padding then ate. A literal would silently stop matching the day
    either number moved.
-   ⚠️ AND IT IS `> :not(.wsh)`, NOT `.ct-desk`, because the manuscript selector row is a SIBLING of
-   the desk — capping the desk alone would leave the selector flying out to the full window. The
-   header is the one child excluded, which is the whole point of the bleed. */
-.ctpage > :not(.wsh) {
+   ⚠️ AND IT IS EVERY CHILD, NOT `.ct-desk` ALONE, because the manuscript selector row is a SIBLING
+   of the desk — capping the desk alone would leave the selector flying out to the full window.
+   ⚠️ THE HEADER IS NO LONGER EXCLUDED (amendment 7). It used to be `> :not(.wsh)`, because a band
+   was chrome and bled past this cap on purpose. A PLATE is an object whose edges must meet the
+   panels below it, so it takes the same cap they do — `.wsh-wrap` is its sticky host and is capped
+   with everything else. */
+.ctpage > * {
   width: 100%;
   max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
   margin-inline: auto;
