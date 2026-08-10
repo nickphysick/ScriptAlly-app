@@ -694,3 +694,74 @@ list does not carry an item that no longer exists.
 
 **Still genuinely outstanding:** Other's `Enter` → chip; the materials summary line + collapsed
 item count.
+
+---
+
+# Fix pack 4 — the What step
+
+**Commits** — ref `db36e76` · §1 `36a732a` · §2 `a355fd7` · §3 `1ac4e04`. Gates green before each. **Not deployed.**
+
+## §1 — the height, and an honest gap in the measurement
+
+**Structurally:** four full-width rows at ~80px each, plus a "NOT REQUESTED" tag on every one and
+"ONLY MANUSCRIPT" on the manuscript row, become **one wrapping chip row** — a checkbox and a label
+each, expanding in place only when Sample or Other is ticked — plus one sentence in the head.
+
+**⚠️ I did not measure the before and after, and the report asked for it.** The static harness
+renders the pane at its first frame, where the open step is `When`; `What` is a collapsed row, so
+there is no rendered height to read on either side of the change. A number here would have been
+invented. **This is the one item in the brief I have not delivered** — it needs the real app with
+the What step open, which is the browser checklist's job.
+
+## Where the requirement sentence is generated
+
+`asksSentence` and `askPhrase` in **`lib/createQty.ts`**, off the **seeded rows**
+(`materialRowsForDraft`) rather than a second parse of the agent record — asking her record twice
+would give two answers the moment either changed. Rendered once, right-aligned in the What head.
+
+**The empty case reads: "Dermot asks for the manuscript only."** An agent listing no materials is
+asking for the manuscript only; that is a fact worth stating and exactly what the retired ONLY
+MANUSCRIPT tag was clumsily making. A nameless agent falls back to "They".
+
+Grammar is tested at one, two, three and zero items, with serial "and" before the last. Chapters
+read "3 chapters"; words carry separators ("5,000 words").
+
+## §2 — each behaviour and the test that guards it
+
+| behaviour | test |
+|---|---|
+| Steps and bounds per unit; step displayed | "and the create bounds are the narrower, likelier range" · "the arrows say what they will do" |
+| Arrows and ↑/↓ while focused | "↑ and ↓ do what the arrows do" |
+| Off-step → next clean multiple (37 ▲ 40) | "37 → 40 up, 37 → 35 down" |
+| Arrows disable at the bounds | "and it refuses at the bounds rather than pretending" |
+| Typing overrides; focus strips, blur reformats | "nothing snaps a typed figure" · "formatting is reapplied only when the field is not being typed into" |
+| **Unit switching snaps, never converts** | **"switching unit snaps to that unit's default and never converts"** |
+| Snapped value legal in its new unit | "and the snapped value is legal in the unit it lands in" |
+| Bound yields to a stated requirement | "an agent asking for more than the bound keeps her figure" · "stepping up towards a stated 500 pages is not clamped at 400" |
+| Pre-ticking, query-letter-only included | "pre-ticks from the agent's requirements, query-letter-only included" |
+| Other commits on Enter to a removable chip | "Other commits on Enter to a removable chip, and the draft keeps one field" |
+| stopPropagation inside an expanded chip | "controls inside an expanded chip do not toggle the chip" |
+
+**The snap test uses a value that would convert to something plausible**, as asked: 50 pages at the
+conventional 250 words/page is **12,500** — a number that would look entirely correct in the field
+and be a figure the writer never chose. The assertion names it, and a companion check bans the
+conversion constants outright.
+
+## §3 — verification, not repair
+
+The footer was already correct. Back renders on every step but the first (`STEP_ORDER[index - 1]`
+resolves to undefined there — absent because there is nowhere to go). Measured on all four edges,
+every step, both widths: **top 20 · right 17 · bottom 16 · left 17**, nothing touching.
+
+## Browser checklist — fix pack 4
+
+- [ ] **Measure the What step's height** with it open — the one number this report is missing
+- [ ] Tick and untick every chip; confirm Sample and Other expand **in place** and nothing else does
+- [ ] Arrow and type in the sample field — and press an arrow **immediately after ticking Sample**, which is the case `stopPropagation` guards
+- [ ] Switch units **in both directions**: 50 pages → Words must give 5,000, never 12,500
+- [ ] Commit an Other chip with Enter, then remove it
+- [ ] Walk Back and Next through every step; values intact on the way back
+- [ ] The head sentence for a three-requirement agent, a query-letter-only agent, and one who lists none
+
+**Remaining deferred:** the materials summary line's collapsed item count. *(The `AgentSearchField`
+cleanup with `.qc-qrow` and `.sa-ag-stars` is DONE — `67251a4` and `5534b94`.)*
