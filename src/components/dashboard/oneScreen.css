@@ -500,6 +500,27 @@
 }
 .os-counter:hover .os-cic img { transform: rotate(-3deg) scale(1.05); }
 
+/**
+ * ⚠️ THE QUERIES-SENT MARK IS A PAINTING, AND IT BREAKS THE HOUSE RULE ON PURPOSE (audit pack P3).
+ *
+ * `mix-blend-mode: multiply` exists on `.os-mark-il img` because the other marks are drawn on an
+ * OPAQUE WHITE FIELD, and without it each renders as a white square on the parchment. This one is
+ * genuinely transparent — its corners are 3% white, not 100% — so multiply has nothing to remove
+ * and instead DARKENS the watercolour wash against the card beneath it. The exception is stated
+ * here, at the rule, rather than left as an unexplained `normal` someone later "restores".
+ *
+ * ⚠️ AND THE TEST FOR THE OTHER THREE STILL HOLDS. Multiply is not weakened on `.os-mark-il img`;
+ * it is overridden for this one selector only, so a fourth line-drawn mark still gets it by
+ * default and still fails loudly if it does not.
+ *
+ * 54px against its siblings' 44px because a wash needs room the line drawings do not — and the
+ * negative margin grows with it, so the card's height is untouched: 54 − 24 = 30px effective,
+ * still well under the ~50px the label and figure occupy. Verified: the card measures 82px with
+ * the plane in, as it did with the icon it replaced.
+ */
+.os-cic.plane { width: 54px; height: 54px; margin: -12px 0; }
+.os-cic.plane img { mix-blend-mode: normal; }
+
 /* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
 /* ⚠️ `align-self: center` IS LOAD-BEARING — `.os-goal-r1` is `align-items: baseline`, and AN IMAGE
    HAS NO BASELINE: it aligns on its bottom margin edge and drags the row taller than its text.

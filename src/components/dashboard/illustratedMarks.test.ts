@@ -25,6 +25,20 @@ describe("trap 1 — the white field", () => {
     expect(blk(".os-mark-il img")).toContain("mix-blend-mode: multiply");
   });
 
+  /**
+   * ⚠️ ONE MARK IS EXEMPT, AND THE EXEMPTION IS NARROW BY CONSTRUCTION (audit pack P3).
+   *
+   * The Queries-sent plane is genuinely transparent, so multiply has no white field to remove and
+   * darkens its watercolour wash instead. The rule above is NOT weakened to accommodate it — a
+   * fourth line-drawn mark must still inherit multiply and still fail loudly without it. Both
+   * halves are asserted: the default stands, and the exception is scoped to one selector.
+   */
+  it("⚠️ …except the painted plane, exempt BY SELECTOR rather than by relaxing the default", () => {
+    expect(blk(".os-cic.plane img")).toContain("mix-blend-mode: normal");
+    expect(blk(".os-mark-il img")).toContain("mix-blend-mode: multiply");
+    expect(bare).not.toMatch(/\.os-mark-il img\s*\{[^}]*mix-blend-mode:\s*normal/);
+  });
+
   it("⚠️ and it is BARE — no plate, no border, no fill behind it", () => {
     const w = blk(".os-mark-il");
     expect(w).not.toMatch(/background/);
@@ -74,6 +88,17 @@ describe("trap 3 — the mark must not set the row's height", () => {
     expect(blk(".os-goalmark")).toMatch(/margin:\s*-6px 0/);
   });
 
+  /* ⚠️ A BIGGER BOX MUST BRING A BIGGER ABSORPTION WITH IT, or the counters card grows. The plane
+     is 54px against its siblings' 44, so its margin is -12px against their -8: 54 − 24 = 30px
+     effective, under the ~50px the label and figure occupy, and the card stays 82px. Setting the
+     size without the margin is the exact shape of trap 3, so both are asserted together. */
+  it("⚠️ the 54px plane absorbs 24px, so the row's height is still the TEXT's", () => {
+    const p = blk(".os-cic.plane");
+    expect(p).toMatch(/width:\s*54px/);
+    expect(p).toMatch(/height:\s*54px/);
+    expect(p).toMatch(/margin:\s*-12px 0/);
+  });
+
   it("⚠️ AND THE GOALS MARK OPTS OUT OF A BASELINE ROW — an image has no baseline", () => {
     /* `.os-goal-r1` is `align-items: baseline`, so the image aligned on its BOTTOM MARGIN EDGE and
        dragged the row: measured 33.3px against 21.8px of text. `align-self: center` takes it out
@@ -93,10 +118,21 @@ describe("the mapping follows the TABLE, not the filenames", () => {
   const counters = readFileSync(resolve(__dirname, "./OneScreenCounters.tsx"), "utf8");
   const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
 
-  it("⚠️ the paper plane is QUERIES SENT, and the target is GOALS — despite their names", () => {
+  /* ⚠️ RETARGETED (audit pack P3): QUERIES SENT now carries the watercolour plane, which replaced
+     the line-drawn `Querying Goals Icon` that had stood in for it. The target-is-GOALS half of the
+     old mismatch is unchanged and still worth stating. */
+  it("⚠️ the painted plane is QUERIES SENT, and the target is GOALS — despite its name", () => {
     expect(counters).toMatch(/sent:\s*sentMark/);
-    expect(counters).toContain("querying-goals-icon.png"); // …imported as the SENT mark
-    expect(rail).toContain("query-target-icon.png");       // …used on the GOALS card
+    expect(counters).toContain("active-query-image.png"); // …imported as the SENT mark
+    expect(counters).not.toContain("querying-goals-icon.png");
+    expect(rail).toContain("query-target-icon.png");      // …used on the GOALS card
+  });
+
+  it("⚠️ only the sent mark takes the plane class — it is a fact about the file, not a prop", () => {
+    expect(counters).toMatch(/MARK_CLASS[^=]*=\s*\{\s*sent:\s*" plane"\s*\}/);
+    expect(counters).toContain("MARK_CLASS[c.key]");
+    // no size/blend decision offered to the caller
+    expect(counters).not.toMatch(/markSize|blend\?:/);
   });
 
   it("each counter gets its own mark", () => {
