@@ -275,6 +275,15 @@
   --qc-ref-rim: 1px dashed rgba(124, 58, 42, 0.28);
   --qc-ref-rule: 1px solid rgba(124, 58, 42, 0.13);
   --qc-ref-plate: #f7f2e9;
+  /* ⚠️ THE SAGE BAND IS THE DASHBOARD'S, NOT A NEW COLOUR. Same family, same stops, same rule
+     colour as `.os-ahead` — the house rule is sage for a container's HEADER and pink reserved for
+     a surface asking something of you. A reference panel asks nothing, so sage is exactly right,
+     and matching the dashboard is the point: two container headers in one app should not be two
+     different greens. Tokenised here because the dashboard holds them as literals; if that sheet
+     ever retunes them, this is the one place to follow. */
+  --qc-ref-band-a: #dde3da;
+  --qc-ref-band-b: #d6dcd3;
+  --qc-ref-band-rule: #cbd3c8;
 
   --bd: #d8cebf;   /* border colour — soft taupe */
   --bdw: 1px;      /* border width */

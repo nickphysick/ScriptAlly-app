@@ -191,11 +191,46 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
       .not.toContain("--qc-ref-rim:");
   });
 
+  /* ⚠️ THE RIM IS AN OVERLAY, NOT A BORDER, AND FILLING THE BAND IS WHY. A child background that
+     meets the container's top edge paints over an inset rim — which is the fault the dashboard hit
+     the moment its own bands landed. Drawing the ring on `::after` puts it ABOVE every child, so
+     the band cannot eat it. */
+  it("the rim is a pseudo-element ring, drawn above the children", () => {
+    const ring = rule(".t-capp .qc-ctx::after");
+    expect(ring).toContain("position: absolute");
+    expect(ring, "inset 0 is only the panel's outline if the border is 0").toContain("inset: 0");
+    expect(ring, "the ring must round with the panel").toContain("border-radius: inherit");
+    expect(ring, "an overlay must never eat a click").toContain("pointer-events: none");
+    expect(ring).toContain("border: var(--qc-ref-rim)");
+    const host = rule(".t-capp .qc-ctx");
+    expect(host, "the container must be a positioning context").toContain("position: relative");
+    expect(host, "a border AND a ring would draw the rim twice").toContain("border: 0");
+  });
+
+  /* ⚠️ THE BAND IS THE DASHBOARD'S SAGE, NOT A NEW COLOUR — the house rule is sage for a
+     container's HEADER, pink reserved for a surface asking something of you. A reference panel
+     asks nothing. Matching `.os-ahead` is the point: two container headers in one app must not be
+     two different greens. */
+  it("the band is the dashboard's own sage, and clips to the panel's corners", () => {
+    const dash = read("../components/dashboard/oneScreen.css");
+    const index = read("../index.css");
+    expect(dash, "the dashboard band moved; these tokens must follow")
+      .toContain("linear-gradient(180deg, #dde3da, #d6dcd3)");
+    expect(index).toContain("--qc-ref-band-a: #dde3da");
+    expect(index).toContain("--qc-ref-band-b: #d6dcd3");
+    expect(index).toContain("--qc-ref-band-rule: #cbd3c8");
+    expect(rule(".t-capp .qc-glance")).toContain("var(--qc-ref-band-a)");
+    /* The panel clips; the band does not round itself. A self-rounded band inside a rounded,
+       clipping container is two radii that can disagree. */
+    expect(rule(".qc-ctx"), "the band relies on this to take the corners").toContain("overflow: hidden");
+    expect(rule(".t-capp .qc-glance"), "the band must not round itself").not.toContain("border-radius");
+  });
+
   /* ⚠️ THE DASHED RIM IS PERMITTED HERE AND NOWHERE ELSE — dashed means draft/placeholder
      everywhere else in this app. Scoping it to one component in one theme is what stops it
      spreading. */
   it("the dashed rim is scoped to .t-capp, and the base rim is untouched", () => {
-    expect(css).toContain(".t-capp .qc-ctx { border: var(--qc-ref-rim); }");
+    expect(css).toContain("border: var(--qc-ref-rim)");
     expect(rule(".qc-ctx"), "the unthemed rim must stay dotted").toContain("dotted");
     const dashed = [...css.matchAll(/^[^\n]*dashed[^\n]*$/gm)].map((m) => m[0]);
     for (const line of dashed) {
@@ -220,10 +255,11 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
 
   /* Fills say "surface"; rules say "record". */
   it("fills go, rules stay", () => {
-    for (const sel of [".t-capp .qc-glance", ".t-capp .qc-ctxstats", ".t-capp .qc-ctxpolicy", ".t-capp .qc-ctxhist", ".t-capp .qc-ctxg"]) {
+    /* ⚠️ AMENDED: the caption bar is now the SAGE BAND — a container header, which is a different
+       thing from a row. Everything BELOW it still trades fills for rules. */
+    for (const sel of [".t-capp .qc-ctxstats", ".t-capp .qc-ctxpolicy", ".t-capp .qc-ctxhist", ".t-capp .qc-ctxg"]) {
       expect(rule(sel), `${sel} kept its fill`).toContain("background: none");
     }
-    expect(rule(".t-capp .qc-glance")).toContain("border-bottom: var(--qc-ref-rule)");
     expect(rule(".t-capp .qc-ctxpolicy"), "a sentence should read as one").toContain("font-style: italic");
     expect(rule(".t-capp .qc-ctxquote"), "a pull-quote is set apart, not a row")
       .toContain("var(--qc-ref-plate)");
@@ -231,8 +267,12 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
 
   /* ⚠️ RECEDED IS NOT DISABLED. It is reference, and reference gets read and clicked. */
   it("the panel stays reachable — no pointer-events, no tabindex, no dimming", () => {
+    /* ⚠️ THE ONE PERMITTED `pointer-events: none` IS THE RING'S, and it is required there: an
+       overlay covering the whole panel would otherwise eat every click in it. What must never
+       happen is the PANEL being made unclickable. */
+    expect(rule(".t-capp .qc-ctx"), "the panel itself must stay clickable").not.toContain("pointer-events");
+    expect(rule(".t-capp .qc-ctx::after"), "the ring must not eat clicks").toContain("pointer-events: none");
     const capp = css.slice(css.indexOf(".t-capp .qc-ctx"), css.indexOf("QUIET REFERENCE"));
-    expect(capp).not.toContain("pointer-events");
     expect(capp, "a receded panel must not be a dimmed one").not.toContain("opacity");
     expect(panel, "its controls must stay in tab order").not.toContain('tabIndex={-1}');
     expect(panel, "the wish-list toggle is a real button").toContain('<button type="button" className="qc-ctxmore"');
@@ -240,7 +280,7 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
 
   /* Bold is locked and correct in dev; Editorial is monochrome and has nothing to recede from. */
   it("Bold Pastille and Editorial are untouched", () => {
-    for (const theme of [".t-bold .qc-ctx", ".t-edn .qc-ctx", ".t-bold .qc-glance", ".t-edn .qc-glance"]) {
+    for (const theme of [".t-bold .qc-ctx", ".t-edn .qc-ctx", ".t-bold .qc-glance", ".t-edn .qc-glance", ".t-bold .qc-ctx::after", ".t-edn .qc-ctx::after"]) {
       expect(rule(theme), `${theme} gained an override`).toBe("");
     }
   });

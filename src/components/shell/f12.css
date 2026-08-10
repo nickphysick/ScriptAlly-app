@@ -502,9 +502,26 @@
    it is scoped to a single component in a single theme so it cannot spread.
    ⚠️ AND THE PANEL IS STILL REACHABLE. Receded is not disabled: no pointer-events, no tabindex,
    no dimming of its links. It is reference, and reference gets read and clicked. */
-.t-capp .qc-ctx { border: var(--qc-ref-rim); }
-.t-capp .qc-glance { background: none; border-bottom: var(--qc-ref-rule); }
-/* the disc was a device for lifting a FILL; with no fill it is a smudge */
+/* ⚠️ THE RIM IS AN OVERLAY, NOT A BORDER, AND FILLING THE BAND IS WHY. A child background that
+   meets the container's top edge paints over an inset rim — inset shadows and clipped fills both
+   resolve beneath children — which is the fault the dashboard hit the moment its own bands landed.
+   Drawing the ring on `::after` puts it ABOVE every child, so the band cannot eat it. The border
+   goes to 0 so the ring sits on the box edge rather than 1px inside it, and `inset: 0` then means
+   exactly the panel's outline.
+   ⚠️ THE DASH IS THE MARGINALIA SIGNAL. It moved WHERE it is drawn, not WHAT it is. */
+.t-capp .qc-ctx { position: relative; border: 0; }
+.t-capp .qc-ctx::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  border: var(--qc-ref-rim); pointer-events: none;
+}
+/* ⚠️ THE BAND IS CLIPPED BY THE PANEL, not rounded by itself. `.qc-ctx` already carries
+   `overflow: hidden`, so the fill takes the container's radius at the top corners and cannot spill
+   past them — the same reason the dashboard's own container clips its band. */
+.t-capp .qc-glance {
+  background: linear-gradient(180deg, var(--qc-ref-band-a), var(--qc-ref-band-b));
+  border-bottom: 1px solid var(--qc-ref-band-rule);
+}
+/* the burgundy disc was a device for lifting a PARCHMENT fill; on a sage band it is a smudge */
 .t-capp .qc-glance::after { display: none; }
 .t-capp .qc-ctxstats { background: none; border-bottom: var(--qc-ref-rule); }
 .t-capp .qc-ctxstat { border-right: var(--qc-ref-rule); }
