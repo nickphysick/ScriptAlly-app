@@ -113,12 +113,67 @@ describe("create mode uses it for BOTH dates, with the constraints intact", () =
     expect(pane.match(/<BrandDatePicker/g)?.length ?? 0).toBe(2);
   });
 
-  it("Date sent still can't be in the future, and the reminder still can't precede the send", () => {
+  it("Date sent still can't be in the future, and the nudge still can't reach back past the send", () => {
     expect(pane).toContain("max={todayInputDate()}");
-    expect(pane).toContain("min={draft.dateSent || undefined}");
+    /* ⚠️ AMENDED: the floor is the sent date PLUS ONE DAY, not the sent date. A reminder to chase
+       something you have just this moment sent is not a reminder — and the old bound also let the
+       nudge land on the sending day, which reads as "chase this before it arrives". */
+    expect(pane).toContain("min={nudgeFloor}");
   });
 
   it("both wear the hub skin", () => {
     expect(pane.match(/variant="hub"/g)?.length ?? 0).toBe(2);
+  });
+});
+
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ THE TWO CREATE-MODE PICKERS POINT IN OPPOSITE DIRECTIONS. The nudge field was reusing the
+   sent field's configuration and offering "Today · Yesterday · Last Monday" for a date that must
+   be in the FUTURE — three shortcuts, none of them selectable, on a control whose whole job is to
+   save the writer some counting.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("sent and nudge carry their own bounds and their own shortcuts", () => {
+  /* A query cannot have been sent tomorrow. */
+  it("the sent picker refuses the future", () => {
+    const html = render({ value: "2026-08-10", max: "2026-08-10" });
+    expect(html).toContain("sa-dp-day off");
+    expect(html).toContain('aria-disabled="true"');
+    expect(pane, "the sent field's ceiling is today").toContain("max={todayInputDate()}");
+  });
+
+  /* ⚠️ AND THE NUDGE FLOOR IS THE SENT DATE PLUS ONE DAY, not the sent date. A reminder to chase
+     something you have just this moment sent is not a reminder. */
+  it("the nudge picker refuses the sending day itself and everything before it", () => {
+    expect(pane).toContain("const nudgeFloor = draft.dateSent ? isoPlusDays(draft.dateSent, 1) : todayInputDate();");
+    expect(pane).toContain("min={nudgeFloor}");
+    const html = render({ value: "", min: "2026-08-11" });
+    expect(html, "days before the floor must be inert").toContain("sa-dp-day off");
+  });
+
+  /* "In eight weeks" on a query posted in June means eight weeks after June, not after today. */
+  it("the nudge shortcuts count forward from the SEND, not from today", () => {
+    expect(pane).toContain("const base = draft.dateSent || todayInputDate();");
+    expect(pane).toContain("label: `In ${w} weeks`");
+    expect(pane).toContain("date: new Date(isoPlusDays(base, w * 7)");
+    expect(pane, "and they are handed to the picker rather than hardcoded in it")
+      .toContain("quickChips={nudgeChips}");
+  });
+
+  /* ⚠️ MOVING THE SEND CAN STRAND A NUDGE THE WRITER CHOSE. Keeping it would leave a reminder
+     scheduled before the query existed; silently correcting it would move a day they picked on
+     purpose without telling them. It falls back to the preset, and the derived line says so. */
+  it("moving the sent date past a chosen nudge date clears that choice", () => {
+    expect(pane).toContain('draft.reminder.kind === "custom" && d && draft.reminder.date <= d');
+    expect(pane).toContain("{ dateSent: d, reminder: initialReminder(agent) }");
+  });
+
+  /* The default chips stay exactly as they were for the twenty Form 11 call sites and the sent
+     field — an additive prop, not a replacement. */
+  it("and the backward-looking chips remain the default", () => {
+    const field = read("../components/forms/BrandDatePicker.tsx");
+    expect(field).toContain('["Today", today],');
+    expect(field).toContain('["Last Monday", lastMonday(today)],');
+    expect(field).toContain("{(quickChips");
   });
 });

@@ -43,6 +43,7 @@ import {
   CREATE_SEND_METHODS,
   NUDGE_PRESETS,
   initialReminder,
+  isoPlusDays,
   materialRowsForDraft,
   nudgeDerivedLine,
   todayInputDate,
@@ -126,6 +127,20 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
     : "");
   const todayLong = longDate(todayInputDate());
   const sentLong = longDate(draft.dateSent);
+  /* ⚠️ THE TWO PICKERS POINT IN OPPOSITE DIRECTIONS, AND SO MUST THEIR BOUNDS AND SHORTCUTS.
+     A query cannot have been sent tomorrow; a nudge cannot be scheduled for a day that has already
+     passed, nor for the sending day itself — a reminder to chase something you have just sent is
+     not a reminder. The nudge floor is therefore the sent date PLUS ONE DAY, and its shortcuts
+     count forward FROM THE SEND, not from today: "in eight weeks" on a query posted in June means
+     eight weeks after June. */
+  const nudgeFloor = draft.dateSent ? isoPlusDays(draft.dateSent, 1) : todayInputDate();
+  const nudgeChips = useMemo(() => {
+    const base = draft.dateSent || todayInputDate();
+    return [4, 8, 12].map((w) => ({
+      label: `In ${w} weeks`,
+      date: new Date(isoPlusDays(base, w * 7) + "T00:00:00"),
+    }));
+  }, [draft.dateSent]);
   const sample = draft.materials.find((r) => r.key === "sample") as Extract<MaterialRow, { key: "sample" }> | undefined;
   const other = draft.materials.find((r) => r.key === "other") as Extract<MaterialRow, { key: "other" }> | undefined;
 
@@ -366,7 +381,16 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                   keeps the "you can't have sent it tomorrow" rule the native input enforced. */}
               <BrandDatePicker
                 value={draft.dateSent}
-                onChange={(d) => set({ dateSent: d })}
+                /* ⚠️ MOVING THE SEND CAN INVALIDATE A NUDGE THE WRITER CHOSE. Keeping an
+                   impossible date would leave a reminder scheduled before the query existed, and
+                   silently correcting it would move a day they picked on purpose without telling
+                   them. It falls back to the preset, and the derived line says what it now is. */
+                onChange={(d) => set(
+                  draft.reminder.kind === "custom" && d && draft.reminder.date <= d
+                    ? { dateSent: d, reminder: initialReminder(agent) }
+                    : { dateSent: d },
+                )}
+                /* No future dates: a query cannot have been sent tomorrow. */
                 max={todayInputDate()}
                 variant="hub"
                 ariaLabel="Date sent"
@@ -430,7 +454,8 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                     onChange={(d) => set(d
                       ? { reminder: { kind: "custom", date: d } }
                       : { reminder: initialReminder(agent) })}
-                    min={draft.dateSent || undefined}
+                    min={nudgeFloor}
+                    quickChips={nudgeChips}
                     variant="hub"
                     ariaLabel="Pick a nudge date"
                     placeholder="Pick a date"

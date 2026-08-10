@@ -27,6 +27,16 @@ export interface BrandDatePickerProps {
    * the only footer that exists.
    */
   footnote?: string;
+  /**
+   * The hub popover's shortcut chips, replacing the backward-looking default.
+   *
+   * ⚠️ SHORTCUTS MUST POINT THE WAY THE FIELD DOES. The nudge field was reusing the sent field's
+   * configuration and offering "Today · Yesterday · Last Monday" for a date that must be in the
+   * FUTURE — three shortcuts, none of them selectable, on a control whose whole job is to save
+   * the writer some counting. Anchored to a date the CALLER chooses, because "in eight weeks"
+   * from a nudge field means eight weeks after the query went out, not after today.
+   */
+  quickChips?: readonly { label: string; date: Date }[];
 }
 
 const MONTHS = [
@@ -70,7 +80,7 @@ const withinRange = (d: Date, min?: string, max?: string): boolean => {
  * sage "today" ring, burgundy selected day, greyed adjacent-month days. Closes on outside click.
  */
 export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
-  value, onChange, placeholder = "Select a date", min, max, variant = "form", ariaLabel, footnote,
+  value, onChange, placeholder = "Select a date", min, max, variant = "form", ariaLabel, footnote, quickChips,
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -266,11 +276,14 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
         {variant === "hub" && (
           <>
             <div className="sa-dp-quick">
-              {([
-                ["Today", today],
-                ["Yesterday", addDays(today, -1)],
-                ["Last Monday", lastMonday(today)],
-              ] as const).map(([label, d]) => (
+              {(quickChips
+                ? quickChips.map((c) => [c.label, c.date] as const)
+                : ([
+                    ["Today", today],
+                    ["Yesterday", addDays(today, -1)],
+                    ["Last Monday", lastMonday(today)],
+                  ] as const)
+              ).map(([label, d]) => (
                 <button
                   key={label}
                   type="button"

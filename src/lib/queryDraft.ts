@@ -76,6 +76,19 @@ export interface QueryDraft {
   journal: string;
 }
 
+/**
+ * yyyy-mm-dd plus n days, in the same string space the pickers speak.
+ *
+ * ⚠️ PARSED AS LOCAL MIDNIGHT, not as the bare ISO date. `new Date("2026-08-10")` is UTC midnight,
+ * so west of Greenwich it is the 9th locally and every derived bound lands a day early.
+ */
+export const isoPlusDays = (iso: string, days: number): string => {
+  const t = new Date(iso + "T00:00:00").getTime();
+  if (Number.isNaN(t)) return iso;
+  const d = new Date(t + days * DAY);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
 export const todayInputDate = (now: number = Date.now()): string =>
   new Date(now).toISOString().slice(0, 10);
 
