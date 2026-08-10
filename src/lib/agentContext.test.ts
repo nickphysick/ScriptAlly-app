@@ -172,6 +172,34 @@ describe("the panel reads as quieter than the form", () => {
   });
 });
 
+/* ══ THE PANEL COLUMN ══════════════════════════════════════════════════════════════════════ */
+describe("the panel is a fixed column that does not scroll away", () => {
+  /* ⚠️ FIXED, NOT PROPORTIONAL. It was 52% / rest, which made the reference column grow with the
+     viewport — a record of two stats and four short rows does not become more useful at 620px
+     than at 322px, it just becomes emptier, while the form loses width it can use. */
+  it("322px, with the flow taking the remainder", () => {
+    expect(rule(".qc-ctx")).toContain("flex: 0 0 322px");
+    expect(rule(".qc-form")).toContain("flex: 1 1 0");
+  });
+
+  /* ⚠️ IT IS ALREADY "STICKY", AND `position: sticky` WOULD BE A DEAD PROPERTY. The spec asks for
+     a panel that does not scroll away with the flow, and it does not: `.qc-form` is the scroll
+     container and the panel is its SIBLING, so the row itself never scrolls. Browser-measured —
+     scrolling the flow 104px moved the panel 0.0px. There is no scrolling ancestor for a sticky
+     element to stick within, so the property would resolve to `relative` and read as
+     load-bearing when it is not. This asserts the STRUCTURE that delivers the behaviour. */
+  it("and the structure is what keeps it in place — not a sticky rule with no scrollport", () => {
+    expect(rule(".qc-form"), "the flow is the scroll container").toContain("overflow-y: auto");
+    expect(rule(".qc-ctx"), "the panel must not stretch with the row").toContain("align-self: flex-start");
+    expect(rule(".qc-ctx")).toContain("max-height: 100%");
+    expect(rule(".qc-two"), "if the ROW ever scrolls, this reasoning stops holding")
+      .toContain("min-height: 0");
+    expect(rule(".qc-ctx"), "a sticky rule here would have nothing to stick within")
+      .not.toContain("position: sticky");
+    expect(css).toContain("THE PANEL IS ALREADY \"STICKY\"");
+  });
+});
+
 /* ══ THE POINT OF THE HEIGHT REDESIGN ══════════════════════════════════════════════════════ */
 describe("the panel ends where its content ends", () => {
   it("height auto, capped at the column — never stretched to fill it", () => {

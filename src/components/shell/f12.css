@@ -187,7 +187,7 @@
    content rather than introducing a column, so nothing jumps under the pointer at the moment of
    choosing. The centred single-column question — and its dashed empty avatar — are retired for
    exactly that reason. */
-.qc-form-ask { justify-content: flex-start; }
+.qc-form-ask { flex: 0 0 52%; justify-content: flex-start; }
 .qc-askq { font-family: var(--f12-serif); font-weight: 700; font-size: 24px; color: var(--ink); margin: 8px 0 0; }
 /* Bordered and lifted: it is the only thing being asked. */
 .qc-askfield { width: 100%; }
@@ -271,8 +271,21 @@
 /* done — the summary IS the receipt, so it states values, not that values exist */
 .qc-sum { width: 100%; text-align: left; background: none; border: none; font-family: inherit; cursor: pointer; }
 .qc-sec.qc-done .qc-tick { background: #7e9178; color: #fff; }
-.qc-ed { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--muted); flex: none; }
-.qc-sum:hover .qc-ed { color: var(--burg); }
+
+/* ⚠️ THE HINT AND THE VALUE ARE THE SAME SLOT, ONE AT A TIME. Before the step is answered the row
+   says what it is FOR; after, it says what was RECORDED — and both at once would put a category
+   label beside the thing it categorises, on four rows, in a column already carrying a heading.
+   The value takes the right edge so the four rows agree about where an answer is found. */
+.qc-sval { margin-left: auto; padding-left: 12px; font-size: 12px; color: var(--ink-2); text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ⚠️ EDIT IS HOVER-REVEALED, AND THE CHEVRON IS NOT. The chevron says the row opens — that is
+   true whether or not the pointer is there, and a row with no persistent affordance reads as a
+   label. EDIT says what opening it is FOR, which is only worth saying once you are reaching. */
+.qc-sedit { margin-left: 12px; flex: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; color: var(--burg); opacity: 0; transition: opacity 0.15s; }
+.qc-sum:hover .qc-sedit, .qc-sum:focus-visible .qc-sedit { opacity: 1; }
+.qc-schev { margin-left: 10px; flex: none; color: #c8b8a8; font-size: 14px; line-height: 1; }
+/* an unanswered row has no value, so the hint must take the slack or the chevron slides left */
+.qc-sec:not(.qc-done) .qc-stxt { margin-right: auto; }
+@media (prefers-reduced-motion: reduce) { .qc-sedit { transition: none; } }
 
 /* ══ STAGE 2 · TWO COLUMNS (ref qc-create-fullscreen.html) ══════════════════════════════════
    ⚠️ THE PAGE MUST NOT SCROLL. Both columns are `flex: 1 1 0; min-height: 0; overflow-y: auto`,
@@ -281,12 +294,24 @@
    the scroll lands on the document instead of inside the columns. Verified in the browser at
    1440×800: document scrollHeight === clientHeight, both columns scrolling. */
 .qc-two { display: flex; gap: 18px; flex: 1 1 0; min-height: 0; }
-.qc-form { flex: 0 0 52%; min-width: 0; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; }
+/* ⚠️ THE FLOW TAKES THE REMAINDER; THE PANEL IS A FIXED 322px. It was 52% / rest, which made the
+   reference column grow with the viewport — a record of two stats and four short rows does not get
+   more useful at 620px than at 322px, it just gets emptier, while the form loses width it can use.
+   Stage 1 keeps the old basis (.qc-form-ask) because it has no panel beside it. */
+.qc-form { flex: 1 1 0; min-width: 0; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; }
 /* ⚠️ THE PANEL ENDS WHERE ITS CONTENT ENDS — `height: auto; max-height: 100%`, NOT a stretched
    flex child. A thin record stretched to the column's full height is a frame around dead space,
    and dead space reads as something that failed to load. `align-self: flex-start` is what stops
    the row's default `stretch` overriding the auto height. */
-/* ══ THE PANEL IS A CARD LAID ON THE DESK (ref qc-tilt.html, b2 + t1) ═══════════════════════
+/* ⚠️ THE PANEL IS ALREADY "STICKY", AND `position: sticky` WOULD BE A DEAD PROPERTY HERE. The
+   spec asks for a panel that does not scroll away with the flow, and it does not: `.qc-form` is
+   the scroll container (`overflow-y: auto`), the panel is its SIBLING, and `.qc-two` itself never
+   scrolls. Browser-measured — scrolling the flow 104px moved the panel 0.0px. There is no
+   scrolling ancestor for a sticky element to stick within, so the property would resolve to
+   `relative` and mislead the next reader into thinking it was load-bearing. The structure below
+   is what delivers the behaviour; do not "fix" its absence.
+
+   ══ THE PANEL IS A CARD LAID ON THE DESK (ref qc-tilt.html, b2 + t1) ═══════════════════════
    A dotted edge and six-tenths of a degree, which together stop it reading as a UI element
    beside the form. Four constraints, all binding:
 
@@ -312,7 +337,7 @@
    ⚠️ AND IT IS NOT GATED ON `prefers-reduced-motion`. This is a static transform, not motion:
    nothing animates, nothing moves, and there is no vestibular effect to spare anyone. Gating it
    would leave those users with a different design, not a calmer one. */
-.qc-ctx { flex: 1 1 0; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; margin: 10px; display: flex; flex-direction: column; border: 1.5px dotted #cdbfa9; border-radius: 16px; overflow: hidden; background: #fbf9f5; transform: rotate(-0.6deg); }
+.qc-ctx { flex: 0 0 322px; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; margin: 10px; display: flex; flex-direction: column; border: 1.5px dotted #cdbfa9; border-radius: 16px; overflow: hidden; background: #fbf9f5; transform: rotate(-0.6deg); }
 
 /* ⚠️ QUIET REFERENCE (qc-focus.html panel 2). Ground #fbf9f5, hairline border, NO SHADOW — a
    shadow implies floating, and this sits back. Values inside are Inter, not Playfair: serif

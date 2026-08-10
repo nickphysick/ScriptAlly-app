@@ -38,7 +38,10 @@ describe("stage 1 asks one question", () => {
     expect(pane, "the dashed empty avatar came back").not.toContain("qc-askav");
     expect(pane).toContain('<div className="qc-form qc-form-ask');
     expect(pane.indexOf("Who are you querying?")).toBeLessThan(pane.indexOf("qc-askfield"));
-    expect(rule(".qc-form"), "both stages share the 52% column").toContain("flex: 0 0 52%");
+    /* ⚠️ THE BASIS MOVED TO `.qc-form-ask`. Stage 2's flow now takes the REMAINDER beside a fixed
+       322px panel; stage 1 has no panel, so it keeps the 52% column it was designed around. */
+    expect(rule(".qc-form-ask"), "stage 1 lost its column width").toContain("flex: 0 0 52%");
+    expect(rule(".qc-form"), "stage 2's flow must take the remainder").toContain("flex: 1 1 0");
   });
 
   it("the field is bordered, lifted and takes the caret on arrival", () => {

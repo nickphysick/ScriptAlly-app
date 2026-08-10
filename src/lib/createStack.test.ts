@@ -34,15 +34,32 @@ describe("the three treatments", () => {
     expect(pane).toContain("enterHint(");
   });
 
-  it("done shows a sage tick, the values, and a Change", () => {
+  it("done shows a sage tick, the value at the right edge, and an EDIT", () => {
     expect(rule(".qc-sec.qc-done .qc-tick")).toContain("#7e9178");
-    expect(pane).toContain('<span className="qc-ed">Change</span>');
-    expect(pane, "the summary must state the values, not that values exist").toContain("summaries.when");
+    expect(pane).toContain('<span className="qc-sval">{summaries.when}</span>');
+    expect(pane).toContain('<span className="qc-sedit">EDIT</span>');
+    expect(rule(".qc-sval"), "the value takes the right edge, so four rows agree where an answer is")
+      .toContain("margin-left: auto");
   });
 
-  it("upcoming shows the hint, not a summary, and offers no Change", () => {
-    expect(pane).toContain('states.when === "done" ? summaries.when : STEP_HINT.when');
-    expect(pane).toContain('states.when === "done" && <span className="qc-ed">Change</span>');
+  /* ⚠️ THE HINT AND THE VALUE ARE THE SAME SLOT, ONE AT A TIME. Before the step is answered the
+     row says what it is FOR; after, what was RECORDED. Both at once puts a category label beside
+     the thing it categorises, on every row, under a heading that already said it. */
+  it("upcoming shows the hint and no value; done shows the value and no hint", () => {
+    expect(pane).toContain('{states.when !== "done" && <span className="qc-stxt">{STEP_HINT.when}</span>}');
+    expect(pane).toContain('{states.when === "done" && <span className="qc-sval">{summaries.when}</span>}');
+    expect(pane, "EDIT must not offer to edit an unanswered step")
+      .toContain('{states.when === "done" && <span className="qc-sedit">EDIT</span>}');
+  });
+
+  /* ⚠️ EDIT IS HOVER-REVEALED, THE CHEVRON IS NOT. The chevron says the row opens, which is true
+     whether or not the pointer is there; a row with no persistent affordance reads as a label. */
+  it("the chevron is always there and EDIT arrives on hover — and on keyboard focus", () => {
+    expect(pane).toContain('<span className="qc-schev" aria-hidden="true">›</span>');
+    expect(rule(".qc-sedit")).toContain("opacity: 0");
+    const reveal = css.slice(css.indexOf(".qc-sum:hover .qc-sedit"));
+    expect(reveal.slice(0, 90), "a hover-only affordance is unreachable by keyboard")
+      .toContain(":focus-visible");
   });
 
   /* ⚠️ UNMOUNTED, NOT HIDDEN. A hidden date picker or textarea still takes tab stops, and the

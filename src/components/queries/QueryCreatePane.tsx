@@ -314,8 +314,10 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <button type="button" className="qc-sum" onClick={() => jump("when")}>
               <span className="qc-tick" aria-hidden="true">{states.when === "done" ? "✓" : ""}</span>
               <b>{STEP_SHORT.when}</b>
-              <span className="qc-stxt">{states.when === "done" ? summaries.when : STEP_HINT.when}</span>
-              {states.when === "done" && <span className="qc-ed">Change</span>}
+              {states.when !== "done" && <span className="qc-stxt">{STEP_HINT.when}</span>}
+              {states.when === "done" && <span className="qc-sval">{summaries.when}</span>}
+              {states.when === "done" && <span className="qc-sedit">EDIT</span>}
+              <span className="qc-schev" aria-hidden="true">›</span>
             </button>
           )}
           {states.when === "active" && (
@@ -413,8 +415,10 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <button type="button" className="qc-sum" onClick={() => jump("what")}>
               <span className="qc-tick" aria-hidden="true">{states.what === "done" ? "✓" : ""}</span>
               <b>{STEP_SHORT.what}</b>
-              <span className="qc-stxt">{states.what === "done" ? summaries.what : STEP_HINT.what}</span>
-              {states.what === "done" && <span className="qc-ed">Change</span>}
+              {states.what !== "done" && <span className="qc-stxt">{STEP_HINT.what}</span>}
+              {states.what === "done" && <span className="qc-sval">{summaries.what}</span>}
+              {states.what === "done" && <span className="qc-sedit">EDIT</span>}
+              <span className="qc-schev" aria-hidden="true">›</span>
             </button>
           )}
           {states.what === "active" && (
@@ -572,8 +576,10 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             <button type="button" className="qc-sum" onClick={() => jump("notes")}>
               <span className="qc-tick" aria-hidden="true">{states.notes === "done" ? "✓" : ""}</span>
               <b>{STEP_SHORT.notes}</b>
-              <span className="qc-stxt">{states.notes === "done" ? summaries.notes : STEP_HINT.notes}</span>
-              {states.notes === "done" && <span className="qc-ed">Change</span>}
+              {states.notes !== "done" && <span className="qc-stxt">{STEP_HINT.notes}</span>}
+              {states.notes === "done" && <span className="qc-sval">{summaries.notes}</span>}
+              {states.notes === "done" && <span className="qc-sedit">EDIT</span>}
+              <span className="qc-schev" aria-hidden="true">›</span>
             </button>
           )}
           {states.notes === "active" && (
