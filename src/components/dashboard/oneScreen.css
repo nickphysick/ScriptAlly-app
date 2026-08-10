@@ -1144,11 +1144,10 @@
 
 
 /* ══ P3 · THE BAND'S CONTROLS ════════════════════════════════════════════════════════════════
-   ⚠️ THEY HAVE TO READ AGAINST SAGE, and that is the specific complaint this answers. Both
-   controls were drawn for a parchment card and put on a sage band, where a pale track on a pale
-   green ground simply disappears. They take a PARCHMENT FILL with a #bcc7b9 edge so they read as
-   objects laid ON the band rather than as areas of it — and both take the same treatment, so the
-   select and the slider read as a pair rather than two unrelated widgets sharing a row. */
+   ⚠️ THEY HAVE TO READ AGAINST SAGE. Both were drawn for a parchment card and put on a sage band,
+   where a pale fill on a pale green ground disappears. The select takes a parchment fill with a
+   #bcc7b9 edge; the SLIDER goes further and takes a capsule of its own (below), because a track is
+   thinner than a select and had nothing to read against at all. */
 .os-ahead .os-freqsel select {
   background: #fffdf9;
   border: 1px solid #bcc7b9;
@@ -1157,30 +1156,44 @@
 .os-ahead .os-freqsel select:hover { border-color: #a8b5a5; }
 .os-ahead .os-cv { color: #6f8069; }
 
-/* ⚠️ THE TRACK IS A SURFACE, NOT A LINE. A 4px rule on a gradient band reads as a scratch; the
-   inset shadow gives it a floor so it reads as a channel the thumb runs in. */
-.os-ahead .os-rangeslider input[type="range"]::-webkit-slider-runnable-track,
-.os-ahead .os-rangeslider input[type="range"]::-moz-range-track {
-  height: 6px;
-  border-radius: 99px;
+/**
+ * ⚠️ THE CAPSULE (P3) — the slider is not ON the sage, it is on parchment laid over it.
+ *
+ * A bare track with a dot was the version that failed. The capsule gives the control a surface,
+ * and the LABEL rides inside it because the label IS the slider's value — separating them put the
+ * readout on the band and its control on parchment.
+ */
+.os-rangecap {
+  display: flex; align-items: center; gap: 9px; flex: none;
   background: #fffdf9;
   border: 1px solid #bcc7b9;
-  box-shadow: inset 0 1px 2px rgba(58, 28, 20, 0.10);
+  border-radius: 99px;
+  padding: 5px 13px 5px 11px;
 }
-/* ⚠️ THE THUMB CARRIES A WHITE RING — burgundy alone on sage is legible but sits IN the band; the
-   ring lifts it off, and it is the one element here that must never be hunted for. */
-.os-ahead .os-rangeslider input[type="range"]::-webkit-slider-thumb {
-  background: #7c3a2a;
-  border: 2px solid #fffdf9;
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.28);
+.os-rangecap .os-rangeslider { width: clamp(72px, 12vw, 132px); padding-top: 0; }
+.os-rangecap .os-rangelbl { color: #4a5a45; min-width: 0; }
+
+/* ⚠️ THE TRAVELLED PORTION IS FILLED — that is what says where you are. `--fill` is set inline per
+   render and read here; without the gradient this is a bare rail again. */
+.os-rangecap input[type="range"]::-webkit-slider-runnable-track {
+  height: 5px; border-radius: 99px;
+  background: linear-gradient(to right, #7c3a2a 0 var(--fill, 0%), #e6ddd0 var(--fill, 0%) 100%);
 }
-.os-ahead .os-rangeslider input[type="range"]::-moz-range-thumb {
-  background: #7c3a2a;
-  border: 2px solid #fffdf9;
-  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.28);
+.os-rangecap input[type="range"]::-webkit-slider-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fffdf9; border: 2.5px solid #7c3a2a;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.24);
+  margin-top: -4px;
 }
-/* the range label is mono on the band, not on parchment — it is a readout, not a control */
-.os-ahead .os-rangelbl { color: #4a5a45; }
+/* ⚠️ FIREFOX IGNORES THE -webkit- PSEUDO-ELEMENTS ENTIRELY and would render the browser default —
+   a blue OS slider sitting on a parchment capsule. These are not a nicety. */
+.os-rangecap input[type="range"]::-moz-range-track { height: 5px; border-radius: 99px; background: #e6ddd0; }
+.os-rangecap input[type="range"]::-moz-range-progress { height: 5px; border-radius: 99px; background: #7c3a2a; }
+.os-rangecap input[type="range"]::-moz-range-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fffdf9; border: 2.5px solid #7c3a2a;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.24);
+}
 
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
    ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule

@@ -285,15 +285,26 @@ export const OneScreenChart: React.FC<{
         </div>
         {/* ⚠️ CONTINUOUS BUT SNAPPING: the thumb can only rest on a landmark, so every position
             it can hold names a real span. The label is the control's value in words. */}
+        {/* ⚠️ THE SLIDER AND ITS LABEL SHARE ONE CAPSULE (P3). The control was invisible because
+            it sat directly ON the sage band; the fix is to stop putting it there. The capsule is a
+            parchment surface the slider can be read against, and the label rides inside it because
+            the label IS the slider's value — separating them put a readout on the band and its
+            control on parchment. */}
+        <div className="os-rangecap">
         <div className="os-rangeslider">
           <input
             type="range" min={0} max={100} step={1} value={stop.p}
             aria-label="Chart range"
             aria-valuetext={stop.label}
+            /* ⚠️ `--fill` IS WHAT MAKES THE TRACK LEGIBLE. A bare track with a dot on it was the
+               version that failed; the travelled portion filled in burgundy is what says where you
+               are. Set inline because it is a per-render value, and read by the track gradient. */
+            style={{ ["--fill" as string]: `${stop.p}%` }}
             onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
           />
         </div>
         <span className="os-rangelbl">{stop.label}</span>
+        </div>
         </div>
       </div>
       {/* ⚠️ THE PADDING IS THE BODY'S, NOT THE CARD'S — the band must run edge to edge, so the

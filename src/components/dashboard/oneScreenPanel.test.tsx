@@ -243,9 +243,20 @@ describe("one band geometry, declared", () => {
   it("⚠️ the controls read AGAINST sage — parchment fill and a green edge, as a pair", () => {
     expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#fffdf9/);
     expect(bare).toMatch(/\.os-ahead \.os-freqsel select\s*\{[^}]*#bcc7b9/);
-    expect(bare).toMatch(/slider-runnable-track[\s\S]{0,200}#bcc7b9/);
-    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#7c3a2a/); // burgundy thumb…
-    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#fffdf9/); // …with its white ring
+    /* ⚠️ RETARGETED (P3 capsule): the slider no longer sits ON the sage, so the green edge moved
+       from the TRACK to the CAPSULE around it, and the track now carries the travelled fill —
+       which is the part that makes the control legible. A bare track was the version that failed. */
+    expect(bare).toMatch(/\.os-rangecap\s*\{[^}]*#fffdf9/);
+    expect(bare).toMatch(/\.os-rangecap\s*\{[^}]*#bcc7b9/);
+    expect(bare).toMatch(/slider-runnable-track[\s\S]{0,220}var\(--fill/);
+    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#7c3a2a/); // burgundy edge…
+    expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#fffdf9/); // …on a parchment thumb
+
+    /* ⚠️ FIREFOX IGNORES -webkit- PSEUDO-ELEMENTS ENTIRELY — without these it renders the browser
+       default, a blue OS slider on a parchment capsule. */
+    expect(bare).toContain("::-moz-range-track");
+    expect(bare).toContain("::-moz-range-progress");
+    expect(bare).toContain("::-moz-range-thumb");
   });
 });
 
