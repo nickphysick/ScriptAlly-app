@@ -193,16 +193,48 @@ describe("how it leaves", () => {
     expect(SKELETON_FADE_MS).toBeLessThanOrEqual(300);
   });
 
-  it("⚠️ the element outlives `shown` by one fade — React cannot transition an unmounting node", () => {
+  /**
+   * ⚠️⚠️ THE PHASE IS ONE PIECE OF STATE, AND THE FIRST ATTEMPT AT THIS FADE SHIPPED BROKEN.
+   *
+   * It held TWO booleans — `shown` plus a `leaving` set by a follow-up effect — and derived
+   * `phase = shown ? "on" : leaving ? "out" : "off"`. When `shown` flips false, React re-renders
+   * BEFORE the effect that sets `leaving` runs, so that render resolves to `"off"` and the element
+   * UNMOUNTS on the spot; `leaving` then re-mounts it already at opacity 0, invisible, for the
+   * length of the fade. On screen: the hard cut the fade existed to remove.
+   *
+   * ⚠️ AND THE TEST THAT WAS HERE ASSERTED THE BROKEN EXPRESSION VERBATIM, so it passed while
+   * describing the bug. Asserting the SHAPE of code proves the code has that shape — never that
+   * the shape is right. These assert the property instead: one state, and no derivation to get
+   * the ordering wrong.
+   *
+   * Measured after the fix, in headless Chrome (the browser pane keeps the document hidden, so
+   * its timers are throttled and its transitions never advance — every timing read there is
+   * nominal): `class "out" added — opacity now 1, 1 animation(s) running` … `UNMOUNTED (220ms
+   * after the fade began)`.
+   */
+  it("⚠️ ONE phase state — never derived from two booleans that can disagree for a render", () => {
     const hook = src.slice(src.indexOf("export function useSkeleton"));
-    expect(hook).toContain("setLeaving(true)");
-    expect(hook).toContain("SKELETON_FADE_MS");
-    expect(hook).toContain('phase: shown ? "on" : leaving ? "out" : "off"');
+    expect(hook).toContain('useState<SkeletonPhase>("off")');
+    expect(hook.match(/useState/g) ?? []).toHaveLength(1);
+    expect(hook).toContain("return { phase, wasShown: everShown.current };");
+    // the derived form, in any spacing, is the regression
+    expect(hook).not.toMatch(/phase:\s*\w+\s*\?/);
+    expect(hook).not.toContain("setLeaving");
   });
 
-  it("a skeleton that never appeared has nothing to dissolve", () => {
+  it('⚠️ "hide" goes straight to "out" — the element must still be mounted when the class lands', () => {
     const hook = src.slice(src.indexOf("export function useSkeleton"));
-    expect(hook).toContain("if (!everShown.current) return;");
+    const hide = hook.slice(hook.indexOf('case "hide":'));
+    expect(hook.indexOf('case "hide":')).toBeGreaterThan(-1);
+    expect(hide.slice(0, hide.indexOf("return"))).toContain('setPhase("out")');
+    // nothing may jump to "off" from the rule; only the fade timer ends it
+    expect(hook.match(/setPhase\("off"\)/g) ?? []).toHaveLength(1);
+  });
+
+  it("the fade timer is the only thing that ends it, and it reads the shared constant", () => {
+    const hook = src.slice(src.indexOf("export function useSkeleton"));
+    expect(hook).toContain('if (phase !== "out") return;');
+    expect(hook).toContain("SKELETON_FADE_MS");
   });
 
   /* ⚠️ `wasShown` IS WHAT STOPS THE PAGE ARRIVING TWICE — the dashboard reads it to skip its own

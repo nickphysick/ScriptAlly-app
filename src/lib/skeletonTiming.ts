@@ -115,21 +115,40 @@ export interface SkeletonState {
 /**
  * The driver.
  *
- * ⚠️ `shown` IS STATE AND `shownAt` IS A REF, deliberately. The moment it appeared is read inside
- * a timeout to compute what is still owed; as state it would put a changing value in the effect's
- * deps and re-arm the timer on every tick. The same reason the dashboard's entrance guard is a
- * ref — see OneScreenDashboard.
+ * ⚠️⚠️ THE PHASE IS ONE PIECE OF STATE, AND THE FIRST ATTEMPT AT THIS FADE PROVED WHY.
+ *
+ * It held TWO booleans — `shown`, plus a `leaving` set by a follow-up effect — and derived
+ * `phase = shown ? "on" : leaving ? "out" : "off"`. That cannot work, and it fails in the one way
+ * that looks fine in review: when `shown` flips false, React re-renders BEFORE the effect that
+ * sets `leaving` runs, so for that render the phase resolves to `"off"` and the element UNMOUNTS
+ * on the spot. `leaving` then turns true and re-mounts it already at opacity 0 — invisible — for
+ * the length of the fade, and unmounts it again. The net effect on screen is the hard cut the fade
+ * was written to remove, plus a pointless mount/unmount, and it SHIPPED.
+ *
+ * A single `phase` removes the ordering rather than sequencing around it: "on" → "out" is one
+ * state change in one update, so the element is still mounted when its class changes and the
+ * browser has something to transition. There is no intermediate value left to compute wrongly.
+ *
+ * ⚠️ AND THE SOURCE TEST DID NOT CATCH IT. It asserted the derived expression verbatim — which is
+ * exactly what was wrong — so it passed while describing the bug. Asserting the SHAPE of code
+ * proves the code has that shape, never that the shape is right.
+ *
+ * ⚠️ `shownAt` IS A REF, deliberately. The moment it appeared is read inside a timeout to compute
+ * what is still owed; as state it would put a changing value in the effect's deps and re-arm the
+ * timer on every tick. The same reason the dashboard's entrance guard is a ref.
  *
  * ⚠️ A SECOND `loading` SPELL DOES NOT RESTART THE CLOCK. If the data goes out again while the
  * skeleton is still up, it simply stays up; `shownAt` keeps its original stamp so the minimum is
  * measured from when the user first saw it, which is the only moment they can perceive.
  */
 export function useSkeleton(loading: boolean): SkeletonState {
-  const [shown, setShown] = useState(false);
-  /* `out` outlives `shown`: the element stays mounted through its dissolve. */
-  const [leaving, setLeaving] = useState(false);
+  const [phase, setPhase] = useState<SkeletonPhase>("off");
   const everShown = useRef(false);
   const shownAt = useRef<number | null>(null);
+
+  /* "out" is still on screen, but it is no longer DOING anything — the rule below asks only
+     whether the skeleton is covering the page. */
+  const shown = phase === "on";
 
   useEffect(() => {
     const step = skeletonStep({
@@ -142,7 +161,7 @@ export function useSkeleton(loading: boolean): SkeletonState {
         const id = window.setTimeout(() => {
           shownAt.current = Date.now();
           everShown.current = true;
-          setShown(true);
+          setPhase("on");
         }, step.ms);
         // ⚠️ THE CLEANUP IS WHAT MAKES THE FAST PATH WORK. Data landing inside the delay changes
         // `loading`, which re-runs this effect — and the cleanup cancels the pending show first,
@@ -150,11 +169,13 @@ export function useSkeleton(loading: boolean): SkeletonState {
         return () => window.clearTimeout(id);
       }
       case "hold": {
-        const id = window.setTimeout(() => setShown(false), step.ms);
+        const id = window.setTimeout(() => setPhase("out"), step.ms);
         return () => window.clearTimeout(id);
       }
       case "hide":
-        setShown(false);
+        // ⚠️ STRAIGHT TO "out", NEVER VIA "off" — the element must still be mounted, and still be
+        // at opacity 1, on the render that adds the class. That is the whole of the fix.
+        setPhase("out");
         return;
       default:
         return; // "stay" and "idle" both mean: leave it exactly as it is
@@ -165,20 +186,12 @@ export function useSkeleton(loading: boolean): SkeletonState {
    * The dissolve, kept OUT of `skeletonStep` on purpose: that function answers "should the
    * skeleton be doing its job?", and this answers "how does it leave?". Folding the fade into the
    * rule would make the minimum-hold arithmetic depend on a presentation constant.
-   *
-   * ⚠️ THE ELEMENT OUTLIVES `shown` BY ONE FADE. React cannot transition an unmounting node, so
-   * `leaving` keeps it mounted at opacity 0 for exactly as long as the CSS takes to get there.
    */
   useEffect(() => {
-    if (shown) { setLeaving(false); return; }
-    if (!everShown.current) return;   // it never appeared: there is nothing to dissolve
-    setLeaving(true);
-    const id = window.setTimeout(() => setLeaving(false), SKELETON_FADE_MS);
+    if (phase !== "out") return;
+    const id = window.setTimeout(() => setPhase("off"), SKELETON_FADE_MS);
     return () => window.clearTimeout(id);
-  }, [shown]);
+  }, [phase]);
 
-  return {
-    phase: shown ? "on" : leaving ? "out" : "off",
-    wasShown: everShown.current,
-  };
+  return { phase, wasShown: everShown.current };
 }
