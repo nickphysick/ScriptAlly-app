@@ -16,8 +16,7 @@
  * another surface.
  */
 import type { Agent, Query } from "../types";
-import { QueryStatus } from "../types";
-import { queryBucket } from "./queryAmbient";
+import { isTerminalStatus } from "./agentList";
 import { agentPrimary, agentAgencyLine } from "./agentDisplay";
 
 /**
@@ -184,61 +183,92 @@ export function moveInGrid(index: number, key: string, count: number): number | 
 }
 
 
-/* ══ THE ALREADY-QUERIED GRID ═══════════════════════════════════════════════════════════════
-   ⚠️ THE GRID IS UNCONDITIONAL; ONLY ITS CONTENTS SWITCH. It used to list un-queried contacts and
-   therefore vanished in the all-queried state — leaving the one state most in need of a browsable
-   list as the only state without one, beside a panel promising "you can still log a query to any
-   of them" and offering no way to do it but typing a name from memory. */
-
-export type QueryOutcome = "offer" | "waiting" | "move" | "closed";
+/* ══ THE FOLDED ALL-QUERIED BLOCK (ref 77-folded-nameplates.html) ══════════════════════════
+   ⚠️ SUPERSEDES A GRID OF ALREADY-QUERIED CARDS, and the reason is worth keeping. A grid says
+   "choose from these" — it is the shape this component uses to RECOMMEND — and nothing in this set
+   is being recommended: they have all been queried. It also made the writer scroll past sixteen
+   entries they had come here to bypass. Folded, the state is one sentence and the names are there
+   if wanted. */
 
 /**
- * ⚠️ DERIVED FROM `queryBucket`, NOT BESIDE IT. That is the app's one split of a status into
- * whose-turn-it-is, and the Queries filter bar, the command bar and the agent list all read it —
- * a second opinion here would eventually disagree with all three.
- *
- * The single thing it adds is OFFER, which `queryBucket` deliberately folds into `closed` because
- * the CTA engine has nothing further to ask of it. On a card that reports WHAT HAPPENED, "closed"
- * for an offer would be plainly wrong: it is the best outcome there is, and the one a writer
- * scanning this list is looking for.
+ * ⚠️ TWO STATES, FROM `isTerminalStatus` — the app's existing split, not a second one.
+ * `active` covers offer, partial requested, full requested and everything else still open;
+ * `previous` covers rejected, withdrawn and no response. **Offer counts as ACTIVE** (CLAUDE.md's
+ * agent-list law), because a live offer is the most open a conversation gets.
  */
-export function queryOutcome(status: QueryStatus): QueryOutcome {
-  return status === QueryStatus.OFFER ? "offer" : queryBucket(status);
+export type PlateState = "active" | "previous";
+
+export interface Nameplate {
+  agent: Agent;
+  state: PlateState;
+  /** yyyy-mm-dd, or "" when the record has no usable date. */
+  sentOn: string;
+  /** "14 Mar 2024", or null — an unparseable or absent date renders NOTHING. */
+  sentLabel: string | null;
 }
 
-export const OUTCOME_LABEL: Record<QueryOutcome, string> = {
-  offer: "Offer",
-  waiting: "Awaiting reply",
-  move: "Your move",
-  closed: "Closed",
-};
-
-export interface QueriedCard { agent: Agent; outcome: QueryOutcome; sentOn: string; status: QueryStatus }
+/**
+ * ⚠️ THE YEAR IS ALWAYS PRESENT. Elsewhere the app drops it for the current year, which is right
+ * for a list you are working through this week; here the whole point is how long ago something
+ * went, and "14 Mar" beside "14 Mar 2024" invites the reader to assume they are the same year.
+ *
+ * ⚠️ AND AN UNPARSEABLE DATE RENDERS NOTHING AT ALL. `new Date(junk)` yields an Invalid Date whose
+ * `toLocaleDateString` is the literal string "Invalid Date", and `getFullYear()` is `NaN` — which
+ * is exactly how "Invalid Date NaN" reached the screen. Guarding the FORMATTER is what stops a bad
+ * record printing an error message at the writer; the record itself is a separate fault.
+ */
+export function plateDate(iso: string | null | undefined): string | null {
+  const raw = String(iso ?? "").trim();
+  if (!raw) return null;
+  const d = new Date(raw.length === 10 ? raw + "T00:00:00" : raw);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getDate()} ${d.toLocaleString("en-GB", { month: "short" })} ${d.getFullYear()}`;
+}
 
 /**
- * Every contact that has been queried, with what happened and when.
- *
- * ⚠️ ORDERED BY DATE SENT, MOST RECENT FIRST — never by outcome and never by rating. A list ordered
- * by anything evaluative is a recommendation wearing a search's clothes, which is why the stars
- * came out of this component in the first place. Recency is a fact about the list, not a judgement
- * about the people in it.
- *
- * The card reports the agent's LATEST query. A writer who has queried someone three times is
- * looking at where things stand now, not at a history.
+ * ⚠️ NEVER SUBSTITUTES ONE FIELD FOR ANOTHER. `agentPrimary` falls back to the agency when a name
+ * is missing, which is right for a line that just needs to say who this record is about — and
+ * wrong on a NAMEPLATE, where it renders "Penhallow Literary" as a person. An agency is not a
+ * name; where there is no name, say so.
  */
-export function queriedCards(agents: Agent[], queries: Query[]): QueriedCard[] {
-  const out: QueriedCard[] = [];
+export function plateName(a: Agent): string {
+  const name = String(a.name ?? "").trim();
+  return name || "Unnamed contact";
+}
+
+/**
+ * Every queried contact as a nameplate, most recent send first.
+ *
+ * ⚠️ ORDERED BY DATE, NEVER BY STATE. Sorting the still-open ones to the top would put them
+ * forward, and nothing in this set is being put forward. Records with no usable date sort last —
+ * they cannot claim a position in a chronology they are not in.
+ */
+export function nameplates(agents: Agent[], queries: Query[]): Nameplate[] {
+  const out: Nameplate[] = [];
   for (const a of agents) {
     if (a.setAside === true) continue;
-    const mine = queries.filter((q) => q.agentId === a.id && q.dateSent);
+    const mine = queries.filter((q) => q.agentId === a.id);
     if (mine.length === 0) continue;
-    const latest = mine.slice().sort((x, y) => String(x.dateSent).localeCompare(String(y.dateSent))).pop()!;
+    const latest = mine
+      .slice()
+      .sort((x, y) => String(x.dateSent ?? "").localeCompare(String(y.dateSent ?? "")))
+      .pop()!;
+    const sentOn = String(latest.dateSent ?? "");
     out.push({
       agent: a,
-      status: latest.status as QueryStatus,
-      outcome: queryOutcome(latest.status as QueryStatus),
-      sentOn: String(latest.dateSent),
+      state: isTerminalStatus(latest.status as never) ? "previous" : "active",
+      sentOn,
+      sentLabel: plateDate(sentOn),
     });
   }
-  return out.sort((x, y) => y.sentOn.localeCompare(x.sentOn));
+  return out.sort((x, y) => (y.sentOn || "").localeCompare(x.sentOn || ""));
+}
+
+/** "You have queried all 16 contacts for this manuscript — 9 still waiting, 7 concluded." */
+export function foldedLine(plates: Nameplate[], manuscriptTitle?: string): string {
+  const total = plates.length;
+  const active = plates.filter((p) => p.state === "active").length;
+  const book = manuscriptTitle ? ` for ${manuscriptTitle}` : "";
+  const noun = total === 1 ? "contact" : "contacts";
+  return `You have queried all ${total} ${noun}${book} — ${active} still waiting, ${total - active} concluded.`;
 }

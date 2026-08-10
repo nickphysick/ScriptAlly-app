@@ -28,7 +28,7 @@ import { ArtSlot } from "../todo/ArtSlot";
 import { AgentQuickAdd } from "./AgentQuickAdd";
 import {
   pickerState, pickerCards, queriedCount, replyLine, moveInGrid,
-  dropdownResults, queryHistoryLabel, queriedCards, OUTCOME_LABEL,
+  dropdownResults, queryHistoryLabel, nameplates, foldedLine, plateName,
 } from "../../lib/agentPicker";
 
 export interface AgentPickerProps {
@@ -78,7 +78,10 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
   const counts = queriedCount(agents, queries);
   /* ⚠️ THE GRID IS UNCONDITIONAL — only its CONTENTS switch. It used to vanish in the all-queried
      state, leaving the one state most in need of a browsable list as the only state without one. */
-  const done = useMemo(() => queriedCards(agents, queries), [agents, queries]);
+  const plates = useMemo(() => nameplates(agents, queries), [agents, queries]);
+  /* ⚠️ CLOSED BY DEFAULT. The writer came to this state to get PAST it — sixteen names they have
+     already used are context, not a choice being offered. One sentence, and the set on request. */
+  const [showPlates, setShowPlates] = useState(false);
 
   /* Outside click closes it. Bound only while it is open, so the picker adds no listener to a
      page that has no dropdown on it. */
@@ -289,35 +292,46 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
       </div>
 
       {allQueried ? (
-        /* ⚠️ SELECTING A QUERIED AGENT IS THE SAME PATH AS SELECTING ANY OTHER. A resubmission is
-           just a query to someone already queried — it needs no separate door, and giving it one
-           would be two ways to do the same thing that could drift apart. */
-        <div className="qc-grid" id={GRID_ID} role="listbox" aria-label="Contacts you have queried" onKeyDown={onGridKey}>
-          {done.map((c, i) => (
-            <div
-              key={c.agent.id}
-              id={`qc-ac-${i}`}
-              role="option"
-              aria-selected={active === i}
-              tabIndex={active === i ? 0 : -1}
-              className={`qc-acard${active === i ? " on" : ""}`}
-              onClick={() => choose(c.agent)}
-              onFocus={() => setHl(i)}
-            >
-              <div className="qc-actop">
-                <span className="qc-acav" aria-hidden="true">{agentInitials(c.agent)}</span>
-                <span className="qc-acwho">
-                  <b>{agentPrimary(c.agent)}</b>
-                  <i>{agentAgencyLine(c.agent)}</i>
-                </span>
+        /* ⚠️ NOT A GRID. A grid is the shape this component uses to RECOMMEND, and nothing here is
+           being recommended — they have all been queried. Folded, the state is one sentence and
+           the names are there if wanted. */
+        <div className="qc-fold">
+          <p className="qc-foldline">
+            {foldedLine(plates, manuscriptTitle)}
+            <button type="button" className="qc-foldbtn" aria-expanded={showPlates} onClick={() => setShowPlates((o) => !o)}>
+              {showPlates ? "Hide them" : "Show them"}
+            </button>
+          </p>
+          {showPlates && (
+            <>
+              {/* ⚠️ DIMMED AT REST, FORWARD ON HOVER OR KEYBOARD FOCUS — available, not suggested.
+                  `focus-within` is what keeps that true for a keyboard: a set that only lit under a
+                  pointer would leave a tabbing writer reading it at rest permanently. */}
+              <div className="qc-plates">
+                {plates.map((p) => (
+                  <button
+                    key={p.agent.id}
+                    type="button"
+                    className={`qc-plate qc-plate-${p.state}`}
+                    /* the agency belongs here, not on the plate — a nameplate carries a name */
+                    title={agentAgencyLine(p.agent) || undefined}
+                    onClick={() => choose(p.agent)}
+                  >
+                    <i className="qc-platedot" aria-hidden="true" />
+                    <span className="qc-platename">{plateName(p.agent)}</span>
+                    {/* an unparseable or absent date renders NOTHING — never "Invalid Date" */}
+                    {p.sentLabel && <span className="qc-platedate">{p.sentLabel}</span>}
+                  </button>
+                ))}
               </div>
-              <div className="qc-acmeta">
-                {/* what happened, and when — the two things a writer scanning this list needs */}
-                <span className={`qc-acout qc-acout-${c.outcome}`}>{OUTCOME_LABEL[c.outcome]}</span>
-                <span className="qc-acrt">{queryHistoryLabel(c.agent, queries).replace(/^Queried /, "")}</span>
-              </div>
-            </div>
-          ))}
+              {/* ⚠️ THE STATE IS NAMED ONCE, not sixteen times. A legend beneath a set is how you
+                  say what the dots mean without repeating it on every plate. */}
+              <p className="qc-platekey">
+                <span><i className="qc-platedot qc-plate-active" aria-hidden="true" /> Active query</span>
+                <span><i className="qc-platedot qc-plate-previous" aria-hidden="true" /> Previously queried</span>
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="qc-grid" id={GRID_ID} role="listbox" aria-label="Your contacts" onKeyDown={onGridKey}>

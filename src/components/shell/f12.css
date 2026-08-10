@@ -276,14 +276,34 @@
 .qc-acmeta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
 .qc-actag { display: inline-flex; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; }
 .qc-actag.shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
-/* ⚠️ THE OUTCOME IS STATED, NOT COLOUR-CODED INTO A JUDGEMENT. Offer takes the sage the app uses
-   for a good state and closed takes the muted grey it uses for a finished one; "awaiting reply"
-   and "your move" stay neutral, because neither is better than the other — one of them is simply
-   your turn. No red anywhere: a pass is an outcome, not an error. */
-.qc-acout { display: inline-flex; border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
-.qc-acout-offer { background: #e9ede6; border-color: #b9c6b4; color: #5a6e58; }
-.qc-acout-move { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
-.qc-acout-closed { color: var(--faint); }
+/* ══ THE FOLDED ALL-QUERIED BLOCK (ref 77) ═════════════════════════════════════════════════
+   ⚠️ 18px CLEAR OF THE PANEL ABOVE. They are two separate statements — the panel says what this
+   state IS, the block says who is in it — and stacked flush they read as one box with a rule
+   through it. */
+.qc-fold { margin-top: 18px; }
+.qc-foldline { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+.qc-foldbtn { margin-left: 8px; background: none; border: 0; padding: 0; font: inherit; font-size: 12px; color: var(--burg); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+/* ⚠️ DIMMED AT REST, FORWARD ON HOVER OR KEYBOARD FOCUS — available, not suggested. 0.66 is quiet
+   without being unreadable: measured against the parchment ground the names stay well above the
+   contrast floor, which is the test that matters. `focus-within` is not optional — a set that lit
+   only under a pointer would leave a tabbing writer reading it at rest permanently. */
+.qc-plates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; opacity: 0.66; transition: opacity 0.15s; }
+.qc-plates:hover, .qc-plates:focus-within { opacity: 1; }
+.qc-plate { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--hairline); background: var(--panel); border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 12px; color: var(--ink); cursor: pointer; transition: border-color 0.15s; }
+.qc-plate:hover { border-color: var(--line); }
+.qc-platename { white-space: nowrap; }
+.qc-platedate { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+/* ⚠️ NEITHER STATE IS EMPHASISED. Same type, same size, same colour — they differ by DOT and by
+   nothing else, because they have all been queried and none is being put forward. */
+.qc-platedot { width: 7px; height: 7px; flex: none; border-radius: 50%; }
+.qc-plate-active .qc-platedot, i.qc-plate-active { background: #8a9e88; }
+.qc-plate-previous .qc-platedot, i.qc-plate-previous { background: #cfc7bb; }
+/* the state is named ONCE, beneath the set — not sixteen times, on every plate */
+.qc-platekey { display: flex; gap: 14px; margin: 9px 0 0; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.qc-platekey span { display: inline-flex; align-items: center; gap: 5px; }
+@media (prefers-reduced-motion: reduce) { .qc-plates, .qc-plate { transition: none; } }
+
 .qc-acrt { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
 @media (prefers-reduced-motion: reduce) { .qc-acard { transition: none; } .qc-acard:hover { transform: none; } }
 

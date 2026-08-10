@@ -17,8 +17,8 @@ import {
   PICKER_LIMIT, pickerState, pickerCards, queriedCount, replyLine, moveInGrid, matchesQuery,
   dropdownResults, queryHistoryLabel, queriedAgentIds,
 } from "./agentPicker";
-import { queriedCards, queryOutcome, OUTCOME_LABEL } from "./agentPicker";
-import { queryBucket } from "./queryAmbient";
+import { nameplates, foldedLine, plateDate, plateName } from "./agentPicker";
+import { isTerminalStatus } from "./agentList";
 import { SubmissionStatus, QueryStatus, type Agent, type Query } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -50,80 +50,123 @@ const q = (agentId: string, over: Partial<Query> = {}): Query =>
    list as the only state without one, beside a panel promising "you can still log a query to any
    of them" and offering no way to do it but typing a name from memory.
    ══════════════════════════════════════════════════════════════════════════════════════════ */
-describe("the already-queried grid", () => {
-  /* ⚠️ DERIVED FROM `queryBucket`, NOT BESIDE IT — that is the app's one split of a status into
-     whose turn it is, and the filter bar, the command bar and the agent list all read it. The one
-     thing added is OFFER, which the bucket folds into `closed` because the CTA engine has nothing
-     further to ask of it; on a card reporting WHAT HAPPENED that would be plainly wrong. */
-  it("the outcome comes from the existing selector, plus the one case it folds", () => {
-    expect(queryOutcome(QueryStatus.QUERIED)).toBe(queryBucket(QueryStatus.QUERIED));
-    expect(queryOutcome(QueryStatus.FULL_REQUESTED)).toBe(queryBucket(QueryStatus.FULL_REQUESTED));
-    expect(queryOutcome(QueryStatus.REJECTED)).toBe("closed");
-    expect(queryBucket(QueryStatus.OFFER), "the bucket folds an offer into closed").toBe("closed");
-    expect(queryOutcome(QueryStatus.OFFER), "the card must not call an offer closed").toBe("offer");
-    expect(OUTCOME_LABEL.offer).toBe("Offer");
-    expect(OUTCOME_LABEL.waiting).toBe("Awaiting reply");
-  });
-
-  it("every queried contact appears, with an outcome and a date", () => {
-    const list = [agent("a1"), agent("a2")];
-    const cards = queriedCards(list, [q("a1", { dateSent: "2026-03-01" }), q("a2", { dateSent: "2026-05-01", status: QueryStatus.OFFER })]);
-    expect(cards).toHaveLength(2);
-    expect(cards.every((c) => c.sentOn && c.outcome)).toBe(true);
-    expect(cards.find((c) => c.agent.id === "a2")?.outcome).toBe("offer");
-  });
-
-  /* ⚠️ DATE-DESCENDING, NEVER BY OUTCOME AND NEVER BY RATING. A list ordered by anything
-     evaluative is a recommendation wearing a search's clothes — which is why the stars came out. */
-  it("ordering is by date sent, most recent first", () => {
-    const list = [agent("a1", { starRating: 1 }), agent("a2", { starRating: 5 })];
-    const cards = queriedCards(list, [
-      q("a1", { dateSent: "2026-06-01", status: QueryStatus.REJECTED }),
-      q("a2", { dateSent: "2026-02-01", status: QueryStatus.OFFER }),
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ THE FOLDED BLOCK SUPERSEDES A GRID OF ALREADY-QUERIED CARDS, and the reason is the point. A
+   grid is the shape this component uses to RECOMMEND, and nothing in this set is being
+   recommended — they have all been queried. It also made the writer scroll past sixteen entries
+   they had come here to bypass.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the folded all-queried block", () => {
+  /* ⚠️ TWO STATES FROM `isTerminalStatus` — the app's existing split, not a second one. OFFER
+     counts as ACTIVE (the agent-list law): a live offer is the most open a conversation gets. */
+  it("the two states come from the existing selector, and an offer is active", () => {
+    const plates = nameplates([agent("a1"), agent("a2"), agent("a3")], [
+      q("a1", { status: QueryStatus.OFFER, dateSent: "2026-05-01" }),
+      q("a2", { status: QueryStatus.REJECTED, dateSent: "2026-04-01" }),
+      q("a3", { status: QueryStatus.QUERIED, dateSent: "2026-03-01" }),
     ]);
-    expect(cards.map((c) => c.agent.id), "an offer or a 5-star must not jump the queue")
-      .toEqual(["a1", "a2"]);
+    expect(plates.map((p) => p.state)).toEqual(["active", "previous", "active"]);
+    expect(isTerminalStatus(QueryStatus.OFFER), "an offer is not terminal").toBe(false);
   });
 
-  /* A writer who has queried someone three times is looking at where things stand now. */
-  it("a card reports the LATEST query, not the first", () => {
-    const cards = queriedCards([agent("a1")], [
-      q("a1", { id: "old", dateSent: "2026-01-01", status: QueryStatus.QUERIED }),
-      q("a1", { id: "new", dateSent: "2026-07-01", status: QueryStatus.OFFER }),
+  it("the counts in the line match the states", () => {
+    const plates = nameplates([agent("a1"), agent("a2")], [
+      q("a1", { status: QueryStatus.QUERIED }), q("a2", { status: QueryStatus.REJECTED }),
     ]);
-    expect(cards).toHaveLength(1);
-    expect(cards[0].outcome).toBe("offer");
-    expect(cards[0].sentOn).toBe("2026-07-01");
+    const line = foldedLine(plates, "Murphy's Day Out");
+    expect(line).toContain("all 2 contacts for Murphy's Day Out");
+    expect(line).toContain("1 still waiting, 1 concluded");
   });
 
-  it("set-aside contacts stay out, and un-queried ones are not invented into it", () => {
-    const list = [agent("a1"), agent("a2", { setAside: true }), agent("a3")];
-    expect(queriedCards(list, [q("a1"), q("a2")]).map((c) => c.agent.id)).toEqual(["a1"]);
+  /* ⚠️ ORDERED BY DATE, NEVER BY STATE. Sorting the open ones to the top would put them forward,
+     and nothing here is being put forward. Dateless records cannot claim a position in a
+     chronology they are not in. */
+  it("ordering is date-descending, and undated plates sort last", () => {
+    const plates = nameplates([agent("a1"), agent("a2"), agent("a3")], [
+      q("a1", { dateSent: "2026-02-01", status: QueryStatus.REJECTED }),
+      q("a2", { dateSent: "2026-08-01", status: QueryStatus.QUERIED }),
+      q("a3", { dateSent: "" }),
+    ]);
+    expect(plates.map((p) => p.agent.id)).toEqual(["a2", "a1", "a3"]);
   });
 
-  it("the grid renders in both conditions and not in the cold start", () => {
-    expect(picker).toContain('<b>{allQueried ? "Already queried for this manuscript" : "Suggested — not yet queried"}</b>');
-    expect(picker, "the panel sits above the grid, not instead of it").toContain("{allQueried && (");
+  it("one plate per contact, and the block renders only in the all-queried condition", () => {
+    expect(nameplates([agent("a1"), agent("a2")], [q("a1")]).length, "un-queried contacts are not plates").toBe(1);
+    expect(picker).toContain('className="qc-fold"');
+    expect(picker, "closed by default").toContain("const [showPlates, setShowPlates] = useState(false);");
     const cold = picker.slice(picker.indexOf('state === "cold"'), picker.indexOf("const field ="));
-    expect(cold, "the cold start stands as built").not.toContain("qc-grid");
+    expect(cold).not.toContain("qc-fold");
   });
 
-  /* A resubmission is just a query to someone already queried; a separate door would be two ways
-     to do one thing that could drift apart. */
-  it("selecting from either grid follows the same path", () => {
-    expect(picker.match(/onClick=\{\(\) => choose\(/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
-    expect(picker).toContain("onClick={() => choose(c.agent)}");
+  /* A resubmission is just a query to someone already queried — one door, not two. */
+  it("selecting a plate follows the same path as a suggestion card", () => {
+    expect(picker).toContain("onClick={() => choose(p.agent)}");
     expect(picker).toContain("onClick={() => choose(a)}");
   });
 
-  /* No red: a pass is an outcome, not an error. And neither "awaiting" nor "your move" is better
-     than the other — one of them is simply your turn. */
-  it("the outcome is stated, not colour-coded into a judgement", () => {
-    expect(rule(".qc-acout-offer"), "an offer takes the app's good-state sage").toContain("#e9ede6");
-    expect(rule(".qc-acout-closed")).toContain("var(--faint)");
-    for (const sel of [".qc-acout", ".qc-acout-offer", ".qc-acout-move", ".qc-acout-closed"]) {
-      expect(rule(sel).toLowerCase(), `${sel} used a red`).not.toMatch(/#[a-f0-9]*(c0|d0|e0|f0)0000|red/);
+  /* ⚠️ NEITHER STATE IS EMPHASISED — same type, same size, same colour, differing only by dot. */
+  it("the two states differ by dot and by nothing else", () => {
+    const act = rule(".qc-plate-active .qc-platedot, i.qc-plate-active");
+    const prev = rule(".qc-plate-previous .qc-platedot, i.qc-plate-previous");
+    expect(act).toContain("background");
+    expect(prev).toContain("background");
+    for (const r of [act, prev]) {
+      for (const banned of ["font-weight", "font-size", "color:", "border"]) {
+        expect(r, `a state took ${banned} — that is emphasis`).not.toContain(banned);
+      }
     }
+    expect(rule(".qc-platekey").length, "the key must exist").toBeGreaterThan(0);
+    expect(picker.match(/qc-platekey/g)?.length ?? 0, "the state is named once, not per plate").toBe(1);
+  });
+
+  /* ⚠️ AVAILABLE, NOT SUGGESTED — and `focus-within` is not optional: a set that lit only under a
+     pointer would leave a tabbing writer reading it at rest permanently. */
+  it("dimmed at rest, forward on hover AND on keyboard focus", () => {
+    expect(rule(".qc-plates")).toContain("opacity: 0.66");
+    expect(rule(".qc-plates:hover, .qc-plates:focus-within")).toContain("opacity: 1");
+  });
+
+  /* They are two separate statements; stacked flush they read as one box with a rule through it. */
+  it("and it clears the panel above it", () => {
+    expect(rule(".qc-fold")).toContain("margin-top: 18px");
+  });
+});
+
+/* ══ §2 · THE DATE AND NAME FAULTS ═════════════════════════════════════════════════════════ */
+describe("a bad record never prints an error message at the writer", () => {
+  /* ⚠️ "Invalid Date NaN" IS WHAT `new Date(junk)` RENDERS: toLocaleDateString gives the literal
+     string "Invalid Date" and getFullYear() gives NaN. Guarding the FORMATTER is what stops that
+     reaching the screen — the record itself is a separate, data-side fault. */
+  it("an absent or unparseable date renders nothing at all", () => {
+    expect(plateDate("2024-03-14")).toBe("14 Mar 2024");
+    expect(plateDate("")).toBeNull();
+    expect(plateDate(null)).toBeNull();
+    expect(plateDate(undefined)).toBeNull();
+    expect(plateDate("not a date"), "this is the string that became 'Invalid Date NaN'").toBeNull();
+    expect(plateDate("14/03/2024"), "a UK-format string is not an ISO date").toBeNull();
+  });
+
+  /* ⚠️ THE YEAR IS ALWAYS PRESENT. Elsewhere the app drops it for the current year, which is right
+     for a list you work through this week; here the point is how long ago something went, and
+     "14 Mar" beside "14 Mar 2024" invites the reader to assume they share a year. */
+  it("the year is present in every path", () => {
+    const thisYear = new Date().getFullYear();
+    expect(plateDate(`${thisYear}-03-14`)).toContain(String(thisYear));
+    expect(plateDate("2024-03-14")).toContain("2024");
+  });
+
+  /* ⚠️ NEVER SUBSTITUTES ONE FIELD FOR ANOTHER. `agentPrimary` falls back to the agency, which is
+     right for a line that just names the record and wrong on a NAMEPLATE — it rendered
+     "Penhallow Literary" as a person. */
+  it("a missing agent name never falls back to the agency", () => {
+    expect(plateName(agent("a1", { name: "Elinor Hale" }))).toBe("Elinor Hale");
+    const nameless = agent("a1", { name: "", agency: "Penhallow Literary" });
+    expect(plateName(nameless), "an agency is not a person").toBe("Unnamed contact");
+    expect(plateName(nameless)).not.toContain("Penhallow");
+  });
+
+  it("and the plate renders the date node only when there is one", () => {
+    expect(picker).toContain("{p.sentLabel && <span className=\"qc-platedate\">{p.sentLabel}</span>}");
   });
 });
 
