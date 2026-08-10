@@ -339,7 +339,10 @@ describe("hero-pair P4 — the bold bar · the inline composer · the dialog swe
     expect(c).toContain("box-shadow: 5px 5px 0 var(--nt-comp-block)"); // the mode-swapping offset block
     expect(rule(".tdb-nc-ttl.note")).toContain("font-family: Caveat"); // the note title is handwriting
     expect(page).toContain("autoFocus"); // the title autofocuses on open
-    expect(page).toContain("ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING"); // the mono hint
+    /* ⚠️ THE HINT SHORTENED WITH THE FOOTER ROW (fix pack, 10 Aug). It taught three things at
+       once from a line nobody reads twice; the two that matter are the commit and the exit, and
+       Enter now commits from the title, so the ⌘⏎ it advertised is no longer the fast path. */
+    expect(page).toContain("ENTER SAVES · ESC DISMISSES"); // the mono hint, in the footer row
     expect(page).toContain('{composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}'); // the save verb changes by nature
   });
   it("keyboard + outside-click law: ⌘⏎/Ctrl⏎ saves · Esc cancels (styled confirm) · outside cancels ONLY when empty", () => {

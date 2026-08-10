@@ -924,6 +924,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setComposerTags([]);
     resetSaveMachine();
     setComposerAt("cards"); // one view now (board+dock P1)
+    /* ⚠️ THE LIST RETURNS TO ITS TOP AS THE COMPOSER OPENS. The composer mounts above the scroll
+       zone; opening it from halfway down a long list otherwise leaves you typing into a card with
+       an unrelated stretch of work under it. One frame later, so the card is in the DOM first. */
+    requestAnimationFrame(() => { if (zoneRef.current) zoneRef.current.scrollTop = 0; });
   };
   /* board fixes II P1 — the ⋯ menu's Edit: the same composer, seeded from the card. The nature
      follows the card's own (a dated task edits as a task); clearing the date on save DOWNGRADES
@@ -1521,9 +1525,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ⌘⏎ saves · Esc cancels (a styled confirm only when dirty). No native prompt/alert/confirm. ──
   function renderComposer() {
     const isTask = composerMode === "task";
+    /* ⚠️ ENTER COMMITS FROM THE TITLE (fix pack, 10 Aug). It used to want ⌘⏎ everywhere, which is
+       a keystroke for a form with many fields — this one has a title and an optional line, and the
+       title is where you already are. ⌘⏎ survives for the detail field, where a bare Enter is a
+       new line. Escape dismisses from either. */
     const onKey = (e: React.KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }
       if (e.key === "Escape") { e.stopPropagation(); e.preventDefault(); tryCloseComposer(); }
+    };
+    const onTitleKey = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveComposer(); return; }
+      onKey(e);
     };
     return (
       <div className={`tdb-nc tdb-nc--${composerMode}${saveState === "failed" ? " failed" : ""}`}>
@@ -1540,7 +1552,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             autoFocus
             readOnly={savePending}
             onChange={(e) => setComposerDraft(e.target.value)}
-            onKeyDown={onKey}
+            onKeyDown={onTitleKey}
           />
           <textarea
             className={`tdb-nc-dtl${isTask ? "" : " note"}`}
@@ -1581,10 +1593,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 onCreate={(tag) => { void createTagDef(tag); setComposerTags((sel) => [...sel, tag.id]); }}
               />
             </span>
-            <button type="button" className="tdb-nc-save" disabled={!composerCanSave || savePending} onClick={saveComposer}>
-              {saveSlow && <span className="tdb-nc-spin" aria-hidden />}
-              {composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}
-            </button>
           </div>
           {saveState === "failed" && (
             <div className="tdb-nc-err" role="alert">
@@ -1593,7 +1601,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </div>
           )}
         </div>
-        <div className="tdb-nc-hint" aria-hidden>ESC CANCELS · ⌘⏎ SAVES · SWITCH TYPE ANY TIME BEFORE SAVING</div>
+        {/* ⚠️ THE COMMIT AFFORDANCE IS A FOOTER ROW (fix pack, 10 Aug). The Save used to sit inline
+            at the end of the tag row, where it competed with the tags for the same line and was the
+            first thing a narrow card carried off the edge. Hint left, then Cancel, then Save —
+            the destructive-adjacent control never sits on the far right where the thumb lands. */}
+        <div className="tdb-nc-foot">
+          <span className="tdb-nc-hint" aria-hidden>ENTER SAVES · ESC DISMISSES</span>
+          {/* ⚠️ CANCEL DISCARDS OUTRIGHT — no confirmation. It is the button whose whole meaning is
+              "I did not want this"; asking again is the app not believing you. (Escape still routes
+              through `tryCloseComposer`, which asks, because Escape is also hit by accident.) */}
+          <button type="button" className="tdb-nc-cancel" disabled={savePending} onClick={closeComposer}>Cancel</button>
+          <button type="button" className="tdb-nc-save" disabled={!composerCanSave || savePending} onClick={saveComposer}>
+            {saveSlow && <span className="tdb-nc-spin" aria-hidden />}
+            {composerEdit ? "Save changes" : isTask ? "Add the task" : "Pin the note"}
+          </button>
+        </div>
       </div>
     );
   }
