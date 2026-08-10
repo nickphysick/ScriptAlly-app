@@ -1335,3 +1335,32 @@
   .qc-entering .qc-pickhead,
   .qc-entering .qc-stack > .qc-sec { animation: none; }
 }
+
+/* ══ CREATE MODE · CANCEL — NOTHING HAPPENED (fix pack 5 §2, ref 82-create-exits.html) ═══════
+   The three exits are three different STATEMENTS, which is why this is not the save's animation
+   with different numbers. Save says "what you filled in is now that line" and lifts upward toward
+   it; cancel says nothing happened, and simply settles out of the way. No receipt, no row, no
+   trace.
+
+   ⚠️ 150ms — DELIBERATELY FASTER THAN THE ENTRANCE, and that asymmetry is the point: undoing an
+   opening should not feel like an event. `ease-in` because a departure accelerates away, where an
+   arrival decelerates in.
+
+   ⚠️ ONE GESTURE. NEVER A REVERSED STAGGER, and there is deliberately no descendant rule here to
+   make one: a staggered exit makes leaving feel like work, and the writer who opened this by
+   accident has to sit through it. The entrance's scope class is dropped in the same beat the
+   cancel is armed, so any child still arriving settles at once and the frame leaves as one object.
+
+   `both`, unlike the entrance's `backwards`: this one MUST hold its final frame, or the takeover
+   flashes back to full opacity for a frame between the animation ending and React unmounting it. */
+@keyframes qc-exit-cancel {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(6px) scale(0.995); }
+}
+.qc-exit-cancel { animation: qc-exit-cancel 150ms ease-in both; }
+
+/* Second belt only — the class is never armed under reduced motion (the JS branches at the door),
+   because there would be no `animationend` to run the teardown on and Cancel would do nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .qc-exit-cancel { animation: none; opacity: 0; }
+}

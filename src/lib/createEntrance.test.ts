@@ -159,9 +159,11 @@ describe("it plays once per opening", () => {
      render its children already at rest, the stagger silently playing only for writers who did not
      change their mind. */
   it("and cleared on the way out, so a re-open re-arms", () => {
-    const shut = queries.indexOf("const shut = () => {");
-    expect(shut, "closeCreate's shut is missing").toBeGreaterThan(-1);
-    expect(queries.slice(shut, queries.indexOf("};", shut))).toContain("setCreateEntering(false)");
+    const shut = queries.indexOf("const shutCreate = (then?: () => void) => {");
+    expect(shut, "the create teardown is missing").toBeGreaterThan(-1);
+    const body = queries.slice(shut, queries.indexOf("\n  };", shut));
+    expect(body).not.toBe("");
+    expect(body).toContain("setCreateEntering(false)");
   });
 });
 

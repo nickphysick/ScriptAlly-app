@@ -82,13 +82,32 @@ describe("the three things that would have broken silently", () => {
      draft row's height transitionend. With no row, that closure is never called and create mode
      simply refuses to close — a dead Cancel button, with no error anywhere. */
   it("the discard runs directly — Cancel cannot depend on a row that is not rendered", () => {
-    const at = queries.indexOf("const shut = () => {");
-    expect(at, "shut() is missing").toBeGreaterThan(-1);
-    const shut = queries.slice(at, queries.indexOf("};", at));
+    const at = queries.indexOf("const shutCreate = (then?: () => void) => {");
+    expect(at, "shutCreate() is missing").toBeGreaterThan(-1);
+    const shut = queries.slice(at, queries.indexOf("\n  };", at));
+    expect(shut).not.toBe("");
     expect(shut, "the discard is deferred again — Cancel will do nothing").not.toContain("pendingDiscardRef");
-    expect(shut, "the reset must happen in shut() itself").toContain("setCreateDraft(null)");
+    expect(shut, "the reset must happen in the teardown itself").toContain("setCreateDraft(null)");
     expect(shut, "the stashed selection must still be restored").toContain("setSelectedQueryId(restore)");
     expect(shut, "the caller's continuation must still run").toContain("then?.()");
+  });
+
+  /* ⚠️ FIX PACK 5 §2 GAVE CANCEL A 150ms EXIT, WHICH IS A DEFERRAL — so the distinction this
+     describe() exists to protect has to be stated rather than assumed. The historic bug was not
+     "waiting"; it was waiting on a SIBLING that had been deleted, so the closure was never called.
+     The exit waits on the takeover's OWN animation — the element that is leaving, and therefore by
+     definition rendered — and under reduced motion it does not wait at all. */
+  it("the cancel exit waits on the takeover itself, and not at all under reduced motion", () => {
+    const at = queries.indexOf("const leave = () => {");
+    expect(at, "closeCreate's leave() is missing").toBeGreaterThan(-1);
+    const leave = queries.slice(at, queries.indexOf("\n    };", at));
+    expect(leave).not.toBe("");
+    /* The teardown must be reachable WITHOUT the animation, or a suppressed animation is a dead
+       Cancel button — the exact shape of the original bug. */
+    expect(leave, "reduced motion must tear down directly")
+      .toContain("if (prefersReducedMotion()) { shutCreate(then); logTriggerRef.current?.focus(); return; }");
+    expect(leave, "and the deferral is armed only after that branch").toContain("setCreateCancelling(true);");
+    expect(leave.indexOf("prefersReducedMotion")).toBeLessThan(leave.indexOf("setCreateCancelling(true)"));
   });
 
   it("the save no longer measures a hidden element", () => {

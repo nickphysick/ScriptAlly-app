@@ -331,6 +331,14 @@ export const Queries: React.FC<{
      stage 1's question and picker into stage 2's hero and stack, so choosing someone would cost
      another 410ms before the first field felt live. Cleared when the last child lands. */
   const [createEntering, setCreateEntering] = useState(false);
+  /* The cancel exit — a DIFFERENT STATEMENT from the save, which is why it is a different flag and
+     a different animation rather than a shared "exiting". Save says "the form became that row";
+     cancel says "nothing happened", and is deliberately the faster of the two: undoing an opening
+     should not feel like an event. */
+  const [createCancelling, setCreateCancelling] = useState(false);
+  /* The caller's continuation, held across the 150ms — `closeCreate(() => pickRow(id))` must still
+     select that row, and the teardown that runs it now happens at the end of the motion. */
+  const cancelThenRef = useRef<(() => void) | undefined>(undefined);
   /* Focus returns to the control that opened the takeover — leaving it on a removed node drops the
      writer at the top of the document. */
   const logTriggerRef = useRef<HTMLButtonElement>(null);
@@ -402,30 +410,61 @@ export const Queries: React.FC<{
     return { ok: true, agent };
   };
 
+  /* ⚠️ THE DISCARD IS NOT DEFERRED INTO A REF WAITING ON SOMETHING ELSE'S MOTION. It once was —
+     parked and fired by the draft row's height transitionend — and when that row was deleted the
+     closure was never called, so Cancel did nothing at all: create mode simply refused to close,
+     with no error anywhere.
+
+     Fix pack 5 §2 gives Cancel its own 150ms exit, which IS a deferral, so the distinction matters:
+     it waits on the TAKEOVER's own animation — the element that is leaving, which is by definition
+     rendered — never on a sibling that may not exist. And under reduced motion nothing is deferred
+     at all, because `animation: none` fires no `animationend` (lib/reducedMotion.ts). The hazard
+     was waiting on a thing that never happens, not waiting as such.
+
+     The selection is restored here: the stashed query if it still exists, else the first row of the
+     current sort. Hoisted out of `closeCreate` because the exit's completion needs it too. */
+  const shutCreate = (then?: () => void) => {
+    setCreateDraft(null);
+    setCreateBase(null);
+    setCreateError(null);
+    /* Cleared on the way out, or a takeover discarded mid-entrance would leave the scope class
+       set and the NEXT opening would render its children already at rest — the stagger silently
+       playing only for writers who did not change their mind. */
+    setCreateEntering(false);
+    setCreateCancelling(false);
+    const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
+      ? stashedSelection
+      : (sortedListRef.current[0]?.id ?? null);
+    setSelectedQueryId(restore);
+    setStashedSelection(null);
+    then?.();
+  };
+
+  /** The cancel exit's completion, at the end of its one gesture. */
+  const finishCancelExit = () => {
+    const then = cancelThenRef.current;
+    cancelThenRef.current = undefined;
+    shutCreate(then);
+    /* ⚠️ FOCUS RETURNS TO THE CONTROL THAT OPENED IT. Leaving it on a node that has just been
+       unmounted drops the writer at the top of the document. */
+    logTriggerRef.current?.focus();
+  };
+
   /** Leave create mode. Untouched → silent; dirty → confirm. `then` runs once it's actually shut
    *  (so clicking another row selects it only after the draft is resolved). */
   const closeCreate = (then?: () => void) => {
-    /* ⚠️ THE DISCARD RUNS DIRECTLY NOW. It used to be deferred into a ref and fired by the draft
-       row's height transitionend — "collapse first, unmount after", so the contents were never
-       seen blanking in place. With the row deleted that transition never fires, and leaving the
-       closure parked in a ref would have made Cancel do NOTHING AT ALL: create mode would simply
-       refuse to close. There is no longer anything to wait for, so the reset is the whole of it.
-       The selection is restored here: the stashed query if it still exists, else the first row of
-       the current sort. */
-    const shut = () => {
-      setCreateDraft(null);
-      setCreateBase(null);
-      setCreateError(null);
-      /* Cleared on the way out, or a takeover discarded mid-entrance would leave the scope class
-         set and the NEXT opening would render its children already at rest — the stagger silently
-         playing only for writers who did not change their mind. */
+    /* Already leaving. Without this, a second Esc during the 150ms would re-arm the animation from
+       its first frame — the takeover flashing back to full opacity on its way out. */
+    if (createCancelling) return;
+    const leave = () => {
+      /* ⚠️ ONE GESTURE, AND NEVER A REVERSED STAGGER. The entrance's scope class goes first, so any
+         children still arriving settle at once and the frame leaves as a single object. A staggered
+         exit makes leaving feel like work, and the writer who opened this by accident has to sit
+         through it. */
       setCreateEntering(false);
-      const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
-        ? stashedSelection
-        : (sortedListRef.current[0]?.id ?? null);
-      setSelectedQueryId(restore);
-      setStashedSelection(null);
-      then?.();
+      if (prefersReducedMotion()) { shutCreate(then); logTriggerRef.current?.focus(); return; }
+      cancelThenRef.current = then;
+      setCreateCancelling(true);
     };
     if (createDraft && createBase && draftDirty(createDraft, createBase)) {
       showConfirm({
@@ -434,11 +473,13 @@ export const Queries: React.FC<{
         confirmLabel: "Discard",
         cancelLabel: "Keep editing",
         body: <p style={{ margin: 0 }}>Nothing has been saved yet — this draft will be lost.</p>,
-        onConfirm: shut,
+        /* The motion plays on the DECISION, not on the click that raised the question — a takeover
+           that started leaving while the confirm was still open would be answering for the writer. */
+        onConfirm: leave,
       });
       return;
     }
-    shut();
+    leave();
   };
   closeCreateRef.current = closeCreate;
   creatingRef.current = creating;
@@ -3025,7 +3066,7 @@ export const Queries: React.FC<{
           <div
             /* ⚠️ THE STATE CLASS GOES ON THE CONTAINER, not merely used as a selector — a class
                that exists only in the stylesheet animates nothing. */
-            className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createEntering ? " qc-entering" : ""}${createExiting ? " qc-exit-save" : ""}`}
+            className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createEntering ? " qc-entering" : ""}${createCancelling ? " qc-exit-cancel" : ""}${createExiting ? " qc-exit-save" : ""}`}
             /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
                drift the moment the timing changed.
 
@@ -3034,8 +3075,11 @@ export const Queries: React.FC<{
                arming site (saveCreate) rather than a second listener. Under reduced motion this
                handler is never reached, because the class is never applied. */
             onAnimationEnd={(e) => {
+              if (createCancelling && e.animationName === "qc-exit-cancel") { finishCancelExit(); return; }
               if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
-              if (e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
+              /* ⚠️ NOT WHILE LEAVING. A `qc-in-last` still in flight when Cancel is pressed would
+                 otherwise put focus back into a takeover that is on its way out. */
+              if (!createCancelling && e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
             }} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
