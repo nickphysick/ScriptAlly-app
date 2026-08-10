@@ -377,11 +377,32 @@
 .tdg-split-p:hover, .tdg-split-c:hover { background: #3a2a20; }
 .tdg-split-p:focus-visible, .tdg-split-c:focus-visible { background: #3a2a20; outline: none; }
 
-/* Undo on a finished row is a way back, not an act — the ghost treatment the primary already had. */
-.tdg-split.ghost { background: #fff; border: 1px solid #e6ddcd; }
+/* ── THE OUTLINED WEIGHT ────────────────────────────────────────────────────────────────────
+   ⚠️ ONE CLASS, ONE MEANING — AND IT USED TO HAVE TWO. `.ghost` meant "Undo on a finished row is
+   a way back rather than an act", a ROW-STATE reason; the weight rule now sets the same class
+   from the GROUP. Two reasons behind one class is a class that eventually contradicts itself, so
+   the row-state flag is deleted and this is the weight, full stop: filled ink inside Needs you
+   now, outlined everywhere else, `splitWeight` deciding. Done still reads exactly as it did —
+   it is simply not the urgent group, which is the honest reason for the same pixels.
+
+   ⚠️ THE HAIRLINE IS AN INSET SHADOW, NOT A BORDER — AND THAT IS A MEASURED FIX, NOT A
+   preference. `border: 1px` on a `border-box` element (Tailwind's preflight, app-wide) leaves the
+   content box 116px while the three children still ask for 81 + 3 + 34 = 118. Flex shrinks them
+   to fit: the seam is `flex: none` and survives, so the primary and the CARET absorb the whole
+   2px — and the caret is the one target on the row with a stated minimum. Guard 1 says 34px, and
+   the bordered version quietly served ~33. `box-shadow: inset` paints the same hairline and
+   occupies no layout at all, so BOTH weights are 81/3/34 exactly and the column stays aligned.
+   (This shipped in 225d4e1 on Done rows and was never measured.)
+
+   ⚠️ IDENTICAL FOOTPRINT, ALL FOUR GUARDS. Only the colours change: the 118px box, the 81/3/34
+   split and both `:hover`s are declared once above and inherited, so a row moving between groups
+   changes nothing that occupies space. */
+.tdg-split.ghost { background: #fff; box-shadow: inset 0 0 0 1px #e6ddcd; }
 .tdg-split.ghost .tdg-split-p, .tdg-split.ghost .tdg-split-c { color: #4d4238; }
 .tdg-split.ghost .tdg-split-seam { background: #e6ddcd; }
 .tdg-split.ghost .tdg-split-p:hover, .tdg-split.ghost .tdg-split-c:hover { background: #faf6f0; }
+.tdg-split.ghost .tdg-split-p:focus-visible,
+.tdg-split.ghost .tdg-split-c:focus-visible { background: #faf6f0; }
 
 /* ── the split's menu ───────────────────────────────────────────────────────────────────────
    The shell is `.tbd-menu2` (consumed from todoBoard.css, never edited); these are the parts the

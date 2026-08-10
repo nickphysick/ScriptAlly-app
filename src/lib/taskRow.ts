@@ -26,6 +26,7 @@
 import { BoardCard } from "./todoBoard";
 import { isSweepCard, TodoColumnId } from "./todoColumns";
 import { cardMenu, MenuItemId } from "./todoMenu";
+import { TaskGroupId } from "./todoGroups";
 
 /* ── the kind pill ─────────────────────────────────────────────────────────────────────────── */
 
@@ -132,6 +133,32 @@ export function rowJourney(c: BoardCard, column: TodoColumnId): RowJourney | nul
          it. Flagged in the report so the omission reads as a decision. */
       return null;
   }
+}
+
+/* ── the split button's weight (Fix 4 revision; ref design-refs/todo-weight-slider-v1.html) ───── */
+
+export type SplitWeight = "filled" | "outlined";
+
+/**
+ * ⚠️ WEIGHT FOLLOWS THE GROUP, NEVER THE ROW — and that is the whole argument. The page has
+ * already sorted urgency into groups and SAID SO in each heading ("An agent is waiting, or a date
+ * is" against "none of it urgent"). Weighting per row would put that same judgement in a second
+ * place, and two judgements about one thing eventually disagree. Ten filled-ink buttons stacked
+ * down Housekeeping was the page shouting at you about tidying.
+ *
+ * ⚠️ IT ASKS "IS THIS THE URGENT GROUP", NOT "IS IT ONE OF THE QUIET ONES". A list of the quiet
+ * groups is a list that a NEW group joins by being forgotten — and the forgotten default would be
+ * filled ink, which is the loud one. Stated positively, anything added later is outlined until
+ * someone deliberately says otherwise.
+ *
+ * ⚠️ THIS SUPERSEDES THE SPLITGUARD REF, which draws every split filled. The weight sheet is the
+ * later artefact and gives its reason; a reasoned value beats an unreasoned one.
+ *
+ * Both weights keep the identical 118px footprint and all four guards, so a row moving between
+ * groups changes colour and nothing else — no reflow, no width change, the column still aligned.
+ */
+export function splitWeight(group: TaskGroupId): SplitWeight {
+  return group === "now" ? "filled" : "outlined";
 }
 
 /* ── the split button's menu (fix pack Fix 4; ref design-refs/todo-splitguard-v1.html) ────────── */

@@ -20,8 +20,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
-import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
-import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
+import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow, TASK_GROUP_ORDER, TaskGroupId } from "../../lib/todoGroups";
+import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, splitWeight, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { TodoColumnId } from "../../lib/todoColumns";
 import { SNOOZE_STOPS, reachableStops } from "../../lib/todoActions";
@@ -205,7 +205,7 @@ describe("⚠️ ONE CONTROL PER ROW, AND ITS SEAM IS DEFENDED FOUR WAYS", () =>
     expect(split).toContain('className="tdg-split-seam" aria-hidden');
     expect(split).not.toContain("onMouseDown");
     expect(split).not.toContain("onPointerDown");
-    expect(code(list)).not.toContain('className={`tdg-split${primary.ghost ? " ghost" : ""}`} onClick');
+    expect(code(list)).not.toContain('className={`tdg-split${weight === "outlined" ? " ghost" : ""}`} onClick');
   });
 
   it("⚠️ THE SPLIT IS ONE TAB STOP, and the caret is never the only route in", () => {
@@ -231,11 +231,71 @@ describe("⚠️ ONE CONTROL PER ROW, AND ITS SEAM IS DEFENDED FOUR WAYS", () =>
     expect(list).toContain("const tickable = isTickable(c);");
   });
 
-  it("Done offers its way BACK — the ghost split, not an ink one", () => {
+  it("Done offers its way BACK — outlined, and now for the GROUP's reason rather than the row's", () => {
+    /* ⚠️ THE PIXELS ARE UNCHANGED AND THE RULE BEHIND THEM IS NOT. `primary.ghost` used to set
+       this from ROW STATE ("Undo is a way back, not an act"); the class is the group's weight
+       now, and Done reaches it by not being the urgent group. Asserted so the fold is proven to
+       have kept the appearance it inherited, not merely to have compiled. */
     const done = render(cols({ done: [card({ key: "d1", done: true, userTaskId: "t9", title: "Reply to Curtis Vane" })] }));
     expect(done).toContain("Undo");
     expect(done).toContain("tdg-split ghost");
+    expect(code(list)).not.toContain("primary.ghost");   // the row-state flag is gone, not shadowed
     expect(rowPrimaryLabel(card({}), "snoozed")).toBe("Return");
+  });
+});
+
+/**
+ * ⚠️ WEIGHT FOLLOWS THE GROUP (Fix 4 revision; ref design-refs/todo-weight-slider-v1.html, panel
+ * 1 — which SUPERSEDES the splitguard sheet's all-filled treatment).
+ *
+ * The page has already sorted urgency into groups and stated it in each heading. Weighting per row
+ * would put that judgement in a second place, and two judgements about one thing eventually
+ * disagree. So: filled ink inside Needs you now, outlined everywhere else.
+ */
+describe("⚠️ THE SPLIT'S WEIGHT IS THE GROUP'S, AND THE FOOTPRINT IS IDENTICAL", () => {
+  it("filled in the urgent group; outlined in every other one", () => {
+    /* rendered, not read from source: this is about which class reaches the markup */
+    const urgent = render(cols({ todo: [card({ key: "n1" })] }));
+    expect(urgent).toContain("tdg-split");
+    expect(urgent).not.toContain("tdg-split ghost");
+
+    /* ⚠️ SNOOZED IS ABSENT FROM THIS LOOP ON PURPOSE, and it is not an oversight: that group is a
+       slim fold whose open/closed state is the component's own, closed by default, so a static
+       render produces its heading and NO rows. There is nothing to assert a class on. Its weight
+       is covered by the pure case below, where it is reachable. */
+    for (const c of [
+      cols({ todo: [sweepCard({ key: "h1" })] }),                                   // housekeeping
+      cols({ done: [card({ key: "d1", done: true, userTaskId: "t9" })] }),          // done
+    ]) expect(render(c)).toContain("tdg-split ghost");
+  });
+
+  it("⚠️ IT ASKS 'IS THIS THE URGENT ONE' — so a group added later is outlined by DEFAULT", () => {
+    /* A list of the quiet groups is a list a new group joins by being forgotten, and the
+       forgotten default would be filled ink — the loud one. Stated positively, the default is
+       quiet. The cast is the point of the case: it stands in for a group id that does not exist
+       yet, which is precisely what a future addition is. */
+    expect(splitWeight("now")).toBe("filled");
+    for (const g of ["housekeeping", "yours", "snoozed", "done"] as TaskGroupId[]) {
+      expect(splitWeight(g)).toBe("outlined");
+    }
+    expect(splitWeight("a-group-invented-tomorrow" as TaskGroupId)).toBe("outlined");
+  });
+
+  it("…and every group id the page can actually render is answered", () => {
+    /* Total over the real domain, so the two cannot drift apart silently. */
+    for (const g of TASK_GROUP_ORDER) expect(["filled", "outlined"]).toContain(splitWeight(g));
+  });
+
+  it("⚠️ THE OUTLINED HAIRLINE TAKES NO LAYOUT — or the caret would breach Guard 1", () => {
+    /* `border: 1px` on a border-box element leaves 116px of content while the children ask for
+       81 + 3 + 34. The seam is `flex: none`, so the primary and the CARET absorb the 2px — and
+       34px is a stated minimum. An inset shadow paints the same hairline and occupies nothing. */
+    const g = rule(".tdg-split.ghost {");
+    expect(g).toContain("box-shadow: inset 0 0 0 1px");
+    expect(g).not.toContain("border:");
+    /* the footprint is declared ONCE, on the shared rule, so neither weight can restate it */
+    expect(rule(".tdg-split {")).toContain("width: 118px");
+    expect(cssDecls).not.toContain(".tdg-split.ghost .tdg-split-c { width");
   });
 });
 

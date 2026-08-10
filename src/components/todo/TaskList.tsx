@@ -33,10 +33,10 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronRight, ChevronDown, Check } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
-import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
+import { TaskGroup, TaskGroupId, groupSlice, showMoreLabel } from "../../lib/todoGroups";
 /* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
-import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, splitWeight, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/todoMenu";
@@ -419,18 +419,29 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
   const openSplit = (anchor: HTMLElement, c: BoardCard, column: TodoColumnId) =>
     setSplit((s2) => (s2?.card.key === c.key ? null : { card: c, column, anchor }));
 
-  const renderRow = (c: BoardCard, column: TodoColumnId) => {
+  /* ⚠️ THE GROUP IS THREADED, AND `groupColumn` CANNOT CARRY IT. That function collapses five
+     group ids onto three columns — `now`, `housekeeping` and `yours` all land on `todo` — which is
+     right for the MENU (a card's permissions follow its state: live, asleep, finished) and useless
+     for weight, which is exactly the distinction the columns threw away. So the group rides beside
+     the column rather than being recovered from it. */
+  const renderRow = (c: BoardCard, column: TodoColumnId, group: TaskGroupId) => {
     const menuModel = cardMenu(c, column);
     const sweep = isSweepCard(c);
     const fig = sweep ? sweepFigure(c) : null;
     const pill = rowPill(c, column);
     const journey = rowJourney(c, column);
+    const weight = splitWeight(group);
 
-    /* SLOT 1 — the primary. ⚠️ THE MENU SAYS WHETHER, `taskRow` SAYS WHAT IT IS CALLED. Absent
-       where the TICK IS THE ACT: a writer's own item is finished by ticking it, so a second verb
-       beside the circle would be two names for one act. */
-    const primary: { id: MenuItemId; label: string; ghost?: true } | null =
-      column === "done" ? (offers(menuModel, "undo-done") ? { id: "undo-done", label: rowPrimaryLabel(c, column), ghost: true } : null)
+    /* ⚠️ THE PRIMARY. THE MENU SAYS WHETHER, `taskRow` SAYS WHAT IT IS CALLED. Absent where the
+       TICK IS THE ACT: a writer's own item is finished by ticking it, so a second verb beside the
+       circle would be two names for one act.
+       ⚠️ AND IT NO LONGER CARRIES A `ghost` FLAG. It briefly did, meaning "Undo on a finished row
+       is a way back rather than an act" — a ROW-STATE reason wearing the same class the GROUP
+       weight now sets. One class with two reasons behind it is one that eventually contradicts
+       itself, so the row-state flag is deleted and Done reaches the outlined weight the honest
+       way: it is not the urgent group. Same pixels, better rule. */
+    const primary: { id: MenuItemId; label: string } | null =
+      column === "done" ? (offers(menuModel, "undo-done") ? { id: "undo-done", label: rowPrimaryLabel(c, column) } : null)
       : column === "snoozed" ? { id: "unsnooze", label: rowPrimaryLabel(c, column) }
       : completionVia(c) === "user-task" ? null
       : { id: "action", label: rowPrimaryLabel(c, column) };
@@ -524,7 +535,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
                todo-splitguard-v1.html). The wrapper takes NO click of its own: the 3px seam
                belongs to neither half and must fire nothing, which it does by there being no
                handler above the halves to fall through to. */
-            <span className={`tdg-split${primary.ghost ? " ghost" : ""}`}>
+            <span className={`tdg-split${weight === "outlined" ? " ghost" : ""}`}>
               {/* ⚠️ COMMIT ON RELEASE, NOT ON PRESS. `onClick` fires only when press AND release
                   land on the same element, so pressing the wrong half and sliding off does
                   nothing — that is the browser's own guarantee rather than a handler of ours.
@@ -636,7 +647,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
               </button>
               {snzOpen && (
                 <div className="tdg-sect">
-                  <div className="tdg-panel">{g.cards.map((c) => renderRow(c, column))}</div>
+                  <div className="tdg-panel">{g.cards.map((c) => renderRow(c, column, g.id))}</div>
                 </div>
               )}
             </React.Fragment>
@@ -665,7 +676,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
                 real expansion, so nothing animates on first paint (sheet 6: one entrance, then
                 never again on filter or sort). */}
             <div className={`tdg-panel${g.id === "housekeeping" && hkExpanded ? " grown" : ""}`}>
-              {visible.map((c) => renderRow(c, column))}
+              {visible.map((c) => renderRow(c, column, g.id))}
             </div>
             {more > 0 && (
               <div className="tdg-more">
