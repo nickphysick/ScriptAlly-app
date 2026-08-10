@@ -128,3 +128,52 @@ describe("the container rim is an overlay, not a border", () => {
     expect(blk(".os-card.os-lift:hover")).not.toContain("transform");
   });
 });
+
+/**
+ * ⚠️ EVERY CONTAINER'S BAND IS THE SAME OBJECT (§2).
+ *
+ * Active queries was the last container on plain parchment. It now wears `.os-ahead`, the same
+ * band as Activity and Goals, and `.os-th2` — the pink tasks band — was 2px taller than the other
+ * three on padding alone (11/18 against 10/16). Nobody had noticed, because until the marks landed
+ * no two bands sat side by side at a shared height. Browser-measured after the fix: all four at
+ * 49px, spread 0, at 1440 AND 1024.
+ */
+describe("the bands are one geometry, coloured by purpose", () => {
+  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const pad = (sel: string) => {
+    const i = bare.indexOf(`${sel} {`);
+    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
+    return /padding:\s*([^;]+)/.exec(bare.slice(i, bare.indexOf("}", i)))?.[1].trim();
+  };
+
+  it("⚠️ the sage and pink bands share their PADDING — colour differs by purpose, geometry does not", () => {
+    expect(pad(".os-th2")).toBe(pad(".os-ahead"));
+  });
+
+  it("Active queries wears the shared band, not a header of its own", () => {
+    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
+    expect(chart).toContain('<div className="os-ahead">');
+    expect(chart).not.toContain('className="os-lh"');
+  });
+
+  it("⚠️ the retired chart header is GONE, not merely unused", () => {
+    // a dormant `.os-lh` is a second treatment waiting to be reattached by the next reader
+    expect(bare).not.toMatch(/\.os-lh\s*\{/);
+    expect(bare).not.toMatch(/\.os-ll\s*\{/);
+  });
+
+  it("⚠️ the SLIDER gives before the title does at a narrow width", () => {
+    // without this the control cluster keeps its full width and ellipses the title at 1024
+    expect(bare).toMatch(/\.os-ahead \.os-rangeslider\s*\{[^}]*clamp\(/);
+    expect(bare).toMatch(/\.os-ahead \.os-ctrls\s*\{[^}]*min-width:\s*0/);
+  });
+
+  it("the controls are IN the band — no separate control row was introduced", () => {
+    const chart = readFileSync(resolve(__dirname, "./OneScreenChart.tsx"), "utf8");
+    const open = chart.indexOf('<div className="os-ahead">');
+    const band = chart.slice(open, chart.indexOf("</div>", chart.indexOf("os-rangelbl", open)));
+    expect(band).toContain("os-ctrls");
+    expect(bare).not.toMatch(/\.os-ctrlrow\s*\{/); // the 45px row the preview measured and rejected
+  });
+});

@@ -244,9 +244,22 @@ export const OneScreenChart: React.FC<{
 
   return (
     <OneScreenPanel variant="os-lead" loading={loading} skel={["h", "grow", ""]}>
-      <div className="os-lh">
+      {/**
+        * ⚠️ THE SAME BAND AS EVERY OTHER CONTAINER (§2) — `.os-ahead`, not a chart-specific header.
+        * Active queries was the last container on plain parchment while Tasks, Activity and Goals
+        * carried the sage band; using the same class is what makes "band heights match" structural
+        * rather than three numbers kept in step by hand.
+        *
+        * ⚠️ THE CONTROLS SIT IN THE BAND, and that is a REVISION of the original spec. A separate
+        * control row beneath measured 45px, which took the chart from 205px to 150px in a 302px
+        * card — under half the container. In the band they cost nothing: the row already exists.
+        * The trade is that this band is the only one carrying interactive children, so its height
+        * is now set by the tallest control rather than by the title; both are checked at 1440 AND
+        * 1024, because a control that wraps at a narrow width breaks the uniformity outright.
+        */}
+      <div className="os-ahead">
         <OneScreenMark name="active-queries" />
-        <span className="os-ll">Active queries</span>
+        <h2>Active queries</h2>
         {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
         <div className="os-ctrls">
         <div className="os-freqsel">

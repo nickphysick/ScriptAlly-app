@@ -381,8 +381,14 @@
 
 /* ══ §3 · THE CHART CARD ══ */
 .os-lead { display: flex; flex-direction: column; padding: 13px 18px 9px; }
-.os-lh { display: flex; align-items: center; gap: 10px; flex: none; }
-.os-lh .os-ll { font-size: 13px; color: #4a3a2e; font-weight: 500; }
+/* ⚠️ `.os-lh` AND `.os-ll` ARE RETIRED (§2) — the chart's bespoke header row and its 13px title.
+   Active queries now wears `.os-ahead`, the same band as every other container, so a header that
+   existed only here would be a second treatment for the thing this pack exists to unify. */
+/* ⚠️ THE BAND'S CONTROLS SHRINK BEFORE THE TITLE DOES. The slider is the only child with no
+   natural minimum, so it is the one that gives; without this the cluster pushes the title into an
+   ellipsis at 1024 while the slider keeps its full 150px. */
+.os-ahead .os-ctrls { min-width: 0; }
+.os-ahead .os-rangeslider { width: clamp(72px, 14vw, 150px); }
 /* ⚠️ TWO CONTROLS, TWO SHAPES — a select for the grain (a small closed set you pick from) and a
    slider for the span (an ordered scale you move along). The retired three-pill group could say
    neither: it had to spend a pill on each range and had no room to say anything about grain. */
@@ -515,9 +521,13 @@
 /* ⚠️ PINK, BECAUSE THIS IS THE TO-DO SURFACE. The house rule is sage for a dashboard container's
    header and PINK where something is asking for you — this card is the one that does. The band
    runs edge to edge, so the card needs `overflow:hidden` for it to meet the radius cleanly. */
+/* ⚠️ THE SAME PADDING AS `.os-ahead` (§2) — it was 11px/18px against the sage band's 10px/16px,
+   so the pink band stood 2px taller than the other three. Nobody had noticed because until now no
+   two bands sat side by side at the same height; measured 51 vs 49 across the four. The colours
+   differ by purpose, the GEOMETRY does not. */
 .os-th2 {
   display: flex; align-items: center; gap: 12px;
-  padding: 11px 18px; margin: 0; flex: none;
+  padding: 10px 16px; margin: 0; flex: none;
   background: linear-gradient(180deg, #f5e3d8, #f2ddd2);
   border-bottom: 1px solid #ebd2c4;
 }
