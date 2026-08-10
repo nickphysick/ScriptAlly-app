@@ -139,10 +139,10 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
      `stillAnimating: true` long after settling. A ref survives the re-render without re-running
      anything, the same reason the chart's `drewIn` is a ref. */
   /**
-   * ⚠️ THE PAGE SKELETON IS NOT `loading`. It lags the flag at BOTH ends on purpose — it refuses
-   * to appear for a wait under ~200ms, and once it has appeared it outlives the data by up to
-   * ~400ms and then dissolves. Rendering it straight off `loading` would reinstate exactly the
-   * flash the delay buys off. The rule lives in lib/skeletonTiming.
+   * ⚠️ THE COVER IS ON FROM THE FIRST PAINT AND OUTLIVES `loading` — never rendered off the flag
+   * directly. The hook initialises its phase from `loading`, holds ~500ms once seen, then
+   * dissolves; the rule and the full history of why (including the deleted 200ms fast-path delay,
+   * which is what made three earlier fixes invisible) live in lib/skeletonTiming.
    *
    * ⚠️ IT IS DECLARED HERE, ABOVE THE ENTRANCE EFFECT THAT READS IT, and that is not cosmetic:
    * a `const` referenced above its declaration sits in the temporal dead zone and throws on the
@@ -157,21 +157,15 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     if (loading || entered.current) return;
     entered.current = true;
     /**
-     * ⚠️ THE PAGE MUST NOT ARRIVE TWICE. If a skeleton was shown, it has already done this
+     * ⚠️ THE PAGE MUST NOT ARRIVE TWICE. If the cover was shown, it has already done this
      * animation's job — it occupied these exact boxes while the data was out — so the stagger is
-     * SKIPPED and the content is simply there, settled, as the skeleton dissolves off it.
+     * SKIPPED and the content is simply there, settled, as the cover dissolves off it. Running
+     * both meant the page arrived twice: cards rising under the cover, revealed mid-flight.
      *
-     * Running both is what produced the reported blip, and it did so in two different ways
-     * depending on how long the wait was. On a short wait the cards rose UNDER the cover and the
-     * cover lifted mid-flight, revealing content at partial opacity, still sliding. On a long wait
-     * the cover lifted the instant the data landed — before the rise had started — so the page
-     * flashed EMPTY WHITE and then faded up. A third fault rode along with both: `.enter` hides
-     * the illustrated marks for its whole duration (they blend against a transformed ancestor, see
-     * the trap note below), so the marks popped in last, after everything else had settled.
-     *
-     * ⚠️ THE STAGGER IS NOT DELETED, and must not be — it is exactly right for the case it was
-     * written for: a load fast enough that no skeleton ever appeared. That is the ONLY case left
-     * where the page has no other way of announcing that it has arrived.
+     * ⚠️ THE STAGGER IS NOT DELETED. With the cover on from the first paint it is nearly always
+     * skipped, but a mount that BEGINS with `loading` false (data already in hand before this
+     * page first mounts, dev labs, tests) never shows a cover, and this is then the page's only
+     * way of announcing it has arrived.
      */
     if (skeleton.wasShown) return;
     const root = rootRef.current;

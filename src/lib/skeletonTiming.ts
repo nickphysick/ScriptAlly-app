@@ -2,99 +2,54 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * skeletonTiming — WHEN a loading skeleton is on screen, as a pure rule plus the hook that drives
- * it (ref design-refs/dashboard-audit.html, `.skel`).
+ * skeletonTiming — when the dashboard's loading skeleton is on screen, and how it leaves.
  *
- * ⚠️ THE HARD PART IS NOT THE PICTURE, IT IS THE TIMING. A skeleton exists to say "we do not know
- * yet"; shown for 90ms it says nothing and costs a flash, and a flash reads as a fault in the app
- * rather than as a wait. So there are two independent thresholds and they answer different
- * questions:
+ * ⚠️⚠️ THE SKELETON COVERS FROM THE FIRST FRAME. THE 200ms "no skeleton under a fast load" DELAY
+ * IS DELETED, AND ITS DELETION IS THE FIX (Nick's call, 10 Aug, superseding the audit pack's
+ * fast-path rule — stated twice, after three attempts that changed nothing he could see).
  *
- *   · SKELETON_DELAY_MS — how long we are willing to show NOTHING before admitting to a wait.
- *     Under it, the data arrives and the page simply appears. The skeleton never existed.
- *   · SKELETON_MIN_MS  — once it HAS appeared, the shortest life it is allowed. Data landing 30ms
- *     later must not snatch it away, because that is the flash we just paid the delay to avoid.
+ * Why the delay was not merely unnecessary but the actual fault: the dashboard has a SECOND,
+ * older skeleton system — the per-card `.isload` bars (§8) — which mounts INSTANTLY at t=0 with
+ * no delay and no minimum. A warm Firestore load resolves from the IndexedDB cache in well under
+ * 200ms, so on a normal dev refresh the sequence was: per-card bars flash at t=0 → data lands
+ * ~100–150ms → this overlay's 200ms timer is CANCELLED and it never mounts → every card's
+ * content snaps from opacity 0 to 1 in a single frame. That snap was the reported blink — and
+ * because it happened entirely OUTSIDE this overlay, three successive fixes to the overlay's
+ * reveal produced no visible difference whatsoever. A fix that lives in a path that never runs
+ * is not a fix.
  *
- * ⚠️ AND THERE IS NO THIRD NUMBER. A longer artificial hold was considered and rejected in the
- * pack: it makes the app measurably slower in exchange for nothing a user wants. Past the
- * minimum, the skeleton leaves the instant the data is ready.
+ * With the cover on the first paint, the per-card bars are never seen (they still render, harmless,
+ * beneath it), there is no two-skeletons pop at 200ms, and every load — however fast — resolves the
+ * same way: one calm surface, held briefly, dissolving onto a page that is already settled.
+ *
+ *   · SKELETON_MIN_MS  — how long the cover stays once seen. ~half a second: long enough to read
+ *     as a deliberate state rather than a flicker, short enough not to feel like a wait.
+ *   · SKELETON_FADE_MS — the dissolve. The element must NOT unmount on the frame it finishes:
+ *     swapping a full-page shell for the page in one frame is a hard cut, and a hard cut reads as
+ *     a glitch however well the blocks line up.
+ *
+ * ⚠️ THE COST IS STATED, NOT HIDDEN: on a 50ms cache load the user now waits ~750ms for content
+ * they could have had sooner. The audit pack rejected exactly this trade; Nick, watching the
+ * alternative, chose it. One consistent arrival beats a faster twitchy one.
  */
 import { useEffect, useRef, useState } from "react";
 
-/** Nothing on screen below this — a wait this short is not worth naming. */
-export const SKELETON_DELAY_MS = 200;
-/** Having appeared, it stays at least this long. */
-export const SKELETON_MIN_MS = 400;
-
-export interface SkeletonMoment {
-  /** Is the data still resolving? */
-  loading: boolean;
-  /** ms since the wait began. */
-  waited: number;
-  /** ms since the skeleton appeared — `null` while it never has. */
-  shownFor: number | null;
-}
-
+/** Once on screen, the cover stays at least this long. */
+export const SKELETON_MIN_MS = 500;
 /**
- * The whole rule, in one expression.
- *
- * ⚠️ THE TWO BRANCHES ARE NOT SYMMETRICAL, and that asymmetry IS the behaviour. Before it has
- * appeared, only `loading` past the delay can raise it. After it has appeared, `waited` is
- * irrelevant — what keeps it up is either the data still being out, or the minimum not yet served.
+ * ⚠️ THE SETTLE BEAT — the cover always outlives `loading` by at least this, EVEN when the
+ * minimum is already served. Found by measurement, not taste: with the fade starting in the same
+ * breath as the data, the populated page's own arrival work (chart draw-in, count-ups, first
+ * layout of the real content) landed a ~200ms main-thread stall in the MIDDLE of the dissolve —
+ * the frame trace read `1 → 0.95 → 0.848 → [208ms of nothing] → unmounted`. The same fade with
+ * the heavy render 400ms behind it ran sixteen clean frames to zero. So the heavy work is made to
+ * happen UNDER the opaque cover, where jank is invisible, and the dissolve begins on a quiet
+ * thread. Dissolving onto a page that is still laying itself out is "revealed mid-arrival" — the
+ * exact fault this module exists to remove — arrived at by a third route.
  */
-export function skeletonShows({ loading, waited, shownFor }: SkeletonMoment): boolean {
-  if (shownFor === null) return loading && waited >= SKELETON_DELAY_MS;
-  return loading || shownFor < SKELETON_MIN_MS;
-}
-
-/** How much of the minimum is still owed — 0 once it is served. */
-export function skeletonHold(shownFor: number): number {
-  return Math.max(0, SKELETON_MIN_MS - shownFor);
-}
-
-/**
- * What to DO next, given where we are. The hook is a dispatcher over this and nothing else.
- *
- * ⚠️ THIS EXISTS SO THE THREE TIMING PATHS CAN BE TESTED RATHER THAN ASSERTED AT SOURCE. This
- * repo's vitest runs in `node` with no jsdom and no testing-library, so a hook cannot be rendered
- * here — which left the DRIVER covered only by "it mentions the right constants". Pulling the
- * decision out makes the sequence itself provable against a stubbed clock: a test can step a
- * timeline through `wait → show → hold → hide` and watch it happen.
- */
-export type SkeletonAction =
-  /** Nothing on screen yet: arm the delay, and show only if we are still waiting when it fires. */
-  | { kind: "wait"; ms: number }
-  /** Up, and staying up — the data is still out. */
-  | { kind: "stay" }
-  /** Data has landed but the minimum is not served: hide in `ms`. */
-  | { kind: "hold"; ms: number }
-  /** Down, now. */
-  | { kind: "hide" }
-  /** Never appeared and never will for this wait. */
-  | { kind: "idle" };
-
-export function skeletonStep(s: {
-  loading: boolean;
-  shown: boolean;
-  /** ms since it appeared; null while it never has. */
-  shownFor: number | null;
-}): SkeletonAction {
-  if (s.loading) return s.shown ? { kind: "stay" } : { kind: "wait", ms: SKELETON_DELAY_MS };
-  if (!s.shown) return { kind: "idle" };
-  const owed = skeletonHold(s.shownFor ?? SKELETON_MIN_MS);
-  return owed === 0 ? { kind: "hide" } : { kind: "hold", ms: owed };
-}
-
-/**
- * How long the skeleton takes to dissolve once its work is done.
- *
- * ⚠️ IT MUST NOT UNMOUNT ON THE FRAME IT FINISHES. Swapping a full-page grey shell for the page in
- * one frame is a hard cut, and a hard cut reads as a glitch however well the blocks line up — the
- * geometry being right is exactly what makes the instant swap noticeable rather than excusable.
- * The content is already settled underneath by then, so this is a dissolve onto a finished page,
- * not a transition between two states.
- */
-export const SKELETON_FADE_MS = 220;
+export const SKELETON_SETTLE_MS = 200;
+/** How long the dissolve takes. ⚠️ Must match `.os-skelpage`'s transition — locked together. */
+export const SKELETON_FADE_MS = 250;
 
 /** `off` — not rendered · `on` — covering the page · `out` — dissolving, content live beneath. */
 export type SkeletonPhase = "off" | "on" | "out";
@@ -102,91 +57,75 @@ export type SkeletonPhase = "off" | "on" | "out";
 export interface SkeletonState {
   phase: SkeletonPhase;
   /**
-   * Did a skeleton appear at all during this wait? Stays true once set.
+   * Did a cover appear during this page's life? Sticky once true.
    *
-   * ⚠️ THIS IS WHAT STOPS THE PAGE ARRIVING TWICE. The dashboard's entrance stagger and the
+   * ⚠️ THIS IS WHAT STOPS THE PAGE ARRIVING TWICE. The dashboard's entrance stagger and this
    * skeleton are two answers to the same question — "the page is arriving" — and running both
-   * means it arrives twice: the cards rise UNDER the cover, and whatever is left of that rise is
-   * revealed mid-flight when the cover lifts. The caller reads this to skip the stagger.
+   * means it arrives twice. The dashboard reads this to skip the stagger; the dissolve IS the
+   * arrival whenever a cover was seen.
    */
   wasShown: boolean;
+}
+
+/** How much of the minimum is still owed, `shownFor` ms after the cover appeared. */
+export function skeletonHold(shownFor: number): number {
+  return Math.max(0, SKELETON_MIN_MS - shownFor);
 }
 
 /**
  * The driver.
  *
- * ⚠️⚠️ THE PHASE IS ONE PIECE OF STATE, AND THE FIRST ATTEMPT AT THIS FADE PROVED WHY.
+ * ⚠️ THE PHASE IS ONE PIECE OF STATE, INITIALISED FROM THE PROP — both halves matter.
  *
- * It held TWO booleans — `shown`, plus a `leaving` set by a follow-up effect — and derived
- * `phase = shown ? "on" : leaving ? "out" : "off"`. That cannot work, and it fails in the one way
- * that looks fine in review: when `shown` flips false, React re-renders BEFORE the effect that
- * sets `leaving` runs, so for that render the phase resolves to `"off"` and the element UNMOUNTS
- * on the spot. `leaving` then turns true and re-mounts it already at opacity 0 — invisible — for
- * the length of the fade, and unmounts it again. The net effect on screen is the hard cut the fade
- * was written to remove, plus a pointless mount/unmount, and it SHIPPED.
+ * ONE state: an earlier version derived the phase from two booleans (`shown` + a `leaving` set by
+ * a follow-up effect), and between the first flipping and the second being set React rendered the
+ * derived value as `"off"` — the element unmounted for a frame, re-mounted already transparent,
+ * and the "fade" was invisible. One state has no intermediate render to get wrong: "on" → "out"
+ * is a single update, so the element is still mounted, still opaque, when its class changes and
+ * the browser has something to transition.
  *
- * A single `phase` removes the ordering rather than sequencing around it: "on" → "out" is one
- * state change in one update, so the element is still mounted when its class changes and the
- * browser has something to transition. There is no intermediate value left to compute wrongly.
+ * INITIALISED from `loading`, never raised by an effect: an effect runs after the first paint, so
+ * a cover it raises arrives a frame late — one frame of the per-card bars, which is exactly the
+ * flash this module exists to remove. `useState(loading ? "on" : "off")` puts the cover in the
+ * FIRST render's output.
  *
- * ⚠️ AND THE SOURCE TEST DID NOT CATCH IT. It asserted the derived expression verbatim — which is
- * exactly what was wrong — so it passed while describing the bug. Asserting the SHAPE of code
- * proves the code has that shape, never that the shape is right.
+ * ⚠️ `shownAt` IS A REF — it is read inside a timeout to compute what is still owed; as state it
+ * would re-arm the timer on every tick.
  *
- * ⚠️ `shownAt` IS A REF, deliberately. The moment it appeared is read inside a timeout to compute
- * what is still owed; as state it would put a changing value in the effect's deps and re-arm the
- * timer on every tick. The same reason the dashboard's entrance guard is a ref.
- *
- * ⚠️ A SECOND `loading` SPELL DOES NOT RESTART THE CLOCK. If the data goes out again while the
- * skeleton is still up, it simply stays up; `shownAt` keeps its original stamp so the minimum is
- * measured from when the user first saw it, which is the only moment they can perceive.
+ * ⚠️ A LATER `loading` SPELL RAISES THE COVER AGAIN (with its own minimum), but `wasShown` stays
+ * true from the first — the stagger must not return on a refetch.
  */
 export function useSkeleton(loading: boolean): SkeletonState {
-  const [phase, setPhase] = useState<SkeletonPhase>("off");
-  const everShown = useRef(false);
-  const shownAt = useRef<number | null>(null);
-
-  /* "out" is still on screen, but it is no longer DOING anything — the rule below asks only
-     whether the skeleton is covering the page. */
-  const shown = phase === "on";
+  const [phase, setPhase] = useState<SkeletonPhase>(loading ? "on" : "off");
+  const everShown = useRef(loading);
+  const shownAt = useRef<number | null>(loading ? Date.now() : null);
 
   useEffect(() => {
-    const step = skeletonStep({
-      loading,
-      shown,
-      shownFor: shownAt.current === null ? null : Date.now() - shownAt.current,
-    });
-    switch (step.kind) {
-      case "wait": {
-        const id = window.setTimeout(() => {
-          shownAt.current = Date.now();
-          everShown.current = true;
-          setPhase("on");
-        }, step.ms);
-        // ⚠️ THE CLEANUP IS WHAT MAKES THE FAST PATH WORK. Data landing inside the delay changes
-        // `loading`, which re-runs this effect — and the cleanup cancels the pending show first,
-        // so the skeleton never appears at all rather than appearing and being torn down.
-        return () => window.clearTimeout(id);
+    if (loading) {
+      // A refetch after the first life: raise the cover again. (On mount this branch is a no-op —
+      // the initialiser already raised it, at paint rather than a frame later.)
+      if (phase !== "on") {
+        shownAt.current = Date.now();
+        everShown.current = true;
+        setPhase("on");
       }
-      case "hold": {
-        const id = window.setTimeout(() => setPhase("out"), step.ms);
-        return () => window.clearTimeout(id);
-      }
-      case "hide":
-        // ⚠️ STRAIGHT TO "out", NEVER VIA "off" — the element must still be mounted, and still be
-        // at opacity 1, on the render that adds the class. That is the whole of the fix.
-        setPhase("out");
-        return;
-      default:
-        return; // "stay" and "idle" both mean: leave it exactly as it is
+      return;
     }
-  }, [loading, shown]);
+    if (phase !== "on") return; // off stays off; a fade in flight completes via its own timer
+    /* ⚠️ ALWAYS A TIMER, NEVER AN IMMEDIATE "out" — the settle beat is a floor, not a fallback.
+       The populated render happens on this very update; the beat is what keeps its jank under the
+       opaque cover. And "out" is reached from "on" in ONE state change, so the element is still
+       mounted, still opaque, on the render that adds the fade class. */
+    const owed = Math.max(
+      SKELETON_SETTLE_MS,
+      skeletonHold(shownAt.current === null ? 0 : Date.now() - shownAt.current),
+    );
+    const id = window.setTimeout(() => setPhase("out"), owed);
+    return () => window.clearTimeout(id);
+  }, [loading, phase]);
 
-  /**
-   * The dissolve, kept OUT of `skeletonStep` on purpose: that function answers "should the
-   * skeleton be doing its job?", and this answers "how does it leave?". Folding the fade into the
-   * rule would make the minimum-hold arithmetic depend on a presentation constant.
-   */
+  /* The dissolve's own clock. React cannot transition an unmounting node, so the element outlives
+     the decision by exactly one fade. */
   useEffect(() => {
     if (phase !== "out") return;
     const id = window.setTimeout(() => setPhase("off"), SKELETON_FADE_MS);

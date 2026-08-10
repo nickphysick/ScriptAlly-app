@@ -326,8 +326,11 @@
   /* ⚠️ IT DISSOLVES, IT DOES NOT VANISH. Swapping a full-page grey shell for the page in a single
      frame is a hard cut, and a hard cut reads as a glitch however well the blocks line up — the
      geometry being right is precisely what makes the instant swap conspicuous rather than
-     forgivable. Opacity only, per the pack's motion rule. */
-  transition: opacity 220ms ease;
+     forgivable. Opacity only, per the pack's motion rule.
+     ⚠️ 250ms IS `SKELETON_FADE_MS` (lib/skeletonTiming) — the hook unmounts the element when that
+     timer fires, so a longer transition here would be cut off mid-dissolve and a shorter one would
+     leave an invisible element intercepting nothing for the difference. Locked together. */
+  transition: opacity 250ms ease;
 }
 /* ⚠️ THE PAGE UNDERNEATH IS ALREADY FINISHED by the time this runs — see the entrance note in
    OneScreenDashboard. So this is a dissolve onto a settled page, not a crossfade between two

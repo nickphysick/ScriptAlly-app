@@ -83,17 +83,17 @@ describe("the shimmer", () => {
 });
 
 /**
- * ⚠️ THE PAGE MUST NOT ARRIVE TWICE — the reported blip, and the reason it had two different
- * shapes depending on how long the wait was.
+ * ⚠️ THE PAGE MUST NOT ARRIVE TWICE, AND THE COVER MUST BE THE ONLY SKELETON EVER SEEN.
  *
- * The entrance stagger and the skeleton both answer "the page is arriving". Running both meant:
- * on a SHORT wait the cards rose under the cover and the cover lifted mid-flight, revealing
- * content at partial opacity, still sliding; on a LONG wait the cover lifted the instant the data
- * landed, before the rise had begun, so the page flashed EMPTY WHITE and faded up. And `.enter`
- * hides the illustrated marks for its whole duration, so they popped in last either way.
+ * The dashboard has TWO skeleton systems: the per-card `.isload` bars (§8, instant, no timing
+ * discipline) and the page cover. The reported blink survived three fixes because all three lived
+ * in the cover's reveal — and the cover, behind its then-200ms delay, never mounted on a warm
+ * Firestore load. What the user was watching was the OTHER system snapping to content in one
+ * frame. The cover is now on from the FIRST PAINT (initialised state, not an effect), so the bars
+ * are never seen and every load resolves the same way: hold, then dissolve.
  */
 describe("the reveal — one arrival, not two", () => {
-  it("⚠️ the entrance stagger is SKIPPED when a skeleton was shown", () => {
+  it("⚠️ the entrance stagger is SKIPPED when the cover was shown", () => {
     expect(dash).toContain("if (skeleton.wasShown) return;");
     // …and the guard sits before the class is ever added
     const at = dash.indexOf("if (skeleton.wasShown) return;");
@@ -102,16 +102,16 @@ describe("the reveal — one arrival, not two", () => {
     expect(add).toBeGreaterThan(at);
   });
 
-  it("⚠️ …and NOT deleted — it is still right for a load too fast to show a skeleton", () => {
+  it("⚠️ …and NOT deleted — a mount that BEGINS loaded shows no cover, and then it is the arrival", () => {
     expect(dash).toContain('classList.add("enter")');
     expect(dash).toContain('classList.remove("enter")');
   });
 
-  it("⚠️ the skeleton dissolves rather than vanishing — mounted through its fade", () => {
+  it("⚠️ the cover dissolves rather than vanishing — mounted through its fade", () => {
     expect(dash).toContain('skeleton.phase !== "off" && <OneScreenSkeleton leaving={skeleton.phase === "out"} />');
     const at = css.indexOf(".os-skelpage {");
     expect(at).toBeGreaterThan(-1);
-    expect(css.slice(at, css.indexOf("}", at))).toContain("transition: opacity 220ms ease");
+    expect(css.slice(at, css.indexOf("}", at))).toContain("transition: opacity 250ms ease");
     expect(css).toContain(".os-skelpage.out { opacity: 0; pointer-events: none; }");
   });
 
