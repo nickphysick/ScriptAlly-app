@@ -52,10 +52,12 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
 }) => {
   const [query, setQuery] = useState("");
   const [hl, setHl] = useState(-1);
-  /* ⚠️ THE DROPDOWN OPENS ON THE FIRST KEYSTROKE — never on mount, never on focus. `dismissed` is
-     what lets Esc and an outside click close it while the text stays in the field: without it,
-     "open" would be a pure function of the query and the writer could not put it away. */
-  const [dismissed, setDismissed] = useState(false);
+  /* ⚠️ FOCUS IS NOT INTENT, AND THAT DISTINCTION IS THE WHOLE OPEN MODEL. The field takes focus on
+     mount so typing works immediately — but programmatic focus is the app's act, not the writer's,
+     and opening on it is what put an expanded empty popup under the field on arrival. So `open` is
+     explicit state, raised only by things the writer DID: a click on the field, ↓, or a keystroke.
+     There is deliberately no `onFocus` handler here; adding one would restore the fault. */
+  const [open, setOpen] = useState(false);
   const [dhl, setDhl] = useState(-1);
   const fieldRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -63,7 +65,7 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
      action are the same destination; two states would let one of them be open while the other
      thought it was closed, and the second click would appear to do nothing. */
   const [adding, setAdding] = useState(false);
-  const onAddAgent = () => { setDismissed(true); setAdding(true); };
+  const onAddAgent = () => { setOpen(false); setAdding(true); };
   /* Cancel and Esc both land here: the form closes and the caret goes back where it started, so
      changing your mind returns you to the thing you were doing rather than to nowhere. */
   const closeAdd = () => { setAdding(false); fieldRef.current?.focus(); };
@@ -73,7 +75,6 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
      set — filtering it as you type made the page reshuffle under the writer mid-keystroke. */
   const res = useMemo(() => pickerCards(agents, queries), [agents, queries]);
   const hits = useMemo(() => dropdownResults(agents, query), [agents, query]);
-  const open = query.trim().length > 0 && !dismissed;
   const counts = queriedCount(agents, queries);
 
   /* Outside click closes it. Bound only while it is open, so the picker adds no listener to a
@@ -81,7 +82,7 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setDismissed(true);
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
@@ -93,10 +94,10 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
   const active = hl >= 0 && hl < res.cards.length ? hl : -1;
   const dActive = dhl >= 0 && dhl < hits.length ? dhl : -1;
 
-  const choose = (a: Agent) => { setHl(-1); setDhl(-1); setDismissed(true); onSelect(a); };
+  const choose = (a: Agent) => { setHl(-1); setDhl(-1); setOpen(false); onSelect(a); };
 
   const onFieldKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape" && open) { e.preventDefault(); setDismissed(true); setDhl(-1); return; }
+    if (e.key === "Escape" && open) { e.preventDefault(); setOpen(false); setDhl(-1); return; }
     /* ⚠️ ↓ MEANS TWO DIFFERENT THINGS, AND WHICH ONE DEPENDS ON WHETHER THE DROPDOWN IS OPEN.
        Open, it walks the results the writer is looking at; closed, it enters the standing grid.
        Sending it to the grid while a list of matches is on screen would step past the answer. */
@@ -107,7 +108,9 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
       if (e.key === "Enter" && dActive >= 0) { e.preventDefault(); choose(hits[dActive]); return; }
       return;
     }
-    if (e.key === "ArrowDown" && res.cards.length > 0) { e.preventDefault(); setHl(0); return; }
+    /* ↓ on a closed field OPENS the list — it is a request to see the options, and answering it
+       by jumping past them into the standing grid would skip the thing being asked for. */
+    if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setDhl(0); return; }
     if (e.key === "Enter" && active >= 0) { e.preventDefault(); choose(res.cards[active]); }
   };
 
@@ -157,8 +160,14 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
         aria-label="Search your contacts by name or agency"
         placeholder="Search by name or agency…"
         value={query}
-        /* Typing re-opens it — `dismissed` survives only until the writer asks again. */
-        onChange={(e) => { setQuery(e.target.value); setHl(-1); setDhl(-1); setDismissed(false); }}
+        /* A keystroke opens it; clearing back to empty closes it again, because an empty field is
+           the writer having withdrawn the question. */
+        onChange={(e) => {
+          const v = e.target.value;
+          setQuery(v); setHl(-1); setDhl(-1);
+          setOpen(v.trim().length > 0);
+        }}
+        onClick={() => setOpen(true)}
         onKeyDown={onFieldKey}
       />
       {open && (

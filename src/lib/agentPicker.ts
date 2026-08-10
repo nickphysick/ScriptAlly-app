@@ -132,11 +132,17 @@ export function dropdownResults(
   query: string,
   limit: number = PICKER_LIMIT,
 ): Agent[] {
-  if (!query.trim()) return [];
   return agents
+    /* ⚠️ AN EMPTY QUERY LISTS EVERYONE. Opening the list is an act of browsing as much as of
+       searching — the writer asked to see their contacts, and answering with nothing would make
+       the control useless until they had already guessed a name. */
     .filter((a) => a.setAside !== true && matchesQuery(a, query))
     .slice()
-    .sort((a, b) => Date.parse(b.dateAdded || "0") - Date.parse(a.dateAdded || "0"))
+    /* ⚠️ ALPHABETICAL, AND DELIBERATELY NEUTRAL. Newest-first is a recommendation about which
+       contact matters, and rating-descending is the same recommendation wearing a search's
+       clothes — which is why the stars went. A list you can predict the shape of is a list you can
+       scan; the writer knows the name they are looking for. */
+    .sort((a, b) => agentPrimary(a).localeCompare(agentPrimary(b), "en-GB"))
     .slice(0, limit);
 }
 

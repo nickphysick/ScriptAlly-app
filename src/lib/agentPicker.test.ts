@@ -91,10 +91,50 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
     expect(queryHistoryLabel(list[1], [q("a1")], now)).toBe("Not queried");
   });
 
-  /* ⚠️ NEVER ON MOUNT, NEVER ON FOCUS — the first keystroke is the whole trigger. */
-  it("an empty query yields no dropdown at all", () => {
-    expect(dropdownResults([agent("a1")], "")).toEqual([]);
-    expect(dropdownResults([agent("a1")], "   ")).toEqual([]);
+  /* ⚠️ AN EMPTY QUERY LISTS EVERYONE. Opening the list is an act of browsing as much as of
+     searching — answering with nothing would make the control useless until the writer had
+     already guessed a name. It is the OPEN STATE, not the query, that keeps it off the page on
+     arrival. */
+  it("an empty query lists every contact, queried or not", () => {
+    const list = [agent("a1", { name: "Zed" }), agent("a2", { name: "Amy" })];
+    expect(dropdownResults(list, "").map((a) => a.name)).toEqual(["Amy", "Zed"]);
+    expect(dropdownResults(list, "   ").length).toBe(2);
+  });
+
+  /* ⚠️ ALPHABETICAL, AND DELIBERATELY NEUTRAL. Newest-first is a recommendation about which
+     contact matters, and rating-descending is the same recommendation wearing a search's clothes
+     — which is why the stars went. */
+  it("ordering is alphabetical, not by date added and not by rating", () => {
+    const list = [
+      agent("a1", { name: "Zed Ash", dateAdded: "2026-08-01", starRating: 5 }),
+      agent("a2", { name: "Amy Bell", dateAdded: "2026-01-01", starRating: 1 }),
+    ];
+    expect(dropdownResults(list, "").map((a) => a.name), "newest-first or rating-first came back")
+      .toEqual(["Amy Bell", "Zed Ash"]);
+  });
+
+  /* ⚠️ FOCUS IS NOT INTENT. The field takes focus on mount so typing works immediately, but
+     programmatic focus is the APP's act — opening on it is exactly what put an expanded empty
+     popup under the field on arrival. */
+  it("focus does not open it — there is no onFocus handler at all", () => {
+    expect(picker).toContain("const [open, setOpen] = useState(false);");
+    expect(picker, "the field must not open on focus").not.toContain("onFocus={() => setOpen");
+    expect(picker, "and must not open on mount").not.toMatch(/useState\(true\)/);
+    expect(picker, "focus on mount is still wanted, for typing").toContain("autoFocus");
+  });
+
+  it("three explicit acts open it: a click, ↓, and a keystroke", () => {
+    expect(picker).toContain("onClick={() => setOpen(true)}");
+    expect(picker).toContain('if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setDhl(0); return; }');
+    expect(picker).toContain("setOpen(v.trim().length > 0);");
+  });
+
+  it("and four things close it: Esc, an outside click, selection, clearing to empty", () => {
+    expect(picker).toContain('if (e.key === "Escape" && open) { e.preventDefault(); setOpen(false); setDhl(-1); return; }');
+    expect(picker).toContain("if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);");
+    expect(picker).toContain("const choose = (a: Agent) => { setHl(-1); setDhl(-1); setOpen(false); onSelect(a); };");
+    expect(picker, "an empty field is the writer withdrawing the question")
+      .toContain("setOpen(v.trim().length > 0);");
   });
 
   it("matching reads name and agency, and nothing else", () => {
@@ -117,10 +157,17 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
   /* The whole point of the change: no overlay, so no state in which results are hidden. */
   it("the picker mounts no popup and holds no open/close state", () => {
     const code = picker.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
-    for (const banned of ["setOpen", "sa-ag-menu", "menuStyle", "useFixedMenu"]) {
+    /* ⚠️ AMENDED: `setOpen` is now the picker's OWN open state, and having one is the point — a
+       dropdown you can browse needs a state that a click and ↓ can raise. What must stay gone is
+       the retired combobox's machinery, and the rule it broke: opening on FOCUS. */
+    for (const banned of ["sa-ag-menu", "menuStyle", "useFixedMenu"]) {
       expect(code, `${banned} would reintroduce the overlay`).not.toContain(banned);
     }
-    expect(code, "the grid is always rendered, never toggled").toContain('role="listbox"');
+    /* The grid's cards legitimately use onFocus to track the highlight; what must never exist is
+       a focus handler that OPENS the dropdown — that is the arrival fault, precisely. */
+    expect(code, "opening on focus is what put an empty popup on the page at arrival")
+      .not.toMatch(/onFocus=\{[^}]*setOpen/);
+    expect(code, "the standing grid is always rendered, never toggled").toContain('role="listbox"');
   });
 
   /* ⚠️ EXACTLY ONE SEARCH INPUT ON STAGE 1. The pane used to mount the whole of
@@ -145,7 +192,7 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
      it was closed, and the second click would appear to do nothing. */
   it("both entry points open the same component through one state", () => {
     expect(picker).toContain("const [adding, setAdding] = useState(false);");
-    expect(picker).toContain("const onAddAgent = () => { setDismissed(true); setAdding(true); };");
+    expect(picker).toContain("const onAddAgent = () => { setOpen(false); setAdding(true); };");
     expect(picker.match(/onClick=\{onAddAgent\}/g)?.length ?? 0,
       "the field link, the panel action and the cold start all share it").toBeGreaterThanOrEqual(3);
     expect(picker).toContain("<AgentQuickAdd");
@@ -219,10 +266,13 @@ describe("the keyboard model lives on the grid", () => {
   /* ⚠️ ↓ MEANS TWO DIFFERENT THINGS, AND WHICH DEPENDS ON WHETHER THE DROPDOWN IS OPEN. Open, it
      walks the results the writer is looking at; closed, it enters the standing grid. Sending it to
      the grid while a list of matches is on screen would step past the answer. */
-  it("↓ walks the dropdown when open, and enters the grid when closed", () => {
+  /* ⚠️ ↓ MEANS TWO DIFFERENT THINGS, AND WHICH DEPENDS ON WHETHER THE DROPDOWN IS OPEN. Open, it
+     walks the results the writer is looking at. CLOSED, it now OPENS the list — a request to see
+     the options, which jumping past into the standing grid would skip. */
+  it("↓ walks the dropdown when open, and opens it when closed", () => {
     expect(picker).toContain("if (open) {");
     expect(picker).toContain('if (e.key === "ArrowDown") { e.preventDefault(); setDhl((h) => Math.min(h + 1, hits.length - 1)); return; }');
-    expect(picker).toContain('if (e.key === "ArrowDown" && res.cards.length > 0)');
+    expect(picker).toContain('if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true); setDhl(0); return; }');
   });
 
   /* Esc and an outside click must close it while the TEXT stays in the field — without a
@@ -230,12 +280,11 @@ describe("the keyboard model lives on the grid", () => {
   it("Esc and an outside click close it; typing re-opens it", () => {
     expect(picker).toContain('if (e.key === "Escape" && open)');
     expect(picker).toContain('document.addEventListener("pointerdown", onDown)');
-    expect(picker).toContain("const open = query.trim().length > 0 && !dismissed;");
-    expect(picker).toContain("setDismissed(false)");
+    expect(picker).toContain("const [open, setOpen] = useState(false);");
   });
 
-  it("↓ enters the grid; Enter selects; Esc returns to the field", () => {
-    expect(picker).toContain('if (e.key === "ArrowDown" && res.cards.length > 0)');
+  it("inside the grid: arrows move, Enter selects, Esc returns to the field", () => {
+    expect(picker).toContain("const onGridKey = (e: React.KeyboardEvent) => {");
     expect(picker).toContain('if (e.key === "Escape")');
     expect(picker).toContain("fieldRef.current?.focus()");
     expect(picker).toContain("choose(res.cards[active])");
