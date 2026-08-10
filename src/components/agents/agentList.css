@@ -124,7 +124,11 @@
    elements, two jobs — merging them would tie the cap to the padding.
    v4 P1: the two numbers now come from the SHARED column tokens (pageHeader.css) so the Queries
    header can sit in the same column. The token values ARE these values — this is a no-op. */
-.aglist .agl-page { padding: 28px var(--sa-col-gut) 48px; }
+/* ⚠️ 14px, NOT 28px — the header sits inside this padding, so the top value is the gap between
+   the window's edge and the header itself. At 28 it read as a band of empty paper above a header
+   that is already generous; halved, the header sits where the window starts. The SIDE and BOTTOM
+   values are untouched — they gutter the CONTENT, which is a different job. */
+.aglist .agl-page { padding: 14px var(--sa-col-gut) 48px; }
 .aglist .agl-inner { max-width: var(--sa-col-max); margin: 0 auto; }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
@@ -324,11 +328,11 @@
 .aglist .agl-empty .small { font-size: 13px; font-weight: 300; }
 
 @media (max-width: 900px) {
-  .aglist .agl-page { padding: 24px 28px 44px; }
+  .aglist .agl-page { padding: 12px 28px 44px; }
 }
 /* the 640px hand-rolled breakpoint migrated to md (Mobile Pass 1 breakpoint law) */
 @media (max-width: 767.98px) {
-  .aglist .agl-page { padding: 18px 16px 40px; }
+  .aglist .agl-page { padding: 9px 16px 40px; }
   .aglist .agl-h1 { font-size: 38px; }
   .aglist .agl-search { min-width: 0; width: 100%; }
 }

@@ -43,8 +43,13 @@ describe("agent list · the page column", () => {
   it("padding rides the page, the CAP rides the inner column — two elements, two jobs", () => {
     expect(
       block(".aglist .agl-page"),
-      "the page padding changed — 28px top / the shared gutter / 48px bottom is the mockup's breathing room; merging it with the cap would tie the two together",
-    ).toContain("padding: 28px var(--sa-col-gut) 48px");
+      /* ⚠️ THE TOP IS 14px, HALVED FROM 28 (Contact List pass). The workspace header now sits
+         INSIDE this padding, so the top value stopped being breathing room above the content and
+         became a band of empty paper above a header that is already generous. The gutter and the
+         48px bottom are untouched — they gutter the CONTENT, which is a different job, and
+         merging them with the cap would still tie the two together. */
+      "the page padding changed — 14px top / the shared gutter / 48px bottom; merging it with the cap would tie the two together",
+    ).toContain("padding: 14px var(--sa-col-gut) 48px");
     expect(
       block(".aglist .agl-inner"),
       "the content cap left the inner column — without it the grid stretches the full width of an ultrawide monitor instead of pooling the surplus as margin",
