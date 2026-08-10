@@ -19,6 +19,7 @@ import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, Us
 import { StatusDot } from "../StatusDot";
 import { goalBlockGap, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
+import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
 
@@ -377,7 +378,9 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>}
           </button>
         </div>
-        <div className="os-abody" id="os-actv-body">
+        {/* ⚠️ THE SHARED FADE (polish P2) — conditional by construction, so a short feed shows
+            none and the end of a long one is honestly the end. See the tasks card for the rule. */}
+        <EdgeFadeScroll fade="#fffdf9" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body">
           {rows.length === 0 ? (
             <div className="os-aempty">
               <span className="os-aempty-thread" aria-hidden="true" />
@@ -413,7 +416,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               </React.Fragment>
             ))
           )}
-        </div>
+        </EdgeFadeScroll>
         <div className="os-esc">Click the arrows, press Escape, or click away to close</div>
         {/* §6: the footer is a quiet caption ONLY — no link; the arrows are the sole route in */}
         <div className="os-afoot"><span className="os-ac">Last 30 days</span></div>
