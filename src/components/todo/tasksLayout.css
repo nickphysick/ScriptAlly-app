@@ -15,11 +15,20 @@
    they came to share would have resolved on source order alone. They never overlapped, which is
    exactly how such a pair survives until the day it does. */
 .tpl-head { width: 100%; flex: 0 0 auto; }
-.tpl-title {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 30px; font-weight: 700; color: #2b2118; margin: 0;
+/* ⚠️ `.tpl-title` AND `.tpl-sub` ARE DELETED (amendment 7). The plate carries the title and the
+   description now; two orphaned rules left behind are a specificity contest waiting to happen.
+   ⚠️ THE PLATE DOES NOT CONDENSE ON THESE PAGES, and that is correct rather than broken —
+   `.tpl-head` never scrolls (`flex: 0 0 auto`) and `.tpl-zone` below it is the only scroller, so
+   the plate is never covering anything that has to get past it.
+   ⚠️ `.tpl-eyebrow` GAINS A RULE FOR THE FIRST TIME — it had NONE. The class was rendered and never
+   styled, so the To-do list's date line has been showing as plain body text all along. It rides the
+   tool row now (plate = identity, tool row = tallies and context) in the same mono treatment the
+   other pages' tallies use; `margin-right: auto` holds the page's controls out at the right. */
+.tpl-eyebrow {
+  margin-right: auto; white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.11em; text-transform: uppercase; color: #8a7a6c;
 }
-.tpl-sub { font-size: 13px; color: #8a7a6c; margin: 5px 0 0; }
 
 /* the tool row — margin/rule per the ref (.tools): the hairline is ITS bottom edge, so the
    header ends exactly where the columns begin. */
