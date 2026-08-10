@@ -26,14 +26,36 @@
   color: #b3a394;
 }
 
-/* ⚠️ THE DATE IS THE HEADLINE, not a caption — it is the one thing you need before you decide. */
+/* ⚠️ TWO FACTS, TWO REGISTERS, ONE LINE (Fix 4 revision). Playfair says how LONG, mono says WHICH
+   DAY. Twelve stops are what made the duration worth stating: at five stops "3 weeks" was nearly
+   guessable from the knob, at twelve it is not. Baselined by `align-items: baseline` — safe here
+   because BOTH children are text; the moment an image joins this row it must become `center`
+   (an image has no baseline and aligns on its bottom margin edge — the pagebar's 7.6px lesson). */
+.snz-read {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0 18px;
+}
+
 .snz-v {
   font-family: "Playfair Display", Georgia, serif;
   font-size: 19px;
   font-weight: 700;
   color: #2b2118;
-  margin: 8px 0 18px;
 }
+
+.snz-date {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: #a0958a;
+  white-space: nowrap;
+}
+
+/* "Not at all" has no date beside it, so it carries the spacing the readout row would have given */
+.snz-vsolo { margin: 8px 0 0; }
 
 .snz-track {
   position: relative;
@@ -63,6 +85,27 @@
 }
 
 .snz-stop.past { background: #d3a894; }
+
+/* ⚠️ A STOP PAST THE CEILING STAYS DRAWN, FAINTLY. The scale must be the same scale on every
+   card — an offer's track that simply ended at 9% would read as "there is nothing past here"
+   rather than "you may not go past here", which is the whole point of hatching instead of
+   shortening. */
+.snz-stop.out { background: #ece5d9; }
+
+/* ⚠️ THE HATCH IS THE CEILING, DRAWN — and it takes NO POINTER EVENTS. The operable range sits
+   beneath it, and a click on the reachable part of the track must still reach it; an overlay
+   that swallowed clicks would make the dial feel broken at exactly the moment a limit applies.
+   The 45° rule is the app's own closed-door device (the agent card's hatched band), reused here
+   for the same meaning: this is shut, and something else decided it. */
+.snz-bar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 0 3px 3px 0;
+  background: repeating-linear-gradient(-45deg, rgba(46, 39, 35, 0.14) 0 3px, transparent 3px 7px);
+  pointer-events: none;
+}
 
 .snz-knob {
   position: absolute;
@@ -115,22 +158,43 @@
   box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.22), 0 2px 7px rgba(58, 28, 20, 0.22);
 }
 
+/* ⚠️ EACH MARK SITS OVER THE STOP IT NAMES — absolutely, not spaced evenly. The twelve stops are
+   not evenly spaced in DAYS (1D is index 0, 1W is 6, 1M is 9, 3M is 11), so an evenly-spaced row
+   would put "1M" at a third of the track while the one-month stop sits at four fifths. A ruler
+   whose numbers are in the wrong places is worse than no ruler. (This is the one deliberate
+   departure from the ref, which draws them `space-between` — a static mockup's shortcut.) */
 .snz-ticks {
-  display: flex;
-  justify-content: space-between;
-  margin: 15px 4px 0;
+  position: relative;
+  height: 9px;
+  margin: 15px 6px 0;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 6px;
   letter-spacing: 0.09em;
   color: #b3a394;
 }
 
-.snz-ticks .on { color: #7c3a2a; font-weight: 600; }
+.snz-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
 
+/* the ends pull inside the track rather than hanging off it */
+.snz-ticks span:first-child { transform: none; }
+.snz-ticks span:last-child { transform: translateX(-100%); }
+
+.snz-ticks .on { color: #7c3a2a; font-weight: 600; }
+.snz-ticks .out { color: #ddd5c8; }
+
+/* ⚠️ THE BUTTON IS FULL WIDTH AND THE PICKER SITS UNDER IT (ref panel 2's `slbtn`). It carries a
+   resolved date now, so its width varies with the month's name — beside a flexing picker it would
+   have squeezed one of them at "Snooze until 10 October". Stacking also survives the inline menu's
+   258px, which is narrower than this popover. */
 .snz-foot {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   margin-top: 17px;
 }
 
@@ -149,7 +213,7 @@
 
 .snz-go:hover { background: #3a2a20; }
 
-.snz-pick { min-width: 0; flex: 1; }
+.snz-pick { min-width: 0; }
 
 .snz-cap {
   margin: 12px 0 0;

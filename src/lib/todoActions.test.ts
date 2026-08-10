@@ -18,8 +18,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   clampSnooze, snoozeCeilingDays, snoozeWhenLabel, snoozeVia, cardLane,
-  completionVia, isTickable, dockQueue,
-  SNOOZE_MAX_DAYS, OFFER_SNOOZE_MAX_DAYS,
+  completionVia, isTickable, dockQueue, snoozeDateLabel, stopTitle,
+  SNOOZE_MAX_DAYS, OFFER_SNOOZE_MAX_DAYS, SNOOZE_STOPS,
 } from "./todoActions";
 import { BoardCard } from "./todoBoard";
 
@@ -48,9 +48,12 @@ describe("⚠️ THE SNOOZE CEILING — one clamp, and every path reaches it", (
   it("a deadline never snoozes past the deadline itself", () => {
     /* Snoozing an expiring exclusive past its expiry is the app helping you miss it. */
     const c = card({ taskType: "exclusive_expiring" });
-    /* ⚠️ 4 days is NOT a stop, so it is named as itself. The first draft rounded it up to
-       "next week" — a clamp that wrote 4 days and announced 7. */
-    expect(clampSnooze(c, 30, "in a month", 4)).toEqual({ days: 4, when: "in 4 days", clamped: true });
+    /* ⚠️ 10 days is NOT a stop, so it is named as itself. The first draft rounded a between-stops
+       clamp UP to the next tier — a clamp that wrote 4 days and announced 7. (This case used 4
+       days until the scale widened to twelve stops and 4 became one of them; the property under
+       test is "a value between stops is stated, never rounded", so it needed a value that is
+       still between stops.) */
+    expect(clampSnooze(c, 30, "in a month", 10)).toEqual({ days: 10, when: "in 10 days", clamped: true });
     // an exact stop keeps the stop's own words
     expect(clampSnooze(c, 30, "in a month", 7).when).toBe("next week");
     // a deadline already past clamps to nothing at all — the caller reads 0 as "cannot snooze"
@@ -67,12 +70,63 @@ describe("⚠️ THE SNOOZE CEILING — one clamp, and every path reaches it", (
 
   it("the stop labels read as English at every tier", () => {
     expect(snoozeWhenLabel(1)).toBe("tomorrow");
-    expect(snoozeWhenLabel(3)).toBe("in a few days");
-    expect(snoozeWhenLabel(4)).toBe("in 4 days"); // between stops — stated, never rounded
+    expect(snoozeWhenLabel(3)).toBe("in three days");
     expect(snoozeWhenLabel(7)).toBe("next week");
     expect(snoozeWhenLabel(14)).toBe("in two weeks");
     expect(snoozeWhenLabel(30)).toBe("in a month");
+    expect(snoozeWhenLabel(90)).toBe("in three months");
+    expect(snoozeWhenLabel(10)).toBe("in 10 days"); // between stops — stated, never rounded
     expect(snoozeWhenLabel(0)).toBe("not at all");
+  });
+
+  /**
+   * ⚠️ TWELVE STOPS (Fix 4 revision; ref todo-weight-slider-v1.html). Fine where a day is a real
+   * difference, coarse where nobody is choosing between the 61st and the 62nd.
+   */
+  it("the scale is 1–6 days, then 1–3 weeks, then 1–3 months — twelve, ascending, no repeats", () => {
+    expect(SNOOZE_STOPS.map((s) => s.days)).toEqual([1, 2, 3, 4, 5, 6, 7, 14, 21, 30, 60, 90]);
+    /* every stop carries BOTH registers, or one surface names it and another cannot */
+    for (const s of SNOOZE_STOPS) {
+      expect(s.label.length, `${s.days} has no prose`).toBeGreaterThan(0);
+      expect(s.tick.length, `${s.days} has no tick`).toBeGreaterThan(0);
+    }
+  });
+
+  it("⚠️ THE PRINTED AXIS IS FOUR MARKS, AND EACH SITS ON A REAL STOP", () => {
+    /* Twelve labels under one track collide into a smear. The marks live ON the table so they
+       cannot drift off the stops they name — and `Shift`+arrow travels these same four, so the
+       axis the reader sees is the axis the keyboard uses. */
+    const axis = SNOOZE_STOPS.filter((s) => s.axis);
+    expect(axis.map((s) => s.axis)).toEqual(["1D", "1W", "1M", "3M"]);
+    expect(axis.map((s) => s.days)).toEqual([1, 7, 30, 90]);
+    /* the last stop is a mark, so Shift+→ always has somewhere to land */
+    expect(SNOOZE_STOPS[SNOOZE_STOPS.length - 1].axis).toBe("3M");
+  });
+
+  it("`stopTitle` lowers the tick for the dial's Playfair line — one fact, two registers", () => {
+    expect(stopTitle("TOMORROW")).toBe("Tomorrow");
+    expect(stopTitle("3 WEEKS")).toBe("3 weeks");
+    expect(stopTitle("1 MONTH")).toBe("1 month");
+  });
+
+  /**
+   * ⚠️ THE RECEIPT AND THE BUTTON STATE A DATE, NOT A TIER — and the bug this replaces was live.
+   * The page flashed `days === 1 ? "tomorrow" : "next week"`, a BINARY label over what was already
+   * a five-stop scale: snoozing something for a month announced "Snoozed until next week". At
+   * twelve stops it would have been wrong nine times out of twelve.
+   */
+  it("`snoozeDateLabel`: a weekday at one day, a date beyond it", () => {
+    const mon = new Date(2026, 7, 10); // Monday 10 August 2026
+    expect(snoozeDateLabel(1, mon)).toBe("Tuesday");
+    expect(snoozeDateLabel(7, mon)).toBe("17 August");
+    expect(snoozeDateLabel(21, mon)).toBe("31 August");
+    expect(snoozeDateLabel(90, mon)).toBe("8 November");
+  });
+
+  it("…and the page's receipts all go through it — no binary tier label survives", () => {
+    expect(page).toContain("flash(`Snoozed until ${snoozeDateLabel(days)}`,");
+    expect(page).not.toContain('days === 1 ? "tomorrow" : "next week"');
+    expect(page).not.toContain("flash(`Snoozed until next week`,");
   });
 
   it("⚠️ THE PAGE CALLS THE CLAMP — it no longer carries the rule itself", () => {

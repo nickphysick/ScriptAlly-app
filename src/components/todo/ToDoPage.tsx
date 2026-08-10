@@ -78,7 +78,7 @@ import { TagDef } from "../../types";
 import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
-import { clampSnooze, cardLane, snoozeVia, completionVia } from "../../lib/todoActions";
+import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
 import { focusesSearch, isTypingTarget } from "../../lib/taskShortcuts";
 import { activityEventLabel } from "../../lib/activityEvent";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
@@ -511,7 +511,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });
       const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
       setOverlay(c.key, { kind: "dismissed", lane, text, undo });
-      flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
     if (snoozeVia(c) !== "dismiss-task") return;
@@ -519,14 +519,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const key = flagKeyForTask(c.taskType, c.relatedRecordId);
     const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
     setOverlay(c.key, { kind: "dismissed", lane, text, undo });
-    flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
   }
   function snoozeGroup(g: HkGroup, days: number, when: string) {
     g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", days));
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
     const gkey = `group-${g.rule}`;
     setOverlay(gkey, { kind: "dismissed", lane: "hk", text: `Snoozed — back ${when}.`, undo });
-    flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(gkey); flash("Restored"); } });
+    flash(`Snoozed until ${snoozeDateLabel(days)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(gkey); flash("Restored"); } });
   }
   // the per-type hide — the SAME single suppression point Task settings drives (restorable there)
   function hideType(c: BoardCard, ruleKey: string) {
@@ -878,7 +878,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
     const key = `group-${g.rule}`;
     setOverlay(key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo });
-    flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
+    flash(`Snoozed until ${snoozeDateLabel(7)}`, { label: "Undo", fn: async () => { await undo(); clearOverlay(key); flash("Restored"); } });
   }
   function forkNeverThese(g: HkGroup) {
     g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL }));
@@ -903,7 +903,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
       const snoozeUndo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
       setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo: snoozeUndo });
-      flash(`Snoozed until next week`, { label: "Undo", fn: async () => { await snoozeUndo(); clearOverlay(c.key); flash("Restored"); } });
+      /* the same formatter every other receipt uses — "next week" was right for a fixed 7 days
+         and would still have been a second way of saying a date the app now states once */
+      flash(`Snoozed until ${snoozeDateLabel(7)}`, { label: "Undo", fn: async () => { await snoozeUndo(); clearOverlay(c.key); flash("Restored"); } });
     } else {
       upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
       setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about this query again.", undo });

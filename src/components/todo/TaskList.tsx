@@ -171,7 +171,16 @@ const SplitMenu: React.FC<{
     const b = el.getBoundingClientRect();
     const p = placeMenu(r, { w: b.width, h: b.height }, { w: window.innerWidth, h: window.innerHeight });
     setPos({ left: p.left, top: p.top });
-    el.focus({ preventScroll: true }); // the BOX, not an item — nothing is pre-focused
+    /* ⚠️ THE SLIDER TAKES FOCUS WHERE THERE IS ONE, AND THIS SUPERSEDES "NOTHING IS PRE-FOCUSED".
+       That rule was written when the menu was a column of VERBS, where a pre-focused item made
+       Enter fire something destructive-adjacent by accident. The snooze section is a control now:
+       it opens on tomorrow, Enter commits, and open-then-Enter is the commonest move on the page —
+       so the slider is focused deliberately, and the act it commits is reversible from its own
+       receipt, which is what makes a one-key commit honest. Where the dial is greyed there is
+       nothing to drive, so focus falls back to the BOX and Enter still does nothing. The child's
+       `autoFocus` lands in the commit phase, i.e. BEFORE this effect — so this must not take it
+       back, and the guard is what stops it. */
+    if (!sections.some((sec) => sec.dial?.enabled)) el.focus({ preventScroll: true });
   }, [anchor]);
 
   useEffect(() => {
@@ -219,7 +228,7 @@ const SplitMenu: React.FC<{
               of something pressable and then refuse. */}
           {sec.dial && (sec.dial.enabled ? (
             <div className="tdg-mdial">
-              <SnoozeDialBody card={card} onSnooze={onSnooze} />
+              <SnoozeDialBody card={card} onSnooze={onSnooze} autoFocus />
             </div>
           ) : (
             <div className="tbd-mi dim" role="menuitem" aria-disabled title={sec.dial.why}>

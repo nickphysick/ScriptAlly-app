@@ -57,19 +57,66 @@ export function snoozeCeilingDays(card: BoardCard, daysUntilDeadline?: number): 
 /**
  * The dial's stops, and the only day-counts that get a name of their own.
  *
- * ⚠️ TWO REGISTERS OF ONE FACT, PAIRED HERE ON PURPOSE (tasks-consolidation P4). `label` is the
- * PROSE the toast speaks ("Snoozed until next week"); `tick` is the terse form the dial prints
- * under its track, where four words would collide with their neighbours. They are declared on the
- * same row so a stop cannot gain one and lose the other — the alternative was a second table in
- * the component, which is how a tier ends up named two different things on two surfaces.
+ * ⚠️ TWELVE STOPS: FINE WHERE PRECISION MATTERS, COARSE WHERE IT DOES NOT (Fix 4 revision; ref
+ * design-refs/todo-weight-slider-v1.html). Five stops — 1, 3, 7, 14, 30 — made the writer round
+ * their own intention to whichever was nearest, and the day they wanted was usually neither. Every
+ * day of the first week is reachable because that is the range where a day is a real difference
+ * ("after the weekend", "the day their reply is due"); past a month nobody is choosing between the
+ * 61st and the 62nd, so the scale steps in months.
+ *
+ * ⚠️ THREE REGISTERS OF ONE FACT, AND ONLY ONE OF THEM IS STORED PER ROW BEYOND THE FIRST TWO.
+ * `label` is the PROSE the page speaks ("back next week"); `tick` is the terse form, spoken to
+ * assistive technology and lower-cased for the dial's Playfair title by `stopTitle`. They are
+ * declared on the same row so a stop cannot gain one and lose the other — the alternative was a
+ * second table in the component, which is how a tier ends up named two different things on two
+ * surfaces.
+ *
+ * ⚠️ `axis` MARKS THE PRINTED RULER, and it is deliberately sparse. Twelve labels under a 246px
+ * track collide into a grey smear; four — 1D · 1W · 1M · 3M — read as a scale. It lives on the
+ * table rather than in a list of its own so the marks cannot drift off the stops they name, and
+ * `Shift`+arrow jumps between exactly these, so the axis you can see is the axis the keyboard
+ * travels.
  */
-export const SNOOZE_STOPS: { days: number; label: string; tick: string }[] = [
-  { days: 1, label: "tomorrow", tick: "TOMORROW" },
-  { days: 3, label: "in a few days", tick: "3 DAYS" },
-  { days: 7, label: "next week", tick: "1 WEEK" },
+export const SNOOZE_STOPS: { days: number; label: string; tick: string; axis?: string }[] = [
+  { days: 1, label: "tomorrow", tick: "TOMORROW", axis: "1D" },
+  { days: 2, label: "in two days", tick: "2 DAYS" },
+  { days: 3, label: "in three days", tick: "3 DAYS" },
+  { days: 4, label: "in four days", tick: "4 DAYS" },
+  { days: 5, label: "in five days", tick: "5 DAYS" },
+  { days: 6, label: "in six days", tick: "6 DAYS" },
+  { days: 7, label: "next week", tick: "1 WEEK", axis: "1W" },
   { days: 14, label: "in two weeks", tick: "2 WEEKS" },
-  { days: 30, label: "in a month", tick: "1 MONTH" },
+  { days: 21, label: "in three weeks", tick: "3 WEEKS" },
+  { days: 30, label: "in a month", tick: "1 MONTH", axis: "1M" },
+  { days: 60, label: "in two months", tick: "2 MONTHS" },
+  { days: 90, label: "in three months", tick: "3 MONTHS", axis: "3M" },
 ];
+
+/**
+ * The dial's Playfair title, DERIVED from the tick rather than stored beside it — "3 WEEKS" reads
+ * as a system tag and "3 weeks" reads as an answer, but they are the same fact and a fourth column
+ * would be a fourth chance to disagree.
+ */
+export function stopTitle(tick: string): string {
+  return tick.charAt(0) + tick.slice(1).toLowerCase();
+}
+
+/**
+ * ⚠️ THE RESOLVED DATE, WHICH IS WHAT A RECEIPT AND A COMMIT BUTTON MUST BOTH SAY. "Snoozed until
+ * next week" is a promise about a date the writer then has to work out; "Snoozed until 31 August"
+ * is the answer. One formatter, so the button they press and the receipt they read cannot state
+ * different days.
+ *
+ * ⚠️ AT ONE DAY IT IS A WEEKDAY. "Tomorrow" is a relative word that stops being true the moment
+ * the toast is still on screen at midnight, and "11 August" makes you count; "Tuesday" is legible
+ * and exact at that range. Past a week a weekday would be ambiguous, so the date takes over.
+ */
+export function snoozeDateLabel(days: number, now = new Date()): string {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
+  return days === 1
+    ? d.toLocaleDateString("en-GB", { weekday: "long" })
+    : d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+}
 
 /**
  * ⚠️ WHICH STOPS THE DIAL MAY REACH — the ceiling applied to the TIERS, so the knob physically

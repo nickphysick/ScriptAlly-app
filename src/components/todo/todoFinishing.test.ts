@@ -43,8 +43,14 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
       expect(toastCalls).not.toContain(gone);
     }
     expect(page).toContain("flash(`Done — “${c.title}”`,");
-    expect(page).toContain('flash(`Snoozed until ${days === 1 ? "tomorrow" : "next week"}`,');
-    expect(page).toContain("flash(`Snoozed until next week`,"); // the fixed 7-day paths
+    /* ⚠️ THE RECEIPT NAMES THE DATE, NOT THE TIER (Fix 4 revision). It read
+       `days === 1 ? "tomorrow" : "next week"` — a BINARY label over a five-stop scale, so a
+       month's snooze announced "next week". The fixed 7-day path had its own hardcoded copy of
+       the same sentence. Both go through one formatter now, so what the button says, what the
+       receipt says and what was written cannot name three different days. */
+    expect(page).toContain("flash(`Snoozed until ${snoozeDateLabel(days)}`,");
+    expect(page).toContain("flash(`Snoozed until ${snoozeDateLabel(7)}`,"); // the fixed 7-day path
+    expect(page).not.toContain('days === 1 ? "tomorrow" : "next week"');
     expect(page).toContain("flash(`Hidden — ${g.meta.label}`,");
     expect(page).toContain("flash(`Hidden — ${HK_RULES[g.rule].label}`,");
     expect(page).toContain("flash(`Hidden — “${c.title}”`,"); // item-level mutes name the item

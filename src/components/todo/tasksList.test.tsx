@@ -24,9 +24,9 @@ import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow, TASK_GROUP_
 import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, splitWeight, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { TodoColumnId } from "../../lib/todoColumns";
-import { SNOOZE_STOPS, reachableStops } from "../../lib/todoActions";
+import { SNOOZE_STOPS, reachableStops, snoozeDateLabel } from "../../lib/todoActions";
 import { focusesSearch, isTypingTarget, ShortcutKey } from "../../lib/taskShortcuts";
-import { dialDateLine } from "./SnoozeDial";
+import { dialDateLine, dialDateShort } from "./SnoozeDial";
 import { TaskList, groupColumn } from "./TaskList";
 
 const here = __dirname;
@@ -360,9 +360,25 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
     expect(mine.flatMap((x) => x.items).find((i) => i.label === "Edit last entry")!.enabled).toBe(true);
   });
 
-  it("⚠️ NOTHING IS PRE-FOCUSED — Enter straight after opening does nothing", () => {
-    expect(list).toContain("el.focus({ preventScroll: true }); // the BOX, not an item");
+  /**
+   * ⚠️ "NOTHING IS PRE-FOCUSED" IS SUPERSEDED, DELIBERATELY — and it is restated rather than
+   * deleted so the change reads as a decision.
+   *
+   * That rule was written when this menu was a column of VERBS, where a pre-focused item meant
+   * Enter could fire something a slip away from Dismiss. The snooze section is a CONTROL now: it
+   * opens on tomorrow, Enter commits, and open-then-Enter is the commonest move on the page. What
+   * makes a one-key commit honest is that it is reversible from its own receipt — which it is.
+   *
+   * Where the dial is greyed there is nothing to drive, so focus falls back to the box and Enter
+   * still does nothing. No verb is ever pre-focused, in either case.
+   */
+  it("⚠️ THE SLIDER TAKES FOCUS WHERE THERE IS ONE — and no VERB ever does", () => {
+    expect(list).toContain("if (!sections.some((sec) => sec.dial?.enabled)) el.focus({ preventScroll: true });");
     expect(list).not.toContain("items[0]?.focus()");
+    /* the child's autoFocus lands in the commit phase, BEFORE the parent's layout effect — so the
+       guard is what stops the box taking focus straight back off the slider */
+    expect(list).toContain("autoFocus />");
+    expect(dialSrc).toContain("autoFocus={autoFocus}");
   });
 
   /* ⚠️ THE NUMBER KEYS ARE INERT FROM HERE, BY CONSTRUCTION — and this case is written down so
@@ -398,10 +414,10 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
  */
 describe("⚠️ ONE DIAL, TWO SURFACES — the menu wears the control, it does not copy it", () => {
   it("the menu renders `SnoozeDialBody`, and the popover renders the very same component", () => {
-    expect(list).toContain("<SnoozeDialBody card={card} onSnooze={onSnooze} />");
+    expect(list).toContain("<SnoozeDialBody card={card} onSnooze={onSnooze} autoFocus />");
     expect(dialSrc).toContain("export const SnoozeDialBody");
     /* the popover is now a wrapper around it — portal, placement and closers, nothing more */
-    expect(dialSrc).toContain("<SnoozeDialBody card={card} daysUntilDeadline={daysUntilDeadline} onSnooze={onSnooze} />");
+    expect(dialSrc).toContain("<SnoozeDialBody card={card} daysUntilDeadline={daysUntilDeadline} onSnooze={onSnooze} autoFocus />");
     /* …and the body itself owns no popover machinery, or the inline copy would fight the menu's */
     const body = dialSrc.slice(dialSrc.indexOf("export const SnoozeDialBody"), dialSrc.indexOf("export const SnoozeDial:"));
     expect(body).not.toContain("createPortal");
@@ -735,8 +751,96 @@ describe("⚠️ THE CEILING IS THE TRACK'S OWN LENGTH — the knob cannot reach
   });
 
   it("a deadline stops at the deadline; every tier below it survives", () => {
-    expect(reachableStops(card({}), 10).map((s) => s.days)).toEqual([1, 3, 7]);
+    expect(reachableStops(card({}), 10).map((s) => s.days)).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect(reachableStops(card({}), 0)).toEqual([]);   // already past — nothing honest to offer
+  });
+
+  /**
+   * ⚠️ THE TRACK IS THE WHOLE SCALE AND THE HATCH IS THE CEILING (Fix 4 revision, Phase 3).
+   *
+   * The dial used to render ONLY the reachable stops, so a shortened track was the sole sign a
+   * ceiling existed — and a track that quietly ends early reads as "there is nothing past here"
+   * rather than "you may not go past here". Those are different sentences, and only one of them
+   * is true. `reachableStops` still decides what may be WRITTEN; the hatch is presentation over
+   * that same answer.
+   */
+  it("the full twelve are drawn, and `reachableStops` decides only how far the knob goes", () => {
+    /* ⚠️ ANCHOR BEFORE YOU SLICE — and this case caught itself doing the opposite. It first read
+       `dialSrc.toContain("SNOOZE_STOPS.map")` and PASSED with the track neutered back to the
+       pre-fix `reach.map`, because the AXIS block a few lines below walks the same table and the
+       whole-file search found that instead. Two blocks, two maps; the assertion has to say which
+       one it means. */
+    const a = dialSrc.indexOf('<div className="snz-track">');
+    const b = dialSrc.indexOf('<div className="snz-ticks">');
+    expect(a, "the track block must exist").toBeGreaterThan(-1);
+    expect(b, "the ticks block must follow it").toBeGreaterThan(a);
+    const track = dialSrc.slice(a, b);
+
+    expect(track).toContain("SNOOZE_STOPS.map((s, n) =>");     // the track walks the WHOLE scale
+    expect(track).not.toContain("reach.map(");                 // …never the reachable subset
+    expect(dialSrc).toContain("const maxI = reach.length - 1");// and the reach walks the ceiling
+    expect(track).toContain("max={maxI}");                     // the knob physically stops there
+    /* the stop past the ceiling stays drawn, faintly — the scale is the same scale on every card */
+    expect(track).toContain('${n > maxI ? " out" : ""}');
+    expect(rule2(".snz-stop.out")).toContain("background:");
+  });
+
+  it("⚠️ THE HATCH TAKES NO POINTER EVENTS — the operable range sits beneath it", () => {
+    /* An overlay that swallowed clicks would make the dial feel broken at exactly the moment a
+       limit applies: the reachable part of the track must still take a click. */
+    const bar = rule2(".snz-bar");
+    expect(bar).toContain("repeating-linear-gradient(-45deg");
+    expect(bar).toContain("pointer-events: none");
+    expect(bar).toContain("right: 0");
+  });
+
+  it("⚠️ AND THE CLAMP IS STILL CALLED ON THE WAY OUT, though the knob should never reach it", () => {
+    /* A guard you rely on being unnecessary is a guard you have stopped having. */
+    expect(dialSrc).toContain("clampSnooze(card, days,");
+  });
+});
+
+describe("⚠️ THE DIAL SAYS TWO THINGS, AND THE DATE IS ONE OF THEM EVERYWHERE IT MATTERS", () => {
+  it("Playfair says how LONG, mono says WHICH DAY — two facts, not one twice", () => {
+    /* The readout used to be the spelled date alone. At five stops the duration was nearly
+       guessable from the knob; at twelve it is not, so it is stated — and printing the same date
+       in two fonts would have said one fact twice and left the other unsaid. */
+    expect(dialSrc).toContain('<span className="snz-v">{stopTitle(cur.tick)}</span>');
+    expect(dialSrc).toContain('<span className="snz-date">{dialDateShort(cur.days)}</span>');
+    expect(dialDateShort(1, new Date(2026, 7, 10))).toBe("TUE 11 AUG");
+    /* the spelled form survives where it is worth most: spoken to assistive technology */
+    expect(dialSrc).toContain("aria-valuetext={`${cur.tick} — ${dialDateLine(cur.days)}`}");
+  });
+
+  it("⚠️ THE BUTTON CARRIES THE DATE IT WILL WRITE — one formatter with the receipt", () => {
+    expect(dialSrc).toContain("Snooze until {snoozeDateLabel(cur.days)}");
+    expect(snoozeDateLabel(1, new Date(2026, 7, 10))).toBe("Tuesday");   // a weekday at one day
+    expect(snoozeDateLabel(21, new Date(2026, 7, 10))).toBe("31 August");
+  });
+
+  it("⚠️ IT OPENS ON TOMORROW — the commonest move stays open-then-Enter", () => {
+    expect(dialSrc).toContain("const [i, setI] = useState(0);");
+    expect(SNOOZE_STOPS[0].days).toBe(1);
+    expect(dialSrc).toContain('if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); commit(cur.days); return; }');
+  });
+
+  it("⚠️ SHIFT+ARROW TRAVELS THE PRINTED AXIS, and is clamped like every other movement", () => {
+    /* A jump whose destination the reader cannot see is a jump they have to learn; these four are
+       drawn on the ruler. Plain arrows stay the platform's — the range input already moves one
+       stop per press, and reimplementing that would be worse than free. */
+    expect(dialSrc).toContain("if (!e.shiftKey) return;                       // plain arrows are the platform's");
+    expect(dialSrc).toContain("setI(Math.max(0, Math.min(next, maxI)));");
+    for (const k of ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"]) expect(dialSrc).toContain(k);
+  });
+
+  it("the axis marks are positioned on their stops, not spaced evenly", () => {
+    /* 1D is index 0 of 12, 1W is 6, 1M is 9 — evenly spaced would put "1M" at a third of the
+       track while its stop sits at four fifths. A ruler with its numbers in the wrong places is
+       worse than no ruler. (The one deliberate departure from the ref, which draws them
+       `space-between` — a static mockup's shortcut.) */
+    expect(dialSrc).toContain('style={{ left: `${pctOf(n)}%` }}');
+    expect(rule2(".snz-ticks")).toContain("position: relative");
+    expect(rule2(".snz-ticks span")).toContain("position: absolute");
   });
 
   it("an ordinary card gets the whole ladder", () => {
