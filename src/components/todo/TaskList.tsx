@@ -31,12 +31,17 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronRight, ChevronDown, Check } from "lucide-react";
+import {
+  ChevronRight, ChevronDown, Check,
+  Send, Archive, Award, ListChecks, Undo2, RotateCcw, Clock, X, MoreHorizontal,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
-import { TaskGroup, TaskGroupId, groupSlice, showMoreLabel } from "../../lib/todoGroups";
+import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
 /* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
-import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, splitWeight } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, rowPrimaryIcon, PrimaryIcon } from "../../lib/taskRow";
+import { RowTip, useTipShow } from "./RowTip";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/todoMenu";
@@ -102,9 +107,14 @@ export const RING_MS = 600;
 
 /**
  * ⚠️ THE SKELETON IS THE REAL ROW, WEARING PLACEHOLDERS (sheet 3). It reuses `.tdg-row` and its
- * six tracks and the split's own 118px seat — so nothing shifts by a pixel when the data lands.
- * A bespoke skeleton with its own measurements would be a second layout to keep in step with the
- * first, and the day they drift is the day the page jumps on load.
+ * six tracks — so nothing shifts by a pixel when the data lands. A bespoke skeleton with its own
+ * measurements would be a second layout to keep in step with the first, and the day they drift is
+ * the day the page jumps on load.
+ *
+ * ⚠️ ITS ACTION CELL IS EMPTY, AND THAT IS THE FAITHFUL SHAPE. It held a placeholder for the split
+ * button; the cluster renders NOTHING at rest, so a placeholder there would show a shape the
+ * loaded row does not have. The 152px track still reserves the space, which is the only job that
+ * mattered.
  *
  * Two groups, as the ref says: in practice the first arrive and the rest follow without a spinner.
  */
@@ -115,7 +125,7 @@ const SkeletonRow: React.FC = () => (
     <div className="tdg-cc"><span className="tdg-sk pill" /></div>
     <div className="tdg-cc"><div className="tdg-jrny" /></div>
     <div className="tdg-cr"><span className="tdg-sk age" /></div>
-    <div className="tdg-acts"><span className="tdg-sk split" /></div>
+    <div className="tdg-acts" />
   </div>
 );
 
@@ -138,6 +148,69 @@ interface OpenMenu {
   openSub?: "snooze" | "resnooze" | "dismiss";
 }
 
+
+/**
+ * ⚠️ ONLY THE FIRST GLYPH VARIES — this map is the whole of that variation, and the KEY it reads
+ * comes from `rowPrimaryIcon`, which walks the same branches as `rowPrimaryLabel`. Glyph and word
+ * are two renderings of one answer, so a plane can never appear over a tooltip reading "Close".
+ *
+ * ⚠️ lucide-react, THE SET ALREADY IN THIS FILE — no new icon library, and no bare `.ti` class
+ * (that collides with Tabler). `Award` carries the offer because the deed is answering something
+ * that was won; it is the closest the existing set gets, and it is flagged in the report rather
+ * than treated as obvious.
+ */
+const PRIMARY_GLYPH: Record<PrimaryIcon, LucideIcon> = {
+  send: Send,          // record that you sent it — the ref's paper plane
+  close: Archive,      // file a query nobody answered
+  task: Check,         // your own item: the deed is finishing it
+  offer: Award,
+  sweep: ListChecks,   // a walk through a pile, not a single act
+  undo: Undo2,
+  return: RotateCcw,   // wake something you put away
+};
+
+/**
+ * ⚠️ ONE ICON, ITS TOOLTIP AND ITS DIM STATE, IN ONE PLACE. The alternative was four copies of the
+ * hover/focus wiring in the row, which is four chances for one of them to lose its keyboard path.
+ *
+ * ⚠️ AN INAPPLICABLE ICON IS `aria-disabled` ON A LIVE BUTTON, NOT `disabled`. A disabled button
+ * takes no hover and no focus — so its tooltip, which is the ONLY thing that explains why it is
+ * dim, would be unreachable by either pointer or keyboard. The click is refused in the handler
+ * instead, which keeps the explanation reachable and the refusal real.
+ */
+const RowIcon: React.FC<{
+  Glyph: LucideIcon;
+  label: string;
+  hint?: string;
+  enabled: boolean;
+  /** Shown in place of the deed when the icon is dim — it must say WHY, not repeat the name. */
+  why?: string;
+  kind?: "prim" | "dz";
+  expanded?: boolean;
+  onFire: (anchor: HTMLElement) => void;
+}> = ({ Glyph, label, hint, enabled, why, kind, expanded, onFire }) => {
+  const btn = useRef<HTMLButtonElement | null>(null);
+  const { shown, show, hide } = useTipShow();
+  return (
+    <button
+      ref={btn}
+      type="button"
+      className={`tdg-ic${kind ? " " + kind : ""}${enabled ? "" : " off"}`}
+      aria-label={enabled ? label : `${label} — ${why ?? "not available"}`}
+      aria-disabled={enabled ? undefined : true}
+      aria-haspopup={expanded === undefined ? undefined : "menu"}
+      aria-expanded={expanded}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+      onClick={(e) => { e.stopPropagation(); if (enabled) onFire(e.currentTarget); }}
+    >
+      <Glyph size={14} aria-hidden />
+      {shown && <RowTip label={enabled ? label : (why ?? label)} hint={enabled ? hint : undefined} anchor={btn.current} />}
+    </button>
+  );
+};
 
 /**
  * ⚠️ THE SPLIT'S MENU, AND WHERE DANGER SITS (Fix 4; ref todo-splitguard-v1.html §2). Safe verbs
@@ -447,13 +520,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
      right for the MENU (a card's permissions follow its state: live, asleep, finished) and useless
      for weight, which is exactly the distinction the columns threw away. So the group rides beside
      the column rather than being recovered from it. */
-  const renderRow = (c: BoardCard, column: TodoColumnId, group: TaskGroupId) => {
+  const renderRow = (c: BoardCard, column: TodoColumnId) => {
     const menuModel = cardMenu(c, column);
     const sweep = isSweepCard(c);
     const fig = sweep ? sweepFigure(c) : null;
     const pill = rowPill(c, column);
     const journey = rowJourney(c, column);
-    const weight = splitWeight(group);
 
     /* ⚠️ THE PRIMARY. THE MENU SAYS WHETHER, `taskRow` SAYS WHAT IT IS CALLED. Absent where the
        TICK IS THE ACT: a writer's own item is finished by ticking it, so a second verb beside the
@@ -552,46 +624,48 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           <span className="tdg-age">{sweep ? "—" : c.due}</span>
         </div>
 
+        {/* ⚠️ FOUR ICONS, FIXED WIDTH, NOTHING AT REST (ref todo-iconcluster-v2.html). The split
+            button is gone — its seam, its arm-before-press rule, its caret target and its two
+            weights were all solving a problem created by putting a compound control in a row
+            sixteen times over. An inapplicable icon DIMS IN PLACE and is inert; it is never
+            removed, so the column cannot reflow between one row and the next. */}
         <div className="tdg-acts" onClick={(e) => e.stopPropagation()}>
-          {primary && (
-            /* ⚠️ ONE CONTROL, TWO HALVES, AND THE SEAM IS DEFENDED FOUR WAYS (ref
-               todo-splitguard-v1.html). The wrapper takes NO click of its own: the 3px seam
-               belongs to neither half and must fire nothing, which it does by there being no
-               handler above the halves to fall through to. */
-            <span className={`tdg-split${weight === "outlined" ? " ghost" : ""}`}>
-              {/* ⚠️ COMMIT ON RELEASE, NOT ON PRESS. `onClick` fires only when press AND release
-                  land on the same element, so pressing the wrong half and sliding off does
-                  nothing — that is the browser's own guarantee rather than a handler of ours.
-                  ⚠️ AND THIS IS THE SINGLE TAB STOP: the caret is `tabIndex={-1}`, so Tab reaches
-                  the split once, Enter fires the primary, and ↓ opens the menu from here. The
-                  caret is never the only route in. */}
-              <button
-                type="button"
-                className="tdg-split-p"
-                onClick={() => fire(c, column, primary.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowDown") {
-                    e.preventDefault(); e.stopPropagation();
-                    openSplit(e.currentTarget.parentElement as HTMLElement, c, column);
-                  }
-                }}
-              >
-                {primary.label}
-              </button>
-              <span className="tdg-split-seam" aria-hidden />
-              <button
-                type="button"
-                tabIndex={-1}
-                className="tdg-split-c"
-                aria-haspopup="menu"
-                aria-expanded={split?.card.key === c.key}
-                aria-label={`More actions for ${c.title}`}
-                onClick={(e) => { e.stopPropagation(); openSplit(e.currentTarget.parentElement as HTMLElement, c, column); }}
-              >
-                <ChevronDown size={13} aria-hidden />
-              </button>
-            </span>
-          )}
+          <RowIcon
+            kind="prim"
+            Glyph={PRIMARY_GLYPH[rowPrimaryIcon(c, column)]}
+            label={primary ? primary.label : rowPrimaryLabel(c, column)}
+            hint="↵"
+            enabled={!!primary}
+            why="The tick is the act on this one."
+            onFire={() => primary && fire(c, column, primary.id)}
+          />
+          <RowIcon
+            Glyph={Clock}
+            label="Snooze"
+            hint="S"
+            enabled={offers(menuModel, "snooze-1")}
+            why="A finished task has nothing left to put off."
+            onFire={(el) => setDial({ card: c, anchor: el })}
+          />
+          <RowIcon
+            kind="dz"
+            Glyph={X}
+            label="Dismiss"
+            hint="X"
+            enabled={offers(menuModel, "dismiss-week")}
+            why={c.taskType === "offer_received"
+              ? "Offers cannot be dismissed — the reply-by date is not yours to move."
+              : "There is nothing here to dismiss."}
+            onFire={() => fire(c, column, "dismiss-week")}
+          />
+          <RowIcon
+            Glyph={MoreHorizontal}
+            label="More"
+            hint="."
+            enabled
+            expanded={split?.card.key === c.key}
+            onFire={(el) => openSplit(el, c, column)}
+          />
         </div>
       </div>
     );
@@ -628,7 +702,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
              menu closes because the act is done, exactly as picking a verb closes it. */
           onSnooze={(days, when) => { setSplit(null); onSnooze(split.card, days, when); }}
           onClose={(returnFocus) => {
-            if (returnFocus) (split.anchor.querySelector(".tdg-split-p") as HTMLElement | null)?.focus();
+            /* ⚠️ FOCUS RETURNS TO THE ICON THAT OPENED IT — the anchor IS that button now. It used
+               to hunt for `.tdg-split-p` INSIDE the anchor, because the anchor was the split's
+               wrapper and the primary half was where focus belonged; with the caret retired the
+               anchor is the control, and the old query would silently find nothing and drop focus
+               to the body. (Caught by the lock that says no `.tdg-split-` survives.) */
+            if (returnFocus) split.anchor.focus();
             setSplit(null);
           }}
         />
@@ -674,7 +753,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
               </button>
               {snzOpen && (
                 <div className="tdg-sect">
-                  <div className="tdg-panel">{g.cards.map((c) => renderRow(c, column, g.id))}</div>
+                  <div className="tdg-panel">{g.cards.map((c) => renderRow(c, column))}</div>
                 </div>
               )}
             </React.Fragment>
@@ -703,7 +782,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
                 real expansion, so nothing animates on first paint (sheet 6: one entrance, then
                 never again on filter or sort). */}
             <div className={`tdg-panel${g.id === "housekeeping" && hkExpanded ? " grown" : ""}`}>
-              {visible.map((c) => renderRow(c, column, g.id))}
+              {visible.map((c) => renderRow(c, column))}
             </div>
             {more > 0 && (
               <div className="tdg-more">

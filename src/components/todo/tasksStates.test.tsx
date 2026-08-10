@@ -106,14 +106,18 @@ describe("⚠️ THE SKELETON IS THE REAL ROW WEARING PLACEHOLDERS", () => {
     expect(cssDecls).not.toContain(".tdg-skrow {");
   });
 
-  it("it reserves the SPLIT's own seat, so nothing shifts when the data lands", () => {
+  it("⚠️ ITS ACTION CELL IS EMPTY, BECAUSE THE LOADED ROW'S IS TOO (icon-cluster pack)", () => {
     const rows = (html.match(/class="tdg-row"/g) ?? []).length;
     expect(rows).toBe(6); // two groups × three rows — the ref's "the first two render"
-    /* ⚠️ ONE PLACEHOLDER PER ROW NOW (Fix 4). The four-slot grid it used to mirror is retired, so
-       the skeleton mirrors what actually arrives: a single 118px control. */
-    expect((html.match(/tdg-sk split/g) ?? []).length).toBe(rows);
+    /* The skeleton's whole job is that nothing shifts when the data lands. It held a placeholder
+       for the split button; the cluster renders NOTHING at rest, so a placeholder there would draw
+       a shape the loaded row does not have — a bar that vanishes on arrival is the exact jump the
+       skeleton exists to prevent. The 152px track still reserves the space, which was the only
+       part that ever mattered. */
+    expect((html.match(/class="tdg-acts"/g) ?? []).length).toBe(rows);
+    expect(html).not.toContain("tdg-sk split");
+    expect(cssDecls).not.toContain(".tdg-sk.split");   // deleted, not left unreferenced
     expect(html).not.toContain("tdg-slot");
-    expect(rule(".tdg-sk.split {")).toContain("width: 118px");
   });
 
   it("it announces itself rather than miming content silently", () => {

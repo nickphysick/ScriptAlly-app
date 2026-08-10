@@ -20,8 +20,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
-import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow, TASK_GROUP_ORDER, TaskGroupId } from "../../lib/todoGroups";
-import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, splitWeight } from "../../lib/taskRow";
+import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
+import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, rowPrimaryIcon } from "../../lib/taskRow";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { TodoColumnId } from "../../lib/todoColumns";
 import { SNOOZE_STOPS, reachableStops, snoozeDateLabel } from "../../lib/todoActions";
@@ -35,6 +35,7 @@ const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const list = readFileSync(join(here, "TaskList.tsx"), "utf8");
 const dialSrc = readFileSync(join(here, "SnoozeDial.tsx"), "utf8");
 const rowSrc = readFileSync(join(here, "..", "..", "lib", "taskRow.ts"), "utf8");
+const tipSrc = readFileSync(join(here, "RowTip.tsx"), "utf8");
 const dialCss = readFileSync(join(here, "snoozeDial.css"), "utf8");
 const rule2 = (sel: string): string => {
   const i = dialCss.indexOf(sel);
@@ -113,7 +114,7 @@ describe("⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display
 
   it("the six tracks, exactly — tick · title · pill · journey · age · verbs", () => {
     expect(rule(".tdg-row {")).toContain(
-      "grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 118px",  // 216 → 118 with the split (Fix 4)
+      "grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 152px",  // 216 → 118 with the split (Fix 4)
     );
   });
 
@@ -159,144 +160,200 @@ describe("⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED, and the why-line sits 
 /* ── 2. the four-slot action grid ───────────────────────────────────────────────────────────── */
 
 /**
- * ⚠️ THE FOUR-SLOT GRID IS RETIRED (fix pack Fix 4; ref design-refs/todo-splitguard-v1.html).
+ * ⚠️ THE SPLIT BUTTON IS RETIRED, AND SO IS EVERY GUARD IT NEEDED (icon-cluster pack; ref
+ * design-refs/todo-iconcluster-v2.html, which SUPERSEDES the splitguard and weight-slider sheets
+ * for row actions).
  *
- * It existed so a missing verb left its place standing and every primary began at the same x.
- * Every row carries ONE identical control now, so there is nothing left to align — and the device
- * is DELETED rather than disabled, because one kept past its reason is the next reader's puzzle.
- * Snooze and dismiss moved into the split's menu; the standalone icon buttons went with them.
+ * The 3px dead seam, the arm-before-press pair of `:hover`s, the 34px caret minimum and the
+ * filled/outlined weights were four guards around ONE problem: a compound control repeated sixteen
+ * times down a list. Four separate targets have no seam to defend, so the guards are DELETED
+ * rather than carried across — a guard kept past the hazard it guarded is the next reader's puzzle.
  */
-describe("⚠️ ONE CONTROL PER ROW, AND ITS SEAM IS DEFENDED FOUR WAYS", () => {
-  it("the four-slot grid and its empty slot are EXTINCT, in the sheet and in the markup", () => {
+describe("⚠️ THE SPLIT BUTTON AND ITS FOUR GUARDS ARE EXTINCT", () => {
+  it("every `.tdg-split*` rule is gone from the sheet — except the menu, which the cluster kept", () => {
+    for (const gone of [".tdg-split {", ".tdg-split-p", ".tdg-split-c", ".tdg-split-seam", ".tdg-split.ghost"]) {
+      expect(cssDecls, `${gone} survives`).not.toContain(gone);
+    }
+    /* ⚠️ THE MENU'S WIDTH SURVIVES ON PURPOSE — icon 4 opens the same portalled menu, and the
+       snooze dial inside it still needs the room. */
+    expect(cssDecls).toContain(".tdg-splitmenu { width: 258px; }");
+  });
+
+  it("…and out of the markup: no seam, no caret, no weight, no arrow-down-opens-menu", () => {
+    expect(code(list)).not.toContain("tdg-split-");
+    expect(code(list)).not.toContain("splitWeight");
+    expect(code(list)).not.toContain('e.key === "ArrowDown"');
+    expect(rowSrc, "the weight derivation goes with the button").not.toContain("splitWeight");
+    /* the group thread existed ONLY to carry weight — the glyph derives from the KIND instead */
+    expect(code(list)).not.toContain("TaskGroupId");
+    expect(code(list)).toContain("renderRow(c, column)");
+  });
+
+  it("the four-slot grid before it stays extinct too", () => {
     expect(cssDecls).not.toContain(".tdg-verbs");
     expect(cssDecls).not.toContain(".tdg-slot");
     expect(code(list)).not.toContain("tdg-slot");
-    expect(code(list)).not.toContain("tdg-verbs");
-    /* the standalone snooze and dismiss buttons went with them */
-    expect(list).not.toContain('aria-label={`Snooze');
-    expect(list).not.toContain('aria-label={`Dismiss');
   });
 
-  it("118px total, so the column NARROWS rather than grows: 81 + 3 + 34", () => {
-    expect(rule(".tdg-split {")).toContain("width: 118px");
-    expect(rule(".tdg-split {")).toContain("height: 34px");
-    expect(rule(".tdg-split-p {")).toContain("width: 81px");
-    expect(rule(".tdg-split-seam {")).toContain("width: 3px");
-  });
-
-  it("⚠️ GUARD 1 — the caret is 34px, not 28: it sits flush against a high-consequence primary", () => {
-    /* anchored on the STANDALONE rule — the shared `.tdg-split-p, .tdg-split-c` block above it
-       ends in the same selector text, and a naive indexOf lands there instead */
-    expect(cssDecls).toContain(".tdg-split-c { width: 34px; }");
-  });
-
-  it("⚠️ GUARD 2 — each half arms ALONE, which two separate `:hover`s guarantee", () => {
-    /* Two elements, two hovers: they can never both light, and never both stay dark while one is
-       hovered. That is the reader's confirmation of what is loaded before the press lands. */
-    expect(cssDecls).toContain(".tdg-split-p:hover, .tdg-split-c:hover");
-    expect(cssDecls).not.toContain(".tdg-split:hover");
-  });
-
-  it("⚠️ GUARD 3 — the seam fires nothing, and commit is on RELEASE", () => {
-    /* The seam is a plain span and NOTHING above the halves takes a click, so a press landing on
-       it has nothing to fall through to. `onClick` fires only when press and release land on the
-       same element — so pressing a half and sliding off does nothing, by the browser's own rule
-       rather than by a handler of ours. */
-    const split = list.slice(list.indexOf('className={`tdg-split'), list.indexOf("</span>\n          )}"));
-    expect(split).toContain('className="tdg-split-seam" aria-hidden');
-    expect(split).not.toContain("onMouseDown");
-    expect(split).not.toContain("onPointerDown");
-    expect(code(list)).not.toContain('className={`tdg-split${weight === "outlined" ? " ghost" : ""}`} onClick');
-  });
-
-  it("⚠️ THE SPLIT IS ONE TAB STOP, and the caret is never the only route in", () => {
-    expect(list).toContain('tabIndex={-1}');           // the caret leaves the tab order
-    expect(list).toContain('if (e.key === "ArrowDown")'); // …and ↓ opens the menu from the primary
-  });
-
+  /* carried over unchanged — these were never about the split */
   it("every verb still comes through ONE door, which resolves against `cardMenu`", () => {
     expect(list).toContain("const fire = (c: BoardCard, column: TodoColumnId, id: MenuItemId) => {");
     expect(list).toContain("const leaf = cardMenu(c, column)");
     expect(list).toContain("onVerb(c, leaf ?? { kind: \"leaf\", id, label: id }, column);");
   });
 
-  it("THE TICK IS THE ACT for a writer's own item — so it draws no split beside the circle", () => {
-    const mine = card({ key: "u1", userTaskId: "t1", kind: "", taskType: undefined, relatedRecordId: undefined, stream: "do", nature: "task" });
-    const html = render(cols({ todo: [mine] }));
-    expect(html).toContain("tdg-tick");
-    expect(html).not.toContain("tdg-split");
-  });
-
   it("a row that CANNOT be completed draws no tick — `isTickable` decides, never the render", () => {
     expect(render(cols({ todo: [sweepCard({ key: "s1" })] }))).not.toContain("tdg-tick");
     expect(list).toContain("const tickable = isTickable(c);");
   });
+});
 
-  it("Done offers its way BACK — outlined, and now for the GROUP's reason rather than the row's", () => {
-    /* ⚠️ THE PIXELS ARE UNCHANGED AND THE RULE BEHIND THEM IS NOT. `primary.ghost` used to set
-       this from ROW STATE ("Undo is a way back, not an act"); the class is the group's weight
-       now, and Done reaches it by not being the urgent group. Asserted so the fold is proven to
-       have kept the appearance it inherited, not merely to have compiled. */
-    const done = render(cols({ done: [card({ key: "d1", done: true, userTaskId: "t9", title: "Reply to Curtis Vane" })] }));
-    expect(done).toContain("Undo");
-    expect(done).toContain("tdg-split ghost");
-    expect(code(list)).not.toContain("primary.ghost");   // the row-state flag is gone, not shadowed
-    expect(rowPrimaryLabel(card({}), "snoozed")).toBe("Return");
+/**
+ * ⚠️ FOUR ICONS, FIXED WIDTH, NOTHING AT REST (ref todo-iconcluster-v2.html, panel 1).
+ *
+ * Only the FIRST glyph varies. Positions two, three and four are the same three deeds on every row
+ * in the app, which is what makes them muscle memory after a day; if the first one moved too there
+ * would be nothing to learn.
+ */
+describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
+  it("all four render on every row — the cluster is fixed-width whatever a card can do", () => {
+    const html = render(cols({ todo: [card({ key: "n1" })] }));
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
+    /* 4 × 30 + 3 × 5 = 135, seated in the row's last track */
+    expect(rule(".tdg-row {")).toContain("104px 152px");
+    expect(rule(".tdg-ic {")).toContain("width: 30px");
+    expect(rule(".tdg-ic {")).toContain("height: 30px");
+    expect(rule(".tdg-ic {")).toContain("border-radius: 8px");
+    expect(rule(".tdg-acts {")).toContain("gap: 5px");
+  });
+
+  it("⚠️ AN INAPPLICABLE ICON DIMS IN PLACE — it is NEVER removed, or the column would reflow", () => {
+    /* An offer cannot be dismissed. The slot stays, greyed, with the reason in its label — an
+       absent slot would shift every icon on that row out of line with the rows above it. */
+    const offer = render(cols({ todo: [card({ key: "o1", taskType: "offer_received" })] }));
+    expect((offer.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
+    expect(offer).toContain("tdg-ic dz off");
+    expect(offer).toContain("Offers cannot be dismissed");
+    expect(rule(".tdg-ic.off")).toBeTruthy();
+  });
+
+  it("THE TICK IS THE ACT on a writer's own item — so its first icon is dim, not absent", () => {
+    const mine = card({ key: "u1", userTaskId: "t1", kind: "", taskType: undefined, relatedRecordId: undefined, stream: "do", nature: "task" });
+    const html = render(cols({ todo: [mine] }));
+    expect(html).toContain("tdg-tick");                        // the circle IS the verb
+    expect(html).toContain("tdg-ic prim off");                 // …so the deed icon states that
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
+  });
+
+  it("⚠️ NOTHING AT REST, AND IT ARRIVES FOR A KEYBOARD TOO", () => {
+    /* `:focus-within` is not decoration: hover alone would make the cluster a set of controls only
+       a mouse can find. */
+    expect(rule(".tdg-ic {")).toContain("opacity: 0");
+    expect(cssDecls).toContain(".tdg-row:hover .tdg-ic,\n.tdg-row:focus-within .tdg-ic { opacity: 1; }");
+    expect(cssDecls).toContain(".tdg-row:hover .tdg-ic.off,\n.tdg-row:focus-within .tdg-ic.off { opacity: 0.32; }");
+  });
+
+  it("⚠️ ON A COARSE POINTER IT IS PERMANENT — a hidden control on a phone is an absent one", () => {
+    /* Keyed on the INPUT, never on the screen's width: a narrow desktop window still has a
+       pointer, and a wide tablet still has none. */
+    const i = cssDecls.indexOf("@media (pointer: coarse)");
+    expect(i, "the coarse-pointer rule must exist").toBeGreaterThan(-1);
+    const block = cssDecls.slice(i, cssDecls.indexOf("\n}", i));
+    expect(block).toContain(".tdg-ic { opacity: 1; }");
+    expect(block).toContain(".tdg-ic.off { opacity: 0.32; }");
   });
 });
 
 /**
- * ⚠️ WEIGHT FOLLOWS THE GROUP (Fix 4 revision; ref design-refs/todo-weight-slider-v1.html, panel
- * 1 — which SUPERSEDES the splitguard sheet's all-filled treatment).
+ * ⚠️ ONLY THE FIRST GLYPH VARIES, AND IT IS THE SAME DERIVATION AS THE WORD.
  *
- * The page has already sorted urgency into groups and stated it in each heading. Weighting per row
- * would put that judgement in a second place, and two judgements about one thing eventually
- * disagree. So: filled ink inside Needs you now, outlined everywhere else.
+ * `rowPrimaryIcon` walks `rowPrimaryLabel`'s branches in the same order, so the glyph and the
+ * tooltip are two renderings of ONE answer. A separate table would be a second answer, and the
+ * failure mode is a paper plane above a tooltip reading "Close".
  */
-describe("⚠️ THE SPLIT'S WEIGHT IS THE GROUP'S, AND THE FOOTPRINT IS IDENTICAL", () => {
-  it("filled in the urgent group; outlined in every other one", () => {
-    /* rendered, not read from source: this is about which class reaches the markup */
-    const urgent = render(cols({ todo: [card({ key: "n1" })] }));
-    expect(urgent).toContain("tdg-split");
-    expect(urgent).not.toContain("tdg-split ghost");
-
-    /* ⚠️ SNOOZED IS ABSENT FROM THIS LOOP ON PURPOSE, and it is not an oversight: that group is a
-       slim fold whose open/closed state is the component's own, closed by default, so a static
-       render produces its heading and NO rows. There is nothing to assert a class on. Its weight
-       is covered by the pure case below, where it is reachable. */
-    for (const c of [
-      cols({ todo: [sweepCard({ key: "h1" })] }),                                   // housekeeping
-      cols({ done: [card({ key: "d1", done: true, userTaskId: "t9" })] }),          // done
-    ]) expect(render(c)).toContain("tdg-split ghost");
+describe("⚠️ THE FIRST GLYPH IS THE ROW'S KIND, NOT ITS GROUP", () => {
+  it("the four the ref names, off the card's own facts", () => {
+    expect(rowPrimaryIcon(card({}), "todo")).toBe("send");
+    expect(rowPrimaryIcon(card({ taskType: "no_response_close" }), "todo")).toBe("close");
+    expect(rowPrimaryIcon(card({ taskType: "offer_received" }), "todo")).toBe("offer");
+    expect(rowPrimaryIcon(card({ userTaskId: "t1", taskType: undefined, relatedRecordId: undefined }), "todo")).toBe("task");
   });
 
-  it("⚠️ IT ASKS 'IS THIS THE URGENT ONE' — so a group added later is outlined by DEFAULT", () => {
-    /* A list of the quiet groups is a list a new group joins by being forgotten, and the
-       forgotten default would be filled ink — the loud one. Stated positively, the default is
-       quiet. The cast is the point of the case: it stands in for a group id that does not exist
-       yet, which is precisely what a future addition is. */
-    expect(splitWeight("now")).toBe("filled");
-    for (const g of ["housekeeping", "yours", "snoozed", "done"] as TaskGroupId[]) {
-      expect(splitWeight(g)).toBe("outlined");
+  it("…and the three the ref does NOT draw, which the app can still raise", () => {
+    /* Forcing Done, Snoozed and sweeps into one of the four would have put a paper plane on
+       "Undo". They get their own marks rather than an approximation. */
+    expect(rowPrimaryIcon(card({ done: true }), "done")).toBe("undo");
+    expect(rowPrimaryIcon(card({}), "snoozed")).toBe("return");
+    expect(rowPrimaryIcon(sweepCard({}), "todo")).toBe("sweep");
+  });
+
+  it("⚠️ GLYPH AND WORD CANNOT DISAGREE — same branches, same order, asserted in pairs", () => {
+    const pairs: [BoardCard, TodoColumnId, string, string][] = [
+      [card({ done: true }), "done", "undo", "Undo"],
+      [card({}), "snoozed", "return", "Return"],
+      [sweepCard({}), "todo", "sweep", "Start"],
+      [card({ taskType: "no_response_close" }), "todo", "close", "Close"],
+      [card({}), "todo", "send", "Action"],
+    ];
+    for (const [c, col, icon, label] of pairs) {
+      expect(rowPrimaryIcon(c, col)).toBe(icon);
+      expect(rowPrimaryLabel(c, col)).toBe(label);
     }
-    expect(splitWeight("a-group-invented-tomorrow" as TaskGroupId)).toBe("outlined");
   });
 
-  it("…and every group id the page can actually render is answered", () => {
-    /* Total over the real domain, so the two cannot drift apart silently. */
-    for (const g of TASK_GROUP_ORDER) expect(["filled", "outlined"]).toContain(splitWeight(g));
+  it("every key in the derivation has a glyph — a missing one renders `undefined` and throws", () => {
+    /* The map is in the component and the keys are in the lib; nothing type-links them at the
+       point of use, so the census is the link. */
+    for (const k of ["send", "close", "task", "offer", "sweep", "undo", "return"]) {
+      expect(list, `PRIMARY_GLYPH has no ${k}`).toMatch(new RegExp(`\\n  ${k}:`));
+    }
+  });
+});
+
+/**
+ * ⚠️ THE TOOLTIP IS THE MITIGATION FOR USING GLYPHS AT ALL — not decoration, and not optional.
+ * Four glyphs replaced a button that said "Action" in words; a paper plane does not carry "record
+ * that you sent it". Every icon names its deed and teaches its key.
+ */
+describe("⚠️ EVERY ICON CARRIES A TOOLTIP, ON FOCUS AS WELL AS HOVER", () => {
+  it("it is a component, never a `title` attribute", () => {
+    /* `title` never appears on keyboard focus and never appears on touch — so on the two inputs
+       that most need the teaching, it teaches nothing. */
+    expect(tipSrc).toContain("export const RowTip");
+    expect(list).toContain("onFocus={show}");
+    expect(list).toContain("onMouseEnter={show}");
+    const icon = list.slice(list.indexOf("const RowIcon"), list.indexOf("const SplitMenu") >= 0 ? list.indexOf("const SplitMenu") : list.length);
+    expect(icon).not.toContain("title=");
   });
 
-  it("⚠️ THE OUTLINED HAIRLINE TAKES NO LAYOUT — or the caret would breach Guard 1", () => {
-    /* `border: 1px` on a border-box element leaves 116px of content while the children ask for
-       81 + 3 + 34. The seam is `flex: none`, so the primary and the CARET absorb the 2px — and
-       34px is a stated minimum. An inset shadow paints the same hairline and occupies nothing. */
-    const g = rule(".tdg-split.ghost {");
-    expect(g).toContain("box-shadow: inset 0 0 0 1px");
-    expect(g).not.toContain("border:");
-    /* the footprint is declared ONCE, on the shared rule, so neither weight can restate it */
-    expect(rule(".tdg-split {")).toContain("width: 118px");
-    expect(cssDecls).not.toContain(".tdg-split.ghost .tdg-split-c { width");
+  it("⚠️ IT BUILDS ON `lib/deskTooltip` AND DOES NOT IMPORT THE DASHBOARD'S TOOLTIP", () => {
+    /* Importing `StatTooltip` was permitted and would have worked — but it lives in
+       components/dashboard/ with its CSS in dashboardV37.css, so the To-do page would have taken a
+       dependency on the dashboard's component folder AND its stylesheet to draw a 30px tip. The
+       placement maths is the part worth sharing and is already pure and unit-tested. */
+    expect(tipSrc).toContain('from "../../lib/deskTooltip"');
+    expect(code(tipSrc), "no dashboard IMPORT — the prose may name it, the code may not").not.toContain("dashboard");
+    expect(code(list)).not.toContain("StatTooltip");
+    /* …and it portals, or the top row's tip would be clipped by the scroll zone */
+    expect(tipSrc).toContain("createPortal");
+    expect(rule(".tdg-tip {")).toContain("position: fixed");
+  });
+
+  it("⚠️ A DIM ICON STAYS HOVERABLE AND FOCUSABLE — its tooltip is the only thing explaining it", () => {
+    /* `disabled` on a button removes hover AND focus, so the explanation would be unreachable by
+       either input. `aria-disabled` on a live button, with the click refused in the handler. */
+    expect(list).toContain("aria-disabled={enabled ? undefined : true}");
+    expect(code(list)).not.toContain("disabled={!enabled}");
+    expect(list).toContain("if (enabled) onFire(e.currentTarget);");
+    /* and the dim tooltip says WHY rather than repeating the name */
+    expect(list).toContain("label={enabled ? label : (why ?? label)}");
+  });
+
+  it("the tip names the deed and shows the key, in the ref's two registers", () => {
+    expect(tipSrc).toContain("{hint && <span className=\"tdg-tipk\">{hint}</span>}");
+    expect(rule(".tdg-tipk")).toContain("JetBrains Mono");
+    /* the four keys the cluster advertises */
+    for (const k of ['hint="↵"', 'hint="S"', 'hint="X"', 'hint="."']) expect(list).toContain(k);
   });
 });
 
@@ -602,9 +659,13 @@ describe("⚠️ THE PRIMARY'S NAME IS PER KIND; WHETHER IT EXISTS IS THE MENU'S
     expect(rowPrimaryLabel(card({ done: true }), "done")).toBe("Undo");
   });
 
-  it("rendered: a stale row says Close, a sweep says Start", () => {
-    expect(render(cols({ todo: [card({ key: "st", stream: "hk", kind: "STALE", taskType: "no_response_close" })] }))).toContain(">Close<");
-    expect(render(cols({ todo: [sweepCard({ key: "sw" })] }))).toContain(">Start<");
+  it("rendered: a stale row says Close, a sweep says Start — in the LABEL, since the verb is a glyph now", () => {
+    /* ⚠️ THE WORD MOVED, IT DID NOT GO. The split button printed the verb; the cluster draws it as
+       an icon, so the name lives in `aria-label` and in the tooltip. That is exactly why the
+       tooltip is not optional — and it is why this case still asserts the words: a glyph whose
+       accessible name went missing would be a button that says nothing to anyone not looking. */
+    expect(render(cols({ todo: [card({ key: "st", stream: "hk", kind: "STALE", taskType: "no_response_close" })] }))).toContain('aria-label="Close"');
+    expect(render(cols({ todo: [sweepCard({ key: "sw" })] }))).toContain('aria-label="Start"');
   });
 
   /* ⚠️ TWO OF THE REF'S THIRTEEN ROWS ARE NOT BUILT, AND THAT IS THE LAW RATHER THAN AN OMISSION.

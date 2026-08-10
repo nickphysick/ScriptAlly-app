@@ -26,7 +26,7 @@
 import { BoardCard } from "./todoBoard";
 import { isSweepCard, TodoColumnId } from "./todoColumns";
 import { cardMenu, MenuItemId } from "./todoMenu";
-import { TaskGroupId } from "./todoGroups";
+import { completionVia } from "./todoActions";
 
 /* ── the kind pill ─────────────────────────────────────────────────────────────────────────── */
 
@@ -135,30 +135,36 @@ export function rowJourney(c: BoardCard, column: TodoColumnId): RowJourney | nul
   }
 }
 
-/* ── the split button's weight (Fix 4 revision; ref design-refs/todo-weight-slider-v1.html) ───── */
-
-export type SplitWeight = "filled" | "outlined";
+/* ── the cluster's first glyph (icon-cluster pack; ref design-refs/todo-iconcluster-v2.html) ──── */
 
 /**
- * ⚠️ WEIGHT FOLLOWS THE GROUP, NEVER THE ROW — and that is the whole argument. The page has
- * already sorted urgency into groups and SAID SO in each heading ("An agent is waiting, or a date
- * is" against "none of it urgent"). Weighting per row would put that same judgement in a second
- * place, and two judgements about one thing eventually disagree. Ten filled-ink buttons stacked
- * down Housekeeping was the page shouting at you about tidying.
+ * ⚠️ ONLY THE FIRST GLYPH VARIES. Positions two, three and four are the same three deeds on every
+ * row in the app, which is what makes them muscle memory after a day; if the first one moved too,
+ * there would be nothing to learn.
  *
- * ⚠️ IT ASKS "IS THIS THE URGENT GROUP", NOT "IS IT ONE OF THE QUIET ONES". A list of the quiet
- * groups is a list that a NEW group joins by being forgotten — and the forgotten default would be
- * filled ink, which is the loud one. Stated positively, anything added later is outlined until
- * someone deliberately says otherwise.
+ * ⚠️ AND IT DERIVES FROM THE SAME FACTS AS `rowPrimaryLabel`, DELIBERATELY. The glyph and the word
+ * are two renderings of ONE answer — "what does this row's primary do" — so they are computed from
+ * the same branches in the same order. A separate table would be a second answer, and the failure
+ * would be a plane icon on a button whose tooltip says "Close".
  *
- * ⚠️ THIS SUPERSEDES THE SPLITGUARD REF, which draws every split filled. The weight sheet is the
- * later artefact and gives its reason; a reasoned value beats an unreasoned one.
- *
- * Both weights keep the identical 118px footprint and all four guards, so a row moving between
- * groups changes colour and nothing else — no reflow, no width change, the column still aligned.
+ * ⚠️ WEIGHT-BY-GROUP IS RETIRED WITH THE SPLIT BUTTON, and the group thread went with it. The kind
+ * is more precise than the group ever was: `now` held sends, closes and offers together, so a
+ * group-derived glyph could not have distinguished them.
  */
-export function splitWeight(group: TaskGroupId): SplitWeight {
-  return group === "now" ? "filled" : "outlined";
+export type PrimaryIcon = "send" | "close" | "task" | "offer" | "sweep" | "undo" | "return";
+
+export function rowPrimaryIcon(c: BoardCard, column: TodoColumnId): PrimaryIcon {
+  /* the branch order is `rowPrimaryLabel`'s, line for line */
+  if (column === "done" || c.done) return "undo";
+  if (column === "snoozed") return "return";
+  if (isSweepCard(c)) return "sweep";
+  if (c.taskType === "no_response_close") return "close";
+  /* ⚠️ THE REF NAMES FOUR AND THE APP RAISES SEVEN. Done, Snoozed and sweeps are states the ref's
+     three panels do not draw, and forcing them into one of the four would have put a paper plane
+     on "Undo". They get their own marks, recorded here rather than invented at the call site. */
+  if (c.taskType === "offer_received") return "offer";
+  if (completionVia(c) === "user-task") return "task";
+  return "send";
 }
 
 /* ── the split button's menu (fix pack Fix 4; ref design-refs/todo-splitguard-v1.html) ────────── */

@@ -166,7 +166,8 @@
    Six tracks: tick · title (the only flexible one) · status pill · journey · age · verbs. */
 .tdg-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 118px;
+  /* the last track is the CLUSTER's: 4 × 30px + 3 × 5px gap = 135, in a 152px seat */
+  grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 152px;
   align-items: center;
   padding: 16px 14px;
   border-radius: 11px;
@@ -325,88 +326,105 @@
   white-space: nowrap;
 }
 
-/* ── THE ROW'S ONE CONTROL: A GUARDED SPLIT BUTTON ─────────────────────────────────────────
-   (Fix 4; ref design-refs/todo-splitguard-v1.html)
+/* ── THE ROW'S ACTIONS: FOUR ICONS, REVEALED ────────────────────────────────────────────────
+   (icon-cluster pack; ref design-refs/todo-iconcluster-v2.html — which SUPERSEDES the splitguard
+   and weight-slider sheets for row actions.)
 
-   ⚠️ THE FOUR-SLOT GRID AND ITS PRESERVED EMPTY SLOT ARE DELETED, NOT DISABLED. They existed so
-   that a missing verb left its place standing and every primary began at the same x. Every row
-   now carries ONE identical control, so there is nothing left to align — and a device kept past
-   its reason is the next reader's puzzle. */
-.tdg-acts { display: flex; align-items: center; justify-content: flex-end; }
+   ⚠️ THE SPLIT BUTTON IS GONE, AND SO IS EVERYTHING IT NEEDED. Its 3px dead seam, its
+   arm-before-press pair of `:hover`s, its 34px caret minimum and its filled/outlined weights were
+   four guards around ONE problem — a compound control repeated sixteen times down a list. Four
+   separate targets have no seam to defend, so the guards are deleted rather than carried over. */
+.tdg-acts { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
 
-/* 118px total, so the column NARROWS rather than grows: 81 + 3 seam + 34 caret. */
-.tdg-split {
-  display: flex;
-  width: 118px;
-  height: 34px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #2a1a13;
-  /* ⚠️ NO CLICK HANDLER LIVES ABOVE THE HALVES, and no pointer rule brings one back: the seam
-     belongs to neither half and must fire nothing, which it does by there being nothing to fall
-     through to. */
-}
-
-.tdg-split-p,
-.tdg-split-c {
+/* ⚠️ NOTHING AT REST. The cluster is the row's actions, not its furniture: a list of sixteen rows
+   each wearing four icons is a wall of glyphs, and at rest the row should read as a sentence. */
+.tdg-ic {
+  width: 30px;
+  height: 30px;
+  flex: none;
   border: 0;
-  background: transparent;
-  color: var(--paper, #f6efe6);
-  font: inherit;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  position: relative;
+  cursor: pointer;
+  background: transparent;
+  color: #8a7a6c;
+  opacity: 0;
+  transition: opacity 80ms var(--tdg-ease), background var(--tdg-emph) var(--tdg-ease),
+    color var(--tdg-emph) var(--tdg-ease);
 }
 
-.tdg-split-p { width: 81px; font-size: 11px; font-weight: 600; }
+/* ⚠️ FOCUS-WITHIN, NOT JUST HOVER — the cluster must arrive for a keyboard as well as a pointer,
+   or it is a set of controls only a mouse can find. `:focus-within` covers the row's own focus
+   ring AND a tabbed-to icon; `:hover` covers the pointer. */
+.tdg-row:hover .tdg-ic,
+.tdg-row:focus-within .tdg-ic { opacity: 1; }
 
-/* ⚠️ GUARD 1 — 34px, NOT 28. The caret sits flush against a high-consequence primary, so it is
-   the one target on the row that must be comfortably past the 24px minimum. */
-.tdg-split-c { width: 34px; }
+/* ⚠️ AN INAPPLICABLE ICON DIMS IN PLACE AND IS NEVER REMOVED — that is what keeps the cluster a
+   fixed width, so the column cannot reflow between one row and the next. It stays hoverable and
+   focusable on purpose: its tooltip is the only thing that explains the dimming. */
+.tdg-ic.off { cursor: default; }
+.tdg-row:hover .tdg-ic.off,
+.tdg-row:focus-within .tdg-ic.off { opacity: 0.32; }
 
-/* ⚠️ GUARD 3 — THE DEAD SEAM. 3px belonging to neither half. It is a plain span with no handler
-   above it, so a press that lands here commits nothing. */
-.tdg-split-seam { width: 3px; background: rgba(255, 255, 255, 0.2); flex: none; }
+.tdg-ic:hover { background: #faf6f0; color: #3a1c14; }
+.tdg-ic.off:hover { background: transparent; color: #8a7a6c; }
 
-/* ⚠️ GUARD 2 — ARM BEFORE PRESS. The half under the pointer lightens and the other does not:
-   two separate elements, two separate `:hover`s, so they can never both light and never both
-   stay dark while one is hovered. This is the reader's confirmation of what is loaded BEFORE the
-   press lands, which is the whole defence of a seam. */
-.tdg-split-p:hover, .tdg-split-c:hover { background: #3a2a20; }
-.tdg-split-p:focus-visible, .tdg-split-c:focus-visible { background: #3a2a20; outline: none; }
+/* icon 1 — the deed, in the app's burgundy over its canonical soft pink */
+.tdg-ic.prim { color: #7c3a2a; }
+.tdg-ic.prim:hover { background: #f5e2da; color: #7c3a2a; }
 
-/* ── THE OUTLINED WEIGHT ────────────────────────────────────────────────────────────────────
-   ⚠️ ONE CLASS, ONE MEANING — AND IT USED TO HAVE TWO. `.ghost` meant "Undo on a finished row is
-   a way back rather than an act", a ROW-STATE reason; the weight rule now sets the same class
-   from the GROUP. Two reasons behind one class is a class that eventually contradicts itself, so
-   the row-state flag is deleted and this is the weight, full stop: filled ink inside Needs you
-   now, outlined everywhere else, `splitWeight` deciding. Done still reads exactly as it did —
-   it is simply not the urgent group, which is the honest reason for the same pixels.
+/* icon 3 — dismiss. A faint rose, the app's own alert blush, so consequence reads before the
+   pointer lands. (The ref's #f7e6e0 / #9c5a45 are unhoused — see the report.) */
+.tdg-ic.dz:hover { background: #faf0ea; color: #7c3a2a; }
 
-   ⚠️ THE HAIRLINE IS AN INSET SHADOW, NOT A BORDER — AND THAT IS A MEASURED FIX, NOT A
-   preference. `border: 1px` on a `border-box` element (Tailwind's preflight, app-wide) leaves the
-   content box 116px while the three children still ask for 81 + 3 + 34 = 118. Flex shrinks them
-   to fit: the seam is `flex: none` and survives, so the primary and the CARET absorb the whole
-   2px — and the caret is the one target on the row with a stated minimum. Guard 1 says 34px, and
-   the bordered version quietly served ~33. `box-shadow: inset` paints the same hairline and
-   occupies no layout at all, so BOTH weights are 81/3/34 exactly and the column stays aligned.
-   (This shipped in 225d4e1 on Done rows and was never measured.)
+.tdg-ic:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 1px; }
 
-   ⚠️ IDENTICAL FOOTPRINT, ALL FOUR GUARDS. Only the colours change: the 118px box, the 81/3/34
-   split and both `:hover`s are declared once above and inherited, so a row moving between groups
-   changes nothing that occupies space. */
-.tdg-split.ghost { background: #fff; box-shadow: inset 0 0 0 1px #e6ddcd; }
-.tdg-split.ghost .tdg-split-p, .tdg-split.ghost .tdg-split-c { color: #4d4238; }
-.tdg-split.ghost .tdg-split-seam { background: #e6ddcd; }
-.tdg-split.ghost .tdg-split-p:hover, .tdg-split.ghost .tdg-split-c:hover { background: #faf6f0; }
-.tdg-split.ghost .tdg-split-p:focus-visible,
-.tdg-split.ghost .tdg-split-c:focus-visible { background: #faf6f0; }
+/* ⚠️ ON A COARSE POINTER THE CLUSTER IS PERMANENT. There is no hover on a phone, so a revealed
+   control is an absent one. Stated as its own rule rather than folded into a width breakpoint:
+   the question is the INPUT, never the screen size. */
+@media (pointer: coarse) {
+  .tdg-ic { opacity: 1; }
+  .tdg-ic.off { opacity: 0.32; }
+}
 
-/* ── the split's menu ───────────────────────────────────────────────────────────────────────
+/* ── the icons' tooltips ────────────────────────────────────────────────────────────────────
+   ⚠️ THE TOOLTIP IS THE MITIGATION FOR USING GLYPHS AT ALL, so it is real chrome rather than a
+   `title` attribute: it names the deed in words and teaches the key, and it appears on FOCUS as
+   well as hover. Portalled and `position: fixed`, placed by `lib/deskTooltip` — the cluster sits
+   at row-right, so the fourth icon's tip would hang off the viewport without that clamp. */
+.tdg-tip {
+  position: fixed;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  background: #3a1c14;
+  color: #f6efe6;
+  font-size: 11.5px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 5px 16px rgba(58, 28, 20, 0.24);
+}
+
+.tdg-tipk {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 1px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 4px;
+  color: #e2d8c8;
+}
+
+/* ── the more menu ──────────────────────────────────────────────────────────────────────────
    The shell is `.tbd-menu2` (consumed from todoBoard.css, never edited); these are the parts the
-   split's own grammar adds. */
+   row's own grammar adds. */
 
 /* ⚠️ THE 12px DEAD ZONE TAKES NO CLICK, and the rule above the destructive pair is its edge.
    `pointer-events: none` is the half that matters: a drifting pointer crossing it cannot arm
@@ -504,6 +522,8 @@
 @media (prefers-reduced-motion: reduce) {
   .tdg-foldchev { transition: none; }
   .tdg-row { transition: none; }
+  /* the cluster still APPEARS on hover — it simply stops fading. Visibility is not motion. */
+  .tdg-ic { transition: none; }
 }
 
 /* ══ PHASE 5 — THE ROW'S STATES, THE LOADING SHELL, THE EMPTY PANELS ═══════════════════════════
@@ -564,7 +584,6 @@
 
 .tdg-sk.pill { height: 25px; width: 124px; border-radius: 7px; }
 .tdg-sk.tick { height: 20px; width: 20px; border-radius: 50%; }
-.tdg-sk.split { height: 34px; width: 118px; border-radius: 8px; }
 .tdg-sk.t { height: 13px; width: 62%; }
 .tdg-sk.sub { height: 10px; width: 38%; margin-top: 7px; }
 .tdg-sk.age { height: 9px; width: 54px; }
