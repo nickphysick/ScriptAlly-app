@@ -338,3 +338,100 @@ Unchanged from the main run, and not in fix pack 1's scope:
 - [ ] Move the sent date past a chosen nudge date — the choice clears back to the preset
 - [ ] Provenance line across all three cases, especially: agent stating 6 weeks + writer picks 12 → **no** default clause
 - [ ] `Next: …` / `← Back` through every step, values intact on the way back, and Enter still advancing
+
+---
+
+# Fix pack 2
+
+**Commits** — refs `d09a531` · §1 `063fcc5` · §2 `edb8d65` · §3 `812d3fa` · §4 `07f0119` ·
+§5 `a4fe8ca`. Gates green before each. **Not deployed.**
+
+`68-panel-tone.html` was **not** in `~/Downloads` and is not committed. It was cited only for §4's
+spacing, which the prompt specifies in full, and its panel tones were superseded by 69 anyway — so
+nothing was built from a ref I had not seen.
+
+## §1 — how quick-add was extracted, and what else was mounting `AgentSearchField`
+
+Two earlier attempts to delete the duplicate field failed for one structural reason, which fix
+pack 1's own note identified without acting on: **the quick-add form lived inside
+`AgentSearchField`**, so reaching it meant mounting a combobox whose popup opens on focus. That is
+why the panel's "Add a new agent" appeared to open a list of existing agents — it was scrolling to
+that second field.
+
+`AgentQuickAdd` is the lift: name · agency · email · response weeks · the writer's own rating, with
+"Add and select" and Cancel, and **no search**. Every field the old form collected is kept —
+dropping any would quietly reduce what an inline add records — and `onCreateAgent` is the same
+contract the popup called, so an agent added here is born with the shape it always had. The rating
+survives the no-stars rule because that rule banned the app *ordering* agents, not the writer
+rating one.
+
+One open state serves both entry points; two states would let one be open while the other thought
+it was closed, and the second click would appear to do nothing. It opens inline beneath the field,
+where the link already pointed. Esc and Cancel both close it and return focus to the field — and
+**Esc is stopped there**, because the pane behind it discards the whole draft on Escape.
+
+**What else was mounting `AgentSearchField`: nothing.** Create mode was its only consumer. With the
+legacy mount gone the component is **dead code app-wide** — every remaining mention in `src/` is a
+comment. Not deleted here: that is a separate change and three sessions are live in this checkout.
+**Carried forward as a cleanup**, alongside the already-dead `.qc-qrow` and `.sa-ag-stars` rules.
+
+## §3 — the dropdown's open-state machine
+
+**Opens on** — a click/tap on the field · `↓` · the first keystroke.
+**Does not open on** — mount · programmatic focus · *any* focus. There is deliberately no
+`onFocus` handler on the field, and the lock bans a focus handler that calls `setOpen` rather than
+banning `onFocus` outright, because the grid's cards legitimately use it to track the highlight.
+**Closes on** — `Esc` · an outside click · selection · clearing back to empty.
+
+The distinction the whole model rests on is **focus versus intent**: the field takes focus on mount
+so typing works immediately, but programmatic focus is the *app's* act, and opening on it is
+exactly what put an expanded empty popup under the field on arrival in the first place.
+
+An empty query lists **every** contact with its history, because opening the list is an act of
+browsing as much as of searching. Ordering is **alphabetical** — newest-first is a recommendation
+about which contact matters, and rating-descending is the same recommendation wearing a search's
+clothes. The standing grid still does not filter while typing.
+
+## §4 — and the measurement that caught it
+
+The first attempt **measured 0px of clearance while every declaration read as correct.** I gave the
+footer negative margins to escape a padding it does not have: it is a *sibling* of `.qc-body`, not
+a child, and its actual parent `.qc-sec` has no padding at all — so `-26px` hung it past the card
+and the compensating `26px` brought the primary back to exactly flush. The rule now runs the card's
+full width with the buttons inset by the body's own 16px.
+
+Browser-measured after the fix, at **1440 and 1024**: 17px from the card's right edge at both, rule
+`1px solid`, `touching: false`. Before: 0px and touching at both.
+
+## §5 — where the marginalia tokens live, and how they are scoped
+
+`--qc-ref-rim` · `--qc-ref-rule` · `--qc-ref-plate`, defined **under `.t-capp` in `index.css`** and
+consumed by a `.t-capp`-scoped block in `f12.css`. Putting them in the theme scope rather than the
+base sheet is what keeps Bold Pastille and Editorial out of it **without a single override of their
+own** — both keep the base sheet's dotted rim, and a lock asserts they gained nothing. The law is
+in `design-refs/themes.md`.
+
+The grounding, recorded so it survives future edits: read-only surfaces recede by dropping their
+**affordance signals**, not by taking a new hue, and the **text colour does not change** — a
+reference panel that is harder to read has failed at the only thing it does. Fills say "surface";
+rules say "record". The dashed rim is the one sanctioned exception to dashed-means-provisional, and
+it is scoped to a single component in a single theme so it cannot spread.
+
+## Still deferred, carried forward again
+
+- **Other's `Enter` → removable chip.** Today `Enter` blurs the field.
+- **The materials summary line + the collapsed row's item count.**
+- **Dead code awaiting a cleanup commit:** `AgentSearchField.tsx` (now unmounted), `.qc-qrow` and
+  `.sa-ag-stars` rules.
+
+## Browser checklist — fix pack 2
+
+- [ ] **One** field on stage 1; no second "Search by name or agency…" anywhere
+- [ ] Both add-agent routes — the link beside the field, and the all-queried panel's action — open the **same** inline form beneath the field; nothing scrolls
+- [ ] Esc and Cancel close it and put the caret back in the search field; Esc does **not** discard the draft
+- [ ] Dropdown **closed on arrival** despite the field holding focus; opens on click, on ↓, and on the first keystroke
+- [ ] Open with an empty field lists every contact, alphabetically, each stating its history
+- [ ] The standing grid does not reshuffle while typing; the all-queried panel is capped and its actions sit on one row
+- [ ] Footer spacing at **1440 and 1024** — rule visible, neither button against the card edge
+- [ ] The reference panel read against the step beside it at **100% and 125% zoom**: does it recede without becoming harder to read?
+- [ ] Bold Pastille and Editorial panels unchanged
