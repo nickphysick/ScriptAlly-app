@@ -6,7 +6,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { CREATE_QTY, askPhrase, asksSentence, canStep, effectiveMax, formatQty, parseQty, serialJoin, stepLabel, stepQty } from "./createQty";
-import { MAT_QTY } from "./agentMaterials";
+import { MAT_QTY, snapToUnit } from "./agentMaterials";
+import { materialRowsForDraft } from "./queryDraft";
 import { readFileSync } from "fs";
 
 const pane = readFileSync(new URL("../components/queries/QueryCreatePane.tsx", import.meta.url), "utf8");
@@ -170,5 +171,79 @@ describe("the row reports the requirement and passes no comment on it", () => {
     for (const word of ["less than requested", "more than requested", "doesn't match", "warning"]) {
       expect(code, `"${word}" is an opinion about the writer's own submission`).not.toContain(word);
     }
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ PARITY — NOTHING MAY BE LOST IN THE MOVE INTO A CHIP. The stepper already worked; relocating
+   it is exactly the kind of change that quietly simplifies a control, so each behaviour below has
+   an assertion that would fail if it were dropped rather than a comment saying it should not be.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the stepper survived the move into the chip", () => {
+  /* ⚠️ SNAP, NEVER CONVERT — the locked law in agentMaterials. The test value is chosen so a
+     reintroduced conversion FAILS LOUDLY: 50 pages at the conventional 250 words/page is 12,500,
+     a thoroughly plausible number that would look correct in the field and be a figure the writer
+     never chose, written into a record of what they actually sent. */
+  it("switching unit snaps to that unit's default and never converts", () => {
+    expect(snapToUnit("Words")).toBe("5000");
+    expect(snapToUnit("Words"), "50 pages 'converted' would be 12,500 — a plausible lie").not.toBe("12500");
+    expect(snapToUnit("Chapters"), "3 chapters must not become 3 words").toBe("3");
+    expect(snapToUnit("Pages")).toBe("10");
+    expect(pane, "the unit menu must snap, not compute")
+      .toContain('setRow("sample", { unit: u, amount: snapToUnit(u) })');
+    const code = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
+    for (const n of ["250", "* 250", "/ 250", "wordsPerPage", "pagesPerChapter"]) {
+      expect(code, `a conversion constant (${n}) reappeared`).not.toContain(n);
+    }
+  });
+
+  /* Every snapped value is itself on-step and inside its own unit's range — switching cannot land
+     the field somewhere the arrows would then refuse to move from. */
+  it("and the snapped value is legal in the unit it lands in", () => {
+    for (const u of ["Pages", "Words", "Chapters"] as const) {
+      const v = parseQty(snapToUnit(u));
+      expect(v, `${u} default is below its own minimum`).toBeGreaterThanOrEqual(CREATE_QTY[u].min);
+      expect(v, `${u} default is above its own bound`).toBeLessThanOrEqual(CREATE_QTY[u].max);
+      expect(v % CREATE_QTY[u].step, `${u} default is off its own ladder`).toBe(0);
+    }
+  });
+
+  /* ⚠️ THE CHIP IS A BUTTON AND THE STEPPER IS INSIDE IT. Without stopPropagation, ticking Sample
+     and then pressing an arrow toggles the chip back off — the control the writer aimed at is
+     nested inside the control they did not. */
+  it("controls inside an expanded chip do not toggle the chip", () => {
+    const body = pane.slice(pane.indexOf('className="qc-chipbody"'), pane.indexOf("{isOther && on"));
+    expect(body).toContain("onClick={(e) => e.stopPropagation()}");
+    expect(body, "the arrows must not bubble").toContain("e.stopPropagation(); setRow(\"sample\"");
+    expect(body, "nor the unit menu").toContain("e.stopPropagation(); setUnitMenuOpen");
+    expect(body, "nor ↑/↓ in the field").toMatch(/e\.preventDefault\(\); e\.stopPropagation\(\);[\s\S]{0,80}ArrowUp/);
+  });
+
+  /* Pre-ticking from the agent's own requirements, including the case with exactly one. */
+  it("pre-ticks from the agent's requirements, query-letter-only included", () => {
+    const only = materialRowsForDraft({ materialsWanted: ["Query letter"] } as never);
+    expect(only.filter((r) => r.on).map((r) => r.key)).toEqual(["queryLetter"]);
+    /* ⚠️ THE ARRAY IS THE DELIMITER and each material is its own element — "Sample pages", not a
+       formatted label. A label-shaped string falls through to Other by whole-string match, which
+       is the documented parser behaviour and was this fixture's first mistake. */
+    const three = materialRowsForDraft({
+      materialsWanted: ["Query letter", "Synopsis", "Sample pages"],
+    } as never);
+    expect(three.filter((r) => r.on).map((r) => r.key)).toContain("sample");
+    expect(materialRowsForDraft(null).some((r) => r.on), "no agent pre-ticks nothing").toBe(false);
+  });
+
+  /* ⚠️ ENTER COMMITS TO A REMOVABLE CHIP — it used to blur, which left the writer unsure whether
+     anything had been recorded. The chips are pane-local and mirrored into `other.text`, so the
+     SAVED value is unchanged and `materialsPhrase` needs no knowledge of them. */
+  it("Other commits on Enter to a removable chip, and the draft keeps one field", () => {
+    expect(pane).toContain("commitOther([...otherChips, v]);");
+    expect(pane).toContain("commitOther(otherChips.filter((_, j) => j !== i))");
+    expect(pane, "the chips must mirror into the draft's single text field")
+      .toContain('setRow("other", { text: chips.join(", ") })');
+    const rows = materialRowsForDraft(null);
+    expect(Object.keys(rows.find((r) => r.key === "other")!).sort(),
+      "the shared MaterialRow must not have grown a committed[]")
+      .toEqual(["key", "kind", "name", "on", "text"]);
   });
 });
