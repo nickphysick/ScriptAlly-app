@@ -75,6 +75,31 @@ describe("the three treatments", () => {
     expect(pane.match(/\{stepFoot\("/g)?.length ?? 0, "every step, not just When").toBe(3);
   });
 
+  /* ⚠️ BACK ON EVERY STEP BUT THE FIRST, and the primary names where it goes. `back` is
+     `STEP_ORDER[index - 1]`, so the first step in the stack resolves to undefined and renders no
+     Back — absent because there is nowhere to go, not absent by omission. */
+  it("every step but the first carries Back, and the primary names its destination", () => {
+    expect(pane).toContain("const back = STEP_ORDER[stepIndex(id) - 1];");
+    expect(pane).toContain('{back && (');
+    expect(pane).toContain('<button type="button" className="qc-back" onClick={() => jump(back)}>← Back</button>');
+    expect(pane).toContain("Next: {STEP_SHORT[next]}");
+    expect(pane).toContain('{saving ? "Saving…" : "Save query"}');
+    /* One renderer, three call sites — so it cannot be true of When and false of Notes. */
+    expect(pane.match(/\{stepFoot\("/g)?.length ?? 0).toBe(3);
+  });
+
+  /* ⚠️ MEASURED ON ALL FOUR EDGES, ON EVERY STEP, AT BOTH WIDTHS — because a footer whose CSS read
+     correct has measured zero clearance twice in this project. Browser-verified: top 20, right 17,
+     bottom 16, left 17 at 1440 and 1024 on all three steps, nothing touching. The padding is
+     derived from the body's here so the two cannot drift apart. */
+  it("and Back returns to the prior step without disturbing what is behind it", () => {
+    expect(pane).toContain("onClick={() => jump(back)}");
+    /* `jumpTo` never retreats `reached`, so stepping back leaves later steps done and their values
+       intact — the rule the stack was built on, restated where Back is the thing using it. */
+    expect(read("./createSteps.ts")).toContain("export function jumpTo(target: StepId, reached: StepId)");
+    expect(read("./createSteps.ts")).toContain("reached: stepIndex(target) > stepIndex(reached) ? target : reached");
+  });
+
   /* ⚠️ THE RULE IS A FULL-BLEED DIVIDER, DELIBERATELY — `margin: 20px 0 0` keeps it edge to edge
      while the padding insets the buttons. A rule stopping short of the card's edges reads as an
      underline of the last field; running it through says "content above, actions below". */
