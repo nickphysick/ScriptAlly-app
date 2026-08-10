@@ -17,6 +17,8 @@ import {
   PICKER_LIMIT, pickerState, pickerCards, queriedCount, replyLine, moveInGrid, matchesQuery,
   dropdownResults, queryHistoryLabel, queriedAgentIds,
 } from "./agentPicker";
+import { queriedCards, queryOutcome, OUTCOME_LABEL } from "./agentPicker";
+import { queryBucket } from "./queryAmbient";
 import { SubmissionStatus, QueryStatus, type Agent, type Query } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -39,8 +41,91 @@ const agent = (id: string, over: Partial<Agent> = {}): Agent => ({
   submissionStatus: SubmissionStatus.OPEN, materialsWanted: [], ...over,
 }) as Agent;
 
-const q = (agentId: string): Query =>
-  ({ id: "q" + agentId, agentId, manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-01-01" }) as Query;
+const q = (agentId: string, over: Partial<Query> = {}): Query =>
+  ({ id: "q" + agentId, agentId, manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-01-01", ...over }) as Query;
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ THE GRID IS UNCONDITIONAL; ONLY ITS CONTENTS SWITCH. It used to list un-queried contacts and
+   therefore vanished in the all-queried state — leaving the one state most in need of a browsable
+   list as the only state without one, beside a panel promising "you can still log a query to any
+   of them" and offering no way to do it but typing a name from memory.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the already-queried grid", () => {
+  /* ⚠️ DERIVED FROM `queryBucket`, NOT BESIDE IT — that is the app's one split of a status into
+     whose turn it is, and the filter bar, the command bar and the agent list all read it. The one
+     thing added is OFFER, which the bucket folds into `closed` because the CTA engine has nothing
+     further to ask of it; on a card reporting WHAT HAPPENED that would be plainly wrong. */
+  it("the outcome comes from the existing selector, plus the one case it folds", () => {
+    expect(queryOutcome(QueryStatus.QUERIED)).toBe(queryBucket(QueryStatus.QUERIED));
+    expect(queryOutcome(QueryStatus.FULL_REQUESTED)).toBe(queryBucket(QueryStatus.FULL_REQUESTED));
+    expect(queryOutcome(QueryStatus.REJECTED)).toBe("closed");
+    expect(queryBucket(QueryStatus.OFFER), "the bucket folds an offer into closed").toBe("closed");
+    expect(queryOutcome(QueryStatus.OFFER), "the card must not call an offer closed").toBe("offer");
+    expect(OUTCOME_LABEL.offer).toBe("Offer");
+    expect(OUTCOME_LABEL.waiting).toBe("Awaiting reply");
+  });
+
+  it("every queried contact appears, with an outcome and a date", () => {
+    const list = [agent("a1"), agent("a2")];
+    const cards = queriedCards(list, [q("a1", { dateSent: "2026-03-01" }), q("a2", { dateSent: "2026-05-01", status: QueryStatus.OFFER })]);
+    expect(cards).toHaveLength(2);
+    expect(cards.every((c) => c.sentOn && c.outcome)).toBe(true);
+    expect(cards.find((c) => c.agent.id === "a2")?.outcome).toBe("offer");
+  });
+
+  /* ⚠️ DATE-DESCENDING, NEVER BY OUTCOME AND NEVER BY RATING. A list ordered by anything
+     evaluative is a recommendation wearing a search's clothes — which is why the stars came out. */
+  it("ordering is by date sent, most recent first", () => {
+    const list = [agent("a1", { starRating: 1 }), agent("a2", { starRating: 5 })];
+    const cards = queriedCards(list, [
+      q("a1", { dateSent: "2026-06-01", status: QueryStatus.REJECTED }),
+      q("a2", { dateSent: "2026-02-01", status: QueryStatus.OFFER }),
+    ]);
+    expect(cards.map((c) => c.agent.id), "an offer or a 5-star must not jump the queue")
+      .toEqual(["a1", "a2"]);
+  });
+
+  /* A writer who has queried someone three times is looking at where things stand now. */
+  it("a card reports the LATEST query, not the first", () => {
+    const cards = queriedCards([agent("a1")], [
+      q("a1", { id: "old", dateSent: "2026-01-01", status: QueryStatus.QUERIED }),
+      q("a1", { id: "new", dateSent: "2026-07-01", status: QueryStatus.OFFER }),
+    ]);
+    expect(cards).toHaveLength(1);
+    expect(cards[0].outcome).toBe("offer");
+    expect(cards[0].sentOn).toBe("2026-07-01");
+  });
+
+  it("set-aside contacts stay out, and un-queried ones are not invented into it", () => {
+    const list = [agent("a1"), agent("a2", { setAside: true }), agent("a3")];
+    expect(queriedCards(list, [q("a1"), q("a2")]).map((c) => c.agent.id)).toEqual(["a1"]);
+  });
+
+  it("the grid renders in both conditions and not in the cold start", () => {
+    expect(picker).toContain('<b>{allQueried ? "Already queried for this manuscript" : "Suggested — not yet queried"}</b>');
+    expect(picker, "the panel sits above the grid, not instead of it").toContain("{allQueried && (");
+    const cold = picker.slice(picker.indexOf('state === "cold"'), picker.indexOf("const field ="));
+    expect(cold, "the cold start stands as built").not.toContain("qc-grid");
+  });
+
+  /* A resubmission is just a query to someone already queried; a separate door would be two ways
+     to do one thing that could drift apart. */
+  it("selecting from either grid follows the same path", () => {
+    expect(picker.match(/onClick=\{\(\) => choose\(/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(picker).toContain("onClick={() => choose(c.agent)}");
+    expect(picker).toContain("onClick={() => choose(a)}");
+  });
+
+  /* No red: a pass is an outcome, not an error. And neither "awaiting" nor "your move" is better
+     than the other — one of them is simply your turn. */
+  it("the outcome is stated, not colour-coded into a judgement", () => {
+    expect(rule(".qc-acout-offer"), "an offer takes the app's good-state sage").toContain("#e9ede6");
+    expect(rule(".qc-acout-closed")).toContain("var(--faint)");
+    for (const sel of [".qc-acout", ".qc-acout-offer", ".qc-acout-move", ".qc-acout-closed"]) {
+      expect(rule(sel).toLowerCase(), `${sel} used a red`).not.toMatch(/#[a-f0-9]*(c0|d0|e0|f0)0000|red/);
+    }
+  });
+});
 
 /* ══ THE THREE STATES ══════════════════════════════════════════════════════════════════════ */
 describe("stage 1 has three states, and they are different situations", () => {
@@ -182,6 +267,10 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
     const code = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
     expect(code, "the legacy field is still mounted").not.toContain("<AgentSearchField");
     expect(picker.match(/placeholder="Search by name or agency/g)?.length ?? 0).toBe(1);
+    /* ⚠️ AND IT IS RENDERED ONCE. Folding the all-queried panel in from its early-return form
+       carried a second `{field}` with it and put two search inputs on the page — the exact fault
+       fix pack 2 §1a existed to remove, reintroduced by a copy-paste. One mount, one field. */
+    expect(picker.match(/\{field\}/g)?.length ?? 0, "the field must be mounted exactly once").toBe(1);
     const qaCode = quickAdd.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(qaCode, "the extracted form must own no search").not.toContain("Search by name");
     expect(picker, "the field's own link is the only one").toContain("Not listed? <button");
@@ -370,7 +459,11 @@ describe("art belongs to the cold start and nowhere else", () => {
      subject, not one. The number was stated three times over in one panel. */
   it("compact: capped width, one row of actions, and the count stated once", () => {
     expect(rule(".qc-allq")).toContain("max-width: 620px");
-    const allqRaw = picker.slice(picker.indexOf('state === "all-queried"'), picker.indexOf("1 · THE GRID"));
+    /* ⚠️ RE-ANCHORED: the panel no longer returns early — it now renders ABOVE the grid, which is
+       the whole of §1. Slicing to "1 · THE GRID" would have caught an empty string. */
+    const panelAt = picker.indexOf("{allQueried && (");
+    expect(panelAt, "the all-queried panel is missing").toBeGreaterThan(-1);
+    const allqRaw = picker.slice(panelAt, picker.indexOf('<div className="qc-pickcap">'));
     expect(allqRaw, "the heading names the state; the ring carries the figure")
       .toContain("Every contact queried");
     expect(allqRaw, "the count must not be restated in the heading").not.toContain("of {counts.total} contacts");
@@ -391,9 +484,14 @@ describe("art belongs to the cold start and nowhere else", () => {
       expect(ring, `the ring borrowed ${sage} — this state is neutral, not an achievement`)
         .not.toContain(sage);
     }
-    const allq = picker.slice(picker.indexOf('state === "all-queried"'), picker.indexOf("1 · THE GRID"));
-    expect(allq, "the search field must stay live — this is not a dead end").toContain("{field}");
+    const panelAt = picker.indexOf("{allQueried && (");
+    expect(panelAt, "the all-queried panel is missing").toBeGreaterThan(-1);
+    const allq = picker.slice(panelAt, picker.indexOf('<div className="qc-pickcap">'));
     expect(allq).toContain("a resubmission, or a second manuscript");
+    /* The field is rendered once for every state, above the panel — and now the GRID is too, so
+       this state has a browsable list rather than only the promise of one. */
+    expect(picker.slice(0, panelAt), "the search field must stay live — this is not a dead end")
+      .toContain("{field}");
   });
 
   /* A route that goes nowhere teaches the wrong shape of the app. */

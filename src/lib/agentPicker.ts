@@ -16,6 +16,8 @@
  * another surface.
  */
 import type { Agent, Query } from "../types";
+import { QueryStatus } from "../types";
+import { queryBucket } from "./queryAmbient";
 import { agentPrimary, agentAgencyLine } from "./agentDisplay";
 
 /**
@@ -179,4 +181,64 @@ export function moveInGrid(index: number, key: string, count: number): number | 
   if (key === "ArrowDown" || key === "ArrowRight") return Math.min(index + 1, count - 1);
   if (key === "ArrowUp" || key === "ArrowLeft") return index <= 0 ? -1 : index - 1;
   return null;
+}
+
+
+/* ══ THE ALREADY-QUERIED GRID ═══════════════════════════════════════════════════════════════
+   ⚠️ THE GRID IS UNCONDITIONAL; ONLY ITS CONTENTS SWITCH. It used to list un-queried contacts and
+   therefore vanished in the all-queried state — leaving the one state most in need of a browsable
+   list as the only state without one, beside a panel promising "you can still log a query to any
+   of them" and offering no way to do it but typing a name from memory. */
+
+export type QueryOutcome = "offer" | "waiting" | "move" | "closed";
+
+/**
+ * ⚠️ DERIVED FROM `queryBucket`, NOT BESIDE IT. That is the app's one split of a status into
+ * whose-turn-it-is, and the Queries filter bar, the command bar and the agent list all read it —
+ * a second opinion here would eventually disagree with all three.
+ *
+ * The single thing it adds is OFFER, which `queryBucket` deliberately folds into `closed` because
+ * the CTA engine has nothing further to ask of it. On a card that reports WHAT HAPPENED, "closed"
+ * for an offer would be plainly wrong: it is the best outcome there is, and the one a writer
+ * scanning this list is looking for.
+ */
+export function queryOutcome(status: QueryStatus): QueryOutcome {
+  return status === QueryStatus.OFFER ? "offer" : queryBucket(status);
+}
+
+export const OUTCOME_LABEL: Record<QueryOutcome, string> = {
+  offer: "Offer",
+  waiting: "Awaiting reply",
+  move: "Your move",
+  closed: "Closed",
+};
+
+export interface QueriedCard { agent: Agent; outcome: QueryOutcome; sentOn: string; status: QueryStatus }
+
+/**
+ * Every contact that has been queried, with what happened and when.
+ *
+ * ⚠️ ORDERED BY DATE SENT, MOST RECENT FIRST — never by outcome and never by rating. A list ordered
+ * by anything evaluative is a recommendation wearing a search's clothes, which is why the stars
+ * came out of this component in the first place. Recency is a fact about the list, not a judgement
+ * about the people in it.
+ *
+ * The card reports the agent's LATEST query. A writer who has queried someone three times is
+ * looking at where things stand now, not at a history.
+ */
+export function queriedCards(agents: Agent[], queries: Query[]): QueriedCard[] {
+  const out: QueriedCard[] = [];
+  for (const a of agents) {
+    if (a.setAside === true) continue;
+    const mine = queries.filter((q) => q.agentId === a.id && q.dateSent);
+    if (mine.length === 0) continue;
+    const latest = mine.slice().sort((x, y) => String(x.dateSent).localeCompare(String(y.dateSent))).pop()!;
+    out.push({
+      agent: a,
+      status: latest.status as QueryStatus,
+      outcome: queryOutcome(latest.status as QueryStatus),
+      sentOn: String(latest.dateSent),
+    });
+  }
+  return out.sort((x, y) => y.sentOn.localeCompare(x.sentOn));
 }

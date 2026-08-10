@@ -28,7 +28,7 @@ import { ArtSlot } from "../todo/ArtSlot";
 import { AgentQuickAdd } from "./AgentQuickAdd";
 import {
   pickerState, pickerCards, queriedCount, replyLine, moveInGrid,
-  dropdownResults, queryHistoryLabel,
+  dropdownResults, queryHistoryLabel, queriedCards, OUTCOME_LABEL,
 } from "../../lib/agentPicker";
 
 export interface AgentPickerProps {
@@ -76,6 +76,9 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
   const res = useMemo(() => pickerCards(agents, queries), [agents, queries]);
   const hits = useMemo(() => dropdownResults(agents, query), [agents, query]);
   const counts = queriedCount(agents, queries);
+  /* ⚠️ THE GRID IS UNCONDITIONAL — only its CONTENTS switch. It used to vanish in the all-queried
+     state, leaving the one state most in need of a browsable list as the only state without one. */
+  const done = useMemo(() => queriedCards(agents, queries), [agents, queries]);
 
   /* Outside click closes it. Bound only while it is open, so the picker adds no listener to a
      page that has no dropdown on it. */
@@ -230,10 +233,17 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
      of people, which is a neutral fact and often an uncomfortable one.
      ⚠️ AND THE FIELD STAYS LIVE. A resubmission, or a second manuscript to the same agent, is a
      real thing; this is a state with nothing to SUGGEST, not a state with nothing to do. */
-  if (state === "all-queried") {
-    return (
-      <div className="qc-pick">
-        {field}
+  /* ⚠️ THE PANEL SITS ABOVE THE GRID, NOT INSTEAD OF IT. It states the situation; the grid is what
+     you act on. Returning early here is what made the all-queried state a dead end in practice
+     while its own copy said it was not one. */
+  const allQueried = state === "all-queried";
+
+  /* ══ 1 · THE GRID ══════════════════════════════════════════════════════════════════════════ */
+  return (
+    <div className="qc-pick">
+      {field}
+      {allQueried && (
+<div className="qc-pick">
         <div className="qc-allq">
           <div className="qc-allqtop">
             {/* ⚠️ THE NUMBER LIVES IN THE RING, AND NOWHERE ELSE IN THIS PANEL. It was stated
@@ -267,15 +277,9 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
           </div>
         </div>
       </div>
-    );
-  }
-
-  /* ══ 1 · THE GRID ══════════════════════════════════════════════════════════════════════════ */
-  return (
-    <div className="qc-pick">
-      {field}
+      )}
       <div className="qc-pickcap">
-        <b>Not yet queried</b>
+        <b>{allQueried ? "Already queried for this manuscript" : "Suggested — not yet queried"}</b>
         <span>
           {manuscriptTitle ? <>for <i>{manuscriptTitle}</i> · </> : null}{res.total} contacts
         </span>
@@ -284,7 +288,38 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
         )}
       </div>
 
-      {(
+      {allQueried ? (
+        /* ⚠️ SELECTING A QUERIED AGENT IS THE SAME PATH AS SELECTING ANY OTHER. A resubmission is
+           just a query to someone already queried — it needs no separate door, and giving it one
+           would be two ways to do the same thing that could drift apart. */
+        <div className="qc-grid" id={GRID_ID} role="listbox" aria-label="Contacts you have queried" onKeyDown={onGridKey}>
+          {done.map((c, i) => (
+            <div
+              key={c.agent.id}
+              id={`qc-ac-${i}`}
+              role="option"
+              aria-selected={active === i}
+              tabIndex={active === i ? 0 : -1}
+              className={`qc-acard${active === i ? " on" : ""}`}
+              onClick={() => choose(c.agent)}
+              onFocus={() => setHl(i)}
+            >
+              <div className="qc-actop">
+                <span className="qc-acav" aria-hidden="true">{agentInitials(c.agent)}</span>
+                <span className="qc-acwho">
+                  <b>{agentPrimary(c.agent)}</b>
+                  <i>{agentAgencyLine(c.agent)}</i>
+                </span>
+              </div>
+              <div className="qc-acmeta">
+                {/* what happened, and when — the two things a writer scanning this list needs */}
+                <span className={`qc-acout qc-acout-${c.outcome}`}>{OUTCOME_LABEL[c.outcome]}</span>
+                <span className="qc-acrt">{queryHistoryLabel(c.agent, queries).replace(/^Queried /, "")}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="qc-grid" id={GRID_ID} role="listbox" aria-label="Your contacts" onKeyDown={onGridKey}>
           {res.cards.map((a, i) => {
             const shut = a.submissionStatus === SubmissionStatus.CLOSED;

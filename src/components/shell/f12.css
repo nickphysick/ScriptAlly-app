@@ -267,6 +267,14 @@
 .qc-acmeta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
 .qc-actag { display: inline-flex; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; }
 .qc-actag.shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
+/* ⚠️ THE OUTCOME IS STATED, NOT COLOUR-CODED INTO A JUDGEMENT. Offer takes the sage the app uses
+   for a good state and closed takes the muted grey it uses for a finished one; "awaiting reply"
+   and "your move" stay neutral, because neither is better than the other — one of them is simply
+   your turn. No red anywhere: a pass is an outcome, not an error. */
+.qc-acout { display: inline-flex; border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+.qc-acout-offer { background: #e9ede6; border-color: #b9c6b4; color: #5a6e58; }
+.qc-acout-move { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
+.qc-acout-closed { color: var(--faint); }
 .qc-acrt { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
 @media (prefers-reduced-motion: reduce) { .qc-acard { transition: none; } .qc-acard:hover { transform: none; } }
 
