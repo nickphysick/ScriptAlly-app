@@ -41,11 +41,19 @@ describe("the pane footer is GONE — one home per action", () => {
     expect(css, "the footer rule is still in the sheet").not.toContain(".qc-foot {");
   });
 
-  it("the props that served it went too, so nothing can quietly re-render them", () => {
-    for (const prop of ["onSave", "onCancel", "saving: boolean", "error: string | null"]) {
+  /* ⚠️ AMENDED — AND THE DISTINCTION IS SCOPE, NOT THE PROP. What was retired is a FOOTER BAR
+     across the pane carrying Save · Cancel · the requirement line: a second home for the header's
+     own actions, at the same scope, saying the same thing twice.
+     A per-STEP primary is a different control. It finishes the STACK; the header's finishes the
+     PANE. Two primaries are fine when they act at different scopes — and the step's takes the
+     softer treatment so the header's stays the louder claim. Cancel and the error line are still
+     the header's alone, and those are what this now pins. */
+  it("no pane-wide footer props — Cancel and the error line stay the header's alone", () => {
+    for (const prop of ["onCancel", "error: string | null"]) {
       expect(paneSrc, `${prop} survives on the pane`).not.toContain(prop);
     }
-    expect(queries, "the call site still passes footer props").not.toMatch(/<QueryCreatePane[\s\S]{0,400}onSave=/);
+    expect(paneSrc, "the retired bar's own class must stay gone").not.toContain("qc-foot");
+    expect(paneSrc, "but the LAST STEP may finish the stack").toContain("onSave?: () => void;");
   });
 });
 

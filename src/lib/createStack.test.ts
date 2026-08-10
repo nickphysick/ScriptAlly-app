@@ -28,10 +28,36 @@ const AGENT = { id: "a1", name: "William Tan", agency: "Foxglove Literary", resp
 const MS = [{ id: "m1", title: "Murphy's Day Out" }] as never[];
 
 describe("the three treatments", () => {
-  it("active is lifted and numbered, with the Enter hint in its head", () => {
+  /* ⚠️ A BUTTON, NOT AN INSTRUCTION. The head carried `ENTER TO ACCEPT ⏎` — a sentence standing in
+     for a control, which asks the writer to know a keyboard convention before they can move and
+     offers a pointer user nothing at all. Enter still commits the step; it simply stopped being
+     advertised, because the button now says what it does. */
+  it("active is lifted and numbered, and its head no longer instructs", () => {
     expect(rule(".qc-sec.qc-active")).toContain("box-shadow");
     expect(pane).toContain('<span className="qc-n"');
-    expect(pane).toContain("enterHint(");
+    const bare = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
+    expect(bare.toLowerCase(), "the instruction came back").not.toContain("enter to accept");
+    expect(bare, "and the hint helper went with it").not.toContain("enterHint(");
+  });
+
+  it("every step offers a control instead — Next by name, Save on the last", () => {
+    expect(pane).toContain("const stepFoot = (id: StepId) => {");
+    expect(pane, "naming the destination is worth more than a bare Next")
+      .toContain("Next: {STEP_SHORT[next]}");
+    expect(pane).toContain("{saving ? \"Saving…\" : \"Save query\"}");
+    expect(pane, "Back on every step after the first").toContain("const back = STEP_ORDER[stepIndex(id) - 1];");
+    /* Two primaries, different scopes — so the step's must be the softer treatment. */
+    expect(rule(".qc-next"), "the step primary must not shout louder than the header's")
+      .not.toContain("box-shadow");
+    expect(rule(".qc-sfoot .qc-back"), "Back reads left of the primary").toContain("order: -1");
+  });
+
+  /* ⚠️ THE KEY HANDLER STAYS. Removing the advertisement is not removing the behaviour — a writer
+     who already knows Enter works must not find it stopped working. */
+  it("and Enter still commits the step", () => {
+    expect(pane).toContain("const onStackKeyDown = (e: React.KeyboardEvent) => {");
+    expect(pane).toContain("if (!nextStep(active)) return;");
+    expect(pane).toContain("step();");
   });
 
   it("done shows a sage tick, the value at the right edge, and an EDIT", () => {

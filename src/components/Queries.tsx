@@ -3128,6 +3128,9 @@ export const Queries: React.FC<{
                      dirty-confirm — leaving the pane by any other door could lose typing in
                      silence. Both are omitted when the page has no navigation bridge, because a
                      route card that goes nowhere teaches the wrong shape of the app. */
+                  onSave={() => void saveCreate()}
+                  canSave={createReady}
+                  saving={createSaving}
                   onSeeAllAgents={onNavigate ? () => closeCreate(() => onNavigate("agents")) : undefined}
                   onDiscover={onNavigate ? () => closeCreate(() => onNavigate("agents", "Discover")) : undefined}
                 />

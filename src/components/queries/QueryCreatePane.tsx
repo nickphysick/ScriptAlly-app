@@ -23,7 +23,7 @@ import { Agent, Manuscript, Query } from "../../types";
 import { AgentSearchField } from "../AgentSearchField";
 import {
   STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL,
-  stepStates, stepIndex, advance, jumpTo, nextStep, enterHint, stackAvailable, type StepId,
+  stepStates, stepIndex, advance, jumpTo, nextStep, stackAvailable, type StepId,
 } from "../../lib/createSteps";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
@@ -63,6 +63,10 @@ export interface QueryCreatePaneProps {
   /** Stage 1's "See all" / Discover routes. OMITTED rather than rendered dead when absent. */
   onSeeAllAgents?: () => void;
   onDiscover?: () => void;
+  /** The last step's primary. Omitted → that step shows no save control (the header still has one). */
+  onSave?: () => void;
+  canSave?: boolean;
+  saving?: boolean;
 }
 
 const LABEL: React.CSSProperties = {
@@ -81,6 +85,9 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   onOpenQuery,
   onSeeAllAgents,
   onDiscover,
+  onSave,
+  canSave = false,
+  saving = false,
 }) => {
   const agent = useMemo(() => agents.find((a) => a.id === draft.agentId) ?? null, [agents, draft.agentId]);
   const set = (patch: Partial<QueryDraft>) => onChange({ ...draft, ...patch });
@@ -210,6 +217,35 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
     });
   };
 
+
+  /* ⚠️ A BUTTON, NOT AN INSTRUCTION. Each step's head carried `ENTER TO ACCEPT ⏎` — a sentence
+     standing in for a control, which asks the writer to know a keyboard convention before they can
+     move, and offers a pointer user nothing at all. Enter still commits the step; it simply stops
+     being advertised, because the button now says what it does.
+
+     ⚠️ AND IT NAMES ITS DESTINATION. "Next: What" is worth more than "Next" — the stack is short
+     enough that knowing where you are going is knowing how much is left. */
+  const stepFoot = (id: StepId) => {
+    const next = nextStep(id);
+    const back = STEP_ORDER[stepIndex(id) - 1];
+    return (
+      <div className="qc-sfoot">
+        {back && (
+          <button type="button" className="qc-back" onClick={() => jump(back)}>← Back</button>
+        )}
+        {next ? (
+          <button type="button" className="qc-next" onClick={step}>Next: {STEP_SHORT[next]}</button>
+        ) : onSave ? (
+          /* ⚠️ TWO PRIMARIES, DELIBERATELY, because they act at different scopes: this finishes the
+             STACK, the header's finishes the PANE. The step's takes the softer treatment so the
+             header's stays the louder of the two. */
+          <button type="button" className="qc-next" disabled={!canSave || saving} onClick={onSave}>
+            {saving ? "Saving…" : "Save query"}
+          </button>
+        ) : null}
+      </div>
+    );
+  };
 
   const jump = (id: StepId) => { const n = jumpTo(id, reached); setActive(n.active); setReached(n.reached); };
   const step = () => { const n = advance(active, reached); setActive(n.active); setReached(n.reached); };
@@ -368,7 +404,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               <div className="qc-shead">
                 <span className="qc-n" aria-hidden="true">{stepIndex("when") + 1}</span>
                 <h3 id="qc-h-when">{STEP_TITLE.when}{STEP_OPTIONAL.when && <span className="qc-opt"> · OPTIONAL</span>}</h3>
-                <span className="qc-enter">{enterHint("when")}</span>
               </div>
               <div className="qc-body">
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
@@ -470,6 +505,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             </div>
             </div>
           </div>
+              {stepFoot("when")}
             </>
           )}
         </section>
@@ -491,7 +527,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               <div className="qc-shead">
                 <span className="qc-n" aria-hidden="true">{stepIndex("what") + 1}</span>
                 <h3 id="qc-h-what">{STEP_TITLE.what}{STEP_OPTIONAL.what && <span className="qc-opt"> · OPTIONAL</span>}</h3>
-                <span className="qc-enter">{enterHint("what")}</span>
               </div>
               <div className="qc-body">
             <div style={{ marginBottom: 0 }}>
@@ -663,6 +698,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               </div>
             )}
           </div>
+              {stepFoot("what")}
             </>
           )}
         </section>
@@ -684,7 +720,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               <div className="qc-shead">
                 <span className="qc-n" aria-hidden="true">{stepIndex("notes") + 1}</span>
                 <h3 id="qc-h-notes">{STEP_TITLE.notes}{STEP_OPTIONAL.notes && <span className="qc-opt"> · OPTIONAL</span>}</h3>
-                <span className="qc-enter">{enterHint("notes")}</span>
               </div>
               <div className="qc-body">
             {/* ⚠️ THE NOTE FILLS ITS STEP (ref qc-stage1.html, variant A). It was a small inset
@@ -703,6 +738,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             {/* One line, beneath — what happens to it and who sees it. */}
             <p className="qc-notecap">Saved with this query · only you see it</p>
           </div>
+              {stepFoot("notes")}
             </>
           )}
         </section>
