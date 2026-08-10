@@ -193,15 +193,30 @@ describe("§1 · the lock", () => {
 });
 
 describe("§2 · the greeting", () => {
-  /* ⚠️ NO KICKER (v16 §1) — a muted DATE LINE replaces it. The week number and the manuscript
-     were repeating what the chrome already says. */
-  it("a muted date line sits above the greeting, and the name is plain ink", () => {
+  /* ⚠️ RETARGETED (audit pack P2). The kicker went first, for repeating what the chrome already
+     said; the muted DATE LINE that replaced it has now gone too, for a plainer reason — anyone
+     reading it knows what day it is. A subtitle sits BELOW the name instead, so the block reads
+     greeting → address → facts. */
+  it("the greeting leads, a subtitle sits under it, and the name is plain ink", () => {
     const html = render();
-    expect(html).toContain('class="os-dateline"');
-    expect(html).not.toContain("os-kicker");
     expect(html).toContain("Hello, Nick");
+    expect(html).toContain('class="os-sub2"');
+    expect(html).toContain("on your desk today?");
+    expect(html).not.toContain("os-kicker");
     // no italic-burgundy name: the h1 carries no <em>
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);
+  });
+
+  it("⚠️ the date line is GONE, not merely unstyled — no element and no rule", () => {
+    expect(render()).not.toContain("os-dateline");
+    expect(cssRules).not.toContain(".os-dateline {");
+  });
+
+  it("the subtitle is 13.5px muted brown, 6px under the name", () => {
+    const r = rule(".os-sub2");
+    expect(r).toContain("font-size: 13.5px");
+    expect(r).toContain("color: #8a7a6c");
+    expect(r).toContain("margin-top: 6px");
   });
 
   /* ⚠️ TWO PILLS NOW. The agents count moved to the counters card — one number, one home; two

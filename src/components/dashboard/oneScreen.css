@@ -258,8 +258,10 @@
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
-/* the muted date line replaces the kicker — it says the one thing the chrome does not */
-.os-dateline { font-size: 12.5px; color: #a4968a; letter-spacing: 0.01em; margin-bottom: 5px; }
+/* ⚠️ `.os-dateline` IS DELETED, NOT HIDDEN (audit pack P2). Its rule said the date line "says the
+   one thing the chrome does not" — which was true of the kicker it replaced and never true of the
+   date itself. A subtitle sits BELOW the name instead; the header is shorter for it. */
+.os-sub2 { font-size: 13.5px; color: #8a7a6c; margin-top: 6px; letter-spacing: 0.005em; }
 .os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; }
 .os-greet h1 {
   font-family: var(--font-serif); font-weight: 700; font-size: 46px;
@@ -349,7 +351,9 @@
    sit at the same three baselines as the text they cover. Widths are approximate by nature: the
    name is exactly what we are still waiting to learn. */
 .os-sk-h1 { width: 300px; height: 46px; border-radius: 10px; }
-.os-sk-sub { width: 206px; height: 19px; margin-top: 6px; }
+/* 20.3px is `.os-sub2`'s measured line box (13.5px Inter at the sheet's line-height), not a round
+   number — and rounding it to 19 is what put the whole second row 1.3px low. */
+.os-sk-sub { width: 206px; height: 20.3px; margin-top: 6px; }
 .os-sk-pills { display: flex; gap: 7px; margin-top: 14px; padding-bottom: 6px; }
 /* ⚠️ THE PILL WIDTHS SET WHERE THE COUNTERS CARD STARTS, which is not obvious and is why they are
    measured rather than picked. `.os-gl` is `flex: 0 0 auto`, so the greeting column is exactly as

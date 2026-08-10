@@ -24,7 +24,6 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
-import { longDate } from "../../lib/dashboardStats";
 import { achievementPill, Achievement, runStage, tenureLine, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
@@ -202,9 +201,13 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         <div className={`os-greet${loading ? " isload" : ""}`}>
           {loading && <Skel bars={["h", ""]} />}
           <div className="os-gl">
-            {/* ⚠️ NO KICKER (v16 §1). A muted DATE LINE sits above the greeting instead — the week
-                number and the manuscript were repeating what the chrome already says. */}
-            <div className="os-dateline">{longDate(now)}</div>
+            {/* ⚠️ NO KICKER, AND NO DATE LINE EITHER (audit pack P2). The kicker went first,
+                for repeating what the chrome already said; the muted date that replaced it has
+                now gone the same way, for a plainer reason — anyone reading it knows what day it
+                is. The header is shorter without it, and the greeting leads.
+                ⚠️ WHAT SITS UNDER THE NAME IS A QUESTION, NOT A FACT. Every other line in this
+                header states something derived; this one is the only piece of address on the
+                page, which is why it is a constant rather than something computed. */}
             <div className="os-grow2">
               {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
                   swing of that pendulum, recorded at each turn. */}
@@ -216,6 +219,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
                 </button>
               )}
             </div>
+            <div className="os-sub2">What&rsquo;s on your desk today?</div>
             <div className="os-pills">
               {/* §2: tenure · achievement. ⚠️ THE AGENTS PILL IS GONE — the counters card states
                   that figure now, and two homes for one number is how they come to disagree.
