@@ -911,3 +911,68 @@
   position: absolute; left: 20px; top: 8px; bottom: 8px; width: 1.5px;
   background: linear-gradient(#e8dcd0, rgba(232, 220, 208, 0));
 }
+
+/* ══ §P3 · MICRO-INTERACTIONS ═══════════════════════════════════════════════════════════════
+   ⚠️ TRANSFORM AND OPACITY ONLY (pack rule 7). Width, height, top and left force a layout
+   recalculation on every frame; on a page holding a live chart and two scrollers that is felt,
+   not theoretical. Everything below moves by transform or changes a colour — nothing resizes.
+
+   ⚠️ AND NOTHING HERE IS THE ONLY ROUTE TO AN AFFORDANCE. Every hover effect is decoration on a
+   control that is already visible and already reachable by keyboard, which is what makes the
+   reduced-motion block at the end safe: turning all of it off removes polish, never function. */
+
+/* cards — the shadow was already here; the lift is the addition */
+.os-card.os-lift { transition: box-shadow 0.16s ease, border-color 0.16s ease, transform 0.16s ease; }
+.os-card.os-lift:hover { transform: translateY(-2px); }
+
+/* activity — the cardlet steps aside, its dot swells on a slight overshoot */
+.os-tlev .os-cardlet { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.os-tlev:hover .os-cardlet { transform: translateX(2px); }
+.os-tlthread > * { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.os-tlev:hover .os-tlthread > * { transform: scale(1.15); }
+
+/* author tile — the plate lifts and tips off-square as the whole card is hovered */
+.os-msicon { transition: transform 0.18s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.os-aut:hover .os-msicon { transform: translateY(-3px) rotate(-2deg); }
+.os-aut-pic { transition: transform 0.16s ease; }
+.os-aut:hover .os-aut-pic { transform: scale(1.04); }
+
+/* counters — ⚠️ THE ICON MOVES, THE FIGURE NEVER DOES. A number that shifts under the cursor
+   reads as unreliable, and these are the page's headline figures. */
+.os-cic { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.os-counter:hover .os-cic { transform: scale(1.06) rotate(-3deg); }
+
+/* header pills — a 1px lift and a warmer edge */
+.os-p { transition: transform 0.14s ease, border-color 0.14s ease; }
+.os-p:hover { transform: translateY(-1px); }
+
+/* buttons — ⚠️ THE PRESSED STATE IS THE ONE USUALLY MISSED, and it is the only feedback a click
+   gives before its effect arrives. */
+.os-btn-mini, .os-see, .os-goal-num { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
+.os-btn-mini:hover, .os-see:hover, .os-goal-num:hover { transform: translateY(-1px); }
+.os-btn-mini:active, .os-see:active, .os-goal-num:active { transform: scale(0.97); }
+
+/* ⚠️ TASK ROWS KEEP THEIR PLAIN HOVER — background only. A hover-revealed action button was
+   tried on these rows and rejected; the status pill stays put and the ⋯ is always there. */
+
+/* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
+   ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule
+   above is equal specificity. Anything added below it is silently exempt.
+
+   ⚠️ NOTHING IS HOVER-REVEALED ON THIS PAGE, so collapsing the motion hides nothing. If a future
+   affordance is ever revealed by a hover or an animation, it must be made permanently visible
+   here — an affordance you can only reach by moving is unusable when motion is switched off. */
+@media (prefers-reduced-motion: reduce) {
+  .os-root *,
+  .os-root *::before,
+  .os-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  /* the entrance offsets must not be left applied — a 0.01ms animation still paints its `from` */
+  .os-card.enter, .os-greet.enter, .os-actv.enter .os-tlev { animation: none !important; }
+  .os-blocks i.f { animation: none !important; }
+}

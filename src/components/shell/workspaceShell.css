@@ -606,3 +606,49 @@
   .ws-window { border-radius: 0; border: 0; box-shadow: none; }
   .ws-pagebar { display: none; }
 }
+
+/* ══ POLISH P3 — shell micro-interactions (transform/opacity only, pack rule 7) ══════════════ */
+/* nav rows: the label steps right, the count swells — the ROW does not move, so the list stays
+   still under the cursor and only the thing you are pointing at responds */
+.ws-ni { transition: background-color 0.14s ease, color 0.14s ease; }
+.ws-ni > span:not(.ws-ic) { display: inline-block; transition: transform 0.14s ease; }
+.ws-ni:hover > span:not(.ws-ic) { transform: translateX(2px); }
+.ws-ni .sp-count { transition: transform 0.14s ease; }
+.ws-ni:hover .sp-count { transform: scale(1.06); }
+
+/* manuscript selector: the edge warms and the mark tilts */
+.ws-mspill { transition: border-color 0.16s ease, background-color 0.16s ease; }
+.ws-mspill:hover { border-color: #d8c9b4; }
+.ws-mspill img, .ws-mspill svg { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.ws-mspill:hover img, .ws-mspill:hover svg { transform: rotate(-3deg); }
+
+/* buttons — the pressed state, again the one usually missed */
+.ws-nbtn, .ws-upg { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
+.ws-nbtn:hover, .ws-upg:hover { transform: translateY(-1px); }
+.ws-nbtn:active, .ws-upg:active { transform: scale(0.97); }
+
+/* ⚠️ THE SEARCH FIELD MUST NOT CHANGE WIDTH ON FOCUS — a field that grows shoves the bar's
+   flanks and, on the dashboard, walks the centred pill off the midline. The ring is a shadow,
+   which costs no layout. */
+.sp-search { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+.sp-search:focus-visible { box-shadow: 0 0 0 3px rgba(185, 138, 118, 0.32); }
+
+/* keyboard parity — every interactive element in the shell answers focus-visible */
+.ws-panel a:focus-visible, .ws-panel button:focus-visible,
+.ws-main a:focus-visible, .ws-main button:focus-visible {
+  outline: 2px solid #b98a76;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ⚠️ LAST IN THE FILE, DELIBERATELY — equal specificity means source order decides, so a rule
+   added below this block would be exempt from it without anyone noticing. */
+@media (prefers-reduced-motion: reduce) {
+  .ws-app *, .ws-app *::before, .ws-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .ws-newmenu { animation: none !important; }
+}
