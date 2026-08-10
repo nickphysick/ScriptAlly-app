@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>Split button — guarded</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--parch:#fdfaf5;--ink:#2b2118;--muted:#8b7d70;--faint:#a99c90;--line:#ece4d6;--line2:#e3d9c9;
+        --burg:#7c3a2a;--pinkbg:#f5e2da;--stale:#efe7d8;--sagebg:#e9ede6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8e2da;font-family:Inter,sans-serif;color:var(--ink);padding:24px}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b5f54;margin:0 0 14px 4px}
+  .lbl em{font-family:Inter;text-transform:none;letter-spacing:0;font-size:12.5px;color:#7a6d61;font-style:normal}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:22px;max-width:1300px;position:relative}
+  .chead{padding:16px 24px 13px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:12px}
+  .ctag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:#fff;background:var(--burg);padding:4px 8px;border-radius:5px}
+  .cname{font-family:'Playfair Display',serif;font-size:19px;font-weight:700}
+  .cdesc{font-size:12.5px;color:var(--muted);margin-left:auto;max-width:660px;text-align:right}
+  .body{padding:22px 24px 26px}
+
+  /* anatomy */
+  .anat{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
+  .spec{width:250px}
+  .spec h4{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;color:var(--faint);margin:0 0 11px;text-transform:uppercase}
+  .spec p{font-size:12.5px;line-height:1.6;color:#5d5147;margin:11px 0 0}
+
+  .sp{height:34px;width:118px;border-radius:8px;background:#2b2118;display:flex;overflow:hidden;position:relative}
+  .sp .lft{flex:1;display:flex;align-items:center;justify-content:center;color:#f6f1ea;font-size:12.5px;font-weight:600}
+  .sp .seam{width:3px;background:rgba(255,255,255,.20)}
+  .sp .rgt{width:34px;display:flex;align-items:center;justify-content:center;color:#f6f1ea;font-size:9px}
+  .sp.armL .lft{background:#4a3628}
+  .sp.armR .rgt{background:#4a3628}
+  .sp.live .lft:hover{background:#4a3628}
+  .sp.live .rgt:hover{background:#4a3628}
+  .cal{position:relative;margin-top:9px;width:118px}
+  .cal i{position:absolute;top:0;height:7px;border-left:1px solid #c9b6a6;border-right:1px solid #c9b6a6;border-bottom:1px solid #c9b6a6}
+  .cal b{position:absolute;top:9px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#a98d7b;font-weight:400}
+
+  /* rows */
+  .row{display:grid;grid-template-columns:30px minmax(0,1fr) 144px 104px 118px;align-items:center;gap:14px;
+       padding:13px 24px;border-top:1px solid var(--line)}
+  .row:hover{background:#fdfaf5}
+  .tick{width:19px;height:19px;border-radius:50%;border:1.5px solid #d6ccbe}
+  .tt{font-size:14.5px;font-weight:600}
+  .ts{font-size:12px;color:var(--muted);margin-top:2px}
+  .pill{height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+        font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.11em}
+  .p-offer{background:var(--pinkbg);color:var(--burg)}
+  .p-wait{background:#f8ece6;color:#9c5a45}
+  .p-stale{background:var(--stale);color:#8a7654}
+  .p-task{background:var(--sagebg);color:#5a6e58}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;color:var(--faint);text-align:right}
+
+  /* menu */
+  .menu{position:absolute;width:224px;background:#fff;border:1px solid var(--line2);border-radius:11px;
+        box-shadow:0 10px 30px rgba(43,33,24,.16);padding:6px;z-index:9}
+  .mi{padding:8px 11px;border-radius:7px;font-size:13px;color:#3d3229;display:flex;align-items:center;gap:9px}
+  .mi:hover{background:#f7f1e8}
+  .mi.dz{color:#9c5a45}
+  .mi.dz:hover{background:#fbeee9}
+  .mi.off{color:#c4b8ab}
+  .mi .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint)}
+  .msec{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;color:var(--faint);padding:9px 11px 4px}
+  .gap{height:12px;position:relative}
+  .gap::after{content:'DEAD ZONE';position:absolute;left:11px;top:2px;font-family:'JetBrains Mono',monospace;
+              font-size:7.5px;letter-spacing:.12em;color:#d9cbbd}
+  .mdiv{height:1px;background:var(--line);margin:0 0 2px}
+
+  /* receipt */
+  .receipt{display:inline-flex;align-items:center;gap:14px;background:#2b2118;color:#f4ece2;border-radius:11px;
+           padding:12px 14px 12px 18px;font-size:13px;box-shadow:0 10px 28px rgba(43,33,24,.24)}
+  .receipt button{background:none;border:1px solid rgba(255,255,255,.34);color:#f6f1ea;border-radius:7px;
+                  height:28px;padding:0 13px;font-size:12px;font-weight:600;font-family:Inter;cursor:pointer}
+  .note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin:0 0 24px;
+        font-size:13px;line-height:1.7;color:#4a3e34;max-width:1300px}
+  .note b{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink)}
+  .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--burg);letter-spacing:.06em}
+</style>
+</head>
+<body>
+
+<div class="lbl">SPLIT BUTTON, GUARDED <em>— one control per row. The seam is defended four ways: a widened caret, a visible arm-before-press, a dead seam that fires nothing, and reversibility on everything the menu can do.</em></div>
+
+<!-- ANATOMY -->
+<div class="card">
+  <div class="chead"><span class="ctag">1</span><span class="cname">Anatomy</span>
+    <span class="cdesc">Hover the live example — the half you are over darkens before you press, so you always see which action is armed.</span></div>
+  <div class="body">
+    <div class="anat">
+      <div class="spec">
+        <h4>At rest</h4>
+        <div class="sp"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div>
+        <div class="cal" style="height:22px">
+          <i style="left:0;width:81px"></i><b style="left:26px">81px</b>
+          <i style="left:84px;width:34px"></i><b style="left:88px">34px</b>
+        </div>
+        <p>Caret widened from 28 to <span class="num">34PX</span> — comfortably past the 24px minimum, and the whole control is 118px so the column narrows rather than grows.</p>
+      </div>
+      <div class="spec">
+        <h4>Primary armed</h4>
+        <div class="sp armL"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div>
+        <p>Pointer over the left half. The label field lightens; the caret stays dark. You know what will fire before the press lands.</p>
+      </div>
+      <div class="spec">
+        <h4>Caret armed</h4>
+        <div class="sp armR"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div>
+        <p>Pointer over the caret. Only the caret lightens. The two states are never both lit and never both dark.</p>
+      </div>
+      <div class="spec">
+        <h4>Live</h4>
+        <div class="sp live"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div>
+        <p>A <span class="num">3PX</span> seam belongs to neither half and fires nothing. Both halves commit on release, not on press — slide off and nothing happens.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENU -->
+<div class="card" style="min-height:390px">
+  <div class="chead"><span class="ctag">2</span><span class="cname">The menu, and where danger sits</span>
+    <span class="cdesc">Nothing destructive sits within a pointer's drift of the caret. The first item under an opened menu is always safe.</span></div>
+  <div class="row" style="border-top:none"><span class="tick"></span>
+    <div><div class="tt">Jonathan Marsh silent for 852 days</div><div class="ts">No reply — consider closing</div></div>
+    <div class="pill p-stale">STALE</div><div class="meta">SILENT 852 DAYS</div>
+    <div class="sp armR"><div class="lft">Close</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+  <div class="menu" style="right:24px;top:104px">
+    <div class="msec">SNOOZE</div>
+    <div class="mi">◷ &nbsp;Tomorrow<span class="k">1</span></div>
+    <div class="mi">◷ &nbsp;Next week<span class="k">2</span></div>
+    <div class="msec">THIS QUERY</div>
+    <div class="mi">↗ &nbsp;Open the query</div>
+    <div class="mi">✎ &nbsp;Edit last entry</div>
+    <div class="gap"></div>
+    <div class="mdiv"></div>
+    <div class="mi dz">× &nbsp;Dismiss</div>
+    <div class="mi dz">⊘ &nbsp;Stop showing this kind</div>
+  </div>
+  <div style="padding:150px 24px 22px;max-width:660px;font-size:13px;line-height:1.7;color:#5d5147">
+    Safe verbs first, destructive verbs last, behind a rule and a <span class="num">12PX</span> dead zone that takes no click. The menu opens with nothing pre-focused, so Enter straight after opening does nothing. Number keys hit the snooze presets — the frequent move stays one keystroke even though it no longer has its own button.
+  </div>
+</div>
+
+<!-- OFFER + REVERSIBILITY -->
+<div class="card">
+  <div class="chead"><span class="ctag">3</span><span class="cname">Offers, and undo</span>
+    <span class="cdesc">The strongest guard is that nothing is final. Every menu verb writes a receipt you can reverse.</span></div>
+  <div class="row" style="border-top:none"><span class="tick"></span>
+    <div><div class="tt">Tom Ellery has made an offer</div><div class="ts">Murphy's Day Out</div></div>
+    <div class="pill p-offer">OFFER</div><div class="meta"></div>
+    <div class="sp"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+  <div style="padding:20px 24px 8px">
+    <div class="menu" style="position:static;width:224px;box-shadow:none">
+      <div class="msec">SNOOZE</div>
+      <div class="mi">◷ &nbsp;Tomorrow<span class="k">1</span></div>
+      <div class="mi off">◷ &nbsp;Next week</div>
+      <div class="msec">THIS QUERY</div>
+      <div class="mi">↗ &nbsp;Open the query</div>
+      <div class="gap"></div>
+      <div class="mdiv"></div>
+      <div class="mi off">× &nbsp;Dismiss</div>
+    </div>
+    <div style="font-size:12.5px;color:#8b7d70;margin-top:11px;max-width:224px">
+      An offer keeps tomorrow only, and dismiss is present but inert — an absent row is a puzzle, a greyed one is an answer.
+    </div>
+  </div>
+  <div style="padding:6px 24px 26px">
+    <div class="receipt">Dismissed — Jonathan Marsh silent for 852 days <button>Undo</button></div>
+    <div style="font-size:12.5px;color:#8b7d70;margin-top:12px;max-width:660px">
+      Eight seconds, bottom-left, one at a time. Nothing the menu can do is unrecoverable, which is what actually makes a split button safe — the seam guards stop the mis-click, and the receipt makes the ones that get through cost a click rather than a query.
+    </div>
+  </div>
+</div>
+
+<div class="note">
+<b>Why this holds up.</b> The mis-click risk I flagged was the caret sitting flush against a high-consequence primary. Three of the four guards work on the seam itself — widened target, arm-before-press, dead gutter, commit-on-release. The fourth works on the consequence: neither half of the split does anything final. The primary opens a recording flow you can cancel; the menu's destructive verbs are buried below a dead zone and write an undoable receipt.
+<br><br>
+<b>Keyboard.</b> Tab reaches the split as one stop; Enter fires the primary, <span class="num">↓</span> or <span class="num">ALT+↓</span> opens the menu — the standard split-button contract, so the caret is never the only route in. Snooze presets keep number keys, so the verb that lost its button did not lose its speed.
+<br><br>
+<b>Column cost.</b> 118px against 216px for the current four-slot grid. That is nearly 100px back to the title and pill columns on every row.
+</div>
+
+</body>
+</html>
