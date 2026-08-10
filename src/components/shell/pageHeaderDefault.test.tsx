@@ -6,7 +6,7 @@
  *
  * `PageHeader` is mounted by ten pages. Five of them — Manuscripts, Comparable titles, Import,
  * Help centre and Plans — are NOT meant to get the band, and they are protected by nothing except
- * the fact that they never pass `variant="band"`. That protection is only real if adding the band
+ * the fact that they never pass `variant="workspace"`. That protection is only real if adding the band
  * left the default path untouched.
  *
  * So this asserts the rendered markup of `variant="full"` **character for character**, against a
@@ -50,7 +50,7 @@ describe("⚠️ the default variant is frozen", () => {
     expect(render(<PageHeader variant="full" title="T" />)).toBe(render(<PageHeader title="T" />));
   });
 
-  it("⚠️ the band's props are INERT on the default — passing them changes nothing", () => {
+  it("⚠️ the workspace props are INERT on the default — passing them changes nothing", () => {
     // a page that adds a count before flipping its variant must not half-render the band
     expect(render(<PageHeader title="T" count="9 THINGS" mark="queries" />))
       .toBe(render(<PageHeader title="T" />));
@@ -61,39 +61,50 @@ describe("⚠️ the default variant is frozen", () => {
   });
 });
 
-describe("the band variant", () => {
+describe("the workspace variant", () => {
   it("renders title, count, mark and actions", () => {
     const out = render(
       <PageHeader
-        variant="band"
+        variant="workspace"
         title="Query Centre"
         mark="queries"
         count="22 ACTIVE · 3 AWAITING"
         actions={[{ label: "Export", onClick: () => {} }, { label: "Log query", onClick: () => {}, primary: true }]}
       />
     );
-    expect(out).toContain('class="pb"');
-    expect(out).toContain('class="pb-title">Query Centre');
+    expect(out).toContain('class="wsh"');
+    expect(out).toContain("Query Centre");
     expect(out).toContain("22 ACTIVE · 3 AWAITING");
     expect(out).toContain('data-mark="queries"');
-    expect(out).toContain("pb-btn-primary");
+    /* ⚠️ THE EXISTING INK BUTTON, REUSED — not a new class of this variant's own. */
+    expect(out).toContain("svh-btn-ink");
   });
 
   it("⚠️ NO count element at all when count is absent — not an empty strip", () => {
-    // an empty `.pb-count` would draw its 1px divider against the title with nothing after it
-    const out = render(<PageHeader variant="band" title="Settings" mark="settings" />);
-    expect(out).not.toContain("pb-count");
+    // an empty `.wsh-count` would draw its 1px divider against the title with nothing after it
+    const out = render(<PageHeader variant="workspace" title="Settings" mark="settings" />);
+    expect(out).not.toContain("wsh-count");
   });
 
-  it("⚠️ LAYOUT IS ON THE INNER ROW — `.pb` carries the ground, `.pb-row` the flex", () => {
-    const out = render(<PageHeader variant="band" title="T" mark="todo" />);
-    expect(out).toContain('<header class="pb"><div class="pb-row">');
+  it("⚠️ LAYOUT IS ON THE INNER ROW — `.wsh` carries the hairline, `.wsh-row` the flex", () => {
+    const out = render(<PageHeader variant="workspace" title="T" mark="todo" />);
+    expect(out).toContain('<header class="wsh"><div class="wsh-row">');
+  });
+
+  it("⚠️ NO DESCRIPTION → no sub element, and the title steps up — height unchanged", () => {
+    const solo = render(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
+    expect(solo).not.toContain("wsh-sub");
+    expect(solo).toContain("wsh-title--solo"); // the 25px step
+    const withSub = render(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
+    expect(withSub).toContain("wsh-sub");
+    expect(withSub).not.toContain("wsh-title--solo");
+    /* the 78px height is CSS, not markup — asserted in the browser, not here (see the report) */
   });
 
   it("every mark key renders", () => {
     for (const m of ["queries", "todo", "calendar", "contacts", "packages", "analytics",
       "noteboard", "discover", "settings"] as const) {
-      expect(render(<PageHeader variant="band" title="T" mark={m} />), m).toContain(`data-mark="${m}"`);
+      expect(render(<PageHeader variant="workspace" title="T" mark={m} />), m).toContain(`data-mark="${m}"`);
     }
   });
 });

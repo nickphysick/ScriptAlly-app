@@ -1,3 +1,6 @@
+> **Renamed (Amendment 3):** the "page band" is the `workspace` variant of `PageHeader`; classes
+> use a `wsh-` stem. This file keeps its filename so the history stays traceable.
+
 # PageBand — Step 0 audit (written incrementally)
 
 **Baseline at `93eb65c`, tree clean (0 dirty):** `tsc` CLEAN · **234 files / 3,778 passing, 2 skipped** ·

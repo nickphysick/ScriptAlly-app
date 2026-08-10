@@ -56,21 +56,25 @@ export interface PageHeaderProps {
   /** One variant remains; the prop survives (optional) so existing `variant="full"` call
    *  sites stand unchanged. */
   /**
-   * ⚠️ THE UNION WAS CLOSED ON PURPOSE, AND `"band"` RE-OPENS IT KNOWINGLY. `compact` and
-   * `greeting` were RETIRED by the flyouts pack on the conclusion that one full layout was right;
-   * this is not their return. The band is a 60px workspace header on a sage ground — a different
-   * OBJECT, not a second full layout — and pages opt in explicitly, one prop at a time.
+   * ⚠️ THE UNION WAS CLOSED ON PURPOSE, AND `"workspace"` RE-OPENS IT KNOWINGLY.
+   *
+   * `compact` and `greeting` were retired because they were SIZE VARIANTS OF THE SAME OBJECT — the
+   * same content at a different scale, which is a thing one layout should absorb rather than fork.
+   * `workspace` is a different OBJECT with different content rules: it carries a mark and a mono
+   * count strip the default has no concept of, and it drops the tool row entirely. That is why
+   * re-opening the union is right here and would not be right for a third size. **This is not
+   * licence to re-add compact or greeting.**
    *
    * ⚠️ `"full"` MUST RENDER IDENTICALLY TO BEFORE. That contract is what protects Manuscripts,
    * Comparable titles, Import, Help centre and Plans: they are not exempted by a list, they simply
    * never pass the new value. `pageHeaderDefault.test.tsx` fails if a pixel of it moves.
    */
-  variant?: "full" | "band";
+  variant?: "full" | "workspace";
   title: string;
   description?: string;
-  /** The band's mono count strip — DATA, never prose. Ignored by the default variant. */
+  /** The workspace header's mono count strip — DATA, never prose. Ignored by the default. */
   count?: React.ReactNode;
-  /** The band's 30px mark. Required when `variant="band"`; ignored otherwise. */
+  /** The workspace header's 38px mark. Required when `variant="workspace"`; ignored otherwise. */
   mark?: MarkName;
   actions?: PageHeaderActions;
   /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
@@ -109,7 +113,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   compact = false,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
-  const bandActs = (actions ?? []).slice(0, 2);
+  const wsActs = (actions ?? []).slice(0, 2);
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -179,34 +183,42 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
   /**
    * ⚠️ THE BAND RETURNS EARLY, and that is the mechanism protecting the default. Threading
-   * `variant === "band"` conditionals through the markup below would put the two layouts in one
+   * `variant === "workspace"` conditionals through the markup below would put the two layouts in one
    * expression, and every future edit to either would risk the other. Two returns, one contract:
    * nothing beneath this block can change what `"full"` renders.
    *
-   * ⚠️ LAYOUT IS ON THE INNER ROW, NEVER THE OUTER ELEMENT. `.pb` owns background and show/hide;
-   * `.pb-row` owns `display:flex`. A single-class layout rule sharing an element with a
+   * ⚠️ LAYOUT IS ON THE INNER ROW, NEVER THE OUTER ELEMENT. `.wsh` owns the hairline and show/hide;
+   * `.wsh-row` owns `display:flex`. A single-class layout rule sharing an element with a
    * multi-class visibility rule is how the last two mockups broke.
    */
-  if (variant === "band") {
+  if (variant === "workspace") {
     return (
-      <header className="pb">
-        <div className="pb-row">
-          {mark && <span className="pb-mark"><OneScreenMark name={mark} /></span>}
-          <h1 className="pb-title">{title}{titleAdornment}</h1>
-          {/* ⚠️ ABSENT COUNT RENDERS NOTHING — not an empty strip, which would draw a bare divider
-              against the title. */}
-          {count != null && count !== false && <div className="pb-count">{count}</div>}
-          <span className="pb-grow" aria-hidden="true" />
-          {(bandActs.length > 0 || actionsSlot) && (
-            <div className="pb-acts">
-              {bandActs.length === 0 && actionsSlot}
-              {bandActs.map((action, i) => (
+      <header className="wsh">
+        <div className="wsh-row">
+          {mark && <span className="wsh-mark"><OneScreenMark name={mark} /></span>}
+          {/* ⚠️ TITLE OVER DESCRIPTION IN ONE COLUMN, with the count to its RIGHT — the count is
+              not sacrificed to make room for prose. The page would lose data to gain a sentence. */}
+          <div className="wsh-txt">
+            <h1 className={`wsh-title${description ? "" : " wsh-title--solo"}`}>
+              {title}{titleAdornment}
+            </h1>
+            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING and the title steps up to 25px. The header
+                stays 78px either way — it must not shrink, or two pages side by side read as one
+                being broken rather than one being different. */}
+            {description && <p className="wsh-sub">{description}</p>}
+          </div>
+          {count != null && count !== false && <div className="wsh-count">{count}</div>}
+          <span className="wsh-grow" aria-hidden="true" />
+          {(wsActs.length > 0 || actionsSlot) && (
+            <div className="wsh-acts">
+              {wsActs.length === 0 && actionsSlot}
+              {wsActs.map((action, i) => (
+                /* ⚠️ THE EXISTING BUTTON STYLES, REUSED — `svh-btn-ink` and `svh-btn-ghost` both
+                   already exist. This variant changes WHERE the button sits, not what it is. */
                 <button
                   key={i}
                   type="button"
-                  /* ⚠️ INK IS THE PRIMARY HERE, NOT PINK — the new grammar: ink starts something,
-                     pink records something that happened. */
-                  className={action.primary ? "pb-btn pb-btn-primary" : "pb-btn"}
+                  className={action.primary ? "svh-btn svh-btn-ink" : "svh-btn svh-btn-ghost"}
                   onClick={action.onClick}
                   disabled={action.disabled}
                 >

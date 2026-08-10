@@ -79,12 +79,6 @@
      competes with every card sitting near it. */
   --ws-ground: #f7f4ee;
   --ws-edge: #e9e2d7;
-  /* ⚠️ THE PAGE BAND'S DEEP SAGE — the ONE value in this pack that is not an existing token.
-     Every other band value (title ink, count ink, mark stroke) reads the ink tokens already here:
-     the sage is a GROUND the app sits on, not a colour that tints its type. No green-cast text. */
-  --pb-fill-a: #c2ccbf;
-  --pb-fill-b: #bcc7b9;
-  --pb-edge: #adb8aa;
   /* THE TWO CAPSULES (app-shell pack, Baked 3). There are two now, not three — the panel folded
      into the column — and both fills come from the sage-desk mockup. The old cream trio was
      tuned against a cream ground; against sage it read as three washed-out greys. */
