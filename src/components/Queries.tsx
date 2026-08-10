@@ -317,6 +317,16 @@ export const Queries: React.FC<{
     { id: string; again?: { dateSent: string; sendMethod: SubmissionMethod; reminder: ReminderChoice; manuscriptId: string } } | null
   >(null);
   const [settleId, setSettleId] = useState<string | null>(null);
+  /* ⚠️ THE EXIT PLAYS ON WRITE SUCCESS, NEVER ON CLICK. A failed save must not have already shown
+     a row that then vanishes, so nothing animates until `addQuery` resolves: the button holds its
+     pressed state and the takeover stays put while the write is in flight. A spinner in place is
+     honest; an optimistic exit is a claim the app cannot yet make. */
+  const [createExiting, setCreateExiting] = useState(false);
+  /* The row that has just landed — carries the sage ring for one beat. */
+  const [landedId, setLandedId] = useState<string | null>(null);
+  /* Focus returns to the control that opened the takeover — leaving it on a removed node drops the
+     writer at the top of the document. */
+  const logTriggerRef = useRef<HTMLButtonElement>(null);
   const [graceRow, setGraceRow] = useState<{ id: string; leaving: boolean } | null>(null);
 
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
@@ -457,6 +467,19 @@ export const Queries: React.FC<{
       }
       if (createDraft.journal.trim()) await addJournalEntry(res.id, createDraft.journal.trim());
       const newId = res.id;
+      /* ⚠️ HERE, AND ONLY HERE — past every early return, so a rejected write leaves the takeover
+         open with its error and no row anywhere. */
+      if (!logAnother) setCreateExiting(true);
+      setLandedId(newId);
+      /* THE RECEIPT IS THE APP'S EXISTING TOAST, not a second primitive. `showToast` already owns
+         one-at-a-time replacement and the undo affordance elsewhere in this app; a receipt built
+         here would be a parallel system that drifts. */
+      {
+        const savedAgent = agents.find((a) => a.id === createDraft.agentId) ?? null;
+        showToast({
+          message: `Query to ${agentPrimary(savedAgent ?? ({} as never)) || "that agent"} logged`,
+        });
+      }
       /* The list is hidden while creating, so there is no draft row to shed a skin or to fly
          from. The effect below waits for the real row to arrive; the list returning WITH it —
          settling — is the confirmation. */
@@ -2736,7 +2759,7 @@ export const Queries: React.FC<{
               <div className="qc-welcome">
                 <h3>Your first query starts here</h3>
                 <p>Track every submission — who has it, what you sent, and when to follow up.</p>
-                <button type="button" className="f12-btn-pri" onClick={() => openCreate()}>
+                <button ref={logTriggerRef} type="button" className="f12-btn-pri" onClick={() => openCreate()}>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
                   Log your first query
                 </button>
@@ -2894,7 +2917,7 @@ export const Queries: React.FC<{
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
-                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${landedId === q.id ? " qc-landed" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
                       // The collapse's own end fires the toast — no timer schedules either.
@@ -2946,7 +2969,19 @@ export const Queries: React.FC<{
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}`} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
+          <div
+            /* ⚠️ THE STATE CLASS GOES ON THE CONTAINER, not merely used as a selector — a class
+               that exists only in the stylesheet animates nothing. */
+            className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createExiting ? " qc-exit-save" : ""}`}
+            /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
+               drift the moment the timing changed. Reduced motion sets `animation: none`, which
+               still fires `animationend` — so the cut-to-final-frame path closes too. */
+            onAnimationEnd={(e) => {
+              if (!createExiting || e.animationName !== "qc-exit-save") return;
+              setCreateExiting(false);
+              closeCreate();
+              logTriggerRef.current?.focus();
+            }} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
                here put a bordered, shadowed card around all of them — a card inside the frame,

@@ -1241,3 +1241,36 @@
 @media (prefers-reduced-motion: reduce) {
   .f12-root .f12-body .f12-pane { transition: none; }
 }
+
+
+/* ══ CREATE MODE · THE SAVE TRANSITION (fix pack 5 §3, ref 82-create-exits.html) ═════════════
+   The claim this motion makes is "what you filled in is now that line", so the two halves
+   OVERLAP rather than run in sequence: the takeover lifts away while the row is already landing.
+   Played in sequence it would read as two events — a form closing, and separately a row arriving —
+   which is the opposite of the thing being said.
+
+   ⚠️ LITERAL PERCENTAGES IN THE KEYFRAME SELECTORS. A `var()` in a keyframe percentage fails
+   SILENTLY: the whole block is dropped and the animation simply does not play, with nothing in the
+   console. It has cost this project a bug before. */
+@keyframes qc-exit-save {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-18px) scale(0.985); }
+}
+.qc-exit-save { animation: qc-exit-save 220ms cubic-bezier(0.5, 0, 0.75, 0) both; }
+
+/* ⚠️ THE RING HOLDS TO 55%, THEN SETTLES. It is a receipt, not a highlight: it has to last long
+   enough to be SEEN arriving after the eye has followed the takeover upward, which is why it does
+   not begin fading immediately. */
+@keyframes qc-row-land {
+  0%   { opacity: 0; transform: translateY(-10px); box-shadow: inset 0 0 0 1px #8a9e88, 0 0 0 4px rgba(138, 158, 136, 0.18); }
+  55%  { opacity: 1; transform: translateY(0);     box-shadow: inset 0 0 0 1px #8a9e88, 0 0 0 4px rgba(138, 158, 136, 0.18); }
+  100% { opacity: 1; transform: translateY(0);     box-shadow: inset 0 0 0 0 rgba(138, 158, 136, 0), 0 0 0 0 rgba(138, 158, 136, 0); }
+}
+.f12-row.qc-landed { animation: qc-row-land 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+
+/* ⚠️ REDUCED MOTION CUTS TO THE FINAL FRAME — no animation, not a shortened one. The takeover
+   simply goes; the row is simply there. A 60ms version of a departure is still a departure. */
+@media (prefers-reduced-motion: reduce) {
+  .qc-exit-save { animation: none; opacity: 0; }
+  .f12-row.qc-landed { animation: none; }
+}
