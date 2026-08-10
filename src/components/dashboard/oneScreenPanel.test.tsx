@@ -276,3 +276,45 @@ describe("the columns bleed, and nothing moves", () => {
     expect(col).toContain("overflow: hidden");
   });
 });
+
+/**
+ * ⚠️ A BAND MUST MEET ITS CARD'S EDGES — and the height tests could not see that it didn't.
+ *
+ * THE FAULT: `.os-lead` kept the `padding: 13px 18px 9px` it wore as a plain card when the band
+ * arrived, so `.os-ahead` sat 18px in from each side and 13px down, inside a card that was also
+ * `overflow: visible` — a square band floating within a rounded card. Every band still measured
+ * 51px, so every test passed.
+ *
+ * A band's geometry is its POSITION as much as its size. Browser-measured after the fix: left, top
+ * and width identical to the card on all three (deltas 0.00).
+ */
+describe("the bands meet their cards' edges", () => {
+  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  /* ⚠️ ANCHOR AT A RULE BOUNDARY. `indexOf(".os-lead {")` also matches INSIDE
+     `.os-midrow .os-lead {`, so the naive helper read the midrow's height rule and reported the
+     card as unclipped. The slice-anchoring trap, caught by its own assertion. */
+  const blk2 = (sel: string) => {
+    const re = new RegExp(`(^|[}\\n])\\s*\\${sel}\\s*\\{([^}]*)\\}`, "m");
+    const m = re.exec(bare);
+    expect(m, `${sel} must exist as a rule of its own`).not.toBeNull();
+    return m![2];
+  };
+
+  it("⚠️ every banded card carries NO padding — the padding belongs to its body", () => {
+    for (const sel of [".os-lead", ".os-tasks", ".os-actv"]) {
+      const b = blk2(sel);
+      const p = /padding:\s*([^;]+)/.exec(b)?.[1]?.trim();
+      expect(p === undefined || p === "0", `${sel} padding is "${p}" — it would inset the band`).toBe(true);
+    }
+  });
+
+  it("⚠️ every banded card CLIPS, or the band's corners escape the card radius", () => {
+    for (const sel of [".os-lead", ".os-tasks", ".os-actv"]) {
+      expect(blk2(sel), `${sel} must clip`).toContain("overflow: hidden");
+    }
+  });
+
+  it("the chart's padding lives in its body instead", () => {
+    expect(blk2(".os-lbody")).toMatch(/padding:\s*12px 18px 10px/);
+  });
+});
