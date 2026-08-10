@@ -34,7 +34,6 @@ import {
   quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt,
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
-import { isProUser } from "../../lib/assistFill";
 import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
@@ -46,7 +45,10 @@ import { HeroSession } from "./FocusedSession";
 import { RITUAL_LINES, progressPct } from "../../lib/sessionStage";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
-import { AssistantBand, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
+/* ⚠️ `AssistantBand` IS NO LONGER IMPORTED (fix pack, 10 Aug) — it is unmounted from this page.
+   The MODAL is still reachable, so `AssistantModal` stays; the component and its file survive
+   untouched for whoever re-places the band (units first — see reports/STATE.md). */
+import { AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { BrandDatePicker } from "../forms";
@@ -1202,11 +1204,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           />
         ) : renderList()}
 
-          {/* THE ASSISTANT BAND — the page's closing note, and the ONE Pro surface here.
-              (It sits below the board, at full column width, as it always has.) */}
-          {!isProUser(currentUser) && (
-            <AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />
-          )}
+          {/* ⚠️ THE ASSISTANT BAND IS UNMOUNTED FROM THIS PAGE (fix pack, 10 Aug) — a PLACEMENT
+              decision, not a deletion. `AssistantBand` and `AssistantPromo.tsx` are untouched, and
+              the modal it opened is still reachable from the same state. It sat as the last child
+              of `.tdb-centre`, taking its own height PLUS the column's row-gap out of the scroll
+              zone on every render — on a page whose complaint was that the window was too short.
+
+              ⚠️ AND ITS FIGURES ARE WRONG, WHICH IS WHY IT MUST NOT SIMPLY BE MOVED. It was fed
+              `tiles.housekeeping` and `shownY` — MEMBER-unit counts, every sweep uncollapsed —
+              while "Outstanding" beside it counts CARDS. That is the "38 of your 44 tasks" seen
+              against an Outstanding of 16 in production. Whoever re-places it fixes the units
+              first; the note is in reports/STATE.md. Not fixed here: this pack is four fixes and
+              a units change to a Pro surface is neither of them. */}
           </div>{/* .tdb-centre */}
         </TasksPageLayout>
         {/* THE WORKSPACE SHELL (todo-fix48) — Today, back in its corner: a floating card

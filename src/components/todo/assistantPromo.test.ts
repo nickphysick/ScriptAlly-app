@@ -58,14 +58,24 @@ describe("briefing-slot P2 — THE ASSISTANT BAND (supersedes the Pro strip)", (
     expect(band).not.toMatch(/\d+ of your \d+/);
     expect(band).not.toMatch(/hours?/i);
   });
-  it("gating + wiring: non-Pro only, at the page FOOT, opening the preview modal", () => {
-    expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain("<AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
-    expect(page.indexOf("<AssistantBand")).toBeGreaterThan(page.indexOf('<div className="tdb-board">'));
+  /**
+   * ⚠️ THE BAND IS UNMOUNTED FROM THE TO-DO LIST (fix pack, 10 Aug) — a PLACEMENT decision, not a
+   * deletion. It sat as the last child of `.tdb-centre`, taking its own height plus the column's
+   * row-gap out of the scroll zone, on a page whose complaint was that the window was too short.
+   *
+   * ⚠️ AND IT MUST NOT SIMPLY BE MOVED BACK: it was fed `tiles.housekeeping` and `shownY`, which
+   * are MEMBER-unit counts (every sweep uncollapsed), while "Outstanding" beside it counts CARDS
+   * — the "38 of your 44 tasks" against an Outstanding of 16 seen in production. Units first.
+   * The COMPONENT is untouched and everything below still covers it.
+   */
+  it("the band is not mounted on the To-do list, and its gate went with it", () => {
+    expect(page).not.toContain("<AssistantBand");
+    expect(page).not.toContain("{!isProUser(currentUser) && (");
     expect(page).not.toContain("tdb-stickerseat");
+    /* the MODAL is still reachable — only the band's seat was given up */
+    expect(page).toContain("<AssistantModal");
   });
-  it("EXACTLY ONE Pro surface on the page — and NO dismiss control (it is the closing note)", () => {
-    expect((page.match(/<AssistantBand/g) ?? []).length).toBe(1);
+  it("NO other Pro surface crept onto the page in its place", () => {
     for (const gone of ["ProStrip", "ProSticker", "ProBanner", "tdb-prostrip", "spine-pro", "tdb-colo"]) {
       expect(page).not.toContain(gone);
       expect(css).not.toContain(gone);

@@ -33,9 +33,12 @@ const shell = ruleIn(shellCss);
    disagree on the live page. The side container's rows are the one narrowing. */
 
 describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", () => {
-  it("gated to non-Pro only; the count is live-derived; it opens the assistant preview", () => {
-    expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain("<AssistantBand hkCount={tiles.housekeeping} totalCount={shownY} onPreview={() => setAssistantOpen(true)} />");
+  it("the component keeps its copy and its gate — it is unmounted from the page, not deleted", () => {
+    /* ⚠️ UNMOUNTED FROM THE TO-DO LIST (fix pack, 10 Aug): a placement decision. What this case
+       protects is the COMPONENT, which is untouched; its seat on this page is gone because it was
+       taking height from a scroll zone that was already too short — and because its counts are in
+       the wrong unit (see assistantPromo.test.ts). */
+    expect(page).not.toContain("<AssistantBand");
     const band = promo.slice(promo.indexOf("export const AssistantBand"), promo.indexOf("export const AssistantModal"));
     expect(band).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
     expect(band).toContain("onClick={onPreview}>Meet the assistant");

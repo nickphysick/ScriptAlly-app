@@ -1,4 +1,42 @@
-**Last updated: 9 August 2026 (twentieth pass — the Tasks consolidation, Phases 5 and 6).**
+**Last updated: 10 August 2026 (twenty-first pass — the To-do list fix pack).**
+
+## To-do list fix pack — commit 0 + Fixes 1–3 (report: `reports/todo-fix-pack.md`)
+
+`ecf2ff1` (Fix 1) → `d10f728` (Fix 2) → `<Fix 3>`, over commit 0's two refs. **Baseline was green
+and stayed green: 222 files, 3523 passed | 2 skipped.**
+
+⚠️ **THE TREE WAS DIRTY THROUGHOUT AND THAT WAS AUTHORISED** (pre-launch, dev only). Two other
+sessions had work in this checkout — one with 29 paths staged, one unstaged plus untracked. Every
+commit used `git commit --only -- <paths>`, and their index came through at 29 paths each time.
+
+- **⚠️ THE PINNED BLOCK ATE THE PAGE: 282px → 204px** at 1440×900, so the scroll zone grew
+  570 → 648px (seven rows → eight). The complaint was "it will not scroll"; the chain has been
+  correct since 9 Aug and the real fault was that the window was short. Gaps only — no control
+  moved, resized or restyled. **The two largest are SHARED tokens** (`--tdb-chrome-gap` 44 → 16,
+  `--tdb-hero-gap` 26 → 12), so the Calendar and the Noteboard tighten with it and stay level:
+  that is the alignment contract working, not a leak.
+- **⚠️ `.tpl-head` WAS DECLARED TWICE** in tasksLayout.css — width in one rule, `flex: 0 0 auto`
+  eighty lines below — both single-class. They never overlapped, which is how such a pair survives
+  until the day it does. Folded.
+- **⚠️ THE COMPOSER WAS NEVER FIXED-HEIGHT.** It is a flex ITEM of `.tdb-centre` and declared no
+  `flex`, so it took `0 1 auto`, was shrunk below its content, and its own `overflow: hidden` cut
+  the tag row. `flex: 0 0 auto` is the whole fix. It also gained a footer row (hint · Cancel ·
+  Save), Enter-to-commit from the title, and the house INERT grammar on the disabled Save —
+  `opacity: .45` dimmed burgundy to a washed-out burgundy, which reads as broken rather than
+  unavailable.
+- **⚠️ THE ASSISTANT BAND IS UNMOUNTED FROM THIS PAGE — AND MUST NOT SIMPLY BE MOVED BACK.** It was
+  fed `tiles.housekeeping` and `shownY`, which are MEMBER-unit counts (every sweep uncollapsed),
+  while "Outstanding" beside it counts CARDS. **That is the "38 of your 44 tasks" against an
+  Outstanding of 16 seen in production** — the same units bug board-optimise P5 fixed elsewhere.
+  **Whoever re-places the band fixes the units first.** The component and its file are untouched;
+  the modal is still reachable. Not fixed here: a units change to a Pro surface is its own job.
+
+### ⚠️ The parked board-era sweep has a dependency — do not delete `todoBoard.css`
+
+`TodoBoard.tsx` and `todoBoard.css` stay parked (session A holds `src/lib/todoBoard.ts`). But the
+stylesheet is **not dead**: `PortalMenu` — live on this page, and the host of Fix 4's split menu —
+renders `.tbd-menu2` / `.tbd-mi`, and those rules live in `todoBoard.css`. Deleting the file in a
+sweep would strip the styling off a menu that is very much in use. Consume, never edit.
 
 ## Tasks consolidation — P5 + P6 ARE IN; ⚠️ P7 STANDS ALONE AND IS NOT STARTED
 
