@@ -802,14 +802,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       <div className={`agl-page${mobilePushOpen ? " agl-mpushed" : ""}`}>
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
-       <div className="agl-inner">
-        {/* The standard page header — FULL variant (flyouts pack P3: the compact variant is
-            retired; one header grammar app-wide). The description resurrects the page's own
-            original sub line. */}
+       {/* ⚠️ THE HEADER SITS OUTSIDE `.agl-inner`, and that is the fix for the inset rule.
+           `.agl-inner` is a centred `max-width` column, so a header inside it stops at the content
+           gutter and takes its bottom border with it — the rule read as a page divider rather than
+           the window's own edge. The workspace header spans the window; the CONTENT is what is
+           columned. */}
         <div className="agl-head-slot">
         <PageHeader
           variant="workspace"
           mark="contacts"
+          markSize="xl"
           /* ⚠️ DERIVED, NEVER A LITERAL. `agentAxisCounts` is the same derivation the toolbar's
              facet counts read, so the header cannot disagree with the filters beneath it. And it
              reports TOTALS — it does not react to the filters, which describe the view. */
@@ -819,6 +821,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
         />
         </div>
+       <div className="agl-inner">
+        {/* The standard page header — FULL variant (flyouts pack P3: the compact variant is
+            retired; one header grammar app-wide). The description resurrects the page's own
+            original sub line. */}
+
 
         <AgentToolbar
           search={search}

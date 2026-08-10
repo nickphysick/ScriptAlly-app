@@ -21,6 +21,7 @@
  * shipping as body text. The placeholder shows the slot NAME in mono, nothing more.
  */
 import React, { useState } from "react";
+import rolodexMark from "../../assets/shell/agents-on-file-icon.png";
 
 /** The four marks, and the brief each one is waiting for. */
 export type MarkName =
@@ -70,8 +71,19 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   todo: { label: "check", icon: <><path d="M4 6h11M4 12h11M4 18h7" /><path d="M17 16l2 2 4-4" /></> },
   /* a calendar leaf, one date circled */
   calendar: { label: "cal", icon: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 11h18" /></> },
-  /* a single figure, filed — a person you know, not a crowd */
-  contacts: { label: "figure", icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a8 8 0 0 1 16 0v1" /></> },
+  /**
+   * a rolodex — cards, a spine and a phone. THE BRIEF IS THIS COMMENT AND NEVER RENDERS.
+   *
+   * ⚠️ THE SAME ASSET SERVES THE DASHBOARD'S "Agents on file" COUNTER at 44px. One drawing, two
+   * mounts, and the sizes live at the call sites — the slot's box is independent of its contents,
+   * which is what lets 44 and 64 share a file. The monoline figure below stays as the degrade
+   * path, per the ArtSlot rule: a 404 must not leave a broken-image glyph in a header.
+   */
+  contacts: {
+    label: "figure",
+    src: rolodexMark,
+    icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a8 8 0 0 1 16 0v1" /></>,
+  },
   /* a wrapped parcel, string and all */
   packages: { label: "parcel", icon: <><path d="M3 8h18v12H3z" /><path d="M3 8l3-5h12l3 5M12 8v12" /></> },
   /* a trend line rising across a ruled page */

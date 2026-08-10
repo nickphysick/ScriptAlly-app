@@ -181,6 +181,7 @@
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: description first, then count. Title and
    actions never shrink — a clipped action is unusable and a clipped title is a lie. */
 .wsh-mark { flex: 0 0 38px; }
+.wsh-mark--xl { flex: 0 0 64px; }
 .wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
 .wsh-title {
   font-family: var(--font-serif); font-size: 23px; font-weight: 500;
@@ -214,3 +215,27 @@
   box-shadow: none;
 }
 .wsh-mark .os-mark svg { width: 20px; height: 20px; stroke: var(--shell-ink); stroke-width: 1.5; }
+
+/**
+ * ⚠️ THE 64px MARK IS BARE — no plate, no border. The drawing carries its own outline, and a
+ * parchment plate at this size competes with it rather than seating it.
+ *
+ * ⚠️ AND IT MULTIPLIES, because the artwork is drawn on WHITE PAPER, not transparency. On this
+ * header the ground is the window's white, so multiply is a no-op visually — but it is what keeps
+ * the mark honest if the header ever sits on anything else, and it costs nothing here.
+ *
+ * ⚠️ THE ENTRANCE ANIMATION IS THE TRAP. `.agl-head-slot` carries `animation: rise … both`, and a
+ * transform on ANY ancestor isolates the blend group — the white field would flash for the whole
+ * 0.28s. The mark is held at opacity 0 until the animation ends, exactly as the dashboard marks
+ * are. See the CLAUDE.md entry; do not remove this as redundant.
+ */
+.wsh-mark--xl .os-mark {
+  width: 64px; height: 64px; flex: 0 0 64px;
+  background: none; border: none; box-shadow: none; border-radius: 0;
+}
+.wsh-mark--xl .os-mark img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  mix-blend-mode: multiply;
+}
+.wsh-mark--xl .os-mark svg { width: 34px; height: 34px; }  /* the degrade path, still centred */
+.agl-anim .agl-head-slot .wsh-mark--xl .os-mark img { opacity: 0; }

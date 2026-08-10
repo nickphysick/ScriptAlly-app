@@ -76,6 +76,12 @@ export interface PageHeaderProps {
   count?: React.ReactNode;
   /** The workspace header's 38px mark. Required when `variant="workspace"`; ignored otherwise. */
   mark?: MarkName;
+  /**
+   * ⚠️ `"xl"` IS 64px AND BARE — no plate. The illustrated marks carry cards, a spine and a phone;
+   * below about 44px that turns to mush, and at 64px a bordered parchment plate is far too heavy
+   * beside the drawing's own outline. Per-page while the illustrations arrive one at a time.
+   */
+  markSize?: "md" | "xl";
   actions?: PageHeaderActions;
   /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
    *  Additive and optional — every existing call site is unchanged. */
@@ -106,6 +112,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   description,
   count,
   mark,
+  markSize = "md",
   actions,
   titleAdornment,
   actionsSlot,
@@ -197,7 +204,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
          must never be one — see the knob-versus-rule note in pageHeader.css. */
       <header className={`wsh${description ? "" : " wsh--solo"}`}>
         <div className="wsh-row">
-          {mark && <span className="wsh-mark"><OneScreenMark name={mark} /></span>}
+          {mark && <span className={`wsh-mark wsh-mark--${markSize}`}><OneScreenMark name={mark} /></span>}
           {/* ⚠️ TITLE OVER DESCRIPTION IN ONE COLUMN, with the count to its RIGHT — the count is
               not sacrificed to make room for prose. The page would lose data to gain a sentence. */}
           <div className="wsh-txt">
