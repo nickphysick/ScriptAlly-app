@@ -1459,3 +1459,15 @@ what stops a reader meeting a metaphor.
 **A corollary that keeps catching things:** a suggestion region carries **no count**. A number
 invites you to work through a pile; these are the most pressing few, and the list you committed
 to is the only one with a length worth stating.
+
+## The Query Centre reference panel — the marginalia treatment (Cappuccino only, fix pack 2 §5; ref `69-reference-treatments.html`, treatment C)
+
+**⚠️ READ-ONLY SURFACES RECEDE BY DROPPING THEIR AFFORDANCE SIGNALS, NOT BY TAKING A NEW HUE — and the text colour never changes.** The panel was reading as a second card competing with the step beside it; it should read as something you *consult*. Fills say "surface"; rules say "record". So the caption bar, the stat strip, the policy line and the history row drop their backgrounds and keep their separating rules, and the rim becomes a marginal annotation. The ground stays parchment and the values stay ink — **a reference panel that is harder to read has failed at the only thing it does.**
+
+- **Tokens live in the theme scope**, `.t-capp` in `index.css`, never the base sheet: `--qc-ref-rim` (1px dashed burgundy at .28), `--qc-ref-rule` (1px solid burgundy at .13), `--qc-ref-plate` (`#f7f2e9`, the wish-list pull-quote). Consumed by a `.t-capp`-scoped block in `f12.css`.
+- **⚠️ NO SLATE AND NO COOL TINT.** Slate already means **Pro** in this app and must not come to mean "reference" as well — one colour, one meaning.
+- **⚠️ THE DASHED RIM IS PERMITTED HERE AND NOWHERE ELSE.** Dashed means draft/placeholder everywhere else (the `ArtSlot` commissioning box). This is the single sanctioned exception, scoped to one component in one theme so it cannot spread.
+- **No drop shadow.** The panel does not sit above the page; rim, rules and type carry it.
+- **The sage status pill is untouched** — it is a state signal, not part of the surface treatment.
+- **⚠️ RECEDED IS NOT DISABLED.** No `pointer-events`, no `tabindex`, no dimmed links: the panel stays keyboard-navigable and its values keep the standard ink token. Captions, labels and the footer stamp are the muted ones, and already were.
+- **Bold Pastille and Editorial are untouched.** Bold is locked and correct in dev; Editorial is monochrome and has nothing to recede from. Both keep the base sheet's dotted rim.

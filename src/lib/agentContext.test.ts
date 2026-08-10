@@ -172,6 +172,86 @@ describe("the panel reads as quieter than the form", () => {
   });
 });
 
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ THE MARGINALIA TREATMENT — CAPPUCCINO ONLY (fix pack 2 §5, ref 69 treatment C).
+   Read-only surfaces recede by dropping their AFFORDANCE SIGNALS, not by taking a new hue, and
+   the text colour never changes — the whole point is that it gets read.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the reference panel reads as marginalia, not as a second card", () => {
+  const index = read("../index.css");
+
+  /* Tokens in the THEME scope, never the base sheet — that is what keeps Bold and Editorial out
+     of it without a single override of their own. */
+  it("the tokens live under .t-capp, and the base sheet holds none of them", () => {
+    const capp = index.slice(index.indexOf(".t-capp {"), index.indexOf("--bd: #d8cebf"));
+    expect(capp).toContain("--qc-ref-rim: 1px dashed rgba(124, 58, 42, 0.28)");
+    expect(capp).toContain("--qc-ref-rule:");
+    expect(capp).toContain("--qc-ref-plate:");
+    expect(css, "a theme token in the base sheet would apply to every theme")
+      .not.toContain("--qc-ref-rim:");
+  });
+
+  /* ⚠️ THE DASHED RIM IS PERMITTED HERE AND NOWHERE ELSE — dashed means draft/placeholder
+     everywhere else in this app. Scoping it to one component in one theme is what stops it
+     spreading. */
+  it("the dashed rim is scoped to .t-capp, and the base rim is untouched", () => {
+    expect(css).toContain(".t-capp .qc-ctx { border: var(--qc-ref-rim); }");
+    expect(rule(".qc-ctx"), "the unthemed rim must stay dotted").toContain("dotted");
+    const dashed = [...css.matchAll(/^[^\n]*dashed[^\n]*$/gm)].map((m) => m[0]);
+    for (const line of dashed) {
+      if (line.includes("--qc-ref-rim") || line.includes("*")) continue;
+      expect(line, "a second dashed rim would dilute the exception").not.toContain(".qc-ctx");
+    }
+  });
+
+  /* ⚠️ VALUES KEEP THE STANDARD INK. Dimming them is the one change that would cost the panel its
+     job. Captions and the stamp are the muted ones, and already were. */
+  it("values keep the ink token; only captions are muted", () => {
+    expect(css).toContain(".t-capp .qc-ctxv { color: var(--ink); }");
+    expect(rule(".qc-ctxk"), "captions are the muted ones").toContain("var(--muted)");
+    expect(rule(".qc-ctxfoot"), "the footer stamp too").toContain("var(--faint)");
+  });
+
+  it("no drop shadow — the panel does not sit above the page", () => {
+    expect(rule(".qc-ctx")).not.toContain("box-shadow");
+    const capp = css.slice(css.indexOf(".t-capp .qc-ctx"), css.indexOf("QUIET REFERENCE"));
+    expect(capp, "the treatment must not add one either").not.toContain("box-shadow");
+  });
+
+  /* Fills say "surface"; rules say "record". */
+  it("fills go, rules stay", () => {
+    for (const sel of [".t-capp .qc-glance", ".t-capp .qc-ctxstats", ".t-capp .qc-ctxpolicy", ".t-capp .qc-ctxhist", ".t-capp .qc-ctxg"]) {
+      expect(rule(sel), `${sel} kept its fill`).toContain("background: none");
+    }
+    expect(rule(".t-capp .qc-glance")).toContain("border-bottom: var(--qc-ref-rule)");
+    expect(rule(".t-capp .qc-ctxpolicy"), "a sentence should read as one").toContain("font-style: italic");
+    expect(rule(".t-capp .qc-ctxquote"), "a pull-quote is set apart, not a row")
+      .toContain("var(--qc-ref-plate)");
+  });
+
+  /* ⚠️ RECEDED IS NOT DISABLED. It is reference, and reference gets read and clicked. */
+  it("the panel stays reachable — no pointer-events, no tabindex, no dimming", () => {
+    const capp = css.slice(css.indexOf(".t-capp .qc-ctx"), css.indexOf("QUIET REFERENCE"));
+    expect(capp).not.toContain("pointer-events");
+    expect(capp, "a receded panel must not be a dimmed one").not.toContain("opacity");
+    expect(panel, "its controls must stay in tab order").not.toContain('tabIndex={-1}');
+    expect(panel, "the wish-list toggle is a real button").toContain('<button type="button" className="qc-ctxmore"');
+  });
+
+  /* Bold is locked and correct in dev; Editorial is monochrome and has nothing to recede from. */
+  it("Bold Pastille and Editorial are untouched", () => {
+    for (const theme of [".t-bold .qc-ctx", ".t-edn .qc-ctx", ".t-bold .qc-glance", ".t-edn .qc-glance"]) {
+      expect(rule(theme), `${theme} gained an override`).toBe("");
+    }
+  });
+
+  /* The pill is a STATE signal, not part of the surface treatment. */
+  it("and the sage status pill is left alone", () => {
+    expect(rule(".qc-ctxpill")).toContain("#e9ede6");
+    expect(rule(".t-capp .qc-ctxpill"), "the treatment must not reach it").toBe("");
+  });
+});
+
 /* ══ THE PANEL COLUMN ══════════════════════════════════════════════════════════════════════ */
 describe("the panel is a fixed column that does not scroll away", () => {
   /* ⚠️ FIXED, NOT PROPORTIONAL. It was 52% / rest, which made the reference column grow with the

@@ -491,6 +491,34 @@
    would leave those users with a different design, not a calmer one. */
 .qc-ctx { flex: 0 0 322px; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; margin: 10px; display: flex; flex-direction: column; border: 1.5px dotted #cdbfa9; border-radius: 16px; overflow: hidden; background: #fbf9f5; transform: rotate(-0.6deg); }
 
+/* ══ THE MARGINALIA TREATMENT — CAPPUCCINO ONLY (ref 69, treatment C) ══════════════════════
+   ⚠️ THE PANEL RECEDES BY LOSING ITS AFFORDANCE SIGNALS, NOT BY CHANGING COLOUR. Fills say
+   "surface"; rules say "record". So the caption bar, the stat strip, the policy line and the
+   history row all drop their backgrounds and keep their separating rules, and the rim becomes a
+   dashed burgundy annotation. The GROUND stays parchment and the TEXT stays ink — a reference
+   panel that is harder to read has failed at the only thing it does.
+   ⚠️ THE DASHED RIM IS PERMITTED HERE AND NOWHERE ELSE. Dashed means draft/placeholder everywhere
+   else in this app (the ArtSlot's commissioning box); this is the one sanctioned exception, and
+   it is scoped to a single component in a single theme so it cannot spread.
+   ⚠️ AND THE PANEL IS STILL REACHABLE. Receded is not disabled: no pointer-events, no tabindex,
+   no dimming of its links. It is reference, and reference gets read and clicked. */
+.t-capp .qc-ctx { border: var(--qc-ref-rim); }
+.t-capp .qc-glance { background: none; border-bottom: var(--qc-ref-rule); }
+/* the disc was a device for lifting a FILL; with no fill it is a smudge */
+.t-capp .qc-glance::after { display: none; }
+.t-capp .qc-ctxstats { background: none; border-bottom: var(--qc-ref-rule); }
+.t-capp .qc-ctxstat { border-right: var(--qc-ref-rule); }
+.t-capp .qc-ctxstat:last-child { border-right: none; }
+/* a sentence, and now it reads as one */
+.t-capp .qc-ctxpolicy { background: none; font-style: italic; }
+.t-capp .qc-ctxhist { background: none; border: 0; border-radius: 0; border-top: var(--qc-ref-rule); border-bottom: var(--qc-ref-rule); padding-left: 0; padding-right: 0; }
+.t-capp .qc-ctxg { background: none; }
+/* the wish list keeps its plate — a pull-quote is a thing set apart, not a row */
+.t-capp .qc-ctxquote { background: var(--qc-ref-plate); }
+/* ⚠️ VALUES KEEP THE STANDARD INK. Dimming them would be the one change that costs the panel its
+   job; captions and the footer stamp are the muted ones, and they already were. */
+.t-capp .qc-ctxv { color: var(--ink); }
+
 /* ⚠️ QUIET REFERENCE (qc-focus.html panel 2). Ground #fbf9f5, hairline border, NO SHADOW — a
    shadow implies floating, and this sits back. Values inside are Inter, not Playfair: serif
    numerals here read as a second headline and pull the eye off the form.
