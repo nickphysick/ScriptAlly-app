@@ -27,7 +27,7 @@ import { SubmissionStatus } from "../../types";
 import { ArtSlot } from "../todo/ArtSlot";
 import { AgentQuickAdd } from "./AgentQuickAdd";
 import {
-  pickerState, pickerCards, queriedCount, replyLine, moveInGrid,
+  pickerState, pickerCards, replyLine, moveInGrid,
   dropdownResults, queryHistoryLabel, nameplates, foldedLine, plateName,
 } from "../../lib/agentPicker";
 
@@ -75,7 +75,6 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
      set — filtering it as you type made the page reshuffle under the writer mid-keystroke. */
   const res = useMemo(() => pickerCards(agents, queries), [agents, queries]);
   const hits = useMemo(() => dropdownResults(agents, query), [agents, query]);
-  const counts = queriedCount(agents, queries);
   /* ⚠️ THE GRID IS UNCONDITIONAL — only its CONTENTS switch. It used to vanish in the all-queried
      state, leaving the one state most in need of a browsable list as the only state without one. */
   const plates = useMemo(() => nameplates(agents, queries), [agents, queries]);
@@ -236,53 +235,20 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
      of people, which is a neutral fact and often an uncomfortable one.
      ⚠️ AND THE FIELD STAYS LIVE. A resubmission, or a second manuscript to the same agent, is a
      real thing; this is a state with nothing to SUGGEST, not a state with nothing to do. */
-  /* ⚠️ THE PANEL SITS ABOVE THE GRID, NOT INSTEAD OF IT. It states the situation; the grid is what
-     you act on. Returning early here is what made the all-queried state a dead end in practice
-     while its own copy said it was not one. */
+  /* ⚠️ ONE BLOCK, NOT TWO. A panel stating the situation above a fold stating the same situation
+     was the same fact twice in two containers; the block below is the whole of this state. */
   const allQueried = state === "all-queried";
 
   /* ══ 1 · THE GRID ══════════════════════════════════════════════════════════════════════════ */
   return (
     <div className="qc-pick">
       {field}
-      {allQueried && (
-<div className="qc-pick">
-        <div className="qc-allq">
-          <div className="qc-allqtop">
-            {/* ⚠️ THE NUMBER LIVES IN THE RING, AND NOWHERE ELSE IN THIS PANEL. It was stated
-                three times over — ring, heading and route — which made a small fact look like the
-                subject of the page. The heading names the STATE; the ring carries the figure. */}
-            <span className="qc-allqring" aria-hidden="true">{counts.done}</span>
-            <div className="qc-allqtx">
-              <div className="qc-allqn">Every contact queried</div>
-              <p>
-                Every agent on your contact list has been queried
-                {manuscriptTitle ? <> for <i>{manuscriptTitle}</i></> : null}. You can still log a
-                query to any of them — a resubmission, or a second manuscript.
-              </p>
-            </div>
-          </div>
-          {/* ⚠️ COMPACT INLINE ACTIONS ON ONE ROW, not three full-width cards. At card width the
-              panel outranked the search field that does the actual work, and this state is not
-              the subject of the page — it is the absence of one. Second lines are gone with the
-              cards: "Straight into your list" only restated its own label. The contacts route
-              keeps its count, because a number is information rather than description. */}
-          <div className="qc-routes">
-            <button type="button" className="qc-route" onClick={onAddAgent}>Add a new agent</button>
-            {onDiscover && (
-              <button type="button" className="qc-route" onClick={onDiscover}>Find agents in Discover</button>
-            )}
-            {onSeeAll && (
-              <button type="button" className="qc-route" onClick={onSeeAll}>
-                Review your contacts <span>{counts.total}</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-      )}
+      {/* ⚠️ NO SECTION HEADING IN THE ALL-QUERIED CONDITION. It named the manuscript and counted
+          the contacts, both of which the block's own sentence says — and a heading over a folded
+          block labels a thing that is not on screen. */}
+      {!allQueried && (
       <div className="qc-pickcap">
-        <b>{allQueried ? "Already queried for this manuscript" : "Suggested — not yet queried"}</b>
+        <b>Suggested — not yet queried</b>
         <span>
           {manuscriptTitle ? <>for <i>{manuscriptTitle}</i> · </> : null}{res.total} contacts
         </span>
@@ -290,48 +256,62 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
           <button type="button" className="qc-pickall" onClick={onSeeAll}>See all →</button>
         )}
       </div>
+      )}
 
       {allQueried ? (
-        /* ⚠️ NOT A GRID. A grid is the shape this component uses to RECOMMEND, and nothing here is
-           being recommended — they have all been queried. Folded, the state is one sentence and
-           the names are there if wanted. */
+        /* ⚠️ ONE BLOCK. The panel, the section heading and the fold line each stated that every
+           contact had been queried, for this manuscript, and how many there were — four ways of
+           telling the writer something they understood by the second. The counts are the only
+           thing here they cannot work out for themselves. */
         <div className="qc-fold">
           <p className="qc-foldline">
-            {foldedLine(plates, manuscriptTitle)}
+            {foldedLine(plates, manuscriptTitle)}{" "}
+            {/* a link at the end of the sentence, not a fourth button competing with the routes */}
             <button type="button" className="qc-foldbtn" aria-expanded={showPlates} onClick={() => setShowPlates((o) => !o)}>
               {showPlates ? "Hide them" : "Show them"}
             </button>
           </p>
+          <p className="qc-foldsub">
+            You can still log a query to any of them — a resubmission, or a second manuscript.
+          </p>
+
+          {/* ⚠️ THE PLATES OPEN INSIDE THIS BLOCK, ABOVE THE ACTIONS, so the three routes stay at
+              the foot in both states and there is no second container to space against. */}
           {showPlates && (
             <>
-              {/* ⚠️ DIMMED AT REST, FORWARD ON HOVER OR KEYBOARD FOCUS — available, not suggested.
-                  `focus-within` is what keeps that true for a keyboard: a set that only lit under a
-                  pointer would leave a tabbing writer reading it at rest permanently. */}
               <div className="qc-plates">
                 {plates.map((p) => (
                   <button
                     key={p.agent.id}
                     type="button"
                     className={`qc-plate qc-plate-${p.state}`}
-                    /* the agency belongs here, not on the plate — a nameplate carries a name */
                     title={agentAgencyLine(p.agent) || undefined}
                     onClick={() => choose(p.agent)}
                   >
                     <i className="qc-platedot" aria-hidden="true" />
                     <span className="qc-platename">{plateName(p.agent)}</span>
-                    {/* an unparseable or absent date renders NOTHING — never "Invalid Date" */}
                     {p.sentLabel && <span className="qc-platedate">{p.sentLabel}</span>}
                   </button>
                 ))}
               </div>
-              {/* ⚠️ THE STATE IS NAMED ONCE, not sixteen times. A legend beneath a set is how you
-                  say what the dots mean without repeating it on every plate. */}
               <p className="qc-platekey">
                 <span><i className="qc-platedot qc-plate-active" aria-hidden="true" /> Active query</span>
                 <span><i className="qc-platedot qc-plate-previous" aria-hidden="true" /> Previously queried</span>
               </p>
             </>
           )}
+
+          <div className="qc-routes">
+            <button type="button" className="qc-route" onClick={onAddAgent}>Add a new agent</button>
+            {onDiscover && (
+              <button type="button" className="qc-route" onClick={onDiscover}>Find agents in Discover</button>
+            )}
+            {/* ⚠️ NO COUNT HERE. The block's sentence already gives it; a second copy on a button
+                is the same number in two places, which is how two numbers start disagreeing. */}
+            {onSeeAll && (
+              <button type="button" className="qc-route" onClick={onSeeAll}>Review your contacts</button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="qc-grid" id={GRID_ID} role="listbox" aria-label="Your contacts" onKeyDown={onGridKey}>

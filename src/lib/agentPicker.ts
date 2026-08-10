@@ -264,11 +264,19 @@ export function nameplates(agents: Agent[], queries: Query[]): Nameplate[] {
   return out.sort((x, y) => (y.sentOn || "").localeCompare(x.sentOn || ""));
 }
 
-/** "You have queried all 16 contacts for this manuscript — 9 still waiting, 7 concluded." */
+/**
+ * "You've queried all 16 contacts for Murphy's Day Out — 12 still waiting, 4 concluded."
+ *
+ * ⚠️ THE ONLY PLACE THE COUNT AND THE BOOK ARE STATED. A panel heading, a count ring, a section
+ * heading and this line all said the same fact — that every contact has been queried, for this
+ * manuscript, and how many there are — which is four ways of telling the writer something they
+ * had already understood by the second. The counts are the one thing here they cannot work out
+ * for themselves; everything else was decoration, and it is gone.
+ */
 export function foldedLine(plates: Nameplate[], manuscriptTitle?: string): string {
   const total = plates.length;
   const active = plates.filter((p) => p.state === "active").length;
   const book = manuscriptTitle ? ` for ${manuscriptTitle}` : "";
   const noun = total === 1 ? "contact" : "contacts";
-  return `You have queried all ${total} ${noun}${book} — ${active} still waiting, ${total - active} concluded.`;
+  return `You've queried all ${total} ${noun}${book} — ${active} still waiting, ${total - active} concluded.`;
 }

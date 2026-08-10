@@ -73,7 +73,7 @@ describe("the folded all-queried block", () => {
       q("a1", { status: QueryStatus.QUERIED }), q("a2", { status: QueryStatus.REJECTED }),
     ]);
     const line = foldedLine(plates, "Murphy's Day Out");
-    expect(line).toContain("all 2 contacts for Murphy's Day Out");
+    expect(line).toContain("You've queried all 2 contacts for Murphy's Day Out");
     expect(line).toContain("1 still waiting, 1 concluded");
   });
 
@@ -87,6 +87,30 @@ describe("the folded all-queried block", () => {
       q("a3", { dateSent: "" }),
     ]);
     expect(plates.map((p) => p.agent.id)).toEqual(["a2", "a1", "a3"]);
+  });
+
+  /* ⚠️ THE FACT IS STATED ONCE. A panel heading, a count ring, a section heading and the fold line
+     all said that every contact had been queried, for this manuscript, and how many there were —
+     four ways of telling the writer something they understood by the second. The counts are the
+     only thing here they cannot work out for themselves; everything else was decoration. */
+  it("the count and the manuscript name each appear exactly once", () => {
+    const allq = picker.slice(picker.indexOf("{allQueried ? ("), picker.indexOf("      ) : ("));
+    expect(allq, "the sentence is the one place either is stated").toContain("foldedLine(plates, manuscriptTitle)");
+    expect(allq.match(/manuscriptTitle/g)?.length ?? 0, "the book is named once").toBe(1);
+    expect(allq, "the count ring came back").not.toContain("qc-allqring");
+    expect(allq, "the panel heading came back").not.toContain("Every contact queried");
+    expect(allq, "the section heading came back").not.toContain("Already queried for this manuscript");
+    expect(allq, "the route must not restate the count").not.toContain("{counts.total}");
+    expect(picker, "the panel container went with it").not.toContain('className="qc-allq"');
+  });
+
+  /* One container, so the routes stay at the foot in both states and there is no second box to
+     space against. */
+  it("the plates open INSIDE the block, above the actions", () => {
+    const allq = picker.slice(picker.indexOf("{allQueried ? ("), picker.indexOf("      ) : ("));
+    expect(allq.indexOf("qc-plates"), "the plates must precede the routes")
+      .toBeLessThan(allq.indexOf("qc-routes"));
+    expect(allq.match(/className="qc-fold"/g)?.length ?? 0, "one container").toBe(1);
   });
 
   it("one plate per contact, and the block renders only in the all-queried condition", () => {
@@ -372,7 +396,10 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
        pane entirely (fix pack 2 §1), so what this now pins is that the selector itself is the one
        source, and that no caller anywhere hands a hardcoded set in its place. */
     expect(pane, "the empty set is what made them disagree").not.toContain("new Set<string>()");
-    expect(picker, "the picker derives, never receives, the queried set").toContain("queriedCount(agents, queries)");
+    /* ⚠️ RE-POINTED: `queriedCount` is no longer rendered — the block's own sentence states the
+       figures, derived from the same plates it lists. The rule survives: one derivation, from
+       `queriedAgentIds`, and nothing is handed a hardcoded set. */
+    expect(picker, "the picker derives, never receives, the queried set").toContain("nameplates(agents, queries)");
   });
 
   /* ⚠️ NO FIT SCORE, STAR RATING OR "RECOMMENDED" ORDERING ANYWHERE IN THE PICKER — a baked
@@ -508,27 +535,17 @@ describe("art belongs to the cold start and nowhere else", () => {
   /* ⚠️ THE RING IS MUTED GREY, NEVER SAGE. Sage means "done well" everywhere else in this app,
      and a writer who has queried their whole list has not finished anything — they have run out
      of people, which is neutral and often uncomfortable. */
-  /* ⚠️ THE PANEL IS NOT THE SUBJECT OF THE PAGE. At the card's width with three equal route cards
-     it outranked the search field that does the actual work — and this state is the ABSENCE of a
-     subject, not one. The number was stated three times over in one panel. */
-  it("compact: capped width, one row of actions, and the count stated once", () => {
-    expect(rule(".qc-allq")).toContain("max-width: 620px");
-    /* ⚠️ RE-ANCHORED: the panel no longer returns early — it now renders ABOVE the grid, which is
-       the whole of §1. Slicing to "1 · THE GRID" would have caught an empty string. */
-    const panelAt = picker.indexOf("{allQueried && (");
-    expect(panelAt, "the all-queried panel is missing").toBeGreaterThan(-1);
-    const allqRaw = picker.slice(panelAt, picker.indexOf('<div className="qc-pickcap">'));
-    expect(allqRaw, "the heading names the state; the ring carries the figure")
-      .toContain("Every contact queried");
-    expect(allqRaw, "the count must not be restated in the heading").not.toContain("of {counts.total} contacts");
-    expect(allqRaw.match(/counts\.done/g)?.length ?? 0, "the figure appears once").toBe(1);
-    /* Comments stripped: this file EXPLAINS which descriptions were dropped, and an assertion
-       about the code must not be satisfiable by prose about the code. Second lines went with the
-       cards — the contacts route keeps its count, because a number is information. */
-    const allq = allqRaw.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
+  /* ⚠️ SUPERSEDED, AND THE PRINCIPLE SURVIVES. This asserted a compact PANEL — capped width, one
+     row of actions, the count stated once — because at full width with three equal route cards it
+     outranked the search field that does the actual work. The panel is now MERGED into the folded
+     block, so there is no second container to compact; what carried over is the cap, the one row
+     of actions, and the count appearing once, all asserted on the block instead. */
+  it("the block is capped, its actions sit on one row, and the count is stated once", () => {
+    expect(rule(".qc-fold")).toContain("max-width: 620px");
+    expect(rule(".qc-routes"), "actions on one row, not a grid of cards").toContain("display: flex");
+    const allq = picker.slice(picker.indexOf("{allQueried ? ("), picker.indexOf("      ) : ("));
+    expect(allq.match(/foldedLine/g)?.length ?? 0, "the figures are stated once").toBe(1);
     expect(allq, "the route descriptions came back").not.toContain("Straight into your list");
-    expect(allq).toContain("Review your contacts <span>{counts.total}</span>");
-    expect(rule(".qc-routes"), "three actions on one row, not a grid of cards").toContain("display: flex");
   });
 
   it("the all-queried ring is muted, and the field stays live", () => {
@@ -538,9 +555,9 @@ describe("art belongs to the cold start and nowhere else", () => {
       expect(ring, `the ring borrowed ${sage} — this state is neutral, not an achievement`)
         .not.toContain(sage);
     }
-    const panelAt = picker.indexOf("{allQueried && (");
-    expect(panelAt, "the all-queried panel is missing").toBeGreaterThan(-1);
-    const allq = picker.slice(panelAt, picker.indexOf('<div className="qc-pickcap">'));
+    const panelAt = picker.indexOf("{allQueried ? (");
+    expect(panelAt, "the all-queried block is missing").toBeGreaterThan(-1);
+    const allq = picker.slice(panelAt, picker.indexOf("      ) : ("));
     expect(allq).toContain("a resubmission, or a second manuscript");
     /* The field is rendered once for every state, above the panel — and now the GRID is too, so
        this state has a browsable list rather than only the promise of one. */

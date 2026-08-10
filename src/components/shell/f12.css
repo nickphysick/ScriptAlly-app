@@ -280,15 +280,20 @@
    ⚠️ 18px CLEAR OF THE PANEL ABOVE. They are two separate statements — the panel says what this
    state IS, the block says who is in it — and stacked flush they read as one box with a rule
    through it. */
-.qc-fold { margin-top: 18px; }
-.qc-foldline { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+/* ⚠️ ONE CONTAINER FOR THE WHOLE STATE. It was a panel above a fold block — two boxes stating one
+   fact, which is why they needed spacing between them in the first place. The block carries the
+   panel's own treatment; nothing sits above it but the search field. */
+.qc-fold { max-width: 620px; margin-top: 18px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--paper); padding: 15px 17px; }
+.qc-foldline { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
+/* the one muted line beneath — context, not a second statement of the situation */
+.qc-foldsub { margin: 5px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
 .qc-foldbtn { margin-left: 8px; background: none; border: 0; padding: 0; font: inherit; font-size: 12px; color: var(--burg); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 
 /* ⚠️ DIMMED AT REST, FORWARD ON HOVER OR KEYBOARD FOCUS — available, not suggested. 0.66 is quiet
    without being unreadable: measured against the parchment ground the names stay well above the
    contrast floor, which is the test that matters. `focus-within` is not optional — a set that lit
    only under a pointer would leave a tabbing writer reading it at rest permanently. */
-.qc-plates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; opacity: 0.66; transition: opacity 0.15s; }
+.qc-plates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 13px; opacity: 0.66; transition: opacity 0.15s; }
 .qc-plates:hover, .qc-plates:focus-within { opacity: 1; }
 .qc-plate { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--hairline); background: var(--panel); border-radius: 999px; padding: 5px 11px; font: inherit; font-size: 12px; color: var(--ink); cursor: pointer; transition: border-color 0.15s; }
 .qc-plate:hover { border-color: var(--line); }
