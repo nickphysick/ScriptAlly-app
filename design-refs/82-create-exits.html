@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — create: entry and the three exits</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#ece0d2;--sage:#8a9e88;--sage-tx:#5a6e58;--pink:#f5e2da;--pink-br:#e8c8bc;--rim:rgba(124,58,42,.16);--d:1;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:24px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px #e0d5c8;}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:var(--muted);font-style:italic;}
+
+.page{position:relative;background:var(--parchment);border-radius:14px;padding:22px 24px 24px;max-width:1080px;min-height:600px;overflow:hidden;
+  box-shadow:inset 0 0 0 1px var(--rim),0 8px 26px rgba(58,28,20,.07);}
+.ph{display:flex;align-items:flex-end;gap:14px;padding-bottom:13px;margin-bottom:16px;box-shadow:inset 0 -1px 0 var(--hair);}
+.ph h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;}
+.ph .acts{margin-left:auto;display:flex;gap:9px;}
+.gh{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;}
+#logq{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+
+.qrow{display:flex;align-items:center;gap:12px;background:#fbf8f3;border-radius:10px;padding:13px 15px;margin-bottom:8px;box-shadow:inset 0 0 0 1px var(--hair);}
+.qrow .dot{width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--burg);background:#f8e7dc;flex:0 0 12px;}
+.qrow b{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;}
+.qrow span{font-size:12px;color:var(--muted);}
+.qrow em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.qrow.land{animation:land calc(420ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+@keyframes land{
+  0%{opacity:0;transform:translateY(-10px);box-shadow:inset 0 0 0 1px var(--sage),0 0 0 4px rgba(138,158,136,.16);}
+  55%{opacity:1;transform:none;box-shadow:inset 0 0 0 1px var(--sage),0 0 0 4px rgba(138,158,136,.16);}
+  100%{opacity:1;transform:none;box-shadow:inset 0 0 0 1px var(--hair);}
+}
+
+/* takeover */
+.take{position:absolute;left:24px;right:24px;top:76px;bottom:24px;background:#fff;border-radius:12px;padding:18px 20px;
+  box-shadow:inset 0 0 0 1px #e0d5c8,0 10px 30px rgba(58,28,20,.10);display:none;z-index:2;overflow:hidden;}
+.take.run{display:block;animation:frame calc(220ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+@keyframes frame{from{opacity:0;transform:scale(.985);}to{opacity:1;transform:none;}}
+.take.run .tk-h{animation:pop calc(240ms*var(--d)) calc(120ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+.take.run .tk-q{animation:pop calc(240ms*var(--d)) calc(200ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+.take.run .tk-f{animation:pop calc(240ms*var(--d)) calc(250ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+.take.run .tk-step:nth-child(1){animation:pop calc(240ms*var(--d)) calc(310ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+.take.run .tk-step:nth-child(2){animation:pop calc(240ms*var(--d)) calc(360ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+.take.run .tk-step:nth-child(3){animation:pop calc(240ms*var(--d)) calc(410ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+@keyframes pop{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* exits — one gesture, never a reverse stagger */
+.take.exit-cancel{display:block;animation:cancelOut calc(150ms*var(--d)) both ease-in;}
+@keyframes cancelOut{to{opacity:0;transform:translateY(6px) scale(.995);}}
+.take.exit-save{display:block;animation:saveOut calc(220ms*var(--d)) both cubic-bezier(.5,0,.75,0);transform-origin:top center;}
+@keyframes saveOut{60%{opacity:.5;}100%{opacity:0;transform:translateY(-18px) scale(.985);}}
+
+/* save & log another — resets in place */
+.take.reseat .tk-body{animation:reseat calc(300ms*var(--d)) both cubic-bezier(.2,.7,.3,1);}
+@keyframes reseat{0%{opacity:1;}35%{opacity:0;transform:translateY(-6px);}36%{transform:translateY(6px);}100%{opacity:1;transform:none;}}
+
+.tk-h{display:flex;align-items:flex-start;gap:14px;padding-bottom:13px;box-shadow:inset 0 -1px 0 var(--hair);}
+.tk-m{width:44px;height:44px;flex:0 0 44px;border-radius:9px;background:#f7f0e6;box-shadow:inset 0 0 0 1px var(--hair);display:flex;align-items:center;justify-content:center;}
+.tk-m svg{width:24px;height:24px;stroke:var(--burg);fill:none;stroke-width:1.3;}
+.tk-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;}
+.tk-s{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+.tk-chips{display:flex;gap:12px;margin-top:8px;}
+.tk-chips span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);}
+.ring{width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #d3c6b8;}
+.tk-a{margin-left:auto;display:flex;gap:9px;align-items:center;}
+.tk-b{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;}
+.tk-b.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+.tk-body{padding-top:16px;}
+.tk-q{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;margin-bottom:12px;}
+.tk-f{background:#fff;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:9px;padding:11px 13px;font-size:13px;color:#c8b8a8;max-width:400px;}
+.tk-steps{margin-top:20px;display:flex;flex-direction:column;gap:8px;}
+.tk-step{display:flex;align-items:center;gap:11px;background:#fbf8f3;border-radius:10px;padding:12px 15px;box-shadow:inset 0 0 0 1px var(--hair);}
+.tk-step b{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:var(--ink-soft);}
+.tk-step span{font-size:12px;color:#a89686;}
+
+/* session tally, only in save-and-log-another */
+.tally{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-tx);
+  background:#e9ede6;border-radius:20px;padding:4px 9px;opacity:0;transition:opacity .2s;}
+.tally.on{opacity:1;}
+
+/* receipt */
+.receipt{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:12px;background:#2f1c15;color:#f6ece5;border-radius:10px;padding:11px 15px;
+  font-size:12.5px;box-shadow:0 10px 26px rgba(58,28,20,.22);z-index:20;transition:opacity .2s,transform .2s;}
+.receipt.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+.receipt u{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#f0c8b6;cursor:pointer;}
+
+@media (prefers-reduced-motion:reduce){.take,.take *,.qrow{animation:none!important;}.receipt{transition:none;}}
+
+.legend{max-width:1080px;margin-top:22px;padding:16px 20px;background:#f8f2ea;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+.legend code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#fff;padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="ctl">
+  <b>Speed</b>
+  <div class="seg" id="spd"><button data-s="1" class="on">1×</button><button data-s="2.5">Slow</button></div>
+  <span class="note">Log query → then try Cancel, Save query, and Save &amp; log another.</span>
+</div>
+
+<div class="page" id="page">
+  <div class="ph">
+    <h1>Query Centre</h1>
+    <div class="acts"><button class="gh">↓ Export</button><button class="gh" id="logq">+ Log query</button></div>
+  </div>
+
+  <div id="list">
+    <div class="qrow"><span class="dot"></span><b>Eleanor Whitfield</b><span>Greenfield Literary</span><em>14 MAR</em></div>
+    <div class="qrow"><span class="dot"></span><b>Daniel O'Rourke</b><span>Inkwell &amp; Stone</span><em>9 AUG</em></div>
+    <div class="qrow"><span class="dot"></span><b>Aisha Kapoor</b><span>The Lantern Agency</span><em>3 APR</em></div>
+    <div class="qrow"><span class="dot"></span><b>Tom Ellery</b><span>Curtis Vane</span><em>3 MAR</em></div>
+    <div class="qrow"><span class="dot"></span><b>Sophie Dunn</b><span>Curtis Vane</span><em>15 JAN</em></div>
+  </div>
+
+  <div class="take" id="take">
+    <div class="tk-h">
+      <span class="tk-m"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/><path d="m10 13.5 4.5-4.5"/></svg></span>
+      <div>
+        <div class="tk-t">Logging new query</div>
+        <div class="tk-s">Needs an agent, a manuscript and a date — everything else can wait.</div>
+        <div class="tk-chips"><span><i class="ring"></i>Agent</span><span><i class="ring"></i>Manuscript</span><span><i class="ring"></i>Date</span></div>
+      </div>
+      <div class="tk-a">
+        <span class="tally" id="tally">2 logged</span>
+        <button class="tk-b" id="cancel">Cancel</button>
+        <button class="tk-b" id="another">Save &amp; log another</button>
+        <button class="tk-b pk" id="save">➤ Save query</button>
+      </div>
+    </div>
+    <div class="tk-body" id="tkbody">
+      <div class="tk-q">Who are you querying?</div>
+      <div class="tk-f">Search by name or agency…</div>
+      <div class="tk-steps">
+        <div class="tk-step"><i class="ring"></i><b>When</b><span>Date, how you sent it, and a nudge</span></div>
+        <div class="tk-step"><i class="ring"></i><b>What</b><span>Manuscript and materials</span></div>
+        <div class="tk-step"><i class="ring"></i><b>Notes</b><span>Optional — first impressions, personalisation</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="receipt" id="receipt"><span id="rtxt"></span><u id="rundo">Undo</u></div>
+</div>
+
+<div class="legend">
+  <b>The three exits are three different statements</b>
+  <ul>
+    <li><b>Cancel / Esc — nothing happened.</b> 150ms, single gesture, straight out. No receipt, no row, no trace. Deliberately faster than the entrance: undoing an opening should not feel like an event. <b>Never reverse the stagger</b> — a staggered exit makes leaving feel like work, and the writer who opened this by accident has to sit through it.</li>
+    <li><b>Save query — the form becomes the row.</b> The takeover lifts and fades upward while the new row lands at the top of the list beneath it, carrying a brief sage ring that settles into the normal rim. The eye follows one object turning into another, which is the whole claim the motion is making: <i>what you filled in is now that line</i>. A receipt confirms it with an Undo.</li>
+    <li><b>Save &amp; log another — you did not leave.</b> The takeover does not exit at all. The body wipes and reseats, the chips reset, focus returns to the search field, and a session tally appears in the header. The new row still lands in the list behind, so nothing is lost when you eventually close. Exiting and re-entering here would be a lie: you never went anywhere.</li>
+  </ul>
+  <br>
+  <b>Things that decide whether this feels right or broken</b>
+  <ul>
+    <li><b>Never play the exit before the write resolves.</b> Animate on success, not on click, or a failed save shows a row that then vanishes. If the write is slow, the button holds and the takeover stays put — a spinner in place is honest; an optimistic exit is not.</li>
+    <li><b>Focus after every exit.</b> Cancel and Save return focus to the Log query button. Save &amp; log another returns it to the search field, once motion ends.</li>
+    <li><b>The receipt owns the undo.</b> One receipt at a time; logging another replaces the previous receipt rather than stacking, and the tally does the counting.</li>
+    <li><code>prefers-reduced-motion</code> cuts every one of these to the final frame — the row simply appears, the takeover simply goes.</li>
+  </ul>
+</div>
+
+<script>
+var take=document.getElementById('take'),list=document.getElementById('list'),page=document.getElementById('page'),
+    receipt=document.getElementById('receipt'),rtxt=document.getElementById('rtxt'),tally=document.getElementById('tally');
+var NAMES=[['Rhiannon Salt','Marchmont Agency'],['Joseph Okafor','Northbank Literary'],['Nadia Verhoeven','Copperline'],['Gareth Kelso','Ivy & Thorn']];
+var n=0,count=0,rt;
+function d(){return Number(getComputedStyle(document.body).getPropertyValue('--d'))||1;}
+function clear(){take.className='take';}
+function open(){clear();count=0;tally.classList.remove('on');take.classList.add('run');}
+function addRow(){
+  var a=NAMES[n%NAMES.length];n++;
+  var r=document.createElement('div');r.className='qrow land';
+  r.innerHTML='<span class="dot"></span><b>'+a[0]+'</b><span>'+a[1]+'</span><em>10 AUG</em>';
+  list.insertBefore(r,list.firstChild);
+  return a[0];
+}
+function showReceipt(t){
+  rtxt.textContent=t;receipt.classList.add('on');
+  clearTimeout(rt);rt=setTimeout(function(){receipt.classList.remove('on');},4200);
+}
+document.getElementById('logq').addEventListener('click',open);
+document.getElementById('cancel').addEventListener('click',function(){
+  clear();take.classList.add('exit-cancel');
+  setTimeout(function(){clear();},160*d());
+});
+document.getElementById('save').addEventListener('click',function(){
+  var who=addRow();
+  clear();take.classList.add('exit-save');
+  setTimeout(function(){clear();showReceipt('Query to '+who+' logged.');},230*d());
+});
+document.getElementById('another').addEventListener('click',function(){
+  var who=addRow();count++;
+  tally.textContent=count+' logged';tally.classList.add('on');
+  take.classList.remove('run');take.classList.add('reseat');
+  take.style.display='block';
+  showReceipt('Query to '+who+' logged. Ready for the next.');
+  setTimeout(function(){take.classList.remove('reseat');take.style.display='block';},320*d());
+});
+document.getElementById('rundo').addEventListener('click',function(){
+  if(list.firstChild)list.removeChild(list.firstChild);
+  receipt.classList.remove('on');
+  if(count>0){count--;tally.textContent=count+' logged';if(!count)tally.classList.remove('on');}
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('cancel').click();});
+document.getElementById('spd').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  document.body.style.setProperty('--d',b.dataset.s);
+  [].forEach.call(e.currentTarget.children,function(x){x.classList.toggle('on',x===b);});});
+</script>
+</body>
+</html>
