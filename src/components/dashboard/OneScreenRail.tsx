@@ -19,7 +19,7 @@ import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, Us
 import { StatusDot } from "../StatusDot";
 import { goalBlockGap, goalFigure, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
 import { agentPrimary } from "../../lib/agentDisplay";
-import { Skel } from "./OneScreenDashboard";
+import { OneScreenPanel } from "./OneScreenPanel";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
@@ -379,8 +379,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
   return (
     <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
       {/* ══ querying goals ══ */}
-      <div className={`os-card os-lift os-goal stowable${loading ? " isload" : ""}`}>
-        {loading && <Skel bars={["h", "", ""]} />}
+      <OneScreenPanel variant="os-goal stowable" loading={loading} skel={["h", "", ""]}>
         <div className="os-goal-r1">
           <h2>Querying goals</h2>
           {goal && !editingGoal && (
@@ -439,11 +438,10 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             </div>
           </>
         )}
-      </div>
+      </OneScreenPanel>
 
       {/* ══ activity ══ */}
-      <div className={`os-card os-lift os-actv${loading ? " isload" : ""}`} ref={actvRef}>
-        {loading && <Skel bars={["h", "", "", "grow"]} />}
+      <OneScreenPanel variant="os-actv" loading={loading} skel={["h", "", "", "grow"]} innerRef={actvRef}>
         <div className="os-ahead">
           {/* ⚠️ THE FLANKING RULES ARE GONE. They existed to centre the title on a plain card
               head; on a filled band they draw two lines across a colour that is already doing
@@ -508,7 +506,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
         <div className="os-esc">Click the arrows, press Escape, or click away to close</div>
         {/* §6: the footer is a quiet caption ONLY — no link; the arrows are the sole route in */}
         <div className="os-afoot"><span className="os-ac">Last 30 days</span></div>
-      </div>
+      </OneScreenPanel>
 
       {/* ⚠️ THE PRO MINI LEFT THE RAIL (v16 §5) — it is the full-width banner beneath tasks now
           (OneScreenPro). Do not reinstate one here: two upsells on one screen sell the same thing

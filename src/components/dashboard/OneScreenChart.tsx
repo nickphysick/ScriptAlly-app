@@ -28,7 +28,7 @@ import {
   defaultFreq, Freq, LedgerPoint, monotonePath, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
   rangeWindow, stopForDays, yScale,
 } from "../../lib/oneScreen";
-import { Skel } from "./OneScreenDashboard";
+import { OneScreenPanel } from "./OneScreenPanel";
 import { useCountUp } from "../../lib/useCountUp";
 
 /* ── pure geometry (exported for the node-env tests — there is no layout engine to ask) ── */
@@ -242,8 +242,7 @@ export const OneScreenChart: React.FC<{
   const pinEvent = pinIdx !== null ? events.get(pinIdx) ?? null : null;
 
   return (
-    <div className={`os-card os-lift os-lead${loading ? " isload" : ""}`}>
-      {loading && <Skel bars={["h", "grow", ""]} />}
+    <OneScreenPanel variant="os-lead" loading={loading} skel={["h", "grow", ""]}>
       <div className="os-lh">
         <span className="os-ll">Active queries</span>
         {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
@@ -433,6 +432,6 @@ export const OneScreenChart: React.FC<{
           </div>
         ) : null}
       </ChartTip>
-    </div>
+    </OneScreenPanel>
   );
 };

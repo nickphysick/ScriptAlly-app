@@ -16,7 +16,7 @@ import React from "react";
 import { Agent, Query, Task, UserTask } from "../../types";
 import { taskSurfaced } from "../../lib/todoBoard";
 import { buildHousekeepingRows, buildOverToYouRows } from "./OverToYou";
-import { Skel } from "./OneScreenDashboard";
+import { OneScreenPanel } from "./OneScreenPanel";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /** "Due today" / "Due Friday" / "Overdue" — the row's second line when it has no detail of its own. */
@@ -83,8 +83,7 @@ export const OneScreenTasks: React.FC<{
   const empty = trio.length === 0;
 
   return (
-    <div className={`os-card os-lift os-tasks${loading ? " isload" : ""}`}>
-      {loading && <Skel bars={["h", "", "", ""]} />}
+    <OneScreenPanel variant="os-tasks" loading={loading} skel={["h", "", "", ""]}>
       <div className="os-th2">
         <h2>Tasks requiring your attention</h2>
         {/* ⚠️ ONE TYPEFACE THROUGHOUT THE PILL. Playfair digits beside Inter labels sit below the
@@ -172,6 +171,6 @@ export const OneScreenTasks: React.FC<{
           </div>
         ))}
       </EdgeFadeScroll>
-    </div>
+    </OneScreenPanel>
   );
 };
