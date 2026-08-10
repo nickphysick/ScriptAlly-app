@@ -642,3 +642,55 @@ Both landed before this revision arrived and match its wording:
 - [ ] Chips show **dash, not tick**, on arrival; no value strings
 - [ ] **No dead space** in any stage-1 condition, especially the cold start
 - [ ] The two bad-date entries now show **no date at all** rather than "Invalid Date NaN"
+
+---
+
+# Fix pack 3 (revised, second pass)
+
+**Commits** — ref `db37aab` · §1 `b198471`. §2, §3 and §4 were unchanged from the first revision and are
+already on `main`. Gates green. **Not deployed.**
+
+## §1 — what changed from the first revision
+
+The first revision folded the state but left **two containers**: the compact panel above, the fold
+block below, 18px apart. This revision merges them, and the reason is the interesting part — **four
+things were stating one fact.** The panel heading ("Every contact queried"), the count ring, the
+section heading naming the manuscript and counting the contacts, and the fold line all told the
+writer that every contact had been queried, for this book, and how many there were.
+
+All of it is gone except the sentence: *"You've queried all 16 contacts for Murphy's Day Out — 12
+still waiting, 4 concluded."* with **Show them** as a link at its end rather than a fourth button
+competing with the three routes.
+
+**The spacing problem disappears rather than getting solved.** The 18px gap existed because two
+boxes stated one fact; merged, there is nothing to space against. The plates open *inside* the
+block, above the actions, so the routes stay at the foot in both states.
+
+The count also comes off "Review your contacts" — the sentence gives it, and the same number in two
+places is how two numbers start disagreeing. `queriedCount` is no longer rendered anywhere.
+
+**Which selector supplies the two states:** unchanged — `isTerminalStatus` (`lib/agentList.ts`),
+with **Offer counting as active** per the agent-list law. The counts derive from the same plate list
+the block renders.
+
+## §2, §3, §4 — already answered
+
+Unchanged from the first revision and recorded above:
+
+- **§2** — the rendering fault is fixed in two places (`plateDate`, and the sibling
+  `queryHistoryLabel` found by looking rather than waiting to be told). The **data** fault is
+  diagnosed but unconfirmed: I have no read path to your dev account. Suspects and how to check are
+  in the previous section. **Marcus Reed is reported, not merged.**
+- **§3** — `5d01ced`. Labels only, dash for pre-filled, tick gated on the step being opened.
+- **§4** — `152a2b9`. `.qc-ghosts { margin-top: auto }`, not a viewport chain. 514.3px → 12px,
+  then constant across all three conditions at both widths.
+
+## ⚠️ One item in the carried-forward list is already done
+
+The brief lists the `AgentSearchField` dead-code cleanup as out of scope. It was done at your
+explicit instruction after the first revision — `AgentSearchField.tsx` deleted (376 lines) with
+`.qc-qrow` and `.sa-ag-stars`, and five suites **re-pointed rather than deleted**. Noted so the
+list does not carry an item that no longer exists.
+
+**Still genuinely outstanding:** Other's `Enter` → chip; the materials summary line + collapsed
+item count.
