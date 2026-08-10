@@ -519,16 +519,15 @@
   }
 }
 
-/* ── The Analytics placeholder (Amendment 1, H3) — a real destination, honestly empty. ── */
-.qa-wrap { padding: 34px 30px; }
-.qa-title {
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--shell-ink);
-  margin: 0 0 8px;
-}
-.qa-note { font-size: 13.5px; color: var(--shell-muted); margin: 0; }
+/* ── The Analytics placeholder (Amendment 1, H3) — a real destination, honestly empty. ──
+   ⚠️ `.qa-title` AND `.qa-note` ARE DELETED, not left behind (amendment 7 §7). They were this
+   page's bespoke title block; the plate replaces it and its prose is the plate's description. A
+   retired rule kept "just in case" is the pair that silently wins a specificity contest later.
+   ⚠️ `--pg-gut` IS THE SIDE GUTTER, declared once and read by the padding — the one token the plate
+   aligns to, as on every other band-tier page.
+   ⚠️ TOP 34 → 17, HALVED, for the reason every other page halved: the plate carries its own 88px,
+   so the old value was a band of empty paper above a header that is already generous. */
+.qa-wrap { --pg-gut: 30px; padding: 17px var(--pg-gut) 30px; }
 
 
 /* ══════════════════ APP SHELL v2 — one ground, one window ══════════════════

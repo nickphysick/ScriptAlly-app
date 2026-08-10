@@ -36,6 +36,10 @@ const BAND_TIER: { page: string; file: string; root: string }[] = [
   { page: "Discover", file: "components/agents/discover.css", root: ".dv2" },
   { page: "Manuscripts", file: "components/manuscripts/manuscripts.css", root: ".msv1" },
   { page: "Comparable titles", file: "components/manuscripts/comps.css", root: ".ctpage" },
+  /* ⚠️ ADDED WHEN ANALYTICS TOOK THE PLATE (amendment 7 §7) — which is the census working as
+     intended. A new band-tier page that is not listed here is not tested here, and the whole point
+     of a census is that adding the page and forgetting the row is the thing that fails. */
+  { page: "Analytics", file: "components/shell/workspaceShell.css", root: ".qa-wrap" },
 ];
 
 /**

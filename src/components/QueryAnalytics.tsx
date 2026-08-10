@@ -16,12 +16,27 @@
  * the reply-window distribution that packageMetrics already derives.
  */
 import React from "react";
+import { PageHeader } from "./shell/PageHeader";
 
+/**
+ * ⚠️ THE BESPOKE HEADER IS GONE (amendment 7 §7), and this page was the only one of the three in
+ * that group that HAD one. `.qa-title` + `.qa-note` were its own hand-rolled title block, standing
+ * on no shared contract — which is precisely what made it safe to migrate on its own.
+ *
+ * Its prose became the plate's DESCRIPTION rather than being deleted: the sentence is the honest
+ * statement of what this page is, and it is the only thing on it.
+ *
+ * ⚠️ NOTHING WAS INVENTED TO FILL THE PLATE. Still no count and no figure, because there is still
+ * no analysis — the note at the top of this file stands. A placeholder that grew a tally to look
+ * furnished would be exactly the plausible-looking data it warns against.
+ */
 export const QueryAnalytics: React.FC = () => (
   <div className="qa-wrap">
-    <h1 className="qa-title">Analytics</h1>
-    <p className="qa-note">
-      Response rates, reply times and outcomes across your queries — coming soon.
-    </p>
+    <PageHeader
+      variant="workspace"
+      mark="analytics"
+      title="Analytics"
+      description="Response rates, reply times and outcomes across your queries — coming soon."
+    />
   </div>
 );
