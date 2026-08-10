@@ -53,7 +53,8 @@ const frames = (name: string): string => {
 describe("nothing animates until the write resolves", () => {
   it("the exit is armed past every early return, not in the click handler", () => {
     const save = saveBody();
-    expect(save).toContain("if (!logAnother) setCreateExiting(true);");
+    expect(save).toContain("if (!logAnother) {");
+    expect(save).toContain("else setCreateExiting(true);");
     /* It must sit AFTER the failure branch — if it were above, a rejected write would animate. */
     expect(save.indexOf("setCreateError(res.error"), "the failure branch is missing")
       .toBeGreaterThan(-1);
@@ -142,18 +143,80 @@ describe("the motion laws hold", () => {
   });
 
   /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would drift the
-     moment a timing changed. Reduced motion still fires `animationend` with `animation: none`, so
-     the cut-to-final-frame path closes too. */
+     moment a timing changed. */
   it("the close is bound to animationend, never to a timer", () => {
-    expect(queries).toContain("onAnimationEnd={(e) => {");
+    const a = queries.indexOf("onAnimationEnd={(e) => {");
+    expect(a, "the animationend handler is missing").toBeGreaterThan(-1);
     expect(queries).toContain('e.animationName !== "qc-exit-save"');
-    const handler = queries.slice(queries.indexOf("onAnimationEnd={(e) => {"), queries.indexOf("closeCreate();") + 20);
+    /* ⚠️ ANCHOR BOTH ENDS, AND ASSERT THE RANGE RUNS FORWARDS. The first version of this sliced to
+       `queries.indexOf("closeCreate();")`, which first occurs in the ESCAPE handler ~2,000 lines
+       ABOVE — so the range ran backwards, the extraction was "", and `.not.toContain` passed on
+       nothing. It is the very fault this file's header warns about, committed in this file. */
+    const b = queries.indexOf("finishSaveExit();", a);
+    expect(b, "the handler no longer completes through finishSaveExit").toBeGreaterThan(a);
+    const handler = queries.slice(a, b);
+    expect(handler, "the slice must not be empty").not.toBe("");
     expect(handler, "a setTimeout here would drift from the CSS").not.toContain("setTimeout");
   });
 
   it("and focus returns to the control that opened it", () => {
     expect(queries).toContain("logTriggerRef.current?.focus();");
     expect(queries).toContain('<button ref={logTriggerRef} type="button" className="f12-btn-pri"');
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ `animation: none` DOES NOT FIRE `animationend` — verified in-browser, 10 Aug. The shipped
+   comment asserted the opposite, and the consequence was severe: under reduced motion the pane kept
+   `qc-exit-save` (which is `opacity: 0` in that block) after every successful save, with no event
+   left to clear it — the reading pane blanked for the rest of the session.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("reduced motion completes without an event that never arrives", () => {
+  it("the class is never armed when motion is suppressed", () => {
+    const save = saveBody();
+    const at = save.indexOf("if (prefersReducedMotion()) finishSaveExit();");
+    expect(at, "the reduced-motion branch is missing").toBeGreaterThan(-1);
+    /* The branch must sit BEFORE the arming, as its alternative — not after it as a repair. */
+    expect(save.indexOf("else setCreateExiting(true);")).toBeGreaterThan(at);
+  });
+
+  it("it is a branch on the preference, never a timer standing in for the animation", () => {
+    const save = saveBody();
+    expect(save, "a setTimeout here is the drift this exists to avoid").not.toContain("setTimeout");
+    expect(queries).toContain('import { prefersReducedMotion } from "../lib/reducedMotion";');
+  });
+
+  /* ⚠️ READ AT THE MOMENT OF USE. A module-level const answers with whatever was true when the
+     bundle was first evaluated, so a writer turning the preference on mid-session gets the old
+     answer for the rest of the session. */
+  it("the helper asks the preference when called, and is node-safe", () => {
+    const lib = read("./reducedMotion.ts");
+    expect(lib).toContain("export const prefersReducedMotion = (): boolean =>");
+    expect(lib).toContain('typeof window !== "undefined"');
+    expect(lib, "caching it at module load answers with a stale preference")
+      .not.toMatch(/^const\s+\w+\s*=\s*typeof window/m);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ THE SAVE EXIT MUST NOT COMPLETE THROUGH `closeCreate`. That is the DISCARD door: it owns the
+   dirty-confirm, so a listener slower than the 220ms exit would put "Discard this query?" on screen
+   after a SUCCESSFUL save; and it restores the stashed selection, overriding the saved row the
+   pendingSave effect had just selected.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the save exit does not go out through the discard door", () => {
+  it("completion is finishSaveExit, and it is not closeCreate", () => {
+    const a = queries.indexOf("const finishSaveExit = () => {");
+    expect(a, "finishSaveExit is missing").toBeGreaterThan(-1);
+    const b = queries.indexOf("};", a);
+    expect(b, "its body never closes").toBeGreaterThan(a);
+    const body = queries.slice(a, b);
+    expect(body).not.toBe("");
+    expect(body, "the discard door would confirm after a successful save").not.toContain("closeCreate");
+    expect(body, "and would override the selection the pendingSave effect sets")
+      .not.toContain("setSelectedQueryId");
+    expect(body, "the exit flag must clear or the pane stays armed").toContain("setCreateExiting(false)");
+    expect(body, "and the draft must go even if the listener never delivers").toContain("setCreateDraft(null)");
   });
 });
 

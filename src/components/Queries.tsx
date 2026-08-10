@@ -28,6 +28,7 @@ import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F
 import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
 import { requirements } from "../lib/createSteps";
+import { prefersReducedMotion } from "../lib/reducedMotion";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
@@ -450,6 +451,22 @@ export const Queries: React.FC<{
     return () => setMobileDetail("queries", null);
   }, [isMobile, mobileDetailOn, setMobileDetail]);
 
+  /* ── THE SAVE EXIT'S COMPLETION ───────────────────────────────────────────────────────────
+     ⚠️ NOT `closeCreate`, which is the DISCARD door and does two things this path must not do.
+     It owns the dirty-confirm — so a slow listener would put "Discard this query?" on screen
+     AFTER a successful save — and it restores the stashed selection, which would override the
+     saved row the `pendingSave` effect has just selected. Saving tears the draft down through
+     that effect; this only ends the motion and returns focus.
+
+     The draft nulls here as well because the effect waits on the listener: if the row never
+     arrives, this is what stops the takeover sitting open over a query that was written. */
+  const finishSaveExit = () => {
+    setCreateExiting(false);
+    setCreateDraft(null);
+    setCreateBase(null);
+    logTriggerRef.current?.focus();
+  };
+
   /* `logAnother` keeps create mode open after the write instead of handing over to the saved
      record — the batch case (a morning's worth of queries in one sitting). */
   const saveCreate = async (logAnother = false) => {
@@ -468,8 +485,16 @@ export const Queries: React.FC<{
       if (createDraft.journal.trim()) await addJournalEntry(res.id, createDraft.journal.trim());
       const newId = res.id;
       /* ⚠️ HERE, AND ONLY HERE — past every early return, so a rejected write leaves the takeover
-         open with its error and no row anywhere. */
-      if (!logAnother) setCreateExiting(true);
+         open with its error and no row anywhere.
+
+         ⚠️ AND UNDER REDUCED MOTION THE CLASS IS NEVER ARMED. `animation: none` fires no
+         `animationend` (see lib/reducedMotion.ts), so arming it there would leave the pane wearing
+         a rule that is `opacity: 0` with no event left to clear it — every save blanking the
+         reading pane for the rest of the session. The completion runs directly instead. */
+      if (!logAnother) {
+        if (prefersReducedMotion()) finishSaveExit();
+        else setCreateExiting(true);
+      }
       setLandedId(newId);
       /* THE RECEIPT IS THE APP'S EXISTING TOAST, not a second primitive. `showToast` already owns
          one-at-a-time replacement and the undo affordance elsewhere in this app; a receipt built
@@ -2974,13 +2999,15 @@ export const Queries: React.FC<{
                that exists only in the stylesheet animates nothing. */
             className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createExiting ? " qc-exit-save" : ""}`}
             /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
-               drift the moment the timing changed. Reduced motion sets `animation: none`, which
-               still fires `animationend` — so the cut-to-final-frame path closes too. */
+               drift the moment the timing changed.
+
+               ⚠️ THE OLD COMMENT HERE CLAIMED `animation: none` "still fires animationend". IT DOES
+               NOT — verified in-browser — which is why the reduced-motion path is a branch at the
+               arming site (saveCreate) rather than a second listener. Under reduced motion this
+               handler is never reached, because the class is never applied. */
             onAnimationEnd={(e) => {
               if (!createExiting || e.animationName !== "qc-exit-save") return;
-              setCreateExiting(false);
-              closeCreate();
-              logTriggerRef.current?.focus();
+              finishSaveExit();
             }} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
