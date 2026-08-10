@@ -765,3 +765,62 @@ every step, both widths: **top 20 · right 17 · bottom 16 · left 17**, nothing
 
 **Remaining deferred:** the materials summary line's collapsed item count. *(The `AgentSearchField`
 cleanup with `.qc-qrow` and `.sa-ag-stars` is DONE — `67251a4` and `5534b94`.)*
+
+---
+
+# Fix pack 5 — entry and exit motion · HANDOVER
+
+**Done:** ref `79a6feb` · §3 `b07a7a8` (the save transition, with §0's four laws).
+**Outstanding:** §1 entrance, §2 cancel, §4 save-and-log-another, and **§3's undo**.
+Ref: `design-refs/82-create-exits.html` — all four transitions are live in it and its timings and
+easings are the specification.
+
+## The map, so the next session starts from one
+
+| what | where |
+|---|---|
+| Takeover container (state classes go here) | `Queries.tsx`, the `qp-pane f12-detail` div — already carries `qc-exit-save` |
+| Close bound to motion end | same div's `onAnimationEnd`, guarded on `e.animationName` — **never a timer** |
+| Focus return target | `logTriggerRef` on the "Log query" button |
+| Write resolution point | `saveCreate`, immediately after `await addQuery` and **past** the failure return |
+| Row-landing hook | `settleId` (pre-existing) + `landedId` → `.qc-landed` |
+| Receipt primitive | `showToast` from `useToast`, already imported in `Queries.tsx` — one at a time, do not build a second |
+| Motion CSS | end of `f12.css`, under the fix-pack-5 banner |
+| Motion locks | `src/lib/createSaveMotion.test.ts` |
+
+## §1 — entrance
+
+Stagger the container and five children (frame 0 · header 120 · question 200 · field 250 · steps
+310/360/410, all 240ms, `cubic-bezier(.2,.7,.3,1)`, 8px rise). **Focus must land on the search
+field when motion ends** — `AgentPicker` currently autofocuses on mount, which is what would eat the
+first keystroke, so the entrance has to take focus over rather than race it. Use `animationend` on
+the last-delayed element, not a `setTimeout` matching the CSS.
+
+## §2 — cancel
+
+150ms, one gesture, `ease-in`, 6px settle, **no per-element delays** — never reverse the stagger.
+Esc must work *during* the entrance: the existing Escape handler is in `Queries.tsx` and is not
+currently gated on animation state, so this is likely already true and wants a test rather than a
+change. Focus returns to `logTriggerRef`.
+
+## §4 — save & log another
+
+`saveCreate(true)` already keeps create mode open and reseeds from `pendingSave.again`; the takeover
+is **not** torn down, which is the property §4 needs and it already holds. What is missing: the
+300ms body wipe-and-reseat, the header chip reset, the session tally, and receipt *replacement*
+(check whether `showToast` already replaces rather than stacks before building anything).
+
+## ⚠️ §3's undo is not built, and it is not a line of CSS
+
+The receipt is wired; its Undo is not. Undoing a create means **deleting the query and its seeded
+`QUERY_SENT` activity** — the repo law is that undo deletes the original records and never appends
+compensating entries. `showToast` would also need an action affordance it may not have. Treat this
+as its own piece of work, not as motion polish.
+
+## Two traps this pack has already hit
+
+- **`var()` in a keyframe percentage selector fails silently** — the whole block is dropped, nothing
+  in the console.
+- **Slice both ends, and assert both.** A lock here sliced from `saveCreate` to `const closeCreate`,
+  which is declared *before* it: the range ran backwards, every extraction was `""`, and that is the
+  state in which `.not.toContain` passes on nothing.
