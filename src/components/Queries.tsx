@@ -350,6 +350,12 @@ export const Queries: React.FC<{
   /* How many have been logged in THIS sitting. Session-only and deliberately not stored: it counts
      a stretch of work, not a fact about the account. */
   const [sessionLogged, setSessionLogged] = useState(0);
+  /* ⚠️ READ FRESH AT UNDO TIME, NOT CAPTURED AT SAVE TIME. The receipt's closure is built during the
+     write, when the journal entry it needs to remove has not yet come back from the listener — a
+     captured array would be empty exactly when it mattered, and the entry would survive its
+     query. */
+  const journalEntriesRef = useRef(journalEntries);
+  journalEntriesRef.current = journalEntries;
   /* Focus returns to the control that opened the takeover — leaving it on a removed node drops the
      writer at the top of the document. */
   const logTriggerRef = useRef<HTMLButtonElement>(null);
@@ -540,6 +546,39 @@ export const Queries: React.FC<{
     logTriggerRef.current?.focus();
   };
 
+  /**
+   * Undo a create — the receipt's own action (fix pack 5 §3).
+   *
+   * ⚠️ IT DELETES THE RECORDS THE CREATE MADE. It never writes a compensating one: that is the
+   * repo's standing undo law, and it is the difference between a query that never happened and a
+   * query with a cancellation stapled to it. `deleteQuery` is the existing cascade — it removes the
+   * per-query activity subcollection, the global-feed twins of those activities (so the seeded
+   * QUERY_SENT goes from both places), and any taskFlags — so this is one door, not a second one.
+   *
+   * ⚠️ JOURNAL ENTRIES ARE NOT IN THAT CASCADE. They live in a TOP-LEVEL `journalEntries`
+   * collection keyed by queryId, so `deleteQuery` cannot see them, and a create that carried an
+   * opening note would leave that note behind attached to a query that no longer exists. Removed
+   * here first, while the query is still there to identify them by.
+   *
+   * (That gap is a property of `deleteQuery` itself, so the Delete button orphans them too. Fixing
+   * it at source belongs in db.tsx, which another stream is holding — flagged in the report rather
+   * than patched from here.)
+   */
+  const undoCreate = async (id: string, wasBatch: boolean) => {
+    for (const j of journalEntriesRef.current.filter((e) => e.queryId === id)) {
+      await deleteJournalEntry(j.id);
+    }
+    /* Off the screen before it goes off the database: the reading pane resolves its record from the
+       selected id, and a selection pointing at a deleted query is a pane with nothing behind it. */
+    setSelectedQueryId((cur) => (cur === id ? null : cur));
+    setLandedId((cur) => (cur === id ? null : cur));
+    setGraceRow((cur) => (cur?.id === id ? null : cur));
+    await deleteQuery(id);
+    /* The tally counted it; undoing it must uncount it, or the sitting reports work that is no
+       longer there. `max(0, …)` because the floor is a real one — never a negative count. */
+    if (wasBatch) setSessionLogged((n) => Math.max(0, n - 1));
+  };
+
   /** The reseat's completion. The takeover never left, so there is nothing to tear down — this only
    *  ends the motion and makes sure focus is back where the next query begins. */
   const finishReseat = (pane: HTMLElement) => {
@@ -606,6 +645,10 @@ export const Queries: React.FC<{
           message: logAnother
             ? `Query to ${who} logged. Ready for the next.`
             : `Query to ${who} logged`,
+          /* ⚠️ THE RECEIPT OWNS THE UNDO. `newId` is bound here, at the write — reading it back off
+             the draft when the button is pressed would undo whatever is being drafted NOW, which
+             after "Save & log another" is a different query entirely. */
+          undo: () => undoCreate(newId, logAnother),
         });
       }
       /* The list is hidden while creating, so there is no draft row to shed a skin or to fly
