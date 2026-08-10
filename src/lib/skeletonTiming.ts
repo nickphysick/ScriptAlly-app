@@ -86,7 +86,34 @@ export function skeletonStep(s: {
 }
 
 /**
- * The driver. Returns whether the skeleton should be rendered right now.
+ * How long the skeleton takes to dissolve once its work is done.
+ *
+ * ⚠️ IT MUST NOT UNMOUNT ON THE FRAME IT FINISHES. Swapping a full-page grey shell for the page in
+ * one frame is a hard cut, and a hard cut reads as a glitch however well the blocks line up — the
+ * geometry being right is exactly what makes the instant swap noticeable rather than excusable.
+ * The content is already settled underneath by then, so this is a dissolve onto a finished page,
+ * not a transition between two states.
+ */
+export const SKELETON_FADE_MS = 220;
+
+/** `off` — not rendered · `on` — covering the page · `out` — dissolving, content live beneath. */
+export type SkeletonPhase = "off" | "on" | "out";
+
+export interface SkeletonState {
+  phase: SkeletonPhase;
+  /**
+   * Did a skeleton appear at all during this wait? Stays true once set.
+   *
+   * ⚠️ THIS IS WHAT STOPS THE PAGE ARRIVING TWICE. The dashboard's entrance stagger and the
+   * skeleton are two answers to the same question — "the page is arriving" — and running both
+   * means it arrives twice: the cards rise UNDER the cover, and whatever is left of that rise is
+   * revealed mid-flight when the cover lifts. The caller reads this to skip the stagger.
+   */
+  wasShown: boolean;
+}
+
+/**
+ * The driver.
  *
  * ⚠️ `shown` IS STATE AND `shownAt` IS A REF, deliberately. The moment it appeared is read inside
  * a timeout to compute what is still owed; as state it would put a changing value in the effect's
@@ -97,8 +124,11 @@ export function skeletonStep(s: {
  * skeleton is still up, it simply stays up; `shownAt` keeps its original stamp so the minimum is
  * measured from when the user first saw it, which is the only moment they can perceive.
  */
-export function useSkeleton(loading: boolean): boolean {
+export function useSkeleton(loading: boolean): SkeletonState {
   const [shown, setShown] = useState(false);
+  /* `out` outlives `shown`: the element stays mounted through its dissolve. */
+  const [leaving, setLeaving] = useState(false);
+  const everShown = useRef(false);
   const shownAt = useRef<number | null>(null);
 
   useEffect(() => {
@@ -111,6 +141,7 @@ export function useSkeleton(loading: boolean): boolean {
       case "wait": {
         const id = window.setTimeout(() => {
           shownAt.current = Date.now();
+          everShown.current = true;
           setShown(true);
         }, step.ms);
         // ⚠️ THE CLEANUP IS WHAT MAKES THE FAST PATH WORK. Data landing inside the delay changes
@@ -130,5 +161,24 @@ export function useSkeleton(loading: boolean): boolean {
     }
   }, [loading, shown]);
 
-  return shown;
+  /**
+   * The dissolve, kept OUT of `skeletonStep` on purpose: that function answers "should the
+   * skeleton be doing its job?", and this answers "how does it leave?". Folding the fade into the
+   * rule would make the minimum-hold arithmetic depend on a presentation constant.
+   *
+   * ⚠️ THE ELEMENT OUTLIVES `shown` BY ONE FADE. React cannot transition an unmounting node, so
+   * `leaving` keeps it mounted at opacity 0 for exactly as long as the CSS takes to get there.
+   */
+  useEffect(() => {
+    if (shown) { setLeaving(false); return; }
+    if (!everShown.current) return;   // it never appeared: there is nothing to dissolve
+    setLeaving(true);
+    const id = window.setTimeout(() => setLeaving(false), SKELETON_FADE_MS);
+    return () => window.clearTimeout(id);
+  }, [shown]);
+
+  return {
+    phase: shown ? "on" : leaving ? "out" : "off",
+    wasShown: everShown.current,
+  };
 }

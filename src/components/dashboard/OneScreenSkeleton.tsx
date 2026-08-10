@@ -23,10 +23,13 @@
  */
 import React from "react";
 
-export const OneScreenSkeleton: React.FC = () => (
+export const OneScreenSkeleton: React.FC<{
+  /** Dissolving — mounted, on its way out, with the finished page live beneath it. */
+  leaving?: boolean;
+}> = ({ leaving = false }) => (
   /* aria-hidden: a screen reader is told nothing by a shape. The wait itself is announced by the
      page's live regions when the content lands. */
-  <div className="os-skelpage" aria-hidden="true">
+  <div className={`os-skelpage${leaving ? " out" : ""}`} aria-hidden="true">
     <div className="os-content">
       <div className="os-greet">
         <div className="os-gl">

@@ -14,7 +14,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  SKELETON_DELAY_MS, SKELETON_MIN_MS, skeletonHold, skeletonShows, skeletonStep,
+  SKELETON_DELAY_MS, SKELETON_FADE_MS, SKELETON_MIN_MS, skeletonHold, skeletonShows, skeletonStep,
 } from "./skeletonTiming";
 
 const src = readFileSync(join(__dirname, "skeletonTiming.ts"), "utf8");
@@ -179,5 +179,36 @@ describe("useSkeleton is bound to the rule it implements", () => {
   it("⚠️ the pending show is CANCELLED on cleanup — that is what makes the fast path fast", () => {
     const hook = src.slice(src.indexOf("export function useSkeleton"));
     expect(hook).toContain("window.clearTimeout(id)");
+  });
+});
+
+/**
+ * ⚠️ THE DISSOLVE IS A SEPARATE CONCERN FROM THE RULE, and deliberately so: `skeletonStep` answers
+ * "should the skeleton be doing its job?", the fade answers "how does it leave?". Folding the fade
+ * into the rule would make the minimum-hold arithmetic depend on a presentation constant.
+ */
+describe("how it leaves", () => {
+  it("the fade is short enough to feel immediate and long enough to read as a fade", () => {
+    expect(SKELETON_FADE_MS).toBeGreaterThanOrEqual(150);
+    expect(SKELETON_FADE_MS).toBeLessThanOrEqual(300);
+  });
+
+  it("⚠️ the element outlives `shown` by one fade — React cannot transition an unmounting node", () => {
+    const hook = src.slice(src.indexOf("export function useSkeleton"));
+    expect(hook).toContain("setLeaving(true)");
+    expect(hook).toContain("SKELETON_FADE_MS");
+    expect(hook).toContain('phase: shown ? "on" : leaving ? "out" : "off"');
+  });
+
+  it("a skeleton that never appeared has nothing to dissolve", () => {
+    const hook = src.slice(src.indexOf("export function useSkeleton"));
+    expect(hook).toContain("if (!everShown.current) return;");
+  });
+
+  /* ⚠️ `wasShown` IS WHAT STOPS THE PAGE ARRIVING TWICE — the dashboard reads it to skip its own
+     entrance stagger, so the two arrival animations cannot run over each other. */
+  it("⚠️ it reports whether a skeleton ever appeared, and that is sticky", () => {
+    expect(src).toContain("wasShown: everShown.current");
+    expect(src).toContain("everShown.current = true");
   });
 });

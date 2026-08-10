@@ -82,12 +82,54 @@ describe("the shimmer", () => {
   });
 });
 
+/**
+ * ⚠️ THE PAGE MUST NOT ARRIVE TWICE — the reported blip, and the reason it had two different
+ * shapes depending on how long the wait was.
+ *
+ * The entrance stagger and the skeleton both answer "the page is arriving". Running both meant:
+ * on a SHORT wait the cards rose under the cover and the cover lifted mid-flight, revealing
+ * content at partial opacity, still sliding; on a LONG wait the cover lifted the instant the data
+ * landed, before the rise had begun, so the page flashed EMPTY WHITE and faded up. And `.enter`
+ * hides the illustrated marks for its whole duration, so they popped in last either way.
+ */
+describe("the reveal — one arrival, not two", () => {
+  it("⚠️ the entrance stagger is SKIPPED when a skeleton was shown", () => {
+    expect(dash).toContain("if (skeleton.wasShown) return;");
+    // …and the guard sits before the class is ever added
+    const at = dash.indexOf("if (skeleton.wasShown) return;");
+    const add = dash.indexOf('classList.add("enter")');
+    expect(at).toBeGreaterThan(-1);
+    expect(add).toBeGreaterThan(at);
+  });
+
+  it("⚠️ …and NOT deleted — it is still right for a load too fast to show a skeleton", () => {
+    expect(dash).toContain('classList.add("enter")');
+    expect(dash).toContain('classList.remove("enter")');
+  });
+
+  it("⚠️ the skeleton dissolves rather than vanishing — mounted through its fade", () => {
+    expect(dash).toContain('skeleton.phase !== "off" && <OneScreenSkeleton leaving={skeleton.phase === "out"} />');
+    const at = css.indexOf(".os-skelpage {");
+    expect(at).toBeGreaterThan(-1);
+    expect(css.slice(at, css.indexOf("}", at))).toContain("transition: opacity 220ms ease");
+    expect(css).toContain(".os-skelpage.out { opacity: 0; pointer-events: none; }");
+  });
+
+  /* ⚠️ THE HOOK IS READ ABOVE THE EFFECT THAT USES IT. A `const` referenced before its declaration
+     sits in the temporal dead zone and throws on the render that reaches it — the failure this
+     repo has already shipped once, on a page carrying a warning against exactly it. */
+  it("⚠️ useSkeleton is declared BEFORE the entrance effect reads it", () => {
+    const decl = dash.indexOf("const skeleton = useSkeleton(loading)");
+    const read = dash.indexOf("if (skeleton.wasShown) return;");
+    expect(decl).toBeGreaterThan(-1);
+    expect(read).toBeGreaterThan(decl);
+  });
+});
+
 describe("the timing is the lib's, not the component's", () => {
   it("the dashboard renders the skeleton off useSkeleton — never off `loading` directly", () => {
     expect(dash).toContain("const skeleton = useSkeleton(loading)");
-    expect(dash).toContain("{skeleton && <OneScreenSkeleton />}");
-    // The real page stays mounted beneath it, so the entrance stagger has cards to find.
-    expect(dash).not.toContain("skeleton ? <OneScreenSkeleton /> :");
+    expect(dash).not.toContain("loading && <OneScreenSkeleton");
   });
 
   it("the three content-driven heights are declared once, as tokens", () => {

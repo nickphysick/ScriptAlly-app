@@ -138,11 +138,42 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
      was added and never removed — a self-cancelling effect that read as correct and was verified
      `stillAnimating: true` long after settling. A ref survives the re-render without re-running
      anything, the same reason the chart's `drewIn` is a ref. */
+  /**
+   * ⚠️ THE PAGE SKELETON IS NOT `loading`. It lags the flag at BOTH ends on purpose — it refuses
+   * to appear for a wait under ~200ms, and once it has appeared it outlives the data by up to
+   * ~400ms and then dissolves. Rendering it straight off `loading` would reinstate exactly the
+   * flash the delay buys off. The rule lives in lib/skeletonTiming.
+   *
+   * ⚠️ IT IS DECLARED HERE, ABOVE THE ENTRANCE EFFECT THAT READS IT, and that is not cosmetic:
+   * a `const` referenced above its declaration sits in the temporal dead zone and throws on the
+   * render that reaches it. This file's own house rule says initialisation goes after what it
+   * depends on, never before.
+   */
+  const skeleton = useSkeleton(loading);
+
   const rootRef = useRef<HTMLDivElement>(null);
   const entered = useRef(false);
   useEffect(() => {
     if (loading || entered.current) return;
     entered.current = true;
+    /**
+     * ⚠️ THE PAGE MUST NOT ARRIVE TWICE. If a skeleton was shown, it has already done this
+     * animation's job — it occupied these exact boxes while the data was out — so the stagger is
+     * SKIPPED and the content is simply there, settled, as the skeleton dissolves off it.
+     *
+     * Running both is what produced the reported blip, and it did so in two different ways
+     * depending on how long the wait was. On a short wait the cards rose UNDER the cover and the
+     * cover lifted mid-flight, revealing content at partial opacity, still sliding. On a long wait
+     * the cover lifted the instant the data landed — before the rise had started — so the page
+     * flashed EMPTY WHITE and then faded up. A third fault rode along with both: `.enter` hides
+     * the illustrated marks for its whole duration (they blend against a transformed ancestor, see
+     * the trap note below), so the marks popped in last, after everything else had settled.
+     *
+     * ⚠️ THE STAGGER IS NOT DELETED, and must not be — it is exactly right for the case it was
+     * written for: a load fast enough that no skeleton ever appeared. That is the ONLY case left
+     * where the page has no other way of announcing that it has arrived.
+     */
+    if (skeleton.wasShown) return;
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const items = root.querySelectorAll(".os-card, .os-greet");
@@ -176,14 +207,6 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
    * nothing extra.
    */
   const scopedStage = runStage(scopedQueries, manuscripts, now);
-
-  /**
-   * ⚠️ THE PAGE SKELETON IS NOT `loading` (P1). It lags the flag at BOTH ends on purpose — it
-   * refuses to appear for a wait under ~200ms, and once it has appeared it outlives the data by
-   * up to ~400ms. Rendering it straight off `loading` would reinstate exactly the flash the delay
-   * buys off. The rule lives in lib/skeletonTiming.
-   */
-  const skeleton = useSkeleton(loading);
 
   return (
     <div
@@ -297,10 +320,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           now={now}
         />
       </div>
-      {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it — the
-          entrance stagger has to find them the moment this lifts, and leaving them mounted is what
-          makes "no layout shift" structural rather than a matter of matching numbers. */}
-      {skeleton && <OneScreenSkeleton />}
+      {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
+          makes "no layout shift" structural rather than a matter of matching numbers — and it is
+          why the dissolve works: the page is already finished under there, so this fades off a
+          settled picture rather than crossfading between two moving ones. */}
+      {skeleton.phase !== "off" && <OneScreenSkeleton leaving={skeleton.phase === "out"} />}
       {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}
     </div>
   );

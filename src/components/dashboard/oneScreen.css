@@ -323,7 +323,17 @@
   /* the window's own paper, so the page beneath is covered rather than tinted */
   background: var(--os-skel-paper);
   overflow: hidden;
+  /* ⚠️ IT DISSOLVES, IT DOES NOT VANISH. Swapping a full-page grey shell for the page in a single
+     frame is a hard cut, and a hard cut reads as a glitch however well the blocks line up — the
+     geometry being right is precisely what makes the instant swap conspicuous rather than
+     forgivable. Opacity only, per the pack's motion rule. */
+  transition: opacity 220ms ease;
 }
+/* ⚠️ THE PAGE UNDERNEATH IS ALREADY FINISHED by the time this runs — see the entrance note in
+   OneScreenDashboard. So this is a dissolve onto a settled page, not a crossfade between two
+   moving things; nothing beneath it is animating while it goes.
+   `pointer-events: none` the moment it starts leaving: the page is usable before it is invisible. */
+.os-skelpage.out { opacity: 0; pointer-events: none; }
 .os-sk {
   background: #f0eae1;
   border-radius: 8px;
