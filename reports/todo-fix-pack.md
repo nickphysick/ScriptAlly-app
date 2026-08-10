@@ -4,15 +4,16 @@
 (Fix 4, not started). A third ref, `todo-rowactions-v1.html`, was never supplied and was not
 needed — its conclusion is carried by the split-guard file.
 
-**⚠️ Fix 4 is NOT started.** It is the largest by some margin and the brief forbids beginning one
-that cannot be finished. Its recon is complete and sits at the foot of this file.
+**All four fixes are in.** Commit 0 → Fix 1 (`ecf2ff1`) → Fix 2 (`d10f728`) → Fix 3 (`6b8d20a`) →
+Fix 4 (`225d4e1`).
 
 ## Gates
 
 | | tsc | build | Vitest |
 |---|---|---|---|
 | **baseline** (before touching anything) | 0 | clean | **222 files, 3523 passed \| 2 skipped** |
-| after each of Fixes 1, 2, 3 | 0 | clean | **222 files, 3523 passed \| 2 skipped** |
+| after Fixes 1, 2, 3 | 0 | clean | **222 files, 3523 passed \| 2 skipped** |
+| after Fix 4 | 0 | clean | **222 files, 3550 passed \| 2 skipped** (+27 new locks) |
 
 Baseline was already green, so the gate was "stay green" rather than "no worse".
 
@@ -127,22 +128,50 @@ Still manual, and **not** verifiable in jsdom:
 - Composer: Save disabled on empty title; **Enter saves**; **Esc dismisses**; Cancel discards.
 - The Calendar and Noteboard tops still sit level with the To-do list after the shared-token change.
 
-## Fix 4 — recon, so it can start cold
+## Fix 4 — the guarded split button (`225d4e1`)
 
-Everything below is confirmed; no red gate fires.
+The four-slot grid, its preserved empty slot and the standalone snooze and dismiss icon buttons
+are **deleted, not disabled**. Every row carries one identical control, so the alignment device has
+nothing left to align — and one kept past its reason is the next reader's puzzle. Row's last track
+`216px` → `118px`.
 
-- **Grid:** `todoGroups.css:153`, last track `216px` → `118px`. Single definition.
-- **What to delete:** `.tdg-verbs`' four-column grid and `.tdg-slot` (`todoGroups.css:319, 326`,
-  one definition each) and **four `tdg-slot` occurrences** in `TaskList.tsx`, plus the standalone
-  snooze and dismiss icon buttons.
-- **Wiring is already right and must not change:** snooze and dismiss have **no local
-  implementations**. Both ask `cardMenu` for permission and route `performCardVerb` → `snoozeCard`
-  (via `clampSnooze`) / `dismissTask`. The split's menu changes what invokes them, never the path.
-- **Receipt exists — extend, build nothing.** `useTodoToast`: `flash(msg, action?)`, `warn`,
-  `dismiss`, `pause`, `resume`, `remember(key, fn)`, `recall(key)`. Already bottom-left, 8s, one at
-  a time, hover-pausing.
-- **Menu host:** `PortalMenu` (`position: fixed; z-index: 80`), classes from `todoBoard.css`.
-- **Number keys:** `lib/taskShortcuts.ts` already owns the page's key decisions (`listKey`,
-  `worksTheList`, `focusesSearch`, `KEY_MAP`) and is where `1` / `2` belong. `KEY_MAP` drives the
-  `?` overlay, and a lock walks it — any key added there must be answered by a handler.
-- **Duplicates:** none among the selectors Fix 4 touches.
+**Browser-measured: 81 + 3 seam + 34 caret = 118.**
+
+| guard | how it holds | measured |
+|---|---|---|
+| **1 — target size** | caret widened from 28 to 34px | `width: 34px` |
+| **2 — arm before press** | two elements, two `:hover`s | over primary: `#3a2a20` / transparent; over caret: exactly reversed; **never both** |
+| **3 — dead seam** | a plain span, and *nothing above the halves takes a click* | seam midpoint hits the seam element, which has no handler |
+| **3 — commit on release** | `onClick`, never `onMouseDown` | the browser fires `click` only when press and release share an element, so press-and-slide-off does nothing by its rule rather than ours |
+| **4 — reversibility** | `snoozeCard`, `forkStale` and `hideType` each **already** flash an Undo receipt through `useTodoToast` | nothing new built, as instructed |
+
+**The menu.** Portalled; safe verbs first; the destructive pair below a **12px dead zone that takes
+no click** (`pointer-events: none` — measured: a click at its midpoint reaches the menu box, not an
+item) and a hairline. It opens with the **box** focused rather than an item, so Enter straight
+after opening does nothing. Keys `1`/`2` fire the snooze presets — snooze lost its button, not its
+speed — and are **inert on a greyed tier**, or the grey would be a lie. Inapplicable verbs render
+greyed with their reason as the title.
+
+**⚠️ The shape is the ref's; the permissions are `cardMenu`'s**, so the row, the menu and the
+keyboard cannot come to disagree about what a card allows. Wiring untouched: `cardMenu` →
+`performCardVerb` → `snoozeCard` (via `clampSnooze`) / `dismissTask`.
+
+Two mappings worth stating:
+
+- **"Edit last entry" is `edit-task`** — live on a writer's own item (the row *is* their entry) and
+  greyed on a derived card, because there is no entry of yours to edit. No primitive was invented.
+- **"Stop showing this kind" is the MUTE**, reaching the existing `hideType` through `dismiss-rule`
+  — a different verb from dismiss, not a second copy of it.
+
+**One Tab stop:** the caret is `tabIndex={-1}`, Enter fires the primary, `↓` opens the menu from
+the primary, so the caret is never the only route in.
+
+The skeleton follows the row — one 118px placeholder, not four slots — because its whole job is
+that nothing shifts when the data lands.
+
+## Still manual, for Fix 4
+
+- Press a half and slide off before release — nothing fires.
+- `↓` and `Alt+↓` open the menu from the primary; Tab reaches the split once.
+- `1` and `2` snooze from the open menu; both are inert on an offer row's greyed `Next week`.
+- The receipt appears bottom-left and reverses, for snooze *and* dismiss.

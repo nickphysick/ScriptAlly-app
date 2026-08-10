@@ -1,9 +1,9 @@
 **Last updated: 10 August 2026 (twenty-first pass — the To-do list fix pack).**
 
-## To-do list fix pack — commit 0 + Fixes 1–3 (report: `reports/todo-fix-pack.md`)
+## To-do list fix pack — commit 0 + ALL FOUR FIXES (report: `reports/todo-fix-pack.md`)
 
-`ecf2ff1` (Fix 1) → `d10f728` (Fix 2) → `<Fix 3>`, over commit 0's two refs. **Baseline was green
-and stayed green: 222 files, 3523 passed | 2 skipped.**
+`ecf2ff1` (Fix 1) → `d10f728` (Fix 2) → `6b8d20a` (Fix 3) → `225d4e1` (Fix 4), over commit 0's two
+refs. **Baseline was green and stayed green: 3523 → 3550 passed (+27 locks), 222 files.**
 
 ⚠️ **THE TREE WAS DIRTY THROUGHOUT AND THAT WAS AUTHORISED** (pre-launch, dev only). Two other
 sessions had work in this checkout — one with 29 paths staged, one unstaged plus untracked. Every
@@ -30,6 +30,14 @@ commit used `git commit --only -- <paths>`, and their index came through at 29 p
   Outstanding of 16 seen in production** — the same units bug board-optimise P5 fixed elsewhere.
   **Whoever re-places the band fixes the units first.** The component and its file are untouched;
   the modal is still reachable. Not fixed here: a units change to a Pro surface is its own job.
+
+- **⚠️ THE ROW'S FOUR-SLOT GRID IS RETIRED FOR ONE GUARDED SPLIT BUTTON** (118px = 81 + 3 seam +
+  34 caret). The empty-slot alignment device is DELETED, not disabled — every row carries one
+  identical control, so there is nothing left to align. **The seam is defended four ways**: a 34px
+  caret, per-half `:hover` arming (browser-measured: never both lit), a dead seam with no handler
+  above the halves, and commit on `click` rather than `mousedown`. Snooze and dismiss moved into
+  the menu; the standalone icon buttons went with them. **The shape is the ref's, the permissions
+  are `cardMenu`'s**, and the write path is untouched.
 
 ### ⚠️ The parked board-era sweep has a dependency — do not delete `todoBoard.css`
 
