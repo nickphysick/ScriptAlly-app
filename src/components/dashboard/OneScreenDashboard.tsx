@@ -32,6 +32,7 @@ import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenPro } from "./OneScreenPro";
 import { OneScreenCounters } from "./OneScreenCounters";
+import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { OneScreenRail } from "./OneScreenRail";
 import "./oneScreen.css";
 
@@ -70,6 +71,20 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, currentUser,
   activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
 }) => {
+  /**
+   * ⚠️ THE SCOPED SETS ARE DERIVED ONCE, HERE, AND HANDED DOWN (B2). Every card reading the same
+   * three arrays is what makes "switching manuscripts changes exactly the scoped figures" a
+   * property of the page rather than something maintained card by card.
+   *
+   * ⚠️ `agents` IS DELIBERATELY ABSENT from this list. An agent is a person you know, not a
+   * per-book fact — "agents on file" must not move when the scope does.
+   */
+  const scopeId = activeManuscript?.id ?? null;
+  const msIds = React.useMemo(() => new Set(manuscripts.map((m) => m.id)), [manuscripts]);
+  const scopedQueries = React.useMemo(() => scopeQueries(queries, scopeId), [queries, scopeId]);
+  const scopedActivities = React.useMemo(() => scopeActivities(activities, scopeId), [activities, scopeId]);
+  const scopedTasks = React.useMemo(() => scopeTasks(tasks, queries, msIds, scopeId), [tasks, queries, msIds, scopeId]);
+
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
   /* ── §12 · the tour ── */
@@ -135,7 +150,15 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     return () => window.clearTimeout(id);
   }, [loading]);
 
+  /* ⚠️ TENURE IS ACCOUNT-SCOPED — "querying since" is when YOU started, not when this book did. */
   const tenure = tenureLine(queries);
+  /**
+   * ⚠️ THE ACHIEVEMENT PILL STAYS ACCOUNT-SCOPED, beside the tenure pill it partners. "Your best
+   * month" and "a new fastest reply" are facts about your querying, and narrowing them to one book
+   * turns a real record into a weaker claim about a subset — while the pill sits next to a tenure
+   * line that is explicitly account-wide. Two neighbouring pills answering at different scopes is
+   * the two-numbers-one-name fault in a new place.
+   */
   const ach = achievementPill(queries, now);
   const stage = runStage(queries, manuscripts, now);
 
@@ -189,7 +212,8 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               )}
             </div>
           </div>
-          <OneScreenCounters loading={loading} queries={queries} agents={agents} now={now} />
+          {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
+          <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />
         </div>
 
         <div className="os-colM">
@@ -203,7 +227,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               onNavigate={onNavigate}
             />
             <OneScreenChart
-              loading={loading} queries={queries} agents={agents} now={now}
+              loading={loading} queries={scopedQueries} agents={agents} now={now}
               dayOne={stage === "day-one"} earlyDays={stage === "early-days"}
               onSendFirst={() => onNavigate("queries", "Send a query")}
             />
@@ -211,7 +235,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
 
           <OneScreenTasks
             loading={loading}
-            tasks={tasks}
+            tasks={scopedTasks}
             queries={queries}
             agents={agents}
             userTasks={userTasks}
@@ -233,11 +257,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           expanded={railExpanded}
           setExpanded={setRailExpanded}
           loading={loading}
-          queries={queries}
+          queries={scopedQueries}
           agents={agents}
           manuscripts={manuscripts}
           userTasks={userTasks}
-          activities={activities}
+          activities={scopedActivities}
           currentUser={currentUser}
           activeManuscript={activeManuscript}
           onNavigate={onNavigate}
