@@ -326,7 +326,8 @@
 .ws-srow.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
 .ws-srow:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 
-/* foot — name + plan + Settings. NO avatar: the rail carries the face. */
+/* foot — the user row alone: avatar, name, plan, Upgrade. Settings left for the ACCOUNT section
+   (audit pack P5), and the old "NO avatar: the rail carries the face" note went with the rail. */
 .ws-pfoot { flex: none; }
 /**
  * ⚠️ ONE RULE FOR THIS ROW, AND THERE USED TO BE TWO (audit P2).
@@ -386,7 +387,9 @@
 }
 .ws-upg:hover { background: #f5e3da; }
 .ws-upg:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
-.ws-setrow { margin-top: 4px; height: 36px; font-size: 13px; }
+/* ⚠️ `.ws-setrow` IS DELETED WITH THE ROW IT STYLED (audit pack P5) — Settings is an ordinary
+   `.ws-ni` in the ACCOUNT section now, and a leftover rule for a row that no longer exists is how
+   a foot quietly regrows one. */
 
 /* flyout — anchored to the RAIL */
 

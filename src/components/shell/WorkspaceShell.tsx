@@ -25,7 +25,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Plus, Settings,
+  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Plus,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveScopedManuscript, stepManuscript } from "../../lib/shellSidebar";
@@ -397,7 +397,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               spacer BESIDE a flex:1 nav is two claimants on the same slack and the browser
               splits it, leaving the last groups below a fold with empty panel beneath. */}
 
-          {/* ── foot, in the ref's order: hairline → user row → Settings ──
+          {/* ── foot: hairline → the user row, and NOTHING ELSE (audit pack P5) ──
+              ⚠️ SETTINGS CAME UP OUT OF HERE and is an ordinary row in the ACCOUNT section now. As
+              a lone row pinned below the divider it was a destination living in the furniture —
+              the one page in the app you could not find by reading down the nav.
+
+              ⚠️ AND THAT IS WHAT MAKES THE DIVIDER MEAN SOMETHING: above it, places to go; below
+              it, who you are. A second navigating row down here would blur that again.
+
               ⚠️ THE AVATAR IS BACK. It said "NO avatar (the rail carries the face)" — and the rail
               no longer exists, so nothing carried it. */}
           <div className="ws-pfoot">
@@ -434,10 +441,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 </button>
               )}
             </div>
-            <button type="button" className="ws-ni ws-setrow" onClick={() => go("/account")}>
-              <span className="ws-ic"><Settings aria-hidden="true" /></span>
-              Settings
-            </button>
           </div>
         </div>
       </div>

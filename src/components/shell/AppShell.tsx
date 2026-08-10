@@ -150,6 +150,12 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
   materials: <Book aria-hidden="true" />,
+  /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
+     added — the group's and the row's — per the parallel-surface warning above; adding the
+     section without its glyph is the quiet half of that failure.
+     ⚠️ AND IT STAYS MONOLINE. Settings is a control, not an object: the two-icon-families rule in
+     workspaceShell.css says so explicitly, and an illustrated Settings was explored and rejected. */
+  account: <Settings aria-hidden="true" />,
   // panel rows — one per destination
   dash: <LayoutGrid aria-hidden="true" />,
   send: <Send aria-hidden="true" />,
@@ -161,6 +167,7 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   people: <Users aria-hidden="true" />,
   compass: <Compass aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
+  settings: <Settings aria-hidden="true" />,
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {

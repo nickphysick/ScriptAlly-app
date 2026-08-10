@@ -72,24 +72,14 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
            chrome are peers in the IA, and the fold left Calendar reachable from nowhere. */
       ],
     },
-    /* ⚠️ THE TASKS SECTION (sidebar-IA fix, 6 Aug) — directly after WORKSPACE, the same
-       section grammar as Queries/Agents/Materials, NO new variant. Its rows ARE `TODO_ROUTES`
-       — the one definition of the four pages (labels, paths, palette blurbs), so the sidebar,
-       the ⌘K palette, the breadcrumb ("Tasks / To-do list") and every route-section lookup
-       follow from the same source and cannot drift. The urgency dot + count ride the To-do
-       list row alone — the board's own total, the ONLY count in the nav (Amendment 1, H5). */
-    {
-      id: "tasks",
-      label: "Tasks",
-      def: "list",
-      children: TODO_ROUTES.map((r) => ({
-        id: r.id,
-        label: r.label,
-        path: r.path,
-        icon: TASKS_ICON[r.id],
-        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
-      })),
-    },
+    /* ⚠️ THE ORDER IS THE WORK'S ORDER (audit pack P5), and it CHANGED: Tasks used to lead,
+       directly after Workspace. It now sits fourth, after Queries · Agents · Materials.
+
+       The reasoning the 6 Aug fix recorded — that Tasks is a section rather than a page under
+       Querying — is untouched and still right; only its POSITION moved. The three sections above
+       it are the querying work itself, in the order it happens: you write to agents, you keep
+       agents, you keep the materials you send them. Tasks is what falls out of that work, so it
+       reads better after it than before it. */
     {
       id: "queries",
       label: "Queries",
@@ -113,6 +103,41 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       label: "Materials",
       def: "m-pkg",
       children: [{ id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" }],
+    },
+    /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages (labels, paths,
+       palette blurbs), so the sidebar, the ⌘K palette, the breadcrumb ("Tasks / To-do list") and
+       every route-section lookup follow from the same source and cannot drift. Do NOT hand-write
+       these rows to change the section's place in the list: the order lives here, the rows do
+       not. The urgency dot + count ride the To-do list row alone — the board's own total, and
+       still the ONLY count in the nav (Amendment 1, H5). */
+    {
+      id: "tasks",
+      label: "Tasks",
+      def: "list",
+      children: TODO_ROUTES.map((r) => ({
+        id: r.id,
+        label: r.label,
+        path: r.path,
+        icon: TASKS_ICON[r.id],
+        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
+      })),
+    },
+    /* ⚠️ ACCOUNT IS A SECTION NOW, AND SETTINGS CAME UP OUT OF THE FOOT (audit pack P5).
+       Settings was a lone row pinned below the divider beside the user block — a destination
+       living in the furniture rather than in the navigation, and the only page in the app you
+       could not find by reading down the nav. It is an ordinary row in an ordinary section here.
+
+       ⚠️ THE FOOT IS NOW THE USER ROW AND NOTHING ELSE, which is what makes the divider mean
+       something: everything above it is somewhere to go, everything below it is who you are.
+
+       One child, and that is honest rather than awkward — `/plans` and `/help` are real routes
+       but they are reached from inside Settings and from the help control, so listing them here
+       would be a second door apiece. The section grows when a page genuinely has no other home. */
+    {
+      id: "account",
+      label: "Account",
+      def: "settings",
+      children: [{ id: "settings", label: "Settings", path: "/account", icon: "settings" }],
     },
   ];
 }

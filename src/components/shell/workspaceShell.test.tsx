@@ -227,15 +227,29 @@ describe("the sidebar", () => {
     expect(rule(".ws-av")).toContain("border-radius: 50%");
   });
 
-  /* ⚠️ NEW (Part 2) — the ref's order, and it is easy to get backwards. */
-  it("⚠️ foot order: hairline, then the user row, then Settings", () => {
-    const foot = srcCode.slice(srcCode.indexOf('className="ws-pfoot"'));
+  /* ⚠️ RETARGETED (audit pack P5) from "hairline, then the user row, then Settings". Settings has
+     come UP into the ACCOUNT section — as a lone row below the divider it was a destination living
+     in the furniture, and the one page you could not find by reading down the nav.
+
+     What is asserted now is the SHAPE the divider promises: above it, places to go; below it, who
+     you are. So the foot holds the hairline and the user row, and nothing that navigates. */
+  it("⚠️ the foot is the hairline and the user row — no Settings, nothing else to go to", () => {
+    const from = srcCode.indexOf('className="ws-pfoot"');
+    const to = srcCode.indexOf("{accountMenu}", from);
+    expect(from).toBeGreaterThan(-1);
+    expect(to).toBeGreaterThan(from);
+    const foot = srcCode.slice(from, to);
     const div = foot.indexOf('className="ws-pdiv"');
     const user = foot.indexOf('className="ws-uacct"');
-    const set = foot.indexOf("ws-setrow");
     expect(div).toBeGreaterThan(-1);
     expect(user).toBeGreaterThan(div);
-    expect(set).toBeGreaterThan(user);
+    expect(foot).not.toContain("ws-setrow");
+    expect(foot).not.toContain("Settings");
+  });
+
+  /* ⚠️ AND ITS RULE WENT WITH IT — a leftover `.ws-setrow` is how a foot quietly regrows a row. */
+  it("⚠️ `.ws-setrow` is deleted, not left orphaned in the sheet", () => {
+    expect(cssRules).not.toContain(".ws-setrow");
   });
 
   /* ⚠️ RETARGETED — the pack's rule 7, and the one most likely to be undone by a future repaint. */
