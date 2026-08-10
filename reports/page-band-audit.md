@@ -38,3 +38,57 @@ deletions:
 
 **Calendar, Noteboard, To-do and Analytics do NOT appear in the PageHeader mount list** — they are
 the genuinely bespoke ones and still need auditing individually.
+
+---
+
+# Amendment 1 — resumed audit (the four bespoke pages)
+
+## The three recon items
+
+**1. The variant union is `variant?: "full"` — a union of ONE.** The file's own comment records that
+`compact` and `greeting` were *retired* by the flyouts pack, deliberately, because "one full layout"
+was the conclusion. The prop survives only so existing `variant="full"` call sites keep compiling.
+Nothing existing is band-like; the band is genuinely new. **Adding `"band"` re-opens a union that was
+closed on purpose** — worth stating in the commit so it reads as a decision, not a regression.
+
+**2. No page passes `description`.** Only the test file does (three cases). So the band variant
+dropping the prose slot costs **nothing live**, and needs no decision from Nick. The `description`
+prop stays supported for the default variant, which the contract requires anyway.
+
+**3. PageHeader DOES render its own closing rule** — "a hairline rule closing the header… everything
+below the rule is page content". The band variant must suppress it; the band's own 1px `#adb8aa`
+bottom border replaces it.
+
+## ⚠️ SECOND FINDING: the four "bespoke" pages share a primitive too
+
+**Calendar, Noteboard and To-do all render `TasksPageLayout`** (`todo/TasksPageLayout.tsx`), which
+owns `.tpl-head` — eyebrow, `<h1 className="tpl-title">`, an optional title-actions row, subtitle,
+a `beneath` slot and a tools row whose bottom edge carries the hairline.
+
+| Page | File | Header |
+|---|---|---|
+| To-do list | `todo/ToDoPage.tsx` | `TasksPageLayout` |
+| Calendar | `todo/TodoCalendarPage.tsx` | `TasksPageLayout` |
+| Noteboard | `todo/TodoNoteboardPage.tsx` | `TasksPageLayout` |
+| Analytics | `packages/AnalyticsTab.tsx` | **none** — a tab inside Submission packages, not a routed page; its `<h2 class="gsec">` rows are section headings, i.e. view state |
+
+So there are **two** header primitives app-wide, not ten bespoke headers: `PageHeader` (10 pages) and
+`TasksPageLayout` (3 pages). Analytics has no page header at all.
+
+**This sharpens the amendment's own goal** — "this pack should end with fewer header implementations
+than it started with." The real target is 2 → 1, and the To-do family is where the work is.
+
+⚠️ **`TasksPageLayout` is very heavily locked** — nine test files reference it
+(`tasksLayout`, `tasksViewport`, `todoListChrome`, `todoTightening`, `artSlots`, `todoWorkbench`,
+`todoShellPolish`, `todoPanelFinal`, `todoBoardMenu`). Migrating it is not a prop change; it is a
+retargeting exercise across nine locks, and it is **the To-do stream's territory**.
+
+## Verdicts
+
+| Page | Verdict |
+|---|---|
+| Contact list, Submission packages, Query Centre, Discover, Settings | **MODIFY** — pass the band variant |
+| Manuscripts, Comparable titles, Import | **ALREADY CORRECT** — keep default, never opt in |
+| Help centre, Plans | **focus-tier — keep default.** Proposed list, per the amendment's instruction to name it rather than decide silently |
+| Analytics | **ALREADY CORRECT** — no page header exists; it is a tab. Giving it one is new work, not a migration |
+| To-do, Calendar, Noteboard | **BUILD** — migrate off `TasksPageLayout`'s head onto `PageHeader` band. Gated on the To-do stream, and it touches nine locks |
