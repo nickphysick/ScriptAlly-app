@@ -682,7 +682,7 @@ describe("⚠️ SEARCH STAYS REACHABLE FROM ANYWHERE ON THE PAGE", () => {
     /* Stated so the shortcuts read as REACH rather than as rescue: the header block is fixed by
        the alignment contract, and `.tpl-zone` is the one declared scroller. */
     const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
-    expect(layoutCss).toContain(".tpl-head { flex: 0 0 auto");
+    expect(layoutCss).toContain(".tpl-head { width: 100%; flex: 0 0 auto; }"); // folded, fix pack 10 Aug
     expect(page).toContain("tools={renderTools()}");
   });
 });

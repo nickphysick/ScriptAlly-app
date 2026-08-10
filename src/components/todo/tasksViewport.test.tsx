@@ -89,7 +89,10 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
   });
 
   it("the header block is fixed — it never scrolls away from the list it controls", () => {
-    expect(rule(css, ".tpl-head { flex:")).toContain("flex: 0 0 auto");
+    /* ⚠️ ONE RULE NOW (fix pack, 10 Aug): `.tpl-head` was declared twice in this file — width here,
+       `flex: 0 0 auto` eighty lines down — a single-class pair that would have resolved on source
+       order the day they shared a property. Folded, so the anchor is the whole rule. */
+    expect(rule(css, ".tpl-head {")).toContain("flex: 0 0 auto");
   });
 
   it("⚠️ THE ZONE IS THE ONLY DECLARED SCROLLER on a Tasks page", () => {
@@ -516,7 +519,10 @@ describe("⚠️ WHAT ACTUALLY BOUNDS THE TASKS FRAME — and it is not in the c
       expect(rule(sheet, sel), sel).toContain("min-height: 0");
       expect(rule(sheet, sel), sel).toMatch(/flex:\s*1/);
     }
-    expect(rule(css, ".tpl-head { flex:")).toContain("flex: 0 0 auto"); // the header never shrinks
+    /* ⚠️ ONE RULE NOW (fix pack, 10 Aug): `.tpl-head` was declared twice in this file — width here,
+       `flex: 0 0 auto` eighty lines down — a single-class pair that would have resolved on source
+       order the day they shared a property. Folded, so the anchor is the whole rule. */
+    expect(rule(css, ".tpl-head {")).toContain("flex: 0 0 auto"); // the header never shrinks
   });
 });
 

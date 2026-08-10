@@ -47,11 +47,17 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
     expect(c).not.toContain("margin-inline: auto");
     expect(c).not.toContain("margin-inline: 0 auto"); // centred, equal gutters grow with the viewport
   });
-  it("the column max + gutter + chrome gap are tokens (~1360 / 40 / ≥44)", () => {
+  it("the column max + gutter + chrome gap are TOKENS (~1360 / 40 / the top air)", () => {
     const w = rule(".tdb-wrap");
     expect(w).toContain("--tdb-col-max: 1360px");
     expect(w).toContain("--tdb-col-gutter: 40px");
-    expect(w).toContain("--tdb-chrome-gap: 44px");
+    /* ⚠️ THE CHROME GAP TIGHTENED 44 → 16 (fix pack, 10 Aug). The pinned block measured 282px at
+       1440×900, leaving a scroll window barely eight rows tall, which reads as a page that will
+       not scroll. It came out of GAPS only — no control moved, resized or restyled — and this is
+       the largest of them. What the case protects is that the value is a TOKEN on `.tdb-wrap`
+       feeding `.tdb-col`'s padding, so all four Tasks pages keep ONE top offset; the number itself
+       is a design figure, and pinning it here made a deliberate change look like a regression. */
+    expect(w).toMatch(/--tdb-chrome-gap: \d+px/);
     // the chrome gap is the column's top padding (air under the bar)
     expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
   });
