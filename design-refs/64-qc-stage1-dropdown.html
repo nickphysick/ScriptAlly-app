@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Query Centre stage 1 · v64</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;--hair:#ece0d2;--sage:#8a9e88;--sage-tx:#5a6e58;--pink:#f5e2da;--pink-br:#e8c8bc;--rim:rgba(124,58,42,0.16);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+.ctl{position:sticky;top:0;z-index:60;background:#efe7de;border-bottom:1px solid #e0d5c8;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.ctl-lb{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+.seg{display:flex;background:#fff;border:.5px solid #e0d5c8;border-radius:9px;padding:3px;gap:2px;}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;padding:6px 12px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:var(--muted);font-style:italic;}
+
+.shell{display:flex;min-height:calc(100vh - 45px);}
+.nrail{width:52px;flex:0 0 52px;border-right:1px solid #e6dcd0;padding-top:14px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.nrail i{width:20px;height:20px;border-radius:5px;background:#e2d7c9;}
+.nrail i.act{background:var(--burg);opacity:.55;}
+.panel{width:214px;flex:0 0 214px;border-right:1px solid #e6dcd0;padding:16px 14px;}
+.pl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;}
+.pi{font-size:12.5px;color:var(--ink-soft);padding:6px 8px;border-radius:7px;}
+.pi.act{background:#e8dfd4;color:var(--burg);font-weight:500;}
+.main{flex:1;min-width:0;padding:14px 18px 60px;}
+
+.crumb{display:flex;align-items:center;gap:10px;height:38px;padding:0 4px;margin-bottom:10px;}
+.crumb span{font-family:'Playfair Display',serif;font-size:15px;}
+.crumb .sl{color:#cbbcae;font-family:'Inter';font-size:13px;}
+.crumb .dim{color:var(--burg);}
+.crumb .right{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+.page{background:var(--parchment);border:1px solid var(--rim);border-radius:16px;padding:24px 28px 28px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);}
+.page-head{display:flex;align-items:flex-end;gap:16px;padding-bottom:13px;border-bottom:1px solid var(--hair);margin-bottom:18px;}
+.page-head h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;}
+.page-head .acts{margin-left:auto;display:flex;gap:10px;}
+.gh{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;background:#fff;border:.5px solid #e0d5c8;color:var(--ink-soft);border-radius:9px;padding:9px 15px;cursor:pointer;}
+.gh.dis{opacity:.45;}
+
+.cc{border:1px solid var(--rim);border-radius:13px;}
+.cc-head{display:flex;align-items:flex-start;gap:15px;padding:18px 20px 15px;border-bottom:1px solid var(--hair);}
+.cc-motif{width:52px;height:52px;flex:0 0 52px;border-radius:10px;background:#f7f0e6;border:.5px solid #ece0d2;display:flex;align-items:center;justify-content:center;}
+.cc-motif svg{width:28px;height:28px;stroke:var(--burg);fill:none;stroke-width:1.3;}
+.cc-t{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;line-height:1.15;}
+.cc-s{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+.chips{display:flex;gap:14px;margin-top:8px;}
+.chip{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);}
+.dot{width:14px;height:14px;border-radius:50%;border:1.5px solid #d3c6b8;flex:0 0 14px;}
+.dot.done{background:var(--sage);border-color:var(--sage);position:relative;}
+.dot.done::after{content:'';position:absolute;left:4px;top:2px;width:4px;height:7px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+.dot.now{border-color:var(--burg);box-shadow:0 0 0 3px rgba(124,58,42,.1);}
+.cc-acts{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.esc{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:#c0b0a2;}
+.b-ghost{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;background:#fff;border:.5px solid #e0d5c8;color:var(--ink-soft);border-radius:9px;padding:9px 16px;cursor:pointer;}
+.b-link{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;background:none;border:0;color:#bcaa9c;padding:9px 4px;}
+.b-pink{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;background:var(--pink);border:.5px solid var(--pink-br);color:var(--burg);border-radius:9px;padding:10px 18px;cursor:pointer;opacity:.5;}
+.b-pink.live{opacity:1;}
+.b-pink.live:hover{background:#efd5ca;}
+
+/* body: flow + reference panel */
+.cc-body{padding:18px 20px 20px;display:grid;grid-template-columns:minmax(0,1fr) 322px;gap:20px;align-items:start;}
+body[data-stage="1"] .cc-body{grid-template-columns:minmax(0,1fr);}
+body[data-stage="1"] .refp{display:none;}
+.flow{display:flex;flex-direction:column;gap:9px;}
+
+/* collapsed row */
+.srow{display:flex;align-items:center;gap:12px;border:.5px solid #ece0d2;background:#fbf6ef;border-radius:10px;padding:12px 16px;cursor:pointer;transition:.15s;}
+.srow:hover{border-color:#dcc9bb;background:#fff;}
+.srow .dot{width:15px;height:15px;flex:0 0 15px;}
+.srow b{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink-soft);}
+.srow .hint{font-size:12.5px;color:#a89686;}
+.srow .val{margin-left:auto;font-size:12.5px;color:var(--ink-soft);text-align:right;}
+.srow .val em{font-style:normal;color:var(--muted);}
+.srow .chev{margin-left:12px;color:#c8b8a8;font-size:14px;}
+.srow.done{background:#fbf8f3;}
+.srow.done b{color:var(--ink);}
+.srow .edit{margin-left:12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;color:var(--burg);opacity:0;transition:.15s;}
+.srow:hover .edit{opacity:1;}
+
+/* expanded block */
+.sopen{border:.5px solid #e0d5c8;background:#fff;border-radius:11px;padding:18px 20px 18px;box-shadow:0 1px 2px rgba(58,28,20,.04),0 6px 18px rgba(58,28,20,.06);}
+.so-h{display:flex;align-items:baseline;gap:11px;margin-bottom:3px;}
+.so-h .dot{width:15px;height:15px;flex:0 0 15px;align-self:center;}
+.so-h h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;}
+.so-h .of{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;color:#c0b0a2;}
+.lede{font-size:12.5px;color:var(--muted);margin:0 0 15px 26px;}
+.so-in{margin-left:26px;}
+label.fl{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);display:block;margin-bottom:6px;}
+.tfield{width:100%;background:#fff;border:.5px solid #e0d5c8;border-radius:9px;padding:11px 13px;font-size:13.5px;color:var(--ink);outline:none;box-shadow:inset 0 1px 2px rgba(58,28,20,.03);}
+.tfield::placeholder{color:#c8b8a8;}
+.tfield:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(138,158,136,.12);}
+.searchline{display:flex;align-items:center;gap:14px;}
+.searchline .tfield{max-width:400px;}
+.helper{font-size:12px;color:var(--ink-soft);}
+.helper a{color:var(--burg);text-underline-offset:2px;}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.trig{background:#fff;border:.5px solid #e0d5c8;border-radius:9px;padding:11px 13px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.trig span.c{color:var(--burg);}
+.chipset{display:flex;gap:7px;flex-wrap:wrap;}
+.ch{border:.5px solid #e0d5c8;background:#fff;border-radius:9px;padding:9px 13px;font-size:12.5px;cursor:pointer;}
+.ch.on{background:var(--pink);border-color:var(--pink-br);color:var(--burg);font-weight:500;}
+.derived{margin-top:9px;font-size:11.5px;color:var(--muted);}
+.so-f{display:flex;align-items:center;gap:10px;margin:18px 0 0 26px;}
+.so-f .right{margin-left:auto;font-size:11.5px;color:var(--muted);}
+
+/* picker */
+.pick-h{display:flex;align-items:baseline;gap:10px;margin:18px 0 9px;}
+.pick-h b{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.pick-h span{font-size:11.5px;color:#b0a092;}
+.pick-h a{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--burg);text-decoration:none;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:9px;}
+.acard{border:.5px solid #ece0d2;background:#fbf6ef;border-radius:10px;padding:12px 13px;cursor:pointer;transition:.15s;}
+.acard:hover{background:#fff;border-color:#dcc9bb;box-shadow:0 2px 8px rgba(58,28,20,.07);transform:translateY(-1px);}
+.acard.sel{background:#fff;border-color:var(--pink-br);box-shadow:0 0 0 2px rgba(124,58,42,.12);}
+.ac-top{display:flex;align-items:center;gap:9px;}
+.av{width:30px;height:30px;flex:0 0 30px;border-radius:50%;background:var(--parchment);border:1px solid rgba(124,58,42,.22);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;color:var(--burg);}
+.ac-n{font-size:13.5px;font-weight:500;line-height:1.2;}
+.ac-a{font-size:11px;color:var(--muted);}
+.ac-meta{display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:9px;border-top:1px solid #efe6da;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:20px;color:var(--sage-tx);background:#e9ede6;}
+.tag.shut{color:#a89686;background:#efe7dd;}
+.ac-t{font-size:11px;color:var(--ink-soft);margin-left:auto;}
+
+/* materials cards */
+.matgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.mat{border:.5px solid #ece0d2;background:#fbf6ef;border-radius:10px;padding:12px 13px;cursor:pointer;}
+.mat.on{background:#fff;border-color:var(--pink-br);}
+.mat .box{width:16px;height:16px;border-radius:4px;border:1.5px solid #d3c6b8;position:relative;margin-bottom:9px;}
+.mat.on .box{border-color:var(--sage);background:var(--sage);}
+.mat.on .box::after{content:'';position:absolute;left:5px;top:2px;width:4px;height:8px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+.mat b{display:block;font-size:13px;font-weight:500;}
+.mat i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:2px;}
+.ta{width:100%;min-height:104px;background:#fff;border:.5px solid #e0d5c8;border-radius:9px;padding:11px 13px;font-family:'Inter';font-size:13.5px;resize:vertical;outline:none;}
+
+
+/* locked date picker */
+.dp{position:relative;display:inline-block;}
+.dp-pop{position:absolute;top:calc(100% + 5px);left:0;background:var(--parchment);border:.5px solid #e0d5c8;border-radius:12px;box-shadow:0 8px 24px rgba(58,28,20,.16);padding:14px;z-index:40;width:284px;display:none;animation:popIn .15s ease;}
+.dp.open .dp-pop{display:block;}
+@keyframes popIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.dp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.dp-month{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink);}
+.dp-nav{display:flex;gap:4px;}
+.dp-navbtn{width:26px;height:26px;border-radius:7px;border:.5px solid #e0d5c8;background:#fff;color:var(--burg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;}
+.dp-navbtn:hover{background:var(--pink);border-color:#d8a89a;}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.dp-dow{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-align:center;padding:4px 0;}
+.dp-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink);cursor:pointer;border-radius:7px;}
+.dp-day:hover{background:var(--pink);color:var(--burg);}
+.dp-day.muted{color:#cbbcae;}
+.dp-day.muted:hover{background:transparent;color:#cbbcae;}
+.dp-day.today{font-weight:600;color:var(--sage-tx);box-shadow:inset 0 0 0 1px #b8c8b0;}
+.dp-day.sel{background:var(--burg);color:#f5ede8;font-weight:500;}
+.dp-day.sel:hover{background:#5a2a1e;color:#f5ede8;}
+.dp-foot{margin-top:10px;padding-top:9px;border-top:1px solid var(--hair);display:flex;align-items:center;gap:8px;}
+.dp-foot .rel{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--muted);margin-left:auto;}
+.dp-clear{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--burg);background:none;border:0;cursor:pointer;}
+.ch.cal{display:inline-flex;align-items:center;gap:7px;}
+.ch.cal .ic{color:var(--burg);font-size:11px;}
+.ch.on.cal .ic{color:var(--burg);}
+
+
+/* materials rows */
+.mrow{display:flex;align-items:center;gap:12px;border:.5px solid #ece0d2;background:#fbf6ef;border-radius:10px;padding:12px 15px;margin-bottom:7px;transition:.15s;}
+.mrow.on{background:#fff;border-color:#e3d3c6;}
+.mrow .box{width:17px;height:17px;flex:0 0 17px;border-radius:5px;border:1.5px solid #d3c6b8;background:#fff;position:relative;cursor:pointer;}
+.mrow.on .box{border-color:var(--sage);background:var(--sage);}
+.mrow.on .box::after{content:'';position:absolute;left:5px;top:2px;width:4px;height:9px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+.mrow .nm{min-width:132px;}
+.mrow .nm b{display:block;font-size:13.5px;font-weight:500;}
+.mrow .nm i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:1px;}
+.mrow .ctrl{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.mrow.off .ctrl{opacity:.35;pointer-events:none;}
+.numf{width:74px;background:#fff;border:.5px solid #e0d5c8;border-radius:8px;padding:7px 9px;font-size:13px;text-align:right;outline:none;font-family:'Inter';}
+.numf:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(138,158,136,.12);}
+.units{display:flex;background:#f4ede4;border:.5px solid #e6dbcd;border-radius:8px;padding:2px;gap:2px;}
+.units span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;padding:5px 9px;border-radius:6px;cursor:pointer;color:var(--ink-soft);}
+.units span.on{background:#fff;color:var(--burg);font-weight:500;box-shadow:0 1px 2px rgba(58,28,20,.06);}
+.reqt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;padding:3px 8px;border-radius:20px;color:var(--sage-tx);background:#e9ede6;white-space:nowrap;}
+.reqt.no{color:#a89686;background:#efe7dd;}
+.otherf{flex:1;background:#fff;border:.5px solid #e0d5c8;border-radius:8px;padding:8px 11px;font-size:12.5px;outline:none;font-family:'Inter';min-width:150px;}
+.otherf:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(138,158,136,.12);}
+.otags{display:flex;gap:5px;flex-wrap:wrap;}
+.otag{font-size:11px;background:#f4ede4;border:.5px solid #e6dbcd;border-radius:20px;padding:3px 9px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
+.otag u{text-decoration:none;cursor:pointer;color:#b0a092;}
+.msum{margin-top:11px;font-size:12px;color:var(--muted);}
+.msum b{color:var(--ink-soft);font-weight:400;}
+
+
+/* unit-aware stepper */
+.stepper{position:relative;display:inline-flex;align-items:center;}
+.stepper .numf{width:92px;padding-right:24px;}
+.sarr{position:absolute;right:5px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px;}
+.sarr b{width:15px;height:12px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--burg);cursor:pointer;border-radius:3px;line-height:1;user-select:none;}
+.sarr b:hover{background:var(--pink);}
+.sarr b.dis{color:#d8cabb;cursor:default;}
+.sarr b.dis:hover{background:transparent;}
+.smphint{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.07em;color:#b8a898;white-space:nowrap;}
+
+
+/* typeahead dropdown */
+.searchwrap{position:relative;max-width:400px;flex:1 1 400px;}
+.searchwrap .tfield{max-width:none;width:100%;}
+.tapop{position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--parchment);border:.5px solid #e0d5c8;border-radius:11px;box-shadow:0 10px 28px rgba(58,28,20,.16);z-index:45;display:none;overflow:hidden;max-height:296px;overflow-y:auto;}
+.searchwrap.open .tapop{display:block;}
+.tacap{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:9px 13px 6px;border-bottom:1px solid var(--hair);}
+.tarow{display:flex;align-items:center;gap:10px;padding:9px 13px;cursor:pointer;}
+.tarow:hover,.tarow.cur{background:var(--pink);}
+.tarow .av{width:27px;height:27px;flex:0 0 27px;font-size:11px;}
+.ta-n{font-size:13px;line-height:1.2;}
+.ta-a{font-size:11px;color:var(--muted);}
+.ta-r{margin-left:auto;display:flex;align-items:center;gap:7px;}
+.ta-q{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.07em;color:#a89686;white-space:nowrap;}
+.tanone{padding:14px 13px;font-size:12.5px;color:var(--muted);}
+.tanone a{color:var(--burg);}
+
+/* reference panel */
+.refp{background:#f8f2ea;border:.5px solid #ece0d2;border-radius:11px;overflow:hidden;position:sticky;top:56px;}
+.rp-cap{display:flex;align-items:center;gap:7px;padding:9px 14px;background:#f2ebe1;border-bottom:1px solid #e6dbcd;}
+.rp-cap b{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.rp-cap .gl{width:14px;height:14px;border-radius:50%;border:1px solid #cbbcae;color:#a89686;font-size:9px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;}
+.rp-pill{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;color:var(--sage-tx);background:#e9ede6;}
+.rp-id{display:flex;align-items:center;gap:11px;padding:14px;}
+.rp-id .av{width:38px;height:38px;flex:0 0 38px;font-size:14px;}
+.rp-n{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;line-height:1.15;}
+.rp-a{font-size:11.5px;color:var(--muted);margin-top:1px;}
+.rp-stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #ece0d2;border-bottom:1px solid #ece0d2;background:#fbf6ef;}
+.rp-stat{padding:11px 13px;}
+.rp-stat+.rp-stat{border-left:1px solid #ece0d2;}
+.rp-v{font-family:'Playfair Display',serif;font-size:19px;line-height:1;}
+.rp-v small{font-size:11px;color:var(--muted);}
+.rp-k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px;line-height:1.45;}
+.rp-policy{padding:9px 14px;border-bottom:1px solid #ece0d2;font-size:11.5px;color:var(--ink-soft);}
+.rp-body{padding:12px 14px 6px;}
+.rp-row{padding:8px 0;border-bottom:1px solid #efe6da;}
+.rp-row:last-child{border-bottom:0;}
+.rp-lb{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#b0a092;margin-bottom:4px;}
+.rp-tx{font-size:12.5px;line-height:1.4;}
+.rp-tx.quote{font-family:'Playfair Display',serif;font-style:italic;color:var(--ink-soft);}
+.rp-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.rp-tag{font-size:11px;background:#fff;border:.5px solid #ece0d2;border-radius:20px;padding:3px 9px;color:var(--ink-soft);}
+.rp-f{padding:10px 14px;border-top:1px solid #ece0d2;text-align:center;}
+.rp-f a{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;color:var(--burg);text-decoration:none;}
+
+/* alt states */
+.aq{border:.5px solid #ece0d2;background:#fbf6ef;border-radius:11px;padding:18px 20px;margin-top:18px;}
+.aq-top{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.ring{width:46px;height:46px;flex:0 0 46px;transform:rotate(-90deg);}
+.ring .trk{fill:none;stroke:#e6dcd0;stroke-width:4;}
+.ring .fil{fill:none;stroke:#bfb2a4;stroke-width:4;stroke-linecap:round;}
+.aq-n{font-family:'Playfair Display',serif;font-size:20px;line-height:1;}
+.aq-n em{font-style:normal;font-size:12px;color:var(--muted);}
+.aq-c{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.aq-b{font-size:13px;color:var(--ink-soft);line-height:1.5;max-width:640px;}
+.aq-b .sm{display:block;font-size:11.5px;color:var(--muted);margin-top:4px;}
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px;}
+.route{display:flex;align-items:center;gap:10px;padding:11px 12px;border:.5px solid #ece0d2;background:#fff;border-radius:10px;text-decoration:none;color:var(--ink);}
+.route:hover{border-color:#dcc9bb;box-shadow:0 2px 8px rgba(58,28,20,.07);}
+.route .ri{width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:var(--pink);border:.5px solid var(--pink-br);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.route b{display:block;font-size:12.5px;font-weight:500;}
+.route i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px;}
+.cold{border:1px dashed #ddd0c0;border-radius:11px;padding:24px;display:flex;align-items:center;gap:22px;background:repeating-linear-gradient(135deg,#f8f2e9 0 7px,#f4ede3 7px 14px);margin-top:18px;}
+.cold .slot{width:150px;height:110px;flex:0 0 150px;border:1px dashed #d8c9b8;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;color:#c3b3a3;background:var(--parchment);}
+.cold h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;margin-bottom:5px;}
+.cold p{font-size:13px;color:var(--ink-soft);max-width:430px;line-height:1.5;}
+.b-cold{margin-top:13px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;background:var(--pink);border:.5px solid var(--pink-br);color:var(--burg);border-radius:9px;padding:10px 18px;cursor:pointer;}
+
+body:not([data-rail="picks"]) .v-picks{display:none;}
+body:not([data-rail="allq"]) .v-allq{display:none;}
+body:not([data-rail="none"]) .v-none{display:none;}
+
+.legend{max-width:860px;margin:26px auto 0;padding:16px 20px;background:#f8f2ea;border:.5px solid #ece0d2;border-radius:11px;font-size:12.5px;color:var(--ink-soft);line-height:1.6;}
+.legend b{color:var(--burg);}
+.legend ul{margin:6px 0 0 18px;}
+</style>
+</head>
+<body data-stage="1" data-rail="picks">
+
+<div class="ctl">
+  <span class="ctl-lb">Jump to</span>
+  <div class="seg" id="segStage">
+    <button data-s="1" class="on">Agent</button><button data-s="2">When</button><button data-s="3">What</button><button data-s="4">Notes</button>
+  </div>
+  <span class="ctl-lb">Contacts</span>
+  <div class="seg" id="segRail">
+    <button data-r="picks" class="on">Un-queried available</button><button data-r="allq">All queried</button><button data-r="none">None yet</button>
+  </div>
+  <span class="note">Pick an agent, then Continue — completed steps close upward.</span>
+</div>
+
+<div class="shell">
+  <div class="nrail"><i class="act"></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="panel">
+    <div class="pl">Tasks</div><div class="pi">To-do list</div><div class="pi">Calendar</div><div class="pi">Noteboard</div>
+    <div class="pl">Queries</div><div class="pi act">Query Centre</div><div class="pi">Analytics</div>
+    <div class="pl">Agents</div><div class="pi">Contact list</div><div class="pi">Discover</div>
+  </div>
+
+  <div class="main">
+    <div class="crumb"><span class="sl">/</span><span class="dim">Queries</span><span class="sl">/</span><span>Query Centre</span><span class="right">All changes saved</span></div>
+
+    <div class="page">
+      <div class="page-head"><h1>Query Centre</h1><div class="acts"><button class="gh">↓  Export</button><button class="gh dis">+  Log query</button></div></div>
+
+      <div class="cc">
+        <div class="cc-head">
+          <div class="cc-motif"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/><path d="m10 13.5 4.5-4.5"/></svg></div>
+          <div>
+            <div class="cc-t">Logging new query</div>
+            <div class="cc-s">Needs an agent, a manuscript and a date — everything else can wait.</div>
+            <div class="chips">
+              <div class="chip" data-chip="agent"><i class="dot now"></i>Agent</div>
+              <div class="chip" data-chip="when"><i class="dot"></i>Date</div>
+              <div class="chip" data-chip="what"><i class="dot"></i>Manuscript</div>
+            </div>
+          </div>
+          <div class="cc-acts">
+            <span class="esc">ESC</span><button class="b-ghost">Cancel</button>
+            <button class="b-link">Save &amp; log another</button><button class="b-pink" id="save">➤ Save query</button>
+          </div>
+        </div>
+
+        <div class="cc-body">
+          <div class="flow">
+
+            <!-- 1 · AGENT -->
+            <div class="block" data-b="1">
+              <div class="srow" data-open="1"><i class="dot"></i><b>Agent</b><span class="hint">Who you’re querying</span><span class="val"></span><span class="edit">EDIT</span><span class="chev">›</span></div>
+              <div class="sopen">
+                <div class="so-h"><i class="dot now"></i><h2>Who are you querying?</h2><span class="of">Step 1 of 4</span></div>
+                <div class="lede">Pick from your contact list, or search by name or agency.</div>
+                <div class="so-in">
+                  <div class="searchline">
+                    <span class="searchwrap" id="sw">
+                      <input class="tfield" id="q" type="text" placeholder="Search by name or agency…" autocomplete="off">
+                      <div class="tapop" id="tapop"></div>
+                    </span>
+                    <span class="helper">Not listed? <a href="#" id="addNew">Add a new agent</a></span>
+                  </div>
+
+                  <div class="v-picks">
+                    <div class="pick-h"><b>Suggested — not yet queried</b><span>for <i>Murphy’s Day Out</i> · 34 contacts</span><a href="#">See all →</a></div>
+                    <div class="grid">
+                      <div class="acard"><div class="ac-top"><div class="av">EH</div><div><div class="ac-n" data-w="8" data-m="Email" data-s="Open to queries" data-req="ql,syn:One page,smp:50:Pages">Elinor Hale</div><div class="ac-a">Cavendish &amp; Roe</div></div></div><div class="ac-meta"><span class="tag">Open</span><span class="ac-t">~8 weeks</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">JO</div><div><div class="ac-n" data-w="6" data-m="Query Manager" data-s="Open to queries" data-req="ql,smp:10000:Words">Joseph Okafor</div><div class="ac-a">Northbank Literary</div></div></div><div class="ac-meta"><span class="tag">Open</span><span class="ac-t">~6 weeks</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">RS</div><div><div class="ac-n" data-w="12" data-m="Email" data-s="Open to queries" data-req="ql,syn:Two pages,smp:3:Chapters">Rhiannon Salt</div><div class="ac-a">Marchmont Agency</div></div></div><div class="ac-meta"><span class="tag">Open</span><span class="ac-t">~12 weeks</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">DF</div><div><div class="ac-n" data-w="—" data-m="Email" data-s="Closed to queries" data-req="ql">Dermot Finch</div><div class="ac-a">Finch &amp; Wilder</div></div></div><div class="ac-meta"><span class="tag shut">Closed</span><span class="ac-t">—</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">AM</div><div><div class="ac-n" data-w="10" data-m="Query Manager" data-s="Open to queries" data-req="ql,syn:One page,smp:50:Pages">Aoife Meaney</div><div class="ac-a">Blackwater Agency</div></div></div><div class="ac-meta"><span class="tag">Open</span><span class="ac-t">~10 weeks</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">TB</div><div><div class="ac-n" data-w="4" data-m="Email" data-s="Open to queries" data-req="ql,smp:30:Pages">Tomas Bright</div><div class="ac-a">Peregrine &amp; Sloe</div></div></div><div class="ac-meta"><span class="tag">Open</span><span class="ac-t">~4 weeks</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">NV</div><div><div class="ac-n" data-w="9" data-m="Email" data-s="Open to queries" data-req="ql,syn:One page,smp:5000:Words">Nadia Verhoeven</div><div class="ac-a">Copperline</div></div></div><div class="ac-meta"><span class="tag">Open</span><span class="ac-t">~9 weeks</span></div></div>
+                      <div class="acard"><div class="ac-top"><div class="av">GK</div><div><div class="ac-n" data-w="—" data-m="Post" data-s="Closed to queries" data-req="ql,syn:One page,smp:3:Chapters">Gareth Kelso</div><div class="ac-a">Ivy &amp; Thorn</div></div></div><div class="ac-meta"><span class="tag shut">Closed</span><span class="ac-t">—</span></div></div>
+                    </div>
+                  </div>
+
+                  <div class="v-allq">
+                    <div class="aq">
+                      <div class="aq-top"><svg viewBox="0 0 46 46" class="ring"><circle cx="23" cy="23" r="20" class="trk"/><circle cx="23" cy="23" r="20" class="fil"/></svg>
+                        <div><div class="aq-n">34 <em>of 34</em></div><div class="aq-c">contacts queried</div></div></div>
+                      <div class="aq-b">Every agent on your contact list has been queried for <i>Murphy’s Day Out</i>.
+                        <span class="sm">You can still log a query to any of them — a resubmission, or a second manuscript. Search above as usual.</span></div>
+                      <div class="routes">
+                        <a class="route" href="#"><span class="ri">＋</span><span><b>Add a new agent</b><i>Straight into your list</i></span></a>
+                        <a class="route" href="#"><span class="ri">◎</span><span><b>Find agents in Discover</b><i>By genre and openness</i></span></a>
+                        <a class="route" href="#"><span class="ri">☰</span><span><b>Review your contacts</b><i>34 agents · 12 open</i></span></a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="v-none">
+                    <div class="cold"><div class="slot">ART · EMPTY-CONTACTS</div>
+                      <div><h3>Your contact list is empty</h3>
+                        <p>Add an agent and they’ll appear here every time you log a query. Add one by hand, or browse Discover.</p>
+                        <button class="b-cold">＋  Add your first agent</button></div></div>
+                  </div>
+                </div>
+                <div class="so-f"><button class="b-pink" id="cont1">Continue  →</button><span class="right" id="chosen"></span></div>
+              </div>
+            </div>
+
+            <!-- 2 · WHEN -->
+            <div class="block" data-b="2">
+              <div class="srow" data-open="2"><i class="dot"></i><b>When</b><span class="hint">Date, how you sent it, and a nudge</span><span class="val"></span><span class="edit">EDIT</span><span class="chev">›</span></div>
+              <div class="sopen">
+                <div class="so-h"><i class="dot now"></i><h2>When did it go?</h2><span class="of">Step 2 of 4</span></div>
+                <div class="lede" id="whenLede">Elinor replies in about eight weeks, so the nudge is set from that.</div>
+                <div class="so-in cols3">
+                  <div><label class="fl">Date sent</label>
+                    <div class="dp" id="dpSent"><div class="trig" data-trig>9 August 2026 <span class="c">▤</span></div><div class="dp-pop"></div></div>
+                  </div>
+                  <div><label class="fl">How you sent it</label><div class="chipset"><span class="ch on">Email</span><span class="ch">Query Manager</span><span class="ch">Post</span></div></div>
+                  <div><label class="fl">Nudge me after</label>
+                    <div class="chipset" id="nudgeSet">
+                      <span class="ch" data-wk="6">6 wks</span>
+                      <span class="ch on" data-wk="8">8 wks</span>
+                      <span class="ch" data-wk="12">12 wks</span>
+                      <span class="dp" id="dpNudge"><span class="ch cal" data-trig><span class="ic">▤</span><span id="nudgeCalLbl">Pick a date</span></span><div class="dp-pop"></div></span>
+                      <span class="ch" data-wk="0">No nudge</span>
+                    </div>
+                    <div class="derived" id="nudgeDerived">A task appears on 4 October 2026.</div>
+                  </div>
+                </div>
+                <div class="so-f"><button class="b-pink live" data-go="3">Continue  →</button><button class="b-ghost" data-go="1">← Back</button></div>
+              </div>
+            </div>
+
+            <!-- 3 · WHAT -->
+            <div class="block" data-b="3">
+              <div class="srow" data-open="3"><i class="dot"></i><b>What</b><span class="hint">Manuscript and materials</span><span class="val"></span><span class="edit">EDIT</span><span class="chev">›</span></div>
+              <div class="sopen">
+                <div class="so-h"><i class="dot now"></i><h2>What did you send?</h2><span class="of">Step 3 of 4</span></div>
+                <div class="lede">Her listed requirements are ticked. Adjust if you sent something else.</div>
+                <div class="so-in">
+                  <div style="max-width:420px;margin-bottom:15px;"><label class="fl">Manuscript</label><div class="trig">Murphy’s Day Out — Thriller · 50,000 words <span class="c">▾</span></div></div>
+                  <label class="fl">Materials sent</label>
+                  <div id="mats">
+                    <div class="mrow" data-m="ql">
+                      <span class="box"></span>
+                      <span class="nm"><b>Query letter</b><i class="sub"></i></span>
+                      <span class="ctrl"><span class="reqt"></span></span>
+                    </div>
+                    <div class="mrow" data-m="syn">
+                      <span class="box"></span>
+                      <span class="nm"><b>Synopsis</b><i class="sub"></i></span>
+                      <span class="ctrl"><span class="reqt"></span></span>
+                    </div>
+                    <div class="mrow" data-m="smp">
+                      <span class="box"></span>
+                      <span class="nm"><b>Opening sample</b><i class="sub"></i></span>
+                      <span class="ctrl">
+                        <span class="stepper"><input class="numf" id="smpN" type="text" value="50" inputmode="numeric"><span class="sarr"><b data-d="1">▲</b><b data-d="-1">▼</b></span></span>
+                        <span class="smphint" id="smpHint"></span>
+                        <span class="units" id="smpU"><span data-u="Pages" class="on">Pages</span><span data-u="Words">Words</span><span data-u="Chapters">Chaps</span></span>
+                        <span class="reqt"></span>
+                      </span>
+                    </div>
+                    <div class="mrow" data-m="oth">
+                      <span class="box"></span>
+                      <span class="nm"><b>Other</b><i class="sub">Anything else you sent</i></span>
+                      <span class="ctrl">
+                        <span class="otags" id="othTags"></span>
+                        <input class="otherf" id="othIn" type="text" placeholder="Type and press Enter…">
+                      </span>
+                    </div>
+                  </div>
+                  <div class="msum" id="matSum"></div>
+                </div>
+                <div class="so-f"><button class="b-pink live" data-go="4">Continue  →</button><button class="b-ghost" data-go="2">← Back</button></div>
+              </div>
+            </div>
+
+            <!-- 4 · NOTES -->
+            <div class="block" data-b="4">
+              <div class="srow" data-open="4"><i class="dot"></i><b>Notes</b><span class="hint">Optional — first impressions, personalisation</span><span class="val"></span><span class="edit">EDIT</span><span class="chev">›</span></div>
+              <div class="sopen">
+                <div class="so-h"><i class="dot now"></i><h2>Anything worth remembering?</h2><span class="of">Step 4 of 4</span></div>
+                <div class="lede">Optional — how you personalised it, where you found her, what you noticed.</div>
+                <div class="so-in"><textarea class="ta" placeholder="Mentioned her interview in The Bookseller about Irish crime…"></textarea></div>
+                <div class="so-f"><button class="b-pink live" id="fin">➤ Save query</button><button class="b-ghost" data-go="3">← Back</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="refp" id="refp">
+            <div class="rp-cap"><span class="gl">i</span><b>For reference</b><span class="rp-pill" id="rpStatus">Open to queries</span></div>
+            <div class="rp-id"><div class="av" id="rpAv">EH</div><div><div class="rp-n" id="rpName">Elinor Hale</div><div class="rp-a" id="rpAgency">Cavendish &amp; Roe</div></div></div>
+            <div class="rp-stats">
+              <div class="rp-stat"><div class="rp-v" id="rpWeeks">8 <small>weeks</small></div><div class="rp-k">Expected response time</div></div>
+              <div class="rp-stat"><div class="rp-v" id="rpMethod" style="font-size:15px;">Email</div><div class="rp-k">Preferred submission method</div></div>
+            </div>
+            <div class="rp-policy" id="rpPolicy">No reply after 8 weeks means a pass.</div>
+            <div class="rp-body">
+              <div class="rp-row"><div class="rp-lb">What she asks for</div><div class="rp-tx">Query letter · one-page synopsis · first 50 pages, pasted into the body of the email.</div></div>
+              <div class="rp-row"><div class="rp-lb">Represents</div><div class="rp-tags"><span class="rp-tag">Crime</span><span class="rp-tag">Thriller</span><span class="rp-tag">Book club</span></div></div>
+              <div class="rp-row"><div class="rp-lb">Manuscript wish list</div><div class="rp-tx quote">Contemporary crime with a strong sense of place — especially outside London.</div></div>
+              <div class="rp-row"><div class="rp-lb">Your history</div><div class="rp-tx">No previous queries to Elinor.</div></div>
+            </div>
+            <div class="rp-f"><a href="#">Open full profile →</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <b>What changed</b>
+      <ul>
+        <li><b>True sequence.</b> The four steps sit in order and the active one expands in place, so completed steps are always <i>above</i> the one you're on and upcoming steps below. Nothing jumps.</li>
+        <li>The <b>reference panel is now a persistent column</b> spanning the whole body and sticky on scroll — not a sibling of the active step. It stays put while the flow moves beneath it.</li>
+        <li>Whitespace: the expanded step uses the <b>full column width</b> — When is three columns across, materials are three cards, the picker auto-fills. The card is sized by content at every stage.</li>
+        <li><b>Nudge me after</b> now carries a custom date option using the locked calendar popover — the same component as Date sent. Picking a date clears the week chips and the derived line reports the interval back.</li>
+        <li><b>Stage 1</b> is dropdown + grid: the field opens a typeahead on the first keystroke (never on mount or focus) and searches every contact, queried or not; the grid beneath is a standing set of suggestions and does not filter.</li>
+        <li>The <b>opening sample</b> is a unit-aware stepper: arrows and ↑/↓ move in sensible increments per unit (5 pages, 500 words, 1 chapter), typing always overrides, and switching unit converts the figure rather than leaving a nonsense number.</li>
+        <li><b>Materials</b> are the four locked rows — query letter, synopsis, unit-aware opening sample, free-text Other. Pre-ticked from the agent’s stated requirements and fully editable.</li>
+        <li>Completed rows carry their values and reveal an <b>EDIT</b> affordance on hover, so going back is explicit rather than implied by a click target.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const st={agent:null,agency:null,weeks:null,method:null,status:null,done:{}};
+function initials(n){return n.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();}
+function tick(k){const d=document.querySelector('.chip[data-chip="'+k+'"] .dot');if(d){d.classList.remove('now');d.classList.add('done');}}
+function nowChip(k){document.querySelectorAll('.chip .dot').forEach(d=>d.classList.remove('now'));
+  const d=document.querySelector('.chip[data-chip="'+k+'"] .dot');if(d&&!d.classList.contains('done'))d.classList.add('now');}
+function paintPanel(){
+  if(!st.agent)return;
+  rpName.textContent=st.agent;rpAgency.textContent=st.agency;rpAv.textContent=initials(st.agent);
+  rpStatus.textContent=st.status;
+  const shut=st.status.indexOf('Closed')===0;
+  rpStatus.style.color=shut?'#a89686':'';rpStatus.style.background=shut?'#efe7dd':'';
+  rpWeeks.innerHTML = st.weeks==='—' ? '<span style="font-size:14px;color:#b0a092;">Not stated</span>' : st.weeks+' <small>weeks</small>';
+  rpMethod.textContent=st.method;
+  const pol=document.getElementById('rpPolicy');
+  if(st.weeks==='—'){pol.style.display='none';}
+  else{pol.style.display='';pol.textContent='No reply after '+st.weeks+' weeks means a pass.';}
+  S.nudgeWeeks = st.weeks!=='—' ? Number(st.weeks) : 8;
+  S.nudgeFromAgent = st.weeks!=='—';
+  S.nudgeDate=null; if(window.paintWhen)paintWhen();
+  document.getElementById('whenLede').textContent = st.weeks==='—'
+    ? st.agent.split(' ')[0]+' hasn’t stated a response time, so the nudge falls back to eight weeks.'
+    : st.agent.split(' ')[0]+' replies in about '+st.weeks+' weeks, so the nudge is set from that.';
+}
+const VALS={1:()=>st.agent?st.agent+' · '+st.agency:'',
+            2:()=>'9 Aug 2026 · Email · nudge 4 Oct',
+            3:()=>'Murphy’s Day Out · 3 items',
+            4:()=>'—'};
+function render(){
+  const cur=document.body.dataset.stage;
+  document.querySelectorAll('.block').forEach(b=>{
+    const n=b.dataset.b, open=(n===cur);
+    b.querySelector('.sopen').style.display=open?'':'none';
+    b.querySelector('.srow').style.display=open?'none':'';
+    const row=b.querySelector('.srow'), d=st.done[n];
+    row.classList.toggle('done',!!d);
+    row.querySelector('.dot').classList.toggle('done',!!d);
+    row.querySelector('.val').textContent=d?VALS[n]():'';
+    row.querySelector('.edit').style.display=d?'':'none';
+    row.querySelector('.hint').style.display=d?'none':'';
+  });
+  [...document.getElementById('segStage').children].forEach(b=>b.classList.toggle('on',b.dataset.s===cur));
+  nowChip({1:'agent',2:'when',3:'what',4:'what'}[cur]);
+}
+function setStage(n){document.body.dataset.stage=String(n);render();}
+document.getElementById('segStage').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setStage(b.dataset.s);});
+document.getElementById('segRail').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  document.body.dataset.rail=b.dataset.r;[...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));});
+document.querySelectorAll('.srow').forEach(r=>r.addEventListener('click',()=>setStage(r.dataset.open)));
+document.querySelectorAll('.acard').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('.acard').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');
+  const n=c.querySelector('.ac-n');
+  st.agent=n.textContent;st.agency=c.querySelector('.ac-a').textContent;
+  st.weeks=n.dataset.w;st.method=n.dataset.m;st.status=n.dataset.s;st.req=n.dataset.req;
+  if(window.applyAgentReqs)applyAgentReqs();
+  document.getElementById('q').value=st.agent;
+  document.getElementById('chosen').textContent=st.agent+' selected';
+  document.getElementById('cont1').classList.add('live');
+  document.getElementById('save').classList.add('live');
+  tick('agent');paintPanel();
+}));
+
+document.getElementById('cont1').addEventListener('click',()=>{if(!st.agent)return;st.done[1]=true;setStage(2);});
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{
+  const from=document.body.dataset.stage, to=b.dataset.go;
+  if(Number(to)>Number(from)){st.done[from]=true;if(from==='2')tick('when');if(from==='3')tick('what');}
+  setStage(to);
+}));
+render();
+
+/* ---- locked date picker ---- */
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW=['M','T','W','T','F','S','S'];
+function fmt(d){return d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();}
+function fmtShort(d){return d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3)+' '+d.getFullYear();}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function sameDay(a,b){return a&&b&&a.toDateString()===b.toDateString();}
+const TODAY=new Date(2026,7,9);
+const S={sent:new Date(2026,7,9),nudgeWeeks:8,nudgeDate:null,nudgeFromAgent:true};
+
+function makePicker(root,opts){
+  const trig=root.querySelector('[data-trig]'), pop=root.querySelector('.dp-pop');
+  let view=new Date((opts.get()||TODAY).getFullYear(),(opts.get()||TODAY).getMonth(),1);
+  function draw(){
+    const sel=opts.get();
+    let h='<div class="dp-head"><div class="dp-month">'+MONTHS[view.getMonth()]+' '+view.getFullYear()+'</div>'+
+      '<div class="dp-nav"><button class="dp-navbtn" data-n="-1">‹</button><button class="dp-navbtn" data-n="1">›</button></div></div>'+
+      '<div class="dp-grid">'+DOW.map(d=>'<div class="dp-dow">'+d+'</div>').join('');
+    const first=new Date(view.getFullYear(),view.getMonth(),1);
+    let start=(first.getDay()+6)%7;
+    const prevEnd=new Date(view.getFullYear(),view.getMonth(),0).getDate();
+    for(let i=start-1;i>=0;i--)h+='<div class="dp-day muted">'+(prevEnd-i)+'</div>';
+    const days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+    for(let d=1;d<=days;d++){
+      const dt=new Date(view.getFullYear(),view.getMonth(),d);
+      let c='dp-day';
+      if(sameDay(dt,TODAY))c+=' today';
+      if(sameDay(dt,sel))c+=' sel';
+      h+='<div class="'+c+'" data-d="'+d+'">'+d+'</div>';
+    }
+    const tail=(7-((start+days)%7))%7;
+    for(let i=1;i<=tail;i++)h+='<div class="dp-day muted">'+i+'</div>';
+    h+='</div><div class="dp-foot">'+(opts.clear?'<button class="dp-clear">Clear</button>':'')+
+       '<span class="rel">'+opts.foot()+'</span></div>';
+    pop.innerHTML=h;
+  }
+  trig.addEventListener('click',e=>{
+    e.stopPropagation();
+    document.querySelectorAll('.dp.open').forEach(x=>{if(x!==root)x.classList.remove('open');});
+    root.classList.toggle('open'); if(root.classList.contains('open')){
+      const sel=opts.get()||TODAY; view=new Date(sel.getFullYear(),sel.getMonth(),1); draw();}
+  });
+  pop.addEventListener('click',e=>{
+    e.stopPropagation();
+    const nav=e.target.closest('.dp-navbtn');
+    if(nav){view=new Date(view.getFullYear(),view.getMonth()+Number(nav.dataset.n),1);draw();return;}
+    if(e.target.classList.contains('dp-clear')){opts.clear();root.classList.remove('open');return;}
+    const day=e.target.closest('.dp-day[data-d]');
+    if(day){opts.set(new Date(view.getFullYear(),view.getMonth(),Number(day.dataset.d)));root.classList.remove('open');}
+  });
+  return {draw};
+}
+document.addEventListener('click',()=>document.querySelectorAll('.dp.open').forEach(x=>x.classList.remove('open')));
+
+function nudgeDate(){
+  if(S.nudgeDate)return S.nudgeDate;
+  if(!S.nudgeWeeks)return null;
+  return addDays(S.sent,S.nudgeWeeks*7);
+}
+function weeksBetween(a,b){return Math.round((b-a)/(7*864e5));}
+window.paintWhen=paintWhen;
+function paintWhen(){
+  document.querySelector('#dpSent [data-trig]').innerHTML=fmt(S.sent)+' <span class="c">▤</span>';
+  const lbl=document.getElementById('nudgeCalLbl'), calChip=document.querySelector('#dpNudge .ch');
+  document.querySelectorAll('#nudgeSet .ch[data-wk]').forEach(c=>
+    c.classList.toggle('on',!S.nudgeDate&&Number(c.dataset.wk)===S.nudgeWeeks));
+  calChip.classList.toggle('on',!!S.nudgeDate);
+  lbl.textContent=S.nudgeDate?fmtShort(S.nudgeDate):'Pick a date';
+  const n=nudgeDate(), d=document.getElementById('nudgeDerived');
+  if(!n){d.textContent='No nudge will be set.';}
+  else if(S.nudgeDate){d.textContent='A task appears on '+fmt(n)+' — '+weeksBetween(S.sent,n)+' weeks after sending.';}
+  else{d.textContent='A task appears on '+fmt(n)+(S.nudgeFromAgent===false?' \u2014 a default, as no response time is listed for her.':'.');}
+  VALS[2]=()=>fmtShort(S.sent)+' · Email · '+(n?'nudge '+fmtShort(n).replace(' 2026',''):'no nudge');
+}
+makePicker(document.getElementById('dpSent'),{
+  get:()=>S.sent,
+  set:d=>{S.sent=d;paintWhen();},
+  foot:()=>'Today is '+fmtShort(TODAY)
+});
+makePicker(document.getElementById('dpNudge'),{
+  get:()=>nudgeDate(),
+  set:d=>{S.nudgeDate=d;S.nudgeWeeks=null;paintWhen();},
+  clear:()=>{S.nudgeDate=null;S.nudgeWeeks=8;paintWhen();},
+  foot:()=>'Sent '+fmtShort(S.sent)
+});
+document.querySelectorAll('#nudgeSet .ch[data-wk]').forEach(c=>c.addEventListener('click',()=>{
+  S.nudgeWeeks=Number(c.dataset.wk);S.nudgeDate=null;paintWhen();}));
+paintWhen();
+
+/* ---- materials ---- */
+const M={ql:{on:true,req:true},syn:{on:true,req:'One page'},smp:{on:true,req:{n:'50',u:'Pages'},n:'50',u:'Pages'},oth:{on:false,tags:[]}};
+function parseReq(str){
+  const out={ql:false,syn:false,smp:null};
+  (str||'ql').split(',').forEach(function(part){
+    if(part==='ql')out.ql=true;
+    else if(part.indexOf('syn:')===0)out.syn=part.slice(4);
+    else if(part.indexOf('smp:')===0){var b=part.split(':');out.smp={n:b[1],u:b[2]};}
+  });
+  return out;
+}
+function applyAgentReqs(){
+  var r=parseReq(st.req);
+  M.ql.on=r.ql; M.ql.req=r.ql;
+  M.syn.on=!!r.syn; M.syn.req=r.syn;
+  M.smp.on=!!r.smp; M.smp.req=r.smp;
+  if(r.smp){M.smp.n=r.smp.n;M.smp.u=r.smp.u;}
+  M.oth.on=false; M.oth.tags=[];
+  paintMats();
+}
+window.applyAgentReqs=applyAgentReqs;
+function fmtN(n,u){
+  var num=Number(String(n).replace(/[^0-9]/g,''));
+  if(!num)return String(n)+' '+u.toLowerCase();
+  var word=(num===1)?u.toLowerCase().replace(/s$/,''):u.toLowerCase();
+  return num.toLocaleString('en-GB')+' '+word;
+}
+function firstName(){return st.agent?st.agent.split(' ')[0]:'The agent';}
+function paintMats(){
+  ['ql','syn','smp','oth'].forEach(function(k){
+    var el=document.querySelector('.mrow[data-m="'+k+'"]');
+    el.classList.toggle('on',M[k].on); el.classList.toggle('off',!M[k].on);
+    var tag=el.querySelector('.reqt'), sub=el.querySelector('.sub');
+    if(k==='ql'){tag.textContent=M.ql.req?'Requested':'Not requested';tag.classList.toggle('no',!M.ql.req);sub.textContent='';}
+    if(k==='syn'){
+      tag.textContent=M.syn.req?'Requested':'Not requested';tag.classList.toggle('no',!M.syn.req);
+      sub.textContent=M.syn.req?(firstName()+' asks for '+String(M.syn.req).toLowerCase()):'';
+    }
+    if(k==='smp'){
+      tag.textContent=M.smp.req?'Requested':'Not requested';tag.classList.toggle('no',!M.smp.req);
+      sub.textContent=M.smp.req?(firstName()+' asks for '+fmtN(M.smp.req.n,M.smp.req.u)):'Not listed as a requirement';
+      if(window.paintStepper)paintStepper();
+      document.querySelectorAll('#smpU span').forEach(function(u){u.classList.toggle('on',u.dataset.u===M.smp.u);});
+    }
+    if(k==='oth'){
+      document.getElementById('othTags').innerHTML=M.oth.tags.map(function(t,i){return '<span class="otag">'+t+'<u data-i="'+i+'">\u00d7</u></span>';}).join('');
+      document.getElementById('othIn').style.display=M.oth.on?'':'none';
+    }
+  });
+  var parts=[];
+  if(M.ql.on)parts.push('Query letter');
+  if(M.syn.on)parts.push('Synopsis');
+  if(M.smp.on)parts.push(fmtN(M.smp.n,M.smp.u));
+  M.oth.tags.forEach(function(t){parts.push(t);});
+  document.getElementById('matSum').innerHTML = parts.length
+    ? 'Sending: <b>'+parts.join(' \u00b7 ')+'</b>'
+    : 'Nothing ticked \u2014 the query will be logged with no materials.';
+  VALS[3]=function(){return 'Murphy\u2019s Day Out \u00b7 '+(parts.length?parts.length+' item'+(parts.length>1?'s':''):'no materials');};
+}
+document.querySelectorAll('.mrow').forEach(function(r){
+  r.querySelector('.box').addEventListener('click',function(){
+    var k=r.dataset.m;M[k].on=!M[k].on;paintMats();
+    if(k==='oth'&&M.oth.on)setTimeout(function(){document.getElementById('othIn').focus();},0);});
+});
+document.getElementById('smpN').addEventListener('input',function(e){
+  M.smp.n=e.target.value.replace(/[^0-9]/g,'');paintMats();});
+document.querySelectorAll('#smpU span').forEach(function(u){u.addEventListener('click',function(){
+  var from=M.smp.u, to=u.dataset.u;
+  if(from!==to){M.smp.n=String(convertUnit(M.smp.n,from,to));M.smp.u=to;}
+  paintMats();});});
+document.getElementById('othIn').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.value.trim()){M.oth.tags.push(e.target.value.trim());e.target.value='';paintMats();}});
+document.getElementById('othTags').addEventListener('click',function(e){
+  var u=e.target.closest('u'); if(u){M.oth.tags.splice(Number(u.dataset.i),1);paintMats();}});
+
+
+
+/* ---- unit-aware stepper ---- */
+var UNITS={
+  Pages:   {step:5,   min:5,   max:400,    perPage:1},
+  Words:   {step:500, min:500, max:120000, perPage:250},
+  Chapters:{step:1,   min:1,   max:40,     perPage:0.1}
+};
+function clampSnap(v,u){
+  var c=UNITS[u], n=Math.round(v/c.step)*c.step;
+  if(n<c.min)n=c.min; if(n>c.max)n=c.max;
+  return n;
+}
+function convertUnit(val,from,to){
+  var raw=Number(String(val).replace(/[^0-9]/g,''))||UNITS[from].min;
+  var pages=raw/UNITS[from].perPage;
+  return clampSnap(pages*UNITS[to].perPage,to);
+}
+function groupNum(n){return Number(n).toLocaleString('en-GB');}
+function stepSample(dir){
+  var c=UNITS[M.smp.u], cur=Number(String(M.smp.n).replace(/[^0-9]/g,''))||c.min;
+  var snapped=Math.round(cur/c.step)*c.step, next;
+  if(snapped===cur)next=cur+dir*c.step;
+  else next=(dir>0)?Math.ceil(cur/c.step)*c.step:Math.floor(cur/c.step)*c.step;
+  M.smp.n=String(Math.min(c.max,Math.max(c.min,next)));
+  paintMats();
+}
+window.paintStepper=paintStepper;
+function paintStepper(){
+  var c=UNITS[M.smp.u], cur=Number(String(M.smp.n).replace(/[^0-9]/g,''))||0;
+  var f=document.getElementById('smpN');
+  if(document.activeElement!==f)f.value=groupNum(cur);
+  document.getElementById('smpHint').textContent='\u00b1 '+groupNum(c.step);
+  var up=document.querySelector('.sarr b[data-d="1"]'), dn=document.querySelector('.sarr b[data-d="-1"]');
+  up.classList.toggle('dis',cur>=c.max); dn.classList.toggle('dis',cur<=c.min);
+}
+document.querySelectorAll('.sarr b').forEach(function(b){
+  b.addEventListener('click',function(){if(!b.classList.contains('dis'))stepSample(Number(b.dataset.d));});
+});
+document.getElementById('smpN').addEventListener('keydown',function(e){
+  if(e.key==='ArrowUp'){e.preventDefault();stepSample(1);}
+  if(e.key==='ArrowDown'){e.preventDefault();stepSample(-1);}
+});
+document.getElementById('smpN').addEventListener('focus',function(e){
+  e.target.value=String(M.smp.n).replace(/[^0-9]/g,'');});
+document.getElementById('smpN').addEventListener('blur',function(){paintStepper();});
+
+paintMats();
+paintStepper();
+
+
+/* ---- typeahead: opens on typing, never on mount or focus ---- */
+var ALL=[
+ {n:'Elinor Hale',a:'Cavendish & Roe',q:null},
+ {n:'Joseph Okafor',a:'Northbank Literary',q:null},
+ {n:'Rhiannon Salt',a:'Marchmont Agency',q:null},
+ {n:'Dermot Finch',a:'Finch & Wilder',q:null},
+ {n:'Aoife Meaney',a:'Blackwater Agency',q:null},
+ {n:'Tomas Bright',a:'Peregrine & Sloe',q:null},
+ {n:'Nadia Verhoeven',a:'Copperline',q:null},
+ {n:'Gareth Kelso',a:'Ivy & Thorn',q:null},
+ {n:'Aisha Kapoor',a:'The Lantern Agency',q:'Queried 12 Jun'},
+ {n:'William Tan',a:'Foxglove Literary',q:'Queried 3 Apr'},
+ {n:'Priya Raman',a:'Independent',q:'Queried 28 Feb'},
+ {n:'Fenella Strand',a:'Brightwater Books',q:'Queried 14 Jan'}
+];
+var sw=document.getElementById('sw'), pop=document.getElementById('tapop'), qf=document.getElementById('q');
+var cur=-1, hits=[];
+function ini(n){return n.split(' ').map(function(x){return x[0];}).join('').slice(0,2).toUpperCase();}
+function closePop(){sw.classList.remove('open');cur=-1;}
+function drawPop(){
+  if(!hits.length){pop.innerHTML='<div class="tanone">No contact matches that. <a href="#">Add a new agent</a></div>';return;}
+  pop.innerHTML='<div class="tacap">'+hits.length+' contact'+(hits.length>1?'s':'')+'</div>'+
+    hits.map(function(h,i){
+      return '<div class="tarow'+(i===cur?' cur':'')+'" data-i="'+i+'">'+
+        '<span class="av">'+ini(h.n)+'</span>'+
+        '<span><span class="ta-n">'+h.n+'</span><span class="ta-a" style="display:block">'+h.a+'</span></span>'+
+        '<span class="ta-r"><span class="ta-q">'+(h.q?h.q:'Not queried')+'</span></span>'+
+      '</div>';}).join('');
+}
+function pick(i){
+  var h=hits[i]; if(!h)return;
+  qf.value=h.n; closePop();
+  var card=[].slice.call(document.querySelectorAll('.acard')).filter(function(c){
+    return c.querySelector('.ac-n').textContent===h.n;})[0];
+  if(card)card.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  else{document.getElementById('chosen').textContent=h.n+' selected';
+       document.getElementById('cont1').classList.add('live');
+       document.getElementById('save').classList.add('live');}
+}
+qf.addEventListener('input',function(e){
+  var t=e.target.value.trim().toLowerCase();
+  if(!t){closePop();return;}
+  hits=ALL.filter(function(x){return (x.n+' '+x.a).toLowerCase().indexOf(t)>-1;}).slice(0,6);
+  cur=hits.length?0:-1; drawPop(); sw.classList.add('open');
+});
+qf.addEventListener('keydown',function(e){
+  var open=sw.classList.contains('open');
+  if(e.key==='Escape'){closePop();return;}
+  if(e.key==='ArrowDown'){if(open){e.preventDefault();cur=Math.min(cur+1,hits.length-1);drawPop();}return;}
+  if(e.key==='ArrowUp'&&open){e.preventDefault();cur=Math.max(cur-1,0);drawPop();return;}
+  if(e.key==='Enter'&&open&&cur>-1){e.preventDefault();pick(cur);}
+});
+pop.addEventListener('mousedown',function(e){var r=e.target.closest('.tarow');if(r)pick(Number(r.dataset.i));});
+document.addEventListener('click',function(e){if(!sw.contains(e.target))closePop();});
+
+</script>
+</body>
+</html>
