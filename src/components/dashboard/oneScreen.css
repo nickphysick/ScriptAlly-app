@@ -33,6 +33,14 @@
      work is how this drifts; the padding is now derived from the foot, and the foot is built from
      the same token. Measured: foot 25.5px rendered, last row 36px clear of it. */
   --os-afoot-h: 26px;
+  /**
+   * ⚠️ THE PASTILLE, AS TOKENS (fixes-2 A5) — the same treatment is wanted on other pages' header
+   * pills, and four loose hexes repeated per surface is how three pages end up nearly matching.
+   */
+  --os-pastille-bg: #f4f7fa;
+  --os-pastille-line: #dde6ee;
+  --os-pastille-ink: #4a5a6b;
+  --os-pastille-fig: #2c3f52;
   height: 100%;
   overflow: hidden;
   display: flex;
@@ -169,14 +177,17 @@
 }
 .os-datechip svg { width: 13px; height: 13px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; flex: none; }
 .os-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; padding-bottom: 6px; }
+/* ⚠️ THESE ARE THE HEADER PILLS THE PASTILLE WAS FOR (fixes-2 A5), and the previous pass put it
+   on `.os-p` — the TASKS TRIO — instead. Two different pills, similar names, and the colour landed
+   on the wrong one while the copy change landed on the right one. */
 .os-pill {
   display: inline-flex; align-items: center; gap: 6px;
-  background: #ffffff; border: 1px solid #e3d9cc; border-radius: 99px;
-  padding: 5px 12px; font-size: 11.5px; color: #5c5148; white-space: nowrap;
+  background: var(--os-pastille-bg); border: 1px solid var(--os-pastille-line); border-radius: 99px;
+  padding: 5px 12px; font-size: 11.5px; color: var(--os-pastille-ink); white-space: nowrap;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.os-pill:hover { border-color: #cdbfae; background: #fffdf9; }
-.os-pill b { font-family: var(--font-serif); font-size: 13px; color: #241811; font-weight: 500; }
+.os-pill:hover { border-color: #c9d6e2; }
+.os-pill b { font-family: var(--font-serif); font-size: 13px; color: var(--os-pastille-fig); font-weight: 500; }
 .os-pill.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
 .os-pill.sg b { color: #3f5a3c; }
 .os-pill.pk { background: #f8ece4; border-color: #e8c8bc; color: #6b3023; }
@@ -484,8 +495,8 @@
    trio read as three separate objects rather than one readout; a single quiet fill groups them
    and lets the coloured dot do the sorting it was always there to do.
    ⚠️ THE FIGURE IS DARKER THAN THE LABEL. It is the thing being read. */
-.os-p { background: #f4f7fa; border: 1px solid #dde6ee; color: #4a5a6b; }
-.os-p b { color: #2c3f52; }
+.os-p { background: var(--os-pastille-bg); border: 1px solid var(--os-pastille-line); color: var(--os-pastille-ink); }
+.os-p b { color: var(--os-pastille-fig); }
 .os-p.u .os-pdot { background: #7c3a2a; }
 .os-p.h .os-pdot { background: #8a9e88; }
 .os-p.m .os-pdot { background: #b9a893; }

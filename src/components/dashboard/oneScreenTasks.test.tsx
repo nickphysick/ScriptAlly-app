@@ -159,8 +159,10 @@ describe("the pink band (app-shell-v2)", () => {
      faint pastille-blue fill and the DOT carries the kind, which is the job it always had. The
      dots' own hues are unchanged, and that half of the lock stands. */
   it("the trio's pills share ONE pastille fill, and the dots still carry the kind", () => {
-    expect(rule(".os-p")).toContain("background: #f4f7fa");
-    expect(rule(".os-p")).toContain("border: 1px solid #dde6ee");
+    /* ⚠️ TOKENS NOW (fixes-2 A5) — the same pastille is wanted on other pages' header pills, and
+       four loose hexes repeated per surface is how three pages end up NEARLY matching. */
+    expect(rule(".os-p")).toContain("background: var(--os-pastille-bg)");
+    expect(rule(".os-p")).toContain("border: 1px solid var(--os-pastille-line)");
     /* ⚠️ THE PER-KIND FILL RULES ARE GONE ENTIRELY — asserted as ABSENT, not asserted through a
        helper that requires them to exist. One fill, declared once; a `.os-p.u { background }`
        reappearing is the trio splintering back into three objects. */
@@ -202,5 +204,44 @@ describe("§5 · the stylesheet", () => {
     const m = cssRules.slice(cssRules.lastIndexOf("@media (max-width: 640px)"));
     expect(m).toContain("grid-template-columns: 1fr");
     expect(m).toContain(".os-trow .os-dots { display: none; }");
+  });
+});
+
+/**
+ * ⚠️ THE PASTILLE BELONGS TO THE HEADER PILLS, AND IT WAS PUT ON THE WRONG ONES (fixes-2 A5).
+ *
+ * `.os-p` is the tasks TRIO; `.os-pill` is the greeting's header pill. Similar names, different
+ * objects — the previous pass coloured the trio while the copy change landed on the header, so
+ * half of one instruction went to each. This pins the pastille to BOTH by token, so the next
+ * change to it cannot reach one and miss the other.
+ */
+describe("the pastille is tokenised and reaches the header pills", () => {
+  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const blk = (sel: string) => {
+    const i = bare.indexOf(`${sel} {`);
+    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
+    return bare.slice(i, bare.indexOf("}", i));
+  };
+
+  it("the four values are declared once, as tokens", () => {
+    for (const t of ["--os-pastille-bg: #f4f7fa", "--os-pastille-line: #dde6ee",
+      "--os-pastille-ink: #4a5a6b", "--os-pastille-fig: #2c3f52"]) {
+      expect(bare).toContain(t);
+    }
+  });
+
+  it("⚠️ the HEADER pill wears it — the pill the instruction was actually about", () => {
+    const p = blk(".os-pill");
+    expect(p).toContain("var(--os-pastille-bg)");
+    expect(p).toContain("var(--os-pastille-line)");
+    expect(p).toContain("var(--os-pastille-ink)");
+    expect(blk(".os-pill b")).toContain("var(--os-pastille-fig)");
+  });
+
+  it("neither pill restates a raw hex — a literal here is the drift starting again", () => {
+    for (const sel of [".os-pill", ".os-p"]) {
+      expect(blk(sel), `${sel} must read the token`).not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
+    }
   });
 });
