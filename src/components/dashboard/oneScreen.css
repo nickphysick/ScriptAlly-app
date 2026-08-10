@@ -350,12 +350,58 @@
   border-left: 1px solid #f0e7db;
 }
 .os-counter:first-child { border-left: none; }
-.os-cic {
-  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-  background: #f5e2da; border: 1px solid #f0dccd;
-  display: grid; place-items: center;
+/**
+ * ⚠️ ILLUSTRATED MARKS, BARE ON THE CARD — and two traps, each of which cost a round to find.
+ *
+ * TRAP 1 — THE ARTWORK HAS AN OPAQUE WHITE FIELD. These are drawn on white paper, not on
+ * transparency (44% of the target image is solid white). On parchment they render as a WHITE
+ * SQUARE. `mix-blend-mode: multiply` drops the white into the card behind it. The fix is NOT to
+ * put the illustration back on a white plate — bare on the card is the chosen treatment.
+ *
+ * ⚠️ TRAP 2 — A TRANSFORM ON ANY ANCESTOR KILLS THE BLEND. `transform`, `filter` and `opacity < 1`
+ * each create a stacking context, which ISOLATES the blend group: the image then blends against
+ * transparency instead of against the card, and the white square comes back. So the WRAPPER
+ * carries no transform — the optical nudge is `position: relative; top`, never `translateY` — and
+ * the hover transform goes on the IMG. This also means an entrance animation on a card holding an
+ * illustration will flash the white field for as long as its transform is applied.
+ *
+ * ⚠️ TRAP 3 — THE IMAGE MUST NOT SET THE ROW'S HEIGHT. An image taller than the text beside it
+ * grows the flex row and pushes the text down. The box is fixed, it cannot shrink, and the
+ * negative vertical margin absorbs the overhang so the TEXT owns the row height.
+ */
+.os-mark-il { display: block; flex-shrink: 0; }
+.os-mark-il img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  mix-blend-mode: multiply;
+  transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1);
 }
-.os-cic svg { width: 16px; height: 16px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; }
+.os-cic {
+  width: 44px; height: 44px;
+  /* the overhang is absorbed, so the counter's text sets the row height */
+  margin: -8px 0;
+  /* ⚠️ `position/top`, NOT a transform — see trap 2. Playfair's optical centre sits above its
+     line-box centre, so a mark beside it needs the nudge. */
+  position: relative; top: -2px;
+}
+.os-counter:hover .os-cic img { transform: rotate(-3deg) scale(1.05); }
+
+/* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
+/* ⚠️ `align-self: center` IS LOAD-BEARING — `.os-goal-r1` is `align-items: baseline`, and AN IMAGE
+   HAS NO BASELINE: it aligns on its bottom margin edge and drags the row taller than its text.
+   Measured before: row 33.3px against 21.8px of text. This opts the mark out of the baseline
+   group so the TEXT owns the row, which is the whole point of trap 3. */
+.os-goalmark { width: 34px; height: 34px; margin: -6px 0; position: relative; top: -2px; align-self: center; }
+.os-goal:hover .os-goalmark img { transform: rotate(-4deg) scale(1.05); }
+
+/**
+ * ⚠️ THE ENTRANCE ANIMATION WOULD FLASH THE WHITE FIELD (trap 2, the case that is easy to miss).
+ * `.enter` is a TRANSFORM on the card, so for its ~420ms every illustration inside it blends
+ * against transparency and shows as a white square. Isolating the mark from its own ancestor's
+ * transform is not possible, so the marks stay hidden until the card has landed — opacity only,
+ * which creates no stacking context on the CARD.
+ */
+.os-card.enter .os-mark-il img { opacity: 0; }
+.os-mark-il img { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s; }
 .os-cw { min-width: 0; }
 .os-cl { font-size: 12px; color: #5c5148; white-space: nowrap; }
 .os-cv { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
@@ -1089,8 +1135,7 @@
 
 /* counters — ⚠️ THE ICON MOVES, THE FIGURE NEVER DOES. A number that shifts under the cursor
    reads as unreliable, and these are the page's headline figures. */
-.os-cic { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
-.os-counter:hover .os-cic { transform: scale(1.06) rotate(-3deg); }
+/* ⚠️ THE HOVER MOVED TO THE IMG (trap 2) — a transform on this wrapper isolates the blend. */
 
 /* header pills — a 1px lift and a warmer edge */
 .os-p { transition: transform 0.14s ease, border-color 0.14s ease; }

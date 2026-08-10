@@ -87,7 +87,13 @@ describe("dashboard — the entrances are cancelled, not merely shortened", () =
 describe("counters — the figure never moves", () => {
   const bare = readFileSync(join(__dirname, "oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   it("only the icon transforms on hover; no rule transforms the number", () => {
-    expect(bare).toMatch(/\.os-counter:hover \.os-cic\s*\{[^}]*transform/);
+    /* ⚠️ RETARGETED: the transform moved to the IMG. A transform on the wrapper creates a
+       stacking context, which isolates the blend group and brings the artwork's white field back —
+       so this assertion moving is the fix, not a weakening of it. */
+    expect(bare).toMatch(/\.os-counter:hover \.os-cic img\s*\{[^}]*transform/);
+    /* and the wrapper must NOT carry one */
+    const cic = bare.slice(bare.indexOf(".os-cic {"), bare.indexOf("}", bare.indexOf(".os-cic {")));
+    expect(cic).not.toMatch(/transform:/);
     // .os-cn is the figure — a transform on it would make the headline jitter under the cursor
     expect(bare).not.toMatch(/\.os-counter:hover \.os-cn\s*\{[^}]*transform/);
   });

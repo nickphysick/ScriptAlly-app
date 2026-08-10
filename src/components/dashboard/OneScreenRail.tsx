@@ -21,6 +21,7 @@ import { goalBlockGap, goalFigure, GoalPeriod, goalMeter, goalState } from "../.
 import { agentPrimary } from "../../lib/agentDisplay";
 import { OneScreenPanel } from "./OneScreenPanel";
 import { OneScreenMark } from "./OneScreenMark";
+import targetMark from "../../assets/shell/query-target-icon.png";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
@@ -386,6 +387,8 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             it a weight the card does not carry. A bare flex row inside the card's own padding —
             title, status word right-aligned, line and meter beneath. */}
         <div className="os-goal-r1">
+          {/* ⚠️ BARE, and no transform on this wrapper — see the blend traps in oneScreen.css. */}
+          <span className="os-mark-il os-goalmark" aria-hidden="true"><img src={targetMark} alt="" /></span>
           <h2>Querying goals</h2>
           {goal && !editingGoal && (
             <button type="button" className="os-goal-num" title="Adjust the goal" onClick={() => { setGoalDraft({ target: goal.target, period: goal.period }); setEditingGoal(true); }}>

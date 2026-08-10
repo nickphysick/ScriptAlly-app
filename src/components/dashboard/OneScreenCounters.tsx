@@ -15,13 +15,20 @@ import React from "react";
 import { Agent, Query } from "../../types";
 import { headerCounters, HeaderCounter } from "../../lib/oneScreen";
 import { Skel } from "./OneScreenDashboard";
+import sentMark from "../../assets/shell/querying-goals-icon.png";
+import agentsMark from "../../assets/shell/agents-on-file-icon.png";
+import replyMark from "../../assets/shell/response-rate-icon.png";
 import { useCountUp } from "../../lib/useCountUp";
 
-/** The ref's three marks: send · people · reply-arrow. */
-const ICON: Record<HeaderCounter["key"], React.ReactNode> = {
-  sent: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />,
-  agents: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></>,
-  responses: <><path d="M9 14 4 9l5-5" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" /></>,
+/**
+ * ⚠️ THE FILENAMES DO NOT MATCH THE CARDS, AND THE TABLE WINS. `Querying Goals Icon` (a paper
+ * plane) is the QUERIES SENT mark; `Query Target Icon` (a target) is the GOALS mark. Nick's
+ * mapping, confirmed in the pack — do not "correct" this by following the filenames.
+ */
+const ICON: Record<HeaderCounter["key"], string> = {
+  sent: sentMark,       // Querying Goals Icon.png — a paper plane in an envelope
+  agents: agentsMark,   // Agents On File Icon.png — a rolodex
+  responses: replyMark, // Response Rate Icon.png  — a speech bubble on pages
 };
 
 /** ⚠️ ITS OWN COMPONENT SO THE HOOK IS NOT CALLED IN A LOOP — hooks cannot run inside `.map`
@@ -40,8 +47,11 @@ export const OneScreenCounters: React.FC<{
     {loading && <Skel bars={["h", ""]} />}
     {headerCounters(queries, agents, now).map((c) => (
       <div className="os-counter" key={c.key}>
-        <span className="os-cic" aria-hidden="true">
-          <svg viewBox="0 0 24 24">{ICON[c.key]}</svg>
+        {/* ⚠️ BARE ON THE CARD — no plate, no circle, no border. And no wrapper transform: a
+            transform on any ancestor isolates the blend group and the artwork's white field
+            returns (see .os-mark-il in the stylesheet). */}
+        <span className="os-mark-il os-cic" aria-hidden="true">
+          <img src={ICON[c.key]} alt="" />
         </span>
         <div className="os-cw">
           <div className="os-cl">{c.label}</div>
