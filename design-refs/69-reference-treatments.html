@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — reference panel: four treatments</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#ece0d2;--sage:#8a9e88;--sage-tx:#5a6e58;--pink:#f5e2da;--pink-br:#e8c8bc;--slate:#6A89A7;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:26px;-webkit-font-smoothing:antialiased;}
+h1{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;margin-bottom:4px;}
+.sub{font-size:12.5px;color:var(--muted);margin-bottom:24px;max-width:760px;line-height:1.6;}
+
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start;max-width:1400px;}
+.col > .lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.col > .say{font-size:11px;color:#b0a092;line-height:1.45;margin-bottom:10px;min-height:44px;}
+
+/* ── shared panel anatomy ── */
+.refp{border-radius:11px;overflow:hidden;}
+.rp-cap{display:flex;align-items:flex-start;gap:9px;padding:11px 13px;}
+.rp-gl{width:22px;height:22px;flex:0 0 22px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.rp-gl svg{width:13px;height:13px;fill:none;stroke-width:1.5;}
+.rp-t{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;line-height:1.2;}
+.rp-sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;margin-top:3px;}
+.rp-pill{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:20px;color:var(--sage-tx);background:#e9ede6;white-space:nowrap;}
+.rp-stats{display:grid;grid-template-columns:1fr 1fr;}
+.rp-stat{padding:10px 12px;}
+.rp-v{font-family:'Playfair Display',serif;font-size:16px;line-height:1;color:var(--ink);}
+.rp-v small{font-size:10px;}
+.rp-k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;margin-top:5px;line-height:1.4;}
+.rp-policy{padding:8px 13px;font-size:11px;color:var(--ink-soft);}
+.rp-body{padding:10px 13px 6px;}
+.rp-row{padding:8px 0;}
+.rp-lb{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.rp-tx{font-size:12px;line-height:1.4;color:var(--ink);}
+.tags{display:flex;flex-wrap:wrap;gap:4px;}
+.tag{font-size:10.5px;border-radius:20px;padding:3px 8px;color:var(--ink-soft);}
+.mswl{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:var(--ink-soft);padding:9px 11px;border-radius:8px;}
+.rp-f{padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;}
+
+/* ── A · RECEDE (Carbon / M3) ─────────────────────
+   Panel drops below the card plane: ground-coloured,
+   no shadow, no raised rim. Text contrast untouched. */
+.a .refp{background:#eee7df;box-shadow:inset 0 0 0 1px rgba(124,58,42,.09);}
+.a .rp-cap{background:#e8e0d6;box-shadow:inset 0 -1px 0 rgba(124,58,42,.08);}
+.a .rp-gl{background:rgba(253,250,245,.6);} .a .rp-gl svg{stroke:#a08b7b;}
+.a .rp-sub,.a .rp-k,.a .rp-lb,.a .rp-f{color:#a3907f;}
+.a .rp-stats{background:#f1eae1;box-shadow:inset 0 -1px 0 rgba(124,58,42,.08);}
+.a .rp-stat+.rp-stat{box-shadow:inset 1px 0 0 rgba(124,58,42,.08);}
+.a .rp-policy{box-shadow:inset 0 -1px 0 rgba(124,58,42,.08);}
+.a .rp-row{box-shadow:inset 0 -1px 0 rgba(124,58,42,.07);}
+.a .rp-row:last-child{box-shadow:none;}
+.a .tag{background:rgba(253,250,245,.7);box-shadow:inset 0 0 0 1px rgba(124,58,42,.08);}
+.a .mswl{background:rgba(253,250,245,.55);box-shadow:inset 0 0 0 1px rgba(124,58,42,.08);}
+.a .rp-f{box-shadow:inset 0 1px 0 rgba(124,58,42,.08);}
+
+/* ── B · COOL TINT ────────────────────────────────
+   Same anatomy, slate family. Ink stays warm. */
+.b .refp{background:#f1f4f7;box-shadow:inset 0 0 0 1px rgba(106,137,167,.26);}
+.b .rp-cap{background:#e7edf3;box-shadow:inset 0 -1px 0 #dde5ed;}
+.b .rp-gl{background:rgba(255,255,255,.75);} .b .rp-gl svg{stroke:#4e6c88;}
+.b .rp-sub,.b .rp-k,.b .rp-lb,.b .rp-f{color:#7b8fa3;}
+.b .rp-stats{background:#f7f9fb;box-shadow:inset 0 -1px 0 #dde5ed;}
+.b .rp-stat+.rp-stat{box-shadow:inset 1px 0 0 #dde5ed;}
+.b .rp-policy{box-shadow:inset 0 -1px 0 #dde5ed;}
+.b .rp-row{box-shadow:inset 0 -1px 0 #e3eaf1;}
+.b .rp-row:last-child{box-shadow:none;}
+.b .tag{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px #dde5ed;}
+.b .mswl{background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px #dde5ed;}
+.b .rp-f{box-shadow:inset 0 1px 0 #dde5ed;}
+
+/* ── C · MARGINALIA ───────────────────────────────
+   A note pinned beside the work: parchment, dashed
+   rim, ruled rows, no fill on the head. */
+.c .refp{background:var(--parchment);box-shadow:none;border:1px dashed rgba(124,58,42,.28);border-radius:11px;}
+.c .rp-cap{background:transparent;box-shadow:inset 0 -1px 0 rgba(124,58,42,.14);}
+.c .rp-gl{background:transparent;box-shadow:inset 0 0 0 1px rgba(124,58,42,.2);} .c .rp-gl svg{stroke:var(--burg);}
+.c .rp-sub,.c .rp-k,.c .rp-lb,.c .rp-f{color:var(--muted);}
+.c .rp-stats{background:transparent;box-shadow:inset 0 -1px 0 rgba(124,58,42,.14);}
+.c .rp-stat+.rp-stat{box-shadow:inset 1px 0 0 rgba(124,58,42,.12);}
+.c .rp-policy{font-style:italic;box-shadow:inset 0 -1px 0 rgba(124,58,42,.14);}
+.c .rp-row{box-shadow:inset 0 -1px 0 rgba(124,58,42,.10);}
+.c .rp-row:last-child{box-shadow:none;}
+.c .tag{background:#f8f2ea;box-shadow:inset 0 0 0 1px var(--hair);}
+.c .mswl{background:#f8f2ea;box-shadow:inset 0 0 0 1px var(--hair);}
+.c .rp-f{box-shadow:inset 0 1px 0 rgba(124,58,42,.14);}
+
+/* ── D · WELL ─────────────────────────────────────
+   Carved into the page rather than sitting on it:
+   top-edge inner shadow, no drop shadow at all. */
+.d .refp{background:#efe8e0;box-shadow:inset 0 2px 5px rgba(58,28,20,.10),inset 0 0 0 1px rgba(124,58,42,.10);}
+.d .rp-cap{background:transparent;box-shadow:inset 0 -1px 0 rgba(124,58,42,.10);}
+.d .rp-gl{background:rgba(253,250,245,.75);} .d .rp-gl svg{stroke:#8d7666;}
+.d .rp-sub,.d .rp-k,.d .rp-lb,.d .rp-f{color:#a3907f;}
+.d .rp-stats{background:rgba(253,250,245,.5);box-shadow:inset 0 -1px 0 rgba(124,58,42,.10);}
+.d .rp-stat+.rp-stat{box-shadow:inset 1px 0 0 rgba(124,58,42,.10);}
+.d .rp-policy{box-shadow:inset 0 -1px 0 rgba(124,58,42,.10);}
+.d .rp-row{box-shadow:inset 0 -1px 0 rgba(124,58,42,.09);}
+.d .rp-row:last-child{box-shadow:none;}
+.d .tag{background:rgba(253,250,245,.8);box-shadow:inset 0 0 0 1px rgba(124,58,42,.10);}
+.d .mswl{background:rgba(253,250,245,.65);box-shadow:inset 0 0 0 1px rgba(124,58,42,.10);}
+.d .rp-f{box-shadow:inset 0 1px 0 rgba(124,58,42,.10);}
+
+/* the working surface, for comparison */
+.work{background:#fff;border-radius:11px;padding:14px;margin-bottom:14px;
+  box-shadow:inset 0 0 0 1px #e0d5c8,0 1px 2px rgba(58,28,20,.04),0 6px 18px rgba(58,28,20,.06);}
+.work .wt{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;margin-bottom:10px;}
+.work .ch{display:inline-block;background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);
+  border-radius:8px;padding:7px 11px;font-size:11.5px;font-weight:500;}
+.work .fld{background:#fff;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:8px;padding:9px 11px;font-size:12px;margin-top:9px;}
+
+.res{max-width:1400px;margin-top:26px;padding:18px 22px;background:var(--parchment);border-radius:12px;
+  box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.res h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);margin-bottom:8px;}
+.res h3+p{margin-bottom:12px;}
+.res b{color:var(--burg);}
+.res ul{margin:4px 0 14px 18px;}
+.res code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f4ede4;padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<h1>Reference panel — four treatments</h1>
+<div class="sub">Same anatomy, same content, four ways of saying "this is for reference". The white card at the top of each column is the working surface, so you can judge each panel against the thing it must not compete with.</div>
+
+<div class="grid">
+
+  <!-- A -->
+  <div class="col a">
+    <div class="lab">A · Recede</div>
+    <div class="say">Drops below the card plane. Ground-coloured, unshadowed, flat.</div>
+    <div class="work"><div class="wt">When you sent it</div><span class="ch">6 wks</span><div class="fld">10 August 2026</div></div>
+    <div class="refp">
+      <div class="rp-cap"><span class="rp-gl"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.7 3.4-5.6 7-5.6s6.4 1.9 7 5.6"/></svg></span>
+        <span><span class="rp-t">This agent at a glance</span><span class="rp-sub">Fenella Str</span></span><span class="rp-pill">Open</span></div>
+      <div class="rp-stats"><div class="rp-stat"><div class="rp-v">6 <small>weeks</small></div><div class="rp-k">Expected response</div></div>
+        <div class="rp-stat"><div class="rp-v" style="font-size:13px">Email</div><div class="rp-k">Preferred method</div></div></div>
+      <div class="rp-policy">No reply after 6 weeks means a pass.</div>
+      <div class="rp-body">
+        <div class="rp-row"><div class="rp-lb">Your history</div><div class="rp-tx">1 closed · last sent 14 Mar</div></div>
+        <div class="rp-row"><div class="rp-lb">Seeking</div><div class="tags"><span class="tag">Historical</span><span class="tag">Romance</span><span class="tag">Sci-fi</span></div></div>
+        <div class="rp-row"><div class="rp-lb">Wish list</div><div class="mswl">Big, warm historical sagas with a woman at the centre.</div></div>
+      </div>
+      <div class="rp-f">Updated 25 Jun</div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="col b">
+    <div class="lab">B · Cool tint</div>
+    <div class="say">Slate family, warm ink kept. Temperature does the separating.</div>
+    <div class="work"><div class="wt">When you sent it</div><span class="ch">6 wks</span><div class="fld">10 August 2026</div></div>
+    <div class="refp">
+      <div class="rp-cap"><span class="rp-gl"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.7 3.4-5.6 7-5.6s6.4 1.9 7 5.6"/></svg></span>
+        <span><span class="rp-t">This agent at a glance</span><span class="rp-sub">Fenella Str</span></span><span class="rp-pill">Open</span></div>
+      <div class="rp-stats"><div class="rp-stat"><div class="rp-v">6 <small>weeks</small></div><div class="rp-k">Expected response</div></div>
+        <div class="rp-stat"><div class="rp-v" style="font-size:13px">Email</div><div class="rp-k">Preferred method</div></div></div>
+      <div class="rp-policy">No reply after 6 weeks means a pass.</div>
+      <div class="rp-body">
+        <div class="rp-row"><div class="rp-lb">Your history</div><div class="rp-tx">1 closed · last sent 14 Mar</div></div>
+        <div class="rp-row"><div class="rp-lb">Seeking</div><div class="tags"><span class="tag">Historical</span><span class="tag">Romance</span><span class="tag">Sci-fi</span></div></div>
+        <div class="rp-row"><div class="rp-lb">Wish list</div><div class="mswl">Big, warm historical sagas with a woman at the centre.</div></div>
+      </div>
+      <div class="rp-f">Updated 25 Jun</div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="col c">
+    <div class="lab">C · Marginalia</div>
+    <div class="say">A note pinned beside the work. Dashed rim, ruled rows, no fill.</div>
+    <div class="work"><div class="wt">When you sent it</div><span class="ch">6 wks</span><div class="fld">10 August 2026</div></div>
+    <div class="refp">
+      <div class="rp-cap"><span class="rp-gl"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.7 3.4-5.6 7-5.6s6.4 1.9 7 5.6"/></svg></span>
+        <span><span class="rp-t">This agent at a glance</span><span class="rp-sub">Fenella Str</span></span><span class="rp-pill">Open</span></div>
+      <div class="rp-stats"><div class="rp-stat"><div class="rp-v">6 <small>weeks</small></div><div class="rp-k">Expected response</div></div>
+        <div class="rp-stat"><div class="rp-v" style="font-size:13px">Email</div><div class="rp-k">Preferred method</div></div></div>
+      <div class="rp-policy">No reply after 6 weeks means a pass.</div>
+      <div class="rp-body">
+        <div class="rp-row"><div class="rp-lb">Your history</div><div class="rp-tx">1 closed · last sent 14 Mar</div></div>
+        <div class="rp-row"><div class="rp-lb">Seeking</div><div class="tags"><span class="tag">Historical</span><span class="tag">Romance</span><span class="tag">Sci-fi</span></div></div>
+        <div class="rp-row"><div class="rp-lb">Wish list</div><div class="mswl">Big, warm historical sagas with a woman at the centre.</div></div>
+      </div>
+      <div class="rp-f">Updated 25 Jun</div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="col d">
+    <div class="lab">D · Well</div>
+    <div class="say">Carved into the page rather than sitting on it. Inner shadow, no lift.</div>
+    <div class="work"><div class="wt">When you sent it</div><span class="ch">6 wks</span><div class="fld">10 August 2026</div></div>
+    <div class="refp">
+      <div class="rp-cap"><span class="rp-gl"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.7 3.4-5.6 7-5.6s6.4 1.9 7 5.6"/></svg></span>
+        <span><span class="rp-t">This agent at a glance</span><span class="rp-sub">Fenella Str</span></span><span class="rp-pill">Open</span></div>
+      <div class="rp-stats"><div class="rp-stat"><div class="rp-v">6 <small>weeks</small></div><div class="rp-k">Expected response</div></div>
+        <div class="rp-stat"><div class="rp-v" style="font-size:13px">Email</div><div class="rp-k">Preferred method</div></div></div>
+      <div class="rp-policy">No reply after 6 weeks means a pass.</div>
+      <div class="rp-body">
+        <div class="rp-row"><div class="rp-lb">Your history</div><div class="rp-tx">1 closed · last sent 14 Mar</div></div>
+        <div class="rp-row"><div class="rp-lb">Seeking</div><div class="tags"><span class="tag">Historical</span><span class="tag">Romance</span><span class="tag">Sci-fi</span></div></div>
+        <div class="rp-row"><div class="rp-lb">Wish list</div><div class="mswl">Big, warm historical sagas with a woman at the centre.</div></div>
+      </div>
+      <div class="rp-f">Updated 25 Jun</div>
+    </div>
+  </div>
+</div>
+
+<div class="res">
+  <h3>What the research says</h3>
+  <p>Two established patterns bear directly on this, and they agree.</p>
+  <ul>
+    <li><b>Carbon's read-only pattern</b> — the field background blends into the layer beneath, borders lose emphasis to make information more readable, signifier icons take a disabled colour, and <b>text colour does not change</b> so contrast holds. Structure and spacing stay identical to the interactive version. Read-only is explicitly not disabled: it stays keyboard-navigable, because the point is that it gets read.</li>
+    <li><b>Material 3's tonal separation</b> — surfaces separate by tonal difference rather than by borders, and overlapping containment areas take different surface roles. Elevation rises with tonal prominence, which inverts cleanly for reference material: it should sit lower, not higher.</li>
+  </ul>
+  <p>Both point the same way: <b>a reference surface recedes and drops its affordance signals — it does not take a new hue.</b> Hue changes usually mean semantics elsewhere in a system (error, success, Pro), so borrowing one for "reference" spends a signal you may want later.</p>
+
+  <h3>How they land here</h3>
+  <ul>
+    <li><b>A · Recede</b> is the textbook answer. The panel sits at page-ground tone while the step sits on white, so the tonal gap does the work. Cheapest to build, uses only existing tokens, no new semantics. Risk: at a glance it can read as disabled rather than reference — Carbon's own warning — which is why the mono captions and the caption bar matter.</li>
+    <li><b>B · Cool tint</b> separates hardest and is the clearest at speed. It costs a hue, collides with Pro slate at <code>#6A89A7</code>, and needs theme-scoping so it can't leak into Bold Pastille or Editorial.</li>
+    <li><b>C · Marginalia</b> is the one most native to this product. A dashed rim reads as annotation rather than as a second application, and it borrows nothing from anyone else's semantics. It is also the most likely to look decorative rather than deliberate if the dash weight is wrong.</li>
+    <li><b>D · Well</b> says "not a card" most literally — carved in rather than sitting on. It reads as a container for consultation, and the inner shadow is a treatment used nowhere else in the app, so it carries no existing meaning. Watch it does not read as a disabled input at small sizes.</li>
+  </ul>
+
+  <h3>My recommendation</h3>
+  <p><b>C, with A's tonal discipline underneath it.</b> Marginalia is the pattern ScriptAlly is already writing in — parchment, mono captions, Playfair italic for the wish list — and it says "consult this" without spending a hue or borrowing a convention from a system this app is not part of. If it reads too light in the browser, D is the fallback: same argument, more structure. B is the one I would hold back, not because it looks wrong — it is the strongest at a glance — but because it makes slate mean two things and adds a theming obligation to every future panel.</p>
+</div>
+</body>
+</html>
