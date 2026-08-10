@@ -87,8 +87,22 @@ describe("the container rim is an overlay, not a border", () => {
     expect(blk(".os-card")).toContain("position: relative");
   });
 
-  it("⚠️ the BORDER STAYS, for geometry — removing it shifts every card's contents by 1px", () => {
-    expect(blk(".os-card")).toMatch(/border:\s*1px solid/);
+  it("⚠️ THE RING IS THE ONLY RIM — no border alongside it, or one hairline has two owners", () => {
+    /* An earlier pass kept a border "for geometry". That made the next retune of the rim token a
+       two-place edit, and the second place is the one that gets missed. Measured cost of dropping
+       it: card size unchanged, contents 1px further out. */
+    expect(blk(".os-card")).not.toMatch(/(^|;|\s)border:\s*[\d.]+px/);
+  });
+
+  it("⚠️ the rim is NOT a bare inset shadow on the element — that paints beneath children", () => {
+    // the whole fault: an opaque band child covers anything painted on the element's own layer
+    const card = blk(".os-card");
+    expect(card).not.toContain("box-shadow: inset");
+  });
+
+  it("hover transitions the PSEUDO-ELEMENT's shadow, not the container's rim", () => {
+    expect(bare).toContain(".os-card.os-lift:hover::after");
+    expect(blk(".os-card.os-lift:hover")).not.toContain("border-color");
   });
 
   it("hover warms the rim and moves nothing — no transform on a container", () => {

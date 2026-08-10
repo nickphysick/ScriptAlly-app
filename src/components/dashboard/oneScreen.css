@@ -112,7 +112,10 @@
      the FIRST match, so the second rule's declarations are invisible to it. One element, one rule. */
   position: relative;
   background: #fffdf9;
-  border: 1px solid #e3d9cc;
+  /* ⚠️ NO `border` — THE RIM IS THE ::after RING BELOW, and it is the only thing that declares it.
+     A border here would be a second source of truth for one hairline, and the next person to
+     retune the rim token would move one and miss the other. Measured cost of removing it: card
+     size unchanged, contents sit 1px further out. */
   border-radius: 15px;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
   min-height: 0;
@@ -149,10 +152,10 @@
   pointer-events: none; /* the rim must never intercept a click meant for the card */
   transition: box-shadow 0.16s ease;
 }
-/* §10: hover deepens the shadow and warms the rim — NO movement, and no transform on a container */
+/* §10: hover deepens the DROP shadow only — no movement, no transform on a container. The RIM's
+   hover lives on the ::after (below), because the ring is the rim's single source of truth. */
 .os-card.os-lift:hover {
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 10px 26px rgba(58, 28, 20, 0.1);
-  border-color: #dbd0c1;
 }
 .os-card.os-lift:hover::after { box-shadow: inset 0 0 0 1px #dbd0c1; }
 
@@ -308,8 +311,13 @@
    so adding the class later cannot quietly re-arm a hover that promises a click. */
 .os-card.os-counters:hover, .os-card.os-counters.os-lift:hover {
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
-  border-color: #e3d9cc;
   transform: none;
+}
+/* ⚠️ THE READOUT CARD HOLDS ITS RIM STILL TOO — the ring, not a border-color, since the ring is
+   now the only thing that draws it. Without this the rim would warm on hover and promise the
+   click the rest of this rule exists to deny. */
+.os-card.os-counters:hover::after, .os-card.os-counters.os-lift:hover::after {
+  box-shadow: inset 0 0 0 1px #e3d9cc;
 }
 /* equal thirds, each CENTRED within its own third — not spread to the edges.
    ⚠️ NOT `.os-ct`: that name belonged to the retired book-spine title, and a class that has meant
