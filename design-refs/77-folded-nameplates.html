@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — already queried: folded nameplates</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#ece0d2;--sage:#8a9e88;--sage-tx:#5a6e58;--pink:#f5e2da;--pink-br:#e8c8bc;--rim:rgba(124,58,42,.16);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:26px;-webkit-font-smoothing:antialiased;}
+
+.ctl{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px #e0d5c8;flex-wrap:wrap;}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;padding:6px 11px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:var(--muted);font-style:italic;}
+
+.card{background:var(--parchment);border-radius:14px;padding:24px 26px 26px;max-width:1180px;
+  box-shadow:inset 0 0 0 1px var(--rim),0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);}
+h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;margin-bottom:14px;}
+.searchline{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.tfield{max-width:400px;flex:1 1 400px;background:#fff;border-radius:9px;padding:11px 13px;font-size:13.5px;border:0;
+  box-shadow:inset 0 0 0 1px #e0d5c8;font-family:'Inter';outline:none;}
+.tfield::placeholder{color:#c8b8a8;}
+.helper{font-size:12px;color:var(--ink-soft);} .helper a{color:var(--burg);}
+.aq{max-width:620px;background:#f8f2ea;border-radius:11px;padding:15px 17px;box-shadow:inset 0 0 0 1px var(--hair);}
+.aq-top{display:flex;align-items:center;gap:11px;}
+.aq-ring{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:#8d7d6e;box-shadow:inset 0 0 0 2px #ddd2c4;}
+.aq-t{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;}
+.aq-b{font-size:12.5px;color:var(--ink-soft);margin-top:9px;line-height:1.5;}
+.aq-acts{display:flex;gap:8px;margin-top:13px;padding-top:12px;box-shadow:inset 0 1px 0 var(--hair);}
+.act{background:#fff;border-radius:9px;padding:8px 12px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;cursor:pointer;}
+
+.lh{display:flex;align-items:baseline;gap:10px;margin:24px 0 12px;}
+.lh b{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.lh span{font-size:11.5px;color:#b0a092;}
+.dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%;}
+.dot.live{box-shadow:inset 0 0 0 2px var(--burg);background:#f8e7dc;}
+.dot.past{box-shadow:inset 0 0 0 2px #c3b3a3;background:#efe7dd;}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.11em;text-transform:uppercase;}
+
+/* ══ 1 · SPINE — dated timeline, grouped by month ══ */
+.spine{position:relative;padding-left:28px;opacity:.66;transition:opacity .16s;}
+.spine:hover{opacity:1;}
+.spine::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:1px;background:rgba(124,58,42,.18);}
+.sp-m{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  margin:14px 0 7px;position:relative;}
+.sp-m:first-child{margin-top:0;}
+.sp-r{position:relative;display:flex;align-items:baseline;gap:12px;padding:7px 0;cursor:pointer;}
+.sp-r::before{content:'';position:absolute;left:-24px;top:12px;width:9px;height:9px;border-radius:50%;background:var(--parchment);
+  box-shadow:inset 0 0 0 2px #c3b3a3;}
+.sp-r.live::before{box-shadow:inset 0 0 0 2px var(--burg);background:#f8e7dc;}
+.sp-r:hover{background:rgba(255,255,255,.7);border-radius:7px;padding-left:8px;margin-left:-8px;}
+.sp-n{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;}
+.sp-a{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.sp-d{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* ══ 2 · SPLIT — two ledgers, sorted for you ══ */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sl{background:var(--parchment);border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);overflow:hidden;opacity:.66;transition:opacity .16s;}
+.sl:hover{opacity:1;}
+.sl-h{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f6efe6;box-shadow:inset 0 -1px 0 var(--hair);}
+.sl-h b{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;}
+.sl-h em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.sl-r{display:flex;align-items:baseline;gap:10px;padding:10px 14px;box-shadow:inset 0 -1px 0 var(--hair);cursor:pointer;}
+.sl-r:last-child{box-shadow:none;}
+.sl-r:hover{background:#fff;}
+.sl-n{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;}
+.sl-a{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.sl-d{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* ══ 3 · STAMPED — a record sheet, tabular ══ */
+.sheet{background:var(--parchment);border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);overflow:hidden;opacity:.68;transition:opacity .16s;}
+.sheet:hover{opacity:1;}
+.sh-h{display:grid;grid-template-columns:1fr 200px 116px 110px;gap:12px;padding:9px 16px;background:#f6efe6;
+  box-shadow:inset 0 -1px 0 var(--hair);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.sh-r{display:grid;grid-template-columns:1fr 200px 116px 110px;gap:12px;padding:11px 16px;align-items:center;
+  box-shadow:inset 0 -1px 0 rgba(124,58,42,.08);cursor:pointer;}
+.sh-r:nth-child(even){background:rgba(246,239,230,.5);}
+.sh-r:hover{background:#fff;}
+.sh-n{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;}
+.sh-a,.sh-d{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--muted);}
+.stamp{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-soft);padding:4px 9px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(124,58,42,.22);}
+.stamp.past{color:var(--muted);box-shadow:inset 0 0 0 1px rgba(124,58,42,.12);}
+
+/* ══ 4 · NAMEPLATE — names only, dense ══ */
+.plate{display:flex;flex-wrap:wrap;gap:7px;opacity:.66;transition:opacity .16s;}
+.plate:hover{opacity:1;}
+.np{display:inline-flex;align-items:center;gap:8px;background:var(--parchment);border-radius:20px;padding:7px 13px 7px 10px;
+  box-shadow:inset 0 0 0 1px var(--hair);cursor:pointer;transition:box-shadow .15s;}
+.np:hover{box-shadow:inset 0 0 0 1px #dcc9bb,0 2px 8px rgba(58,28,20,.07);}
+.np span{font-size:13px;}
+.np em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;color:var(--muted);}
+
+/* ══ 5 · FOLDED — one line, opens on ask ══ */
+.fold{margin-top:18px;background:#f8f2ea;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);overflow:hidden;}
+.fo-h{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
+.fo-t{font-size:13px;color:var(--ink-soft);}
+.fo-t b{font-weight:500;color:var(--ink);}
+.fo-x{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--burg);}
+.fo-b{display:none;padding:2px 16px 14px;}
+.plate-key{display:flex;align-items:center;gap:7px;margin-top:12px;padding-top:10px;box-shadow:inset 0 1px 0 rgba(124,58,42,.10);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+body[data-open="1"] .fo-b{display:block;}
+.fo-r{display:flex;align-items:baseline;gap:10px;padding:9px 0;box-shadow:inset 0 -1px 0 rgba(124,58,42,.08);cursor:pointer;}
+.fo-r:last-child{box-shadow:none;}
+.fo-n{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;}
+.fo-a{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.fo-d{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+
+body:not([data-v="spine"]) #v-spine{display:none;}
+body:not([data-v="split"]) #v-split{display:none;}
+body:not([data-v="sheet"]) #v-sheet{display:none;}
+body:not([data-v="plate"]) #v-plate{display:none;}
+body:not([data-v="fold"]) #v-fold{display:none;}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+
+.legend{max-width:1180px;margin-top:24px;padding:16px 20px;background:#f8f2ea;border-radius:11px;
+  box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style>
+</head>
+<body data-v="spine" data-open="0">
+
+<div class="ctl"><b>Ref</b><span class="note">Folded by default. Click "Show them" to reveal the nameplates.</span></div>
+
+<div class="card">
+  <h2>Who are you querying?</h2>
+  <div class="searchline">
+    <input class="tfield" placeholder="Search by name or agency…">
+    <span class="helper">Not listed? <a href="#">Add a new agent</a></span>
+  </div>
+
+  <div class="aq">
+    <div class="aq-top"><span class="aq-ring">16</span><span class="aq-t">Every contact queried</span></div>
+    <div class="aq-b">All 16 agents on your contact list have been queried for <i>Murphy's Day Out</i>. You can still log a query to any of them — a resubmission, or a second manuscript.</div>
+    <div class="aq-acts"><span class="act">Add a new agent</span><span class="act">Find agents in Discover</span><span class="act">Review your contacts</span></div>
+  </div>
+
+  <div class="fold" id="fold"></div>
+</div>
+
+<div class="legend">
+  <b>The combination</b>
+  <ul>
+    <li><b>Folded by default.</b> One sentence with the counts. The writer came here to log a query — this state is context, not a workspace, and the panel above has already said the useful thing.</li>
+    <li><b>Opens to nameplates.</b> Names only, wrapped, whole set in three lines. Every plate identical in weight; the dot reports state without ranking. A key sits beneath rather than repeating the words sixteen times.</li>
+    <li><b>Dimmed at rest, forward on hover or focus.</b> Available, not suggested.</li>
+    <li>Dates render only when they parse; agency moves to the plate's title attribute so the set stays scannable.</li>
+    <li>Clicking a plate selects that agent and proceeds exactly as any other selection does.</li>
+  </ul>
+</div>
+
+<script>
+var ROWS=[
+ ["Daniel O'Rourke","Inkwell & Stone","live","",             "Aug 2026"],
+ ["William Tan","Foxglove Literary","live","",                "Aug 2026"],
+ ["Marcus Reed","Bloomsbury Quill","live","11 Jun 2024",      "Jun 2024"],
+ ["Priya Raman","","live","1 May 2024",                       "May 2024"],
+ ["Jonathan Marsh","The Marsh Agency","live","9 Apr 2024",    "Apr 2024"],
+ ["Aisha Kapoor","The Lantern Agency","live","3 Apr 2024",    "Apr 2024"],
+ ["Eleanor Whitfield","Greenfield Literary","live","14 Mar 2024","Mar 2024"],
+ ["Fenella Str","Brightwater Books","past","14 Mar 2024",     "Mar 2024"],
+ ["Tom Ellery","Curtis Vane","live","3 Mar 2024",             "Mar 2024"],
+ ["Marcus Reed","Hartley & Co","past","20 Feb 2024",          "Feb 2024"],
+ ["Sophie Dunn","Curtis Vane","live","15 Jan 2024",           "Jan 2024"],
+ ["Gareth Kelso","Ivy & Thorn","past","2 Jan 2024",           "Jan 2024"]
+];
+var AG=function(a){return a||'No agency recorded';};
+var live=ROWS.filter(function(r){return r[2]==='live';}), past=ROWS.filter(function(r){return r[2]==='past';});
+
+/* folded, opening to nameplates */
+document.getElementById('fold').innerHTML=
+ '<div class="fo-h" id="fh"><span class="fo-t">You have queried all <b>16</b> contacts for this manuscript \u2014 <b>'+live.length+'</b> still waiting, <b>'+past.length+'</b> concluded.</span><span class="fo-x" id="fx">Show them \u25be</span></div>'+
+ '<div class="fo-b"><div class="plate">'+ROWS.map(function(r){
+   return '<span class="np" tabindex="0" title="'+AG(r[1])+'"><span class="dot '+r[2]+'"></span><span>'+r[0]+'</span>'+(r[3]?'<em>'+r[3]+'</em>':'')+'</span>';
+ }).join('')+'</div><div class="plate-key"><span class="dot live"></span>Active query<span class="dot past" style="margin-left:14px"></span>Previously queried</div></div>';
+document.getElementById('fh').addEventListener('click',function(){
+  var o=document.body.dataset.open==='1';document.body.dataset.open=o?'0':'1';
+  document.getElementById('fx').textContent=o?'Show them \u25be':'Hide \u25b4';});
+
+</script>
+</body>
+</html>
