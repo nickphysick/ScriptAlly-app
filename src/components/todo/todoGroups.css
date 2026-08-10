@@ -166,7 +166,7 @@
    Six tracks: tick · title (the only flexible one) · status pill · journey · age · verbs. */
 .tdg-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 216px;
+  grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 118px;
   align-items: center;
   padding: 16px 14px;
   border-radius: 11px;
@@ -325,54 +325,92 @@
   white-space: nowrap;
 }
 
-/* ── THE FOUR-SLOT ACTION GRID ──────────────────────────────────────────────────────────────
-   ⚠️ FIXED TRACKS, AND AN ABSENT VERB LEAVES ITS SLOT STANDING. Every primary in the panel
-   therefore starts at the same x, and a missing verb reads as a considered absence rather than a
-   row that shifted. (The ref's words: "where a verb is forbidden the slot stays empty so the
-   absence is legible rather than mysterious".) */
-.tdg-verbs {
-  display: grid;
-  grid-template-columns: 68px 30px 30px 30px;
-  gap: 7px;
-  align-items: center;
+/* ── THE ROW'S ONE CONTROL: A GUARDED SPLIT BUTTON ─────────────────────────────────────────
+   (Fix 4; ref design-refs/todo-splitguard-v1.html)
+
+   ⚠️ THE FOUR-SLOT GRID AND ITS PRESERVED EMPTY SLOT ARE DELETED, NOT DISABLED. They existed so
+   that a missing verb left its place standing and every primary began at the same x. Every row
+   now carries ONE identical control, so there is nothing left to align — and a device kept past
+   its reason is the next reader's puzzle. */
+.tdg-acts { display: flex; align-items: center; justify-content: flex-end; }
+
+/* 118px total, so the column NARROWS rather than grows: 81 + 3 seam + 34 caret. */
+.tdg-split {
+  display: flex;
+  width: 118px;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #2a1a13;
+  /* ⚠️ NO CLICK HANDLER LIVES ABOVE THE HALVES, and no pointer rule brings one back: the seam
+     belongs to neither half and must fire nothing, which it does by there being nothing to fall
+     through to. */
 }
 
-.tdg-slot { height: 30px; }
-
-.tdg-vb {
-  width: 100%;
-  height: 30px;
-  padding: 0;
-  border-radius: 8px;
-  border: 1px solid #ece4d6;
-  background: #fff;
+.tdg-split-p,
+.tdg-split-c {
+  border: 0;
+  background: transparent;
+  color: var(--paper, #f6efe6);
+  font: inherit;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #6b5a4e;
-  cursor: pointer;
+  padding: 0;
 }
 
-.tdg-vb:hover { border-color: #cdbfae; color: #2b2118; }
+.tdg-split-p { width: 81px; font-size: 11px; font-weight: 600; }
 
-.tdg-vb.go {
-  background: #2a1a13;
-  border-color: #2a1a13;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
+/* ⚠️ GUARD 1 — 34px, NOT 28. The caret sits flush against a high-consequence primary, so it is
+   the one target on the row that must be comfortably past the 24px minimum. */
+.tdg-split-c { width: 34px; }
+
+/* ⚠️ GUARD 3 — THE DEAD SEAM. 3px belonging to neither half. It is a plain span with no handler
+   above it, so a press that lands here commits nothing. */
+.tdg-split-seam { width: 3px; background: rgba(255, 255, 255, 0.2); flex: none; }
+
+/* ⚠️ GUARD 2 — ARM BEFORE PRESS. The half under the pointer lightens and the other does not:
+   two separate elements, two separate `:hover`s, so they can never both light and never both
+   stay dark while one is hovered. This is the reader's confirmation of what is loaded BEFORE the
+   press lands, which is the whole defence of a seam. */
+.tdg-split-p:hover, .tdg-split-c:hover { background: #3a2a20; }
+.tdg-split-p:focus-visible, .tdg-split-c:focus-visible { background: #3a2a20; outline: none; }
+
+/* Undo on a finished row is a way back, not an act — the ghost treatment the primary already had. */
+.tdg-split.ghost { background: #fff; border: 1px solid #e6ddcd; }
+.tdg-split.ghost .tdg-split-p, .tdg-split.ghost .tdg-split-c { color: #4d4238; }
+.tdg-split.ghost .tdg-split-seam { background: #e6ddcd; }
+.tdg-split.ghost .tdg-split-p:hover, .tdg-split.ghost .tdg-split-c:hover { background: #faf6f0; }
+
+/* ── the split's menu ───────────────────────────────────────────────────────────────────────
+   The shell is `.tbd-menu2` (consumed from todoBoard.css, never edited); these are the parts the
+   split's own grammar adds. */
+
+/* ⚠️ THE 12px DEAD ZONE TAKES NO CLICK, and the rule above the destructive pair is its edge.
+   `pointer-events: none` is the half that matters: a drifting pointer crossing it cannot arm
+   anything, so Dismiss is never one slip from the caret. */
+.tdg-deadzone {
+  height: 12px;
+  margin: 4px 0 0;
+  border-bottom: 1px solid #ece4d6;
+  pointer-events: none;
 }
 
-.tdg-vb.go:hover { color: #fff; }
+.tdg-mglyph { width: 14px; text-align: center; flex: none; opacity: 0.75; }
 
-/* the ghost primary — Undo on a finished row is a way back, not an act */
-.tdg-vb.ghost {
-  background: #fff;
-  border-color: #e6ddcd;
-  color: #4d4238;
-  font-size: 11px;
-  font-weight: 600;
+.tdg-mkey {
+  margin-left: auto;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  color: #a5988c;
 }
+
+/* ⚠️ A VERB THAT DOES NOT APPLY IS GREY AND INERT, NEVER ABSENT — an absent row is a puzzle, a
+   greyed one is an answer. The house inert grammar: faint ink, not-allowed, no fill change. */
+.tbd-mi.dim, .tbd-mi:disabled { color: #c1b4a5; cursor: not-allowed; }
+.tbd-mi.dim:hover, .tbd-mi:disabled:hover { background: transparent; }
+.tbd-mi.dim .tdg-mkey { color: #d5ccc1; }
 
 /* ── THE HOUSEKEEPING FOLD ──────────────────────────────────────────────────────────────────
    One control, stating the number it holds back, centred beneath its panel. ⚠️ ONLY
@@ -497,7 +535,7 @@
 
 .tdg-sk.pill { height: 25px; width: 124px; border-radius: 7px; }
 .tdg-sk.tick { height: 20px; width: 20px; border-radius: 50%; }
-.tdg-sk.vb { height: 30px; border-radius: 8px; }
+.tdg-sk.split { height: 34px; width: 118px; border-radius: 8px; }
 .tdg-sk.t { height: 13px; width: 62%; }
 .tdg-sk.sub { height: 10px; width: 38%; margin-top: 7px; }
 .tdg-sk.age { height: 9px; width: 54px; }

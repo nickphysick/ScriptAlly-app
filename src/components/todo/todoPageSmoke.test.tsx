@@ -92,7 +92,12 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     expect(html).toContain("Your tasks");                // the group heading, outside its panel
     expect(html).toContain("tdg-panel");                 // the white panel
     expect(html).toContain("Redraft the opening chapter");
-    expect(html).toContain("tdg-verbs");                 // the four-slot action grid
+    /* ⚠️ THE SEAT IS ALWAYS THERE; THE SPLIT IS NOT (Fix 4). The seeded row is a writer's own
+       task, whose TICK is the act — so it draws the seat and no control, which is the deliberate
+       shape rather than a gap. A derived card's split is exercised in tasksList.test.tsx. */
+    expect(html).toContain("tdg-acts");
+    expect(html).toContain("tdg-tick");
+    expect(html).not.toContain("tdg-split");
     /* ⚠️ THE ROW IS ONE ELEMENT — never `display: contents`, which fractures hover, focus and any
        selected band into per-cell rectangles. Asserted against RENDERED output, not source. */
     expect(html).toContain('class="tdg-row"');

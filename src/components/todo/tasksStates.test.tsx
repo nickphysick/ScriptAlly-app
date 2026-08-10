@@ -101,18 +101,19 @@ describe("⚠️ THE SKELETON IS THE REAL ROW WEARING PLACEHOLDERS", () => {
 
   it("it reuses the row's own class, so the six tracks are the SAME six tracks", () => {
     expect(html).toContain('class="tdg-row"');
-    expect(html).toContain('class="tdg-verbs"');
+    expect(html).toContain('class="tdg-acts"');
     /* nothing shifts by a pixel when the data lands, because there is no second layout to drift */
     expect(cssDecls).not.toContain(".tdg-skrow {");
   });
 
-  it("it keeps the four verb slots per row, empties and all", () => {
+  it("it reserves the SPLIT's own seat, so nothing shifts when the data lands", () => {
     const rows = (html.match(/class="tdg-row"/g) ?? []).length;
     expect(rows).toBe(6); // two groups × three rows — the ref's "the first two render"
-    /* two painted verbs and two standing empties in every row, so the four-slot grid is the same
-       four-slot grid and the primary lands at the same x the moment data arrives */
-    expect((html.match(/tdg-sk vb/g) ?? []).length).toBe(rows * 2);
-    expect((html.match(/tdg-slot/g) ?? []).length).toBe(rows * 2);
+    /* ⚠️ ONE PLACEHOLDER PER ROW NOW (Fix 4). The four-slot grid it used to mirror is retired, so
+       the skeleton mirrors what actually arrives: a single 118px control. */
+    expect((html.match(/tdg-sk split/g) ?? []).length).toBe(rows);
+    expect(html).not.toContain("tdg-slot");
+    expect(rule(".tdg-sk.split {")).toContain("width: 118px");
   });
 
   it("it announces itself rather than miming content silently", () => {

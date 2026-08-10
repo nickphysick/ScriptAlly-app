@@ -1940,7 +1940,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
          tier does. A board-local dismissal would be a second path to the same stance. */
       case "dismiss-week": group ? forkNotNowGroup(group) : forkStale(card, "notNow"); break;
       case "dismiss-never": group ? forkNeverThese(group) : forkStale(card, "neverThis"); break;
-      case "dismiss-rule": if (group) forkNeverRule(group); break;
+      case "dismiss-rule":
+        /* ⚠️ "STOP SHOWING THIS KIND" IS THE MUTE, AND IT REACHES AN EXISTING PRIMITIVE (Fix 4).
+           A sweep mutes its whole rule through the fork; a single card mutes its TYPE through
+           `hideType`, which the retired later-menu already used and which writes its own undo.
+           No second dismiss path: `dismissTask` is untouched, and this is a different verb. */
+        if (group) { forkNeverRule(group); break; }
+        { const hk = laterHideKey(card.taskType); if (hk) hideType(card, hk); }
+        break;
       case "undo-done":
         if (card.userTaskId) {
           void updateUserTask(card.userTaskId, { done: false })

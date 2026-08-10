@@ -25,6 +25,7 @@
  */
 import { BoardCard } from "./todoBoard";
 import { isSweepCard, TodoColumnId } from "./todoColumns";
+import { cardMenu, MenuItemId } from "./todoMenu";
 
 /* ── the kind pill ─────────────────────────────────────────────────────────────────────────── */
 
@@ -132,3 +133,94 @@ export function rowJourney(c: BoardCard, column: TodoColumnId): RowJourney | nul
       return null;
   }
 }
+
+/* ── the split button's menu (fix pack Fix 4; ref design-refs/todo-splitguard-v1.html) ────────── */
+
+export interface SplitItem {
+  id: MenuItemId;
+  glyph: string;
+  label: string;
+  /** The number key that fires it directly, where it has one. */
+  hint?: string;
+  /** ⚠️ A VERB THAT DOES NOT APPLY IS GREYED, NEVER ABSENT — an absent row is a puzzle, a greyed
+   *  one is an answer. `why` becomes the control's title so the answer is readable. */
+  enabled: boolean;
+  why?: string;
+}
+
+export interface SplitSection {
+  head: "SNOOZE" | "THIS QUERY" | null;
+  /** The last section sits below a dead zone and a rule; nothing destructive is within a
+   *  pointer's drift of the caret. */
+  danger?: true;
+  items: SplitItem[];
+}
+
+/**
+ * ⚠️ THE SHAPE IS THE REF'S; THE PERMISSIONS ARE `cardMenu`'s. This function decides what the
+ * split's menu LOOKS like — the two sections, the order, the dead zone's contents — and asks the
+ * existing menu model whether each verb is live. That keeps one answer to "may this card do this"
+ * across the row, the ⋯ grammar and the keyboard, which is the property the whole page is built
+ * on; a second permission table here is exactly how an offer comes to be dismissible on one
+ * surface and not another.
+ *
+ * ⚠️ "EDIT LAST ENTRY" MAPS TO `edit-task`, AND IS GREY ON A DERIVED CARD. There is no primitive
+ * for editing a query's last activity, and inventing one is not a fix-pack's job. On a writer's
+ * own item the row IS their entry, so the verb is honest and live; on an agent-derived card there
+ * is no entry of yours to edit, and grey says so.
+ *
+ * ⚠️ "STOP SHOWING THIS KIND" IS THE MUTE, NOT A SECOND DISMISS. It reaches `hideType` through
+ * `dismiss-rule`, the same leaf the sweep fork already used; `laterHideKey` is what decides
+ * whether the card's type HAS a rule to mute, and returns null for offers.
+ */
+export function splitMenu(
+  card: BoardCard,
+  column: TodoColumnId,
+  hideKey: string | null,
+): SplitSection[] {
+  const model = cardMenu(card, column);
+  const live = (id: MenuItemId): boolean =>
+    model.some((g) => g.entries.some((e) =>
+      e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((sx) => sx.id === id && !sx.disabled)));
+  const isOffer = card.taskType === "offer_received";
+
+  return [
+    {
+      head: "SNOOZE",
+      items: [
+        { id: "snooze-1", glyph: "◷", label: "Tomorrow", hint: "1", enabled: live("snooze-1") },
+        {
+          id: "snooze-7", glyph: "◷", label: "Next week", hint: "2", enabled: live("snooze-7"),
+          why: isOffer ? "An offer has a reply-by date that is not yours to move." : undefined,
+        },
+      ],
+    },
+    {
+      head: "THIS QUERY",
+      items: [
+        { id: "open-query", glyph: "↗", label: "Open the query", enabled: live("open-query") },
+        {
+          id: "edit-task", glyph: "✎", label: "Edit last entry", enabled: live("edit-task"),
+          why: live("edit-task") ? undefined : "There is no entry of yours on this one to edit.",
+        },
+      ],
+    },
+    {
+      head: null,
+      danger: true,
+      items: [
+        {
+          id: "dismiss-week", glyph: "×", label: "Dismiss", enabled: live("dismiss-week"),
+          why: isOffer ? "An offer has a reply-by date that is not yours to move." : undefined,
+        },
+        {
+          id: "dismiss-rule", glyph: "⊘", label: "Stop showing this kind", enabled: !!hideKey,
+          why: hideKey ? undefined : "This kind has no standing rule to mute.",
+        },
+      ],
+    },
+  ];
+}
+
+/** The two number keys the menu answers directly — one source, so the hint and the handler agree. */
+export const SPLIT_NUMBER_KEYS: Record<string, MenuItemId> = { "1": "snooze-1", "2": "snooze-7" };

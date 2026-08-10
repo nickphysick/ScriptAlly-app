@@ -21,7 +21,9 @@ import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
-import { rowPill, rowPrimaryLabel, rowJourney, PillTone } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
+import { laterHideKey } from "../../lib/todoHousekeeping";
+import { TodoColumnId } from "../../lib/todoColumns";
 import { SNOOZE_STOPS, reachableStops } from "../../lib/todoActions";
 import { focusesSearch, isTypingTarget, ShortcutKey } from "../../lib/taskShortcuts";
 import { dialDateLine } from "./SnoozeDial";
@@ -110,7 +112,7 @@ describe("⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display
 
   it("the six tracks, exactly — tick · title · pill · journey · age · verbs", () => {
     expect(rule(".tdg-row {")).toContain(
-      "grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 216px",
+      "grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 118px",  // 216 → 118 with the split (Fix 4)
     );
   });
 
@@ -155,62 +157,146 @@ describe("⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED, and the why-line sits 
 
 /* ── 2. the four-slot action grid ───────────────────────────────────────────────────────────── */
 
-describe("⚠️ FOUR FIXED SLOTS, AND AN ABSENT VERB LEAVES ITS SLOT STANDING", () => {
-  /* The ref's own words: "where a verb is forbidden the slot stays empty so the absence is
-     legible rather than mysterious". Fixed tracks are what make every primary in a panel start
-     at the same x — a collapsing grid would shuffle the whole column on one card's permissions. */
-  it("the tracks are fixed and stated once", () => {
-    expect(rule(".tdg-verbs {")).toContain("grid-template-columns: 68px 30px 30px 30px");
-    expect(rule(".tdg-slot {")).toContain("height: 30px"); // the empty slot still occupies its row
+/**
+ * ⚠️ THE FOUR-SLOT GRID IS RETIRED (fix pack Fix 4; ref design-refs/todo-splitguard-v1.html).
+ *
+ * It existed so a missing verb left its place standing and every primary began at the same x.
+ * Every row carries ONE identical control now, so there is nothing left to align — and the device
+ * is DELETED rather than disabled, because one kept past its reason is the next reader's puzzle.
+ * Snooze and dismiss moved into the split's menu; the standalone icon buttons went with them.
+ */
+describe("⚠️ ONE CONTROL PER ROW, AND ITS SEAM IS DEFENDED FOUR WAYS", () => {
+  it("the four-slot grid and its empty slot are EXTINCT, in the sheet and in the markup", () => {
+    expect(cssDecls).not.toContain(".tdg-verbs");
+    expect(cssDecls).not.toContain(".tdg-slot");
+    expect(code(list)).not.toContain("tdg-slot");
+    expect(code(list)).not.toContain("tdg-verbs");
+    /* the standalone snooze and dismiss buttons went with them */
+    expect(list).not.toContain('aria-label={`Snooze');
+    expect(list).not.toContain('aria-label={`Dismiss');
   });
 
-  it("AN OFFER HAS NO DISMISS — the slot renders empty, and the permission is the MENU's", () => {
-    /* ⚠️ ASKED OF `cardMenu`, NEVER OF A SECOND PER-KIND TABLE. An offer's dismiss line exists in
-       the menu, DISABLED with its reason ("a reply-by date that is not yours to move"), so the
-       row's `offers` helper refuses it. One source for the permission; the row and the menu
-       cannot come to disagree about what a card allows. */
-    const html = render(cols({ todo: [card({ key: "o", taskType: "offer_received", kind: "OFFER" })] }));
-    const verbs = html.slice(html.indexOf("tdg-verbs"));
-    expect(verbs).toContain("tdg-slot");                 // the empty dismissal slot
-    expect(verbs).not.toContain("Dismiss “");
-    // …while an ordinary agent-waiting card DOES get one
-    const ok = renderToStaticMarkup(
-      <TaskList groups={taskGroups(cols({ todo: [card()] }))} hkExpanded={false}
-        onToggleHk={() => {}} onOpen={() => {}} onTick={() => {}} onVerb={() => {}} onSnooze={() => {}} />,
-    );
-    expect(ok).toContain("Dismiss “Send your full to Jonathan Marsh”");
+  it("118px total, so the column NARROWS rather than grows: 81 + 3 + 34", () => {
+    expect(rule(".tdg-split {")).toContain("width: 118px");
+    expect(rule(".tdg-split {")).toContain("height: 34px");
+    expect(rule(".tdg-split-p {")).toContain("width: 81px");
+    expect(rule(".tdg-split-seam {")).toContain("width: 3px");
   });
 
-  it("THE TICK IS THE ACT for a writer's own item — so it draws no primary beside the circle", () => {
+  it("⚠️ GUARD 1 — the caret is 34px, not 28: it sits flush against a high-consequence primary", () => {
+    /* anchored on the STANDALONE rule — the shared `.tdg-split-p, .tdg-split-c` block above it
+       ends in the same selector text, and a naive indexOf lands there instead */
+    expect(cssDecls).toContain(".tdg-split-c { width: 34px; }");
+  });
+
+  it("⚠️ GUARD 2 — each half arms ALONE, which two separate `:hover`s guarantee", () => {
+    /* Two elements, two hovers: they can never both light, and never both stay dark while one is
+       hovered. That is the reader's confirmation of what is loaded before the press lands. */
+    expect(cssDecls).toContain(".tdg-split-p:hover, .tdg-split-c:hover");
+    expect(cssDecls).not.toContain(".tdg-split:hover");
+  });
+
+  it("⚠️ GUARD 3 — the seam fires nothing, and commit is on RELEASE", () => {
+    /* The seam is a plain span and NOTHING above the halves takes a click, so a press landing on
+       it has nothing to fall through to. `onClick` fires only when press and release land on the
+       same element — so pressing a half and sliding off does nothing, by the browser's own rule
+       rather than by a handler of ours. */
+    const split = list.slice(list.indexOf('className={`tdg-split'), list.indexOf("</span>\n          )}"));
+    expect(split).toContain('className="tdg-split-seam" aria-hidden');
+    expect(split).not.toContain("onMouseDown");
+    expect(split).not.toContain("onPointerDown");
+    expect(code(list)).not.toContain('className={`tdg-split${primary.ghost ? " ghost" : ""}`} onClick');
+  });
+
+  it("⚠️ THE SPLIT IS ONE TAB STOP, and the caret is never the only route in", () => {
+    expect(list).toContain('tabIndex={-1}');           // the caret leaves the tab order
+    expect(list).toContain('if (e.key === "ArrowDown")'); // …and ↓ opens the menu from the primary
+  });
+
+  it("every verb still comes through ONE door, which resolves against `cardMenu`", () => {
+    expect(list).toContain("const fire = (c: BoardCard, column: TodoColumnId, id: MenuItemId) => {");
+    expect(list).toContain("const leaf = cardMenu(c, column)");
+    expect(list).toContain("onVerb(c, leaf ?? { kind: \"leaf\", id, label: id }, column);");
+  });
+
+  it("THE TICK IS THE ACT for a writer's own item — so it draws no split beside the circle", () => {
     const mine = card({ key: "u1", userTaskId: "t1", kind: "", taskType: undefined, relatedRecordId: undefined, stream: "do", nature: "task" });
     const html = render(cols({ todo: [mine] }));
     expect(html).toContain("tdg-tick");
-    expect(html).not.toContain("tdg-vb go");
+    expect(html).not.toContain("tdg-split");
   });
 
   it("a row that CANNOT be completed draws no tick — `isTickable` decides, never the render", () => {
-    /* A tick that does nothing is worse than no tick: it invites a click and answers with
-       silence. `completionVia` is the one map from kind to write path, and the row asks it. */
     expect(render(cols({ todo: [sweepCard({ key: "s1" })] }))).not.toContain("tdg-tick");
     expect(list).toContain("const tickable = isTickable(c);");
   });
 
-  it("⚠️ A SWEEP CAN BE SNOOZED FROM THE ROW — the permission is the MENU's, not `snoozeVia`", () => {
-    /* FOUND IN A BROWSER WALK, 9 Aug. `snoozeVia` answers "which WRITE PATH does a snooze take",
-       and a sweep has no `relatedRecordId` (it stands for many), so it answered "none" — while
-       `cardMenu` offered the sweep a Snooze… submenu. Two answers to one question on one card.
-       All three optional slots ask the same model now. */
-    expect(render(cols({ todo: [sweepCard({ key: "s2" })] }))).toContain("Snooze “Materials sweep”");
-  });
-
-  it("Done offers its way BACK (Undo, ghost) and Snoozed offers Return — never a planning verb", () => {
+  it("Done offers its way BACK — the ghost split, not an ink one", () => {
     const done = render(cols({ done: [card({ key: "d1", done: true, userTaskId: "t9", title: "Reply to Curtis Vane" })] }));
     expect(done).toContain("Undo");
-    expect(done).toContain("tdg-vb go ghost");
-    /* Snoozed renders collapsed by default (asserted below), so its primary is pinned through the
-       pure model — the ONE place the per-state verb is named, rather than at a second render. */
-    expect(list).toContain('{ id: "unsnooze", label: rowPrimaryLabel(c, column) }');
+    expect(done).toContain("tdg-split ghost");
     expect(rowPrimaryLabel(card({}), "snoozed")).toBe("Return");
+  });
+});
+
+describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
+  const sections = (c: BoardCard, col: TodoColumnId = "todo") => splitMenu(c, col, laterHideKey(c.taskType));
+
+  it("the ref's shape, in the ref's order", () => {
+    const secs = sections(card({}));
+    expect(secs.map((x) => x.head)).toEqual(["SNOOZE", "THIS QUERY", null]);
+    expect(secs[0].items.map((i) => i.label)).toEqual(["Tomorrow", "Next week"]);
+    expect(secs[1].items.map((i) => i.label)).toEqual(["Open the query", "Edit last entry"]);
+    expect(secs[2].items.map((i) => i.label)).toEqual(["Dismiss", "Stop showing this kind"]);
+    expect(secs[2].danger).toBe(true);
+  });
+
+  it("⚠️ THE 12px DEAD ZONE TAKES NO CLICK — Dismiss is never one slip from the caret", () => {
+    const dz = rule(".tdg-deadzone {");
+    expect(dz).toContain("height: 12px");
+    expect(dz).toContain("pointer-events: none");
+    expect(dz).toContain("border-bottom: 1px solid");
+  });
+
+  it("⚠️ AN OFFER KEEPS TOMORROW ONLY, and the rest are GREY rather than absent", () => {
+    /* An absent row is a puzzle; a greyed one is an answer — and the answer is readable, because
+       `why` becomes the control's title. */
+    const secs = sections(card({ taskType: "offer_received" }));
+    const flat = secs.flatMap((x) => x.items);
+    expect(flat.map((i) => i.label)).toHaveLength(6);             // nothing is hidden
+    expect(flat.find((i) => i.label === "Tomorrow")!.enabled).toBe(true);
+    expect(flat.find((i) => i.label === "Next week")!.enabled).toBe(false);
+    expect(flat.find((i) => i.label === "Dismiss")!.enabled).toBe(false);
+    expect(flat.find((i) => i.label === "Dismiss")!.why).toMatch(/not yours to move/);
+  });
+
+  it("⚠️ THE PERMISSIONS ARE `cardMenu`'s — one answer to 'may this card do this'", () => {
+    const stale = sections(card({ taskType: "no_response_close" })).flatMap((x) => x.items);
+    expect(stale.find((i) => i.label === "Dismiss")!.enabled).toBe(true);
+    expect(stale.find((i) => i.label === "Next week")!.enabled).toBe(true);
+    /* "Edit last entry" maps to `edit-task`: on a derived card there is no entry of YOURS to
+       edit, so it greys and says why rather than vanishing. */
+    expect(stale.find((i) => i.label === "Edit last entry")!.enabled).toBe(false);
+    const mine = sections(card({ userTaskId: "t1", taskType: undefined, relatedRecordId: undefined }));
+    expect(mine.flatMap((x) => x.items).find((i) => i.label === "Edit last entry")!.enabled).toBe(true);
+  });
+
+  it("⚠️ NOTHING IS PRE-FOCUSED — Enter straight after opening does nothing", () => {
+    expect(list).toContain("el.focus({ preventScroll: true }); // the BOX, not an item");
+    expect(list).not.toContain("items[0]?.focus()");
+  });
+
+  it("⚠️ THE NUMBER KEYS KEEP SNOOZE FAST, and a greyed tier is inert to them too", () => {
+    /* It lost its button; it must not lose its speed. But a key that fired a greyed verb would
+       make the grey a lie. */
+    expect(SPLIT_NUMBER_KEYS).toEqual({ "1": "snooze-1", "2": "snooze-7" });
+    expect(list).toContain("if (item?.enabled)");
+  });
+
+  it("the menu wears the shell it always wore — consumed from todoBoard.css, never edited", () => {
+    expect(list).toContain('className="t-f12 tbd-menu2 tdg-splitmenu"');
+    const boardCss = readFileSync(join(here, "todoBoard.css"), "utf8");
+    expect(boardCss).toContain(".tbd-menu2 {"); // live despite the retired board — see STATE.md
   });
 });
 
@@ -438,15 +524,14 @@ describe("the page wires the list to its EXISTING primitives, and to nothing new
     expect(groupColumn("done")).toBe("done");
   });
 
-  it("the ✕ is a DOOR INTO THE ONE MENU, and the clock is the dial's (P4)", () => {
-    /* P2 routed both through `openMenu` with a pre-opened submenu precisely so that Phase 4 could
-       swap the snooze one for the dial at a SINGLE call site — which is what happened. The ⋯
-       menu keeps its tiers for the keyboard path and for Snoozed's "Change the date…", and both
-       resolve through the same `clampSnooze`, so there is still one ceiling. */
-    expect(list).toContain('openMenu(e, c, column, "dismiss")');
-    expect(list).not.toContain('openMenu(e, c, column, "snooze")');
+  it("the icon doors are gone; the split's caret is the one way to the menu (Fix 4)", () => {
+    /* P2 gave the row three icon buttons and routed each through a pre-opened submenu. Fix 4
+       replaces all three with one control, so the doors went with them. The DIAL survives — it is
+       still the snooze surface the ⋯ grammar reaches — and the split's own tiers resolve through
+       the same `clampSnooze` ceiling, so there is still one ceiling. */
+    expect(code(list)).not.toContain("openMenu(e, c, column");
+    expect(list).toContain("<SplitMenu");
     expect(list).toContain("<SnoozeDial");
-    expect((list.match(/setDial\(/g) ?? []).length).toBeGreaterThan(0);
   });
 });
 

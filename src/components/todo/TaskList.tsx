@@ -29,17 +29,19 @@
  * opinion about. The split is the point: the menu says WHETHER, taskRow says WHAT IT IS CALLED,
  * so the row and the menu cannot disagree about what a card allows.
  */
-import React, { useEffect, useRef, useState } from "react";
-import { ChevronRight, ChevronDown, Clock, MoreHorizontal, X, Check } from "lucide-react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { ChevronRight, ChevronDown, Check } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
 /* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
-import { rowPill, rowPrimaryLabel, rowJourney } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
-import { cardMenu, MenuLeaf, MenuEntry, MenuItemId } from "../../lib/todoMenu";
+import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/todoMenu";
 import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
+import { laterHideKey } from "../../lib/todoHousekeeping";
 import { PortalMenu } from "./PortalMenu";
 import { SnoozeDial } from "./SnoozeDial";
 import "./todoGroups.css";
@@ -100,7 +102,7 @@ export const RING_MS = 600;
 
 /**
  * ⚠️ THE SKELETON IS THE REAL ROW, WEARING PLACEHOLDERS (sheet 3). It reuses `.tdg-row` and its
- * six tracks, `.tdg-verbs` and its four slots — so nothing shifts by a pixel when the data lands.
+ * six tracks and the split's own 118px seat — so nothing shifts by a pixel when the data lands.
  * A bespoke skeleton with its own measurements would be a second layout to keep in step with the
  * first, and the day they drift is the day the page jumps on load.
  *
@@ -113,9 +115,7 @@ const SkeletonRow: React.FC = () => (
     <div className="tdg-cc"><span className="tdg-sk pill" /></div>
     <div className="tdg-cc"><div className="tdg-jrny" /></div>
     <div className="tdg-cr"><span className="tdg-sk age" /></div>
-    <div className="tdg-verbs">
-      <span className="tdg-sk vb" /><span className="tdg-slot" /><span className="tdg-slot" /><span className="tdg-sk vb" />
-    </div>
+    <div className="tdg-acts"><span className="tdg-sk split" /></div>
   </div>
 );
 
@@ -138,6 +138,100 @@ interface OpenMenu {
   openSub?: "snooze" | "resnooze" | "dismiss";
 }
 
+
+/**
+ * ⚠️ THE SPLIT'S MENU, AND WHERE DANGER SITS (Fix 4; ref todo-splitguard-v1.html §2). Safe verbs
+ * first; the destructive pair last, below a 12px dead zone that takes no click and a hairline —
+ * nothing destructive sits within a pointer's drift of the caret.
+ *
+ * ⚠️ IT OPENS WITH NOTHING PRE-FOCUSED, so Enter straight after opening does nothing. Focus goes
+ * to the menu's own box, which answers Escape and the number keys but fires no verb.
+ *
+ * It reuses `.tbd-menu2` / `.tbd-mi` from todoBoard.css — the shell the portalled menu has always
+ * worn. Those classes are LIVE despite living in the retired board's stylesheet (recorded in
+ * reports/STATE.md against the parked sweep): consumed here, never edited.
+ */
+const SplitMenu: React.FC<{
+  card: BoardCard;
+  column: TodoColumnId;
+  anchor: HTMLElement;
+  onPick: (id: MenuItemId) => void;
+  onClose: (returnFocus: boolean) => void;
+}> = ({ card, column, anchor, onPick, onClose }) => {
+  const elRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const sections = splitMenu(card, column, laterHideKey(card.taskType));
+
+  useLayoutEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    const r = anchor.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    const p = placeMenu(r, { w: b.width, h: b.height }, { w: window.innerWidth, h: window.innerHeight });
+    setPos({ left: p.left, top: p.top });
+    el.focus({ preventScroll: true }); // the BOX, not an item — nothing is pre-focused
+  }, [anchor]);
+
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node | null;
+      if (t && (elRef.current?.contains(t) || anchor.contains(t))) return;
+      onClose(false);
+    };
+    const away = () => onClose(false);
+    document.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("resize", away);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("resize", away);
+    };
+  }, [anchor, onClose]);
+
+  return createPortal(
+    <div
+      ref={elRef}
+      tabIndex={-1}
+      className="t-f12 tbd-menu2 tdg-splitmenu"
+      role="menu"
+      aria-label={`Actions for ${card.title}`}
+      style={pos ? { left: pos.left, top: pos.top } : { left: 0, top: 0, visibility: "hidden" }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") { e.stopPropagation(); onClose(true); return; }
+        /* ⚠️ THE NUMBER KEYS KEEP SNOOZE FAST. It lost its own button; it must not lose its speed.
+           They fire only where the verb is live — a greyed tier is inert to the key as well as to
+           the pointer, or the grey would be a lie. */
+        const id = SPLIT_NUMBER_KEYS[e.key];
+        if (!id) return;
+        const item = sections.flatMap((sec) => sec.items).find((i) => i.id === id);
+        if (item?.enabled) { e.preventDefault(); e.stopPropagation(); onPick(id); }
+      }}
+    >
+      {sections.map((sec, si) => (
+        <React.Fragment key={si}>
+          {sec.danger && <div className="tdg-deadzone" aria-hidden />}
+          {sec.head && <div className="tbd-mhead">{sec.head}</div>}
+          {sec.items.map((it) => (
+            <button
+              key={it.id}
+              type="button"
+              role="menuitem"
+              className={`tbd-mi${it.enabled ? "" : " dim"}`}
+              disabled={!it.enabled}
+              title={it.why}
+              onClick={() => onPick(it.id)}
+            >
+              <span className="tdg-mglyph" aria-hidden>{it.glyph}</span>
+              {it.label}
+              {it.hint && <span className="tdg-mkey" aria-hidden>{it.hint}</span>}
+            </button>
+          ))}
+        </React.Fragment>
+      ))}
+    </div>,
+    document.body,
+  );
+};
+
 export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze, loading = false }) => {
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   /* ⚠️ THE DIAL IS THE CLOCK'S SURFACE NOW (P4) — it replaced the ⋯ menu's snooze submenu at THIS
@@ -145,6 +239,9 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
      rather than growing a chooser of its own. The ⋯ menu keeps its tiers for the keyboard path
      and for Snoozed's "Change the date…"; they resolve through the same `clampSnooze`. */
   const [dial, setDial] = useState<{ card: BoardCard; anchor: HTMLElement } | null>(null);
+  /* The split's menu — anchored to the whole control rather than to the caret, so it lines up with
+     the button's edge instead of hanging off a 34px sliver. */
+  const [split, setSplit] = useState<{ card: BoardCard; column: TodoColumnId; anchor: HTMLElement } | null>(null);
   /* Snoozed opens in place. Session-only and deliberately so: a band that remembered being open
      would greet you with the things you had put away. */
   const [snzOpen, setSnzOpen] = useState(false);
@@ -306,6 +403,22 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
     return () => window.removeEventListener("keydown", onKeyDown);
   });
 
+  /* ⚠️ ONE WAY IN TO EVERY VERB (Fix 4). The split's primary, its menu and the number keys all
+     come through here, which resolves the id against `cardMenu` and hands the LEAF to the page's
+     existing performer. Nothing about the write path changed: what invokes it did. */
+  const fire = (c: BoardCard, column: TodoColumnId, id: MenuItemId) => {
+    const leaf = cardMenu(c, column)
+      .flatMap((g) => g.entries)
+      .flatMap((e) => (e.kind === "leaf" ? [e] : e.sub))
+      .find((l) => l.id === id);
+    /* `dismiss-rule` on a non-sweep is the MUTE, which `cardMenu` only lists for sweeps — the page
+       performs it from the same leaf shape, so the menu model stays untouched. */
+    onVerb(c, leaf ?? { kind: "leaf", id, label: id }, column);
+  };
+
+  const openSplit = (anchor: HTMLElement, c: BoardCard, column: TodoColumnId) =>
+    setSplit((s2) => (s2?.card.key === c.key ? null : { card: c, column, anchor }));
+
   const renderRow = (c: BoardCard, column: TodoColumnId) => {
     const menuModel = cardMenu(c, column);
     const sweep = isSweepCard(c);
@@ -322,20 +435,9 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       : completionVia(c) === "user-task" ? null
       : { id: "action", label: rowPrimaryLabel(c, column) };
 
-    /* SLOT 2 — the clock. It opens the ⋯ menu AT its date tiers rather than owning a second
-       chooser; Phase 4 swaps that submenu for the dial, at this one call site. Absent on a
-       finished row, and on a sleeping one (its snooze is "change the date", which lives in ⋯).
-       ⚠️ THE PERMISSION IS THE MENU'S, like the dismissal's. It was `snoozeVia(c) !== "none"`
-       for one browser walk, and that put a SWEEP — which has no `relatedRecordId`, because it
-       stands for many — in the state of refusing a snooze on the row while offering one in its
-       own ⋯ menu. Two answers to one question, on one card. */
-    const clock = column !== "done" && column !== "snoozed" && offers(menuModel, "snooze-1");
-
-    /* SLOT 3 — the dismissal. ⚠️ THE PERMISSION IS THE MENU'S, NOT A SECOND TABLE: an offer's
-       dismiss line is rendered DISABLED with its reason, so `offers` refuses it and the slot
-       stands empty — which is exactly the ref's rule for offers and deadlines. */
-    const dismiss = offers(menuModel, "dismiss-week");
-
+    /* ⚠️ THE FOUR SLOTS ARE RETIRED (fix pack Fix 4). Snooze and dismiss are in the split's menu
+       now, and with every row carrying ONE identical control the empty-slot alignment device has
+       nothing left to align — so it is deleted rather than left inert. */
     const tickable = isTickable(c);
 
     return (
@@ -416,63 +518,46 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           <span className="tdg-age">{sweep ? "—" : c.due}</span>
         </div>
 
-        <div className="tdg-verbs" onClick={(e) => e.stopPropagation()}>
-          {primary ? (
-            <button
-              type="button"
-              className={`tdg-vb go${primary.ghost ? " ghost" : ""}`}
-              onClick={() => {
-                const leaf = menuModel
-                  .flatMap((g) => g.entries)
-                  .flatMap((e) => (e.kind === "leaf" ? [e] : e.sub))
-                  .find((l) => l.id === primary.id);
-                if (leaf) onVerb(c, leaf, column);
-              }}
-            >
-              {primary.label}
-            </button>
-          ) : <span className="tdg-slot" />}
-
-          {clock ? (
-            <button
-              type="button"
-              className="tdg-vb"
-              aria-haspopup="menu"
-              aria-label={`Snooze “${c.title}”`}
-              title="Snooze"
-              onClick={(e) => {
-                e.stopPropagation();
-                const anchor = e.currentTarget;
-                setDial((d) => (d?.card.key === c.key ? null : { card: c, anchor }));
-              }}
-            >
-              <Clock size={13} aria-hidden />
-            </button>
-          ) : <span className="tdg-slot" />}
-
-          {dismiss ? (
-            <button
-              type="button"
-              className="tdg-vb"
-              aria-haspopup="menu"
-              aria-label={`Dismiss “${c.title}”`}
-              title="Dismiss"
-              onClick={(e) => openMenu(e, c, column, "dismiss")}
-            >
-              <X size={13} aria-hidden />
-            </button>
-          ) : <span className="tdg-slot" />}
-
-          <button
-            type="button"
-            className="tdg-vb"
-            aria-haspopup="menu"
-            aria-expanded={menu?.key === c.key}
-            aria-label={`Actions for ${c.title}`}
-            onClick={(e) => openMenu(e, c, column)}
-          >
-            <MoreHorizontal size={13} aria-hidden />
-          </button>
+        <div className="tdg-acts" onClick={(e) => e.stopPropagation()}>
+          {primary && (
+            /* ⚠️ ONE CONTROL, TWO HALVES, AND THE SEAM IS DEFENDED FOUR WAYS (ref
+               todo-splitguard-v1.html). The wrapper takes NO click of its own: the 3px seam
+               belongs to neither half and must fire nothing, which it does by there being no
+               handler above the halves to fall through to. */
+            <span className={`tdg-split${primary.ghost ? " ghost" : ""}`}>
+              {/* ⚠️ COMMIT ON RELEASE, NOT ON PRESS. `onClick` fires only when press AND release
+                  land on the same element, so pressing the wrong half and sliding off does
+                  nothing — that is the browser's own guarantee rather than a handler of ours.
+                  ⚠️ AND THIS IS THE SINGLE TAB STOP: the caret is `tabIndex={-1}`, so Tab reaches
+                  the split once, Enter fires the primary, and ↓ opens the menu from here. The
+                  caret is never the only route in. */}
+              <button
+                type="button"
+                className="tdg-split-p"
+                onClick={() => fire(c, column, primary.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault(); e.stopPropagation();
+                    openSplit(e.currentTarget.parentElement as HTMLElement, c, column);
+                  }
+                }}
+              >
+                {primary.label}
+              </button>
+              <span className="tdg-split-seam" aria-hidden />
+              <button
+                type="button"
+                tabIndex={-1}
+                className="tdg-split-c"
+                aria-haspopup="menu"
+                aria-expanded={split?.card.key === c.key}
+                aria-label={`More actions for ${c.title}`}
+                onClick={(e) => { e.stopPropagation(); openSplit(e.currentTarget.parentElement as HTMLElement, c, column); }}
+              >
+                <ChevronDown size={13} aria-hidden />
+              </button>
+            </span>
+          )}
         </div>
       </div>
     );
@@ -497,6 +582,18 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
             </tbody></table>
           </div>
         </div>
+      )}
+      {split && (
+        <SplitMenu
+          card={split.card}
+          column={split.column}
+          anchor={split.anchor}
+          onPick={(id) => { setSplit(null); fire(split.card, split.column, id); }}
+          onClose={(returnFocus) => {
+            if (returnFocus) (split.anchor.querySelector(".tdg-split-p") as HTMLElement | null)?.focus();
+            setSplit(null);
+          }}
+        />
       )}
       {dial && (
         <SnoozeDial
