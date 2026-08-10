@@ -83,3 +83,55 @@ export function canStep(raw: string, unit: SampleUnit, dir: 1 | -1, stated?: num
   const current = parseQty(raw) || CREATE_QTY[unit].min;
   return stepQty(raw, unit, dir, stated) !== current;
 }
+
+/* ══ WHAT THE AGENT ASKS FOR — ONE SENTENCE, IN THE STEP HEAD ═══════════════════════════════
+   ⚠️ ONE FACT ABOUT THE AGENT, NOT FIVE FACTS ABOUT MATERIALS. "NOT REQUESTED" repeated on every
+   row and "ONLY MANUSCRIPT" said the same thing a fifth time on the manuscript row — five tags
+   restating a single sentence, and the rows were 80px tall partly to hold them.
+
+   ⚠️ IT REPORTS AND NEVER APPRAISES. It states what she asked for and stops: no comparison to what
+   the writer has ticked, no warning when the two differ. This record says what you sent, not
+   whether the app approves of it. */
+
+/**
+ * The phrase for one requirement row — "a query letter", "a synopsis", "50 pages", "3 chapters".
+ *
+ * ⚠️ READ OFF THE SEEDED ROW, never re-parsed from the agent record. `materialRowsForDraft` has
+ * already turned her requirements into rows; asking her record a second time here would give two
+ * answers to one question the moment either changed. Words carry thousands separators, because
+ * "5000 words" is a number you have to stop and read.
+ */
+export function askPhrase(row: { key: string; name: string; kind?: string; amount?: string; unit?: string; pages?: string }): string {
+  if (row.key === "sample") {
+    const n = parseQty(String(row.amount ?? ""));
+    if (!n) return "an opening sample";
+    return `${formatQty(n)} ${String(row.unit ?? "").toLowerCase()}`;
+  }
+  if (row.key === "synopsis") {
+    const pages = parseQty(String(row.pages ?? ""));
+    return pages ? `a ${formatQty(pages)}-page synopsis` : "a synopsis";
+  }
+  if (row.key === "queryLetter") return "a query letter";
+  return String(row.name ?? "").toLowerCase();
+}
+
+/** Serial join with "and" before the last — "a", "a and b", "a, b and c". */
+export function serialJoin(parts: string[]): string {
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
+}
+
+/**
+ * ⚠️ THE EMPTY CASE IS A REAL SENTENCE, NOT A BLANK. An agent who lists no materials is asking for
+ * the manuscript only — that is a fact worth stating, and it is exactly the case the retired "ONLY
+ * MANUSCRIPT" tag was clumsily making. Absence of a requirement is not absence of information.
+ *
+ * `first` is the agent's first name; the sentence is about a person and reads as one.
+ */
+export function asksSentence(first: string, items: string[]): string {
+  const who = first.trim() || "They";
+  return items.length === 0
+    ? `${who} asks for the manuscript only.`
+    : `${who} asks for ${serialJoin(items)}`;
+}

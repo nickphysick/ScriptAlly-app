@@ -347,6 +347,25 @@
 
 /* Quick picks — the agents you have never queried, newest first. */
 
+/* ══ MATERIALS AS CHIPS (ref 80-what-chips-stepper.html) ═══════════════════════════════════
+   ⚠️ FOUR FULL-WIDTH ROWS AT ~80px WAS THE WIDEST ARRANGEMENT OF THE SMALLEST CONTROLS — a
+   checkbox and a word, given a row each. A chip is the control and its label and nothing else
+   until it is ticked; only Sample and Other have more to say, and they say it in place. */
+.qc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.qc-chip2 { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); padding: 0 4px 0 0; transition: border-color 0.15s, background 0.15s; }
+.qc-chip2.on { border-color: var(--pink-b); background: var(--pink-t); }
+/* an expanded chip stops being a pill — it is holding a control now, not a word */
+.qc-chip2.open { border-radius: 12px; padding-right: 9px; }
+.qc-chiptick { display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; padding: 8px 13px; font: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; border-radius: inherit; }
+.qc-chipbody { display: inline-flex; align-items: center; gap: 7px; padding-right: 4px; }
+.qc-chipbody input { width: 150px; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; background: var(--panel); font: inherit; font-size: 12.5px; color: var(--ink); outline: none; }
+.qc-otherchip { display: inline-flex; align-items: center; gap: 5px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 5px 3px 9px; font-size: 11.5px; color: var(--ink-2); }
+.qc-otherchip button { background: none; border: 0; padding: 0 3px; font: inherit; font-size: 13px; line-height: 1; color: var(--muted); cursor: pointer; }
+.qc-otherchip button:hover { color: var(--burg); }
+/* ⚠️ THE REQUIREMENT SENTENCE, ONCE, RIGHT-ALIGNED IN THE HEAD. It reports and never appraises —
+   no colour, no emphasis, nothing that could read as a warning when the ticks differ from it. */
+.qc-asks { margin-left: auto; flex: none; max-width: 55%; font-size: 11.5px; color: var(--muted); text-align: right; }
+
 /* the material row: checkbox · name · sub-label · controls right */
 .qc-matn { flex: none; }
 /* ⚠️ REPORTS, NEVER APPRAISES — it states what the agent asked for and stops. No colour change

@@ -37,7 +37,7 @@ import {
   snapToUnit,
   type MaterialRow,
 } from "../../lib/agentMaterials";
-import { canStep, formatQty, parseQty, stepLabel, stepQty } from "../../lib/createQty";
+import { askPhrase, asksSentence, canStep, formatQty, parseQty, stepLabel, stepQty } from "../../lib/createQty";
 import {
   CREATE_SEND_METHODS,
   NUDGE_PRESETS,
@@ -118,11 +118,34 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const queriedIds = useMemo(() => queriedAgentIds(queries), [queries]);
   /* The stepper's field is raw while it holds the caret and formatted the rest of the time. */
   const [qtyFocused, setQtyFocused] = useState(false);
+  /* ⚠️ THE COMMITTED "OTHER" CHIPS ARE PANE-LOCAL, AND THE DRAFT KEEPS ONE FIELD. `MaterialRow`'s
+     other row is `{ text }` and it is SHARED with the agent editor's Materials tab — growing it a
+     `committed[]` would change a model two surfaces write. So the chips are an editing affordance
+     held here and mirrored into `other.text`, which stays the single saved value: what gets
+     written is exactly what was written before, and `materialsPhrase` needs no knowledge of this.
+     `otherDraft` is the in-progress text, separate so Enter can clear it without clearing them. */
+  const [otherChips, setOtherChips] = useState<string[]>([]);
+  const [otherDraft, setOtherDraft] = useState("");
+  const commitOther = (chips: string[]) => {
+    setOtherChips(chips);
+    setRow("other", { text: chips.join(", ") });
+  };
   /* ⚠️ WHAT THE AGENT ASKED FOR, READ FROM THE SEEDED ROWS — never a second parse of their record.
      `materialRowsForDraft` already turned their stated requirements into rows; asking the agent
      again here would give two answers to one question the moment either changed. */
   const asked = useMemo(() => materialRowsForDraft(agent), [agent]);
-  const requested = (key: MaterialRow["key"]) => asked.some((r) => r.key === key && r.on);
+  /* ⚠️ ONE SENTENCE, IN THE HEAD, DERIVED FROM THE SEEDED ROWS. It replaces a "NOT REQUESTED" tag
+     on every row plus "ONLY MANUSCRIPT" on the manuscript row — five tags restating one fact about
+     the agent. It reports and never appraises: no comparison to what the writer ticked. */
+  /* ⚠️ `agent` IS NULL AT STAGE 1 and `agentPrimary` dereferences it — this threw on mount the
+     moment the sentence was added, and the render smoke caught it. The sentence is about an agent;
+     with no agent there is nothing to say. */
+  const asksLine = useMemo(
+    () => (agent
+      ? asksSentence(agentPrimary(agent).split(" ")[0] || "", asked.filter((r) => r.on).map(askPhrase))
+      : ""),
+    [asked, agent],
+  );
   const askedFor = (key: MaterialRow["key"]): string => {
     const r = asked.find((x) => x.key === key && x.on);
     if (!r) return "";
@@ -520,6 +543,10 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               <div className="qc-shead">
                 <span className="qc-n" aria-hidden="true">{stepIndex("what") + 1}</span>
                 <h3 id="qc-h-what">{STEP_TITLE.what}{STEP_OPTIONAL.what && <span className="qc-opt"> · OPTIONAL</span>}</h3>
+                {/* ⚠️ THE REQUIREMENT, ONCE. It replaces a "NOT REQUESTED" tag on every material
+                    row and "ONLY MANUSCRIPT" on the manuscript row — five tags restating one fact
+                    about the agent, in a step that was 800px tall partly to hold them. */}
+                {agent && <span className="qc-asks">{asksLine}</span>}
               </div>
               <div className="qc-body">
             <div style={{ marginBottom: 0 }}>
@@ -530,7 +557,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
                   </span>
                   <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{onlyManuscript.title}</span>
-                  <span style={{ marginLeft: "auto", flex: "none", fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)" }}>Only manuscript</span>
                 </div>
               ) : (
                 <span className="f12-popwrap" style={{ display: "block" }}>
@@ -565,125 +591,138 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             </div>
             {/* the hairline that separates WHICH book from WHAT went with it */}
             <div style={{ height: 1, background: "var(--line)", margin: "15px 0" }} />
-            {draft.materials.map((row) => {
-              if (row.key === "sample") return null; // rendered below, with its quantity control
-              if (row.key === "other") return null;
-              return (
-                <button key={row.key} type="button" className={`qc-mat${row.on ? " on" : ""}`} onClick={() => setRow(row.key, { on: !row.on })}>
-                  <span className="qc-ck" aria-hidden="true">{row.on ? "✓" : ""}</span>
-                  <span className="qc-matn">{row.name}</span>
-                  {/* ⚠️ THE SUB-LABEL REPORTS, IT NEVER APPRAISES. It states what the agent asked
-                      for and stops. Sending something different is the writer's business and gets
-                      no warning, no colour and no "less than requested" — this record says what
-                      you sent, not whether the app approves. */}
-                  {askedFor(row.key) && <span className="qc-matsub">{askedFor(row.key)}</span>}
-                  <span className={`qc-matreq${requested(row.key) ? " on" : ""}`}>
-                    {requested(row.key) ? "Requested" : "Not requested"}
-                  </span>
-                </button>
-              );
-            })}
+            {/* ⚠️ CHIPS, NOT ROWS. Four full-width rows at ~80px each was the widest possible
+                arrangement of the smallest possible controls — a checkbox and a word. A chip is a
+                checkbox, a label, and nothing else until it is ticked; only Sample and Other have
+                anything more to say, and they say it in place. */}
+            <div className="qc-chips">
+              {draft.materials.map((row) => {
+                const on = row.on;
+                const isSample = row.key === "sample";
+                const isOther = row.key === "other";
+                return (
+                  <div
+                    key={row.key}
+                    className={`qc-chip2${on ? " on" : ""}${on && (isSample || isOther) ? " open" : ""}`}
+                  >
+                    <button
+                      type="button"
+                      className="qc-chiptick"
+                      aria-pressed={on}
+                      onClick={() => setRow(row.key, isSample
+                        ? { on: !on, amount: (row as never as { amount?: string }).amount || snapToUnit((row as never as { unit: never }).unit) }
+                        : { on: !on })}
+                    >
+                      <span className="qc-ck" aria-hidden="true">{on ? "✓" : ""}</span>
+                      {row.key === "sample" ? "Sample" : row.name}
+                    </button>
 
-            {sample && (
-              <div className={`qc-mat${sample.on ? " on" : ""}`} style={{ cursor: "default" }}>
-                <button type="button" className="qc-ck" aria-pressed={sample.on} aria-label="Sample materials" onClick={() => setRow("sample", { on: !sample.on, amount: sample.amount || snapToUnit(sample.unit) })}>
-                  {sample.on ? "✓" : ""}
-                </button>
-                <span style={{ cursor: "pointer" }} onClick={() => setRow("sample", { on: !sample.on, amount: sample.amount || snapToUnit(sample.unit) })}>Sample materials</span>
-                {sample.on && (
-                  /* The quantity control (ref qdb-create-fixes2 §3). The PHYSICS is not
-                     re-implemented here: stepAmount / snapToUnit / UNIT_CFG come from
-                     lib/agentMaterials, the same module the agent form's Materials tab runs on, so
-                     the two can never disagree about what a sensible quantity is. Only the skin
-                     differs — an editor row and a create field are allowed to look different.
+                    {/* ⚠️ EVERY CONTROL INSIDE AN EXPANDED CHIP STOPS PROPAGATION. Without it,
+                        ticking Sample and then pressing an arrow toggles the chip back off — the
+                        control the writer aimed at is nested inside the control they did not. */}
+                    {isSample && on && sample && (
+                      <span className="qc-chipbody" onClick={(e) => e.stopPropagation()}>
+                        <span className="qc-stp">
+                          <button
+                            type="button"
+                            aria-label="Fewer"
+                            disabled={!canStep(sample.amount, sample.unit, -1, statedSample)}
+                            onClick={(e) => { e.stopPropagation(); setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, -1, statedSample)) }); }}
+                          >−</button>
+                          <input
+                            value={qtyFocused ? sample.amount : formatQty(sample.amount)}
+                            onChange={(e) => setRow("sample", { amount: String(parseQty(e.target.value)) })}
+                            onFocus={() => setQtyFocused(true)}
+                            onBlur={() => setQtyFocused(false)}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                              e.preventDefault(); e.stopPropagation();
+                              const dir = e.key === "ArrowUp" ? 1 : -1;
+                              setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, dir, statedSample)) });
+                            }}
+                            aria-label={`Sample quantity in ${sample.unit.toLowerCase()}`}
+                            inputMode="numeric"
+                          />
+                          <button
+                            type="button"
+                            aria-label="More"
+                            disabled={!canStep(sample.amount, sample.unit, 1, statedSample)}
+                            onClick={(e) => { e.stopPropagation(); setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, 1, statedSample)) }); }}
+                          >+</button>
+                        </span>
+                        <span className="qc-stpn" aria-hidden="true">{stepLabel(sample.unit)}</span>
+                        <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                          <button
+                            ref={unitTrigRef}
+                            type="button"
+                            className="qc-unit"
+                            aria-haspopup="menu"
+                            aria-expanded={unitMenuOpen}
+                            aria-label={`Sample unit: ${sample.unit}`}
+                            onClick={(e) => { e.stopPropagation(); setUnitMenuOpen((o) => !o); }}
+                          >
+                            {sample.unit}
+                            <span className="qc-cv" aria-hidden="true">▾</span>
+                          </button>
+                          <F12Menu
+                            open={unitMenuOpen}
+                            onClose={() => setUnitMenuOpen(false)}
+                            style={unitMenuStyle}
+                            ariaLabel="Sample unit"
+                            items={SAMPLE_UNITS.map((u) => ({
+                              label: u,
+                              icon: u === sample.unit ? <span aria-hidden="true">✓</span> : undefined,
+                              /* ⚠️ SNAP, NEVER CONVERT — the locked law. 3 chapters must not become
+                                 3 words, and 50 pages must not become 12,500 words: converting
+                                 writes a figure the writer never chose into a record of what they
+                                 actually sent, using a pages-per-chapter guess. */
+                              onClick: () => { setRow("sample", { unit: u, amount: snapToUnit(u) }); setUnitMenuOpen(false); },
+                            }))}
+                          />
+                        </span>
+                      </span>
+                    )}
 
-                     The value is an INPUT, not a read-out: 5,000 words is typed, never stepped. */
-                  <span className="qc-qty">
-                    <span className="qc-stp">
-                      <button
-                        type="button"
-                        aria-label="Fewer"
-                        disabled={!canStep(sample.amount, sample.unit, -1, statedSample)}
-                        onClick={() => setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, -1, statedSample)) })}
-                      >−</button>
-                      <input
-                        value={qtyFocused ? sample.amount : formatQty(sample.amount)}
-                        /* ⚠️ TYPING ALWAYS OVERRIDES — no snapping, ever. The ladder is what the
-                           ARROWS offer; a writer who types 37 sent 37, and a stepper that
-                           "corrected" it would overwrite a fact with a convenience. */
-                        onChange={(e) => setRow("sample", { amount: String(parseQty(e.target.value)) })}
-                        onFocus={() => setQtyFocused(true)}
-                        onBlur={() => setQtyFocused(false)}
-                        onKeyDown={(e) => {
-                          /* ↑/↓ do what the arrows do, so the keyboard is not a second-class way
-                             to use this control. */
-                          if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-                          e.preventDefault();
-                          const dir = e.key === "ArrowUp" ? 1 : -1;
-                          setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, dir, statedSample)) });
-                        }}
-                        aria-label={`Sample quantity in ${sample.unit.toLowerCase()}`}
-                        inputMode="numeric"
-                      />
-                      <button
-                        type="button"
-                        aria-label="More"
-                        disabled={!canStep(sample.amount, sample.unit, 1, statedSample)}
-                        onClick={() => setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, 1, statedSample)) })}
-                      >+</button>
-                    </span>
-                    <span className="qc-stpn" aria-hidden="true">{stepLabel(sample.unit)}</span>
-                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
-                      <button
-                        ref={unitTrigRef}
-                        type="button"
-                        className="qc-unit"
-                        aria-haspopup="menu"
-                        aria-expanded={unitMenuOpen}
-                        aria-label={`Sample unit: ${sample.unit}`}
-                        onClick={() => setUnitMenuOpen((o) => !o)}
-                      >
-                        {sample.unit}
-                        <span className="qc-cv" aria-hidden="true">▾</span>
-                      </button>
-                      <F12Menu
-                        open={unitMenuOpen}
-                        onClose={() => setUnitMenuOpen(false)}
-                        style={unitMenuStyle}
-                        ariaLabel="Sample unit"
-                        items={SAMPLE_UNITS.map((u) => ({
-                          label: u,
-                          icon: u === sample.unit ? <span aria-hidden="true">✓</span> : undefined,
-                          /* SNAP, never convert — 3 chapters must not become 3 words. */
-                          onClick: () => { setRow("sample", { unit: u, amount: snapToUnit(u) }); setUnitMenuOpen(false); },
-                        }))}
-                      />
-                    </span>
-                  </span>
-                )}
-              </div>
-            )}
-
-            {other && (
-              <div className={`qc-mat${other.on ? " on" : ""}`} style={{ cursor: "default" }}>
-                <button type="button" className="qc-ck" aria-pressed={other.on} aria-label="Other materials" onClick={() => setRow("other", { on: !other.on })}>
-                  {other.on ? "✓" : ""}
-                </button>
-                {other.on ? (
-                  <input
-                    autoFocus
-                    value={other.text}
-                    placeholder="What else did you send?"
-                    onChange={(e) => setRow("other", { text: e.target.value })}
-                    onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-                    aria-label="Other materials"
-                    style={{ flex: 1, minWidth: 0, border: "none", background: "transparent", fontFamily: "inherit", fontSize: 13.5, color: "var(--ink)", outline: "none" }}
-                  />
-                ) : (
-                  <span style={{ cursor: "pointer" }} onClick={() => setRow("other", { on: true })}>Other…</span>
-                )}
-              </div>
-            )}
+                    {isOther && on && other && (
+                      <span className="qc-chipbody" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          autoFocus
+                          value={otherDraft}
+                          placeholder="What else did you send?"
+                          onChange={(e) => setOtherDraft(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          /* Enter COMMITS to a removable chip — it used to just blur, which left
+                             the writer unsure whether anything had been recorded. */
+                          onKeyDown={(e) => {
+                            if (e.key !== "Enter") return;
+                            e.preventDefault(); e.stopPropagation();
+                            const v = otherDraft.trim();
+                            if (!v) return;
+                            commitOther([...otherChips, v]);
+                            setOtherDraft("");
+                          }}
+                          aria-label="Other materials"
+                        />
+                        {otherChips.map((t, i) => (
+                          <span key={`${t}-${i}`} className="qc-otherchip">
+                            {t}
+                            <button
+                              type="button"
+                              aria-label={`Remove ${t}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                commitOther(otherChips.filter((_, j) => j !== i));
+                              }}
+                            >×</button>
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
             {!agent && (
               <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)", marginTop: 12 }}>

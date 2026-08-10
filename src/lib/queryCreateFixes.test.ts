@@ -110,7 +110,12 @@ describe("the manuscript field has two states, and neither is a native select", 
   });
 
   it("one manuscript → a locked read-out that says why", () => {
-    expect(pane).toContain("Only manuscript");
+    /* ⚠️ AMENDED: the "ONLY MANUSCRIPT" tag is retired. It said the same thing a fifth time — the
+       head's one sentence now states what the agent asks for, including the manuscript-only case
+       ("Dermot asks for the manuscript only."). The read-out itself stands: with one book there is
+       nothing to choose, so it is a locked read-out and not a one-option dropdown. */
+    expect(pane, "the tag came back").not.toContain("Only manuscript");
+    expect(pane, "the locked read-out is what this test is really about").toContain("onlyManuscript ? (");
     expect(pane).toContain("const onlyManuscript = manuscripts.length === 1");
   });
 

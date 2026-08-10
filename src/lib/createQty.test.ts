@@ -5,7 +5,7 @@
  * CREATE-MODE SAMPLE BOUNDS — the fork, and the one rule that makes it safe.
  */
 import { describe, it, expect } from "vitest";
-import { CREATE_QTY, canStep, effectiveMax, formatQty, parseQty, stepLabel, stepQty } from "./createQty";
+import { CREATE_QTY, askPhrase, asksSentence, canStep, effectiveMax, formatQty, parseQty, serialJoin, stepLabel, stepQty } from "./createQty";
 import { MAT_QTY } from "./agentMaterials";
 import { readFileSync } from "fs";
 
@@ -128,10 +128,35 @@ describe("typed values survive, and read as numbers when not being typed", () =>
    stops: sending something different is the writer's business, and this record says what you
    sent, not whether the app approves. */
 describe("the row reports the requirement and passes no comment on it", () => {
-  it("a sub-label and a Requested tag, from the seeded rows", () => {
-    expect(pane).toContain("asks for");
-    expect(pane).toContain('className="qc-matsub"');
-    expect(pane).toContain('{requested(row.key) ? "Requested" : "Not requested"}');
+  /* ⚠️ ONE SENTENCE REPLACED FIVE TAGS. "NOT REQUESTED" repeated on every material row and "ONLY
+     MANUSCRIPT" said the same thing a fifth time on the manuscript row — five tags restating one
+     fact about the agent, in a step that was 800px tall partly to hold them. */
+  it("the requirement is stated once, in the head, and nowhere else", () => {
+    expect(pane).toContain('<span className="qc-asks">{asksLine}</span>');
+    expect(pane, "the per-row sub-label came back").not.toContain('className="qc-matsub"');
+    expect(pane, "the per-row tag came back").not.toContain('"Requested" : "Not requested"');
+    expect(pane, "and the manuscript row's tag went with them").not.toContain("Only manuscript");
+  });
+
+  it("the sentence is right for one, two, three and no requirements", () => {
+    expect(asksSentence("Eleanor", ["a query letter"])).toBe("Eleanor asks for a query letter");
+    expect(asksSentence("Eleanor", ["a query letter", "a synopsis"]))
+      .toBe("Eleanor asks for a query letter and a synopsis");
+    expect(asksSentence("Eleanor", ["a query letter", "a synopsis", "50 pages"]))
+      .toBe("Eleanor asks for a query letter, a synopsis and 50 pages");
+    /* ⚠️ THE EMPTY CASE IS A REAL SENTENCE. An agent listing no materials is asking for the
+       manuscript only — the fact the retired "ONLY MANUSCRIPT" tag was clumsily making. */
+    expect(asksSentence("Dermot", [])).toBe("Dermot asks for the manuscript only.");
+    expect(asksSentence("", []), "a nameless agent still reads as a sentence")
+      .toBe("They asks for the manuscript only.");
+  });
+
+  it("and the phrases carry their units and separators", () => {
+    expect(askPhrase({ key: "queryLetter", name: "Query letter" })).toBe("a query letter");
+    expect(askPhrase({ key: "sample", name: "Opening sample", amount: "3", unit: "Chapters" })).toBe("3 chapters");
+    expect(askPhrase({ key: "sample", name: "Opening sample", amount: "5000", unit: "Words" }),
+      "a five-figure number needs its separator").toBe("5,000 words");
+    expect(askPhrase({ key: "synopsis", name: "Synopsis", pages: "2" })).toBe("a 2-page synopsis");
   });
 
   /* Asking the agent again here would give two answers to one question the moment either changed;
