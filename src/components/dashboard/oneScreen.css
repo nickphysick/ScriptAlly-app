@@ -27,6 +27,10 @@
      for the smoke test's `rule(".os-root")` slice and took the lock's `height:100%` out of view.
      One element, one rule — the same fault P2 fixed in the sidebar foot. */
   --os-cardgap: 15px;
+  /* ⚠️ HOW FAR A SHADOW MAY REACH PAST ITS COLUMN (P4). The columns clip, so without an allowance
+     every card's shadow is sliced flush at the boundary — a hard line where a soft falloff should
+     be. 10px covers the 5px/18px blur pair's visible reach. */
+  --os-bleed: 10px;
   /* ⚠️ THE FOOT'S HEIGHT, AS A TOKEN (fixes-2 A4). The scroller's bottom padding must clear the
      LAST 30 DAYS foot so the final entry can scroll past it — and the fade is NOT a substitute,
      since it dims the row rather than letting it through. Two independent numbers that happen to
@@ -80,7 +84,24 @@
 .os-colR { grid-column: 2; grid-row: 2; }
 /* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
    escapes them. Without the overflow, a tall card pushes past its column silently. */
-.os-colM, .os-colR { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
+/**
+ * ⚠️ A CLIPPING COLUMN NEEDS A BLEED ALLOWANCE, or its children's shadows end at its edge.
+ *
+ * The padding grows the box outward by `--os-bleed` and the equal negative margin pulls it back to
+ * where it was, so the CLIP is 10px further out while the CONTENT has not moved. That is the whole
+ * technique, and the lock measures it: card positions identical before and after.
+ *
+ * ⚠️ `content-box` IS REQUIRED, not a preference. Under `border-box` the padding eats INTO the
+ * declared `height: 100%` instead of extending the box, and the negative margin then pulls the
+ * content out of position rather than restoring it — the cards would sit 10px high and 10px left.
+ */
+.os-colM, .os-colR {
+  display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
+  overflow: hidden;
+  box-sizing: content-box;
+  padding: var(--os-bleed);
+  margin: calc(var(--os-bleed) * -1);
+}
 .os-colM { gap: var(--os-cardgap); }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */

@@ -248,3 +248,31 @@ describe("one band geometry, declared", () => {
     expect(bare).toMatch(/slider-thumb[\s\S]{0,160}#fffdf9/); // …with its white ring
   });
 });
+
+/**
+ * ⚠️ A CLIPPING COLUMN SLICES ITS CHILDREN'S SHADOWS (P4). The bleed allowance grows the clip
+ * outward and pulls the box back, so the shadows survive and nothing moves. Browser-measured with
+ * and without: card positions identical, gap 15px both ways, page still does not scroll.
+ */
+describe("the columns bleed, and nothing moves", () => {
+  const bare = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const col = (() => {
+    const i = bare.indexOf(".os-colM, .os-colR {");
+    expect(i, "the columns must share one rule").toBeGreaterThan(-1);
+    return bare.slice(i, bare.indexOf("}", i));
+  })();
+
+  it("the allowance is a token, applied as equal padding and negative margin", () => {
+    expect(bare).toContain("--os-bleed: 10px");
+    expect(col).toContain("padding: var(--os-bleed)");
+    expect(col).toContain("margin: calc(var(--os-bleed) * -1)");
+  });
+
+  it("⚠️ `content-box` IS REQUIRED — border-box eats the padding and the margin then shifts content", () => {
+    expect(col).toContain("box-sizing: content-box");
+  });
+
+  it("the columns still clip — the bleed widens the clip, it does not remove it", () => {
+    expect(col).toContain("overflow: hidden");
+  });
+});
