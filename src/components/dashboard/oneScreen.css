@@ -27,6 +27,12 @@
      for the smoke test's `rule(".os-root")` slice and took the lock's `height:100%` out of view.
      One element, one rule — the same fault P2 fixed in the sidebar foot. */
   --os-cardgap: 15px;
+  /* ⚠️ THE FOOT'S HEIGHT, AS A TOKEN (fixes-2 A4). The scroller's bottom padding must clear the
+     LAST 30 DAYS foot so the final entry can scroll past it — and the fade is NOT a substitute,
+     since it dims the row rather than letting it through. Two independent numbers that happen to
+     work is how this drifts; the padding is now derived from the foot, and the foot is built from
+     the same token. Measured: foot 25.5px rendered, last row 36px clear of it. */
+  --os-afoot-h: 26px;
   height: 100%;
   overflow: hidden;
   display: flex;
@@ -742,7 +748,7 @@
    of the scroll region, so the final entry could never be read in full — it scrolled to its limit
    still under the foot. The padding is the foot's own height (7px + 7px + ~9px line + 1px rule),
    so the last row now scrolls clear of it rather than up to it. */
-.os-abody { padding: 0 14px 36px; }
+.os-abody { padding: 0 14px calc(var(--os-afoot-h) + 10px); }
 .os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
 .os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
 .os-tlday { margin: 8px 0 6px; }
