@@ -824,3 +824,189 @@ as its own piece of work, not as motion polish.
 - **Slice both ends, and assert both.** A lock here sliced from `saveCreate` to `const closeCreate`,
   which is declared *before* it: the range ran backwards, every extraction was `""`, and that is the
   state in which `.not.toContain` passes on nothing.
+
+---
+
+# Fix pack 5 — COMPLETE
+
+**Commits** — §0 `155b96d` · §1 `d34cbc0` · §2 `eba6c53` · §4 `5638f80` · §3's undo `2d6d25b`.
+Gates green before each (`tsc --noEmit`, `vite build`, full Vitest, `set -o pipefail`). Suite
+**3,712** at close, from 3,523 at the handover. **Not deployed.**
+
+Everything the handover listed as outstanding is built: §1 entrance, §2 cancel, §4 save-and-log-
+another, and §3's undo.
+
+## ⚠️ §0 — a bug in the landed work, found before anything was built
+
+**`animation: none` does not fire `animationend`.** The shipped comment in `Queries.tsx` asserted
+that it does. Verified in-browser: the normal-motion case fires; the `animation: none` case fires
+nothing at all.
+
+The consequence was severe and silent. Under reduced motion a **successful save** left the pane
+wearing `qc-exit-save` — which is `opacity: 0` in that block — with no event left to clear it. The
+reading pane blanked, and `createExiting` never reset, so it stayed blank for the rest of the
+session.
+
+The house rule that produced the trap is still right: reduced motion **cuts to the final frame**
+rather than playing a shortened animation, so a 1ms stand-in is not the fix (and the existing lock
+correctly bans one). The JS branches instead — where motion is suppressed the class is never armed
+and the completion runs directly. **A branch, never a timer.** `src/lib/reducedMotion.ts` is the
+canonical helper; it reads the preference *at the moment of use*, because a module-level `const`
+answers with whatever was true when the bundle was first evaluated.
+
+Two more faults fell out of the same three lines:
+
+1. **The save exit completed through `closeCreate` — the DISCARD door.** It owns the dirty-confirm,
+   so a listener slower than the 220ms exit would put *"Discard this query?"* on screen after a
+   successful save; and it restores the stashed selection, overriding the saved row `pendingSave`
+   had just selected. `finishSaveExit` is the save's own completion and does neither.
+2. **The lock guarding all of it sliced backwards.** It sliced to `queries.indexOf("closeCreate();")`,
+   which first occurs in the Escape handler ~2,000 lines *above* the handler it meant to read — so
+   the range ran backwards, the extraction was `""`, and `.not.toContain("setTimeout")` passed on
+   nothing. It is the exact fault that file's own header warns about, committed in that file.
+   A sibling of it was found while writing §1: **there are two `onAnimationEnd` handlers** in
+   `Queries.tsx` (the row's and the pane's), so a bare `indexOf` anchors on the wrong one. Both are
+   now anchored through the pane's className, and both assert the range is non-empty.
+
+## What each section turned out to need
+
+**§1 · Entrance.** Frame 220ms, then header 120 · question 200 · field 250 · steps 310/360/410, all
+240ms on `cubic-bezier(.2,.7,.3,1)`, rising 8px.
+
+- The create side of the existing pane crossfade **is** the frame, retuned to the ref rather than
+  joined by a second frame class — which would have doubled the fade *and* left the original applied
+  by nothing, dead code with a lock still on it.
+- **It plays once per opening**, bounded by `qc-entering`. Hung off `.f12-pane-enter-create` —
+  present for as long as create mode is — the rules would replay on every remount, and picking an
+  agent remounts stage 1's question and picker into stage 2's hero and stack. Choosing someone would
+  have cost another 410ms before the first field felt live.
+- **Only the last beat carries a distinct animation name** (`qc-in-last`). "The last-delayed
+  element" is not something `animationend` can be asked about: every child fires the same event with
+  the same name, so a completion bound to `qc-in` would run six times, the first 530ms early.
+  Counting events instead breaks the day a step is added.
+- **`backwards`, not `both`** — the delays run to 410ms and the children must stay hidden through
+  them, but the forwards half would hold the final frame, and a held fill outranks inline transforms
+  (the ~7px FLIP trap in CLAUDE.md).
+- Focus **ends** in the field rather than being grabbed again: the field autofocuses on mount so
+  typing works from the first frame, and a writer who clicked or tabbed during the entrance keeps
+  where they went. Stealing focus back at 650ms is the behaviour that would actually eat a keystroke.
+
+**§2 · Cancel.** 150ms `ease-in`, settling 6px down and to `scale(.995)`.
+
+- Asserted **faster than the entrance** *against the entrance's own duration*, not against the
+  number 150 — pinning both as literals would let someone slow this past the thing it undoes with
+  both tests green.
+- **One gesture, and there is no descendant rule at all** — its absence is the guarantee. The
+  entrance's scope class is dropped in the same beat the exit is armed, so any child still arriving
+  settles at once.
+- The teardown is hoisted out of `closeCreate` so the exit's completion can reach it, which brushes
+  against `createListStandsDown.test.ts` — the lock guarding a historic bug where the discard sat in
+  a ref waiting on the deleted draft row's `transitionend` and Cancel silently did nothing. **The
+  distinction is now stated rather than assumed:** this waits on the *takeover's own* animation, the
+  element that is leaving and therefore by definition rendered, and under reduced motion it does not
+  wait at all. The hazard was waiting on a thing that never happens, not waiting as such.
+- Also handled: the motion plays on the discard **decision**, not the click that raised the
+  question; a second Esc mid-exit is ignored rather than replaying from full opacity; a `qc-in-last`
+  still in flight cannot put focus back into a departing takeover; and `closeCreate(() => pickRow(id))`
+  survives the 150ms.
+
+**§4 · Save & log another.** The one path with no exit.
+
+- The **35%/36% pair is the wipe** and the single frame between them does real work: the body leaves
+  upward, is *replaced at the bottom of its travel while invisible*, and rises back. A single fade
+  reads as the same page flickering.
+- The body is hooked by a class on the pane's **existing** root, not a wrapper div — this column's
+  height chain is load-bearing (CLAUDE.md records an auto margin here opening a 514px hole) and an
+  extra flex parent silently rewrites it. A lock asserts the hook carries no layout properties.
+- **The chips reset**, because they report which steps have been *opened*: leaving them ticked would
+  claim the writer had confirmed a date and manuscript for a record they have not looked at.
+- **⚠️ `showToast` STACKED.** The handover asked whether it already replaces; it did not. Two
+  receipts on screen, each offering Undo, with nothing to say which undoes which. Fixed by a channel
+  (`replaces`) on the existing primitive rather than a second receipt system — and **absent means
+  stack, exactly as before**, so no existing call site changes behaviour. The filter sits inside the
+  state updater so two toasts in one tick cannot both read a stale list.
+- The tally's first draft read `--sage-tx` and `--sage-soft` behind inline fallbacks. **Neither is
+  defined anywhere in this app** — it would have rendered the right colour while naming nothing, the
+  `--pad-r` fault. It reads `--sage-d` and `--sage-band`, and a lock now checks every token that
+  rule names resolves to a definition.
+
+**§3 · The undo.** Deletes the records the create made; never appends a compensating one.
+
+- `deleteQuery` is the existing cascade and covers the seeded `QUERY_SENT` in **both** places
+  `addQuery` writes it (the per-query subcollection and the global feed). The lock asserts that
+  against `db.tsx`, so a narrowed cascade fails here rather than silently leaving the dashboard
+  timeline reporting a send with no query behind it.
+- **⚠️ JOURNAL ENTRIES ARE NOT IN THAT CASCADE.** They live in a top-level `journalEntries`
+  collection keyed by `queryId`, so `deleteQuery` cannot see them — a create carrying an opening
+  note would leave the note attached to a query that no longer exists. The undo removes them first,
+  while the query is still there to identify them by.
+- The id is bound **at the write**: read back off the draft when the button is pressed, it would
+  undo whatever is being drafted now — which, after "Save & log another", is a different query.
+- The journal lookup goes through a ref, because the receipt's closure is built during the write,
+  when the entry it needs has not yet come back from the listener.
+
+## Verified in the browser, and the one thing that could not be
+
+Against the **built** `dist/assets/index-*.css`, with the takeover's real nesting:
+
+- [x] All six entrance beats resolve: delays 120/200/250/310/360/410, each 240ms, each on the ref's
+      easing, each `backwards`.
+- [x] **The animation that ends LAST (650ms) is the one named `qc-in-last`** — proven from the Web
+      Animations timings, so it holds independently of any single run.
+- [x] Cancel produces **exactly one** animation and no descendant animations — "one gesture",
+      checked against the real stylesheet rather than by reading it.
+- [x] Reseat targets `.qc-take-body`, not the container, so the header does not move.
+- [x] Every rule reached `dist` (the minifier rewrites `410ms` → `.41s`).
+- [x] The tally renders as a sage mono pill in the header's action row.
+
+**⚠️ `animationend` firing could not be observed here.** The in-app browser pane holds
+`document.visibilityState: "hidden"`, and a hidden document does not advance animations, so no
+`animationend` ever fires — `Animation.finish()` does not produce one either. This is the animation
+form of the transition trap already in CLAUDE.md. The *ordering* claim is proven structurally
+(above), but the dispatcher itself needs a real page.
+
+## Browser checklist — fix pack 5
+
+- [ ] Open create mode: the frame, then header · question · field · steps arrive in that order —
+      once, and **not again when you pick an agent**
+- [ ] Type immediately on opening — the first keystroke is not eaten, and focus does not jump at
+      ~650ms
+- [ ] Click or tab somewhere during the entrance: focus **stays** where you put it
+- [ ] Esc **during** the entrance cancels it — you do not have to wait for it to finish
+- [ ] Cancel with an untouched draft: straight out, no confirm, focus back on **Log query**
+- [ ] Cancel with a dirty draft: the confirm appears **first**; the takeover only starts leaving
+      when you choose Discard; "Keep editing" leaves it exactly as it was
+- [ ] Press Esc twice quickly while leaving — no flash back to full opacity
+- [ ] Save: the takeover lifts while the row lands, and **the saved row stays selected** (this is
+      the one §0 fixed — previously the selection could jump after 220ms)
+- [ ] Save & log another: the **body** wipes and reseats while the **header holds still**; chips
+      return to dashes; the tally appears and counts up; focus is back in the search field
+- [ ] Log three in a row — **one receipt on screen at a time**, never a stack
+- [ ] Undo a plain save: the query and its row go, and the dashboard timeline has no orphan send
+- [ ] Undo a save that carried an opening note — check the note is gone too
+- [ ] Undo after "Save & log another": the tally goes back down, and the draft in progress is
+      untouched
+- [ ] **With Reduce Motion on**: every one of the four cuts to its final frame, and — the §0 case —
+      saving does **not** blank the reading pane
+
+## Still deferred, and now the only outstanding create-mode items
+
+- **Other's `Enter` → removable chip is DONE** — it landed in fix pack 4 and the carried-forward
+  list has been wrong about it since. `QueryCreatePane` holds `otherChips`, Enter calls
+  `commitOther`, each chip removes, and `createQty.test.ts:239` locks it. Checked rather than
+  assumed, because it had been repeated as outstanding across four packs.
+- **The materials summary line + the collapsed row's item count** — the genuine remainder, and now
+  the only one.
+- **§4's whisper-vs-derived-line duplication** (fix pack 1 §4) — still awaiting Nick's call.
+
+## Flagged, not fixed
+
+- **`deleteQuery` orphans journal entries.** The undo works around it for creates, but the **Delete
+  query** button has the same gap: journal entries are top-level and keyed by `queryId`, and nothing
+  removes them. The fix belongs in `db.tsx`'s cascade (alongside `activityIdsForQueries`), which
+  another stream was holding uncommitted throughout this run — so it is recorded rather than patched
+  from here.
+- **`prefersReducedMotion` has ~6 inline copies** elsewhere (`ToDoPage`, `TodoBoard`, `FocusFlow`,
+  `AssistantPromo`, `Form11Drawer`). `src/lib/reducedMotion.ts` is now the canonical util; those were
+  not repointed because they sit in files other streams hold, and `assistantPromo.test.ts` asserts
+  the inline string in source. Repoint opportunistically, per the response-deadline precedent.
