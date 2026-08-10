@@ -20,7 +20,6 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Agent, Manuscript, Query } from "../../types";
-import { AgentSearchField } from "../AgentSearchField";
 import {
   STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL,
   stepStates, stepIndex, advance, jumpTo, nextStep, stackAvailable, type StepId,
@@ -184,8 +183,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      than any animation, and they are what makes Enter-through work at all: without focus inside
      the section, Enter has nothing to accept from. The pulse is the decoration; this is the
      mechanism. It is also why reduced motion loses nothing that matters. */
-  /* Stage 1's quick-add is mounted on demand — see the picker below. */
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [engaged, setEngaged] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);
 
@@ -294,32 +291,17 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               queries={queries}
               manuscriptTitle={manuscripts.find((m) => m.id === draft.manuscriptId)?.title}
               onSelect={pickAgent}
-              onAddAgent={() => setQuickAddOpen(true)}
+              onCreateAgent={onCreateAgent}
               onSeeAll={onSeeAllAgents}
               onDiscover={onDiscover}
             />
-            {/* ⚠️ ONE SEARCH INPUT ON STAGE 1, and this is not a second one. `startInQuickAdd`
-                mounts AgentSearchField straight into its ADD form with no field and no popup —
-                the form has its own validation and write path and must not be forked, but
-                mounting the whole component to reach it put a second "Search by name or agency…"
-                on the page whose popup opened on focus. That is why "Add a new agent" appeared to
-                open a list of existing agents: it was scrolling to the legacy field. */}
-            {quickAddOpen && (
-              <div className="qc-askfield">
-                <AgentSearchField
-                  startInQuickAdd
-                  agents={agents}
-                  value=""
-                  queriedAgentIds={queriedIds}
-                  onSelect={pickAgent}
-                  onCreateAgent={async (d) => {
-                    const res = await onCreateAgent(d);
-                    if (res.ok && res.agent) pickAgent(res.agent);
-                    return res;
-                  }}
-                />
-              </div>
-            )}
+            {/* ⚠️ THE LEGACY FIELD IS GONE, AND THE FORM IT TRAPPED IS NOW ITS OWN COMPONENT.
+                Two earlier attempts to delete this field failed for the same structural reason:
+                the quick-add form lived INSIDE `AgentSearchField`, so reaching it meant mounting a
+                second "Search by name or agency…" whose popup opened on focus — which is why the
+                panel's "Add a new agent" appeared to open a list of existing agents. Extracting
+                the form (AgentQuickAdd) is what finally removed the blocker; the picker now owns
+                both entry points and one open state. */}
 
             {/* Pushed to the FOOT of the column (margin-top:auto): anatomy you can see without
                 being asked for it. They sit where the real stack will sit. */}

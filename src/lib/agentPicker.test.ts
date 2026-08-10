@@ -23,6 +23,7 @@ const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8"
 const picker = read("../components/queries/AgentPicker.tsx");
 const pane = read("../components/queries/QueryCreatePane.tsx");
 const field = read("../components/AgentSearchField.tsx");
+const quickAdd = read("../components/queries/AgentQuickAdd.tsx");
 const css = read("../components/shell/f12.css");
 
 const rule = (selector: string): string => {
@@ -126,14 +127,47 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
      AgentSearchField to reach its ADD form, which put a second "Search by name or agency…" on the
      page whose popup opened on focus — which is why "Add a new agent" appeared to open a list of
      existing agents. `startInQuickAdd` mounts the form and nothing else. */
-  it("one search input on stage 1, and the legacy popup cannot mount", () => {
-    const stage1 = pane.slice(pane.indexOf("!stackAvailable(agent)"), pane.indexOf("STAGE 2"));
-    expect(stage1).toContain("<AgentPicker");
-    expect(stage1, "the legacy field must open straight into its add form")
-      .toContain("startInQuickAdd");
-    expect(stage1, "and must never render its own search field").not.toContain("autoFocus\n");
-    expect(field).toContain("const [showQuickAdd, setShowQuickAdd] = useState(startInQuickAdd);");
+  /* ⚠️ THE LEGACY FIELD IS GONE, AND EXTRACTING THE FORM IS WHAT LET IT GO. Two earlier attempts
+     failed for the same structural reason: the quick-add form lived INSIDE `AgentSearchField`, so
+     reaching it meant mounting a second "Search by name or agency…" whose popup opened on focus —
+     which is why the panel's "Add a new agent" appeared to open a list of existing agents. */
+  it("exactly one search input on stage 1, and no second add-agent link", () => {
+    const code = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
+    expect(code, "the legacy field is still mounted").not.toContain("<AgentSearchField");
     expect(picker.match(/placeholder="Search by name or agency/g)?.length ?? 0).toBe(1);
+    const qaCode = quickAdd.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(qaCode, "the extracted form must own no search").not.toContain("Search by name");
+    expect(picker, "the field's own link is the only one").toContain("Not listed? <button");
+    expect(picker, "and the legacy link went with the field").not.toContain("Agent not listed?");
+  });
+
+  /* ⚠️ ONE OPEN STATE, TWO ENTRY POINTS. Two states would let one be open while the other thought
+     it was closed, and the second click would appear to do nothing. */
+  it("both entry points open the same component through one state", () => {
+    expect(picker).toContain("const [adding, setAdding] = useState(false);");
+    expect(picker).toContain("const onAddAgent = () => { setDismissed(true); setAdding(true); };");
+    expect(picker.match(/onClick=\{onAddAgent\}/g)?.length ?? 0,
+      "the field link, the panel action and the cold start all share it").toBeGreaterThanOrEqual(3);
+    expect(picker).toContain("<AgentQuickAdd");
+  });
+
+  /* Changing your mind must return you to what you were doing, not to nowhere. And Esc must be
+     STOPPED here: the pane behind this discards the whole draft on Escape. */
+  it("Esc and Cancel close it and return focus to the search field", () => {
+    expect(picker).toContain("const closeAdd = () => { setAdding(false); fieldRef.current?.focus(); };");
+    expect(picker).toContain("onCancel={closeAdd}");
+    expect(quickAdd).toContain('if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); }');
+    expect(quickAdd).toContain(">Cancel<");
+    expect(quickAdd).toContain("Add and select");
+  });
+
+  /* Every field the old form collected survives — dropping any would quietly reduce what an
+     inline add records, and the write path is the same contract the popup called. */
+  it("the lift kept the whole form and the same write path", () => {
+    for (const f of ["Agent name", "Agency", "Email (optional)", "Response wks (optional)"]) {
+      expect(quickAdd, `${f} was dropped in the lift`).toContain(f);
+    }
+    expect(quickAdd).toContain("onCreateAgent({");
   });
 
   /* ⚠️ ONE SELECTOR FOR "HAS THIS AGENT BEEN QUERIED". The panel said "16 of 16 contacts queried"
@@ -146,9 +180,11 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
     expect(ids.has("a2")).toBe(false);
     expect(queriedCount(list, [q("a1")]), "the panel counts what the rows mark")
       .toEqual({ done: ids.size, total: 2 });
-    expect(pane, "the empty set is what made them disagree").not.toContain("queriedAgentIds={new Set<string>()}");
-    expect(pane).toContain("queriedAgentIds={queriedIds}");
-    expect(pane).toContain("const queriedIds = useMemo(() => queriedAgentIds(queries), [queries]);");
+    /* ⚠️ AMENDED: the consumer that was handed the empty set — the legacy field — is gone from the
+       pane entirely (fix pack 2 §1), so what this now pins is that the selector itself is the one
+       source, and that no caller anywhere hands a hardcoded set in its place. */
+    expect(pane, "the empty set is what made them disagree").not.toContain("new Set<string>()");
+    expect(picker, "the picker derives, never receives, the queried set").toContain("queriedCount(agents, queries)");
   });
 
   /* ⚠️ NO FIT SCORE, STAR RATING OR "RECOMMENDED" ORDERING ANYWHERE IN THE PICKER — a baked

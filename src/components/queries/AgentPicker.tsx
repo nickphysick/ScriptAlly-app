@@ -21,9 +21,11 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { Agent, Query } from "../../types";
+import type { AgentQuickAddProps } from "./AgentQuickAdd";
 import { agentInitials, agentPrimary, agentAgencyLine } from "../../lib/agentDisplay";
 import { SubmissionStatus } from "../../types";
 import { ArtSlot } from "../todo/ArtSlot";
+import { AgentQuickAdd } from "./AgentQuickAdd";
 import {
   pickerState, pickerCards, queriedCount, replyLine, moveInGrid,
   dropdownResults, queryHistoryLabel,
@@ -35,8 +37,8 @@ export interface AgentPickerProps {
   /** Named in the heading, so the count is scoped to the book being queried. */
   manuscriptTitle?: string;
   onSelect: (a: Agent) => void;
-  /** Hands over to AgentSearchField's quick-add — never a second copy of that form. */
-  onAddAgent: () => void;
+  /** The write path for an inline add — the same contract the retired popup called. */
+  onCreateAgent: AgentQuickAddProps["onCreateAgent"];
   /** Omitted rather than rendered dead when the host cannot navigate. */
   onSeeAll?: () => void;
   onDiscover?: () => void;
@@ -46,7 +48,7 @@ const GRID_ID = "qc-agent-grid";
 const LIST_ID = "qc-agent-list";
 
 export const AgentPicker: React.FC<AgentPickerProps> = ({
-  agents, queries, manuscriptTitle, onSelect, onAddAgent, onSeeAll, onDiscover,
+  agents, queries, manuscriptTitle, onSelect, onCreateAgent, onSeeAll, onDiscover,
 }) => {
   const [query, setQuery] = useState("");
   const [hl, setHl] = useState(-1);
@@ -57,6 +59,14 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
   const [dhl, setDhl] = useState(-1);
   const fieldRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  /* ⚠️ ONE OPEN STATE, TWO ENTRY POINTS. The link beside the field and the all-queried panel's
+     action are the same destination; two states would let one of them be open while the other
+     thought it was closed, and the second click would appear to do nothing. */
+  const [adding, setAdding] = useState(false);
+  const onAddAgent = () => { setDismissed(true); setAdding(true); };
+  /* Cancel and Esc both land here: the form closes and the caret goes back where it started, so
+     changing your mind returns you to the thing you were doing rather than to nowhere. */
+  const closeAdd = () => { setAdding(false); fieldRef.current?.focus(); };
 
   const state = pickerState(agents, queries);
   /* ⚠️ THE GRID IS COMPUTED WITHOUT THE QUERY. It is a standing set of suggestions, not a result
@@ -189,6 +199,19 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
       <span className="qc-pickadd">
         Not listed? <button type="button" onClick={onAddAgent}>Add a new agent</button>
       </span>
+      {/* ⚠️ INLINE, BENEATH THE FIELD, WHERE THE LINK ALREADY POINTED. Nothing navigates and
+          nothing scrolls — the previous behaviour scrolled to a second field further down the
+          page, which is what made this action look like it opened a list of agents. */}
+      {adding && (
+        <div className="qc-qawrap">
+          <AgentQuickAdd
+            initialName={query}
+            onCreateAgent={onCreateAgent}
+            onCreated={(a) => { setAdding(false); choose(a); }}
+            onCancel={closeAdd}
+          />
+        </div>
+      )}
     </div>
   );
 

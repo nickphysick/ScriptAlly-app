@@ -181,8 +181,11 @@ describe("Enter accepts and advances; ⌘↵ saves", () => {
     /* The three routes, each named: the typeahead passes the function itself, the inline
        quick-add calls it with the agent it just created, and a quick pick calls it with its row.
        Counting bare `pickAgent(` would have missed the first — it is passed, not called. */
-    expect(pane, "the quick-add's typeahead route").toContain("onSelect={pickAgent}");
-    expect(pane, "the inline quick-add route").toContain("pickAgent(res.agent)");
+    expect(pane, "the picker route").toContain("onSelect={pickAgent}");
+    /* The inline quick-add now lives in the picker and hands its new agent back through the same
+       onSelect — one door still, one layer further out. */
+    expect(read("../components/queries/AgentPicker.tsx"), "the inline quick-add route")
+      .toContain("onCreated={(a) => { setAdding(false); choose(a); }}");
     expect(pane, "the picker route").toContain("onSelect={pickAgent}");
   });
 });

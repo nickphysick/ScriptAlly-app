@@ -37,7 +37,9 @@ describe("stage 1 asks one question", () => {
   it("the question and the field, in a left column the same width as stage 2's", () => {
     expect(pane, "the dashed empty avatar came back").not.toContain("qc-askav");
     expect(pane).toContain('<div className="qc-form qc-form-ask');
-    expect(pane.indexOf("Who are you querying?")).toBeLessThan(pane.indexOf("qc-askfield"));
+    /* ⚠️ AMENDED: `.qc-askfield` was the legacy field's wrapper and went with it. The question now
+       sits above the PICKER, which is the only search on the page. */
+    expect(pane.indexOf("Who are you querying?")).toBeLessThan(pane.indexOf("<AgentPicker"));
     /* ⚠️ STAGE 1 TAKES THE WHOLE WIDTH — it has no panel beside it, and the grid needs the room.
        Stage 2's flow takes the remainder beside a fixed 322px panel. */
     expect(rule(".qc-two-solo > .qc-form"), "stage 1 must not be held at half width")
@@ -54,9 +56,9 @@ describe("stage 1 asks one question", () => {
      selection and the "Agent not listed? Add a new agent now" quick-add. Rebuilding any of it
      here would fork three behaviours at once — and the Enter selection is P5's keyboard flow. */
   it("the picker is the shared field, and the quick-add comes with it", () => {
-    expect(pane).toContain("<AgentSearchField");
-    expect(read("../components/AgentSearchField.tsx"), "the quick-add line moved or was renamed")
-      .toContain("Agent not listed?");
+    expect(read("../components/queries/AgentPicker.tsx")).toContain("<AgentQuickAdd");
+    expect(read("../components/queries/AgentQuickAdd.tsx"), "the quick-add form moved or was renamed")
+      .toContain("Add and select");
   });
 
   /* ⚠️ EVERYTHING SEEDED FROM THE AGENT IS RE-DERIVED TOGETHER — the materials checklist, the
