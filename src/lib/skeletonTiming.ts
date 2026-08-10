@@ -53,6 +53,39 @@ export function skeletonHold(shownFor: number): number {
 }
 
 /**
+ * What to DO next, given where we are. The hook is a dispatcher over this and nothing else.
+ *
+ * ⚠️ THIS EXISTS SO THE THREE TIMING PATHS CAN BE TESTED RATHER THAN ASSERTED AT SOURCE. This
+ * repo's vitest runs in `node` with no jsdom and no testing-library, so a hook cannot be rendered
+ * here — which left the DRIVER covered only by "it mentions the right constants". Pulling the
+ * decision out makes the sequence itself provable against a stubbed clock: a test can step a
+ * timeline through `wait → show → hold → hide` and watch it happen.
+ */
+export type SkeletonAction =
+  /** Nothing on screen yet: arm the delay, and show only if we are still waiting when it fires. */
+  | { kind: "wait"; ms: number }
+  /** Up, and staying up — the data is still out. */
+  | { kind: "stay" }
+  /** Data has landed but the minimum is not served: hide in `ms`. */
+  | { kind: "hold"; ms: number }
+  /** Down, now. */
+  | { kind: "hide" }
+  /** Never appeared and never will for this wait. */
+  | { kind: "idle" };
+
+export function skeletonStep(s: {
+  loading: boolean;
+  shown: boolean;
+  /** ms since it appeared; null while it never has. */
+  shownFor: number | null;
+}): SkeletonAction {
+  if (s.loading) return s.shown ? { kind: "stay" } : { kind: "wait", ms: SKELETON_DELAY_MS };
+  if (!s.shown) return { kind: "idle" };
+  const owed = skeletonHold(s.shownFor ?? SKELETON_MIN_MS);
+  return owed === 0 ? { kind: "hide" } : { kind: "hold", ms: owed };
+}
+
+/**
  * The driver. Returns whether the skeleton should be rendered right now.
  *
  * ⚠️ `shown` IS STATE AND `shownAt` IS A REF, deliberately. The moment it appeared is read inside
@@ -69,23 +102,32 @@ export function useSkeleton(loading: boolean): boolean {
   const shownAt = useRef<number | null>(null);
 
   useEffect(() => {
-    if (loading) {
-      if (shown) return; // already up — it stays up while the data is out
-      const id = window.setTimeout(() => {
-        shownAt.current = Date.now();
-        setShown(true);
-      }, SKELETON_DELAY_MS);
-      return () => window.clearTimeout(id);
+    const step = skeletonStep({
+      loading,
+      shown,
+      shownFor: shownAt.current === null ? null : Date.now() - shownAt.current,
+    });
+    switch (step.kind) {
+      case "wait": {
+        const id = window.setTimeout(() => {
+          shownAt.current = Date.now();
+          setShown(true);
+        }, step.ms);
+        // ⚠️ THE CLEANUP IS WHAT MAKES THE FAST PATH WORK. Data landing inside the delay changes
+        // `loading`, which re-runs this effect — and the cleanup cancels the pending show first,
+        // so the skeleton never appears at all rather than appearing and being torn down.
+        return () => window.clearTimeout(id);
+      }
+      case "hold": {
+        const id = window.setTimeout(() => setShown(false), step.ms);
+        return () => window.clearTimeout(id);
+      }
+      case "hide":
+        setShown(false);
+        return;
+      default:
+        return; // "stay" and "idle" both mean: leave it exactly as it is
     }
-    // Data has landed. If it never appeared, it never will for this wait.
-    if (!shown) return;
-    const owed = skeletonHold(shownAt.current === null ? SKELETON_MIN_MS : Date.now() - shownAt.current);
-    if (owed === 0) {
-      setShown(false);
-      return;
-    }
-    const id = window.setTimeout(() => setShown(false), owed);
-    return () => window.clearTimeout(id);
   }, [loading, shown]);
 
   return shown;

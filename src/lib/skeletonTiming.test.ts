@@ -14,7 +14,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  SKELETON_DELAY_MS, SKELETON_MIN_MS, skeletonHold, skeletonShows,
+  SKELETON_DELAY_MS, SKELETON_MIN_MS, skeletonHold, skeletonShows, skeletonStep,
 } from "./skeletonTiming";
 
 const src = readFileSync(join(__dirname, "skeletonTiming.ts"), "utf8");
@@ -69,14 +69,106 @@ describe("skeletonTiming — the three paths", () => {
   });
 });
 
+/**
+ * ⚠️ THE THREE PATHS, DRIVEN — not asserted at source.
+ *
+ * `skeletonStep` is the whole of the hook's decision, so a stubbed clock can run the real timeline
+ * through it and watch what happens. The loop below IS the hook's dispatcher: it arms a timer for
+ * `wait`/`hold`, cancels a pending one whenever the input changes (which is precisely what the
+ * effect's cleanup does), and applies `show`/`hide`. If the hook and this simulation ever disagree
+ * about the shape of that dispatch, the source locks further down fail.
+ */
+function runTimeline(events: { at: number; loading: boolean }[], until: number) {
+  let now = 0;
+  let loading = events[0]!.loading;
+  let shown = false;
+  let shownAt: number | null = null;
+  let timer: { at: number; fire: () => void } | null = null;
+  const frames: { at: number; shown: boolean }[] = [];
+
+  const plan = () => {
+    timer = null;
+    const step = skeletonStep({ loading, shown, shownFor: shownAt === null ? null : now - shownAt });
+    if (step.kind === "wait") {
+      timer = { at: now + step.ms, fire: () => { shownAt = now; shown = true; frames.push({ at: now, shown: true }); } };
+    } else if (step.kind === "hold") {
+      timer = { at: now + step.ms, fire: () => { shown = false; frames.push({ at: now, shown: false }); } };
+    } else if (step.kind === "hide") {
+      shown = false;
+      frames.push({ at: now, shown: false });
+    }
+  };
+
+  plan();
+  for (let t = 1; t <= until; t++) {
+    now = t;
+    const ev = events.find((e) => e.at === t);
+    // an input change re-runs the effect: the cleanup cancels any pending timer first
+    if (ev) { loading = ev.loading; plan(); continue; }
+    if (timer && timer.at === t) { timer.fire(); plan(); }
+  }
+  return { frames, endedShown: shown };
+}
+
+describe("the driver, run against a stubbed clock", () => {
+  it("PATH 1 · resolves in 150ms → the skeleton never appears at all", () => {
+    const { frames, endedShown } = runTimeline(
+      [{ at: 0, loading: true }, { at: 150, loading: false }],
+      2_000,
+    );
+    expect(frames).toEqual([]); // it was never raised, so there is nothing to take down
+    expect(endedShown).toBe(false);
+  });
+
+  it("PATH 2 · resolves at 230ms → it appears at 200 and holds until 600", () => {
+    const { frames, endedShown } = runTimeline(
+      [{ at: 0, loading: true }, { at: 230, loading: false }],
+      2_000,
+    );
+    expect(frames).toEqual([{ at: 200, shown: true }, { at: 600, shown: false }]);
+    // 400ms on screen — the minimum, served exactly
+    expect(frames[1]!.at - frames[0]!.at).toBe(SKELETON_MIN_MS);
+    expect(endedShown).toBe(false);
+  });
+
+  it("PATH 3 · a 5s wait → it appears at 200, stays, and leaves the instant data lands", () => {
+    const { frames, endedShown } = runTimeline(
+      [{ at: 0, loading: true }, { at: 5_000, loading: false }],
+      6_000,
+    );
+    expect(frames).toEqual([{ at: 200, shown: true }, { at: 5_000, shown: false }]);
+    expect(endedShown).toBe(false);
+  });
+
+  /* ⚠️ THE MINIMUM RUNS FROM WHEN IT APPEARED, NOT FROM WHEN THE DATA LANDED — which is the only
+     moment the reader can perceive. Data at 201ms leaves 399ms owed, so it goes at 600: exactly
+     400ms on screen, the same as any other early resolve. Without the hold this is a 1ms flash,
+     the precise fault the delay was paid to avoid. */
+  it("⚠️ the boundary case the minimum exists for: data 1ms after it appeared", () => {
+    const { frames } = runTimeline([{ at: 0, loading: true }, { at: 201, loading: false }], 2_000);
+    expect(frames).toEqual([{ at: 200, shown: true }, { at: 600, shown: false }]);
+    expect(frames[1]!.at - frames[0]!.at).toBe(SKELETON_MIN_MS);
+  });
+
+  it("data already in hand → nothing is ever armed", () => {
+    expect(runTimeline([{ at: 0, loading: false }], 2_000).frames).toEqual([]);
+  });
+});
+
 describe("useSkeleton is bound to the rule it implements", () => {
-  it("drives off the shared constants and helper, never its own numbers", () => {
+  it("dispatches over skeletonStep and holds no numbers of its own", () => {
     const hook = src.slice(src.indexOf("export function useSkeleton"));
-    expect(hook).toContain("SKELETON_DELAY_MS");
-    expect(hook).toContain("skeletonHold(");
-    // No second opinion about the minimum, spelled as a literal.
+    expect(hook).toContain("skeletonStep({");
+    expect(hook).toContain("step.ms");
+    // no second opinion about either threshold, spelled as a literal
     expect(hook).not.toMatch(/\b400\b/);
     expect(hook).not.toMatch(/\b200\b/);
+  });
+
+  it("⚠️ it handles every action the step can return — a missed case is a stuck skeleton", () => {
+    const hook = src.slice(src.indexOf("export function useSkeleton"));
+    for (const k of ["wait", "hold", "hide"]) expect(hook).toContain(`case "${k}"`);
+    expect(hook).toContain("default:"); // "stay" and "idle" both mean leave it alone
   });
 
   it("⚠️ the moment it appeared is a REF — as state it would re-arm the timer every tick", () => {
@@ -84,8 +176,8 @@ describe("useSkeleton is bound to the rule it implements", () => {
     expect(src).toMatch(/\}, \[loading, shown\]\);/);
   });
 
-  it("a skeleton that never appeared cannot appear once the data has landed", () => {
+  it("⚠️ the pending show is CANCELLED on cleanup — that is what makes the fast path fast", () => {
     const hook = src.slice(src.indexOf("export function useSkeleton"));
-    expect(hook).toContain("if (!shown) return;");
+    expect(hook).toContain("window.clearTimeout(id)");
   });
 });
