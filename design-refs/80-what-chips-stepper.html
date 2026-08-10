@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — What you sent: chips with the real stepper</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#ece0d2;--sage:#8a9e88;--sage-tx:#5a6e58;--pink:#f5e2da;--pink-br:#e8c8bc;--rim:rgba(124,58,42,.16);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:26px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px #e0d5c8;}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;padding:6px 12px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:var(--muted);font-style:italic;}
+.hgt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--burg);}
+
+.wrap{max-width:1080px;}
+.srow{display:flex;align-items:center;gap:12px;background:#fbf8f3;border-radius:11px;padding:13px 16px;margin-bottom:9px;box-shadow:inset 0 0 0 1px var(--hair);}
+.srow .tick{width:22px;height:22px;border-radius:50%;background:var(--sage);position:relative;flex:0 0 22px;}
+.srow .tick::after{content:'';position:absolute;left:8px;top:5px;width:5px;height:9px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+.srow b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;}
+.srow .v{margin-left:auto;font-size:12.5px;color:var(--ink-soft);}
+
+.step{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:inset 0 0 0 1px #e0d5c8,0 6px 18px rgba(58,28,20,.06);}
+.st-h{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.st-n{width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:var(--pink);color:var(--burg);
+  font-family:'JetBrains Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;}
+.st-h h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.st-h .ask{margin-left:auto;font-size:11.5px;color:var(--muted);}
+.fl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.msel{display:flex;align-items:center;gap:10px;background:#fbf8f3;border-radius:9px;padding:10px 12px;cursor:pointer;box-shadow:inset 0 0 0 1px var(--hair);}
+.msel .ic{width:26px;height:26px;flex:0 0 26px;border-radius:7px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair);display:flex;align-items:center;justify-content:center;}
+.msel .ic svg{width:14px;height:14px;stroke:var(--burg);fill:none;stroke-width:1.5;}
+.msel .nm{font-size:13.5px;} .msel .gn{font-size:11px;color:var(--muted);margin-left:auto;}
+.st-f{display:flex;align-items:center;margin-top:16px;padding-top:13px;box-shadow:inset 0 1px 0 var(--hair);}
+.b-back{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;}
+.b-next{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;background:var(--pink);border:0;box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);border-radius:9px;padding:9px 16px;cursor:pointer;}
+
+/* chips */
+.mats{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;}
+.m{display:inline-flex;align-items:center;gap:8px;background:#fbf8f3;border-radius:9px;padding:9px 13px;cursor:pointer;
+  box-shadow:inset 0 0 0 1px var(--hair);font-size:13px;transition:box-shadow .15s ease,background .15s ease;}
+.m:hover{background:#fff;box-shadow:inset 0 0 0 1px #dcc9bb;}
+.m.on{background:#fff;box-shadow:inset 0 0 0 1px var(--pink-br);}
+.m .bx{width:15px;height:15px;flex:0 0 15px;border-radius:4px;background:#fff;box-shadow:inset 0 0 0 1.5px #d3c6b8;position:relative;}
+.m.on .bx{background:var(--sage);box-shadow:inset 0 0 0 1.5px var(--sage);}
+.m.on .bx::after{content:'';position:absolute;left:4.5px;top:2px;width:4px;height:8px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+
+/* the real stepper, inline */
+.qty{display:none;align-items:center;gap:7px;margin-left:3px;padding-left:10px;box-shadow:inset 1px 0 0 var(--hair);}
+.m.on .qty{display:inline-flex;}
+.stepper{position:relative;display:inline-flex;}
+.numf{width:78px;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:7px;padding:6px 22px 6px 8px;
+  font-size:12.5px;text-align:right;font-family:'Inter';outline:none;}
+.numf:focus{box-shadow:inset 0 0 0 1px var(--sage),0 0 0 3px rgba(138,158,136,.12);}
+.sarr{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px;}
+.sarr b{width:14px;height:11px;display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--burg);
+  cursor:pointer;border-radius:3px;line-height:1;user-select:none;}
+.sarr b:hover{background:var(--pink);}
+.sarr b.dis{color:#d8cabb;cursor:default;} .sarr b.dis:hover{background:transparent;}
+.units{display:flex;background:#f4ede4;border-radius:7px;padding:2px;gap:2px;box-shadow:inset 0 0 0 1px #e6dbcd;}
+.units span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.05em;padding:4px 7px;border-radius:5px;cursor:pointer;color:var(--ink-soft);}
+.units span.on{background:#fff;color:var(--burg);font-weight:500;box-shadow:0 1px 2px rgba(58,28,20,.06);}
+.stephint{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:#b8a898;white-space:nowrap;}
+.otherf{width:180px;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:7px;padding:6px 9px;font-size:12px;font-family:'Inter';outline:none;}
+.otags{display:flex;gap:5px;flex-wrap:wrap;}
+.otag{font-size:11px;background:#f4ede4;border-radius:20px;padding:3px 9px;color:var(--ink-soft);box-shadow:inset 0 0 0 1px #e6dbcd;display:inline-flex;align-items:center;gap:6px;}
+.otag u{text-decoration:none;cursor:pointer;color:#b0a092;}
+.msum{margin-top:12px;font-size:12px;color:var(--muted);}
+.msum b{color:var(--ink-soft);font-weight:400;}
+
+.legend{max-width:1080px;margin-top:22px;padding:16px 20px;background:#f8f2ea;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+.legend code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#fff;padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="ctl">
+  <b>Agent</b>
+  <div class="seg" id="seg">
+    <button data-a="0" class="on">Asks for 50 pages</button>
+    <button data-a="1">Asks for 10,000 words</button>
+    <button data-a="2">Manuscript only</button>
+  </div>
+  <span class="note">Arrows, ↑/↓ keys, typing, unit switching — all live.</span>
+  <span class="hgt" id="h"></span>
+</div>
+
+<div class="wrap">
+  <div class="srow"><span class="tick"></span><b>When</b><span class="v">10 Aug · email · nudge 21 Sept</span></div>
+
+  <div class="step" id="step">
+    <div class="st-h"><span class="st-n">2</span><h2>What you sent</h2><span class="ask" id="ask"></span></div>
+    <div class="fl">Manuscript</div>
+    <div class="msel"><span class="ic"><svg viewBox="0 0 24 24" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/></svg></span>
+      <span class="nm">Murphy's Day Out</span><span class="gn">Thriller · 50,000 words</span></div>
+
+    <div class="fl" style="margin-top:14px">Materials sent</div>
+    <div class="mats">
+      <span class="m" data-k="ql"><span class="bx"></span>Query letter</span>
+      <span class="m" data-k="syn"><span class="bx"></span>Synopsis</span>
+      <span class="m" data-k="smp"><span class="bx"></span>Sample
+        <span class="qty">
+          <span class="stepper"><input class="numf" id="smpN" inputmode="numeric"><span class="sarr"><b data-d="1">▲</b><b data-d="-1">▼</b></span></span>
+          <span class="units" id="smpU"><span data-u="Pages">Pages</span><span data-u="Words">Words</span><span data-u="Chapters">Chaps</span></span>
+          <span class="stephint" id="smpH"></span>
+        </span></span>
+      <span class="m" data-k="oth"><span class="bx"></span>Other
+        <span class="qty"><span class="otags" id="othTags"></span><input class="otherf" id="othIn" placeholder="Type and press Enter…"></span></span>
+    </div>
+    <div class="msum" id="sum"></div>
+
+    <div class="st-f"><button class="b-back">← Back</button><button class="b-next">Next: Notes</button></div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>Everything from the stepper build is intact</b>
+  <ul>
+    <li><b>Steps and bounds per unit</b> — Pages ± 5 (5–400) · Words ± 500 (500–120,000) · Chapters ± 1 (1–40). The current step shows beside the field.</li>
+    <li><b>Arrows and ↑/↓ keys.</b> From an off-step value the arrows move to the next clean multiple — type 37 and press ▲ for 40, not 42. Arrows disable at the bounds.</li>
+    <li><b>Typing always overrides.</b> Focus strips formatting to a raw integer; blur reformats with thousands separators. Typed values are never snapped.</li>
+    <li><b>Unit switching SNAPS, never converts</b> — the locked law. 50 pages switched to Words becomes 500, not 12,500; three chapters must not become three words. The value is clamped into the new unit's own range and step.</li>
+    <li><b>The bound yields to a stated requirement.</b> An agent asking for 500 pages pre-fills at 500 even though the create bound is 400 — the app must not quietly alter what she asked for.</li>
+    <li><b>Other</b> commits on Enter to a removable chip.</li>
+    <li>Pre-ticking still follows the agent's requirements — switch agent above to watch the chips and the sample change.</li>
+    <li><b>The requirement sentence sits once in the header</b>, not once per chip. That was five repetitions of one fact.</li>
+  </ul>
+</div>
+
+<script>
+var UNITS={Pages:{step:5,min:5,max:400},Words:{step:500,min:500,max:120000},Chapters:{step:1,min:1,max:40}};
+var AGENTS=[
+ {name:'Eleanor',ql:true,syn:'One page',smp:{n:50,u:'Pages'}},
+ {name:'Joseph',ql:true,syn:null,smp:{n:10000,u:'Words'}},
+ {name:'Dermot',ql:false,syn:null,smp:null}
+];
+var A=AGENTS[0];
+var M={ql:{on:true},syn:{on:true},smp:{on:true,n:50,u:'Pages'},oth:{on:false,tags:[]}};
+
+function clampSnap(v,u){var c=UNITS[u],n=Math.round(v/c.step)*c.step;var max=effMax(u);
+  if(n<c.min)n=c.min; if(n>max)n=max; return n;}
+function effMax(u){ // the bound yields to a stated requirement
+  var c=UNITS[u]; if(A.smp&&A.smp.u===u)return Math.max(c.max,A.smp.n); return c.max;}
+function grp(n){return Number(n).toLocaleString('en-GB');}
+function raw(v){return Number(String(v).replace(/[^0-9]/g,''))||0;}
+
+function applyAgent(){
+  M.ql.on=A.ql; M.syn.on=!!A.syn;
+  M.smp.on=!!A.smp;
+  if(A.smp){M.smp.n=A.smp.n;M.smp.u=A.smp.u;}
+  M.oth.on=false;M.oth.tags=[];
+  var bits=[]; if(A.ql)bits.push('a query letter'); if(A.syn)bits.push('a synopsis');
+  if(A.smp)bits.push(A.smp.u==='Chapters'?(A.smp.n+' chapters'):(grp(A.smp.n)+' '+A.smp.u.toLowerCase()));
+  document.getElementById('ask').textContent = bits.length
+    ? A.name+' asks for '+(bits.length>1?bits.slice(0,-1).join(', ')+' and '+bits.slice(-1):bits[0])
+    : A.name+' asks for the manuscript only';
+  paint();
+}
+function stepSample(dir){
+  var c=UNITS[M.smp.u],cur=raw(M.smp.n)||c.min,snap=Math.round(cur/c.step)*c.step,next;
+  if(snap===cur)next=cur+dir*c.step;
+  else next=(dir>0)?Math.ceil(cur/c.step)*c.step:Math.floor(cur/c.step)*c.step;
+  M.smp.n=Math.min(effMax(M.smp.u),Math.max(c.min,next)); paint();
+}
+function paint(){
+  ['ql','syn','smp','oth'].forEach(function(k){
+    document.querySelector('.m[data-k="'+k+'"]').classList.toggle('on',M[k].on);});
+  var c=UNITS[M.smp.u],cur=raw(M.smp.n),f=document.getElementById('smpN');
+  if(document.activeElement!==f)f.value=grp(cur);
+  document.getElementById('smpH').textContent='± '+grp(c.step);
+  document.querySelectorAll('#smpU span').forEach(function(u){u.classList.toggle('on',u.dataset.u===M.smp.u);});
+  var up=document.querySelector('.sarr b[data-d="1"]'),dn=document.querySelector('.sarr b[data-d="-1"]');
+  up.classList.toggle('dis',cur>=effMax(M.smp.u)); dn.classList.toggle('dis',cur<=c.min);
+  document.getElementById('othTags').innerHTML=M.oth.tags.map(function(t,i){return '<span class="otag">'+t+'<u data-i="'+i+'">×</u></span>';}).join('');
+  var parts=[]; if(M.ql.on)parts.push('Query letter'); if(M.syn.on)parts.push('Synopsis');
+  if(M.smp.on)parts.push(grp(raw(M.smp.n))+' '+M.smp.u.toLowerCase());
+  M.oth.tags.forEach(function(t){parts.push(t);});
+  document.getElementById('sum').innerHTML=parts.length?'Sending: <b>'+parts.join(' · ')+'</b>':'Nothing ticked — the query will be logged with no materials.';
+  document.getElementById('h').textContent='step height ≈ '+Math.round(document.getElementById('step').getBoundingClientRect().height)+'px';
+}
+document.querySelectorAll('.m').forEach(function(el){
+  el.addEventListener('click',function(e){
+    if(e.target.closest('.qty'))return;
+    var k=el.dataset.k;M[k].on=!M[k].on;paint();
+    if(k==='oth'&&M.oth.on)setTimeout(function(){document.getElementById('othIn').focus();},0);});
+});
+document.querySelectorAll('.sarr b').forEach(function(b){
+  b.addEventListener('click',function(e){e.stopPropagation();if(!b.classList.contains('dis'))stepSample(Number(b.dataset.d));});});
+var f=document.getElementById('smpN');
+f.addEventListener('keydown',function(e){
+  if(e.key==='ArrowUp'){e.preventDefault();stepSample(1);}
+  if(e.key==='ArrowDown'){e.preventDefault();stepSample(-1);}});
+f.addEventListener('focus',function(){f.value=String(raw(M.smp.n));});
+f.addEventListener('input',function(){M.smp.n=raw(f.value);paint();});
+f.addEventListener('blur',paint);
+document.querySelectorAll('#smpU span').forEach(function(u){
+  u.addEventListener('click',function(e){e.stopPropagation();
+    if(u.dataset.u!==M.smp.u){M.smp.n=clampSnap(raw(M.smp.n),u.dataset.u);M.smp.u=u.dataset.u;}paint();});});
+document.getElementById('othIn').addEventListener('keydown',function(e){
+  e.stopPropagation();
+  if(e.key==='Enter'&&e.target.value.trim()){M.oth.tags.push(e.target.value.trim());e.target.value='';paint();}});
+document.getElementById('othTags').addEventListener('click',function(e){
+  e.stopPropagation();var u=e.target.closest('u');if(u){M.oth.tags.splice(Number(u.dataset.i),1);paint();}});
+document.getElementById('seg').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  A=AGENTS[Number(b.dataset.a)];
+  [].forEach.call(e.currentTarget.children,function(x){x.classList.toggle('on',x===b);});
+  applyAgent();});
+applyAgent();
+</script>
+</body>
+</html>
