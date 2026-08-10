@@ -29,7 +29,16 @@ describe("⚠️ EVERY LIST KEY IS A BARE KEY — so the typing guard is the who
     expect(listKey(K("Enter"), false)).toBe("primary");
     expect(listKey(K("s"), false)).toBe("snooze");
     expect(listKey(K("e"), false)).toBe("edit");
-    expect(listKey(K("Escape"), false)).toBe("dismiss");
+    /* ⚠️ THE CLUSTER'S THREE NEW KEYS (icon-cluster P3) — one per icon, so the tooltip that
+       prints a key and the handler that answers it cannot come apart. */
+    expect(listKey(K("x"), false)).toBe("dismiss");
+    expect(listKey(K("X"), false)).toBe("dismiss");
+    expect(listKey(K("."), false)).toBe("more");
+    expect(listKey(K("o"), false)).toBe("open");
+    /* ⚠️ ESCAPE IS `close` NOW, BECAUSE `x` TOOK THE WORD `dismiss`. Shutting a surface and
+       putting a card away are different acts, and one name for both is how a handler comes to
+       close a menu when it meant to dismiss a task. */
+    expect(listKey(K("Escape"), false)).toBe("close");
     expect(listKey(K("?"), false)).toBe("help");
     expect(listKey(K("q"), false)).toBeNull();
   });
@@ -83,7 +92,7 @@ describe("⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS", () => {
   });
 
   it("⚠️ ESCAPE CLOSES INNERMOST-FIRST and is NOT stopped — the page has its own Escape business", () => {
-    const esc = list.slice(list.indexOf('if (action === "dismiss")'), list.indexOf('if (action === "down"'));
+    const esc = list.slice(list.indexOf('if (action === "close")'), list.indexOf('if (action === "down"'));
     expect(esc.indexOf("setDial(null)")).toBeLessThan(esc.indexOf("closeMenu(true)"));
     expect(esc.indexOf("closeMenu(true)")).toBeLessThan(esc.indexOf("setHelpOpen(false)"));
     expect(esc).not.toContain("stopPropagation");
@@ -91,7 +100,7 @@ describe("⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS", () => {
 
   it("the `?` map is built FROM `KEY_MAP`, so the sheet cannot advertise a key that does nothing", () => {
     expect(list).toContain("KEY_MAP.map((k) => (");
-    for (const k of ["J / K", "Space", "Enter", "S", "E", "/", "W", "Esc", "?"]) {
+    for (const k of ["J / K", "Space", "Enter", "S", "X", ".", "O", "E", "/", "W", "Esc", "?"]) {
       expect(KEY_MAP.some((m) => m.key === k), k).toBe(true);
     }
     /* and every key the map advertises is one the handlers actually answer */
@@ -105,26 +114,78 @@ describe("⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS", () => {
   });
 });
 
-describe("⚠️ SELECTION IS NOT BUILT, AND THE ABSENCE IS THE DECISION", () => {
+/**
+ * ⚠️ THE ICON IS THE TAUGHT FORM OF THE KEY (icon-cluster P3).
+ *
+ * Every icon's tooltip prints the key that does the same thing, so the pointer path is how the
+ * keyboard path is learned. That only holds while the two reach the SAME call — a key that did
+ * something subtly different from the icon above it would make every tooltip on the page a lie,
+ * and it would be a quiet lie, because nobody checks a shortcut against a picture.
+ */
+describe("⚠️ EACH CLUSTER KEY CALLS WHAT ITS ICON CALLS", () => {
+  it("`↵` and icon 1 are ONE function — they used to be two, and they disagreed", () => {
+    /* Enter called `onOpen(c)` — the dock, whatever the row was — while the control resolved a
+       per-column leaf. On a Done row the button said "Undo" and the key opened the dock. */
+    expect(list).toContain("const firePrimary = (c: BoardCard, column: TodoColumnId) => {");
+    expect(list).toContain("onFire={() => firePrimary(c, column)}");
+    expect(list).toContain('if (action === "primary") { firePrimary(c, column); return; }');
+    expect(code(list)).not.toContain('if (action === "primary") { onOpen(c); return; }');
+    /* and ONE derivation of which leaf the primary is, read by both */
+    expect(list).toContain("const primaryId = (c: BoardCard, column: TodoColumnId): MenuItemId | null =>");
+    expect(list).toContain("const primary = primaryId(c, column);");
+  });
+
+  it("`S`, `X`, `.` and `O` each reach the icon's own handler, with the icon's own permission", () => {
+    /* Permission is `cardMenu`'s in both paths — never a second table for the keyboard. */
+    expect(list).toContain('if (offers(cardMenu(c, column), "dismiss-week")) fire(c, column, "dismiss-week");');
+    expect(list).toContain('if (offers(cardMenu(c, column), "open-query")) fire(c, column, "open-query");');
+    expect(list).toContain('if (action === "more") { if (el) openSplit(el, c, column); return; }');
+    expect(list).toContain('if (el && offers(cardMenu(c, column), "snooze-1")) setDial({ card: c, anchor: el });');
+  });
+
+  it("⚠️ EVERY KEY A TOOLTIP PRINTS IS ANSWERED, AND EVERY ONE IS IN THE MAP", () => {
+    /* The four the cluster advertises on its icons. `↵` is Enter; the rest are bare letters. */
+    expect(listKey(K("Enter"), false)).toBe("primary");
+    for (const [key, action] of [["s", "snooze"], ["x", "dismiss"], [".", "more"]] as const) {
+      expect(listKey(K(key), false)).toBe(action);
+    }
+    for (const k of ["Enter", "S", "X", "."]) {
+      expect(KEY_MAP.some((m) => m.key === k), `${k} is on an icon but not in the map`).toBe(true);
+    }
+  });
+});
+
+describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is no longer free for it", () => {
   /**
    * Sheet 7 says "selection borrows the batch model wholesale". THERE IS NO BATCH MODEL — the
    * ledger's machinery retired with the run sheet, `todoLedger`'s `batch*` helpers are the
    * housekeeping COHORT, and board-optimise's Phase 8 was left unbuilt for this exact reason with
-   * Nick's call still open. Building one fresh contradicts the phase's own central instruction.
+   * Nick's call still open.
+   *
+   * ⚠️ WHAT CHANGED IS THE KEY, NOT THE CONCLUSION. The cluster's third icon needed a binding and
+   * `x` is the obvious one for a cross — so the mail-client convention (`x` selects) is no longer
+   * available on this page. A real cost, flagged in the report rather than found later by someone
+   * wondering why `x` removed their row. The mitigations are that dismiss is reversible from its
+   * receipt, and that the icon's tooltip prints the key.
    */
-  it("`x` is unbound, and nothing renders a checkbox or a selection bar", () => {
-    expect(listKey(K("x"), false)).toBeNull();
+  it("nothing selection-shaped is half-built — no checkbox, no picked set, no bar", () => {
     expect(list).not.toContain('type="checkbox"');
-    /* the markers a selection system would need: a set of picked keys, and a bar to hold them */
     expect(code(list)).not.toContain("setSelected");
     expect(code(list)).not.toContain("selectedKeys");
     expect(code(list)).not.toContain("SELECTED ·");
-    expect(KEY_MAP.some((m) => m.key.toUpperCase() === "X")).toBe(false);
   });
 
-  it("…and the reason is written where the next reader will look for it", () => {
+  it("⚠️ `x` DISMISSES NOW, and the map says so — an unadvertised destructive key is a trap", () => {
+    expect(listKey(K("x"), false)).toBe("dismiss");
+    const entry = KEY_MAP.find((m) => m.key === "X");
+    expect(entry, "X must be in the map").toBeTruthy();
+    expect(entry!.does).toMatch(/undo/i);          // …and the map states the way back
+  });
+
+  it("…and the reason the absence stands is still written where the next reader will look", () => {
     expect(lib).toContain("THERE IS NO BATCH MODEL");
-    expect(lib).toContain("SELECTION_NOT_BUILT");
+    expect(lib).toContain("SELECTION_STILL_NOT_BUILT");
+    expect(lib).toContain("`x` is taken");
   });
 
   it("⚠️ THE ROW'S `.sel` STATE IS NOT SHIPPED EITHER — a state with no producer is dormant code", () => {

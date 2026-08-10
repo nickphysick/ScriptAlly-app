@@ -68,12 +68,24 @@ export function isTypingTarget(target: EventTarget | null): boolean {
 export type ListAction =
   | "down" | "up"        // j / k — move the focused row
   | "tick"               // space — complete, or open the flow where the tick is not the act
-  | "primary"            // enter — fire the row's primary verb
-  | "snooze"             // s — open the dial on the focused row
+  | "primary"            // enter — fire the row's primary verb (icon 1's deed, exactly)
+  | "snooze"             // s — open the dial on the focused row (icon 2)
+  | "dismiss"            // x — dismiss the row (icon 3); reversible from its receipt
+  | "more"               // . — open the row's menu (icon 4)
+  | "open"               // o — open the query
   | "edit"               // e — the writer's own items only; the row decides, not this
-  | "dismiss"            // esc — close the dial, then the menu (the row decides the order)
+  | "close"              // esc — close the dial, then the menu (the row decides the order)
   | "help";              // ? — the map, over the page
 
+/**
+ * ⚠️ FOUR OF THESE ARE THE CLUSTER'S ICONS, ONE KEY EACH, AND THAT PAIRING IS THE POINT (icon
+ * cluster P3). Every icon's tooltip prints its key, so the pointer path TEACHES the keyboard path;
+ * a key the tooltip names and this function does not answer would be a lie told by the chrome.
+ *
+ * ⚠️ `Escape` WAS CALLED `dismiss` AND IS NOW `close`, because `x` needed the word. They are
+ * genuinely different acts — Escape shuts a surface, `x` dismisses a CARD — and one name for both
+ * is how a handler comes to close a menu when it meant to put a task away.
+ */
 export function listKey(e: ShortcutKey, typing: boolean): ListAction | null {
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return null;
   switch (e.key) {
@@ -82,8 +94,11 @@ export function listKey(e: ShortcutKey, typing: boolean): ListAction | null {
     case " ": return "tick";
     case "Enter": return "primary";
     case "s": case "S": return "snooze";
+    case "x": case "X": return "dismiss";
+    case ".": return "more";
+    case "o": case "O": return "open";
     case "e": case "E": return "edit";
-    case "Escape": return "dismiss";
+    case "Escape": return "close";
     case "?": return "help";
     default: return null;
   }
@@ -99,25 +114,41 @@ export function worksTheList(e: ShortcutKey, typing: boolean): boolean {
 }
 
 /**
- * ⚠️ `X` — SELECT — IS DELIBERATELY ABSENT, and this is where the absence is recorded.
+ * ⚠️ `X` NOW DISMISSES, AND THAT FORECLOSES THE SELECTION CONVENTION — recorded here, where the
+ * absence used to be, because a note that quietly changed its meaning would be worse than none.
  *
- * Sheet 7 says "selection borrows the batch model wholesale". THERE IS NO BATCH MODEL. The
- * ledger's selection machinery was retired with the run sheet (Final Shape P5), `todoLedger`'s
- * `batch*` helpers are the housekeeping COHORT rather than a selection, and board-optimise's own
- * Phase 8 was left unbuilt for exactly this reason with the finding written up and Nick's call
- * still open. Building one fresh here would contradict the phase's own central instruction and is
- * a pack of its own.
+ * This constant used to say: `x` is unbound because sheet 7's "selection borrows the batch model
+ * wholesale" is written against something that does not exist — THERE IS NO BATCH MODEL. (The
+ * ledger's machinery went with the run sheet,
+ * `todoLedger`'s `batch*` helpers are the housekeeping COHORT rather than a selection, and
+ * board-optimise's Phase 8 was left unbuilt for exactly that reason, with Nick's call still open).
  *
- * So `x` is not bound, no checkbox renders, and no selection bar exists. Nothing is half-built.
+ * THAT IS STILL TRUE — nothing selection-shaped exists. What changed is that the icon cluster
+ * needed a key for its third icon, and `x` is the obvious one for a cross. So if selection is ever
+ * built, `x` is taken, and the usual mail-client convention (`x` selects) is no longer available
+ * on this page. That is a real cost and it is Nick's to weigh; it is flagged in the report rather
+ * than discovered later by someone wondering why `x` deletes their row.
+ *
+ * The mitigations: dismiss is reversible from its own Undo receipt, and the icon's tooltip prints
+ * the key, so the binding is taught rather than stumbled into.
  */
-export const SELECTION_NOT_BUILT = "x" as const;
+export const SELECTION_STILL_NOT_BUILT = true;
 
-/** The map `?` opens — one source, so the overlay and the handler cannot list different keys. */
+/**
+ * The map `?` opens — one source, so the overlay and the handler cannot list different keys.
+ *
+ * ⚠️ EVERY KEY THE CLUSTER'S TOOLTIPS PRINT IS ANSWERED HERE. The tooltips teach four keys and
+ * this map teaches the rest; a key advertised on an icon and missing from the map would leave the
+ * page's own help sheet contradicting its own chrome. Locked against `listKey` in both directions.
+ */
 export const KEY_MAP: { key: string; does: string }[] = [
   { key: "J / K", does: "Move down and up the rows" },
   { key: "Space", does: "Tick the focused row — or open its flow, where the tick is not the act" },
-  { key: "Enter", does: "Fire the primary verb" },
+  { key: "Enter", does: "Fire the primary verb — the first icon's deed" },
   { key: "S", does: "Open the snooze dial on the focused row" },
+  { key: "X", does: "Dismiss the focused row — undo from the receipt" },
+  { key: ".", does: "Open the row's menu" },
+  { key: "O", does: "Open the query behind the row" },
   { key: "E", does: "Edit — your tasks and notes only" },
   { key: "/", does: "Jump to search" },
   { key: "W", does: "Work the list — opens the dock at the top of the order" },

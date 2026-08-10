@@ -443,9 +443,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
     const action = listKey(e, isTypingTarget(e.target));
     if (!action) return;
     if (action === "help") { e.preventDefault(); setHelpOpen((v) => !v); return; }
-    if (action === "dismiss") {
+    if (action === "close") {
       /* ⚠️ THE ORDER IS DIAL, THEN MENU, THEN THE MAP — innermost first, so Escape never closes
-         two things at once. It is NOT stopped: the page beyond has its own Escape business. */
+         two things at once. It is NOT stopped: the page beyond has its own Escape business.
+         ⚠️ AND IT IS `close`, NOT `dismiss`, SINCE `x` TOOK THAT WORD. Shutting a surface and
+         putting a card away are different acts; one name for both is how a handler comes to
+         close a menu when it meant to dismiss a task. */
       if (dial) { setDial(null); e.preventDefault(); }
       else if (menu) { closeMenu(true); e.preventDefault(); }
       else if (helpOpen) { setHelpOpen(false); e.preventDefault(); }
@@ -463,10 +466,23 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       if (isTickable(c)) tick(c); else onOpen(c);
       return;
     }
-    if (action === "primary") { onOpen(c); return; }
+    /* ⚠️ EVERY ROW KEY CALLS WHAT ITS ICON CALLS — the four that the tooltips advertise reach the
+       same handlers the pointer does, so the two paths cannot come to mean different things. The
+       icon is the taught form of the key; if they diverged, the tooltip would be teaching a lie.
+       Permission is still asked of `cardMenu`, once, exactly as the icons ask it. */
+    const el = rowEls.current.get(c.key);
+    if (action === "primary") { firePrimary(c, column); return; }
     if (action === "snooze") {
-      const el = rowEls.current.get(c.key);
       if (el && offers(cardMenu(c, column), "snooze-1")) setDial({ card: c, anchor: el });
+      return;
+    }
+    if (action === "dismiss") {
+      if (offers(cardMenu(c, column), "dismiss-week")) fire(c, column, "dismiss-week");
+      return;
+    }
+    if (action === "more") { if (el) openSplit(el, c, column); return; }
+    if (action === "open") {
+      if (offers(cardMenu(c, column), "open-query")) fire(c, column, "open-query");
       return;
     }
     if (action === "edit") {
@@ -500,6 +516,27 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
   const openSplit = (anchor: HTMLElement, c: BoardCard, column: TodoColumnId) =>
     setSplit((s2) => (s2?.card.key === c.key ? null : { card: c, column, anchor }));
 
+  /**
+   * ⚠️ WHICH LEAF IS THE ROW'S PRIMARY — ONE ANSWER, READ BY THE ICON AND BY `↵` (P3). The row
+   * used to compute this inline while the keyboard's Enter did something else entirely (it opened
+   * the dock, whatever the row was), so on a Done row the icon said Undo and the key said dock.
+   * Two derivations of "what is this row's deed" is exactly the drift the whole page is built to
+   * avoid; `null` means the deed is not a menu verb — see `firePrimary`.
+   */
+  const primaryId = (c: BoardCard, column: TodoColumnId): MenuItemId | null =>
+    column === "done" ? (offers(cardMenu(c, column), "undo-done") ? "undo-done" : null)
+    : column === "snoozed" ? "unsnooze"
+    : completionVia(c) === "user-task" ? null
+    : "action";
+
+  /** ⚠️ ICON 1 AND `↵` ARE THE SAME DEED, so they are the same call. */
+  const firePrimary = (c: BoardCard, column: TodoColumnId) => {
+    const id = primaryId(c, column);
+    if (id) fire(c, column, id);
+    /* the writer's own item: no menu verb, the deed IS the completion (icon-cluster P2) */
+    else if (isTickable(c) && !c.done) tick(c);
+  };
+
   /* ⚠️ THE GROUP IS THREADED, AND `groupColumn` CANNOT CARRY IT. That function collapses five
      group ids onto three columns — `now`, `housekeeping` and `yours` all land on `todo` — which is
      right for the MENU (a card's permissions follow its state: live, asleep, finished) and useless
@@ -520,11 +557,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
        weight now sets. One class with two reasons behind it is one that eventually contradicts
        itself, so the row-state flag is deleted and Done reaches the outlined weight the honest
        way: it is not the urgent group. Same pixels, better rule. */
-    const primary: { id: MenuItemId; label: string } | null =
-      column === "done" ? (offers(menuModel, "undo-done") ? { id: "undo-done", label: rowPrimaryLabel(c, column) } : null)
-      : column === "snoozed" ? { id: "unsnooze", label: rowPrimaryLabel(c, column) }
-      : completionVia(c) === "user-task" ? null
-      : { id: "action", label: rowPrimaryLabel(c, column) };
+    const primary = primaryId(c, column);
 
     /* ⚠️ THE FOUR SLOTS ARE RETIRED (fix pack Fix 4). Snooze and dismiss are in the split's menu
        now, and with every row carrying ONE identical control the empty-slot alignment device has
@@ -626,11 +659,11 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           <RowIcon
             kind="prim"
             Glyph={PRIMARY_GLYPH[rowPrimaryIcon(c, column)]}
-            label={primary ? primary.label : rowPrimaryLabel(c, column)}
+            label={rowPrimaryLabel(c, column)}
             hint="↵"
             enabled={!!primary || (tickable && !c.done)}
             why="There is nothing to do on this one."
-            onFire={() => (primary ? fire(c, column, primary.id) : tick(c))}
+            onFire={() => firePrimary(c, column)}
           />
           <RowIcon
             Glyph={Clock}
