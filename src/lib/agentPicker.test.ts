@@ -548,11 +548,16 @@ describe("art belongs to the cold start and nowhere else", () => {
     expect(allq, "the route descriptions came back").not.toContain("Straight into your list");
   });
 
-  it("the all-queried ring is muted, and the field stays live", () => {
-    const ring = rule(".qc-allqring");
-    expect(ring).toContain("#cfc7bb");
+  /* ⚠️ THE RING IS RETIRED WITH THE PANEL, and the rule it enforced is retired with it: the ring
+     existed to carry a figure the block's sentence now states in words, so there is no longer a
+     numeral that could be tinted into an achievement. What survives is the reason — running out of
+     people to query is neutral, often uncomfortable — and it survives as a ban on the block
+     borrowing the app's good-state sage for a state that is not one. */
+  it("the block does not dress a neutral state as an achievement, and the field stays live", () => {
+    expect(rule(".qc-allqring"), "the count ring came back").toBe("");
+    const fold = rule(".qc-fold");
     for (const sage of ["#7e9178", "#e9ede6", "var(--sage)"]) {
-      expect(ring, `the ring borrowed ${sage} — this state is neutral, not an achievement`)
+      expect(fold, `the block borrowed ${sage} — this state is neutral, not an achievement`)
         .not.toContain(sage);
     }
     const panelAt = picker.indexOf("{allQueried ? (");
