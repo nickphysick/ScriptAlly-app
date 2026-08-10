@@ -39,11 +39,17 @@
    The app's body font is Source Sans Pro and every page depends on it, so this cannot go on
    `.ws-app` — it would cascade into page content the ref says nothing about.
 
-   ⚠️ AND THIS IS WHY THE SIDEBAR READ AS SMALLER THAN THE MOCKUP WHILE EVERY SIZE ALREADY MATCHED
-   IT. Browser-measured: `.ws-ni` is 13.5px in both, as are all fourteen other type sizes in the
-   panel and bar. Source Sans Pro simply has a markedly smaller x-height than Inter, so the same
-   number renders visibly smaller. Bumping the size would have made the numbers disagree with the
-   ref in order to make the picture agree with it — the typeface was the difference. */
+   ⚠️ AND THIS IS WHY THE SIDEBAR ONCE READ AS SMALLER THAN THE MOCKUP WHILE EVERY SIZE ALREADY
+   MATCHED IT. Browser-measured at the time: `.ws-ni` was 13.5px in both, as were all fourteen
+   other type sizes in the panel and bar. Source Sans Pro has a markedly smaller x-height than
+   Inter, so the same number renders visibly smaller. Bumping the size then would have made the
+   numbers disagree with the ref in order to make the picture agree with it.
+
+   ⚠️ THE NUMBERS HAVE SINCE MOVED ANYWAY, BY INSTRUCTION (audit pack P6) — rows are 14.5px, icons
+   17px, the manuscript title 14/11.5, the user block 14/12, the badge 11px. That is a deliberate
+   step up in the sidebar's own scale, taken WITH the panel's width (214 → 264). The note above is
+   kept because its lesson survives its numbers: if this surface ever reads wrong again at sizes
+   that match a mockup, suspect the typeface before changing a value. */
 
 
 
@@ -194,7 +200,7 @@
 .ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
 .ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
 .ws-msg {
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--shell-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -205,7 +211,7 @@
 .ws-mspill.static { cursor: default; }
 .ws-mspill.static:hover { border-color: var(--shell-edge); }
 .ws-mst {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--shell-ink);
   white-space: nowrap;
@@ -225,7 +231,37 @@
 
 /* section rows — the panel's own rhythm, 38px */
 /* 30px, so the pill reads as its own object rather than the first row of the navigation. */
-.ws-nav { flex: 1; min-height: 0; overflow: auto; padding-top: 30px; }
+/**
+ * ⚠️ THE NAV LIST IS THE SIDEBAR'S ONLY SCROLLING REGION (audit pack P6), and without that the
+ * sidebar overflows below roughly 740px of viewport height — the brand, the selector and the user
+ * block are all fixed heights, so everything they cannot fit falls off the bottom with nothing to
+ * reach it. This element is the one that gives.
+ *
+ * `flex: 1; min-height: 0` is what makes it the grower — and `min-height: 0` is load-bearing, not
+ * tidiness: a flex item's default `min-height: auto` refuses to shrink below its content, so
+ * without it the LIST would push the foot off instead of scrolling.
+ *
+ * ⚠️ `overscroll-behavior: contain` STOPS THE SCROLL CHAINING OUT. Reaching the end of the nav and
+ * carrying on would scroll the PAGE behind it — the sidebar quietly driving the content window.
+ *
+ * ⚠️ AND THE SCROLLBAR IS HIDDEN, WHICH IS ONLY SAFE BECAUSE OF WHAT IT SCROLLS. A hidden bar on
+ * content you must discover is a trap; this list is short, self-evident, and every row in it is
+ * also reachable by keyboard. Both properties are set — the WebKit pseudo-element and the standard
+ * `scrollbar-width` — because neither covers every browser on its own.
+ */
+.ws-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: 30px;
+  scrollbar-width: none;
+}
+.ws-nav::-webkit-scrollbar { width: 0; height: 0; }
+/* ⚠️ AND THE THREE FIXED BLOCKS ARE PINNED EXPLICITLY. A flex item shrinks by default, so at a
+   short viewport the brand and the selector would compress instead of the list scrolling — the
+   sidebar would look subtly wrong everywhere rather than obviously wrong in one place. */
+.ws-brand, .ws-phead, .ws-pfoot { flex: none; }
 
 /* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
    which is the whole point of retiring the accordion's parent rows. */
@@ -250,7 +286,7 @@
   background: transparent;
   cursor: pointer;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 500;
   color: #544b44;
   transition: background 0.13s, color 0.13s;
@@ -259,7 +295,7 @@
   text-align: left;
 }
 .ws-ic { display: flex; flex: none; opacity: 0.9; color: inherit; }
-.ws-ic svg { width: 18px; height: 18px; stroke-width: 1.7; }
+.ws-ic svg { width: 17px; height: 17px; stroke-width: 1.7; }
 .ws-ni:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
 .ws-ni:hover .ws-ic { opacity: 1; }
 .ws-ni.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
@@ -359,7 +395,7 @@
    line — the block-element failure this foot has now hit three times. */
 .ws-n {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--shell-ink);
   white-space: nowrap;
@@ -371,11 +407,11 @@
    grid-template-rows:0fr` would have collapsed this line to zero height. The collision was
    invisible in the markup and instant in the render. */
 .ws-acctline { display: block; }
-.ws-pl { display: block; font-size: 11px; color: var(--shell-muted); line-height: 1.3; }
+.ws-pl { display: block; font-size: 12px; color: var(--shell-muted); line-height: 1.3; }
 .ws-upg {
   flex: none;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--shell-burgundy);
   border: 1px solid rgba(124, 58, 42, 0.3);
@@ -500,11 +536,14 @@
    window. A dark rail beside a pale page read as two applications bolted together. */
 .ws-app { background: var(--ws-ground); }
 .ws-panel { background: transparent; border-right: 0; }
-/* the single hairline that separates sidebar from page — nothing else divides them */
-.ws-panel::after {
-  content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 1px;
-  background: var(--ws-edge); pointer-events: none;
-}
+/* ⚠️ NOTHING DIVIDES THE SIDEBAR FROM THE PAGE (audit pack P6). The hairline that used to run down
+   `.ws-panel::after` is GONE, and it is gone rather than made fainter: the two surfaces already
+   share one ground, and a rule between them drew an edge where there is no edge. The white content
+   window is what separates the page from the ground — the sidebar simply sits on it.
+
+   ⚠️ THIS ELEMENT KEEPS `position: relative` REGARDLESS. It is not decoration: `.ws-msmenu` (the
+   manuscript flyout) is absolutely positioned and anchors to the panel. Removing the hairline is
+   not a reason to remove the containing block. */
 
 /* ── brand: the plane-and-S mark beside the wordmark, the pair centred ── */
 /* ⚠️ THE BRAND ROW SHARES THE PAGEBAR'S LINE, and the two live in DIFFERENT containers — the

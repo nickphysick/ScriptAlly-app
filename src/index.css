@@ -177,7 +177,13 @@
   /* ⚠️ 232 → 186 (polish §5). The panel was sized before its rhythm settled; at 232 it carried
      more empty width than content. 186 is the narrowest that still fits the longest label with
      its count without wrapping — verified against the live IA, not guessed. */
-  --shell-panelw: 214px;              /* the panel — a sibling of the rail, not a band within it */
+  /* ⚠️ 214 → 264 (audit pack P6). The "narrowest that still fits" argument above was answered
+     against a 13.5px row; that pack steps the sidebar's WHOLE type scale up — rows to 14.5, the
+     manuscript title to 14, the user block to 14/12 — so the width that was narrowest-that-fits is
+     no longer that width. 264 is stated by the pack and measured against the new scale, not
+     derived from the old one. (The pack calls it 246 → 264; 246 is the design ref's own starting
+     width and was never this app's.) */
+  --shell-panelw: 264px;              /* the panel — a sibling of the rail, not a band within it */
   /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
      full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever

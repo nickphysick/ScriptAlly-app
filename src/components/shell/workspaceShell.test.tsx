@@ -114,13 +114,28 @@ describe("one ground, one window", () => {
     expect(w).toContain("box-shadow:");
   });
 
-  it("⚠️ ONE GROUND — sidebar and page read the same token, and the sidebar paints nothing", () => {
+  /* ⚠️ RETARGETED (audit pack P6), and the retarget FINISHES this rule rather than relaxing it.
+     "One ground" already said the sidebar and the page are one surface; the hairline down the
+     panel's right edge was the last thing still claiming otherwise, drawing an edge where there is
+     no edge. It is deleted, so what this now asserts is the whole of the rule: same token, sidebar
+     paints nothing, and NOTHING divides them. The white content window does the separating. */
+  it("⚠️ ONE GROUND — same token, the sidebar paints nothing, and no rule divides them", () => {
     expect(rule(".ws-app")).toContain("background: var(--ws-ground)");
     expect(rule(".ws-main")).toContain("background: var(--ws-ground)");
     expect(rule(".ws-panel")).toContain("background: transparent");
-    // a single hairline is the ONLY thing dividing them
-    expect(cssRules).toContain(".ws-panel::after");
-    expect(cssRules).toContain("background: var(--ws-edge)");
+    expect(cssRules).not.toContain(".ws-panel::after");
+    /* ⚠️ `[1-9]`, NOT A NEGATIVE LOOKAHEAD. The first draft was `/border-right:\s*(?!0)/`, and
+       `\s*` backtracks to ZERO characters — so the lookahead ran against the space rather than the
+       value and `border-right: 0` "matched". The rule was correct and the test was not. */
+    expect(cssRules).not.toMatch(/\.ws-panel[^{]*\{[^}]*border-right:\s*[1-9]/);
+  });
+
+  /* ⚠️ AND THE CONTAINING BLOCK SURVIVES THE HAIRLINE. `.ws-msmenu` is absolutely positioned and
+     anchors to the panel; removing a decoration is not a reason to remove `position: relative`,
+     and the flyout would silently reparent to the viewport if it were. */
+  it("⚠️ the panel is still a containing block — the manuscript flyout anchors to it", () => {
+    expect(rule(".ws-panel")).toContain("position: relative");
+    expect(rule(".ws-msmenu")).toContain("position: absolute");
   });
 
   /* ⚠️ RETARGETED from contentColumn's "the slot paints NOTHING — the stage owns the ground". */
@@ -128,6 +143,68 @@ describe("one ground, one window", () => {
     const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
     expect(idx).toContain("--ws-ground: #f7f4ee");
     expect(idx).toContain("--ws-edge: #e9e2d7");
+  });
+});
+
+/**
+ * ⚠️ THE SIDEBAR'S TYPE SCALE (audit pack P6). These are not a house style anyone can infer — they
+ * are a stated table, and the WIDTH moved with them (214 → 264). Kept together in one test for
+ * exactly that reason: a later pass that steps one size without the others, or trims the width
+ * back towards its old "narrowest that fits", should fail here and read why.
+ */
+describe("the sidebar's type scale, and the width that moved with it", () => {
+  it("every size in the pack's table", () => {
+    expect(rule(".ws-ni")).toContain("font-size: 14.5px");        // nav items
+    expect(rule(".ws-glabel")).toContain("font-size: 9px");       // section labels
+    expect(rule(".ws-mst")).toContain("font-size: 14px");         // manuscript title
+    expect(rule(".ws-msg")).toContain("font-size: 11.5px");       // manuscript sub-line
+    expect(rule(".ws-n")).toContain("font-size: 14px");           // user name
+    expect(rule(".ws-pl")).toContain("font-size: 12px");          // plan line
+    expect(rule(".ws-upg")).toContain("font-size: 12px");         // upgrade pill
+    expect(rule(".ws-bwm")).toContain("font-size: 22px");         // wordmark
+    expect(rule(".ws-ic svg")).toContain("width: 17px");          // nav icons
+  });
+
+  it("the To-do badge steps up with them — in the shared primitive both shells draw", () => {
+    const prims = readFileSync(resolve(__dirname, "./primitives.css"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+    const at = prims.indexOf(".sp-ct {");
+    expect(at).toBeGreaterThan(-1);
+    expect(prims.slice(at, prims.indexOf("}", at))).toContain("font-size: 11px");
+  });
+
+  it("⚠️ and the panel is 264px — a width sized for 13.5px rows is not the width for 14.5px", () => {
+    const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    expect(idx).toContain("--shell-panelw: 264px");
+  });
+});
+
+/**
+ * ⚠️ THE NAV LIST IS THE ONLY THING THAT SCROLLS, and without that the sidebar overflows below
+ * roughly 740px of viewport height: brand, selector and user block are all fixed, so whatever they
+ * cannot fit simply falls off the bottom with no way to reach it.
+ */
+describe("the sidebar's one scrolling region", () => {
+  it("the nav grows, scrolls, and does not chain its scroll out to the page", () => {
+    const nav = rule(".ws-nav");
+    expect(nav).toContain("flex: 1");
+    // `min-height: 0` is load-bearing: a flex item's default `auto` refuses to shrink below its
+    // content, so without it the LIST pushes the foot off instead of scrolling.
+    expect(nav).toContain("min-height: 0");
+    expect(nav).toContain("overflow-y: auto");
+    expect(nav).toContain("overscroll-behavior: contain");
+  });
+
+  it("its scrollbar is hidden in both idioms — neither covers every browser alone", () => {
+    expect(rule(".ws-nav")).toContain("scrollbar-width: none");
+    expect(cssRules).toContain(".ws-nav::-webkit-scrollbar");
+  });
+
+  /* ⚠️ A flex item shrinks by default, so at a short viewport the brand and the selector would
+     compress instead of the list scrolling — the sidebar would look subtly wrong everywhere
+     rather than obviously wrong in one place. */
+  it("⚠️ brand, selector and foot are pinned, so the list is what gives", () => {
+    expect(rule(".ws-brand, .ws-phead, .ws-pfoot")).toContain("flex: none");
   });
 });
 
