@@ -274,17 +274,24 @@
    ⚠️ THE RING IS MUTED GREY, NEVER SAGE. Sage means "done well" everywhere else in this app, and
    a writer who has queried their whole list has not finished anything — they have run out of
    people, which is neutral and often uncomfortable. */
-.qc-allq { margin-top: 18px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--paper); padding: 16px 18px; }
-.qc-allqtop { display: flex; gap: 14px; align-items: flex-start; }
-.qc-allqring { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 2px solid #cfc7bb; color: var(--muted); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 12px; }
-.qc-allqn { font-family: var(--f12-serif); font-weight: 700; font-size: 15px; color: var(--ink); margin-bottom: 4px; }
+/* ⚠️ NOT FULL WIDTH. At the card's width, with three equal route cards, this panel outranked the
+   search field that does the actual work — and this state is not the subject of the page, it is
+   the absence of one. The field above it stays live: a resubmission is a real thing, so there is
+   no dead end here to dramatise. */
+.qc-allq { max-width: 620px; margin-top: 18px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--paper); padding: 15px 17px; }
+.qc-allqtop { display: flex; gap: 13px; align-items: flex-start; }
+.qc-allqtx { min-width: 0; }
+/* ⚠️ THE RING CARRIES THE FIGURE, and it is muted GREY, never sage. Sage means "done well"
+   everywhere else in this app, and running out of people to query is neutral — often
+   uncomfortable — rather than an achievement. */
+.qc-allqring { width: 38px; height: 38px; flex: none; border-radius: 50%; border: 2px solid #cfc7bb; color: var(--muted); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 11px; }
+.qc-allqn { font-family: var(--f12-serif); font-weight: 700; font-size: 14.5px; color: var(--ink); margin-bottom: 3px; }
 .qc-allq p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); margin: 0; }
-.qc-allqsm { margin-top: 6px !important; color: var(--muted) !important; font-size: 11.5px !important; }
-.qc-routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-top: 14px; }
-.qc-route { display: flex; flex-direction: column; gap: 2px; text-align: left; border: 1px solid var(--hairline); background: var(--panel); border-radius: 10px; padding: 10px 12px; font: inherit; cursor: pointer; transition: border-color 0.15s; }
+/* one row of compact actions, wrapping only when it genuinely cannot fit */
+.qc-routes { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+.qc-route { display: inline-flex; align-items: center; gap: 6px; text-align: left; border: 1px solid var(--hairline); background: var(--panel); border-radius: 999px; padding: 7px 13px; font: inherit; font-size: 12px; color: var(--ink); cursor: pointer; transition: border-color 0.15s; }
 .qc-route:hover { border-color: var(--line); }
-.qc-route b { font-size: 12.5px; color: var(--ink); font-weight: 600; }
-.qc-route i { font-style: normal; font-size: 11px; color: var(--muted); }
+.qc-route span { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; color: var(--faint); }
 
 /* ── 3 · COLD START — the only state with art ─────────────────────────────────────────────── */
 .qc-pick-cold { flex-direction: row; align-items: center; gap: 22px; flex-wrap: wrap; }

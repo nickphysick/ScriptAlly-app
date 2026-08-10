@@ -316,6 +316,25 @@ describe("art belongs to the cold start and nowhere else", () => {
   /* ⚠️ THE RING IS MUTED GREY, NEVER SAGE. Sage means "done well" everywhere else in this app,
      and a writer who has queried their whole list has not finished anything — they have run out
      of people, which is neutral and often uncomfortable. */
+  /* ⚠️ THE PANEL IS NOT THE SUBJECT OF THE PAGE. At the card's width with three equal route cards
+     it outranked the search field that does the actual work — and this state is the ABSENCE of a
+     subject, not one. The number was stated three times over in one panel. */
+  it("compact: capped width, one row of actions, and the count stated once", () => {
+    expect(rule(".qc-allq")).toContain("max-width: 620px");
+    const allqRaw = picker.slice(picker.indexOf('state === "all-queried"'), picker.indexOf("1 · THE GRID"));
+    expect(allqRaw, "the heading names the state; the ring carries the figure")
+      .toContain("Every contact queried");
+    expect(allqRaw, "the count must not be restated in the heading").not.toContain("of {counts.total} contacts");
+    expect(allqRaw.match(/counts\.done/g)?.length ?? 0, "the figure appears once").toBe(1);
+    /* Comments stripped: this file EXPLAINS which descriptions were dropped, and an assertion
+       about the code must not be satisfiable by prose about the code. Second lines went with the
+       cards — the contacts route keeps its count, because a number is information. */
+    const allq = allqRaw.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "");
+    expect(allq, "the route descriptions came back").not.toContain("Straight into your list");
+    expect(allq).toContain("Review your contacts <span>{counts.total}</span>");
+    expect(rule(".qc-routes"), "three actions on one row, not a grid of cards").toContain("display: flex");
+  });
+
   it("the all-queried ring is muted, and the field stays live", () => {
     const ring = rule(".qc-allqring");
     expect(ring).toContain("#cfc7bb");

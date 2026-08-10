@@ -227,31 +227,32 @@ export const AgentPicker: React.FC<AgentPickerProps> = ({
         {field}
         <div className="qc-allq">
           <div className="qc-allqtop">
+            {/* ⚠️ THE NUMBER LIVES IN THE RING, AND NOWHERE ELSE IN THIS PANEL. It was stated
+                three times over — ring, heading and route — which made a small fact look like the
+                subject of the page. The heading names the STATE; the ring carries the figure. */}
             <span className="qc-allqring" aria-hidden="true">{counts.done}</span>
-            <div>
-              <div className="qc-allqn">{counts.done} of {counts.total} contacts queried</div>
+            <div className="qc-allqtx">
+              <div className="qc-allqn">Every contact queried</div>
               <p>
                 Every agent on your contact list has been queried
-                {manuscriptTitle ? <> for <i>{manuscriptTitle}</i></> : null}.
-              </p>
-              <p className="qc-allqsm">
-                You can still log a query to any of them — a resubmission, or a second manuscript.
-                Search above as usual.
+                {manuscriptTitle ? <> for <i>{manuscriptTitle}</i></> : null}. You can still log a
+                query to any of them — a resubmission, or a second manuscript.
               </p>
             </div>
           </div>
+          {/* ⚠️ COMPACT INLINE ACTIONS ON ONE ROW, not three full-width cards. At card width the
+              panel outranked the search field that does the actual work, and this state is not
+              the subject of the page — it is the absence of one. Second lines are gone with the
+              cards: "Straight into your list" only restated its own label. The contacts route
+              keeps its count, because a number is information rather than description. */}
           <div className="qc-routes">
-            <button type="button" className="qc-route" onClick={onAddAgent}>
-              <b>Add a new agent</b><i>Straight into your list</i>
-            </button>
+            <button type="button" className="qc-route" onClick={onAddAgent}>Add a new agent</button>
             {onDiscover && (
-              <button type="button" className="qc-route" onClick={onDiscover}>
-                <b>Find agents in Discover</b><i>By genre and openness</i>
-              </button>
+              <button type="button" className="qc-route" onClick={onDiscover}>Find agents in Discover</button>
             )}
             {onSeeAll && (
               <button type="button" className="qc-route" onClick={onSeeAll}>
-                <b>Review your contacts</b><i>{counts.total} agents on file</i>
+                Review your contacts <span>{counts.total}</span>
               </button>
             )}
           </div>
