@@ -431,18 +431,15 @@
 
 .tdg-mglyph { width: 14px; text-align: center; flex: none; opacity: 0.75; }
 
-.tdg-mkey {
-  margin-left: auto;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  color: #a5988c;
-}
+/* ⚠️ `.tdg-mkey` IS EXTINCT — it printed the `1` and `2` beside the two preset snooze rows, and
+   both the rows and the keys are gone (a twelve-stop scale has no two stops worth a shortcut).
+   Deleted rather than left unreferenced, along with its dim-state override: a rule kept past its
+   only consumer is the next reader's puzzle, and this sheet's own law is that a dead rule goes.
 
-/* ⚠️ A VERB THAT DOES NOT APPLY IS GREY AND INERT, NEVER ABSENT — an absent row is a puzzle, a
+   ⚠️ A VERB THAT DOES NOT APPLY IS GREY AND INERT, NEVER ABSENT — an absent row is a puzzle, a
    greyed one is an answer. The house inert grammar: faint ink, not-allowed, no fill change. */
 .tbd-mi.dim, .tbd-mi:disabled { color: #c1b4a5; cursor: not-allowed; }
 .tbd-mi.dim:hover, .tbd-mi:disabled:hover { background: transparent; }
-.tbd-mi.dim .tdg-mkey { color: #d5ccc1; }
 
 /* ── THE HOUSEKEEPING FOLD ──────────────────────────────────────────────────────────────────
    One control, stating the number it holds back, centred beneath its panel. ⚠️ ONLY

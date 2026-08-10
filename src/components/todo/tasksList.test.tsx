@@ -21,11 +21,11 @@ import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow, TASK_GROUP_ORDER, TaskGroupId } from "../../lib/todoGroups";
-import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, splitWeight, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, splitWeight } from "../../lib/taskRow";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { TodoColumnId } from "../../lib/todoColumns";
 import { SNOOZE_STOPS, reachableStops, snoozeDateLabel } from "../../lib/todoActions";
-import { focusesSearch, isTypingTarget, ShortcutKey } from "../../lib/taskShortcuts";
+import { focusesSearch, isTypingTarget, ShortcutKey, KEY_MAP } from "../../lib/taskShortcuts";
 import { dialDateLine, dialDateShort } from "./SnoozeDial";
 import { TaskList, groupColumn } from "./TaskList";
 
@@ -34,6 +34,7 @@ const css = readFileSync(join(here, "todoGroups.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const list = readFileSync(join(here, "TaskList.tsx"), "utf8");
 const dialSrc = readFileSync(join(here, "SnoozeDial.tsx"), "utf8");
+const rowSrc = readFileSync(join(here, "..", "..", "lib", "taskRow.ts"), "utf8");
 const dialCss = readFileSync(join(here, "snoozeDial.css"), "utf8");
 const rule2 = (sel: string): string => {
   const i = dialCss.indexOf(sel);
@@ -381,20 +382,42 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
     expect(dialSrc).toContain("autoFocus={autoFocus}");
   });
 
-  /* ⚠️ THE NUMBER KEYS ARE INERT FROM HERE, BY CONSTRUCTION — and this case is written down so
-     the interim does not read as an oversight. They fired `snooze-1`/`snooze-7` by finding them
-     among the section ITEMS; the snooze section has no items now, so the lookup finds nothing and
-     the keys do nothing. The dial makes them redundant — a continuous scale has no two stops
-     worth a shortcut. The constant and its handler are DELETED in Phase 4; until then they are
-     dead code that cannot misfire, which is the safe order to do it in. */
-  it("⚠️ THE NUMBER KEYS CAN NO LONGER FIRE — the section they searched has no items", () => {
-    const secs = sections(card({}));
-    for (const key of Object.keys(SPLIT_NUMBER_KEYS)) {
-      const id = SPLIT_NUMBER_KEYS[key];
-      expect(secs.flatMap((s) => s.items).find((i) => i.id === id)).toBeUndefined();
-    }
-    /* the guard stays until the handler goes, so a resurrected item could not fire while greyed */
-    expect(list).toContain("if (item?.enabled)");
+  /**
+   * ⚠️ THE NUMBER KEYS ARE EXTINCT, IN ALL FOUR PLACES THEY LIVED (Phase 4).
+   *
+   * `1` and `2` fired the two preset snooze rows. A continuous twelve-stop scale has no two stops
+   * worth a shortcut — picking tomorrow is open-then-Enter now, which is FEWER keys than it was —
+   * so the binding has nothing left to select. Deleted rather than left unreferenced: a binding
+   * kept past the thing it selected is the next reader's puzzle, and worse, an invitation to
+   * re-point it at something arbitrary.
+   */
+  it("the constant, the hint field, the handler and the CSS are all GONE, not merely unused", () => {
+    /* on DECLARATIONS, not raw text — this sheet's house style explains a rule by naming what it
+       forbids, so a naive whole-file search fails on a correct file that documents itself */
+    expect(code(rowSrc)).not.toContain("SPLIT_NUMBER_KEYS");
+    expect(code(rowSrc)).not.toContain("hint");        // the field the two rows carried
+    expect(code(list)).not.toContain("SPLIT_NUMBER_KEYS");
+    expect(code(list)).not.toContain("tdg-mkey");
+    expect(cssDecls).not.toContain(".tdg-mkey");       // its rule AND its dim-state override
+    /* the menu's keydown answers Escape and nothing else */
+    expect(list).toContain('if (e.key === "Escape") { e.stopPropagation(); onClose(true); }');
+  });
+
+  /**
+   * ⚠️ AND THE `?` OVERLAY IS GENUINELY UNAFFECTED — confirmed rather than assumed.
+   *
+   * The two tables were always separate: `KEY_MAP` (taskShortcuts) drives the overlay AND the
+   * window handler, `SPLIT_NUMBER_KEYS` (taskRow) drove the menu alone. The overlay therefore
+   * never advertised `1` or `2`, which is why removing them cannot leave it teaching a key that
+   * does nothing — the exact failure the shell packs keep hitting from the other direction.
+   */
+  it("`KEY_MAP` never listed the number keys, so nothing in the map went stale", () => {
+    const shortcuts = readFileSync(join(here, "..", "..", "lib", "taskShortcuts.ts"), "utf8");
+    expect(shortcuts).not.toContain("SPLIT_NUMBER_KEYS");
+    for (const k of KEY_MAP) expect(k.key).not.toMatch(/^[12]$/);
+    /* the overlay is still built FROM the map, so handler and sheet cannot list different keys */
+    expect(list).toContain("KEY_MAP.map((k) => (");
+    expect(KEY_MAP.map((k) => k.key)).toContain("S");   // the dial's own key, still advertised
   });
 
   it("the menu wears the shell it always wore — consumed from todoBoard.css, never edited", () => {

@@ -36,7 +36,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup, TaskGroupId, groupSlice, showMoreLabel } from "../../lib/todoGroups";
 /* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
-import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, splitWeight, SPLIT_NUMBER_KEYS } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, splitWeight } from "../../lib/taskRow";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/todoMenu";
@@ -206,15 +206,13 @@ const SplitMenu: React.FC<{
       role="menu"
       aria-label={`Actions for ${card.title}`}
       style={pos ? { left: pos.left, top: pos.top } : { left: 0, top: 0, visibility: "hidden" }}
+      /* ⚠️ ESCAPE ONLY. The number keys are GONE, not merely unused: `1` and `2` fired the two
+         preset snooze rows, and a continuous twelve-stop scale has no two stops worth a shortcut
+         — picking tomorrow is now open-then-Enter, which is fewer keys than it was. A binding
+         kept past the thing it selected is the next reader's puzzle, and worse, an invitation to
+         re-point it at something arbitrary. */
       onKeyDown={(e) => {
-        if (e.key === "Escape") { e.stopPropagation(); onClose(true); return; }
-        /* ⚠️ THE NUMBER KEYS KEEP SNOOZE FAST. It lost its own button; it must not lose its speed.
-           They fire only where the verb is live — a greyed tier is inert to the key as well as to
-           the pointer, or the grey would be a lie. */
-        const id = SPLIT_NUMBER_KEYS[e.key];
-        if (!id) return;
-        const item = sections.flatMap((sec) => sec.items).find((i) => i.id === id);
-        if (item?.enabled) { e.preventDefault(); e.stopPropagation(); onPick(id); }
+        if (e.key === "Escape") { e.stopPropagation(); onClose(true); }
       }}
     >
       {sections.map((sec, si) => (
@@ -248,7 +246,6 @@ const SplitMenu: React.FC<{
             >
               <span className="tdg-mglyph" aria-hidden>{it.glyph}</span>
               {it.label}
-              {it.hint && <span className="tdg-mkey" aria-hidden>{it.hint}</span>}
             </button>
           ))}
         </React.Fragment>

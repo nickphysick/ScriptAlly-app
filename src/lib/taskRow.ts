@@ -167,8 +167,6 @@ export interface SplitItem {
   id: MenuItemId;
   glyph: string;
   label: string;
-  /** The number key that fires it directly, where it has one. */
-  hint?: string;
   /** ⚠️ A VERB THAT DOES NOT APPLY IS GREYED, NEVER ABSENT — an absent row is a puzzle, a greyed
    *  one is an answer. `why` becomes the control's title so the answer is readable. */
   enabled: boolean;
@@ -265,6 +263,3 @@ export function splitMenu(
     },
   ];
 }
-
-/** The two number keys the menu answers directly — one source, so the hint and the handler agree. */
-export const SPLIT_NUMBER_KEYS: Record<string, MenuItemId> = { "1": "snooze-1", "2": "snooze-7" };
