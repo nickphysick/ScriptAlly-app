@@ -148,7 +148,13 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           "N manuscripts · M in submission" pulse line is dropped with it (no meta slot under
           the header law) — see the rollout report. */}
       <PageHeader
-        variant="full"
+        variant="workspace"
+        mark="manuscripts"
+        /* ⚠️ THIS COUNT IS A RESTORATION, not an invention. The grand slab's
+           "N manuscripts · M in submission" pulse was dropped when the header law arrived because
+           there was no meta slot; the workspace header has one, and `activeQueryCount` is the same
+           predicate the field roster uses. */
+        count={`${manuscripts.length} MANUSCRIPTS · ${manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} IN SUBMISSION`}
         title="Your manuscripts"
         description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
         actions={[{

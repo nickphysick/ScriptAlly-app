@@ -27,7 +27,7 @@ export type MarkName =
   | "active-queries" | "goals" | "activity" | "tasks"
   /* the page-band keys — one per page that mounts variant="band" */
   | "queries" | "todo" | "calendar" | "contacts" | "packages" | "analytics"
-  | "noteboard" | "discover" | "settings";
+  | "noteboard" | "discover" | "settings" | "manuscripts" | "comps";
 
 /**
  * ⚠️ THE BRIEFS. Kept beside the icons they will replace so the two never drift apart, and kept
@@ -80,6 +80,10 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   noteboard: { label: "note", icon: <><path d="M5 4h14v16l-5-4H5z" /><path d="M9 9h6M9 13h4" /></> },
   /* ⚠️ MY CALL: a compass — Discover is looking outward for agents you do not have yet */
   discover: { label: "compass", icon: <><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></> },
+  /* a stack of bound pages — the shelf, not a single book */
+  manuscripts: { label: "shelf", icon: <><path d="M4 4h6v16H4zM12 4h4v16h-4z" /><path d="M18 5l3 15" /></> },
+  /* two books side by side — the comparison itself */
+  comps: { label: "comps", icon: <><path d="M4 5h7v14H4z" /><path d="M13 5h7v14h-7z" /></> },
   /* ⚠️ MY CALL: a cog, the one place a mechanism is the honest metaphor */
   settings: { label: "cog", icon: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></> },
 };

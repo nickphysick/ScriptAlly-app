@@ -568,7 +568,10 @@ export const ComparableTitlesPage: React.FC<{
           dropped with it (no meta slot under the header law); the manuscript selector keeps its
           function in the row below the rule until the sidebar switcher is live-wired. */}
       <PageHeader
-        variant="full"
+        variant="workspace"
+        mark="comps"
+        /* the shelf's own total, already derived on this page for the spine switcher */
+        count={activeMs ? `${comps.length} COMPS` : undefined}
         title="Comparable titles"
         description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
       />

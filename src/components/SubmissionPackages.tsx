@@ -189,7 +189,8 @@ export const SubmissionPackages: React.FC = () => {
           `.pkgw` scope — Discover's pattern, so there is no second rule and no fork of a component
           eleven pages share. */}
       <PageHeader
-        variant="full"
+        variant="workspace"
+        mark="packages"
         title="Package Workshop"
         description="Bundle your materials once, then send them without rebuilding each time."
         titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}

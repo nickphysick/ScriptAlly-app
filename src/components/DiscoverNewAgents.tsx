@@ -464,7 +464,8 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
           manuscript selector occupies the same slot as the agent list's "Add new agent" button. */}
       <div className="dv-wrap">
         <PageHeader
-          variant="full"
+          variant="workspace"
+          mark="discover"
           title="Discover new agents"
           description="Verified agents matched to your manuscript — with the reasons they fit."
           titleAdornment={<span className="dv-propill">Pro</span>}
