@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — all queried, one block</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#ece0d2;--sage:#8a9e88;--pink:#f5e2da;--pink-br:#e8c8bc;--rim:rgba(124,58,42,.16);}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:26px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.note{font-size:11px;color:var(--muted);font-style:italic;}
+
+.card{background:var(--parchment);border-radius:14px;padding:24px 26px 26px;max-width:1180px;
+  box-shadow:inset 0 0 0 1px var(--rim),0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);}
+h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;margin-bottom:14px;}
+.searchline{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.tfield{max-width:400px;flex:1 1 400px;background:#fff;border-radius:9px;padding:11px 13px;font-size:13.5px;border:0;
+  box-shadow:inset 0 0 0 1px #e0d5c8;font-family:'Inter';outline:none;}
+.tfield::placeholder{color:#c8b8a8;}
+.helper{font-size:12px;color:var(--ink-soft);} .helper a{color:var(--burg);}
+
+/* ── one block ── */
+.blk{max-width:760px;background:#f8f2ea;border-radius:11px;padding:16px 18px;box-shadow:inset 0 0 0 1px var(--hair);}
+.blk-l1{font-size:14px;line-height:1.5;}
+.blk-l1 b{font-weight:500;}
+.blk-l1 .cts{color:var(--muted);}
+.blk-l1 a{color:var(--burg);text-underline-offset:2px;cursor:pointer;margin-left:4px;white-space:nowrap;}
+.blk-l2{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5;}
+.blk-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:13px;box-shadow:inset 0 1px 0 var(--hair);}
+.act{background:#fff;border-radius:9px;padding:8px 12px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;cursor:pointer;
+  transition:box-shadow .15s ease;}
+.act:hover{box-shadow:inset 0 0 0 1px #dcc9bb,0 2px 8px rgba(58,28,20,.07);}
+
+/* ── plates ── */
+.reveal{display:none;margin-top:14px;padding-top:13px;box-shadow:inset 0 1px 0 var(--hair);}
+body[data-open="1"] .reveal{display:block;}
+.plate{display:flex;flex-wrap:wrap;gap:7px;opacity:.66;transition:opacity .16s ease;}
+.plate:hover{opacity:1;}
+.np{display:inline-flex;align-items:center;gap:8px;background:var(--parchment);border-radius:20px;padding:7px 13px 7px 10px;
+  box-shadow:inset 0 0 0 1px var(--hair);cursor:pointer;transition:box-shadow .15s ease;}
+.np:hover{box-shadow:inset 0 0 0 1px #dcc9bb,0 2px 8px rgba(58,28,20,.07);}
+.np span{font-size:13px;}
+.np em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;color:var(--muted);}
+.dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;}
+.dot.live{box-shadow:inset 0 0 0 2px var(--burg);background:#f8e7dc;}
+.dot.past{box-shadow:inset 0 0 0 2px #c3b3a3;background:#efe7dd;}
+.key{display:flex;align-items:center;gap:7px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:8.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+
+.legend{max-width:1180px;margin-top:24px;padding:16px 20px;background:#f8f2ea;border-radius:11px;
+  box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+.legend del{color:#b0a092;}
+</style>
+</head>
+<body data-open="0">
+
+<div class="ctl"><b>Ref</b><span class="note">One block. Click "Show them" to reveal the nameplates.</span></div>
+
+<div class="card">
+  <h2>Who are you querying?</h2>
+  <div class="searchline">
+    <input class="tfield" placeholder="Search by name or agency…">
+    <span class="helper">Not listed? <a href="#">Add a new agent</a></span>
+  </div>
+
+  <div class="blk">
+    <div class="blk-l1">You've queried all <b>16</b> contacts for <i>Murphy's Day Out</i> — <span class="cts">12 still waiting, 4 concluded.</span><a id="tg">Show them</a></div>
+    <div class="blk-l2">You can still log a query to any of them — a resubmission, or a second manuscript.</div>
+
+    <div class="reveal">
+      <div class="plate" id="plate"></div>
+      <div class="key"><span class="dot live"></span>Active query<span class="dot past" style="margin-left:14px"></span>Previously queried</div>
+    </div>
+
+    <div class="blk-acts">
+      <span class="act">Add a new agent</span>
+      <span class="act">Find agents in Discover</span>
+      <span class="act">Review your contacts</span>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>What was said more than once</b>
+  <ul>
+    <li><del>"Every contact queried" heading</del> · <del>the 16 in a ring</del> · <del>"ALREADY QUERIED FOR THIS MANUSCRIPT"</del> · <del>"for Murphy's Day Out · 16 contacts"</del> · <del>"16" on the Review button</del> — the same fact stated five times across two containers.</li>
+    <li><b>One block now says it once</b>, and says the useful version: the total, the manuscript, and the split between waiting and concluded. The counts are the only thing here the writer cannot work out for themselves.</li>
+    <li>The section heading is gone entirely. A heading that restates the sentence beneath it is decoration.</li>
+    <li><b>The plates open inside the same block</b>, above the actions — so the routes out stay at the foot whether it is open or closed, and there is no second container to space against.</li>
+    <li>"Show them" sits at the end of the sentence it acts on, rather than being a fourth button competing with the three routes.</li>
+  </ul>
+</div>
+
+<script>
+var ROWS=[
+ ["Daniel O'Rourke","live","9 Aug 2026"],["William Tan","live","29 Jul 2026"],["Fenella Str","past","14 Mar 2026"],
+ ["Marcus Reed","live","11 Jun 2024"],["Priya Raman","live","1 May 2024"],["Jonathan Marsh","live","9 Apr 2024"],
+ ["Aisha Kapoor","live","3 Apr 2024"],["Eleanor Whitfield","live","14 Mar 2024"],["Tom Ellery","live","3 Mar 2024"],
+ ["Marcus Reed","past","20 Feb 2024"],["Sophie Dunn","live","15 Jan 2024"],["Harriet Vane-Coe","past","5 Dec 2023"],
+ ["Rosalind Achebe","live",""],["Greg Panetta","live",""]
+];
+document.getElementById('plate').innerHTML=ROWS.map(function(r){
+ return '<span class="np" tabindex="0"><span class="dot '+r[1]+'"></span><span>'+r[0]+'</span>'+(r[2]?'<em>'+r[2]+'</em>':'')+'</span>';}).join('');
+document.getElementById('tg').addEventListener('click',function(){
+ var o=document.body.dataset.open==='1';document.body.dataset.open=o?'0':'1';
+ this.textContent=o?'Show them':'Hide them';});
+</script>
+</body>
+</html>
