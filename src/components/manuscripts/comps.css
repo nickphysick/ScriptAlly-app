@@ -89,6 +89,23 @@
   .ct-split { grid-template-columns: 1fr; height: auto; }
 }
 
+/* ⚠️ THE TOOLBAR ROW — tally left, manuscript selector right. It replaces an inline-styled
+   flex-end div, so the selector's position is unchanged; the tally is the addition.
+   ⚠️ THE TALLY TREATMENT IS READ OFF THE CONTACT LIST's `.agl-count`, not re-derived, so the pages
+   state their figures in one voice. THE RULE: the plate carries identity, this row carries tallies
+   and view state. `margin-right:auto` on the tally is what holds the selector at the right edge —
+   the mirror of the sibling's `margin-left:auto`, because here the tally is not the last child. */
+.ct-tools { display: flex; align-items: center; gap: 10px; margin: -12px 0 12px; }
+.ct-tally {
+  margin-right: auto; white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  /* ⚠️ `--ct-label`, NOT `--ct-muted` — the latter does NOT EXIST on this page. A `var()` naming
+     nothing does not error: the declaration is dropped at computed-value time and the text quietly
+     inherits whatever colour it lands next to. `--ct-label` is this page's mono-uppercase token
+     (the selector's own label reads it) and is defined in all three themes. */
+  letter-spacing: 0.11em; text-transform: uppercase; color: var(--ct-label);
+}
+
 /* manuscript selector on the right of the masthead */
 .ct-mssel-wrap { position: relative; }
 .ct-mssel {

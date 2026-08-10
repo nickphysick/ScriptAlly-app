@@ -151,12 +151,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
       <PageHeader
         variant="workspace"
         mark="manuscripts"
-        /* ⚠️ NO COUNT — and this is the page where that costs something, so it is stated rather
-           than left as a silent absence. The strip carried "N MANUSCRIPTS · M IN SUBMISSION", itself
-           a RESTORATION of the grand slab's pulse; dropping it loses that figure for the SECOND
-           time, and no other surface states it. It goes because the header is chrome and has to read
-           the same on every band-tier page. The derivation survives in `activeQueryCount` and the
-           strip is a one-line restore if that trade is ever revisited. */
+        /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the figure did NOT go
+           with it. THE RULE IS: the plate carries IDENTITY, the toolbar carries TALLIES and view
+           state. So "N MANUSCRIPTS · M IN SUBMISSION" moved down to the tally row below, which is
+           where the Contact list has always kept its own "16 OF 16". This figure had already been
+           dropped once (with the grand slab) and would have gone a second time for want of a home;
+           the home existed on a sibling page all along. */
         title="Your manuscripts"
         description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
         actions={[{
@@ -166,6 +166,21 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           primary: true,
         }]}
       />
+        {/* ⚠️ THE TALLY ROW — the Contact list's `.agl-count` slot, in this page's own scope. Mono,
+            uppercase, pushed right by `margin-left:auto` so it sits at the end of the row exactly as
+            the sibling's does. It is a TOOLBAR row, not a header element: identity belongs to the
+            plate, tallies and view state belong here.
+            ⚠️ DERIVED, NEVER STORED — `activeQueryCount` is the same pipeline predicate the field
+            roster uses, so the tally cannot disagree with the plates beneath it. And it is HIDDEN on
+            the empty state: "0 MANUSCRIPTS · 0 IN SUBMISSION" beside "Your library is empty" states
+            the same nothing twice. */}
+        {ordered.length > 0 && (
+          <div className="msv-tools">
+            <span className="msv-tally">
+              {manuscripts.length} manuscripts · {manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} in submission
+            </span>
+          </div>
+        )}
         {ordered.length === 0 ? (
           /* ── zero-manuscript state: minimal, in the plate grammar ── */
           <div className="msv-panel">

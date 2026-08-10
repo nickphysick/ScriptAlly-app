@@ -570,15 +570,20 @@ export const ComparableTitlesPage: React.FC<{
       <PageHeader
         variant="workspace"
         mark="comps"
-        /* ⚠️ NO COUNT — the header is chrome and reads the same on every band-tier page. This is the
-           cheapest of the removals: the shelf's total was `comps.length`, and the shelf itself sits
-           immediately below the rule stating exactly that, so the strip was duplicating a number the
-           page already shows rather than carrying one only it had. */
+        /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the shelf total moved to
+           the tally slot in the row below rather than being dropped. THE RULE: the plate carries
+           IDENTITY, the toolbar carries TALLIES and view state — the same split the Contact list has
+           always had with its "16 OF 16". */
         title="Comparable titles"
         description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
       />
       {activeMs && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12, marginBottom: 12 }}>
+        /* ⚠️ THE TALLY JOINS THE ROW THAT ALREADY EXISTED rather than getting one of its own — the
+            manuscript selector is view state and the tally is a tally, which is precisely what this
+            row is for. The selector keeps the right edge (it is the control); the tally sits to its
+            left, `margin-right:auto` pushing them apart. */
+        <div className="ct-tools">
+          <span className="ct-tally">{comps.length} {comps.length === 1 ? "comp" : "comps"}</span>
           <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
         </div>
       )}
