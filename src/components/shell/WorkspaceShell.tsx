@@ -32,7 +32,7 @@ import { planLine, resolveActiveManuscript } from "../../lib/shellSidebar";
 import {
   ShellSection, openForHit, sectionClick, sectionRowState, shellCrumb, shellHitFor,
 } from "../../lib/workspaceShell";
-import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardItem, SearchPill } from "./primitives";
+import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill } from "./primitives";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { invokeCapture } from "./railNav";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
@@ -137,18 +137,48 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     };
   }, [msOpen]);
 
+  /**
+   * ⚠️ THE MENU OWNS ITS KEYBOARD (polish P1). Outside-click and Escape were already here; arrow
+   * cycling, Tab-to-close and focus handling were not, so the menu could be opened by keyboard and
+   * then not operated by one.
+   *
+   * ⚠️ FOCUS RETURNS TO THE BUTTON ON CLOSE — but only when focus is still INSIDE the menu. A
+   * selection that navigates away has already put focus where it belongs, and yanking it back to a
+   * button on the previous page is worse than leaving it.
+   */
   useEffect(() => {
     if (!newOpen) return;
+    const items = (): HTMLElement[] =>
+      Array.from(newRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+
+    items()[0]?.focus();
+
     const onDown = (e: PointerEvent) => {
       if (newRef.current?.contains(e.target as Node)) return;
       setNewOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setNewOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setNewOpen(false); return; }
+      // Tab closes rather than trapping — this is a menu, not a dialogue.
+      if (e.key === "Tab") { setNewOpen(false); return; }
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      const list = items();
+      if (!list.length) return;
+      e.preventDefault(); // else the page scrolls under an open menu
+      const at = list.indexOf(document.activeElement as HTMLElement);
+      const next = e.key === "ArrowDown"
+        ? (at + 1) % list.length
+        : (at <= 0 ? list.length - 1 : at - 1);
+      list[next]?.focus();
+    };
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("keydown", onKey);
+      if (newRef.current?.contains(document.activeElement)) {
+        newRef.current.querySelector<HTMLElement>(".ws-nbtn")?.focus();
+      }
     };
   }, [newOpen]);
 
@@ -420,6 +450,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           for. The shell must not learn what a composer is. */}
                       {pathname.startsWith("/todo") && (
                         <MenuCardItem
+                          role="menuitem"
                           label="Add a task"
                           onSelect={() => {
                             setNewOpen(false);
@@ -430,16 +461,31 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       {/* The SAME capture contracts the dashboard hero actions use — the bar adds
                           a doorway, never a second door. */}
                       <MenuCardItem
+                        role="menuitem"
                         label="Log a query"
                         onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("query", onNavigate); }}
                       />
                       <MenuCardItem
+                        role="menuitem"
                         label="Record a response"
                         onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("record", onNavigate); }}
                       />
                       <MenuCardItem
+                        role="menuitem"
                         label="Add agent"
                         onSelect={() => { setNewOpen(false); if (onNavigate) invokeCapture("agent", onNavigate); }}
+                      />
+                      <MenuCardDivider />
+                      {/* ⚠️ THE REF ASKS FOR SIX ITEMS AND FOUR EXIST. "Add a manuscript" is real —
+                          App.tsx intercepts that exact sub-page name — so it is here. "New note"
+                          is NOT: the composer is opened by an event the To-do PAGE listens for, so
+                          from anywhere else it would reach no listener and the row would do
+                          nothing. A dead row teaches the wrong shape of the app (the shell renders
+                          what exists), so it waits for a real contract. */}
+                      <MenuCardItem
+                        role="menuitem"
+                        label="Add a manuscript"
+                        onSelect={() => { setNewOpen(false); onNavigate?.("manuscripts", "Add a manuscript"); }}
                       />
                     </MenuCard>
                   )}

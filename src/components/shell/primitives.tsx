@@ -97,13 +97,16 @@ export interface MenuCardItemProps {
   count?: number;
   urgent?: boolean;
   onSelect: () => void;
+  /** `"menuitem"` inside a `role="menu"` card — the roles must pair or neither is announced. */
+  role?: string;
 }
 
 export const MenuCardItem: React.FC<MenuCardItemProps> = ({
-  label, on = false, count, urgent, onSelect,
+  label, on = false, count, urgent, onSelect, role,
 }) => (
   <button
     type="button"
+    role={role}
     className={`sp-card-i${on ? " on" : ""}`}
     aria-current={on ? "page" : undefined}
     onClick={onSelect}

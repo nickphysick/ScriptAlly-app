@@ -552,6 +552,31 @@
 /* ⚠️ THE MENU ANCHOR CAME BACK WITH THE BUTTON. `.ws-newwrap` was swept out with the bar's rules
    and its absence was invisible in every measurement — the + New menu had nothing to anchor to. */
 .ws-newwrap { position: relative; flex: none; }
+/**
+ * ⚠️ THE MENU MUST NOT BE IN FLOW (polish P1). It had NO rule of its own, and `.sp-card` is
+ * statically positioned — so the panel laid out as an ordinary child of the pagebar, grew the bar
+ * by its own height, and pushed the entire content window down the page. Opening a menu moved the
+ * thing you were reading.
+ *
+ * The wrapper above is the anchor (`position: relative`); this takes the panel out of flow and
+ * hangs it off the button's bottom-right. `z-index` clears the window, which paints a background.
+ *
+ * ⚠️ TRANSFORM AND OPACITY ONLY (pack rule 7). The entrance scales from the top-right corner it
+ * belongs to — animating height or top here would relayout the pagebar every frame, which is the
+ * displacement bug again in slow motion.
+ */
+.ws-newmenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  transform-origin: top right;
+  animation: ws-menuin 0.14s cubic-bezier(0.22, 0.68, 0.36, 1);
+}
+@keyframes ws-menuin { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+/* the chevron/plus turns to say the menu is open — transform only */
+.ws-nbtn svg { transition: transform 0.14s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.ws-nbtn[aria-expanded="true"] svg { transform: rotate(45deg); }
 /* ⚠️ AND `display:flex` IS LOAD-BEARING: the button holds an icon AND a label, and without it
    they stack — the pill rendered as a tall black circle. Caught by the screenshot, not the tests. */
 .ws-nbtn {
