@@ -12,6 +12,8 @@
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { OneScreenPanel } from "./OneScreenPanel";
 
 const html = (el: React.ReactElement) => renderToStaticMarkup(el);
@@ -51,5 +53,46 @@ describe("OneScreenPanel — the shell the four containers had", () => {
 
   it("`os-lift` is the default and can be turned off explicitly", () => {
     expect(html(<OneScreenPanel variant="os-x" lift={false} />)).toContain('class="os-card os-x"');
+  });
+});
+
+/**
+ * ⚠️ THE RIM SURVIVES A BAND (§2). Browser-proven cause: a child with an opaque background inside
+ * a rounded `overflow:hidden` parent is clipped to the BORDER box and paints over the parent's
+ * border. jsdom cannot render, so what is pinned here is the shape of the fix — an overlay that
+ * paints above descendants — and the two things that would silently undo it.
+ */
+describe("the container rim is an overlay, not a border", () => {
+  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const blk = (sel: string) => {
+    const i = bare.indexOf(`${sel} {`);
+    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
+    return bare.slice(i, bare.indexOf("}", i));
+  };
+
+  it("the rim is drawn by ::after, above descendants", () => {
+    const r = blk(".os-card::after");
+    expect(r).toContain("position: absolute");
+    expect(r).toContain("inset: 0");
+    expect(r).toContain("box-shadow: inset 0 0 0 1px");
+    expect(r).toContain("border-radius: inherit"); // or the rim squares off the corners
+  });
+
+  it("⚠️ the overlay never eats a click meant for the card", () => {
+    expect(blk(".os-card::after")).toContain("pointer-events: none");
+  });
+
+  it("⚠️ the card is the positioning context — without it the overlay escapes the card", () => {
+    expect(blk(".os-card")).toContain("position: relative");
+  });
+
+  it("⚠️ the BORDER STAYS, for geometry — removing it shifts every card's contents by 1px", () => {
+    expect(blk(".os-card")).toMatch(/border:\s*1px solid/);
+  });
+
+  it("hover warms the rim and moves nothing — no transform on a container", () => {
+    expect(bare).toContain(".os-card.os-lift:hover::after");
+    expect(blk(".os-card.os-lift:hover")).not.toContain("transform");
   });
 });

@@ -107,6 +107,10 @@
 
 /* ══ CARD CHROME ══ */
 .os-card {
+  /* ⚠️ THE POSITIONING CONTEXT FOR THE RIM OVERLAY — declared HERE, not in a second `.os-card`
+     rule. A separate block is how this sheet has been bitten twice: the smoke test's slice takes
+     the FIRST match, so the second rule's declarations are invisible to it. One element, one rule. */
+  position: relative;
   background: #fffdf9;
   border: 1px solid #e3d9cc;
   border-radius: 15px;
@@ -114,11 +118,43 @@
   min-height: 0;
   transition: box-shadow 0.18s ease, border-color 0.18s ease;
 }
-/* §10: hover lift is shadow/border ONLY — no movement */
+/**
+ * ⚠️ THE RIM IS AN OVERLAY, BECAUSE A CHILD WAS EATING THE BORDER (§2, browser-proven).
+ *
+ * THE BUG: `.os-card` is `border-radius` + `overflow: hidden`, and a child with an OPAQUE
+ * background — `.os-ahead`, `.os-th2` — is clipped to the BORDER box, not the padding box. So the
+ * band painted straight over the card's 1px border along every straight edge it touched. Red-rim
+ * test: without the band the rim drew complete; with it, red survived ONLY in the corner arcs,
+ * where the rectangular band curves away from the border.
+ *
+ * ⚠️ IT WAS NEVER A HOVER BUG. The top rim is absent at REST too. Hover darkens `border-color`,
+ * the edges you can still see change, the covered one cannot — and that reads as "the rim
+ * disappeared on hover".
+ *
+ * ⚠️ AN INSET box-shadow DOES NOT FIX IT, and is the obvious thing to try. Tested: an inset shadow
+ * paints with the element's background, BELOW descendants, so the band covers it exactly as it
+ * covered the border. Only an overlay that paints ABOVE descendants survives.
+ *
+ * ⚠️ THE BORDER STAYS FOR GEOMETRY. Removing it would give every card 2px more inner width under
+ * border-box and shift its contents; the overlay is the visible rim, the border is the spacing.
+ * Measured across banded and band-less cards: child offsets identical, so this is a no-op on the
+ * cards that have no band — which is the case the primitive will meet most often elsewhere.
+ */
+.os-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px #e3d9cc;
+  pointer-events: none; /* the rim must never intercept a click meant for the card */
+  transition: box-shadow 0.16s ease;
+}
+/* §10: hover deepens the shadow and warms the rim — NO movement, and no transform on a container */
 .os-card.os-lift:hover {
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 10px 26px rgba(58, 28, 20, 0.1);
   border-color: #dbd0c1;
 }
+.os-card.os-lift:hover::after { box-shadow: inset 0 0 0 1px #dbd0c1; }
 
 /* one-time entrance, scoped to .enter and REMOVED after it runs.
    ⚠️ THE §6 TRAP: never a persistent fill-mode on these — an animation's final keyframe outranks
