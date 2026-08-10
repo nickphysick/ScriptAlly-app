@@ -26,6 +26,17 @@ export interface ToastOptions {
   undoLabel?: string;
   /** ms before auto-dismiss; default 6000. */
   duration?: number;
+  /**
+   * A CHANNEL name. A toast carrying one replaces any toast already showing on the same channel
+   * instead of stacking beside it.
+   *
+   * ⚠️ WHY IT IS NOT THE DEFAULT: stacking is right for unrelated actions — three different writes
+   * each deserve their own confirmation. It is wrong for a REPEATED one. Logging a second query
+   * without leaving create mode would otherwise leave two receipts on screen, each offering Undo,
+   * with nothing to say which undoes which; the session tally is what does the counting. Omit it
+   * and the toast stacks exactly as before, so no existing call site changes behaviour.
+   */
+  replaces?: string;
 }
 
 export interface ConfirmOptions {
@@ -69,7 +80,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const showToast = useCallback((opts: ToastOptions) => {
     const id = ++seq.current;
-    setToasts((prev) => [...prev, { ...opts, id }]);
+    /* The filter lives INSIDE the updater so it reads the current list rather than a captured one —
+       two toasts fired in the same tick would otherwise both see the pre-existing state and neither
+       would replace the other. It stays PURE for that reason: no timer is cleared here, because an
+       updater can legitimately run twice. A replaced toast's timer is left to fire into `dismiss`,
+       which filters by id and is a no-op once that id has gone. */
+    setToasts((prev) => [
+      ...(opts.replaces ? prev.filter((t) => t.replaces !== opts.replaces) : prev),
+      { ...opts, id },
+    ]);
     const handle = window.setTimeout(() => dismiss(id), opts.duration ?? 6000);
     timers.current.set(id, handle);
   }, [dismiss]);

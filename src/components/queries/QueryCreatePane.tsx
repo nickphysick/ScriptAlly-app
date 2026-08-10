@@ -297,7 +297,12 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   };
 
   return (
-    <div className="f12-detail" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
+    /* `qc-take-body` is the takeover's BODY — the part that wipes and reseats on "Save & log
+       another" (fix pack 5 §4) while the header above it stays put. It is a hook only: no layout
+       hangs off it, so the height chain is untouched. A wrapper div would have been the obvious
+       alternative and is the one thing not to do here — this column's height chain is load-bearing
+       (see the `.qc-ghosts` note in CLAUDE.md), and an extra flex parent silently rewrites it. */
+    <div className="f12-detail qc-take-body" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
       {/* ══ STAGE 1 — ONE QUESTION (ref qc-create-steps.html) ══════════════════════════════
           Before an agent is chosen the pane asks exactly one thing, centred, with nothing
           competing for the answer. The three sections wait beneath as GHOST ROWS: their

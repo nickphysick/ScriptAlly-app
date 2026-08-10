@@ -1364,3 +1364,38 @@
 @media (prefers-reduced-motion: reduce) {
   .qc-exit-cancel { animation: none; opacity: 0; }
 }
+
+/* ══ CREATE MODE · SAVE & LOG ANOTHER — YOU DID NOT LEAVE (fix pack 5 §4, ref 82-create-exits) ═
+   ⚠️ THIS IS THE ONE PATH WITH NO EXIT, and that is the whole statement. Exiting and re-entering
+   here would be a lie: you never went anywhere. The takeover stays; only its BODY wipes and
+   reseats, while the header — the thing that says what you are doing — holds still above it.
+
+   ⚠️ THE 35%/36% PAIR IS THE WIPE, and the one frame between them is doing real work: the body
+   leaves upward, then is REPLACED at the bottom of its travel while invisible, and rises back. A
+   single fade would read as the same page flickering; this reads as one sheet going and another
+   arriving. Do not "tidy" the two frames into one. */
+@keyframes qc-reseat {
+  0%   { opacity: 1; transform: translateY(0); }
+  35%  { opacity: 0; transform: translateY(-6px); }
+  36%  { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: none; }
+}
+.qc-reseat .qc-take-body { animation: qc-reseat 300ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+
+/* The session tally — how far you have got in THIS sitting. Mono and quiet: it is a count, not an
+   announcement, and it sits beside the actions rather than in the title block because it describes
+   the work rather than the thing being made.
+
+   ⚠️ TOKENS THAT EXIST. The first draft of this rule read `--sage-tx` and `--sage-soft` behind
+   inline fallbacks, and neither is defined anywhere in this app — the fallback would have rendered
+   the right colour while the var named nothing, which is precisely the fault CLAUDE.md records
+   against `--pad-r` and `--shell-ease`. `--sage-band` and `--sage-d` are real. */
+.qch-tally {
+  flex: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--sage-d); background: var(--sage-band);
+  border-radius: 20px; padding: 4px 9px; white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qc-reseat .qc-take-body { animation: none; }
+}

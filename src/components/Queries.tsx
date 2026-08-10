@@ -29,6 +29,10 @@ import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
 import { requirements } from "../lib/createSteps";
 import { prefersReducedMotion } from "../lib/reducedMotion";
+
+/** The receipt channel for a logged query — see ToastOptions.replaces. Named once so the save and
+ *  the save-and-log-another cannot end up on two channels and stack after all. */
+const CREATE_RECEIPT_CHANNEL = "query-created";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
@@ -339,6 +343,13 @@ export const Queries: React.FC<{
   /* The caller's continuation, held across the 150ms — `closeCreate(() => pickRow(id))` must still
      select that row, and the teardown that runs it now happens at the end of the motion. */
   const cancelThenRef = useRef<(() => void) | undefined>(undefined);
+  /* ⚠️ "SAVE & LOG ANOTHER" IS NOT AN EXIT — it is the one path where the takeover does not leave,
+     and pretending otherwise would be a lie: you never went anywhere. The body wipes and reseats in
+     place while the header stays put. */
+  const [createReseating, setCreateReseating] = useState(false);
+  /* How many have been logged in THIS sitting. Session-only and deliberately not stored: it counts
+     a stretch of work, not a fact about the account. */
+  const [sessionLogged, setSessionLogged] = useState(0);
   /* Focus returns to the control that opened the takeover — leaving it on a removed node drops the
      writer at the top of the document. */
   const logTriggerRef = useRef<HTMLButtonElement>(null);
@@ -377,6 +388,11 @@ export const Queries: React.FC<{
        rest of the session (see lib/reducedMotion.ts). Focus is unaffected either way: the field
        autofocuses on mount, and the entrance's completion only GUARANTEES that ending place. */
     setCreateEntering(!prefersReducedMotion());
+    /* A fresh sitting starts at nothing. The tally counts this opening, so it must not carry over
+       from the last one — a takeover that opened stating "3 logged" would be counting a session the
+       writer has already finished. */
+    setSessionLogged(0);
+    setCreateReseating(false);
   };
 
   /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
@@ -524,6 +540,17 @@ export const Queries: React.FC<{
     logTriggerRef.current?.focus();
   };
 
+  /** The reseat's completion. The takeover never left, so there is nothing to tear down — this only
+   *  ends the motion and makes sure focus is back where the next query begins. */
+  const finishReseat = (pane: HTMLElement) => {
+    setCreateReseating(false);
+    /* The picker remounts with the agent cleared and autofocuses itself, so this is the GUARANTEE
+       rather than the mechanism — and, as with the entrance, it must not take focus off a writer
+       who has already started typing into it. */
+    if (pane.contains(document.activeElement)) return;
+    pane.querySelector<HTMLElement>(".qc-pickfield")?.focus();
+  };
+
   /** The entrance's completion — bound to the LAST child's own animation NAME (see f12.css), which
    *  is the only deterministic way to ask `animationend` "was that the last one?". */
   const finishEntrance = (pane: HTMLElement) => {
@@ -570,8 +597,15 @@ export const Queries: React.FC<{
          here would be a parallel system that drifts. */
       {
         const savedAgent = agents.find((a) => a.id === createDraft.agentId) ?? null;
+        const who = agentPrimary(savedAgent ?? ({} as never)) || "that agent";
         showToast({
-          message: `Query to ${agentPrimary(savedAgent ?? ({} as never)) || "that agent"} logged`,
+          /* ⚠️ ONE RECEIPT AT A TIME, which is what the channel buys. Logging a second query
+             without leaving create mode would otherwise leave two receipts on screen, each
+             offering Undo, with nothing to say which undoes which. The tally does the counting. */
+          replaces: CREATE_RECEIPT_CHANNEL,
+          message: logAnother
+            ? `Query to ${who} logged. Ready for the next.`
+            : `Query to ${who} logged`,
         });
       }
       /* The list is hidden while creating, so there is no draft row to shed a skin or to fly
@@ -617,6 +651,15 @@ export const Queries: React.FC<{
       };
       setCreateDraft(next);
       setCreateBase(next);
+      /* ⚠️ THE CHIPS RESET WITH THE DRAFT. They report which steps have been OPENED, and this is a
+         new query — leaving them ticked would state that the writer had confirmed a date and a
+         manuscript for a record they have not looked at yet. The values carry over; the claim that
+         they were checked does not. */
+      setCreateOpened({ when: false, what: false });
+      setSessionLogged((n) => n + 1);
+      /* The body wipes and reseats in place. Not armed under reduced motion, where it would resolve
+         to `animation: none` and leave no `animationend` to complete on. */
+      if (!prefersReducedMotion()) setCreateReseating(true);
       setPendingSave(null);
       return;
     }
@@ -3077,6 +3120,7 @@ export const Queries: React.FC<{
             onAnimationEnd={(e) => {
               if (createCancelling && e.animationName === "qc-exit-cancel") { finishCancelExit(); return; }
               if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
+              if (createReseating && e.animationName === "qc-reseat") { finishReseat(e.currentTarget); return; }
               /* ⚠️ NOT WHILE LEAVING. A `qc-in-last` still in flight when Cancel is pressed would
                  otherwise put focus back into a takeover that is on its way out. */
               if (!createCancelling && e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
@@ -3180,7 +3224,9 @@ export const Queries: React.FC<{
             })()}
             {createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
-              <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
+              <div
+                className={createReseating ? "qc-reseat" : undefined}
+                style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
                 {/* ── THE ILLUSTRATED HEADER (ref qc-create-v2.html) — replaces the retired
                     command bar. It says what you are doing, what it needs, and offers the three
                     ways out, in one band at the top of the work. ── */}
@@ -3231,6 +3277,15 @@ export const Queries: React.FC<{
                     </div>
                   </div>
                   <div className="qch-acts">
+                    {/* ⚠️ THE TALLY IS THE ONLY THING THAT COUNTS. It appears once this sitting has
+                        produced something, and it is why the receipt replaces rather than stacks:
+                        between them, one line says what just happened and one says how far you have
+                        got. Absent at zero — "0 logged" is a statement about nothing. */}
+                    {sessionLogged > 0 && (
+                      <span className="qch-tally" aria-live="polite">
+                        {sessionLogged} logged
+                      </span>
+                    )}
                     <span className="qch-esc" aria-hidden="true">Esc</span>
                     <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
                     <button
