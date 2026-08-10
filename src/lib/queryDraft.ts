@@ -30,12 +30,40 @@ export const CREATE_SEND_METHODS: readonly { label: string; value: SubmissionMet
   { label: "Post", value: SubmissionMethod.POST },
 ];
 
-/** The nudge-reminder choice. `suggested` derives its date from the agent's stated turnaround;
- *  `custom` carries a user-picked date; `none` writes no reminder at all. */
+/**
+ * The nudge-reminder choice.
+ *
+ * ⚠️ `preset` CARRIES WEEKS, NOT A DATE, and that is what makes "changing the sent date moves the
+ * nudge, but a date you picked yourself stays put" true by construction rather than by a handler
+ * remembering to do it. A preset is an INTERVAL resolved against `dateSent` at read time; a custom
+ * is an ABSOLUTE date the writer chose. There is no third case where the two could disagree.
+ *
+ * It replaces `{ kind: "suggested" }`, which meant "whatever the agent stated" and therefore had
+ * no answer at all for an agent who stated nothing — the writer fell through to no reminder,
+ * silently, because a gap in the agent's record was read as a preference of theirs.
+ */
 export type ReminderChoice =
-  | { kind: "suggested" }
+  | { kind: "preset"; weeks: number }
   | { kind: "custom"; date: string }
   | { kind: "none" };
+
+/** The presets offered, in weeks. Three is a choice; six is a list. */
+export const NUDGE_PRESETS: readonly number[] = [6, 8, 12] as const;
+
+/**
+ * ⚠️ THE HOUSE DEFAULT EXISTS SO A MISSING AGENT FIGURE IS NEVER READ AS "NO NUDGE". An agent who
+ * has not published a turnaround is a gap in *their* record; falling through to no reminder turns
+ * that gap into a decision the writer never made, and the query goes quiet with nothing scheduled.
+ * Eight weeks is a convention, and the derived line says so out loud rather than passing it off as
+ * the agent's own figure.
+ */
+export const HOUSE_NUDGE_WEEKS = 8;
+
+/** The nudge a freshly chosen agent gets: their stated turnaround, else the house convention. */
+export function initialReminder(agent: Agent | null | undefined): ReminderChoice {
+  const w = agent?.responseTimeWeeks;
+  return { kind: "preset", weeks: typeof w === "number" && w > 0 ? w : HOUSE_NUDGE_WEEKS };
+}
 
 export interface QueryDraft {
   agentId: string | null;
@@ -80,7 +108,7 @@ export function emptyDraft(seed: { agentId?: string | null; manuscriptId?: strin
     manuscriptId: seed.manuscriptId ?? "",
     dateSent: todayInputDate(now),
     sendMethod: SubmissionMethod.EMAIL,
-    reminder: { kind: "suggested" },
+    reminder: { kind: "preset", weeks: HOUSE_NUDGE_WEEKS },
     materials: materialRowsForDraft(null),
     journal: "",
   };
@@ -128,10 +156,47 @@ export function reminderChipLabel(dateISO: string, fromISO: string): string {
 }
 
 /** The date the draft would actually write as `nudgeDate` (null = no reminder). */
-export function resolveReminder(d: QueryDraft, agent: Agent | null | undefined): string | null {
+export function resolveReminder(d: QueryDraft, _agent?: Agent | null): string | null {
   if (d.reminder.kind === "none") return null;
   if (d.reminder.kind === "custom") return d.reminder.date || null;
-  return suggestedReminderDate(d.dateSent, agent?.responseTimeWeeks);
+  /* Resolved from `dateSent` on every read — which is why moving the sent date moves a preset and
+     leaves a custom date exactly where the writer put it. The agent is no longer consulted here:
+     their figure was already baked into `weeks` when the preset was chosen, and re-reading it
+     would silently overwrite a writer who picked a different interval on purpose. */
+  return suggestedReminderDate(d.dateSent, d.reminder.weeks);
+}
+
+/**
+ * The line under the chips. It ALWAYS reports the resulting task date — a nudge you cannot see the
+ * consequence of is a setting, not a decision.
+ *
+ * ⚠️ IT NAMES THE HOUSE DEFAULT AS A DEFAULT. Presenting eight weeks as though the agent had said
+ * so would put words in their mouth, and the writer would have no way to tell a stated turnaround
+ * from a convention when deciding whether to trust it.
+ */
+export function nudgeDerivedLine(
+  d: QueryDraft,
+  agent: Agent | null | undefined,
+  now: number = Date.now(),
+): string | null {
+  const date = resolveReminder(d);
+  if (!date) return null;
+  const when = new Date(date + "T00:00:00").toLocaleDateString("en-GB", {
+    day: "numeric", month: "long", year: "numeric",
+  });
+  if (d.reminder.kind === "custom") {
+    const days = Math.round((new Date(date).getTime() - new Date(d.dateSent).getTime()) / DAY);
+    const weeks = Math.round(days / 7);
+    return days > 0
+      ? `A task appears on ${when} — ${weeks} ${weeks === 1 ? "week" : "weeks"} after sending.`
+      : `A task appears on ${when}.`;
+  }
+  const stated = agent?.responseTimeWeeks;
+  const weeks = d.reminder.kind === "preset" ? d.reminder.weeks : 0;
+  const isStated = typeof stated === "number" && stated > 0 && stated === weeks;
+  return isStated
+    ? `A task appears on ${when}.`
+    : `A task appears on ${when} — a default, as no response time is listed for them.`;
 }
 
 /**

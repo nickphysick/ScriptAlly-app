@@ -85,7 +85,10 @@ describe("the summaries are the receipt", () => {
 
   /* An empty summary row reads as a rendering fault, and "no nudge" is a real answer. */
   it("absence is stated, never left blank", () => {
-    const d = { ...emptyDraft({ manuscriptId: "" }), materials: [] };
+    /* ⚠️ THE FIXTURE MUST TURN THE NUDGE OFF EXPLICITLY. A bare draft now carries the HOUSE
+       preset — a missing agent figure is a gap in their record, never a decision the writer made —
+       so "no nudge" is a state you choose, not one you fall into. */
+    const d = { ...emptyDraft({ manuscriptId: "" }), materials: [], reminder: { kind: "none" as const } };
     const s = stepSummaries(d, null, [], Date.parse("2026-08-09"));
     expect(s.what).toContain("no manuscript");
     expect(s.what).toContain("nothing ticked");

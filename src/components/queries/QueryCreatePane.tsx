@@ -40,9 +40,10 @@ import {
 } from "../../lib/agentMaterials";
 import {
   CREATE_SEND_METHODS,
+  NUDGE_PRESETS,
+  initialReminder,
   materialRowsForDraft,
-  reminderChipLabel,
-  suggestedReminderDate,
+  nudgeDerivedLine,
   todayInputDate,
   type QueryDraft, resolveReminder } from "../../lib/queryDraft";
 
@@ -97,7 +98,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const onlyManuscript = manuscripts.length === 1 ? manuscripts[0] : null;
   const chosenManuscript = manuscripts.find((m) => m.id === draft.manuscriptId) ?? null;
 
-  const suggested = suggestedReminderDate(draft.dateSent, agent?.responseTimeWeeks);
+  const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0
+    ? agent.responseTimeWeeks : null;
+  const derivedNudge = nudgeDerivedLine(draft, agent);
+  /* Both popovers anchor the choice: a calendar with no "you are here" makes the writer count. */
+  const longDate = (iso: string) => (iso
+    ? new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : "");
+  const todayLong = longDate(todayInputDate());
+  const sentLong = longDate(draft.dateSent);
   const sample = draft.materials.find((r) => r.key === "sample") as Extract<MaterialRow, { key: "sample" }> | undefined;
   const other = draft.materials.find((r) => r.key === "other") as Extract<MaterialRow, { key: "other" }> | undefined;
 
@@ -149,7 +158,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const pickAgent = (a: Agent) => {
     setActive("when");
     setReached("when");
-    set({ agentId: a.id, materials: materialRowsForDraft(a) });
+    /* Everything seeded from the agent is re-derived together — the materials checklist, the
+       nudge interval and the send method. A custom nudge date is left alone: the writer chose an
+       absolute day, and swapping agent is not a reason to overwrite it. */
+    set({
+      agentId: a.id,
+      materials: materialRowsForDraft(a),
+      sendMethod: a.submissionMethod ?? draft.sendMethod,
+      reminder: draft.reminder.kind === "custom" ? draft.reminder : initialReminder(a),
+    });
   };
 
 
@@ -313,7 +330,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
                 at ordinary laptop heights, so the one field that needs a decision was the one you
                 had to scroll to find. */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 15 }}>
+            <div style={{ display: "flex", gap: 12, marginBottom: 15, flexWrap: "wrap" }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={LABEL}>Date sent</div>
               {/* The shared BrandDatePicker in its hub skin — never a native date input. `max`
@@ -325,11 +342,12 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 variant="hub"
                 ariaLabel="Date sent"
                 placeholder="Pick a date"
+                footnote={`Today is ${todayLong}`}
               />
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={LABEL}>Sent by</div>
+              <div style={LABEL}>How you sent it</div>
               {/* Inset track (.qc-seg): the segments are children of a recessed tan track, so the
                   active pill is raised OUT of the frame rather than ringed inside it — the ink-ring
                   version overflowed its container and pushed its own label off-centre. */}
@@ -348,43 +366,54 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 })}
               </div>
             </div>
-            </div>
 
-            <div>
-              <div style={LABEL}>Nudge reminder</div>
+            {/* ⚠️ THREE COLUMNS, ONE ROW. Date and method shared a row with the nudge beneath, which
+                pushed the one field that needs a decision below the fold at ordinary laptop
+                heights — so the thing you had to think about was the thing you had to scroll to
+                find. All three are send facts and they belong on one line. */}
+            <div style={{ flex: 1.4, minWidth: 0 }}>
+              <div style={LABEL}>Nudge me after</div>
+              {/* the calendar sits AMONG the presets, not beneath them: beneath, it reads as an
+                  escape hatch for when the presets failed you; among them it is a fifth answer to
+                  the same question, which is what it is. */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {suggested && (
-                  <button type="button" className={`qc-chip${draft.reminder.kind === "suggested" ? " on" : ""}`} onClick={() => set({ reminder: { kind: "suggested" } })}>
-                    {reminderChipLabel(suggested, draft.dateSent)}
-                  </button>
+                {NUDGE_PRESETS.map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    className={`qc-chip${draft.reminder.kind === "preset" && draft.reminder.weeks === w ? " on" : ""}`}
+                    onClick={() => set({ reminder: { kind: "preset", weeks: w } })}
+                  >{w} wks</button>
+                ))}
+                {/* an agent's own figure gets its own chip when it is not one of the three —
+                    otherwise choosing "their turnaround" would mean picking the preset nearest to
+                    it, which is a different interval wearing their name. */}
+                {statedWeeks && !NUDGE_PRESETS.includes(statedWeeks) && (
+                  <button
+                    type="button"
+                    className={`qc-chip${draft.reminder.kind === "preset" && draft.reminder.weeks === statedWeeks ? " on" : ""}`}
+                    onClick={() => set({ reminder: { kind: "preset", weeks: statedWeeks } })}
+                  >{statedWeeks} wks</button>
                 )}
-                <button type="button" className={`qc-chip${draft.reminder.kind === "custom" ? " on" : ""}`} onClick={() => set({ reminder: { kind: "custom", date: draft.reminder.kind === "custom" ? draft.reminder.date : (suggested ?? draft.dateSent) } })}>
-                  Pick a date
-                </button>
-                <button type="button" className={`qc-chip${draft.reminder.kind === "none" ? " on" : ""}`} onClick={() => set({ reminder: { kind: "none" } })}>
-                  None
-                </button>
-              </div>
-              {draft.reminder.kind === "custom" && (
-                <div style={{ marginTop: 8 }}>
-                  {/* `min` keeps the native input's rule: you can't be reminded before you sent it. */}
+                <span className="qc-chipcal">
                   <BrandDatePicker
-                    value={draft.reminder.date}
-                    onChange={(d) => set({ reminder: { kind: "custom", date: d } })}
+                    value={draft.reminder.kind === "custom" ? draft.reminder.date : ""}
+                    onChange={(d) => set(d
+                      ? { reminder: { kind: "custom", date: d } }
+                      : { reminder: initialReminder(agent) })}
                     min={draft.dateSent || undefined}
                     variant="hub"
-                    ariaLabel="Reminder date"
+                    ariaLabel="Pick a nudge date"
                     placeholder="Pick a date"
+                    footnote={sentLong ? `Sent ${sentLong}` : undefined}
                   />
-                </div>
-              )}
-              {draft.reminder.kind === "suggested" && (
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--faint)", marginTop: 7 }}>
-                  {suggested
-                    ? `Suggested from ${agentPrimary(agent).split(" ")[0] || "the agent"}'s typical reply time (~${agent?.responseTimeWeeks} weeks)`
-                    : "No stated reply time — pick a date if you want a reminder"}
-                </div>
-              )}
+                </span>
+                <button type="button" className={`qc-chip${draft.reminder.kind === "none" ? " on" : ""}`} onClick={() => set({ reminder: { kind: "none" } })}>
+                  No nudge
+                </button>
+              </div>
+              {derivedNudge && <div className="qc-derived">{derivedNudge}</div>}
+            </div>
             </div>
           </div>
             </>

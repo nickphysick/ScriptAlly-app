@@ -279,6 +279,14 @@
 .qc-qag { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-qadded { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
 
+/* the nudge calendar sits AMONG the preset chips, so it must look like one of them */
+.qc-chipcal { display: inline-flex; }
+.qc-chipcal .sa-dp-trigger { min-height: 0; }
+/* ⚠️ ALWAYS PRESENT WHEN A NUDGE RESOLVES — a reminder you cannot see the consequence of is a
+   setting, not a decision. It also names the house default AS a default; presenting eight weeks
+   as though the agent had said so would put words in their mouth. */
+.qc-derived { margin-top: 9px; font-size: 11.5px; color: var(--muted); }
+
 /* ══ THE NOTE (ref qc-stage1.html variant A) ═══════════════════════════════════════════════
    ⚠️ IT FILLS ITS STEP. It was a small inset box in a three-column layout — a field you could
    not think in. Full width, 104px to start, and RESIZABLE: a writer who wants two lines should

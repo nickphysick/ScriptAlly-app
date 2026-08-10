@@ -59,8 +59,14 @@ describe("stage 1 asks one question", () => {
       .toContain("Agent not listed?");
   });
 
-  it("choosing an agent re-derives the materials from what THEY ask for", () => {
-    expect(pane).toContain("set({ agentId: a.id, materials: materialRowsForDraft(a) })");
+  /* ⚠️ EVERYTHING SEEDED FROM THE AGENT IS RE-DERIVED TOGETHER — the materials checklist, the
+     nudge interval and the send method all come from their record, so leaving any one of them on
+     the previous agent's figure would attribute it to the new one. A CUSTOM nudge date survives:
+     the writer chose an absolute day, and swapping agent is not a reason to overwrite it. */
+  it("choosing an agent re-derives everything seeded from them", () => {
+    expect(pane).toContain("materials: materialRowsForDraft(a)");
+    expect(pane).toContain("sendMethod: a.submissionMethod ?? draft.sendMethod");
+    expect(pane).toContain('reminder: draft.reminder.kind === "custom" ? draft.reminder : initialReminder(a)');
   });
 });
 

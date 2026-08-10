@@ -891,3 +891,7 @@
   transition: all 0.15s;
 }
 .sa-backward-no:hover { border-color: #c9a89e; color: #5a3010; }
+
+/* The hub picker's anchoring footnote — mono, quiet, and left of the Clear/Done pair so the
+   controls keep the right edge they have at every other call site. */
+.sa-dp-note { margin-right: auto; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: #a2947f; }

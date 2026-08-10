@@ -19,6 +19,14 @@ export interface BrandDatePickerProps {
   variant?: "form" | "hub";
   /** Accessible name for the trigger, when the visible label alone isn't enough. */
   ariaLabel?: string;
+  /**
+   * A mono line in the popover foot anchoring the choice — "Today is 9 August 2026", "Sent 2 July".
+   *
+   * ⚠️ ADDITIVE AND OPTIONAL, so the twenty existing Form 11 call sites grow nothing they did not
+   * ask for. It renders only where it is passed, and only in the `hub` variant's footer, which is
+   * the only footer that exists.
+   */
+  footnote?: string;
 }
 
 const MONTHS = [
@@ -62,7 +70,7 @@ const withinRange = (d: Date, min?: string, max?: string): boolean => {
  * sage "today" ring, burgundy selected day, greyed adjacent-month days. Closes on outside click.
  */
 export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
-  value, onChange, placeholder = "Select a date", min, max, variant = "form", ariaLabel,
+  value, onChange, placeholder = "Select a date", min, max, variant = "form", ariaLabel, footnote,
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -273,6 +281,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({
               ))}
             </div>
             <div className="sa-dp-foot">
+              {footnote && <span className="sa-dp-note">{footnote}</span>}
               <button type="button" className="sa-dp-link quiet" onClick={() => { onChange(""); closeAndReturn(); }}>Clear</button>
               <button type="button" className="sa-dp-link" onClick={closeAndReturn}>Done</button>
             </div>

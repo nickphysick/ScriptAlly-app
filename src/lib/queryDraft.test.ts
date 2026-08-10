@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  HOUSE_NUDGE_WEEKS,
+  initialReminder,
+  nudgeDerivedLine,
   emptyDraft,
   draftReady,
   draftDirty,
@@ -26,7 +29,7 @@ describe("emptyDraft — the create-mode starting point", () => {
     expect(d.agentId).toBeNull();
     expect(d.manuscriptId).toBe("");
     expect(d.journal).toBe("");
-    expect(d.reminder).toEqual({ kind: "suggested" });
+    expect(d.reminder).toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
   });
 
   it("carries the seeds the launch points pass (agent card / manuscript plate)", () => {
@@ -87,13 +90,55 @@ describe("the nudge reminder — derived from the agent's stated turnaround", ()
     expect(reminderChipLabel("2026-09-09", "2026-07-29")).toBe(`${day} · in 6 weeks`);
     expect(reminderChipLabel("2026-09-09", "2026-07-29")).toMatch(/· in 6 weeks$/);
   });
-  it("resolveReminder honours the choice: suggested / custom / none", () => {
+  /* ⚠️ A PRESET CARRIES WEEKS, NOT A DATE — which is what makes "moving the sent date moves the
+     nudge, but a date you picked yourself stays put" true by construction rather than by a handler
+     remembering to do it. The agent is NOT consulted at resolve time: their figure was baked into
+     `weeks` when the preset was chosen, and re-reading it would overwrite a writer who picked a
+     different interval on purpose. */
+  it("resolveReminder honours the choice: preset / custom / none", () => {
     const d: QueryDraft = { ...emptyDraft({}, NOW), agentId: "a1", manuscriptId: "m1" };
-    expect(resolveReminder(d, agent())).toBe("2026-09-09");
-    expect(resolveReminder({ ...d, reminder: { kind: "custom", date: "2026-08-01" } }, agent())).toBe("2026-08-01");
-    expect(resolveReminder({ ...d, reminder: { kind: "none" } }, agent())).toBeNull();
-    // suggested, but the agent states no window → nothing to write
-    expect(resolveReminder(d, agent({ responseTimeWeeks: undefined }))).toBeNull();
+    expect(resolveReminder({ ...d, reminder: { kind: "preset", weeks: 6 } })).toBe("2026-09-09");
+    expect(resolveReminder({ ...d, reminder: { kind: "custom", date: "2026-08-01" } })).toBe("2026-08-01");
+    expect(resolveReminder({ ...d, reminder: { kind: "none" } })).toBeNull();
+  });
+
+  it("moving the sent date moves a preset and leaves a custom date alone", () => {
+    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "preset", weeks: 6 } };
+    expect(resolveReminder({ ...d, dateSent: "2026-08-05" })).toBe("2026-09-16");
+    const custom: QueryDraft = { ...d, reminder: { kind: "custom", date: "2026-09-09" } };
+    expect(resolveReminder({ ...custom, dateSent: "2026-08-05" }), "a chosen day is a chosen day")
+      .toBe("2026-09-09");
+  });
+
+  /* ⚠️ A MISSING AGENT FIGURE IS A GAP IN THEIR RECORD, NEVER A DECISION THE WRITER MADE. The old
+     `suggested` kind resolved to null when the agent stated nothing, so the query went quiet with
+     no reminder scheduled and nobody had chosen that. */
+  it("an agent with no stated turnaround gets the house default, not silence", () => {
+    expect(initialReminder(agent({ responseTimeWeeks: undefined })))
+      .toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
+    expect(initialReminder(agent({ responseTimeWeeks: 6 }))).toEqual({ kind: "preset", weeks: 6 });
+    expect(initialReminder(null)).toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
+    expect(initialReminder(agent({ responseTimeWeeks: 0 })), "zero is not a turnaround")
+      .toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
+  });
+
+  /* ⚠️ AND THE LINE SAYS SO OUT LOUD. Presenting eight weeks as though the agent had said it would
+     put words in their mouth, and the writer could not tell a stated turnaround from a convention
+     when deciding whether to trust it. */
+  it("the derived line always names the task date, and names a default as a default", () => {
+    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "preset", weeks: 6 } };
+    expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: 6 }))).toMatch(/^A task appears on .+\.$/);
+    expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: 6 })), "their own figure needs no caveat")
+      .not.toContain("a default");
+    expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: undefined })))
+      .toContain("a default, as no response time is listed for them");
+    expect(nudgeDerivedLine({ ...d, reminder: { kind: "none" } }, agent()), "nothing resolves, nothing is claimed")
+      .toBeNull();
+  });
+
+  it("and a custom date reports the interval back to the send", () => {
+    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "custom", date: "2026-09-30" } };
+    expect(nudgeDerivedLine(d, agent())).toContain("9 weeks after sending");
   });
 });
 
@@ -148,8 +193,11 @@ describe("draftToPayload — the SAME shape the retired popup handed addQuery", 
   it("writes nudgeDate only when a reminder resolves — parity with the popup", () => {
     expect(draftToPayload(d, agent())).toHaveProperty("nudgeDate");
     expect(draftToPayload({ ...d, reminder: { kind: "none" } }, agent())).not.toHaveProperty("nudgeDate");
-    // suggested but the agent states no window → nothing to write
-    expect(draftToPayload(d, agent({ responseTimeWeeks: undefined }))).not.toHaveProperty("nudgeDate");
+    /* ⚠️ AMENDED: an agent with no stated window USED to write nothing, because `suggested`
+       resolved against their record and found nothing there. It now writes the house default —
+       the whole point of the preset model is that a gap in their record is not a decision. */
+    expect(draftToPayload(d, agent({ responseTimeWeeks: undefined })), "the house default still writes")
+      .toHaveProperty("nudgeDate");
   });
 
   it("never sets a status — addQuery defaults Queried and seeds the QUERY_SENT activity", () => {
