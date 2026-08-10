@@ -150,11 +150,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
       <PageHeader
         variant="workspace"
         mark="manuscripts"
-        /* ⚠️ THIS COUNT IS A RESTORATION, not an invention. The grand slab's
-           "N manuscripts · M in submission" pulse was dropped when the header law arrived because
-           there was no meta slot; the workspace header has one, and `activeQueryCount` is the same
-           predicate the field roster uses. */
-        count={`${manuscripts.length} MANUSCRIPTS · ${manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} IN SUBMISSION`}
+        /* ⚠️ NO COUNT — and this is the page where that costs something, so it is stated rather
+           than left as a silent absence. The strip carried "N MANUSCRIPTS · M IN SUBMISSION", itself
+           a RESTORATION of the grand slab's pulse; dropping it loses that figure for the SECOND
+           time, and no other surface states it. It goes because the header is chrome and has to read
+           the same on every band-tier page. The derivation survives in `activeQueryCount` and the
+           strip is a one-line restore if that trade is ever revisited. */
         title="Your manuscripts"
         description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
         actions={[{

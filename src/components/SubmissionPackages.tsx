@@ -172,7 +172,26 @@ export const SubmissionPackages: React.FC = () => {
   ) : null;
 
   return (
-    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflowY: "auto" }}>
+    /* ⚠️ `--pg-gut` IS DECLARED INLINE HERE, because this page's PADDING is inline — splitting the
+       pair across an inline style and a stylesheet would let the inline padding win while the
+       stylesheet's token was ignored, which is precisely the silent mismatch the token exists to
+       prevent. It is still ONE number: the padding reads it, and the workspace header's bleed
+       (pageHeader.css `.wsh`) reads the same token back to cancel it, so the header's rule spans the
+       page while the CONTENT stays guttered (`.pkgw > :not(.wsh)` in packageWorkshop.css).
+       ⚠️ TOP 22 → 11, HALVED, as on the other band-tier pages: the header sits inside this padding
+       and already carries its own 78px. */
+    <div
+      className="pkg-root pkgw"
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        ["--pg-gut" as never]: "28px",
+        padding: "11px var(--pg-gut) 16px",
+        gap: 14,
+        overflowY: "auto",
+      }}
+    >
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }

@@ -18,7 +18,14 @@
   overflow-y: auto;
   /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas */
   color: var(--msv-ink);
-  padding: 22px 28px 48px; /* masthead gutter mirrors the Queries hub (22px top / 28px sides) */
+  /* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE — the padding reads it and the workspace
+     header's bleed (pageHeader.css `.wsh`) reads the same token back, so the header's rule spans
+     the page while the CONTENT stays guttered inside `.msv-wrap`.
+     ⚠️ TOP 22 → 11, HALVED, for the reason the agent list halved: the header sits inside this
+     padding and already carries its own 78px, so the top value was empty paper above it. The side
+     and bottom values gutter the CONTENT, which is a different job, and are untouched. */
+  --pg-gut: 28px;
+  padding: 11px var(--pg-gut) 48px;
 }
 
 .t-capp .msv1 {
@@ -53,9 +60,15 @@
 }
 
 /* ── shared primitives ── */
-/* max-width retired → the shell's content-column cap (read = 1200px) now centres this page;
-   see contentColumn.css. Kept as a hook (full-width) so the markup/selector is undisturbed. */
-.msv-wrap { width: 100%; }
+/* ⚠️ THE CAP IS BACK ON THIS HOOK, and it is the SAME cap — it moved off the route slot, not away.
+   `contentVariant="read"` capped the slot at 1200px, which wrapped the page HEADER too and stopped
+   its rule 278px short of the window on each side; the header is chrome and must span the page. So
+   the cap came inward to the content, where capping content belongs.
+   ⚠️ AND IT IS EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal. The slot cap
+   was an OUTER width that the page's 28px padding then ate, so the content measured 1200 − 56 =
+   1144. Writing `1144px` here would be a magic number that silently stops matching the day either
+   the cap or the gutter moves; this stays correct through both. Measured before and after: 1144. */
+.msv-wrap { width: 100%; max-width: calc(var(--content-max-read) - 2 * var(--pg-gut)); margin-inline: auto; }
 .msv-lab {
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.17em;
   text-transform: uppercase; font-weight: 500; color: var(--msv-label);

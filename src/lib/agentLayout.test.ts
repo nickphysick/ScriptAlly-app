@@ -47,9 +47,14 @@ describe("agent list · the page column", () => {
          INSIDE this padding, so the top value stopped being breathing room above the content and
          became a band of empty paper above a header that is already generous. The gutter and the
          48px bottom are untouched — they gutter the CONTENT, which is a different job, and
-         merging them with the cap would still tie the two together. */
-      "the page padding changed — 14px top / the shared gutter / 48px bottom; merging it with the cap would tie the two together",
-    ).toContain("padding: 14px var(--sa-col-gut) 48px");
+         merging them with the cap would still tie the two together.
+         ⚠️ RETARGETED, NOT RELAXED (band-tier full-bleed pass): the side value is now read through
+         `--pg-gut` rather than straight from `--sa-col-gut`. That indirection is the POINT — the
+         header's bleed reads the same token back to cancel it, so the rule spans the page while the
+         content stays guttered. `--pg-gut` is still DEFINED as `var(--sa-col-gut)` on this rule, so
+         the shared column token is still what sets the number. */
+      "the page padding changed — 14px top / the gutter token / 48px bottom; merging it with the cap would tie the two together",
+    ).toContain("--pg-gut: var(--sa-col-gut); padding: 14px var(--pg-gut) 48px");
     expect(
       block(".aglist .agl-inner"),
       "the content cap left the inner column — without it the grid stretches the full width of an ultrawide monitor instead of pooling the surplus as margin",

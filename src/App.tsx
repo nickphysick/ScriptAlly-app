@@ -670,16 +670,32 @@ function AppContent() {
           <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
-        {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;
-            the Contact List page renders the F12 shell (its own chrome), so its slot is bare. */}
-        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn" contentVariant="work">
+        {/* The agents slot is SPLIT (F12): both pages self-chrome, so BOTH slots are bare.
+            ⚠️ DISCOVER'S `contentVariant="work"` IS GONE, and the cap did not go with it — it moved
+            INWARD to `.dv-wrap` (which already held 1240px, tighter than the 1600px work cap, so no
+            content width changed). A cap on the SLOT wraps the page header too, and the header is
+            chrome: its rule must span the window, not stop at a content column. Capping content is
+            a content concern, so the cap now lives with the content. Same reasoning as the
+            manuscripts slot below. */}
+        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
           <DiscoverNewAgents onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
           <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
         </StagePage>
 
-        <StagePage active={routeKey === "manuscripts"} layout="fill" contentVariant="read">
+        {/* ⚠️ `contentVariant="read"` IS GONE FROM THIS SLOT, and the cap did not go with it — it
+            moved INWARD into each of the three pages (`.msv-wrap`, `.ct-desk`, `.pkgw`'s children),
+            each expressed as `--content-max-read` MINUS the page's own gutter so the content width
+            is unchanged to the pixel. A cap on the slot wraps the page HEADER too, and the header is
+            chrome: its rule has to span the window rather than stop at a 1200px content column.
+            ⚠️ AND THE THREE MOVE TOGETHER because they SHARE this one slot — Manuscripts, Comps and
+            Packages cannot be converted separately.
+            ⚠️ THE HEIGHT CHAIN IS UNAFFECTED, measured rather than assumed: dropping the variant
+            flips the slot from flex-column to block, but `flex:1; min-height:0` still gives it a
+            definite height, so the pages' `height:100%` resolves identically. `.ctpage` measured
+            416/416/820 and `.pkgw` 416/798 both before and after. */}
+        <StagePage active={routeKey === "manuscripts"} layout="fill">
           {manuscriptsPackages ? (
             <SubmissionPackages />
           ) : manuscriptsComps ? (

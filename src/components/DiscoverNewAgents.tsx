@@ -462,8 +462,11 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       {/* THE shared page header — identical to the agent list's but for two things: the Pro pill
           beside the title, and the closing rule rendered 2px in the Pro token (discover.css). The
           manuscript selector occupies the same slot as the agent list's "Add new agent" button. */}
-      <div className="dv-wrap">
-        <PageHeader
+      {/* ⚠️ THE HEADER SITS OUTSIDE `.dv-wrap`, exactly as it sits outside `.agl-inner` on the agent
+          list. `.dv-wrap` is a centred 1240px column, so a header inside it stopped at the content
+          gutter and took its bottom border with it. The header spans the page; the CONTENT is what
+          is columned. */}
+      <PageHeader
           variant="workspace"
           mark="discover"
           title="Discover new agents"
@@ -491,6 +494,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
             ) : undefined
           }
         />
+      <div className="dv-wrap">
         <div>
           {/* The vetting strip earns its place beside real matches; in the first-run state the
               no-match message takes this position instead. */}

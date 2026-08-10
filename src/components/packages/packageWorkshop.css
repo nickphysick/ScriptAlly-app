@@ -56,6 +56,22 @@
   color: var(--pkg-ink);
 }
 
+/* ⚠️ THE CAP MOVED HERE FROM THE ROUTE SLOT, and it is the SAME cap — `contentVariant="read"` capped
+   the manuscripts slot at 1200px, which wrapped the page HEADER too and stopped its rule short of
+   the window. Capping content is a content concern, so the cap sits on the content now.
+   ⚠️ EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal 1144: the slot cap was an
+   OUTER width the page's 28px padding then ate. `--pg-gut` is declared INLINE on this page's root
+   (SubmissionPackages.tsx) because its padding is inline — see the note there.
+   ⚠️ AND IT IS A CHILD SELECTOR, NOT A WRAPPER DIV, because `.pkgw` is a flex column with `gap:14`:
+   wrapping the content would collapse those three gaps into one and change every vertical rhythm on
+   the page. `.wsh` is the one child excluded — that is the bleed. `<style>` is `display:none`, so it
+   is not a flex item and takes no gap. */
+.pkgw > :not(.wsh) {
+  width: 100%;
+  max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
+  margin-inline: auto;
+}
+
 /* ── Tabs ─────────────────────────────────────────────────────────────────────
    A sibling block beneath PageHeader, never inside it: PageHeader draws title +
    description + its own closing rule, and has no tabs slot (nor a meta slot — the

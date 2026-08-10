@@ -570,8 +570,10 @@ export const ComparableTitlesPage: React.FC<{
       <PageHeader
         variant="workspace"
         mark="comps"
-        /* the shelf's own total, already derived on this page for the spine switcher */
-        count={activeMs ? `${comps.length} COMPS` : undefined}
+        /* ⚠️ NO COUNT — the header is chrome and reads the same on every band-tier page. This is the
+           cheapest of the removals: the shelf's total was `comps.length`, and the shelf itself sits
+           immediately below the rule stating exactly that, so the strip was duplicating a number the
+           page already shows rather than carrying one only it had. */
         title="Comparable titles"
         description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
       />

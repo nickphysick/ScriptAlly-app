@@ -22,6 +22,7 @@
  */
 import React, { useState } from "react";
 import rolodexMark from "../../assets/shell/agents-on-file-icon.png";
+import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 
 /** The four marks, and the brief each one is waiting for. */
 export type MarkName =
@@ -92,13 +93,39 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   noteboard: { label: "note", icon: <><path d="M5 4h14v16l-5-4H5z" /><path d="M9 9h6M9 13h4" /></> },
   /* ⚠️ MY CALL: a compass — Discover is looking outward for agents you do not have yet */
   discover: { label: "compass", icon: <><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></> },
-  /* a stack of bound pages — the shelf, not a single book */
-  manuscripts: { label: "shelf", icon: <><path d="M4 4h6v16H4zM12 4h4v16h-4z" /><path d="M18 5l3 15" /></> },
+  /**
+   * a stack of bound pages — the shelf, not a single book. THE BRIEF IS THIS COMMENT AND NEVER
+   * RENDERS.
+   *
+   * ⚠️ THE SAME ASSET ALREADY SERVES `OneScreenAuthor` AND THE SHELL's manuscript scope. One
+   * drawing, three mounts, sizes at the call sites — see the rolodex note above. The monoline
+   * shelf stays as the degrade path.
+   */
+  manuscripts: {
+    label: "shelf",
+    src: manuscriptMark,
+    icon: <><path d="M4 4h6v16H4zM12 4h4v16h-4z" /><path d="M18 5l3 15" /></>,
+  },
   /* two books side by side — the comparison itself */
   comps: { label: "comps", icon: <><path d="M4 5h7v14H4z" /><path d="M13 5h7v14h-7z" /></> },
   /* ⚠️ MY CALL: a cog, the one place a mechanism is the honest metaphor */
   settings: { label: "cog", icon: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></> },
 };
+
+/**
+ * ⚠️ THE MARK'S SIZE IS A RULE, NOT A CALLER'S OPINION — and this is the same knob-versus-rule
+ * distinction the header's HEIGHT already makes (see pageHeader.css).
+ *
+ * Illustration present → 64px and BARE. No illustration → the 38px monoline glyph on its plate.
+ * A page does not choose; it is told, by whether its drawing exists. So when a mark's artwork
+ * lands, that ONE line in the map above converts its page — no call site is edited, and there is
+ * no decision left for anyone to get wrong or forget.
+ *
+ * ⚠️ IT READS THE MAP, NOT THE LOAD. A 404 at runtime falls back to the monoline glyph but KEEPS
+ * the 64px bare box (the degrade path pageHeader.css already sizes) — because the alternative is a
+ * header whose geometry changes when a network request fails.
+ */
+export const markHasArt = (name: MarkName): boolean => !!MARK[name].src;
 
 export const OneScreenMark: React.FC<{ name: MarkName }> = ({ name }) => {
   const m = MARK[name];

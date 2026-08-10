@@ -64,11 +64,19 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
 });
 
 describe("route variants — declared once at the mount", () => {
-  it("workspace hubs declare their width kind; the F12 pages self-chrome (no cap)", () => {
+  it("workspace hubs declare their width kind; the BAND-TIER pages cap their own content instead", () => {
     // Queries (and, from Stage 4, Agents) render the F12 shell — their own full-bleed header
-    // + centred --maxw column — so their slots carry NO contentVariant. Other routes keep theirs.
+    // + centred --maxw column — so their slots carry NO contentVariant.
     expect(app).not.toMatch(/routeKey === "queries"[^>]*contentVariant/s);
-    expect(app).toMatch(/routeKey === "manuscripts"[^>]*contentVariant="read"/s);
+    /* ⚠️ RETARGETED, NOT RELAXED (band-tier full-bleed pass). This previously asserted
+       `manuscripts … contentVariant="read"`. The cap did NOT go away — it moved INWARD, off the
+       route slot and onto each page's own content column, because a cap on the SLOT wraps the page
+       HEADER too and the header is chrome: its rule has to span the window rather than stop at a
+       1200px column. The assertion still pins a real invariant, and a stronger one — the slot must
+       NOT cap, and the pages MUST, which is what `pageBandBleed.test.ts` enforces on the other side.
+       Import keeps its slot cap: it is not band-tier and still mounts the compact header. */
+    expect(app).not.toMatch(/routeKey === "manuscripts"[^>]*contentVariant/s);
+    expect(app).not.toMatch(/agentsDiscover}\s+layout="fillColumn"[^>]*contentVariant/s);
     expect(app).toContain('<StagePage active contentVariant="read"><ImportCsv');
   });
 
@@ -79,8 +87,22 @@ describe("route variants — declared once at the mount", () => {
 });
 
 describe("no competing per-page cap survives (folded into the wrapper)", () => {
-  it("manuscripts .msv-wrap no longer sets its own max-width", () => {
-    expect(msv).not.toContain(".msv-wrap { max-width: 1150px");
-    expect(msv).toContain(".msv-wrap { width: 100%; }");
+  /**
+   * ⚠️ RETARGETED, NOT RELAXED, AND IT REVERSES DIRECTION — say so plainly rather than let the diff
+   * read as a lock being dropped. This asserted `.msv-wrap { width: 100%; }`: the page's cap had been
+   * folded UP into the route slot's `contentVariant`, so a page-level cap would have been a second,
+   * competing one. The band-tier full-bleed pass moved the cap back DOWN, because a cap on the slot
+   * wraps the page HEADER too and the header is chrome — its rule must span the window.
+   *
+   * ⚠️ SO THE THING BEING GUARDED IS UNCHANGED: there must be exactly ONE cap. What moved is WHERE
+   * the one lives. The old bespoke 1150px must still never come back — that was a THIRD value, and
+   * the assertion against it is kept verbatim.
+   */
+  it("manuscripts .msv-wrap carries the ONE cap — tied to the read token, never the old bespoke 1150", () => {
+    expect(msv, "the bespoke 1150px cap came back — it is a third value that agrees with neither the read cap nor the gutter").not.toContain("max-width: 1150px");
+    expect(
+      msv,
+      "the content cap left .msv-wrap — with the route slot no longer capping, nothing else does, and the shelf stretches the full width of an ultrawide monitor",
+    ).toContain(".msv-wrap { width: 100%; max-width: calc(var(--content-max-read) - 2 * var(--pg-gut)); margin-inline: auto; }");
   });
 });

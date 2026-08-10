@@ -13,6 +13,21 @@
    of the ref's Guides view, not an accident. */
 :root { --sa-col-max: 1240px; --sa-col-gut: 60px; }
 
+/**
+ * ⚠️ `--pg-gut` — THE SIDE GUTTER A BAND-TIER PAGE DECLARES, defaulting to NO GUTTER. Each such page
+ * sets it on its own root; the page's padding reads it and the workspace header's bleed reads it
+ * back, so the header's rule spans the page while the content stays guttered. Declared here, at
+ * `:root`, so the shell owns the default and `shellV2Tokens`' "no rule reads a token nothing
+ * defines" guard is satisfied honestly rather than by exemption.
+ *
+ * ⚠️ IT MUST NOT BE DECLARED ON `.wsh` ITSELF. A custom property set ON an element beats the value
+ * it would INHERIT, so a default sitting on `.wsh` would shadow every page's gutter and pin the
+ * bleed to zero everywhere — silently, and looking exactly like the bug it was added to fix.
+ *
+ * 0px is also the right default on the merits: a page that declares no gutter has none to cancel.
+ */
+:root { --pg-gut: 0px; }
+
 .svh { margin-bottom: 26px; }
 .svh-top {
   display: flex;
@@ -168,11 +183,30 @@
  * passes a description; no caller can request a height and no prop controls one. A page changes
  * the header's height only by changing what it has to say.
  */
+/**
+ * ⚠️ THE HEADER IS CHROME, SO ITS RULE SPANS THE PAGE — it is not inset by the page's CONTENT
+ * gutter. `--pg-gut` is the ONE number a band-tier page declares for that gutter: the page's own
+ * padding reads it, and this bleed reads the same token back. So the rule lands flush on every
+ * page BECAUSE both sides read one declaration, not because two numbers were matched by hand.
+ * If a page ever hardcodes a literal gutter in its padding, this bleed stops agreeing with it —
+ * which is exactly what `pageBandBleed.test.ts` fails on. Do not "fix" a mismatch by editing the
+ * number here; put the page's padding back on its token.
+ *
+ * ⚠️ AND THE FALLBACK IS `0px`, NOT NOTHING. `calc()` on an undefined custom property yields NaN
+ * and CSS drops the whole declaration silently (the `--pad-r` incident in CLAUDE.md). With the
+ * fallback, a page that declares no gutter simply does not bleed — the safe direction.
+ *
+ * ⚠️ THE BLEED EXACTLY EQUALS THE PADDING, which is what keeps it from overflowing: the header's
+ * border box comes out equal to the page root's PADDING box, never wider. That matters on the two
+ * roots that scroll (`.pkgw`, `.msv1`) — one pixel over and `overflow-y:auto` computes `overflow-x`
+ * to auto too, and the page grows a horizontal scrollbar.
+ */
 .wsh {
   flex: 0 0 78px;
   height: 78px;
   box-sizing: border-box;
   border-bottom: 1px solid var(--ws-edge);
+  margin-inline: calc(-1 * var(--pg-gut, 0px));
 }
 /* the derived short state — set by the absence of a description, never by a prop */
 .wsh--solo { flex-basis: 60px; height: 60px; }

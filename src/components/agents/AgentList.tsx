@@ -811,7 +811,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
         <PageHeader
           variant="workspace"
           mark="contacts"
-          markSize="xl"
           title="Contact List"
           description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}

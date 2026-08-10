@@ -53,12 +53,33 @@
 }
 
 /* ── page shell (workspace-fills: masthead flex-none, split fills, panels scroll) ── */
+/* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE — the padding reads it and the workspace header's
+   bleed (pageHeader.css `.wsh`) reads the same token back, so the header's rule spans the page while
+   the CONTENT stays guttered.
+   ⚠️ TOP 22 → 11, HALVED, as on the agent list: the header sits inside this padding and already
+   carries its own 78px, so the top value was empty paper above it. */
 .ctpage {
   height: 100%; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--ct-desk); color: var(--ct-ink); padding: 22px 28px 20px; /* masthead gutter mirrors the Queries hub */
+  background: var(--ct-desk); color: var(--ct-ink);
+  --pg-gut: 28px;
+  padding: 11px var(--pg-gut) 20px;
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
 .ct-desk { flex: 1; min-height: 0; }
+/* ⚠️ THE CAP MOVED HERE FROM THE ROUTE SLOT, and it is the SAME cap — `contentVariant="read"` capped
+   the slot at 1200px, which wrapped the HEADER too and stopped its rule short of the window. Capping
+   content is a content concern, so it now sits on the content.
+   ⚠️ EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal 1144: the slot cap was an
+   OUTER width that the page's padding then ate. A literal would silently stop matching the day
+   either number moved.
+   ⚠️ AND IT IS `> :not(.wsh)`, NOT `.ct-desk`, because the manuscript selector row is a SIBLING of
+   the desk — capping the desk alone would leave the selector flying out to the full window. The
+   header is the one child excluded, which is the whole point of the bleed. */
+.ctpage > :not(.wsh) {
+  width: 100%;
+  max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
+  margin-inline: auto;
+}
 .ct-split { display: grid; grid-template-columns: 1fr 396px; gap: 22px; height: 100%; }
 @media (max-width: 1180px) {
   .ct-desk { overflow-y: auto; }

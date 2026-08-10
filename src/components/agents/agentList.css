@@ -128,7 +128,13 @@
    the window's edge and the header itself. At 28 it read as a band of empty paper above a header
    that is already generous; halved, the header sits where the window starts. The SIDE and BOTTOM
    values are untouched — they gutter the CONTENT, which is a different job. */
-.aglist .agl-page { padding: 14px var(--sa-col-gut) 48px; }
+/* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE. The padding below reads it, and the workspace
+   header's bleed (pageHeader.css `.wsh`) reads the SAME token back to cancel it — so the header's
+   rule lands flush on the window while the CONTENT stays guttered. The two agree structurally,
+   not by two numbers kept in step; if you change the gutter, change it here only.
+   ⚠️ MEASURED, because the old comment was wrong: before the bleed this rule was inset 61px per
+   side at a 1700px window, NOT full-bleed as `f5be3af` claimed. */
+.aglist .agl-page { --pg-gut: var(--sa-col-gut); padding: 14px var(--pg-gut) 48px; }
 .aglist .agl-inner { max-width: var(--sa-col-max); margin: 0 auto; }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
@@ -327,12 +333,15 @@
 .aglist .agl-empty .big { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--agl-ink-head); margin-bottom: 6px; }
 .aglist .agl-empty .small { font-size: 13px; font-weight: 300; }
 
+/* ⚠️ THE BREAKPOINTS MOVE `--pg-gut`, NEVER A LITERAL IN THE PADDING. The header's bleed reads the
+   token, so a literal here would leave the rule bleeding by the DESKTOP gutter on a phone — inset
+   on one breakpoint and overhanging on the next, with nothing in the CSS to point at. */
 @media (max-width: 900px) {
-  .aglist .agl-page { padding: 12px 28px 44px; }
+  .aglist .agl-page { --pg-gut: 28px; padding: 12px var(--pg-gut) 44px; }
 }
 /* the 640px hand-rolled breakpoint migrated to md (Mobile Pass 1 breakpoint law) */
 @media (max-width: 767.98px) {
-  .aglist .agl-page { padding: 9px 16px 40px; }
+  .aglist .agl-page { --pg-gut: 16px; padding: 9px var(--pg-gut) 40px; }
   .aglist .agl-h1 { font-size: 38px; }
   .aglist .agl-search { min-width: 0; width: 100%; }
 }
