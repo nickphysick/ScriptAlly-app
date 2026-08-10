@@ -98,11 +98,25 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass" },
       ],
     },
+    /* ⚠️ MANUSCRIPTS AND COMPARABLE TITLES JOIN MATERIALS (amendment 7 §6), and this RESTORES
+       access rather than adding features: both pages have been live and routed all along, reachable
+       only by typing the URL, because this section held nothing but Packages.
+       ⚠️ THE ROWS ARE LITERALS, matching every other section in this file. They are NOT derived from
+       `TODO_ROUTES` — that definition is the three To-do pages and drives the Tasks section alone.
+       (A shared MATERIALS_ROUTES definition would be the tidier shape, but there is no second
+       consumer to justify it yet; noted as a follow-up rather than done under a header pack.)
+       ⚠️ AND `def` MOVED WITH THE ORDER. Every other section defaults to its FIRST child, so the
+       rib now lands on Manuscripts rather than Packages — a deliberate behaviour change that comes
+       with leading the section, not an oversight. */
     {
       id: "materials",
       label: "Materials",
-      def: "m-pkg",
-      children: [{ id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" }],
+      def: "m-ms",
+      children: [
+        { id: "m-ms", label: "Manuscripts", path: "/manuscripts", icon: "library" },
+        { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books" },
+        { id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" },
+      ],
     },
     /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages (labels, paths,
        palette blurbs), so the sidebar, the ⌘K palette, the breadcrumb ("Tasks / To-do list") and

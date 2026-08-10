@@ -20,8 +20,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, CalendarDays, Compass, HelpCircle, LayoutGrid, LineChart, ListChecks, LogOut, Package,
-  Send, Settings, StickyNote, Sun, Upload, Users,
+  Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
+  LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -166,6 +166,13 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   note: <StickyNote aria-hidden="true" />,
   people: <Users aria-hidden="true" />,
   compass: <Compass aria-hidden="true" />,
+  /* ⚠️ ADDED WITH THE MATERIALS ROWS, and adding them here is not optional bookkeeping — this map
+     is a PARALLEL SURFACE to workspaceNav's rows, not type-linked to it, so a row whose icon key is
+     missing renders a blank space and nothing complains. That is the quiet half of the failure the
+     account-key note above describes. `Library` is the shelf of bound volumes the Manuscripts mark
+     already draws; `BookCopy` is the two-books-side-by-side the Comps mark draws. */
+  library: <Library aria-hidden="true" />,
+  books: <BookCopy aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
   settings: <Settings aria-hidden="true" />,
 };

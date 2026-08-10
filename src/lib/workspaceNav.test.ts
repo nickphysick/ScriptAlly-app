@@ -7,6 +7,8 @@
  * decision somebody made.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { QueryStatus } from "../types";
 import { workspaceSections } from "./workspaceNav";
 import {
@@ -18,6 +20,47 @@ import { shellHitFor } from "./workspaceShell";
 
 const NAV = workspaceSections({ todo: 4 });
 const byId = (id: string) => NAV.find((s) => s.id === id)!;
+
+describe("⚠️ THE ICON MAP IS A PARALLEL SURFACE — every key the nav names must exist in it", () => {
+  /**
+   * ⚠️ THIS GUARD WAS MISSING, AND ITS ABSENCE WAS PROVEN RATHER THAN ASSUMED: two brand-new icon
+   * keys ("library", "books") were added to the nav and the ENTIRE suite stayed green. The existing
+   * assertion only checks that `c.icon` is TRUTHY — a row naming an icon nobody drew passes it.
+   *
+   * `WORKSPACE_ICONS` lives in AppShell.tsx and is NOT type-linked to this model, so a key that
+   * resolves to nothing renders a blank space where a glyph should be, with no error anywhere. The
+   * same shape is already recorded in CLAUDE.md for the old RAIL_ICONS ("a parallel surface not
+   * type-linked to RAIL_GROUPS — add both"), and AppShell's own comment calls it "the quiet half of
+   * that failure". It is read as SOURCE TEXT because importing AppShell here would pull React and
+   * the db provider into a node-environment unit test.
+   */
+  const appShell = readFileSync(resolve(__dirname, "../components/shell/AppShell.tsx"), "utf8");
+  const iconBlock = appShell.slice(
+    appShell.indexOf("const WORKSPACE_ICONS"),
+    appShell.indexOf("};", appShell.indexOf("const WORKSPACE_ICONS")),
+  );
+  /* ⚠️ ANCHOR BEFORE SLICING — an empty slice makes every `toContain` below vacuously true, which
+     is the string-spec failure mode already documented in CLAUDE.md. */
+  it("the icon map is where this test thinks it is", () => {
+    expect(iconBlock, "WORKSPACE_ICONS moved or was renamed — every assertion below is now vacuous").toContain("workspace:");
+  });
+
+  it("every ROW's icon key is drawn", () => {
+    for (const s of NAV) {
+      for (const c of s.children ?? []) {
+        expect(iconBlock, `nav row "${c.id}" names icon "${c.icon}", which WORKSPACE_ICONS does not draw — the row renders a blank space and nothing complains`)
+          .toContain(`${c.icon}:`);
+      }
+    }
+  });
+
+  it("every SECTION's own key is drawn — the rail rib needs its glyph too", () => {
+    for (const s of NAV) {
+      expect(iconBlock, `nav section "${s.id}" has no glyph in WORKSPACE_ICONS — the collapsed rail loses a rib, which is what makes it a complete map of the app`)
+        .toContain(`${s.id}:`);
+    }
+  });
+});
 
 describe("The IA renders what exists — and nothing else", () => {
   it("every path in the nav is a route the app actually has", () => {
