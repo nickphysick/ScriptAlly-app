@@ -160,11 +160,27 @@ export function enterHint(id: StepId): string {
    the manuscript does. With no baseline to compare, everything present reads as PRE-FILLED:
    never claim the writer did something when you cannot tell. */
 export type RequirementState = "empty" | "prefilled" | "answered";
+
+/**
+ * Which steps the writer has actually OPENED.
+ *
+ * ⚠️ A TICK MEANS CONFIRMED AND NOTHING ELSE. The pre-filled state used to render a tick inside an
+ * outlined ring, and whatever the intent, a tick reads as DONE — which is the exact claim the
+ * three-state chip existed to stop making. Being outlined is not enough of a difference to carry
+ * "you have not looked at this yet". So the tick is now gated on the step having been opened, and
+ * pre-filled takes a DASH: the conventional partial mark, and one that cannot be misread as
+ * completion.
+ */
+export interface StepsOpened { when: boolean; what: boolean }
+/**
+ * ⚠️ NO VALUE. The chips used to preview "Manuscript Murphy's Day Out" and "Date today" beside
+ * their labels, which restated what the sidebar and the When step already say — and read as
+ * confirmations of things the writer had not seen. The values live in the collapsed step rows,
+ * which is where they belong; the chip is a LABEL and a MARK.
+ */
 export interface Requirement {
   key: "agent" | "manuscript" | "date";
   label: string;
-  /** What is actually recorded — "Murphy's Day Out", "today", or the prompt when nothing is. */
-  value: string;
   state: RequirementState;
   /** Kept for the callers that only ask whether the query can be saved. */
   met: boolean;
@@ -181,37 +197,23 @@ export function dateRequirementLabel(iso: string, now: number = Date.now()): str
 export function requirements(
   d: ReqDraft,
   base: ReqDraft | null = null,
-  names: { agent?: string; manuscript?: string } = {},
+  opened: StepsOpened = { when: false, what: false },
   now: number = Date.now(),
 ): Requirement[] {
-  /* ⚠️ `unchanged` DEFAULTS TO TRUE WITH NO BASELINE, and the direction matters: `!!base && …`
-     would report every value as ANSWERED the moment the baseline went missing — claiming the
-     writer did three things they had not done. Pre-filled is the quieter mistake by a distance. */
-  const mark = (value: string, unchanged: boolean): RequirementState =>
-    !value ? "empty" : unchanged ? "prefilled" : "answered";
-
-  const agentValue = d.agentId ? (names.agent ?? "").trim() || "Chosen" : "";
-  const msValue = d.manuscriptId ? (names.manuscript ?? "").trim() || "Chosen" : "";
-  const dateValue = dateRequirementLabel(d.dateSent, now);
+  /**
+   * ⚠️ THE TICK IS GATED ON THE STEP HAVING BEEN OPENED, not on the value having changed. A writer
+   * who opened the When step and kept today's date HAS confirmed it; a writer who never opened it
+   * has not, whatever the field says. `base` no longer decides the mark — it decided whether the
+   * value had MOVED, which is a different question and the one that let a tick appear beside
+   * something nobody had looked at.
+   */
+  const mark = (value: string, seen: boolean): RequirementState =>
+    !value ? "empty" : seen ? "answered" : "prefilled";
 
   return [
-    {
-      key: "agent", label: "Agent",
-      value: agentValue || "choose one",
-      state: mark(agentValue, !base || base.agentId === d.agentId),
-      met: !!d.agentId,
-    },
-    {
-      key: "manuscript", label: "Manuscript",
-      value: msValue || "choose one",
-      state: mark(msValue, !base || base.manuscriptId === d.manuscriptId),
-      met: !!d.manuscriptId,
-    },
-    {
-      key: "date", label: "Date",
-      value: dateValue || "pick one",
-      state: mark(dateValue, !base || base.dateSent === d.dateSent),
-      met: !!d.dateSent,
-    },
+    /* Choosing an agent IS the act — there is no step to open, and no default to look past. */
+    { key: "agent", label: "Agent", state: d.agentId ? "answered" : "empty", met: !!d.agentId },
+    { key: "manuscript", label: "Manuscript", state: mark(d.manuscriptId, opened.what), met: !!d.manuscriptId },
+    { key: "date", label: "Date", state: mark(d.dateSent, opened.when), met: !!d.dateSent },
   ];
 }

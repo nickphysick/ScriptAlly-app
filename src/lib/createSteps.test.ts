@@ -9,8 +9,7 @@ import { readFileSync } from "fs";
 import {
   STEP_ORDER, STEP_TITLE, STEP_SHORT, STEP_OPTIONAL,
   stepStates, nextStep, advance, jumpTo, enterHint, requirements, stepIndex,
-  stackAvailable, dateRequirementLabel,
-} from "./createSteps";
+  stackAvailable, } from "./createSteps";
 import { draftReady, emptyDraft } from "./queryDraft";
 
 describe("one section is open at a time", () => {
@@ -91,7 +90,7 @@ describe("the requirement pips read the draft, never the steps", () => {
      writer sees, and the module would have been blamed for the fixture's shortcut. */
   it("two are already met on arrival — only the agent is open", () => {
     const d = emptyDraft({ manuscriptId: "m1" });
-    expect(requirements(d, d, { manuscript: "Murphy's Day Out" }).map((r) => [r.key, r.state, r.met]))
+    expect(requirements(d, d).map((r) => [r.key, r.state, r.met]))
       .toEqual([["agent", "empty", false], ["manuscript", "prefilled", true], ["date", "prefilled", true]]);
   });
 
@@ -113,50 +112,67 @@ describe("the requirement pips read the draft, never the steps", () => {
    something they never looked at — and the one item that genuinely needs them reads as one open
    thing among three settled ones.
    ══════════════════════════════════════════════════════════════════════════════════════════ */
-describe("the checklist states its values, and its ticks are not all the same tick", () => {
-  const now = Date.parse("2026-08-09T09:00:00Z");
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ A TICK MEANS CONFIRMED AND NOTHING ELSE. Pre-filled used to render a tick inside an OUTLINED
+   ring — and whatever the intent, a tick reads as DONE, which is the exact claim the three-state
+   chip existed to stop making. Being outlined is not enough of a difference to carry "you have not
+   looked at this yet". Pre-filled now takes a DASH: the conventional partial mark, and one that
+   cannot be misread as completion.
+
+   ⚠️ AND THE GATE IS "HAS THIS STEP BEEN OPENED", not "has the value moved". A writer who opened
+   the When step and kept today's date HAS confirmed it; one who never opened it has not, whatever
+   the field says. The old baseline test answered a different question, and it is the question that
+   let a tick appear beside something nobody had looked at.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the chips are labels and a mark — no values, and no premature tick", () => {
+  const now = Date.parse("2026-08-10T09:00:00Z");
   const base = emptyDraft({ manuscriptId: "m1" }, now);
+  const shut = { when: false, what: false };
 
-  it("each row states what is actually recorded", () => {
-    const rs = requirements(base, base, { manuscript: "Murphy's Day Out" }, now);
-    expect(rs.find((r) => r.key === "manuscript")?.value).toBe("Murphy's Day Out");
-    expect(rs.find((r) => r.key === "date")?.value, "today is a word, not a date to decode").toBe("today");
+  it("a pre-filled step is a DASH, never a tick", () => {
+    const rs = requirements(base, base, shut, now);
+    expect(rs.find((r) => r.key === "date")?.state).toBe("prefilled");
+    expect(rs.find((r) => r.key === "manuscript")?.state).toBe("prefilled");
   });
 
-  /* An empty row must say what to DO. "Agent" beside an empty ring states a category, not a task. */
-  it("and an empty row states the instruction, never a blank", () => {
-    expect(requirements(base, base, {}, now).find((r) => r.key === "agent"))
-      .toMatchObject({ state: "empty", value: "choose one" });
+  it("and the tick arrives only once that step has been opened", () => {
+    const opened = requirements(base, base, { when: true, what: false }, now);
+    expect(opened.find((r) => r.key === "date")?.state).toBe("answered");
+    expect(opened.find((r) => r.key === "manuscript")?.state,
+      "opening When must not tick What").toBe("prefilled");
   });
 
-  it("pre-filled is a different mark from answered — the baseline is what tells them apart", () => {
-    const moved = { ...base, dateSent: "2026-08-01" };
-    expect(requirements(base, base, {}, now).find((r) => r.key === "date")?.state).toBe("prefilled");
-    expect(requirements(moved, base, {}, now).find((r) => r.key === "date")?.state).toBe("answered");
+  /* Keeping today's date is still confirming it — the mark follows the LOOKING, not the changing. */
+  it("opening a step ticks it even when the writer changes nothing", () => {
+    expect(requirements(base, base, { when: true, what: true }, now).map((r) => r.state))
+      .toEqual(["empty", "answered", "answered"]);
   });
 
-  /* The agent list's "Send query" seeds the agent, so it arrives pre-filled exactly as the
-     manuscript does — it is the baseline that decides, never which field it is. */
-  it("a SEEDED agent is pre-filled too, and a chosen one is answered", () => {
-    const seeded = emptyDraft({ agentId: "a1", manuscriptId: "m1" }, now);
-    expect(requirements(seeded, seeded, { agent: "Elinor Hale" }, now).find((r) => r.key === "agent"))
-      .toMatchObject({ state: "prefilled", value: "Elinor Hale" });
-    expect(requirements({ ...base, agentId: "a1" }, base, { agent: "Elinor Hale" }, now)
+  /* Choosing an agent IS the act: there is no step to open and no default to look past. */
+  it("the agent is empty until chosen, then answered outright", () => {
+    expect(requirements(base, base, shut, now).find((r) => r.key === "agent")?.state).toBe("empty");
+    expect(requirements({ ...base, agentId: "a1" }, base, shut, now)
       .find((r) => r.key === "agent")?.state).toBe("answered");
   });
 
-  /* ⚠️ NEVER CLAIM THE WRITER DID SOMETHING WHEN YOU CANNOT TELL. With no baseline every present
-     value reads as pre-filled — the quieter of the two mistakes by a wide margin. */
-  it("with no baseline, everything present reads as pre-filled", () => {
-    const d = { ...base, agentId: "a1", dateSent: "2026-08-01" };
-    expect(requirements(d, null, { agent: "X", manuscript: "Y" }, now).map((r) => r.state))
-      .toEqual(["prefilled", "prefilled", "prefilled"]);
+  /* ⚠️ NO VALUE PREVIEWS. They restated what the sidebar and the When step already say, and read
+     as confirmations of things the writer had not seen. */
+  it("a requirement carries no value string at all", () => {
+    for (const r of requirements(base, base, shut, now)) {
+      expect(Object.keys(r).sort()).toEqual(["key", "label", "met", "state"]);
+    }
+    const queries = readFileSync(new URL("../components/Queries.tsx", import.meta.url), "utf8");
+    expect(queries, "the chip must not render a value").not.toContain('className="qch-v"');
+    expect(queries).toContain('{r.state === "empty" ? "" : r.state === "prefilled" ? "–" : "✓"}');
   });
 
-  it("a date that is not today is stated as a date", () => {
-    expect(dateRequirementLabel("2026-08-09", now)).toBe("today");
-    expect(dateRequirementLabel("2026-08-01", now)).toBe("1 Aug");
-    expect(dateRequirementLabel("", now)).toBe("");
+  /* ⚠️ SAVE SEMANTICS ARE UNCHANGED — a valid query saves whatever the chips say. This assertion
+     exists so a later reader does not "fix" the asymmetry. */
+  it("and none of this gates saving", () => {
+    const d = { ...base, agentId: "a1" };
+    expect(draftReady(d)).toBe(true);
+    expect(requirements(d, base, shut, now).some((r) => r.state === "prefilled"),
+      "the fixture must actually have un-opened steps").toBe(true);
   });
 });
 

@@ -63,6 +63,8 @@ export interface QueryCreatePaneProps {
   onSeeAllAgents?: () => void;
   onDiscover?: () => void;
   /** The last step's primary. Omitted → that step shows no save control (the header still has one). */
+  /** Which steps the writer has opened — the header's chips gate their tick on this. */
+  onStepsOpened?: (o: { when: boolean; what: boolean }) => void;
   onSave?: () => void;
   canSave?: boolean;
   saving?: boolean;
@@ -84,6 +86,7 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   onOpenQuery,
   onSeeAllAgents,
   onDiscover,
+  onStepsOpened,
   onSave,
   canSave = false,
   saving = false,
@@ -185,6 +188,14 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      mechanism. It is also why reduced motion loses nothing that matters. */
   const [engaged, setEngaged] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);
+
+  /* ⚠️ REPORTED UP, NOT DUPLICATED. `reached` is the pane's own state and the chips are the
+     header's, so one of them has to tell the other; deriving "opened" a second time in Queries.tsx
+     would give two answers to one question the moment the stack's rules changed. */
+  useEffect(() => {
+    const i = stepIndex(reached);
+    onStepsOpened?.({ when: i >= stepIndex("when"), what: i >= stepIndex("what") });
+  }, [reached, onStepsOpened]);
 
   useEffect(() => {
     setEngaged(false);

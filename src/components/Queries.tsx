@@ -295,6 +295,8 @@ export const Queries: React.FC<{
      draft still matches it, and confirm when it doesn't. */
   const [createDraft, setCreateDraft] = useState<QueryDraft | null>(null);
   const [createBase, setCreateBase] = useState<QueryDraft | null>(null);
+  /* Which create-mode steps have been opened — reported up by the pane, which owns the stack. */
+  const [createOpened, setCreateOpened] = useState({ when: false, what: false });
   const [createSaving, setCreateSaving] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const creating = createDraft !== null;
@@ -344,6 +346,7 @@ export const Queries: React.FC<{
     setCreateDraft(base);
     setCreateError(null);
     setCreateSaving(false);
+    setCreateOpened({ when: false, what: false });
   };
 
   /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
@@ -3074,21 +3077,21 @@ export const Queries: React.FC<{
                         item that genuinely needs them read as one open thing among three
                         settled ones. Outlined = answered for you; solid = answered by you.
                         `createBase` is the baseline that tells them apart (see requirements). */}
+                    {/* ⚠️ LABELS AND A MARK — NO VALUES. The chips used to preview "Manuscript
+                        Murphy's Day Out" and "Date today", which restated what the sidebar and the
+                        When step already say and read as confirmations of things the writer had not
+                        seen. The values live in the collapsed step rows.
+                        ⚠️ AND A TICK MEANS CONFIRMED. Pre-filled takes a DASH — the conventional
+                        partial mark, and one that cannot be misread as completion — because an
+                        outlined tick still reads as done, which is the claim this exists to stop
+                        making. The tick arrives only once that step has been opened. */}
                     <div className="qch-reqs">
-                      {requirements(
-                        createDraft,
-                        createBase,
-                        {
-                          agent: createDraft.agentId
-                            ? agentPrimary(agents.find((a) => a.id === createDraft.agentId) ?? ({} as never))
-                            : "",
-                          manuscript: manuscripts.find((m) => m.id === createDraft.manuscriptId)?.title ?? "",
-                        },
-                      ).map((r) => (
+                      {requirements(createDraft, createBase, createOpened).map((r) => (
                         <span key={r.key} className={`qch-rq qch-${r.state}`}>
-                          <span className="qch-c" aria-hidden="true">{r.state === "empty" ? "" : "✓"}</span>
+                          <span className="qch-c" aria-hidden="true">
+                            {r.state === "empty" ? "" : r.state === "prefilled" ? "–" : "✓"}
+                          </span>
                           {r.label}
-                          <b className="qch-v">{r.value}</b>
                         </span>
                       ))}
                     </div>
@@ -3128,6 +3131,7 @@ export const Queries: React.FC<{
                      dirty-confirm — leaving the pane by any other door could lose typing in
                      silence. Both are omitted when the page has no navigation bridge, because a
                      route card that goes nowhere teaches the wrong shape of the app. */
+                  onStepsOpened={setCreateOpened}
                   onSave={() => void saveCreate()}
                   canSave={createReady}
                   saving={createSaving}
