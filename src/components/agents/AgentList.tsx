@@ -812,11 +812,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           variant="workspace"
           mark="contacts"
           markSize="xl"
-          /* ⚠️ DERIVED, NEVER A LITERAL. `agentAxisCounts` is the same derivation the toolbar's
-             facet counts read, so the header cannot disagree with the filters beneath it. And it
-             reports TOTALS — it does not react to the filters, which describe the view. */
-          count={`${agents.length} ON FILE · ${counts.standing.active} QUERIED · ${counts.standing.never} IDLE`}
-          title="Your agent list"
+          title="Contact List"
           description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
         />
