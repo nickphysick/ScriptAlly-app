@@ -52,6 +52,17 @@ describe("the three treatments", () => {
     expect(rule(".qc-sfoot .qc-back"), "Back reads left of the primary").toContain("order: -1");
   });
 
+  /* ⚠️ THE FOOTER IS A ROW, NOT A BUTTON HANGING OFF THE BODY. The primary sat flush against the
+     card's inner edge, so it read as escaping the card rather than closing it. And it applies to
+     EVERY step — one renderer, so it cannot be true of When and false of Notes. */
+  it("the footer is separated, padded, and inside the card on every step", () => {
+    const r = rule(".qc-sfoot");
+    expect(r, "no rule between the step's content and its actions").toContain("border-top");
+    expect(r).toContain("margin: 20px");
+    expect(r).toContain("padding: 15px");
+    expect(pane.match(/\{stepFoot\("/g)?.length ?? 0, "every step, not just When").toBe(3);
+  });
+
   /* ⚠️ THE KEY HANDLER STAYS. Removing the advertisement is not removing the behaviour — a writer
      who already knows Enter works must not find it stopped working. */
   it("and Enter still commits the step", () => {
