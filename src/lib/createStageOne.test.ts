@@ -99,9 +99,24 @@ describe("the ghost rows show anatomy without asking anything", () => {
     expect(pane.slice(at, at + 80)).toContain('aria-hidden="true"');
   });
 
-  /* They sit where the real stack will sit, so the eye does not have to relearn the column. */
-  it("and they sit at the foot of the column, where the real stack will be", () => {
-    expect(rule(".qc-ghosts")).toContain("margin-top: auto");
+  /* ⚠️ AMENDED, AND THIS WAS THE DEAD SPACE. The ghosts were pinned to the FOOT of the column so
+     they sat where the real stack would appear — sound when stage 1 held one question and nothing
+     else. The column now holds a picker, a panel and a grid, so an auto margin is a spacer that
+     opens a hole exactly as large as whatever is left over: browser-measured at a 1400px column,
+     514px with it and 12px without. It is NOT a viewport-height chain, and none is permitted here
+     — the card sizes to its content, which is the repo law. */
+  it("the ghosts follow the content — no auto margin holding the column open", () => {
+    expect(rule(".qc-ghosts"), "the spacer came back").not.toContain("margin-top: auto");
+    expect(rule(".qc-ghosts")).toContain("padding-top: 18px");
+  });
+
+  /* The repo law: page heights are stage-relative, and no bar-offset arithmetic anywhere. */
+  it("and nothing in the create pane's height chain measures the viewport", () => {
+    for (const sel of [".qc-two", ".qc-form", ".qc-pick", ".qc-stack", ".qc-ghosts"]) {
+      const r = rule(sel);
+      expect(r, `${sel} reaches for the viewport`).not.toMatch(/\b\d*\.?\d*vh\b/);
+      expect(r, `${sel} does bar-offset arithmetic`).not.toMatch(/calc\([^)]*vh/);
+    }
   });
 });
 
@@ -117,19 +132,23 @@ describe("the requirement pips", () => {
      completed what openCreate merely pre-filled — so the one item that genuinely needed them read
      as one open thing among three settled ones. Outlined = answered FOR you and still editable;
      solid = answered BY you; an open ring = nothing recorded. */
-  it("pre-filled is outlined, answered is solid, and empty is a hollow ring", () => {
+  /* ⚠️ AMENDED: pre-filled is a DASH in a muted ring, not an outlined TICK. A tick reads as done
+     however it is drawn, and the sage is now reserved for the one state actually confirmed. */
+  it("pre-filled is a muted dash, answered is solid sage, and empty is a hollow ring", () => {
     const pre = rule(".qch-rq.qch-prefilled .qch-c");
-    expect(pre, "pre-filled must not be a filled tick").toContain("background: transparent");
-    expect(pre, "but it is still sage — it IS answered").toContain("#7e9178");
+    expect(pre, "pre-filled must not be a filled mark").toContain("background: transparent");
+    expect(pre, "sage is reserved for confirmed").not.toContain("#7e9178");
     expect(rule(".qch-rq.qch-answered .qch-c")).toContain("background: #7e9178");
     expect(rule(".qch-c"), "the unmet pip must read as empty").toContain("border: 1.5px solid #cfc3b1");
     expect(rule(".qch-rq.qch-on .qch-c"), "the old one-tick rule must be gone").toBe("");
   });
 
-  /* A tick with no value says a category is settled without saying what settled it. */
-  it("and every row states its value", () => {
-    expect(queries).toContain('<b className="qch-v">{r.value}</b>');
-    expect(rule(".qch-v")).toContain("font-weight: 600");
+  /* ⚠️ AMENDED — the values went. They restated what the sidebar and the When step already say,
+     and read as confirmations of things the writer had not seen. The chip is a label and a mark;
+     the values live in the collapsed step rows. */
+  it("and no row states a value", () => {
+    expect(queries, "the value preview came back").not.toContain('className="qch-v"');
+    expect(rule(".qch-v"), "and its rule went with it").toBe("");
   });
 
   /* ⚠️ The tick is the BAND sage. index.css locks --sage / --sageC / --sageD to StatusDots, and

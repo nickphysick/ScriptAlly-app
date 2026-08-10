@@ -172,12 +172,13 @@
    StatusDots, and a requirement mark is not a query status. */
 .qch-rq { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
 .qch-c { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #cfc3b1; display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; flex: none; }
-.qch-v { font-weight: 600; color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* empty — an open ring, and the value is the instruction */
-.qch-rq.qch-empty .qch-v { font-weight: 500; color: var(--muted); }
-/* pre-filled — outlined: the tick is sage, the disc is not filled */
-.qch-rq.qch-prefilled { color: var(--ink); }
-.qch-rq.qch-prefilled .qch-c { background: transparent; border-color: #7e9178; color: #7e9178; }
+/* (`.qch-v` retired with the value previews — the values live in the collapsed step rows.) */
+/* ⚠️ PRE-FILLED IS A DASH, NOT AN OUTLINED TICK. Whatever the intent, a tick reads as DONE — and
+   being outlined is not enough of a difference to carry "you have not looked at this yet". A dash
+   is the conventional partial mark and cannot be misread as completion. The ring stays muted, so
+   the sage is reserved for the one state that has actually been confirmed. */
+.qch-rq.qch-prefilled { color: var(--ink-2); }
+.qch-rq.qch-prefilled .qch-c { background: transparent; border-color: #cfc3b1; color: var(--muted); font-size: 10px; }
 /* answered — the solid tick, reserved for what the writer actively did */
 .qch-rq.qch-answered { color: var(--ink); }
 .qch-rq.qch-answered .qch-c { background: #7e9178; border-color: #7e9178; color: #fff; }
@@ -193,7 +194,15 @@
 .qc-askfield { width: 100%; }
 .qc-askfield .f12-lsearch { height: 44px; border-color: var(--line); background: var(--panel); box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
 /* The ghosts sit at the FOOT of the column, where the real stack will be. */
-.qc-ghosts { margin-top: auto; padding-top: 18px; opacity: 0.5; }
+/* ⚠️ NO `margin-top: auto` — THAT WAS THE DEAD SPACE. The ghosts were pinned to the FOOT of the
+   column so they sat where the real stack would appear, which was sound when stage 1 held one
+   question and nothing else. The column now holds a picker, a panel and a grid, so an auto margin
+   is a spacer that opens a hole exactly as large as whatever is left over: browser-measured at a
+   1400px column, 514px of dead space with it and 12px without, in every stage-1 condition where
+   the content does not already overflow.
+   It is NOT a viewport-height chain, and no bar-offset arithmetic belongs anywhere near this — the
+   card sizes to its content, which is the repo law and now actually true in all three states. */
+.qc-ghosts { padding-top: 18px; opacity: 0.5; }
 
 /* ══ STAGE 1 · THE PICKER (ref 63-qc-create-stepper.html, step 1) ═══════════════════════════
    ⚠️ THE GRID IS THE RESULT SET — there is no overlay and no open/close state. The field filters
