@@ -74,9 +74,16 @@ describe("§6 · the 30-day feed", () => {
       act({ id: "ms", activityType: ActivityType.MANUSCRIPT_ADDED, queryId: "", manuscriptId: "m1",
         resultingStatus: undefined, date: daysAgo(2) }),
     ], queries, agents, manuscripts, NOW);
-    expect(rows[0]).toMatchObject({ pill: "Agent added", who: "Added Sophie Dunn at Curtis Vane" });
+    /* ⚠️ RETARGETED, NOT DELETED (polish P5). This asserted the SENTENCE grammar —
+       who: "Added Sophie Dunn at Curtis Vane" — which is precisely what P5 replaces: the pill is
+       the verb, the line is the SUBJECT, the caption is the context. The row still must never be
+       an em dash, and that half of the lock is untouched. */
+    expect(rows[0]).toMatchObject({ pill: "Agent added", who: "Sophie Dunn" });
+    expect(rows[0].caption).toBe("Curtis Vane · added to your list");
     expect(rows[1]).toMatchObject({ pill: "Manuscript added", who: "Murphy's Day Out" });
     for (const r of rows) expect(r.who).not.toBe("—");
+    /* ⚠️ NO ROW IS A SENTENCE ANY MORE — the fault subject grammar exists to remove. */
+    for (const r of rows) expect(r.who).not.toMatch(/^(You |Added |Updated |Removed )/);
   });
 
   it("the caption is agency · manuscript for query events", () => {

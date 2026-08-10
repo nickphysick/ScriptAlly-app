@@ -18,6 +18,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { goalBlockGap, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
+import { agentPrimary } from "../../lib/agentDisplay";
 import { Skel } from "./OneScreenDashboard";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
@@ -41,6 +42,8 @@ export interface FeedRow {
   count: number;
   /** DISTINCT subjects inside the run — six edits to one agent is not "six agents". */
   subjects: number;
+  /** The run's subject NAMES, in order, so a collapsed row can name who it stands for. */
+  subjectNames: string[];
   /** The EARLIEST time in a folded run, so a run reads as a span rather than one instant. */
   fromTime: string;
 }
@@ -82,6 +85,12 @@ const TYPE_PILL: Record<string, { label: string; sage: boolean }> = {
   [ActivityType.MANUSCRIPT_UPDATED]: { label: "Manuscript updated", sage: false },
   [ActivityType.MANUSCRIPT_DELETED]: { label: "Manuscript removed", sage: false },
 };
+
+/** The caption's tail for an agent event — what was done, in words, since the pill is the verb. */
+const agentEventContext = (t: string): string =>
+  t === ActivityType.AGENT_ADDED ? "added to your list"
+    : t === ActivityType.AGENT_DELETED ? "removed from your list"
+      : "details updated";
 
 /** Which family an event belongs to decides HOW its subject is found. */
 const AGENT_TYPES = new Set<string>([ActivityType.AGENT_ADDED, ActivityType.AGENT_UPDATED, ActivityType.AGENT_DELETED]);
@@ -127,7 +136,38 @@ export const feedRows = (
     let scope: FeedRow["scope"] = "query";
     if (AGENT_TYPES.has(a.activityType)) {
       scope = "agent";
-      who = a.description.trim();
+      /**
+       * ⚠️ SUBJECT GRAMMAR: THE ROW NAMES WHO, NOT WHAT HAPPENED IN A SENTENCE (polish P5). The
+       * pill is the verb; this line is the subject. A sentence is what ran out of room and got
+       * truncated mid-clause, and it is what hid the missing-name bug — "You updated details for
+       * at Penhallow" reads as a layout problem rather than the data fault it is.
+       *
+       * ⚠️ THE SUBJECT IS LOOKED UP, NOT PARSED OUT. `Activity` carries no `agentId`, and picking
+       * a name out of the description with a regex is the string-parsing this codebase forbids.
+       * So the AGENT LIST is the authority: find the agent this description NAMES, by testing
+       * known values against it. Longest match wins, or "Vane" would claim "Vane-Coe".
+       *
+       * ⚠️ AND THIS REPAIRS LEGACY RECORDS. Descriptions written before the db.tsx fix have a hole
+       * where the name should be, but they still carry the AGENCY — so an agency match recovers
+       * the subject for rows that can never be repaired at source.
+       */
+      const desc = a.description;
+      let best: Agent | undefined;
+      let bestLen = 0;
+      for (const ag of agents) {
+        for (const token of [agentPrimary(ag), ag.agency]) {
+          const t = (token ?? "").trim();
+          if (t.length > bestLen && desc.includes(t)) { best = ag; bestLen = t.length; }
+        }
+      }
+      if (best) {
+        who = agentPrimary(best);
+        caption = [best.agency, agentEventContext(a.activityType)].filter(Boolean).join(" · ");
+      } else {
+        /* No match — a deleted agent, or a description naming nobody we hold. The whole sentence
+           is the honest fallback: it is what we know, and the row is not dropped. */
+        who = desc.trim();
+      }
     } else if (MS_TYPES.has(a.activityType)) {
       scope = "manuscript";
       who = manuscripts.find((m) => m.id === a.manuscriptId)?.title?.trim() || a.description.trim();
@@ -154,6 +194,7 @@ export const feedRows = (
       scope,
       count: 1,
       subjects: 1,
+      subjectNames: [who],
       fromTime: "",
     });
   }
@@ -200,7 +241,13 @@ export const collapseFeedRuns = (rows: FeedRow[]): FeedRow[] => {
       const seen = subjectsSeen[subjectsSeen.length - 1];
       seen.add(r.who);
       // `prev` is the newer row; `r` is older, so it supplies the run's start time.
-      out[out.length - 1] = { ...prev, count: prev.count + 1, subjects: seen.size, fromTime: r.time };
+      out[out.length - 1] = {
+        ...prev,
+        count: prev.count + 1,
+        subjects: seen.size,
+        subjectNames: [...seen],
+        fromTime: r.time,
+      };
       continue;
     }
     out.push(r);
@@ -210,20 +257,34 @@ export const collapseFeedRuns = (rows: FeedRow[]): FeedRow[] => {
 };
 
 /**
- * The words a folded run says. **Six edits to ONE agent is not "six agents"** — the run counts
- * events, the sentence counts SUBJECTS, and where those differ the sentence must follow the
- * subjects or it states something that did not happen. A single-subject run keeps the original
- * line and carries its repetition as a count instead.
+ * A folded run's two lines, in the SAME grammar as an ordinary row: the line is the subject, the
+ * caption is the context. `null` when the row is not a run, or when the run has one subject —
+ * six edits to ONE agent is not "six agents", so that row keeps its own name and shows ×n.
  */
-export const runSentence = (r: FeedRow): string | null => {
-  if (r.count < 2) return null;
-  if (r.subjects < 2) return null; // one subject, many edits — the row keeps its own name
+export const runLines = (r: FeedRow): { line: string; caption: string } | null => {
+  if (r.count < 2 || r.subjects < 2) return null;
   const noun = r.scope === "manuscript" ? "manuscripts" : "agents";
-  const p = r.pill.toLowerCase();
-  if (p.includes("added")) return `You added ${r.subjects} ${noun}`;
-  if (p.includes("removed") || p.includes("deleted")) return `You removed ${r.subjects} ${noun}`;
-  return `You updated details for ${r.subjects} ${noun}`;
+  return { line: `${r.subjects} ${noun}`, caption: nameList(r.subjectNames) };
 };
+
+/**
+ * "Jonathan Marsh, Harriet Vane-Coe & 4 more" — two names then a count.
+ *
+ * ⚠️ TWO NAMES IS THE CAP BECAUSE THE CAPTION IS ONE LINE. Listing four and ellipsing the last
+ * loses a name mid-word, which is the truncation this whole phase exists to remove; a stated
+ * "& 4 more" is complete at whatever width it is given.
+ */
+export const nameList = (names: string[]): string => {
+  const shown = names.slice(0, 2);
+  const rest = names.length - shown.length;
+  return rest > 0 ? `${shown.join(", ")} & ${rest} more` : shown.join(" & ");
+};
+
+/** The pill's words for a run — the verb pluralises with its subjects. */
+export const runPill = (r: FeedRow): string =>
+  (r.count > 1 && r.subjects > 1 && r.pill.startsWith("Agent "))
+    ? r.pill.replace(/^Agent /, "Agents ")
+    : r.pill;
 
 /* ── the rail ── */
 
@@ -402,15 +463,18 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                         would be pushed to the middle of the row rather than sitting with the pill. */}
                     <div className="os-r1">
                       <span className="os-r1l">
-                        <span className={`os-st${r.sage ? " sg" : ""}`}>{r.pill}</span>
+                        <span className={`os-st${r.sage ? " sg" : ""}`}>{runPill(r)}</span>
                         {/* ⚠️ A FOLDED RUN STATES ITS SIZE AND ITS SPAN — without the count, the
                             fold is indistinguishable from events having gone missing. */}
                         {r.count > 1 && <span className="os-runx">×{r.count}</span>}
                       </span>
                       <span className="os-tm">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
                     </div>
-                    <div className="os-who">{runSentence(r) ?? r.who}</div>
-                    {r.caption && <div className="os-cap">{r.caption}</div>}
+                    {/* ⚠️ SUBJECT ON THE LINE, CONTEXT BENEATH — never a sentence spanning both. */}
+                    <div className="os-who">{runLines(r)?.line ?? r.who}</div>
+                    {(runLines(r)?.caption || r.caption) && (
+                      <div className="os-cap">{runLines(r)?.caption || r.caption}</div>
+                    )}
                   </div>
                 </div>
               </React.Fragment>

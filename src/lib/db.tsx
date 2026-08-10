@@ -1400,7 +1400,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const existingAgent = agents.find(a => a.id === id);
     if (!existingAgent) return;
     const previousStarRating = existingAgent.starRating;
-    const agentName = existingAgent.name;
+    /**
+     * ⚠️ THE DISPLAY HELPER, NEVER THE RAW FIELD (polish P5). An agent is VALID with an agency and
+     * no name — the agency-less rule — so reading `.name` directly wrote activity descriptions
+     * with a hole in them: "You updated details for  at Penhallow Literary", which is exactly what
+     * the dashboard's activity feed then rendered. `agentPrimary` is the canonical answer to "what
+     * do we call this agent", it falls back to the agency, and it was already imported here.
+     *
+     * ⚠️ THIS STRING IS WRITTEN INTO THE ACTIVITY RECORD, so it is not a display bug and cannot be
+     * repaired at the render: descriptions composed before this fix keep their hole for good.
+     * Which is the argument for subject grammar in the feed — an absent name is then obvious
+     * rather than hidden mid-sentence.
+     */
+    const agentName = agentPrimary(existingAgent);
     const agencyName = existingAgent.agency;
 
     let writeSuccess = false;

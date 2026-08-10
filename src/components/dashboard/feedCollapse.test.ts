@@ -9,7 +9,7 @@
  * information if the corresponding rule were dropped — not a restatement of the implementation.
  */
 import { describe, it, expect } from "vitest";
-import { collapseFeedRuns, runSentence, FeedRow } from "./OneScreenRail";
+import { collapseFeedRuns, runLines, nameList, runPill, FeedRow } from "./OneScreenRail";
 
 const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   dayLabel: "Wed 29 Jul",
@@ -22,6 +22,7 @@ const row = (over: Partial<FeedRow> & Pick<FeedRow, "id">): FeedRow => ({
   scope: "agent",
   count: 1,
   subjects: 1,
+  subjectNames: [over.who ?? "Updated Sophie Dunn at Curtis Vane"],
   fromTime: "",
   ...over,
 });
@@ -77,7 +78,12 @@ describe("activity feed — run collapse", () => {
     expect(out).toHaveLength(1);
     expect(out[0].count).toBe(6);
     expect(out[0].subjects).toBe(6);
-    expect(runSentence(out[0])).toBe("You updated details for 6 agents");
+    expect(runLines(out[0])).toEqual({
+      line: "6 agents",
+      caption: "Updated Sophie Dunn, Updated Anya Rell & 4 more",
+    });
+    // ⚠️ the verb pluralises with its subjects — "Agent updated ×6" reads as one agent, six times
+    expect(runPill(out[0])).toBe("Agents updated");
   });
 
   it("⚠️ six edits to ONE agent is NOT 'six agents' — the sentence counts subjects, not events", () => {
@@ -87,8 +93,9 @@ describe("activity feed — run collapse", () => {
     ]);
     expect(out[0].count).toBe(2);
     expect(out[0].subjects).toBe(1);
-    // no sentence — the row keeps its own name and shows the repetition as a count
-    expect(runSentence(out[0])).toBeNull();
+    // no run line — the row keeps its own name and shows the repetition as a count
+    expect(runLines(out[0])).toBeNull();
+    expect(runPill(out[0])).toBe("Agent updated"); // singular verb for a single subject
   });
 
   it("does not fold the same subject under a different event", () => {
@@ -117,5 +124,11 @@ describe("activity feed — run collapse", () => {
 
   it("an empty feed stays empty", () => {
     expect(collapseFeedRuns([])).toEqual([]);
+  });
+
+  it("⚠️ the caption names two and counts the rest — never a name cut mid-word", () => {
+    expect(nameList(["Ada", "Bo"])).toBe("Ada & Bo");
+    expect(nameList(["Ada", "Bo", "Cy", "Di", "Ed", "Fi"])).toBe("Ada, Bo & 4 more");
+    expect(nameList(["Ada"])).toBe("Ada");
   });
 });
