@@ -29,7 +29,9 @@ describe("emptyDraft — the create-mode starting point", () => {
     expect(d.agentId).toBeNull();
     expect(d.manuscriptId).toBe("");
     expect(d.journal).toBe("");
-    expect(d.reminder).toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
+    /* `seeded` is part of the starting value: nothing has been chosen yet, which is exactly what
+       the provenance line needs to know before it explains where a default came from. */
+    expect(d.reminder).toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS, seeded: true });
   });
 
   it("carries the seeds the launch points pass (agent card / manuscript plate)", () => {
@@ -114,26 +116,56 @@ describe("the nudge reminder — derived from the agent's stated turnaround", ()
      `suggested` kind resolved to null when the agent stated nothing, so the query went quiet with
      no reminder scheduled and nobody had chosen that. */
   it("an agent with no stated turnaround gets the house default, not silence", () => {
+    /* ⚠️ `seeded: true` IS PART OF THE VALUE. It is what lets the provenance line tell "the app
+       chose 8 weeks" from "the writer chose 8 weeks" — the same date, two different facts. */
     expect(initialReminder(agent({ responseTimeWeeks: undefined })))
-      .toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
-    expect(initialReminder(agent({ responseTimeWeeks: 6 }))).toEqual({ kind: "preset", weeks: 6 });
-    expect(initialReminder(null)).toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
+      .toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS, seeded: true });
+    expect(initialReminder(agent({ responseTimeWeeks: 6 }))).toEqual({ kind: "preset", weeks: 6, seeded: true });
+    expect(initialReminder(null)).toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS, seeded: true });
     expect(initialReminder(agent({ responseTimeWeeks: 0 })), "zero is not a turnaround")
-      .toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS });
+      .toEqual({ kind: "preset", weeks: HOUSE_NUDGE_WEEKS, seeded: true });
   });
 
   /* ⚠️ AND THE LINE SAYS SO OUT LOUD. Presenting eight weeks as though the agent had said it would
      put words in their mouth, and the writer could not tell a stated turnaround from a convention
      when deciding whether to trust it. */
-  it("the derived line always names the task date, and names a default as a default", () => {
-    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "preset", weeks: 6 } };
+  /* ══════════════════════════════════════════════════════════════════════════════════════
+     ⚠️ THE CLAUSE EXPLAINS WHERE A **DEFAULT** CAME FROM. It was flagged off "the selection
+     differs from the agent's figure", so a writer who picked 12 weeks for an agent stating 6 was
+     told no response time was listed — while the panel beside it showed six. Once the writer has
+     chosen, the provenance is the writer, and the app says nothing about it.
+     ══════════════════════════════════════════════════════════════════════════════════════ */
+  const CLAUSE = "a default, as no response time is listed for them";
+
+  it("case 1 — agent states a figure, preset untouched: the bare sentence", () => {
+    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: initialReminder(agent({ responseTimeWeeks: 6 })) };
     expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: 6 }))).toMatch(/^A task appears on .+\.$/);
-    expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: 6 })), "their own figure needs no caveat")
-      .not.toContain("a default");
-    expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: undefined })))
-      .toContain("a default, as no response time is listed for them");
-    expect(nudgeDerivedLine({ ...d, reminder: { kind: "none" } }, agent()), "nothing resolves, nothing is claimed")
-      .toBeNull();
+    expect(nudgeDerivedLine(d, agent({ responseTimeWeeks: 6 }))).not.toContain(CLAUSE);
+  });
+
+  it("case 2 — agent states nothing, house fallback untouched: the clause", () => {
+    const bare = agent({ responseTimeWeeks: undefined });
+    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: initialReminder(bare) };
+    expect(nudgeDerivedLine(d, bare)).toContain(CLAUSE);
+  });
+
+  /* ⚠️ AND IT GOES THE MOMENT THE WRITER PICKS ANYTHING — including picking the same number the
+     app had already chosen. Arriving at 8 weeks by default and choosing 8 weeks by hand are
+     different facts about provenance, which is why `seeded` lives on the choice. */
+  it("case 3 — the writer chose: no clause, whatever the agent states", () => {
+    const bare = agent({ responseTimeWeeks: undefined });
+    const chosen: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "preset", weeks: 8 } };
+    expect(nudgeDerivedLine(chosen, bare), "the writer's own pick needs no explanation")
+      .not.toContain(CLAUSE);
+    const twelve: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "preset", weeks: 12 } };
+    expect(nudgeDerivedLine(twelve, agent({ responseTimeWeeks: 6 })),
+      "this is the case that shipped the bug — a different preset is not a missing figure")
+      .not.toContain(CLAUSE);
+  });
+
+  it("and nothing resolving claims nothing", () => {
+    const d: QueryDraft = { ...emptyDraft({}, NOW), reminder: { kind: "none" } };
+    expect(nudgeDerivedLine(d, agent())).toBeNull();
   });
 
   it("and a custom date reports the interval back to the send", () => {

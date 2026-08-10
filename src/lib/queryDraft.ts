@@ -43,7 +43,14 @@ export const CREATE_SEND_METHODS: readonly { label: string; value: SubmissionMet
  * silently, because a gap in the agent's record was read as a preference of theirs.
  */
 export type ReminderChoice =
-  | { kind: "preset"; weeks: number }
+  /**
+   * ⚠️ `seeded` IS THE "UNTOUCHED" BIT, AND IT LIVES ON THE CHOICE so it cannot drift from it.
+   * It is true only while the interval is the one the app put there on the writer's behalf; every
+   * chip in the pane omits it, so choosing 8 weeks by hand is a different value from arriving at
+   * 8 weeks by default even though both resolve to the same date. That distinction is the whole
+   * of the provenance rule — see `nudgeDerivedLine`.
+   */
+  | { kind: "preset"; weeks: number; seeded?: true }
   | { kind: "custom"; date: string }
   | { kind: "none" };
 
@@ -62,7 +69,7 @@ export const HOUSE_NUDGE_WEEKS = 8;
 /** The nudge a freshly chosen agent gets: their stated turnaround, else the house convention. */
 export function initialReminder(agent: Agent | null | undefined): ReminderChoice {
   const w = agent?.responseTimeWeeks;
-  return { kind: "preset", weeks: typeof w === "number" && w > 0 ? w : HOUSE_NUDGE_WEEKS };
+  return { kind: "preset", weeks: typeof w === "number" && w > 0 ? w : HOUSE_NUDGE_WEEKS, seeded: true };
 }
 
 export interface QueryDraft {
@@ -121,7 +128,7 @@ export function emptyDraft(seed: { agentId?: string | null; manuscriptId?: strin
     manuscriptId: seed.manuscriptId ?? "",
     dateSent: todayInputDate(now),
     sendMethod: SubmissionMethod.EMAIL,
-    reminder: { kind: "preset", weeks: HOUSE_NUDGE_WEEKS },
+    reminder: { kind: "preset", weeks: HOUSE_NUDGE_WEEKS, seeded: true },
     materials: materialRowsForDraft(null),
     journal: "",
   };
@@ -204,12 +211,20 @@ export function nudgeDerivedLine(
       ? `A task appears on ${when} — ${weeks} ${weeks === 1 ? "week" : "weeks"} after sending.`
       : `A task appears on ${when}.`;
   }
+  /* ⚠️ THE CLAUSE EXPLAINS WHERE A **DEFAULT** CAME FROM, so it needs two facts and neither of
+     them is "the selection differs from the agent's figure". That comparison is what shipped the
+     bug: a writer who picked 12 weeks for an agent who states 6 was told no response time was
+     listed, while the panel beside it showed six. Once the writer has chosen, the provenance is
+     the writer, and the app says nothing about it.
+       · the agent has NO figure — `responseTimeWeeks` absent, not merely different, and
+       · the interval is still the one we seeded (`seeded`).
+     Either one false, and the line is the bare sentence. */
   const stated = agent?.responseTimeWeeks;
-  const weeks = d.reminder.kind === "preset" ? d.reminder.weeks : 0;
-  const isStated = typeof stated === "number" && stated > 0 && stated === weeks;
-  return isStated
-    ? `A task appears on ${when}.`
-    : `A task appears on ${when} — a default, as no response time is listed for them.`;
+  const agentStatesNothing = !(typeof stated === "number" && stated > 0);
+  const untouched = d.reminder.kind === "preset" && d.reminder.seeded === true;
+  return agentStatesNothing && untouched
+    ? `A task appears on ${when} — a default, as no response time is listed for them.`
+    : `A task appears on ${when}.`;
 }
 
 /**
