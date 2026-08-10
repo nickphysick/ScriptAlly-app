@@ -112,12 +112,12 @@ export function queryHistoryLabel(a: Agent, queries: Query[], now: number = Date
     .filter(Boolean)
     .sort()
     .pop();
-  if (!latest) return "Queried";
-  const d = new Date(latest + "T00:00:00");
-  const day = d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-  return d.getFullYear() === new Date(now).getFullYear()
-    ? `Queried ${day}`
-    : `Queried ${day} ${d.getFullYear()}`;
+  /* ⚠️ THE SAME GUARD AS THE PLATE, AND FOR THE SAME REASON. This parsed without a NaN check and
+     would have printed "Queried Invalid Date NaN" on any record the plate would have skipped —
+     the second instance of one fault, found by looking for siblings rather than fixing the one
+     that was reported. A record with an unusable date says only that it was queried. */
+  const label = plateDate(latest);
+  return label ? `Queried ${label}` : "Queried";
 }
 
 /**

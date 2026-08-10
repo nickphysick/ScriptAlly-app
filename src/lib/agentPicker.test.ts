@@ -165,6 +165,16 @@ describe("a bad record never prints an error message at the writer", () => {
     expect(plateName(nameless)).not.toContain("Penhallow");
   });
 
+  /* ⚠️ THE SIBLING HAD THE SAME FAULT. The dropdown's history label parsed without a NaN guard and
+     would have printed "Queried Invalid Date NaN" on exactly the records the plate skips — found
+     by looking for siblings rather than fixing only the instance that was reported. */
+  it("the dropdown's history label is guarded too", () => {
+    const a = agent("a1");
+    expect(queryHistoryLabel(a, [q("a1", { dateSent: "not a date" })]), "never an error string")
+      .toBe("Queried");
+    expect(queryHistoryLabel(a, [q("a1", { dateSent: "2024-03-14" })])).toBe("Queried 14 Mar 2024");
+  });
+
   it("and the plate renders the date node only when there is one", () => {
     expect(picker).toContain("{p.sentLabel && <span className=\"qc-platedate\">{p.sentLabel}</span>}");
   });
@@ -215,7 +225,7 @@ describe("the grid suggests and the dropdown searches — two jobs, two surfaces
     expect(dropdownResults(list, "elinor").map((a) => a.id), "a queried agent must stay findable")
       .toEqual(["a1"]);
     const now = Date.parse("2026-08-10");
-    expect(queryHistoryLabel(list[0], [q("a1")], now)).toBe("Queried 1 Jan");
+    expect(queryHistoryLabel(list[0], [q("a1")], now)).toBe("Queried 1 Jan 2026");
     expect(queryHistoryLabel(list[1], [q("a1")], now)).toBe("Not queried");
   });
 
