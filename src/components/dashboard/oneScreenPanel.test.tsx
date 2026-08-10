@@ -100,6 +100,24 @@ describe("the container rim is an overlay, not a border", () => {
     expect(card).not.toContain("box-shadow: inset");
   });
 
+  it("⚠️ NO TRANSFORM ON A CARD HOVER — the column clips, and the lifted 2px takes the rim with it", () => {
+    /* `.os-colM`/`.os-colR` are overflow:hidden and the cards sit flush to the top of the column,
+       so a lift pushes the card's top edge — ring included — past the clip. This asserts across
+       EVERY `.os-card...:hover` rule in the sheet, because the bug was a SECOND such rule 870
+       lines below the first: reading only the first is what produced a wrong diagnosis. */
+    const rules = bare.match(/\.os-card[^{}]*:hover\s*\{[^}]*\}/g) ?? [];
+    expect(rules.length).toBeGreaterThan(0);
+    for (const r of rules) {
+      if (r.includes("::after")) continue; // the ring's own hover is a shadow swap, not a move
+      /* ⚠️ `transform: none` is a GUARD, not a lift — the counters card states it so a future
+         `os-lift` cannot quietly re-arm a movement. Read the VALUE rather than lookahead-ing past
+         the colon, which backtracks and matches the guard itself. */
+      for (const [, value] of r.matchAll(/transform:\s*([^;}]+)/g)) {
+        expect(value.trim(), `a card hover must not move:\n${r}`).toBe("none");
+      }
+    }
+  });
+
   it("hover transitions the PSEUDO-ELEMENT's shadow, not the container's rim", () => {
     expect(bare).toContain(".os-card.os-lift:hover::after");
     expect(blk(".os-card.os-lift:hover")).not.toContain("border-color");
