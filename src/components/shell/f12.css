@@ -747,10 +747,18 @@
 
 /* the pane crossfade — ONE container, not two stacked layers: the reading pane is a fill column
    whose three columns own their scrolling, and absolutely positioning it would break that (the
-   ref simplifies the scroll model away). Entering CREATE mode lags the row by 110ms so the two
-   read as one gesture; returning to reading mode has no lag. */
-.f12-pane-enter-create { animation: rise 0.18s ease-out 0.11s backwards; }
+   ref simplifies the scroll model away). Returning to reading mode keeps the original `rise`.
+
+   ⚠️ THE CREATE SIDE IS NOW THE TAKEOVER'S FRAME (fix pack 5 §1, ref 82-create-exits.html): the
+   ref's own 220ms scale-in, retuned HERE rather than added as a second class beside it. A new
+   frame class would have left this one applied-by-nothing — dead code with a lock still guarding
+   it — and two frame animations on one element double the fade. One frame, one owner. */
+.f12-pane-enter-create { animation: qc-frame-in 220ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards; }
 .f12-pane-enter-read { animation: rise 0.18s ease-out backwards; }
+@keyframes qc-frame-in {
+  0%   { opacity: 0; transform: scale(0.985); }
+  100% { opacity: 1; transform: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .f12-row.f12-settle, .f12-row.f12-row-leaving,
@@ -1269,8 +1277,61 @@
 .f12-row.qc-landed { animation: qc-row-land 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 
 /* ⚠️ REDUCED MOTION CUTS TO THE FINAL FRAME — no animation, not a shortened one. The takeover
-   simply goes; the row is simply there. A 60ms version of a departure is still a departure. */
+   simply goes; the row is simply there. A 60ms version of a departure is still a departure.
+
+   ⚠️ AND THE JS MUST BRANCH TOO. `animation: none` fires no `animationend` (verified in-browser),
+   so anything that completes on that event never runs here — which is why the arming sites ask
+   `prefersReducedMotion()` instead of relying on these rules alone. See lib/reducedMotion.ts. */
 @media (prefers-reduced-motion: reduce) {
   .qc-exit-save { animation: none; opacity: 0; }
   .f12-row.qc-landed { animation: none; }
+}
+
+/* ══ CREATE MODE · THE ENTRANCE (fix pack 5 §1, ref 82-create-exits.html) ════════════════════
+   The frame arrives, then its contents in reading order: what you are doing (the header), what is
+   being asked (the question), where to answer it (the field), and what comes after (the steps).
+
+   ⚠️ IT PLAYS ONCE PER OPENING, and `.qc-entering` is what bounds it. Hung off a class that is
+   present for the whole session — `.f12-pane-enter-create` is on the pane the entire time create
+   mode is open — these same rules would replay every time their elements remounted, and choosing
+   an agent remounts the lot: stage 1's question and picker are replaced by stage 2's hero and
+   stack. Picking someone would then cost another 410ms before the first field felt live. The
+   scope class is set when the takeover opens and removed when the last child lands.
+
+   ⚠️ `backwards`, NOT `both`. These children carry delays of up to 410ms and must stay hidden
+   through them, which is what `backwards` buys. `both` would additionally HOLD the final frame,
+   and a held fill outranks inline transforms — the ~7px FLIP displacement documented in CLAUDE.md
+   is that exact trap. Nothing here needs the forwards half: the last frame IS the natural state. */
+@keyframes qc-in {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: none; }
+}
+/* ⚠️ A DISTINCT NAME FOR THE LAST ONE, and it is not decoration. "The last-delayed element" is not
+   something `animationend` can be asked about: every child fires the same event carrying the same
+   animation name, so a completion bound to `qc-in` would run six times, the first of them 530ms
+   early. Counting the events instead would break the day a step is added or a stage renders one
+   fewer child. The NAME is the signal, and it moves with the rule that is genuinely last. */
+@keyframes qc-in-last {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: none; }
+}
+
+.qc-entering .qch { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 120ms backwards; }
+/* The question, per stage: stage 1 asks it in words, stage 2 has answered it and shows the agent.
+   One delay, because they occupy the same beat and the same place. */
+.qc-entering .qc-askq,
+.qc-entering .qc-hero { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 200ms backwards; }
+.qc-entering .qc-pickhead { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 250ms backwards; }
+.qc-entering .qc-stack > .qc-sec:nth-child(1) { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 310ms backwards; }
+.qc-entering .qc-stack > .qc-sec:nth-child(2) { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 360ms backwards; }
+.qc-entering .qc-stack > .qc-sec:last-child { animation: qc-in-last 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 410ms backwards; }
+
+/* ⚠️ THE CLASS IS NEVER APPLIED UNDER REDUCED MOTION — the JS branch at the arming site is the
+   real guard, because `animation: none` would leave `qc-in-last` unfired and the scope class on
+   the pane forever. This block is the second belt, for the preference changing mid-flight. */
+@media (prefers-reduced-motion: reduce) {
+  .qc-entering .qch,
+  .qc-entering .qc-askq, .qc-entering .qc-hero,
+  .qc-entering .qc-pickhead,
+  .qc-entering .qc-stack > .qc-sec { animation: none; }
 }

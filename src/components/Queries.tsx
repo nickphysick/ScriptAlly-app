@@ -325,6 +325,12 @@ export const Queries: React.FC<{
   const [createExiting, setCreateExiting] = useState(false);
   /* The row that has just landed — carries the sage ring for one beat. */
   const [landedId, setLandedId] = useState<string | null>(null);
+  /* ⚠️ THE ENTRANCE IS SCOPED TO ONE OPENING, which is the whole job of this flag. The stagger is
+     written as descendant rules under `.qc-entering`; hung off a class that lives as long as create
+     mode does, they would replay whenever their elements remounted — and picking an agent remounts
+     stage 1's question and picker into stage 2's hero and stack, so choosing someone would cost
+     another 410ms before the first field felt live. Cleared when the last child lands. */
+  const [createEntering, setCreateEntering] = useState(false);
   /* Focus returns to the control that opened the takeover — leaving it on a removed node drops the
      writer at the top of the document. */
   const logTriggerRef = useRef<HTMLButtonElement>(null);
@@ -358,6 +364,11 @@ export const Queries: React.FC<{
     setCreateError(null);
     setCreateSaving(false);
     setCreateOpened({ when: false, what: false });
+    /* ⚠️ NOT ARMED UNDER REDUCED MOTION. The scope class would resolve to `animation: none` on
+       every child, so `qc-in-last` would never fire and the class would sit on the pane for the
+       rest of the session (see lib/reducedMotion.ts). Focus is unaffected either way: the field
+       autofocuses on mount, and the entrance's completion only GUARANTEES that ending place. */
+    setCreateEntering(!prefersReducedMotion());
   };
 
   /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
@@ -405,6 +416,10 @@ export const Queries: React.FC<{
       setCreateDraft(null);
       setCreateBase(null);
       setCreateError(null);
+      /* Cleared on the way out, or a takeover discarded mid-entrance would leave the scope class
+         set and the NEXT opening would render its children already at rest — the stagger silently
+         playing only for writers who did not change their mind. */
+      setCreateEntering(false);
       const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
         ? stashedSelection
         : (sortedListRef.current[0]?.id ?? null);
@@ -462,9 +477,22 @@ export const Queries: React.FC<{
      arrives, this is what stops the takeover sitting open over a query that was written. */
   const finishSaveExit = () => {
     setCreateExiting(false);
+    setCreateEntering(false);
     setCreateDraft(null);
     setCreateBase(null);
     logTriggerRef.current?.focus();
+  };
+
+  /** The entrance's completion — bound to the LAST child's own animation NAME (see f12.css), which
+   *  is the only deterministic way to ask `animationend` "was that the last one?". */
+  const finishEntrance = (pane: HTMLElement) => {
+    setCreateEntering(false);
+    /* ⚠️ FOCUS ENDS IN THE FIELD; IT IS NOT GRABBED AGAIN. The field autofocuses on mount so
+       typing works from the first frame — this only guarantees where focus ENDS UP. A writer who
+       clicked or tabbed somewhere inside the takeover while it was arriving keeps where they went;
+       stealing them back at 650ms is the behaviour that would actually eat a keystroke. */
+    if (pane.contains(document.activeElement)) return;
+    pane.querySelector<HTMLElement>(".qc-pickfield")?.focus();
   };
 
   /* `logAnother` keeps create mode open after the write instead of handing over to the saved
@@ -2997,7 +3025,7 @@ export const Queries: React.FC<{
           <div
             /* ⚠️ THE STATE CLASS GOES ON THE CONTAINER, not merely used as a selector — a class
                that exists only in the stylesheet animates nothing. */
-            className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createExiting ? " qc-exit-save" : ""}`}
+            className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createEntering ? " qc-entering" : ""}${createExiting ? " qc-exit-save" : ""}`}
             /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
                drift the moment the timing changed.
 
@@ -3006,8 +3034,8 @@ export const Queries: React.FC<{
                arming site (saveCreate) rather than a second listener. Under reduced motion this
                handler is never reached, because the class is never applied. */
             onAnimationEnd={(e) => {
-              if (!createExiting || e.animationName !== "qc-exit-save") return;
-              finishSaveExit();
+              if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
+              if (e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
             }} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane

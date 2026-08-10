@@ -145,9 +145,17 @@ describe("the motion laws hold", () => {
   /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would drift the
      moment a timing changed. */
   it("the close is bound to animationend, never to a timer", () => {
-    const a = queries.indexOf("onAnimationEnd={(e) => {");
-    expect(a, "the animationend handler is missing").toBeGreaterThan(-1);
-    expect(queries).toContain('e.animationName !== "qc-exit-save"');
+    /* ⚠️ TWO `onAnimationEnd` HANDLERS LIVE IN THIS FILE — the row's and the pane's. A bare
+       `indexOf` anchors on the row's and reads a slice spanning everything in between, which is
+       how a lock ends up green while looking at code it was never pointed at. */
+    const pane = queries.indexOf("className={`qp-pane f12-detail");
+    expect(pane, "the pane's className is missing").toBeGreaterThan(-1);
+    const a = queries.indexOf("onAnimationEnd={(e) => {", pane);
+    expect(a, "the pane's animationend handler is missing").toBeGreaterThan(pane);
+    /* One handler, dispatching on the animation NAME — the entrance and the exit both end on this
+       element, so a handler that did not discriminate would close the takeover the moment it had
+       finished arriving. */
+    expect(queries).toContain('createExiting && e.animationName === "qc-exit-save"');
     /* ⚠️ ANCHOR BOTH ENDS, AND ASSERT THE RANGE RUNS FORWARDS. The first version of this sliced to
        `queries.indexOf("closeCreate();")`, which first occurs in the ESCAPE handler ~2,000 lines
        ABOVE — so the range ran backwards, the extraction was "", and `.not.toContain` passed on
