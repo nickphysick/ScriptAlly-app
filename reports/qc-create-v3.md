@@ -435,3 +435,74 @@ it is scoped to a single component in a single theme so it cannot spread.
 - [ ] Footer spacing at **1440 and 1024** — rule visible, neither button against the card edge
 - [ ] The reference panel read against the step beside it at **100% and 125% zoom**: does it recede without becoming harder to read?
 - [ ] Bold Pastille and Editorial panels unchanged
+
+---
+
+# Sage header, and the step footer gutter
+
+**Commits** — §1 `0b3598e` · §2 `be4e4d5`. Gates green before each. **Not deployed.**
+
+## §1 — where the band and rim tokens live
+
+All in the `.t-capp` scope in `index.css`, never the base sheet, consumed by a `.t-capp` block in
+`f12.css`: `--qc-ref-band-a` `#dde3da` · `--qc-ref-band-b` `#d6dcd3` · `--qc-ref-band-rule`
+`#cbd3c8`, alongside the existing `--qc-ref-rim` / `--qc-ref-rule` / `--qc-ref-plate`.
+
+**The band is the dashboard's own sage**, not a new green — the same stops and rule colour as
+`.os-ahead` in `oneScreen.css`, under the house rule *sage for a container's header, pink reserved
+for a surface asking something of you*. A reference panel asks nothing. They are tokenised here
+because the dashboard holds them as literals; if that sheet retunes, this is the one place to
+follow. A lock asserts the dashboard's gradient string still matches.
+
+Bold Pastille and Editorial gain nothing — asserted for the ring as well as the panel and the band.
+
+## Whether the dashed rim survived the move
+
+**It did, unchanged.** Browser-verified at 3× magnification: `dashed`, `1px`,
+`rgba(124, 58, 42, 0.28)`, `border-radius: inherit` at 16px, `pointer-events: none`, and **even
+through both top corner arcs** with no thinning or bunching. It draws *over* the sage band, which
+is the whole point of the move.
+
+The mechanics: the host takes `position: relative` and **`border: 0`**, so `inset: 0` on the ring
+means exactly the panel's outline rather than 1px inside it. The band relies on the panel's
+existing `overflow: hidden` for its corners and does **not** round itself — two radii that can
+disagree is one radius too many.
+
+**One observation, flagged not fixed:** the sage status pill now sits sage-on-sage. It stays
+legible on its border, and the brief said to leave it alone as a state signal — but it is a real
+change in contrast and worth your eye.
+
+## §2 — measured clearance, all four edges
+
+The cause was the one found last time and only half-fixed: the footer is a sibling of `.qc-body`
+whose real parent has no padding, so **vertical margin was added by hand while the bottom was left
+at zero** — and the footer is the card's last child, so the buttons sat flush on the card's bottom
+edge with the CSS reading as correct.
+
+Measured on **every step** (the footer's markup cloned into all three cards, since the static
+render only opens `When` and all three go through one renderer), at both widths:
+
+| | top | right | bottom | left | rule |
+|---|---|---|---|---|---|
+| when / what / notes @ 1440 | 20 | 17 | 16 | 17 | full-bleed |
+| when / what / notes @ 1024 | 20 | 17 | 16 | 17 | full-bleed |
+
+Before: **bottom 0** at both. `Back`'s left edge is 17px and the "Date sent" label's left edge is
+17px — **aligned**. The lock derives the footer's padding *from* the body's rather than pinning
+literals, so the two cannot drift apart.
+
+## Which treatment the rule takes
+
+**Full-bleed divider.** `margin: 20px 0 0` keeps the rule edge to edge while the padding insets the
+buttons. A rule stopping short of the card's edges reads as an underline of the last field; running
+it through says "content above, actions below", which is what it is for. Both were defensible — the
+choice is recorded so it does not drift into an accidental mixture.
+
+## Browser checklist
+
+- [ ] The panel at **100% and 125% zoom** — does the sage band read as a header rather than a second subject?
+- [ ] **All four rim edges present at rest and on any hover** — the ring is an overlay now, so a hover state that repaints a child must not appear to cut it
+- [ ] The band **clipped cleanly to the panel's corners**, with no fill past the radius
+- [ ] Footer buttons **aligned with the field labels above them, on every step** — open When, What and Notes in turn
+- [ ] The sage status pill on the sage band — legible enough, or does it need its own call?
+- [ ] Bold Pastille and Editorial panels unchanged
