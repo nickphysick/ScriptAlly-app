@@ -177,3 +177,22 @@ describe("the bands are one geometry, coloured by purpose", () => {
     expect(bare).not.toMatch(/\.os-ctrlrow\s*\{/); // the 45px row the preview measured and rejected
   });
 });
+
+/**
+ * ⚠️ THE GOALS CARD IS DELIBERATELY UNBANDED (headers P2). Tried, rejected: its header names the
+ * card rather than operating it, and the sage band gave it a weight the card does not carry.
+ */
+describe("Querying goals keeps its bare header", () => {
+  const rail = readFileSync(resolve(__dirname, "./OneScreenRail.tsx"), "utf8");
+  const goalHead = rail.slice(rail.indexOf('className="os-goal-r1"'), rail.indexOf("</h2>", rail.indexOf('className="os-goal-r1"')));
+
+  it("no band and no mark box in the goals header", () => {
+    expect(goalHead).not.toContain("os-ahead");
+    expect(goalHead).not.toContain("OneScreenMark");
+  });
+
+  it("⚠️ `Goal met` survives — the at-or-beyond-target state is not what was rejected", () => {
+    const lib = readFileSync(resolve(__dirname, "../../lib/oneScreen.ts"), "utf8");
+    expect(lib).toContain('"Goal met"');
+  });
+});

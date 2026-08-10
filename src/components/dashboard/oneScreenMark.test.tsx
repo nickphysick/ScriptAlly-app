@@ -91,6 +91,9 @@ describe("every dashboard container header carries one mark", () => {
       const src = readFileSync(resolve(__dirname, `./${f}`), "utf8");
       total += (src.match(/<OneScreenMark name=/g) ?? []).length;
     }
-    expect(total).toBe(4); // one per container — a fifth would mean a header grew a second mark
+    /* ⚠️ THREE, NOT FOUR — Goals carries no mark. Its header is a LABEL, not an instrument, and
+       both the band and the mark box were tried there and rejected. A fourth appearing means the
+       goals card has been re-banded by someone who read this as an oversight. */
+    expect(total).toBe(3);
   });
 });

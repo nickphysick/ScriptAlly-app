@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Active queries header</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f2ede7; --card:#fffdf9; --parchment:#fdfaf5;
+    --ink:#3a1c14; --ink-deep:#2b2118; --muted:#8a7a6c; --label:#9c8878;
+    --burgundy:#7c3a2a; --burgundy-deep:#6b3023;
+    --pink:#f3e0d6; --pink-soft:#f8ece4; --pink-border:#e8c8bc;
+    --sage:#8a9e88; --sage-band-a:#d7ddd5; --sage-band-b:#d5dbd3; --sage-soft:#e9ede6; --sage-text:#5a6e58;
+    --hairline:#ece0d2; --border:#e3d9cc;
+    --shadow-card:0 1px 2px rgba(58,28,20,.04), 0 5px 18px rgba(58,28,20,.06);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:var(--ground); color:var(--ink); font-size:14px; -webkit-font-smoothing:antialiased;}
+  .label{font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.17em; text-transform:uppercase; font-weight:500; color:var(--label);}
+  .pill-o{font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; text-transform:uppercase; font-weight:500; background:#fffdf9; border:1px solid #b9aa97; border-radius:99px; padding:5px 12px; color:#4a3a2e; white-space:nowrap;}
+  .btn{font-size:13px; font-weight:500; border-radius:99px; padding:11px 21px; cursor:pointer; display:flex; align-items:center; gap:9px; transition:all .15s; font-family:'Inter',sans-serif;}
+  .btn svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7;}
+  .btn-dark{background:var(--ink-deep); border:1px solid var(--ink-deep); color:#f6efe8;}
+  .btn-dark:hover{background:#3a2d22;}
+  .btn-ghost{background:#fff; border:1px solid #d5c8b8; color:#5c4d42;}
+  .btn-ghost:hover{border-color:#b9a893; color:var(--ink);}
+  .sdot{width:12px; height:12px; border-radius:50%; flex-shrink:0; display:inline-block;}
+  .sdot.out-full{border:2px solid var(--burgundy); background:#f8e7dc;}
+  .sdot.out-half{border:2px solid var(--burgundy); background:linear-gradient(90deg,#f8e7dc 50%, #fff 50%);}
+  .sdot.out-empty{border:2px solid var(--burgundy); background:#fff;}
+  .sdot.in-full{border:2px solid var(--sage); background:var(--sage-soft);}
+  .sdot.offer{border:2px solid var(--burgundy); background:var(--burgundy);}
+  .sdot.closed{border:2px solid #cfc6bb; background:#efeae2;}
+
+  body{padding:40px 36px 90px; background:#f7f4ee;}
+  h1.t{font-family:'Playfair Display',serif; font-weight:700; font-size:27px; color:#241811; margin-bottom:6px;}
+  .intro{font-size:13px; color:var(--muted); max-width:820px; line-height:1.6; margin-bottom:30px;}
+  .study{margin-bottom:34px;}
+  .cap{font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--label); margin-bottom:9px;}
+  .note{font-size:11.5px; color:var(--muted); line-height:1.5; margin-top:10px; max-width:820px;}
+  .card{background:#faf7f2; border:1px solid #e9e1d6; border-radius:14px; box-shadow:0 1px 2px rgba(58,28,20,.04);
+    width:900px; overflow:hidden;}
+  .chart{height:150px; position:relative; margin:0 18px;}
+  .chart svg{position:absolute; inset:0; width:100%; height:100%;}
+  .xl{display:flex; justify-content:space-between; padding:6px 18px 12px;}
+  .xl span{font-family:'JetBrains Mono',monospace; font-size:7px; letter-spacing:.1em; text-transform:uppercase; color:#c0b2a2;}
+
+  .mk{width:28px; height:28px; border-radius:8px; background:#fffdf9; border:1px solid #cbd3c8;
+    display:grid; place-items:center; flex-shrink:0;}
+  .mk svg{width:15px; height:15px; stroke:#5f6f5b; fill:none; stroke-width:1.7;}
+  .ttl{font-family:'Playfair Display',serif; font-size:15.5px; font-weight:600; color:#2b3a29; white-space:nowrap;}
+  .big{font-family:'Playfair Display',serif; font-size:22px; font-weight:600; color:#241811; line-height:1; font-variant-numeric:tabular-nums;}
+  .chip{font-size:10px; border-radius:99px; padding:3px 9px; background:#fffdf9; border:1px solid #cbd3c8; color:#3f5a3c; white-space:nowrap;}
+  .band{background:linear-gradient(180deg,#dde3da,#d6dcd3); border-bottom:1px solid #cbd3c8;}
+
+  /* --- shared control bits, restyled so the slider is actually visible --- */
+  .sel{appearance:none; -webkit-appearance:none; font-family:'Inter',sans-serif; font-size:11px; color:#3a4a38;
+    background:#fffdf9; border:1px solid #bcc7b9; border-radius:8px; padding:5px 22px 5px 10px; cursor:pointer; line-height:1;}
+  .selw{position:relative; display:flex; align-items:center;}
+  .selw i{position:absolute; right:8px; font-size:8px; color:#7d8b79; pointer-events:none; font-style:normal;}
+
+  .rng{-webkit-appearance:none; appearance:none; height:16px; background:transparent; cursor:pointer; margin:0;}
+  .rng::-webkit-slider-runnable-track{height:5px; border-radius:99px;
+    background:#fffdf9; border:1px solid #bcc7b9; box-shadow:inset 0 1px 2px rgba(58,28,20,.08);}
+  .rng::-webkit-slider-thumb{-webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+    background:var(--burgundy); border:2px solid #fffdf9; margin-top:-5.5px;
+    box-shadow:0 1px 3px rgba(58,28,20,.35);}
+  .rng.dark::-webkit-slider-runnable-track{background:#efe9e0; border-color:#ddd3c4;}
+
+  .rlab{font-size:11px; font-weight:500; color:#3a4a38; white-space:nowrap;}
+  .seg{display:flex; background:#fffdf9; border:1px solid #bcc7b9; border-radius:8px; padding:2px;}
+  .seg button{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.1em; text-transform:uppercase;
+    border:none; background:none; color:#7d8b79; padding:5px 9px; border-radius:6px; cursor:pointer;}
+  .seg button.on{background:#5f6f5b; color:#fff;}
+
+  /* A */
+  .vA .hd{display:flex; align-items:center; gap:12px; height:51px; padding:0 16px; box-sizing:border-box;}
+  .vA .ctr{margin-left:auto; display:flex; align-items:center; gap:10px;}
+  .vA .rng{width:110px;}
+
+  /* B */
+  .vB .hd{display:flex; align-items:center; gap:12px; height:51px; padding:0 16px; box-sizing:border-box;}
+  .vB .stat{display:flex; align-items:baseline; gap:8px; margin-left:auto;}
+  .vB .sub{display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--hairline); background:#fdfbf7;}
+  .vB .k{font-family:'JetBrains Mono',monospace; font-size:7px; letter-spacing:.16em; text-transform:uppercase; color:#a4968a;}
+  .vB .rng{width:150px;}
+
+  /* C */
+  .vC .hd{display:flex; align-items:stretch; height:62px; box-sizing:border-box;}
+  .vC .left{display:flex; align-items:center; gap:12px; padding:0 16px; flex:1;}
+  .vC .figbox{display:flex; flex-direction:column; justify-content:center; padding:0 18px;
+    border-left:1px solid #cbd3c8; background:rgba(255,253,249,.5);}
+  .vC .figbox .lab{font-family:'JetBrains Mono',monospace; font-size:6.5px; letter-spacing:.15em; text-transform:uppercase; color:#5f6f5b;}
+  .vC .figbox .row{display:flex; align-items:baseline; gap:8px; margin-top:3px;}
+  .vC .ctr{display:flex; align-items:center; gap:10px; padding:0 16px; border-left:1px solid #cbd3c8;}
+  .vC .rng{width:104px;}
+
+  /* D */
+  .vD .hd{display:flex; align-items:center; gap:12px; height:51px; padding:0 16px; box-sizing:border-box;}
+  .vD .ctr{margin-left:auto; display:flex; align-items:center; gap:8px;}
+  .vD .steps{display:flex; align-items:center; gap:0; background:#fffdf9; border:1px solid #bcc7b9; border-radius:99px; padding:2px; position:relative;}
+  .vD .steps button{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.08em; text-transform:uppercase;
+    border:none; background:none; color:#7d8b79; padding:5px 10px; border-radius:99px; cursor:pointer; position:relative; z-index:2; transition:color .2s;}
+  .vD .steps button.on{color:#fff;}
+  .vD .glide{position:absolute; top:2px; bottom:2px; border-radius:99px; background:#5f6f5b; transition:all .25s cubic-bezier(.4,0,.2,1); z-index:1;}
+
+  /* E */
+  .vE .hd{display:flex; align-items:center; gap:12px; height:51px; padding:0 16px; box-sizing:border-box;}
+  .vE .ctr{margin-left:auto; display:flex; align-items:center; gap:11px;}
+  .vE .track{display:flex; align-items:center; gap:9px; background:#fffdf9; border:1px solid #bcc7b9; border-radius:99px; padding:4px 12px 4px 10px;}
+  .vE .rng{width:96px;}
+  .vE .rng::-webkit-slider-runnable-track{background:#e6ddd0; border:none; height:4px;}
+  .vE .rng::-webkit-slider-thumb{margin-top:-5px;}
+
+  /* F */
+  .vF .hd{display:flex; align-items:center; gap:14px; height:51px; padding:0 16px; box-sizing:border-box;}
+  .vF .divide{width:1px; height:22px; background:#bcc7b9;}
+  .vF .ctr{margin-left:auto; display:flex; align-items:center; gap:11px;}
+  .vF .rng{width:120px;}
+  .vF .rlabbox{background:#fffdf9; border:1px solid #bcc7b9; border-radius:99px; padding:4px 11px;
+    font-size:10.5px; font-weight:500; color:#3a4a38; white-space:nowrap;}
+</style></head>
+<body>
+<h1 class="t">Active queries &mdash; six headers</h1>
+<p class="intro">Same information every time: title, the current figure, the change over the range, granularity and range. The slider is restyled throughout &mdash; a parchment track with a burgundy thumb, so it reads against the sage band instead of vanishing into it.</p>
+
+<div class="study">
+  <div class="cap">A &middot; One band, everything in a line</div>
+  <div class="card vA"><div class="hd band">
+    <span class="mk"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7"/></svg></span><span class="ttl">Active queries</span>
+    <span class="big">13</span><span class="chip">&uarr; +2</span>
+    <span class="ctr"><span class="selw"><select class="sel"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select><i>&#9662;</i></span><input type="range" class="rng" value="34"><span class="rlab">Last 8 weeks</span></span>
+  </div><div class="chart"><svg viewBox="0 0 900 150" preserveAspectRatio="none">
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9e88" stop-opacity=".24"/><stop offset="1" stop-color="#8a9e88" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32 L890 150 L10 150 Z" fill="url(#cg)"/>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32" fill="none" stroke="#8a9e88" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="890" cy="32" r="4" fill="#fffdf9" stroke="#8a9e88" stroke-width="2"/>
+</svg></div>
+<div class="xl"><span>15 Jun</span><span>29 Jun</span><span>13 Jul</span><span>27 Jul</span><span>10 Aug</span></div></div>
+  <div class="note">What you have, with the slider made visible and the pill shortened to <em>&uarr; +2</em> so the row breathes. Simplest, and identical in construction to the other cards.</div>
+</div>
+
+<div class="study">
+  <div class="cap">B &middot; Band for identity, sub-rail for controls</div>
+  <div class="card vB">
+    <div class="hd band"><span class="mk"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7"/></svg></span><span class="ttl">Active queries</span>
+      <span class="stat"><span class="big">13</span><span class="chip">&uarr; +2 over this range</span></span></div>
+    <div class="sub"><span class="k">View</span><span class="selw"><select class="sel"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select><i>&#9662;</i></span><input type="range" class="rng dark" value="34"><span class="rlab">Last 8 weeks</span></div>
+    <div class="chart"><svg viewBox="0 0 900 150" preserveAspectRatio="none">
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9e88" stop-opacity=".24"/><stop offset="1" stop-color="#8a9e88" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32 L890 150 L10 150 Z" fill="url(#cg)"/>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32" fill="none" stroke="#8a9e88" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="890" cy="32" r="4" fill="#fffdf9" stroke="#8a9e88" stroke-width="2"/>
+</svg></div>
+<div class="xl"><span>15 Jun</span><span>29 Jun</span><span>13 Jul</span><span>27 Jul</span><span>10 Aug</span></div>
+  </div>
+  <div class="note">The band says what the card is; a quieter rail beneath holds the controls on parchment, where the slider reads easily. Costs ~40px of chart &mdash; the clearest separation of identity from instrument.</div>
+</div>
+
+<div class="study">
+  <div class="cap">C &middot; Compartments</div>
+  <div class="card vC">
+    <div class="hd band">
+      <span class="left"><span class="mk"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7"/></svg></span><span class="ttl">Active queries</span></span>
+      <span class="figbox"><span class="lab">Now</span><span class="row"><span class="big">13</span><span class="chip">&uarr; +2</span></span></span>
+      <span class="ctr"><span class="selw"><select class="sel"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select><i>&#9662;</i></span><input type="range" class="rng" value="34"><span class="rlab">Last 8 weeks</span></span>
+    </div>
+    <div class="chart"><svg viewBox="0 0 900 150" preserveAspectRatio="none">
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9e88" stop-opacity=".24"/><stop offset="1" stop-color="#8a9e88" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32 L890 150 L10 150 Z" fill="url(#cg)"/>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32" fill="none" stroke="#8a9e88" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="890" cy="32" r="4" fill="#fffdf9" stroke="#8a9e88" stroke-width="2"/>
+</svg></div>
+<div class="xl"><span>15 Jun</span><span>29 Jun</span><span>13 Jul</span><span>27 Jul</span><span>10 Aug</span></div>
+  </div>
+  <div class="note">Hairline dividers cut the band into three jobs: what it is, where it stands, how you are looking at it. Taller at 62px, but each part is unmistakable &mdash; and it echoes the counters card at the top of the page.</div>
+</div>
+
+<div class="study">
+  <div class="cap">D &middot; Stepped range, no slider</div>
+  <div class="card vD">
+    <div class="hd band"><span class="mk"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7"/></svg></span><span class="ttl">Active queries</span><span class="big">13</span><span class="chip">&uarr; +2</span>
+      <span class="ctr"><span class="selw"><select class="sel"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select><i>&#9662;</i></span>
+        <span class="steps" id="steps"><span class="glide" id="glide"></span>
+          <button>2w</button><button class="on">8w</button><button>3m</button><button>6m</button><button>1y</button><button>All</button>
+        </span>
+      </span>
+    </div><div class="chart"><svg viewBox="0 0 900 150" preserveAspectRatio="none">
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9e88" stop-opacity=".24"/><stop offset="1" stop-color="#8a9e88" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32 L890 150 L10 150 Z" fill="url(#cg)"/>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32" fill="none" stroke="#8a9e88" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="890" cy="32" r="4" fill="#fffdf9" stroke="#8a9e88" stroke-width="2"/>
+</svg></div>
+<div class="xl"><span>15 Jun</span><span>29 Jun</span><span>13 Jul</span><span>27 Jul</span><span>10 Aug</span></div>
+  </div>
+  <div class="note">The slider problem solved by removing the slider: six stops with a sage pill gliding between them. Nothing to see against the band because there is no track &mdash; and no imprecision either. Click a stop to try it.</div>
+</div>
+
+<div class="study">
+  <div class="cap">E &middot; Slider in its own capsule</div>
+  <div class="card vE">
+    <div class="hd band"><span class="mk"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7"/></svg></span><span class="ttl">Active queries</span><span class="big">13</span><span class="chip">&uarr; +2</span>
+      <span class="ctr"><span class="selw"><select class="sel"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select><i>&#9662;</i></span><span class="track"><input type="range" class="rng" value="34"><span class="rlab">Last 8 weeks</span></span></span>
+    </div><div class="chart"><svg viewBox="0 0 900 150" preserveAspectRatio="none">
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9e88" stop-opacity=".24"/><stop offset="1" stop-color="#8a9e88" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32 L890 150 L10 150 Z" fill="url(#cg)"/>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32" fill="none" stroke="#8a9e88" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="890" cy="32" r="4" fill="#fffdf9" stroke="#8a9e88" stroke-width="2"/>
+</svg></div>
+<div class="xl"><span>15 Jun</span><span>29 Jun</span><span>13 Jul</span><span>27 Jul</span><span>10 Aug</span></div>
+  </div>
+  <div class="note">The slider and its label share one parchment capsule, so the track sits on a light ground and the label is visibly attached to the thing it describes. Compact, and it keeps everything on one 51px row.</div>
+</div>
+
+<div class="study">
+  <div class="cap">F &middot; Divided, with the range as a chip</div>
+  <div class="card vF">
+    <div class="hd band"><span class="mk"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-7"/></svg></span><span class="ttl">Active queries</span><span class="divide"></span>
+      <span class="big">13</span><span class="chip">&uarr; +2 over this range</span>
+      <span class="ctr"><span class="selw"><select class="sel"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select><i>&#9662;</i></span><input type="range" class="rng" value="34"><span class="rlabbox">Last 8 weeks</span></span>
+    </div><div class="chart"><svg viewBox="0 0 900 150" preserveAspectRatio="none">
+  <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8a9e88" stop-opacity=".24"/><stop offset="1" stop-color="#8a9e88" stop-opacity="0"/>
+  </linearGradient></defs>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32 L890 150 L10 150 Z" fill="url(#cg)"/>
+  <path d="M10 118 L120 118 L230 116 L340 114 L450 84 L560 42 L700 34 L890 32" fill="none" stroke="#8a9e88" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="890" cy="32" r="4" fill="#fffdf9" stroke="#8a9e88" stroke-width="2"/>
+</svg></div>
+<div class="xl"><span>15 Jun</span><span>29 Jun</span><span>13 Jul</span><span>27 Jul</span><span>10 Aug</span></div>
+  </div>
+  <div class="note">A vertical rule separates identity from figure, and the range label becomes a chip so it reads as a value rather than stray text. Slider still on the band, but flanked by two light objects that give it context.</div>
+</div>
+
+<script>
+const steps=document.getElementById('steps'), glide=document.getElementById('glide');
+function move(b){ glide.style.left=b.offsetLeft+'px'; glide.style.width=b.offsetWidth+'px'; }
+steps.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  steps.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); move(b);
+}));
+move(steps.querySelector('.on'));
+</script>
+</body>
+</html>

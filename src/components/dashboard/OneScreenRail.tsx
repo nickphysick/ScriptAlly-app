@@ -381,8 +381,11 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
     <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
       {/* ══ querying goals ══ */}
       <OneScreenPanel variant="os-goal stowable" loading={loading} skel={["h", "", ""]}>
+        {/* ⚠️ NO BAND AND NO MARK BOX HERE — both were tried and rejected. The goals header is a
+            LABEL, not an instrument: it names the card and gets out of the way, and the band gave
+            it a weight the card does not carry. A bare flex row inside the card's own padding —
+            title, status word right-aligned, line and meter beneath. */}
         <div className="os-goal-r1">
-          <OneScreenMark name="goals" />
           <h2>Querying goals</h2>
           {goal && !editingGoal && (
             <button type="button" className="os-goal-num" title="Adjust the goal" onClick={() => { setGoalDraft({ target: goal.target, period: goal.period }); setEditingGoal(true); }}>
