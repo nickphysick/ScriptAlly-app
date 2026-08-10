@@ -131,21 +131,34 @@
    at 186px with nothing on the left a left-aligned row left a gap in the middle that read as a
    missing element. The cover slot IS that missing element: with it in place the row anchors left
    and the gap closes for the right reason. Superseded, not reversed on taste. */
+/* ⚠️ THE CARD IS THE CONTAINER (fixes-2 A1) — the opener and the arrows are its children, so it
+   is `position: relative` and carries the frame, while `.ws-msopen` carries the click. */
 .ws-mspill {
+  position: relative;
   flex: 1;
   min-width: 0;
   height: 56px;
   background: #ffffff;
   border: 1px solid var(--shell-edge);
   border-radius: 10px;
+  transition: border-color 0.15s;
+}
+.ws-msopen {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 10px;
+  /* ⚠️ THE RIGHT PADDING RESERVES THE ARROWS' LANE, so a long title runs UNDER them rather than
+     to the card's edge and out of reach beneath a control. */
+  padding: 0 46px 0 10px;
+  background: none;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  transition: border-color 0.15s;
   font: inherit;
   text-align: left;
+  min-width: 0;
 }
 
 /* ⚠️ THE COVER SLOT ANCHORS THE LEFT EDGE, which is why the row is left-aligned and not centred.
@@ -188,6 +201,7 @@
   text-overflow: ellipsis;
 }
 .ws-mspill:hover { border-color: #d6cdbf; }
+.ws-mspill.static .ws-msopen { cursor: default; }
 .ws-mspill.static { cursor: default; }
 .ws-mspill.static:hover { border-color: var(--shell-edge); }
 .ws-mst {
@@ -649,7 +663,20 @@
 .ws-phead { display: flex; flex-direction: column; }
 /* full width, matching the nav rows below — the card no longer shares its line with a chevron */
 .ws-phead .ws-mspill { width: 100%; flex: none; }
-.ws-msnav { display: flex; justify-content: flex-end; gap: 2px; margin-top: 4px; }
+/* the dots sit beneath the card; the arrows no longer do */
+.ws-msdots { margin-top: 6px; }
+/* ⚠️ INSIDE THE CARD, VERTICALLY CENTRED AGAINST THE TITLE BLOCK (fixes-2 A1). Absolutely
+   positioned so the opener beneath keeps the full card as its hit area; `z-index` puts the arrows
+   on top, or the opener would swallow their clicks. */
+.ws-msnav {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 1px;
+  z-index: 1;
+}
 /* 20x24 hit areas, per the ref */
 .ws-msarrow {
   width: 20px; height: 24px; padding: 0;

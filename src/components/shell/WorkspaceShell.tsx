@@ -25,7 +25,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  Book, ChevronDown, ChevronsUpDown, ChevronsLeft, ChevronsRight, Plus, Settings,
+  Book, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Plus, Settings,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { planLine, resolveActiveManuscript, stepManuscript } from "../../lib/shellSidebar";
@@ -265,43 +265,52 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <div className="ws-phead">
             {activeMs ? (
               <>
-                <button
-                  type="button"
-                  className={`ws-mspill${manyMs ? "" : " static"}`}
-                  aria-haspopup={manyMs ? "menu" : undefined}
-                  aria-expanded={manyMs ? msOpen : undefined}
-                  onClick={() => { if (manyMs) setMsOpen((o) => !o); }}
-                >
-                  {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
-                      FRAMED — parchment, hairline, soft shadow — because it is an object with an
-                      edge. The illustrated mark is UNFRAMED, an illustration sitting on the panel;
-                      framing it would make the artwork claim to be the book.
-                      TODO(cover-upload): `coverUrl` does not exist on Manuscript yet — when it
-                      does, this ternary is the only thing that changes. */}
-                  {activeMs.coverUrl ? (
-                    <span className="ws-mcov framed"><img src={activeMs.coverUrl} alt="" /></span>
-                  ) : (
-                    <span className="ws-mcov illus"><img src={manuscriptMark} alt="" aria-hidden="true" /></span>
-                  )}
-                  <span className="ws-mstt">
-                    <span className="ws-mst">{activeMs.title}</span>
-                    {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}
-                  </span>
-                </button>
-                {/* ⚠️ THE ARROWS ARE A SHORTCUT, NOT THE ONLY ROUTE — the card still opens the
-                    full picker. They sit OUTSIDE that button because a button inside a button is
-                    invalid and the inner one never receives its own click. */}
-                <div className="ws-msnav">
+                {/**
+                  * ⚠️ THE CARD IS A CONTAINER, NOT A BUTTON (fixes-2 A1). The arrows belong INSIDE
+                  * the card — an arrow that steps between manuscripts must be attached to the
+                  * manuscript it steps from, and below the card it belongs to nothing. But a
+                  * button inside a button is invalid markup and the inner one never receives its
+                  * own click, so the card is a positioned DIV holding two siblings: the opener,
+                  * which fills it, and the arrow pair laid over its right edge.
+                  */}
+                <div className={`ws-mspill${manyMs ? "" : " static"}`}>
                   <button
-                    type="button" className="ws-msarrow" disabled={!manyMs}
-                    aria-label="Previous manuscript"
-                    onClick={() => stepMs(-1)}
-                  ><ChevronsLeft aria-hidden="true" /></button>
-                  <button
-                    type="button" className="ws-msarrow" disabled={!manyMs}
-                    aria-label="Next manuscript"
-                    onClick={() => stepMs(1)}
-                  ><ChevronsRight aria-hidden="true" /></button>
+                    type="button"
+                    className="ws-msopen"
+                    aria-haspopup={manyMs ? "menu" : undefined}
+                    aria-expanded={manyMs ? msOpen : undefined}
+                    onClick={() => { if (manyMs) setMsOpen((o) => !o); }}
+                  >
+                    {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
+                        FRAMED — parchment, hairline, soft shadow — because it is an object with an
+                        edge. The illustrated mark is UNFRAMED, an illustration sitting on the panel;
+                        framing it would make the artwork claim to be the book.
+                        TODO(cover-upload): `coverUrl` does not exist on Manuscript yet — when it
+                        does, this ternary is the only thing that changes. */}
+                    {activeMs.coverUrl ? (
+                      <span className="ws-mcov framed"><img src={activeMs.coverUrl} alt="" /></span>
+                    ) : (
+                      <span className="ws-mcov illus"><img src={manuscriptMark} alt="" aria-hidden="true" /></span>
+                    )}
+                    <span className="ws-mstt">
+                      <span className="ws-mst">{activeMs.title}</span>
+                      {msMeta(activeMs) && <span className="ws-msg">{msMeta(activeMs)}</span>}
+                    </span>
+                  </button>
+                  {/* ⚠️ SINGLE chevrons. The double `«`/`»` pair is the sidebar-COLLAPSE idiom and
+                      read as a collapse control rather than a stepper. */}
+                  <div className="ws-msnav">
+                    <button
+                      type="button" className="ws-msarrow" disabled={!manyMs}
+                      aria-label="Previous manuscript"
+                      onClick={() => stepMs(-1)}
+                    ><ChevronLeft aria-hidden="true" /></button>
+                    <button
+                      type="button" className="ws-msarrow" disabled={!manyMs}
+                      aria-label="Next manuscript"
+                      onClick={() => stepMs(1)}
+                    ><ChevronRight aria-hidden="true" /></button>
+                  </div>
                 </div>
                 {/* ⚠️ DOTS ONLY WHEN THERE IS SOMETHING TO STEP THROUGH — one dot beneath one
                     manuscript is a control describing nothing. */}
