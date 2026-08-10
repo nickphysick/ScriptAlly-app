@@ -418,6 +418,17 @@
   pointer-events: none;
 }
 
+/* ⚠️ 258px, WIDER THAN `.tbd-menu2`'s 228 — the ONE thing this menu overrides on the shell it
+   consumes, and it overrides it because it holds a control rather than a column of rows. The
+   track needs the width to make a twelve-stop scale legible; the rows are happy either way. The
+   shell is todoBoard.css's and stays untouched — a width stated here is a width the split's menu
+   owns, so nothing the retired board's other menus draw moves with it. */
+.tdg-splitmenu { width: 258px; }
+
+/* The dial, worn inline. Its own popover supplies 18/20 padding; here the menu's 6px does most of
+   the work, so this adds only what the rows already get and a little air beneath the head. */
+.tdg-mdial { padding: 2px 10px 6px; }
+
 .tdg-mglyph { width: 14px; text-align: center; flex: none; opacity: 0.75; }
 
 .tdg-mkey {

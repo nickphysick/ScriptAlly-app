@@ -42,6 +42,12 @@ export interface SnoozeDialProps {
   onClose: (returnFocus: boolean) => void;
 }
 
+export interface SnoozeDialBodyProps {
+  card: BoardCard;
+  daysUntilDeadline?: number;
+  onSnooze: (days: number, when: string) => void;
+}
+
 /** "Tuesday 11 August" — the resulting day, spelled, because a writer plans in weekdays. */
 export function dialDateLine(days: number, now = new Date()): string {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
@@ -58,44 +64,21 @@ const daysBetween = (from: Date, isoDay: string): number => {
   return Math.round((target.getTime() - base.getTime()) / 86400000);
 };
 
-export const SnoozeDial: React.FC<SnoozeDialProps> = ({ card, anchor, daysUntilDeadline, onSnooze, onClose }) => {
+/**
+ * ⚠️ THE CONTROL, SEPARATED FROM ITS CONTAINER — and this is the whole of Phase 2's structural
+ * work. The dial is now worn by TWO surfaces: its own portalled popover (the `s` key, and
+ * Snoozed's "Change the date…") and, inline, the split button's menu. Extracting the body is what
+ * lets both be the SAME dial rather than two that drift; a second slider built for the menu is
+ * precisely what the pack forbade, and copying this one would have been that in all but name.
+ *
+ * What stays outside: the portal, the placement and the closers. Those are a POPOVER's concerns,
+ * and the menu already has its own — it is placed by `placeMenu`, closed by its own outside-press
+ * and Escape. Pushing them down here would give the inline copy a second set fighting the first.
+ */
+export const SnoozeDialBody: React.FC<SnoozeDialBodyProps> = ({ card, daysUntilDeadline, onSnooze }) => {
   const stops = reachableStops(card, daysUntilDeadline);
   const ceiling = snoozeCeilingDays(card, daysUntilDeadline);
   const [i, setI] = useState(0);
-  const elRef = useRef<HTMLDivElement | null>(null);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-
-  /* Placed after first paint, from the trigger's own rect — the same `placeMenu` the ⋯ menu uses,
-     so the two surfaces flip off the viewport's bottom edge by identical arithmetic. */
-  useLayoutEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
-    const r = anchor.getBoundingClientRect();
-    const b = el.getBoundingClientRect();
-    const p = placeMenu(r, { w: b.width, h: b.height }, { w: window.innerWidth, h: window.innerHeight });
-    setPos({ left: p.left, top: p.top });
-  }, [anchor, stops.length]);
-
-  /* The closers, matching PortalMenu's: outside press, Escape (focus returns), scroll, resize. */
-  useEffect(() => {
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as Node | null;
-      if (t && (elRef.current?.contains(t) || anchor.contains(t))) return;
-      onClose(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.stopPropagation(); onClose(true); }
-    };
-    const away = () => onClose(false);
-    document.addEventListener("pointerdown", onDown, true);
-    document.addEventListener("keydown", onKey, true);
-    window.addEventListener("resize", away);
-    return () => {
-      document.removeEventListener("pointerdown", onDown, true);
-      document.removeEventListener("keydown", onKey, true);
-      window.removeEventListener("resize", away);
-    };
-  }, [anchor, onClose]);
 
   /* ⚠️ A DIAL WITH NOTHING TO CHOOSE IS NOT A DIAL. A deadline already past clamps the ceiling to
      zero, so there is no honest tier to offer — the surface says so rather than presenting a
@@ -109,15 +92,8 @@ export const SnoozeDial: React.FC<SnoozeDialProps> = ({ card, anchor, daysUntilD
   const cur = stops[Math.min(i, Math.max(0, stops.length - 1))];
   const pct = stops.length > 1 ? (i / (stops.length - 1)) * 100 : 0;
 
-  return createPortal(
-    <div
-      ref={elRef}
-      className="snz-dial"
-      role="dialog"
-      aria-label={`Put “${card.title}” off until`}
-      style={pos ? { left: pos.left, top: pos.top } : { opacity: 0, pointerEvents: "none" }}
-    >
-      <div className="snz-k">PUT IT OFF UNTIL</div>
+  return (
+    <>
       {stops.length === 0 ? (
         <>
           <div className="snz-v">Not at all</div>
@@ -184,6 +160,63 @@ export const SnoozeDial: React.FC<SnoozeDialProps> = ({ card, anchor, daysUntilD
           ) : null}
         </>
       )}
+    </>
+  );
+};
+
+/**
+ * ⚠️ THE POPOVER THE BODY WEARS AT ITS OWN CALL SITES — the `s` key and Snoozed's "Change the
+ * date…". Nothing about the control changed when the menu learned to wear it too: this keeps the
+ * portal, the placement and the closers, and the dial inside is the same component the menu draws.
+ */
+export const SnoozeDial: React.FC<SnoozeDialProps> = ({ card, anchor, daysUntilDeadline, onSnooze, onClose }) => {
+  const elRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+
+  /* Placed after first paint, from the trigger's own rect — the same `placeMenu` the ⋯ menu uses,
+     so the two surfaces flip off the viewport's bottom edge by identical arithmetic. The deps are
+     the inputs the CONTENT's height depends on; the stop list is derived from them by a pure
+     function, so naming them names it. */
+  useLayoutEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    const r = anchor.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    const p = placeMenu(r, { w: b.width, h: b.height }, { w: window.innerWidth, h: window.innerHeight });
+    setPos({ left: p.left, top: p.top });
+  }, [anchor, card, daysUntilDeadline]);
+
+  /* The closers, matching PortalMenu's: outside press, Escape (focus returns), scroll, resize. */
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as Node | null;
+      if (t && (elRef.current?.contains(t) || anchor.contains(t))) return;
+      onClose(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.stopPropagation(); onClose(true); }
+    };
+    const away = () => onClose(false);
+    document.addEventListener("pointerdown", onDown, true);
+    document.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", away);
+    return () => {
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("resize", away);
+    };
+  }, [anchor, onClose]);
+
+  return createPortal(
+    <div
+      ref={elRef}
+      className="snz-dial"
+      role="dialog"
+      aria-label={`Put “${card.title}” off until`}
+      style={pos ? { left: pos.left, top: pos.top } : { opacity: 0, pointerEvents: "none" }}
+    >
+      <div className="snz-k">PUT IT OFF UNTIL</div>
+      <SnoozeDialBody card={card} daysUntilDeadline={daysUntilDeadline} onSnooze={onSnooze} />
     </div>,
     document.body,
   );

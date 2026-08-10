@@ -302,13 +302,32 @@ describe("⚠️ THE SPLIT'S WEIGHT IS THE GROUP'S, AND THE FOOTPRINT IS IDENTIC
 describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
   const sections = (c: BoardCard, col: TodoColumnId = "todo") => splitMenu(c, col, laterHideKey(c.taskType));
 
-  it("the ref's shape, in the ref's order", () => {
+  it("the ref's shape, in the ref's order — and SNOOZE is a control, not two rows", () => {
     const secs = sections(card({}));
-    expect(secs.map((x) => x.head)).toEqual(["SNOOZE", "THIS QUERY", null]);
-    expect(secs[0].items.map((i) => i.label)).toEqual(["Tomorrow", "Next week"]);
+    expect(secs.map((x) => x.head)).toEqual(["SNOOZE UNTIL", "THIS QUERY", null]);
+    /* ⚠️ THE PRESET ROWS ARE GONE, AND THE EMPTY `items` IS THE POINT. Tomorrow and Next week
+       asked the writer to round their intention to the nearer of two dates, and the day they
+       wanted was usually neither. */
+    expect(secs[0].items).toEqual([]);
+    expect(secs[0].dial).toEqual({ enabled: true, why: undefined });
     expect(secs[1].items.map((i) => i.label)).toEqual(["Open the query", "Edit last entry"]);
     expect(secs[2].items.map((i) => i.label)).toEqual(["Dismiss", "Stop showing this kind"]);
     expect(secs[2].danger).toBe(true);
+  });
+
+  it("⚠️ IN SNOOZED THE HEAD CHANGES SHAPE — a sleeping card is MOVED, not snoozed", () => {
+    /* `cardMenu` already made this decision, swapping "Snooze…" for "Change the date…" there;
+       "Snooze until" over a card that is already asleep reads as a no-op. */
+    expect(sections(card({}), "snoozed")[0].head).toBe("MOVE IT TO");
+    expect(sections(card({}), "snoozed")[0].dial!.enabled).toBe(true);
+  });
+
+  it("⚠️ A FINISHED CARD HAS NO DIAL, and says so rather than drawing a dead track", () => {
+    /* Planning verbs on a finished thing imply it is not finished — `cardMenu` collapses Done to
+       its way back, and the dial takes its answer from there rather than deciding again. */
+    const done = sections(card({ done: true }), "done")[0];
+    expect(done.dial!.enabled).toBe(false);
+    expect(done.dial!.why).toMatch(/nothing left to put off/);
   });
 
   it("⚠️ THE 12px DEAD ZONE TAKES NO CLICK — Dismiss is never one slip from the caret", () => {
@@ -318,14 +337,15 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
     expect(dz).toContain("border-bottom: 1px solid");
   });
 
-  it("⚠️ AN OFFER KEEPS TOMORROW ONLY, and the rest are GREY rather than absent", () => {
-    /* An absent row is a puzzle; a greyed one is an answer — and the answer is readable, because
-       `why` becomes the control's title. */
+  it("⚠️ AN OFFER STILL GETS A DIAL — its CEILING is what says one day, not a greyed row", () => {
+    /* The greyed `Next week` row used to carry this; the dial carries it better, because the
+       limit is visible ON the control (one stop, and a caption saying why) rather than stated
+       beside a row you cannot press. The dismiss line keeps the greyed-not-absent treatment. */
     const secs = sections(card({ taskType: "offer_received" }));
+    expect(secs[0].dial!.enabled).toBe(true);
+    expect(reachableStops(card({ taskType: "offer_received" }))).toHaveLength(1);
     const flat = secs.flatMap((x) => x.items);
-    expect(flat.map((i) => i.label)).toHaveLength(6);             // nothing is hidden
-    expect(flat.find((i) => i.label === "Tomorrow")!.enabled).toBe(true);
-    expect(flat.find((i) => i.label === "Next week")!.enabled).toBe(false);
+    expect(flat.map((i) => i.label)).toHaveLength(4);             // nothing is hidden
     expect(flat.find((i) => i.label === "Dismiss")!.enabled).toBe(false);
     expect(flat.find((i) => i.label === "Dismiss")!.why).toMatch(/not yours to move/);
   });
@@ -333,7 +353,6 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
   it("⚠️ THE PERMISSIONS ARE `cardMenu`'s — one answer to 'may this card do this'", () => {
     const stale = sections(card({ taskType: "no_response_close" })).flatMap((x) => x.items);
     expect(stale.find((i) => i.label === "Dismiss")!.enabled).toBe(true);
-    expect(stale.find((i) => i.label === "Next week")!.enabled).toBe(true);
     /* "Edit last entry" maps to `edit-task`: on a derived card there is no entry of YOURS to
        edit, so it greys and says why rather than vanishing. */
     expect(stale.find((i) => i.label === "Edit last entry")!.enabled).toBe(false);
@@ -346,10 +365,19 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
     expect(list).not.toContain("items[0]?.focus()");
   });
 
-  it("⚠️ THE NUMBER KEYS KEEP SNOOZE FAST, and a greyed tier is inert to them too", () => {
-    /* It lost its button; it must not lose its speed. But a key that fired a greyed verb would
-       make the grey a lie. */
-    expect(SPLIT_NUMBER_KEYS).toEqual({ "1": "snooze-1", "2": "snooze-7" });
+  /* ⚠️ THE NUMBER KEYS ARE INERT FROM HERE, BY CONSTRUCTION — and this case is written down so
+     the interim does not read as an oversight. They fired `snooze-1`/`snooze-7` by finding them
+     among the section ITEMS; the snooze section has no items now, so the lookup finds nothing and
+     the keys do nothing. The dial makes them redundant — a continuous scale has no two stops
+     worth a shortcut. The constant and its handler are DELETED in Phase 4; until then they are
+     dead code that cannot misfire, which is the safe order to do it in. */
+  it("⚠️ THE NUMBER KEYS CAN NO LONGER FIRE — the section they searched has no items", () => {
+    const secs = sections(card({}));
+    for (const key of Object.keys(SPLIT_NUMBER_KEYS)) {
+      const id = SPLIT_NUMBER_KEYS[key];
+      expect(secs.flatMap((s) => s.items).find((i) => i.id === id)).toBeUndefined();
+    }
+    /* the guard stays until the handler goes, so a resurrected item could not fire while greyed */
     expect(list).toContain("if (item?.enabled)");
   });
 
@@ -357,6 +385,56 @@ describe("⚠️ THE MENU: SAFE VERBS FIRST, DANGER BEHIND A DEAD ZONE", () => {
     expect(list).toContain('className="t-f12 tbd-menu2 tdg-splitmenu"');
     const boardCss = readFileSync(join(here, "todoBoard.css"), "utf8");
     expect(boardCss).toContain(".tbd-menu2 {"); // live despite the retired board — see STATE.md
+  });
+});
+
+/**
+ * ⚠️ THE DIAL, WORN INLINE (Fix 4 revision, Phase 2; ref todo-weight-slider-v1.html panels 2–3).
+ *
+ * The two preset rows are replaced by the snooze dial itself. The rule that made this safe to do
+ * is that there is still exactly ONE dial: `SnoozeDialBody` was extracted from the popover so the
+ * menu could wear the same control, rather than a second slider being built for the menu — which
+ * is the thing the pack forbade in as many words.
+ */
+describe("⚠️ ONE DIAL, TWO SURFACES — the menu wears the control, it does not copy it", () => {
+  it("the menu renders `SnoozeDialBody`, and the popover renders the very same component", () => {
+    expect(list).toContain("<SnoozeDialBody card={card} onSnooze={onSnooze} />");
+    expect(dialSrc).toContain("export const SnoozeDialBody");
+    /* the popover is now a wrapper around it — portal, placement and closers, nothing more */
+    expect(dialSrc).toContain("<SnoozeDialBody card={card} daysUntilDeadline={daysUntilDeadline} onSnooze={onSnooze} />");
+    /* …and the body itself owns no popover machinery, or the inline copy would fight the menu's */
+    const body = dialSrc.slice(dialSrc.indexOf("export const SnoozeDialBody"), dialSrc.indexOf("export const SnoozeDial:"));
+    expect(body).not.toContain("createPortal");
+    expect(body).not.toContain("addEventListener");
+  });
+
+  it("⚠️ BOTH ENTRY POINTS SURVIVE — the dial gained a surface, it did not lose one", () => {
+    /* `s` on the focused row, and Snoozed's "Change the date…". A refactor that quietly cost an
+       entry point would be a regression wearing a tidy-up's clothes. */
+    expect(list).toContain("<SnoozeDial");
+    expect(list).toContain('setDial({ card: c, anchor: el })');
+    expect(dialSrc).toContain("<BrandDatePicker");        // the exact-date route, kept
+  });
+
+  it("the write is the page's own `onSnooze`, already clamped inside the body", () => {
+    expect(list).toContain("onSnooze={(days, when) => { setSplit(null); onSnooze(split.card, days, when); }}");
+    expect(dialSrc).toContain("clampSnooze(card, days,");
+  });
+
+  it("258px — the one thing this menu overrides on the shell it consumes", () => {
+    expect(rule(".tdg-splitmenu {")).toContain("width: 258px");
+    const boardCss = readFileSync(join(here, "todoBoard.css"), "utf8");
+    expect(boardCss).toContain("width: 228px");           // the shell's own, untouched
+  });
+
+  it("⚠️ THE GREYED DIAL REUSES THE EXISTING `.tbd-mi.dim` GRAMMAR — no fourth state rule", () => {
+    expect(list).toContain('className="tbd-mi dim" role="menuitem" aria-disabled');
+    /* the state rules that already existed, still the only ones */
+    expect(cssDecls).toContain(".tbd-mi.dim, .tbd-mi:disabled");
+    expect(cssDecls).not.toContain(".tdg-mdial.dim");
+    /* and it is not a <button disabled>: a button takes the shape of something pressable and
+       then refuses, where a plain row with `aria-disabled` never offered */
+    expect(list).not.toContain('className="tbd-mi dim" disabled');
   });
 });
 

@@ -43,7 +43,7 @@ import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/
 import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { PortalMenu } from "./PortalMenu";
-import { SnoozeDial } from "./SnoozeDial";
+import { SnoozeDial, SnoozeDialBody } from "./SnoozeDial";
 import "./todoGroups.css";
 
 export interface TaskListProps {
@@ -156,8 +156,10 @@ const SplitMenu: React.FC<{
   column: TodoColumnId;
   anchor: HTMLElement;
   onPick: (id: MenuItemId) => void;
+  /** The dial's write, straight through — the menu decides nothing about it. */
+  onSnooze: (days: number, when: string) => void;
   onClose: (returnFocus: boolean) => void;
-}> = ({ card, column, anchor, onPick, onClose }) => {
+}> = ({ card, column, anchor, onPick, onSnooze, onClose }) => {
   const elRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const sections = splitMenu(card, column, laterHideKey(card.taskType));
@@ -210,6 +212,21 @@ const SplitMenu: React.FC<{
         <React.Fragment key={si}>
           {sec.danger && <div className="tdg-deadzone" aria-hidden />}
           {sec.head && <div className="tbd-mhead">{sec.head}</div>}
+          {/* ⚠️ THE SAME DIAL THE `s` KEY OPENS, worn inline — `SnoozeDialBody`, not a copy of it.
+              ⚠️ AND WHERE IT CANNOT ACT IT IS GREY, NEVER ABSENT, wearing `.tbd-mi.dim` — the
+              greyed grammar that already exists in this sheet rather than a fourth state rule.
+              `aria-disabled` with no handler, because a `<button disabled>` would take the shape
+              of something pressable and then refuse. */}
+          {sec.dial && (sec.dial.enabled ? (
+            <div className="tdg-mdial">
+              <SnoozeDialBody card={card} onSnooze={onSnooze} />
+            </div>
+          ) : (
+            <div className="tbd-mi dim" role="menuitem" aria-disabled title={sec.dial.why}>
+              <span className="tdg-mglyph" aria-hidden>◷</span>
+              {sec.dial.why}
+            </div>
+          ))}
           {sec.items.map((it) => (
             <button
               key={it.id}
@@ -600,6 +617,10 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           column={split.column}
           anchor={split.anchor}
           onPick={(id) => { setSplit(null); fire(split.card, split.column, id); }}
+          /* ⚠️ THE DIAL'S WRITE IS THE PAGE'S OWN `onSnooze` — the same one the popover dial has
+             always called, already clamped and re-labelled by `clampSnooze` inside the body. The
+             menu closes because the act is done, exactly as picking a verb closes it. */
+          onSnooze={(days, when) => { setSplit(null); onSnooze(split.card, days, when); }}
           onClose={(returnFocus) => {
             if (returnFocus) (split.anchor.querySelector(".tdg-split-p") as HTMLElement | null)?.focus();
             setSplit(null);

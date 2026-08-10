@@ -176,10 +176,21 @@ export interface SplitItem {
 }
 
 export interface SplitSection {
-  head: "SNOOZE" | "THIS QUERY" | null;
+  head: "SNOOZE UNTIL" | "MOVE IT TO" | "THIS QUERY" | null;
   /** The last section sits below a dead zone and a rule; nothing destructive is within a
    *  pointer's drift of the caret. */
   danger?: true;
+  /**
+   * ⚠️ THE SNOOZE SECTION IS A CONTROL, NOT A LIST OF ROWS. Two prescribed stops asked the writer
+   * to round their own intention to the nearer of Tomorrow and Next week, and the day they wanted
+   * was usually neither; the dial names the resulting date before they commit to it, which is the
+   * one thing they actually want to know. Empty `items` here is the point, not an oversight.
+   *
+   * `enabled` is `cardMenu`'s answer, never a second permission table: a finished card has no
+   * snooze at all (planning verbs on a finished thing imply it is not finished), so the section
+   * states that rather than drawing a track that can write nothing.
+   */
+  dial?: { enabled: boolean; why?: string };
   items: SplitItem[];
 }
 
@@ -213,14 +224,20 @@ export function splitMenu(
 
   return [
     {
-      head: "SNOOZE",
-      items: [
-        { id: "snooze-1", glyph: "◷", label: "Tomorrow", hint: "1", enabled: live("snooze-1") },
-        {
-          id: "snooze-7", glyph: "◷", label: "Next week", hint: "2", enabled: live("snooze-7"),
-          why: isOffer ? "An offer has a reply-by date that is not yours to move." : undefined,
-        },
-      ],
+      /* ⚠️ THE HEAD CHANGES SHAPE IN SNOOZED, because `cardMenu` already decided it does: a card
+         that is asleep is not being snoozed, it is being MOVED. "Snooze until" over a sleeping
+         card reads as a no-op, which is the exact confusion the menu model avoided when it
+         swapped "Snooze…" for "Change the date…" there. */
+      head: column === "snoozed" ? "MOVE IT TO" : "SNOOZE UNTIL",
+      /* ⚠️ ONE STOP IS STILL A DIAL. An offer's ceiling is a day, so its track has a single stop
+         and a caption saying why — the dial answers "why can't I" itself, which is what the greyed
+         `Next week` row used to do and does better, because the limit is visible on the control
+         rather than stated beside a row you cannot press. */
+      dial: {
+        enabled: live("snooze-1"),
+        why: live("snooze-1") ? undefined : "A finished task has nothing left to put off.",
+      },
+      items: [],
     },
     {
       head: "THIS QUERY",
