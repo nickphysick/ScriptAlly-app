@@ -87,7 +87,13 @@ describe("P2 · the sample quantity is ONE control over the SHARED physics", () 
     const qty = block(".qc-stp input");
     expect(qty, "the .qc-stp input rule is missing — is the value a read-out again?").not.toBe("");
     expect(pane).toContain("inputMode=\"numeric\"");
-    expect(pane).toContain("onChange={(e) => setRow(\"sample\", { amount: e.target.value })}");
+    /* ⚠️ AMENDED: the raw string is normalised to digits on the way in and formatted with
+       separators on the way out, so 12,500 READS as a number while the field is not being typed
+       into. The rule this suite protects is unchanged, and the second assertion is what pins it:
+       nothing snaps a TYPED value — the ladder is what the arrows offer. */
+    expect(pane).toContain("onChange={(e) => setRow(\"sample\", { amount: String(parseQty(e.target.value)) })}");
+    expect(pane, "a typed figure must never be snapped to the ladder")
+      .not.toMatch(/onChange=[^\n]*snapToUnit/);
   });
 
   it("the stepper is one bordered 32px control, not three loose buttons", () => {

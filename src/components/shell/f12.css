@@ -279,6 +279,19 @@
 .qc-qag { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-qadded { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
 
+/* the material row: checkbox · name · sub-label · controls right */
+.qc-matn { flex: none; }
+/* ⚠️ REPORTS, NEVER APPRAISES — it states what the agent asked for and stops. No colour change
+   and no warning when the writer sends something different; this record says what you sent. */
+.qc-matsub { font-size: 11.5px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qc-matreq { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 7px; }
+.qc-matreq.on { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
+/* ⚠️ AN UNTICKED ROW GREYS ITS CONTROLS BUT KEEPS ITS CHECKBOX LIVE — the row is how you tick it,
+   so disabling the whole thing would make the state unreachable. */
+.qc-mat:not(.on) .qc-matsub, .qc-mat:not(.on) .qc-qty { opacity: 0.45; }
+.qc-stpn { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; color: var(--faint); margin-left: 7px; }
+.qc-stp button:disabled { opacity: 0.35; cursor: default; }
+
 /* the nudge calendar sits AMONG the preset chips, so it must look like one of them */
 .qc-chipcal { display: inline-flex; }
 .qc-chipcal .sa-dp-trigger { min-height: 0; }

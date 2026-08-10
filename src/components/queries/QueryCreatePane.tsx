@@ -35,9 +35,9 @@ import { agentInitials, agentPrimary, agentAgencyLine } from "../../lib/agentDis
 import {
   SAMPLE_UNITS,
   snapToUnit,
-  stepAmount,
   type MaterialRow,
 } from "../../lib/agentMaterials";
+import { canStep, formatQty, parseQty, stepLabel, stepQty } from "../../lib/createQty";
 import {
   CREATE_SEND_METHODS,
   NUDGE_PRESETS,
@@ -101,6 +101,20 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0
     ? agent.responseTimeWeeks : null;
   const derivedNudge = nudgeDerivedLine(draft, agent);
+  /* The stepper's field is raw while it holds the caret and formatted the rest of the time. */
+  const [qtyFocused, setQtyFocused] = useState(false);
+  /* ⚠️ WHAT THE AGENT ASKED FOR, READ FROM THE SEEDED ROWS — never a second parse of their record.
+     `materialRowsForDraft` already turned their stated requirements into rows; asking the agent
+     again here would give two answers to one question the moment either changed. */
+  const asked = useMemo(() => materialRowsForDraft(agent), [agent]);
+  const requested = (key: MaterialRow["key"]) => asked.some((r) => r.key === key && r.on);
+  const askedFor = (key: MaterialRow["key"]): string => {
+    const r = asked.find((x) => x.key === key && x.on);
+    if (!r) return "";
+    const who = agentPrimary(agent).split(" ")[0] || "They";
+    if (r.kind === "qty") return `${who} asks for ${formatQty(r.amount)} ${String(r.unit).toLowerCase()}`;
+    return `${who} asks for this`;
+  };
   /* Both popovers anchor the choice: a calendar with no "you are here" makes the writer count. */
   const longDate = (iso: string) => (iso
     ? new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
@@ -109,6 +123,13 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   const sentLong = longDate(draft.dateSent);
   const sample = draft.materials.find((r) => r.key === "sample") as Extract<MaterialRow, { key: "sample" }> | undefined;
   const other = draft.materials.find((r) => r.key === "other") as Extract<MaterialRow, { key: "other" }> | undefined;
+
+  /* ⚠️ DECLARED AFTER `sample`, AND THAT ORDER IS LOAD-BEARING. It reads `sample.unit`, so hoisting
+     it up with the other derivations puts a const in its own temporal dead zone — which `tsc` does
+     catch here, but only because the reference shares this scope. Read from a helper the render
+     calls and the same mistake typechecks clean. */
+  const askedSample = asked.find((r) => r.key === "sample" && r.on) as Extract<MaterialRow, { key: "sample" }> | undefined;
+  const statedSample = askedSample && askedSample.unit === sample?.unit ? parseQty(askedSample.amount) : null;
 
   /* ── THE STACK'S POSITION. Local to the pane: it is presentation, not draft data — a
      half-walked stack must not make the draft dirty, and reopening create mode starts the walk
@@ -489,7 +510,15 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               return (
                 <button key={row.key} type="button" className={`qc-mat${row.on ? " on" : ""}`} onClick={() => setRow(row.key, { on: !row.on })}>
                   <span className="qc-ck" aria-hidden="true">{row.on ? "✓" : ""}</span>
-                  {row.name}
+                  <span className="qc-matn">{row.name}</span>
+                  {/* ⚠️ THE SUB-LABEL REPORTS, IT NEVER APPRAISES. It states what the agent asked
+                      for and stops. Sending something different is the writer's business and gets
+                      no warning, no colour and no "less than requested" — this record says what
+                      you sent, not whether the app approves. */}
+                  {askedFor(row.key) && <span className="qc-matsub">{askedFor(row.key)}</span>}
+                  <span className={`qc-matreq${requested(row.key) ? " on" : ""}`}>
+                    {requested(row.key) ? "Requested" : "Not requested"}
+                  </span>
                 </button>
               );
             })}
@@ -510,15 +539,39 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                      The value is an INPUT, not a read-out: 5,000 words is typed, never stepped. */
                   <span className="qc-qty">
                     <span className="qc-stp">
-                      <button type="button" aria-label="Fewer" onClick={() => setRow("sample", { amount: stepAmount(sample.amount, sample.unit, -1) })}>−</button>
+                      <button
+                        type="button"
+                        aria-label="Fewer"
+                        disabled={!canStep(sample.amount, sample.unit, -1, statedSample)}
+                        onClick={() => setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, -1, statedSample)) })}
+                      >−</button>
                       <input
-                        value={sample.amount}
-                        onChange={(e) => setRow("sample", { amount: e.target.value })}
+                        value={qtyFocused ? sample.amount : formatQty(sample.amount)}
+                        /* ⚠️ TYPING ALWAYS OVERRIDES — no snapping, ever. The ladder is what the
+                           ARROWS offer; a writer who types 37 sent 37, and a stepper that
+                           "corrected" it would overwrite a fact with a convenience. */
+                        onChange={(e) => setRow("sample", { amount: String(parseQty(e.target.value)) })}
+                        onFocus={() => setQtyFocused(true)}
+                        onBlur={() => setQtyFocused(false)}
+                        onKeyDown={(e) => {
+                          /* ↑/↓ do what the arrows do, so the keyboard is not a second-class way
+                             to use this control. */
+                          if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                          e.preventDefault();
+                          const dir = e.key === "ArrowUp" ? 1 : -1;
+                          setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, dir, statedSample)) });
+                        }}
                         aria-label={`Sample quantity in ${sample.unit.toLowerCase()}`}
                         inputMode="numeric"
                       />
-                      <button type="button" aria-label="More" onClick={() => setRow("sample", { amount: stepAmount(sample.amount, sample.unit, 1) })}>+</button>
+                      <button
+                        type="button"
+                        aria-label="More"
+                        disabled={!canStep(sample.amount, sample.unit, 1, statedSample)}
+                        onClick={() => setRow("sample", { amount: String(stepQty(sample.amount, sample.unit, 1, statedSample)) })}
+                      >+</button>
                     </span>
+                    <span className="qc-stpn" aria-hidden="true">{stepLabel(sample.unit)}</span>
                     <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                       <button
                         ref={unitTrigRef}
