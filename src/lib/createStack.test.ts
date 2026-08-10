@@ -55,12 +55,31 @@ describe("the three treatments", () => {
   /* ⚠️ THE FOOTER IS A ROW, NOT A BUTTON HANGING OFF THE BODY. The primary sat flush against the
      card's inner edge, so it read as escaping the card rather than closing it. And it applies to
      EVERY step — one renderer, so it cannot be true of When and false of Notes. */
-  it("the footer is separated, padded, and inside the card on every step", () => {
+  /* ⚠️ ALL FOUR EDGES — and the bottom was the one still missing after the first pass. That pass
+     measured 17px at the TOP and stopped there, while `padding: 15px 16px 0` gave the row a
+     horizontal gutter and NO bottom at all; the footer is the card's last child, so the buttons
+     sat flush on the card's bottom edge with the CSS reading as correct. Measuring one edge is how
+     a gutter goes half-built twice. */
+  it("the footer's gutter is the step body's, on all four edges", () => {
     const r = rule(".qc-sfoot");
     expect(r, "no rule between the step's content and its actions").toContain("border-top");
-    expect(r).toContain("margin: 20px");
-    expect(r).toContain("padding: 15px");
+    expect(r).toContain("margin: 20px 0 0");
+    /* Horizontal and bottom must EQUAL the body's, not merely be non-zero — that is what makes the
+       buttons line up with the field labels above them rather than approximately near them. */
+    const body = rule(".qc-body");
+    const bodyPad = /padding:\s*([^;]+);/.exec(body)?.[1].trim().split(/\s+/) ?? [];
+    const footPad = /padding:\s*([^;]+);/.exec(r)?.[1].trim().split(/\s+/) ?? [];
+    expect(bodyPad, "the body's padding shape changed; re-derive the footer's").toHaveLength(3);
+    expect(footPad[1], "horizontal gutter must match the body's").toBe(bodyPad[1]);
+    expect(footPad[0], "and the bottom must match the body's bottom").toBe(bodyPad[2]);
     expect(pane.match(/\{stepFoot\("/g)?.length ?? 0, "every step, not just When").toBe(3);
+  });
+
+  /* ⚠️ THE RULE IS A FULL-BLEED DIVIDER, DELIBERATELY — `margin: 20px 0 0` keeps it edge to edge
+     while the padding insets the buttons. A rule stopping short of the card's edges reads as an
+     underline of the last field; running it through says "content above, actions below". */
+  it("and its rule runs full-bleed rather than taking the gutter", () => {
+    expect(rule(".qc-sfoot")).toContain("margin: 20px 0 0");
   });
 
   /* ⚠️ THE KEY HANDLER STAYS. Removing the advertisement is not removing the behaviour — a writer
