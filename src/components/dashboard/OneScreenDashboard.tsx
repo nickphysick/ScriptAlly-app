@@ -34,6 +34,8 @@ import { OneScreenPro } from "./OneScreenPro";
 import { OneScreenCounters } from "./OneScreenCounters";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { OneScreenRail } from "./OneScreenRail";
+import { OneScreenSkeleton } from "./OneScreenSkeleton";
+import { useSkeleton } from "../../lib/skeletonTiming";
 import "./oneScreen.css";
 
 export interface OneScreenDashboardProps {
@@ -176,6 +178,14 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
    */
   const scopedStage = runStage(scopedQueries, manuscripts, now);
 
+  /**
+   * ⚠️ THE PAGE SKELETON IS NOT `loading` (P1). It lags the flag at BOTH ends on purpose — it
+   * refuses to appear for a wait under ~200ms, and once it has appeared it outlives the data by
+   * up to ~400ms. Rendering it straight off `loading` would reinstate exactly the flash the delay
+   * buys off. The rule lives in lib/skeletonTiming.
+   */
+  const skeleton = useSkeleton(loading);
+
   return (
     <div
       ref={rootRef}
@@ -283,6 +293,10 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           now={now}
         />
       </div>
+      {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it — the
+          entrance stagger has to find them the moment this lifts, and leaving them mounted is what
+          makes "no layout shift" structural rather than a matter of matching numbers. */}
+      {skeleton && <OneScreenSkeleton />}
       {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}
     </div>
   );

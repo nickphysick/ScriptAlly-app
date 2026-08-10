@@ -45,8 +45,43 @@
   --os-pastille-line: #dde6ee;
   --os-pastille-ink: #4a5a6b;
   --os-pastille-fig: #2c3f52;
+  /**
+   * ⚠️ THE PAGE SKELETON'S MEASURED HEIGHTS, AND ITS PAPER (P1) — declared in THIS rule for the
+   * reason stated above: a second `.os-root` block is invisible to the smoke test's slice.
+   *
+   * Only three ghosts need a number at all. Every other block is sized by a grid row, a column
+   * width or a flex rule that `OneScreenSkeleton` reuses verbatim, so it cannot be wrong. These
+   * three are CONTENT-driven on the real page, and content is the one thing a skeleton by
+   * definition does not have.
+   *
+   * ⚠️ ALL THREE ARE BROWSER-MEASURED AGAINST THE LOADED PAGE at 1440×900, and TWO OF THEM
+   * DISAGREE WITH THE REF ON PURPOSE. The ref draws the counters at 79 and the goal at 89; this
+   * app renders them at 82 and 115, because its cards carry different padding and a different
+   * first-run body. Copying the ref's numbers would have produced a ghost that matched the mockup
+   * and jumped in the app — the exact failure the harness rule in CLAUDE.md exists to catch.
+   *
+   *   · counters — 82px. Invariant, not incidental: the row's height is set by its TEXT (label +
+   *     figure ≈ 50px inside 32px of padding), and every mark's box is absorbed below that by its
+   *     negative margin. P3's 54px plane is 30px effective and so does not touch it.
+   *   · goal — 115px, its first-run height. A goal that has been SET renders a different body, and
+   *     no number can be right for both while we are still waiting to learn which. It does not
+   *     matter: `.os-sk-actv` beneath it is `flex: 1 1 auto`, so any error is absorbed INSIDE the
+   *     rail column and cannot move anything else on the page.
+   *   · tasks — 200px, likewise approximate (the real card is `flex: 0 1 auto` between 118 and
+   *     318). It is the LAST block in its column with slack beneath it, so its error moves nothing.
+   *
+   * The paper matches `.ws-window`'s white, so the overlay covers rather than tints.
+   */
+  --os-sk-counters-h: 82px;
+  --os-sk-goal-h: 115px;
+  --os-sk-tasks-h: 200px;
+  --os-skel-paper: #ffffff;
   height: 100%;
   overflow: hidden;
+  /* the page skeleton's containing block — see .os-skelpage. Every other absolutely-positioned
+     descendant on this page sits inside a `.os-card`, which is already `position: relative`, so
+     nothing else changes its anchor. */
+  position: relative;
   display: flex;
   flex-direction: column;
   font-size: 14px;
@@ -269,6 +304,82 @@
 @keyframes os-skpulse { 0% { background-position: 120% 0; } 100% { background-position: -80% 0; } }
 .os-skel i.h { height: 16px; min-height: 16px; }
 .os-skel i.grow { flex: 1; min-height: 34px; }
+
+/* ══ THE PAGE SKELETON (audit pack P1; ref dashboard-audit.html `.skel`) ══
+   ⚠️ THE PER-CARD SKELETONS ABOVE ARE NOT RETIRED. They still dress each card during the first
+   ~200ms, before this overlay is allowed to admit to a wait, and on any later per-card wait. This
+   is the PAGE-level answer, laid over the top: the two are different scales of the same idea.
+
+   ⚠️ ITS GEOMETRY IS THE PAGE'S OWN. `OneScreenSkeleton` renders `.os-content` / `.os-greet` /
+   `.os-colM` / `.os-midrow` / `.os-colR` verbatim, so every column width, gap and padding below is
+   already declared once, further up this sheet. Nothing here restates the grid — only the blocks'
+   own heights, and each of those is the measured height of the card it covers. */
+.os-skelpage {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  /* the window's own paper, so the page beneath is covered rather than tinted */
+  background: var(--os-skel-paper);
+  overflow: hidden;
+}
+.os-sk {
+  background: #f0eae1;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+/* ⚠️ THE SWEEP IS A PSEUDO-ELEMENT AND ITS KEYFRAMES ARE LITERAL PERCENTAGES. A `var()` in a
+   keyframe SELECTOR is not a thing CSS resolves — the whole block is dropped, with no error and no
+   red build, and the shimmer simply never runs. */
+.os-sk::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: os-sk-sweep 1.25s linear infinite;
+}
+@keyframes os-sk-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* The greeting stack — h1, the subtitle beneath it, then the fact pills. The MARGINS here are the
+   real ones (`.os-greet h1` line box 46, `.os-sub2` 6, `.os-pills` 14 + 6), so the three ghosts
+   sit at the same three baselines as the text they cover. Widths are approximate by nature: the
+   name is exactly what we are still waiting to learn. */
+.os-sk-h1 { width: 300px; height: 46px; border-radius: 10px; }
+.os-sk-sub { width: 206px; height: 19px; margin-top: 6px; }
+.os-sk-pills { display: flex; gap: 7px; margin-top: 14px; padding-bottom: 6px; }
+/* ⚠️ THE PILL WIDTHS SET WHERE THE COUNTERS CARD STARTS, which is not obvious and is why they are
+   measured rather than picked. `.os-gl` is `flex: 0 0 auto`, so the greeting column is exactly as
+   wide as its widest child — the pills row — and the counters card takes the rest after the 32px
+   gap. Ghost pills 20px narrow put the whole counters card 20px out. Measured against the real
+   pair ("Querying since {month year}" · "{n} queries out with agents"): 184 + 7 + 136 = 327.
+   These two follow the writer's own tenure and count, so they can only ever match the common
+   case — but the common case is what a load actually shows. */
+.os-sk-pill { width: 184px; height: 31.5px; border-radius: 99px; }
+.os-sk-pill.narrow { width: 136px; }
+/* the counters card takes the rest of the header row, as the real one does */
+.os-sk-counters { flex: 1; min-width: 0; height: var(--os-sk-counters-h); border-radius: 14px; }
+
+/* ⚠️ NO HEIGHTS ON THE MIDROW PAIR — `.os-midrow` is a 302px grid and its items stretch, so the
+   tile and the chart are sized by the same rule that sizes the real cards. */
+.os-sk-card { border-radius: 14px; }
+.os-sk-tasks { flex: none; height: var(--os-sk-tasks-h); border-radius: 14px; }
+.os-sk-goal { flex: none; height: var(--os-sk-goal-h); border-radius: 14px; }
+/* ⚠️ `flex: 1 1 auto`, AS THE REAL ACTIVITY CARD IS — which is also what makes the goal ghost's
+   approximation harmless: this block eats the difference. */
+.os-sk-actv { flex: 1 1 auto; min-height: 120px; border-radius: 14px; }
+
+/* ⚠️ THE SWEEP IS SUPPRESSED BY NAME, NOT BY DURATION. This sheet's blanket reduced-motion rule
+   sets `animation-duration: .01ms !important` on everything inside `.os-root`, which would leave
+   an infinite sweep running at 100 frames a second — a strobe, not a stillness. Killing the
+   animation-NAME is what actually stops it, and the blocks then carry the wait at rest. */
+@media (prefers-reduced-motion: reduce) {
+  .os-sk::after { animation-name: none !important; opacity: 0; }
+  .os-sk { opacity: 0.62; }
+}
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
 @media (max-width: 1360px) {
