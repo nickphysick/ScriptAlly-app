@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/assets/index-DGH2I4w4.css">
+<style>html,body{margin:0;background:#efe7db}</style></head><body>
+<div class="os-root" style="height:900px">
+<div class="os-content" style="height:100%">
+ <div class="os-colM">
+  <div class="os-midrow">
+   <div class="os-card os-lift os-aut" id="author"><div style="padding:14px">Author tile</div></div>
+   <div class="os-card os-lift os-lead" id="chart">
+     <div class="os-ahead"><span class="os-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.5"><circle cx="12" cy="12" r="8"/></svg></span><h2>Active queries</h2><span class="os-n">13</span><span class="os-chip">&#9650; 2</span><div class="os-ctrls"><div class="os-freqsel"><select><option>Weekly</option></select><span class="os-cv">&#9662;</span></div><div class="os-rangeslider"><input type="range" value="40"></div><span class="os-rangelbl">Last 8 weeks</span></div></div>
+     <div class="os-lbody"><div class="os-chartwrap" style="background:#fbf7f0"></div></div></div>
+  </div>
+  <div class="os-card os-lift os-tasks" id="tasks">
+    <div class="os-th2"><span class="os-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.5"><circle cx="12" cy="12" r="8"/></svg></span><h2>Tasks requiring your attention</h2></div>
+    <div style="padding:10px 16px">rows</div></div>
+ </div>
+ <div class="os-colR">
+  <div class="os-card os-lift os-goal" id="goals" style="padding:13px 16px 14px">
+    <div class="os-goal-r1"><h2>Querying goals</h2><span class="os-goal-num">Goal met</span></div>
+    <div class="os-goal-t" style="margin-top:6px">Queried 25 of 25 agents this quarter</div>
+    <div class="os-blocks" style="gap:2px;margin-top:9px"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i></div></div>
+  <div class="os-card os-lift os-actv" id="actv" style="flex:1">
+    <div class="os-ahead"><span class="os-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.5"><circle cx="12" cy="12" r="8"/></svg></span><h2>Activity</h2></div>
+    <div style="padding:10px 14px">feed</div></div>
+ </div>
+</div></div>
+<script>
+window.__v5=function(){
+ var q=function(s){return document.querySelector(s);}, o={};
+ o.bands={chart:+q('#chart .os-ahead').getBoundingClientRect().height.toFixed(2),
+           tasks:+q('#tasks .os-th2').getBoundingClientRect().height.toFixed(2),
+           actv:+q('#actv .os-ahead').getBoundingClientRect().height.toFixed(2)};
+ var v=Object.values(o.bands); o.bandSpread=+(Math.max.apply(0,v)-Math.min.apply(0,v)).toFixed(2);
+ o.titleWraps=q('#chart h2').getBoundingClientRect().height>24;
+ o.goalsHasBand=!!q('#goals .os-ahead')||!!q('#goals .os-th2');
+ o.goalsHasMark=!!q('#goals .os-mark');
+ var c=q('#chart'); o.cardTransformRest=getComputedStyle(c).transform;
+ var col=q('.os-colM'), cs=getComputedStyle(col);
+ o.bleed={boxSizing:cs.boxSizing,padding:cs.paddingTop,margin:cs.marginTop};
+ o.pageScrolls=document.documentElement.scrollHeight>window.innerHeight+1;
+ o.pos={};['author','chart','tasks','goals','actv'].forEach(function(i){
+   var r=document.getElementById(i).getBoundingClientRect(); o.pos[i]=[+r.left.toFixed(1),+r.top.toFixed(1)];});
+ return o;};
+window.__nobleed=function(){var st=document.createElement('style');
+ st.textContent='.os-colM,.os-colR{padding:0 !important;margin:0 !important;box-sizing:border-box !important}';
+ document.head.appendChild(st); var r=window.__v5().pos; st.remove(); return r;};
+</script></body></html>
