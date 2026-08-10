@@ -17,6 +17,7 @@
  */
 import React from "react";
 import { MoreHorizontal } from "lucide-react";
+import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
 import "./pageHeader.css";
 
 export interface PageHeaderAction {
@@ -54,9 +55,23 @@ export interface PageHeaderOverflowItem {
 export interface PageHeaderProps {
   /** One variant remains; the prop survives (optional) so existing `variant="full"` call
    *  sites stand unchanged. */
-  variant?: "full";
+  /**
+   * ⚠️ THE UNION WAS CLOSED ON PURPOSE, AND `"band"` RE-OPENS IT KNOWINGLY. `compact` and
+   * `greeting` were RETIRED by the flyouts pack on the conclusion that one full layout was right;
+   * this is not their return. The band is a 60px workspace header on a sage ground — a different
+   * OBJECT, not a second full layout — and pages opt in explicitly, one prop at a time.
+   *
+   * ⚠️ `"full"` MUST RENDER IDENTICALLY TO BEFORE. That contract is what protects Manuscripts,
+   * Comparable titles, Import, Help centre and Plans: they are not exempted by a list, they simply
+   * never pass the new value. `pageHeaderDefault.test.tsx` fails if a pixel of it moves.
+   */
+  variant?: "full" | "band";
   title: string;
   description?: string;
+  /** The band's mono count strip — DATA, never prose. Ignored by the default variant. */
+  count?: React.ReactNode;
+  /** The band's 30px mark. Required when `variant="band"`; ignored otherwise. */
+  mark?: MarkName;
   actions?: PageHeaderActions;
   /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
    *  Additive and optional — every existing call site is unchanged. */
@@ -82,8 +97,11 @@ export interface PageHeaderProps {
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
+  variant = "full",
   title,
   description,
+  count,
+  mark,
   actions,
   titleAdornment,
   actionsSlot,
@@ -91,6 +109,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   compact = false,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
+  const bandActs = (actions ?? []).slice(0, 2);
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -157,6 +176,50 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       )}
     </>
   );
+
+  /**
+   * ⚠️ THE BAND RETURNS EARLY, and that is the mechanism protecting the default. Threading
+   * `variant === "band"` conditionals through the markup below would put the two layouts in one
+   * expression, and every future edit to either would risk the other. Two returns, one contract:
+   * nothing beneath this block can change what `"full"` renders.
+   *
+   * ⚠️ LAYOUT IS ON THE INNER ROW, NEVER THE OUTER ELEMENT. `.pb` owns background and show/hide;
+   * `.pb-row` owns `display:flex`. A single-class layout rule sharing an element with a
+   * multi-class visibility rule is how the last two mockups broke.
+   */
+  if (variant === "band") {
+    return (
+      <header className="pb">
+        <div className="pb-row">
+          {mark && <span className="pb-mark"><OneScreenMark name={mark} /></span>}
+          <h1 className="pb-title">{title}{titleAdornment}</h1>
+          {/* ⚠️ ABSENT COUNT RENDERS NOTHING — not an empty strip, which would draw a bare divider
+              against the title. */}
+          {count != null && count !== false && <div className="pb-count">{count}</div>}
+          <span className="pb-grow" aria-hidden="true" />
+          {(bandActs.length > 0 || actionsSlot) && (
+            <div className="pb-acts">
+              {bandActs.length === 0 && actionsSlot}
+              {bandActs.map((action, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  /* ⚠️ INK IS THE PRIMARY HERE, NOT PINK — the new grammar: ink starts something,
+                     pink records something that happened. */
+                  className={action.primary ? "pb-btn pb-btn-primary" : "pb-btn"}
+                  onClick={action.onClick}
+                  disabled={action.disabled}
+                >
+                  {action.icon}
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className={`svh svh--full${compact ? " svh--compact" : ""}`}>

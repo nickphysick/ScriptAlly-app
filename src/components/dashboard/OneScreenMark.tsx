@@ -23,7 +23,11 @@
 import React, { useState } from "react";
 
 /** The four marks, and the brief each one is waiting for. */
-export type MarkName = "active-queries" | "goals" | "activity" | "tasks";
+export type MarkName =
+  | "active-queries" | "goals" | "activity" | "tasks"
+  /* the page-band keys — one per page that mounts variant="band" */
+  | "queries" | "todo" | "calendar" | "contacts" | "packages" | "analytics"
+  | "noteboard" | "discover" | "settings";
 
 /**
  * ⚠️ THE BRIEFS. Kept beside the icons they will replace so the two never drift apart, and kept
@@ -58,6 +62,26 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
     label: "list",
     icon: <><path d="M4 6h10M4 12h7M4 18h5" /><path d="M15 15l5-5 2 2-5 5-3 1z" /></>,
   },
+
+  /* ── the page-band marks. Briefs in comments only, per the ArtSlot convention. ── */
+  /* a paper plane in flight, ink-drawn */
+  queries: { label: "plane", icon: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" /> },
+  /* a ticked checklist on a clipboard */
+  todo: { label: "check", icon: <><path d="M4 6h11M4 12h11M4 18h7" /><path d="M17 16l2 2 4-4" /></> },
+  /* a calendar leaf, one date circled */
+  calendar: { label: "cal", icon: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 11h18" /></> },
+  /* a single figure, filed — a person you know, not a crowd */
+  contacts: { label: "figure", icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a8 8 0 0 1 16 0v1" /></> },
+  /* a wrapped parcel, string and all */
+  packages: { label: "parcel", icon: <><path d="M3 8h18v12H3z" /><path d="M3 8l3-5h12l3 5M12 8v12" /></> },
+  /* a trend line rising across a ruled page */
+  analytics: { label: "trend", icon: <><path d="M3 3v18h18" /><path d="M7 15l4-5 3 3 5-7" /></> },
+  /* ⚠️ MY CALL, REPORTED: a pinned note — the board is things you kept, not things due */
+  noteboard: { label: "note", icon: <><path d="M5 4h14v16l-5-4H5z" /><path d="M9 9h6M9 13h4" /></> },
+  /* ⚠️ MY CALL: a compass — Discover is looking outward for agents you do not have yet */
+  discover: { label: "compass", icon: <><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></> },
+  /* ⚠️ MY CALL: a cog, the one place a mechanism is the honest metaphor */
+  settings: { label: "cog", icon: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></> },
 };
 
 export const OneScreenMark: React.FC<{ name: MarkName }> = ({ name }) => {

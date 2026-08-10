@@ -603,6 +603,26 @@
 /* ⚠️ THE WINDOW IS THE SHEET OF PAPER, AND ITS FRAME MUST NOT MOVE. It is `overflow:hidden` and
    its BODY scrolls — put the scroll on the window itself and the radius, border and inset slide
    off screen on the first wheel, at which point it is just a border. */
+/**
+ * ⚠️ THE RIM IS AN ::after OVERLAY, MANDATORY — not a precaution.
+ *
+ * The band is a child with an OPAQUE background at the top of this rounded, clipping window. A
+ * child's background is clipped to the BORDER box, not the padding box, so it paints over the
+ * window's 1px border along every straight edge it touches, leaving only the corner arcs. Proven
+ * by test on the dashboard cards (see CLAUDE.md); an inset box-shadow on this element fails the
+ * same way, because inset shadows paint BELOW descendants. Only an overlay above them survives.
+ *
+ * The border stays for geometry — removing it shifts every page's contents by 1px.
+ */
+.ws-window { position: relative; }
+.ws-window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--ws-edge);
+  pointer-events: none;
+}
 .ws-window {
   flex: 1; min-height: 0; background: #ffffff;
   border: 1px solid var(--ws-edge); border-radius: 16px;
