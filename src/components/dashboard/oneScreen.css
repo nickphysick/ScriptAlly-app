@@ -591,12 +591,16 @@
 .os-p b { font-weight: 600; font-size: 12px; line-height: 1; font-variant-numeric: tabular-nums; }
 .os-pdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 /* ⚠️ FAINT PASTILLE BLUE (polish P7) — ONE fill for all three pills, with the DOT carrying the
-   kind. The pills were three white chips distinguished only by their text colour, which made the
-   trio read as three separate objects rather than one readout; a single quiet fill groups them
-   and lets the coloured dot do the sorting it was always there to do.
+   kind.
+
+   ⚠️ WHITE, NOT TINTED (P5). The pills went pastille blue in an earlier pass, and the tint was
+   doing the same job as the dot beside it — two devices for one distinction, so the dot stopped
+   reading as the thing that carried the category. COLOUR LIVES IN THE DOT; the pill is a white
+   chip with a hairline. That also frees the tint for surfaces where nothing else is doing the
+   sorting.
    ⚠️ THE FIGURE IS DARKER THAN THE LABEL. It is the thing being read. */
-.os-p { background: var(--os-pastille-bg); border: 1px solid var(--os-pastille-line); color: var(--os-pastille-ink); }
-.os-p b { color: var(--os-pastille-fig); }
+.os-p { background: #ffffff; border: 1px solid rgba(58, 28, 20, 0.08); color: #5c5148; }
+.os-p b { color: #2e2118; }
 .os-p.u .os-pdot { background: #7c3a2a; }
 .os-p.h .os-pdot { background: #8a9e88; }
 .os-p.m .os-pdot { background: #b9a893; }

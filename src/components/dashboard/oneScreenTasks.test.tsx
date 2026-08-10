@@ -161,8 +161,11 @@ describe("the pink band (app-shell-v2)", () => {
   it("the trio's pills share ONE pastille fill, and the dots still carry the kind", () => {
     /* ⚠️ TOKENS NOW (fixes-2 A5) — the same pastille is wanted on other pages' header pills, and
        four loose hexes repeated per surface is how three pages end up NEARLY matching. */
-    expect(rule(".os-p")).toContain("background: var(--os-pastille-bg)");
-    expect(rule(".os-p")).toContain("border: 1px solid var(--os-pastille-line)");
+    /* ⚠️ RETARGETED (P5): the trio went WHITE. The tint was doing the dot's job — two devices for
+       one distinction — so colour lives in the dot and the pill is a white chip. The pastille
+       tokens survive for the HEADER pills, where nothing else carries the sorting. */
+    expect(rule(".os-p")).toContain("background: #ffffff");
+    expect(rule(".os-p")).toContain("border: 1px solid rgba(58, 28, 20, 0.08)");
     /* ⚠️ THE PER-KIND FILL RULES ARE GONE ENTIRELY — asserted as ABSENT, not asserted through a
        helper that requires them to exist. One fill, declared once; a `.os-p.u { background }`
        reappearing is the trio splintering back into three objects. */
@@ -240,8 +243,8 @@ describe("the pastille is tokenised and reaches the header pills", () => {
   });
 
   it("neither pill restates a raw hex — a literal here is the drift starting again", () => {
-    for (const sel of [".os-pill", ".os-p"]) {
-      expect(blk(sel), `${sel} must read the token`).not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
-    }
+    /* ⚠️ ONLY THE HEADER PILL NOW — the trio is white, so it must NOT read the pastille. */
+    expect(blk(".os-pill"), ".os-pill must read the token").not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
+    expect(blk(".os-p"), ".os-p is white and must not wear the pastille").not.toMatch(/pastille/);
   });
 });
