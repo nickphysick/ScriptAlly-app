@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>Button weight + snooze slider</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--parch:#fdfaf5;--ink:#2b2118;--muted:#8b7d70;--faint:#a99c90;--line:#ece4d6;--line2:#e3d9c9;
+        --burg:#7c3a2a;--pinkbg:#f5e2da;--stale:#efe7d8;--sagebg:#e9ede6}
+  *{box-sizing:border-box}
+  body{margin:0;background:#e8e2da;font-family:Inter,sans-serif;color:var(--ink);padding:24px}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b5f54;margin:0 0 14px 4px}
+  .lbl em{font-family:Inter;text-transform:none;letter-spacing:0;font-size:12.5px;color:#7a6d61;font-style:normal}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:22px;max-width:1320px;position:relative}
+  .chead{padding:16px 24px 13px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:12px}
+  .ctag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:#fff;background:var(--burg);padding:4px 8px;border-radius:5px}
+  .cname{font-family:'Playfair Display',serif;font-size:19px;font-weight:700}
+  .cdesc{font-size:12.5px;color:var(--muted);margin-left:auto;max-width:680px;text-align:right}
+
+  .ghead{display:flex;align-items:center;gap:10px;padding:18px 24px 9px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--burg)}
+  .dot.sage{background:#c9c2a8}.dot.grey{background:#cfc6ba}
+  .gname{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+  .gnum{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)}
+  .gnote{margin-left:auto;font-size:12px;color:var(--faint)}
+
+  .row{display:grid;grid-template-columns:30px minmax(0,1fr) 144px 104px 118px;align-items:center;gap:14px;
+       padding:13px 24px;border-top:1px solid var(--line)}
+  .row:hover{background:#fdfaf5}
+  .tick{width:19px;height:19px;border-radius:50%;border:1.5px solid #d6ccbe}
+  .tt{font-size:14.5px;font-weight:600}
+  .ts{font-size:12px;color:var(--muted);margin-top:2px}
+  .pill{height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+        font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.11em}
+  .p-offer{background:var(--pinkbg);color:var(--burg)}
+  .p-wait{background:#f8ece6;color:#9c5a45}
+  .p-stale{background:var(--stale);color:#8a7654}
+  .p-task{background:var(--sagebg);color:#5a6e58}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.09em;color:var(--faint);text-align:right}
+
+  /* SPLIT — two weights */
+  .sp{height:34px;width:118px;border-radius:8px;display:flex;overflow:hidden;position:relative;cursor:pointer}
+  .sp .lft{flex:1;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600}
+  .sp .seam{width:3px}
+  .sp .rgt{width:34px;display:flex;align-items:center;justify-content:center;font-size:9px}
+  /* urgent = filled ink */
+  .sp.fill{background:#2b2118}
+  .sp.fill .lft,.sp.fill .rgt{color:#f6f1ea}
+  .sp.fill .seam{background:rgba(255,255,255,.20)}
+  .sp.fill .lft:hover,.sp.fill .rgt:hover{background:#4a3628}
+  .sp.fill.armL .lft{background:#4a3628}
+  .sp.fill.armR .rgt{background:#4a3628}
+  /* quiet = outlined parchment */
+  .sp.out{background:var(--parch);border:1px solid var(--line2)}
+  .sp.out .lft,.sp.out .rgt{color:#4a3e34}
+  .sp.out .seam{background:var(--line2)}
+  .sp.out .lft:hover,.sp.out .rgt:hover{background:#f2eade}
+  .sp.out.armR .rgt{background:#f2eade}
+
+  /* MENU */
+  .menu{position:absolute;width:258px;background:#fff;border:1px solid var(--line2);border-radius:11px;
+        box-shadow:0 10px 30px rgba(43,33,24,.16);padding:6px;z-index:9}
+  .menu.stat{position:static;box-shadow:none;margin:0}
+  .mi{padding:8px 11px;border-radius:7px;font-size:13px;color:#3d3229;display:flex;align-items:center;gap:9px}
+  .mi:hover{background:#f7f1e8}
+  .mi.dz{color:#9c5a45}.mi.dz:hover{background:#fbeee9}
+  .mi.off{color:#c4b8ab}
+  .msec{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;color:var(--faint);padding:9px 11px 5px}
+  .gap{height:12px}
+  .mdiv{height:1px;background:var(--line);margin:0 0 2px}
+
+  /* SLIDER */
+  .sl{padding:2px 11px 10px}
+  .slread{display:flex;align-items:baseline;gap:8px;margin-bottom:11px}
+  .slnum{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+  .sldate{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;color:var(--faint);margin-left:auto}
+  .track{position:relative;height:22px}
+  .rail{position:absolute;top:9px;left:0;right:0;height:4px;border-radius:2px;background:#eee4d6}
+  .fillr{position:absolute;top:9px;left:0;height:4px;border-radius:2px;background:var(--burg)}
+  .clamp{position:absolute;top:9px;height:4px;border-radius:2px;background:repeating-linear-gradient(
+        45deg,#f0e7db,#f0e7db 3px,#e6dbcb 3px,#e6dbcb 6px)}
+  .knob{position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;
+        border:2px solid var(--burg);box-shadow:0 1px 4px rgba(43,33,24,.22);margin-left:-9px}
+  .ticks{display:flex;justify-content:space-between;margin-top:7px;
+         font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:#c2b5a7}
+  .slbtn{margin-top:12px;height:32px;border-radius:8px;background:var(--burg);color:#fdf6f0;font-size:12.5px;
+         font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .slnote{font-size:11.5px;color:#9c8a7b;margin-top:9px;line-height:1.5}
+
+  .note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin:0 0 24px;
+        font-size:13px;line-height:1.7;color:#4a3e34;max-width:1320px}
+  .note b{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink)}
+  .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--burg);letter-spacing:.06em}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;padding:20px 24px 24px}
+  .colh{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;color:var(--faint);margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<div class="lbl">BUTTON WEIGHT &amp; THE SNOOZE SLIDER <em>— filled ink reserved for the urgent group; everything below it outlined. Snooze becomes one continuous control rather than two prescribed stops.</em></div>
+
+<!-- 1 — WEIGHT -->
+<div class="card">
+  <div class="chead"><span class="ctag">1</span><span class="cname">Weight follows the group</span>
+    <span class="cdesc">Filled ink only in <i>Needs you now</i>. Housekeeping and Your tasks take the outlined weight — same 118px control, same guards, quieter voice. Ten black buttons stacked down a Housekeeping column was shouting at you about tidying.</span></div>
+
+  <div class="ghead"><span class="dot"></span><span class="gname">Needs you now</span><span class="gnum">4</span><span class="gnote">An agent is waiting, or a date is.</span></div>
+  <div class="row" style="border-top:none"><span class="tick"></span>
+    <div><div class="tt">Tom Ellery has made an offer</div><div class="ts">Murphy's Day Out</div></div>
+    <div class="pill p-offer">OFFER</div><div class="meta"></div>
+    <div class="sp fill"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+  <div class="row"><span class="tick"></span>
+    <div><div class="tt">Send your full to Jonathan Marsh</div><div class="ts">Murphy's Day Out</div></div>
+    <div class="pill p-wait">AGENT WAITING</div><div class="meta">REQ 28 JUN</div>
+    <div class="sp fill"><div class="lft">Action</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+
+  <div class="ghead" style="margin-top:6px"><span class="dot sage"></span><span class="gname">Housekeeping</span><span class="gnum">10</span><span class="gnote">Small tidying the app can see — none of it urgent.</span></div>
+  <div class="row"><span class="tick"></span>
+    <div><div class="tt">Jonathan Marsh silent for 853 days</div><div class="ts">No reply — consider closing</div></div>
+    <div class="pill p-stale">STALE</div><div class="meta">SILENT 853 DAYS</div>
+    <div class="sp out"><div class="lft">Close</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+  <div class="row"><span class="tick"></span>
+    <div><div class="tt">Marcus Reed silent for 790 days</div><div class="ts">No reply — consider closing</div></div>
+    <div class="pill p-stale">STALE</div><div class="meta">SILENT 790 DAYS</div>
+    <div class="sp out"><div class="lft">Close</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+
+  <div class="ghead" style="margin-top:6px"><span class="dot grey"></span><span class="gname">Your tasks</span><span class="gnum">2</span><span class="gnote">Things you added yourself.</span></div>
+  <div class="row"><span class="tick"></span>
+    <div><div class="tt">Rewrite the opening page</div><div class="ts">Due Friday</div></div>
+    <div class="pill p-task">YOUR TASK</div><div class="meta">DUE 14 AUG</div>
+    <div class="sp out"><div class="lft">Start</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+  <div class="row" style="border-bottom:none;padding-bottom:20px"><span class="tick"></span>
+    <div><div class="tt">Draft synopsis for Curtis Brown</div><div class="ts">No date</div></div>
+    <div class="pill p-task">YOUR TASK</div><div class="meta"></div>
+    <div class="sp out"><div class="lft">Start</div><div class="seam"></div><div class="rgt">▾</div></div></div>
+</div>
+
+<!-- 2 — SLIDER -->
+<div class="card">
+  <div class="chead"><span class="ctag">2</span><span class="cname">Snooze, as a slider</span>
+    <span class="cdesc">One continuous control instead of two stops. It opens on tomorrow, so the commonest move is still Enter — but a week, a fortnight or three months are all one drag away.</span></div>
+  <div class="cols">
+    <div>
+      <div class="colh">DEFAULT — OPENS ON TOMORROW</div>
+      <div class="menu stat">
+        <div class="msec">SNOOZE UNTIL</div>
+        <div class="sl">
+          <div class="slread"><span class="slnum">Tomorrow</span><span class="sldate">TUE 11 AUG</span></div>
+          <div class="track">
+            <div class="rail"></div><div class="fillr" style="width:9%"></div>
+            <div class="knob" style="left:9%"></div>
+          </div>
+          <div class="ticks"><span>1D</span><span>1W</span><span>1M</span><span>3M</span></div>
+          <div class="slbtn">Snooze until Tuesday</div>
+        </div>
+        <div class="msec">THIS QUERY</div>
+        <div class="mi">↗ &nbsp;Open the query</div>
+        <div class="mi">✎ &nbsp;Edit last entry</div>
+        <div class="gap"></div><div class="mdiv"></div>
+        <div class="mi dz">× &nbsp;Dismiss</div>
+        <div class="mi dz">⊘ &nbsp;Stop showing this kind</div>
+      </div>
+    </div>
+    <div>
+      <div class="colh">DRAGGED — STOPS COARSEN AS THEY LENGTHEN</div>
+      <div class="menu stat">
+        <div class="msec">SNOOZE UNTIL</div>
+        <div class="sl">
+          <div class="slread"><span class="slnum">3 weeks</span><span class="sldate">MON 31 AUG</span></div>
+          <div class="track">
+            <div class="rail"></div><div class="fillr" style="width:62%"></div>
+            <div class="knob" style="left:62%"></div>
+          </div>
+          <div class="ticks"><span>1D</span><span>1W</span><span>1M</span><span>3M</span></div>
+          <div class="slbtn">Snooze until 31 August</div>
+        </div>
+        <div class="msec">THIS QUERY</div>
+        <div class="mi">↗ &nbsp;Open the query</div>
+        <div class="mi">✎ &nbsp;Edit last entry</div>
+        <div class="gap"></div><div class="mdiv"></div>
+        <div class="mi dz">× &nbsp;Dismiss</div>
+        <div class="mi dz">⊘ &nbsp;Stop showing this kind</div>
+      </div>
+      <div class="slnote">Stops: <span class="num">1–6 DAYS</span> singly, then <span class="num">1–3 WEEKS</span>, then <span class="num">1, 2, 3 MONTHS</span>. Twelve stops, fine where precision matters and coarse where it doesn't — nobody needs the difference between 61 and 62 days.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 — CLAMP -->
+<div class="card">
+  <div class="chead"><span class="ctag">3</span><span class="cname">When the clamp bites</span>
+    <span class="cdesc">An offer cannot be parked for a month. The track shows the ceiling rather than silently refusing the drag.</span></div>
+  <div class="cols">
+    <div>
+      <div class="colh">OFFER ROW — CEILING AT ONE DAY</div>
+      <div class="menu stat">
+        <div class="msec">SNOOZE UNTIL</div>
+        <div class="sl">
+          <div class="slread"><span class="slnum">Tomorrow</span><span class="sldate">TUE 11 AUG</span></div>
+          <div class="track">
+            <div class="rail"></div><div class="fillr" style="width:9%"></div>
+            <div class="clamp" style="left:9%;right:0"></div>
+            <div class="knob" style="left:9%"></div>
+          </div>
+          <div class="ticks"><span>1D</span><span>1W</span><span>1M</span><span>3M</span></div>
+          <div class="slbtn">Snooze until Tuesday</div>
+          <div class="slnote">An offer waits a day at most. The hatched track is the part you cannot reach, and the knob stops there rather than snapping back.</div>
+        </div>
+        <div class="msec">THIS QUERY</div>
+        <div class="mi">↗ &nbsp;Open the query</div>
+        <div class="gap"></div><div class="mdiv"></div>
+        <div class="mi off">× &nbsp;Dismiss</div>
+      </div>
+    </div>
+    <div>
+      <div class="colh">HOUSEKEEPING ROW — NO CEILING</div>
+      <div class="menu stat">
+        <div class="msec">SNOOZE UNTIL</div>
+        <div class="sl">
+          <div class="slread"><span class="slnum">2 months</span><span class="sldate">SAT 10 OCT</span></div>
+          <div class="track">
+            <div class="rail"></div><div class="fillr" style="width:86%"></div>
+            <div class="knob" style="left:86%"></div>
+          </div>
+          <div class="ticks"><span>1D</span><span>1W</span><span>1M</span><span>3M</span></div>
+          <div class="slbtn">Snooze until 10 October</div>
+          <div class="slnote">Stale-query tidying is exactly the thing a writer wants out of sight for a season. The full range is honest here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+<b>Why weight by group, not by row.</b> The page already sorts urgency into groups and states it in the head — <i>An agent is waiting, or a date is</i> against <i>none of it urgent</i>. Weighting per row would duplicate that judgement in a second place and eventually disagree with it. One rule: filled inside <i>Needs you now</i>, outlined everywhere else. Both weights keep all four guards and the identical 118px footprint, so the column stays aligned and nothing shifts as a row moves between groups.
+<br><br>
+<b>The slider is not new machinery.</b> <span class="num">CLAMPSNOOZE</span> already exists in <code>todoActions</code> and already knows the ceilings — the slider reads its clamp rather than hard-coding one, so offer rules stay in one place. <span class="num">CHECKBACKSLIDER</span> from the nudge flow is the same day-then-week control; extend it with the month stops rather than building a second slider.
+<br><br>
+<b>Keyboard.</b> The slider takes focus on menu open but fires nothing — arrows move a stop, <span class="num">SHIFT+ARROW</span> jumps a unit, Enter commits. That keeps "snooze till tomorrow" at open-then-Enter, which is what the number keys were protecting. Keys <span class="num">1</span> and <span class="num">2</span> are therefore not needed and should not be added to <code>KEY_MAP</code> — one less entry for the <span class="num">?</span> overlay to answer.
+<br><br>
+<b>Receipt unchanged.</b> Committing writes through <code>useTodoToast</code> with the resolved date in the message: <i>Snoozed until 31 August</i> — Undo.
+</div>
+
+</body>
+</html>
