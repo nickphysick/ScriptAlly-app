@@ -81,6 +81,41 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(t, "the hairline beneath the toolbar went").toContain("border-bottom: 1px solid var(--ws-edge)");
   });
 
+  /**
+   * ⚠️ THE CAP IS TWO DECLARATIONS OF ONE TOKEN, and this asserts the token — never the number.
+   *
+   * Row 3 spans FULL WIDTH so its scrollbar rides the page edge; the cap lives on an inner column
+   * inside it, and on the two chrome rows. Capping the grid root instead put the scroller inside the
+   * cap, so a classic scrollbar's 15px came off the CONTENT column: measured 1240 → 1225. Invisible
+   * under overlay scrollbars, which is how it shipped.
+   *
+   * ⚠️ A TEST PINNED TO 1240 WOULD PASS WHILE THE ALIGNMENT ROTTED. What has to hold is that the
+   * chrome rows and the content column resolve the SAME cap — so this checks they read one token and
+   * that neither states a literal. Layout equality itself needs a browser and is checked there.
+   */
+  it("⚠️ ONE TOKEN, TWO DECLARATIONS — the chrome rows and the content column cannot drift", () => {
+    const rows = block(".wpg-plate,\n.wpg-tools") || block(".wpg-plate") + block(".wpg-tools");
+    expect(rows, "the chrome rows stopped reading the cap token").toContain("max-width: var(--wpg-cap)");
+    expect(rows, "the chrome rows stopped centring — they would pin left of the content").toContain("margin-inline: auto");
+    expect(block(".wpg-scroll"), "row 3 took a cap. It must span FULL width, or the scrollbar comes out of the content column again — that is the bug this replaced.").not.toContain("max-width");
+
+    /* every converted page: its content column reads the token, and NOBODY states a literal cap */
+    const PAGES: [string, string][] = [
+      ["Contact list", "components/agents/agentList.css"],
+      ["Manuscripts", "components/manuscripts/manuscripts.css"],
+      ["Comparable titles", "components/manuscripts/comps.css"],
+      ["Discover", "components/agents/discover.css"],
+      ["Submission packages", "components/packages/packageWorkshop.css"],
+    ];
+    for (const [page, file] of PAGES) {
+      const css = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(css, `${page}: no content column reads --wpg-cap, so its content and its chrome resolve different widths`)
+        .toContain("max-width: var(--wpg-cap)");
+      const gridRoot = /--wpg-cap:\s*([^;]+);/.exec(css);
+      expect(gridRoot, `${page}: nothing declares --wpg-cap, so the cap resolves to \`none\` and the page runs full width`).toBeTruthy();
+    }
+  });
+
   it("the scroll row carries `scroll-padding-top` — missing throughout before this", () => {
     expect(block(".wpg-scroll")).toContain("scroll-padding-top");
   });

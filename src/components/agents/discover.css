@@ -69,12 +69,12 @@
   --pg-gut: 60px;
   padding: 14px var(--pg-gut) 0;
 }
-.dv-wpg { flex: 1; min-height: 0; }
+.dv-wpg { flex: 1; min-height: 0; --wpg-cap: 1240px; }
 .dv2 .wpg-scroll { padding-bottom: 48px; }
-.dv-wrap {
-  max-width: 1240px;
-  margin: 0 auto;
-}
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; that is what keeps the content the width it was before the grid. */
+.dv-wrap { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
 /* ⚠️ THE BREAKPOINTS MOVE THE TOKEN, NEVER A LITERAL — a literal would leave the header bleeding by
    the desktop gutter on a phone: inset at one step and overhanging at the next. */
 @media (max-width: 900px) {

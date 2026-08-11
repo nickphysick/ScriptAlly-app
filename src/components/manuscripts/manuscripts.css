@@ -40,9 +40,8 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
-  margin-inline: auto;
-}
+  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
+  }
 .msv1 .wpg-scroll { padding-bottom: 48px; }
 
 .t-capp .msv1 {
@@ -86,7 +85,10 @@
    1144. Writing `1144px` here would be a magic number that silently stops matching the day either
    the cap or the gutter moves; this stays correct through both. Measured before and after: 1144. */
 /* the cap moved up to `.msv-wpg`; this survives as a plain full-width wrapper in the scroller */
-.msv-wrap { width: 100%; }
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; this is what keeps the content the same width it was before the grid. */
+.msv-wrap { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
 /* ⚠️ THE TALLY ROW — the toolbar slot, read off the Contact list's `.agl-count` rather than
    re-derived, so the two pages state their figures in one voice. THE RULE: the plate carries
    identity, this row carries tallies and view state. `margin-left:auto` is what pushes it to the

@@ -65,14 +65,19 @@ describe("agent list · the page column", () => {
     /* ⚠️ THE CAP MOVED UP A LEVEL, to the grid root, and that is a STRONGER guarantee: it governs
        plate, toolbar and cards at once, so the three cannot disagree. Capping the inner column alone
        left the chrome rows full width and made the alignment three rules hoping to match. */
+    /* ⚠️ RETARGETED (amendment 11): the grid root DECLARES the cap as a token now, it does not carry
+       `max-width` itself. Row 3 must span FULL width so its scrollbar rides the page edge — capping
+       the root put the scroller inside the cap and a classic scrollbar took 15px off the content
+       (measured 1240 → 1225, invisible under overlay scrollbars). The chrome rows and the content
+       column both read `--wpg-cap`; the equality that matters is locked in workspacePageGrid.test. */
     expect(
       block(".aglist .agl-wpg"),
-      "the content cap left the grid root — without it the three rows stretch the full width of an ultrawide monitor instead of pooling the surplus as margin",
-    ).toContain("max-width: var(--sa-col-max)");
+      "the grid root stopped declaring --wpg-cap — the cap resolves to `none` and the page runs full width",
+    ).toContain("--wpg-cap: var(--sa-col-max)");
     expect(
-      block(".aglist .agl-wpg"),
-      "the capped column stopped centring — it would pin left and leave all the surplus on one side",
-    ).toContain("margin-inline: auto");
+      css,
+      "the content column stopped reading the cap token, so content and chrome can now resolve different widths",
+    ).toContain(".aglist .agl-inner { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }");
   });
 
   it("NO compensating right-hand padding anywhere — the gutter is fixed at its cause", () => {

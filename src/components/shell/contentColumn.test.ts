@@ -107,7 +107,9 @@ describe("no competing per-page cap survives (folded into the wrapper)", () => {
     expect(
       msv,
       "the content cap left the grid root — nothing else caps now, and the shelf plus its chrome stretch the full width of an ultrawide monitor",
-    ).toMatch(/\.msv-wpg\s*\{[^}]*max-width:\s*calc\(var\(--content-max-read\) - 2 \* var\(--pg-gut\)\)/s);
-    expect(msv, "the capped column stopped centring").toMatch(/\.msv-wpg\s*\{[^}]*margin-inline:\s*auto/s);
+    ).toMatch(/\.msv-wpg\s*\{[^}]*--wpg-cap:\s*calc\(var\(--content-max-read\) - 2 \* var\(--pg-gut\)\)/s);
+    /* ⚠️ RETARGETED (amendment 11): the grid root DECLARES the cap; the content column READS it, and
+       row 3 spans full width so the scrollbar comes off the page rather than off the content. */
+    expect(msv, "the content column stopped reading the cap token").toContain("max-width: var(--wpg-cap)");
   });
 });

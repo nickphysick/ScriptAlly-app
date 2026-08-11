@@ -164,12 +164,14 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: var(--sa-col-max);
-  margin-inline: auto;
-}
+  --wpg-cap: var(--sa-col-max);
+  }
 /* `.agl-inner` survives as a plain wrapper inside the scroller — the cap it used to carry is above
    it now, so it only has to be full width. */
-.aglist .agl-inner { width: 100%; }
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; this is what keeps the content the same width it was before the grid. */
+.aglist .agl-inner { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
 .aglist .wpg-scroll { padding-bottom: 48px; }
 /* the toolbar sits in the grid's row, so its sibling-era top margin would push it off the hairline */
 .aglist .wpg-tools .agl-toolbar { margin: 0; flex: 1 1 auto; }

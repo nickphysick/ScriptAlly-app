@@ -75,13 +75,18 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
-  margin-inline: auto;
+  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
 }
 /* ⚠️ ROW 3 KEEPS THIS PAGE'S FLEX COLUMN, because its contents (the strip, the tabs, the workshop)
    were laid out by `.pkgw`'s own `display:flex; flex-direction:column; gap:14px` and that gap is the
    page's vertical rhythm. Moving them into a block scroll row would collapse every gap at once. */
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; that is what keeps the content the width it was before the grid. */
 .pkgw .wpg-scroll { display: flex; flex-direction: column; gap: 14px; }
+/* ⚠️ EVERY CHILD, because this page's rhythm is the scroll row's own `gap` — a single wrapper
+   would collapse those gaps into one. `<style>` is display:none and takes no gap. */
+.pkgw .wpg-scroll > * { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
 
 /* ── Tabs ─────────────────────────────────────────────────────────────────────
    A sibling block beneath PageHeader, never inside it: PageHeader draws title +

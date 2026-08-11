@@ -24,6 +24,19 @@
    ⚠️ EVERY ROW IS PLACED EXPLICITLY, and that is not decoration. With auto-placement a page that
    passes NO toolbar would put its scroller in track 2 — an `auto` track — so the scroller would
    size to its content and never scroll, on exactly the pages with least to show. */
+/* ⚠️ `--wpg-cap` IS THE ONE CAP TOKEN, and the duplication it governs is the whole risk here.
+   ROW 3 SPANS FULL WIDTH so its scrollbar rides the PAGE edge; the cap lives on an inner column
+   inside it. Rows 1 and 2 are capped here. That is two declarations of one cap — and two places
+   expressing one number is exactly how four different page paddings happened, so BOTH read this
+   token and NEITHER carries a literal.
+   ⚠️ WHY NOT CAP THE GRID ROOT (what shipped, and the bug): the scroller then sits INSIDE the cap,
+   so a classic scrollbar's 15px comes off the CONTENT column instead of the page margin. Measured
+   1240 → 1225 with classic scrollbars; invisible under overlay scrollbars, which is how it shipped.
+   ⚠️ AND NOT `scrollbar-gutter: stable` EITHER: that reserves the space symmetrically but the
+   content is still 15px narrower. It treats the symptom. */
+.wpg { --wpg-cap: none; }
+.wpg-plate,
+.wpg-tools { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
 .wpg-plate { grid-row: 1; min-width: 0; }
 
 /* ⚠️ THE TOOLBAR HAS NO CONTAINER — no border, no shadow, no background, and no state change on
@@ -53,6 +66,14 @@
      inset, NOT an offset for the chrome above — the chrome is outside this scrollport entirely, so
      nothing here needs to clear it. */
   scroll-padding-top: var(--wpg-scroll-pad, 12px);
+  /* ⚠️ `both-edges`, AND IT IS ABOUT CENTRING, NOT SPACE. Row 3 spans full width, so a classic
+     scrollbar makes its CONTENT box 15px narrower than its border box — and a centred column inside
+     it then sits 7.5px left of the chrome rows above, which centre in the full width. Measured
+     exactly that: plate 280–1520 against content 272.5–1512.5. Reserving the gutter on BOTH edges
+     makes the content box symmetric again, so one cap resolves to one position for all three rows.
+     ⚠️ NOT the same use as `scrollbar-gutter: stable` alone, which was rejected as option 1 — that
+     was proposed to hide a width loss. This restores alignment; the width is already right. */
+  scrollbar-gutter: stable both-edges;
 }
 
 /* ⚠️ 1px, ABSOLUTE, AND IT COSTS NO LAYOUT HEIGHT. In flow it would add a pixel to every page's
