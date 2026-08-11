@@ -142,9 +142,11 @@ describe("the three-row grid — chrome outside the scroller", () => {
    * out, and not before.
    */
   it("⚠️ THE CONVERSION IS PARTIAL, and both halves are asserted", () => {
-    const CONVERTED = [["Contact list", "../agents/AgentList.tsx"]] as const;
-    const NOT_YET = [
+    const CONVERTED = [
+      ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
+    ] as const;
+    const NOT_YET = [
       ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
       ["Tasks family", "../todo/TasksPageLayout.tsx"],
     ] as const;

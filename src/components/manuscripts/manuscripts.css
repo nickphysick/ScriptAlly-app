@@ -15,7 +15,11 @@
   --msv-hue: var(--sd-hue);
   --msv-huec: var(--sd-centre);
   height: 100%;
-  overflow-y: auto;
+  /* ⚠️ THE ROOT NO LONGER SCROLLS (amendment 9) — the grid's row 3 does. A scroller here as well
+     would put the whole page inside a second scrollport and take the chrome with it. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas */
   color: var(--msv-ink);
   /* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE — the padding reads it and the workspace
@@ -25,8 +29,21 @@
      padding and already carries its own 78px, so the top value was empty paper above it. The side
      and bottom values gutter the CONTENT, which is a different job, and are untouched. */
   --pg-gut: 28px;
-  padding: 11px var(--pg-gut) 48px;
+  /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER. Below row 3 it would be fixed space the shelf
+     could never scroll into — a dead band under the last plate. */
+  padding: 11px var(--pg-gut) 0;
 }
+/* ⚠️ THE CAP IS ON THE GRID ROOT, not the content wrapper, so plate, toolbar and plates below are
+   one column wide BY CONSTRUCTION rather than by separate rules agreeing. Same expression as
+   before — the read cap minus this page's own gutter — one level out. */
+.msv-wpg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
+  margin-inline: auto;
+}
+.msv1 .wpg-scroll { padding-bottom: 48px; }
 
 .t-capp .msv1 {
   --msv-card: #fdfaf5; --msv-cardbd: 1px solid #d8cebf; --msv-crad: 10px;
@@ -68,7 +85,8 @@
    was an OUTER width that the page's 28px padding then ate, so the content measured 1200 − 56 =
    1144. Writing `1144px` here would be a magic number that silently stops matching the day either
    the cap or the gutter moves; this stays correct through both. Measured before and after: 1144. */
-.msv-wrap { width: 100%; max-width: calc(var(--content-max-read) - 2 * var(--pg-gut)); margin-inline: auto; }
+/* the cap moved up to `.msv-wpg`; this survives as a plain full-width wrapper in the scroller */
+.msv-wrap { width: 100%; }
 /* ⚠️ THE TALLY ROW — the toolbar slot, read off the Contact list's `.agl-count` rather than
    re-derived, so the two pages state their figures in one voice. THE RULE: the plate carries
    identity, this row carries tallies and view state. `margin-left:auto` is what pushes it to the

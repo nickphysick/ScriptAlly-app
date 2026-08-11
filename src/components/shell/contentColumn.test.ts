@@ -100,9 +100,14 @@ describe("no competing per-page cap survives (folded into the wrapper)", () => {
    */
   it("manuscripts .msv-wrap carries the ONE cap — tied to the read token, never the old bespoke 1150", () => {
     expect(msv, "the bespoke 1150px cap came back — it is a third value that agrees with neither the read cap nor the gutter").not.toContain("max-width: 1150px");
+    /* ⚠️ RETARGETED AGAIN, AND UP A LEVEL (amendment 9). The cap was on `.msv-wrap`; it is on the
+       GRID ROOT now, where it governs the plate, the toolbar and the shelf at once — so the three
+       cannot disagree, which capping only the content could never guarantee. Still the same
+       expression: the read cap minus this page's own gutter, never a literal. */
     expect(
       msv,
-      "the content cap left .msv-wrap — with the route slot no longer capping, nothing else does, and the shelf stretches the full width of an ultrawide monitor",
-    ).toContain(".msv-wrap { width: 100%; max-width: calc(var(--content-max-read) - 2 * var(--pg-gut)); margin-inline: auto; }");
+      "the content cap left the grid root — nothing else caps now, and the shelf plus its chrome stretch the full width of an ultrawide monitor",
+    ).toMatch(/\.msv-wpg\s*\{[^}]*max-width:\s*calc\(var\(--content-max-read\) - 2 \* var\(--pg-gut\)\)/s);
+    expect(msv, "the capped column stopped centring").toMatch(/\.msv-wpg\s*\{[^}]*margin-inline:\s*auto/s);
   });
 });

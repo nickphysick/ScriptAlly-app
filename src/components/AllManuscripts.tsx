@@ -22,6 +22,7 @@ import { ConfirmDestroy } from "./ConfirmDestroy";
 import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { PageHeader } from "./shell/PageHeader";
+import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check, ChevronDown } from "lucide-react";
 import { isShelvedPresentation, activeQueryCount } from "../lib/manuscriptPage";
 import { manuscriptComps } from "../lib/comps";
@@ -147,35 +148,44 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
       {/* ⚠️ THE HEADER IS INSIDE `.msv-wrap`, the capped content column — a PLATE's edges must meet
           the first and last plate below it, and past the cap the column centres, so that is the only
           place they agree. (It sat outside while it was a window-spanning band.) */}
-      <div className="msv-wrap">
-      <PageHeader
-        variant="workspace"
-        mark="manuscripts"
-        /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the figure did NOT go
-           with it. THE RULE IS: the plate carries IDENTITY, the toolbar carries TALLIES and view
-           state. So "N MANUSCRIPTS · M IN SUBMISSION" moved down to the tally row below, which is
-           where the Contact list has always kept its own "16 OF 16". This figure had already been
-           dropped once (with the grand slab) and would have gone a second time for want of a home;
-           the home existed on a sibling page all along. */
-        title="Your manuscripts"
-        description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-        actions={[{
-          label: "Add manuscript",
-          icon: <Plus aria-hidden="true" />,
-          onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
-          primary: true,
-        }]}
-        /* ⚠️ THE TALLY ROW IS THE PLATE'S SECOND ROW NOW (amendment 8 B) — it was a sibling beneath
-           the plate, and it pins with the header instead. Nothing about the FIGURE moves: it was
-           already a tool-row tally rather than a header count, which is the split this pack fixed.
-           ⚠️ STILL HIDDEN ON THE EMPTY STATE — `undefined`, not an empty row, so the plate renders
-           no tool row and no hairline rather than an empty strip under the title. */
+      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). Plate and toolbar are rows 1 and 2 of
+          a grid whose row 3 is the only thing that scrolls — pinned by construction, so there is no
+          `top` to compute and none to get wrong.
+          ⚠️ THE MODALS STAY OUTSIDE THE GRID, below it in `.msv1`. They are fixed-position overlays;
+          inside the scroller they would be children of a scrollport they are meant to cover. */}
+      <WorkspacePageGrid
+        className="msv-wpg"
+        scrollLabel="Manuscripts"
+        plate={
+          <PageHeader
+            variant="workspace"
+          mark="manuscripts"
+          /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the figure did NOT go
+             with it. THE RULE IS: the plate carries IDENTITY, the toolbar carries TALLIES and view
+             state. So "N MANUSCRIPTS · M IN SUBMISSION" moved down to the tally row below, which is
+             where the Contact list has always kept its own "16 OF 16". This figure had already been
+             dropped once (with the grand slab) and would have gone a second time for want of a home;
+             the home existed on a sibling page all along. */
+          title="Your manuscripts"
+          description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+          actions={[{
+            label: "Add manuscript",
+            icon: <Plus aria-hidden="true" />,
+            onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
+            primary: true,
+          }]}
+          />
+        }
+        /* ⚠️ `undefined`, NOT an empty node, on the empty state — the grid then renders no tool row
+           and no hairline at all rather than a bare rule under the plate. "0 MANUSCRIPTS · 0 IN
+           SUBMISSION" beside "Your library is empty" states the same nothing twice. */
         toolbar={ordered.length > 0 ? (
           <span className="msv-tally">
             {manuscripts.length} manuscripts · {manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} in submission
           </span>
         ) : undefined}
-      />
+      >
+      <div className="msv-wrap">
         {ordered.length === 0 ? (
           /* ── zero-manuscript state: minimal, in the plate grammar ── */
           <div className="msv-panel">
@@ -318,6 +328,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           </div>
         )}
       </div>
+      </WorkspacePageGrid>
 
       {/* ── edit modal (comps field deliberately absent — managed on the shelf sub-page) ── */}
       <AnimatePresence>

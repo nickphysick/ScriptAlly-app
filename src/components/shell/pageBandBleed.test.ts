@@ -225,9 +225,12 @@ describe("the header plate — one gutter token, and the plate inside the column
        up to the grid root, where it governs all three rows at once and the alignment stops depending
        on the plate and the cards sharing a container. The assertion that replaces it is in
        `workspacePageGrid.test.tsx`. The two pages below are still on the old arrangement. */
+    /* ⚠️ MANUSCRIPTS LEFT TOO (amendment 9, conversion 2) — its plate is row 1 of a grid and the cap
+       moved above both chrome and content, so "inside the same wrapper" stopped being the thing that
+       aligns them. DISCOVER IS THE LAST PAGE STILL ON THE OLD ARRANGEMENT here; when it converts,
+       this case has no subjects left and should be DELETED rather than left asserting nothing. */
     for (const [page, file, wrapper] of [
       ["Discover", "components/DiscoverNewAgents.tsx", "dv-wrap"],
-      ["Manuscripts", "components/AllManuscripts.tsx", "msv-wrap"],
     ] as const) {
       const tsx = read(file);
       const wrapAt = tsx.indexOf(`className="${wrapper}"`);
