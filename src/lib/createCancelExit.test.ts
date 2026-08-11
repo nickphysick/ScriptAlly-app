@@ -34,8 +34,13 @@ const frames = (name: string): string => {
 
 /** `closeCreate`'s `leave()` — where the exit is armed. Both ends anchored (house rule). */
 const leaveBody = (): string => {
-  const a = queries.indexOf("const leave = () => {");
-  expect(a, "closeCreate's leave() is missing").toBeGreaterThan(-1);
+  /* ⚠️ ANCHORED THROUGH `closeCreate` FIRST. The response takeover has its own `closeRecord` with
+     its own `leave()`, and it is declared EARLIER in the file — so a bare indexOf reads the wrong
+     journey's exit and this suite would silently be describing a different door. */
+  const door = queries.indexOf("const closeCreate = (then?: () => void) => {");
+  expect(door, "closeCreate is missing").toBeGreaterThan(-1);
+  const a = queries.indexOf("const leave = () => {", door);
+  expect(a, "closeCreate's leave() is missing").toBeGreaterThan(door);
   const b = queries.indexOf("\n    };", a);
   expect(b, "leave() never closes").toBeGreaterThan(a);
   return queries.slice(a, b);
@@ -196,6 +201,8 @@ describe("the motion laws hold", () => {
   });
 
   it("the state class is applied to the element, not merely styled", () => {
-    expect(queries).toContain('${createCancelling ? " qc-exit-cancel" : ""}');
+    /* ⚠️ THE CLASS NOW SERVES TWO JOURNEYS. Create and the response takeover arm the SAME cancel
+       animation rather than each having one — the expression widened, the rule did not. */
+    expect(queries).toContain('${createCancelling || respCancelling ? " qc-exit-cancel" : ""}');
   });
 });

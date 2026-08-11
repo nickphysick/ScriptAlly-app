@@ -26,13 +26,23 @@ import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
-import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
+import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, todayInputDate, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
 import { requirements } from "../lib/createSteps";
 import { prefersReducedMotion } from "../lib/reducedMotion";
+import { ResponsePane, type RespStepId } from "./queries/ResponsePane";
+import {
+  emptyResponseDraft, responseReady, responseChips, responseDraftToPayload, OUTCOME_LABEL,
+  type ResponseDraft,
+} from "../lib/responseDraft";
+import { jumpIn, advanceIn } from "../lib/stepStack";
+import { RESP_STEP_ORDER } from "./queries/ResponsePane";
 
 /** The receipt channel for a logged query — see ToastOptions.replaces. Named once so the save and
  *  the save-and-log-another cannot end up on two channels and stack after all. */
 const CREATE_RECEIPT_CHANNEL = "query-created";
+/** ⚠️ A SEPARATE CHANNEL from the create receipt. Logging a query and recording a reply are two
+ *  different facts; one replacing the other would delete a receipt whose undo had not been used. */
+const RESPONSE_RECEIPT_CHANNEL = "query-response";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
@@ -59,7 +69,6 @@ import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
-import { TimelineComposer, type TimelineComposerHandle } from "./reading-pane/TimelineComposer";
 import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
 import { useToast } from "./toast/ToastProvider";
 import { deriveQueryFields } from "../lib/queryDerivation";
@@ -335,6 +344,23 @@ export const Queries: React.FC<{
      stage 1's question and picker into stage 2's hero and stack, so choosing someone would cost
      another 410ms before the first field felt live. Cleared when the last child lands. */
   const [createEntering, setCreateEntering] = useState(false);
+  /* ── RECORDING A RESPONSE (§1) ────────────────────────────────────────────────────────────
+     The same takeover as create, and deliberately the same STATE SHAPE: a draft that is local
+     until Save, a baseline for the dirty check, and the three motion flags. Two journeys, one
+     rhythm — see StepStack, extracted for exactly this. */
+  const [respDraft, setRespDraft] = useState<ResponseDraft | null>(null);
+  const [respBase, setRespBase] = useState<ResponseDraft | null>(null);
+  const [respQueryId, setRespQueryId] = useState<string | null>(null);
+  const [respStep, setRespStep] = useState<{ active: RespStepId; reached: RespStepId }>({ active: "outcome", reached: "outcome" });
+  const [respOpened, setRespOpened] = useState({ when: false });
+  const [respSaving, setRespSaving] = useState(false);
+  const [respError, setRespError] = useState<string | null>(null);
+  const [respEntering, setRespEntering] = useState(false);
+  const [respCancelling, setRespCancelling] = useState(false);
+  const [respExiting, setRespExiting] = useState(false);
+  const recording = respDraft !== null;
+  /* The control that opened it — focus goes back there on every exit, as create's does. */
+  const recordTriggerRef = useRef<HTMLButtonElement>(null);
   /* The cancel exit — a DIFFERENT STATEMENT from the save, which is why it is a different flag and
      a different animation rather than a shared "exiting". Save says "the form became that row";
      cancel says "nothing happened", and is deliberately the faster of the two: undoing an opening
@@ -399,6 +425,99 @@ export const Queries: React.FC<{
        writer has already finished. */
     setSessionLogged(0);
     setCreateReseating(false);
+  };
+
+  /**
+   * Open the response takeover. ⚠️ THE ONLY DOOR — the "Record response" primary is now the single
+   * entry point in the Query Centre, which is what removing the inline composer bought: a primary
+   * and a composer behaving differently were two implementations of one journey, and the primary
+   * did not even record anything (it focused the composer).
+   */
+  const openRecord = (q: { id: string }) => {
+    if (recording) return;
+    const base = emptyResponseDraft(todayInputDate());
+    setRespQueryId(q.id);
+    setRespDraft(base);
+    setRespBase(base);
+    setRespError(null);
+    setRespSaving(false);
+    setRespOpened({ when: false });
+    setRespStep({ active: "outcome", reached: "outcome" });
+    setRespCancelling(false);
+    setRespExiting(false);
+    /* Not armed under reduced motion — `animation: none` fires no `animationend`, so the scope
+       class would never be cleared (lib/reducedMotion.ts). */
+    setRespEntering(!prefersReducedMotion());
+  };
+
+  const shutRecord = () => {
+    setRespDraft(null);
+    setRespBase(null);
+    setRespQueryId(null);
+    setRespError(null);
+    setRespEntering(false);
+    setRespCancelling(false);
+    setRespExiting(false);
+  };
+
+  /** Cancel — nothing happened. Dirty drafts confirm first; the motion plays on the decision. */
+  const closeRecord = () => {
+    if (respCancelling) return;
+    const leave = () => {
+      setRespEntering(false);
+      if (prefersReducedMotion()) { shutRecord(); recordTriggerRef.current?.focus(); return; }
+      setRespCancelling(true);
+    };
+    const dirty = !!respDraft && !!respBase && JSON.stringify(respDraft) !== JSON.stringify(respBase);
+    if (dirty) {
+      showConfirm({
+        title: "Discard this response?",
+        danger: true,
+        confirmLabel: "Discard",
+        cancelLabel: "Keep editing",
+        body: <p style={{ margin: 0 }}>Nothing has been saved yet — what you've entered will be lost.</p>,
+        onConfirm: leave,
+      });
+      return;
+    }
+    leave();
+  };
+
+  /**
+   * Save. ⚠️ THE WRITE GOES THROUGH `recordQueryResponse` — the app's single response path. It
+   * appends the activity carrying its `resultingStatus` and lets `recomputeQuery` derive status,
+   * response count, revision round and every pipeline date. Nothing here writes any of those.
+   */
+  const saveResponse = async () => {
+    if (!respDraft || !respQueryId || !responseReady(respDraft) || respSaving) return;
+    const q = queries.find((x) => x.id === respQueryId);
+    if (!q || !currentUser) return;
+    setRespSaving(true);
+    setRespError(null);
+    try {
+      const agent = agents.find((a) => a.id === q.agentId) ?? null;
+      /* ⚠️ deps FIRST, then the payload — and the payload is built by a named function rather
+         than assembled at the call site, so the eighteen fields it needs are stated in one place
+         that can be tested without a database. */
+      const res = await recordQueryResponse(
+        { userId: currentUser.id, query: q, agent, manuscript: { title: activeMs?.title } },
+        responseDraftToPayload(respDraft),
+      );
+      /* ⚠️ PAST THE WRITE, NEVER ON THE CLICK — a failed save must not have already animated a row
+         that then reverts. Reduced motion completes directly, for want of an `animationend`. */
+      if (prefersReducedMotion()) { shutRecord(); recordTriggerRef.current?.focus(); }
+      else setRespExiting(true);
+      showToast({
+        replaces: RESPONSE_RECEIPT_CHANNEL,
+        message: `${OUTCOME_LABEL[respDraft.outcome!]} recorded`,
+        undo: () => res.undo(),
+      });
+    } catch {
+      /* The takeover STAYS OPEN with its error, and nothing is animated. */
+      setRespError("Couldn't save that response — please try again.");
+    } finally {
+      setRespSaving(false);
+    }
   };
 
   /** The picker's inline quick-add — lifted verbatim from the retired popup, so a brand-new agent
@@ -757,7 +876,6 @@ export const Queries: React.FC<{
   const { triggerRef: tasksTrigRef, menuStyle: tasksMenuStyle } = useFixedMenu<HTMLButtonElement>(isTasksOpen);
   // Timeline composer (5a): the CTA button scrolls + focuses this; Offer/R&R + "Add more detail"
   // open the rich form pre-set via these seam props.
-  const composerRef = useRef<TimelineComposerHandle>(null);
   const [richInitialType, setRichInitialType] = useState<QueryStatus | undefined>(undefined);
   const [richInitialDraft, setRichInitialDraft] = useState<{ dateReceived?: string; note?: string } | undefined>(undefined);
   const openRichForm = (rt: QueryStatus, draft?: { dateReceived?: string; note?: string }) => {
@@ -765,7 +883,6 @@ export const Queries: React.FC<{
   };
   // 5b — timeline corrections. Edit reopens the composer in place; Delete confirms with the DERIVED
   // consequence (the status the query recomputes to once this entry is gone) — never a bare "sure?".
-  const onEditEntry = (entry: TimelineEntryRef) => composerRef.current?.startEdit(entry);
   const onDeleteEntry = (entry: TimelineEntryRef) => {
     const remaining = trackingEvents
       .filter((e) => e.id !== entry.activityId)
@@ -1166,6 +1283,21 @@ export const Queries: React.FC<{
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creating, createDraft, createBase, filterPopOpen, sortPopOpen]);
+
+  /* Esc leaves the response takeover, exactly as it leaves create's — and it is live from the
+     moment the takeover opens, not once it has finished arriving, so a writer who opened it by
+     accident does not have to sit through the entrance to undo it. */
+  useEffect(() => {
+    if (!recording) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || filterPopOpen || sortPopOpen) return;
+      e.preventDefault();
+      closeRecord();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording, respDraft, respBase, respCancelling, filterPopOpen, sortPopOpen]);
 
   // Portalled popovers anchor to their icon triggers via the codebase's fixed-position utility
   // (chrome revision — the list pane keeps overflow:hidden; the portal escapes the clip).
@@ -2491,7 +2623,7 @@ export const Queries: React.FC<{
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
         /* (The old .qdesk / .queries-content-grid short-screen fallback is retired — both panes
-           now live in the shared .f12-body column, same as the Contact list page.) */
+           now live in the shared .f12-body column, same as the Contact List page.) */
       `}</style>
 
 
@@ -3022,7 +3154,7 @@ export const Queries: React.FC<{
             handleDeleteQuery note above); the confirm flow itself is real. */}
 
         {/* ── Split — list pane beside the reading pane, in the SAME centred column as the
-            Contact list page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
+            Contact List page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
             the two panes are --listw / flex:1, locked to the control-bar zones above). ── */}
         <div className="f12-body" style={{ paddingTop: activeFilterChips.length ? 0 : "var(--gut)" }}>
 
@@ -3152,7 +3284,10 @@ export const Queries: React.FC<{
           <div
             /* ⚠️ THE STATE CLASS GOES ON THE CONTAINER, not merely used as a selector — a class
                that exists only in the stylesheet animates nothing. */
-            className={`qp-pane f12-detail ${creating ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createEntering ? " qc-entering" : ""}${createCancelling ? " qc-exit-cancel" : ""}${createExiting ? " qc-exit-save" : ""}`}
+            /* ⚠️ THE RESPONSE TAKEOVER WEARS THE SAME MOTION CLASSES — one entrance, one cancel,
+               one save exit, shared with create rather than reimplemented. Both journeys arm the
+               same classes; only the state driving them differs. */
+            className={`qp-pane f12-detail ${creating || recording ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createEntering || respEntering ? " qc-entering" : ""}${createCancelling || respCancelling ? " qc-exit-cancel" : ""}${createExiting || respExiting ? " qc-exit-save" : ""}`}
             /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
                drift the moment the timing changed.
 
@@ -3161,6 +3296,13 @@ export const Queries: React.FC<{
                arming site (saveCreate) rather than a second listener. Under reduced motion this
                handler is never reached, because the class is never applied. */
             onAnimationEnd={(e) => {
+              if (respCancelling && e.animationName === "qc-exit-cancel") {
+                shutRecord(); recordTriggerRef.current?.focus(); return;
+              }
+              if (respExiting && e.animationName === "qc-exit-save") {
+                shutRecord(); recordTriggerRef.current?.focus(); return;
+              }
+              if (respEntering && e.animationName === "qc-in-last") { setRespEntering(false); return; }
               if (createCancelling && e.animationName === "qc-exit-cancel") { finishCancelExit(); return; }
               if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
               if (createReseating && e.animationName === "qc-reseat") { finishReseat(e.currentTarget); return; }
@@ -3216,18 +3358,19 @@ export const Queries: React.FC<{
                         <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
                       )}
                     </span>
-                    <button type="button" className="f12-act" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-                      Edit
-                    </button>
+                    {/* ⚠️ THE GENERIC "Edit" IS GONE (§1). Every real use of it was one of three
+                        things: recording a response (the takeover), correcting an entry (its own
+                        work, drawn in the ref but not built here), or changing a record detail in
+                        place — which "What you sent" already does with MARK SENT and + ADD. A verb
+                        that means "change something, somewhere" is not an action. */}
                     <button type="button" className="f12-act" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined}>
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
                       Nudge
                     </button>
-                    <button ref={closeTriggerRef} type="button" className="f12-act" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M9 12h6" /></svg>
-                      Mark closed
-                    </button>
+                    {/* ⚠️ "Mark closed" IS GONE (§1). Closing a query is one of the things that can
+                        come back, so it lives in the response takeover as the outcome "Closed — no
+                        reply" rather than as a toolbar verb with its own menu and its own write
+                        path. Withdrawing — which is NOT a response — becomes its own action (§5). */}
                     {/* link group — pushed right by margin-left:auto */}
                     <div className="f12-grp-links">
                       <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
@@ -3265,7 +3408,73 @@ export const Queries: React.FC<{
                 </div>
               );
             })()}
-            {createDraft ? (
+            {respDraft && respQueryId ? (
+              /* ── RECORDING A RESPONSE (§1, ref 83-record-response.html) ── */
+              <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
+                <div className="qch qch-resp">
+                  <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  <div className="qch-txt">
+                    <h2 className="qch-title">Recording a response</h2>
+                    {/* ONE LINE, TWO JOBS — the standing line by default, the save error in burgundy
+                        when there is one. A failure belongs beside the button that failed. */}
+                    <p className={`qch-sub${respError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
+                      {respError ?? "What came back, and when — the rest follows from that."}
+                    </p>
+                    {/* ⚠️ TWO CHIPS ONLY, because Save waits for exactly two facts. The three-state
+                        marks are create's: empty until answered, a DASH for what we pre-filled, a
+                        tick only once the writer has opened the step carrying it. */}
+                    <div className="qch-reqs">
+                      {responseChips(respDraft, respOpened).map((r) => (
+                        <span key={r.key} className={`qch-rq qch-${r.state}`}>
+                          <span className="qch-c" aria-hidden="true">
+                            {r.state === "empty" ? "" : r.state === "prefilled" ? "–" : "✓"}
+                          </span>
+                          {r.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="qch-acts">
+                    <span className="qch-esc" aria-hidden="true">Esc</span>
+                    <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
+                    {/* ⚠️ NO "SAVE AND RECORD ANOTHER" HERE. A response belongs to one query; there
+                        is no next one to move on to, and offering it would invent a batch that does
+                        not exist. */}
+                    <button
+                      type="button"
+                      className="f12-btn-pri"
+                      onClick={() => void saveResponse()}
+                      disabled={!responseReady(respDraft) || respSaving}
+                    >
+                      {respSaving ? "Saving…" : "Save response"}
+                    </button>
+                  </div>
+                </div>
+                <ResponsePane
+                  draft={respDraft}
+                  onChange={setRespDraft}
+                  query={queries.find((q) => q.id === respQueryId)!}
+                  agent={agents.find((a) => a.id === queries.find((q) => q.id === respQueryId)?.agentId) ?? null}
+                  manuscripts={manuscripts}
+                  active={respStep.active}
+                  reached={respStep.reached}
+                  onJump={(id) => {
+                    const n = jumpIn(RESP_STEP_ORDER, id, respStep.reached);
+                    setRespStep(n);
+                    if (n.reached === "when" || n.active === "when") setRespOpened({ when: true });
+                  }}
+                  onAdvance={() => {
+                    const n = advanceIn(RESP_STEP_ORDER, respStep.active, respStep.reached);
+                    setRespStep(n);
+                    if (n.active === "when" || n.reached === "when") setRespOpened({ when: true });
+                  }}
+                  onSave={() => void saveResponse()}
+                  canSave={responseReady(respDraft)}
+                  saving={respSaving}
+                  sentISO={(queries.find((q) => q.id === respQueryId) as { dateSent?: string } | undefined)?.dateSent}
+                />
+              </div>
+            ) : createDraft ? (
               /* v4 P2 — CREATE MODE owns the pane while a draft is open (ref create-mode-ref.html). */
               <div
                 className={createReseating ? "qc-reseat" : undefined}
@@ -3416,7 +3625,7 @@ export const Queries: React.FC<{
                         type="button"
                         className="f12-btn-pri"
                         style={{ marginLeft: "auto", flexShrink: 0 }}
-                        onClick={() => composerRef.current?.focus()}
+                        onClick={() => openRecord(activeQuery)}
                       >
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
                         {heroLabel}
@@ -3448,27 +3657,21 @@ export const Queries: React.FC<{
                               agent={activeAgent}
                               events={trackingEvents}
                               primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
-                              onEditEntry={onEditEntry}
+                              /* ⚠️ CORRECTION IS UNREACHABLE UNTIL IT HAS ITS OWN HOME. The editor
+                                  lived inside the inline composer this section removed, so there is
+                                  nothing to hand an entry to. Omitted rather than wired to a ref
+                                  that is always null — the menu item now hides itself. */
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
                               onSetExpectedDate={() => openEditQuery(activeQuery.id)}
                             />
                           );
                         })()}
-                        {/* P6 (Layout A) — the "What happened next?" composer FLOWS directly under the
-                            tracking readout, in normal document order (un-pinned from the card foot);
-                            any leftover column height falls as whitespace below it. Chips derive from
-                            composerChips (the CTA engine); it never auto-writes and stays NEUTRAL — the
-                            overdue readout is the pane's only needs-you signal. */}
-                        <TimelineComposer
-                          ref={composerRef}
-                          query={activeQuery}
-                          agent={activeAgent}
-                          manuscript={{ title: activeMs?.title || "" }}
-                          onOpenRichForm={openRichForm}
-                          onMarkSent={() => setIsMarkSentOpen(true)}
-                          onNudge={() => setIsNudgeOpen(true)}
-                        />
+                        {/* ⚠️ THE "What happened next?" COMPOSER IS GONE (§1). It was the second
+                            implementation of the response journey — a primary and an inline
+                            composer that behaved differently, in one room. The takeover is the
+                            single door now, and the primary above opens it. TimelineComposer
+                            itself survives for the dashboard's own flows; only this mount went. */}
                       </EdgeFadeScroll>
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
@@ -3772,7 +3975,7 @@ export const Queries: React.FC<{
                   ref={isMark ? markSentTriggerRef : undefined}
                   type="button"
                   className="f12-btn-pri"
-                  onClick={() => composerRef.current?.focus()}
+                  onClick={() => openRecord(activeQuery)}
                 >
                   {label}
                 </button>

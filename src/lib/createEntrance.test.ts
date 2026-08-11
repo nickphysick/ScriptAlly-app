@@ -145,7 +145,8 @@ describe("it plays once per opening", () => {
     }
     expect(css, "the stagger must not hang off the always-present class")
       .not.toContain(".f12-pane-enter-create .qch");
-    expect(queries).toContain('${createEntering ? " qc-entering" : ""}');
+    /* ⚠️ WIDENED, NOT WEAKENED: both takeovers arm the same entrance scope class. */
+    expect(queries).toContain('${createEntering || respEntering ? " qc-entering" : ""}');
   });
 
   it("armed on opening, cleared when the last child lands", () => {

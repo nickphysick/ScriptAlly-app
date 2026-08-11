@@ -518,8 +518,14 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
           onClose={() => setMenu(null)}
           style={menu.style}
           ariaLabel="Correct entry"
+          /* ⚠️ EDIT RENDERS ONLY WHEN IT HAS SOMEWHERE TO GO. It used to render unconditionally and
+             call `onEditEntry?.()`, which is silent when the handler is absent — and it became
+             absent the moment the inline composer that hosted the correction editor was removed
+             (record-response §1). An always-present menu item backed by an optional handler is a
+             button that does nothing, and nothing says so. Correcting an entry is its own work;
+             until it lands, the item is absent rather than dead. */
           items={[
-            { label: "Edit", icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>, onClick: () => onEditEntry?.(menu.entry) },
+            ...(onEditEntry ? [{ label: "Edit", icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>, onClick: () => onEditEntry(menu.entry) }] : []),
             { label: "Delete…", danger: true, icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>, onClick: () => onDeleteEntry?.(menu.entry) },
           ]}
         />

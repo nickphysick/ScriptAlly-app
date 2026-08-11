@@ -138,7 +138,8 @@ describe("the motion laws hold", () => {
   /* ⚠️ THE STATE CLASS GOES ON THE CONTAINER — a class that exists only in the stylesheet
      animates nothing. */
   it("the state class is applied to the element, not merely styled", () => {
-    expect(queries).toContain('${createExiting ? " qc-exit-save" : ""}');
+    /* ⚠️ WIDENED, NOT WEAKENED: both takeovers arm the same save exit. */
+    expect(queries).toContain('${createExiting || respExiting ? " qc-exit-save" : ""}');
     expect(queries).toContain('${landedId === q.id ? " qc-landed" : ""}');
   });
 

@@ -98,8 +98,11 @@ describe("the three things that would have broken silently", () => {
      The exit waits on the takeover's OWN animation — the element that is leaving, and therefore by
      definition rendered — and under reduced motion it does not wait at all. */
   it("the cancel exit waits on the takeover itself, and not at all under reduced motion", () => {
-    const at = queries.indexOf("const leave = () => {");
-    expect(at, "closeCreate's leave() is missing").toBeGreaterThan(-1);
+    /* ⚠️ ANCHORED THROUGH `closeCreate` — `closeRecord` has its own `leave()`, declared earlier. */
+    const door = queries.indexOf("const closeCreate = (then?: () => void) => {");
+    expect(door, "closeCreate is missing").toBeGreaterThan(-1);
+    const at = queries.indexOf("const leave = () => {", door);
+    expect(at, "closeCreate's leave() is missing").toBeGreaterThan(door);
     const leave = queries.slice(at, queries.indexOf("\n    };", at));
     expect(leave).not.toBe("");
     /* The teardown must be reachable WITHOUT the animation, or a suppressed animation is a dead

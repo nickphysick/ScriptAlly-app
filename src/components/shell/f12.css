@@ -1071,7 +1071,7 @@
 .f12-row.f12-sel::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ink); }
 .f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
 /* Smaller-tonal monogram (monogram-styles.html) — the QUERY-LIST instance only (via the additive
-   --sm modifier on that span; the Contact list keeps the shared .f12-av). Warm-grey tonal fill so
+   --sm modifier on that span; the Contact List keeps the shared .f12-av). Warm-grey tonal fill so
    colour stays reserved for the semantic StatusDots. --mono-tonal is defined here rather than in
    index.css (a parallel stream holds an uncommitted theme retoken there); fold it into index.css's
    .t-f12 token block once that lands. Placed AFTER the base rule so it wins at equal specificity. */
@@ -1086,7 +1086,7 @@
 .f12-lfoot b { color: var(--muted); font-weight: 600; }
 .f12-lfoot button { color: var(--muted); letter-spacing: 0.09em; padding: 2px 4px; border-radius: 4px; }
 .f12-lfoot button:hover { color: var(--ink); background: var(--paper); }
-/* sticky group headers (Contact list group-by) */
+/* sticky group headers (Contact List group-by) */
 .f12-ghead { position: sticky; top: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--hairline); padding: 6px 14px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
 
 /* ── reading pane ── */
@@ -1118,7 +1118,7 @@
   .f12-root *, .f12-root { transition: none !important; animation: none !important; }
 }
 
-/* ── Contact list reading pane (4d) ── */
+/* ── Contact List reading pane (4d) ── */
 /* Open/Closed segmented pill — SAGE active state (scoped override of the shared SegmentedToggle;
    the component itself is untouched). */
 .t-f12 .sa-seg-b.on { background: var(--sageC) !important; color: var(--sageD) !important; font-weight: 600; }
@@ -1399,3 +1399,86 @@
 @media (prefers-reduced-motion: reduce) {
   .qc-reseat .qc-take-body { animation: none; }
 }
+
+/* ══ RECORDING A RESPONSE (§1, ref 83-record-response.html) ══════════════════════════════════
+   The same shell as Logging new query — the entrance, the two exits and the step grammar are all
+   shared, so only what genuinely differs is written here.
+
+   ⚠️ EVERY COLOUR IS AN EXISTING TOKEN. The ref's hexes are mockup values; the marginalia rim and
+   plate are create's own (`--qc-ref-rim` / `--qc-ref-plate`, fix pack 2), the sage is the band
+   sage, and the burgundy is `--burg`. A second set of literals here would be a second palette to
+   keep in step. */
+
+/* The two columns. `align-items: start` so the panel ends where its content ends rather than
+   stretching — a thin record in a full-height frame reads as something failing to load. */
+.qr-two { align-items: start; }
+
+/* ── the outcome grid ─────────────────────────────────────────────────────────────────────── */
+.qr-outs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+@media (max-width: 900px) { .qr-outs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.qr-out {
+  display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer;
+  background: var(--paper); border: 0; border-radius: 10px; padding: 12px 13px;
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  transition: box-shadow 0.15s, background 0.15s; font-family: inherit;
+}
+.qr-out:hover { background: var(--white); box-shadow: inset 0 0 0 1px var(--line); }
+.qr-out:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+/* Selected takes a RING, not a fill: the marks below already carry the colour, and a filled card
+   under a coloured mark makes the mark unreadable. */
+.qr-out.on { background: var(--white); box-shadow: inset 0 0 0 2px var(--sage-edge); }
+.qr-out b { display: block; font-size: 13px; font-weight: 500; color: var(--ink); }
+.qr-out i { display: block; font-style: normal; font-size: 10.5px; color: var(--faint); margin-top: 1px; }
+.qr-outtx { min-width: 0; }
+
+/* ⚠️ THREE FAMILIES, AND NO RED. Incoming sage for what the agent did, burgundy for an offer,
+   muted grey for an ending. A rejection is GREY: the app reports what happened and does not tell
+   the writer how to feel about it, and red is the app having an opinion in the one place a writer
+   is least likely to want one. */
+.qr-m { width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; }
+.qr-m-in { background: var(--sage-band); box-shadow: inset 0 0 0 2px var(--sage-edge); }
+.qr-m-offer { background: var(--pink-t); box-shadow: inset 0 0 0 2px var(--burg); }
+.qr-m-shut { background: var(--paper); box-shadow: inset 0 0 0 2px var(--line); }
+
+.qr-date {
+  background: var(--white); border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit; color: var(--ink); outline: none;
+}
+.qr-date:focus { box-shadow: inset 0 0 0 1px var(--burg); }
+.qc-fl {
+  font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 7px;
+}
+
+/* ── the reference panel ──────────────────────────────────────────────────────────────────── */
+/* ⚠️ THE MARGINALIA TREATMENT, REUSED. Read-only surfaces recede by dropping their affordance
+   signals, not by taking a new hue — and the text colour does not change, because a reference
+   panel that is harder to read has failed at the only thing it does. The dashed rim is the one
+   sanctioned exception to dashed-means-provisional; it is scoped here as it is in create. */
+.qr-ref {
+  width: 300px; flex: none; align-self: start; position: sticky; top: 0;
+  background: var(--qc-ref-plate, var(--paper)); border-radius: 11px;
+  border: 1px dashed var(--qc-ref-rim, var(--hairline)); overflow: hidden;
+}
+.qr-refcap { padding: 11px 13px; box-shadow: inset 0 -1px 0 var(--qc-ref-rule, var(--hairline)); }
+.qr-reft { font-family: var(--f12-serif); font-size: 14px; font-weight: 500; color: var(--ink); }
+.qr-refsub {
+  font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--faint); margin-top: 3px;
+}
+.qr-refrow { padding: 9px 13px; box-shadow: inset 0 -1px 0 var(--qc-ref-rule, var(--hairline)); }
+.qr-refrow:last-child { box-shadow: none; }
+.qr-reflb {
+  font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--faint); margin-bottom: 4px;
+}
+.qr-reftx { font-size: 12px; line-height: 1.4; color: var(--ink); }
+
+/* Below the breakpoint the form takes the width to itself, as create's does — a squeezed
+   reference table wraps every row to three lines and costs the form its measure. */
+@media (max-width: 1100px) { .qr-ref { display: none; } }
+
+/* ⚠️ THE MOTIF IS SAGE HERE, BURGUNDY IN CREATE — the one visual difference in the two headers,
+   and it earns its place: burgundy is the sending colour throughout this app, and this journey is
+   about something that came back. */
+.qch-resp .qch-ill { background: var(--sage-band); box-shadow: inset 0 0 0 1px var(--sage-edge); }
