@@ -192,6 +192,83 @@ green each time.
 
 ---
 
+## Phase 2b — theme verification
+
+Commit: `manuscripts: plate theme verification`. One new file,
+`src/components/manuscripts/manuscriptPlateTokens.test.ts` (19 tests).
+
+Verification is a **rule-text lock** — the house pattern (`hubTokens.test.ts`, `railTokens.test.ts`)
+and the only kind available here, since the repo has no jsdom and no browser in the loop. It parses
+the stylesheet and asserts each theme's resolution directly, which is what "verified against the
+components in isolation, do not wait for mounting" asks for.
+
+### What the plateband resolves to
+
+| | Cappuccino | Bold Pastille | Editorial |
+|---|---|---|---|
+| **Plateband** | `#dadfd7 → #d5dbd3` **sage** | `#f4c7c2` flat **pink** | `#f4f4f5 → #efeff0` **pale grey** |
+| Band base rule | `1px rgba(138,158,136,.35)` | `1.5px #1d1712` ink | `1px #e3e2e0` hairline |
+| Card surface | `#fdfaf5` | `#fffefb` | `#ffffff` |
+| Card border | `1px #d8cebf` | `1.5px #1d1712` | none |
+| Title | `#5d4037` mocha | `#000000` | `#000000` |
+| Genre pill | `#e7ede3` sage / sage hairline | `#ffffff` / `1px` ink | `#f1f1ef` / transparent |
+| Stat strip | white `.62` wash / sage hairline | `#fffefb` / `1.5px` ink | `#ffffff` / `1px #e3e2e0` |
+| Primary action | `#f6e4da` fill, `#7c3a2a` text | `#f8dcd8` fill, `#1d1712` text | `#e9eaeb` fill, `#44484d` text |
+| Active tab | `#7c3a2a` burgundy | `#1d1712` ink | `#44484d` graphite |
+
+**Editorial renders no sage.** Asserted twice — once against the named sage vocabulary
+(`#dadfd7`, `#e7ede3`, `#8a9e88`, `rgba(138,158,136,…)` and six more), and once **mechanically**, so
+a *new* green nobody listed still fails: any hex in the Editorial block whose green channel leads
+both others perceptibly is rejected. Verified red with `#dfe8dc`, a green on no list.
+
+The primary action and the active tab read `--msv-hue`/`--msv-huec` — the theme's own accent pair,
+which is `--sd-hue`/`--sd-centre`. Cappuccino's is `#7c3a2a`, **exactly** the ref's burgundy, and
+`#f6e4da` against the ref's `#f5e2da` pink. So one rule gives three correct answers and no new
+token was needed for either.
+
+### Three deltas against the brief's expected Cappuccino values, all deliberate
+
+| Surface | Brief expected | Resolves to | Why |
+|---|---|---|---|
+| Card | `#fefdf8` | `#fdfaf5` | reuses `--msv-card`, which already carries the card role |
+| Card hairline | `#e2dacf` | `#d8cebf` | reuses `--msv-cardbd` |
+| Mono label | `#a2907f` | `#9c8878` | reuses `--msv-label` |
+
+Each is a 1–2 point difference and imperceptible. Ruling 3 says add a token only where no existing
+one carries the role — all three roles are carried, so reuse won over three more near-duplicates.
+**Flagged rather than silently absorbed**: if the exact drawn values matter, they are three token
+values, not a code change.
+
+### Ten tokens added, and one deliberately not reused
+
+`--msv-plateA/B/line` · `--msv-palebg/palebd/paletx` · `--msv-stripbg/stripbd/stripkey` ·
+`--msv-prbd`, declared on the same `.t-* .msv1` selectors the page already uses, in a **new**
+stylesheet so the blocked `manuscripts.css` is untouched. A lock asserts none of the ten is a name
+that file already owns — a token defined twice makes load order decide, not intent.
+
+> ⚠️ **`--msv-plateA/B` is not `--msv-bandA/B`, and that is the point.** The existing band token is
+> already used with exactly this declaration shape (`manuscripts.css:189, 292`) — but it resolves
+> **warm foam** in Cappuccino (`#ece5d8 → #e5ddcd`), while this design's Cappuccino plateband is
+> sage. Reusing it would have made Cappuccino quietly wrong while Bold and Editorial looked right.
+> The reveal panels' band and the card's identity head are two surfaces that happen to share a
+> gradient shape.
+
+### ⚠️ The consumption → definition guard
+
+Every `var(--x)` the stylesheet **reads** must resolve to a definition in either file. This is the
+`--pad-r` lesson: `var()` on an undefined property drops the declaration silently, which once left
+the shell's only active marker 0px wide through a green typecheck, a green build and a green suite.
+Checking that what we wrote *arrived* cannot catch what we *referenced and never wrote*.
+
+Verified red by pointing one rule at `--msv-stripkeyx`. It also means this spec reads
+`manuscripts.css` — so if the header stream removes a token the plate consumes, this goes red
+rather than the card going silently unstyled. That coupling is intentional.
+
+One further lock: outside the three token blocks, **no rule authors a colour** — every hex must come
+through `var()`, with `#ffffff` exempt as the plate's own paper. Verified red.
+
+---
+
 ## Rulings folded in (superseding the original brief)
 
 1. **Submission packages is not Pro-gated** — the Free/Pro fork is deleted from Phase 5. One pane
