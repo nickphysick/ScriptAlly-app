@@ -31,7 +31,7 @@ const pane = (versions: ManuscriptVersion[] = [], packages: SubmissionPackage[] 
 describe("the four rows always render, and absence is SAID", () => {
   it("names all four slots even with nothing on file", () => {
     const html = pane();
-    for (const label of ["Query letter", "Synopsis", "Sample pages", "Packages compiled"]) {
+    for (const label of ["Query letter", "Synopsis", "Opening sample", "Packages compiled"]) {
       expect(html).toContain(label);
     }
     expect(html.match(/class="msv-frow"/g)).toHaveLength(4);
@@ -56,7 +56,7 @@ describe("the four rows always render, and absence is SAID", () => {
     expect(rows).toEqual([
       { label: "Query letter", count: "2 versions" },
       { label: "Synopsis", count: "1 version" },
-      { label: "Sample pages", count: null },
+      { label: "Opening sample", count: null },
       { label: "Packages compiled", count: "1 package" },
     ]);
   });
@@ -106,6 +106,28 @@ describe("⚠️ ONE PANE — no plan fork, no chip, no upsell, no fake preview"
   it("takes no plan input: it cannot branch on who is looking", () => {
     const src = readFileSync(resolve(__dirname, "./ManuscriptPackagesPane.tsx"), "utf8");
     expect(src).not.toMatch(/isPro|UserPlan|isProUser|currentUser/);
+  });
+});
+
+/**
+ * ⚠️ ONE ARTEFACT, ONE NAME, ON BOTH SURFACES. `agentMaterials.ts` offers three options — "Sample
+ * pages", "Sample chapters" and "Sample words" — that ALL map to `ComponentType.SAMPLE_PAGES`,
+ * because the unit is the only thing separating them. The stored artefact therefore does not know
+ * which unit the agency asked in, so "Sample pages" would assert one. "Opening sample" is what the
+ * Agent Materials editor calls the row and the only name true of all three.
+ */
+describe("⚠️ the sample slot is named for what it is, not for one of its units", () => {
+  it("reads Opening sample, on the pane and in the tile", () => {
+    expect(MATERIAL_LABEL[ComponentType.SAMPLE_PAGES]).toBe("Opening sample");
+    expect(pane([ver(ComponentType.SAMPLE_PAGES, "s")])).toContain("Opening sample");
+    expect(submissionMaterials([], [ver(ComponentType.SAMPLE_PAGES, "s")]).detail).toContain("Opening sample");
+  });
+
+  it("and never asserts a unit the stored artefact does not carry", () => {
+    const html = pane([ver(ComponentType.SAMPLE_PAGES, "s")]);
+    expect(html).not.toContain("Sample pages");
+    expect(html).not.toContain("Sample chapters");
+    expect(html).not.toContain("Sample words");
   });
 });
 

@@ -478,6 +478,27 @@ package materials.
 > the call is wrong it is **one list** to change and the tile follows automatically. Locked both
 > ways: the list excludes it, and a full-manuscript version is asserted absent from tile and pane.
 
+> ⚠️ **CONFIRMED AS A STANDING LAW, NOT A JUDGEMENT CALL — and it now applies to both surfaces.**
+> "Full manuscript" and "Author bio" were explicitly removed from the **Agent Materials** tab in
+> favour of "Other", with a standing instruction not to reinstate them (`CLAUDE.md`, Agent list —
+> Materials; they survive in `agentMaterials.ts` only so legacy stored flags parse and decay). This
+> pass reached the same exclusion independently, from the shape of `SubmissionPackage`'s three
+> slots. **The model and the design agree, and the law is one law: neither the agent's requested
+> materials nor a manuscript's package materials carry Full manuscript or Author bio.**
+> **⚠️ This belongs in `CLAUDE.md` and is NOT there yet — see the blocked-file note below.**
+
+### One artefact, one name — `Opening sample`, not `Sample pages`
+
+`agentMaterials.ts` offers **three** options — `Sample pages`, `Sample chapters`, `Sample words` —
+and **all three map to `ComponentType.SAMPLE_PAGES`**, because the unit is the only thing separating
+them. So the stored artefact does not know which unit the agency asked in, and a label reading
+"Sample pages" **asserts a unit the data does not carry**. `Opening sample` is what the Agent
+Materials editor already calls the row and the only name true of all three.
+
+Changed in the shared `MATERIAL_LABEL`, so the pane and the Details tile moved together. Locked: the
+label is `Opening sample`, and neither surface renders any of the three unit-specific strings.
+Verified red by reverting the label.
+
 ### The pitch phrase is now one constant
 
 `PITCH_PHRASE = ‘X meets Y’` builds `PITCH_LABEL`, `PITCH_NEEDS_TWO` and `PITCH_NEEDS_ONE`, and the
@@ -524,6 +545,21 @@ material the pane does not · straight quotes in the pitch phrase.
   already the one commit that unblocks everything. It is its own prompt, and **its first job is
   checking whether the sub-page has anything the tab does not** — sorting, extra fields, a wider
   grid. If it does, that capability moves into the tab *before* the page goes, not after.
+
+- **⚠️ `Other` (free text) has no home in the package model — unresolved, and next to the comps
+  retirement on purpose.** Agent Materials has four rows: Query letter · Synopsis · Opening sample ·
+  **Other**. `SubmissionPackage` has three slots and no equivalent, and `agentMaterials.ts` already
+  records the mismatch in its own words (*"Absent keys ('Author bio', 'Other') have no member — that
+  is the reported gap, not an omission"*). Two readings, and they lead different places: either the
+  package model is short a slot, or there is a **deliberate distinction between what an agency
+  REQUESTS and what a package CONTAINS**. Not resolved here. It sits beside the comps retirement
+  because both are questions about how the package model relates to per-agent requirements.
+
+- **⚠️ `CLAUDE.md` IS BLOCKED — the Full-manuscript/Author-bio law is written up here, not there.**
+  `CLAUDE.md` is `M` with another stream mid-edit (19 lines being deleted, including the illustrated-
+  marks `mix-blend-mode` note this build referenced in Phase 1). Editing it would have carried their
+  in-flight deletions into this commit. **First job when it frees up:** move the two-surface law into
+  the Agent list — Materials section, and add the `Opening sample` naming rule beside it.
 
 - **⚠️ The Scout is a PRO-LAUNCH BLOCKER, not just a dev flag.** `SCOUT_LIVE = false`, so a Pro user
   today sees the outage strip on a feature they are paying for. That is not a fault in this build —

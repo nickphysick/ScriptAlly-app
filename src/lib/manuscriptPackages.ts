@@ -33,11 +33,21 @@ export const PACKAGE_MATERIALS: ComponentType[] = [
   ComponentType.SAMPLE_PAGES,
 ];
 
-/** Sentence case for reading; the enum's Title Case is a stored value, not a sentence. */
+/**
+ * Sentence case for reading; the enum's Title Case is a stored value, not a sentence.
+ *
+ * ⚠️ `SAMPLE_PAGES` READS "Opening sample", NOT "Sample pages" — and this is a correctness fix,
+ * not just a naming one. `agentMaterials.ts` offers THREE options — "Sample pages", "Sample
+ * chapters" and "Sample words" — which **all map to this one `ComponentType`**, because the unit is
+ * the only difference between them. So the stored artefact does not know whether the agency asked
+ * in pages, chapters or words, and a label saying "Sample pages" asserts a unit the data does not
+ * carry. "Opening sample" is what the Agent Materials editor already calls the row, and it is the
+ * only name true of all three. One artefact, one name, on both surfaces.
+ */
 export const MATERIAL_LABEL: Record<ComponentType, string> = {
   [ComponentType.QUERY_LETTER]: "Query letter",
   [ComponentType.SYNOPSIS]: "Synopsis",
-  [ComponentType.SAMPLE_PAGES]: "Sample pages",
+  [ComponentType.SAMPLE_PAGES]: "Opening sample",
   [ComponentType.FULL_MANUSCRIPT]: "Full manuscript",
 };
 
