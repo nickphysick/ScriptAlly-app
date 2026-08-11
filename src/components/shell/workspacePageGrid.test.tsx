@@ -145,9 +145,9 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const CONVERTED = [
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
+      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
     ] as const;
     const NOT_YET = [
-      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
       ["Tasks family", "../todo/TasksPageLayout.tsx"],
     ] as const;
     for (const [page, file] of CONVERTED) {

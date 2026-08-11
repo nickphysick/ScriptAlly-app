@@ -200,8 +200,12 @@ describe("the header plate — one gutter token, and the plate inside the column
    * other two the header is nested inside the capped element in the TSX, asserted below.
    */
   it("Comps and Packages cap EVERY child — the plate is no longer excluded from the column", () => {
+    /* ⚠️ COMPARABLE TITLES LEFT THIS CASE (amendment 9, conversion 3). Its cap is on the GRID ROOT
+       now, which governs all three rows at once — an all-children selector is what you need when the
+       chrome and the content are siblings sharing a parent, and they no longer are. PACKAGES IS THE
+       LAST SUBJECT; when it converts this case should be DELETED rather than left asserting nothing.
+       Its sibling assertion below (`> :not(.wsh)` must not return) still applies to it. */
     for (const [page, file, root] of [
-      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage"],
       ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw"],
     ] as const) {
       const css = read(file);
