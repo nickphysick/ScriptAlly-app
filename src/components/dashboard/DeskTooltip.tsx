@@ -18,7 +18,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { placeTooltip, placeTooltipRight, Rect } from "../../lib/deskTooltip";
+import { placeTooltip, Rect } from "../../lib/deskTooltip";
 import "./deskTooltip.css";
 
 export type DeskTipMode = "plain" | "interactive" | "pinned";
@@ -32,18 +32,9 @@ export interface DeskTooltipProps {
   onClose: () => void;
   /** Labels the dialog when pinned. */
   label?: string;
-  /**
-   * Where it sits relative to the anchor. "above" is the settled desk's centred-over placement
-   * (with its below-flip); "right" is the sidebar rail's fly-out (sidebar-collapse pack, Phase 3
-   * — EXTENDING this component rather than writing a second tooltip is that pack's own rule: two
-   * would have to agree about placement, timers, and which is on screen).
-   */
-  side?: "above" | "right";
-  /** A chrome variant class — `dk-tip--{variant}`. The rail's restyles type and padding only. */
-  variant?: "rail";
 }
 
-export const DeskTooltip: React.FC<DeskTooltipProps> = ({ anchor, mode, children, onClose, label, side = "above", variant }) => {
+export const DeskTooltip: React.FC<DeskTooltipProps> = ({ anchor, mode, children, onClose, label }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const pinned = mode === "pinned";
@@ -54,14 +45,13 @@ export const DeskTooltip: React.FC<DeskTooltipProps> = ({ anchor, mode, children
   useLayoutEffect(() => {
     if (!anchor || !ref.current) { setPos(null); return; }
     const box = ref.current.getBoundingClientRect();
-    const place = side === "right" ? placeTooltipRight : placeTooltip;
-    const { left, top } = place(
+    const { left, top } = placeTooltip(
       anchor,
       { width: box.width, height: box.height },
       { width: window.innerWidth, height: window.innerHeight },
     );
     setPos({ left, top });
-  }, [anchor, children, side]);
+  }, [anchor, children]);
 
   /* Escape closes from anywhere; a pinned card also closes on outside click and on scroll —
      scroll because a fixed-position card would otherwise float away from the glyph it belongs to. */
@@ -96,7 +86,7 @@ export const DeskTooltip: React.FC<DeskTooltipProps> = ({ anchor, mode, children
   return createPortal(
     <div
       ref={ref}
-      className={`dk-tip${variant ? ` dk-tip--${variant}` : ""}${mode !== "plain" ? " live" : ""}${pinned ? " pinned" : ""}${pos ? " show" : ""}`}
+      className={`dk-tip${mode !== "plain" ? " live" : ""}${pinned ? " pinned" : ""}${pos ? " show" : ""}`}
       style={pos ? { left: pos.left, top: pos.top } : { left: 0, top: 0 }}
       role={pinned ? "dialog" : "tooltip"}
       aria-label={pinned ? label : undefined}

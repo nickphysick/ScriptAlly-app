@@ -79,36 +79,6 @@
      competes with every card sitting near it. */
   --ws-ground: #f7f4ee;
   --ws-edge: #e9e2d7;
-  /**
-   * THE HEADER PLATE (amendment 7; ref design-refs/header-plate-frosted-v1.html). The band with a
-   * closing rule is retired — the header is now an OBJECT sitting on the window, with its own
-   * fill, border and shadow, condensing on first scroll.
-   *
-   * ⚠️ THE SCROLLED BORDER IS `--ws-edge` AT 75%, NOT THE PACK'S LITERAL. The pack quotes
-   * `rgba(228,221,209,.75)` — that is the REF's `--edge` (#e4ddd1), a different hue from this
-   * app's `--ws-edge` (#e9e2d7). Taken literally the plate's border would CHANGE COLOUR as it
-   * condensed, which is not what "the same plate, quieter" can mean. Pre-computed from our own
-   * token rather than `color-mix()`, per the standing no-runtime-mix rule.
-   *
-   * ⚠️ 62% IS MORE OPAQUE THAN THE REF'S DEFAULT (.42), AND 2px IS FAR LESS BLUR THAN ITS 14px.
-   * The ref is a TUNER — those are slider start positions, not the design. These are the settled
-   * values and the pack is explicit: paper picking up a faint sense of depth, not frost. Raising
-   * either is the one "improvement" specifically ruled out.
-   *
-   * ⚠️ THE TWO HEIGHTS AND THE GAP ARE TOKENS because the sticky wrapper must RESERVE the rest
-   * height — otherwise condensing pulls every following element up by 32px (measured: scrollHeight
-   * 952 → 920). Three numbers agreeing by hand is how that reservation silently stops matching.
-   */
-  --wsh-plate-h: 88px;
-  --wsh-plate-h-scrolled: 56px;
-  --wsh-plate-gap: 18px;
-  --wsh-plate-bg: #ffffff;
-  --wsh-plate-bg-scrolled: rgba(255, 255, 255, 0.62);
-  --wsh-plate-edge-scrolled: rgba(233, 226, 215, 0.75);
-  --wsh-plate-radius: 2px;
-  --wsh-plate-blur: blur(2px) saturate(1.08);
-  --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
-  --wsh-plate-sh-scrolled: 0 2px 5px rgba(58, 28, 20, 0.07), 0 12px 30px rgba(58, 28, 20, 0.13);
   /* THE TWO CAPSULES (app-shell pack, Baked 3). There are two now, not three — the panel folded
      into the column — and both fills come from the sage-desk mockup. The old cream trio was
      tuned against a cream ground; against sage it read as three washed-out greys. */
@@ -207,32 +177,7 @@
   /* ⚠️ 232 → 186 (polish §5). The panel was sized before its rhythm settled; at 232 it carried
      more empty width than content. 186 is the narrowest that still fits the longest label with
      its count without wrapping — verified against the live IA, not guessed. */
-  /* ⚠️ 214 → 264 (audit pack P6). The "narrowest that still fits" argument above was answered
-     against a 13.5px row; that pack steps the sidebar's WHOLE type scale up — rows to 14.5, the
-     manuscript title to 14, the user block to 14/12 — so the width that was narrowest-that-fits is
-     no longer that width. 264 is stated by the pack and measured against the new scale, not
-     derived from the old one. (The pack calls it 246 → 264; 246 is the design ref's own starting
-     width and was never this app's.) */
-  /* ⚠️ 264 → 224 (Nick, 11 Aug — "reduce width of expanded sidebar by 15%"). 264 × 0.85 = 224.4,
-     taken as 224 rather than a fraction of a pixel.
-
-     ⚠️ AND IT IS A NARROWING WITHOUT A TYPE CHANGE, which is exactly the pairing the note above
-     says to respect — so the claim that argument protects was RE-MEASURED, not assumed. Browser-
-     measured at 224 against the BUILT stylesheet:
-
-       · worst label — "Submission packages" 148px into 157px of row → fits, HEADROOM 9px;
-       · the To-do row, the only one sharing its width with a count chip → 64 into 134, ample.
-
-     ⚠️ NINE PIXELS IS THE WHOLE MARGIN, and `.ws-lbl` is `overflow: hidden; white-space: nowrap`
-     — so a label that outgrows its row CLIPS SILENTLY rather than wrapping visibly. A longer nav
-     label, or any step up in row type, spends that 9px and the failure will not announce itself.
-     Re-measure here on any change to either; do not eyeball it.
-
-     ⚠️ THE MANUSCRIPT TITLE NOW ELLIPSISES SOONER, by design and by arithmetic: its box is 106px
-     at this width (was ~146), so "The Smoke Test" (107px) just tips over. `.ws-mst` has always
-     carried `text-overflow: ellipsis` for exactly this — a book title is arbitrary-length and the
-     pill is not — but the crossover moved, and longer titles now abbreviate earlier. */
-  --shell-panelw: 224px;              /* the panel — a sibling of the rail, not a band within it */
+  --shell-panelw: 214px;              /* the panel — a sibling of the rail, not a band within it */
   /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
      full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever

@@ -1,5 +1,5 @@
 /**
- * AgentMaterialsEditor — the Contact list "Materials" card, made editable (interaction layer 6d).
+ * AgentMaterialsEditor — the Contact List "Materials" card, made editable (interaction layer 6d).
  *
  * Reads/writes `agent.materialsWanted` (stored `string[]`) through the ONE canonical model,
  * `lib/agentMaterials` (parse → structured state → edit → build). The 6d vocabulary lives there:

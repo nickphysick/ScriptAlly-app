@@ -28,9 +28,7 @@ import {
   defaultFreq, Freq, LedgerPoint, monotonePath, nearestStop, periodLabel, RANGE_STOPS, rangeChip,
   rangeWindow, stopForDays, yScale,
 } from "../../lib/oneScreen";
-import { OneScreenPanel } from "./OneScreenPanel";
-import { OneScreenMark } from "./OneScreenMark";
-import { useCountUp } from "../../lib/useCountUp";
+import { Skel } from "./OneScreenDashboard";
 
 /* ── pure geometry (exported for the node-env tests — there is no layout engine to ask) ── */
 
@@ -96,8 +94,26 @@ const ChartTip: React.FC<{ anchor: Rect | null; children: React.ReactNode }> = (
 
 /* ── the card ── */
 
-/* ⚠️ THE COUNT-UP MOVED TO `lib/useCountUp` (audit P6) — the header counters need the same
-   behaviour, and one screen must not hold two of it. */
+/** §10: the headline counts up once on first paint — instant under reduced motion. */
+const useCountUp = (to: number, ms = 700): number => {
+  const [shown, setShown] = useState(to);
+  const ran = useRef(false);
+  useEffect(() => {
+    if (ran.current) { setShown(to); return; } // later data changes land instantly
+    ran.current = true;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || to === 0) { setShown(to); return; }
+    let raf = 0;
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      setShown(Math.round(to * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [to, ms]);
+  return shown;
+};
 
 export const OneScreenChart: React.FC<{
   loading: boolean;
@@ -243,34 +259,10 @@ export const OneScreenChart: React.FC<{
   const pinEvent = pinIdx !== null ? events.get(pinIdx) ?? null : null;
 
   return (
-    <OneScreenPanel variant="os-lead" loading={loading} skel={["h", "grow", ""]}>
-      {/**
-        * ⚠️ THE SAME BAND AS EVERY OTHER CONTAINER (§2) — `.os-ahead`, not a chart-specific header.
-        * Active queries was the last container on plain parchment while Tasks, Activity and Goals
-        * carried the sage band; using the same class is what makes "band heights match" structural
-        * rather than three numbers kept in step by hand.
-        *
-        * ⚠️ THE CONTROLS SIT IN THE BAND, and that is a REVISION of the original spec. A separate
-        * control row beneath measured 45px, which took the chart from 205px to 150px in a 302px
-        * card — under half the container. In the band they cost nothing: the row already exists.
-        * The trade is that this band is the only one carrying interactive children, so its height
-        * is now set by the tallest control rather than by the title; both are checked at 1440 AND
-        * 1024, because a control that wraps at a narrow width breaks the uniformity outright.
-        */}
-      <div className="os-ahead">
-        <OneScreenMark name="active-queries" />
-        <h2>Active queries</h2>
-        {/* ⚠️ THE FIGURE LIVES IN THE BAND (option A). Nothing floats loose beneath the header any
-            more: the headline number and its chip are part of the label, so the body below is the
-            chart and only the chart. */}
-        <span className="os-n">{shownActive}</span>
-        {/* §9: in the first fortnight the chip states what is out, not a movement — a two-point
-            range delta is noise dressed as trend */}
-        {earlyDays
-          ? <span className="os-chip">{awaitingChip(queries)}</span>
-          : view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
-        {/* ⚠️ ONE CLUSTER (audit P5) — the label must travel WITH the slider it reports. */}
-        <div className="os-ctrls">
+    <div className={`os-card os-lift os-lead${loading ? " isload" : ""}`}>
+      {loading && <Skel bars={["h", "grow", ""]} />}
+      <div className="os-lh">
+        <span className="os-ll">Active queries</span>
         <div className="os-freqsel">
           <select
             aria-label="Chart frequency"
@@ -285,31 +277,25 @@ export const OneScreenChart: React.FC<{
         </div>
         {/* ⚠️ CONTINUOUS BUT SNAPPING: the thumb can only rest on a landmark, so every position
             it can hold names a real span. The label is the control's value in words. */}
-        {/* ⚠️ THE SLIDER AND ITS LABEL SHARE ONE CAPSULE (P3). The control was invisible because
-            it sat directly ON the sage band; the fix is to stop putting it there. The capsule is a
-            parchment surface the slider can be read against, and the label rides inside it because
-            the label IS the slider's value — separating them put a readout on the band and its
-            control on parchment. */}
-        <div className="os-rangecap">
         <div className="os-rangeslider">
           <input
             type="range" min={0} max={100} step={1} value={stop.p}
             aria-label="Chart range"
             aria-valuetext={stop.label}
-            /* ⚠️ `--fill` IS WHAT MAKES THE TRACK LEGIBLE. A bare track with a dot on it was the
-               version that failed; the travelled portion filled in burgundy is what says where you
-               are. Set inline because it is a per-render value, and read by the track gradient. */
-            style={{ ["--fill" as string]: `${stop.p}%` }}
             onChange={(e) => { setRangeDays(nearestStop(Number(e.target.value)).days); resetRead(); }}
           />
         </div>
         <span className="os-rangelbl">{stop.label}</span>
-        </div>
-        </div>
       </div>
-      {/* ⚠️ THE PADDING IS THE BODY'S, NOT THE CARD'S — the band must run edge to edge, so the
-          card carries none and the chart wrapper supplies its own. */}
-      <div className="os-lbody">
+      <div className="os-fig">
+        <span className="os-n">{shownActive}</span>
+        {/* §9: in the first fortnight the chip states what is out, not a movement — a two-point
+            range delta is noise dressed as trend */}
+        {earlyDays
+          ? <span className="os-chip">{awaitingChip(queries)}</span>
+          : view.length >= 2 && <span className="os-chip">{rangeChip(view)}</span>}
+      </div>
+
       <div className="os-chartwrap" ref={wrapRef}>
         {dayOne ? (
           /* §9: the day-one card is an invitation, not an empty chart */
@@ -384,20 +370,16 @@ export const OneScreenChart: React.FC<{
                     </g>
                   );
                 })}
-                {/* ⚠️ ONE RESTING NODE — THE LATEST (audit P5). A node at every point was
-                    defended as showing how many readings the line is drawn from; at daily grain
-                    over a long range that is hundreds of rings, and the LINE stops being readable
-                    — the thing they were meant to support. The latest point keeps its mark
-                    because it anchors "where we are now"; hover and the crosshair carry the rest.
-
-                    ⚠️ THE KEYBOARD NODE IS NOT A HOVER NODE. Arrow-key stepping renders its own
-                    focus mark just below, so the chart stays fully operable with no pointer. */}
-                {lastIdx >= 0 && pts[lastIdx] && (
+                {/* ⚠️ A NODE AT EVERY POINT — the line alone hides how many readings it is drawn
+                    from, and at daily grain that is the difference between a trend and a guess.
+                    The latest sits bigger, as the resting mark. */}
+                {pts.map(([x, y], i) => (
                   <circle
-                    cx={pts[lastIdx][0].toFixed(1)} cy={pts[lastIdx][1].toFixed(1)}
-                    r={4} fill="#fdfaf5" stroke="#8a9e88" strokeWidth={2}
+                    key={i} cx={x.toFixed(1)} cy={y.toFixed(1)}
+                    r={i === lastIdx ? 4 : 2.6} fill="#fdfaf5" stroke="#8a9e88"
+                    strokeWidth={i === lastIdx ? 2 : 1.6}
                   />
-                )}
+                ))}
                 {/* crosshair + black node while a week is focused */}
                 {focusIdx >= 0 && (
                   <>
@@ -461,7 +443,6 @@ export const OneScreenChart: React.FC<{
           </div>
         ) : null}
       </ChartTip>
-      </div>
-    </OneScreenPanel>
+    </div>
   );
 };

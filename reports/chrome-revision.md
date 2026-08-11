@@ -1,4 +1,4 @@
-# Chrome revision — Queries Hub + Contact list (2026-07-13)
+# Chrome revision — Queries Hub + Contact List (2026-07-13)
 
 A revision pass on the overnight build (see `reports/overnight-nav-hub-agents.md`); new file
 rather than appending — the overnight report documents a different run and stays as its record.
@@ -65,7 +65,7 @@ file list is recorded in each phase's message.
   avatar + full name → account, hover pill, focusable).
 - **P3:** 56px bar. Left zone flush (padding-left 0): pink `Log a query`/`Add agent` + white
   `Import data`. Right zone inset 20px: verbs → `margin-left:auto` link group (Hub: Agent ·
-  Manuscript stubs; Contact list: Website — opens the selected agent's site, disabled when
+  Manuscript stubs; Contact List: Website — opens the selected agent's site, disabled when
   none) → divider → PDF · Delete. View-tasks badge white/ink/hairline/`--sh-btn`. The
   triggers moved to the list head in the same commit (pill form, still functional) so filters
   never went unreachable between phases — the prompt's strict sequencing was softened to
@@ -92,5 +92,5 @@ file list is recorded in each phase's message.
 - `DashTopBar` / `CrumbStrip` convergence (also carried over from the overnight run).
 - The Hub's "Agent" / "Manuscript" link-group buttons remain disabled stubs pending the
   id-carrying nav bridge.
-- `agentQueried` in `lib/agentsPage.ts` is now unused by the Contact list filter (the
+- `agentQueried` in `lib/agentsPage.ts` is now unused by the Contact List filter (the
   active/closed/never model derives inline); the lib export stays for other consumers.

@@ -274,12 +274,12 @@ describe("achievementPill — the highest-priority TRUE fact, facts only", () =>
     const a = achievementPill([], NOW);
     expect(a.key).toBe("awaiting");
     expect(a.strong).toBe("0");
-    expect(a.post).toContain("queries out with agents");
+    expect(a.post).toContain("queries awaiting");
   });
 
   it("the fallback agrees in number at one", () => {
     const a = achievementPill([q({ dateSent: daysAgo(3) })], NOW);
-    expect(a.key === "awaiting" ? a.post : "").toContain("query out with agents");
+    expect(a.key === "awaiting" ? a.post : "").toContain("query awaiting");
   });
 
   it("a streak of ≥4 consecutive weeks fires rule 2", () => {

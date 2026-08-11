@@ -22,7 +22,6 @@ import { CheckCircle2, ListChecks, PlusCircle, Plus, Check, Calendar, X } from "
 import { Task, Query, Agent, UserTask } from "../../types";
 import { MountCard } from "../MountCard";
 import { agentPrimary } from "../../lib/agentDisplay";
-import { agentCardKey } from "../../lib/todoBoard";
 import {
   parchment,
   burgundy,
@@ -115,32 +114,12 @@ export interface OverToYouRow {
   deadline: Date | null;
 }
 
-/**
- * Build the urgent rows from the live tasks, sorted deadline-asc (ordering kept isolated).
- *
- * ⚠️ THE BOARD IS THE URGENT SOURCE, AND THIS COLLAPSES THE SAME WAY IT DOES (audit P3). Every
- * surface that says a number about urgent work — the attention chip, the dashboard tasks card,
- * the To-do panel — comes through here, and all of them used to over-count by exactly the rows
- * the board collapses: two requests from one agent on one manuscript are ONE thing to do.
- * `agentCardKey` is that collapse, imported rather than restated, so the two can no longer drift.
- */
+/** Build the urgent rows from the live tasks, sorted deadline-asc (ordering kept isolated). */
 export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agent[]): OverToYouRow[] => {
   const now = new Date();
-  const seen = new Set<string>();
 
   const rows: OverToYouRow[] = tasks
     .filter((t) => (URGENT_TYPES as readonly string[]).includes(t.taskType))
-    /* ⚠️ DEDUPE BEFORE THE SORT, so the row kept is the one the BOARD keeps — both take the first
-       in task order. Deduping after would keep the earliest deadline instead, and the two lists
-       would agree on the count while disagreeing about which query it names. */
-    .filter((t) => {
-      const q = queries.find((item) => item.id === t.relatedRecordId);
-      const key = agentCardKey(t.taskType, q?.agentId, t.manuscriptTitle);
-      if (!key) return true; // no agent identity to collide on — never collapsed
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
     .map((task) => {
       const type = task.taskType as UrgentType;
       const q = queries.find((item) => item.id === task.relatedRecordId);

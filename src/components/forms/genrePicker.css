@@ -1,6 +1,6 @@
 /* GenrePicker (interaction layer, Stage 3d). The inline part (chips + trigger) renders in the host
    form — which may be an app theme (.t-capp/.t-bold/.t-edn), NOT .t-f12 — so every var() carries a
-   literal fallback (it still picks up the f12 tokens when used inside the Contact list). The popover
+   literal fallback (it still picks up the f12 tokens when used inside the Contact List). The popover
    is always portalled inside a .t-f12 wrapper. No color-mix(); reduced motion honoured. */
 
 .gp-root { display: flex; flex-direction: column; gap: 6px; }

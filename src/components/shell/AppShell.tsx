@@ -20,8 +20,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
-  LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
+  Book, CalendarDays, Compass, HelpCircle, LayoutGrid, LineChart, ListChecks, LogOut, Package,
+  Send, Settings, StickyNote, Sun, Upload, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -30,6 +30,7 @@ import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
+import { ShellV2Section, shellPageForPath } from "./shellV2Nav";
 import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
 import { MobileSheet } from "./MobileSheet";
 import { BottomTabBar } from "../BottomTabBar";
@@ -149,12 +150,6 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
   materials: <Book aria-hidden="true" />,
-  /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
-     added — the group's and the row's — per the parallel-surface warning above; adding the
-     section without its glyph is the quiet half of that failure.
-     ⚠️ AND IT STAYS MONOLINE. Settings is a control, not an object: the two-icon-families rule in
-     workspaceShell.css says so explicitly, and an illustrated Settings was explored and rejected. */
-  account: <Settings aria-hidden="true" />,
   // panel rows — one per destination
   dash: <LayoutGrid aria-hidden="true" />,
   send: <Send aria-hidden="true" />,
@@ -165,15 +160,7 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   note: <StickyNote aria-hidden="true" />,
   people: <Users aria-hidden="true" />,
   compass: <Compass aria-hidden="true" />,
-  /* ⚠️ ADDED WITH THE MATERIALS ROWS, and adding them here is not optional bookkeeping — this map
-     is a PARALLEL SURFACE to workspaceNav's rows, not type-linked to it, so a row whose icon key is
-     missing renders a blank space and nothing complains. That is the quiet half of the failure the
-     account-key note above describes. `Library` is the shelf of bound volumes the Manuscripts mark
-     already draws; `BookCopy` is the two-books-side-by-side the Comps mark draws. */
-  library: <Library aria-hidden="true" />,
-  books: <BookCopy aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
-  settings: <Settings aria-hidden="true" />,
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
@@ -224,22 +211,91 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   const mobileChromeValue = useMemo(() => ({ setMobileDetail }), [setMobileDetail]);
   const activeMobileDetail = mobileDetailMap[routeKey] ?? null;
 
-  /* ⚠️ THE SV2 TUCK MACHINERY THAT LIVED HERE IS SWEPT (sidebar-collapse pack, Step 0.5) — and it
-     was swept because it was a GHOST, not because it was in the way. `panelCollapsed`, the browse
-     model, the accordion's `openSec`, collapse-on-navigate, Escape-collapse, the outside-click
-     abandon and the ⌘\ binding all mutated state whose ONLY styled element — `.sv2-side`
-     (shellV2.css) — is rendered NOWHERE: the app-shell-v2 rebuild retired the collapse model
-     ("the sidebar is one width, always open", WorkspaceShell) and deleted the rail, but this
-     machinery survived unswept. So for two weeks ⌘\ toggled an invisible state, EVERY navigation
-     force-wrote `sa.shellSideTucked = "1"`, and any unprevented Escape "collapsed" nothing.
+  // Panel collapse (fixes pack) — the rail IS the collapsed state (the deferred rail question,
+  // resolved; no flyouts, no mini-panel). Persisted under the sa. UI-pref convention, REUSING
+  // the flat shell's sa.shellSideTucked key (same concept — no key litter). ⌘\ toggles (the
+  // ⌘K convention's sibling), registered HERE rather than in the top bar: the bar's ⌘K stands
+  // down on /todo and the chord must work on every route. Skipped while an editable has focus.
+  // The hide is a CSS transition on the container class (never JS timers).
+  const [panelCollapsed, setPanelCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem("sa.shellSideTucked") === "1"; } catch { return false; }
+  });
+  const setPanel = useCallback((value: boolean) => {
+    setPanelCollapsed(value);
+    try { localStorage.setItem("sa.shellSideTucked", value ? "1" : "0"); } catch { /* private mode */ }
+  }, []);
+  const togglePanel = useCallback(() => {
+    setBrowsing(false); // a manual toggle ends any rail-initiated browse
+    setPanelCollapsed((prev) => {
+      const value = !prev;
+      try { localStorage.setItem("sa.shellSideTucked", value ? "1" : "0"); } catch { /* private mode */ }
+      return value;
+    });
+  }, []);
 
-     ⚠️ THE STORED KEY IS ABANDONED, NOT MIGRATED, for exactly that reason: collapse-on-navigate
-     wrote "1" on every route change, so the value says "collapsed" for everyone regardless of
-     anything they chose. Migrating it would start every user collapsed.
-
-     The concept returns — deliberately, visibly — as the workspace sidebar's icon rail
-     (WorkspaceShell + useSidebarCollapsed), which is what now owns the freed ⌘\. */
+  // The rail selects a SECTION (rail-section-select pack), and — rail-icon-toggle pack — the
+  // OPEN section's icon toggles the panel shut. The accordion's open section is OWNED HERE so
+  // the rail's click policy can read the REAL open section at click time (collapse keys off
+  // the open section, never the route's — the two differ while browsing). Route changes steer
+  // it; ANY collapse snaps it back to the current page's section, so the panel never drifts;
+  // "querying" seeds a fresh expanded mount on a sectionless route (the old sidebar default).
   const { pathname } = useLocation();
+  const routeSec = shellPageForPath(pathname)?.section?.key ?? null;
+  const [openSec, setOpenSec] = useState<ShellV2Section["key"] | null>(() => routeSec ?? "querying");
+  useEffect(() => { if (routeSec) setOpenSec(routeSec); }, [routeSec]);
+  useEffect(() => { if (panelCollapsed) setOpenSec(routeSec ?? null); }, [panelCollapsed, routeSec]);
+  const onToggleSection = useCallback((key: ShellV2Section["key"]) => {
+    setOpenSec((prev) => (prev === key ? null : key));
+  }, []);
+  // A browse expands the panel and steers the accordion — it never navigates. `browsing` marks
+  // a rail-initiated expansion so an ABANDONED browse (Escape, or a click into page content
+  // outside the panel/rail) collapses again. (The old {sec, n} bump channel is gone — the
+  // state lives here now, so a browse is plain assignment.)
+  const [browsing, setBrowsing] = useState(false);
+  const onBrowse = useCallback((sec: ShellV2Section["key"] | null) => {
+    setPanel(false);
+    setBrowsing(true);
+    setOpenSec(sec);
+  }, [setPanel]);
+  // One collapse path for the rail toggle, Escape and the outside click — ends any live browse.
+  const collapsePanel = useCallback(() => {
+    setPanel(true);
+    setBrowsing(false);
+  }, [setPanel]);
+  // Escape closes the expanded panel regardless of how it was opened (no focus trap exists).
+  useEffect(() => {
+    if (panelCollapsed) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      collapsePanel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [panelCollapsed, collapsePanel]);
+  // Abandon-a-browse: a pointer-down in page content (outside the panel AND the rail — rail
+  // clicks are section switches or the toggle, never abandonment) while a browse is open.
+  useEffect(() => {
+    if (panelCollapsed || !browsing) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.closest(".sv2-side") || t.closest(".sv2-rail"))) return;
+      collapsePanel();
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [panelCollapsed, browsing, collapsePanel]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+        const t = e.target as HTMLElement | null;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+        e.preventDefault();
+        togglePanel();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [togglePanel]);
 
   // ── THE FOOT FADE (canonical shell pack). It appears ONLY when content continues below the
   // fold: a permanent fade over a short page reads as a rendering fault rather than an
@@ -287,9 +343,22 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     [navigate, setSearchQuery]
   );
 
+  // Auto-collapse on navigation (flyouts pack, baked option a): EVERY route change returns the
+  // panel to the rail; expansion is manual (⌘\ / the expand control) and lasts until the next
+  // navigation. Observed on the full pathname — routeKey alone would miss sibling moves like
+  // /agents ↔ /agents/discover. The persisted key still tracks within-page toggling, but the
+  // collapse-on-navigate wins on route change. First render is exempt (nothing was navigated).
+  const firstPath = useRef(true);
+  useEffect(() => {
+    if (firstPath.current) { firstPath.current = false; return; }
+    setPanelCollapsed(true);
+    setBrowsing(false); // choosing a page ends the browse (the nav collapse covers it)
+    try { localStorage.setItem("sa.shellSideTucked", "1"); } catch { /* private mode */ }
+  }, [pathname]);
+
   return (
     <div
-      className={`${THEME_CLASS[theme]} sv2-app ws-host`}
+      className={`${THEME_CLASS[theme]} sv2-app ws-host${panelCollapsed ? " sv2-collapsed" : ""}`}
       data-sa-ground=""
       // ⚠️ THE DESK IS GONE (Amendment 1, A1). This was the sage-grey field the capsules floated
       // on; the workspace is full-screen now, so --shell-chrome IS the page ground and the
@@ -360,10 +429,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             scope={<ShellScope onNavigate={onNavigate} />}
             onOpenSearch={openPalette}
             searchOpenerRef={searchOpenerRef}
-            /* ⚠️ onTuck IS NO LONGER PASSED — it toggled the swept sv2 tuck state, which styled
-               nothing on any viewport. The bar's own tuck button was therefore already inert in
-               effect; without the prop it is inert in fact, byte-identical on screen. The button
-               itself belongs to the LOCKED mobile bar and is left for a mobile pass to remove. */
+            onTuck={togglePanel}
             onOpenAccount={() => setAccountOpen((v) => !v)}
             mobileDetail={activeMobileDetail}
             onOpenYou={() => setYouOpen(true)}

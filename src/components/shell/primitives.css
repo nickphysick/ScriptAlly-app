@@ -14,9 +14,7 @@
   align-items: center;
   gap: 5px;
   font-family: "JetBrains Mono", monospace;
-  /* 11px, up with the sidebar's type scale (audit pack P6) — the To-do badge has to hold its own
-     beside 14.5px rows. This chip is drawn in BOTH shells, so the step is app-wide by design. */
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--shell-muted);
 }
 .sp-ct-dot {

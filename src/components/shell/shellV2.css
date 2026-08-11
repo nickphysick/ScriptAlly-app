@@ -191,10 +191,16 @@
     transition: width 0.26s ease, opacity 0.2s ease, margin-left 0.26s ease;
   }
 }
-/* ⚠️ THE `.sv2-collapsed .sv2-side` RULE IS SWEPT WITH THE TUCK MACHINERY (sidebar-collapse pack,
-   Step 0.5). It was the machinery's ONLY styled surface, and `.sv2-side` is rendered nowhere —
-   the app-shell-v2 rebuild deleted the element and left the rule pointing at nothing. The
-   collapse concept lives in WorkspaceShell's icon rail now. */
+/* PANEL COLLAPSE (fixes pack) — the rail IS the collapsed state; no flyouts, no mini-panel.
+   The negative margin swallows the flex gap so the content capsule widens by the full
+   288 + 14px; the fixed-width inner column keeps the contents from reflowing mid-slide. */
+.sv2-collapsed .sv2-side {
+  width: 0;
+  opacity: 0;
+  margin-left: calc(-1 * var(--shell-cap-gap));
+  pointer-events: none;
+  box-shadow: none;
+}
 .sv2-side-inner {
   width: 288px;
   height: 100%;

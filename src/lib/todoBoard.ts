@@ -396,37 +396,13 @@ function orderDoNext(cards: BoardCard[]): BoardCard[] {
  * ⚠️ IT DEDUPES ON THE DERIVATION, NOT THE RENDER. Hiding the second row would lose real work;
  * what was wrong was a key that ignored the manuscript and a title that dropped it.
  */
-/**
- * ⚠️ THE URGENT IDENTITY, SHARED — one function, two consumers (dashboard audit P3).
- *
- * THE FAULT IT SETTLES: the board collapsed two `full_requested` cards for one agent on one
- * manuscript into a single card, and `buildOverToYouRows` — which the dashboard's attention chip,
- * its tasks card and the To-do panel all read — did not. Measured on a three-task fixture: the
- * board said ONE urgent, the dashboard said TWO. Neither was wrong on its own terms, and nothing
- * in the app said which one the word "urgent" meant. That is the two-numbers-one-name fault
- * `todoCount` exists to end, reappearing across the board/dashboard seam instead of inside the
- * panel — so the fix is a shared key, not a second reconciliation.
- *
- * ⚠️ A NULL KEY MEANS "NEVER COLLAPSE THIS". Cards with no agent (user tasks, manuscript prompts)
- * have no agent identity to collide on, so they always survive. Returning a shared empty-string
- * key instead would silently fold every one of them into a single row.
- *
- * ⚠️ THE KEY ONLY HAS TO BE CONSISTENT WITHIN ONE LIST, which is why the two callers may source
- * the title differently: the board prefers the manuscript record's `title`, while a dashboard row
- * holds only the task's denormalised `manuscriptTitle`. Both are per-task, so two tasks sharing a
- * manuscript produce the same string on whichever side is asking.
- */
-export const agentCardKey = (
-  taskType: string | undefined,
-  agentId: string | undefined,
-  msTitle: string | undefined,
-): string | null => (agentId ? `${taskType ?? ""}|${agentId}|${msTitle ?? ""}` : null);
-
 export function dedupeAgentCards(cards: BoardCard[]): BoardCard[] {
   const seen = new Set<string>();
   const kept: BoardCard[] = [];
   for (const c of cards) {
-    const id = agentCardKey(c.taskType, c.agentId, c.msTitle);
+    // Cards with no agent (user tasks, manuscript prompts) are never collapsed — they have no
+    // agent identity to collide on.
+    const id = c.agentId ? `${c.taskType ?? ""}|${c.agentId}|${c.msTitle ?? ""}` : null;
     if (id) {
       if (seen.has(id)) continue;
       seen.add(id);

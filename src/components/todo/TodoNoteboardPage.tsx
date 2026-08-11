@@ -157,7 +157,6 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = () => {
       <div className="tdb-wrap today-off">
         <TasksPageLayout
           title="Noteboard"
-          mark="noteboard"
           subtitle={subtitle}
           tools={
             <>

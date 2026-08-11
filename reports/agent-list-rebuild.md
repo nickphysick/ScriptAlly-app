@@ -97,7 +97,7 @@ field in the same commit; a new agent's preview/pin ride the create itself.
 - **`AgentMaterialsEditor.tsx`** — assessed for reuse (ruling: "reuse only if it's free"). Verdict:
   **written fresh.** It has no unit physics and carries its own Save/Cancel — a second commit model
   that would fight the buffered draft. It keeps its old callers' contract, untouched.
-- The F12 Contact list page body, its `agentsHub.test.ts` lock (27 markup assertions — audited:
+- The F12 Contact List page body, its `agentsHub.test.ts` lock (27 markup assertions — audited:
   zero behavioural, nothing re-homed) and one F12-artefact test in `agentsPage.test.ts`. All
   retrievable at `ed909ce`.
 

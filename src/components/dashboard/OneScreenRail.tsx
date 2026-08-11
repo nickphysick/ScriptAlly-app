@@ -17,12 +17,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus, User, UserTask } from "../../types";
 import { StatusDot } from "../StatusDot";
-import { goalBlockGap, goalFigure, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
-import { agentPrimary } from "../../lib/agentDisplay";
-import { OneScreenPanel } from "./OneScreenPanel";
-import { OneScreenMark } from "./OneScreenMark";
-import targetMark from "../../assets/shell/query-target-icon.png";
-import { EdgeFadeScroll } from "../EdgeFadeScroll";
+import { goalBlockGap, GoalPeriod, goalMeter, goalState } from "../../lib/oneScreen";
+import { Skel } from "./OneScreenDashboard";
 
 /* ── the 30-day feed, pure (exported for tests) ── */
 
@@ -38,16 +34,6 @@ export interface FeedRow {
   who: string;
   caption: string;
   dotStatus: QueryStatus | null;
-  /** What the event is ABOUT. The collapse law keys on it — query events never fold. */
-  scope: "query" | "agent" | "manuscript";
-  /** How many consecutive events this line stands for. 1 = an ordinary row. */
-  count: number;
-  /** DISTINCT subjects inside the run — six edits to one agent is not "six agents". */
-  subjects: number;
-  /** The run's subject NAMES, in order, so a collapsed row can name who it stands for. */
-  subjectNames: string[];
-  /** The EARLIEST time in a folded run, so a run reads as a span rather than one instant. */
-  fromTime: string;
 }
 
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -87,36 +73,6 @@ const TYPE_PILL: Record<string, { label: string; sage: boolean }> = {
   [ActivityType.MANUSCRIPT_UPDATED]: { label: "Manuscript updated", sage: false },
   [ActivityType.MANUSCRIPT_DELETED]: { label: "Manuscript removed", sage: false },
 };
-
-/**
- * ⚠️ A CAPTION ADDS WHAT THE SUBJECT LINE DOES NOT ALREADY SAY (fixes-2 A3).
- *
- * THE FAULT: `agentPrimary` correctly falls back to the AGENCY for a nameless agent — and the
- * caption then led with the agency too, so the row read
- *
- *     Penhallow Literary
- *     PENHALLOW LITERARY · DETAILS UPDATED
- *
- * ⚠️ THIS IS A GENERAL RULE, NOT AN AGENT-UPDATED PATCH. The same fallback fires on every agent
- * event and on query rows whose agent has no name, so the rule lives in one function both paths
- * call rather than in a condition at one call site.
- *
- * The comparison is case- and space-insensitive because the caption is uppercased by CSS and the
- * two strings come from different fields of the same record.
- */
-export const captionFor = (subject: string, ...parts: (string | undefined)[]): string => {
-  const norm = (v: string) => v.trim().toLowerCase();
-  return parts
-    .map((p) => (p ?? "").trim())
-    .filter((p) => p && norm(p) !== norm(subject))
-    .join(" · ");
-};
-
-/** The caption's tail for an agent event — what was done, in words, since the pill is the verb. */
-const agentEventContext = (t: string): string =>
-  t === ActivityType.AGENT_ADDED ? "added to your list"
-    : t === ActivityType.AGENT_DELETED ? "removed from your list"
-      : "details updated";
 
 /** Which family an event belongs to decides HOW its subject is found. */
 const AGENT_TYPES = new Set<string>([ActivityType.AGENT_ADDED, ActivityType.AGENT_UPDATED, ActivityType.AGENT_DELETED]);
@@ -159,50 +115,16 @@ export const feedRows = (
 
     let who = "";
     let caption = "";
-    let scope: FeedRow["scope"] = "query";
     if (AGENT_TYPES.has(a.activityType)) {
-      scope = "agent";
-      /**
-       * ⚠️ SUBJECT GRAMMAR: THE ROW NAMES WHO, NOT WHAT HAPPENED IN A SENTENCE (polish P5). The
-       * pill is the verb; this line is the subject. A sentence is what ran out of room and got
-       * truncated mid-clause, and it is what hid the missing-name bug — "You updated details for
-       * at Penhallow" reads as a layout problem rather than the data fault it is.
-       *
-       * ⚠️ THE SUBJECT IS LOOKED UP, NOT PARSED OUT. `Activity` carries no `agentId`, and picking
-       * a name out of the description with a regex is the string-parsing this codebase forbids.
-       * So the AGENT LIST is the authority: find the agent this description NAMES, by testing
-       * known values against it. Longest match wins, or "Vane" would claim "Vane-Coe".
-       *
-       * ⚠️ AND THIS REPAIRS LEGACY RECORDS. Descriptions written before the db.tsx fix have a hole
-       * where the name should be, but they still carry the AGENCY — so an agency match recovers
-       * the subject for rows that can never be repaired at source.
-       */
-      const desc = a.description;
-      let best: Agent | undefined;
-      let bestLen = 0;
-      for (const ag of agents) {
-        for (const token of [agentPrimary(ag), ag.agency]) {
-          const t = (token ?? "").trim();
-          if (t.length > bestLen && desc.includes(t)) { best = ag; bestLen = t.length; }
-        }
-      }
-      if (best) {
-        who = agentPrimary(best);
-        caption = captionFor(who, best.agency, agentEventContext(a.activityType));
-      } else {
-        /* No match — a deleted agent, or a description naming nobody we hold. The whole sentence
-           is the honest fallback: it is what we know, and the row is not dropped. */
-        who = desc.trim();
-      }
+      who = a.description.trim();
     } else if (MS_TYPES.has(a.activityType)) {
-      scope = "manuscript";
       who = manuscripts.find((m) => m.id === a.manuscriptId)?.title?.trim() || a.description.trim();
     } else {
       const q = queries.find((x) => x.id === a.queryId);
       const agent = q ? agents.find((x) => x.id === q.agentId) : undefined;
       who = (agent?.name || agent?.agency || "").trim();
       const msTitle = manuscripts.find((m) => m.id === a.manuscriptId)?.title;
-      caption = captionFor(who, agent?.agency, msTitle);
+      caption = [agent?.agency, msTitle].filter(Boolean).join(" · ");
     }
     /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
     if (!who) continue;
@@ -217,100 +139,10 @@ export const feedRows = (
       who,
       caption,
       dotStatus: a.resultingStatus ?? null,
-      scope,
-      count: 1,
-      subjects: 1,
-      subjectNames: [who],
-      fromTime: "",
     });
   }
-  return collapseFeedRuns(rows);
+  return rows;
 };
-
-/**
- * ⚠️ A RUN IS FOLDED, NOT FILTERED (audit P7). Editing one agent six times in an afternoon wrote
- * six identical lines and pushed a week of real querying off the card. The six are still all
- * there — they are one line that says so — because a feed that silently drops events is worse
- * than a noisy one.
- *
- * THREE RULES, and each exists because breaking it loses information:
- *
- * 1. **QUERY-SCOPED EVENTS NEVER FOLD.** Two "Query sent" rows naming the same agent on the same
- *    day are two different queries. Folding them would report one submission where two happened —
- *    the one kind of error this feed must never make. Only agent and manuscript housekeeping
- *    folds, because there the repetition genuinely is one record being worked on.
- *
- * 2. **ONLY CONSECUTIVE ROWS FOLD — a run never merges across an interruption.** If an agent edit
- *    is followed by a query sent and then another edit of the same agent, that is TWO runs of one,
- *    not one run of two: the events did not happen together, and the order is the story the feed
- *    is telling. (This is why the fold walks the sorted list rather than grouping by key — a
- *    `groupBy` would silently merge the two ends around the interruption.)
- *
- * 3. **THE DAY IS PART OF THE KEY.** Rows are already day-grouped in the render, so a run
- *    crossing midnight would render under one day heading while containing another day's events.
- *
- * The fold keeps the FIRST row of the run (newest, since the list is newest-first) so the line
- * carries the most recent state, and records the run's earliest time so it reads as a span.
- */
-export const collapseFeedRuns = (rows: FeedRow[]): FeedRow[] => {
-  const out: FeedRow[] = [];
-  const subjectsSeen: Set<string>[] = [];
-  for (const r of rows) {
-    const prev = out[out.length - 1];
-    const foldable =
-      prev
-      && prev.scope !== "query" && r.scope !== "query"
-      && prev.scope === r.scope
-      && prev.dayLabel === r.dayLabel
-      && prev.pill === r.pill;
-    if (foldable) {
-      const seen = subjectsSeen[subjectsSeen.length - 1];
-      seen.add(r.who);
-      // `prev` is the newer row; `r` is older, so it supplies the run's start time.
-      out[out.length - 1] = {
-        ...prev,
-        count: prev.count + 1,
-        subjects: seen.size,
-        subjectNames: [...seen],
-        fromTime: r.time,
-      };
-      continue;
-    }
-    out.push(r);
-    subjectsSeen.push(new Set([r.who]));
-  }
-  return out;
-};
-
-/**
- * A folded run's two lines, in the SAME grammar as an ordinary row: the line is the subject, the
- * caption is the context. `null` when the row is not a run, or when the run has one subject —
- * six edits to ONE agent is not "six agents", so that row keeps its own name and shows ×n.
- */
-export const runLines = (r: FeedRow): { line: string; caption: string } | null => {
-  if (r.count < 2 || r.subjects < 2) return null;
-  const noun = r.scope === "manuscript" ? "manuscripts" : "agents";
-  return { line: `${r.subjects} ${noun}`, caption: nameList(r.subjectNames) };
-};
-
-/**
- * "Jonathan Marsh, Harriet Vane-Coe & 4 more" — two names then a count.
- *
- * ⚠️ TWO NAMES IS THE CAP BECAUSE THE CAPTION IS ONE LINE. Listing four and ellipsing the last
- * loses a name mid-word, which is the truncation this whole phase exists to remove; a stated
- * "& 4 more" is complete at whatever width it is given.
- */
-export const nameList = (names: string[]): string => {
-  const shown = names.slice(0, 2);
-  const rest = names.length - shown.length;
-  return rest > 0 ? `${shown.join(", ")} & ${rest} more` : shown.join(" & ");
-};
-
-/** The pill's words for a run — the verb pluralises with its subjects. */
-export const runPill = (r: FeedRow): string =>
-  (r.count > 1 && r.subjects > 1 && r.pill.startsWith("Agent "))
-    ? r.pill.replace(/^Agent /, "Agents ")
-    : r.pill;
 
 /* ── the rail ── */
 
@@ -381,18 +213,13 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
   return (
     <div className={`os-colR${expanded ? " os-rail-expanded" : ""}`}>
       {/* ══ querying goals ══ */}
-      <OneScreenPanel variant="os-goal stowable" loading={loading} skel={["h", "", ""]}>
-        {/* ⚠️ NO BAND AND NO MARK BOX HERE — both were tried and rejected. The goals header is a
-            LABEL, not an instrument: it names the card and gets out of the way, and the band gave
-            it a weight the card does not carry. A bare flex row inside the card's own padding —
-            title, status word right-aligned, line and meter beneath. */}
+      <div className={`os-card os-lift os-goal stowable${loading ? " isload" : ""}`}>
+        {loading && <Skel bars={["h", "", ""]} />}
         <div className="os-goal-r1">
-          {/* ⚠️ BARE, and no transform on this wrapper — see the blend traps in oneScreen.css. */}
-          <span className="os-mark-il os-goalmark" aria-hidden="true"><img src={targetMark} alt="" /></span>
           <h2>Querying goals</h2>
           {goal && !editingGoal && (
             <button type="button" className="os-goal-num" title="Adjust the goal" onClick={() => { setGoalDraft({ target: goal.target, period: goal.period }); setEditingGoal(true); }}>
-              {goalFigure(goal.done, goal.target)}
+              {goal.done}/{goal.target}
             </button>
           )}
         </div>
@@ -446,15 +273,15 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
             </div>
           </>
         )}
-      </OneScreenPanel>
+      </div>
 
       {/* ══ activity ══ */}
-      <OneScreenPanel variant="os-actv" loading={loading} skel={["h", "", "", "grow"]} innerRef={actvRef}>
+      <div className={`os-card os-lift os-actv${loading ? " isload" : ""}`} ref={actvRef}>
+        {loading && <Skel bars={["h", "", "", "grow"]} />}
         <div className="os-ahead">
           {/* ⚠️ THE FLANKING RULES ARE GONE. They existed to centre the title on a plain card
               head; on a filled band they draw two lines across a colour that is already doing
               the separating. The title sits left, as the ref has it. */}
-          <OneScreenMark name="activity" />
           <h2>Activity</h2>
           <button
             ref={expBtnRef}
@@ -470,9 +297,7 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
               : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>}
           </button>
         </div>
-        {/* ⚠️ THE SHARED FADE (polish P2) — conditional by construction, so a short feed shows
-            none and the end of a long one is honestly the end. See the tasks card for the rule. */}
-        <EdgeFadeScroll fade="#fffdf9" outerClassName="os-abodywrap" scrollClassName="os-abody" scrollId="os-actv-body">
+        <div className="os-abody" id="os-actv-body">
           {rows.length === 0 ? (
             <div className="os-aempty">
               <span className="os-aempty-thread" aria-hidden="true" />
@@ -490,32 +315,19 @@ export const OneScreenRail: React.FC<OneScreenRailProps> = ({
                     <span className="os-tlln" aria-hidden="true" />
                   </div>
                   <div className="os-cardlet">
-                    {/* ⚠️ TWO CHILDREN, ALWAYS. `.os-r1` is space-between, so a bare third child
-                        would be pushed to the middle of the row rather than sitting with the pill. */}
-                    <div className="os-r1">
-                      <span className="os-r1l">
-                        <span className={`os-st${r.sage ? " sg" : ""}`}>{runPill(r)}</span>
-                        {/* ⚠️ A FOLDED RUN STATES ITS SIZE AND ITS SPAN — without the count, the
-                            fold is indistinguishable from events having gone missing. */}
-                        {r.count > 1 && <span className="os-runx">×{r.count}</span>}
-                      </span>
-                      <span className="os-tm">{r.count > 1 && r.fromTime ? `${r.fromTime}–${r.time}` : r.time}</span>
-                    </div>
-                    {/* ⚠️ SUBJECT ON THE LINE, CONTEXT BENEATH — never a sentence spanning both. */}
-                    <div className="os-who">{runLines(r)?.line ?? r.who}</div>
-                    {(runLines(r)?.caption || r.caption) && (
-                      <div className="os-cap">{runLines(r)?.caption || r.caption}</div>
-                    )}
+                    <div className="os-r1"><span className={`os-st${r.sage ? " sg" : ""}`}>{r.pill}</span><span className="os-tm">{r.time}</span></div>
+                    <div className="os-who">{r.who}</div>
+                    {r.caption && <div className="os-cap">{r.caption}</div>}
                   </div>
                 </div>
               </React.Fragment>
             ))
           )}
-        </EdgeFadeScroll>
+        </div>
         <div className="os-esc">Click the arrows, press Escape, or click away to close</div>
         {/* §6: the footer is a quiet caption ONLY — no link; the arrows are the sole route in */}
         <div className="os-afoot"><span className="os-ac">Last 30 days</span></div>
-      </OneScreenPanel>
+      </div>
 
       {/* ⚠️ THE PRO MINI LEFT THE RAIL (v16 §5) — it is the full-width banner beneath tasks now
           (OneScreenPro). Do not reinstate one here: two upsells on one screen sell the same thing

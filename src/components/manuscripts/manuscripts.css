@@ -15,34 +15,11 @@
   --msv-hue: var(--sd-hue);
   --msv-huec: var(--sd-centre);
   height: 100%;
-  /* ⚠️ THE ROOT NO LONGER SCROLLS (amendment 9) — the grid's row 3 does. A scroller here as well
-     would put the whole page inside a second scrollport and take the chrome with it. */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
   /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas */
   color: var(--msv-ink);
-  /* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE — the padding reads it and the workspace
-     header's bleed (pageHeader.css `.wsh`) reads the same token back, so the header's rule spans
-     the page while the CONTENT stays guttered inside `.msv-wrap`.
-     ⚠️ TOP 22 → 11, HALVED, for the reason the agent list halved: the header sits inside this
-     padding and already carries its own 78px, so the top value was empty paper above it. The side
-     and bottom values gutter the CONTENT, which is a different job, and are untouched. */
-  --pg-gut: 28px;
-  /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER. Below row 3 it would be fixed space the shelf
-     could never scroll into — a dead band under the last plate. */
-  padding: 11px var(--pg-gut) 0;
+  padding: 22px 28px 48px; /* masthead gutter mirrors the Queries hub (22px top / 28px sides) */
 }
-/* ⚠️ THE CAP IS ON THE GRID ROOT, not the content wrapper, so plate, toolbar and plates below are
-   one column wide BY CONSTRUCTION rather than by separate rules agreeing. Same expression as
-   before — the read cap minus this page's own gutter — one level out. */
-.msv-wpg {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
-  }
-.msv1 .wpg-scroll { padding-bottom: 48px; }
 
 .t-capp .msv1 {
   --msv-card: #fdfaf5; --msv-cardbd: 1px solid #d8cebf; --msv-crad: 10px;
@@ -76,29 +53,9 @@
 }
 
 /* ── shared primitives ── */
-/* ⚠️ THE CAP IS BACK ON THIS HOOK, and it is the SAME cap — it moved off the route slot, not away.
-   `contentVariant="read"` capped the slot at 1200px, which wrapped the page HEADER too and stopped
-   its rule 278px short of the window on each side; the header is chrome and must span the page. So
-   the cap came inward to the content, where capping content belongs.
-   ⚠️ AND IT IS EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal. The slot cap
-   was an OUTER width that the page's 28px padding then ate, so the content measured 1200 − 56 =
-   1144. Writing `1144px` here would be a magic number that silently stops matching the day either
-   the cap or the gutter moves; this stays correct through both. Measured before and after: 1144. */
-/* the cap moved up to `.msv-wpg`; this survives as a plain full-width wrapper in the scroller */
-/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
-   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
-   edge; this is what keeps the content the same width it was before the grid. */
-.msv-wrap { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
-/* ⚠️ THE TALLY ROW — the toolbar slot, read off the Contact list's `.agl-count` rather than
-   re-derived, so the two pages state their figures in one voice. THE RULE: the plate carries
-   identity, this row carries tallies and view state. `margin-left:auto` is what pushes it to the
-   end of the row, and it is why this is a ROW and not a bare span — a tally with nothing to be
-   pushed away from would just sit left and read as a stray caption. */
-.msv-tally {
-  margin-left: auto; white-space: nowrap;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  letter-spacing: 0.11em; text-transform: uppercase; color: var(--msv-muted);
-}
+/* max-width retired → the shell's content-column cap (read = 1200px) now centres this page;
+   see contentColumn.css. Kept as a hook (full-width) so the markup/selector is undisturbed. */
+.msv-wrap { width: 100%; }
 .msv-lab {
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.17em;
   text-transform: uppercase; font-weight: 500; color: var(--msv-label);
@@ -152,11 +109,7 @@
 .msv-spine.on { background: var(--msv-card); box-shadow: var(--msv-cardshadow); }
 .msv-spine.on::before { opacity: 1; }
 .msv-spine.shelved { opacity: 0.55; }
-/* ⚠️ SHADOW-ONLY HOVER, same reason as the agent card: the spine row sits flush to the top of the
-   scroll row, which clips, so a 1px lift clipped its top edge. It carried NO hover shadow, so this
-   substitutes the resting card shadow rather than simply deleting the feedback — a control that
-   stops responding to the pointer reads as broken, not as restrained. */
-.msv-spine:hover { box-shadow: var(--msv-cardshadow); }
+.msv-spine:hover { transform: translateY(-1px); }
 
 /* ── frontispiece plates (overview) ── */
 .msv-tilegrid { display: flex; flex-direction: column; gap: 26px; }

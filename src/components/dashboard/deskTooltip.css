@@ -19,38 +19,6 @@
   max-width: 280px;
 }
 .dk-tip.show { opacity: 1; transform: translateY(0); }
-
-/* ── the RAIL variant (sidebar-collapse pack, Phase 3) — the collapsed sidebar's fly-out label.
-   Same surface, same portal, different clothes: mono uppercase at 10px, tighter padding, the
-   pack's lighter shadow — and it ARRIVES FROM THE LEFT (translateX) because it flies out of the
-   rail rather than rising from under a glyph. Copy is the route label verbatim — no appraisal. */
-.dk-tip--rail {
-  transform: translateX(-4px);
-  background: #fdfaf5;
-  border: 1px solid #e7ddd2;
-  border-radius: 9px;
-  box-shadow: 0 4px 14px rgba(60, 30, 20, 0.1);
-  padding: 7px 12px;
-  min-width: 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--shell-ink, #2e2723);
-  white-space: nowrap;
-}
-.dk-tip--rail.show { transform: translateX(0); }
-/* the two-line variant: manuscript (title / genre · count) and user (name / plan) */
-.dk-railsub {
-  font-family: "Inter", sans-serif;
-  font-size: 10.5px;
-  letter-spacing: 0;
-  text-transform: none;
-  color: #9c8878;
-  margin-top: 3px;
-}
-/* the toggle's shortcut hint rides the label's line, quieter */
-.dk-railkbd { color: #b3a596; margin-left: 8px; }
 /* interactive: the pointer may travel INTO it, so it must accept events */
 .dk-tip.live { pointer-events: auto; }
 .dk-tip.pinned {

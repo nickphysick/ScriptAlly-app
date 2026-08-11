@@ -38,13 +38,13 @@ monogram column stops dominating the left edge.
 
 ### Shared-component handling (the Step-0 scoping)
 `.f12-av` is a **shared** class: `.f12-row .f12-av` styles the monogram in **both** the query list
-(`Queries.tsx`) **and** the Contact list (`Agents.tsx`). The large reading-pane header uses a different
+(`Queries.tsx`) **and** the Contact List (`Agents.tsx`). The large reading-pane header uses a different
 class (`.f12-bigav`); the account chip uses `.f12-av2`. To scope the change to the query list **only**,
 I added an **additive `.f12-av--sm` modifier** to the query-list span alone and a matching rule in
 `f12.css` (placed after the base rule so it wins at equal specificity):
 
 - **Changed:** the query-list monogram (`Queries.tsx` — `f12-av f12-av--sm`).
-- **Unchanged:** the Contact list monogram (`Agents.tsx`, plain `.f12-av`), the reading-pane header
+- **Unchanged:** the Contact List monogram (`Agents.tsx`, plain `.f12-av`), the reading-pane header
   monogram (`.f12-bigav`, 76px), and the account-chip monogram (`.f12-av2`).
 
 The warm-grey token `--mono-tonal: #ece5db` is defined in **`f12.css`** (a `.t-f12` block), **not**
@@ -58,7 +58,7 @@ block once that lands (same precedent as `contentColumn.css`).
 - Save is **soft-pink**; unit toggle is **outline-selected**; the quantity **placeholder is gone**.
 - Query letter / Synopsis / sample materials **toggle & remove as corrections — no timeline log**.
 - Package action **gates Attach (Pro) / Upgrade (free)** off the app's plan check.
-- Monogram change **scoped to the query list** via an additive variant; Contact list / reading-pane
+- Monogram change **scoped to the query list** via an additive variant; Contact List / reading-pane
   header / account chip untouched (shared-component handling above).
 - **No new fields, no rules changes.** Tokens not hex (`--mono-tonal` added in `f12.css`); UK spelling;
   locked components consumed verbatim (`TypeGlyph`, `StatusDot`, `F12Menu`).
@@ -75,4 +75,4 @@ Clean `git status` after the Phase 3 commit (bar the pre-existing out-of-scope t
 ## ⚠ Verify in-browser on dev (auth-gated — the preview harness can't log in)
 - What-you-sent: soft-pink Save; outline unit toggle; empty quantity; toggling Query letter/Synopsis
   (Mark sent ↔ Sent, no log); sample Change/Remove; free-vs-Pro package action.
-- The query list at 32px warm-grey tonal monograms; confirm the Contact list monograms are unchanged.
+- The query list at 32px warm-grey tonal monograms; confirm the Contact List monograms are unchanged.

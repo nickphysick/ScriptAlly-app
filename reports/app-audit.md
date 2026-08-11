@@ -443,7 +443,7 @@ New-since-prod spot checks (all verified with `git cat-file`): shell/AppShell.ts
 | 19 | Edit Query drawer + shared form primitives | 7 | `a240b5d`→`a7173de` | Editable query drawer, correction fork, journal CRUD; retires QuerySlideInPanel. |
 | 20 | Territory / location model | 7 | `3671c79`→`ad1a03a` | ISO countries + flags, homeCountry seed, CountryCombobox. |
 | 21 | App shell, rail, chrome, navigation | 96 | `398eab1`→`657bfc8` | Rail → global AppShell + URL routing → capsule shell → v2 bar/panel → per-page header; mobile tab bar. |
-| 22 | Agents / Contact list / Discover rebuilds | 67 | `eb525c2`→`6d40e2b` | Agents rebuilt twice (reading-pane hub, then card-flip AgentList); Discover as its own page; three-axis status model. |
+| 22 | Agents / Contact List / Discover rebuilds | 67 | `eb525c2`→`6d40e2b` | Agents rebuilt twice (reading-pane hub, then card-flip AgentList); Discover as its own page; three-axis status model. |
 | 23 | Manuscripts + comparable titles | 15 | `2b6b78e`→`dd81bdd` | CompTitle[] hard cut; plates page; comps sub-page; Scout panel (flag-gated). |
 | 24 | Interactions stream (toasts, genres, composer, UserTask) | 49 | `62c5f2a`→`4e4355f` | Toast+undo system; genre taxonomy; inline response composer; canonical tasks store; structured materials; deleteQuery. |
 | 25 | Tracking / grace / overdue / nudges | 29 | `a2fce7d`→`ed909ce` | Escalation state machine, progress geometry, nudge chips/events, expected-date override. |

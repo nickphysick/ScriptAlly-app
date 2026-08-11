@@ -533,14 +533,15 @@ export const Dashboard: React.FC<{
     setNoteToast(null);
   };
 
-  /* ⚠️ THE 180ms `showSkeleton` STATE THAT LIVED HERE IS DELETED (audit pack P1), and it had
-     already stopped doing anything: it was set by a timer and READ BY NOTHING — left standing when
-     the early skeleton return was removed (see the note at the render). So the app carried a
-     timer, a state slot and a re-render per load in service of a decision no one consulted.
-
-     Its idea was right and now lives where it can be tested: `useSkeleton` in lib/skeletonTiming,
-     which the one-screen dashboard drives. That version also holds a MINIMUM once shown, which
-     this one never did — a delay alone still flashes when the data lands 20ms after the timer. */
+  // Loading vs loaded-empty vs loaded-with-data. While the user's collections are still loading we
+  // show the skeleton — never the empty/onboarding state — but only if the load takes a moment
+  // (~180ms), so fast loads don't flash it.
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  useEffect(() => {
+    if (collectionsReady) { setShowSkeleton(false); return; }
+    const t = setTimeout(() => setShowSkeleton(true), 180);
+    return () => clearTimeout(t);
+  }, [collectionsReady]);
 
   const [isTasksPanelOpen, setIsTasksPanelOpen] = useState(false);
   const [spotlightTaskIndex, setSpotlightTaskIndex] = useState(0);

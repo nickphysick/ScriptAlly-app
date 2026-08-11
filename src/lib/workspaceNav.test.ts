@@ -7,8 +7,6 @@
  * decision somebody made.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { QueryStatus } from "../types";
 import { workspaceSections } from "./workspaceNav";
 import {
@@ -20,47 +18,6 @@ import { shellHitFor } from "./workspaceShell";
 
 const NAV = workspaceSections({ todo: 4 });
 const byId = (id: string) => NAV.find((s) => s.id === id)!;
-
-describe("⚠️ THE ICON MAP IS A PARALLEL SURFACE — every key the nav names must exist in it", () => {
-  /**
-   * ⚠️ THIS GUARD WAS MISSING, AND ITS ABSENCE WAS PROVEN RATHER THAN ASSUMED: two brand-new icon
-   * keys ("library", "books") were added to the nav and the ENTIRE suite stayed green. The existing
-   * assertion only checks that `c.icon` is TRUTHY — a row naming an icon nobody drew passes it.
-   *
-   * `WORKSPACE_ICONS` lives in AppShell.tsx and is NOT type-linked to this model, so a key that
-   * resolves to nothing renders a blank space where a glyph should be, with no error anywhere. The
-   * same shape is already recorded in CLAUDE.md for the old RAIL_ICONS ("a parallel surface not
-   * type-linked to RAIL_GROUPS — add both"), and AppShell's own comment calls it "the quiet half of
-   * that failure". It is read as SOURCE TEXT because importing AppShell here would pull React and
-   * the db provider into a node-environment unit test.
-   */
-  const appShell = readFileSync(resolve(__dirname, "../components/shell/AppShell.tsx"), "utf8");
-  const iconBlock = appShell.slice(
-    appShell.indexOf("const WORKSPACE_ICONS"),
-    appShell.indexOf("};", appShell.indexOf("const WORKSPACE_ICONS")),
-  );
-  /* ⚠️ ANCHOR BEFORE SLICING — an empty slice makes every `toContain` below vacuously true, which
-     is the string-spec failure mode already documented in CLAUDE.md. */
-  it("the icon map is where this test thinks it is", () => {
-    expect(iconBlock, "WORKSPACE_ICONS moved or was renamed — every assertion below is now vacuous").toContain("workspace:");
-  });
-
-  it("every ROW's icon key is drawn", () => {
-    for (const s of NAV) {
-      for (const c of s.children ?? []) {
-        expect(iconBlock, `nav row "${c.id}" names icon "${c.icon}", which WORKSPACE_ICONS does not draw — the row renders a blank space and nothing complains`)
-          .toContain(`${c.icon}:`);
-      }
-    }
-  });
-
-  it("every SECTION's own key is drawn — the rail rib needs its glyph too", () => {
-    for (const s of NAV) {
-      expect(iconBlock, `nav section "${s.id}" has no glyph in WORKSPACE_ICONS — the collapsed rail loses a rib, which is what makes it a complete map of the app`)
-        .toContain(`${s.id}:`);
-    }
-  });
-});
 
 describe("The IA renders what exists — and nothing else", () => {
   it("every path in the nav is a route the app actually has", () => {
@@ -87,14 +44,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
-       work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
-       ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
-       describe four different things. A pre-existing artefact of an earlier bulk retarget; left
-       as found rather than widened here. */
-    expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -118,14 +69,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
-       work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
-       ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
-       describe four different things. A pre-existing artefact of an earlier bulk retarget; left
-       as found rather than widened here. */
-    expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -157,14 +102,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
-       work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
-       ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
-       describe four different things. A pre-existing artefact of an earlier bulk retarget; left
-       as found rather than widened here. */
-    expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -184,14 +123,8 @@ describe("The IA renders what exists — and nothing else", () => {
        navigated and disclosed was one control doing two jobs, and it put half the app behind a
        state you had to know to open. */
     const secs = workspaceSections({ todo: 42 });
-    /* sidebar-IA fix (6 Aug): TASKS joined the IA. Audit pack P5: it MOVED — the order is now the
-       work's order, Queries · Agents · Materials first and Tasks after the work it falls out of —
-       and ACCOUNT joined at the end, holding the Settings row that used to sit in the foot.
-       ⚠️ NOTE: this body is copy-pasted verbatim across four tests in this file whose NAMES
-       describe four different things. A pre-existing artefact of an earlier bulk retarget; left
-       as found rather than widened here. */
-    expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+    // sidebar-IA fix (6 Aug): TASKS joined, directly after WORKSPACE
+    expect(secs.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);

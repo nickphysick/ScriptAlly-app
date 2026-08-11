@@ -144,7 +144,7 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
   it("both branches share the centred .f12-body column (the old queries-content-grid is retired)", () => {
-    // The panes live in the SAME centred column as the Contact list page — .f12-body caps at
+    // The panes live in the SAME centred column as the Contact List page — .f12-body caps at
     // --maxw with auto margins and the --gut bottom gap; the old page-specific grid is gone.
     expect(src.includes('className="queries-content-grid"')).toBe(false);
     // the empty branch's body carries the pusher opt-out modifier (Mobile Pass 1)

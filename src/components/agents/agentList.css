@@ -43,13 +43,7 @@
   --agl-grey-band: #eae8e4; --agl-grey-cast: #e2dfda; --agl-grey-rule: #b8b3ab;
 
   height: 100%;
-  /* ⚠️ THE ROOT NO LONGER SCROLLS (amendment 9). `overflow-y: auto` lived here while the page was
-     one long document with sticky chrome inside it; the chrome is OUT of the scroller now, and the
-     grid's row 3 is the only thing that scrolls. A scroller here as well would put the whole page
-     inside a second scrollport and the chrome would leave with it. */
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
   /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas; --agl-paper
      survives for the cards and buttons that read it */
   color: var(--agl-ink-body);
@@ -68,12 +62,7 @@
    animations carry fill-mode `both`, and a filled animation outranks an inline transform, so a
    card still holding one would silently ignore a FLIP transform.
    ══════════════════════════════════════════════════════════════════════════ */
-/* ⚠️ THE ENTRANCE RIDES `.wsh`, NOT the sticky `.wsh-wrap`. `rise` ends at `translateY(0)`
-   under `fill-mode: both`, so it leaves a transform on whatever carries it — and a transform
-   on the sticky element is the next quiet way to stop it pinning. The wrapper it used to sit
-   on (`.agl-head-slot`) is DELETED: it boxed the plate at its own height, so sticky had zero
-   travel and the header scrolled away. */
-.aglist.agl-anim .wsh { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+.aglist.agl-anim .agl-head-slot { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
 .aglist.agl-anim .agl-toolbar { animation: rise .28s cubic-bezier(.4, 0, .2, 1) .06s both; }
 /* the delay comes from the inline style; the duration and curve come from here */
 .aglist.agl-anim .agl-scene { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
@@ -119,7 +108,7 @@
 .aglist .agl-notice-in { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .aglist.agl-anim .wsh,
+  .aglist.agl-anim .agl-head-slot,
   .aglist.agl-anim .agl-toolbar,
   .aglist.agl-anim .agl-scene,
   .aglist .agl-scene.agl-arriving,
@@ -135,46 +124,8 @@
    elements, two jobs — merging them would tie the cap to the padding.
    v4 P1: the two numbers now come from the SHARED column tokens (pageHeader.css) so the Queries
    header can sit in the same column. The token values ARE these values — this is a no-op. */
-/* ⚠️ 14px, NOT 28px — the header sits inside this padding, so the top value is the gap between
-   the window's edge and the header itself. At 28 it read as a band of empty paper above a header
-   that is already generous; halved, the header sits where the window starts. The SIDE and BOTTOM
-   values are untouched — they gutter the CONTENT, which is a different job. */
-/* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE. The padding below reads it, and the workspace
-   header's bleed (pageHeader.css `.wsh`) reads the SAME token back to cancel it — so the header's
-   rule lands flush on the window while the CONTENT stays guttered. The two agree structurally,
-   not by two numbers kept in step; if you change the gutter, change it here only.
-   ⚠️ MEASURED, because the old comment was wrong: before the bleed this rule was inset 61px per
-   side at a 1700px window, NOT full-bleed as `f5be3af` claimed. */
-.aglist .agl-page {
-  --pg-gut: var(--sa-col-gut);
-  /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER (amendment 9). At 48px here it would be fixed
-     space BELOW row 3 — a permanent dead band the list could never scroll into. It is the
-     scroller's own bottom padding now, so it scrolls with the last card as it always read. */
-  padding: 14px var(--pg-gut) 0;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-/* ⚠️ THE CAP IS ON THE GRID ROOT, NOT THE INNER COLUMN, and that is what makes the three rows
-   agree. Plate, toolbar and cards are one column wide BY CONSTRUCTION — capping only the content
-   would leave the chrome rows full width and the alignment would be three rules hoping to match.
-   RETARGETED, NOT RELAXED: the same `--sa-col-max`, one level out. */
-.aglist .agl-wpg {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  --wpg-cap: var(--sa-col-max);
-  }
-/* `.agl-inner` survives as a plain wrapper inside the scroller — the cap it used to carry is above
-   it now, so it only has to be full width. */
-/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
-   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
-   edge; this is what keeps the content the same width it was before the grid. */
-.aglist .agl-inner { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
-.aglist .wpg-scroll { padding-bottom: 48px; }
-/* the toolbar sits in the grid's row, so its sibling-era top margin would push it off the hairline */
-.aglist .wpg-tools .agl-toolbar { margin: 0; flex: 1 1 auto; }
+.aglist .agl-page { padding: 28px var(--sa-col-gut) 48px; }
+.aglist .agl-inner { max-width: var(--sa-col-max); margin: 0 auto; }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
 .aglist .agl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
@@ -203,7 +154,6 @@
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin: 22px 0 0; position: relative; z-index: 20;
 }
-
 
 .aglist .agl-search {
   display: flex; align-items: center; gap: 9px;
@@ -373,15 +323,12 @@
 .aglist .agl-empty .big { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--agl-ink-head); margin-bottom: 6px; }
 .aglist .agl-empty .small { font-size: 13px; font-weight: 300; }
 
-/* ⚠️ THE BREAKPOINTS MOVE `--pg-gut`, NEVER A LITERAL IN THE PADDING. The header's bleed reads the
-   token, so a literal here would leave the rule bleeding by the DESKTOP gutter on a phone — inset
-   on one breakpoint and overhanging on the next, with nothing in the CSS to point at. */
 @media (max-width: 900px) {
-  .aglist .agl-page { --pg-gut: 28px; padding: 12px var(--pg-gut) 44px; }
+  .aglist .agl-page { padding: 24px 28px 44px; }
 }
 /* the 640px hand-rolled breakpoint migrated to md (Mobile Pass 1 breakpoint law) */
 @media (max-width: 767.98px) {
-  .aglist .agl-page { --pg-gut: 16px; padding: 9px var(--pg-gut) 40px; }
+  .aglist .agl-page { padding: 18px 16px 40px; }
   .aglist .agl-h1 { font-size: 38px; }
   .aglist .agl-search { min-width: 0; width: 100%; }
 }
@@ -419,16 +366,7 @@
   box-shadow: 6px 6px 0 var(--agl-cast);
   transition: transform .16s ease, box-shadow .16s ease, opacity .25s ease;
 }
-/* ⚠️ SHADOW-ONLY HOVER — the lift is DELETED, and CLAUDE.md already prescribes this: "cards flush
-   to a clipped boundary use shadow-only hover". The cards sit in a grid inside `.wpg-scroll`, which
-   is `overflow-y: auto` and therefore clips BOTH axes, and the top row is flush to its top edge —
-   so `translate(-2px, -2px)` pushed the top-left corner of the top-left cards straight through the
-   clip. The card appeared to lose a sliver on hover.
-   ⚠️ AND THE EFFECT SURVIVES WITHOUT IT. The letterpress read was never the 2px move on its own: it
-   is the CAST growing 6 → 8, which is untouched. Adding scroller padding to make room for the lift
-   would be the compensating fix the layout locks forbid — it papers over the clip and drifts.
-   The lift survives where nothing clips it: buttons and pills, unchanged. */
-.aglist .agl-facef .agl-acard:hover { box-shadow: 8px 8px 0 var(--agl-cast); }
+.aglist .agl-facef .agl-acard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--agl-cast); }
 /* closed for submissions: the whole face rests faded, and hover restores it to full */
 /* THE DOOR, IN INK — a hatch over the band's colour, beneath the band's contents. The overlay
    is pointer-events:none and the children take a stacking context, so it never washes over the

@@ -10,10 +10,9 @@
  * title and its header squashed against the top bar — because each page hand-assembled the same
  * geometry and one of them missed the column. The contract, once, here:
  *
- *  1. The content region's TOP PADDING IS A SINGLE TOKEN — `--tdb-chrome-gap` (16px; this comment
- *     said 44px and was simply wrong, corrected 10 Aug against todo.css) — AND SO IS ITS GUTTER —
- *     `--tdb-col-gutter` (40px) — both carried by the `.tdb-col` geometry this
- *     component owns, with `.tdb-col`'s max width as the one horizontal cap.
+ *  1. The content region's TOP PADDING IS A SINGLE TOKEN — `--tdb-chrome-gap` (44px) — AND SO IS
+ *     ITS GUTTER — `--tdb-col-gutter` (40px) — both carried by the `.tdb-col` geometry this
+ *     component owns, with `.tdb-col`'s max width and auto-centring as the one horizontal cap.
  *     Every page title sits at the same offset on BOTH axes because every page renders THIS
  *     component and NOTHING ELSE caps or pads the column: the route slots carry no
  *     contentVariant (tasks-audit addendum — three slots' leftover read caps made the board's
@@ -38,30 +37,23 @@
  *     part, and jsdom cannot check that the chain resolves.
  */
 import React from "react";
-import { PageHeader } from "../shell/PageHeader";
-import { MarkName } from "../dashboard/OneScreenMark";
 import "./tasksLayout.css";
 
 export interface TasksPageLayoutProps {
   title: string;
-  /** ⚠️ THE PLATE'S MARK, declared per page as on every other band-tier page. Required rather than
-   *  derived: this component cannot see the route, and one shared default would give three pages
-   *  the same glyph. */
-  mark: MarkName;
-  /** The one-line description. Optional — a page with nothing to say says nothing. It is the
-   *  PLATE's description now, so it fades when the plate condenses. */
+  /** The one-line subtitle under the title. Optional — a page with nothing to say says nothing. */
   subtitle?: string;
-  /** ⚠️ THE MONO EYEBROW — the To-do list's "{DAY DATE} · WEEK {n} OF QUERYING", the Dashboard's
-   *  own grammar. It MOVED INTO THE TOOL ROW with the plate (amendment 7): the plate carries
-   *  IDENTITY and the tool row carries tallies and context, which is what a dated week-count is.
-   *  It stays a prop rather than something a page hand-assembles, because a page assembling its own
-   *  header is how these pages came to disagree about their top edge in the first place. */
+  /** ⚠️ THE MONO EYEBROW, above the title (tasks-viewport P2) — Today's "{DAY DATE} · WEEK {n} OF
+   *  QUERYING", the Dashboard's own grammar. It sits INSIDE the header block rather than being
+   *  hand-assembled by the page, because a page that assembles its own header is exactly how the
+   *  four of them came to disagree about their top edge in the first place. */
   eyebrow?: string;
-  /* ⚠️ `titleActions` AND `beneath` ARE DELETED, not deprecated. Both existed for the Today page,
-     retired on 9 Aug (tasks-consolidation P1), and NEITHER had a caller left anywhere in the repo —
-     verified before removing. A prop with no callers is a slot a future page fills without anyone
-     deciding it should exist; the plate's own `actions`/`actionsSlot` are the supported way in, and
-     they are one contract shared with every band-tier page. */
+  /** ⚠️ THE ROW BENEATH THE TITLE — Today's stat pills. Renders under the title/actions line and
+   *  above the tool row's hairline, so the header block stays one fixed unit. */
+  beneath?: React.ReactNode;
+  /** Actions on the TITLE's own line (Today's ghost + ink pair), right-aligned. Distinct from
+   *  `tools`: these are the page's two verbs, not its control row. */
+  titleActions?: React.ReactNode;
   /** The page's controls — the ONLY place they may live. Right slot = the pink creation action. */
   tools?: React.ReactNode;
   /** The shared side container. Absent = the body takes the full width (the Noteboard). */
@@ -107,50 +99,27 @@ export const TplZone: React.FC<TplZoneProps> = ({ children, hem = true, classNam
 );
 
 export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
-  title, mark, subtitle, eyebrow, tools, sidebar, children,
+  title, subtitle, eyebrow, beneath, titleActions, tools, sidebar, children,
 }) => (
   /* `.tdb-col` is the SINGLE geometry owner (max-width, gutters, and the top token) — the layout
      wears it rather than restating its numbers. `.tpl` adds only what the contract needs. */
   <div className="tdb-col tpl">
     <header className="tpl-head">
-      {/**
-       * ⚠️ THE PLATE REPLACES THE TITLE BLOCK, and it replaces it HERE rather than in each page —
-       * which is the whole reason this component exists. Converting the three Tasks pages one at a
-       * time would have had them disagreeing about their top edge between commits, the exact fault
-       * this file was written to end.
-       *
-       * ⚠️ AND IT WILL NOT CONDENSE ON THESE PAGES, by construction and correctly. `.tpl-head` is
-       * `flex: 0 0 auto` and never scrolls; `.tpl-zone` below it is "the only thing that scrolls".
-       * So the plate has no scroller to stick within and stays at its 88px rest height — which is
-       * right, because it is never covering anything that needs to get past it. Comparable titles
-       * already behaves this way for the same reason. Do NOT "fix" this by moving the plate into
-       * the zone: it would then scroll away with the list, and reaching for the `min-height: 0`
-       * chain to avoid that is explicitly out of bounds (see the chain note in tasksLayout.css).
-       */}
-      {/* ⚠️ THE TOOL ROW MOVED INSIDE THE PLATE (amendment 8 B). It was a sibling below it, drawing
-          its own hairline; it is now the plate's second row, sharing one border, one shadow and one
-          background — so the controls pin with the header rather than scrolling away from it.
-          ⚠️ THE EYEBROW RIDES THAT ROW. It is mono context — a date and a week count — and the rule
-          is that the plate's identity row carries identity while the tool row carries tallies and
-          context. Neither controls nor an eyebrow → no row and no hairline at all. */}
-      <PageHeader
-        variant="workspace"
-        mark={mark}
-        title={title}
-        description={subtitle}
-        /* ⚠️ `.tpl-tools` SURVIVES AS AN INNER WRAPPER, and deleting it would have been the quiet
-           mistake here: its DESCENDANT rules carry this family's control grammar — the house
-           disabled treatment (`.tpl-tools button[disabled]`) and the tool-row button sizing. Drop
-           the class and those stop matching with nothing to point at. Its own frame (the hairline
-           and margins it drew as a sibling) is neutralised inside `.wsh-tools`, which supplies the
-           row's one separator. */
-        toolbar={(tools || eyebrow) ? (
-          <div className="tpl-tools tdb-tools">
-            {eyebrow && <span className="tpl-eyebrow">{eyebrow}</span>}
-            {tools}
-          </div>
-        ) : undefined}
-      />
+      {eyebrow && <div className="tpl-eyebrow">{eyebrow}</div>}
+      {titleActions ? (
+        <div className="tpl-titlerow">
+          <h1 className="tpl-title">{title}</h1>
+          <span className="tpl-grow" aria-hidden />
+          {titleActions}
+        </div>
+      ) : (
+        <h1 className="tpl-title">{title}</h1>
+      )}
+      {subtitle && <p className="tpl-sub">{subtitle}</p>}
+      {beneath}
+      {/* the hairline lives on this row's bottom edge — the header ends where the columns begin.
+          An empty tool row would draw a bare rule, so a page with no controls renders none. */}
+      {tools && <div className="tpl-tools tdb-tools">{tools}</div>}
     </header>
     <div className="tpl-cols">
       {sidebar && <aside className="tpl-side">{sidebar}</aside>}

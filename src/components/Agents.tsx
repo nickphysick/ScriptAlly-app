@@ -6,7 +6,7 @@
  * App.tsx is untouched); the page itself is now the AGENT LIST rebuild — a card grid with an
  * in-place flip editor, per design-refs/agent-list-mockup.html.
  *
- * The previous "F12 Contact list" implementation (filter/sort/group rail, two-pane reading
+ * The previous "F12 Contact List" implementation (filter/sort/group rail, two-pane reading
  * surface, inline link-pill editors, tasks popover) is superseded wholesale and lives in git
  * history at ed909ce — pull from there if any of its behaviour needs reviving.
  */

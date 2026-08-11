@@ -81,13 +81,8 @@ describe("the app sidebar's TASKS section", () => {
   const nav = workspaceSections({ todo: 7 });
   const tasks = nav.find((s) => s.id === "tasks")!;
 
-  /* ⚠️ RETARGETED (audit pack P5): TASKS is FOURTH now, not second. The rule this test exists for
-     — that To-do is its own section and no To-do row survives under Workspace — is untouched and
-     still asserted; only the position moved, because the sections above it are the querying work
-     itself and Tasks is what falls out of that work. */
-  it("is its own section, after the querying work — and no To-do row survives under Workspace", () => {
-    expect(nav.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
+  it("sits directly after WORKSPACE — and no To-do row survives under Workspace", () => {
+    expect(nav.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 

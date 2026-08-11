@@ -28,7 +28,6 @@ const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
 const render = (sidebar?: React.ReactNode) =>
   renderToStaticMarkup(
     <TasksPageLayout
-      mark="todo"
       title="Fixture page"
       subtitle="One line about it"
       tools={<><span data-t="tool-a" /><TplGrow /><button type="button" data-t="pink">＋ Make</button></>}

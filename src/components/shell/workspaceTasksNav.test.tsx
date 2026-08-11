@@ -52,37 +52,16 @@ const renderShell = (path: string, todo = 0) =>
 describe("⚠️ the TASKS section renders — same grammar, three rows, in order", () => {
   const html = renderShell("/todo");
 
-  /* ⚠️ RETARGETED AGAIN (audit pack P5) — TASKS NO LONGER LEADS. The order is the WORK's order:
-     Queries · Agents · Materials are the querying itself, and Tasks is what falls out of it, so it
-     reads better after that work than before it. ACCOUNT closes the list, holding the Settings row
-     that used to be pinned in the foot.
-
-     The 6 Aug decision this file was written for — that Tasks is a SECTION, not a page under
-     Querying — is untouched. Only its position moved. */
-  it("the group labels run Queries · Agents · Materials · Tasks · Account", () => {
+  /* ⚠️ RETARGETED (app-shell-v2). The rule is the ORDER of the groups, and it survives untouched;
+     what changed is the landmark it was written against. "Workspace" no longer renders a heading —
+     it holds Dashboard alone, and a section header over a group of one labels nothing — so Tasks
+     is now the FIRST label. Asserted as the full sequence, so a group appearing, vanishing or
+     moving still fails here. */
+  it("TASKS leads the group labels, ahead of QUERIES", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(labels).toEqual(["Queries", "Agents", "Materials", "Tasks", "Account"]);
-    // and Dashboard is still there, standing alone without a heading over it
+    expect(labels).toEqual(["Tasks", "Queries", "Agents", "Materials"]);
+    // and Dashboard is still there, simply without a heading over it
     expect(html).toContain(">Dashboard<");
-  });
-
-  /* ⚠️ THE RENDER AND THE MODEL ARE ASSERTED AGAINST EACH OTHER, not both against a hand-typed
-     list — two literals agree happily on the day someone changes both in the same wrong direction.
-     The first section is deliberately headingless (Dashboard stands alone). */
-  it("the rendered headings ARE the model's sections, in the model's order", () => {
-    const model = workspaceSections({ todo: 0 });
-    const rendered = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(rendered).toEqual(model.slice(1).map((s) => s.label));
-  });
-
-  it("⚠️ Settings is an ordinary nav row under ACCOUNT, not a lone row in the foot", () => {
-    const account = workspaceSections({ todo: 0 }).find((s) => s.id === "account")!;
-    expect(account.children!.map((c) => c.path)).toEqual(["/account"]);
-    const navAt = html.indexOf('class="ws-nav"');
-    const footAt = html.indexOf("ws-pfoot");
-    expect(navAt).toBeGreaterThan(-1);
-    expect(footAt).toBeGreaterThan(navAt);
-    expect(html.slice(navAt, footAt)).toContain(">Settings<");
   });
 
   it("the three rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {

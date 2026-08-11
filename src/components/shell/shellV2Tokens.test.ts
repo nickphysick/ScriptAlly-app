@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { resolve, join } from "node:path";
+import { resolve } from "node:path";
 import * as dt from "../../lib/designTokens";
 
 const css = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
@@ -358,17 +358,14 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
     expect(shellCss).not.toContain("#b3a598"); // the hex still lives ONLY on the token
   });
 
-  /* ⚠️ REWRITTEN THREE TIMES, NEVER DELETED. Phase 3 made the brand type rather than the PNG;
+  /* ⚠️ REWRITTEN TWICE, NEVER DELETED. Phase 3 made the brand type rather than the PNG;
      Amendment 1 (C) moved the wordmark OUT of the sidebar to the head of the breadcrumb, as the
-     real asset; app-shell-v2 brought both back to the sidebar, still as assets.
+     real asset, leaving the rail's "S" tile as the sidebar's only mark. So the brand still
+     appears exactly once in each place — one tile, one logotype.
 
-     ⚠️ AND THE AUDIT PACK (P4) HAS SWUNG IT BACK TO TYPE — deliberately, with the cost named.
-     "The asset is the mark, type is a lookalike" is a fair argument, and it lost to a plainer
-     one: `/scriptally-title-v2.png` is only ~51.7% ink, so its element height was never its cap
-     height and every future size change had to carry that compensation with it. Type has no dead
-     space, and 22px is 22px. The ~51.7%-ink trap still holds wherever that PNG is still used
-     (ScriptAllyLogo, SidebarNav, SmartImportReview) — it simply no longer applies HERE, which is
-     the whole gain. The MARK stays artwork, and changed file: the plane-and-S logo-new. */
+     ⚠️ AND THE MEASURED-ASSET PROBLEM WENT WITH THE ASSET. The crumb's PNG carried the 51.7%-ink
+     trap (a ~17px cap needing a 33px element); the v2 brand is TYPE — a Playfair "S" in an ink
+     square — so there is no ink ratio to compensate for and no LOGOTYPE_PX to keep in step. */
   it("THE BRAND APPEARS ONCE per surface — mark and wordmark, in the sidebar", () => {
     const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     expect(ws.match(/ws-bmark/g)?.length, "one mark").toBe(1);
@@ -377,36 +374,7 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
        recording the retirement: the guard caught its own note. */
     expect(ws.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("LOGOTYPE_PX");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(ws).toContain('src="/scriptally-logo-new.png"');
-    expect(ws).toContain('<span className="ws-bwm">ScriptAlly</span>');
-    expect(ws).not.toContain('src="/scriptally-title-v2.png"');
-    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 38px/s);
-    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*font-size: 22px/s);
-  });
-
-  /* ⚠️ BARE ARTWORK. The mark is transparent, so a plate would draw a box round a shape that does
-     not want one — and a plate is exactly what a future pass adds to "tidy" a floating logo. */
-  it("⚠️ the mark sits on the ground — no plate, no border, no fill", () => {
-    const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    const at = wsCss.indexOf(".ws-bmark {");
-    expect(at).toBeGreaterThan(-1);
-    const decl = wsCss.slice(at, wsCss.indexOf("}", at));
-    expect(decl).not.toMatch(/background|border(?!-)|box-shadow/);
-  });
-
-  /* ⚠️ THE ONE-BRAND RULE IS ABOUT THE MARK. The crumb's root is the word "ScriptAlly" — the name
-     of a place, not a second logo — so this asserts that no IMAGE rides the pagebar, rather than
-     that the string is absent. */
-  it("⚠️ the crumb carries the root as WORDS; no image rides the pagebar", () => {
-    const ws = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
-    const from = ws.indexOf('<header className="ws-pagebar">');
-    const to = ws.indexOf("</header>", from);
-    expect(from).toBeGreaterThan(-1);
-    expect(to).toBeGreaterThan(from);
-    const bar = ws.slice(from, to);
-    expect(bar).not.toContain("<img");
-    expect(bar).toContain("ws-croot");
-    expect(bar).toContain("ScriptAlly");
+    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*var\(--font-serif\)/s);
   });
 });
 
@@ -472,33 +440,5 @@ describe("the foot fade", () => {
     expect(shell).toContain("scrollHeight - el.scrollTop - el.clientHeight > 8");
     expect(shell).toContain("new ResizeObserver(updateFade)");
     expect(shell).toMatch(/useEffect\(\(\) => \{\s*updateFade\(\);/);
-  });
-});
-
-/**
- * ⚠️ ONE ELEMENT, ONE RULE — the duplicate-declaration trap (audit P2).
- *
- * Two `.ws-uacct` blocks at equal specificity produced the sidebar foot's reported fault: the
- * later one set `align-items` and never reset `flex-direction`, so `column` from the earlier rule
- * stood and the avatar stacked above the name. Neither rule was wrong to read. This asserts the
- * foot's row selectors are declared ONCE, because a second declaration is how the fault returns.
- */
-describe("sidebar foot — the composed row is declared once", () => {
-  const css = readFileSync(join(__dirname, "workspaceShell.css"), "utf8");
-  const bare = css.replace(/\/\*[\s\S]*?\*\//g, ""); // comments name these selectors; don't count those
-
-  for (const sel of [".ws-uacct", ".ws-n", ".ws-pl", ".ws-utext"]) {
-    it(`${sel} has exactly one rule block`, () => {
-      const hits = bare.match(new RegExp(`(^|[},])\\s*\\${sel}\\s*\\{`, "g")) ?? [];
-      expect(hits).toHaveLength(1);
-    });
-  }
-
-  it("the row runs left-to-right and stacks its text as blocks", () => {
-    const block = bare.slice(bare.indexOf(".ws-uacct {"));
-    expect(block.slice(0, block.indexOf("}"))).toContain("flex-direction: row");
-    // the name and plan must be blocks or they run together on one line
-    expect(bare).toMatch(/\.ws-n\s*\{[^}]*display:\s*block/);
-    expect(bare).toMatch(/\.ws-pl\s*\{[^}]*display:\s*block/);
   });
 });

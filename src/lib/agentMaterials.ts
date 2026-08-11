@@ -4,7 +4,7 @@
  *
  * Agent "materials wanted" — the round-trip between the stored `string[]` and the structured editor
  * (pills + count inputs + an "Other" free-text) used by the Add-Agent form, the v12 Edit Agent
- * drawer, AND (Stage 6d) the Contact list reading pane's Materials card.
+ * drawer, AND (Stage 6d) the Contact List reading pane's Materials card.
  *
  * STORAGE SHAPE: the agent stores `materialsWanted: string[]` of FORMATTED strings — "Query letter",
  * "Author bio", "Synopsis" / "Synopsis (2 pages)", "First 10 pages" / "Sample pages", "First 3

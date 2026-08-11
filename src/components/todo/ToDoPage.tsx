@@ -1092,7 +1092,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             Noteboard (its own nav row) — the sidebar's other two jobs. */}
         <TasksPageLayout
           title="To-do list"
-          mark="todo"
           eyebrow={tasksEyebrow(longDate(new Date(now)), weekOfQuerying(queries, new Date(now)))}
           tools={renderTools()}
         >

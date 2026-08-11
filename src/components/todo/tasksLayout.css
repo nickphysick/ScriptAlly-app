@@ -15,20 +15,11 @@
    they came to share would have resolved on source order alone. They never overlapped, which is
    exactly how such a pair survives until the day it does. */
 .tpl-head { width: 100%; flex: 0 0 auto; }
-/* ⚠️ `.tpl-title` AND `.tpl-sub` ARE DELETED (amendment 7). The plate carries the title and the
-   description now; two orphaned rules left behind are a specificity contest waiting to happen.
-   ⚠️ THE PLATE DOES NOT CONDENSE ON THESE PAGES, and that is correct rather than broken —
-   `.tpl-head` never scrolls (`flex: 0 0 auto`) and `.tpl-zone` below it is the only scroller, so
-   the plate is never covering anything that has to get past it.
-   ⚠️ `.tpl-eyebrow` GAINS A RULE FOR THE FIRST TIME — it had NONE. The class was rendered and never
-   styled, so the To-do list's date line has been showing as plain body text all along. It rides the
-   tool row now (plate = identity, tool row = tallies and context) in the same mono treatment the
-   other pages' tallies use; `margin-right: auto` holds the page's controls out at the right. */
-.tpl-eyebrow {
-  margin-right: auto; white-space: nowrap;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  letter-spacing: 0.11em; text-transform: uppercase; color: #8a7a6c;
+.tpl-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 30px; font-weight: 700; color: #2b2118; margin: 0;
 }
+.tpl-sub { font-size: 13px; color: #8a7a6c; margin: 5px 0 0; }
 
 /* the tool row — margin/rule per the ref (.tools): the hairline is ITS bottom edge, so the
    header ends exactly where the columns begin. */
@@ -38,11 +29,6 @@
   border-bottom: 1px solid #f0e9dd;
 }
 .tpl-grow { flex: 1; }
-/* ⚠️ INSIDE THE PLATE THE TOOL ROW OWNS NO FRAME — `.wsh-tools` draws the ONE hairline that
-   separates the plate's two rows, and supplies the row's padding. `.tpl-tools` keeps its class
-   only so its DESCENDANT rules (the house disabled grammar, the button sizing) go on matching;
-   its own border and margins would otherwise stack a second rule under the first. */
-.wsh-tools .tpl-tools { margin: 0; padding: 0; border-bottom: 0; flex: 1 1 auto; }
 
 /* ⚠️ ONE CONTROL HEIGHT ACROSS THE ROW (tasks-audit P3): the ink primary (.tdb-btnp, 42px on
    the board's own surfaces) takes the ROW'S 34px step here — the pink Add's height and

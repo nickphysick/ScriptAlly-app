@@ -193,30 +193,15 @@ describe("§1 · the lock", () => {
 });
 
 describe("§2 · the greeting", () => {
-  /* ⚠️ RETARGETED (audit pack P2). The kicker went first, for repeating what the chrome already
-     said; the muted DATE LINE that replaced it has now gone too, for a plainer reason — anyone
-     reading it knows what day it is. A subtitle sits BELOW the name instead, so the block reads
-     greeting → address → facts. */
-  it("the greeting leads, a subtitle sits under it, and the name is plain ink", () => {
+  /* ⚠️ NO KICKER (v16 §1) — a muted DATE LINE replaces it. The week number and the manuscript
+     were repeating what the chrome already says. */
+  it("a muted date line sits above the greeting, and the name is plain ink", () => {
     const html = render();
-    expect(html).toContain("Hello, Nick");
-    expect(html).toContain('class="os-sub2"');
-    expect(html).toContain("on your desk today?");
+    expect(html).toContain('class="os-dateline"');
     expect(html).not.toContain("os-kicker");
+    expect(html).toContain("Hello, Nick");
     // no italic-burgundy name: the h1 carries no <em>
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);
-  });
-
-  it("⚠️ the date line is GONE, not merely unstyled — no element and no rule", () => {
-    expect(render()).not.toContain("os-dateline");
-    expect(cssRules).not.toContain(".os-dateline {");
-  });
-
-  it("the subtitle is 13.5px muted brown, 6px under the name", () => {
-    const r = rule(".os-sub2");
-    expect(r).toContain("font-size: 13.5px");
-    expect(r).toContain("color: #8a7a6c");
-    expect(r).toContain("margin-top: 6px");
   });
 
   /* ⚠️ TWO PILLS NOW. The agents count moved to the counters card — one number, one home; two
@@ -226,10 +211,7 @@ describe("§2 · the greeting", () => {
     const pills = html.indexOf("os-pills");
     expect(pills).toBeGreaterThan(-1);
     const tenure = html.indexOf("Querying since", pills);
-    /* ⚠️ RETARGETED (polish P7): the header pill reads "out with agents" now — same number,
-       and the writer is the subject of it. The CHART chip below still says "awaiting a reply";
-       that string was not in the pack's scope and is flagged in reports/dashboard-polish.md. */
-    const ach = html.indexOf("out with agents", pills);
+    const ach = html.indexOf("awaiting a reply", pills);
     expect(tenure).toBeGreaterThan(-1);
     expect(ach).toBeGreaterThan(tenure);
     // the phrase survives ONLY as the counter's label, never as a pill
