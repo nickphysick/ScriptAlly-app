@@ -10,7 +10,7 @@
  * that remains is "does it look right", which is Nick's.
  */
 import { describe, it, expect } from "vitest";
-import { placeTooltip, TIP_EDGE, TIP_GAP } from "./deskTooltip";
+import { placeTooltip, placeTooltipRight, Rect, TIP_EDGE, TIP_GAP } from "./deskTooltip";
 
 const VIEW = { width: 1440, height: 900 };
 const anchor = (over: Partial<{ left: number; top: number; width: number; height: number }> = {}) => ({
@@ -67,5 +67,30 @@ describe("⚠️ it FLIPS below the anchor rather than sliding up over it", () =
     const a = anchor({ top: 10 });
     const p = placeTooltip(a, TIP, VIEW);
     expect(p.top).toBeGreaterThanOrEqual(a.top + a.height);
+  });
+});
+
+describe("placeTooltipRight — the rail variant (sidebar-collapse pack)", () => {
+  const railAnchor = (over: Partial<Rect> = {}): Rect => ({ left: 10, top: 300, width: 52, height: 36, ...over });
+  const RTIP = { width: 120, height: 30 };
+
+  it("sits TIP_GAP right of the anchor, vertically centred on it", () => {
+    const p = placeTooltipRight(railAnchor(), RTIP, VIEW);
+    expect(p.left).toBe(10 + 52 + TIP_GAP);
+    expect(p.top).toBe(300 + 36 / 2 - 30 / 2);
+    expect(p.flipped).toBe(false);
+  });
+
+  /* ⚠️ CLAMPED, NEVER FLIPPED — flipping left would put it over the rail it describes (and under
+     the panel's overflow clip, which is the whole reason the portal + this function exist). A few
+     px of vertical slide at the viewport's edges still points at the right row. */
+  it("clamps at the viewport's top and bottom edges", () => {
+    expect(placeTooltipRight(railAnchor({ top: 2 }), RTIP, VIEW).top).toBe(TIP_EDGE);
+    expect(placeTooltipRight(railAnchor({ top: 890 }), RTIP, VIEW).top).toBe(900 - 30 - TIP_EDGE);
+  });
+
+  it("never runs off the right edge", () => {
+    const p = placeTooltipRight(railAnchor({ left: 1400 }), RTIP, VIEW);
+    expect(p.left).toBe(1440 - 120 - TIP_EDGE);
   });
 });

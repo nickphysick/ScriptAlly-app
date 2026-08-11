@@ -35,6 +35,8 @@ import {
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill } from "./primitives";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
+import { DeskTooltip } from "../dashboard/DeskTooltip";
+import { Rect as TipRect } from "../../lib/deskTooltip";
 import { invokeCapture } from "./railNav";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import "./primitives.css";
@@ -118,6 +120,40 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      sidebar whose width narrows to an icon rail — every row keeps existing, labels collapse in
      place, the toggle lives in the pagebar at the seam. There is no second component to drift. */
   const sidebar = useSidebarCollapsed();
+
+  /* ── rail tooltips (sidebar-collapse pack, Phase 3) ──
+     ⚠️ PORTALLED THROUGH DeskTooltip, NEVER A ::after ON THE ROW — the nav list is an internal
+     scroller inside a panel with `overflow: hidden`, so a child-element tooltip is clipped at the
+     rail's 72px edge. The pack names this the single most likely thing to get wrong. One tip on
+     screen at a time; the anchor rect is measured at open, exactly as the desk's own callers do. */
+  const [railTip, setRailTip] = useState<{ anchor: TipRect; title: string; sub?: string; kbd?: string } | null>(null);
+  const tipTimer = useRef<number | null>(null);
+  const hideTip = useCallback(() => {
+    if (tipTimer.current !== null) { window.clearTimeout(tipTimer.current); tipTimer.current = null; }
+    setRailTip(null);
+  }, []);
+  /* Expanding while a tip is open (the `[` key) would strand it beside a full-width sidebar. */
+  useEffect(() => { hideTip(); }, [sidebar.collapsed, hideTip]);
+  /**
+   * Handlers for one rail anchor. `when` gates rows to the collapsed state — the pack suppresses
+   * rail tips entirely when expanded; the toggle passes `true` and its own 250ms. Copy is the
+   * route label VERBATIM (no appraisal, no invented descriptions). Focus opens like hover, so the
+   * keyboard pass reads the rail too; mousedown hides, so a tip never rides through a navigation.
+   */
+  const railTipFor = (title: string, sub: string | undefined, kbd: string | undefined, delayMs: number, when: boolean) => {
+    const open = (e: { currentTarget: Element }) => {
+      if (!when) return;
+      const r = e.currentTarget.getBoundingClientRect();
+      if (tipTimer.current !== null) window.clearTimeout(tipTimer.current);
+      tipTimer.current = window.setTimeout(() => {
+        setRailTip({ anchor: { left: r.left, top: r.top, width: r.width, height: r.height }, title, sub, kbd });
+      }, delayMs);
+    };
+    return { onMouseEnter: open, onFocus: open, onMouseLeave: hideTip, onBlur: hideTip, onMouseDown: hideTip };
+  };
+  const macLike = typeof navigator !== "undefined" && /Mac|iP/.test(navigator.platform ?? "");
+  const toggleKbd = macLike ? "⌘\\" : "Ctrl+\\";
+
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
   const [msOpen, setMsOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
@@ -317,6 +353,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       if (sidebar.collapsed) { sidebar.setCollapsed(false); return; }
                       if (manyMs) setMsOpen((o) => !o);
                     }}
+                    {...railTipFor(activeMs.title, msMeta(activeMs) || undefined, undefined, 120, sidebar.collapsed)}
                   >
                     {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
                         FRAMED — parchment, hairline, soft shadow — because it is an object with an
@@ -396,6 +433,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       className={`ws-ni${on ? " on" : ""}`}
                       aria-current={on ? "page" : undefined}
                       onClick={() => go(ch.path)}
+                      {...railTipFor(ch.label, undefined, undefined, 120, sidebar.collapsed)}
                     >
                       <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
                       {/* ⚠️ A SPAN, SO THE LABEL CAN COLLAPSE (sidebar-collapse pack, Phase 2). A
@@ -444,6 +482,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               tabIndex={0}
               onClick={() => go("/account")}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("/account"); } }}
+              {...railTipFor(name, plan.label, undefined, 120, sidebar.collapsed)}
             >
               <span className="ws-av" aria-hidden="true">{initials(name)}</span>
               {/* ⚠️ NAME OVER PLAN AS BLOCKS, AND THE PILL OUTSIDE THE TEXT COLUMN (audit P2).
@@ -470,6 +509,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
         </div>
       </div>
       {accountMenu}
+      {/* the one rail tooltip — portalled to the fixed layer, so the panel's overflow cannot
+          clip it at the 72px edge */}
+      {railTip && (
+        <DeskTooltip anchor={railTip.anchor} mode="plain" side="right" variant="rail" onClose={hideTip}>
+          {railTip.title}
+          {railTip.kbd && <span className="dk-railkbd">{railTip.kbd}</span>}
+          {railTip.sub && <div className="dk-railsub">{railTip.sub}</div>}
+        </DeskTooltip>
+      )}
 
       {/* ══ MAIN — one ground, and a single white window resting on it (app-shell-v2). ══
           ⚠️ THE GREIGE BAR IS GONE. The breadcrumb row now sits DIRECTLY ON THE GROUND above the
@@ -498,6 +546,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 aria-controls="ws-sidebar"
                 aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"
                 aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                   <rect x="1.5" y="2.5" width="15" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
