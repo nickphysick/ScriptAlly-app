@@ -20,7 +20,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, BookOpen, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
+  Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
   LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
@@ -149,6 +149,12 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
   materials: <Book aria-hidden="true" />,
+  /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
+     added — the group's and the row's — per the parallel-surface warning below; adding the
+     section without its glyph is the quiet half of that failure.
+     ⚠️ AND IT STAYS MONOLINE. Settings is a control, not an object: the two-icon-families rule in
+     workspaceShell.css says so explicitly, and an illustrated Settings was explored and rejected. */
+  account: <Settings aria-hidden="true" />,
   // panel rows — one per destination
   dash: <LayoutGrid aria-hidden="true" />,
   send: <Send aria-hidden="true" />,
@@ -159,12 +165,17 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   note: <StickyNote aria-hidden="true" />,
   people: <Users aria-hidden="true" />,
   compass: <Compass aria-hidden="true" />,
+  /* ⚠️ ADDED WITH THE MATERIALS ROWS, and adding them here is not optional bookkeeping — this map
+     is a PARALLEL SURFACE to workspaceNav's rows, not type-linked to it, so a row whose icon key is
+     missing renders a blank space and nothing complains. That is the quiet half of the failure the
+     account-key note above describes. `Library` is the shelf of bound volumes the Manuscripts mark
+     already draws; `BookCopy` is the two-books-side-by-side the Comps mark draws.
+     ⚠️ THE KEYS ARE `library`/`books`, NOT `book`/`shelf`. A re-land after a7b5d54 briefly invented
+     the second pair; this is the established vocabulary and the one the parity lock names. */
+  library: <Library aria-hidden="true" />,
+  books: <BookCopy aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
-  /* ⚠️ THIS MAP IS A PARALLEL SURFACE — it is keyed by strings `workspaceNav.ts` writes and
-     nothing type-links the two, so a row whose `icon` has no entry here renders no glyph. Adding
-     a destination means adding it in BOTH places. */
-  book: <BookOpen aria-hidden="true" />,
-  shelf: <Library aria-hidden="true" />,
+  settings: <Settings aria-hidden="true" />,
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {

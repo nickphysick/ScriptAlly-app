@@ -52,16 +52,23 @@ const renderShell = (path: string, todo = 0) =>
 describe("⚠️ the TASKS section renders — same grammar, three rows, in order", () => {
   const html = renderShell("/todo");
 
-  /* ⚠️ RETARGETED (app-shell-v2). The rule is the ORDER of the groups, and it survives untouched;
-     what changed is the landmark it was written against. "Workspace" no longer renders a heading —
-     it holds Dashboard alone, and a section header over a group of one labels nothing — so Tasks
-     is now the FIRST label. Asserted as the full sequence, so a group appearing, vanishing or
-     moving still fails here. */
-  it("TASKS leads the group labels, ahead of QUERIES", () => {
+  /* ⚠️ RETARGETED TWICE, AND THE SECOND TIME REVERSES THE FIRST. The rule has always been the
+     ORDER of the groups; only the order it asserts has moved.
+       · app-shell-v2: "Workspace" stopped rendering a heading (one child, nothing to label), so
+         Tasks became the first LABEL — a landmark change, not an IA change.
+       · `bdf0d83` (10 Aug, "the nav runs in the work's order"): Tasks moved DOWN, below Materials,
+         and Account joined beneath it. That is the order here. It supersedes the 6 Aug sidebar-IA
+         fix that put Tasks second, and it was erased by `a7b5d54` before it could be seen — the
+         lock kept asserting the pre-`bdf0d83` order because the code had been reverted under it,
+         so lock and source agreed about a state neither had been asked for.
+     Asserted as the full sequence, so a group appearing, vanishing or moving still fails here. */
+  it("the groups run in the work's order, with Tasks and Account beneath Materials", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(labels).toEqual(["Tasks", "Queries", "Agents", "Materials"]);
+    expect(labels).toEqual(["Queries", "Agents", "Materials", "Tasks", "Account"]);
     // and Dashboard is still there, simply without a heading over it
     expect(html).toContain(">Dashboard<");
+    // Settings came up out of the foot and is a nav destination now, not a chip
+    expect(html).toContain(">Settings<");
   });
 
   it("the three rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {

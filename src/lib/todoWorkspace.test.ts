@@ -72,17 +72,23 @@ describe("the three routes", () => {
 });
 
 describe("the app sidebar's TASKS section", () => {
-  /* ⚠️ RE-REVERSED (sidebar-IA fix, 6 Aug — Nick's call). The one-row-under-Workspace fold is
-     superseded: To-do left WORKSPACE for its own TASKS section, positioned directly after it,
-     with all four routes as rows in the same section grammar as Queries/Agents/Materials. The
-     rows ARE `TODO_ROUTES` — one definition for the sidebar, the ⌘K palette and both
-     breadcrumbs. (The fold's real cost was Calendar: reachable from nowhere in-page, its "gap"
-     was the nav row this restores.) */
+  /* ⚠️ THE SECTION EXISTS; ITS POSITION MOVED (sidebar-IA fix, 6 Aug — Nick's call — then
+     `bdf0d83`, 10 Aug). The one-row-under-Workspace fold is still superseded: To-do left
+     WORKSPACE for its own TASKS section, with all its routes as rows in the same section grammar
+     as Queries/Agents/Materials, and the rows ARE `TODO_ROUTES` — one definition for the sidebar,
+     the ⌘K palette and both breadcrumbs. (The fold's real cost was Calendar: reachable from
+     nowhere in-page, its "gap" was the nav row this restores.)
+
+     ⚠️ WHAT CHANGED IS ONLY WHERE IT SITS. "The nav runs in the work's order" moved Tasks BELOW
+     Materials and brought Account up beneath it. `a7b5d54` erased that before it was ever seen,
+     which is why this lock went on passing: the source had been reverted under it, so lock and
+     code agreed about an order neither had been asked for. The order is asserted in FULL, here
+     and in workspaceTasksNav.test.tsx, so the two cannot drift apart again. */
   const nav = workspaceSections({ todo: 7 });
   const tasks = nav.find((s) => s.id === "tasks")!;
 
-  it("sits directly after WORKSPACE — and no To-do row survives under Workspace", () => {
-    expect(nav.map((s) => s.id)).toEqual(["workspace", "tasks", "queries", "agents", "materials"]);
+  it("sits below MATERIALS, ahead of ACCOUNT — and no To-do row survives under Workspace", () => {
+    expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials", "tasks", "account"]);
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 
