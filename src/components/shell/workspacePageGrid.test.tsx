@@ -191,16 +191,17 @@ describe("the three-row grid — chrome outside the scroller", () => {
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
     ] as const;
-    /* ⚠️ THE THIRD STATE: PAGES THAT DRAW NO PLATE AT ALL, which the first two halves could not
-       express. The Tasks family was `NOT_YET` — still on the sticky plate, awaiting conversion —
-       and it is not that any more: it renders no `PageHeader` of any variant, only its own
-       `.tpl-head`/`.tpl-title` block under its own viewport lock. Asserting it still says
-       `variant="workspace"` would fail forever while describing nothing true.
-       The census's PURPOSE is unchanged and is why this half must stay populated rather than be
-       deleted: anything that renders the plate is on ONE of the two paths, so the cleanup commit
-       can tell what is safe to delete. A page on NEITHER path has to be named too, or its absence
-       reads as an oversight the next time someone counts. */
-    const NO_PLATE = [
+    /* ⚠️ THE CENSUS BRIEFLY GREW A "NO PLATE" HALF, AND THAT WAS THE CENSUS BEING WRONG RATHER
+       THAN THE WORLD MOVING. `ee0094b` put the plate on all three Tasks pages; `a7b5d54` reverted
+       it; a later pass read the reverted source, concluded the Tasks family had left the plate
+       behind, and rewrote this half to assert the ABSENCE of `variant="workspace"` — pinning a
+       regression as though it were a decision. The half is `NOT_YET` again, meaning exactly what
+       it always meant: still on the sticky plate, awaiting conversion to the grid.
+       ⚠️ THE LESSON, AND IT IS WHY THIS COMMENT STAYS: a census read off current source can only
+       ever describe what is there. It cannot tell a decision from a revert, so when its two halves
+       stop fitting, the first question is which commit last moved the page — not which half to
+       widen. */
+    const NOT_YET = [
       ["Tasks family", "../todo/TasksPageLayout.tsx"],
     ] as const;
     for (const [page, file] of CONVERTED) {
@@ -209,10 +210,10 @@ describe("the three-row grid — chrome outside the scroller", () => {
         `${page} is listed as converted but no longer renders the grid`,
       ).toContain("WorkspacePageGrid");
     }
-    for (const [page, file] of NO_PLATE) {
+    for (const [page, file] of NOT_YET) {
       const t = readFileSync(resolve(__dirname, file), "utf8");
       expect(t, `${page} converted — move it into CONVERTED above, and check whether this was the LAST one`).not.toContain("WorkspacePageGrid");
-      expect(t, `${page} grew a workspace plate — it draws its own header, so this is now two headers`).not.toContain('variant="workspace"');
+      expect(t, `${page} is still on the old path, so it must still render the plate the old way`).toContain('variant="workspace"');
     }
     /* the legacy path must survive while anything is still on it */
     const ph = readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8");

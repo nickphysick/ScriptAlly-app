@@ -136,6 +136,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
       <div className="tdb-wrap today-off">
         <TasksPageLayout
           title="Calendar"
+          mark="calendar"
           subtitle={subtitle}
           tools={
             <>

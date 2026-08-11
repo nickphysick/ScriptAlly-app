@@ -145,12 +145,12 @@ describe("⚠️ the fade hem: sticky, weightless, and only where content contin
 describe("⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE — the other three run full width", () => {
   it("the contract renders NO aside when the sidebar is absent — never an empty gutter", () => {
     const bare = renderToStaticMarkup(
-      <TasksPageLayout title="T" tools={<span />}>body</TasksPageLayout>,
+      <TasksPageLayout mark="todo" title="T" tools={<span />}>body</TasksPageLayout>,
     );
     expect(bare).not.toContain("<aside");
     expect(bare).toContain("tpl-body");
     const withSide = renderToStaticMarkup(
-      <TasksPageLayout title="T" tools={<span />} sidebar={<nav>side</nav>}>body</TasksPageLayout>,
+      <TasksPageLayout mark="todo" title="T" tools={<span />} sidebar={<nav>side</nav>}>body</TasksPageLayout>,
     );
     expect(withSide).toContain("<aside");
   });
