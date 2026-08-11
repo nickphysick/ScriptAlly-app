@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Manuscripts details pane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f8f4ee; --window:#ffffff; --card:#fefdf8; --line:#e2dacf; --line-soft:#ece4d8;
+  --band-sage:#dadfd7; --band-sage-2:#d5dbd3; --band-pink:#f5e2d7;
+  --sage-pale:#e7ede3; --sage-acc:#8a9e88; --sage-txt:#5a6e58;
+  --burg:#7c3a2a; --burg-deep:#6b3023; --ink:#3a1c14; --head-ink:#241611;
+  --label:#9c8878; --pink:#f5e2da; --pink-bd:#e8c8bc; --pink-hov:#efd5ca; --pink-chip:#f8ede4;
+  --pro:#6A89A7; --shadow-card:0 1px 2px rgba(58,28,20,.04), 0 6px 18px rgba(58,28,20,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* shell */
+.shell{display:grid;grid-template-rows:64px 1fr;height:100vh}
+.topnav{display:flex;align-items:center;gap:24px;padding:0 24px}
+.brand{display:flex;align-items:center;gap:10px;width:240px;flex:0 0 auto}
+.brand .wordmark{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:var(--head-ink)}
+.crumb{flex:1;display:flex;align-items:baseline;gap:10px;font-family:'Playfair Display',serif;font-size:19px;color:#4a3a30}
+.crumb b{font-weight:600;color:var(--head-ink)}.crumb .sep{color:#b9a898}
+.crumb .saved{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#b3a293;border-left:1px solid var(--line);padding-left:14px;text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:12px}
+.searchbox{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:9px 16px;width:210px;color:#b3a293;font-size:13px}
+.btn-new{background:var(--head-ink);color:#fdfaf5;border:none;border-radius:24px;padding:11px 20px;font-size:13.5px;font-weight:500;cursor:pointer}
+.help{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:#8a7a6c}
+.below{display:grid;grid-template-columns:264px 1fr;min-height:0}
+.sidebar{display:flex;flex-direction:column;padding:0 16px 14px;min-height:0}
+.ms-selector{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ms-selector .thumb{width:40px;height:40px;border-radius:8px;background:var(--sage-pale);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ms-selector .t{font-weight:600;font-size:13.5px;color:var(--head-ink);line-height:1.25}
+.ms-selector .s{font-size:11.5px;color:#8a7a6c}
+.ms-selector .arrows{margin-left:auto;color:#c4b5a5;font-size:13px}
+.side-rule{border-top:1px solid var(--line);margin:6px 4px 14px}
+.navscroll{flex:1;overflow:auto;min-height:0}
+.sect{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:#a2907f;margin:16px 10px 8px;text-transform:uppercase}
+.nitem{display:flex;align-items:center;gap:12px;padding:9.5px 12px;border-radius:10px;font-size:14.5px;color:#3f3229;cursor:pointer}
+.nitem:hover{background:rgba(255,255,255,.55)}
+.nitem.active{background:#fff;font-weight:600;color:var(--head-ink);border:1px solid var(--line)}
+.nitem .ic{width:18px;height:18px;flex:0 0 auto;color:#6a5a50}
+.nitem .count{margin-left:auto;font-size:13px;color:#8a7a6c}
+.side-foot{margin-top:10px;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:10px}
+.uav{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a5a50}
+.uname{font-weight:600;font-size:13.5px;color:var(--head-ink);line-height:1.2}
+.uplan{font-size:11.5px;color:#8a7a6c}
+.upg{margin-left:auto;border:1px solid var(--pink-bd);background:#fff;color:var(--burg);border-radius:20px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.content{min-height:0;overflow:auto;padding:0 16px 16px 4px}
+.window{background:var(--window);border-radius:18px;min-height:100%;padding:34px 40px 44px;box-shadow:0 1px 3px rgba(58,28,20,.05),0 10px 30px rgba(58,28,20,.05)}
+.inner{max-width:1240px;margin:0 auto}
+
+/* common */
+.pagehead{padding-bottom:20px;border-bottom:1px solid var(--line-soft);margin-bottom:22px;display:flex;align-items:flex-end;gap:24px}
+.pagehead h1{font-family:'Playfair Display',serif;font-weight:600;font-size:40px;color:var(--head-ink);line-height:1.05}
+.pagehead .desc{font-size:13.5px;font-weight:300;color:#7d6d60;margin-top:8px}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:18px;padding-bottom:4px}
+.ph-count{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase;white-space:nowrap}
+.btn-pink{display:inline-flex;align-items:center;gap:7px;background:var(--pink);border:1px solid var(--pink-bd);color:var(--burg);border-radius:10px;padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.btn-pink:hover{background:var(--pink-hov)}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);color:#6a5a50;border-radius:10px;padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.btn-sm{padding:8px 14px;font-size:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card);overflow:hidden}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--pink-chip);border:1px solid var(--pink-bd);border-radius:20px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase;font-weight:500}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--burg)}
+.gp{background:var(--sage-pale);border:1px solid rgba(138,158,136,.3);border-radius:20px;padding:5px 14px;font-size:12px;color:#4a5a48}
+.wcx{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;color:#7a6a5c;text-transform:uppercase}
+.logl{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#4a3a30;line-height:1.5}
+.linkline{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.linkline:hover{color:var(--burg-deep)}
+.prochip{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;background:var(--pro);color:#fff;border-radius:20px;padding:3px 8px;text-transform:uppercase}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase}
+.plate{background:#fff;border:1px solid var(--line);border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(58,28,20,.06);flex:0 0 auto;width:118px;height:118px}
+
+/* sage plateband */
+.plateband{display:flex;align-items:center;gap:30px;padding:28px 32px;background:linear-gradient(135deg,var(--band-sage),var(--band-sage-2));border-bottom:1px solid rgba(138,158,136,.35)}
+.plateband h2{font-family:'Playfair Display',serif;font-weight:600;font-size:34px;color:var(--head-ink);line-height:1.1;margin:8px 0 12px}
+.plateband .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.plateband .logl{margin-top:14px;max-width:520px}
+.plateband .side{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:14px;flex:0 0 auto}
+.statstrip{display:flex;background:rgba(255,255,255,.62);border:1px solid rgba(138,158,136,.3);border-radius:14px;overflow:hidden}
+.statstrip .stat{padding:12px 20px;text-align:center}
+.statstrip .stat+.stat{border-left:1px solid rgba(138,158,136,.25)}
+.statstrip .n{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--head-ink);line-height:1}
+.statstrip .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#6a7a68;text-transform:uppercase;margin-top:6px}
+
+/* tabs */
+.tabs.rule{display:flex;gap:26px;border-bottom:1px solid var(--line-soft);padding:0 32px}
+.tabs.rule .tab{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7a6a5c;padding:13px 2px;border-bottom:2px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.tabs.rule .tab:hover{color:var(--head-ink)}
+.tabs.rule .tab.on{border-bottom-color:var(--burg);color:var(--head-ink);font-weight:600}
+
+/* ======================= DETAILS — treatment A: journey + illustrated cards ======================= */
+.dbody{padding:26px 30px 30px}
+.journey{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px 20px;position:relative;overflow:hidden}
+.journey .jhead{display:flex;align-items:baseline;gap:14px;margin-bottom:20px}
+.journey .jt{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--head-ink)}
+.journey .jsub{font-size:12.5px;font-weight:300;color:#8a7a6c}
+.journey .linkline{margin-left:auto}
+.track{display:grid;grid-template-columns:repeat(5,1fr);position:relative}
+.track::before{content:'';position:absolute;left:9%;right:9%;top:23px;height:1px;background:var(--line);z-index:0}
+.node{text-align:center;position:relative;z-index:1}
+.node .ring{width:46px;height:46px;margin:0 auto;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--line)}
+.node.out .ring{border-color:var(--burg);background:#f8e7dc}
+.node.in .ring{border-color:var(--sage-acc);background:#e9ede6}
+.node.none .ring{border-color:#e2dacf;background:#fff}
+.node .n{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--head-ink);margin-top:10px;line-height:1}
+.node.none .n{color:#c4b5a5}
+.node .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#a2907f;text-transform:uppercase;margin-top:6px}
+
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.icard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px 18px;position:relative;overflow:hidden;transition:box-shadow .15s}
+.icard:hover{box-shadow:var(--shadow-card)}
+.icard .art{position:absolute;right:-8px;top:-6px;opacity:.9;pointer-events:none}
+.icard .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase}
+.icard .big{font-family:'Playfair Display',serif;font-size:32px;font-weight:600;color:var(--head-ink);line-height:1;margin:12px 0 6px}
+.icard .sub{font-size:12.5px;font-weight:300;color:#7d6d60;line-height:1.5;max-width:74%}
+.icard .foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--line-soft)}
+
+/* ======================= treatment B: big illustrated tiles ======================= */
+.tiles2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.btile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;gap:20px;align-items:center;transition:box-shadow .15s}
+.btile:hover{box-shadow:var(--shadow-card)}
+.btile .scene{width:104px;height:104px;flex:0 0 auto;border-radius:14px;background:var(--sage-pale);display:flex;align-items:center;justify-content:center}
+.btile .scene.pinkbg{background:var(--pink-chip)}
+.btile .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase}
+.btile h4{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;color:var(--head-ink);margin:8px 0 6px}
+.btile p{font-size:12.5px;font-weight:300;color:#7d6d60;line-height:1.5}
+.btile .ll{margin-top:12px;display:block}
+
+/* ======================= treatment C: illustrated timeline ======================= */
+.tl{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px 30px 22px}
+.tl .th{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+.tl .tt{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--head-ink)}
+.tl .tsub{font-size:12.5px;font-weight:300;color:#8a7a6c}
+.tl .linkline{margin-left:auto}
+.steps{position:relative;padding-left:8px;margin-top:16px}
+.steps::before{content:'';position:absolute;left:35px;top:16px;bottom:26px;width:1px;background:var(--line)}
+.step{display:flex;gap:22px;align-items:flex-start;padding:14px 0;position:relative}
+.step .mk{width:56px;height:56px;flex:0 0 auto;border-radius:14px;background:var(--sage-pale);border:1px solid rgba(138,158,136,.3);display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.step.now .mk{background:var(--pink-chip);border-color:var(--pink-bd)}
+.step .dt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;color:#a2907f;text-transform:uppercase}
+.step h5{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--head-ink);margin:5px 0 4px}
+.step p{font-size:12.5px;font-weight:300;color:#7d6d60;line-height:1.5;max-width:520px}
+.step .right{margin-left:auto;text-align:right;flex:0 0 auto;padding-top:4px}
+.step .rn{font-family:'Playfair Display',serif;font-size:26px;font-weight:600;color:var(--head-ink);line-height:1}
+.step .rk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#a2907f;text-transform:uppercase;margin-top:5px}
+.tl .stripfoot{display:flex;gap:12px;margin-top:14px;padding-top:16px;border-top:1px solid var(--line-soft)}
+.mini{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.mini .mn{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--head-ink)}
+.mini .mk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#a2907f;text-transform:uppercase;margin-top:3px}
+.mini .ll{margin-left:auto}
+
+/* other panes (unchanged) */
+.padbody{padding:26px 30px 28px}
+.pitchbox{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:18px}
+.pitchline{font-family:'Playfair Display',serif;font-size:20px;color:var(--head-ink);margin-top:8px}
+.pitchline .m{color:#8a7a6c;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:300;padding:0 6px}
+.pitchbox .linkline{margin-left:auto}
+.compgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(206px,1fr));gap:14px;margin-top:18px}
+.comp{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px 14px 20px;position:relative;overflow:hidden}
+.comp .sp{position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--sage-acc)}
+.comp.h2 .sp{background:#c9a06a}.comp.h3 .sp{background:#a98ba0}
+.comp .ct{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;color:var(--head-ink);line-height:1.25}
+.comp .ca{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:#a2907f;text-transform:uppercase;margin:6px 0 8px}
+.comp .cn{font-family:'Caveat',cursive;font-size:16px;color:#5a4a3e;line-height:1.25}
+.addcomp{border:1.5px dashed #d9cdbc;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;color:#a2907f;text-transform:uppercase;min-height:106px;cursor:pointer}
+.offer{margin-top:22px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:18px}
+.offer .ot{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--head-ink);display:flex;align-items:center;gap:10px}
+.offer .od{font-size:12.5px;font-weight:300;color:#7d6d60;margin-top:4px;max-width:520px;line-height:1.5}
+.offer .oa{margin-left:auto;display:flex;gap:10px;flex:0 0 auto}
+.pkgempty{text-align:center;padding:22px 20px 4px}
+.pkgempty .pe1{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#4a3a30}
+.pkgempty .pe2{font-size:12.5px;font-weight:300;color:#8a7a6c;margin-top:8px}
+.bullets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.bul{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.bul .bt{font-size:13px;font-weight:600;color:var(--head-ink);margin-top:10px}
+.bul .bd{font-size:12px;font-weight:300;color:#7d6d60;margin-top:5px;line-height:1.5}
+.frow{display:flex;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.frow:last-child{border-bottom:none}
+
+.dv{display:none}
+body[data-d="A"] .dA,body[data-d="B"] .dB,body[data-d="C"] .dC{display:block}
+body.p-pro .free-only{display:none}
+body.p-free .pro-only{display:none}
+.devbar{position:fixed;bottom:16px;right:16px;background:var(--head-ink);border-radius:12px;padding:8px 10px;display:flex;gap:6px;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.devbar .lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#b3a293;text-transform:uppercase;align-self:center;margin:0 4px}
+.devbar button{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1px solid rgba(253,250,245,.25);color:#d8cabb;border-radius:8px;padding:6px 9px;cursor:pointer}
+.devbar button.on{background:var(--pink);border-color:var(--pink);color:var(--burg);font-weight:600}
+@media (max-width:1150px){.cards3,.tiles2{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-d="A" class="p-free">
+
+<div class="shell">
+  <div class="topnav">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M6 24 C10 20 18 12 27 7 L24 13 L15 21 Z" fill="#241611"/><path d="M9 27 c-1.5 1.5 -3 1.2 -4 .5 c1.8 -.2 2.4 -1.6 2.6 -2.8" stroke="#241611" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+      <span class="wordmark">ScriptAlly</span>
+    </div>
+    <div class="crumb"><span>ScriptAlly</span><span class="sep">/</span><span>Materials</span><span class="sep">/</span><b>Manuscripts</b><span class="saved">All changes saved</span></div>
+    <div class="nav-right"><div class="searchbox">Search</div><div class="help">?</div><button class="btn-new">＋ New</button></div>
+  </div>
+
+  <div class="below">
+    <div class="sidebar">
+      <div class="ms-selector">
+        <div class="thumb"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="4" width="13" height="16" rx="1.5" fill="#cdd8ca" stroke="#5a6e58" stroke-width="1.1"/><path d="M8 8h7M8 11h7M8 14h5" stroke="#5a6e58" stroke-width="1" stroke-linecap="round"/></svg></div>
+        <div><div class="t">Murphy's Day Out</div><div class="s">Thriller · 50,000 words</div></div>
+        <div class="arrows">‹ ›</div>
+      </div>
+      <div class="side-rule"></div>
+      <div class="navscroll">
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+        <div class="sect">Queries</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12 21 4l-4 16-6-5z"/></svg>Query Centre</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20h18"/><path d="M5 17l4-6 4 3 6-9"/></svg>Analytics</div>
+        <div class="sect">Agents</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c.6-3.4 2.8-5 5.5-5s4.9 1.6 5.5 5"/></svg>Contact list</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Discover</div>
+        <div class="sect">Materials</div>
+        <div class="nitem active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4v16M9 4v16M13 5l4 15"/></svg>Manuscripts</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="12" height="15" rx="1.5"/><path d="M8 3h12v15"/></svg>Comparable titles</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11"/></svg>Submission packages</div>
+        <div class="sect">Tasks</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 7 2 2 3-3"/><path d="M12 7h9"/><path d="m4 15 2 2 3-3"/><path d="M12 15h9"/></svg>To-do list<span class="count">16</span></div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14H6z"/></svg>Noteboard</div>
+        <div class="sect">Account</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>Settings</div>
+      </div>
+      <div class="side-foot">
+        <div class="uav">ML</div>
+        <div><div class="uname">Michael Li</div><div class="uplan"><span class="free-only">Free plan</span><span class="pro-only">Pro plan</span></div></div>
+        <button class="upg free-only">Upgrade</button>
+      </div>
+    </div>
+
+    <div class="content"><div class="window"><div class="inner">
+
+      <div class="pagehead">
+        <div><h1>Your manuscripts</h1><div class="desc">Every manuscript on your shelf, and what each one is out doing.</div></div>
+        <div class="ph-right"><span class="ph-count">1 manuscript · 1 in submission</span><button class="btn-pink">＋ Add manuscript</button></div>
+      </div>
+
+      <div class="card">
+        <div class="plateband">
+          <div class="plate">
+            <svg width="74" height="74" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#b9c6b4" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h15M25 32h11M25 38h15M25 44h8" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/><path d="M40 52 54 30l5 3-14 22-6 2z" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="who">
+            <span class="pill"><span class="dot"></span>Querying</span>
+            <h2>Murphy's Day Out</h2>
+            <div class="meta"><span class="gp">Young Adult</span><span class="gp">Thriller</span><span class="wcx">50,000 words</span></div>
+            <div class="logl">Murphy catches a fly</div>
+          </div>
+          <div class="side">
+            <div class="statstrip">
+              <div class="stat"><div class="n">4</div><div class="k">Queries</div></div>
+              <div class="stat"><div class="n">1</div><div class="k">Responses</div></div>
+              <div class="stat"><div class="n">8 Aug</div><div class="k">Last activity</div></div>
+            </div>
+            <div style="display:flex;gap:10px"><button class="btn-ghost btn-sm">Edit details</button><button class="btn-pink btn-sm">Send a query</button></div>
+          </div>
+        </div>
+
+        <div class="tabs rule">
+          <div class="tab on" data-tab="details">Details</div>
+          <div class="tab" data-tab="comps">Comparable titles</div>
+          <div class="tab" data-tab="pkgs">Submission packages<span class="prochip free-only">Pro</span></div>
+        </div>
+
+        <!-- ================= DETAILS ================= -->
+        <div class="pane" id="pane-details">
+
+          <!-- ---------- A: journey + illustrated cards ---------- -->
+          <div class="dv dA"><div class="dbody">
+            <div class="journey">
+              <div class="jhead">
+                <span class="jt">Where it's got to</span>
+                <span class="jsub">4 queries out since 20 June</span>
+                <span class="linkline">Open Queries Hub →</span>
+              </div>
+              <div class="track">
+                <div class="node out"><div class="ring">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.6"><path d="M3 12 21 4l-4 16-6-5z" fill="#fdfaf5"/></svg></div>
+                  <div class="n">4</div><div class="k">Queried</div></div>
+                <div class="node in"><div class="ring">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" stroke-width="1.6"><path d="M5 7h9l4 4-4 4H5z" fill="#fff"/><path d="M9 11h5"/></svg></div>
+                  <div class="n">1</div><div class="k">Partial req.</div></div>
+                <div class="node out"><div class="ring">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.6"><rect x="6" y="4" width="12" height="16" rx="1.5" fill="#fdfaf5"/><path d="M9 9h6M9 13h6"/></svg></div>
+                  <div class="n">1</div><div class="k">Partial sent</div></div>
+                <div class="node none"><div class="ring">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4b5a5" stroke-width="1.6"><path d="M5 4h11l3 3v13H5z"/><path d="M9 12h6M9 16h4"/></svg></div>
+                  <div class="n">—</div><div class="k">Full req.</div></div>
+                <div class="node none"><div class="ring">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4b5a5" stroke-width="1.6"><circle cx="12" cy="10" r="5"/><path d="m9 15-1 6 4-2 4 2-1-6"/></svg></div>
+                  <div class="n">—</div><div class="k">Offer</div></div>
+              </div>
+            </div>
+
+            <div class="cards3">
+              <div class="icard">
+                <div class="art">
+                  <svg width="112" height="96" viewBox="0 0 112 96" fill="none">
+                    <path d="M18 66 96 22l-14 52-24-16z" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M58 58 96 22 34 52z" fill="#e8c8bc" stroke="#3a1c14" stroke-width="1.3" stroke-linejoin="round"/>
+                    <path d="M58 58v18l10-10" stroke="#3a1c14" stroke-width="1.3" stroke-linejoin="round" fill="#fdfaf5"/>
+                    <path d="M10 78c6-2 9-6 10-11" stroke="#c9b0a4" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="k">Out in the world</div>
+                <div class="big">4</div>
+                <div class="sub">queries with agents. One has come back so far.</div>
+                <div class="foot"><span class="linkline">View in Queries Hub →</span></div>
+              </div>
+
+              <div class="icard">
+                <div class="art">
+                  <svg width="112" height="96" viewBox="0 0 112 96" fill="none">
+                    <rect x="30" y="22" width="52" height="20" rx="2" transform="rotate(-6 30 22)" fill="#e7ede3" stroke="#3a1c14" stroke-width="1.4"/>
+                    <rect x="26" y="42" width="58" height="20" rx="2" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.4"/>
+                    <rect x="32" y="62" width="50" height="20" rx="2" transform="rotate(4 32 62)" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.4"/>
+                    <path d="M36 50h20M38 70h18" stroke="#8a7a6c" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="k">Comparable titles</div>
+                <div class="big">3</div>
+                <div class="sub">on the shelf, enough to compose your pitch line.</div>
+                <div class="foot"><span class="linkline">Open the shelf →</span></div>
+              </div>
+
+              <div class="icard">
+                <div class="art">
+                  <svg width="112" height="96" viewBox="0 0 112 96" fill="none">
+                    <rect x="26" y="26" width="56" height="52" rx="4" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.5"/>
+                    <path d="M26 40h56" stroke="#3a1c14" stroke-width="1.4"/>
+                    <path d="M40 22v10M68 22v10" stroke="#3a1c14" stroke-width="1.6" stroke-linecap="round"/>
+                    <circle cx="54" cy="58" r="10" fill="#e7ede3" stroke="#5a6e58" stroke-width="1.4"/>
+                    <path d="M54 53v5l3 3" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="k">On the shelf since</div>
+                <div class="big">12 Jun</div>
+                <div class="sub">Querying since 20 June. Last activity 8 August.</div>
+                <div class="foot"><span class="linkline">Edit details →</span></div>
+              </div>
+            </div>
+          </div></div>
+
+          <!-- ---------- B: big illustrated tiles ---------- -->
+          <div class="dv dB"><div class="dbody">
+            <div class="tiles2">
+              <div class="btile">
+                <div class="scene pinkbg">
+                  <svg width="70" height="70" viewBox="0 0 80 80" fill="none">
+                    <path d="M12 48 68 16l-10 38-18-12z" fill="#fff" stroke="#3a1c14" stroke-width="1.6" stroke-linejoin="round"/>
+                    <path d="M40 42 68 16 24 38z" fill="#e8c8bc" stroke="#3a1c14" stroke-width="1.4" stroke-linejoin="round"/>
+                    <path d="M40 42v14l8-8" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.4" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="k">Out in the world</div>
+                  <h4>4 queries with agents</h4>
+                  <p>One response so far, on 8 August. Nothing is overdue this week.</p>
+                  <span class="linkline ll">View in Queries Hub →</span>
+                </div>
+              </div>
+
+              <div class="btile">
+                <div class="scene">
+                  <svg width="70" height="70" viewBox="0 0 80 80" fill="none">
+                    <rect x="18" y="16" width="16" height="48" rx="2" fill="#cdd8ca" stroke="#3a1c14" stroke-width="1.5"/>
+                    <rect x="36" y="22" width="14" height="42" rx="2" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.5"/>
+                    <rect x="52" y="12" width="14" height="52" rx="2" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.5"/>
+                    <path d="M22 28h8M40 32h6M56 24h6" stroke="#5a6e58" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="k">Comparable titles</div>
+                  <h4>3 on the shelf</h4>
+                  <p><i>Stormbreak</i> meets <i>A Good Girl's Guide to Murder</i>.</p>
+                  <span class="linkline ll">Open the shelf →</span>
+                </div>
+              </div>
+
+              <div class="btile">
+                <div class="scene">
+                  <svg width="70" height="70" viewBox="0 0 80 80" fill="none">
+                    <rect x="16" y="20" width="48" height="46" rx="4" fill="#fff" stroke="#3a1c14" stroke-width="1.6"/>
+                    <path d="M16 32h48" stroke="#3a1c14" stroke-width="1.5"/>
+                    <path d="M28 14v10M52 14v10" stroke="#3a1c14" stroke-width="1.8" stroke-linecap="round"/>
+                    <circle cx="40" cy="49" r="11" fill="#e7ede3" stroke="#5a6e58" stroke-width="1.5"/>
+                    <path d="M40 43v6l4 3" stroke="#5a6e58" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="k">On the shelf</div>
+                  <h4>Added 12 June 2026</h4>
+                  <p>Querying since 20 June — that's seven weeks of active submission.</p>
+                  <span class="linkline ll">Edit details →</span>
+                </div>
+              </div>
+
+              <div class="btile">
+                <div class="scene">
+                  <svg width="70" height="70" viewBox="0 0 80 80" fill="none">
+                    <rect x="14" y="26" width="42" height="40" rx="3" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.5"/>
+                    <rect x="24" y="16" width="42" height="40" rx="3" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.5"/>
+                    <path d="M32 26h26M32 34h26M32 42h16" stroke="#7c3a2a" stroke-width="1.4" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="k">Submission materials <span class="prochip free-only" style="margin-left:6px">Pro</span></div>
+                  <h4 class="free-only">One tidy package per agent</h4>
+                  <h4 class="pro-only">2 packages compiled</h4>
+                  <p class="free-only">Keep versioned letters, synopses and pages, and compile them per agency.</p>
+                  <p class="pro-only">Query letter (2 versions) · Synopsis (1) · Sample pages not added yet.</p>
+                  <span class="linkline ll free-only">See what's included →</span>
+                  <span class="linkline ll pro-only">Open package builder →</span>
+                </div>
+              </div>
+            </div>
+          </div></div>
+
+          <!-- ---------- C: illustrated timeline ---------- -->
+          <div class="dv dC"><div class="dbody">
+            <div class="tl">
+              <div class="th">
+                <span class="tt">The story so far</span>
+                <span class="tsub">Murphy's Day Out, since 12 June 2026</span>
+                <span class="linkline">Open Queries Hub →</span>
+              </div>
+              <div class="steps">
+                <div class="step">
+                  <div class="mk"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><rect x="7" y="5" width="18" height="22" rx="2" fill="#fff" stroke="#3a1c14" stroke-width="1.4"/><rect x="7" y="5" width="4" height="22" rx="1.5" fill="#b9c6b4" stroke="#3a1c14" stroke-width="1.2"/><path d="M15 11h7M15 15h7M15 19h5" stroke="#5a6e58" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+                  <div>
+                    <div class="dt">12 June 2026</div>
+                    <h5>Onto the shelf</h5>
+                    <p>Young Adult thriller, 50,000 words. Logline: Murphy catches a fly.</p>
+                  </div>
+                  <div class="right"><span class="linkline">Edit →</span></div>
+                </div>
+                <div class="step">
+                  <div class="mk"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><path d="M5 18 27 6l-5 18-8-6z" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.4" stroke-linejoin="round"/><path d="M14 18 27 6 9 15z" fill="#e8c8bc" stroke="#3a1c14" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+                  <div>
+                    <div class="dt">20 June 2026</div>
+                    <h5>First query out</h5>
+                    <p>To Daniel O'Rourke at Inkwell &amp; Stone. Three more followed through July.</p>
+                  </div>
+                  <div class="right"><div class="rn">4</div><div class="rk">Queries sent</div></div>
+                </div>
+                <div class="step">
+                  <div class="mk"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><rect x="5" y="8" width="22" height="16" rx="2" fill="#fff" stroke="#3a1c14" stroke-width="1.4"/><path d="m5 10 11 8 11-8" stroke="#3a1c14" stroke-width="1.3"/><circle cx="24" cy="9" r="4.5" fill="#e7ede3" stroke="#5a6e58" stroke-width="1.3"/></svg></div>
+                  <div>
+                    <div class="dt">8 August 2026</div>
+                    <h5>A partial requested</h5>
+                    <p>Penhallow Literary asked for the first fifty pages. Sent the same day.</p>
+                  </div>
+                  <div class="right"><div class="rn">1</div><div class="rk">Responses</div></div>
+                </div>
+                <div class="step now">
+                  <div class="mk"><svg width="30" height="30" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="10" fill="#fff" stroke="#7c3a2a" stroke-width="1.5"/><path d="M16 10v6l4 3" stroke="#7c3a2a" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                  <div>
+                    <div class="dt">Today</div>
+                    <h5>Three still waiting</h5>
+                    <p>Nothing is past its expected reply window yet. The next nudge falls due on 22 August.</p>
+                  </div>
+                  <div class="right"><button class="btn-pink btn-sm">Send a query</button></div>
+                </div>
+              </div>
+              <div class="stripfoot">
+                <div class="mini">
+                  <svg width="30" height="30" viewBox="0 0 32 32" fill="none"><rect x="6" y="8" width="7" height="18" rx="1.5" fill="#cdd8ca" stroke="#3a1c14" stroke-width="1.3"/><rect x="14" y="11" width="6" height="15" rx="1.5" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.3"/><rect x="21" y="6" width="6" height="20" rx="1.5" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.3"/></svg>
+                  <div><div class="mn">3</div><div class="mk2">Comparable titles</div></div>
+                  <span class="linkline ll">Open →</span>
+                </div>
+                <div class="mini">
+                  <svg width="30" height="30" viewBox="0 0 32 32" fill="none"><rect x="5" y="11" width="17" height="16" rx="2" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.3"/><rect x="10" y="6" width="17" height="16" rx="2" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.3"/><path d="M14 11h9M14 15h9" stroke="#7c3a2a" stroke-width="1.2" stroke-linecap="round"/></svg>
+                  <div>
+                    <div class="mn"><span class="free-only">Pro</span><span class="pro-only">2</span></div>
+                    <div class="mk2">Submission packages</div>
+                  </div>
+                  <span class="linkline ll">Open →</span>
+                </div>
+              </div>
+            </div>
+          </div></div>
+
+        </div>
+
+        <!-- ================= COMPS ================= -->
+        <div class="pane" id="pane-comps" style="display:none">
+          <div class="padbody">
+            <div class="pitchbox">
+              <div><div class="lab">The 'X meets Y' of your pitch</div>
+                <div class="pitchline"><i>Stormbreak</i><span class="m">meets</span><i>A Good Girl's Guide to Murder</i></div></div>
+              <span class="linkline">Copy</span>
+            </div>
+            <div class="compgrid">
+              <div class="comp"><span class="sp"></span><div class="ct">Stormbreak</div><div class="ca">L. Okafor · 2024</div><div class="cn">Same breathless pacing, same seaside setting.</div></div>
+              <div class="comp h2"><span class="sp"></span><div class="ct">A Good Girl's Guide to Murder</div><div class="ca">H. Jackson · 2019</div><div class="cn">The amateur-sleuth energy.</div></div>
+              <div class="comp h3"><span class="sp"></span><div class="ct">The Inheritance Games</div><div class="ca">J. L. Barnes · 2020</div><div class="cn">Puzzle-box plotting.</div></div>
+              <div class="addcomp">＋ Add a comp</div>
+            </div>
+            <div class="offer free-only">
+              <svg width="46" height="46" viewBox="0 0 48 48" fill="none"><circle cx="21" cy="21" r="12" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.6"/><path d="m30 30 9 9" stroke="#3a1c14" stroke-width="1.8" stroke-linecap="round"/><path d="M17 21h8M21 17v8" stroke="#5a6e58" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <div><div class="ot">The Scout <span class="prochip">Pro</span></div>
+                <div class="od">Searches recent published fiction for titles that match this manuscript's category, genre and tone, with a note on why each one comps.</div></div>
+              <div class="oa"><button class="btn-ghost btn-sm">See how it works</button><button class="btn-pink btn-sm">Upgrade</button></div>
+            </div>
+            <div class="offer pro-only">
+              <svg width="46" height="46" viewBox="0 0 48 48" fill="none"><circle cx="21" cy="21" r="12" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.6"/><path d="m30 30 9 9" stroke="#3a1c14" stroke-width="1.8" stroke-linecap="round"/><path d="M17 21h8M21 17v8" stroke="#5a6e58" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <div><div class="ot">The Scout</div><div class="od">Find published titles that match Murphy's Day Out. Last run 2 August — 6 suggestions, 3 added.</div></div>
+              <div class="oa"><button class="btn-pink btn-sm">Find comps</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PACKAGES ================= -->
+        <div class="pane" id="pane-pkgs" style="display:none">
+          <div class="padbody free-only">
+            <div class="pkgempty">
+              <svg width="72" height="72" viewBox="0 0 64 64" fill="none"><rect x="10" y="14" width="34" height="40" rx="3" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.5"/><rect x="18" y="8" width="34" height="40" rx="3" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.5"/><path d="M26 20h18M26 27h18M26 34h12" stroke="#7c3a2a" stroke-width="1.4" stroke-linecap="round"/></svg>
+              <div class="pe1">One tidy package per agent.</div>
+              <div class="pe2">Submission packages are part of Pro.</div>
+            </div>
+            <div class="bullets">
+              <div class="bul"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6a5a50" stroke-width="1.5"><path d="M4 5h16v14H4z"/><path d="m4 7 8 6 8-6"/></svg><div class="bt">Versioned materials</div><div class="bd">Keep every draft of your query letter, synopsis and sample pages, and see which version went where.</div></div>
+              <div class="bul"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6a5a50" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11"/></svg><div class="bt">Per-agent packages</div><div class="bd">Compile the exact combination an agency asks for, then attach it when you log the query.</div></div>
+              <div class="bul"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6a5a50" stroke-width="1.5"><path d="M12 3v13"/><path d="m8 12 4 4 4-4"/><path d="M4 20h16"/></svg><div class="bt">Export when asked</div><div class="bd">Send the package out in the format the agency wants, without rebuilding it each time.</div></div>
+            </div>
+            <div style="display:flex;justify-content:center;gap:12px;margin-top:22px"><button class="btn-ghost btn-sm">See how it works</button><button class="btn-pink btn-sm">Upgrade to Pro</button></div>
+          </div>
+          <div class="padbody pro-only">
+            <div class="lab">Materials on file</div>
+            <div style="max-width:560px;margin-top:4px">
+              <div class="frow"><span>Query letter</span><span class="linkline" style="margin-left:auto;color:#5a6e58">2 versions</span></div>
+              <div class="frow"><span>Synopsis</span><span class="linkline" style="margin-left:auto;color:#5a6e58">1 version</span></div>
+              <div class="frow"><span>Sample pages</span><span class="linkline" style="margin-left:auto;color:#c4b5a5">—</span></div>
+              <div class="frow"><span>Packages compiled</span><span class="linkline" style="margin-left:auto;color:#5a6e58">2 packages</span></div>
+            </div>
+            <div style="margin-top:20px"><span class="linkline">Open package builder →</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div></div></div>
+  </div>
+</div>
+
+<div class="devbar">
+  <span class="lbl">Details</span>
+  <button data-d="A" class="on">A journey</button><button data-d="B">B tiles</button><button data-d="C">C timeline</button>
+  <span class="lbl">Plan</span>
+  <button data-p="p-free" class="on">Free</button><button data-p="p-pro">Pro</button>
+</div>
+
+<script>
+const state={d:'A',p:'p-free'};
+function apply(){
+  document.body.dataset.d=state.d;document.body.className=state.p;
+  document.querySelectorAll('.devbar [data-d]').forEach(b=>b.classList.toggle('on',b.dataset.d===state.d));
+  document.querySelectorAll('.devbar [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===state.p));
+}
+document.querySelectorAll('.devbar [data-d]').forEach(b=>b.onclick=()=>{state.d=b.dataset.d;apply();});
+document.querySelectorAll('.devbar [data-p]').forEach(b=>b.onclick=()=>{state.p=b.dataset.p;apply();});
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  document.querySelectorAll('.pane').forEach(p=>p.style.display=(p.id==='pane-'+t.dataset.tab)?'block':'none');
+});
+apply();
+</script>
+</body>
+</html>
