@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — hover lift: rim survival</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--muted:#9c8878;--rim:rgba(124,58,42,.16);--sage:#8a9e88;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:34px;}
+h1{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:6px;}
+.sub{font-size:13px;color:var(--muted);margin-bottom:26px;}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:34px;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;}
+.lab.bad{color:#a8524a;}
+.lab.good{color:#5a6e58;}
+
+.card{background:var(--parchment);border-radius:14px;padding:20px;height:168px;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);}
+.card h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;}
+.card .n{font-family:'Playfair Display',serif;font-size:34px;margin-top:10px;}
+.card .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.spark{margin-top:14px;height:34px;border-radius:8px;background:linear-gradient(180deg,rgba(138,158,136,.22),rgba(138,158,136,0));}
+
+/* ── A · the bug: hairline border + scale ── */
+.a{border:.5px solid var(--rim);transition:transform .18s ease, box-shadow .18s ease;}
+.a:hover{transform:scale(1.012) translateY(-1px);
+  box-shadow:0 2px 3px rgba(58,28,20,.08),0 12px 30px rgba(58,28,20,.12);}
+
+/* ── B · rim as inset shadow, whole-pixel lift ── */
+.b{box-shadow:inset 0 0 0 1px var(--rim),0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);
+  transition:transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s ease;
+  will-change:transform;backface-visibility:hidden;}
+.b:hover{transform:translateY(-2px);
+  box-shadow:inset 0 0 0 1px rgba(124,58,42,.26),0 2px 4px rgba(58,28,20,.07),0 14px 32px rgba(58,28,20,.13);}
+
+/* ── C · no transform at all: shadow + rim only ── */
+.c{box-shadow:inset 0 0 0 1px var(--rim),0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);
+  transition:box-shadow .2s ease;}
+.c:hover{box-shadow:inset 0 0 0 1px rgba(124,58,42,.30),0 3px 6px rgba(58,28,20,.08),0 18px 40px rgba(58,28,20,.14);}
+
+.note{background:#f8f2ea;border-radius:11px;box-shadow:inset 0 0 0 1px #ece0d2;padding:16px 20px;font-size:12.5px;line-height:1.65;max-width:900px;}
+.note b{color:#7c3a2a;}
+.note ul{margin:6px 0 0 18px;}
+.note code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#fff;padding:1px 5px;border-radius:4px;}
+@media (prefers-reduced-motion:reduce){.a,.b,.c{transition:none;}.a:hover,.b:hover{transform:none;}}
+</style>
+</head>
+<body>
+<h1>Hover lift — why the top rim vanishes</h1>
+<div class="sub">Hover each card. Zoom the browser to 110% or 125% to make the failure unmissable.</div>
+
+<div class="row">
+  <div>
+    <div class="lab bad">A · current — 0.5px border + scale</div>
+    <div class="card a"><h3>Active queries</h3><div class="n">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+  </div>
+  <div>
+    <div class="lab good">B · inset rim + whole-pixel lift</div>
+    <div class="card b"><h3>Active queries</h3><div class="n">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+  </div>
+  <div>
+    <div class="lab good">C · no transform — shadow only</div>
+    <div class="card c"><h3>Active queries</h3><div class="n">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+  </div>
+</div>
+
+<div class="note">
+  <b>What's happening</b>
+  <ul>
+    <li>A <code>0.5px</code> border on a transformed element rasterises at a fractional offset. The top edge rounds to nothing; the sides, landing on whole pixels, survive — which is why only the top disappears.</li>
+    <li><code>scale()</code> resamples the border itself, so even a full <code>1px</code> rim thins under it.</li>
+    <li>The hover shadow's top band paints over whatever hairline is left.</li>
+  </ul>
+  <br>
+  <b>The fix</b>
+  <ul>
+    <li><b>Draw the rim as <code>inset 0 0 0 1px</code>, not <code>border</code>.</b> Inset shadows are painted inside the element's own raster and survive transforms and fractional positions intact.</li>
+    <li><b>Never <code>scale()</code> a bordered surface.</b> Translate only, and in whole pixels — <code>-2px</code>, not <code>-1px</code>.</li>
+    <li><b>Promote the layer up front</b> with <code>will-change:transform</code> and <code>backface-visibility:hidden</code> so it rasterises once instead of re-snapping mid-transition.</li>
+    <li><b>Separate rim from lift.</b> The inset shadow is the rim; the drop shadows are the lift. They no longer compete for the same pixels, and the rim can darken slightly on hover as part of the response.</li>
+    <li>Check for an ancestor with <code>overflow:hidden</code> — a 2px lift needs 2px of room, or the top is clipped rather than resampled. Different cause, identical symptom.</li>
+  </ul>
+  <br>
+  <b>C is the safer default.</b> A shadow-only response reads as a lift without moving anything, so there is no transform to go wrong and nothing to clip. Reach for B only where the movement is doing real work.
+</div>
+</body>
+</html>

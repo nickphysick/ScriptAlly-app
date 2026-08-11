@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — rim vs header band</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--rim:rgba(124,58,42,.16);--rim-hi:rgba(124,58,42,.34);--sage-a:#d7ddd5;--sage-b:#d5dbd3;--hair:#ece0d2;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:30px;-webkit-font-smoothing:antialiased;}
+h1{font-family:'Playfair Display',serif;font-size:23px;margin-bottom:4px;}
+.sub{font-size:12.5px;color:var(--muted);margin-bottom:24px;max-width:820px;line-height:1.6;}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;max-width:1400px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:4px;}
+.lab.bad{color:#a8524a;} .lab.good{color:#5a6e58;}
+.say{font-size:11px;color:#b0a092;line-height:1.45;margin-bottom:10px;min-height:56px;}
+
+/* shared innards */
+.phead{display:flex;align-items:center;gap:10px;padding:12px 15px;
+  background:linear-gradient(180deg,var(--sage-a),var(--sage-b));}
+.phead h2{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;}
+.mark{width:26px;height:26px;flex:0 0 26px;border-radius:8px;background:rgba(253,250,245,.72);
+  box-shadow:inset 0 0 0 1px rgba(124,58,42,.13);display:flex;align-items:center;justify-content:center;}
+.mark svg{width:15px;height:15px;stroke:var(--burg);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.pbody{padding:15px;}
+.big{font-family:'Playfair Display',serif;font-size:28px;line-height:1;}
+.k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+.spark{margin-top:12px;height:44px;border-radius:8px;background:linear-gradient(180deg,rgba(138,158,136,.24),rgba(138,158,136,0));}
+
+/* ── A · CURRENT — inset rim, band paints over it ── */
+.a{background:var(--parchment);border-radius:14px;overflow:hidden;
+  box-shadow:inset 0 0 0 1px var(--rim),0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);
+  transition:box-shadow .2s ease;}
+.a:hover{box-shadow:inset 0 0 0 1px var(--rim-hi),0 3px 6px rgba(58,28,20,.08),0 18px 40px rgba(58,28,20,.14);}
+
+/* ── B · RING OVERLAY — rim drawn above children ── */
+.b{position:relative;background:var(--parchment);border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);transition:box-shadow .2s ease;}
+.b::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
+  box-shadow:inset 0 0 0 1px var(--rim);transition:box-shadow .2s ease;}
+.b:hover{box-shadow:0 3px 6px rgba(58,28,20,.08),0 18px 40px rgba(58,28,20,.14);}
+.b:hover::after{box-shadow:inset 0 0 0 1px var(--rim-hi);}
+
+/* ── C · BAND INSET — band draws its own top hairline ── */
+.c{background:var(--parchment);border-radius:14px;overflow:hidden;
+  box-shadow:inset 0 0 0 1px var(--rim),0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);
+  transition:box-shadow .2s ease;}
+.c .phead{box-shadow:inset 0 1px 0 var(--rim),inset 1px 0 0 var(--rim),inset -1px 0 0 var(--rim);transition:box-shadow .2s ease;}
+.c:hover{box-shadow:inset 0 0 0 1px var(--rim-hi),0 3px 6px rgba(58,28,20,.08),0 18px 40px rgba(58,28,20,.14);}
+.c:hover .phead{box-shadow:inset 0 1px 0 var(--rim-hi),inset 1px 0 0 var(--rim-hi),inset -1px 0 0 var(--rim-hi);}
+
+/* ── D · INSET FRAME — the MountCard law, three layers ── */
+.d{background:var(--parchment);border-radius:15px;padding:1px;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07);transition:box-shadow .2s ease;}
+.d .frame{border-radius:14px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--rim);transition:box-shadow .2s ease;}
+.d:hover{box-shadow:0 3px 6px rgba(58,28,20,.08),0 18px 40px rgba(58,28,20,.14);}
+.d:hover .frame{box-shadow:inset 0 0 0 1px var(--rim-hi);}
+
+.res{max-width:1400px;margin-top:26px;padding:18px 22px;background:var(--parchment);border-radius:12px;
+  box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.res h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);margin:10px 0 6px;}
+.res h3:first-child{margin-top:0;}
+.res b{color:var(--burg);} .res ul{margin:4px 0 0 18px;}
+.res code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f4ede4;padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+
+<h1>Why the top rim is still missing</h1>
+<div class="sub">Hover each. A is what ships today. The rim is an inset shadow on the container, but the sage band is a child with a background reaching the container's top edge — and child backgrounds paint above a parent's inset shadow. Only the top edge touches the band, so only the top edge is lost.</div>
+
+<div class="grid">
+
+  <div>
+    <div class="lab bad">A · current — band covers the rim</div>
+    <div class="say">Inset rim on the container. The band paints over its top edge. Wrong at rest too; hover just makes it visible.</div>
+    <div class="a">
+      <div class="phead"><span class="mark"><svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M4 15.5l5-4.5 3.5 2.5L20 6"/></svg></span><h2>Active queries</h2></div>
+      <div class="pbody"><div class="big">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="lab good">B · ring overlay</div>
+    <div class="say">Rim moves to an <code>::after</code> at <code>inset:0</code>, above children, <code>pointer-events:none</code>. Nothing can paint over it.</div>
+    <div class="b">
+      <div class="phead"><span class="mark"><svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M4 15.5l5-4.5 3.5 2.5L20 6"/></svg></span><h2>Active queries</h2></div>
+      <div class="pbody"><div class="big">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="lab good">C · band draws its own edges</div>
+    <div class="say">Container keeps its inset rim; the band adds matching top and side hairlines. Two rules to keep in step forever.</div>
+    <div class="c">
+      <div class="phead"><span class="mark"><svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M4 15.5l5-4.5 3.5 2.5L20 6"/></svg></span><h2>Active queries</h2></div>
+      <div class="pbody"><div class="big">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="lab good">D · inset frame (MountCard law)</div>
+    <div class="say">Outer card with 1px rim padding; inner <code>.frame</code> is the clipping context and carries the rim; band sits inside it.</div>
+    <div class="d">
+      <div class="frame">
+        <div class="phead"><span class="mark"><svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M4 15.5l5-4.5 3.5 2.5L20 6"/></svg></span><h2>Active queries</h2></div>
+        <div class="pbody"><div class="big">13</div><div class="k">+2 over this range</div><div class="spark"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="res">
+  <h3>The mechanism</h3>
+  <ul>
+    <li>An <code>inset</code> box-shadow paints on the element's own background layer — <b>below every child</b>.</li>
+    <li>The sage band is a child with an opaque background running to the container's top edge.</li>
+    <li>So the band covers the rim's top edge. The sides survive because nothing reaches them.</li>
+    <li><code>overflow:hidden</code> clips the band's corners to the radius, which is why the failure reads as a clean cut rather than a fade — and why it looks like a clipping bug when it is a paint-order bug.</li>
+  </ul>
+
+  <h3>Which fix</h3>
+  <ul>
+    <li><b>B is my recommendation.</b> One rule, on the container, above everything. It cannot be defeated by any child, present or future, and it needs no coordination between two selectors. The rim also stays a single source of truth for hover.</li>
+    <li><b>C works but is fragile</b> — the band's hairlines and the container's rim must be changed together forever. This is the duplicate-rule trap: when someone retunes the rim token, one of the two will be missed.</li>
+    <li><b>D is the existing MountCard law</b> and is correct, but it is a structural change to every container and only necessary when a child fill must be physically clipped. Here the rim only needs to be painted last.</li>
+  </ul>
+
+  <h3>Standing rule this should become</h3>
+  <p><b>Where a container has a child whose background meets its edge — a header band, a coloured footer, a full-bleed image — the rim must be a <code>::after</code> ring overlay, not an inset shadow on the container and not a border.</b> Inset shadows sit under children; borders resample under transforms. Only an overlay ring survives both. Assert it: a test that the container's rim is declared on a pseudo-element wherever a header band is present.</p>
+</div>
+</body>
+</html>

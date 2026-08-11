@@ -396,13 +396,42 @@ function orderDoNext(cards: BoardCard[]): BoardCard[] {
  * ⚠️ IT DEDUPES ON THE DERIVATION, NOT THE RENDER. Hiding the second row would lose real work;
  * what was wrong was a key that ignored the manuscript and a title that dropped it.
  */
+/**
+ * ⚠️ THE ONE URGENT KEY, EXPORTED — the dashboard imports it rather than restating it.
+ *
+ * The board is where "urgent" is DEFINED, and every dashboard surface that says a number about
+ * urgent work (the attention chip, the tasks card, the To-do panel) has to collapse the same way
+ * or the app states two different numbers for one word. Measured on a three-task fixture before
+ * this existed: board 1, dashboard 2 — two `full_requested` tasks from one agent on one
+ * manuscript, which the board treats as one thing to do and the dashboard listed twice. Neither
+ * was wrong on its own terms, which is exactly the fault.
+ *
+ * ⚠️ A NULL KEY MEANS "NEVER COLLAPSE THIS", NOT "ALL THE SAME". Cards with no agent (user tasks,
+ * manuscript prompts) have no identity to collide on and always survive; a shared empty-string
+ * key would silently fold every one of them into a single row.
+ *
+ * ⚠️ THE KEY ONLY HAS TO BE CONSISTENT WITHIN ONE LIST, which is why the two callers may source
+ * the title differently: the board prefers the manuscript record's `title`, a dashboard row holds
+ * only the task's denormalised `manuscriptTitle`. Both are per-task, so two tasks sharing a
+ * manuscript produce the same string on whichever side is asking.
+ *
+ * ⚠️ IT WAS INLINED HERE ONCE AND THE DASHBOARD'S HALF WAS LOST WITH IT (a7b5d54). The board went
+ * on collapsing correctly, so nothing looked broken — the divergence only shows if you compare the
+ * two counts, which is what `urgentReconciliation.test.ts` does and why it was restored with this.
+ */
+export const agentCardKey = (
+  taskType: string | undefined,
+  agentId: string | undefined,
+  msTitle: string | undefined,
+): string | null => (agentId ? `${taskType ?? ""}|${agentId}|${msTitle ?? ""}` : null);
+
 export function dedupeAgentCards(cards: BoardCard[]): BoardCard[] {
   const seen = new Set<string>();
   const kept: BoardCard[] = [];
   for (const c of cards) {
     // Cards with no agent (user tasks, manuscript prompts) are never collapsed — they have no
-    // agent identity to collide on.
-    const id = c.agentId ? `${c.taskType ?? ""}|${c.agentId}|${c.msTitle ?? ""}` : null;
+    // agent identity to collide on. The key is `agentCardKey`, shared with the dashboard.
+    const id = agentCardKey(c.taskType, c.agentId, c.msTitle);
     if (id) {
       if (seen.has(id)) continue;
       seen.add(id);
