@@ -34,6 +34,7 @@ import {
 } from "../../lib/workspaceShell";
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill } from "./primitives";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
+import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { invokeCapture } from "./railNav";
 import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import "./primitives.css";
@@ -110,10 +111,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
-  /* ⚠️ THE COLLAPSE MODEL IS RETIRED WITH THE RAIL (app-shell-v2). The rail was not chrome beside
-     the sidebar — it WAS the sidebar's collapsed form, and it owned the only expand control. Keep
-     `collapsed` without it and the state has no UI: collapse, and there is no navigation at all.
-     The ref carries no collapse affordance of any kind, so the sidebar is one width, always open. */
+  /* ⚠️ COLLAPSE RETURNS — AS A NARROWING, NOT A REMOVAL (sidebar-collapse pack; supersedes the
+     app-shell-v2 note that retired it). What v2 retired was the RAIL-AND-PANEL model, where the
+     rail was a second component and collapse swapped between them; keeping `collapsed` without
+     that rail left a state with no UI, so the state went too. This is a different shape: ONE
+     sidebar whose width narrows to an icon rail — every row keeps existing, labels collapse in
+     place, the toggle lives in the pagebar at the seam. There is no second component to drift. */
+  const sidebar = useSidebarCollapsed();
   const [openId, setOpenId] = useState<string | null>(() => openForHit(hit));
   const [msOpen, setMsOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
@@ -250,7 +254,14 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   return (
     <div className="ws-app">
 
-      <div className="ws-panel">
+      {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
+          state is read synchronously, so the first render is already narrow — but a transition
+          declared unconditionally still animates from the stylesheet's width on load. The class
+          arrives two rAFs after mount; until then, state changes are instant. */}
+      <div
+        id="ws-sidebar"
+        className={`ws-panel${sidebar.collapsed ? " sb-collapsed" : ""}${sidebar.ready ? " sb-ready" : ""}`}
+      >
         <div className="ws-pin">
 
           {/* ⚠️ THE BRAND SITS ABOVE THE MANUSCRIPT SELECTOR (app-shell-v2). It used to be the
@@ -457,6 +468,29 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           saved position and MobileSheet all address it by id. */}
       <div className="ws-main">
           <header className="ws-pagebar">
+              {/* ⚠️ THE COLLAPSE TOGGLE SITS AT THE SIDEBAR/CONTENT SEAM — first in the bar, before
+                  the crumb — and it does not move between states (sidebar-collapse pack, baked:
+                  not in the sidebar footer, not on the panel edge, not hover-revealed; a footer
+                  control loses to the nav list's internal scroll). The glyph is the ref's panel
+                  outline; its left-column fill fades when collapsed, keyed off aria-expanded so
+                  the icon cannot disagree with the state it reports.
+                  ⚠️ `[` rides `aria-keyshortcuts` alongside the chord — recon found it unbound;
+                  ⌘\ was freed by the tuck sweep one commit back. */}
+              <button
+                type="button"
+                className="sb-toggle"
+                onClick={sidebar.toggle}
+                aria-expanded={!sidebar.collapsed}
+                aria-controls="ws-sidebar"
+                aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"
+                aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <rect x="1.5" y="2.5" width="15" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.5" />
+                  <line x1="6.6" y1="2.5" x2="6.6" y2="15.5" stroke="currentColor" strokeWidth="1.5" />
+                  <rect className="sb-fillcol" x="2.6" y="3.6" width="3" height="10.8" rx="1" fill="#7c3a2a" opacity="0.28" />
+                </svg>
+              </button>
               {/* ⚠️ EVERY CRUMB SEGMENT IS INTERACTIVE (§5), and the separator is `/` throughout —
                   the live mix of `/` and `·` made the brand look like a different KIND of step
                   from the section. Only the current page is ink; ancestors are muted links. */}

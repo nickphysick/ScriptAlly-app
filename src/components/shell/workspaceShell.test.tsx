@@ -383,13 +383,18 @@ describe("the shell still renders, and the rejected treatments stay rejected", (
    asserts only that what they guarded is genuinely GONE — an absence lock, so the old shell
    cannot creep back in a later pass. */
 describe("⚠️ the old shell is gone, not hidden", () => {
-  it("no rail, no greige bar, no card, no collapse — in markup or stylesheet", () => {
+  /* ⚠️ RETARGETED (sidebar-collapse pack): `collapsed` LEFT THE DEAD-WORD LIST, and only that.
+     This lock was written when collapse meant the RAIL-AND-PANEL model — a second component the
+     sidebar swapped into, with flyouts and hover-peek. That model stays dead, and its four
+     mechanism words below still guard it. The collapse that returned is a different shape: ONE
+     sidebar whose width narrows in place (useSidebarCollapsed), no second component to drift. */
+  it("no rail, no greige bar, no card — and the OLD collapse mechanisms stay dead", () => {
     const html = at("/dashboard");
     for (const dead of ["ws-rail", "ws-bar", "ws-card", "ws-cscroll", "ws-crow2", "ws-xtog"]) {
       expect(html, dead).not.toContain(dead);
       expect(cssRules, dead).not.toContain(dead);
     }
-    for (const dead of ["collapsed", "flyoutFor", "railClick", "peeksOnHover", "readCollapsed"]) {
+    for (const dead of ["flyoutFor", "railClick", "peeksOnHover", "readCollapsed"]) {
       expect(srcCode, dead).not.toContain(dead);
     }
   });

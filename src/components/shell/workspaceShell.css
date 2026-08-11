@@ -565,18 +565,35 @@
    against the crumb's 35.1. Browser-measured at 1440×900, both panel states. The number to keep
    level is the MARK's centre, not the row box's — the row is 16/14 asymmetric and its box centre
    sits at 34, which is not the thing anyone sees. */
+/* ⚠️ `gap: 0` + A MARGIN ON THE WORDMARK, NOT `gap: 9px` (sidebar-collapse pack, Phase 1). The
+   9px between mark and wordmark used to be the row's gap; it is the wordmark's own margin now,
+   so that collapsing the wordmark (max-width 0, margin 0) leaves NOTHING between the mark and
+   the row's centre — a flex gap beside a zero-width child still holds its 9px open and parks the
+   mark 4.5px off-centre. Expanded, the two mechanisms are pixel-identical. */
 .ws-brand {
-  display: flex; align-items: center; justify-content: center; gap: 9px;
+  display: flex; align-items: center; justify-content: center; gap: 0;
   padding: 16px 6px 14px; width: 100%;
   background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
 }
 /* ⚠️ BARE ARTWORK — no plate, no border, no fill. The mark is transparent, so a plate would be a
    box drawn round a shape that does not want one. */
 .ws-bmark { height: 38px; width: auto; flex-shrink: 0; display: block; }
-/* ⚠️ TYPE, NOT AN ASSET — 22px is the cap it looks like, with no ink ratio to keep in step. */
+/* ⚠️ TYPE, NOT AN ASSET — 22px is the cap it looks like, with no ink ratio to keep in step.
+   ⚠️ `max-width` + `overflow: hidden` are the COLLAPSE mechanism, not styling: the wordmark
+   narrows and clips rather than wrapping or reflowing, and it never leaves the accessibility
+   tree — `display: none` here would (locked in Phase 4). 160px comfortably exceeds the
+   wordmark's rendered ~118px, so expanded it clips nothing. */
 .ws-bwm {
   font-family: var(--font-serif); font-weight: 600; font-size: 22px;
   color: #1c130e; letter-spacing: -0.01em; line-height: 1; white-space: nowrap;
+  margin-left: 9px; max-width: 160px; overflow: hidden;
+}
+.sb-collapsed .ws-bwm { opacity: 0; max-width: 0; margin-left: 0; }
+/* the transition arrives with sb-ready — a collapsed sidebar restored on load must not animate
+   shut from the stylesheet's expanded values (Phase 1's flash guard) */
+.ws-panel.sb-ready .ws-bwm {
+  transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
+    margin-left 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
 }
 
 /* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER COMES FROM `--head`. It was
@@ -609,6 +626,22 @@
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
 .ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
+/* ── the collapse toggle — at the sidebar/content seam, first in the bar (sidebar-collapse pack).
+   It does not move between states: same slot, same size, both directions. Rest is muted; hover
+   takes the parchment card treatment; the ring is the house focus ring. The glyph's left-column
+   fill is keyed off `aria-expanded`, so the icon cannot disagree with the state it reports. */
+.sb-toggle {
+  flex: none; width: 34px; height: 34px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid transparent; border-radius: 9px;
+  color: #9a8c80; cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.sb-toggle:hover { background: #fdfaf5; border-color: #e7ddd2; color: var(--shell-ink); }
+.sb-toggle:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
+.sb-toggle svg { display: block; }
+.sb-fillcol { transition: opacity 160ms ease; }
+.sb-toggle[aria-expanded="false"] .sb-fillcol { opacity: 0; }
 /* the whole left group — crumb, hairline, save state — on ONE baseline */
 .ws-crumb { display: flex; align-items: baseline; gap: 9px; }
 .ws-sep { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; }
