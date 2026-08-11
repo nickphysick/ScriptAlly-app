@@ -155,12 +155,17 @@ describe("the pink band (app-shell-v2)", () => {
   });
 
   /* ⚠️ the pills sit ON the band now — a tinted pill on a tinted band loses its edge */
+  /* ⚠️ RETARGETED: ONE FILL, THREE DOTS. This asked each of `.os-p.u/.h/.m` to declare the white
+     fill itself, which stopped being true when the pills were consolidated — the sheet now states
+     `background: #ffffff` ONCE on the shared `.os-p` and lets the modifier classes carry nothing
+     but their dot colour. Asserting the fill per modifier was asserting the duplication, so it
+     failed on the very change that removed it. The rule being locked is the consolidation: one
+     fill on the base, colour in the dot. */
   it("the trio's pills are WHITE on the band, keeping their dots", () => {
-    for (const k of [".os-p.u", ".os-p.h", ".os-p.m"]) {
-      expect(rule(k), k).toContain("background: #ffffff");
-    }
+    expect(rule(".os-p"), "the shared fill left the base rule").toContain("background: #ffffff");
     expect(rule(".os-p.u .os-pdot")).toContain("background: #7c3a2a");
     expect(rule(".os-p.h .os-pdot")).toContain("background: #8a9e88");
+    expect(rule(".os-p.m .os-pdot")).toContain("background: #b9a893");
   });
 });
 
