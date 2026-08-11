@@ -11,8 +11,9 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { QueryStatus } from "../types";
 import {
-  OUTCOME_ORDER, OUTCOME_JOURNEY, JOURNEY_STEPS, stepsFor, changeOutcome, droppedNotice,
+  OUTCOME_ORDER, OUTCOME_JOURNEY, OUTCOME_STATUS, JOURNEY_STEPS, stepsFor, changeOutcome, droppedNotice,
   stepHasContent, responseReady, emptyResponseDraft, RESP_STEP_OPTIONAL,
   type ResponseDraft, type RespStep,
 } from "./responseDraft";
@@ -155,5 +156,44 @@ describe("required is still not sequential", () => {
     }
     expect(RESP_STEP_OPTIONAL.outcome).toBe(false);
     expect(RESP_STEP_OPTIONAL.when).toBe(false);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ⚠️ RECORDING A RESPONSE RESOLVES THE NUDGE TASK BY CONSTRUCTION — there is nothing to close, and
+   building a resolver would be WORSE than nothing, because the next person would believe it was
+   doing something.
+
+   Tasks are DERIVED per render in `db.tsx` from the queries themselves (`calculatedTasks`); only
+   suppression is stored. `replyTask` will only chase a reply on the agent's-court statuses, so the
+   moment a response moves the query off one of them the nudge simply stops being produced.
+
+   This is the guard on that reasoning: if a future outcome ever mapped BACK to an awaiting status,
+   the nudge would survive its own answer and this fails.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+describe("the nudge resolves itself, so nothing resolves it", () => {
+  it("no outcome leaves the query on a status that still chases a reply", () => {
+    const AWAITING = [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT];
+    for (const o of OUTCOME_ORDER) {
+      expect(AWAITING, `${o} would leave the nudge task alive after its own answer`)
+        .not.toContain(OUTCOME_STATUS[o]);
+    }
+  });
+
+  /* The gate this rests on, asserted where it lives — so narrowing it fails here rather than
+     quietly resurrecting a task nobody can dismiss. */
+  it("and the gate it rests on still reads the agent's-court statuses", () => {
+    const prec = read("./taskPrecedence.ts");
+    expect(prec).toContain("const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT;");
+    expect(prec).toContain('if (!awaiting) return "none";');
+  });
+
+  it("and no resolver was built for a task that deletes itself", () => {
+    const queries = read("../components/Queries.tsx");
+    const save = queries.slice(queries.indexOf("const saveResponse = async"), queries.indexOf("/** The picker's inline quick-add"));
+    expect(save).not.toBe("");
+    for (const w of ["dismissTask", "resolveTaskFlag", "nudge_overdue"]) {
+      expect(save, `${w} here would be machinery pretending to do work`).not.toContain(w);
+    }
   });
 });
