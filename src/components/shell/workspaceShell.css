@@ -39,11 +39,17 @@
    The app's body font is Source Sans Pro and every page depends on it, so this cannot go on
    `.ws-app` — it would cascade into page content the ref says nothing about.
 
-   ⚠️ AND THIS IS WHY THE SIDEBAR READ AS SMALLER THAN THE MOCKUP WHILE EVERY SIZE ALREADY MATCHED
-   IT. Browser-measured: `.ws-ni` is 13.5px in both, as are all fourteen other type sizes in the
-   panel and bar. Source Sans Pro simply has a markedly smaller x-height than Inter, so the same
-   number renders visibly smaller. Bumping the size would have made the numbers disagree with the
-   ref in order to make the picture agree with it — the typeface was the difference. */
+   ⚠️ AND THIS IS WHY THE SIDEBAR ONCE READ AS SMALLER THAN THE MOCKUP WHILE EVERY SIZE ALREADY
+   MATCHED IT. Browser-measured at the time: `.ws-ni` was 13.5px in both, as were all fourteen
+   other type sizes in the panel and bar. Source Sans Pro has a markedly smaller x-height than
+   Inter, so the same number renders visibly smaller. Bumping the size then would have made the
+   numbers disagree with the ref in order to make the picture agree with it.
+
+   ⚠️ THE NUMBERS HAVE SINCE MOVED ANYWAY, BY INSTRUCTION (audit pack P6) — rows are 14.5px, icons
+   17px, the manuscript title 14/11.5, the user block 14/12, the badge 11px. That is a deliberate
+   step up in the sidebar's own scale, taken WITH the panel's width (214 → 264). The note above is
+   kept because its lesson survives its numbers: if this surface ever reads wrong again at sizes
+   that match a mockup, suspect the typeface before changing a value. */
 
 
 
@@ -131,21 +137,35 @@
    at 186px with nothing on the left a left-aligned row left a gap in the middle that read as a
    missing element. The cover slot IS that missing element: with it in place the row anchors left
    and the gap closes for the right reason. Superseded, not reversed on taste. */
+/* ⚠️ THE CARD IS THE CONTAINER (fixes-2 A1) — the opener and the arrows are its children, so it
+   is `position: relative` and carries the frame, while `.ws-msopen` carries the click. */
 .ws-mspill {
+  position: relative;
   flex: 1;
   min-width: 0;
   height: 56px;
   background: #ffffff;
   border: 1px solid var(--shell-edge);
   border-radius: 10px;
+  transition: border-color 0.15s;
+}
+.ws-msopen {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 10px;
+  /* gap 0 + margin on .ws-mstt — the shared collapse mechanism (see .ws-ni) */
+  gap: 0;
+  /* ⚠️ THE RIGHT PADDING RESERVES THE ARROWS' LANE, so a long title runs UNDER them rather than
+     to the card's edge and out of reach beneath a control. */
+  padding: 0 46px 0 10px;
+  background: none;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  transition: border-color 0.15s;
   font: inherit;
   text-align: left;
+  min-width: 0;
 }
 
 /* ⚠️ THE COVER SLOT ANCHORS THE LEFT EDGE, which is why the row is left-aligned and not centred.
@@ -179,19 +199,20 @@
 .ws-mcov.illus { background: none; border: 0; box-shadow: none; }
 .ws-mcov.illus img { width: 30px; height: 30px; object-fit: contain; display: block; }
 .ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
-.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
+.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; margin-left: 10px; overflow: hidden; }
 .ws-msg {
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--shell-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .ws-mspill:hover { border-color: #d6cdbf; }
+.ws-mspill.static .ws-msopen { cursor: default; }
 .ws-mspill.static { cursor: default; }
 .ws-mspill.static:hover { border-color: var(--shell-edge); }
 .ws-mst {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--shell-ink);
   white-space: nowrap;
@@ -211,7 +232,37 @@
 
 /* section rows — the panel's own rhythm, 38px */
 /* 30px, so the pill reads as its own object rather than the first row of the navigation. */
-.ws-nav { flex: 1; min-height: 0; overflow: auto; padding-top: 30px; }
+/**
+ * ⚠️ THE NAV LIST IS THE SIDEBAR'S ONLY SCROLLING REGION (audit pack P6), and without that the
+ * sidebar overflows below roughly 740px of viewport height — the brand, the selector and the user
+ * block are all fixed heights, so everything they cannot fit falls off the bottom with nothing to
+ * reach it. This element is the one that gives.
+ *
+ * `flex: 1; min-height: 0` is what makes it the grower — and `min-height: 0` is load-bearing, not
+ * tidiness: a flex item's default `min-height: auto` refuses to shrink below its content, so
+ * without it the LIST would push the foot off instead of scrolling.
+ *
+ * ⚠️ `overscroll-behavior: contain` STOPS THE SCROLL CHAINING OUT. Reaching the end of the nav and
+ * carrying on would scroll the PAGE behind it — the sidebar quietly driving the content window.
+ *
+ * ⚠️ AND THE SCROLLBAR IS HIDDEN, WHICH IS ONLY SAFE BECAUSE OF WHAT IT SCROLLS. A hidden bar on
+ * content you must discover is a trap; this list is short, self-evident, and every row in it is
+ * also reachable by keyboard. Both properties are set — the WebKit pseudo-element and the standard
+ * `scrollbar-width` — because neither covers every browser on its own.
+ */
+.ws-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: 30px;
+  scrollbar-width: none;
+}
+.ws-nav::-webkit-scrollbar { width: 0; height: 0; }
+/* ⚠️ AND THE THREE FIXED BLOCKS ARE PINNED EXPLICITLY. A flex item shrinks by default, so at a
+   short viewport the brand and the selector would compress instead of the list scrolling — the
+   sidebar would look subtly wrong everywhere rather than obviously wrong in one place. */
+.ws-brand, .ws-phead, .ws-pfoot { flex: none; }
 
 /* ⚠️ A LABEL, NOT A CONTROL. Pure typography: not focusable, not clickable, holding no state —
    which is the whole point of retiring the accordion's parent rows. */
@@ -229,23 +280,29 @@
   height: 36px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  /* ⚠️ gap 0 + `.ws-lbl { margin-left: 10px }` — the icon–label 10px moved onto the label so it
+     collapses WITH it (sidebar-collapse pack, Phase 2). A flex gap beside a zero-width child
+     holds itself open and parks the icon 5px off the rail's centre. Pixel-identical expanded. */
+  gap: 0;
   padding: 0 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 500;
   color: #544b44;
   transition: background 0.13s, color 0.13s;
   outline: none;
   width: 100%;
   text-align: left;
+  /* the collapsed corner badge positions against the row */
+  position: relative;
 }
+.ws-lbl { display: inline-block; margin-left: 10px; max-width: 200px; overflow: hidden; white-space: nowrap; }
 .ws-ic { display: flex; flex: none; opacity: 0.9; color: inherit; }
-.ws-ic svg { width: 18px; height: 18px; stroke-width: 1.7; }
+.ws-ic svg { width: 17px; height: 17px; stroke-width: 1.7; }
 .ws-ni:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
 .ws-ni:hover .ws-ic { opacity: 1; }
 .ws-ni.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
@@ -312,16 +369,29 @@
 .ws-srow.on { background: var(--shell-parch); color: var(--shell-ink); font-weight: 600; }
 .ws-srow:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
 
-/* foot — name + plan + Settings. NO avatar: the rail carries the face. */
+/* foot — the user row alone: avatar, name, plan, Upgrade. Settings left for the ACCOUNT section
+   (audit pack P5), and the old "NO avatar: the rail carries the face" note went with the rail. */
 .ws-pfoot { flex: none; }
-/* ⚠️ ONE INTERACTIVE ROW (polish §6), replacing the two small text lines. The name takes the FULL
-   row width on line 1 — at 186px a name sharing a line with the plan and an upsell would truncate
-   on ordinary names, and a foot block that abbreviates who you are is the wrong thing to
-   abbreviate. Line 2 carries the plan and the pill. */
+/**
+ * ⚠️ ONE RULE FOR THIS ROW, AND THERE USED TO BE TWO (audit P2).
+ *
+ * A second `.ws-uacct` block sat ~190 lines further down, added when the avatar returned with the
+ * rail's departure. It declared `align-items: center` but never reset `flex-direction`, so the
+ * `column` declared here survived: equal specificity, and source order only decides properties
+ * that BOTH rules state. That produced the reported fault — the avatar detached ABOVE the name
+ * instead of beside it — with neither rule looking wrong on its own.
+ *
+ * The composed row (ref app-shell-v2): 32px avatar · name over plan as BLOCK elements · Upgrade
+ * pill right-aligned. The name keeps the full text column, because a foot block that abbreviates
+ * who you are is the wrong thing to abbreviate.
+ */
 .ws-uacct {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  /* gap 0 + margins on the text column and the pill — the same collapse mechanism as the nav
+     rows (see .ws-ni): a flex gap beside zero-width children holds itself open. */
+  gap: 0;
   padding: 9px 10px;
   border-radius: 9px;
   cursor: pointer;
@@ -330,8 +400,11 @@
 }
 .ws-uacct:hover { background: rgba(242, 237, 231, 0.6); }
 .ws-uacct:focus-visible { box-shadow: inset 0 0 0 2px var(--shell-focus); }
+/* ⚠️ BLOCK, EXPLICITLY. The name and the plan stack; as inline spans they ran together on one
+   line — the block-element failure this foot has now hit three times. */
 .ws-n {
-  font-size: 13.5px;
+  display: block;
+  font-size: 14px;
   font-weight: 600;
   color: var(--shell-ink);
   white-space: nowrap;
@@ -342,24 +415,37 @@
 /* ⚠️ NOT `.ws-sub` — that name is ALREADY the accordion's container, whose `display:grid;
    grid-template-rows:0fr` would have collapsed this line to zero height. The collision was
    invisible in the markup and instant in the render. */
-.ws-acctline { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ws-pl { font-size: 11.5px; color: var(--shell-muted); }
-.ws-upg {
-  flex: none;
+.ws-acctline { display: block; }
+.ws-pl { display: block; font-size: 12px; color: var(--shell-muted); line-height: 1.3; }
+/* ⚠️ `.ws-upg` IS RETIRED WITH THE INLINE PILL (Option D). It was `flex: none` beside the name,
+   which is precisely what starved the name of width. Its successor is `.ws-upgrow` below — a
+   sibling of the account row, full width, filled. The old class name is deleted rather than
+   restyled so nothing can render the inline pill by accident. */
+
+/* ── Row 2: the Upgrade pill, full width beneath the account row (Option D) ──
+   FILLED rather than ghost: it has the width to carry a fill now, and a ghost control at this
+   size read as a disabled field. Soft pink on the burgundy family, per the ref's values. */
+.ws-upgrow {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 9px 12px;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--shell-burgundy);
-  border: 1px solid rgba(124, 58, 42, 0.3);
-  border-radius: 999px;
-  padding: 4px 10px;
-  background: #fdf6f2;
+  background: #f5e2da;
+  border: 1px solid #e8c8bc;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background 0.15s;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
 }
-.ws-upg:hover { background: #f5e3da; }
-.ws-upg:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
-.ws-setrow { margin-top: 4px; height: 36px; font-size: 13px; }
+.ws-upgrow:hover { background: #f0d5c9; border-color: #ddb6a7; }
+.ws-upgrow:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--shell-focus); }
+/* ⚠️ `.ws-setrow` IS DELETED WITH THE ROW IT STYLED (audit pack P5) — Settings is an ordinary
+   `.ws-ni` in the ACCOUNT section now, and a leftover rule for a row that no longer exists is how
+   a foot quietly regrows one. */
 
 /* flyout — anchored to the RAIL */
 
@@ -453,16 +539,15 @@
   }
 }
 
-/* ── The Analytics placeholder (Amendment 1, H3) — a real destination, honestly empty. ── */
-.qa-wrap { padding: 34px 30px; }
-.qa-title {
-  font-family: "Playfair Display", serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--shell-ink);
-  margin: 0 0 8px;
-}
-.qa-note { font-size: 13.5px; color: var(--shell-muted); margin: 0; }
+/* ── The Analytics placeholder (Amendment 1, H3) — a real destination, honestly empty. ──
+   ⚠️ `.qa-title` AND `.qa-note` ARE DELETED, not left behind (amendment 7 §7). They were this
+   page's bespoke title block; the plate replaces it and its prose is the plate's description. A
+   retired rule kept "just in case" is the pair that silently wins a specificity contest later.
+   ⚠️ `--pg-gut` IS THE SIDE GUTTER, declared once and read by the padding — the one token the plate
+   aligns to, as on every other band-tier page.
+   ⚠️ TOP 34 → 17, HALVED, for the reason every other page halved: the plate carries its own 88px,
+   so the old value was a band of empty paper above a header that is already generous. */
+.qa-wrap { --pg-gut: 30px; padding: 17px var(--pg-gut) 30px; }
 
 
 /* ══════════════════ APP SHELL v2 — one ground, one window ══════════════════
@@ -470,25 +555,66 @@
    window. A dark rail beside a pale page read as two applications bolted together. */
 .ws-app { background: var(--ws-ground); }
 .ws-panel { background: transparent; border-right: 0; }
-/* the single hairline that separates sidebar from page — nothing else divides them */
-.ws-panel::after {
-  content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 1px;
-  background: var(--ws-edge); pointer-events: none;
-}
+/* ⚠️ NOTHING DIVIDES THE SIDEBAR FROM THE PAGE (audit pack P6). The hairline that used to run down
+   `.ws-panel::after` is GONE, and it is gone rather than made fainter: the two surfaces already
+   share one ground, and a rule between them drew an edge where there is no edge. The white content
+   window is what separates the page from the ground — the sidebar simply sits on it.
 
-/* ── brand: ink square + wordmark, above the manuscript selector ── */
+   ⚠️ THIS ELEMENT KEEPS `position: relative` REGARDLESS. It is not decoration: `.ws-msmenu` (the
+   manuscript flyout) is absolutely positioned and anchors to the panel. Removing the hairline is
+   not a reason to remove the containing block. */
+
+/* ── brand: the plane-and-S mark beside the wordmark, the pair centred ── */
+/* ⚠️ THE BRAND ROW SHARES THE PAGEBAR'S LINE, and the two live in DIFFERENT containers — the
+   sidebar and the page column — so nothing aligns them by construction. The row's padding is set
+   FROM the pagebar's (`16px 6px 14px`) and the two optical centres are then MEASURED, never
+   assumed. If either padding moves, the other must.
+
+   ⚠️ IT IS `align-items: center`, NOT `baseline`, BECAUSE THE MARK IS AN IMAGE. An image has no
+   baseline — it resolves to its bottom MARGIN EDGE — so a row mixing an image with text cannot be
+   baselined at all: the text aligns on its baseline, the image on its bottom, and the taller one
+   drags. The mark and the wordmark share an optical CENTRE instead.
+
+   ⚠️ AND THE PAIR IS CENTRED IN THE SIDEBAR (audit pack P4), not ranged left. It is a masthead
+   sitting over the manuscript selector, not the first row of the navigation.
+
+   ⚠️ THE 3px COMPENSATION LEFT WITH THE ASSET IT COMPENSATED FOR. Top padding was 19px against the
+   pagebar's 16px because the title PNG carries ~48% dead space, so its box sat lower than its
+   letterforms. The wordmark is TYPE now — its box IS its letterforms — so the padding returns to
+   the pagebar's own 16px and the alignment simply falls out: 16 + half of the 38px mark = 35.0,
+   against the crumb's 35.1. Browser-measured at 1440×900, both panel states. The number to keep
+   level is the MARK's centre, not the row box's — the row is 16/14 asymmetric and its box centre
+   sits at 34, which is not the thing anyone sees. */
+/* ⚠️ `gap: 0` + A MARGIN ON THE WORDMARK, NOT `gap: 9px` (sidebar-collapse pack, Phase 1). The
+   9px between mark and wordmark used to be the row's gap; it is the wordmark's own margin now,
+   so that collapsing the wordmark (max-width 0, margin 0) leaves NOTHING between the mark and
+   the row's centre — a flex gap beside a zero-width child still holds its 9px open and parks the
+   mark 4.5px off-centre. Expanded, the two mechanisms are pixel-identical. */
 .ws-brand {
-  display: flex; align-items: center; gap: 10px;
-  padding: 2px 6px 16px; min-height: 46px; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 0;
+  padding: 16px 6px 14px; width: 100%;
   background: none; border: 0; cursor: pointer; font: inherit; text-align: left;
 }
-.ws-bmark {
-  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-  background: #1c130e; color: #fdfaf5;
-  font-family: var(--font-serif); font-weight: 600; font-size: 17px;
-  display: grid; place-items: center;
+/* ⚠️ BARE ARTWORK — no plate, no border, no fill. The mark is transparent, so a plate would be a
+   box drawn round a shape that does not want one. */
+.ws-bmark { height: 38px; width: auto; flex-shrink: 0; display: block; }
+/* ⚠️ TYPE, NOT AN ASSET — 22px is the cap it looks like, with no ink ratio to keep in step.
+   ⚠️ `max-width` + `overflow: hidden` are the COLLAPSE mechanism, not styling: the wordmark
+   narrows and clips rather than wrapping or reflowing, and it never leaves the accessibility
+   tree — `display: none` here would (locked in Phase 4). 160px comfortably exceeds the
+   wordmark's rendered ~118px, so expanded it clips nothing. */
+.ws-bwm {
+  font-family: var(--font-serif); font-weight: 600; font-size: 22px;
+  color: #1c130e; letter-spacing: -0.01em; line-height: 1; white-space: nowrap;
+  margin-left: 9px; max-width: 160px; overflow: hidden;
 }
-.ws-bwm { font-family: var(--font-serif); font-weight: 600; font-size: 20px; color: #1c130e; letter-spacing: -0.01em; }
+.sb-collapsed .ws-bwm { opacity: 0; max-width: 0; margin-left: 0; }
+/* the transition arrives with sb-ready — a collapsed sidebar restored on load must not animate
+   shut from the stylesheet's expanded values (Phase 1's flash guard) */
+.ws-panel.sb-ready .ws-bwm {
+  transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
+    margin-left 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
+}
 
 /* ⚠️ THE MASTHEAD'S HEIGHT NO LONGER COMES FROM `--head`. It was
    `calc(var(--head) + var(--shell-frame) + 1px)` for ONE reason: to close on the same continuous
@@ -502,15 +628,16 @@
 }
 .ws-ni:hover { background: #efeae1; color: #241811; }
 
-/* ── foot: the avatar returned with the rail's departure ── */
-.ws-uacct { display: flex; align-items: center; gap: 10px; }
+/* ── foot: the avatar returned with the rail's departure ──
+   ⚠️ THE SECOND `.ws-uacct` RULE THAT LIVED HERE IS GONE (audit P2) — it half-restated the row
+   above and left `flex-direction: column` standing. One element, one rule. */
 .ws-av {
   width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
   background: #ffffff; border: 1px solid var(--shell-edge);
   font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #8a7a6c;
   display: grid; place-items: center;
 }
-.ws-utext { min-width: 0; flex: 1; }
+.ws-utext { min-width: 0; flex: 1; margin-left: 10px; }
 
 /* ══ the page area ══ */
 .ws-main {
@@ -519,17 +646,59 @@
 }
 /* ⚠️ CHROME, NOT CONTENT — it sits ON the ground above the window and never scrolls. */
 .ws-pagebar { flex: none; display: flex; align-items: center; gap: 14px; padding: 16px 6px 14px; }
+/* ── the collapse toggle — at the sidebar/content seam, first in the bar (sidebar-collapse pack).
+   It does not move between states: same slot, same size, both directions. Rest is muted; hover
+   takes the parchment card treatment; the ring is the house focus ring. The glyph's left-column
+   fill is keyed off `aria-expanded`, so the icon cannot disagree with the state it reports. */
+.sb-toggle {
+  flex: none; width: 34px; height: 34px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid transparent; border-radius: 9px;
+  color: #9a8c80; cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.sb-toggle:hover { background: #fdfaf5; border-color: #e7ddd2; color: var(--shell-ink); }
+.sb-toggle:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
+.sb-toggle svg { display: block; }
+.sb-fillcol { transition: opacity 160ms ease; }
+.sb-toggle[aria-expanded="false"] .sb-fillcol { opacity: 0; }
+/* the whole left group — crumb, hairline, save state — on ONE baseline */
 .ws-crumb { display: flex; align-items: baseline; gap: 9px; }
 .ws-sep { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; }
 .ws-cur { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #241811; }
 .ws-seg { font-family: var(--font-serif); font-weight: 600; font-size: 17px; color: #8a7a6c; background: none; border: 0; padding: 0; cursor: pointer; }
 .ws-seg:hover { color: #241811; }
-.ws-vdiv { width: 1px; height: 18px; background: #e2dacd; margin: 0 2px; flex: none; }
+.ws-vdiv { width: 1px; height: 18px; background: #e2dacd; margin: 0 2px; flex: none; align-self: center; }
 .ws-sync { font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.2em; text-transform: uppercase; color: #b3a598; }
 .ws-bright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 /* ⚠️ THE MENU ANCHOR CAME BACK WITH THE BUTTON. `.ws-newwrap` was swept out with the bar's rules
    and its absence was invisible in every measurement — the + New menu had nothing to anchor to. */
 .ws-newwrap { position: relative; flex: none; }
+/**
+ * ⚠️ THE MENU MUST NOT BE IN FLOW (polish P1). It had NO rule of its own, and `.sp-card` is
+ * statically positioned — so the panel laid out as an ordinary child of the pagebar, grew the bar
+ * by its own height, and pushed the entire content window down the page. Opening a menu moved the
+ * thing you were reading.
+ *
+ * The wrapper above is the anchor (`position: relative`); this takes the panel out of flow and
+ * hangs it off the button's bottom-right. `z-index` clears the window, which paints a background.
+ *
+ * ⚠️ TRANSFORM AND OPACITY ONLY (pack rule 7). The entrance scales from the top-right corner it
+ * belongs to — animating height or top here would relayout the pagebar every frame, which is the
+ * displacement bug again in slow motion.
+ */
+.ws-newmenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  transform-origin: top right;
+  animation: ws-menuin 0.14s cubic-bezier(0.22, 0.68, 0.36, 1);
+}
+@keyframes ws-menuin { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+/* the chevron/plus turns to say the menu is open — transform only */
+.ws-nbtn svg { transition: transform 0.14s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.ws-nbtn[aria-expanded="true"] svg { transform: rotate(45deg); }
 /* ⚠️ AND `display:flex` IS LOAD-BEARING: the button holds an icon AND a label, and without it
    they stack — the pill rendered as a tall black circle. Caught by the screenshot, not the tests. */
 .ws-nbtn {
@@ -542,6 +711,26 @@
 /* ⚠️ THE WINDOW IS THE SHEET OF PAPER, AND ITS FRAME MUST NOT MOVE. It is `overflow:hidden` and
    its BODY scrolls — put the scroll on the window itself and the radius, border and inset slide
    off screen on the first wheel, at which point it is just a border. */
+/**
+ * ⚠️ THE RIM IS AN ::after OVERLAY, MANDATORY — not a precaution.
+ *
+ * The band is a child with an OPAQUE background at the top of this rounded, clipping window. A
+ * child's background is clipped to the BORDER box, not the padding box, so it paints over the
+ * window's 1px border along every straight edge it touches, leaving only the corner arcs. Proven
+ * by test on the dashboard cards (see CLAUDE.md); an inset box-shadow on this element fails the
+ * same way, because inset shadows paint BELOW descendants. Only an overlay above them survives.
+ *
+ * The border stays for geometry — removing it shifts every page's contents by 1px.
+ */
+.ws-window { position: relative; }
+.ws-window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--ws-edge);
+  pointer-events: none;
+}
 .ws-window {
   flex: 1; min-height: 0; background: #ffffff;
   border: 1px solid var(--ws-edge); border-radius: 16px;
@@ -558,4 +747,177 @@
   .ws-main { padding: 0; }
   .ws-window { border-radius: 0; border: 0; box-shadow: none; }
   .ws-pagebar { display: none; }
+}
+
+/* ══ POLISH P3 — shell micro-interactions (transform/opacity only, pack rule 7) ══════════════ */
+/* nav rows: the count nudges on hover — the ROW does not move, so the list stays still under the
+   cursor and only the thing you are pointing at responds.
+   ⚠️ SCOPED TO `.sp-ct` WHEN THE LABEL BECAME A SPAN (sidebar-collapse pack, Phase 2). The old
+   `span:not(.ws-ic)` selector DESCRIBED the label but only ever MATCHED the count chip, because
+   the label was a bare text node — so "the label steps right" was written intent that never
+   rendered, and the wrapped label would have picked the nudge up as a silent behaviour change.
+   The nav is locked: today-exact wins over restoring two-week-old intent. (`.sp-count` in the old
+   pair matched nothing — CountChip renders `sp-ct` — recorded in the pack report.) */
+.ws-ni { transition: background-color 0.14s ease, color 0.14s ease; }
+.ws-ni > .sp-ct { transition: transform 0.14s ease; }
+.ws-ni:hover > .sp-ct { transform: translateX(2px); }
+
+/* manuscript selector: the edge warms and the mark tilts */
+.ws-mspill { transition: border-color 0.16s ease, background-color 0.16s ease; }
+.ws-mspill:hover { border-color: #d8c9b4; }
+.ws-mspill img, .ws-mspill svg { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.ws-mspill:hover img, .ws-mspill:hover svg { transform: rotate(-3deg); }
+
+/* buttons — the pressed state, again the one usually missed */
+.ws-nbtn, .ws-upgrow { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
+.ws-nbtn:hover, .ws-upgrow:hover { transform: translateY(-1px); }
+.ws-nbtn:active, .ws-upgrow:active { transform: scale(0.97); }
+
+/* ⚠️ THE SEARCH FIELD MUST NOT CHANGE WIDTH ON FOCUS — a field that grows shoves the bar's
+   flanks and, on the dashboard, walks the centred pill off the midline. The ring is a shadow,
+   which costs no layout. */
+.sp-search { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+.sp-search:focus-visible { box-shadow: 0 0 0 3px rgba(185, 138, 118, 0.32); }
+
+/* keyboard parity — every interactive element in the shell answers focus-visible */
+.ws-panel a:focus-visible, .ws-panel button:focus-visible,
+.ws-main a:focus-visible, .ws-main button:focus-visible {
+  outline: 2px solid #b98a76;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+
+
+/* ══ POLISH P6 — the manuscript selector ═════════════════════════════════════════════════════ */
+/* ⚠️ THE HEAD IS A COLUMN NOW: card, then arrows/dots beneath it. The pill was the only child and
+   sat in a row; the arrows are a sibling, so the container has to say which way things stack. */
+.ws-phead { display: flex; flex-direction: column; }
+/* full width, matching the nav rows below — the card no longer shares its line with a chevron */
+.ws-phead .ws-mspill { width: 100%; flex: none; }
+/* the dots sit beneath the card; the arrows no longer do */
+.ws-msdots { margin-top: 6px; }
+/* ⚠️ INSIDE THE CARD, VERTICALLY CENTRED AGAINST THE TITLE BLOCK (fixes-2 A1). Absolutely
+   positioned so the opener beneath keeps the full card as its hit area; `z-index` puts the arrows
+   on top, or the opener would swallow their clicks. */
+.ws-msnav {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 1px;
+  z-index: 1;
+}
+/* 20x24 hit areas, per the ref */
+.ws-msarrow {
+  width: 20px; height: 24px; padding: 0;
+  display: grid; place-items: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--shell-muted);
+  border-radius: 6px;
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+.ws-msarrow svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.9; }
+.ws-msarrow:hover:not(:disabled) { background: #efeae1; color: #241811; }
+.ws-msarrow:active:not(:disabled) { transform: scale(0.97); }
+/* ⚠️ GREYED AND ACTUALLY DISABLED — a control that looks off but still fires is worse than either */
+.ws-msarrow:disabled { opacity: 0.4; cursor: default; }
+.ws-msdots { display: flex; justify-content: center; gap: 4px; margin-top: 5px; }
+.ws-msdot { width: 4px; height: 4px; border-radius: 50%; background: #d6cdbf; transition: background-color 0.14s ease; }
+.ws-msdot.on { background: #8a7a6c; }
+
+/* ══ SIDEBAR COLLAPSE — the icon rail (sidebar-collapse pack, Phase 2; ref
+   design-refs/sidebar-collapse-v1.html) ═══════════════════════════════════════════════════════
+   ONE sidebar whose width narrows in place: 224px ↔ 72px, `width` and `padding` only — never
+   `transform`, which would create a stacking context over the panel's illustrated marks and
+   isolate any blend. The content pane is `flex: 1 1 auto; min-width: 0` (.ws-main) and simply
+   reflows; it gets no width sums of its own.
+
+   ⚠️ EVERY TRANSITION HERE IS GATED ON `.sb-ready` — added two rAFs after mount — because the
+   collapsed state is restored SYNCHRONOUSLY and must not animate shut from the stylesheet's
+   expanded values on load. The panel's legacy 0.22s width transition (the sv2 `.shut` era's,
+   consumer-swept) is silenced outside sb-ready for the same reason. */
+.ws-panel:not(.sb-ready) { transition: none; }
+.ws-panel.sb-ready,
+.ws-panel.sb-ready .ws-pin {
+  transition: width 240ms cubic-bezier(0.32, 0.72, 0.28, 1), padding 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
+}
+/* 72px, the researched band's upper end — deliberately, because the rail carries mini-badges. */
+.ws-panel.sb-collapsed,
+.sb-collapsed .ws-pin { width: 72px; }
+
+/* the collapsing text: opacity leads (140ms), the box follows on the rail's own curve */
+.ws-panel.sb-ready .ws-lbl,
+.ws-panel.sb-ready .ws-mstt,
+.ws-panel.sb-ready .ws-utext,
+.ws-panel.sb-ready .ws-msnav {
+  transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
+    margin 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
+}
+
+/* nav rows: the icon centres; the label collapses in place. Radius, hover and the parchment
+   active card are UNTOUCHED — the pack adds a state, not a restyle. */
+.sb-collapsed .ws-ni { justify-content: center; padding: 0; }
+.sb-collapsed .ws-lbl { opacity: 0; max-width: 0; margin-left: 0; }
+
+/* ⚠️ THE COUNT BECOMES A CORNER MINI-BADGE — same element, same value, restyled in place (the
+   mockup snaps this swap with display, so the snap is sanctioned). The dot hides: the pink badge
+   IS the alert at this size. No count → CountChip never rendered → no badge, for free. */
+.sb-collapsed .ws-ni .sp-ct {
+  position: absolute;
+  top: 3px;
+  right: 7px;
+  gap: 0;
+  background: #f5e2da;
+  border: 1px solid #e8c8bc;
+  border-radius: 8px;
+  padding: 2px 4px;
+  font-size: 8.5px;
+  line-height: 1;
+  color: var(--shell-ink);
+}
+.sb-collapsed .ws-ni .sp-ct-dot { display: none; }
+.sb-collapsed .ws-ni:hover > .sp-ct { transform: none; }
+
+/* section headings: the mono label yields to a centred hairline. `color: transparent`, never
+   display — the text keeps its exact box (the 22px-rhythm rule) and stays in the a11y tree. */
+.sb-collapsed .ws-glabel { position: relative; color: transparent; user-select: none; }
+.sb-collapsed .ws-glabel::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 1px;
+  background: #e7ddd2;
+}
+
+/* manuscript selector: the 40px book tile alone, centred; title, meta and arrows collapse.
+   (Its 10px gap moved onto .ws-mstt as margin — same mechanism as the nav rows.) */
+.sb-collapsed .ws-msopen { justify-content: center; padding: 0 6px; }
+.sb-collapsed .ws-mstt { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
+.sb-collapsed .ws-msnav { opacity: 0; pointer-events: none; }
+.sb-collapsed .ws-msdots { display: none; }
+
+/* user row: the avatar alone. The Upgrade pill zeroes its border and padding — a collapsed pill
+   that kept them would survive as a stray 10px lozenge of border beside the avatar. */
+.sb-collapsed .ws-uacct { justify-content: center; padding: 9px 0; }
+.sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
+/* ⚠️ NO COLLAPSED RULE FOR THE PILL — it is not rendered at 72px at all (Option D), so there is
+   nothing to zero. The old rule had to null border AND padding or a collapsed pill survived as a
+   stray lozenge of border beside the avatar; removing the element outright retires that whole
+   class of leftover. The upgrade path stays reachable from the account menu and from Settings. */
+
+/* ⚠️ LAST IN THE FILE, DELIBERATELY — equal specificity means source order decides, so a rule
+   added below this block would be exempt from it without anyone noticing. */
+@media (prefers-reduced-motion: reduce) {
+  .ws-app *, .ws-app *::before, .ws-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .ws-newmenu { animation: none !important; }
 }

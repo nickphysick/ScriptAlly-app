@@ -374,7 +374,17 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
        recording the retirement: the guard caught its own note. */
     expect(ws.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("LOGOTYPE_PX");
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*var\(--font-serif\)/s);
+    /* ⚠️ RETARGETED: THE MARK IS ARTWORK AGAIN, NOT A SERIF "S" (sidebar-collapse re-land).
+       This asserted `var(--font-serif)` inside `.ws-bmark` because the mark was then a Playfair
+       letter in an ink square. It is the plane-and-S image now — bare artwork, no plate, no fill
+       — so a font assertion cannot pass and, worse, would read as "the brand is missing" rather
+       than "the brand changed medium". What the lock is FOR is unchanged and still checked above:
+       ONE mark and ONE wordmark per surface. Here it now pins the two properties that make the
+       swap safe — a sized box and no plate — because a mark that grew a background would be the
+       actual regression. The wordmark keeps the serif, and that is asserted where it lives. */
+    expect(wsCss).toMatch(/\.ws-bmark \{[^}]*height: 38px/s);
+    expect(wsCss, "the bare mark grew a plate").not.toMatch(/\.ws-bmark \{[^}]*background:/s);
+    expect(wsCss).toMatch(/\.ws-bwm \{[^}]*var\(--font-serif\)/s);
   });
 });
 

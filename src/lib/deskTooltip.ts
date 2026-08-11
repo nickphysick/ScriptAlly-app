@@ -42,6 +42,29 @@ export const TIP_TOP_MIN = 8;
  * Sliding sideways keeps the tooltip pointing at roughly the right thing; sliding vertically would
  * put it over the anchor it describes. So horizontally we clamp, vertically we flip.
  */
+/**
+ * The RAIL variant (sidebar-collapse pack, Phase 3): 12px to the anchor's right, vertically
+ * centred on it.
+ *
+ * ⚠️ VERTICALLY WE CLAMP AND NEVER FLIP — the inverse of `placeTooltip`'s reasoning, for the same
+ * end. A rail row's tooltip belongs beside its row; sliding it up or down a few px at the
+ * viewport's edges still points at the right row, while flipping it to the LEFT would put it over
+ * the rail it describes (and under the panel's `overflow: hidden`, which is why this function
+ * exists — a child-element tooltip is clipped at the rail edge; the caller portals to a fixed
+ * layer and asks where to put it).
+ */
+export function placeTooltipRight(
+  anchor: Rect,
+  tip: { width: number; height: number },
+  viewport: { width: number; height: number },
+): TooltipPlacement {
+  const left = Math.min(anchor.left + anchor.width + TIP_GAP, viewport.width - tip.width - TIP_EDGE);
+  let top = anchor.top + anchor.height / 2 - tip.height / 2;
+  top = Math.min(top, viewport.height - tip.height - TIP_EDGE);
+  top = Math.max(TIP_EDGE, top);
+  return { left, top, flipped: false };
+}
+
 export function placeTooltip(anchor: Rect, tip: { width: number; height: number }, viewport: { width: number; height: number }): TooltipPlacement {
   const centre = anchor.left + anchor.width / 2;
   let left = centre - tip.width / 2;
