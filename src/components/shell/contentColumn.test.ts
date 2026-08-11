@@ -79,8 +79,29 @@ describe("route variants — declared once at the mount", () => {
 });
 
 describe("no competing per-page cap survives (folded into the wrapper)", () => {
-  it("manuscripts .msv-wrap no longer sets its own max-width", () => {
-    expect(msv).not.toContain(".msv-wrap { max-width: 1150px");
-    expect(msv).toContain(".msv-wrap { width: 100%; }");
+  /**
+   * ⚠️ RETARGETED, NOT RELAXED, AND IT REVERSES DIRECTION — say so plainly rather than let the diff
+   * read as a lock being dropped. This asserted `.msv-wrap { width: 100%; }`: the page's cap had been
+   * folded UP into the route slot's `contentVariant`, so a page-level cap would have been a second,
+   * competing one. The band-tier full-bleed pass moved the cap back DOWN, because a cap on the slot
+   * wraps the page HEADER too and the header is chrome — its rule must span the window.
+   *
+   * ⚠️ SO THE THING BEING GUARDED IS UNCHANGED: there must be exactly ONE cap. What moved is WHERE
+   * the one lives. The old bespoke 1150px must still never come back — that was a THIRD value, and
+   * the assertion against it is kept verbatim.
+   */
+  it("manuscripts .msv-wrap carries the ONE cap — tied to the read token, never the old bespoke 1150", () => {
+    expect(msv, "the bespoke 1150px cap came back — it is a third value that agrees with neither the read cap nor the gutter").not.toContain("max-width: 1150px");
+    /* ⚠️ RETARGETED AGAIN, AND UP A LEVEL (amendment 9). The cap was on `.msv-wrap`; it is on the
+       GRID ROOT now, where it governs the plate, the toolbar and the shelf at once — so the three
+       cannot disagree, which capping only the content could never guarantee. Still the same
+       expression: the read cap minus this page's own gutter, never a literal. */
+    expect(
+      msv,
+      "the content cap left the grid root — nothing else caps now, and the shelf plus its chrome stretch the full width of an ultrawide monitor",
+    ).toMatch(/\.msv-wpg\s*\{[^}]*--wpg-cap:\s*calc\(var\(--content-max-read\) - 2 \* var\(--pg-gut\)\)/s);
+    /* ⚠️ RETARGETED (amendment 11): the grid root DECLARES the cap; the content column READS it, and
+       row 3 spans full width so the scrollbar comes off the page rather than off the content. */
+    expect(msv, "the content column stopped reading the cap token").toContain("max-width: var(--wpg-cap)");
   });
 });

@@ -56,6 +56,38 @@
   color: var(--pkg-ink);
 }
 
+/* ⚠️ THE CAP MOVED HERE FROM THE ROUTE SLOT, and it is the SAME cap — `contentVariant="read"` capped
+   the manuscripts slot at 1200px, which wrapped the page HEADER too and stopped its rule short of
+   the window. Capping content is a content concern, so the cap sits on the content now.
+   ⚠️ EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal 1144: the slot cap was an
+   OUTER width the page's 28px padding then ate. `--pg-gut` is declared INLINE on this page's root
+   (SubmissionPackages.tsx) because its padding is inline — see the note there.
+   ⚠️ AND IT IS A CHILD SELECTOR, NOT A WRAPPER DIV, because `.pkgw` is a flex column with `gap:14`:
+   wrapping the content would collapse those three gaps into one and change every vertical rhythm on
+   the page. `<style>` is `display:none`, so it is not a flex item and takes no gap.
+   ⚠️ THE HEADER IS NO LONGER EXCLUDED (amendment 7). It used to be `> :not(.wsh)`, because a band
+   was chrome and bled past this cap. A PLATE is an object whose edges must meet the cards below it,
+   so its sticky host takes the same cap they do. */
+/* ⚠️ THE CAP MOVED TO THE GRID ROOT (amendment 9). It was `.pkgw > *` — every child capped
+   individually because chrome and content were siblings under one parent. They are rows of a grid
+   now, so one cap governs them all and the selector stops having to enumerate anything. */
+.pkgw-wpg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
+}
+/* ⚠️ ROW 3 KEEPS THIS PAGE'S FLEX COLUMN, because its contents (the strip, the tabs, the workshop)
+   were laid out by `.pkgw`'s own `display:flex; flex-direction:column; gap:14px` and that gap is the
+   page's vertical rhythm. Moving them into a block scroll row would collapse every gap at once. */
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; that is what keeps the content the width it was before the grid. */
+.pkgw .wpg-scroll { display: flex; flex-direction: column; gap: 14px; }
+/* ⚠️ EVERY CHILD, because this page's rhythm is the scroll row's own `gap` — a single wrapper
+   would collapse those gaps into one. `<style>` is display:none and takes no gap. */
+.pkgw .wpg-scroll > * { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+
 /* ── Tabs ─────────────────────────────────────────────────────────────────────
    A sibling block beneath PageHeader, never inside it: PageHeader draws title +
    description + its own closing rule, and has no tabs slot (nor a meta slot — the

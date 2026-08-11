@@ -14,6 +14,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { PageHeader } from "../shell/PageHeader";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
 import { AgentCard } from "./AgentCard";
 import { AgentEditor } from "./AgentEditor";
@@ -802,37 +803,48 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       <div className={`agl-page${mobilePushOpen ? " agl-mpushed" : ""}`}>
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
-       <div className="agl-inner">
-        {/* The standard page header — FULL variant (flyouts pack P3: the compact variant is
-            retired; one header grammar app-wide). The description resurrects the page's own
-            original sub line. */}
-        <div className="agl-head-slot">
-        <PageHeader
-          variant="full"
-          title="Your agent list"
-          description="Everyone you're querying, watching, or saving for later."
-          actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
-        />
-        </div>
-
-        <AgentToolbar
-          search={search}
-          onSearch={setSearch}
-          filters={filters}
-          onFilters={setFilters}
-          counts={counts}
-          starCounts={starCounts}
-          locCounts={locCounts}
-          resultCount={visible.length}
-          total={agents.length}
-          group={grouping}
-          groupOptions={AGENT_GROUP_OPTIONS}
-          onGroup={(k) => setGrouping(k as AgentGrouping)}
-          sort={sort}
-          sortOptions={AGENT_SORT_OPTIONS}
-          defaultSort={DEFAULT_AGENT_SORT}
-          onSort={(k) => setSort(k as AgentListSort)}
-        />
+       {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate and the toolbar are ROWS 1
+           AND 2 of a grid whose row 3 is the only thing that scrolls, so they are pinned by
+           CONSTRUCTION — no `position: sticky`, no `top` offset, no number to compute and therefore
+           none to get wrong. The sticky arrangement they replace encoded another element’s height
+           as a literal and was silently wrong by 32px on the Tasks family, which never condenses.
+           ⚠️ THE CAP MOVED TO THE GRID ROOT, and that is what aligns the three rows: plate, toolbar
+           and cards are one column wide BY CONSTRUCTION rather than by three rules agreeing.
+           `.agl-inner` survives as a plain wrapper inside the scroller. */}
+       <WorkspacePageGrid
+         className="agl-wpg"
+         scrollLabel="Agent list"
+         plate={
+           <PageHeader
+            variant="workspace"
+            mark="contacts"
+            title="Contact list"
+            description="Everyone you're querying, watching, or saving for later."
+            actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
+           />
+         }
+         toolbar={
+          <AgentToolbar
+            search={search}
+            onSearch={setSearch}
+            filters={filters}
+            onFilters={setFilters}
+            counts={counts}
+            starCounts={starCounts}
+            locCounts={locCounts}
+            resultCount={visible.length}
+            total={agents.length}
+            group={grouping}
+            groupOptions={AGENT_GROUP_OPTIONS}
+            onGroup={(k) => setGrouping(k as AgentGrouping)}
+            sort={sort}
+            sortOptions={AGENT_SORT_OPTIONS}
+            defaultSort={DEFAULT_AGENT_SORT}
+            onSort={(k) => setSort(k as AgentListSort)}
+          />
+         }
+       >
+        <div className="agl-inner">
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
@@ -920,6 +932,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           </div>
         )}
        </div>
+       </WorkspacePageGrid>
       </div>
     </div>
   );

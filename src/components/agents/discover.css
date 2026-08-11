@@ -48,15 +48,35 @@
    `flex: 1 0 auto` is load-bearing: the page mounts in a fillColumn slot (height-constrained flex
    column) with the route footer as its sibling. Without it the page can't grow past the container,
    so tall content — the first-run example card — overflowed the box and printed over the footer. */
+/* ⚠️ `--pg-gut` IS THE SIDE GUTTER, DECLARED ONCE — the padding reads it and the workspace header's
+   bleed (pageHeader.css `.wsh`) reads the same token back, so the header's rule spans the page while
+   the CONTENT stays guttered inside `.dv-wrap`. The geometry is read off the agent list, and it
+   stays read off it: change the gutter here only.
+   ⚠️ TOP 28 → 14, HALVED, for the reason the agent list halved: the header moved OUT of `.dv-wrap`
+   and now sits inside this padding, so the top value stopped being breathing room above the content
+   and became empty paper above a header that already carries its own 78px. */
+/* ⚠️ `flex: 1 0 auto` BECOMES `flex: 1; min-height: 0` (amendment 9). The old value let the page
+   GROW past its container — right while the page was one long document scrolled by the shell. Row 3
+   owns the scrolling now, so the page must fill its frame and not exceed it, or the grid has no
+   bounded height to give its scroll row.
+   ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER, where it scrolls with the last card. */
 .dv2 {
-  flex: 1 0 auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   color: var(--dv-ink-body);
-  padding: 28px 60px 48px;
+  --pg-gut: 60px;
+  padding: 14px var(--pg-gut) 0;
 }
-.dv-wrap {
-  max-width: 1240px;
-  margin: 0 auto;
-}
+.dv-wpg { flex: 1; min-height: 0; --wpg-cap: 1240px; }
+.dv2 .wpg-scroll { padding-bottom: 48px; }
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; that is what keeps the content the width it was before the grid. */
+.dv-wrap { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+/* ⚠️ THE BREAKPOINTS MOVE THE TOKEN, NEVER A LITERAL — a literal would leave the header bleeding by
+   the desktop gutter on a phone: inset at one step and overhanging at the next. */
 @media (max-width: 900px) {
   .dv2 { padding: 24px 28px 44px; }
 }

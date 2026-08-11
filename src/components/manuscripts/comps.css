@@ -58,7 +58,38 @@
   background: var(--ct-desk); color: var(--ct-ink); padding: 22px 28px 20px; /* masthead gutter mirrors the Queries hub */
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
-.ct-desk { flex: 1; min-height: 0; }
+/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
+   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
+   edge; this is what keeps the content the same width it was before the grid. */
+.ct-desk { flex: 1; min-height: 0; width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+/* ⚠️ ROW 3 IS A FLEX COLUMN ON THIS PAGE, and without it the desk collapses. `.ct-desk` fills by
+   `flex: 1; min-height: 0`, which needs a flex parent — inside a plain block scroll row those two
+   declarations mean nothing and the two panels lose the height they are 100% of. The page still
+   does not scroll at page level: the desk fills row 3 exactly and the panels scroll inside
+   themselves, exactly as before. */
+.ctpage .wpg-scroll { display: flex; flex-direction: column; }
+/* ⚠️ THE CAP MOVED HERE FROM THE ROUTE SLOT, and it is the SAME cap — `contentVariant="read"` capped
+   the slot at 1200px, which wrapped the HEADER too and stopped its rule short of the window. Capping
+   content is a content concern, so it now sits on the content.
+   ⚠️ EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal 1144: the slot cap was an
+   OUTER width that the page's padding then ate. A literal would silently stop matching the day
+   either number moved.
+   ⚠️ AND IT IS EVERY CHILD, NOT `.ct-desk` ALONE, because the manuscript selector row is a SIBLING
+   of the desk — capping the desk alone would leave the selector flying out to the full window.
+   ⚠️ THE HEADER IS NO LONGER EXCLUDED (amendment 7). It used to be `> :not(.wsh)`, because a band
+   was chrome and bled past this cap on purpose. A PLATE is an object whose edges must meet the
+   panels below it, so it takes the same cap they do — `.wsh-wrap` is its sticky host and is capped
+   with everything else. */
+/* ⚠️ THE CAP MOVED TO THE GRID ROOT (amendment 9). It was `.ctpage > *` — every child capped
+   individually, which worked but meant the plate, the tool row and the desk agreed only because
+   three elements happened to read one rule. On the grid root ONE cap governs all three rows, and
+   the modals below it are excluded for free rather than by a selector that has to remember them. */
+.ct-wpg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
+  }
 .ct-split { display: grid; grid-template-columns: 1fr 396px; gap: 22px; height: 100%; }
 @media (max-width: 1180px) {
   .ct-desk { overflow-y: auto; }

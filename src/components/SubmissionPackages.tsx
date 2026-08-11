@@ -30,6 +30,7 @@ import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
+import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
@@ -188,20 +189,25 @@ export const SubmissionPackages: React.FC = () => {
           chip on its own row is gone), and its own rule is restyled to the 2px Pro rule under the
           `.pkgw` scope — Discover's pattern, so there is no second rule and no fork of a component
           eleven pages share. */}
-      <PageHeader
-        variant="full"
-        title="Package Workshop"
-        description="Bundle your materials once, then send them without rebuilding each time."
-        titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
-        actionsSlot={activeMs ? (
-          <div className="pkgw-hact">
-            {msSelector}
-            <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
-              <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
-            </button>
-          </div>
-        ) : undefined}
-      />
+      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the strip, the tabs
+          and the workshop scroll in row 3. No toolbar → no row 2 and no hairline. */}
+      <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" plate={
+        <PageHeader
+          variant="workspace"
+          mark="packages"
+          title="Package Workshop"
+          description="Bundle your materials once, then send them without rebuilding each time."
+          titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
+          actionsSlot={activeMs ? (
+            <div className="pkgw-hact">
+              {msSelector}
+              <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
+                <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
+              </button>
+            </div>
+          ) : undefined}
+        />
+      }>
       <div className="pkgw-strip">
         <ShieldCheck className="sh" aria-hidden="true" />
         <span className="stx">
@@ -264,6 +270,7 @@ export const SubmissionPackages: React.FC = () => {
       {tourActive && (
         <Tour steps={WORKSHOP_TOUR_STEPS} onDone={endTour} badge="Example data — cleared when the tour ends" />
       )}
+      </WorkspacePageGrid>
     </div>
   );
 };

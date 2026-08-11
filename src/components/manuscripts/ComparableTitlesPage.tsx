@@ -21,6 +21,7 @@ import { ChevronDown, Plus, Copy, Check, Pencil, X, AlertTriangle, Sparkles, Loc
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { FormShell } from "../forms/FormShell";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
@@ -567,17 +568,36 @@ export const ComparableTitlesPage: React.FC<{
       {/* The standard page header (shell follow-up P3) — ChromeSlab retired. The pulse line is
           dropped with it (no meta slot under the header law); the manuscript selector keeps its
           function in the row below the rule until the sidebar switcher is live-wired. */}
-      <PageHeader
-        variant="full"
-        title="Comparable titles"
-        description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-      />
-      {activeMs && (
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -12, marginBottom: 12 }}>
-          <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
-        </div>
-      )}
-
+      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). Plate and tool row are rows 1 and 2;
+          the desk is row 3.
+          ⚠️ THIS PAGE STILL DOES NOT SCROLL AT PAGE LEVEL, and that is unchanged and correct — the
+          desk fills row 3 exactly and the two panels scroll inside themselves, as they always have.
+          So the plate holds its 88px here, for the same reason the Tasks family does: it is never
+          covering anything that has to get past it.
+          ⚠️ THE MODALS STAY OUTSIDE THE GRID, below it in `.ctpage` — fixed-position overlays have
+          no business inside the scrollport they cover. */}
+      <WorkspacePageGrid
+        className="ct-wpg"
+        scrollLabel="Comparable titles"
+        plate={
+          <PageHeader
+          variant="workspace"
+          mark="comps"
+          /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the shelf total moved to
+             the tally slot in the row below rather than being dropped. THE RULE: the plate carries
+             IDENTITY, the toolbar carries TALLIES and view state — the same split the Contact list has
+             always had with its "16 OF 16". */
+          title="Comparable titles"
+          description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+          />
+        }
+          toolbar={activeMs ? (
+            <>
+              <span className="ct-tally">{comps.length} {comps.length === 1 ? "comp" : "comps"}</span>
+              <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
+            </>
+          ) : undefined}
+      >
       <div className="ct-desk">
         {!activeMs ? (
           <div className="ct-panel" style={{ height: "100%" }}>
@@ -727,6 +747,7 @@ export const ComparableTitlesPage: React.FC<{
           </div>
         )}
       </div>
+      </WorkspacePageGrid>
 
       {formState && activeMs && (
         <CompForm

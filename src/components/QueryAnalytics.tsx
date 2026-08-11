@@ -16,12 +16,23 @@
  * the reply-window distribution that packageMetrics already derives.
  */
 import React from "react";
+import { PageHeader } from "./shell/PageHeader";
+import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 
 export const QueryAnalytics: React.FC = () => (
   <div className="qa-wrap">
-    <h1 className="qa-title">Analytics</h1>
-    <p className="qa-note">
-      Response rates, reply times and outcomes across your queries — coming soon.
-    </p>
+    {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9) — even here, where there is nothing to
+        scroll past it. The point is that this page leaves the sticky path with the others rather
+        than being the one exception nobody remembers when the machinery is deleted.
+        ⚠️ ROW 3 IS EMPTY AND THAT IS HONEST. There is still no analysis; a filler would be exactly
+        the plausible-looking data this file's header warns against. */}
+    <WorkspacePageGrid className="qa-wpg" plate={
+      <PageHeader
+        variant="workspace"
+        mark="analytics"
+        title="Analytics"
+        description="Response rates, reply times and outcomes across your queries — coming soon."
+      />
+    }>{null}</WorkspacePageGrid>
   </div>
 );

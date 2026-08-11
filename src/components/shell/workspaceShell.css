@@ -547,7 +547,8 @@
    aligns to, as on every other band-tier page.
    ⚠️ TOP 34 → 17, HALVED, for the reason every other page halved: the plate carries its own 88px,
    so the old value was a band of empty paper above a header that is already generous. */
-.qa-wrap { --pg-gut: 30px; padding: 17px var(--pg-gut) 30px; }
+.qa-wrap { --pg-gut: 30px; padding: 17px var(--pg-gut) 30px; height: 100%; display: flex; flex-direction: column; }
+.qa-wpg { flex: 1; min-height: 0; }
 
 
 /* ══════════════════ APP SHELL v2 — one ground, one window ══════════════════
