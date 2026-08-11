@@ -14,7 +14,8 @@
  * That is why the detail is composed from a clause LIST rather than a template string: a template
  * with a hole in it prints the hole.
  */
-import { Manuscript, ManuscriptStatus, Query, SubmissionPackage, ManuscriptVersion, ComponentType, CompTitle } from "../types";
+import { Manuscript, ManuscriptStatus, Query, SubmissionPackage, ManuscriptVersion, CompTitle } from "../types";
+import { PACKAGE_MATERIALS, MATERIAL_LABEL } from "./manuscriptPackages";
 import { isResponse } from "./packageMetrics";
 import { lastActivityMs } from "./manuscriptPage";
 import { pitchLine, PitchLine } from "./comps";
@@ -98,8 +99,16 @@ export interface CompsTileCopy {
  * An earlier pair failed both tests: they were differently shaped, and "a second makes the line"
  * was quietly coaching.
  */
-export const PITCH_NEEDS_TWO = "The ‘X meets Y’ line needs two comps.";
-export const PITCH_NEEDS_ONE = "The ‘X meets Y’ line needs one more.";
+/**
+ * ⚠️ TYPOGRAPHIC QUOTES, AND THE SAME ONES IN ALL THREE. This phrase is prose the writer reads
+ * while composing a query letter, and the pitch box is the surface they copy from — a straight
+ * `'X meets Y'` beside a curly one reads as two different things being named. `‘ ’` (U+2018/U+2019)
+ * everywhere, locked, so the trio cannot drift apart one edit at a time.
+ */
+export const PITCH_PHRASE = "‘X meets Y’";
+export const PITCH_LABEL = `The ${PITCH_PHRASE} of your pitch`;
+export const PITCH_NEEDS_TWO = `The ${PITCH_PHRASE} line needs two comps.`;
+export const PITCH_NEEDS_ONE = `The ${PITCH_PHRASE} line needs one more.`;
 
 export function comparableTitlesTile(comps: CompTitle[]): CompsTileCopy {
   const pitch = pitchLine(comps);
@@ -163,21 +172,6 @@ export function onTheShelf(
 
 /* ── tile 4 — Submission materials ─────────────────────────────────────────────────────────── */
 
-/** Sentence case for prose; the enum's Title Case is a stored value, not a sentence. */
-const MATERIAL_LABEL: Record<ComponentType, string> = {
-  [ComponentType.QUERY_LETTER]: "Query letter",
-  [ComponentType.SYNOPSIS]: "Synopsis",
-  [ComponentType.SAMPLE_PAGES]: "Sample pages",
-  [ComponentType.FULL_MANUSCRIPT]: "Full manuscript",
-};
-
-const MATERIAL_ORDER: ComponentType[] = [
-  ComponentType.QUERY_LETTER,
-  ComponentType.SYNOPSIS,
-  ComponentType.SAMPLE_PAGES,
-  ComponentType.FULL_MANUSCRIPT,
-];
-
 /**
  * ⚠️ ONE VARIANT, FOR EVERYONE. The package builder has no Pro gate today — a Free/Pro fork here
  * would pitch an upgrade for a page the user can already open from the rail, which is exactly why
@@ -191,7 +185,7 @@ export function submissionMaterials(packages: SubmissionPackage[], versions: Man
   const headline =
     n === 0 ? "No packages compiled yet" : n === 1 ? "1 package compiled" : `${n} packages compiled`;
 
-  const parts = MATERIAL_ORDER.map((t) => {
+  const parts = PACKAGE_MATERIALS.map((t) => {
     const count = versions.filter((v) => v.componentType === t).length;
     return count > 0 ? `${MATERIAL_LABEL[t]} (${count})` : null;
   }).filter((p): p is string => p !== null);

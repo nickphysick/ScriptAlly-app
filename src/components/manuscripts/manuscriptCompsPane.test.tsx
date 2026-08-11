@@ -14,7 +14,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   ManuscriptCompsPane, compMetaLine, SCOUT_BLURB, SCOUT_DOWN, COPIED_MS,
 } from "./ManuscriptCompsPane";
-import { comparableTitlesTile, PITCH_NEEDS_ONE, PITCH_NEEDS_TWO } from "../../lib/manuscriptTiles";
+import { comparableTitlesTile, PITCH_LABEL, PITCH_PHRASE, PITCH_NEEDS_ONE, PITCH_NEEDS_TWO } from "../../lib/manuscriptTiles";
 import { ManuscriptDetailTiles } from "./ManuscriptDetailTiles";
 import { outInTheWorld, onTheShelf, submissionMaterials } from "../../lib/manuscriptTiles";
 import { pitchLineText } from "../../lib/comps";
@@ -107,6 +107,25 @@ describe("⚠️ the threshold copy is shared between the tile and the pitch box
     );
     expect(tile).toContain(esc(PITCH_NEEDS_TWO));
     expect(pane({ comps: [] })).toContain(esc(PITCH_NEEDS_TWO));
+  });
+
+  /**
+   * ⚠️ ONE SET OF QUOTE MARKS, TYPOGRAPHIC. This phrase is prose the writer reads while composing a
+   * query letter, and the pitch box is the surface they copy from — a straight `'X meets Y'` beside
+   * a curly one reads as two different things being named. All three strings are built from ONE
+   * phrase constant, so they cannot drift apart one edit at a time.
+   */
+  it("the label and both threshold strings share one typographic phrase", () => {
+    expect(PITCH_PHRASE).toBe("\u2018X meets Y\u2019");
+    for (const s of [PITCH_LABEL, PITCH_NEEDS_ONE, PITCH_NEEDS_TWO]) {
+      expect(s).toContain(PITCH_PHRASE);
+      expect(s).not.toContain("'X meets Y'");
+      expect(s).not.toMatch(/[\u0022\u0027]/);
+    }
+  });
+
+  it("and the pitch box renders that label rather than restating it", () => {
+    expect(pane({ comps: [comp("A"), comp("B")] })).toContain(PITCH_LABEL);
   });
 
   /** They are one sentence with a different number — parallel, and stating rather than urging. */

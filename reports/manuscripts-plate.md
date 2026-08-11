@@ -4,7 +4,8 @@ Rebuilding the interior of `AllManuscripts` to the approved design: one card who
 plateband carrying the manuscript's identity, with a tab row beneath switching Details ·
 Comparable titles · Submission packages.
 
-**Status: Phase 1 complete. Phases 2–6 BLOCKED at the red gate** — see "The gate" below.
+**Status: Phases 1–5 complete. Phase 6 (wiring) BLOCKED at the red gate** — see "The gate" below.
+Phases 2–5 were re-sequenced to author new files only, so the gate holds up the wiring commit alone.
 
 Design ref: `design-refs/manuscripts-plate.html`, treatment B (`.tiles2` / `.btile`).
 Treatments A (journey) and C (timeline) and the devbar are mockup devices and are not built.
@@ -79,9 +80,9 @@ only this phase's four new files**:
 | Phase 2b (HEAD `2a23d58`) | exit 0 | exit 0 | **250 files · 4067 passed · 2 skipped** |
 | Phase 3 (HEAD `40ed4f3`) | exit 0 | exit 0 | **253 files · 4120 passed · 2 skipped** |
 | Phase 4 (HEAD `3928e2d`) | exit 0 | exit 0 | **255 files · 4167 passed · 2 skipped** |
+| Phase 5 (HEAD `024e8ab`) | exit 0 | exit 0 | **256 files · 4185 passed · 2 skipped** |
 
-Phase 1 adds 31 tests, Phase 2a adds 24, neither adds a failure. The isolated run is the one to
-believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
+No phase adds a failure. The isolated run is the one to believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
 Test totals move between rows because other streams commit throughout — recorded fresh each time,
 never carried over.
 
@@ -99,13 +100,13 @@ Commit: `manuscripts: add plate design ref and illustrated marks`
 
 ### The marks
 
-`src/components/manuscripts/manuscriptMarks.tsx` — **four** inline SVG marks, lifted verbatim from
+`src/components/manuscripts/manuscriptMarks.tsx` — four inline SVG marks, lifted verbatim from
 treatment B's tile scenes: `PaperPlaneMark` · `BookSpinesMark` · `CalendarClockMark` ·
-`StackedPagesMark`, plus a `MANUSCRIPT_MARKS` registry keyed `plane/spines/calendar/pages` so specs
-can sweep all four rather than naming them one at a time.
+`StackedPagesMark`, plus a `MANUSCRIPT_MARKS` registry so specs can sweep every mark rather than
+naming them one at a time. *(Phase 4 added a fifth, `MagnifierMark`, for the Scout strip.)*
 
-Each takes `size` and nothing else, defaulting to `MARK_SIZE = 70` (the ref's tile size). All four
-share a square `0 0 80 80` viewBox, so one number governs both axes and the four sit on a common
+Each takes `size` and nothing else, defaulting to `MARK_SIZE = 70` (the ref's tile size). All
+share a square `0 0 80 80` viewBox, so one number governs both axes and they sit on a common
 optical scale. All are `aria-hidden` + `focusable="false"` — the tile's own text is the label.
 
 **Fills are baked**, per ruling 3: no `currentColor`, no `var()`, no theme token. Palette as drawn
@@ -128,8 +129,10 @@ renders fine on white and dirties its own washes. So they assert the mechanism, 
    present at 1.3–1.8. *Verified red: one `currentColor` → 2 failures; one off-palette hex → 1,
    naming the mark and the colour.*
 3. **No blend mode, no transform** — the dashboard's mark CSS must not follow these across.
-4. **No fifth mark** — asserts four exports, no `NotebookMark`, and that the PNG it defers to is
-   still on disk under the name the plate will import.
+4. **No notebook here** — the PNG is the plate's mark and a traced copy would fork one illustration
+   in two; also asserts the PNG is still on disk under the name the plate imports. *(Originally
+   phrased as "exactly four exports"; Phase 4's legitimate fifth mark showed that the count was
+   incidental and the absence was the invariant — see Phase 4.)*
 
 ### ⚠️ The notebook mark — resolved, and simpler than feared
 
@@ -424,14 +427,70 @@ Outage showing a Pro chip to a paying user · free user shown the outage wording
 last-run history · the pitch box forking its own wording · coaching creeping back into the shared
 copy.
 
-### ⚠️ One thing Phase 6 must decide — two live editing homes for comps
+### The comps fork — DECIDED, and not Phase 6's to carry
 
 This pane edits comps, and `/manuscripts/comps` (`ComparableTitlesPage`) still does too. The pane
-itself is presentational — add and remove are callbacks, and the writes will go through the pure
+itself is presentational — add and remove are callbacks, and the writes go through the pure
 `withCompAdded`/`withCompRemoved` and one `updateManuscript` — so **no second editing logic exists**.
-But two live surfaces for one job is exactly the fork the addendum warns against. Phase 6 must
-settle whether the sub-page is retired, kept as the deep view, or the tab defers to it. **Not decided
-here**, and no extraction from the blocked `ComparableTitlesPage.tsx` was attempted.
+Two live *surfaces* for one job remains the fork to close.
+
+**The sub-page retires.** Decision taken so it cannot drift; execution is its own prompt after
+Phase 6, because it touches a route, a locked nav group and a blocked file. Phase 6 wires the card,
+builds the switcher, and reports the fork as known-and-scheduled. Full target and first step in
+**Outstanding** below. No extraction from the blocked `ComparableTitlesPage.tsx` was attempted.
+
+---
+
+## Phase 5 — submission packages pane
+
+Commit: `manuscripts: submission packages pane`. `src/lib/manuscriptPackages.ts` ·
+`ManuscriptPackagesPane.tsx` · `manuscriptPackagesPane.test.tsx` (11 tests) · two tokens.
+
+**One pane, for everyone.** No plan fork, no chip, no upsell, no dimmed preview. The ref's entire
+Free half — the centred stacked-pages pitch, three bullet cards, `See how it works`,
+`Upgrade to Pro` — is deliberately unbuilt, and its absence is asserted by name.
+
+| Row | Filled | Empty |
+|---|---|---|
+| Query letter | `2 versions` | `—` |
+| Synopsis | `1 version` | `—` |
+| Sample pages | `1 version` | `—` |
+| Packages compiled | `2 packages` | `—` |
+
+**The four rows always render.** A row that vanishes states nothing; `—` states *this slot is
+empty*. That is also what earns the Details tile the right to omit its absent materials — absence
+is spelled out here, so the tile repeating it would be the same information twice.
+
+The pane **takes no plan input at all**, asserted against its source rather than its output, because
+a fork would arrive as an import. Adding one means changing the signature — a change someone has to
+mean.
+
+### One material list, two surfaces
+
+`PACKAGE_MATERIALS` in `manuscriptPackages.ts` is now the single ordered list, and the Details tile
+imports it rather than keeping its own. `SubmissionPackage` has exactly three slots
+(`queryLetterVersionId` / `synopsisVersionId` / `samplePagesVersionId`), so those three **are** the
+package materials.
+
+> ⚠️ **`ComponentType.FULL_MANUSCRIPT` is on neither surface, and that is one decision rather than
+> two omissions.** A full manuscript is what you send when an agent asks, not part of a query
+> package. Phase 3's tile listed it; Phase 5 removed that so the two surfaces cannot disagree. If
+> the call is wrong it is **one list** to change and the tile follows automatically. Locked both
+> ways: the list excludes it, and a full-manuscript version is asserted absent from tile and pane.
+
+### The pitch phrase is now one constant
+
+`PITCH_PHRASE = ‘X meets Y’` builds `PITCH_LABEL`, `PITCH_NEEDS_TWO` and `PITCH_NEEDS_ONE`, and the
+pitch box renders the label rather than restating it. The phrase is prose the writer reads while
+composing a query letter and the pitch box is the surface they copy from, so a straight
+`'X meets Y'` beside a curly one would read as two different things being named. Locked: the trio
+share the constant, contain no straight quote or apostrophe, and cannot drift apart one edit at a
+time.
+
+### Four locks verified red
+
+Empty rows dropped instead of stating `—` · a Pro chip returning to the pane · the tile listing a
+material the pane does not · straight quotes in the pitch phrase.
 
 ---
 
@@ -452,6 +511,25 @@ here**, and no extraction from the blocked `ComparableTitlesPage.tsx` was attemp
 ---
 
 ## Outstanding, separate from this build
+
+- **⚠️ Retire `/manuscripts/comps` — DECIDED, scheduled after Phase 6.** The tab is the right home:
+  comps are a manuscript attribute and you are already looking at the manuscript when you add them.
+  A separate nav item predates the manuscript page having tabs, and keeping it means every future
+  comps change is built twice or drifts. Shared write helpers stop the LOGIC forking; they do not
+  stop the SURFACES diverging, which is the slower failure.
+  **Target:** `/manuscripts/comps` redirects to the manuscript page with the comps tab selected ·
+  `ComparableTitlesPage.tsx` retires · the Materials nav group drops to Manuscripts → Submission
+  packages.
+  **Not Phase 6** — it touches a route, a locked nav group and a blocked file, and Phase 6 is
+  already the one commit that unblocks everything. It is its own prompt, and **its first job is
+  checking whether the sub-page has anything the tab does not** — sorting, extra fields, a wider
+  grid. If it does, that capability moves into the tab *before* the page goes, not after.
+
+- **⚠️ The Scout is a PRO-LAUNCH BLOCKER, not just a dev flag.** `SCOUT_LIVE = false`, so a Pro user
+  today sees the outage strip on a feature they are paying for. That is not a fault in this build —
+  it is the functions not being deployed, the same Blaze + API-key + deploy step Smart Import waits
+  on. Stated here explicitly because **"Unavailable" reads very differently on day one of a paid
+  plan than it does in dev**, and leaving it implicit in a boolean is how it reaches launch unseen.
 
 - **⚠️ One number-speller, not four.** `spellCount` (mine), plus private copies in
   `dashboardStats.ts`, `todoBoard.ts` and `topNav.ts`, none exported. Extract one, retire the four:

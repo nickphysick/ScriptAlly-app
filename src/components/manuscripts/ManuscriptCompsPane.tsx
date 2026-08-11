@@ -31,7 +31,7 @@
 import React, { useEffect, useState } from "react";
 import { CompTitle } from "../../types";
 import { isOlderComp, pitchLine, pitchLineText } from "../../lib/comps";
-import { PITCH_NEEDS_ONE, PITCH_NEEDS_TWO } from "../../lib/manuscriptTiles";
+import { PITCH_LABEL, PITCH_NEEDS_ONE, PITCH_NEEDS_TWO } from "../../lib/manuscriptTiles";
 import { MagnifierMark } from "./manuscriptMarks";
 import "./manuscriptPlate.css";
 
@@ -93,7 +93,7 @@ export const ManuscriptCompsPane: React.FC<ManuscriptCompsPaneProps> = ({
       {/* ── the pitch box ── */}
       <div className="msv-pitchbox">
         <div className="msv-pitchbody">
-          <div className="msv-btilelab">The ‘X meets Y’ of your pitch</div>
+          <div className="msv-btilelab">{PITCH_LABEL}</div>
           {pitch.kind === "two" ? (
             <div className="msv-pitchline">
               <i>{pitch.a}</i><span className="msv-pitchm">meets</span><i>{pitch.b}</i>

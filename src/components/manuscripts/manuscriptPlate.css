@@ -40,6 +40,7 @@
   --msv-pinkplate: #f8ede4;
   --msv-spine1: #8a9e88; --msv-spine2: #c9a06a; --msv-spine3: #a98ba0;
   --msv-dash: 1.5px dashed #d9cdbc;
+  --msv-count: #5a6e58; --msv-countnone: #c4b5a5;
   --msv-stripbg: rgba(255, 255, 255, 0.62); --msv-stripbd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-stripkey: #6a7a68;
   --msv-prbd: 1px solid #e8c8bc;
@@ -53,6 +54,7 @@
   --msv-pinkplate: #f8ede4;
   --msv-spine1: #8a9e88; --msv-spine2: #c9a06a; --msv-spine3: #a98ba0;
   --msv-dash: 1.5px dashed #1d1712;
+  --msv-count: #1d1712; --msv-countnone: #a9a29c;
   --msv-stripbg: #fffefb; --msv-stripbd: 1.5px solid #1d1712;
   --msv-stripkey: #6a625c;
   --msv-prbd: 1.5px solid #1d1712;
@@ -69,6 +71,7 @@
      distinction as lightness, which is what a monochrome theme is for. */
   --msv-spine1: #9a9a9a; --msv-spine2: #6f6f6f; --msv-spine3: #c2c2c2;
   --msv-dash: 1.5px dashed #d6d6d4;
+  --msv-count: #4a4a4a; --msv-countnone: #b4b4b4;
   --msv-stripbg: #ffffff; --msv-stripbd: 1px solid #e3e2e0;
   --msv-stripkey: #6b6b6b;
   --msv-prbd: 1px solid transparent;
@@ -296,3 +299,18 @@
   padding: 3px 8px; text-transform: uppercase;
 }
 .msv-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Submission packages pane — one pane, four rows, absence stated as an em dash ── */
+.msv-frows { max-width: 560px; margin-top: 4px; }
+.msv-frow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 0; border-bottom: 1px solid var(--msv-hair); font-size: 13.5px; color: var(--msv-ink);
+}
+.msv-frow:last-child { border-bottom: none; }
+.msv-fcount {
+  margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--msv-count);
+}
+/* The empty slot is quieter than a filled one, but it is still SAID. */
+.msv-fcount.none { color: var(--msv-countnone); }
+.msv-frowfoot { margin-top: 20px; }
