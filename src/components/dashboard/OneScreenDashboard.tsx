@@ -24,7 +24,6 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { Activity, Agent, Manuscript, Query, Task, User, UserTask } from "../../types";
-import { longDate } from "../../lib/dashboardStats";
 import { achievementPill, Achievement, runStage, tenureLine, tourAutoRuns, tourChipShows } from "../../lib/oneScreen";
 import { OneScreenTour, TOUR_BREAKPOINT } from "./OneScreenTour";
 import { OneScreenAuthor } from "./OneScreenAuthor";
@@ -32,7 +31,11 @@ import { OneScreenChart } from "./OneScreenChart";
 import { OneScreenTasks } from "./OneScreenTasks";
 import { OneScreenPro } from "./OneScreenPro";
 import { OneScreenCounters } from "./OneScreenCounters";
+import { OneScreenCommunity } from "./OneScreenCommunity";
+import { scopeActivities, scopeQueries, scopeTasks } from "../../lib/manuscriptScope";
 import { OneScreenRail } from "./OneScreenRail";
+import { OneScreenSkeleton } from "./OneScreenSkeleton";
+import { useSkeleton } from "../../lib/skeletonTiming";
 import "./oneScreen.css";
 
 export interface OneScreenDashboardProps {
@@ -70,6 +73,20 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
   loading, queries, agents, manuscripts, tasks, userTasks, activities, currentUser,
   activeManuscript, onNavigate, onTaskAction, updateUserProfile, now = new Date(),
 }) => {
+  /**
+   * ⚠️ THE SCOPED SETS ARE DERIVED ONCE, HERE, AND HANDED DOWN (B2). Every card reading the same
+   * three arrays is what makes "switching manuscripts changes exactly the scoped figures" a
+   * property of the page rather than something maintained card by card.
+   *
+   * ⚠️ `agents` IS DELIBERATELY ABSENT from this list. An agent is a person you know, not a
+   * per-book fact — "agents on file" must not move when the scope does.
+   */
+  const scopeId = activeManuscript?.id ?? null;
+  const msIds = React.useMemo(() => new Set(manuscripts.map((m) => m.id)), [manuscripts]);
+  const scopedQueries = React.useMemo(() => scopeQueries(queries, scopeId), [queries, scopeId]);
+  const scopedActivities = React.useMemo(() => scopeActivities(activities, scopeId), [activities, scopeId]);
+  const scopedTasks = React.useMemo(() => scopeTasks(tasks, queries, msIds, scopeId), [tasks, queries, msIds, scopeId]);
+
   const firstName = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "there";
 
   /* ── §12 · the tour ── */
@@ -122,11 +139,36 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
      was added and never removed — a self-cancelling effect that read as correct and was verified
      `stillAnimating: true` long after settling. A ref survives the re-render without re-running
      anything, the same reason the chart's `drewIn` is a ref. */
+  /**
+   * ⚠️ THE COVER IS ON FROM THE FIRST PAINT AND OUTLIVES `loading` — never rendered off the flag
+   * directly. The hook initialises its phase from `loading`, holds ~500ms once seen, then
+   * dissolves; the rule and the full history of why (including the deleted 200ms fast-path delay,
+   * which is what made three earlier fixes invisible) live in lib/skeletonTiming.
+   *
+   * ⚠️ IT IS DECLARED HERE, ABOVE THE ENTRANCE EFFECT THAT READS IT, and that is not cosmetic:
+   * a `const` referenced above its declaration sits in the temporal dead zone and throws on the
+   * render that reaches it. This file's own house rule says initialisation goes after what it
+   * depends on, never before.
+   */
+  const skeleton = useSkeleton(loading);
+
   const rootRef = useRef<HTMLDivElement>(null);
   const entered = useRef(false);
   useEffect(() => {
     if (loading || entered.current) return;
     entered.current = true;
+    /**
+     * ⚠️ THE PAGE MUST NOT ARRIVE TWICE. If the cover was shown, it has already done this
+     * animation's job — it occupied these exact boxes while the data was out — so the stagger is
+     * SKIPPED and the content is simply there, settled, as the cover dissolves off it. Running
+     * both meant the page arrived twice: cards rising under the cover, revealed mid-flight.
+     *
+     * ⚠️ THE STAGGER IS NOT DELETED. With the cover on from the first paint it is nearly always
+     * skipped, but a mount that BEGINS with `loading` false (data already in hand before this
+     * page first mounts, dev labs, tests) never shows a cover, and this is then the page's only
+     * way of announcing it has arrived.
+     */
+    if (skeleton.wasShown) return;
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const items = root.querySelectorAll(".os-card, .os-greet");
@@ -135,9 +177,31 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
     return () => window.clearTimeout(id);
   }, [loading]);
 
+  /* ⚠️ TENURE IS ACCOUNT-SCOPED — "querying since" is when YOU started, not when this book did. */
   const tenure = tenureLine(queries);
+  /**
+   * ⚠️ THE ACHIEVEMENT PILL STAYS ACCOUNT-SCOPED, beside the tenure pill it partners. "Your best
+   * month" and "a new fastest reply" are facts about your querying, and narrowing them to one book
+   * turns a real record into a weaker claim about a subset — while the pill sits next to a tenure
+   * line that is explicitly account-wide. Two neighbouring pills answering at different scopes is
+   * the two-numbers-one-name fault in a new place.
+   */
   const ach = achievementPill(queries, now);
   const stage = runStage(queries, manuscripts, now);
+  /**
+   * ⚠️ TWO STAGES, BECAUSE THE PAGE AND THE BOOK ARE AT DIFFERENT POINTS (B3).
+   *
+   * The GREETING's stage is the ACCOUNT's — an established writer adding a fourth manuscript has
+   * not gone back to day one, and telling them so would be absurd. But the CHART and the TASKS
+   * card are scoped, and a fresh book with no sends must show its own first-run state rather than
+   * a populated layout full of zeros: a zero-filled chart claims a reading that was never taken.
+   *
+   * `runStage` already models exactly this — "a manuscript but no sends: still before the line" —
+   * so the scoped stage is the same function over the scoped set, not a fourth state invented
+   * here. With no manuscripts at all both stages agree on day-one, which is why that case needs
+   * nothing extra.
+   */
+  const scopedStage = runStage(scopedQueries, manuscripts, now);
 
   return (
     <div
@@ -155,9 +219,13 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
         <div className={`os-greet${loading ? " isload" : ""}`}>
           {loading && <Skel bars={["h", ""]} />}
           <div className="os-gl">
-            {/* ⚠️ NO KICKER (v16 §1). A muted DATE LINE sits above the greeting instead — the week
-                number and the manuscript were repeating what the chrome already says. */}
-            <div className="os-dateline">{longDate(now)}</div>
+            {/* ⚠️ NO KICKER, AND NO DATE LINE EITHER (audit pack P2). The kicker went first,
+                for repeating what the chrome already said; the muted date that replaced it has
+                now gone the same way, for a plainer reason — anyone reading it knows what day it
+                is. The header is shorter without it, and the greeting leads.
+                ⚠️ WHAT SITS UNDER THE NAME IS A QUESTION, NOT A FACT. Every other line in this
+                header states something derived; this one is the only piece of address on the
+                page, which is why it is a constant rather than something computed. */}
             <div className="os-grow2">
               {/* ⚠️ PLAYFAIR 700 AT 46px, PLAIN INK. No burgundy, no italics — the third and final
                   swing of that pendulum, recorded at each turn. */}
@@ -169,6 +237,7 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
                 </button>
               )}
             </div>
+            <div className="os-sub2">What&rsquo;s on your desk today?</div>
             <div className="os-pills">
               {/* §2: tenure · achievement. ⚠️ THE AGENTS PILL IS GONE — the counters card states
                   that figure now, and two homes for one number is how they come to disagree.
@@ -189,7 +258,8 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               )}
             </div>
           </div>
-          <OneScreenCounters loading={loading} queries={queries} agents={agents} now={now} />
+          {/* ⚠️ queries SCOPED, agents NOT — "agents on file" is a person-count, not a per-book fact. */}
+          <OneScreenCounters loading={loading} queries={scopedQueries} agents={agents} now={now} />
         </div>
 
         <div className="os-colM">
@@ -203,25 +273,37 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
               onNavigate={onNavigate}
             />
             <OneScreenChart
-              loading={loading} queries={queries} agents={agents} now={now}
-              dayOne={stage === "day-one"} earlyDays={stage === "early-days"}
+              loading={loading} queries={scopedQueries} agents={agents} now={now}
+              dayOne={scopedStage === "day-one"} earlyDays={scopedStage === "early-days"}
               onSendFirst={() => onNavigate("queries", "Send a query")}
             />
           </div>
 
-          <OneScreenTasks
-            loading={loading}
-            tasks={tasks}
-            queries={queries}
-            agents={agents}
-            userTasks={userTasks}
-            now={now}
-            dayOne={stage === "day-one"}
-            onAction={onTaskAction}
-            onSeeAll={() => onNavigate("todo")}
-            onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-            onAddAgent={() => onNavigate("agents", "Add an agent")}
-          />
+          {/* ⚠️ THE LOWER ROW SHARES THE UPPER ROW'S SPINE — literally: `.os-midrow, .os-lowrow`
+              is ONE `grid-template-columns` declaration, so the Community tile is the author
+              tile's width and Tasks is the chart's width because they read the same rule, not
+              because two numbers were matched by hand. If a column moves, both rows move.
+
+              ⚠️ TASKS NARROWED; NOTHING ELSE ABOUT IT CHANGED. Its rows, chips, counts, sort and
+              `See all` are untouched — the card was already width-agnostic (it declares none) and
+              `.os-tt` already carried `min-width: 0`, so the titles ellipsise at the new width
+              rather than pushing the row wide. */}
+          <div className="os-lowrow">
+            <OneScreenCommunity loading={loading} />
+            <OneScreenTasks
+              loading={loading}
+              tasks={scopedTasks}
+              queries={queries}
+              agents={agents}
+              userTasks={userTasks}
+              now={now}
+              dayOne={scopedStage === "day-one"}
+              onAction={onTaskAction}
+              onSeeAll={() => onNavigate("todo")}
+              onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+              onAddAgent={() => onNavigate("agents", "Add an agent")}
+            />
+          </div>
 
           {/* ⚠️ SHOWN ONLY WHERE THE EXTRA ROW GENUINELY FITS — the CSS gates it on viewport
               height AND width (§5). Below either threshold it is not rendered small, it is not
@@ -233,11 +315,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           expanded={railExpanded}
           setExpanded={setRailExpanded}
           loading={loading}
-          queries={queries}
+          queries={scopedQueries}
           agents={agents}
           manuscripts={manuscripts}
           userTasks={userTasks}
-          activities={activities}
+          activities={scopedActivities}
           currentUser={currentUser}
           activeManuscript={activeManuscript}
           onNavigate={onNavigate}
@@ -245,6 +327,11 @@ export const OneScreenDashboard: React.FC<OneScreenDashboardProps> = ({
           now={now}
         />
       </div>
+      {/* ⚠️ LAST CHILD, OVER THE MOUNTED PAGE. The cards stay in the tree beneath it, which is what
+          makes "no layout shift" structural rather than a matter of matching numbers — and it is
+          why the dissolve works: the page is already finished under there, so this fades off a
+          settled picture rather than crossfading between two moving ones. */}
+      {skeleton.phase !== "off" && <OneScreenSkeleton leaving={skeleton.phase === "out"} />}
       {touring && <OneScreenTour rootRef={rootRef} onEnd={endTour} />}
     </div>
   );

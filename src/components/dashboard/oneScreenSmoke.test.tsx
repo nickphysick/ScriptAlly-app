@@ -156,11 +156,16 @@ describe("§1 · the lock", () => {
   /* ⚠️ THE TILE IS SQUARE BECAUSE BOTH NUMBERS ARE THE SAME ONE. Asserted as an identity, not
      as two literals that happen to agree — if the row height moves and the width does not, this
      is what says so. */
+  /* ⚠️ RETARGETED (community-tile pack, P1): the COLUMNS moved to a shared `.os-midrow, .os-lowrow`
+     declaration — the two rows' spine, one rule so the Community tile cannot drift from the author
+     tile's width — while the midrow's own rule keeps its HEIGHT. The squareness this guards is
+     unchanged: the same 302 in both places, now read from two rules instead of one. */
   it("the midrow is a FIXED 302px, and the author tile is SQUARE", () => {
+    const cols = rule(".os-midrow, .os-lowrow");
     const m = rule(".os-midrow");
-    const w = /grid-template-columns: (\d+)px minmax\(0, 1fr\)/.exec(m)?.[1];
+    const w = /grid-template-columns: (\d+)px minmax\(0, 1fr\)/.exec(cols)?.[1];
     const h = /height: (\d+)px/.exec(m)?.[1];
-    expect(w, "the midrow must declare an explicit author width").toBeDefined();
+    expect(w, "the shared row rule must declare an explicit author width").toBeDefined();
     expect(h, "the midrow must declare an explicit height").toBeDefined();
     expect(w).toBe(h);
     expect(m).toContain("flex: 0 0 auto");
@@ -184,24 +189,48 @@ describe("§1 · the lock", () => {
     expect(rule(".os-colR > *")).toContain("margin-bottom: 13px");
   });
 
+  /* ⚠️ RETARGETED (community-tile pack, P1): the 118–318 budget moved from `.os-colM .os-tasks`
+     to `.os-lowrow`, because the ROW is now the thing with a height and the tasks card fills it.
+     The numbers are the tasks card's own, carried over unchanged — what this guards is that the
+     card is still content-driven between those bounds, which is now a fact about its row. */
   it("the vertical budget: the chart flexes, tasks are content-driven 118–318", () => {
     expect(rule(".os-colM .os-lead")).toContain("flex: 1 1 auto");
-    const t = rule(".os-colM .os-tasks");
+    /* ⚠️ NOT `rule(".os-lowrow")` — the shared selector `.os-midrow, .os-lowrow {` CONTAINS that
+       string, so the helper's indexOf finds the columns rule and the height assertions fail
+       against a rule that never had them. The standalone rule starts a line. */
+    const t = /\n\.os-lowrow \{([^}]*)\}/.exec(cssRules)?.[1] ?? "";
+    expect(t, "the standalone .os-lowrow rule must exist").not.toBe("");
     expect(t).toContain("min-height: 118px");
     expect(t).toContain("max-height: 318px");
+    expect(t).toContain("flex: 0 1 auto");
   });
 });
 
 describe("§2 · the greeting", () => {
-  /* ⚠️ NO KICKER (v16 §1) — a muted DATE LINE replaces it. The week number and the manuscript
-     were repeating what the chrome already says. */
-  it("a muted date line sits above the greeting, and the name is plain ink", () => {
+  /* ⚠️ RETARGETED (audit pack P2). The kicker went first, for repeating what the chrome already
+     said; the muted DATE LINE that replaced it has now gone too, for a plainer reason — anyone
+     reading it knows what day it is. A subtitle sits BELOW the name instead, so the block reads
+     greeting → address → facts. */
+  it("the greeting leads, a subtitle sits under it, and the name is plain ink", () => {
     const html = render();
-    expect(html).toContain('class="os-dateline"');
-    expect(html).not.toContain("os-kicker");
     expect(html).toContain("Hello, Nick");
+    expect(html).toContain('class="os-sub2"');
+    expect(html).toContain("on your desk today?");
+    expect(html).not.toContain("os-kicker");
     // no italic-burgundy name: the h1 carries no <em>
     expect(html).not.toMatch(/<h1[^>]*>[^<]*<em/);
+  });
+
+  it("⚠️ the date line is GONE, not merely unstyled — no element and no rule", () => {
+    expect(render()).not.toContain("os-dateline");
+    expect(cssRules).not.toContain(".os-dateline {");
+  });
+
+  it("the subtitle is 13.5px muted brown, 6px under the name", () => {
+    const r = rule(".os-sub2");
+    expect(r).toContain("font-size: 13.5px");
+    expect(r).toContain("color: #8a7a6c");
+    expect(r).toContain("margin-top: 6px");
   });
 
   /* ⚠️ TWO PILLS NOW. The agents count moved to the counters card — one number, one home; two
@@ -211,7 +240,10 @@ describe("§2 · the greeting", () => {
     const pills = html.indexOf("os-pills");
     expect(pills).toBeGreaterThan(-1);
     const tenure = html.indexOf("Querying since", pills);
-    const ach = html.indexOf("awaiting a reply", pills);
+    /* ⚠️ RETARGETED (polish P7): the header pill reads "out with agents" now — same number,
+       and the writer is the subject of it. The CHART chip below still says "awaiting a reply";
+       that string was not in the pack's scope and is flagged in reports/dashboard-polish.md. */
+    const ach = html.indexOf("out with agents", pills);
     expect(tenure).toBeGreaterThan(-1);
     expect(ach).toBeGreaterThan(tenure);
     // the phrase survives ONLY as the counter's label, never as a pill

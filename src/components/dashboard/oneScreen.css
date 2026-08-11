@@ -19,8 +19,69 @@
    JS-measured pixel height (that measured the scroller INCLUDING the 66px bar and overflowed by
    exactly `--head`). Requires `layout="fill"` on the slot AND `fit` on the work wrapper. */
 .os-root {
+  /* ⚠️ ONE INTER-CARD GAP, AS A TOKEN (audit P4). The counters card sat 26px above the row
+     beneath it while every other pair of cards sat 15px apart — a bespoke `padding-bottom` on
+     `.os-greet` unrelated to the cards it was spacing. Both read this now, so they cannot drift.
+     (The rail's 13px is DELIBERATELY its own — it spaces with margins; see `.os-colR`.)
+     ⚠️ DECLARED HERE, NOT IN A SECOND `.os-root` BLOCK: a separate rule became the FIRST match
+     for the smoke test's `rule(".os-root")` slice and took the lock's `height:100%` out of view.
+     One element, one rule — the same fault P2 fixed in the sidebar foot. */
+  --os-cardgap: 15px;
+  /* ⚠️ HOW FAR A SHADOW MAY REACH PAST ITS COLUMN (P4). The columns clip, so without an allowance
+     every card's shadow is sliced flush at the boundary — a hard line where a soft falloff should
+     be. 10px covers the 5px/18px blur pair's visible reach. */
+  --os-bleed: 10px;
+  /* ⚠️ THE FOOT'S HEIGHT, AS A TOKEN (fixes-2 A4). The scroller's bottom padding must clear the
+     LAST 30 DAYS foot so the final entry can scroll past it — and the fade is NOT a substitute,
+     since it dims the row rather than letting it through. Two independent numbers that happen to
+     work is how this drifts; the padding is now derived from the foot, and the foot is built from
+     the same token. Measured: foot 25.5px rendered, last row 36px clear of it. */
+  --os-afoot-h: 26px;
+  /**
+   * ⚠️ THE PASTILLE, AS TOKENS (fixes-2 A5) — the same treatment is wanted on other pages' header
+   * pills, and four loose hexes repeated per surface is how three pages end up nearly matching.
+   */
+  --os-pastille-bg: #f4f7fa;
+  --os-pastille-line: #dde6ee;
+  --os-pastille-ink: #4a5a6b;
+  --os-pastille-fig: #2c3f52;
+  /**
+   * ⚠️ THE PAGE SKELETON'S MEASURED HEIGHTS, AND ITS PAPER (P1) — declared in THIS rule for the
+   * reason stated above: a second `.os-root` block is invisible to the smoke test's slice.
+   *
+   * Only three ghosts need a number at all. Every other block is sized by a grid row, a column
+   * width or a flex rule that `OneScreenSkeleton` reuses verbatim, so it cannot be wrong. These
+   * three are CONTENT-driven on the real page, and content is the one thing a skeleton by
+   * definition does not have.
+   *
+   * ⚠️ ALL THREE ARE BROWSER-MEASURED AGAINST THE LOADED PAGE at 1440×900, and TWO OF THEM
+   * DISAGREE WITH THE REF ON PURPOSE. The ref draws the counters at 79 and the goal at 89; this
+   * app renders them at 82 and 115, because its cards carry different padding and a different
+   * first-run body. Copying the ref's numbers would have produced a ghost that matched the mockup
+   * and jumped in the app — the exact failure the harness rule in CLAUDE.md exists to catch.
+   *
+   *   · counters — 82px. Invariant, not incidental: the row's height is set by its TEXT (label +
+   *     figure ≈ 50px inside 32px of padding), and every mark's box is absorbed below that by its
+   *     negative margin. P3's 54px plane is 30px effective and so does not touch it.
+   *   · goal — 115px, its first-run height. A goal that has been SET renders a different body, and
+   *     no number can be right for both while we are still waiting to learn which. It does not
+   *     matter: `.os-sk-actv` beneath it is `flex: 1 1 auto`, so any error is absorbed INSIDE the
+   *     rail column and cannot move anything else on the page.
+   *   · tasks — 200px, likewise approximate (the real card is `flex: 0 1 auto` between 118 and
+   *     318). It is the LAST block in its column with slack beneath it, so its error moves nothing.
+   *
+   * The paper matches `.ws-window`'s white, so the overlay covers rather than tints.
+   */
+  --os-sk-counters-h: 82px;
+  --os-sk-goal-h: 115px;
+  --os-sk-tasks-h: 200px;
+  --os-skel-paper: #ffffff;
   height: 100%;
   overflow: hidden;
+  /* the page skeleton's containing block — see .os-skelpage. Every other absolutely-positioned
+     descendant on this page sits inside a `.os-card`, which is already `position: relative`, so
+     nothing else changes its anchor. */
+  position: relative;
   display: flex;
   flex-direction: column;
   font-size: 14px;
@@ -58,8 +119,25 @@
 .os-colR { grid-column: 2; grid-row: 2; }
 /* ⚠️ `height:100%` + `overflow:hidden` — the columns take the row they are given and nothing
    escapes them. Without the overflow, a tall card pushes past its column silently. */
-.os-colM, .os-colR { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
-.os-colM { gap: 15px; }
+/**
+ * ⚠️ A CLIPPING COLUMN NEEDS A BLEED ALLOWANCE, or its children's shadows end at its edge.
+ *
+ * The padding grows the box outward by `--os-bleed` and the equal negative margin pulls it back to
+ * where it was, so the CLIP is 10px further out while the CONTENT has not moved. That is the whole
+ * technique, and the lock measures it: card positions identical before and after.
+ *
+ * ⚠️ `content-box` IS REQUIRED, not a preference. Under `border-box` the padding eats INTO the
+ * declared `height: 100%` instead of extending the box, and the negative margin then pulls the
+ * content out of position rather than restoring it — the cards would sit 10px high and 10px left.
+ */
+.os-colM, .os-colR {
+  display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0;
+  overflow: hidden;
+  box-sizing: content-box;
+  padding: var(--os-bleed);
+  margin: calc(var(--os-bleed) * -1);
+}
+.os-colM { gap: var(--os-cardgap); }
 /* ⚠️ THE RAIL USES MARGINS, NOT GAP (§6) — a collapsing panel must take its slot's spacing with
    it, and `gap` leaves a ghost gutter behind a max-height:0 panel. */
 .os-colR { gap: 0; }
@@ -73,30 +151,80 @@
    twice, not two that happen to match. If the row's height ever moves, this width moves with it
    or the tile silently stops being square. (Squareness is a desktop property: below 1024px the
    row releases to `height: auto` and the tile takes the width it is given.) */
-.os-midrow {
+/* ⚠️ ONE DECLARATION, TWO ROWS — the spine. The Community tile is the author tile's width and
+   the tasks card is the chart's width because both rows read THIS rule, not because two pairs of
+   numbers were matched by hand. A column that moves, moves in both. (community-tile pack, P1.) */
+.os-midrow, .os-lowrow {
   display: grid; grid-template-columns: 302px minmax(0, 1fr); gap: 13px;
-  flex: 0 0 auto; height: 302px;
 }
+.os-midrow { flex: 0 0 auto; height: 302px; }
 .os-midrow .os-aut, .os-midrow .os-lead { height: 302px; min-height: 0; }
+/* ⚠️ THE HEIGHT RULES MOVED FROM `.os-tasks` TO THE ROW, deliberately: the row is now the thing
+   with a height, and the tasks card FILLS it. That keeps "tasks sets the row height" true — the
+   row sizes to its content, which is tasks (the tile is the shorter card by design) — while
+   giving the tile something definite to fill. The 118/318 pair is the tasks card's own, carried
+   over unchanged so its internal scroll behaves exactly as before. */
+.os-lowrow { flex: 0 1 auto; min-height: 118px; max-height: 318px; }
 
 /* the vertical budget (§1): tasks are content-driven */
 .os-colM .os-lead { flex: 1 1 auto; min-height: 0; }
-.os-colM .os-tasks { flex: 0 1 auto; min-height: 118px; max-height: 318px; }
+/* the card fills the row that now owns the height (see .os-lowrow) */
+.os-lowrow .os-tasks, .os-lowrow .os-comm { height: 100%; min-height: 0; }
 
 /* ══ CARD CHROME ══ */
 .os-card {
+  /* ⚠️ THE POSITIONING CONTEXT FOR THE RIM OVERLAY — declared HERE, not in a second `.os-card`
+     rule. A separate block is how this sheet has been bitten twice: the smoke test's slice takes
+     the FIRST match, so the second rule's declarations are invisible to it. One element, one rule. */
+  position: relative;
   background: #fffdf9;
-  border: 1px solid #e3d9cc;
+  /* ⚠️ NO `border` — THE RIM IS THE ::after RING BELOW, and it is the only thing that declares it.
+     A border here would be a second source of truth for one hairline, and the next person to
+     retune the rim token would move one and miss the other. Measured cost of removing it: card
+     size unchanged, contents sit 1px further out. */
   border-radius: 15px;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
   min-height: 0;
-  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+  /* border-color is no longer set on this element — the ring owns the rim */
+  transition: box-shadow 0.18s ease;
 }
-/* §10: hover lift is shadow/border ONLY — no movement */
+/**
+ * ⚠️ THE RIM IS AN OVERLAY, BECAUSE A CHILD WAS EATING THE BORDER (§2, browser-proven).
+ *
+ * THE BUG: `.os-card` is `border-radius` + `overflow: hidden`, and a child with an OPAQUE
+ * background — `.os-ahead`, `.os-th2` — is clipped to the BORDER box, not the padding box. So the
+ * band painted straight over the card's 1px border along every straight edge it touched. Red-rim
+ * test: without the band the rim drew complete; with it, red survived ONLY in the corner arcs,
+ * where the rectangular band curves away from the border.
+ *
+ * ⚠️ IT WAS NEVER A HOVER BUG. The top rim is absent at REST too. Hover darkens `border-color`,
+ * the edges you can still see change, the covered one cannot — and that reads as "the rim
+ * disappeared on hover".
+ *
+ * ⚠️ AN INSET box-shadow DOES NOT FIX IT, and is the obvious thing to try. Tested: an inset shadow
+ * paints with the element's background, BELOW descendants, so the band covers it exactly as it
+ * covered the border. Only an overlay that paints ABOVE descendants survives.
+ *
+ * ⚠️ THE BORDER STAYS FOR GEOMETRY. Removing it would give every card 2px more inner width under
+ * border-box and shift its contents; the overlay is the visible rim, the border is the spacing.
+ * Measured across banded and band-less cards: child offsets identical, so this is a no-op on the
+ * cards that have no band — which is the case the primitive will meet most often elsewhere.
+ */
+.os-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px #e3d9cc;
+  pointer-events: none; /* the rim must never intercept a click meant for the card */
+  transition: box-shadow 0.16s ease;
+}
+/* §10: hover deepens the DROP shadow only — no movement, no transform on a container. The RIM's
+   hover lives on the ::after (below), because the ring is the rim's single source of truth. */
 .os-card.os-lift:hover {
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 10px 26px rgba(58, 28, 20, 0.1);
-  border-color: #dbd0c1;
 }
+.os-card.os-lift:hover::after { box-shadow: inset 0 0 0 1px #dbd0c1; }
 
 /* one-time entrance, scoped to .enter and REMOVED after it runs.
    ⚠️ THE §6 TRAP: never a persistent fill-mode on these — an animation's final keyframe outranks
@@ -134,12 +262,16 @@
 /* ══ THE HEADER (v16 §1) ══ */
 /* ⚠️ align-items: CENTER — the counters card is centred against the greeting, not top-aligned;
    a top-aligned card beside a 46px name reads as two unrelated blocks. */
-.os-greet { display: flex; align-items: center; gap: 32px; padding: 14px 2px 26px; flex: none; }
+/* ⚠️ THE BOTTOM PADDING IS THE INTER-CARD GAP — see --os-cardgap. It was 26px, nearly
+   double the gap between every other pair of cards, for no reason the card could state. */
+.os-greet { display: flex; align-items: center; gap: 32px; padding: 14px 2px var(--os-cardgap); flex: none; }
 /* ⚠️ THE GREETING SIZES TO ITS CONTENT so the card can have the rest. It was `flex: 1` in the
    pre-counters ref, which would split the row down the middle instead. */
 .os-greet .os-gl { flex: 0 0 auto; min-width: 0; }
-/* the muted date line replaces the kicker — it says the one thing the chrome does not */
-.os-dateline { font-size: 12.5px; color: #a4968a; letter-spacing: 0.01em; margin-bottom: 5px; }
+/* ⚠️ `.os-dateline` IS DELETED, NOT HIDDEN (audit pack P2). Its rule said the date line "says the
+   one thing the chrome does not" — which was true of the kicker it replaced and never true of the
+   date itself. A subtitle sits BELOW the name instead; the header is shorter for it. */
+.os-sub2 { font-size: 13.5px; color: #8a7a6c; margin-top: 6px; letter-spacing: 0.005em; }
 .os-greet .os-grow2 { display: flex; align-items: center; gap: 14px; }
 .os-greet h1 {
   font-family: var(--font-serif); font-weight: 700; font-size: 46px;
@@ -153,14 +285,17 @@
 }
 .os-datechip svg { width: 13px; height: 13px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; flex: none; }
 .os-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; padding-bottom: 6px; }
+/* ⚠️ THESE ARE THE HEADER PILLS THE PASTILLE WAS FOR (fixes-2 A5), and the previous pass put it
+   on `.os-p` — the TASKS TRIO — instead. Two different pills, similar names, and the colour landed
+   on the wrong one while the copy change landed on the right one. */
 .os-pill {
   display: inline-flex; align-items: center; gap: 6px;
-  background: #ffffff; border: 1px solid #e3d9cc; border-radius: 99px;
-  padding: 5px 12px; font-size: 11.5px; color: #5c5148; white-space: nowrap;
+  background: var(--os-pastille-bg); border: 1px solid var(--os-pastille-line); border-radius: 99px;
+  padding: 5px 12px; font-size: 11.5px; color: var(--os-pastille-ink); white-space: nowrap;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.os-pill:hover { border-color: #cdbfae; background: #fffdf9; }
-.os-pill b { font-family: var(--font-serif); font-size: 13px; color: #241811; font-weight: 500; }
+.os-pill:hover { border-color: #c9d6e2; }
+.os-pill b { font-family: var(--font-serif); font-size: 13px; color: var(--os-pastille-fig); font-weight: 500; }
 .os-pill.sg { background: #e9ede6; border-color: #d6ddd2; color: #5a6e58; }
 .os-pill.sg b { color: #3f5a3c; }
 .os-pill.pk { background: #f8ece4; border-color: #e8c8bc; color: #6b3023; }
@@ -181,6 +316,97 @@
 @keyframes os-skpulse { 0% { background-position: 120% 0; } 100% { background-position: -80% 0; } }
 .os-skel i.h { height: 16px; min-height: 16px; }
 .os-skel i.grow { flex: 1; min-height: 34px; }
+
+/* ══ THE PAGE SKELETON (audit pack P1; ref dashboard-audit.html `.skel`) ══
+   ⚠️ THE PER-CARD SKELETONS ABOVE ARE NOT RETIRED. They still dress each card during the first
+   ~200ms, before this overlay is allowed to admit to a wait, and on any later per-card wait. This
+   is the PAGE-level answer, laid over the top: the two are different scales of the same idea.
+
+   ⚠️ ITS GEOMETRY IS THE PAGE'S OWN. `OneScreenSkeleton` renders `.os-content` / `.os-greet` /
+   `.os-colM` / `.os-midrow` / `.os-colR` verbatim, so every column width, gap and padding below is
+   already declared once, further up this sheet. Nothing here restates the grid — only the blocks'
+   own heights, and each of those is the measured height of the card it covers. */
+.os-skelpage {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  /* the window's own paper, so the page beneath is covered rather than tinted */
+  background: var(--os-skel-paper);
+  overflow: hidden;
+  /* ⚠️ IT DISSOLVES, IT DOES NOT VANISH. Swapping a full-page grey shell for the page in a single
+     frame is a hard cut, and a hard cut reads as a glitch however well the blocks line up — the
+     geometry being right is precisely what makes the instant swap conspicuous rather than
+     forgivable. Opacity only, per the pack's motion rule.
+     ⚠️ 250ms IS `SKELETON_FADE_MS` (lib/skeletonTiming) — the hook unmounts the element when that
+     timer fires, so a longer transition here would be cut off mid-dissolve and a shorter one would
+     leave an invisible element intercepting nothing for the difference. Locked together. */
+  transition: opacity 250ms ease;
+}
+/* ⚠️ THE PAGE UNDERNEATH IS ALREADY FINISHED by the time this runs — see the entrance note in
+   OneScreenDashboard. So this is a dissolve onto a settled page, not a crossfade between two
+   moving things; nothing beneath it is animating while it goes.
+   `pointer-events: none` the moment it starts leaving: the page is usable before it is invisible. */
+.os-skelpage.out { opacity: 0; pointer-events: none; }
+.os-sk {
+  background: #f0eae1;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+/* ⚠️ THE SWEEP IS A PSEUDO-ELEMENT AND ITS KEYFRAMES ARE LITERAL PERCENTAGES. A `var()` in a
+   keyframe SELECTOR is not a thing CSS resolves — the whole block is dropped, with no error and no
+   red build, and the shimmer simply never runs. */
+.os-sk::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  animation: os-sk-sweep 1.25s linear infinite;
+}
+@keyframes os-sk-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* The greeting stack — h1, the subtitle beneath it, then the fact pills. The MARGINS here are the
+   real ones (`.os-greet h1` line box 46, `.os-sub2` 6, `.os-pills` 14 + 6), so the three ghosts
+   sit at the same three baselines as the text they cover. Widths are approximate by nature: the
+   name is exactly what we are still waiting to learn. */
+.os-sk-h1 { width: 300px; height: 46px; border-radius: 10px; }
+/* 20.3px is `.os-sub2`'s measured line box (13.5px Inter at the sheet's line-height), not a round
+   number — and rounding it to 19 is what put the whole second row 1.3px low. */
+.os-sk-sub { width: 206px; height: 20.3px; margin-top: 6px; }
+.os-sk-pills { display: flex; gap: 7px; margin-top: 14px; padding-bottom: 6px; }
+/* ⚠️ THE PILL WIDTHS SET WHERE THE COUNTERS CARD STARTS, which is not obvious and is why they are
+   measured rather than picked. `.os-gl` is `flex: 0 0 auto`, so the greeting column is exactly as
+   wide as its widest child — the pills row — and the counters card takes the rest after the 32px
+   gap. Ghost pills 20px narrow put the whole counters card 20px out. Measured against the real
+   pair ("Querying since {month year}" · "{n} queries out with agents"): 184 + 7 + 136 = 327.
+   These two follow the writer's own tenure and count, so they can only ever match the common
+   case — but the common case is what a load actually shows. */
+.os-sk-pill { width: 184px; height: 31.5px; border-radius: 99px; }
+.os-sk-pill.narrow { width: 136px; }
+/* the counters card takes the rest of the header row, as the real one does */
+.os-sk-counters { flex: 1; min-width: 0; height: var(--os-sk-counters-h); border-radius: 14px; }
+
+/* ⚠️ NO HEIGHTS ON THE MIDROW PAIR — `.os-midrow` is a 302px grid and its items stretch, so the
+   tile and the chart are sized by the same rule that sizes the real cards. */
+.os-sk-card { border-radius: 14px; }
+.os-sk-tasks { flex: none; height: var(--os-sk-tasks-h); border-radius: 14px; }
+.os-sk-goal { flex: none; height: var(--os-sk-goal-h); border-radius: 14px; }
+/* ⚠️ `flex: 1 1 auto`, AS THE REAL ACTIVITY CARD IS — which is also what makes the goal ghost's
+   approximation harmless: this block eats the difference. */
+.os-sk-actv { flex: 1 1 auto; min-height: 120px; border-radius: 14px; }
+
+/* ⚠️ THE SWEEP IS SUPPRESSED BY NAME, NOT BY DURATION. This sheet's blanket reduced-motion rule
+   sets `animation-duration: .01ms !important` on everything inside `.os-root`, which would leave
+   an infinite sweep running at 100 frames a second — a strobe, not a stillness. Killing the
+   animation-NAME is what actually stops it, and the blocks then carry the wait at rest. */
+@media (prefers-reduced-motion: reduce) {
+  .os-sk::after { animation-name: none !important; opacity: 0; }
+  .os-sk { opacity: 0.62; }
+}
 
 /* ══ §11 · RESPONSIVE FRAME ══ */
 @media (max-width: 1360px) {
@@ -245,8 +471,13 @@
    so adding the class later cannot quietly re-arm a hover that promises a click. */
 .os-card.os-counters:hover, .os-card.os-counters.os-lift:hover {
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
-  border-color: #e3d9cc;
   transform: none;
+}
+/* ⚠️ THE READOUT CARD HOLDS ITS RIM STILL TOO — the ring, not a border-color, since the ring is
+   now the only thing that draws it. Without this the rim would warm on hover and promise the
+   click the rest of this rule exists to deny. */
+.os-card.os-counters:hover::after, .os-card.os-counters.os-lift:hover::after {
+  box-shadow: inset 0 0 0 1px #e3d9cc;
 }
 /* equal thirds, each CENTRED within its own third — not spread to the edges.
    ⚠️ NOT `.os-ct`: that name belonged to the retired book-spine title, and a class that has meant
@@ -257,16 +488,86 @@
   border-left: 1px solid #f0e7db;
 }
 .os-counter:first-child { border-left: none; }
-.os-cic {
-  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-  background: #f5e2da; border: 1px solid #f0dccd;
-  display: grid; place-items: center;
+/**
+ * ⚠️ ILLUSTRATED MARKS, BARE ON THE CARD — and two traps, each of which cost a round to find.
+ *
+ * TRAP 1 — THE ARTWORK HAS AN OPAQUE WHITE FIELD. These are drawn on white paper, not on
+ * transparency (44% of the target image is solid white). On parchment they render as a WHITE
+ * SQUARE. `mix-blend-mode: multiply` drops the white into the card behind it. The fix is NOT to
+ * put the illustration back on a white plate — bare on the card is the chosen treatment.
+ *
+ * ⚠️ TRAP 2 — A TRANSFORM ON ANY ANCESTOR KILLS THE BLEND. `transform`, `filter` and `opacity < 1`
+ * each create a stacking context, which ISOLATES the blend group: the image then blends against
+ * transparency instead of against the card, and the white square comes back. So the WRAPPER
+ * carries no transform — the optical nudge is `position: relative; top`, never `translateY` — and
+ * the hover transform goes on the IMG. This also means an entrance animation on a card holding an
+ * illustration will flash the white field for as long as its transform is applied.
+ *
+ * ⚠️ TRAP 3 — THE IMAGE MUST NOT SET THE ROW'S HEIGHT. An image taller than the text beside it
+ * grows the flex row and pushes the text down. The box is fixed, it cannot shrink, and the
+ * negative vertical margin absorbs the overhang so the TEXT owns the row height.
+ */
+.os-mark-il { display: block; flex-shrink: 0; }
+.os-mark-il img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  mix-blend-mode: multiply;
+  transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1);
 }
-.os-cic svg { width: 16px; height: 16px; stroke: #7c3a2a; fill: none; stroke-width: 1.7; }
+.os-cic {
+  width: 44px; height: 44px;
+  /* the overhang is absorbed, so the counter's text sets the row height */
+  margin: -8px 0;
+  /* ⚠️ `position/top`, NOT a transform — see trap 2. Playfair's optical centre sits above its
+     line-box centre, so a mark beside it needs the nudge. */
+  position: relative; top: -2px;
+}
+.os-counter:hover .os-cic img { transform: rotate(-3deg) scale(1.05); }
+
+/**
+ * ⚠️ THE QUERIES-SENT MARK IS A PAINTING, AND IT BREAKS THE HOUSE RULE ON PURPOSE (audit pack P3).
+ *
+ * `mix-blend-mode: multiply` exists on `.os-mark-il img` because the other marks are drawn on an
+ * OPAQUE WHITE FIELD, and without it each renders as a white square on the parchment. This one is
+ * genuinely transparent — its corners are 3% white, not 100% — so multiply has nothing to remove
+ * and instead DARKENS the watercolour wash against the card beneath it. The exception is stated
+ * here, at the rule, rather than left as an unexplained `normal` someone later "restores".
+ *
+ * ⚠️ AND THE TEST FOR THE OTHER THREE STILL HOLDS. Multiply is not weakened on `.os-mark-il img`;
+ * it is overridden for this one selector only, so a fourth line-drawn mark still gets it by
+ * default and still fails loudly if it does not.
+ *
+ * 54px against its siblings' 44px because a wash needs room the line drawings do not — and the
+ * negative margin grows with it, so the card's height is untouched: 54 − 24 = 30px effective,
+ * still well under the ~50px the label and figure occupy. Verified: the card measures 82px with
+ * the plane in, as it did with the icon it replaced.
+ */
+.os-cic.plane { width: 54px; height: 54px; margin: -12px 0; }
+.os-cic.plane img { mix-blend-mode: normal; }
+
+/* the goals mark — same rules, smaller box; `Query Target Icon.png` despite the card's name */
+/* ⚠️ `align-self: center` IS LOAD-BEARING — `.os-goal-r1` is `align-items: baseline`, and AN IMAGE
+   HAS NO BASELINE: it aligns on its bottom margin edge and drags the row taller than its text.
+   Measured before: row 33.3px against 21.8px of text. This opts the mark out of the baseline
+   group so the TEXT owns the row, which is the whole point of trap 3. */
+.os-goalmark { width: 34px; height: 34px; margin: -6px 0; position: relative; top: -2px; align-self: center; }
+.os-goal:hover .os-goalmark img { transform: rotate(-4deg) scale(1.05); }
+
+/**
+ * ⚠️ THE ENTRANCE ANIMATION WOULD FLASH THE WHITE FIELD (trap 2, the case that is easy to miss).
+ * `.enter` is a TRANSFORM on the card, so for its ~420ms every illustration inside it blends
+ * against transparency and shows as a white square. Isolating the mark from its own ancestor's
+ * transform is not possible, so the marks stay hidden until the card has landed — opacity only,
+ * which creates no stacking context on the CARD.
+ */
+.os-card.enter .os-mark-il img { opacity: 0; }
+.os-mark-il img { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1), opacity 0.2s ease 0.1s; }
 .os-cw { min-width: 0; }
 .os-cl { font-size: 12px; color: #5c5148; white-space: nowrap; }
 .os-cv { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+/* ⚠️ TABULAR NUMERALS — a counting figure whose glyph widths change re-lays-out the row on
+   every frame. */
 .os-cn {
+  font-variant-numeric: tabular-nums;
   font-family: var(--font-serif); font-size: 24px; font-weight: 500; color: #241811;
   line-height: 1; font-variant-numeric: tabular-nums;
 }
@@ -305,13 +606,33 @@
 }
 
 /* ══ §3 · THE CHART CARD ══ */
-.os-lead { display: flex; flex-direction: column; padding: 13px 18px 9px; }
-.os-lh { display: flex; align-items: center; gap: 10px; flex: none; }
-.os-lh .os-ll { font-size: 13px; color: #4a3a2e; font-weight: 500; }
+/**
+ * ⚠️ NO PADDING, AND IT CLIPS — matching `.os-tasks` and `.os-actv` (inset fix).
+ *
+ * THE FAULT: when the band arrived, this card kept the padding it had worn as a plain card, so
+ * `.os-ahead` sat 18px in from each side and 13px down from the top instead of meeting the card's
+ * edges as it does on the other two. And with `overflow: visible` the band's corners were not
+ * clipped to the card radius, so a square band sat inside a rounded card.
+ *
+ * ⚠️ THE HEIGHT TESTS COULD NOT SEE THIS. They compared band HEIGHTS — 51px on all three, correct
+ * and passing — while one band was visibly inset on three sides. A band's geometry is its POSITION
+ * as well as its size; the lock now asserts left/top/width against the card, which is the check
+ * that would have caught it.
+ */
+.os-lead { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+/* ⚠️ `.os-lh` AND `.os-ll` ARE RETIRED (§2) — the chart's bespoke header row and its 13px title.
+   Active queries now wears `.os-ahead`, the same band as every other container, so a header that
+   existed only here would be a second treatment for the thing this pack exists to unify. */
+/* ⚠️ THE BAND'S CONTROLS SHRINK BEFORE THE TITLE DOES. The slider is the only child with no
+   natural minimum, so it is the one that gives; without this the cluster pushes the title into an
+   ellipsis at 1024 while the slider keeps its full 150px. */
+.os-ahead .os-ctrls { min-width: 0; }
+.os-ahead .os-rangeslider { width: clamp(72px, 14vw, 150px); }
 /* ⚠️ TWO CONTROLS, TWO SHAPES — a select for the grain (a small closed set you pick from) and a
    slider for the span (an ordered scale you move along). The retired three-pill group could say
    neither: it had to spend a pill on each range and had no room to say anything about grain. */
-.os-freqsel { position: relative; display: flex; align-items: center; margin-left: auto; }
+/* ⚠️ NO `margin-left:auto` HERE — the CLUSTER right-aligns, not each control. */
+.os-freqsel { position: relative; display: flex; align-items: center; }
 .os-freqsel select {
   appearance: none; -webkit-appearance: none;
   font-family: inherit; font-size: 11.5px; color: #4a3a2e;
@@ -343,15 +664,37 @@
 .os-rangeslider input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
 .os-rangeslider input[type="range"]:focus-visible { outline: none; }
 .os-rangeslider input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(185, 138, 118, 0.4); }
-/* the slider has no scale marks, so the label IS its value — never decoration */
+/**
+ * The slider has no scale marks, so the label IS its value — never decoration.
+ *
+ * ⚠️ IT SITS SNUG AGAINST THE SLIDER, LEFT-ALIGNED (audit P5). It used to be `text-align: right`
+ * inside a 96px box at the end of a `margin-left: auto` row, which justified it to the card's far
+ * edge — a value stranded from the control it reports. The min-width stays: the words change
+ * length ("Last 14 days" → "All time"), and without it the slider shifts as you drag.
+ */
 .os-rangelbl {
   font-size: 11px; color: #7c3a2a; font-weight: 500; white-space: nowrap;
-  min-width: 96px; text-align: right; flex: none;
+  min-width: 88px; text-align: left; flex: none;
 }
-.os-fig { display: flex; align-items: center; gap: 11px; margin: 4px 0 2px; flex: none; }
+/* ⚠️ ONE CLUSTER, RIGHT-ALIGNED AS A UNIT — frequency · slider · label. Pushing each control
+   right on its own is what let the label drift away from the slider. */
+.os-ctrls { display: flex; align-items: center; gap: 10px; margin-left: auto; flex: none; }
+/* ⚠️ `.os-fig` IS RETIRED — the figure sits IN the band now (option A), so a wrapper whose only
+   job was to hold it beneath the header has nothing left to do. */
+/* the headline, in the band: smaller than the old 28px body figure, and the chip rides beside it */
+.os-ahead .os-n {
+  font-family: var(--font-serif); font-weight: 500; font-size: 21px; color: #241811;
+  line-height: 1; font-variant-numeric: tabular-nums; flex: none; margin-left: 2px;
+}
+.os-ahead .os-chip { flex: none; }
+/* the cluster takes the slack, and gives it back first */
+.os-ahead .os-ctrls { margin-left: auto; }
 /* §10: the headline counts up once — tabular numerals so the width never jitters */
-.os-fig .os-n { font-family: var(--font-serif); font-weight: 500; font-size: 28px; color: #241811; line-height: 1; font-variant-numeric: tabular-nums; }
+
 .os-chip { font-size: 10px; border-radius: 99px; padding: 2.5px 9px; background: #e9ede6; border: 1px solid #d6ddd2; color: #3f5a3c; }
+/* the band runs edge to edge, so the padding belongs to the body */
+/* the card's old padding lives here now — the band needs the card's edges */
+.os-lbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px 18px 10px; }
 .os-chartwrap { flex: 1; min-height: 120px; position: relative; }
 .os-chartwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; outline: none; }
 /* the cursor flips across the reading-zone boundary — felt, not guessed (§3) */
@@ -429,9 +772,12 @@
 /* ⚠️ PINK, BECAUSE THIS IS THE TO-DO SURFACE. The house rule is sage for a dashboard container's
    header and PINK where something is asking for you — this card is the one that does. The band
    runs edge to edge, so the card needs `overflow:hidden` for it to meet the radius cleanly. */
+/* ⚠️ THE SAME PADDING AS `.os-ahead` (§2) — it was 11px/18px against the sage band's 10px/16px,
+   so the pink band stood 2px taller than the other three. Nobody had noticed because until now no
+   two bands sat side by side at the same height; measured 51 vs 49 across the four. The colours
+   differ by purpose, the GEOMETRY does not. */
 .os-th2 {
-  display: flex; align-items: center; gap: 12px;
-  padding: 11px 18px; margin: 0; flex: none;
+  display: flex; align-items: center; gap: 12px; margin: 0;
   background: linear-gradient(180deg, #f5e3d8, #f2ddd2);
   border-bottom: 1px solid #ebd2c4;
 }
@@ -449,11 +795,19 @@
 }
 .os-p b { font-weight: 600; font-size: 12px; line-height: 1; font-variant-numeric: tabular-nums; }
 .os-pdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.os-p.u { background: #ffffff; color: #5c2418; }
+/* ⚠️ FAINT PASTILLE BLUE (polish P7) — ONE fill for all three pills, with the DOT carrying the
+   kind.
+
+   ⚠️ WHITE, NOT TINTED (P5). The pills went pastille blue in an earlier pass, and the tint was
+   doing the same job as the dot beside it — two devices for one distinction, so the dot stopped
+   reading as the thing that carried the category. COLOUR LIVES IN THE DOT; the pill is a white
+   chip with a hairline. That also frees the tint for surfaces where nothing else is doing the
+   sorting.
+   ⚠️ THE FIGURE IS DARKER THAN THE LABEL. It is the thing being read. */
+.os-p { background: #ffffff; border: 1px solid rgba(58, 28, 20, 0.08); color: #5c5148; }
+.os-p b { color: #2e2118; }
 .os-p.u .os-pdot { background: #7c3a2a; }
-.os-p.h { background: #ffffff; color: #5a6e58; }
 .os-p.h .os-pdot { background: #8a9e88; }
-.os-p.m { background: #ffffff; color: #5c5148; }
 .os-p.m .os-pdot { background: #b9a893; }
 .os-none { font-size: 12px; color: #8a7a6c; }
 .os-see {
@@ -464,7 +818,11 @@
 /* §10: every → slides on hover */
 .os-arr { display: inline-block; transition: transform 0.16s ease; }
 .os-see:hover .os-arr { transform: translateX(3px); }
-.os-tbody { flex: 1; overflow-y: auto; padding: 6px 18px 10px; }
+/* ⚠️ THE WRAPPER TAKES THE FLEX, THE SCROLLER TAKES THE PADDING (polish P2). EdgeFadeScroll
+   inserts a relative frame between the card and the scroll element and positions its two fades
+   against it — so the frame is what must grow, or the fades have nothing to hang on. */
+.os-tbodywrap { flex: 1; min-height: 0; }
+.os-tbody { padding: 6px 18px 10px; }
 .os-tempty { min-height: 80px; display: grid; place-items: center; padding: 16px; }
 .os-tempty span { font-family: var(--font-serif); font-style: italic; font-size: 13.5px; color: #b3a596; }
 
@@ -662,7 +1020,12 @@
    block once there are 60 of them. The declaration here is the fallback for the ghost meter. */
 .os-blocks { display: flex; gap: 3px; margin: 9px 0 1px; }
 .os-blocks i { flex: 1; height: 9px; border-radius: 3px; background: #e9dfd1; transition: background 0.16s ease; }
-.os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) both; }
+/* ⚠️ `backwards`, NEVER `both` (audit P6 · the §6 trap). This animation is NOT scoped to a class
+   that gets removed — it lives on `.f` for the element's whole life — so `both` would PIN
+   transform and opacity permanently and outrank any later declaration on these blocks. The final
+   keyframe is the resting state anyway, so nothing about the finished look changes.
+   ⚠️ AND IT IS DELAYED past the cards (§6): the meter reads after they land, never with them. */
+.os-blocks i.f { background: #c9a293; animation: os-fillin 0.5s cubic-bezier(0.22, 0.68, 0.36, 1) 0.18s backwards; }
 /* hover deepens the fill (§6) — no pace line, no nudge, ever */
 .os-blocks:hover i.f { background: #b98a76; }
 .os-blocks.ghost i { border: 1px dashed #ddd0c0; background: transparent; height: 8px; }
@@ -683,14 +1046,25 @@
    surface that is asking something of you (the tasks card). The band runs edge to edge, so the
    card clips. */
 .os-actv { overflow: hidden; }
+/**
+ * ⚠️ THE BAND'S HEIGHT IS STATED, NOT DERIVED (headers P3). All three bands used to be sized by
+ * their contents and agreed only by COINCIDENCE — Tasks at 11/18 padding, the sage band at 10/16,
+ * measured 51 against 49. Any control, any longer title, any font fallback moved one and not the
+ * others. A fixed height with `box-sizing: border-box` makes the agreement structural: the band is
+ * 51px because it says so, and its contents centre inside whatever room that leaves.
+ */
+.os-ahead, .os-th2 { height: 51px; padding: 0 16px; box-sizing: border-box; flex: none; }
 .os-ahead {
-  display: flex; align-items: center; gap: 12px; padding: 10px 16px; flex: none;
+  display: flex; align-items: center; gap: 12px;
   background: linear-gradient(180deg, #dde3da, #d6dcd3);
   border-bottom: 1px solid #cbd3c8;
 }
+/* ⚠️ NOWRAP, AND THE CONTROLS SHRINK FIRST. A title wrapping to two lines was what broke the band
+   height at narrower widths — with a stated height it would now clip instead, which is worse. */
+.os-ahead h2, .os-th2 h2 { white-space: nowrap; flex: none; }
 .os-ahead h2 {
   font-family: var(--font-serif); font-size: 15px; font-weight: 600; color: #2b3a29;
-  margin: 0; flex: 1;
+  margin: 0;
 }
 .os-exp {
   width: 24px; height: 24px; border-radius: 7px; border: 1px solid #e3d9cc; background: #ffffff;
@@ -700,11 +1074,29 @@
 .os-exp svg { width: 12px; height: 12px; stroke: #8a7a6c; fill: none; stroke-width: 1.8; transition: stroke 0.14s ease; }
 .os-exp:hover { background: #faf6ef; border-color: #cdbfae; }
 .os-exp:hover svg { stroke: #7c3a2a; }
-.os-abody { flex: 1; overflow-y: auto; padding: 0 14px 12px; }
+.os-abodywrap { flex: 1; min-height: 0; }
+/* ⚠️ THE BOTTOM PADDING CLEARS THE FOOT (polish P7). `.os-afoot` (LAST 30 DAYS) sits over the end
+   of the scroll region, so the final entry could never be read in full — it scrolled to its limit
+   still under the foot. The padding is the foot's own height (7px + 7px + ~9px line + 1px rule),
+   so the last row now scrolls clear of it rather than up to it. */
+.os-abody { padding: 0 14px calc(var(--os-afoot-h) + 10px); }
 .os-aempty { min-height: 120px; display: grid; place-items: center; padding: 16px; position: relative; }
 .os-aempty span { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #b3a596; text-align: center; }
 .os-tlday { margin: 8px 0 6px; }
+/* ⚠️ THE CASCADE IS CAPPED AT THE FIRST EIGHT — beyond that a stagger is a queue you wait
+   through, and the feed scrolls. Later cardlets simply appear. Scoped to `.enter`, which the page
+   removes once, so no fill-mode survives the entrance. */
 .os-tlev { display: flex; gap: 9px; }
+.os-actv.enter .os-tlev { animation: os-rise 0.34s cubic-bezier(0.22, 0.68, 0.36, 1) backwards; }
+.os-actv.enter .os-tlev:nth-child(1) { animation-delay: 0.20s; }
+.os-actv.enter .os-tlev:nth-child(2) { animation-delay: 0.25s; }
+.os-actv.enter .os-tlev:nth-child(3) { animation-delay: 0.30s; }
+.os-actv.enter .os-tlev:nth-child(4) { animation-delay: 0.35s; }
+.os-actv.enter .os-tlev:nth-child(5) { animation-delay: 0.40s; }
+.os-actv.enter .os-tlev:nth-child(6) { animation-delay: 0.45s; }
+.os-actv.enter .os-tlev:nth-child(7) { animation-delay: 0.50s; }
+.os-actv.enter .os-tlev:nth-child(8) { animation-delay: 0.55s; }
+.os-actv.enter .os-tlev:nth-child(n+9) { animation: none; }
 .os-tlthread { width: 14px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .os-tlthread .os-tlln { width: 1.5px; flex: 1; background: #e8dcd0; }
 .os-tldot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #cfc6bb; background: #efeae2; flex: none; }
@@ -721,6 +1113,11 @@
   background: #f3e0d6; color: #7c3a2a; border-radius: 99px; padding: 2.5px 7px; white-space: nowrap;
 }
 .os-st.sg { background: #e9ede6; color: #5a6e58; }
+/* the pill and its run count travel together — see the two-children note in OneScreenRail */
+.os-r1l { display: flex; align-items: center; gap: 5px; min-width: 0; }
+/* ⚠️ QUIETER THAN THE PILL. The count is a footnote ON the event, not a second label competing
+   with it — a filled chip here would read as a status of its own. */
+.os-runx { font-family: "JetBrains Mono", monospace; font-size: 6.5px; letter-spacing: 0.06em; color: #a89a8a; white-space: nowrap; }
 .os-tm { font-family: "JetBrains Mono", monospace; font-size: 7.5px; color: #b3a596; }
 .os-who {
   font-family: var(--font-serif); font-size: 14px; color: #2c1a12;
@@ -854,4 +1251,199 @@
 .os-aempty-thread {
   position: absolute; left: 20px; top: 8px; bottom: 8px; width: 1.5px;
   background: linear-gradient(#e8dcd0, rgba(232, 220, 208, 0));
+}
+
+/* ══ §P3 · MICRO-INTERACTIONS ═══════════════════════════════════════════════════════════════
+   ⚠️ TRANSFORM AND OPACITY ONLY (pack rule 7). Width, height, top and left force a layout
+   recalculation on every frame; on a page holding a live chart and two scrollers that is felt,
+   not theoretical. Everything below moves by transform or changes a colour — nothing resizes.
+
+   ⚠️ AND NOTHING HERE IS THE ONLY ROUTE TO AN AFFORDANCE. Every hover effect is decoration on a
+   control that is already visible and already reachable by keyboard, which is what makes the
+   reduced-motion block at the end safe: turning all of it off removes polish, never function. */
+
+/* cards — the shadow was already here; the lift is the addition */
+/**
+ * ⚠️ NO LIFT ON A CARD FLUSH TO A CLIPPED EDGE — this rule USED to raise the card 2px.
+ *
+ * `.os-colM` and `.os-colR` are `overflow: hidden`, and the cards sit flush against the top of
+ * their column. A 2px lift therefore pushed the card's top 2px — INCLUDING its ::after rim — past
+ * the clip, so the rim vanished along the top edge on hover and nowhere else.
+ *
+ * ⚠️ AND THIS WAS THE SECOND CAUSE OF THE MISSING-RIM BUG. The first (an opaque band painting over
+ * anything drawn on the element's own layer) is fixed by the ring overlay. This one is why the
+ * fault looked HOVER-specific, and it was missed because a SECOND `.os-card.os-lift:hover` rule
+ * lived 870 lines below the first — the duplicate-rule trap, this time catching the diagnosis
+ * rather than the code.
+ *
+ * Hover is shadow-and-rim only. The lift survives where nothing clips it: buttons and pills.
+ */
+.os-card.os-lift { transition: box-shadow 0.16s ease; }
+
+/* activity — the cardlet steps aside, its dot swells on a slight overshoot */
+.os-tlev .os-cardlet { transition: transform 0.16s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.os-tlev:hover .os-cardlet { transform: translateX(2px); }
+.os-tlthread > * { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.os-tlev:hover .os-tlthread > * { transform: scale(1.15); }
+
+/* author tile — the plate lifts and tips off-square as the whole card is hovered */
+.os-msicon { transition: transform 0.18s cubic-bezier(0.22, 0.68, 0.36, 1); }
+.os-aut:hover .os-msicon { transform: translateY(-3px) rotate(-2deg); }
+.os-aut-pic { transition: transform 0.16s ease; }
+.os-aut:hover .os-aut-pic { transform: scale(1.04); }
+
+/* counters — ⚠️ THE ICON MOVES, THE FIGURE NEVER DOES. A number that shifts under the cursor
+   reads as unreliable, and these are the page's headline figures. */
+/* ⚠️ THE HOVER MOVED TO THE IMG (trap 2) — a transform on this wrapper isolates the blend. */
+
+/* header pills — a 1px lift and a warmer edge */
+.os-p { transition: transform 0.14s ease, border-color 0.14s ease; }
+.os-p:hover { transform: translateY(-1px); }
+
+/* buttons — ⚠️ THE PRESSED STATE IS THE ONE USUALLY MISSED, and it is the only feedback a click
+   gives before its effect arrives. */
+.os-btn-mini, .os-see, .os-goal-num { transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease; }
+.os-btn-mini:hover, .os-see:hover, .os-goal-num:hover { transform: translateY(-1px); }
+.os-btn-mini:active, .os-see:active, .os-goal-num:active { transform: scale(0.97); }
+
+/* ⚠️ TASK ROWS KEEP THEIR PLAIN HOVER — background only. A hover-revealed action button was
+   tried on these rows and rejected; the status pill stays put and the ⋯ is always there. */
+
+
+
+/* ══ §1 · THE MARK SLOT ══════════════════════════════════════════════════════════════════════
+   ⚠️ THE BOX IS FIXED AT 28px AND ITS CONTENTS ARE NOT. `flex: 0 0 28px` in both directions, so
+   the header's height never depends on what is in the slot — which is the whole point: today a
+   17px monoline icon, later a commissioned illustration at full bleed, and the swap moves nothing.
+
+   ⚠️ THE PLATE'S RIM IS AN INSET SHADOW, NEVER A BORDER. Same reason as the container rim (see the
+   CLAUDE.md entry): a border here would also add 2px to a box whose whole job is to be exactly
+   28px. An inset shadow paints inside the element's own raster and costs no layout.
+
+   ⚠️ THE FILL IS TRANSLUCENT PARCHMENT so ONE rule serves both bands — it reads on the sage
+   activity band and the pink to-do band without a per-band override, which is what stops this
+   becoming four rules again. */
+.os-mark {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(253, 250, 245, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 42, 0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+/* ⚠️ BOUNDED AND `contain` — an asset with the wrong intrinsic size must letterbox inside the
+   plate rather than decide the box. */
+.os-mark img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.os-mark svg { width: 17px; height: 17px; display: block; }
+/* the ArtSlot convention: no art, no icon → the slot's own name, quietly */
+.os-mark-k {
+  font-family: "JetBrains Mono", monospace; font-style: normal;
+  font-size: 6px; letter-spacing: 0.06em; text-transform: uppercase; color: #b09b8c;
+}
+
+
+
+/* ══ P3 · THE BAND'S CONTROLS ════════════════════════════════════════════════════════════════
+   ⚠️ THEY HAVE TO READ AGAINST SAGE. Both were drawn for a parchment card and put on a sage band,
+   where a pale fill on a pale green ground disappears. The select takes a parchment fill with a
+   #bcc7b9 edge; the SLIDER goes further and takes a capsule of its own (below), because a track is
+   thinner than a select and had nothing to read against at all. */
+.os-ahead .os-freqsel select {
+  background: #fffdf9;
+  border: 1px solid #bcc7b9;
+  color: #2b3a29;
+}
+.os-ahead .os-freqsel select:hover { border-color: #a8b5a5; }
+.os-ahead .os-cv { color: #6f8069; }
+
+/**
+ * ⚠️ THE CAPSULE (P3) — the slider is not ON the sage, it is on parchment laid over it.
+ *
+ * A bare track with a dot was the version that failed. The capsule gives the control a surface,
+ * and the LABEL rides inside it because the label IS the slider's value — separating them put the
+ * readout on the band and its control on parchment.
+ */
+.os-rangecap {
+  display: flex; align-items: center; gap: 9px; flex: none;
+  background: #fffdf9;
+  border: 1px solid #bcc7b9;
+  border-radius: 99px;
+  padding: 5px 13px 5px 11px;
+}
+.os-rangecap .os-rangeslider { width: clamp(72px, 12vw, 132px); padding-top: 0; }
+.os-rangecap .os-rangelbl { color: #4a5a45; min-width: 0; }
+
+/* ⚠️ THE TRAVELLED PORTION IS FILLED — that is what says where you are. `--fill` is set inline per
+   render and read here; without the gradient this is a bare rail again. */
+.os-rangecap input[type="range"]::-webkit-slider-runnable-track {
+  height: 5px; border-radius: 99px;
+  background: linear-gradient(to right, #7c3a2a 0 var(--fill, 0%), #e6ddd0 var(--fill, 0%) 100%);
+}
+.os-rangecap input[type="range"]::-webkit-slider-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fffdf9; border: 2.5px solid #7c3a2a;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.24);
+  margin-top: -4px;
+}
+/* ⚠️ FIREFOX IGNORES THE -webkit- PSEUDO-ELEMENTS ENTIRELY and would render the browser default —
+   a blue OS slider sitting on a parchment capsule. These are not a nicety. */
+.os-rangecap input[type="range"]::-moz-range-track { height: 5px; border-radius: 99px; background: #e6ddd0; }
+.os-rangecap input[type="range"]::-moz-range-progress { height: 5px; border-radius: 99px; background: #7c3a2a; }
+.os-rangecap input[type="range"]::-moz-range-thumb {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fffdf9; border: 2.5px solid #7c3a2a;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.24);
+}
+
+/* ══ COMMUNITY TILE (community-tile pack, P1) ═══════════════════════════════════════════════════
+   Sage-band card at the author tile's width. Phase 1 renders the empty state and nothing else —
+   there is no cohort yet, and pre-launch that is the honest state rather than a placeholder. */
+.os-comm { display: flex; flex-direction: column; overflow: hidden; }
+/* ⚠️ THE BAND'S GEOMETRY IS `.os-ahead`'S, NOT ITS OWN. The first draft of this rule restated
+   `height: 44px; padding: 0 14px` — appended below the sheet's `.os-ahead, .os-th2 { height: 51px }`,
+   so it WON, and the Community band rendered 7px shorter than every other band on the page. Only
+   the mark and the chip are this tile's; the band is the shared one. */
+.os-commic { display: flex; flex: none; color: #5f6f5b; }
+.os-commic svg { width: 16px; height: 16px; stroke-width: 1.7; }
+/* ⚠️ A STATEMENT ABOUT THE DATA, NOT THE CODE — it goes when the cohorts are populated enough
+   that most readers see real figures, not when the feature is "finished". */
+.os-commbeta {
+  margin-left: auto; flex: none;
+  font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.16em;
+  background: #fffdf9; border: 1px solid #cbd3c8; color: #5f6f5b;
+  border-radius: 999px; padding: 3px 7px;
+}
+.os-commbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 16px 16px; }
+.os-commempty {
+  margin: 0; font-size: 12.5px; line-height: 1.5; color: #6b6058; max-width: 30ch;
+}
+/* ⚠️ THIS IS WHAT MAKES THE TILE FILL A ROW IT DOES NOT SIZE. The tasks card sets the row's
+   height; without a footer taking the slack the tile's text would sit vertically centred in
+   whatever is left, drifting as the task list changes length. */
+.os-commfoot { margin-top: auto; }
+
+/* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
+   ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule
+   above is equal specificity. Anything added below it is silently exempt.
+
+   ⚠️ NOTHING IS HOVER-REVEALED ON THIS PAGE, so collapsing the motion hides nothing. If a future
+   affordance is ever revealed by a hover or an animation, it must be made permanently visible
+   here — an affordance you can only reach by moving is unusable when motion is switched off. */
+@media (prefers-reduced-motion: reduce) {
+  .os-root *,
+  .os-root *::before,
+  .os-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  /* the entrance offsets must not be left applied — a 0.01ms animation still paints its `from` */
+  .os-card.enter, .os-greet.enter, .os-actv.enter .os-tlev { animation: none !important; }
+  .os-blocks i.f { animation: none !important; }
 }
