@@ -1,0 +1,157 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Sage plateband + tab shell. Reference: design-refs/manuscripts-plate.html (`.plateband`, `.tabs.rule`).
+ *
+ * ⚠️ THIS FILE IS ADDITIVE AND DELIBERATELY SEPARATE FROM `manuscripts.css`.
+ * The card's rules live here so the plate can be authored while `manuscripts.css` is held by
+ * another stream. Tokens are declared on the SAME `.t-* .msv1` selectors the page already uses, so
+ * they simply join the existing set rather than shadowing it — nothing here redefines a token that
+ * `manuscripts.css` owns. Folding the two files together is a later decision, not a requirement.
+ *
+ * ⚠️ EVERY COLOUR RESOLVES THROUGH A `--msv-*` TOKEN. No hex is authored in a rule below.
+ * The brief's literal values (#fefdf8 card, #dadfd7→#d5dbd3 band, #e7ede3 pale, #a2907f label)
+ * are the EXPECTED CAPPUCCINO RESOLUTION and are asserted as such in manuscriptPlateTokens.test.ts
+ * — they are verification targets, not authored values. Bold Pastille and Editorial resolve to
+ * their own palettes from the same rules.
+ *
+ * ⚠️ THE PLATEBAND MUST NOT BE SAGE IN EDITORIAL. Editorial is monochrome and has no sage at all;
+ * a sage band there is not "the theme with a green tint", it is the wrong theme. Locked.
+ */
+
+/* ── the additions, per theme ────────────────────────────────────────────────────────────────
+   Roles the existing --msv-* set does not carry. Everything else REUSES: --msv-card/-cardbd for
+   the card, --msv-head for the title, --msv-ink/-muted/-label for text, --msv-hair for the tab
+   rule, --msv-btn* for the ghost action, and --msv-hue/--msv-huec (the theme's accent pair, which
+   is --sd-hue/--sd-centre) for the primary action and the active tab.
+
+   ⚠️ --msv-plateA/B is NOT --msv-bandA/B, and the difference is the point. The existing band token
+   resolves WARM FOAM in Cappuccino (#ece5d8→#e5ddcd); this design's Cappuccino plateband is SAGE
+   (#dadfd7→#d5dbd3). Same shape of declaration, different surface — the reveal panels' band and
+   the card's identity head are two things. Reusing one token for both would have made Cappuccino
+   quietly wrong while every other theme looked right.
+   ── */
+.t-capp .msv1 {
+  --msv-plateA: #dadfd7; --msv-plateB: #d5dbd3;
+  --msv-plateline: 1px solid rgba(138, 158, 136, 0.35);
+  --msv-palebg: #e7ede3; --msv-palebd: 1px solid rgba(138, 158, 136, 0.3);
+  --msv-paletx: #4a5a48;
+  --msv-stripbg: rgba(255, 255, 255, 0.62); --msv-stripbd: 1px solid rgba(138, 158, 136, 0.3);
+  --msv-stripkey: #6a7a68;
+  --msv-prbd: 1px solid #e8c8bc;
+}
+.t-bold .msv1 {
+  /* Bold's band is pink and closes on an ink rule — the plateband wears the same identity. */
+  --msv-plateA: #f4c7c2; --msv-plateB: #f4c7c2;
+  --msv-plateline: 1.5px solid #1d1712;
+  --msv-palebg: #ffffff; --msv-palebd: 1px solid #1d1712;
+  --msv-paletx: #1d1712;
+  --msv-stripbg: #fffefb; --msv-stripbd: 1.5px solid #1d1712;
+  --msv-stripkey: #6a625c;
+  --msv-prbd: 1.5px solid #1d1712;
+}
+.t-edn .msv1 {
+  /* ⚠️ NO SAGE. Editorial is monochrome — the band is a pale grey step off the white card. */
+  --msv-plateA: #f4f4f5; --msv-plateB: #efeff0;
+  --msv-plateline: 1px solid #e3e2e0;
+  --msv-palebg: #f1f1ef; --msv-palebd: 1px solid transparent;
+  --msv-paletx: #555555;
+  --msv-stripbg: #ffffff; --msv-stripbd: 1px solid #e3e2e0;
+  --msv-stripkey: #6b6b6b;
+  --msv-prbd: 1px solid transparent;
+}
+
+/* ── the card ──
+   ⚠️ GEOMETRY IS STRUCTURAL AND STAYS LITERAL — radius 16, 1px hairline, the two-layer shadow.
+   Only COLOUR themes. --msv-crad is deliberately NOT read here: it is 10/14/16 by theme, and this
+   card's radius is part of the dashboard card grammar rather than a per-theme choice.
+   ⚠️ AND NO FORM 11 INSET BURGUNDY FRAME. That treatment is Cappuccino/Queries-only. */
+.msv-card {
+  background: var(--msv-card);
+  border: var(--msv-cardbd);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 6px 18px rgba(58, 28, 20, 0.05);
+  overflow: hidden;
+}
+
+/* ── the sage plateband ── */
+.msv-plateband {
+  display: flex; align-items: center; gap: 30px; padding: 28px 32px;
+  background: linear-gradient(135deg, var(--msv-plateA), var(--msv-plateB));
+  border-bottom: var(--msv-plateline);
+}
+/* ⚠️ NO `transform` HERE OR ON ANY ANCESTOR OF THE PLATE.
+   The dashboard's painted marks rely on `mix-blend-mode: multiply`, and a transform on an ancestor
+   isolates the blend group and silently brings their white field back. This plate's PNG needs no
+   blend mode (`.os-msicon` carries none either), so the trap is not armed — but a hover lift added
+   here later would arm it for anything that moved in. Offset with position/top if ever needed. */
+.msv-plateimg {
+  flex: 0 0 auto; width: 118px; height: 118px; border-radius: 18px;
+  background: #ffffff; border: var(--msv-cardbd);
+  box-shadow: 0 2px 10px rgba(58, 28, 20, 0.06);
+  display: grid; place-items: center; padding: 22px;
+}
+/* Matches how OneScreenAuthor renders this same asset: contained, block, no blend mode. */
+.msv-plateimg img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.msv-plateid { min-width: 0; }
+.msv-platetitle {
+  font-family: 'Playfair Display', serif; font-weight: 600; font-size: 34px;
+  color: var(--msv-head); line-height: 1.1; margin: 8px 0 12px;
+}
+.msv-platemeta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.msv-gp {
+  background: var(--msv-palebg); border: var(--msv-palebd); border-radius: 20px;
+  padding: 5px 14px; font-size: 12px; color: var(--msv-paletx);
+}
+.msv-platelog {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px;
+  color: var(--msv-ink); line-height: 1.5; margin-top: 14px; max-width: 520px;
+}
+
+.msv-plateside {
+  margin-left: auto; flex: 0 0 auto;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 14px;
+}
+.msv-statstrip {
+  display: flex; background: var(--msv-stripbg); border: var(--msv-stripbd);
+  border-radius: 14px; overflow: hidden;
+}
+.msv-stat { padding: 12px 20px; text-align: center; }
+.msv-stat + .msv-stat { border-left: var(--msv-stripbd); }
+.msv-statn {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;
+  color: var(--msv-head); line-height: 1;
+}
+.msv-statk {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.15em;
+  color: var(--msv-stripkey); text-transform: uppercase; margin-top: 6px;
+}
+.msv-plateacts { display: flex; gap: 10px; }
+
+/* The primary action. Reads the theme's accent pair, so it is soft pink in Cappuccino, pink on ink
+   in Bold and a grey tint in Editorial — one rule, three correct answers. */
+.msv-btn.msv-primary {
+  background: var(--msv-huec); border: var(--msv-prbd); color: var(--msv-hue);
+}
+.msv-btn.msv-primary:hover { filter: brightness(0.97); }
+
+/* ── the tab row ── */
+.msv-tabs {
+  display: flex; gap: 26px; padding: 0 32px;
+  border-bottom: 1px solid var(--msv-hair);
+}
+.msv-tab {
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--msv-muted); background: none; border: none;
+  padding: 13px 2px; border-bottom: 2px solid transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.msv-tab:hover { color: var(--msv-head); }
+.msv-tab.on { border-bottom-color: var(--msv-hue); color: var(--msv-head); font-weight: 600; }
+
+@media (max-width: 1150px) {
+  .msv-plateband { flex-wrap: wrap; gap: 20px; }
+  .msv-plateside { margin-left: 0; align-items: flex-start; width: 100%; }
+}

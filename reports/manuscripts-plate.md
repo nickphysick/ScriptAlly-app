@@ -72,14 +72,15 @@ None of it is in this touch set, and "green locally" against a tree in that stat
 So the gates were re-run per the repo protocol in an **isolated worktree at HEAD (`9284ec4`) carrying
 only this phase's four new files**:
 
-| Gate | HEAD + Phase 1 files only |
-|---|---|
-| `npx tsc --noEmit` | **exit 0**, no diagnostics |
-| `npm run build` | **exit 0** |
-| `npx vitest run` | **247 files · 3996 passed · 2 skipped** |
+| Isolated run at HEAD, carrying only that phase's files | tsc | build | vitest |
+|---|---|---|---|
+| Phase 1 (HEAD `9284ec4`) | exit 0 | exit 0 | **247 files · 3996 passed · 2 skipped** |
+| Phase 2a (HEAD `1a2fd9b`) | exit 0 | exit 0 | **249 files · 4050 passed · 2 skipped** |
 
-Phase 1 adds 31 tests and no failures. The isolated run is the one to believe; the primary tree's
-red belongs to `Queries.tsx` and will clear when that stream lands.
+Phase 1 adds 31 tests, Phase 2a adds 24, neither adds a failure. The isolated run is the one to
+believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
+Test totals move between rows because other streams commit throughout — recorded fresh each time,
+never carried over.
 
 ---
 
@@ -139,6 +140,55 @@ So Phase 2 imports `src/assets/shell/manuscript-icon.png` and matches that rende
 blend mode is needed and none should be added**, which also means the transform trap does not bite
 here — though the plate should still avoid a `transform` on any ancestor, since `.os-msicon`'s own
 hover lift is a `transform` on the plate itself and would need the same care if copied.
+
+---
+
+## Phase 2a — plate and tab shell
+
+Commit: `manuscripts: sage plateband and tab shell`
+
+Authored as new files under addendum 2's re-sequencing: nothing here imports into or edits a
+blocked file, so the plate could be built while `AllManuscripts.tsx` is still held.
+
+| File | What it is |
+|---|---|
+| `src/lib/manuscriptPlate.ts` | `plateStats` / `plateStatCells` / `formatPlateDate` — the three figures, pure |
+| `src/components/manuscripts/ManuscriptPlate.tsx` | the plateband |
+| `src/components/manuscripts/ManuscriptTabs.tsx` | the tab row + `MANUSCRIPT_TABS` |
+| `src/components/manuscripts/manuscriptPlate.css` | tokens + rules, additive to `manuscripts.css` |
+| `src/components/manuscripts/manuscriptPlate.test.tsx` | 24 tests |
+
+Both components are **props-only** — no context, no store, no Firebase — so they render standalone
+in a spec and the figures are asserted against `plateStats` rather than a mocked database.
+
+### The three figures are derived, and two kinds of nothing are kept apart
+
+`plateStats(queries)` counts queries, counts responses **through `isResponse` from
+`packageMetrics`** (the canonical predicate the package maths already uses — a local "did the agent
+reply" test here would eventually give one fact two numbers on two pages), and takes the newest
+`lastActivityMs` across the set.
+
+> ⚠️ **Zero queries and no last activity are not the same absence.** The two counts read `0`,
+> because zero is a true count. Last activity reads `—`, because there is no date and a `0` there
+> would assert an event that never happened. The split lives in `plateStatCells` and in the types
+> (`number` vs `string | null`) so a caller cannot collapse it back by accident.
+
+No logline → the element is not rendered at all, and specifically **not** the current plate list's
+`"No logline yet — add one in Edit details."` placeholder. Empty string counts as absent. No
+genres → no pills. No word count → no words line.
+
+### Tabs
+
+Three, in order, opening on Details. Controlled component; the card owns the `useState` at Phase 6.
+No route, no URL param, no `href` — asserted. **No Pro chip on any tab**, per addendum 1: the
+mockup draws one on Submission packages, and that route has no gate, so it would sell a feature the
+user already has. Locked, because this is the *second* Pro-selling surface retired from packages.
+
+### Four locks verified red before being believed
+
+A logline placeholder → 2 failures. A shelved manuscript still offering Send → 1. `lastActivity`
+falling back to epoch instead of `null` → 1. A Pro chip on the packages tab → 2. Restored to 24
+green each time.
 
 ---
 
