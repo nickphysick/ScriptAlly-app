@@ -74,7 +74,6 @@
    identity, this row carries tallies and view state. `margin-left:auto` is what pushes it to the
    end of the row, and it is why this is a ROW and not a bare span — a tally with nothing to be
    pushed away from would just sit left and read as a stray caption. */
-.msv-tools { display: flex; align-items: center; gap: 10px; margin: 18px 0 0; }
 .msv-tally {
   margin-left: auto; white-space: nowrap;
   font-family: 'JetBrains Mono', monospace; font-size: 9px;

@@ -190,18 +190,22 @@
  * token the plate aligns to, instead of four different page paddings.
  *
  * ⚠️ THE HEIGHT IS ONE NUMBER NOW, and the knob-versus-rule note it replaces still applies: no
- * caller may request a height. The plate is 88px, or 56px once the scroller has moved. A page
- * without a description keeps the full height — only the type steps up.
+ * caller may request a height. The IDENTITY row is 88px, or 56px once the scroller has moved. A
+ * page without a description keeps the full height — only the type steps up.
+ *
+ * ⚠️ THE PLATE HAS TWO ROWS SINCE AMENDMENT 8, so its own height is AUTO and the fixed height moved
+ * DOWN onto `.wsh-row`. Identity row: mark, title, description, primary action — it condenses. Tool
+ * row: search, filters, sort, tally — it does not. One border, one shadow, one background and ONE
+ * sticky element around both; the tool row's separator is an internal hairline, not a second frame.
  */
 .wsh {
   flex: 0 0 auto;
-  height: var(--wsh-plate-h);
   box-sizing: border-box;
   background: var(--wsh-plate-bg);
   border: 1px solid var(--ws-edge);
   border-radius: var(--wsh-plate-radius);
   box-shadow: var(--wsh-plate-sh);
-  transition: height .2s ease, background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
+  transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 /**
  * ⚠️ THE STICKY WRAPPER PAINTS NOTHING. Giving it a fill would put an opaque strip across the
@@ -214,43 +218,73 @@
  * separates plate from content, and once stuck it is transparent space that content scrolls
  * through above the plate.
  *
- * ⚠️ THE WRAPPER RESERVES THE PLATE'S REST HEIGHT, and this is not tidiness — it is the fix for a
- * MEASURED fault. The plate is in flow, so without the reservation the 88 → 56 condense pulled
- * every following element up by 32px: `scrollHeight` measured 952 at rest and 920 condensed, which
- * is precisely the "condensing must not shift the content below it" check. Worse than the jump, it
- * invites a loop — shrinking moves content up, which can move the scroll position back under the
- * trigger, which expands it again.
+ * ⚠️ THE WRAPPER GIVES BACK WHAT THE CONDENSE TAKES, and this is not tidiness — it is the fix for a
+ * MEASURED fault. The plate is in flow, so without it the 88 → 56 condense pulled every following
+ * element up by 32px: `scrollHeight` measured 952 at rest and 920 condensed, which is precisely the
+ * "condensing must not shift the content below it" check. Worse than the jump, it invites a loop —
+ * shrinking moves content up, which can move the scroll position back under the trigger, which
+ * expands it again.
  *
- * So the wrapper's height is fixed at the REST height and the plate shrinks INSIDE it. Condensed,
- * the leftover 32px is transparent wrapper that content scrolls through — invisible, because
- * content already runs under the plate by design.
+ * ⚠️ AND THE MECHANISM CHANGED WITH THE SECOND ROW. It used to be a fixed
+ * `height: calc(88px + 2·gap)` on the wrapper, which cannot survive a TOOL ROW whose height CSS
+ * does not know. So the wrapper is auto-height now and simply pays back the 32px as padding while
+ * the plate is condensed — expressed as the difference between the two identity-row heights, never
+ * as a literal, so it stays correct if either moves. Only the identity row shrinks, so that
+ * difference is the whole debt.
  */
 /* ⚠️ `flex: none` BECAUSE TWO OF THE HOSTS ARE FLEX COLUMNS. `.ctpage` and `.pkgw` are
    `display:flex; flex-direction:column`, so the wrapper is a flex ITEM there and would otherwise
-   shrink under the default `flex-shrink:1` — taking the reserved height with it and reintroducing
-   the very reflow the reservation exists to stop, but only on those two pages. */
+   shrink — taking the plate with it and reintroducing the very reflow this exists to stop, but
+   only on those two pages. */
 .wsh-wrap {
   position: sticky;
   top: 0;
   z-index: 6;
   flex: none;
   padding: var(--wsh-plate-gap) 0;
-  height: calc(var(--wsh-plate-h) + 2 * var(--wsh-plate-gap));
   box-sizing: border-box;
   background: none;
+}
+.wsh-wrap--scrolled {
+  padding-bottom: calc(var(--wsh-plate-gap) + (var(--wsh-plate-h) - var(--wsh-plate-h-scrolled)));
 }
 /* ⚠️ CONDENSED. `backdrop-filter` is what makes the plate read as glass over moving content — and
    it CREATES A STACKING CONTEXT, which is why the illustrated mark's `mix-blend-mode` has to be
    verified in this state rather than assumed (see the mark rules below). */
 .wsh--scrolled {
-  height: var(--wsh-plate-h-scrolled);
   background: var(--wsh-plate-bg-scrolled);
   -webkit-backdrop-filter: var(--wsh-plate-blur);
           backdrop-filter: var(--wsh-plate-blur);
   border-color: var(--wsh-plate-edge-scrolled);
   box-shadow: var(--wsh-plate-sh-scrolled);
 }
-.wsh-row { display: flex; align-items: center; gap: 16px; height: 100%; padding: 0 30px; }
+/* ⚠️ THE IDENTITY ROW CARRIES THE HEIGHT, not `.wsh` — the plate is two rows now and its own height
+   is the sum. This row is what condenses; the tool row below it never does. */
+.wsh-row {
+  display: flex; align-items: center; gap: 16px; padding: 0 30px;
+  height: var(--wsh-plate-h);
+  box-sizing: border-box;
+  transition: height .2s ease;
+}
+.wsh--scrolled .wsh-row { height: var(--wsh-plate-h-scrolled); }
+
+/**
+ * ⚠️ THE TOOL ROW — the plate's second row. It holds the page's controls and its tally, and it
+ * DOES NOT CONDENSE: a filter you can no longer read is not a filter.
+ *
+ * ⚠️ THE SEPARATOR IS AN INTERNAL HAIRLINE IN THE SAME EDGE TOKEN as the plate's own border, and it
+ * moves to the translucent token with it. A second frame here would read as two stacked plates
+ * rather than one plate with two rows — which is the whole point of folding the toolbar in.
+ *
+ * ⚠️ NO `height`. The row is content-sized, so a page with a taller control set simply gets a
+ * taller plate; and a page with NO toolbar renders no row at all, so nothing is reserved.
+ */
+.wsh-tools {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 30px;
+  border-top: 1px solid var(--ws-edge);
+}
+.wsh--scrolled .wsh-tools { border-top-color: var(--wsh-plate-edge-scrolled); }
 
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: the description truncates first. Title and
    actions never shrink — a clipped action is unusable and a clipped title is a lie.
@@ -330,5 +364,5 @@
  * working area it was condensing to give back. Only the tweening goes.
  */
 @media (prefers-reduced-motion: reduce) {
-  .wsh, .wsh-title, .wsh-sub, .wsh-mark, .wsh-mark .os-mark, .wsh .svh-btn { transition: none; }
+  .wsh, .wsh-row, .wsh-title, .wsh-sub, .wsh-mark, .wsh-mark .os-mark, .wsh .svh-btn { transition: none; }
 }

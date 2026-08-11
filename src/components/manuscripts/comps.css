@@ -95,7 +95,6 @@
    state their figures in one voice. THE RULE: the plate carries identity, this row carries tallies
    and view state. `margin-right:auto` on the tally is what holds the selector at the right edge —
    the mirror of the sibling's `margin-left:auto`, because here the tally is not the last child. */
-.ct-tools { display: flex; align-items: center; gap: 10px; margin: -12px 0 12px; }
 .ct-tally {
   margin-right: auto; white-space: nowrap;
   font-family: 'JetBrains Mono', monospace; font-size: 9px;

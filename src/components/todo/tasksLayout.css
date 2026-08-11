@@ -38,6 +38,11 @@
   border-bottom: 1px solid #f0e9dd;
 }
 .tpl-grow { flex: 1; }
+/* ⚠️ INSIDE THE PLATE THE TOOL ROW OWNS NO FRAME — `.wsh-tools` draws the ONE hairline that
+   separates the plate's two rows, and supplies the row's padding. `.tpl-tools` keeps its class
+   only so its DESCENDANT rules (the house disabled grammar, the button sizing) go on matching;
+   its own border and margins would otherwise stack a second rule under the first. */
+.wsh-tools .tpl-tools { margin: 0; padding: 0; border-bottom: 0; flex: 1 1 auto; }
 
 /* ⚠️ ONE CONTROL HEIGHT ACROSS THE ROW (tasks-audit P3): the ink primary (.tdb-btnp, 42px on
    the board's own surfaces) takes the ROW'S 34px step here — the pink Add's height and

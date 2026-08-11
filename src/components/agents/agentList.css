@@ -169,6 +169,11 @@
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin: 22px 0 0; position: relative; z-index: 20;
 }
+/* ⚠️ INSIDE THE PLATE THE TOOLBAR OWNS NO MARGIN — `.wsh-tools` supplies the row's padding,
+   and the 22px above was the gap it needed while it was a SIBLING beneath the header. Left in
+   place it would push the plate's second row off its own hairline. The rule above keeps that
+   margin because the toolbar is still used unwrapped in tests and the mobile push. */
+.aglist .wsh-tools .agl-toolbar { margin: 0; flex: 1 1 auto; }
 
 .aglist .agl-search {
   display: flex; align-items: center; gap: 9px;

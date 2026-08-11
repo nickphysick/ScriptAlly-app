@@ -98,6 +98,53 @@ describe("the header plate — one gutter token, and the plate inside the column
     }
   });
 
+  /**
+   * ⚠️ THE TWO-ROW PLATE (amendment 8, Phase B). The toolbar is a ROW OF THE PLATE, not a second
+   * sticky element with a computed `top` — that alternative has to track the plate's height through
+   * the condense transition, so it is wrong for 200ms on every scroll. These assertions pin the
+   * "one container" half of that: one border, one shadow, one background, one sticky element.
+   */
+  it("ONE background and ONE frame across both rows — the tool row paints neither", () => {
+    const tools = blocksFor(headerCss, ".wsh-tools");
+    expect(tools.length, "`.wsh-tools` has no rule — the plate's second row is unstyled").toBeGreaterThan(0);
+    const t = tools[0].replace(/\s+/g, " ");
+    expect(t, "the tool row gained its own fill. The plate is ONE surface with two rows; a second background makes it read as two stacked plates, and the condensed translucent state would stop covering both.").not.toMatch(/(^|[;{\s])background\s*:/);
+    expect(t, "the tool row gained its own border/shadow — the separator is an internal hairline, not a second frame").not.toMatch(/(^|[;{\s])(box-shadow|border)\s*:/);
+    expect(t, "the separator stopped being the plate's own edge token, so the two rows can now disagree about their hairline").toContain("border-top: 1px solid var(--ws-edge)");
+    /* and it must follow the plate into the translucent state, or the hairline stays opaque
+       against a see-through plate */
+    expect(headerCss, "the tool row's hairline no longer follows the plate when it condenses").toContain(".wsh--scrolled .wsh-tools { border-top-color: var(--wsh-plate-edge-scrolled); }");
+  });
+
+  it("⚠️ the TOOL ROW does not condense, and it reserves nothing when absent", () => {
+    /* Only the identity row carries a height, so the plate is the sum of its rows: a page with no
+       toolbar renders no row and no hairline, and a page whose controls are taller simply gets a
+       taller plate. A height on `.wsh` itself would break both. */
+    for (const b of blocksFor(headerCss, ".wsh")) {
+      expect(b, "`.wsh` took a height again. With two rows the plate's height is the SUM of them — a fixed height here either clips the tool row or reserves space for one that is not rendered.").not.toMatch(/(^|[;{\s])height\s*:/);
+    }
+    expect(blocksFor(headerCss, ".wsh-row")[0], "the identity row lost its height — that is where the 88/56 pair lives now").toContain("height: var(--wsh-plate-h)");
+    expect(headerCss, "the identity row stopped condensing").toContain(".wsh--scrolled .wsh-row { height: var(--wsh-plate-h-scrolled); }");
+    for (const b of blocksFor(headerCss, ".wsh-tools")) {
+      expect(b, "the tool row gained a height — controls must stay legible while the identity row shrinks; a filter you cannot read is not a filter").not.toMatch(/(^|[;{\s])height\s*:/);
+    }
+  });
+
+  it("⚠️ the wrapper pays back exactly what the condense takes — expressed, never a literal", () => {
+    /* MEASURED: without this the 88 → 56 condense pulled the page up 32px (scrollHeight 952 → 920).
+       The old fix was a fixed wrapper height, which cannot survive a tool row whose height CSS does
+       not know — so it is padding, applied only while condensed, sized from the two row heights. */
+    const w = blocksFor(headerCss, ".wsh-wrap--scrolled");
+    expect(w.length, "the reservation is gone — condensing will pull the page below it upward again").toBeGreaterThan(0);
+    expect(
+      w[0].replace(/\s+/g, " "),
+      "the reservation states a literal instead of deriving it. 32px is `--wsh-plate-h` minus `--wsh-plate-h-scrolled`; written out it silently stops matching the day either moves.",
+    ).toContain("calc(var(--wsh-plate-gap) + (var(--wsh-plate-h) - var(--wsh-plate-h-scrolled)))");
+    for (const b of blocksFor(headerCss, ".wsh-wrap")) {
+      expect(b, "the wrapper took a fixed height again — that cannot accommodate a tool row of unknown height").not.toMatch(/(^|[;{\s])height\s*:/);
+    }
+  });
+
   it("the sticky host paints NOTHING — a backing strip is the dead band the ref rules out", () => {
     const wrap = blocksFor(headerCss, ".wsh-wrap");
     expect(wrap.length, "`.wsh-wrap` is missing — the plate has no sticky host and cannot condense").toBe(1);

@@ -127,20 +127,30 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
        * the zone: it would then scroll away with the list, and reaching for the `min-height: 0`
        * chain to avoid that is explicitly out of bounds (see the chain note in tasksLayout.css).
        */}
-      <PageHeader variant="workspace" mark={mark} title={title} description={subtitle} />
-      {/* the hairline lives on this row's bottom edge — the header ends where the columns begin.
-          An empty tool row would draw a bare rule, so a page with neither controls nor an eyebrow
-          renders none.
-          ⚠️ THE EYEBROW RIDES THIS ROW NOW. It is mono context — a date and a week count — and the
-          rule this pack settled is that the plate carries identity while the tool row carries
-          tallies and context. It also gains a style here for the first time: `.tpl-eyebrow` had NO
-          CSS rule at all and had been rendering as unstyled body text. */}
-      {(tools || eyebrow) && (
-        <div className="tpl-tools tdb-tools">
-          {eyebrow && <span className="tpl-eyebrow">{eyebrow}</span>}
-          {tools}
-        </div>
-      )}
+      {/* ⚠️ THE TOOL ROW MOVED INSIDE THE PLATE (amendment 8 B). It was a sibling below it, drawing
+          its own hairline; it is now the plate's second row, sharing one border, one shadow and one
+          background — so the controls pin with the header rather than scrolling away from it.
+          ⚠️ THE EYEBROW RIDES THAT ROW. It is mono context — a date and a week count — and the rule
+          is that the plate's identity row carries identity while the tool row carries tallies and
+          context. Neither controls nor an eyebrow → no row and no hairline at all. */}
+      <PageHeader
+        variant="workspace"
+        mark={mark}
+        title={title}
+        description={subtitle}
+        /* ⚠️ `.tpl-tools` SURVIVES AS AN INNER WRAPPER, and deleting it would have been the quiet
+           mistake here: its DESCENDANT rules carry this family's control grammar — the house
+           disabled treatment (`.tpl-tools button[disabled]`) and the tool-row button sizing. Drop
+           the class and those stop matching with nothing to point at. Its own frame (the hairline
+           and margins it drew as a sibling) is neutralised inside `.wsh-tools`, which supplies the
+           row's one separator. */
+        toolbar={(tools || eyebrow) ? (
+          <div className="tpl-tools tdb-tools">
+            {eyebrow && <span className="tpl-eyebrow">{eyebrow}</span>}
+            {tools}
+          </div>
+        ) : undefined}
+      />
     </header>
     <div className="tpl-cols">
       {sidebar && <aside className="tpl-side">{sidebar}</aside>}

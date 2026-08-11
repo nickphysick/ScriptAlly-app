@@ -165,22 +165,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
           primary: true,
         }]}
+        /* ⚠️ THE TALLY ROW IS THE PLATE'S SECOND ROW NOW (amendment 8 B) — it was a sibling beneath
+           the plate, and it pins with the header instead. Nothing about the FIGURE moves: it was
+           already a tool-row tally rather than a header count, which is the split this pack fixed.
+           ⚠️ STILL HIDDEN ON THE EMPTY STATE — `undefined`, not an empty row, so the plate renders
+           no tool row and no hairline rather than an empty strip under the title. */
+        toolbar={ordered.length > 0 ? (
+          <span className="msv-tally">
+            {manuscripts.length} manuscripts · {manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} in submission
+          </span>
+        ) : undefined}
       />
-        {/* ⚠️ THE TALLY ROW — the Contact list's `.agl-count` slot, in this page's own scope. Mono,
-            uppercase, pushed right by `margin-left:auto` so it sits at the end of the row exactly as
-            the sibling's does. It is a TOOLBAR row, not a header element: identity belongs to the
-            plate, tallies and view state belong here.
-            ⚠️ DERIVED, NEVER STORED — `activeQueryCount` is the same pipeline predicate the field
-            roster uses, so the tally cannot disagree with the plates beneath it. And it is HIDDEN on
-            the empty state: "0 MANUSCRIPTS · 0 IN SUBMISSION" beside "Your library is empty" states
-            the same nothing twice. */}
-        {ordered.length > 0 && (
-          <div className="msv-tools">
-            <span className="msv-tally">
-              {manuscripts.length} manuscripts · {manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} in submission
-            </span>
-          </div>
-        )}
         {ordered.length === 0 ? (
           /* ── zero-manuscript state: minimal, in the plate grammar ── */
           <div className="msv-panel">

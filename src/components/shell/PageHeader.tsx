@@ -124,6 +124,23 @@ export interface PageHeaderProps {
      `markHasArt` decides, so a page converts when its drawing lands rather than when someone
      remembers to pass a prop. See the note on `markHasArt` in OneScreenMark.tsx. */
   actions?: PageHeaderActions;
+  /**
+   * ⚠️ THE TOOL ROW — the plate's SECOND row (amendment 8, Phase B): search, filters, group, sort,
+   * and the right-aligned mono tally. It rides INSIDE the plate rather than beside it, so the
+   * controls pin with the header they belong to.
+   *
+   * ⚠️ IT IS A ROW OF THE PLATE, NOT A SECOND STICKY ELEMENT. The alternative — a separate sticky
+   * strip with `top` set to the plate's height — has to track that height through the condense
+   * transition, so it is wrong for 200ms on every scroll and fragile by construction. One
+   * container, one border, one shadow, one background, one sticky element.
+   *
+   * ⚠️ AND IT DOES NOT CONDENSE. Only the identity row shrinks; the controls stay the same size,
+   * because a filter you can no longer read is not a filter. See the reservation note in the
+   * stylesheet for how the page below is kept from moving when the identity row does shrink.
+   *
+   * Absent → NO row and NO hairline, and the plate reserves nothing for it.
+   */
+  toolbar?: React.ReactNode;
   /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
    *  Additive and optional — every existing call site is unchanged. */
   titleAdornment?: React.ReactNode;
@@ -153,6 +170,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   description,
   mark,
   actions,
+  toolbar,
   titleAdornment,
   actionsSlot,
   overflow,
@@ -247,7 +265,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       /* ⚠️ THE STICKY WRAPPER PAINTS NOTHING — no backing strip, ever. See pageHeader.css: an
          opaque band across the gutters is the dead margin this design exists to avoid, and content
          is meant to run under the plate and out past both its edges. */
-      <div className="wsh-wrap">
+      /* ⚠️ THE CONDENSED CLASS IS ON THE WRAPPER TOO, and that is the reservation. Only the IDENTITY
+         row shrinks (88 → 56), so the wrapper gives back exactly that 32px as padding while it is
+         condensed — which keeps the page below from sliding up. It is done with a class rather than
+         a measured height because the TOOL ROW's height is unknown to CSS, so the old fixed
+         `calc(88 + 2·gap)` reservation could not survive a second row. */
+      <div className={`wsh-wrap${condensed ? " wsh-wrap--scrolled" : ""}`}>
         {/* ⚠️ BOTH CLASSES ARE DERIVED — one from `description`, one from the scroller's position.
             There is no height prop and must never be one; see the knob-versus-rule note in the
             stylesheet. */}
@@ -291,6 +314,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             </div>
           )}
         </div>
+        {/* ⚠️ NO TOOLBAR → NO ROW AND NO HAIRLINE, and the plate reserves nothing for it. An empty
+            row would draw its own separator against the identity row with nothing beneath it —
+            the same fault the count strip's empty state had. */}
+        {toolbar && <div className="wsh-tools">{toolbar}</div>}
         </header>
       </div>
     );

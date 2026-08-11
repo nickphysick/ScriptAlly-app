@@ -576,17 +576,17 @@ export const ComparableTitlesPage: React.FC<{
            always had with its "16 OF 16". */
         title="Comparable titles"
         description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+        /* ⚠️ THE TALLY AND THE SELECTOR ARE THE PLATE'S SECOND ROW NOW (amendment 8 B). They were
+           already one row for the right reason — the selector is view state and the tally is a
+           tally — and that row is what the plate's tool row IS. With no manuscript selected there is
+           neither, so `undefined` renders no row and no hairline. */
+        toolbar={activeMs ? (
+          <>
+            <span className="ct-tally">{comps.length} {comps.length === 1 ? "comp" : "comps"}</span>
+            <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
+          </>
+        ) : undefined}
       />
-      {activeMs && (
-        /* ⚠️ THE TALLY JOINS THE ROW THAT ALREADY EXISTED rather than getting one of its own — the
-            manuscript selector is view state and the tally is a tally, which is precisely what this
-            row is for. The selector keeps the right edge (it is the control); the tally sits to its
-            left, `margin-right:auto` pushing them apart. */
-        <div className="ct-tools">
-          <span className="ct-tally">{comps.length} {comps.length === 1 ? "comp" : "comps"}</span>
-          <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
-        </div>
-      )}
 
       <div className="ct-desk">
         {!activeMs ? (

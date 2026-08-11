@@ -824,25 +824,31 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           title="Contact List"
           description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
-        />
-
-        <AgentToolbar
-          search={search}
-          onSearch={setSearch}
-          filters={filters}
-          onFilters={setFilters}
-          counts={counts}
-          starCounts={starCounts}
-          locCounts={locCounts}
-          resultCount={visible.length}
-          total={agents.length}
-          group={grouping}
-          groupOptions={AGENT_GROUP_OPTIONS}
-          onGroup={(k) => setGrouping(k as AgentGrouping)}
-          sort={sort}
-          sortOptions={AGENT_SORT_OPTIONS}
-          defaultSort={DEFAULT_AGENT_SORT}
-          onSort={(k) => setSort(k as AgentListSort)}
+          /* ⚠️ THE TOOLBAR IS THE PLATE'S SECOND ROW NOW (amendment 8 B), not a sibling beneath it.
+             It pins with the header it belongs to, which is the whole point: filtering a long list
+             while the filters have scrolled off is the state this fixes. `16 OF 16` was already
+             this row's own tally, so nothing about the count moves — the identity row is identity,
+             the tool row is tallies and view state. */
+          toolbar={
+            <AgentToolbar
+              search={search}
+              onSearch={setSearch}
+              filters={filters}
+              onFilters={setFilters}
+              counts={counts}
+              starCounts={starCounts}
+              locCounts={locCounts}
+              resultCount={visible.length}
+              total={agents.length}
+              group={grouping}
+              groupOptions={AGENT_GROUP_OPTIONS}
+              onGroup={(k) => setGrouping(k as AgentGrouping)}
+              sort={sort}
+              sortOptions={AGENT_SORT_OPTIONS}
+              defaultSort={DEFAULT_AGENT_SORT}
+              onSort={(k) => setSort(k as AgentListSort)}
+            />
+          }
         />
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
