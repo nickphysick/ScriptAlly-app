@@ -220,8 +220,12 @@ describe("the header plate — one gutter token, and the plate inside the column
     /* ⚠️ ASSERTED ON ORDER, NOT PRESENCE. Both the wrapper and the PageHeader exist either way —
        what changed is which encloses which, so a `toContain` on both would pass in the broken
        arrangement too. */
+    /* ⚠️ CONTACT LIST LEFT THIS LIST (amendment 9) — retargeted, NOT relaxed. Its plate is row 1 of
+       a `WorkspacePageGrid` now, so it is no longer inside the content wrapper at all; the CAP moved
+       up to the grid root, where it governs all three rows at once and the alignment stops depending
+       on the plate and the cards sharing a container. The assertion that replaces it is in
+       `workspacePageGrid.test.tsx`. The two pages below are still on the old arrangement. */
     for (const [page, file, wrapper] of [
-      ["Contact list", "components/agents/AgentList.tsx", "agl-inner"],
       ["Discover", "components/DiscoverNewAgents.tsx", "dv-wrap"],
       ["Manuscripts", "components/AllManuscripts.tsx", "msv-wrap"],
     ] as const) {

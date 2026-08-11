@@ -43,7 +43,13 @@
   --agl-grey-band: #eae8e4; --agl-grey-cast: #e2dfda; --agl-grey-rule: #b8b3ab;
 
   height: 100%;
-  overflow-y: auto;
+  /* ⚠️ THE ROOT NO LONGER SCROLLS (amendment 9). `overflow-y: auto` lived here while the page was
+     one long document with sticky chrome inside it; the chrome is OUT of the scroller now, and the
+     grid's row 3 is the only thing that scrolls. A scroller here as well would put the whole page
+     inside a second scrollport and the chrome would leave with it. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   /* no bespoke ground (canvas scheme 1) — the page inherits the stage's canvas; --agl-paper
      survives for the cards and buttons that read it */
   color: var(--agl-ink-body);
@@ -139,8 +145,34 @@
    not by two numbers kept in step; if you change the gutter, change it here only.
    ⚠️ MEASURED, because the old comment was wrong: before the bleed this rule was inset 61px per
    side at a 1700px window, NOT full-bleed as `f5be3af` claimed. */
-.aglist .agl-page { --pg-gut: var(--sa-col-gut); padding: 14px var(--pg-gut) 48px; }
-.aglist .agl-inner { max-width: var(--sa-col-max); margin: 0 auto; }
+.aglist .agl-page {
+  --pg-gut: var(--sa-col-gut);
+  /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER (amendment 9). At 48px here it would be fixed
+     space BELOW row 3 — a permanent dead band the list could never scroll into. It is the
+     scroller's own bottom padding now, so it scrolls with the last card as it always read. */
+  padding: 14px var(--pg-gut) 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* ⚠️ THE CAP IS ON THE GRID ROOT, NOT THE INNER COLUMN, and that is what makes the three rows
+   agree. Plate, toolbar and cards are one column wide BY CONSTRUCTION — capping only the content
+   would leave the chrome rows full width and the alignment would be three rules hoping to match.
+   RETARGETED, NOT RELAXED: the same `--sa-col-max`, one level out. */
+.aglist .agl-wpg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--sa-col-max);
+  margin-inline: auto;
+}
+/* `.agl-inner` survives as a plain wrapper inside the scroller — the cap it used to carry is above
+   it now, so it only has to be full width. */
+.aglist .agl-inner { width: 100%; }
+.aglist .wpg-scroll { padding-bottom: 48px; }
+/* the toolbar sits in the grid's row, so its sibling-era top margin would push it off the hairline */
+.aglist .wpg-tools .agl-toolbar { margin: 0; flex: 1 1 auto; }
 
 /* ── header ─────────────────────────────────────────────────────────────── */
 .aglist .agl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
@@ -169,11 +201,7 @@
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   margin: 22px 0 0; position: relative; z-index: 20;
 }
-/* ⚠️ INSIDE THE PLATE THE TOOLBAR OWNS NO MARGIN — `.wsh-tools` supplies the row's padding,
-   and the 22px above was the gap it needed while it was a SIBLING beneath the header. Left in
-   place it would push the plate's second row off its own hairline. The rule above keeps that
-   margin because the toolbar is still used unwrapped in tests and the mobile push. */
-.aglist .wsh-tools .agl-toolbar { margin: 0; flex: 1 1 auto; }
+
 
 .aglist .agl-search {
   display: flex; align-items: center; gap: 9px;

@@ -53,16 +53,26 @@ describe("agent list · the page column", () => {
          header's bleed reads the same token back to cancel it, so the rule spans the page while the
          content stays guttered. `--pg-gut` is still DEFINED as `var(--sa-col-gut)` on this rule, so
          the shared column token is still what sets the number. */
-      "the page padding changed — 14px top / the gutter token / 48px bottom; merging it with the cap would tie the two together",
-    ).toContain("--pg-gut: var(--sa-col-gut); padding: 14px var(--pg-gut) 48px");
+      /* ⚠️ THE BOTTOM IS 0, NOT 48 (amendment 9) — retargeted, not relaxed. The 48px moved INTO the
+         scroller: below row 3 it would be fixed space the list could never scroll into, a permanent
+         dead band at the foot of the page. */
+      "the page padding changed — 14px top / the gutter token / 0 bottom, because the bottom gutter is the scroller's now",
+    ).toContain("padding: 14px var(--pg-gut) 0");
     expect(
-      block(".aglist .agl-inner"),
-      "the content cap left the inner column — without it the grid stretches the full width of an ultrawide monitor instead of pooling the surplus as margin",
+      block(".aglist .wpg-scroll"),
+      "the bottom gutter left the scroller — the last card butts against the frame with nothing under it",
+    ).toContain("padding-bottom: 48px");
+    /* ⚠️ THE CAP MOVED UP A LEVEL, to the grid root, and that is a STRONGER guarantee: it governs
+       plate, toolbar and cards at once, so the three cannot disagree. Capping the inner column alone
+       left the chrome rows full width and made the alignment three rules hoping to match. */
+    expect(
+      block(".aglist .agl-wpg"),
+      "the content cap left the grid root — without it the three rows stretch the full width of an ultrawide monitor instead of pooling the surplus as margin",
     ).toContain("max-width: var(--sa-col-max)");
     expect(
-      block(".aglist .agl-inner"),
-      "the inner column stopped centring — a capped column that doesn't centre just pins itself left and leaves all the surplus on one side",
-    ).toContain("margin: 0 auto");
+      block(".aglist .agl-wpg"),
+      "the capped column stopped centring — it would pin left and leave all the surplus on one side",
+    ).toContain("margin-inline: auto");
   });
 
   it("NO compensating right-hand padding anywhere — the gutter is fixed at its cause", () => {

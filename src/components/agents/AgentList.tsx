@@ -14,6 +14,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { PageHeader } from "../shell/PageHeader";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
 import { AgentCard } from "./AgentCard";
 import { AgentEditor } from "./AgentEditor";
@@ -802,54 +803,48 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
       <div className={`agl-page${mobilePushOpen ? " agl-mpushed" : ""}`}>
        {/* The content column: padding rides the page, the CAP rides here, so a wide monitor
            pools its surplus as symmetric margin rather than stretching the grid. */}
-       <div className="agl-inner">
-        {/* ⚠️ THE HEADER IS BACK INSIDE `.agl-inner`, and that REVERSES the previous pass on
-            purpose. While it was a band it was chrome and spanned the window, so it had to sit
-            outside this centred column. It is a PLATE now: an object whose left edge must meet the
-            first card and whose right edge meets the last. Past the content cap the column centres,
-            so the only place those edges agree is inside the column itself. */}
-        {/* ⚠️ `.agl-head-slot` IS DELETED, AND THAT WRAPPER WAS THE BUG. A sticky element can only
-            travel inside its own containing block, and this div wrapped the header ALONE — 124px of
-            plate inside a 124px box, so there was nowhere to stick and it behaved as `relative`.
-            MEASURED: as shipped the plate sat at -246 after a 260px scroll; as a direct child of
-            `.agl-inner` it holds at 0. Neither suspected cause applied — every ancestor up to the
-            scroller computes `overflow: visible`, and the plate WAS inside the page's own scroller.
-            ⚠️ ITS ENTRANCE ANIMATION MOVED TO `.wsh`, NOT to `.wsh-wrap`. `rise` ends at
-            `translateY(0)` under `fill-mode: both`, so it leaves a transform on whatever carries it
-            — and a transform on the sticky element is the next quiet way to break this. The plate's
-            inner element animates; the sticky wrapper stays clean. */}
-        <PageHeader
-          variant="workspace"
-          mark="contacts"
-          title="Contact list"
-          description="Everyone you're querying, watching, or saving for later."
-          actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
-          /* ⚠️ THE TOOLBAR IS THE PLATE'S SECOND ROW NOW (amendment 8 B), not a sibling beneath it.
-             It pins with the header it belongs to, which is the whole point: filtering a long list
-             while the filters have scrolled off is the state this fixes. `16 OF 16` was already
-             this row's own tally, so nothing about the count moves — the identity row is identity,
-             the tool row is tallies and view state. */
-          toolbar={
-            <AgentToolbar
-              search={search}
-              onSearch={setSearch}
-              filters={filters}
-              onFilters={setFilters}
-              counts={counts}
-              starCounts={starCounts}
-              locCounts={locCounts}
-              resultCount={visible.length}
-              total={agents.length}
-              group={grouping}
-              groupOptions={AGENT_GROUP_OPTIONS}
-              onGroup={(k) => setGrouping(k as AgentGrouping)}
-              sort={sort}
-              sortOptions={AGENT_SORT_OPTIONS}
-              defaultSort={DEFAULT_AGENT_SORT}
-              onSort={(k) => setSort(k as AgentListSort)}
-            />
-          }
-        />
+       {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate and the toolbar are ROWS 1
+           AND 2 of a grid whose row 3 is the only thing that scrolls, so they are pinned by
+           CONSTRUCTION — no `position: sticky`, no `top` offset, no number to compute and therefore
+           none to get wrong. The sticky arrangement they replace encoded another element’s height
+           as a literal and was silently wrong by 32px on the Tasks family, which never condenses.
+           ⚠️ THE CAP MOVED TO THE GRID ROOT, and that is what aligns the three rows: plate, toolbar
+           and cards are one column wide BY CONSTRUCTION rather than by three rules agreeing.
+           `.agl-inner` survives as a plain wrapper inside the scroller. */}
+       <WorkspacePageGrid
+         className="agl-wpg"
+         scrollLabel="Agent list"
+         plate={
+           <PageHeader
+            variant="workspace"
+            mark="contacts"
+            title="Contact list"
+            description="Everyone you're querying, watching, or saving for later."
+            actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
+           />
+         }
+         toolbar={
+          <AgentToolbar
+            search={search}
+            onSearch={setSearch}
+            filters={filters}
+            onFilters={setFilters}
+            counts={counts}
+            starCounts={starCounts}
+            locCounts={locCounts}
+            resultCount={visible.length}
+            total={agents.length}
+            group={grouping}
+            groupOptions={AGENT_GROUP_OPTIONS}
+            onGroup={(k) => setGrouping(k as AgentGrouping)}
+            sort={sort}
+            sortOptions={AGENT_SORT_OPTIONS}
+            defaultSort={DEFAULT_AGENT_SORT}
+            onSort={(k) => setSort(k as AgentListSort)}
+          />
+         }
+       >
+        <div className="agl-inner">
 
         {/* Applied filters live OUTSIDE the popover — closing it must never hide what is
             filtering the list. Each tag removes its own value; "Clear all" empties the set. */}
@@ -937,6 +932,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           </div>
         )}
        </div>
+       </WorkspacePageGrid>
       </div>
     </div>
   );

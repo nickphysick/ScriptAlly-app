@@ -66,3 +66,21 @@
   height: 1px;
   pointer-events: none;
 }
+
+/**
+ * ⚠️ A GRID-HOSTED PLATE IS NOT STICKY, and this is the seam that keeps the conversion safe.
+ *
+ * `.wsh-wrap` still carries `position: sticky` and the reservation padding for the pages still on
+ * the old arrangement. Inside a grid both are wrong AND unnecessary: row 1 is pinned by
+ * construction, and nothing in the scroller can move the chrome, so there is nothing to reserve.
+ * Neutralising here rather than deleting there is what lets pages convert ONE AT A TIME — the old
+ * path stays alive until the last of them is off it.
+ *
+ * ⚠️ THIS BLOCK IS TEMPORARY. When the last page converts, `.wsh-wrap`, the reservation and the
+ * frosted state go together and this goes with them. It outranks `.wsh-wrap--scrolled` (0,2,0 to
+ * 0,1,0), so the reservation cannot come back through the condensed state.
+ */
+.wpg-plate .wsh-wrap {
+  position: static;
+  padding: 0;
+}

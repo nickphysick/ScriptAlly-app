@@ -18,6 +18,7 @@
 import React from "react";
 import { MoreHorizontal } from "lucide-react";
 import { OneScreenMark, MarkName, markHasArt } from "../dashboard/OneScreenMark";
+import { PlateCondensedContext } from "./WorkspacePageGrid";
 import "./pageHeader.css";
 
 /**
@@ -184,7 +185,24 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
      early return without breaking the rules of hooks the moment a caller changes variant. It is
      GATED instead: the default variant passes `false` and never attaches a listener. */
   const plateRef = React.useRef<HTMLElement>(null);
-  const condensed = useCondensed(plateRef, variant === "workspace");
+  /**
+   * ⚠️ TWO PATHS, AND BOTH ARE LIVE ON PURPOSE (amendment 9, mid-conversion). A page inside a
+   * `WorkspacePageGrid` is TOLD when to condense — the grid owns the scroller, the sentinel and the
+   * observer, so there is nothing to find and nothing to compute. A page still on the old sticky
+   * arrangement has no grid above it, reads `null`, and keeps the legacy scroll listener.
+   *
+   * ⚠️ `null` IS WHY THIS WORKS. It is distinguishable from `false`, so "no grid above me" and "in a
+   * grid, not yet scrolled" are different answers; with a `false` default every unconverted page
+   * would silently stop condensing. The legacy hook is GATED on that same null, so a converted page
+   * attaches no listener at all.
+   *
+   * ⚠️ THIS FALLBACK IS TEMPORARY. It goes when the last page converts, together with the sticky
+   * wrapper, the reservation padding and the frosted state. Until then the old path must stay alive,
+   * because a half-converted app is the one thing worse than a slow conversion.
+   */
+  const gridCondensed = React.useContext(PlateCondensedContext);
+  const legacyCondensed = useCondensed(plateRef, variant === "workspace" && gridCondensed === null);
+  const condensed = gridCondensed ?? legacyCondensed;
   React.useEffect(() => {
     if (!moreOpen) return;
     const onDown = (e: PointerEvent) => {

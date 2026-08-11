@@ -130,15 +130,38 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(bare, "an empty toolbar row rendered — it would draw its hairline with nothing above it, and reserve space the page does not use").not.toContain("wpg-tools");
   });
 
-  it("⚠️ INERT AT THIS COMMIT — nothing imports it yet, and that is the sequencing", () => {
-    /* The primitive lands as a visual no-op; pages convert one per commit afterwards. When the
-       first page converts, this assertion is the one to update — deliberately, so the conversion
-       is a decision rather than a drift. */
-    const app = readFileSync(resolve(__dirname, "../../App.tsx"), "utf8");
-    expect(app).not.toContain("WorkspacePageGrid");
-    expect(
-      readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8"),
-      "PageHeader began consuming the grid — that is the first conversion commit, not this one",
-    ).not.toContain("PlateCondensedContext");
+  /**
+   * ⚠️ THE CONVERSION CENSUS. This started life as "nothing imports it yet" and was updated the
+   * moment Contact list converted — deliberately, because that is the point: each page moving is a
+   * decision someone records here, not a drift nobody notices.
+   *
+   * ⚠️ BOTH HALVES MATTER. The converted list proves the new path is live; the UNCONVERTED list
+   * proves the old one still is. A half-converted app that typechecks is the failure this
+   * sequencing exists to prevent, so the day this list empties is the day the sticky machinery —
+   * `.wsh-wrap`, the reservation padding, the frosted state and the legacy scroll listener — comes
+   * out, and not before.
+   */
+  it("⚠️ THE CONVERSION IS PARTIAL, and both halves are asserted", () => {
+    const CONVERTED = [["Contact list", "../agents/AgentList.tsx"]] as const;
+    const NOT_YET = [
+      ["Manuscripts", "../AllManuscripts.tsx"],
+      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
+      ["Tasks family", "../todo/TasksPageLayout.tsx"],
+    ] as const;
+    for (const [page, file] of CONVERTED) {
+      expect(
+        readFileSync(resolve(__dirname, file), "utf8"),
+        `${page} is listed as converted but no longer renders the grid`,
+      ).toContain("WorkspacePageGrid");
+    }
+    for (const [page, file] of NOT_YET) {
+      const t = readFileSync(resolve(__dirname, file), "utf8");
+      expect(t, `${page} converted — move it into CONVERTED above, and check whether this was the LAST one`).not.toContain("WorkspacePageGrid");
+      expect(t, `${page} is still on the old path, so it must still pass its toolbar to the plate`).toContain("toolbar=");
+    }
+    /* the legacy path must survive while anything is still on it */
+    const ph = readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8");
+    expect(ph, "PageHeader stopped consuming the grid — converted pages would fall back to the scroll listener and condense on the wrong element").toContain("PlateCondensedContext");
+    expect(ph, "the legacy scroll listener went while pages are still on it — they would stop condensing entirely").toContain("useCondensed");
   });
 });
