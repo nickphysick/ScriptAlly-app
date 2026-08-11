@@ -40,13 +40,13 @@ const token = (css: string, selector: string, name: string): string => {
 const THEMES = [".t-capp .msv1", ".t-bold .msv1", ".t-edn .msv1"] as const;
 const ADDED = [
   "--msv-plateA", "--msv-plateB", "--msv-plateline",
-  "--msv-palebg", "--msv-palebd", "--msv-paletx",
+  "--msv-palebg", "--msv-palebd", "--msv-paletx", "--msv-pinkplate",
   "--msv-stripbg", "--msv-stripbd", "--msv-stripkey",
   "--msv-prbd",
 ] as const;
 
 describe("the additions are complete — every new token, in every theme", () => {
-  it.each(THEMES)("%s defines all ten", (sel) => {
+  it.each(THEMES)("%s defines all of them", (sel) => {
     for (const t of ADDED) expect(token(PLATE, sel, t)).toBeTruthy();
   });
 
@@ -131,14 +131,21 @@ describe("⚠️ EDITORIAL IS MONOCHROME — THE PLATEBAND MUST NOT BE SAGE", ()
   });
 
   /**
-   * ⚠️ THE MECHANICAL CHECK, so a NEW green that is on nobody's list still fails.
-   * A hex whose green channel leads both others perceptibly has a green cast, whatever it is called.
+   * ⚠️ THE MECHANICAL CHECK, so a hue on nobody's list still fails — and it tests for CHROMA, not
+   * for green. Editorial has no sage AND no pink: the tile plates are two neutral steps, not a
+   * sage one and a pink one. A green-only check would have passed the pink plate straight through,
+   * which is the same mistake one rung along.
    */
-  it("and no colour in the block has a green cast at all, named or not", () => {
+  it("and NO colour in the block carries a hue at all — not green, not pink, none", () => {
     for (const hex of block(PLATE, ".t-edn .msv1").match(/#[0-9a-f]{6}/gi) ?? []) {
-      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-      expect(g > r + 2 && g > b + 3, `${hex} has a green cast and Editorial has no sage`).toBe(false);
+      const ch = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+      const chroma = Math.max(...ch) - Math.min(...ch);
+      expect(chroma, `${hex} carries a hue (chroma ${chroma}) and Editorial is monochrome`).toBeLessThanOrEqual(6);
     }
+  });
+
+  it("the two tile plates are distinct steps, so the design's distinction survives monochrome", () => {
+    expect(edn("--msv-pinkplate")).not.toBe(edn("--msv-palebg"));
   });
 });
 

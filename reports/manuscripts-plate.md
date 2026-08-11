@@ -76,6 +76,8 @@ only this phase's four new files**:
 |---|---|---|---|
 | Phase 1 (HEAD `9284ec4`) | exit 0 | exit 0 | **247 files · 3996 passed · 2 skipped** |
 | Phase 2a (HEAD `1a2fd9b`) | exit 0 | exit 0 | **249 files · 4050 passed · 2 skipped** |
+| Phase 2b (HEAD `2a23d58`) | exit 0 | exit 0 | **250 files · 4067 passed · 2 skipped** |
+| Phase 3 (HEAD `40ed4f3`) | exit 0 | exit 0 | **253 files · 4120 passed · 2 skipped** |
 
 Phase 1 adds 31 tests, Phase 2a adds 24, neither adds a failure. The isolated run is the one to
 believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
@@ -266,6 +268,74 @@ rather than the card going silently unstyled. That coupling is intentional.
 
 One further lock: outside the three token blocks, **no rule authors a colour** — every hex must come
 through `var()`, with `#ffffff` exempt as the plate's own paper. Verified red.
+
+---
+
+## Phase 3 — details tiles
+
+Commit: `manuscripts: illustrated details pane`. `src/lib/manuscriptTiles.ts` (the four builders,
+pure) · `ManuscriptDetailTiles.tsx` · tile rules appended to `manuscriptPlate.css` ·
+`manuscriptDetailTiles.test.tsx` (30 tests). Treatment B only — A, C and the label-value fact rows
+are not built and are not gaps to fill in.
+
+| Tile | Zero | One | Many |
+|---|---|---|---|
+| **Out in the world** | `No queries sent yet` · *This one hasn't gone out yet.* | `1 query with agents` | `4 queries with agents` · *One response so far, on 8 August.* |
+| **Comparable titles** | `Nothing on the shelf yet` | `1 on the shelf` | `3 on the shelf` · *Stormbreak* meets *Nightjar*. |
+| **On the shelf** | — | — | `Querying since 20 June 2026` · *That's seven weeks of active submission.* |
+| **Submission materials** | `No packages compiled yet` · *No materials added yet.* | `1 package compiled` | `2 packages compiled` · *Query letter (2) · Synopsis (1).* |
+
+### Tile 3 leads with the status, and never invents a date
+
+One rule produces both forms the ruling names — `${status} since ${date}` gives
+`Querying since 20 June 2026` and `Revising since 20 June 2026` without a fork, because the status
+word *is* the verb. The duration is `of active submission` only while Querying or On Submission, and
+`so far` otherwise, since elapsed time is only submission time when the book is actually out.
+
+`Added {date}` appears **only** when `createdDate` genuinely exists, and then in the detail line.
+No status date at all → the status alone, no clause. A status change today → no duration, not
+"zero weeks". **Nothing is derived from the earliest activity**: on an imported manuscript that is a
+first-query date wearing the wrong label — a plausible number stating something untrue.
+
+`status`/`statusChangedDate` are taken as the pair they are — the **workflow** status and the date
+it changed. The reversible `shelved` overlay has no date of its own, so Phase 6 must not substitute
+"Shelved" here; the plateband already carries that presentation. Documented at the function.
+
+### Tile 4 has one variant
+
+Real counts, absent materials **omitted** — the ref writes `Sample pages not added yet`, the ruling
+says omit, and omit wins. Nothing at all → `No materials added yet.`, a plain sentence rather than
+a pitch. Asserted to contain no `Pro`, `Upgrade`, `One tidy package` or `See what's included`.
+
+### The Editorial lock got stronger, and needed to
+
+Phase 2b's mechanical check tested for a **green** cast. Tile plates introduced a **pink** one
+(`--msv-pinkplate`), which a green-only check would have waved straight through — the same mistake
+one rung along. It now tests **chroma**: any colour in the Editorial block whose channels spread
+more than 6 fails, whatever hue it is. Verified red by setting Editorial's tile plate to the
+Cappuccino pink `#f8ede4` — **chroma 20**. Editorial's two tile plates stay distinct
+(`#ebebe9` vs `#f1f1ef`) so the design's plane-vs-rest distinction survives monochrome without a hue.
+
+One token added (`--msv-pinkplate`); everything else reuses `--msv-tile/-tilebd`, `--msv-palebg`,
+`--msv-label`, `--msv-head`, `--msv-muted`, `--msv-hue`.
+
+### Five locks verified red
+
+Editorial tile plate set to pink (1, chroma 20) · `zero days` allowed to print (2) · an appraisal
+(`only`) slipping into the duration copy (3) · absent materials listed as `(0)` (2) · an `Added`
+date invented when `createdDate` is absent (3).
+
+### Two adaptations logged
+
+- **The "existing italic hint" the brief refers to does not exist.** `pitchLine` has no consumers
+  anywhere in the app — this tile is its first. So the one-comp and no-comp copy is newly written:
+  *"A second makes the 'X meets Y' line."* and *"Two comps make the 'X meets Y' line in a query
+  letter."* Both state what is true without urging. The **composition itself** is `pitchLine`,
+  reused and asserted to be the same call the shelf will make.
+- **⚠️ `spellCount` is the FOURTH private number-speller in this repo** — `dashboardStats.ts`,
+  `todoBoard.ts` and `topNav.ts` each keep their own and none is exported. Consolidating the four is
+  a real follow-up and deliberately a separate one: it would touch three files this task has no
+  business in. Flagged, not fixed.
 
 ---
 

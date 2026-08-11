@@ -37,6 +37,7 @@
   --msv-plateline: 1px solid rgba(138, 158, 136, 0.35);
   --msv-palebg: #e7ede3; --msv-palebd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-paletx: #4a5a48;
+  --msv-pinkplate: #f8ede4;
   --msv-stripbg: rgba(255, 255, 255, 0.62); --msv-stripbd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-stripkey: #6a7a68;
   --msv-prbd: 1px solid #e8c8bc;
@@ -47,6 +48,7 @@
   --msv-plateline: 1.5px solid #1d1712;
   --msv-palebg: #ffffff; --msv-palebd: 1px solid #1d1712;
   --msv-paletx: #1d1712;
+  --msv-pinkplate: #f8ede4;
   --msv-stripbg: #fffefb; --msv-stripbd: 1.5px solid #1d1712;
   --msv-stripkey: #6a625c;
   --msv-prbd: 1.5px solid #1d1712;
@@ -57,6 +59,8 @@
   --msv-plateline: 1px solid #e3e2e0;
   --msv-palebg: #f1f1ef; --msv-palebd: 1px solid transparent;
   --msv-paletx: #555555;
+  /* ⚠️ NO PINK EITHER — the plane sits on a neutral step, distinct from --msv-palebg but hueless. */
+  --msv-pinkplate: #ebebe9;
   --msv-stripbg: #ffffff; --msv-stripbd: 1px solid #e3e2e0;
   --msv-stripkey: #6b6b6b;
   --msv-prbd: 1px solid transparent;
@@ -151,7 +155,46 @@
 .msv-tab:hover { color: var(--msv-head); }
 .msv-tab.on { border-bottom-color: var(--msv-hue); color: var(--msv-head); font-weight: 600; }
 
+/* ── Details pane — treatment B, the illustrated tiles ── */
+.msv-dbody { padding: 26px 30px 30px; }
+.msv-tiles2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+
+/* ⚠️ HOVER IS SHADOW ONLY — NO LIFT. The card sets `overflow: hidden`, so a translated tile is
+   clipped against the card's edge rather than rising off it. A transform here would also arm the
+   blend-isolation trap for anything painted that later moves into a tile. */
+.msv-btile {
+  display: flex; align-items: center; gap: 20px; padding: 22px;
+  background: var(--msv-tile); border: var(--msv-tilebd); border-radius: 16px;
+  transition: box-shadow 0.15s;
+}
+.msv-btile:hover { box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 6px 18px rgba(58, 28, 20, 0.05); }
+
+.msv-scene {
+  flex: 0 0 auto; width: 104px; height: 104px; border-radius: 14px;
+  background: var(--msv-palebg); display: grid; place-items: center;
+}
+.msv-scene.pink { background: var(--msv-pinkplate); }
+
+.msv-btilebody { min-width: 0; }
+.msv-btilelab {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.17em;
+  color: var(--msv-label); text-transform: uppercase;
+}
+.msv-btilehead {
+  font-family: 'Playfair Display', serif; font-size: 23px; font-weight: 600;
+  color: var(--msv-head); margin: 8px 0 6px; line-height: 1.15;
+}
+.msv-btiledet { font-size: 12.5px; font-weight: 300; color: var(--msv-muted); line-height: 1.5; }
+.msv-linkline {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--msv-hue);
+  background: none; border: none; padding: 0; cursor: pointer;
+}
+.msv-linkline:hover { text-decoration: underline; }
+
 @media (max-width: 1150px) {
   .msv-plateband { flex-wrap: wrap; gap: 20px; }
   .msv-plateside { margin-left: 0; align-items: flex-start; width: 100%; }
+  .msv-tiles2 { grid-template-columns: 1fr; }
 }
