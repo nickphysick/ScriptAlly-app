@@ -16,7 +16,9 @@ import React from "react";
 import { Agent, Query, Task, UserTask } from "../../types";
 import { taskSurfaced } from "../../lib/todoBoard";
 import { buildHousekeepingRows, buildOverToYouRows } from "./OverToYou";
-import { Skel } from "./OneScreenDashboard";
+import { OneScreenPanel } from "./OneScreenPanel";
+import { OneScreenMark } from "./OneScreenMark";
+import { EdgeFadeScroll } from "../EdgeFadeScroll";
 
 /** "Due today" / "Due Friday" / "Overdue" — the row's second line when it has no detail of its own. */
 const dueWord = (dueYmd: string, now: Date): string => {
@@ -82,9 +84,9 @@ export const OneScreenTasks: React.FC<{
   const empty = trio.length === 0;
 
   return (
-    <div className={`os-card os-lift os-tasks${loading ? " isload" : ""}`}>
-      {loading && <Skel bars={["h", "", "", ""]} />}
+    <OneScreenPanel variant="os-tasks" loading={loading} skel={["h", "", "", ""]}>
       <div className="os-th2">
+        <OneScreenMark name="tasks" />
         <h2>Tasks requiring your attention</h2>
         {/* ⚠️ ONE TYPEFACE THROUGHOUT THE PILL. Playfair digits beside Inter labels sit below the
             baseline — the numerals are the thing being read, so they set the face. */}
@@ -99,7 +101,11 @@ export const OneScreenTasks: React.FC<{
         </span>
         <button type="button" className="os-see" onClick={onSeeAll}>See all <span className="os-arr">→</span></button>
       </div>
-      <div className="os-tbody">
+      {/* ⚠️ THE SHARED FADE, NEVER A SECOND ONE (polish P2). EdgeFadeScroll already computes
+          "is there more above / below" with a ResizeObserver and shows each edge only when it is
+          true — a permanent fade is a lie at the end of a list. `fade` takes the CARD's own
+          background so the mist matches the surface rather than being a generic grey. */}
+      <EdgeFadeScroll fade="#fffdf9" outerClassName="os-tbodywrap" scrollClassName="os-tbody">
         {dayOne ? (
           /* §9: day one explains where tasks come from and offers the two first moves */
           <div className="os-tempty os-dayone-tasks">
@@ -166,7 +172,7 @@ export const OneScreenTasks: React.FC<{
             <button type="button" className="os-dots" title="Open on the To-do board" aria-label="Open on the To-do board" onClick={onSeeAll}>⋯</button>
           </div>
         ))}
-      </div>
-    </div>
+      </EdgeFadeScroll>
+    </OneScreenPanel>
   );
 };

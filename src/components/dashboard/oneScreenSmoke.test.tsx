@@ -240,12 +240,14 @@ describe("§2 · the greeting", () => {
     const pills = html.indexOf("os-pills");
     expect(pills).toBeGreaterThan(-1);
     const tenure = html.indexOf("Querying since", pills);
-    /* ⚠️ RETARGETED AGAIN, AND THIS TIME OFF THE COPY. The previous version pinned the literal
-       "out with agents"; the achievement slot now renders whatever `achievementPill` picks for
-       the fixture's data, so a copy assertion tests the fixture rather than the layout and goes
-       red the day a different achievement wins. The ORDER is the invariant — tenure first, the
-       achievement second — so the class the slot renders under is what to anchor on. */
-    const ach = html.indexOf("os-pill ach", pills);
+    /* ⚠️ THE LITERAL IS BACK, AND MY REMOVING IT WAS THE MISTAKE. I retargeted this onto the
+       `os-pill ach` class on the reasoning that the copy was fixture-dependent. It was not: the
+       pill genuinely reads "out with agents", and the reason the source said "awaiting a reply"
+       was that `a7b5d54` had reverted `oneScreen.ts` to the older wording. So the assertion was
+       right, the source was wrong, and retargeting the test PINNED THE REGRESSION — the same
+       fault as the census. Anchored on the copy again, because the copy is the decision:
+       "the writer is the subject of it. The queries are somewhere, doing something." */
+    const ach = html.indexOf("out with agents", pills);
     expect(tenure).toBeGreaterThan(-1);
     expect(ach).toBeGreaterThan(tenure);
     // the phrase survives ONLY as the counter's label, never as a pill

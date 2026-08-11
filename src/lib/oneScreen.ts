@@ -473,7 +473,10 @@ export const achievementPill = (queries: Query[], now: Date): Achievement => {
   /* 5 · Fallback, always true. */
   const awaiting = queries.filter((q) => !TERMINAL.has(q.status) && q.dateSent &&
     (q.status === QueryStatus.QUERIED || q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT)).length;
-  return { key: "awaiting", pre: "", strong: String(awaiting), post: ` ${awaiting === 1 ? "query" : "queries"} awaiting a reply` };
+  /* ⚠️ "OUT WITH AGENTS", NOT "AWAITING A REPLY" (polish P7). Same number, and the writer is the
+     subject of it: the queries are somewhere, doing something. "Awaiting" made the line about
+     sitting still, which is the one thing querying already feels like too much of. */
+  return { key: "awaiting", pre: "", strong: String(awaiting), post: ` ${awaiting === 1 ? "query" : "queries"} out with agents` };
 };
 
 /* ══════════════════════════ §6 · QUERYING GOALS ══════════════════════════ */
@@ -485,6 +488,8 @@ export interface GoalState {
   period: GoalPeriod;
   /** Sends inside the current period — derived from dateSent, never stored (§6). */
   done: number;
+  /** Target reached or passed — the card states completion rather than reporting a fraction. */
+  met: boolean;
   sentence: string;
 }
 
@@ -511,7 +516,16 @@ export const goalState = (
   const word = p === "quarter" ? "this quarter" : p === "month" ? "this month" : "this year";
   /* ⚠️ "Query 1 agents this quarter" was live. A count in a sentence needs its noun to agree. */
   const noun = target === 1 ? "agent" : "agents";
-  return { target, period: p, done, sentence: `Query ${target} ${noun} ${word}` };
+  const met = done >= target;
+  /**
+   * ⚠️ ONE VOICE, BOTH HALVES (fixes-2 A2). The header read "2 — done" while this line still read
+   * "Query 1 agent this quarter" — an instruction to do something already finished, sitting under
+   * a figure saying it was finished. Past the target the sentence REPORTS rather than instructs.
+   */
+  const sentence = met
+    ? `Queried ${done} of ${target} ${noun} ${word}`
+    : `Query ${target} ${noun} ${word}`;
+  return { target, period: p, done, met, sentence };
 };
 
 /**
@@ -593,3 +607,22 @@ export const tourChipShows = (accountCreatedAt: string | undefined, now: Date, w
   if (t === null) return false; // no creation time on record → no chip, never a guess
   return now.getTime() - t <= 7 * DAY_MS;
 };
+
+/**
+ * The goal figure's words (polish P7; wording settled in fixes-2 A2).
+ *
+ * ⚠️ "2/1" IS NOT A PROGRESS FIGURE, IT IS A BROKEN ONE. A fraction whose numerator passes its
+ * denominator reads as a bug even when the maths is right, and it turns beating your own target
+ * into something that looks like a miscount. Past the target the card stops counting UP TO it and
+ * states that it is done, keeping the real number so nothing is hidden.
+ *
+ * The meter already caps (`goalMeter` clamps `filled`), so this is the display catching up with a
+ * derivation that was correct all along.
+ *
+ * ⚠️ "Goal met", NOT "2 — done". The em-dash construction read as a stray fragment rather than a
+ * status, and it left the real figure carrying two jobs at once. The count is not lost: the line
+ * beneath states it in full ("Queried 2 of 1 agent this quarter"), so the card says the same thing
+ * twice in two registers instead of contradicting itself in two halves.
+ */
+export const goalFigure = (done: number, target: number): string =>
+  done >= target ? "Goal met" : `${done}/${target}`;

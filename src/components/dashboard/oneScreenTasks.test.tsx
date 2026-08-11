@@ -154,18 +154,26 @@ describe("the pink band (app-shell-v2)", () => {
     expect(rule(".os-tasks")).toContain("overflow: hidden");
   });
 
-  /* ⚠️ the pills sit ON the band now — a tinted pill on a tinted band loses its edge */
-  /* ⚠️ RETARGETED: ONE FILL, THREE DOTS. This asked each of `.os-p.u/.h/.m` to declare the white
-     fill itself, which stopped being true when the pills were consolidated — the sheet now states
-     `background: #ffffff` ONCE on the shared `.os-p` and lets the modifier classes carry nothing
-     but their dot colour. Asserting the fill per modifier was asserting the duplication, so it
-     failed on the very change that removed it. The rule being locked is the consolidation: one
-     fill on the base, colour in the dot. */
-  it("the trio's pills are WHITE on the band, keeping their dots", () => {
-    expect(rule(".os-p"), "the shared fill left the base rule").toContain("background: #ffffff");
+  /* ⚠️ RETARGETED (polish P7), not deleted. This pinned three WHITE pills — the state where the
+     trio read as three separate objects, told apart only by their text colour. They now share one
+     faint pastille-blue fill and the DOT carries the kind, which is the job it always had. The
+     dots' own hues are unchanged, and that half of the lock stands. */
+  it("the trio's pills share ONE pastille fill, and the dots still carry the kind", () => {
+    /* ⚠️ TOKENS NOW (fixes-2 A5) — the same pastille is wanted on other pages' header pills, and
+       four loose hexes repeated per surface is how three pages end up NEARLY matching. */
+    /* ⚠️ RETARGETED (P5): the trio went WHITE. The tint was doing the dot's job — two devices for
+       one distinction — so colour lives in the dot and the pill is a white chip. The pastille
+       tokens survive for the HEADER pills, where nothing else carries the sorting. */
+    expect(rule(".os-p")).toContain("background: #ffffff");
+    expect(rule(".os-p")).toContain("border: 1px solid rgba(58, 28, 20, 0.08)");
+    /* ⚠️ THE PER-KIND FILL RULES ARE GONE ENTIRELY — asserted as ABSENT, not asserted through a
+       helper that requires them to exist. One fill, declared once; a `.os-p.u { background }`
+       reappearing is the trio splintering back into three objects. */
+    for (const k of [".os-p.u {", ".os-p.h {", ".os-p.m {"]) {
+      expect(cssRules, `${k} must not re-declare a fill`).not.toContain(k);
+    }
     expect(rule(".os-p.u .os-pdot")).toContain("background: #7c3a2a");
     expect(rule(".os-p.h .os-pdot")).toContain("background: #8a9e88");
-    expect(rule(".os-p.m .os-pdot")).toContain("background: #b9a893");
   });
 });
 
@@ -199,5 +207,44 @@ describe("§5 · the stylesheet", () => {
     const m = cssRules.slice(cssRules.lastIndexOf("@media (max-width: 640px)"));
     expect(m).toContain("grid-template-columns: 1fr");
     expect(m).toContain(".os-trow .os-dots { display: none; }");
+  });
+});
+
+/**
+ * ⚠️ THE PASTILLE BELONGS TO THE HEADER PILLS, AND IT WAS PUT ON THE WRONG ONES (fixes-2 A5).
+ *
+ * `.os-p` is the tasks TRIO; `.os-pill` is the greeting's header pill. Similar names, different
+ * objects — the previous pass coloured the trio while the copy change landed on the header, so
+ * half of one instruction went to each. This pins the pastille to BOTH by token, so the next
+ * change to it cannot reach one and miss the other.
+ */
+describe("the pastille is tokenised and reaches the header pills", () => {
+  const css = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8");
+  const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const blk = (sel: string) => {
+    const i = bare.indexOf(`${sel} {`);
+    expect(i, `${sel} must exist`).toBeGreaterThan(-1);
+    return bare.slice(i, bare.indexOf("}", i));
+  };
+
+  it("the four values are declared once, as tokens", () => {
+    for (const t of ["--os-pastille-bg: #f4f7fa", "--os-pastille-line: #dde6ee",
+      "--os-pastille-ink: #4a5a6b", "--os-pastille-fig: #2c3f52"]) {
+      expect(bare).toContain(t);
+    }
+  });
+
+  it("⚠️ the HEADER pill wears it — the pill the instruction was actually about", () => {
+    const p = blk(".os-pill");
+    expect(p).toContain("var(--os-pastille-bg)");
+    expect(p).toContain("var(--os-pastille-line)");
+    expect(p).toContain("var(--os-pastille-ink)");
+    expect(blk(".os-pill b")).toContain("var(--os-pastille-fig)");
+  });
+
+  it("neither pill restates a raw hex — a literal here is the drift starting again", () => {
+    /* ⚠️ ONLY THE HEADER PILL NOW — the trio is white, so it must NOT read the pastille. */
+    expect(blk(".os-pill"), ".os-pill must read the token").not.toMatch(/#f4f7fa|#dde6ee|#4a5a6b/);
+    expect(blk(".os-p"), ".os-p is white and must not wear the pastille").not.toMatch(/pastille/);
   });
 });
