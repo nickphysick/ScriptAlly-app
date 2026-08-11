@@ -41,6 +41,7 @@ const THEMES = [".t-capp .msv1", ".t-bold .msv1", ".t-edn .msv1"] as const;
 const ADDED = [
   "--msv-plateA", "--msv-plateB", "--msv-plateline",
   "--msv-palebg", "--msv-palebd", "--msv-paletx", "--msv-pinkplate",
+  "--msv-spine1", "--msv-spine2", "--msv-spine3", "--msv-dash",
   "--msv-stripbg", "--msv-stripbd", "--msv-stripkey",
   "--msv-prbd",
 ] as const;
@@ -147,6 +148,18 @@ describe("⚠️ EDITORIAL IS MONOCHROME — THE PLATEBAND MUST NOT BE SAGE", ()
   it("the two tile plates are distinct steps, so the design's distinction survives monochrome", () => {
     expect(edn("--msv-pinkplate")).not.toBe(edn("--msv-palebg"));
   });
+
+  /**
+   * ⚠️ THE REF ROTATES THREE HUES for the comp spines (sage/tan/mauve). In Editorial the rotation
+   * has to survive as LIGHTNESS, because the theme has no hues to rotate through. Three identical
+   * greys would silently retire a distinction the design draws.
+   */
+  it("the three comp spines stay distinguishable in Editorial — by value, not by hue", () => {
+    const spines = [edn("--msv-spine1"), edn("--msv-spine2"), edn("--msv-spine3")];
+    expect(new Set(spines).size).toBe(3);
+    const lum = spines.map((h) => parseInt(h.slice(1, 3), 16));
+    expect(Math.max(...lum) - Math.min(...lum)).toBeGreaterThanOrEqual(24);
+  });
 });
 
 describe("no rule authors a colour — the sheet declares tokens and reads them", () => {
@@ -157,9 +170,14 @@ describe("no rule authors a colour — the sheet declares tokens and reads them"
   it("outside the three theme blocks, colour comes only from var()", () => {
     let rules = PLATE;
     for (const sel of THEMES) rules = rules.replace(new RegExp(`${sel.replace(/[.\\]/g, "\\$&")}\\s*\\{[^}]*\\}`), "");
+    /**
+     * Two exemptions, both FIXED BRAND CONSTANTS rather than themed surfaces:
+     *   #ffffff — the plate's own paper; the PNG is drawn for a white ground in every theme.
+     *   #6a89a7 — the Pro slate, which is the same badge everywhere in the app by decision.
+     * Anything else appearing here has stopped theming and one of the three is now wrong.
+     */
     for (const hex of rules.match(/#[0-9a-f]{3,6}/gi) ?? []) {
-      // #ffffff is the plate's own paper — the mark is drawn for a white ground in every theme.
-      expect(["#ffffff"], `${hex} is authored in a rule and has stopped theming`).toContain(hex.toLowerCase());
+      expect(["#ffffff", "#6a89a7"], `${hex} is authored in a rule and has stopped theming`).toContain(hex.toLowerCase());
     }
   });
 

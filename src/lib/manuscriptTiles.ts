@@ -88,19 +88,28 @@ export interface CompsTileCopy {
   detail: string | null;
 }
 
+/**
+ * ⚠️ THE THRESHOLD COPY, AND IT IS SHARED — the tile and the comps pane's pitch box render THESE
+ * strings, never their own wording. `pitchLine` had no consumers before this card, so whatever is
+ * written here becomes the standard the shelf inherits.
+ *
+ * ⚠️ AND THEY ARE PARALLEL ON PURPOSE: one sentence, one number. They state a fact about the
+ * feature — how many comps the line takes — rather than prompting the writer to go and add one.
+ * An earlier pair failed both tests: they were differently shaped, and "a second makes the line"
+ * was quietly coaching.
+ */
+export const PITCH_NEEDS_TWO = "The ‘X meets Y’ line needs two comps.";
+export const PITCH_NEEDS_ONE = "The ‘X meets Y’ line needs one more.";
+
 export function comparableTitlesTile(comps: CompTitle[]): CompsTileCopy {
   const pitch = pitchLine(comps);
   if (pitch.kind === "two") {
     return { headline: `${comps.length} on the shelf`, pitch, detail: null };
   }
   if (pitch.kind === "one") {
-    return { headline: "1 on the shelf", pitch, detail: "A second makes the ‘X meets Y’ line." };
+    return { headline: "1 on the shelf", pitch, detail: PITCH_NEEDS_ONE };
   }
-  return {
-    headline: "Nothing on the shelf yet",
-    pitch,
-    detail: "Two comps make the ‘X meets Y’ line in a query letter.",
-  };
+  return { headline: "Nothing on the shelf yet", pitch, detail: PITCH_NEEDS_TWO };
 }
 
 /* ── tile 3 — On the shelf ─────────────────────────────────────────────────────────────────── */

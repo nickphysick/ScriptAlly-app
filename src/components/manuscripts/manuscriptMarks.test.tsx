@@ -26,6 +26,7 @@ import {
   BookSpinesMark,
   CalendarClockMark,
   StackedPagesMark,
+  MagnifierMark,
   type ManuscriptMarkKey,
 } from "./manuscriptMarks";
 
@@ -33,9 +34,9 @@ const KEYS = Object.keys(MANUSCRIPT_MARKS) as ManuscriptMarkKey[];
 const render = (Mark: React.FC<{ size?: number }>, size?: number) =>
   renderToStaticMarkup(React.createElement(Mark, size === undefined ? {} : { size }));
 
-describe("the four marks — one prop, and it is optional", () => {
-  it("there are exactly four, and they are the four the tiles need", () => {
-    expect(KEYS).toEqual(["plane", "spines", "calendar", "pages"]);
+describe("the marks — one prop, and it is optional", () => {
+  it("the registry is the marks the card needs, in a stable order", () => {
+    expect(KEYS).toEqual(["plane", "spines", "calendar", "pages", "magnifier"]);
   });
 
   it.each(KEYS)("%s renders at the requested size on both axes", (key) => {
@@ -72,8 +73,15 @@ describe("⚠️ trap 1 — a mark that inherits colour disappears in Editorial"
     expect(html).not.toContain("--msv-");
   });
 
+  /**
+   * ⚠️ THIS LIST IS A GATE, NOT A RECORD. It caught `#e9ede6` when the magnifier landed, which is
+   * the point: a new colour must be justified against the ref before it joins the vocabulary,
+   * rather than arriving because one mark's author liked it. `#e9ede6` earned its place — it is
+   * the ref's own `.node.in` fill and the app's canonical sage fill elsewhere. Anything that fails
+   * here should be checked against the ref before the list is widened.
+   */
   it("every stroke and fill is a baked hex from the plate palette", () => {
-    const PALETTE = ["#3a1c14", "#5a6e58", "#7c3a2a", "#fff", "#fdfaf5", "#f5e2da", "#e8c8bc", "#cdd8ca", "#e7ede3"];
+    const PALETTE = ["#3a1c14", "#5a6e58", "#7c3a2a", "#fff", "#fdfaf5", "#f5e2da", "#e8c8bc", "#cdd8ca", "#e7ede3", "#e9ede6"];
     for (const key of KEYS) {
       const html = render(MANUSCRIPT_MARKS[key]);
       for (const hex of html.match(/#[0-9a-f]{3,6}/gi) ?? []) {
@@ -116,13 +124,14 @@ describe("⚠️ trap 3 — the plate's notebook is the dashboard PNG, never a t
   const src = readFileSync(resolve(__dirname, "./manuscriptMarks.tsx"), "utf8");
 
   /**
-   * Ruling 4: the module holds the four SVGs only. The 118px plate imports
-   * `src/assets/shell/manuscript-icon.png` — the same asset `OneScreenAuthor` already renders.
-   * A fifth entry here would mean two copies of one illustration drifting apart.
+   * ⚠️ THE COUNT IS INCIDENTAL; THE ABSENCE IS THE INVARIANT. Phase 4 legitimately added a fifth
+   * mark (the magnifier), so a bare `toHaveLength(4)` would have failed for the right reason and
+   * been "fixed" by bumping a number. What must never come back is the NOTEBOOK — that one is the
+   * dashboard's PNG, and a traced copy here would fork one illustration into two.
    */
-  it("the module exports four marks and no notebook", () => {
-    expect(KEYS).toHaveLength(4);
+  it("no notebook is declared here, whatever else the registry grows", () => {
     expect(src).not.toMatch(/NotebookMark|notebook:/);
+    expect(KEYS).not.toContain("notebook");
   });
 
   it("the PNG it defers to is still on disk under the name the plate will import", () => {
@@ -144,5 +153,6 @@ describe("named exports match the registry — one component per mark, not two",
     expect(MANUSCRIPT_MARKS.spines).toBe(BookSpinesMark);
     expect(MANUSCRIPT_MARKS.calendar).toBe(CalendarClockMark);
     expect(MANUSCRIPT_MARKS.pages).toBe(StackedPagesMark);
+    expect(MANUSCRIPT_MARKS.magnifier).toBe(MagnifierMark);
   });
 });

@@ -78,6 +78,7 @@ only this phase's four new files**:
 | Phase 2a (HEAD `1a2fd9b`) | exit 0 | exit 0 | **249 files · 4050 passed · 2 skipped** |
 | Phase 2b (HEAD `2a23d58`) | exit 0 | exit 0 | **250 files · 4067 passed · 2 skipped** |
 | Phase 3 (HEAD `40ed4f3`) | exit 0 | exit 0 | **253 files · 4120 passed · 2 skipped** |
+| Phase 4 (HEAD `3928e2d`) | exit 0 | exit 0 | **255 files · 4167 passed · 2 skipped** |
 
 Phase 1 adds 31 tests, Phase 2a adds 24, neither adds a failure. The isolated run is the one to
 believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
@@ -339,6 +340,101 @@ date invented when `createdDate` is absent (3).
 
 ---
 
+## Phase 4 — comparable titles pane
+
+Commit: `manuscripts: comparable titles pane`. `ManuscriptCompsPane.tsx` +
+`manuscriptCompsPane.test.tsx` (23 tests), a fifth mark, comps rules and four tokens in
+`manuscriptPlate.css`, and the shared threshold copy in `manuscriptTiles.ts`.
+
+**The tab is free in full.** The shelf, the pitch box and the add tile carry no chip and no gate —
+the pane's single `msv-prochip` belongs to the Scout strip, asserted by count.
+
+### The threshold copy is now one string, on two surfaces
+
+Per the ruling, the pair is parallel — one sentence, one number, stating the feature's threshold
+rather than prompting:
+
+- `The ‘X meets Y’ line needs two comps.`
+- `The ‘X meets Y’ line needs one more.`
+
+They are **exported constants** (`PITCH_NEEDS_TWO` / `PITCH_NEEDS_ONE`), and the Details tile and
+the pitch box both render them — asserted **character for character on both rendered surfaces**,
+not merely "both import something". Two near-identical sentences would drift the first time one was
+edited, and the page would tell a writer two different things about one rule. A further lock rejects
+`you`/`your`/`add`/`write`/`try`/`just`/`simply`/`makes` in either string, which is what caught the
+coaching in the first pair.
+
+Typographic single quotes (`‘ ’`) rather than the straight ones in the ruling text — the app's prose
+elsewhere is typeset, and this string is prose.
+
+### The Scout — three states, and two of them must not be confused
+
+| | Chip | Body | Action |
+|---|---|---|---|
+| **Free** — an offer | `Pro` | what the Scout does | `See how it works` + `Upgrade` |
+| **Pro + live** — a tool | none | what the Scout does | `Find comps` |
+| **Pro + down** — an outage | mono `Unavailable` tag | *The Scout is unavailable just now. Nothing has been lost — try again shortly.* | `Find comps`, disabled |
+
+The outage gets its **own surface treatment** (`.msv-offer-down`: quieter ground, no border, mark at
+55%), not the offer greyed out. Locked four ways: the outage shows no chip, no `Upgrade` and no
+`See how it works`; a **free** user never sees the outage wording (availability is not their fact —
+telling them "unavailable just now" would be a temporary lie about a permanent state); the three
+states are asserted to be **three genuinely different strings**; and the strip holds one slot with
+one `msv-offeracts` in every state, so upgrading changes words rather than page shape.
+
+Gating is `isPro` + `scoutAvailable` as props — `isProUser(currentUser)` and `scoutLive()` at the
+Phase 6 call site. `SCOUT_LIVE` is `false` today, so the live state is currently unreachable in
+production; that is the honest state and the outage strip is what a Pro user would see.
+
+**No fabricated last-run line.** The ref's Pro strip reads *"Last run 2 August — 6 suggestions,
+3 added."* Nothing anywhere stores that. The sentence renders without it; a `lastRun` prop exists so
+the day a real field lands it has somewhere to go, and a lock asserts the line is absent without it.
+
+### The shelf grid
+
+Spine rotating by position, Playfair title, `AUTHOR · YEAR` omitted a clause at a time (author only,
+year only, or the whole line gone), `isOlderComp` for the chip — the same rule the shelf and
+Suggestions use — note in Caveat, and a removal control that **names what it removes**
+(`aria-label="Remove Stormbreak"`) and is reachable by `:focus-visible`, not hover alone.
+
+**Copy is absent, not inert, while the line is incomplete** — there is nothing to copy, so no button.
+
+### Editorial keeps the spine distinction as value
+
+The ref rotates three hues (sage `#8a9e88` / tan `#c9a06a` / mauve `#a98ba0`). Editorial gets three
+**greys** — `#9a9a9a` / `#6f6f6f` / `#c2c2c2` — locked as three distinct values with ≥24 points of
+spread. Three identical greys would have silently retired a distinction the design draws, and three
+hues would have failed the chroma check. This is the standing rule applied, not a one-off.
+
+### The fifth mark, and what the count lock taught
+
+`MagnifierMark` joins the module. Phase 1's `toHaveLength(4)` would have failed here **for the right
+reason and been "fixed" by bumping a number**, so the assertion was rewritten to what actually
+matters: *no notebook is declared here, whatever else the registry grows.* The count is incidental;
+the absence is the invariant.
+
+The palette lock also fired — the magnifier's `#e9ede6` was not on Phase 1's list. It earned its
+place (the ref's own `.node.in` fill, and the app's canonical sage fill elsewhere) and the list now
+says so in as many words: **it is a gate, not a record**, and anything failing it should be checked
+against the ref before the list is widened.
+
+### Five locks verified red
+
+Outage showing a Pro chip to a paying user · free user shown the outage wording · an invented
+last-run history · the pitch box forking its own wording · coaching creeping back into the shared
+copy.
+
+### ⚠️ One thing Phase 6 must decide — two live editing homes for comps
+
+This pane edits comps, and `/manuscripts/comps` (`ComparableTitlesPage`) still does too. The pane
+itself is presentational — add and remove are callbacks, and the writes will go through the pure
+`withCompAdded`/`withCompRemoved` and one `updateManuscript` — so **no second editing logic exists**.
+But two live surfaces for one job is exactly the fork the addendum warns against. Phase 6 must
+settle whether the sub-page is retired, kept as the deep view, or the tab defers to it. **Not decided
+here**, and no extraction from the blocked `ComparableTitlesPage.tsx` was attempted.
+
+---
+
 ## Rulings folded in (superseding the original brief)
 
 1. **Submission packages is not Pro-gated** — the Free/Pro fork is deleted from Phase 5. One pane
@@ -354,6 +450,12 @@ date invented when `createdDate` is absent (3).
    asset. See above.
 
 ---
+
+## Outstanding, separate from this build
+
+- **⚠️ One number-speller, not four.** `spellCount` (mine), plus private copies in
+  `dashboardStats.ts`, `todoBoard.ts` and `topNav.ts`, none exported. Extract one, retire the four:
+  a single commit touching those three files and `manuscriptTiles.ts`. Out of scope here by decision.
 
 ## Open, carried into Phase 2+
 

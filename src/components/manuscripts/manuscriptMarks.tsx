@@ -73,9 +73,18 @@ export const StackedPagesMark: React.FC<MarkProps> = ({ size = MARK_SIZE }) => (
   </svg>
 );
 
+/** The Scout — a magnifier over the shelf. Sits in the comps pane's strip, not in a tile. */
+export const MagnifierMark: React.FC<MarkProps> = ({ size = MARK_SIZE }) => (
+  <svg width={size} height={size} viewBox="0 0 80 80" fill="none" aria-hidden="true" focusable="false">
+    <circle cx="35" cy="35" r="20" fill="#e9ede6" stroke="#3a1c14" strokeWidth="1.6" />
+    <path d="m50 50 15 15" stroke="#3a1c14" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M28 35h14M35 28v14" stroke="#5a6e58" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
 /**
- * The four, by key. Exists so a spec can sweep every mark rather than naming them one at a time —
- * a fifth mark added here is covered the moment it lands.
+ * The marks, by key. Exists so a spec can sweep every mark rather than naming them one at a time —
+ * a mark added here is covered the moment it lands.
  *
  * ⚠️ THE PLATE'S NOTEBOOK MARK IS NOT IN HERE, AND MUST NOT BE ADDED.
  * It is `src/assets/shell/manuscript-icon.png`, the raster the dashboard author tile already
@@ -87,6 +96,7 @@ export const MANUSCRIPT_MARKS = {
   spines: BookSpinesMark,
   calendar: CalendarClockMark,
   pages: StackedPagesMark,
+  magnifier: MagnifierMark,
 } as const;
 
 export type ManuscriptMarkKey = keyof typeof MANUSCRIPT_MARKS;

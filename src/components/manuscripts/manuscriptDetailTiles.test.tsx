@@ -15,7 +15,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { ManuscriptDetailTiles } from "./ManuscriptDetailTiles";
 import {
   outInTheWorld, comparableTitlesTile, onTheShelf, submissionMaterials,
-  elapsedPhrase, spellCount, sinceDate,
+  elapsedPhrase, spellCount, sinceDate, PITCH_NEEDS_ONE, PITCH_NEEDS_TWO,
 } from "../../lib/manuscriptTiles";
 import { pitchLine } from "../../lib/comps";
 import {
@@ -82,13 +82,15 @@ describe("tile 2 — Comparable titles", () => {
     const t = comparableTitlesTile([]);
     expect(t.headline).toBe("Nothing on the shelf yet");
     expect(t.pitch.kind).toBe("none");
-    expect(t.detail).toBe("Two comps make the ‘X meets Y’ line in a query letter.");
+    // The SHARED threshold copy — the comps pane's pitch box states the identical string.
+    expect(t.detail).toBe(PITCH_NEEDS_TWO);
   });
 
-  it("at one: the title, plus what a second would complete", () => {
+  it("at one: the title, plus the threshold stated in the shared words", () => {
     const t = comparableTitlesTile([comp("Stormbreak")]);
     expect(t.headline).toBe("1 on the shelf");
     expect(t.pitch).toEqual({ kind: "one", a: "Stormbreak" });
+    expect(t.detail).toBe(PITCH_NEEDS_ONE);
   });
 
   it("at two or more: the composed pitch, and no accompanying prose", () => {

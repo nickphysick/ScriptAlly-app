@@ -38,6 +38,8 @@
   --msv-palebg: #e7ede3; --msv-palebd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-paletx: #4a5a48;
   --msv-pinkplate: #f8ede4;
+  --msv-spine1: #8a9e88; --msv-spine2: #c9a06a; --msv-spine3: #a98ba0;
+  --msv-dash: 1.5px dashed #d9cdbc;
   --msv-stripbg: rgba(255, 255, 255, 0.62); --msv-stripbd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-stripkey: #6a7a68;
   --msv-prbd: 1px solid #e8c8bc;
@@ -49,6 +51,8 @@
   --msv-palebg: #ffffff; --msv-palebd: 1px solid #1d1712;
   --msv-paletx: #1d1712;
   --msv-pinkplate: #f8ede4;
+  --msv-spine1: #8a9e88; --msv-spine2: #c9a06a; --msv-spine3: #a98ba0;
+  --msv-dash: 1.5px dashed #1d1712;
   --msv-stripbg: #fffefb; --msv-stripbd: 1.5px solid #1d1712;
   --msv-stripkey: #6a625c;
   --msv-prbd: 1.5px solid #1d1712;
@@ -61,6 +65,10 @@
   --msv-paletx: #555555;
   /* ⚠️ NO PINK EITHER — the plane sits on a neutral step, distinct from --msv-palebg but hueless. */
   --msv-pinkplate: #ebebe9;
+  /* ⚠️ THREE VALUES, NOT THREE HUES. The ref rotates sage/tan/mauve spines; Editorial keeps the
+     distinction as lightness, which is what a monochrome theme is for. */
+  --msv-spine1: #9a9a9a; --msv-spine2: #6f6f6f; --msv-spine3: #c2c2c2;
+  --msv-dash: 1.5px dashed #d6d6d4;
   --msv-stripbg: #ffffff; --msv-stripbd: 1px solid #e3e2e0;
   --msv-stripkey: #6b6b6b;
   --msv-prbd: 1px solid transparent;
@@ -198,3 +206,93 @@
   .msv-plateside { margin-left: 0; align-items: flex-start; width: 100%; }
   .msv-tiles2 { grid-template-columns: 1fr; }
 }
+
+/* ── Comparable titles pane ── */
+.msv-padbody { padding: 26px 30px 28px; }
+
+.msv-pitchbox {
+  background: var(--msv-tile); border: var(--msv-tilebd); border-radius: 14px;
+  padding: 18px 22px; display: flex; align-items: center; gap: 18px;
+}
+.msv-pitchbody { min-width: 0; }
+.msv-pitchline {
+  font-family: 'Playfair Display', serif; font-size: 20px; color: var(--msv-head); margin-top: 8px;
+}
+.msv-pitchm {
+  color: var(--msv-muted); font-family: inherit; font-size: 13.5px; font-weight: 300; padding: 0 6px;
+  font-style: normal;
+}
+/* The incomplete state states the threshold; it is not an empty box or a prompt. */
+.msv-pitchwait { font-size: 12.5px; font-weight: 300; color: var(--msv-muted); margin-top: 8px; }
+.msv-pitchcopy { margin-left: auto; margin-top: 0; flex: 0 0 auto; }
+
+.msv-compgrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(206px, 1fr));
+  gap: 14px; margin-top: 18px;
+}
+.msv-comp {
+  position: relative; overflow: hidden;
+  background: var(--msv-tile); border: var(--msv-tilebd); border-radius: 14px;
+  padding: 14px 16px 14px 20px;
+}
+.msv-compsp { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+.msv-compsp.s1 { background: var(--msv-spine1); }
+.msv-compsp.s2 { background: var(--msv-spine2); }
+.msv-compsp.s3 { background: var(--msv-spine3); }
+/* Reveal on hover or keyboard focus — a control that only hover can reach is unreachable. */
+.msv-compx {
+  position: absolute; top: 8px; right: 9px; width: 20px; height: 20px; border-radius: 50%;
+  border: none; background: none; color: var(--msv-muted); cursor: pointer; line-height: 1;
+  opacity: 0; transition: opacity 0.12s;
+}
+.msv-comp:hover .msv-compx, .msv-compx:focus-visible { opacity: 1; }
+.msv-compt {
+  font-family: 'Playfair Display', serif; font-size: 15.5px; font-weight: 600;
+  color: var(--msv-head); line-height: 1.25;
+}
+.msv-compa {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em;
+  color: var(--msv-label); text-transform: uppercase; margin: 6px 0 8px;
+}
+.msv-oldchip {
+  display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--msv-gold);
+  border: 1px solid var(--msv-gold); border-radius: 20px; padding: 2px 7px; margin-bottom: 8px;
+}
+.msv-compn { font-family: 'Caveat', cursive; font-size: 16px; color: var(--msv-ink); line-height: 1.25; }
+.msv-addcomp {
+  border: var(--msv-dash); border-radius: 14px; background: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; min-height: 106px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em;
+  color: var(--msv-label); text-transform: uppercase;
+}
+
+/* ── The Scout strip — one slot, three states ── */
+.msv-offer {
+  margin-top: 22px; background: var(--msv-tile); border: var(--msv-tilebd); border-radius: 14px;
+  padding: 18px 22px; display: flex; align-items: center; gap: 18px;
+}
+/* ⚠️ THE OUTAGE IS NOT THE OFFER GREYED OUT — it is a quieter surface with no offer framing.
+   A paying user must never be shown a chip and an Upgrade button because a function is undeployed. */
+.msv-offer-down { background: var(--msv-palebg); border-color: transparent; }
+.msv-offer-down svg { opacity: 0.55; }
+.msv-offerbody { min-width: 0; }
+.msv-offert {
+  font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600;
+  color: var(--msv-head); display: flex; align-items: center; gap: 10px;
+}
+.msv-offerd {
+  font-size: 12.5px; font-weight: 300; color: var(--msv-muted);
+  margin-top: 4px; max-width: 520px; line-height: 1.5;
+}
+.msv-offeracts { margin-left: auto; display: flex; gap: 10px; flex: 0 0 auto; }
+.msv-prochip {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em;
+  background: #6A89A7; color: #ffffff; border-radius: 20px; padding: 3px 8px; text-transform: uppercase;
+}
+.msv-outtag {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.14em;
+  color: var(--msv-muted); border: 1px solid var(--msv-hair); border-radius: 20px;
+  padding: 3px 8px; text-transform: uppercase;
+}
+.msv-btn:disabled { opacity: 0.5; cursor: default; }
