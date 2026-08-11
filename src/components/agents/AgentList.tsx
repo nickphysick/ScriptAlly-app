@@ -808,7 +808,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             outside this centred column. It is a PLATE now: an object whose left edge must meet the
             first card and whose right edge meets the last. Past the content cap the column centres,
             so the only place those edges agree is inside the column itself. */}
-        <div className="agl-head-slot">
+        {/* ⚠️ `.agl-head-slot` IS DELETED, AND THAT WRAPPER WAS THE BUG. A sticky element can only
+            travel inside its own containing block, and this div wrapped the header ALONE — 124px of
+            plate inside a 124px box, so there was nowhere to stick and it behaved as `relative`.
+            MEASURED: as shipped the plate sat at -246 after a 260px scroll; as a direct child of
+            `.agl-inner` it holds at 0. Neither suspected cause applied — every ancestor up to the
+            scroller computes `overflow: visible`, and the plate WAS inside the page's own scroller.
+            ⚠️ ITS ENTRANCE ANIMATION MOVED TO `.wsh`, NOT to `.wsh-wrap`. `rise` ends at
+            `translateY(0)` under `fill-mode: both`, so it leaves a transform on whatever carries it
+            — and a transform on the sticky element is the next quiet way to break this. The plate's
+            inner element animates; the sticky wrapper stays clean. */}
         <PageHeader
           variant="workspace"
           mark="contacts"
@@ -816,7 +825,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
           description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
         />
-        </div>
 
         <AgentToolbar
           search={search}

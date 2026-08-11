@@ -306,7 +306,7 @@
  * header the ground is the window's white, so multiply is a no-op visually — but it is what keeps
  * the mark honest if the header ever sits on anything else, and it costs nothing here.
  *
- * ⚠️ THE ENTRANCE ANIMATION IS THE TRAP. `.agl-head-slot` carries `animation: rise … both`, and a
+ * ⚠️ THE ENTRANCE ANIMATION IS THE TRAP. `.wsh` carries `animation: rise … both` on the agent list, and a
  * transform on ANY ancestor isolates the blend group — the white field would flash for the whole
  * 0.28s. The mark is held at opacity 0 until the animation ends, exactly as the dashboard marks
  * are. See the CLAUDE.md entry; do not remove this as redundant.
@@ -320,7 +320,7 @@
   mix-blend-mode: multiply;
 }
 .wsh-mark--xl .os-mark svg { width: 34px; height: 34px; }  /* the degrade path, still centred */
-.agl-anim .agl-head-slot .wsh-mark--xl .os-mark img { opacity: 0; }
+.agl-anim .wsh .wsh-mark--xl .os-mark img { opacity: 0; }
 /* the plate's own size transition, so the mark condenses WITH it rather than snapping */
 .wsh-mark .os-mark { transition: width .2s ease, height .2s ease, flex-basis .2s ease; }
 

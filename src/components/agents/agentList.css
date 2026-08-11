@@ -62,7 +62,12 @@
    animations carry fill-mode `both`, and a filled animation outranks an inline transform, so a
    card still holding one would silently ignore a FLIP transform.
    ══════════════════════════════════════════════════════════════════════════ */
-.aglist.agl-anim .agl-head-slot { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
+/* ⚠️ THE ENTRANCE RIDES `.wsh`, NOT the sticky `.wsh-wrap`. `rise` ends at `translateY(0)`
+   under `fill-mode: both`, so it leaves a transform on whatever carries it — and a transform
+   on the sticky element is the next quiet way to stop it pinning. The wrapper it used to sit
+   on (`.agl-head-slot`) is DELETED: it boxed the plate at its own height, so sticky had zero
+   travel and the header scrolled away. */
+.aglist.agl-anim .wsh { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
 .aglist.agl-anim .agl-toolbar { animation: rise .28s cubic-bezier(.4, 0, .2, 1) .06s both; }
 /* the delay comes from the inline style; the duration and curve come from here */
 .aglist.agl-anim .agl-scene { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
@@ -108,7 +113,7 @@
 .aglist .agl-notice-in { animation: rise .28s cubic-bezier(.4, 0, .2, 1) both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .aglist.agl-anim .agl-head-slot,
+  .aglist.agl-anim .wsh,
   .aglist.agl-anim .agl-toolbar,
   .aglist.agl-anim .agl-scene,
   .aglist .agl-scene.agl-arriving,
