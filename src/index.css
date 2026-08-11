@@ -79,6 +79,8 @@
      competes with every card sitting near it. */
   --ws-ground: #f7f4ee;
   --ws-edge: #e9e2d7;
+
+  /**
    * THE HEADER PLATE (amendment 7; ref design-refs/header-plate-frosted-v1.html). The band with a
    * closing rule is retired — the header is now an OBJECT sitting on the window, with its own
    * fill, border and shadow, condensing on first scroll.
