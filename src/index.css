@@ -213,7 +213,26 @@
      no longer that width. 264 is stated by the pack and measured against the new scale, not
      derived from the old one. (The pack calls it 246 → 264; 246 is the design ref's own starting
      width and was never this app's.) */
-  --shell-panelw: 264px;              /* the panel — a sibling of the rail, not a band within it */
+  /* ⚠️ 264 → 224 (Nick, 11 Aug — "reduce width of expanded sidebar by 15%"). 264 × 0.85 = 224.4,
+     taken as 224 rather than a fraction of a pixel.
+
+     ⚠️ AND IT IS A NARROWING WITHOUT A TYPE CHANGE, which is exactly the pairing the note above
+     says to respect — so the claim that argument protects was RE-MEASURED, not assumed. Browser-
+     measured at 224 against the BUILT stylesheet:
+
+       · worst label — "Submission packages" 148px into 157px of row → fits, HEADROOM 9px;
+       · the To-do row, the only one sharing its width with a count chip → 64 into 134, ample.
+
+     ⚠️ NINE PIXELS IS THE WHOLE MARGIN, and `.ws-lbl` is `overflow: hidden; white-space: nowrap`
+     — so a label that outgrows its row CLIPS SILENTLY rather than wrapping visibly. A longer nav
+     label, or any step up in row type, spends that 9px and the failure will not announce itself.
+     Re-measure here on any change to either; do not eyeball it.
+
+     ⚠️ THE MANUSCRIPT TITLE NOW ELLIPSISES SOONER, by design and by arithmetic: its box is 106px
+     at this width (was ~146), so "The Smoke Test" (107px) just tips over. `.ws-mst` has always
+     carried `text-overflow: ellipsis` for exactly this — a book title is arbitrary-length and the
+     pill is not — but the crossover moved, and longer titles now abbreviate earlier. */
+  --shell-panelw: 224px;              /* the panel — a sibling of the rail, not a band within it */
   /* ⚠️ AMENDMENT 1 — THE DESK AND THE CAPSULE ARE GONE from the workspace. The shell is
      full-screen: --shell-chrome IS the page ground, and the content is a white card floating on
      it. These two are that card's frame and corner. --shell-desk-grad survives ONLY for whatever
@@ -790,7 +809,7 @@
 }
 
 /* ── .t-f12 — the F12 MASTER THEME (overnight nav/hub/agents run). Applied ONLY to the Queries
-   Hub and Contact list page roots — never app-wide; .t-capp/.t-bold/.t-edn are untouched.
+   Hub and Contact List page roots — never app-wide; .t-capp/.t-bold/.t-edn are untouched.
    Values copied from the mockups' :root (design-refs/queries-hub-v14.html ≡
    agents-contact-list-v3.html), with ONE correction: the sage band pair is the LIVE dashboard
    diary band (diaryCarousel.css #dce0d9→#d0d6cc), which WINS over the mockups' #d7ddd5→#d5dbd3

@@ -160,6 +160,27 @@ describe("the properties", () => {
     expect(hookSrc).toContain("requestAnimationFrame(() => setReady(true))");
   });
 
+  /**
+   * ⚠️ THE EXPANDED WIDTH HAS ~9px OF HEADROOM ON ITS LONGEST LABEL, and a label that outgrows its
+   * row CLIPS SILENTLY (`.ws-lbl` is overflow:hidden + nowrap) — no wrap, no overflow, just a
+   * quietly truncated word. Browser-measured at 224px: "Submission packages" 148 into 157.
+   *
+   * Node cannot measure text, so this guards the ARITHMETIC either side of it instead: the width
+   * token, and the fixed chrome eating into the row (panel padding, row padding, icon, label
+   * margin). If any of those moves, the headroom moved with it and someone must re-measure —
+   * which is what the failure message says.
+   */
+  it("⚠️ the label budget is unchanged — 9px of headroom, re-measure if any term moves", () => {
+    const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    expect(idx, "panel width changed → re-measure the longest label").toContain("--shell-panelw: 224px");
+    const pin = cssRules.slice(cssRules.indexOf(".ws-pin {"));
+    expect(pin.slice(0, pin.indexOf("}")), "panel padding is a term in the budget").toContain("padding: 0 10px 10px");
+    const ni = cssRules.slice(cssRules.indexOf(".ws-ni {"));
+    expect(ni.slice(0, ni.indexOf("}")), "row padding is a term").toContain("padding: 0 10px");
+    expect(cssRules, "the icon's box is a term").toContain("width: 17px; height: 17px");
+    expect(cssRules, "the label's own margin is a term").toContain(".ws-lbl { display: inline-block; margin-left: 10px");
+  });
+
   it("⚠️ labels collapse by opacity/max-width, NEVER display — they stay in the a11y tree", () => {
     /* ⚠️ ANCHORED ON A RULE, NOT PROSE — "SIDEBAR COLLAPSE" is a comment and cssRules strips
        comments; the first draft anchored there and sliced from -1. */

@@ -820,7 +820,7 @@
 
 /* ══ SIDEBAR COLLAPSE — the icon rail (sidebar-collapse pack, Phase 2; ref
    design-refs/sidebar-collapse-v1.html) ═══════════════════════════════════════════════════════
-   ONE sidebar whose width narrows in place: 264px ↔ 72px, `width` and `padding` only — never
+   ONE sidebar whose width narrows in place: 224px ↔ 72px, `width` and `padding` only — never
    `transform`, which would create a stacking context over the panel's illustrated marks and
    isolate any blend. The content pane is `flex: 1 1 auto; min-width: 0` (.ws-main) and simply
    reflows; it gets no width sums of its own.

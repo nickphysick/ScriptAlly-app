@@ -173,9 +173,13 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
     expect(prims.slice(at, prims.indexOf("}", at))).toContain("font-size: 11px");
   });
 
-  it("⚠️ and the panel is 264px — a width sized for 13.5px rows is not the width for 14.5px", () => {
+  /* ⚠️ RETARGETED 264 → 224 (Nick, 11 Aug: −15%). P6's pairing of width WITH type still holds as
+     reasoning — a width sized for 13.5px rows is not the width for 14.5px — but it is a floor,
+     not a lock: this narrowing keeps the type and re-measured the fit instead (index.css records
+     the numbers). The type scale above is untouched, which is what this file guards. */
+  it("⚠️ and the panel is 224px — narrowed 15% with the type scale held, fit re-measured", () => {
     const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(idx).toContain("--shell-panelw: 264px");
+    expect(idx).toContain("--shell-panelw: 224px");
   });
 });
 

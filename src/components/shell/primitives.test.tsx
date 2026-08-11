@@ -199,9 +199,9 @@ describe("The token block — the pack's palette, and why it is prefixed", () =>
     "--shell-avatar-bg": "#f5e3da",
     "--shell-page": "#f7eee7",
     "--shell-railw": "52px",
-    // 216 → 232 (Amendment 1) → 186 (an interim ref) → 214 (final ref) → 264 (audit pack P6, and
-    // it moved WITH the type scale: a width sized for 13.5px rows is not the width for 14.5px)
-    "--shell-panelw": "264px",
+    // 216 → 232 (Amendment 1) → 186 (an interim ref) → 214 (final ref) → 264 (audit pack P6, WITH
+    // the type scale) → 224 (Nick, 11 Aug: −15%, type unchanged, label fit re-measured)
+    "--shell-panelw": "224px",
     "--shell-spring-out": "cubic-bezier(0.33, 1, 0.5, 1)",
     "--shell-intent": "100ms",
     "--shell-grace": "160ms",

@@ -70,7 +70,7 @@ export interface SidebarCollapsedState {
    * False for the first paint, true one frame later — the width transition is gated on this.
    * ⚠️ WITHOUT IT, RESTORING A COLLAPSED SIDEBAR ANIMATES SHUT ON EVERY LOAD: the state is read
    * synchronously (below), but a transition declared unconditionally still runs from the
-   * stylesheet's 264px the moment layout settles. Two rAFs, not one — the first can land inside
+   * stylesheet's expanded width the moment layout settles. Two rAFs, not one — the first can land inside
    * the same frame as hydration and the class would arrive with the initial style pass.
    */
   ready: boolean;
