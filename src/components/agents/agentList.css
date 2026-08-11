@@ -419,7 +419,16 @@
   box-shadow: 6px 6px 0 var(--agl-cast);
   transition: transform .16s ease, box-shadow .16s ease, opacity .25s ease;
 }
-.aglist .agl-facef .agl-acard:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--agl-cast); }
+/* ⚠️ SHADOW-ONLY HOVER — the lift is DELETED, and CLAUDE.md already prescribes this: "cards flush
+   to a clipped boundary use shadow-only hover". The cards sit in a grid inside `.wpg-scroll`, which
+   is `overflow-y: auto` and therefore clips BOTH axes, and the top row is flush to its top edge —
+   so `translate(-2px, -2px)` pushed the top-left corner of the top-left cards straight through the
+   clip. The card appeared to lose a sliver on hover.
+   ⚠️ AND THE EFFECT SURVIVES WITHOUT IT. The letterpress read was never the 2px move on its own: it
+   is the CAST growing 6 → 8, which is untouched. Adding scroller padding to make room for the lift
+   would be the compensating fix the layout locks forbid — it papers over the clip and drifts.
+   The lift survives where nothing clips it: buttons and pills, unchanged. */
+.aglist .agl-facef .agl-acard:hover { box-shadow: 8px 8px 0 var(--agl-cast); }
 /* closed for submissions: the whole face rests faded, and hover restores it to full */
 /* THE DOOR, IN INK — a hatch over the band's colour, beneath the band's contents. The overlay
    is pointer-events:none and the children take a stacking context, so it never washes over the

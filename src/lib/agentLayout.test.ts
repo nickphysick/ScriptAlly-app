@@ -120,3 +120,24 @@ describe("the help FAB is RETIRED — Help centre lives in the shared account me
   });
 });
 
+
+/**
+ * ⚠️ SHADOW-ONLY HOVER FOR CARDS FLUSH TO A CLIPPED EDGE (amendment 11, commit 4).
+ *
+ * `CLAUDE.md` states the rule and the reason: a hover LIFT on a card inside a clipping container
+ * pushes the lifted edge through the clip. Since the grid conversion the cards sit in `.wpg-scroll`
+ * — `overflow-y: auto`, which clips both axes — with the top row flush to its top edge, so the old
+ * `translate(-2px, -2px)` cost the top-left cards a sliver on hover.
+ *
+ * ⚠️ THE TEMPTING WRONG FIX IS PADDING. Adding room for the lift inside the scroller is the
+ * compensating fix the locks above already forbid on the horizontal axis, for the same reason: it
+ * looks right at one size and drifts everywhere else, and it hides the cause.
+ */
+describe("agent card hover — shadow, never a lift", () => {
+  it("the card's hover carries NO transform", () => {
+    const hover = /\.aglist \.agl-facef \.agl-acard:hover \{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(hover, "the hover rule is gone — the census below would be checking nothing").not.toBe("");
+    expect(hover, "the hover lift came back. Inside a clipping scroller it pushes the card's top-left corner through the clip; the cast growing 6 → 8 is what reads as the lift.").not.toContain("transform");
+    expect(hover, "the cast stopped growing, so the card no longer responds to the pointer at all").toContain("box-shadow: 8px 8px 0");
+  });
+});

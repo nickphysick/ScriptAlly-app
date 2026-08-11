@@ -152,7 +152,11 @@
 .msv-spine.on { background: var(--msv-card); box-shadow: var(--msv-cardshadow); }
 .msv-spine.on::before { opacity: 1; }
 .msv-spine.shelved { opacity: 0.55; }
-.msv-spine:hover { transform: translateY(-1px); }
+/* ⚠️ SHADOW-ONLY HOVER, same reason as the agent card: the spine row sits flush to the top of the
+   scroll row, which clips, so a 1px lift clipped its top edge. It carried NO hover shadow, so this
+   substitutes the resting card shadow rather than simply deleting the feedback — a control that
+   stops responding to the pointer reads as broken, not as restrained. */
+.msv-spine:hover { box-shadow: var(--msv-cardshadow); }
 
 /* ── frontispiece plates (overview) ── */
 .msv-tilegrid { display: flex; flex-direction: column; gap: 26px; }
