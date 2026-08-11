@@ -139,6 +139,33 @@ describe("the rendered states", () => {
     }
   });
 
+  /**
+   * ⚠️ THE ACCOUNT ROW (Option D) — the pill is a SIBLING of the row, not a child, and that is the
+   * whole budget fix: sharing a line with an ~88px pill left the name about 81px, nine characters.
+   * Stacked, the name's box measures 142px (browser-measured; see lib/displayName).
+   */
+  it("⚠️ the Upgrade pill is stacked BELOW the account row, not inside it", () => {
+    const html = renderShell(0);
+    const rowAt = html.indexOf('class="ws-uacct"');
+    const rowEnds = html.indexOf("</div>", html.indexOf('class="ws-utext"'));
+    const pillAt = html.indexOf("ws-upgrow");
+    expect(rowAt).toBeGreaterThan(-1);
+    expect(pillAt).toBeGreaterThan(rowEnds); // outside the row's markup, not nested in it
+    expect(html).not.toContain('class="ws-upg"'); // the inline pill is gone, not restyled
+  });
+
+  /* ⚠️ THE PILL IS REMOVED AT 72px, NOT SQUEEZED. Step 0 confirmed upgrade stays reachable from
+     the account menu and Settings, so nothing becomes unreachable — and an absent element cannot
+     leave the stray border a zeroed pill used to. */
+  it("⚠️ collapsed renders no Upgrade pill at all", () => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "1");
+    try {
+      expect(renderShell(0)).not.toContain("ws-upgrow");
+    } finally {
+      localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
+    }
+  });
+
   it("expanded: no collapse class, toggle reads expanded, controls the panel by id", () => {
     const html = renderShell(0);
     expect(html).not.toContain("sb-collapsed");
@@ -215,5 +242,32 @@ describe("the properties", () => {
   it("the tooltip is portalled through DeskTooltip — never a ::after on a row", () => {
     expect(shellSrc).toContain('side="right" variant="rail"');
     expect(cssRules).not.toMatch(/\.ws-ni::?after[^{]*\{[^}]*content/);
+  });
+
+  /**
+   * ⚠️ THE ROW SHOWS THE FORMATTED NAME; THE TOOLTIP SHOWS THE WHOLE ONE. Asserted at source
+   * because the two only diverge for a name longer than the budget, and this repo's fixture user
+   * ("Nick Physick", 12 chars) fits — a static render cannot tell the two apart, so a render test
+   * here would pass whichever way it was wired.
+   */
+  it("⚠️ the account tooltip carries the FULL name, the row the formatted one", () => {
+    expect(shellSrc).toContain('<span className="ws-n">{formatSidebarName(name)}</span>');
+    expect(shellSrc).toContain("railTipFor(name, plan.label, undefined, 120, true)");
+    expect(shellSrc).not.toContain("railTipFor(formatSidebarName(");
+  });
+
+  /* ⚠️ AND ITS GATE IS `true`, NOT `sidebar.collapsed` — the one rail tooltip that shows in BOTH
+     states, because the name may be shortened or ellipsised even when the sidebar is open. */
+  it("⚠️ the account tooltip is not gated on the rail", () => {
+    const at = shellSrc.indexOf('className="ws-uacct"');
+    expect(at).toBeGreaterThan(-1);
+    const row = shellSrc.slice(at, shellSrc.indexOf("</div>", at));
+    expect(row).toContain("120, true)");
+    expect(row).not.toContain("120, sidebar.collapsed)");
+  });
+
+  it("the avatar's initials come from the same module as the name — no local copy", () => {
+    expect(shellSrc).toContain("{getInitials(name)}");
+    expect(shellSrc).not.toMatch(/const initials = \(n: string\)/);
   });
 });

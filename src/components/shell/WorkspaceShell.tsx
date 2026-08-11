@@ -35,6 +35,7 @@ import {
 import { AvatarChip, CountChip, HelpButton, MenuCard, MenuCardDivider, MenuCardItem, SearchPill } from "./primitives";
 import { useSaveState, saveWhisper } from "../../lib/useSaveState";
 import { useSidebarCollapsed } from "./useSidebarCollapsed";
+import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
 import { invokeCapture } from "./railNav";
@@ -100,9 +101,10 @@ export function msMeta(ms: { genre?: string; wordCount?: number }): string {
   return bits.join(" · ");
 }
 
-/** Up to two initials for the foot avatar — a name is not guaranteed to have a surname. */
-const initials = (n: string): string =>
-  n.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "—";
+/* ⚠️ THE LOCAL `initials` IS GONE — it now comes from lib/displayName, beside the formatter that
+   shortens the name it stands for. Two copies of the splitting rules agree by coincidence; a
+   mononym or a trailing space pulls them apart and nothing fails, the chip just stops matching
+   the name beside it. One input, one module, two outputs. */
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenAccount, onUpgrade,
@@ -486,29 +488,45 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               tabIndex={0}
               onClick={() => go("/account")}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("/account"); } }}
-              {...railTipFor(name, plan.label, undefined, 120, sidebar.collapsed)}
+              /* ⚠️ THE TOOLTIP CARRIES THE FULL NAME, NEVER THE FORMATTED ONE — it is the only
+                 place the whole name is guaranteed to appear, and it now shows in BOTH states:
+                 expanded (where the name may be shortened to "Bethany C." or ellipsised) and
+                 collapsed (where only the avatar shows). Hence `true` rather than
+                 `sidebar.collapsed`, which is the one rail tip whose gate is not the rail. */
+              {...railTipFor(name, plan.label, undefined, 120, true)}
             >
-              <span className="ws-av" aria-hidden="true">{initials(name)}</span>
-              {/* ⚠️ NAME OVER PLAN AS BLOCKS, AND THE PILL OUTSIDE THE TEXT COLUMN (audit P2).
-                  The pill used to sit inside the plan line, which made it a word in a sentence
-                  rather than a control at the end of the row. */}
+              <span className="ws-av" aria-hidden="true">{getInitials(name)}</span>
+              {/* ⚠️ NAME OVER PLAN AS BLOCKS, AND THE PILL IS NO LONGER IN THIS ROW AT ALL
+                  (audit P2, then Option D). The pill first moved out of the plan LINE — it read as
+                  a word in a sentence rather than a control — and has now moved out of the ROW,
+                  because sharing a line with it is what starved the name: ~88px of pill left about
+                  81px for a name, nine characters, and no amount of ellipsis styling buys width. */}
               <span className="ws-utext">
-                <span className="ws-n">{name}</span>
+                <span className="ws-n">{formatSidebarName(name)}</span>
                 <span className="ws-acctline"><span className="ws-pl">{plan.label}</span></span>
               </span>
-              {plan.upgrade && (
-                /* ⚠️ THE PILL STOPS PROPAGATION. Without it the row's own handler would fire too
-                   and the click would land on Settings — the upsell would open the one page that
-                   is not the upgrade flow. */
-                <button
-                  type="button"
-                  className="ws-upg"
-                  onClick={(e) => { e.stopPropagation(); onUpgrade?.(); }}
-                >
-                  Upgrade
-                </button>
-              )}
             </div>
+            {/* ⚠️ ROW 2 — A SIBLING OF THE ACCOUNT ROW, NOT A CHILD, and that is the whole fix: a
+                full-width pill beneath cannot compete with the name for a line's width. It is
+                FILLED rather than ghost now because it finally has the width to carry a fill.
+
+                ⚠️ AND IT IS OUTSIDE THE ROW'S CLICK TARGET, so it no longer needs to stop
+                propagation — the old `stopPropagation` existed only because a pill nested inside a
+                row whose handler opened Settings would send the upsell to the one page that is not
+                the upgrade flow. Being a sibling retires the hazard rather than guarding it.
+
+                ⚠️ REMOVED ENTIRELY WHEN COLLAPSED, never squeezed into a 52px stub — Step 0
+                confirmed the upgrade path is reachable from the account menu and from Settings
+                ("View plans & upgrade"), so nothing becomes unreachable at 72px. */}
+            {plan.upgrade && !sidebar.collapsed && (
+              <button
+                type="button"
+                className="ws-upgrow"
+                onClick={() => onUpgrade?.()}
+              >
+                Upgrade
+              </button>
+            )}
           </div>
         </div>
       </div>

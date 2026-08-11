@@ -160,7 +160,10 @@ describe("the sidebar's type scale, and the width that moved with it", () => {
     expect(rule(".ws-msg")).toContain("font-size: 11.5px");       // manuscript sub-line
     expect(rule(".ws-n")).toContain("font-size: 14px");           // user name
     expect(rule(".ws-pl")).toContain("font-size: 12px");          // plan line
-    expect(rule(".ws-upg")).toContain("font-size: 12px");         // upgrade pill
+    // ⚠️ `.ws-upgrow` since Option D — the pill left the account ROW to become a full-width
+    // sibling beneath it, which is what bought the name its width. The SIZE is unchanged at 12px,
+    // which is what this table guards; only the selector moved.
+    expect(rule(".ws-upgrow")).toContain("font-size: 12px");       // upgrade pill
     expect(rule(".ws-bwm")).toContain("font-size: 22px");         // wordmark
     expect(rule(".ws-ic svg")).toContain("width: 17px");          // nav icons
   });
