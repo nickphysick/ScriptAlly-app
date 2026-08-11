@@ -43,7 +43,7 @@ const ADDED = [
   "--msv-palebg", "--msv-palebd", "--msv-paletx", "--msv-pinkplate",
   "--msv-spine1", "--msv-spine2", "--msv-spine3", "--msv-dash",
   "--msv-stripbg", "--msv-stripbd", "--msv-stripkey",
-  "--msv-prbd",
+  "--msv-prbd", "--msv-count", "--msv-countnone",
 ] as const;
 
 describe("the additions are complete — every new token, in every theme", () => {
@@ -159,6 +159,33 @@ describe("⚠️ EDITORIAL IS MONOCHROME — THE PLATEBAND MUST NOT BE SAGE", ()
     expect(new Set(spines).size).toBe(3);
     const lum = spines.map((h) => parseInt(h.slice(1, 3), 16));
     expect(Math.max(...lum) - Math.min(...lum)).toBeGreaterThanOrEqual(24);
+  });
+});
+
+/**
+ * ⚠️ SHADOW-ONLY HOVER, AND THIS LOCK EXISTS BECAUSE THE FIX WAS ALREADY LOST ONCE.
+ * A card lift inside a clipping container pushes the card's top edge past the clip, so the lift
+ * reads as the top hairline vanishing rather than as movement. `024e8ab` fixed it; an in-flight
+ * revision that predated that fix reinstated `translateY` and landed with `a7b5d54`. A comment
+ * would not have caught that, and did not — only an assertion can.
+ */
+describe("⚠️ cards flush to a clipping boundary hover by SHADOW, never by lift", () => {
+  const PAGE_RAW = readFileSync(resolve(__dirname, "./manuscripts.css"), "utf8");
+  const rule = (sel: string) => {
+    const m = new RegExp(`\\${sel}:hover\\s*\\{([^}]*)\\}`).exec(strip(PAGE_RAW));
+    expect(m, `${sel}:hover must exist as a rule of its own`).not.toBeNull();
+    return m![1];
+  };
+
+  it("the spine switcher lifts nothing", () => {
+    expect(rule(".msv-spine")).not.toMatch(/transform/);
+    expect(rule(".msv-spine")).toContain("box-shadow");
+  });
+
+  /** …and the same for the tiles, which sit inside the card's own `overflow: hidden`. */
+  it("nor does a details tile", () => {
+    expect(block(PLATE, ".msv-btile:hover")).not.toMatch(/transform/);
+    expect(block(PLATE, ".msv-btile:hover")).toContain("box-shadow");
   });
 });
 

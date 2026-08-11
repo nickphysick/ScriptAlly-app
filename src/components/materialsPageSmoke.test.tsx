@@ -32,14 +32,52 @@ describe("/manuscripts renders", () => {
     expect(renderPage(page(), "/manuscripts")).toContain("Your manuscripts");
   });
 
-  /** The plate, the reveal and the In-the-field roster are all derived — none of it runs empty. */
-  it("renders the frontispiece plate without throwing once there is a manuscript", () => {
+  /**
+   * ⚠️ THE POPULATED STATE IS SMOKED TOO, because every figure on the card is DERIVED and none of
+   * those derivations execute on an empty shelf. A source-string spec cannot see a runtime throw,
+   * so this is the only thing standing between a derivation that crashes and a page that will not
+   * load — the exact failure mode that once shipped through a fully green suite.
+   */
+  it("renders the plate card without throwing once there is a manuscript", () => {
     expect(() => renderPageSeeded(page(), "/manuscripts")).not.toThrow();
   });
 
-  it("…and the manuscript reaches the plate", () => {
-    expect(renderPageSeeded(page(), "/manuscripts")).toContain("The Smoke Test");
+  it("…and the manuscript reaches the plateband", () => {
+    const html = renderPageSeeded(page(), "/manuscripts");
+    expect(html).toContain("The Smoke Test");
+    expect(html).toContain("msv-plateband");
   });
+
+  /**
+   * ⚠️ ASSERT THE FIGURE, NOT THE LABEL. The three keys render whatever the numbers are, so a
+   * plate fed constants — or fed the wrong manuscript's queries — passes a key-only check. The
+   * seed carries exactly one query, so the strip must SAY one.
+   */
+  it("…with its three derived figures beside it, and the figures are the real ones", () => {
+    const html = renderPageSeeded(page(), "/manuscripts");
+    for (const key of ["Queries", "Responses", "Last activity"]) expect(html).toContain(key);
+    expect(html).toContain('<div class="msv-statn">1</div>');
+  });
+
+  it("…and the three tabs, opening on Details", () => {
+    const html = renderPageSeeded(page(), "/manuscripts");
+    for (const t of ["Details", "Comparable titles", "Submission packages"]) expect(html).toContain(t);
+    expect(/aria-selected="true"[^>]*>Details</.test(html)).toBe(true);
+  });
+
+  /** The Details pane is the default, so its four derivations run on every first paint. */
+  it("…and the Details pane's four tiles", () => {
+    const html = renderPageSeeded(page(), "/manuscripts");
+    for (const label of ["Out in the world", "Comparable titles", "On the shelf", "Submission materials"]) {
+      expect(html).toContain(label);
+    }
+  });
+
+  /** ⚠️ The lifecycle menu has no other home on this page — losing it is a silent regression. */
+  it("…and keeps the shelve/delete affordance the plate list carried", () => {
+    expect(renderPageSeeded(page(), "/manuscripts")).toContain('aria-label="More actions"');
+  });
+
 });
 
 describe("/manuscripts/comps renders", () => {

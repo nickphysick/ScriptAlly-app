@@ -2,66 +2,46 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Manuscripts overview v2 — frontispiece plates. Reference:
- * design-refs/manuscripts-page-v2.html, variant A (Frontispiece).
+ * Manuscripts overview — the sage plate card. Reference: design-refs/manuscripts-plate.html,
+ * treatment B. Built across six phases; run report in reports/manuscripts-plate.md.
  *
- * Each manuscript is a full-width plate: a corner status pill, a centred stack (AGE · GENRE label,
- * Playfair title, word-count line — NO genre-range whisper here — ornament rule, logline epigraph,
- * Send a query), and an expander that opens an accordion reveal. The reveal's three mini-panels
- * land in v2 Phase 3; this phase carries the rest state + the actions row (Edit details + the
- * lifecycle ⋯ menu, moved wholesale from v1). Comps left for their own sub-page (Phase 1).
+ * ONE CARD, not a plate per manuscript: a sage plateband carrying the selected manuscript's
+ * identity and three derived figures, a tab row beneath it, and three panes — illustrated Details
+ * tiles, the Comparable titles shelf, and Materials on file. A shelf switcher above the card picks
+ * the subject when there is more than one manuscript.
  *
- * The shelved treatment (grey "Shelved" pill, plate dimmed, Send hidden) keys off
- * isShelvedPresentation — Shelved status OR the reversible `shelved` overlay. Lifecycle
- * (shelve/reactivate/deferred-delete + undo) and the edit modal carry over unchanged.
+ * ⚠️ EVERYTHING ABOVE THE CARD BELONGS TO THE HEADER STREAM. `PageHeader` and `.msv1` are theirs
+ * (a7b5d54); this file's business starts at the switcher.
+ *
+ * ⚠️ SELECTION AND TAB STATE LIVE ABOVE THE CARD so switching manuscripts swaps the plate and panes
+ * without remounting it — which is what lets the chosen tab survive the switch. Tab state is LOCAL:
+ * no route, no URL param, no persistence.
+ *
+ * The lifecycle flows (reversible shelve with undo, guarded delete via the cascade manifest) and the
+ * edit modal carry over unchanged from the plate list; comps are deliberately absent from the modal.
  */
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { destroyManifest } from "../lib/cascade";
 import { ConfirmDestroy } from "./ConfirmDestroy";
 import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { PageHeader } from "./shell/PageHeader";
-import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
-import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check, ChevronDown } from "lucide-react";
-import { isShelvedPresentation, activeQueryCount } from "../lib/manuscriptPage";
-import { manuscriptComps } from "../lib/comps";
-import { PlateReveal } from "./manuscripts/RevealPanels";
+import { Plus, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "lucide-react";
+import { isShelvedPresentation } from "../lib/manuscriptPage";
+import { manuscriptComps, withCompRemoved } from "../lib/comps";
+import { isProUser, scoutLive } from "../lib/suggestComps";
+import { plateStats } from "../lib/manuscriptPlate";
+import { outInTheWorld, comparableTitlesTile, onTheShelf, submissionMaterials } from "../lib/manuscriptTiles";
+import { ManuscriptPlate } from "./manuscripts/ManuscriptPlate";
+import { ManuscriptTabs, DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
+import { ManuscriptDetailTiles } from "./manuscripts/ManuscriptDetailTiles";
+import { ManuscriptCompsPane } from "./manuscripts/ManuscriptCompsPane";
+import { ManuscriptPackagesPane } from "./manuscripts/ManuscriptPackagesPane";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-
-/**
- * Accordion reveal — animates its own height between 0 and content, then releases to `auto` so
- * late content growth isn't clipped. Replaces the mockup's `grid-template-rows: 0fr→1fr` trick,
- * which collapses to 0px inside the stage's definite-height scroll context. Reduced motion still
- * measures/toggles; the CSS transition is disabled by media query, so it snaps.
- */
-const Reveal: React.FC<{ open: boolean; children: React.ReactNode }> = ({ open, children }) => {
-  const innerRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | "auto">(open ? "auto" : 0);
-
-  useLayoutEffect(() => {
-    const inner = innerRef.current;
-    if (!inner) return;
-    if (open) {
-      setHeight(inner.scrollHeight);
-      const t = setTimeout(() => setHeight("auto"), 360); // release after the transition
-      return () => clearTimeout(t);
-    }
-    // From auto → an explicit px, then next frame → 0 so the height transition has two keyframes.
-    setHeight(inner.scrollHeight);
-    const raf = requestAnimationFrame(() => setHeight(0));
-    return () => cancelAnimationFrame(raf);
-  }, [open]);
-
-  return (
-    <div className="msv-reveal" style={{ height }}>
-      <div ref={innerRef} className="msv-reveal-inner">{children}</div>
-    </div>
-  );
-};
 
 interface AllManuscriptsProps {
   searchQuery?: string;
@@ -70,11 +50,19 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, queries, agents, packages, versions, activities, taskFlags, updateManuscript, deleteManuscript, setManuscriptShelved } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, deleteManuscript, setManuscriptShelved } =
     useScriptAllyDb();
 
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  /**
+   * ⚠️ SELECTION AND TAB LIVE HERE, ABOVE THE CARD, so switching manuscripts swaps the plate and
+   * panes WITHOUT remounting the card — and the chosen tab therefore survives the switch. Seeded
+   * from the shared active-manuscript pointer the comps and packages sub-pages already read.
+   */
+  const [selectedId, setSelectedId] = useState<string | null>(() => {
+    try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; }
+  });
+  const [tab, setTab] = useState<ManuscriptTabKey>(DEFAULT_MANUSCRIPT_TAB);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deleteModalMs, setDeleteModalMs] = useState<Manuscript | null>(null);
   const [undoToast, setUndoToast] = useState<{ msg: string; undo: () => void } | null>(null);
@@ -86,11 +74,16 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   if (!currentUser) return null;
 
-  const toggle = (id: string) => setOpenId((o) => (o === id ? null : id));
+  /** The card's subject. A stale pointer (deleted manuscript) falls back to the first plate. */
+  const selected = ordered.find((m) => m.id === selectedId) ?? ordered[0] ?? null;
+  const selectMs = (id: string) => {
+    setSelectedId(id);
+    try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode — selection is session-only */ }
+  };
 
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
-    setMenuOpenId(null);
+    setMenuOpen(false);
     const next = !ms.shelved;
     await setManuscriptShelved(ms.id, next);
     if (next) {
@@ -108,8 +101,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   // 6A: type-to-confirm IS the safety — the delete runs immediately on confirm; no undo window
   // (the guard's dialog says so). The cascade + durable log live in db.deleteManuscript.
   const confirmDestroyMs = async (ms: Manuscript) => {
-    setMenuOpenId(null);
-    if (openId === ms.id) setOpenId(null);
+    setMenuOpen(false);
     await deleteManuscript(ms.id);
     setDeleteModalMs(null);
     setToastMessage(`“${ms.title}” deleted`);
@@ -117,7 +109,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   };
 
   // ── edit modal (carried over; comps deliberately absent — the shelf sub-page is the single home) ──
-  const startEditMs = (m: Manuscript) => { setMenuOpenId(null); setEditingMs({ ...m }); };
+  const startEditMs = (m: Manuscript) => { setMenuOpen(false); setEditingMs({ ...m }); };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,50 +133,31 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
     }
   };
 
-  // "In submission" = manuscripts with ≥1 active (non-closed) query — activeQueryCount over each
-  // manuscript's scoped queries (the same pipeline predicate the field roster uses).
+  /* Everything the card states is DERIVED here, per render, from the selected manuscript's own
+     records. No counter is stored and none is written. */
+  const msQueries = selected ? queries.filter((q) => q.manuscriptId === selected.id) : [];
+  const msVersions = selected ? versions.filter((v) => v.manuscriptId === selected.id) : [];
+  const msPackages = selected
+    ? packages.filter((p) => p.manuscriptId === selected.id && p.status !== "Retired")
+    : [];
+  const msComps = selected ? manuscriptComps(selected) : [];
+
   return (
     <div className="msv1">
-      {/* ⚠️ THE HEADER IS INSIDE `.msv-wrap`, the capped content column — a PLATE's edges must meet
-          the first and last plate below it, and past the cap the column centres, so that is the only
-          place they agree. (It sat outside while it was a window-spanning band.) */}
-      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). Plate and toolbar are rows 1 and 2 of
-          a grid whose row 3 is the only thing that scrolls — pinned by construction, so there is no
-          `top` to compute and none to get wrong.
-          ⚠️ THE MODALS STAY OUTSIDE THE GRID, below it in `.msv1`. They are fixed-position overlays;
-          inside the scroller they would be children of a scrollport they are meant to cover. */}
-      <WorkspacePageGrid
-        className="msv-wpg"
-        scrollLabel="Manuscripts"
-        plate={
-          <PageHeader
-            variant="workspace"
-          mark="manuscripts"
-          /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the figure did NOT go
-             with it. THE RULE IS: the plate carries IDENTITY, the toolbar carries TALLIES and view
-             state. So "N MANUSCRIPTS · M IN SUBMISSION" moved down to the tally row below, which is
-             where the Contact list has always kept its own "16 OF 16". This figure had already been
-             dropped once (with the grand slab) and would have gone a second time for want of a home;
-             the home existed on a sibling page all along. */
-          title="Your manuscripts"
-          description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-          actions={[{
-            label: "Add manuscript",
-            icon: <Plus aria-hidden="true" />,
-            onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
-            primary: true,
-          }]}
-          />
-        }
-        /* ⚠️ `undefined`, NOT an empty node, on the empty state — the grid then renders no tool row
-           and no hairline at all rather than a bare rule under the plate. "0 MANUSCRIPTS · 0 IN
-           SUBMISSION" beside "Your library is empty" states the same nothing twice. */
-        toolbar={ordered.length > 0 ? (
-          <span className="msv-tally">
-            {manuscripts.length} manuscripts · {manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} in submission
-          </span>
-        ) : undefined}
-      >
+      {/* The standard page header (shell rollout Phase 5) — full variant. The grand slab's
+          "N manuscripts · M in submission" pulse line is dropped with it (no meta slot under
+          the header law) — see the rollout report. */}
+      <PageHeader
+        variant="full"
+        title="Your manuscripts"
+        description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
+        actions={[{
+          label: "Add manuscript",
+          icon: <Plus aria-hidden="true" />,
+          onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
+          primary: true,
+        }]}
+      />
       <div className="msv-wrap">
         {ordered.length === 0 ? (
           /* ── zero-manuscript state: minimal, in the plate grammar ── */
@@ -204,131 +177,118 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="msv-tilegrid">
-            {ordered.map((m) => {
-              const shel = isShelvedPresentation(m);
-              const open = openId === m.id;
-              return (
-                <div key={m.id} className={`msv-plate${shel ? " shelved" : ""}${open ? " open" : ""}`}>
-                  <span className={`msv-statuspill msv-platepill${shel ? " grey" : ""}`}>
-                    <span className="msv-dt" />
-                    {shel ? "Shelved" : m.status}
-                  </span>
-
-                  {/* head — click toggles the reveal (buttons inside stop propagation) */}
-                  <div className="msv-plate-head msv-fphead" onClick={() => toggle(m.id)}>
-                    <span className="msv-lab">
-                      {(m.ageCategory || "").toUpperCase()} · {(m.genre || "").toUpperCase()}
-                    </span>
-                    <h2 className="msv-fptitle">{m.title}</h2>
-                    <div className="msv-wcline">
-                      <span className="msv-wc">{(m.wordCount ?? 0).toLocaleString("en-GB")} words</span>
-                    </div>
-                    <div className="msv-orn"><i /></div>
-                    <div className={`msv-fplogline${m.logline ? "" : " empty"}`}>
-                      {m.logline || "No logline yet — add one in Edit details."}
-                    </div>
-                    {!shel && (
-                      <div className="msv-restsend">
+        ) : selected ? (
+          /*
+           * ⚠️ ONE CARD, NOT A PLATE PER MANUSCRIPT. The shelf switcher above picks the subject;
+           * the card renders it. Most writers have exactly one manuscript, so a list of one read as
+           * an accident — and at five, a column of full-height plates buried everything below the
+           * first. The card is the same shape at one and at five.
+           */
+          <div className="msv-card">
+            <ManuscriptPlate
+              title={selected.title}
+              status={isShelvedPresentation(selected) ? "Shelved" : selected.status}
+              shelved={isShelvedPresentation(selected)}
+              genres={[selected.ageCategory, selected.genre].filter(Boolean) as string[]}
+              wordCount={selected.wordCount}
+              logline={selected.logline}
+              stats={plateStats(msQueries)}
+              onSendQuery={() => onNavigate?.("queries", "Send a query", { manuscriptId: selected.id })}
+              onEditDetails={() => startEditMs(selected)}
+              /* Shelve / reactivate / guarded delete — carried over whole; see the prop's note. */
+              lifecycle={
+                <div style={{ position: "relative" }}>
+                  <button
+                    type="button"
+                    className="msv-btn sm"
+                    title="More actions"
+                    aria-label="More actions"
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((o) => !o)}
+                    style={{ padding: "6.5px 9px" }}
+                  >
+                    <MoreHorizontal />
+                  </button>
+                  {menuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
+                      <div className="absolute right-0 top-[34px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
                         <button
-                          type="button"
-                          className="msv-btn sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onNavigate?.("queries", "Send a query", { manuscriptId: m.id });
-                          }}
+                          onClick={() => toggleShelved(selected)}
+                          className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
                         >
-                          <Send />
-                          Send a query
+                          <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                          {selected.shelved ? "Reactivate" : "Shelve"}
+                        </button>
+                        <div className="h-px bg-[#f0eae2] my-1 mx-1" />
+                        <button
+                          onClick={() => { setMenuOpen(false); setDeleteModalMs(selected); }}
+                          className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                          Delete…
                         </button>
                       </div>
-                    )}
-                  </div>
-
-                  {/* accordion reveal — three band panels + the lifecycle actions row */}
-                  <Reveal open={open}>
-                      <PlateReveal
-                        queries={queries.filter((q) => q.manuscriptId === m.id)}
-                        agents={agents}
-                        packages={packages.filter((p) => p.manuscriptId === m.id && p.status !== "Retired")}
-                        comps={manuscriptComps(m)}
-                        onOpenHub={() => onNavigate?.("queries")}
-                        onOpenBuilder={() => {
-                          localStorage.setItem(ACTIVE_MS_KEY, m.id);
-                          onNavigate?.("manuscripts", "Submission packages");
-                        }}
-                        onManageComps={() => {
-                          localStorage.setItem(ACTIVE_MS_KEY, m.id);
-                          onNavigate?.("manuscripts", "Comparable titles");
-                        }}
-                      />
-                      <div className="msv-actionsect msv-s4">
-                        <div className="msv-actions">
-                          <button type="button" className="msv-btn sm" onClick={() => startEditMs(m)}>
-                            <Pencil />
-                            Edit details
-                          </button>
-                          <div style={{ position: "relative" }}>
-                            <button
-                              type="button"
-                              className="msv-btn sm"
-                              title="More actions"
-                              aria-label="More actions"
-                              aria-expanded={menuOpenId === m.id}
-                              onClick={() => setMenuOpenId((o) => (o === m.id ? null : m.id))}
-                              style={{ padding: "6.5px 9px" }}
-                            >
-                              <MoreHorizontal />
-                            </button>
-                            {menuOpenId === m.id && (
-                              <>
-                                <div className="fixed inset-0 z-30" onClick={() => setMenuOpenId(null)} />
-                                <div className="absolute left-0 top-[34px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
-                                  <button
-                                    onClick={() => toggleShelved(m)}
-                                    className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
-                                  >
-                                    <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-                                    {m.shelved ? "Reactivate" : "Shelve"}
-                                  </button>
-                                  <div className="h-px bg-[#f0eae2] my-1 mx-1" />
-                                  <button
-                                    onClick={() => { setMenuOpenId(null); setDeleteModalMs(m); }}
-                                    className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                                    Delete…
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                  </Reveal>
-
-                  <button type="button" className="msv-expander" onClick={() => toggle(m.id)}>
-                    <span>{open ? "LESS" : "MORE DETAILS"}</span>
-                    <ChevronDown />
-                  </button>
+                    </>
+                  )}
                 </div>
-              );
-            })}
+              }
+            />
 
-            <button
-              type="button"
-              className="msv-ghost"
-              onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-            >
-              <span className="msv-plus">+</span>
-              <span className="msv-cap">ADD A MANUSCRIPT</span>
-              <span className="msv-ghost-sub">— the shelf holds more than one.</span>
-            </button>
+            <ManuscriptTabs active={tab} onChange={setTab} />
+
+            {tab === "details" && (
+              <div className="msv-dbody">
+                <ManuscriptDetailTiles
+                  world={outInTheWorld(msQueries)}
+                  comps={comparableTitlesTile(msComps)}
+                  shelf={onTheShelf(selected, Date.now())}
+                  materials={submissionMaterials(msPackages, msVersions)}
+                  onOpenQueriesHub={() => onNavigate?.("queries")}
+                  /* A TAB SWITCH, not a navigation — the shelf is a pane of this card. */
+                  onOpenShelf={() => setTab("comps")}
+                  onEditDetails={() => startEditMs(selected)}
+                  onOpenPackageBuilder={() => {
+                    selectMs(selected.id);
+                    onNavigate?.("manuscripts", "Submission packages");
+                  }}
+                />
+              </div>
+            )}
+
+            {tab === "comps" && (
+              <ManuscriptCompsPane
+                comps={msComps}
+                /* The ONE Pro predicate, gating the Scout strip and nothing else on this page. */
+                isPro={isProUser(currentUser)}
+                scoutAvailable={scoutLive()}
+                currentYear={new Date().getFullYear()}
+                /* Removal is the shared pure helper + the single writer; adding needs the form the
+                   sub-page owns, so it goes there until the comps retirement moves it across. */
+                onRemoveComp={(i) => { void updateManuscript(selected.id, { comps: withCompRemoved(msComps, i) }); }}
+                onAddComp={() => {
+                  selectMs(selected.id);
+                  onNavigate?.("manuscripts", "Comparable titles");
+                }}
+                onCopyPitch={(text) => { void navigator.clipboard?.writeText(text); }}
+                onSeeHowItWorks={() => onNavigate?.("plans")}
+                onUpgrade={() => onNavigate?.("plans")}
+              />
+            )}
+
+            {tab === "packages" && (
+              <ManuscriptPackagesPane
+                versions={msVersions}
+                packages={msPackages}
+                onOpenBuilder={() => {
+                  selectMs(selected.id);
+                  onNavigate?.("manuscripts", "Submission packages");
+                }}
+              />
+            )}
           </div>
-        )}
+        ) : null}
       </div>
-      </WorkspacePageGrid>
 
       {/* ── edit modal (comps field deliberately absent — managed on the shelf sub-page) ── */}
       <AnimatePresence>

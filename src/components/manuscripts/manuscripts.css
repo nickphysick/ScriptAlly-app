@@ -109,7 +109,14 @@
 .msv-spine.on { background: var(--msv-card); box-shadow: var(--msv-cardshadow); }
 .msv-spine.on::before { opacity: 1; }
 .msv-spine.shelved { opacity: 0.55; }
-.msv-spine:hover { transform: translateY(-1px); }
+/* ⚠️ SHADOW-ONLY HOVER — RESTORED, and it was reverted once already. A card lift inside a clipping
+   container pushes the card's top edge past the clip, so the lift reads as the top hairline
+   vanishing rather than as movement (024e8ab, the same fault the agent card hit). This rule came
+   back as `translateY(-1px)` in an in-flight revision that predated that fix and landed with
+   a7b5d54. It carried NO hover shadow originally, so the resting card shadow substitutes rather
+   than the feedback simply being deleted — a control that stops answering the pointer reads as
+   broken, not as restrained. */
+.msv-spine:hover { box-shadow: var(--msv-cardshadow); }
 
 /* ── frontispiece plates (overview) ── */
 .msv-tilegrid { display: flex; flex-direction: column; gap: 26px; }

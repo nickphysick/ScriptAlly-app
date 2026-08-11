@@ -32,6 +32,13 @@ export interface ManuscriptPlateProps {
   stats: PlateStats;
   onSendQuery?: () => void;
   onEditDetails?: () => void;
+  /**
+   * ⚠️ THE LIFECYCLE MENU'S HOME. The design draws two actions and this is a third, quiet one —
+   * a deliberate deviation with precedent (the Agents page keeps its ⋯ for exactly this reason).
+   * Shelve, reactivate and the guarded delete have no other surface on this page, and dropping
+   * them to match a mockup would be a functional regression wearing a design decision's clothes.
+   */
+  lifecycle?: React.ReactNode;
 }
 
 export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
@@ -44,6 +51,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
   stats,
   onSendQuery,
   onEditDetails,
+  lifecycle,
 }) => (
   <div className="msv-plateband">
     {/*
@@ -92,6 +100,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
             Send a query
           </button>
         )}
+        {lifecycle}
       </div>
     </div>
   </div>
