@@ -166,7 +166,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
              where the Contact list has always kept its own "16 OF 16". This figure had already been
              dropped once (with the grand slab) and would have gone a second time for want of a home;
              the home existed on a sibling page all along. */
-          title="Your manuscripts"
+          title="Manuscripts"
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           actions={[{
             label: "Add manuscript",

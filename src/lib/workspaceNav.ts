@@ -108,11 +108,26 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass" },
       ],
     },
+    /* ⚠️ MATERIALS HAS THREE DESTINATIONS AGAIN, AND `/manuscripts` HAD NONE AT ALL.
+       The section was childless-but-one for a stretch, carrying only Submission packages — which
+       meant the manuscript library, a routed page with its own plate card, tabs and panes, was
+       reachable from the shell only by typing the URL. That is the opposite failure from the one
+       the file's header warns about: not a nav entry with no route, but a route with no nav entry.
+       Both leave the sidebar lying about the shape of the app.
+
+       ⚠️ THE ORDER IS BROAD TO NARROW, and it is not alphabetical by accident: the manuscript is
+       the object, comps and packages are things you attach to it. `def` moves to `m-list` with the
+       order — the section segment must land on the section's FIRST destination, or clicking
+       "Materials" would skip the page the other two are about. */
     {
       id: "materials",
       label: "Materials",
-      def: "m-pkg",
-      children: [{ id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" }],
+      def: "m-list",
+      children: [
+        { id: "m-list", label: "Manuscripts", path: "/manuscripts", icon: "book" },
+        { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "shelf" },
+        { id: "m-pkg", label: "Submission packages", path: "/manuscripts/packages", icon: "folder" },
+      ],
     },
   ];
 }

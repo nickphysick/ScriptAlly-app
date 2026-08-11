@@ -20,8 +20,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, CalendarDays, Compass, HelpCircle, LayoutGrid, LineChart, ListChecks, LogOut, Package,
-  Send, Settings, StickyNote, Sun, Upload, Users,
+  Book, BookOpen, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
+  LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -160,6 +160,11 @@ const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   people: <Users aria-hidden="true" />,
   compass: <Compass aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
+  /* ⚠️ THIS MAP IS A PARALLEL SURFACE — it is keyed by strings `workspaceNav.ts` writes and
+     nothing type-links the two, so a row whose `icon` has no entry here renders no glyph. Adding
+     a destination means adding it in BOTH places. */
+  book: <BookOpen aria-hidden="true" />,
+  shelf: <Library aria-hidden="true" />,
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
@@ -301,7 +306,26 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
            above everything that chain covers: `.ws-work` refuses to shrink, so no number of
            correct links below it can make the card smaller than its content. All four Tasks
            pages are fixed-viewport surfaces; `todo` covers the four of them. */
-        fit={routeKey === "queries" || routeKey === "dashboard" || routeKey === "todo"}
+        /* ⚠️ AND THE GRID-CONVERTED ROUTES — WITHOUT THIS THE GRID DOES NOTHING (amendment 12).
+           The three-row grid pins the chrome and scrolls row 3, but only if it has a definite
+           height to divide up. It never did: browser-measured on the Contact list, `.ws-work`
+           resolved to 2723px inside a 777px viewport with `biggerThanParent: true`, the real
+           scroller was `.ws-wbody`, and `.wpg-scroll` reported `canScroll: false`. The page
+           scrolled as one document and the plate went with it — reading exactly like "sticky is
+           broken", which is what sent the last two passes into the header's own CSS.
+
+           ⚠️ `routeKey` IS THE FIRST PATH SEGMENT, so this is per-SECTION, not per-page, and
+           the siblings come along whether or not they were the point:
+             · `agents`      → Contact list AND Discover
+             · `manuscripts` → Manuscripts, Comparable titles AND Submission packages
+           All five are on the grid and all five now clip at the root with `.wpg-scroll` inside,
+           which is the precondition. Discover was the one that did not — its root grew a definite
+           height in the same pass, and the note there says why.
+
+           ⚠️ `/queries/analytics` NEEDS NO ENTRY: its routeKey is `queries`, already listed. A
+           third clause naming it would read as a fourth route and never fire. */
+        fit={routeKey === "queries" || routeKey === "dashboard" || routeKey === "todo"
+          || routeKey === "agents" || routeKey === "manuscripts"}
         sections={sections}
         icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}

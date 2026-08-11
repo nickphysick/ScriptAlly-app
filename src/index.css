@@ -98,7 +98,11 @@
    * height — otherwise condensing pulls every following element up by 32px (measured: scrollHeight
    * 952 → 920). Three numbers agreeing by hand is how that reservation silently stops matching.
    */
-  --wsh-plate-h: 88px;
+  /* ⚠️ 88 → 96 (amendment 12). The plate grew with the title: 33px Playfair in an 88px plate
+     left 27px of air above and below a 37px line box, which reads as a title jammed into a
+     band rather than set on a plate. The CONDENSED height is deliberately unchanged — 56px is
+     sized by the 18px scrolled title, which did not move. */
+  --wsh-plate-h: 96px;
   --wsh-plate-h-scrolled: 56px;
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;

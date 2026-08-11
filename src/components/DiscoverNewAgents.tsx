@@ -473,7 +473,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
         <PageHeader
             variant="workspace"
             mark="discover"
-            title="Discover new agents"
+            title="Discover"
             description="Verified agents matched to your manuscript — with the reasons they fit."
             titleAdornment={<span className="dv-propill">Pro</span>}
             actionsSlot={

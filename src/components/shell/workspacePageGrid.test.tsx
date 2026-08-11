@@ -219,4 +219,90 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(ph, "PageHeader stopped consuming the grid — converted pages would fall back to the scroll listener and condense on the wrong element").toContain("PlateCondensedContext");
     expect(ph, "the legacy scroll listener went while pages are still on it — they would stop condensing entirely").toContain("useCondensed");
   });
+
+  /**
+   * ⚠️ THE VIEWPORT LOCK — `.wpg-scroll` IS THE SCROLLER, AND THE GRID IS INERT WITHOUT IT.
+   *
+   * The grid pins its chrome by putting it in rows 1 and 2 of `auto auto minmax(0,1fr)`. That only
+   * pins anything if the grid HAS a definite height to divide, and for six months of this file's
+   * life it did not: `.ws-work` is `flex: 1 0 auto`, shrink 0, so it grows to its content and the
+   * whole page scrolls as one document with the plate riding along. Browser-measured on the
+   * Contact list before the fix: `.ws-work` 2723px inside a 777px viewport, the real scroller
+   * `.ws-wbody`, and `.wpg-scroll` reporting `canScroll: false`.
+   *
+   * ⚠️ IT PRESENTS AS "STICKY IS BROKEN", WHICH IS WHY THIS IS WORTH A LOCK. The symptom is in the
+   * header; the cause is two components above it, in a prop. Two passes were spent inside
+   * pageHeader.css before anyone measured the chain.
+   *
+   * ⚠️ THERE IS NO LAYOUT ENGINE HERE (`environment: 'node'`), so this asserts the CHAIN AT SOURCE,
+   * never a measurement: the route opts in, the page root refuses to scroll, and the grid's row 3
+   * does. Each link is necessary and none is sufficient — which is precisely why enumerating them
+   * beats testing any one.
+   */
+  it("⚠️ the fixed-viewport chain: the route opts in, the root clips, row 3 scrolls", () => {
+    const shell = readFileSync(resolve(__dirname, "AppShell.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const fit = /fit=\{([\s\S]*?)\}\s*\n/.exec(shell);
+    expect(fit, "the `fit` prop is gone from AppShell — every grid page would scroll as a document").toBeTruthy();
+    /* ⚠️ `routeKey` IS THE FIRST PATH SEGMENT, so these five keys cover eleven pages. Naming a
+       sub-route here (`queries/analytics`) would never match and would read as covered. */
+    for (const key of ["queries", "dashboard", "todo", "agents", "manuscripts"]) {
+      expect(fit![1], `the \`${key}\` route lost its fixed-viewport opt-in`).toContain(`"${key}"`);
+    }
+
+    /* the page roots of every converted page: a definite height, and NOT a second scrollport */
+    const ROOTS: [string, string, string][] = [
+      ["Contact list", "components/agents/agentList.css", ".aglist"],
+      ["Discover", "components/agents/discover.css", ".dv2"],
+      ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv1"],
+      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage"],
+      ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw"],
+    ];
+    for (const [page, file, sel] of ROOTS) {
+      const css = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      /* ⚠️ EVERY BLOCK FOR THE SELECTOR, JOINED — NOT THE FIRST. Four of these five roots are
+         declared TWICE: once for the page's token block and once for its layout. `indexOf` finds
+         the token block, which contains no `overflow` at all, so a first-match slice passes
+         whatever the layout rule says. VERIFIED: this lock was written that way, went green, and
+         stayed green when `.dv2`'s layout rule was mutated to `overflow-y: auto` — it was testing
+         a list of custom properties. Same trap as `.wpg-scroll` earlier in this file's history and
+         the one CLAUDE.md records; the fix is to read them all.
+         ⚠️ AND ANCHOR BEFORE SLICING — no match yields "" and every `.not.toMatch` on an empty
+         string passes, which is the house failure mode for source-string specs. */
+      const blocks: string[] = [];
+      for (let i = css.indexOf(`${sel} {`); i > -1; i = css.indexOf(`${sel} {`, i + 1)) {
+        blocks.push(css.slice(i, css.indexOf("}", i)));
+      }
+      expect(blocks.length, `${page}: no \`${sel} {\` rule — the slice below would test an empty string`).toBeGreaterThan(0);
+      expect(blocks.join("\n"), `${page}: its root scrolls, so the chrome is inside a scrollport and rides away with the content`)
+        .not.toMatch(/overflow(-y)?:\s*(auto|scroll)/);
+    }
+
+    /* ⚠️ AND THE SAME CHECK IN THE MARKUP, BECAUSE ONE OF THEM HID THERE. Submission packages
+       carried `overflowY: "auto"` in an INLINE style object on its root — invisible to every CSS
+       lock above and to any grep of packageWorkshop.css — so its plate scrolled away while the
+       four sibling pages pinned theirs. Inline wins over the stylesheet, which is the same reason
+       CLAUDE.md records for the rail's `display` and the help FAB's `right`. */
+    /* ⚠️ RESTATED, NOT SHARED WITH THE CENSUS ABOVE. A `const` in the enclosing `describe` reads
+       as tidier and is the house trap: the two tests then fail together for one edit and the
+       message names the wrong lock. Each `it` states the anchor it consumes. */
+    const PAGES: [string, string][] = [
+      ["Contact list", "../agents/AgentList.tsx"],
+      ["Manuscripts", "../AllManuscripts.tsx"],
+      ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
+      ["Discover", "../DiscoverNewAgents.tsx"],
+      ["Submission packages", "../SubmissionPackages.tsx"],
+      ["Analytics", "../QueryAnalytics.tsx"],
+    ];
+    for (const [page, file] of PAGES) {
+      const tsx = readFileSync(resolve(__dirname, file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(tsx, `${page}: an inline overflow on the page markup puts the grid inside a scrollport, and no stylesheet lock can see it`)
+        .not.toMatch(/overflow(Y|X)?:\s*["'](auto|scroll)["']/);
+    }
+
+    const grid = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
+    const at = grid.indexOf(".wpg-scroll {");
+    expect(at, "no `.wpg-scroll {` rule").toBeGreaterThan(-1);
+    expect(grid.slice(at, grid.indexOf("}", at)), "row 3 stopped scrolling — nothing on the page does now")
+      .toMatch(/overflow-y:\s*auto/);
+  });
 });

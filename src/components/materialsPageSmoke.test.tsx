@@ -29,7 +29,11 @@ describe("/manuscripts renders", () => {
   });
 
   it("…and produces its own chrome, so it is not an empty shell that merely did not crash", () => {
-    expect(renderPage(page(), "/manuscripts")).toContain("Your manuscripts");
+    /* ⚠️ THE H1, NOT THE BARE WORD. The page title follows its nav label now ("Your
+       manuscripts" → "Manuscripts"), and "Manuscripts" alone appears in half the markup on
+       this page — as a tab, an empty-state label and a button. Matching the loose string would
+       keep this green with no header rendered at all, which is the one thing it is here for. */
+    expect(renderPage(page(), "/manuscripts")).toContain(">Manuscripts</h1>");
   });
 
   /**
@@ -118,7 +122,7 @@ describe("/manuscripts/packages renders", () => {
   });
 
   it("…and produces its own chrome", () => {
-    expect(renderPage(<SubmissionPackages />, "/manuscripts/packages")).toContain("Package Workshop");
+    expect(renderPage(<SubmissionPackages />, "/manuscripts/packages")).toContain('wsh-title">Submission packages');
   });
 
   it("renders without throwing once a manuscript is active", () => {

@@ -172,8 +172,12 @@ export const SubmissionPackages: React.FC = () => {
     </div>
   ) : null;
 
+  /* ⚠️ `overflowY: "auto"` IS GONE FROM THIS ROOT, and it was an INLINE style — which is why
+     neither the CSS locks nor a grep of packageWorkshop.css could see it. It wrapped the whole
+     grid in a scrollport of its own, so the plate and tool row scrolled away on this page while
+     every other converted page pinned them. The grid's row 3 is the scroller. */
   return (
-    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflowY: "auto" }}>
+    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflow: "hidden" }}>
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
@@ -195,7 +199,7 @@ export const SubmissionPackages: React.FC = () => {
         <PageHeader
           variant="workspace"
           mark="packages"
-          title="Package Workshop"
+          title="Submission packages"
           description="Bundle your materials once, then send them without rebuilding each time."
           titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
           actionsSlot={activeMs ? (

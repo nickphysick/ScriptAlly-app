@@ -246,16 +246,24 @@
 .wsh-mark { flex: 0 0 38px; transition: flex-basis .2s ease; }
 .wsh-mark--xl { flex: 0 0 64px; }
 .wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
+/* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
+   heading in the shell is 500; this plate is the one place that goes heavier, so the weight is
+   named where it is used and read once. A bare `600` here would be indistinguishable from the
+   start of a house-wide change, and the next person matching a heading to it would spread it. */
+.wsh { --wsh-plate-title-w: 600; }
 .wsh-title {
-  font-family: var(--font-serif); font-size: 25px; font-weight: 500;
+  font-family: var(--font-serif); font-size: 33px; font-weight: var(--wsh-plate-title-w);
   color: var(--shell-ink); margin: 0; white-space: nowrap; line-height: 1.12;
   transition: font-size .2s ease;
 }
 /* ⚠️ NO DESCRIPTION → THE TITLE STEPS UP. The plate's HEIGHT does not change with it — the two
-   states must read as deliberate side by side, not as one page missing something. */
-.wsh-title--solo { font-size: 27px; }
+   states must read as deliberate side by side, not as one page missing something.
+   ⚠️ THE STEP IS +2, AND IT SCALES FROM 33 — it was 27 against a 25px base. Restating 27 beside a
+   33px title would make the solo state SMALLER than the ordinary one, which is the exact inversion
+   the rule exists to prevent. */
+.wsh-title--solo { font-size: 35px; }
 .wsh-sub {
-  margin: 0; font-size: 13px; color: #6b5a51;
+  margin: 0; font-size: 14px; color: #6b5a51;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
   max-height: 20px;
   transition: opacity .15s ease, max-height .2s ease, margin .2s ease;
