@@ -105,9 +105,10 @@ describe("⚠️ trap 1 — a mark that inherits colour disappears in Editorial"
 
 describe("⚠️ trap 2 — the dashboard's blend rules must NOT follow the marks across", () => {
   /**
-   * The dashboard marks are painted PNGs on a white field and need `mix-blend-mode: multiply`.
-   * These are transparent SVG: multiply has no white to remove and darkens the washes instead.
-   * Anyone porting the dashboard's mark CSS wholesale trips this.
+   * The dashboard once held painted PNGs on a white field that needed `mix-blend-mode: multiply`;
+   * they were retired at `a7b5d54` and none survives in `src/`. These are transparent SVG, where
+   * multiply has no white to remove and darkens the washes instead. The lock stays because the
+   * rule is about THESE marks, not about whether the other ones still exist.
    */
   it.each(KEYS)("%s carries no blend mode of its own", (key) => {
     expect(render(MANUSCRIPT_MARKS[key])).not.toContain("mix-blend-mode");

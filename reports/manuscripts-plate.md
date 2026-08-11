@@ -4,8 +4,10 @@ Rebuilding the interior of `AllManuscripts` to the approved design: one card who
 plateband carrying the manuscript's identity, with a tab row beneath switching Details ·
 Comparable titles · Submission packages.
 
-**Status: Phases 1–5 complete. Phase 6 (wiring) BLOCKED at the red gate** — see "The gate" below.
-Phases 2–5 were re-sequenced to author new files only, so the gate holds up the wiring commit alone.
+**Status: COMPLETE — all six phases landed.** Not deployed; Nick reviews in-browser first.
+
+Phases 2–5 were re-sequenced to author new files only, so the header stream's hold cost the wiring
+commit alone rather than the whole build.
 
 Design ref: `design-refs/manuscripts-plate.html`, treatment B (`.tiles2` / `.btile`).
 Treatments A (journey) and C (timeline) and the devbar are mockup devices and are not built.
@@ -81,6 +83,19 @@ only this phase's four new files**:
 | Phase 3 (HEAD `40ed4f3`) | exit 0 | exit 0 | **253 files · 4120 passed · 2 skipped** |
 | Phase 4 (HEAD `3928e2d`) | exit 0 | exit 0 | **255 files · 4167 passed · 2 skipped** |
 | Phase 5 (HEAD `024e8ab`) | exit 0 | exit 0 | **256 files · 4185 passed · 2 skipped** |
+| Naming fix (HEAD `7563e87`) | exit 0 | exit 0 | 256 files · 4187 passed · 2 skipped |
+
+**Phase 6 ran on a clean tree**, so no isolated worktree was needed — HEAD and the working tree
+agreed for the first time in this build:
+
+| At `a7b5d54` | tsc | build | vitest |
+|---|---|---|---|
+| Baseline | exit 0 | exit 0 | 237 files · 3915 passed · 2 skipped |
+| After step 1 | exit 0 | exit 0 | 237 files · **3921** passed · 2 skipped |
+| After step 2 | exit 0 | exit 0 | 237 files · **3923** passed · 2 skipped |
+
+237 rather than 256 because `a7b5d54` landed ~19 test-file deletions for retired markup — the gap
+I had reported between HEAD and the shared tree, now closed in the committed direction.
 
 No phase adds a failure. The isolated run is the one to believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
 Test totals move between rows because other streams commit throughout — recorded fresh each time,
@@ -515,6 +530,69 @@ material the pane does not · straight quotes in the pitch phrase.
 
 ---
 
+## Phase 6 — wiring, switcher, close-out
+
+Commits: `53d0b59` (wire) → `6ef41d1` (switcher) → close-out.
+
+### What the gate cost, and what it did not
+
+`AllManuscripts.tsx` was held for **five phases**, byte-identical throughout. Because Phases 2–5
+were re-sequenced to create only new files, the block cost exactly one commit's worth of delay
+rather than the build. Everything mounted here was already landed and locked.
+
+`4ddc3d4` turned out to be a partial slice: it removed `PageHeader`'s whole `workspace` variant
+(185 lines) while two live call sites — `SubmissionPackages.tsx` and `todo/TasksPageLayout.tsx` —
+still passed it, so **HEAD typechecked red (exit 2) and failed 9 tests** while the working tree
+looked green on other streams' uncommitted fixes. `a7b5d54` landed the remainder and closed it.
+Reported at the time; nothing was fixed or worked around here.
+
+### Step 1 — the card
+
+The plate list, its accordion and the ghost add-bar are gone; `RevealPanels.tsx` went with them
+(orphaned — the Details tiles are what replaced its panels). Selection and tab state live **above**
+the card, which is what lets a switch swap plate and panes without remounting it.
+
+**The lifecycle menu kept its home** via a new `lifecycle` slot on the plate — a third, quiet action
+the design does not draw. Shelve, reactivate and the guarded delete have no other surface on this
+page; dropping them to match a mockup would be a functional regression wearing a design decision's
+clothes. Same precedent as the Agents page's ⋯.
+
+**Shadow-only spine hover restored, and now locked.** `024e8ab` fixed it; an in-flight revision that
+predated that fix reinstated `translateY` and landed with `a7b5d54`. A comment did not catch that
+and could not — the tokens spec now asserts it for the spine *and* the details tiles.
+
+The other two `manuscripts.css` contradictions **landed coherently and were left alone**:
+`.msv1 { overflow-y: auto }` (the root scrolls now `WorkspacePageGrid` is retired) and
+`.msv-wrap { width: 100% }` (the 1200px read cap delegated to the shell's content column, which
+`/manuscripts` still opts into at `App.tsx:682`). Neither conflicts with the card.
+
+> **⚠️ The page smoke asserts the FIGURE, not the label.** The three stat keys render whatever the
+> numbers are, so a key-only check passed a plate fed constants — verified. It now asserts the
+> seed's single query reaches the strip.
+
+### Step 2 — the switcher
+
+White capsule, pink active fill, burgundy `＋ Add`; **absent at exactly one manuscript**, which is
+the commonest real shelf. Editorial's active fill is a grey step, caught by the chroma sweep — the
+**third** surface that rule has now caught.
+
+### Step 3 — close-out
+
+`CLAUDE.md` carries a new **Manuscripts page — sage plate + tabbed pane** section superseding the v2
+frontispiece spec, plus three items moved into the Agent list — Materials block: the two-surface
+Full-manuscript/Author-bio law, the `Opening sample` naming rule, and the `Other` model gap.
+
+> **⚠️ The `mix-blend-mode` note was NOT restored, and that is the finding.** The instruction assumed
+> it had been removed wrongly. It was removed because **the mechanism no longer exists**: the
+> dashboard's painted raster marks were retired at `a7b5d54`, and `mix-blend-mode` now appears
+> nowhere in `src/` outside my own comments. Restoring it as a live rule would invite someone to add
+> `multiply` to the current inline-SVG marks, which would darken their washes. It is recorded in
+> `CLAUDE.md` as **history with its status stated**, so the knowledge survives without the trap.
+> My own Phase 1 comments in `manuscriptMarks.tsx`, its spec and `manuscriptPlate.css` asserted the
+> painted marks in the present tense and have been corrected.
+
+---
+
 ## Rulings folded in (superseding the original brief)
 
 1. **Submission packages is not Pro-gated** — the Free/Pro fork is deleted from Phase 5. One pane
@@ -530,6 +608,17 @@ material the pane does not · straight quotes in the pitch phrase.
    asset. See above.
 
 ---
+
+## ⚠️ THE TALLY GAP — awaiting a decision, deliberately unfilled
+
+`4ddc3d4` deleted the `N manuscripts · M in submission` row, and the shelf switcher is **hidden at
+one manuscript**. So on the commonest shelf — one book — **nothing on the page states how many
+manuscripts exist.**
+
+The figure had already been dropped once (with the grand slab's pulse line) and restored to the
+tally row; this is its second loss. It is derivable in one line (`activeQueryCount` still exists),
+but the tally was **not** reinstated and no replacement was invented, as instructed. Stated here so
+the absence is a decision rather than an oversight.
 
 ## Outstanding, separate from this build
 

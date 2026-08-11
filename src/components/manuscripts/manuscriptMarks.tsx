@@ -5,12 +5,13 @@
  * Illustrated marks for the Manuscripts plate card. Reference: design-refs/manuscripts-plate.html,
  * treatment B (`.tiles2` / `.btile`) — the four tile scenes, lifted verbatim.
  *
- * ⚠️ THESE ARE INLINE SVG WITH GENUINE TRANSPARENCY — NOT THE DASHBOARD'S PAINTED PNGs.
- * The dashboard's illustrated marks are raster artwork drawn on WHITE PAPER, which is why they
- * carry `mix-blend-mode: multiply` and why a `transform` on an ancestor breaks them (a transform
- * isolates the blend group and the white field silently returns). Neither applies here: there is
- * no white field to remove, so multiply would darken the washes instead of cleaning them up.
- * **Do not add `mix-blend-mode` to these, and do not copy the dashboard's blend rules across.**
+ * ⚠️ THESE ARE INLINE SVG WITH GENUINE TRANSPARENCY, AND MUST NEVER CARRY `mix-blend-mode`.
+ * The dashboard once held raster marks drawn on WHITE PAPER, which needed `multiply` to drop that
+ * field into the card — and which broke whenever an ancestor took a `transform`, because a
+ * transform isolates the blend group and the white square silently returned. Those marks were
+ * RETIRED at `a7b5d54`; no `mix-blend-mode` survives anywhere in `src/` today. The rule stands for
+ * these regardless and for the opposite reason: there is no white field to remove here, so
+ * multiply would darken the washes rather than clean them up.
  *
  * ⚠️ THE FILLS ARE BAKED, DELIBERATELY — these are ILLUSTRATIONS, NOT THEMED SURFACES.
  * Nothing here reads `currentColor` or a `--msv-*` token, so a mark renders identically in

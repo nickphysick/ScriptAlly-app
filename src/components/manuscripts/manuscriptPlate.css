@@ -101,10 +101,11 @@
   border-bottom: var(--msv-plateline);
 }
 /* ⚠️ NO `transform` HERE OR ON ANY ANCESTOR OF THE PLATE.
-   The dashboard's painted marks rely on `mix-blend-mode: multiply`, and a transform on an ancestor
-   isolates the blend group and silently brings their white field back. This plate's PNG needs no
-   blend mode (`.os-msicon` carries none either), so the trap is not armed — but a hover lift added
-   here later would arm it for anything that moved in. Offset with position/top if ever needed. */
+   A transform isolates a blend group, which is what used to bring the white field back on the
+   dashboard's painted marks. Those were retired at `a7b5d54` and no `mix-blend-mode` survives in
+   `src/` today, so the trap is not armed — and this plate's PNG never needed a blend mode anyway
+   (`.os-msicon` carries none). Kept because a hover lift added here later would arm it again for
+   anything raster that moved in. Offset with position/top if ever needed. */
 .msv-plateimg {
   flex: 0 0 auto; width: 118px; height: 118px; border-radius: 18px;
   background: #ffffff; border: var(--msv-cardbd);
