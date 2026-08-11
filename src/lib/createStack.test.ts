@@ -13,7 +13,12 @@ import { QueryStatus, SubmissionMethod } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const css = read("../components/shell/f12.css");
-const pane = read("../components/queries/QueryCreatePane.tsx");
+/* ⚠️ THE ANCHOR IS WIDENED, THE ASSERTIONS ARE NOT. The step-stack CHASSIS — the three
+   treatments, the summary rows, the numbered head, the Back/Next footer, Enter-to-advance and the
+   pulse — was extracted to `StepStack` so the response takeover wears the same rhythm rather than a
+   copy of it. Create mode is now TWO files, and "the pane's source" honestly means both: every
+   assertion below is unchanged and still fails if its subject disappears from wherever it lives. */
+const pane = read("../components/queries/QueryCreatePane.tsx") + read("../components/queries/StepStack.tsx");
 const queries = read("../components/Queries.tsx");
 
 const rule = (selector: string): string => {
@@ -22,6 +27,22 @@ const rule = (selector: string): string => {
   if (!m) return "";
   const open = css.indexOf("{", m.index);
   return open < 0 ? "" : css.slice(m.index, css.indexOf("}", open) + 1);
+};
+
+/**
+ * `StepStack`'s map over the step order — the body of the one renderer every section goes through.
+ *
+ * ⚠️ ANCHOR BEFORE YOU SLICE (house rule). A miss would return "" and every `.toContain` on it
+ * would fail loudly rather than quietly, but `.not.toContain` would pass on nothing — so both ends
+ * are asserted here, once, for every caller.
+ */
+const stackMap = (): string => {
+  const a = pane.indexOf("{steps.map((s) => {");
+  expect(a, "the map over the step order is missing — the stack no longer has one renderer")
+    .toBeGreaterThan(-1);
+  const b = pane.indexOf("</section>", a);
+  expect(b, "the map's section never closes").toBeGreaterThan(a);
+  return pane.slice(a, b);
 };
 
 const AGENT = { id: "a1", name: "William Tan", agency: "Foxglove Literary", responseTimeWeeks: 6 } as never;
@@ -41,11 +62,21 @@ describe("the three treatments", () => {
   });
 
   it("every step offers a control instead — Next by name, Save on the last", () => {
-    expect(pane).toContain("const stepFoot = (id: StepId) => {");
+    /* ⚠️ RESPELLED, NOT WEAKENED (step-stack extraction). The footer moved to `StepStack`, where
+       it is generic over the step id — `(id: StepId)` became `(id: T)` — and the create-specific
+       labels became defaults. The claims are unchanged: ONE footer renderer, the primary NAMES its
+       destination rather than saying a bare "Next", the terminal action still reads "Save query",
+       and Back is the previous step in the order. The label defaults are asserted so create still
+       shows the words it always showed. */
+    expect(pane).toContain("const stepFoot = (id: T) => {");
     expect(pane, "naming the destination is worth more than a bare Next")
-      .toContain("Next: {STEP_SHORT[next]}");
-    expect(pane).toContain("{saving ? \"Saving…\" : \"Save query\"}");
-    expect(pane, "Back on every step after the first").toContain("const back = STEP_ORDER[stepIndex(id) - 1];");
+      .toContain("Next: {nextShort}");
+    expect(pane, "and the name comes from the next step, not from anywhere else")
+      .toContain('const nextShort = next ? steps.find((s) => s.id === next)?.short ?? next : "";');
+    expect(pane).toContain("{saving ? savingLabel : saveLabel}");
+    expect(pane, "create's terminal action still says Save query").toContain('saveLabel = "Save query"');
+    expect(pane, "and its in-flight label is unchanged").toContain('savingLabel = "Saving…"');
+    expect(pane, "Back on every step after the first").toContain("const back = order[i - 1];");
     /* Two primaries, different scopes — so the step's must be the softer treatment. */
     expect(rule(".qc-next"), "the step primary must not shout louder than the header's")
       .not.toContain("box-shadow");
@@ -72,20 +103,29 @@ describe("the three treatments", () => {
     expect(bodyPad, "the body's padding shape changed; re-derive the footer's").toHaveLength(3);
     expect(footPad[1], "horizontal gutter must match the body's").toBe(bodyPad[1]);
     expect(footPad[0], "and the bottom must match the body's bottom").toBe(bodyPad[2]);
-    expect(pane.match(/\{stepFoot\("/g)?.length ?? 0, "every step, not just When").toBe(3);
+    /* ⚠️ THE PROPERTY, NOT A COUNT. This used to assert three `stepFoot("…")` call sites, which
+       was only ever a proxy for "no step can be missing its footer". The footer now renders inside
+       the stack's single map over the step order, which GUARANTEES that rather than sampling it —
+       and a count of one would be a coincidence waiting to break the moment a step is added. */
+    expect(stackMap(), "the footer must render inside the map, so no step can lack one")
+      .toContain("{stepFoot(s.id)}");
   });
 
   /* ⚠️ BACK ON EVERY STEP BUT THE FIRST, and the primary names where it goes. `back` is
      `STEP_ORDER[index - 1]`, so the first step in the stack resolves to undefined and renders no
      Back — absent because there is nowhere to go, not absent by omission. */
   it("every step but the first carries Back, and the primary names its destination", () => {
-    expect(pane).toContain("const back = STEP_ORDER[stepIndex(id) - 1];");
+    /* ⚠️ RESPELLED, NOT WEAKENED. `STEP_ORDER[stepIndex(id) - 1]` became `order[i - 1]` and the
+       caller's jump handler is now the `onJump` prop — same rule: the first step resolves to
+       undefined and renders no Back, because there is nowhere to go. */
+    expect(pane).toContain("const back = order[i - 1];");
     expect(pane).toContain('{back && (');
-    expect(pane).toContain('<button type="button" className="qc-back" onClick={() => jump(back)}>← Back</button>');
-    expect(pane).toContain("Next: {STEP_SHORT[next]}");
-    expect(pane).toContain('{saving ? "Saving…" : "Save query"}');
-    /* One renderer, three call sites — so it cannot be true of When and false of Notes. */
-    expect(pane.match(/\{stepFoot\("/g)?.length ?? 0).toBe(3);
+    expect(pane).toContain('<button type="button" className="qc-back" onClick={() => onJump(back)}>← Back</button>');
+    expect(pane).toContain("Next: {nextShort}");
+    expect(pane).toContain("{saving ? savingLabel : saveLabel}");
+    /* One renderer inside the map over the step order — a stronger guarantee than three identical
+       call sites, because it cannot be true of When and false of Notes by construction. */
+    expect(stackMap()).toContain("{stepFoot(s.id)}");
   });
 
   /* ⚠️ MEASURED ON ALL FOUR EDGES, ON EVERY STEP, AT BOTH WIDTHS — because a footer whose CSS read
@@ -93,11 +133,18 @@ describe("the three treatments", () => {
      bottom 16, left 17 at 1440 and 1024 on all three steps, nothing touching. The padding is
      derived from the body's here so the two cannot drift apart. */
   it("and Back returns to the prior step without disturbing what is behind it", () => {
-    expect(pane).toContain("onClick={() => jump(back)}");
+    /* ⚠️ RESPELLED: the stack calls the caller's `onJump`, which create wires to `jump`. */
+    expect(pane).toContain("onClick={() => onJump(back)}");
     /* `jumpTo` never retreats `reached`, so stepping back leaves later steps done and their values
        intact — the rule the stack was built on, restated where Back is the thing using it. */
     expect(read("./createSteps.ts")).toContain("export function jumpTo(target: StepId, reached: StepId)");
-    expect(read("./createSteps.ts")).toContain("reached: stepIndex(target) > stepIndex(reached) ? target : reached");
+    /* ⚠️ THE ANCHOR IS WIDENED, THE ASSERTION IS NOT. `jumpTo` keeps its signature and its
+       meaning; the rule it enforces now lives in the generic `stepStack`, which create delegates
+       to so a second journey can wear the same rhythm. Reading both is the honest translation of
+       "create's step machinery" — and it still fails if the never-retreat rule is removed from
+       wherever it ends up. */
+    expect(read("./createSteps.ts") + read("./stepStack.ts"))
+      .toContain("reached: indexIn(order, target) > indexIn(order, reached) ? target : reached");
   });
 
   /* ⚠️ THE RULE IS A FULL-BLEED DIVIDER, DELIBERATELY — `margin: 20px 0 0` keeps it edge to edge
@@ -110,14 +157,19 @@ describe("the three treatments", () => {
   /* ⚠️ THE KEY HANDLER STAYS. Removing the advertisement is not removing the behaviour — a writer
      who already knows Enter works must not find it stopped working. */
   it("and Enter still commits the step", () => {
+    /* ⚠️ RESPELLED, NOT WEAKENED. `!nextStep(active)` became the order-generic "is this the last
+       step" test, and `step()` became the caller's `onAdvance`. Same rule: Enter accepts and
+       advances, and on the last section it is not swallowed. */
     expect(pane).toContain("const onStackKeyDown = (e: React.KeyboardEvent) => {");
-    expect(pane).toContain("if (!nextStep(active)) return;");
-    expect(pane).toContain("step();");
+    expect(pane).toContain("if (indexIn(order, active) >= order.length - 1) return;");
+    expect(pane).toContain("onAdvance();");
   });
 
   it("done shows a sage tick, the value at the right edge, and an EDIT", () => {
     expect(rule(".qc-sec.qc-done .qc-tick")).toContain("#7e9178");
-    expect(pane).toContain('<span className="qc-sval">{summaries.when}</span>');
+    /* ⚠️ RESPELLED: the summary is the step descriptor's own value now, so one row cannot show a
+       different step's answer. */
+    expect(pane).toContain('<span className="qc-sval">{s.summary}</span>');
     expect(pane).toContain('<span className="qc-sedit">EDIT</span>');
     expect(rule(".qc-sval"), "the value takes the right edge, so four rows agree where an answer is")
       .toContain("margin-left: auto");
@@ -127,10 +179,14 @@ describe("the three treatments", () => {
      row says what it is FOR; after, what was RECORDED. Both at once puts a category label beside
      the thing it categorises, on every row, under a heading that already said it. */
   it("upcoming shows the hint and no value; done shows the value and no hint", () => {
-    expect(pane).toContain('{states.when !== "done" && <span className="qc-stxt">{STEP_HINT.when}</span>}');
-    expect(pane).toContain('{states.when === "done" && <span className="qc-sval">{summaries.when}</span>}');
+    /* ⚠️ RESPELLED: `states.when` became the row's own `state` and the copy comes from the step
+       descriptor. The exclusivity is unchanged — hint until answered, value after, never both. */
+    expect(pane).toContain('{state !== "done" && <span className="qc-stxt">{s.hint}</span>}');
+    expect(pane).toContain('{state === "done" && <span className="qc-sval">{s.summary}</span>}');
     expect(pane, "EDIT must not offer to edit an unanswered step")
-      .toContain('{states.when === "done" && <span className="qc-sedit">EDIT</span>}');
+      /* ⚠️ RESPELLED: `states.when` became the row's own `state`. EDIT is still gated on the step
+         being answered — it must never offer to edit something nobody has filled in. */
+      .toContain('{state === "done" && <span className="qc-sedit">EDIT</span>}');
   });
 
   /* ⚠️ EDIT IS HOVER-REVEALED, THE CHEVRON IS NOT. The chevron says the row opens, which is true
@@ -146,12 +202,21 @@ describe("the three treatments", () => {
   /* ⚠️ UNMOUNTED, NOT HIDDEN. A hidden date picker or textarea still takes tab stops, and the
      whole point of the stack is that Tab walks the section you are actually in. */
   it("only the active section's body is in the document", () => {
-    expect(pane.match(/states\.\w+ === "active" && \(/g)?.length ?? 0).toBe(3);
-    expect(pane, "a hidden body would still take tab stops").not.toContain("hidden={states.");
+    /* ⚠️ THE PROPERTY, NOT A COUNT. Three `states.X === "active"` gates were a proxy for "exactly
+       the open section's body is in the document". There is now ONE gate inside the map, which
+       makes that true for every step by construction rather than by three matching spellings. */
+    expect(stackMap(), "the body must be gated on the row being active")
+      .toContain('{state === "active" && (');
+    expect(stackMap(), "and the body is the descriptor's own")
+      .toContain('<div className="qc-body">{s.body}</div>');
+    expect(pane, "a hidden body would still take tab stops").not.toContain("hidden={state");
   });
 
   it("every summary is a real button — jumping back is a control, not a click handler on a div", () => {
-    expect(pane.match(/<button type="button" className="qc-sum"/g)?.length ?? 0).toBe(3);
+    /* ⚠️ THE PROPERTY, NOT A COUNT. One summary button inside the map, gated on the row NOT being
+       active — so every collapsed step is a real control, and none can quietly become a div. */
+    expect(stackMap()).toContain('{state !== "active" && (');
+    expect(stackMap()).toContain('<button type="button" className="qc-sum"');
   });
 });
 
@@ -211,7 +276,9 @@ describe("Enter accepts and advances; ⌘↵ saves", () => {
   });
 
   it("and on the last section it does not swallow the key", () => {
-    expect(pane, "Enter on Notes must fall through to the ⌘↵ save").toContain("if (!nextStep(active)) return;");
+    /* ⚠️ RESPELLED: the order-generic last-step test. Same claim. */
+    expect(pane, "Enter on Notes must fall through to the ⌘↵ save")
+      .toContain("if (indexIn(order, active) >= order.length - 1) return;");
   });
 
   it("⌘/Ctrl+Enter saves, gated on the same readiness as the buttons", () => {

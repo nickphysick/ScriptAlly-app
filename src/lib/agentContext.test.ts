@@ -22,7 +22,12 @@ import { SubmissionStatus, SubmissionMethod, QueryStatus, type Agent, type Query
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const css = read("../components/shell/f12.css");
 const panel = read("../components/queries/AgentContextPanel.tsx");
-const pane = read("../components/queries/QueryCreatePane.tsx");
+/* ⚠️ THE ANCHOR IS WIDENED, THE ASSERTIONS ARE NOT. The step-stack CHASSIS — the three
+   treatments, the summary rows, the numbered head, the Back/Next footer, Enter-to-advance and the
+   pulse — was extracted to `StepStack` so the response takeover wears the same rhythm rather than a
+   copy of it. Create mode is now TWO files, and "the pane's source" honestly means both: every
+   assertion below is unchanged and still fails if its subject disappears from wherever it lives. */
+const pane = read("../components/queries/QueryCreatePane.tsx") + read("../components/queries/StepStack.tsx");
 
 const bare = (over: Partial<Agent> = {}): Agent => ({
   id: "a1", userId: "u", name: "William Tan", agency: "Foxglove Literary", email: "", website: "",
@@ -523,7 +528,9 @@ describe("the pulse is an invitation, not a status", () => {
      you type reads as an unresolved alert about the thing you are already doing. CSS cannot know
      about engagement, so the class is REMOVED rather than overridden. */
   it("it stops the moment the writer engages with that step", () => {
-    expect(pane).toContain('states.when === "active" && !engaged ? " qc-pulse" : ""');
+    /* ⚠️ RESPELLED: the pulse moved to `StepStack`, where the row knows its own `state`. The rule
+       is unchanged — the class is REMOVED on engagement rather than overridden. */
+    expect(pane).toContain('state === "active" && !engaged ? " qc-pulse" : ""');
     expect(pane).toContain("onFocusCapture={() => setEngaged(true)}");
     expect(pane).toContain("onInput={() => setEngaged(true)}");
   });

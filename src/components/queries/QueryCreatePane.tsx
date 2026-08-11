@@ -24,6 +24,7 @@ import {
   STEP_ORDER, STEP_SHORT, STEP_HINT, STEP_TITLE, STEP_OPTIONAL,
   stepStates, stepIndex, advance, jumpTo, nextStep, stackAvailable, type StepId,
 } from "../../lib/createSteps";
+import { StepStack } from "./StepStack";
 import { stepSummaries, openQueriesWith, duplicateLine, shortDate } from "../../lib/createSummary";
 import { AgentContextPanel } from "./AgentContextPanel";
 import { AgentPicker } from "./AgentPicker";
@@ -199,18 +200,9 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
      writer opening it. Flagged, not hidden. */
   const whisperDate = resolveReminder(draft, agent);
 
-  /* ── THE ACTIVE-STEP CUE (cue D, qc-focus.html) ────────────────────────────────────────
-     ⚠️ THE PULSE IS AN INVITATION, NOT A STATUS. It says "act here"; the moment the writer does,
-     it has been answered and stops — and it does not return for that step. A halo still
-     breathing while you type reads as an unresolved alert about the thing you are already doing.
-     CSS cannot know about engagement, so the class is REMOVED rather than overridden.
-
-     ⚠️ AND THE REAL "YOU ARE HERE" IS DOM FOCUS. The focus ring and caret are a stronger signal
-     than any animation, and they are what makes Enter-through work at all: without focus inside
-     the section, Enter has nothing to accept from. The pulse is the decoration; this is the
-     mechanism. It is also why reduced motion loses nothing that matters. */
-  const [engaged, setEngaged] = useState(false);
-  const stackRef = useRef<HTMLDivElement>(null);
+  /* ⚠️ THE PULSE, THE FOCUS EFFECT AND THE KEYBOARD MOVED TO `StepStack` — they are the rhythm,
+     not the content, and the response takeover needs the same rhythm. What stays here is what only
+     create knows: which steps exist, what each asks, and how far the writer has got. */
 
   /* ⚠️ REPORTED UP, NOT DUPLICATED. `reached` is the pane's own state and the chips are the
      header's, so one of them has to tell the other; deriving "opened" a second time in Queries.tsx
@@ -219,17 +211,6 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
     const i = stepIndex(reached);
     onStepsOpened?.({ when: i >= stepIndex("when"), what: i >= stepIndex("what") });
   }, [reached, onStepsOpened]);
-
-  useEffect(() => {
-    setEngaged(false);
-    const host = stackRef.current?.querySelector<HTMLElement>(`[data-step="${active}"] .qc-body`);
-    /* The first thing a writer can actually type into or press. `disabled` and negative
-       tabindex are excluded so focus never lands somewhere inert. */
-    const first = host?.querySelector<HTMLElement>(
-      'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])',
-    );
-    first?.focus();
-  }, [active]);
 
   /* ⚠️ ONE DOOR. Typing a name, creating one inline and clicking a quick pick must do exactly
      the same thing — seed the materials from that agent and start the walk at the top — or the
@@ -249,52 +230,12 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   };
 
 
-  /* ⚠️ A BUTTON, NOT AN INSTRUCTION. Each step's head carried `ENTER TO ACCEPT ⏎` — a sentence
-     standing in for a control, which asks the writer to know a keyboard convention before they can
-     move, and offers a pointer user nothing at all. Enter still commits the step; it simply stops
-     being advertised, because the button now says what it does.
-
-     ⚠️ AND IT NAMES ITS DESTINATION. "Next: What" is worth more than "Next" — the stack is short
-     enough that knowing where you are going is knowing how much is left. */
-  const stepFoot = (id: StepId) => {
-    const next = nextStep(id);
-    const back = STEP_ORDER[stepIndex(id) - 1];
-    return (
-      <div className="qc-sfoot">
-        {back && (
-          <button type="button" className="qc-back" onClick={() => jump(back)}>← Back</button>
-        )}
-        {next ? (
-          <button type="button" className="qc-next" onClick={step}>Next: {STEP_SHORT[next]}</button>
-        ) : onSave ? (
-          /* ⚠️ TWO PRIMARIES, DELIBERATELY, because they act at different scopes: this finishes the
-             STACK, the header's finishes the PANE. The step's takes the softer treatment so the
-             header's stays the louder of the two. */
-          <button type="button" className="qc-next" disabled={!canSave || saving} onClick={onSave}>
-            {saving ? "Saving…" : "Save query"}
-          </button>
-        ) : null}
-      </div>
-    );
-  };
+  /* ⚠️ THE FOOTER AND THE KEYBOARD MOVED TO `StepStack` — Back/Next, "Next: What" naming its
+     destination, Enter-to-advance and its textarea/menu carve-outs are all the stack's rhythm
+     rather than create's content, and the response takeover wears the same. */
 
   const jump = (id: StepId) => { const n = jumpTo(id, reached); setActive(n.active); setReached(n.reached); };
   const step = () => { const n = advance(active, reached); setActive(n.active); setReached(n.reached); };
-
-  /* ⚠️ ENTER ACCEPTS AND ADVANCES — except where Enter already means something. A textarea needs
-     it for newlines (Notes), and an open menu needs it to choose the highlighted row (the
-     manuscript picker, the unit menu), so those keep it and the stack does not steal it. On the
-     LAST section there is nothing to advance to, so Enter falls through to the page's ⌘↵ save
-     rather than being swallowed and looking broken. */
-  const onStackKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== "Enter" || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
-    const el = e.target as HTMLElement;
-    if (el.tagName === "TEXTAREA" || el.isContentEditable) return;
-    if (el.getAttribute("aria-haspopup") || el.getAttribute("aria-expanded") === "true") return;
-    if (!nextStep(active)) return;
-    e.preventDefault();
-    step();
-  };
 
   return (
     /* `qc-take-body` is the takeover's BODY — the part that wipes and reseats on "Save & log
@@ -399,34 +340,24 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
 
       {/* ── The three columns, in the reading pane's own chrome (qc-cols stacks them <md —
           Mobile Pass 1) ── */}
-      <div
-        className="qc-stack"
-        ref={stackRef}
-        onKeyDown={onStackKeyDown}
-        onFocusCapture={() => setEngaged(true)}
-        onInput={() => setEngaged(true)}
-      >
-
-        {/* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
-            to "What you sent", where it sits with the materials it went out with. */}
-        <section className={`qc-sec qc-${states.when}${states.when === "active" && !engaged ? " qc-pulse" : ""}`} data-step="when" aria-labelledby="qc-h-when">
-          {states.when !== "active" && (
-            <button type="button" className="qc-sum" onClick={() => jump("when")}>
-              <span className="qc-tick" aria-hidden="true">{states.when === "done" ? "✓" : ""}</span>
-              <b>{STEP_SHORT.when}</b>
-              {states.when !== "done" && <span className="qc-stxt">{STEP_HINT.when}</span>}
-              {states.when === "done" && <span className="qc-sval">{summaries.when}</span>}
-              {states.when === "done" && <span className="qc-sedit">EDIT</span>}
-              <span className="qc-schev" aria-hidden="true">›</span>
-            </button>
-          )}
-          {states.when === "active" && (
-            <>
-              <div className="qc-shead">
-                <span className="qc-n" aria-hidden="true">{stepIndex("when") + 1}</span>
-                <h3 id="qc-h-when">{STEP_TITLE.when}{STEP_OPTIONAL.when && <span className="qc-opt"> · OPTIONAL</span>}</h3>
-              </div>
-              <div className="qc-body">
+      <StepStack
+        order={STEP_ORDER}
+        active={active}
+        states={states}
+        onJump={jump}
+        onAdvance={step}
+        onSave={onSave}
+        canSave={canSave}
+        saving={saving}
+        steps={[
+          {
+            /* 1 · WHEN YOU SENT IT — send facts only: date · method · nudge. The manuscript moved
+               to "What you sent", where it sits with the materials it went out with. */
+            id: "when",
+            short: STEP_SHORT.when, title: STEP_TITLE.when, hint: STEP_HINT.when,
+            optional: STEP_OPTIONAL.when, summary: summaries.when,
+            body: (
+              <>
             {/* Date + method share a row (ref): stacked, they pushed Nudge reminder below the fold
                 at ordinary laptop heights, so the one field that needs a decision was the one you
                 had to scroll to find. */}
@@ -525,35 +456,20 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
               {derivedNudge && <div className="qc-derived">{derivedNudge}</div>}
             </div>
             </div>
-          </div>
-              {stepFoot("when")}
-            </>
-          )}
-        </section>
-
-        {/* 2 · WHAT YOU SENT — the checklist, pre-filled from the agent's materials-wanted */}
-        <section className={`qc-sec qc-${states.what}${states.what === "active" && !engaged ? " qc-pulse" : ""}`} data-step="what" aria-labelledby="qc-h-what">
-          {states.what !== "active" && (
-            <button type="button" className="qc-sum" onClick={() => jump("what")}>
-              <span className="qc-tick" aria-hidden="true">{states.what === "done" ? "✓" : ""}</span>
-              <b>{STEP_SHORT.what}</b>
-              {states.what !== "done" && <span className="qc-stxt">{STEP_HINT.what}</span>}
-              {states.what === "done" && <span className="qc-sval">{summaries.what}</span>}
-              {states.what === "done" && <span className="qc-sedit">EDIT</span>}
-              <span className="qc-schev" aria-hidden="true">›</span>
-            </button>
-          )}
-          {states.what === "active" && (
-            <>
-              <div className="qc-shead">
-                <span className="qc-n" aria-hidden="true">{stepIndex("what") + 1}</span>
-                <h3 id="qc-h-what">{STEP_TITLE.what}{STEP_OPTIONAL.what && <span className="qc-opt"> · OPTIONAL</span>}</h3>
-                {/* ⚠️ THE REQUIREMENT, ONCE. It replaces a "NOT REQUESTED" tag on every material
-                    row and "ONLY MANUSCRIPT" on the manuscript row — five tags restating one fact
-                    about the agent, in a step that was 800px tall partly to hold them. */}
-                {agent && <span className="qc-asks">{asksLine}</span>}
-              </div>
-              <div className="qc-body">
+              </>
+            ),
+          },
+          {
+            /* 2 · WHAT YOU SENT — the checklist, pre-filled from the agent's materials-wanted */
+            id: "what",
+            short: STEP_SHORT.what, title: STEP_TITLE.what, hint: STEP_HINT.what,
+            optional: STEP_OPTIONAL.what, summary: summaries.what,
+            /* ⚠️ THE REQUIREMENT, ONCE. It replaces a "NOT REQUESTED" tag on every material
+               row and "ONLY MANUSCRIPT" on the manuscript row — five tags restating one fact
+               about the agent, in a step that was 800px tall partly to hold them. */
+            head: agent ? <span className="qc-asks">{asksLine}</span> : null,
+            body: (
+              <>
             <div style={{ marginBottom: 0 }}>
               <div style={LABEL}>Manuscript</div>
               {onlyManuscript ? (
@@ -734,31 +650,16 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
                 Pick an agent and this fills in from what they ask for
               </div>
             )}
-          </div>
-              {stepFoot("what")}
-            </>
-          )}
-        </section>
-
-        {/* 3 · JOURNAL — the optional first note */}
-        <section className={`qc-sec qc-${states.notes}${states.notes === "active" && !engaged ? " qc-pulse" : ""}`} data-step="notes" aria-labelledby="qc-h-notes">
-          {states.notes !== "active" && (
-            <button type="button" className="qc-sum" onClick={() => jump("notes")}>
-              <span className="qc-tick" aria-hidden="true">{states.notes === "done" ? "✓" : ""}</span>
-              <b>{STEP_SHORT.notes}</b>
-              {states.notes !== "done" && <span className="qc-stxt">{STEP_HINT.notes}</span>}
-              {states.notes === "done" && <span className="qc-sval">{summaries.notes}</span>}
-              {states.notes === "done" && <span className="qc-sedit">EDIT</span>}
-              <span className="qc-schev" aria-hidden="true">›</span>
-            </button>
-          )}
-          {states.notes === "active" && (
-            <>
-              <div className="qc-shead">
-                <span className="qc-n" aria-hidden="true">{stepIndex("notes") + 1}</span>
-                <h3 id="qc-h-notes">{STEP_TITLE.notes}{STEP_OPTIONAL.notes && <span className="qc-opt"> · OPTIONAL</span>}</h3>
-              </div>
-              <div className="qc-body">
+              </>
+            ),
+          },
+          {
+            /* 3 · JOURNAL — the optional first note */
+            id: "notes",
+            short: STEP_SHORT.notes, title: STEP_TITLE.notes, hint: STEP_HINT.notes,
+            optional: STEP_OPTIONAL.notes, summary: summaries.notes,
+            body: (
+              <>
             {/* ⚠️ THE NOTE FILLS ITS STEP (ref qc-stage1.html, variant A). It was a small inset
                 box in a three-column layout — a field you could not think in. Full width of the
                 body, 104px to start, and resizable DOWNWARD as well as up because a writer who
@@ -774,12 +675,11 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
             />
             {/* One line, beneath — what happens to it and who sees it. */}
             <p className="qc-notecap">Saved with this query · only you see it</p>
-          </div>
-              {stepFoot("notes")}
-            </>
-          )}
-        </section>
-      </div>
+              </>
+            ),
+          },
+        ]}
+      />
       {whisperDate && (
         <p className="qc-whisper">We&rsquo;ll nudge you on {shortDate(whisperDate)} if it&rsquo;s gone quiet.</p>
       )}

@@ -13,7 +13,12 @@ import { STEP_TITLE } from "./createSteps";
 import { readFileSync } from "fs";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
-const pane = read("../components/queries/QueryCreatePane.tsx");
+/* ⚠️ THE ANCHOR IS WIDENED, THE ASSERTIONS ARE NOT. The step-stack CHASSIS — the three
+   treatments, the summary rows, the numbered head, the Back/Next footer, Enter-to-advance and the
+   pulse — was extracted to `StepStack` so the response takeover wears the same rhythm rather than a
+   copy of it. Create mode is now TWO files, and "the pane's source" honestly means both: every
+   assertion below is unchanged and still fails if its subject disappears from wherever it lives. */
+const pane = read("../components/queries/QueryCreatePane.tsx") + read("../components/queries/StepStack.tsx");
 const queries = read("../components/Queries.tsx");
 
 /** Everything between two column headings — the body of the first one. */
@@ -44,8 +49,11 @@ describe("the three sections keep the columns' vocabulary and their split", () =
   });
 
   it("the manuscript stayed with the materials, not with the send facts", () => {
-    const whatAt = pane.indexOf('aria-labelledby="qc-h-what"');
-    const notesAt = pane.indexOf('aria-labelledby="qc-h-notes"');
+    /* ⚠️ RE-ANCHORED, NOT WEAKENED. The per-section `aria-labelledby` literals became one
+       templated attribute in `StepStack`; the step BODIES still live here, in order, behind their
+       descriptors. Slicing on those keeps the assertion pointed at exactly the same content. */
+    const whatAt = pane.indexOf('id: "what",');
+    const notesAt = pane.indexOf('id: "notes",');
     expect(whatAt, "the what section is missing").toBeGreaterThan(-1);
     expect(notesAt).toBeGreaterThan(whatAt);
     const what = pane.slice(whatAt, notesAt);
@@ -54,8 +62,10 @@ describe("the three sections keep the columns' vocabulary and their split", () =
   });
 
   it("and the send facts did not follow it", () => {
-    const whenAt = pane.indexOf('aria-labelledby="qc-h-when"');
-    const when = pane.slice(whenAt, pane.indexOf('aria-labelledby="qc-h-what"'));
+    /* ⚠️ RE-ANCHORED, NOT WEAKENED — see above. */
+    const whenAt = pane.indexOf('id: "when",');
+    expect(whenAt, "the when step is missing").toBeGreaterThan(-1);
+    const when = pane.slice(whenAt, pane.indexOf('id: "what",'));
     expect(when).toContain("Date sent");
     expect(when).toContain("Sent by");
     expect(when, "the manuscript came back to the send facts").not.toContain(">Manuscript<");

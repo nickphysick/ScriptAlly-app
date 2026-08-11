@@ -45,11 +45,13 @@
 
 import { shortDate } from "./createSummary";
 import { todayInputDate } from "./queryDraft";
+import { statesIn, nextIn, advanceIn, jumpIn, type StepState } from "./stepStack";
 
 export type StepId = "when" | "what" | "notes";
 
-/** Presentation only — which of the ref's three treatments a section wears. */
-export type StepState = "active" | "done" | "upcoming";
+/** Presentation only — which of the ref's three treatments a section wears.
+ *  Re-exported from the generic machinery so create's callers keep one import. */
+export type { StepState };
 
 export const STEP_ORDER: readonly StepId[] = ["when", "what", "notes"] as const;
 
@@ -105,30 +107,22 @@ export function stackAvailable(agent: { id: string } | null | undefined): boolea
  * `reached` therefore only ever moves forward.
  */
 export function stepStates(active: StepId, reached: StepId): Record<StepId, StepState> {
-  const a = stepIndex(active);
-  const r = Math.max(stepIndex(reached), a); // a step you are standing in has necessarily been reached
-  return STEP_ORDER.reduce((acc, id, i) => {
-    acc[id] = i === a ? "active" : i <= r ? "done" : "upcoming";
-    return acc;
-  }, {} as Record<StepId, StepState>);
+  return statesIn(STEP_ORDER, active, reached);
 }
 
 /** Enter's target: the next section, or null at the end (where Enter saves instead of advancing). */
 export function nextStep(active: StepId): StepId | null {
-  const i = stepIndex(active);
-  return i < 0 || i >= STEP_ORDER.length - 1 ? null : STEP_ORDER[i + 1];
+  return nextIn(STEP_ORDER, active);
 }
 
 /** Advancing carries `reached` forward with it; jumping BACK leaves it where it was. */
 export function advance(active: StepId, reached: StepId): { active: StepId; reached: StepId } {
-  const next = nextStep(active);
-  if (!next) return { active, reached };
-  return { active: next, reached: stepIndex(next) > stepIndex(reached) ? next : reached };
+  return advanceIn(STEP_ORDER, active, reached);
 }
 
 /** Clicking a summary — any section is reachable, forwards or back. `reached` never retreats. */
 export function jumpTo(target: StepId, reached: StepId): { active: StepId; reached: StepId } {
-  return { active: target, reached: stepIndex(target) > stepIndex(reached) ? target : reached };
+  return jumpIn(STEP_ORDER, target, reached);
 }
 
 /**

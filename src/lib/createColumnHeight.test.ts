@@ -14,7 +14,12 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
-const pane = read("../components/queries/QueryCreatePane.tsx");
+/* ⚠️ THE ANCHOR IS WIDENED, THE ASSERTIONS ARE NOT. The step-stack CHASSIS — the three
+   treatments, the summary rows, the numbered head, the Back/Next footer, Enter-to-advance and the
+   pulse — was extracted to `StepStack` so the response takeover wears the same rhythm rather than a
+   copy of it. Create mode is now TWO files, and "the pane's source" honestly means both: every
+   assertion below is unchanged and still fails if its subject disappears from wherever it lives. */
+const pane = read("../components/queries/QueryCreatePane.tsx") + read("../components/queries/StepStack.tsx");
 const css = read("../components/shell/f12.css");
 
 const rule = (selector: string): string => {
@@ -67,6 +72,12 @@ describe("the columns take the height, and scroll only as a fallback", () => {
   });
 
   it("only the active section's body is mounted, so height is never the sum of three", () => {
-    expect(pane.match(/states\.\w+ === "active" && \(/g)?.length ?? 0).toBe(3);
+    /* ⚠️ THE PROPERTY, NOT A COUNT (step-stack extraction). The height claim is that exactly one
+       body is in the document; one gate inside the map guarantees it for every step, where three
+       matching spellings only sampled it. */
+    const map = pane.slice(pane.indexOf("{steps.map((s) => {"));
+    expect(map, "the map over the step order is missing").not.toBe("");
+    expect(map).toContain('{state === "active" && (');
+    expect(map).toContain('<div className="qc-body">{s.body}</div>');
   });
 });
