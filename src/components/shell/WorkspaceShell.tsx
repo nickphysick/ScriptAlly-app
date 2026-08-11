@@ -417,7 +417,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               a parent row that both navigated AND disclosed was one control doing two jobs, and
               it put half the app behind a state you had to know to open. The group label is pure
               typography — not a button, no state, nothing to click. */}
-          <nav className="ws-nav">
+          {/* ⚠️ ONE ACCESSIBLE NAME, BOTH STATES (sidebar-collapse pack, Phase 4). Collapsed, the
+              labels are hidden by opacity/max-width and stay in the tree — never display:none —
+              so a screen reader walks the same nav either way; the name must not change with the
+              width. */}
+          <nav className="ws-nav" aria-label="Main">
             {sections.map((sec, gi) => (
               <React.Fragment key={sec.id}>
                 {/* ⚠️ THE FIRST GROUP GETS NO HEADING (app-shell-v2). "WORKSPACE" sat above a
