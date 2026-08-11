@@ -1,5 +1,5 @@
 /**
- * AgentResponseGuidelines — the Contact List "Response guidelines" card (interaction layer 6c).
+ * AgentResponseGuidelines — the Contact list "Response guidelines" card (interaction layer 6c).
  * Two editable facts + a static Pro strip:
  *   • Usual response time — a number (weeks) with a "Not stated" option. Absent = not stated (the
  *     `=== 0` convention is retired). Stored unit is weeks (a units picker is a follow-up).

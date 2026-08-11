@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The agent "if they don't reply" tri-state — the pure read/write mapping behind the Contact List's
+ * The agent "if they don't reply" tri-state — the pure read/write mapping behind the Contact list's
  * Response-guidelines toggle (interaction-layer 6c; extracted + locked in the polish pass).
  *
  * MODEL LAW (Nick): `Agent.noResponseMeansNo?` is an OPTIONAL boolean — absence = "not stated",

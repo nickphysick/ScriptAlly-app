@@ -1,4 +1,4 @@
-# Interaction layer — Queries Hub + Contact List + AI Find & update
+# Interaction layer — Queries Hub + Contact list + AI Find & update
 
 Running report. Session 1 = Stages 0–5 (interactions, no AI). Session 2 = Stages 6–9 (the AI
 feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queries-interactions.html`
@@ -106,17 +106,17 @@ enum where a member exists:
 — bespoke boolean state grew Author bio + Full manuscript + Synopsis page-count, output re-mapped
 (counts now optional → out-of-range-only guard); `EditAgentDrawer` `MaterialsControl` is data-driven
 (auto-adapts; label now leads with the material name so "Synopsis pages" ≠ "Sample pages"); NEW
-`agents/AgentMaterialsEditor.tsx` — the f12-themed editable Materials card on the Contact List (parse
+`agents/AgentMaterialsEditor.tsx` — the f12-themed editable Materials card on the Contact list (parse
 → pill editor → one optimistic write per Save + undo toast; empty selection clears via `deleteField`,
 per absence=not-stated). **No rules change** (the `materialsWanted is list, size<=20` rule already
-tolerates it). **UNVERIFIED visually** — Contact List is auth-gated; Nick to eyeball the editable
+tolerates it). **UNVERIFIED visually** — Contact list is auth-gated; Nick to eyeball the editable
 Materials card + the Add-Agent form's new pills on dev, three themes.
 
 ---
 
 ## Stage 6e — query history card (DONE)
 
-**What:** the Contact List reading pane's "history" tab now shows **one row per query** (not the old
+**What:** the Contact list reading pane's "history" tab now shows **one row per query** (not the old
 activity-derived event timeline): real `StatusDot` · manuscript title · a status line · `↗` on hover
 · date sent; footer `{n} queries · Send another`. Each row **routes to the query in the Queries Hub**
 via the existing seam `onNavigate("queries", queryId)` → `pathFor` → `/queries?q=<id>` (unrecognised
@@ -175,7 +175,7 @@ seam landed earlier). No code needed; confirmed + noted.
 ## Stage 5d — Queries reading-pane click-to-pick + the Edit button's fate (DONE)
 
 **Two click-to-pick shortcuts** on the "What you sent" block (constrained values, F12Menu popovers,
-matching the Contact List's 6a method-pick):
+matching the Contact list's 6a method-pick):
 - **Send method** — the "Sent by {method}" value opens a picker (Email / Online Form / Query Manager /
   Post — the exact `SubmissionMethod` enum, which is also what `firestore.rules` validates). Empty →
   "set method". Current value gets a ✓.
@@ -335,7 +335,7 @@ was `28689b2`.
 | 3a — genre taxonomy foundation (pure module + 20 tests) | `8971a1a` | ✅ done |
 | 3b — personal-genre storage + promotion-queue write + rules | `70fa018` | ✅ done |
 | 3d — taxonomy picker + read-time tolerance layer | `d38bfbf` | ✅ done |
-| 3e (agents) — picker wired in Add/Edit-agent (writes IDs); tolerant display on Contact List + dashboard | `2e24b07` | ✅ done |
+| 3e (agents) — picker wired in Add/Edit-agent (writes IDs); tolerant display on Contact list + dashboard | `2e24b07` | ✅ done |
 | 4f / matching — communityMatch + wordCountWhisper made ID-tolerant (read side) | `922058c` | ✅ done |
 | 3 (new) — PDF demoted into a ⋯ overflow menu, both pages (+ shared F12Menu) | `b6774f9` | ✅ done |
 | 4e (manuscript) — picker in the manuscript genre input (write side; stores ID) | `122153f` | ✅ done |
@@ -536,11 +536,11 @@ SmartImportReview still store parsed labels — tolerated, converted on a later 
 (PDF→overflow), and pushes Queries/Contact-List to Stages 5/6 and the AI feature to 7–10. The
 already-done sub-stages map cleanly (old 3a/3b/3d/3e/3f = new 4a/4b/4d/4e/4f).
 | 4 — Queries Hub interactions | — | ⏳ not started |
-| 5 — Contact List interactions | — | ⏳ not started |
+| 5 — Contact list interactions | — | ⏳ not started |
 
 **Where the genre migration stands:**
 - **Agents — fully migrated** (write IDs; legacy labels tolerated + upgraded-on-edit; tolerant
-  display on Contact List + dashboard). Live on dev.
+  display on Contact list + dashboard). Live on dev.
 - **Read side of the manuscript slice — done** (`922058c`): `communityMatch` + `wordCountWhisper`
   resolve `ms.genre` through `genreDisplay()`, so Discover matching + the hero whisper work whether
   the stored value is an id or a legacy label. The app is fully correct with manuscripts still

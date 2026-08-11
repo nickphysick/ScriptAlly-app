@@ -551,7 +551,7 @@ export interface TaskFlag {
 /**
  * UserTask — a task the WRITER wrote (the only stored, user-originated to-do object). Lives in the
  * generic `users/{uid}/tasks` collection so the To-do "Your tasks" column AND the per-record
- * "View tasks" popover (Queries Hub / Contact List) read ONE store. Owner is nullable — an
+ * "View tasks" popover (Queries Hub / Contact list) read ONE store. Owner is nullable — an
  * unattached task floats — so at most one of queryId/agentId/manuscriptId is set (all optional).
  */
 /**

@@ -584,7 +584,7 @@ These flourishes matter as much as the hexes — they are the difference between
 
 ## `.t-f12` — the F12 master theme (overnight nav/hub/agents run, 2026-07-13)
 
-Applied ONLY to the Queries Hub and Contact List page roots (via `F12Page` in
+Applied ONLY to the Queries Hub and Contact list page roots (via `F12Page` in
 `src/components/shell/F12Shell.tsx`); never app-wide. `.t-capp`/`.t-bold`/`.t-edn` are
 untouched — consolidation is a separate, later job. Tokens live in `src/index.css`
 (`.t-f12` block); shared shell classes in `src/components/shell/f12.css`. Values are the

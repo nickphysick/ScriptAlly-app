@@ -2491,7 +2491,7 @@ export const Queries: React.FC<{
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
         /* (The old .qdesk / .queries-content-grid short-screen fallback is retired — both panes
-           now live in the shared .f12-body column, same as the Contact List page.) */
+           now live in the shared .f12-body column, same as the Contact list page.) */
       `}</style>
 
 
@@ -3022,7 +3022,7 @@ export const Queries: React.FC<{
             handleDeleteQuery note above); the confirm flow itself is real. */}
 
         {/* ── Split — list pane beside the reading pane, in the SAME centred column as the
-            Contact List page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
+            Contact list page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
             the two panes are --listw / flex:1, locked to the control-bar zones above). ── */}
         <div className="f12-body" style={{ paddingTop: activeFilterChips.length ? 0 : "var(--gut)" }}>
 

@@ -43,7 +43,7 @@ describe("agent list · the page column", () => {
   it("padding rides the page, the CAP rides the inner column — two elements, two jobs", () => {
     expect(
       block(".aglist .agl-page"),
-      /* ⚠️ THE TOP IS 14px, HALVED FROM 28 (Contact List pass). The workspace header now sits
+      /* ⚠️ THE TOP IS 14px, HALVED FROM 28 (Contact list pass). The workspace header now sits
          INSIDE this padding, so the top value stopped being breathing room above the content and
          became a band of empty paper above a header that is already generous. The gutter and the
          48px bottom are untouched — they gutter the CONTENT, which is a different job, and

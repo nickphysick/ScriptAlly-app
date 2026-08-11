@@ -1,6 +1,6 @@
 /**
  * TasksPopover — the record-scoped "View tasks" popover (interaction layer 5c / Stage 6). One
- * component, two scopes: a query (Queries Hub) or an agent (Contact List). It shows BOTH tiers,
+ * component, two scopes: a query (Queries Hub) or an agent (Contact list). It shows BOTH tiers,
  * visibly distinct:
  *   • derived system SUGGESTIONS for the record (the same Task[] the badge counts — never stored;
  *     tick = dismissTask), and

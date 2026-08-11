@@ -385,7 +385,7 @@ describe("desk rule — provenance footer", () => {
   });
 });
 
-/* "desk rule — compact emptiness artefacts" retired with the F12 Contact List page: its sole test
+/* "desk rule — compact emptiness artefacts" retired with the F12 Contact list page: its sole test
    asserted F12 markup inside Agents.tsx, which the Agent list rebuild replaced. */
 
 describe("masthead pulse line — Your database · N on file · I idle", () => {

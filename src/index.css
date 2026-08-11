@@ -790,7 +790,7 @@
 }
 
 /* ── .t-f12 — the F12 MASTER THEME (overnight nav/hub/agents run). Applied ONLY to the Queries
-   Hub and Contact List page roots — never app-wide; .t-capp/.t-bold/.t-edn are untouched.
+   Hub and Contact list page roots — never app-wide; .t-capp/.t-bold/.t-edn are untouched.
    Values copied from the mockups' :root (design-refs/queries-hub-v14.html ≡
    agents-contact-list-v3.html), with ONE correction: the sage band pair is the LIVE dashboard
    diary band (diaryCarousel.css #dce0d9→#d0d6cc), which WINS over the mockups' #d7ddd5→#d5dbd3

@@ -1,4 +1,4 @@
-# Queries Hub + Contact List — polish pass (report)
+# Queries Hub + Contact list — polish pass (report)
 
 **Status: COMPLETE.** All six phases resolved (P3 as a deliberate documented no-op). One commit per
 phase, each individually revertible; `main` clean; gates green (tsc + build + Vitest **883**) per
@@ -8,7 +8,7 @@ on `claude-il`, ff-merged to `main` after a no-overlap check vs Nick's uncommitt
 
 ## Headline flags
 
-- **⚠️ The Queries Hub + Contact List render under the single `.t-f12` master theme**, NOT the three
+- **⚠️ The Queries Hub + Contact list render under the single `.t-f12` master theme**, NOT the three
   `.t-capp`/`.t-bold`/`.t-edn` classes the brief's Global rules assume. So "resolve in all three themes"
   is moot for these panes — there is one theme. The P6 escalation consumes `.t-f12`'s **needs-you**
   tokens `--pink-t` / `--pink-b` / `--pink-i` (index.css:552, commented `/* needs-you */`). Editorial's
@@ -36,7 +36,7 @@ on `claude-il`, ff-merged to `main` after a no-overlap check vs Nick's uncommitt
   resulting stored value → read back), incl. **absent → "unstated"**, and "Not stated" produces a
   field-CLEAR intent, never `undefined`/`false`. Green (+6).
 
-### P2 — Contact List de-dup (`8b878d9`)
+### P2 — Contact list de-dup (`8b878d9`)
 - Removed the **"Website"** launcher from the command bar (header chip cluster is the single link home;
   a spacer preserves the ⋯/Delete right-alignment). Removed the footer **"OPEN TO QUERIES"** pill —
   the top-right `SegmentedToggle` (same `submissionStatus` source) is the single door readout.
@@ -91,13 +91,13 @@ on `claude-il`, ff-merged to `main` after a no-overlap check vs Nick's uncommitt
 <P6 commit>  fix(polish P6): tracking overdue escalation + composer un-pin (Layout A)
 a0f847f      fix(polish P5): journal placeholder copy — this query, not this agent
 d8e0aaf      fix(polish P4): one materials control in "What you sent"
-8b878d9      fix(polish P2): Contact List — de-dup Website + door state
+8b878d9      fix(polish P2): Contact list — de-dup Website + door state
 a2fce7d      fix(polish P1): lock the reply-policy tri-state round-trip
 ```
 (P3 = documented no-op, no commit.)
 
 ## To eyeball on dev (auth-gated; three-theme note above)
-- Tri-state "Not stated" now sticks (rules deployed). Contact List: no Website in the bar, no footer
+- Tri-state "Not stated" now sticks (rules deployed). Contact list: no Website in the bar, no footer
   door pill. Queries "What you sent": no dashed tile. Journal ghost copy says "this query".
 - **P6 in the browser:** overdue readout tint + badge + inline Nudge + the marker/overdue-zone bar;
   the composer flowing under the readout with whitespace below (Layout A); the fork staying neutral.

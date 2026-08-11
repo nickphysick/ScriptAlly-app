@@ -821,7 +821,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
         <PageHeader
           variant="workspace"
           mark="contacts"
-          title="Contact List"
+          title="Contact list"
           description="Everyone you're querying, watching, or saving for later."
           actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
           /* ⚠️ THE TOOLBAR IS THE PLATE'S SECOND ROW NOW (amendment 8 B), not a sibling beneath it.

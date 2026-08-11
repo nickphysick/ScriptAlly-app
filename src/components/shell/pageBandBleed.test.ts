@@ -32,7 +32,7 @@ const headerCss = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
 const indexCss = read("index.css");
 
 const BAND_TIER: { page: string; file: string; root: string }[] = [
-  { page: "Contact List", file: "components/agents/agentList.css", root: ".aglist .agl-page" },
+  { page: "Contact list", file: "components/agents/agentList.css", root: ".aglist .agl-page" },
   { page: "Discover", file: "components/agents/discover.css", root: ".dv2" },
   { page: "Manuscripts", file: "components/manuscripts/manuscripts.css", root: ".msv1" },
   { page: "Comparable titles", file: "components/manuscripts/comps.css", root: ".ctpage" },
@@ -216,12 +216,12 @@ describe("the header plate — one gutter token, and the plate inside the column
     }
   });
 
-  it("Contact List, Discover and Manuscripts nest the plate INSIDE their capped column", () => {
+  it("Contact list, Discover and Manuscripts nest the plate INSIDE their capped column", () => {
     /* ⚠️ ASSERTED ON ORDER, NOT PRESENCE. Both the wrapper and the PageHeader exist either way —
        what changed is which encloses which, so a `toContain` on both would pass in the broken
        arrangement too. */
     for (const [page, file, wrapper] of [
-      ["Contact List", "components/agents/AgentList.tsx", "agl-inner"],
+      ["Contact list", "components/agents/AgentList.tsx", "agl-inner"],
       ["Discover", "components/DiscoverNewAgents.tsx", "dv-wrap"],
       ["Manuscripts", "components/AllManuscripts.tsx", "msv-wrap"],
     ] as const) {

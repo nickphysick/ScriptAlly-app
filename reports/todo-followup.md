@@ -14,7 +14,7 @@ pack; stop 5's button reads "Done").
    derivations need already exists; the new selectors are pure views.
 3. **Doorway routes:** "Start your first query →" = `onNavigate("queries", "Log a query")` (the
    App.tsx:389 interception — opens the Log-a-query overlay, never navigates); "Add agents to your
-   contact list" = `onNavigate("agents")` (the Contact List).
+   contact list" = `onNavigate("agents")` (the Contact list).
 4. **The corner ?** = the AppShell's GLOBAL help FAB (fixed bottom:20 right:20), currently
    `onNavigate("help")` on every workspace route. Not inert — so per the pack, the popover ADDS
    "Replay the tour" alongside the existing action ("Help centre") rather than replacing it, and
