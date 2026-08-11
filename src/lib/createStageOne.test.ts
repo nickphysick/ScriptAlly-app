@@ -164,9 +164,16 @@ describe("the requirement pips", () => {
   /* The subtitle above is already an assertive live region. A second announcer on the same line
      of chrome would talk over it on every keystroke. */
   it("they are not a second live region", () => {
-    const at = queries.indexOf('<div className="qch-reqs">');
-    expect(at).toBeGreaterThan(-1);
-    const pips = queries.slice(at, queries.indexOf("</div>", queries.indexOf("qch-rq")));
+    /* ⚠️ SCOPED TO THE JOURNEY BEFORE IT MATCHES. There are two `qch-reqs` blocks now — create's
+       and the response takeover's — and the response header is declared EARLIER in the file, so a
+       bare indexOf was reading the wrong journey's chips while claiming to test create's. It passed
+       because neither block has a live region, which is precisely how this fault hides. */
+    const journey = queries.indexOf("Logging new query");
+    expect(journey, "create's header is missing").toBeGreaterThan(-1);
+    const at = queries.indexOf('<div className="qch-reqs">', journey);
+    expect(at, "create's chips are missing").toBeGreaterThan(journey);
+    const pips = queries.slice(at, queries.indexOf("</div>", queries.indexOf("qch-rq", at)));
+    expect(pips, "the slice is empty").not.toBe("");
     expect(pips).not.toContain("aria-live");
     expect(pips).not.toContain('role="status"');
   });

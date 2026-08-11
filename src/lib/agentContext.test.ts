@@ -53,6 +53,28 @@ const rule = (sel: string): string => {
   return open < 0 ? "" : css.slice(m.index, css.indexOf("}", open) + 1);
 };
 
+/**
+ * The Cappuccino marginalia block — every `.t-capp .qc-ctx` rule, read as one region.
+ *
+ * ⚠️ SCOPED, AND BOTH ENDS ASSERTED. `.t-capp .qc-ctx` occurs ten times, so a bare indexOf took
+ * whichever happened to be first and sliced to an unrelated landmark; had that landmark ever moved
+ * above it, the range would have run backwards and every `.not.toContain` would have passed on an
+ * empty string. Anchored on the block's own banner instead.
+ */
+const cappBlock = (): string => {
+  /* Anchored on the block's own banner — a UNIQUE line — rather than on the first of its ten
+     `.t-capp .qc-ctx` rules, which is only the start by coincidence of ordering. */
+  const banner = css.indexOf("⚠️ THE DASH IS THE MARGINALIA SIGNAL");
+  expect(banner, "the Cappuccino marginalia banner is missing").toBeGreaterThan(-1);
+  const a = css.indexOf(".t-capp .qc-ctx", banner);
+  expect(a, "the Cappuccino marginalia block is missing").toBeGreaterThan(banner);
+  const b = css.indexOf("QUIET REFERENCE", a);
+  expect(b, "the block's closing landmark is missing or sits above it").toBeGreaterThan(a);
+  const block = css.slice(a, b);
+  expect(block, "the block is empty").not.toBe("");
+  return block;
+};
+
 /* ══════════════════════════════════════════════════════════════════════════════════════════
    ⚠️ A MALFORMED CSS COMMENT SWALLOWS THE RULE AFTER IT, IN SILENCE. Closing a block early with
    a stray terminator leaves the remaining prose as CSS garbage, and the browser drops it with
@@ -125,9 +147,15 @@ describe("the panel reads as quieter than the form", () => {
      animates and there is no vestibular effect to spare anyone. Gating it would hand those users
      a different design rather than a calmer one. */
   it("reduced motion does not straighten it — there is no motion to reduce", () => {
-    const at = css.indexOf("prefers-reduced-motion");
-    const reduced = css.slice(at);
-    expect(reduced, "the tilt was gated on reduced motion").not.toContain("rotate(0");
+    /* ⚠️ SCOPED. `prefers-reduced-motion` appears fifteen times in this stylesheet, so a bare
+       indexOf took the first block and then read to end of file — an assertion about most of the
+       sheet wearing the name of one about the tilt. The claim is only about THIS panel: no
+       reduced-motion rule anywhere straightens it. */
+    const straightened = css
+      .split("@media (prefers-reduced-motion: reduce)")
+      .slice(1)
+      .some((block) => /\.qc-ctx[^{]*\{[^}]*rotate\(0/.test(block));
+    expect(straightened, "the tilt was gated on reduced motion").toBe(false);
   });
 
   it("values are Inter, not Playfair — serif numerals read as a second headline", () => {
@@ -254,7 +282,7 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
 
   it("no drop shadow — the panel does not sit above the page", () => {
     expect(rule(".qc-ctx")).not.toContain("box-shadow");
-    const capp = css.slice(css.indexOf(".t-capp .qc-ctx"), css.indexOf("QUIET REFERENCE"));
+    const capp = cappBlock();
     expect(capp, "the treatment must not add one either").not.toContain("box-shadow");
   });
 
@@ -277,7 +305,7 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
        happen is the PANEL being made unclickable. */
     expect(rule(".t-capp .qc-ctx"), "the panel itself must stay clickable").not.toContain("pointer-events");
     expect(rule(".t-capp .qc-ctx::after"), "the ring must not eat clicks").toContain("pointer-events: none");
-    const capp = css.slice(css.indexOf(".t-capp .qc-ctx"), css.indexOf("QUIET REFERENCE"));
+    const capp = cappBlock();
     expect(capp, "a receded panel must not be a dimmed one").not.toContain("opacity");
     expect(panel, "its controls must stay in tab order").not.toContain('tabIndex={-1}');
     expect(panel, "the wish-list toggle is a real button").toContain('<button type="button" className="qc-ctxmore"');
